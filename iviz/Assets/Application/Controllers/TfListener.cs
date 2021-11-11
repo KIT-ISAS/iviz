@@ -100,11 +100,8 @@ namespace Iviz.Controllers
 
             GameThread.LateEveryFrame += LateUpdate;
 
-            if (GuiInputModule.Instance != null)
-            {
-                GuiInputModule.Instance.ShortClick += i => OnClick(i, true);
-                GuiInputModule.Instance.LongClick += i => OnClick(i, false);
-            }
+            GuiInputModule.Instance.ShortClick += i => OnClick(i, true);
+            GuiInputModule.Instance.LongClick += i => OnClick(i, false);
         }
 
         void OnClick(ClickInfo clickInfo, bool isShortClick)

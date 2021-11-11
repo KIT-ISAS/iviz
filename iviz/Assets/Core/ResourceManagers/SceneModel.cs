@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,26 +11,26 @@ using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
-using Iviz.XmlRpc;
-using JetBrains.Annotations;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
-using Buffer = System.Buffer;
 using Color32 = UnityEngine.Color32;
 using Object = UnityEngine.Object;
-using Texture = UnityEngine.Texture;
 
 namespace Iviz.Displays
 {
     public static class SceneModel
     {
-        [ItemNotNull]
-        public static async ValueTask<AggregatedMeshMarkerResource> CreateAsync([NotNull] string uriString,
-            [NotNull] Model msg, [CanBeNull] IExternalServiceProvider provider, CancellationToken token)
+        public static async ValueTask<AggregatedMeshMarkerResource> CreateAsync(string uriString,
+            Model msg, IExternalServiceProvider? provider, CancellationToken token)
         {
             if (uriString is null)
             {
                 throw new ArgumentNullException(nameof(uriString));
+            }
+
+            if (!Uri.IsWellFormedUriString(uriString, UriKind.Absolute))
+            {
+                throw new ArgumentException($"Uri string '{uriString}' is not a valid URI!");
             }
 
             if (msg is null)
@@ -54,9 +56,8 @@ namespace Iviz.Displays
             }
         }
 
-        [ItemNotNull]
-        static async ValueTask<AggregatedMeshMarkerResource> CreateImpl(string uriString, [NotNull] Model msg,
-            IExternalServiceProvider provider, CancellationToken token, [NotNull] GameObject root)
+        static async ValueTask<AggregatedMeshMarkerResource> CreateImpl(string uriString, Model msg,
+            IExternalServiceProvider? provider, CancellationToken token, GameObject root)
         {
             root.transform.localRotation =
                 msg.OrientationHint.ToUpperInvariant() == "Z_UP"
@@ -70,7 +71,7 @@ namespace Iviz.Displays
             foreach (var mesh in msg.Meshes)
             {
                 token.ThrowIfCancellationRequested();
-                GameObject obj = new GameObject();
+                var obj = new GameObject();
                 obj.AddComponent<MeshRenderer>();
                 obj.AddComponent<MeshFilter>();
                 obj.EnsureComponent<BoxCollider>();
@@ -140,8 +141,8 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        Core.RosLogger.Warn($"SceneModel: Failed to retrieve diffuse texture " +
-                                         $"'{diffuseTexture.Path}' required by {uriString}");
+                        RosLogger.Warn($"SceneModel: Failed to retrieve diffuse texture " +
+                                       $"'{diffuseTexture.Path}' required by '{uriString}'");
                     }
                 }
 
@@ -154,8 +155,8 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        Core.RosLogger.Warn($"SceneModel: Failed to retrieve normal texture " +
-                                         $"'{bumpTexture.Path}' required by {uriString}");
+                        RosLogger.Warn($"SceneModel: Failed to retrieve normal texture " +
+                                       $"'{bumpTexture.Path}' required by '{uriString}'");
                     }
                 }
 
@@ -165,13 +166,13 @@ namespace Iviz.Displays
                 templateMeshes.Add(meshResource);
             }
 
-            List<GameObject> nodes = new List<GameObject>();
+            var nodes = new List<GameObject>();
             bool[] used = new bool[templateMeshes.Count];
 
             foreach (var node in msg.Nodes)
             {
                 token.ThrowIfCancellationRequested();
-                GameObject nodeObject = new GameObject($"Node:{node.Name}");
+                var nodeObject = new GameObject($"Node:{node.Name}");
                 nodes.Add(nodeObject);
 
                 nodeObject.transform.SetParent(
@@ -197,7 +198,7 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        GameObject newMesh = Object.Instantiate(
+                        var newMesh = Object.Instantiate(
                             templateMeshes[meshId].gameObject,
                             nodeObject.transform,
                             false);
@@ -214,7 +215,7 @@ namespace Iviz.Displays
                 .Select(resource => TransformBoundsUntil(resource.LocalBounds, resource.Transform, root.transform));
             var nullableRootBounds = markerChildren.CombineBounds();
 
-            if (nullableRootBounds is Bounds rootBounds)
+            if (nullableRootBounds is { } rootBounds)
             {
                 parentCollider.center = rootBounds.center;
                 parentCollider.size = rootBounds.size;
@@ -223,13 +224,12 @@ namespace Iviz.Displays
             return marker;
         }
 
-        [ItemCanBeNull]
-        static ValueTask<Info<Texture2D>> GetTextureResourceAsync([NotNull] string uriString,
-            [NotNull] string localPath, IExternalServiceProvider provider, CancellationToken token)
+        static ValueTask<Info<Texture2D>?> GetTextureResourceAsync(string uriString, string localPath,
+            IExternalServiceProvider? provider, CancellationToken token)
         {
-            Uri uri = new Uri(uriString);
+            var uri = new Uri(uriString);
             string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
-            string directoryName = Path.GetDirectoryName(uriPath);
+            string? directoryName = Path.GetDirectoryName(uriPath);
             if (!string.IsNullOrEmpty(directoryName) && Path.DirectorySeparatorChar == '\\')
             {
                 directoryName = directoryName.Replace('\\', '/'); // windows!
@@ -250,11 +250,9 @@ namespace Iviz.Displays
             return bounds;
         }
 
+        static Vector3 Assimp2Unity(in Vector3f vector3) => new(vector3.X, vector3.Y, vector3.Z);
 
-        static Vector3 Assimp2Unity(in Vector3f vector3) =>
-            new Vector3(vector3.X, vector3.Y, vector3.Z);
-
-        static unsafe void MemCopy<TA, TB>([NotNull] TA[] src, [NotNull] TB[] dst, int sizeToCopy)
+        static unsafe void MemCopy<TA, TB>(TA[] src, TB[] dst, int sizeToCopy)
             where TA : unmanaged
             where TB : unmanaged
         {

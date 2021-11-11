@@ -95,16 +95,14 @@ namespace Iviz.Core
         public static string SavedRobotsPath => savedRobotsPath ??= $"{PersistentDataPath}/robots";
         public static string ResourcesFilePath => resourcesFilePath ??= $"{PersistentDataPath}/resources.json";
 
-        static GameObject FindMainCamera() =>
+        public static GameObject FindMainCamera() =>
             GameObject.FindWithTag("MainCamera").CheckedNull()
             ?? GameObject.Find("MainCamera").CheckedNull()
             ?? throw new NullReferenceException("Failed to find camera!");
 
         public static Camera MainCamera
         {
-            get => mainCamera != null
-                ? mainCamera
-                : mainCamera = FindMainCamera().GetComponent<Camera>();
+            get => mainCamera != null ? mainCamera : mainCamera = FindMainCamera().GetComponent<Camera>();
             set
             {
                 mainCamera = value.CheckedNull() ?? throw new NullReferenceException("Camera cannot be null!");

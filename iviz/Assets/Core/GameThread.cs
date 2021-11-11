@@ -298,6 +298,6 @@ namespace Iviz.Core
             instance.actionsQueue.Enqueue(action);
         }
 
-        public static bool IsGameThread => instance != null && Thread.CurrentThread == instance.gameThread;
+        static bool IsGameThread => instance != null && Thread.CurrentThread == instance.gameThread;
     }
 }
