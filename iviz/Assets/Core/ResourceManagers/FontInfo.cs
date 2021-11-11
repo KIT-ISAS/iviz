@@ -1,11 +1,11 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Tools;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -24,8 +24,7 @@ namespace Iviz.Resources
             spaceWidth = CharWidth(' ');
         }
 
-        [NotNull]
-        public string Split([NotNull] string str, int maxWidth, int maxLines = 2)
+        public string Split(string str, int maxWidth, int maxLines = 2)
         {
             if (str == null)
             {

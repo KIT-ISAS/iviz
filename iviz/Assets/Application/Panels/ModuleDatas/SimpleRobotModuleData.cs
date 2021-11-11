@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -7,10 +8,7 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
-using UnityEditor;
 
 namespace Iviz.App
 {
@@ -21,20 +19,20 @@ namespace Iviz.App
     {
         const string ParamSubstring = "_description";
 
-        [NotNull] readonly SimpleRobotPanelContents panel;
+        readonly SimpleRobotPanelContents panel;
 
         public override DataPanelContents Panel => panel;
         public override ModuleType ModuleType => ModuleType.Robot;
         public override IConfiguration Configuration => RobotController.Config;
         public override IController Controller => RobotController;
 
-        [NotNull] public SimpleRobotController RobotController { get; }
+        public SimpleRobotController RobotController { get; }
 
-        [CanBeNull] CancellationTokenSource tokenSource;
+        CancellationTokenSource? tokenSource;
 
         static readonly string[] NoneStr = {"<color=#b0b0b0ff><i><none></i></color>"};
 
-        public SimpleRobotModuleData([NotNull] ModuleDataConstructor constructor) :
+        public SimpleRobotModuleData(ModuleDataConstructor constructor) :
             base(constructor.Topic, constructor.Type)
         {
             RobotController = new SimpleRobotController(this);
@@ -93,8 +91,6 @@ namespace Iviz.App
                 panel.SavedRobotName.Value = RobotController.SavedRobotName;
             }
 
-            //panel.FramePrefix.Value = Robot.FramePrefix;
-            //panel.FrameSuffix.Value = Robot.FrameSuffix;
             panel.AttachToTf.Value = RobotController.AttachedToTf;
             panel.HideButton.State = RobotController.Visible;
 
@@ -179,7 +175,6 @@ namespace Iviz.App
             panel.Save.Interactable = !string.IsNullOrEmpty(RobotController.Robot?.Name);
         }
 
-        [NotNull, ItemNotNull]
         static IEnumerable<string> GetParameterCandidates(CancellationToken token)
         {
             var list = ConnectionManager.Connection.GetSystemParameterList(token)
@@ -190,10 +185,8 @@ namespace Iviz.App
         }
 
 
-        [NotNull, ItemNotNull]
         static IEnumerable<string> GetSavedRobots() => NoneStr.Concat(Resource.GetRobotNames());
 
-        [NotNull, ItemNotNull]
         static IEnumerable<string> GetParameterHints(CancellationToken token) => GetParameterCandidates(token);
 
         bool IsRobotSaved => RobotController.Robot?.Name != null && Resource.IsRobotSaved(RobotController.Robot.Name);
@@ -216,7 +209,7 @@ namespace Iviz.App
             UpdateConfiguration(config, fields);
         }
 
-        public void UpdateConfiguration(RobotConfiguration config, [NotNull, ItemNotNull] IEnumerable<string> fields)
+        public void UpdateConfiguration(RobotConfiguration config, IEnumerable<string> fields)
         {
             bool hasRobotName = false;
             bool hasSourceParameter = false;

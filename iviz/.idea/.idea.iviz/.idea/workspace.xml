@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="68ca9c34-1010-45bb-a44d-d538d3269f03" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Assets/Core/AssetHolders/AssetHolder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/AssetHolders/AssetHolder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/ResourceManagers/FontInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/ResourceManagers/FontInfo.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
