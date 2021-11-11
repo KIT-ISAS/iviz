@@ -4,151 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="68ca9c34-1010-45bb-a44d-d538d3269f03" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Assets/Application/Controllers/XR/XRUtils.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/Application/Controllers/XR/XRUtils.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/ROS/IAdvertisedService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/ROS/IAdvertisedService.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/ROS/IAdvertisedTopic.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/ROS/IAdvertisedTopic.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/ROS/ISubscribedTopic.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/ROS/ISubscribedTopic.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/ROS/Listener.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/ROS/Listener.cs.meta" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/ROS/Sender.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Assets/ROS/Sender.cs.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.run/Publish iviz_utils to folder.run.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.run/Publish iviz_utils to folder.run.xml" afterDir="false" />
+    <list default="true" id="c3ad1c67-6666-403c-8af7-c50a27c9b277" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.iviz/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.iviz/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/ARDialogs/ARDialog.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/ARDialogs/ARDialog.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARFoundationController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARFoundationController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARFoundationScreenCaptureManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARFoundationScreenCaptureManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARMarkerExecutor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARMarkerExecutor.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/AR/HololensManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/AR/HololensManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/GridMapListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/GridMapListener.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/GuiDialogListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/GuiDialogListener.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/InteractiveMarkerListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/InteractiveMarkerListener.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/LaserScanListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/LaserScanListener.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/MarkerListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/MarkerListener.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/MarkerObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/MarkerObject.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/OccupancyGridListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/OccupancyGridListener.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/OctomapListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/OctomapListener.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/PointCloudListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/PointCloudListener.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/Services/ControllerService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/Services/ControllerService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/Services/ModelService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/Services/ModelService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/SimpleRobotController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/SimpleRobotController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/TfFrame.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/TfFrame.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/XR/CustomController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/XR/CustomController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/XR/GazeController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/XR/GazeController.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/XR/HandController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/XR/HandController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/AR/ARMeshLines.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/AR/ARMeshLines.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/ImageTexture.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/ImageTexture.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/ScreenDraggable.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/ScreenDraggable.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/GuiInputModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/GuiInputModule.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/DataPanelManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/DataPanelManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/DialogPanelManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/DialogPanelManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/ARMarkerDialogData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/ARMarkerDialogData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/ConnectionDialogData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/ConnectionDialogData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/ConsoleDialogData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/ConsoleDialogData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/LoadConfigDialogData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/LoadConfigDialogData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/SaveConfigDialogData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/SaveConfigDialogData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/SettingsDialogData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/SettingsDialogData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/SystemDialogData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/SystemDialogData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/ARModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/ARModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/DepthCloudModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/DepthCloudModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/GridMapModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/GridMapModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/GridModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/GridModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/GuiDialogModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/GuiDialogModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/ImageModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/ImageModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/InteractiveMarkerModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/InteractiveMarkerModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/JointStateModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/JointStateModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/JoystickModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/JoystickModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/LaserScanModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/LaserScanModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/MagnitudeModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/MagnitudeModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/MarkerModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/MarkerModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/OccupancyGridModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/OccupancyGridModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/OctomapModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/OctomapModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/PathModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/PathModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/PointCloudModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/PointCloudModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/SimpleRobotModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/SimpleRobotModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/TfModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/TfModuleData.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleListPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleListPanel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/Widgets/DropdownWidget.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/Widgets/DropdownWidget.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/Widgets/FrameWidget.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/Widgets/FrameWidget.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/Widgets/TfLog.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/Widgets/TfLog.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/PointListResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/PointListResource.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/GameThread.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/GameThread.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/ResourceManagers/ExternalResourceManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/ResourceManagers/ExternalResourceManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/ResourceManagers/InternalResourceManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/ResourceManagers/InternalResourceManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/ResourceManagers/Resource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/ResourceManagers/Resource.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/ResourceManagers/RobotModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/ResourceManagers/RobotModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/ResourceManagers/SceneModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/ResourceManagers/SceneModel.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/Settings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Settings.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/Utils/Logger.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Utils/RosLogger.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/Utils/Logger.cs.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Utils/RosLogger.cs.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.ModelService.Lib.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.ModelService.Lib.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.ModelService.Lib.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.ModelService.Lib.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Msgs.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Msgs.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Msgs.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Msgs.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.MsgsGen.Dynamic.Lib.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.MsgsGen.Dynamic.Lib.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.MsgsGen.Dynamic.Lib.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.MsgsGen.Dynamic.Lib.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.MsgsWrapper.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.MsgsWrapper.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.MsgsWrapper.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.MsgsWrapper.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Ntp.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Ntp.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Ntp.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Ntp.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Octree.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Octree.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Octree.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Octree.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Rosbag.Lib.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Rosbag.Lib.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Rosbag.Lib.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Rosbag.Lib.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Roslib.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Roslib.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Roslib.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Roslib.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Rosmaster.Lib.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Rosmaster.Lib.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Rosmaster.Lib.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Rosmaster.Lib.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.TfManager.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.TfManager.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.TfManager.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.TfManager.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Tools.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Tools.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Tools.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Tools.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Urdf.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Urdf.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Urdf.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Urdf.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Utils.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Utils.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Utils.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.Utils.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.XmlRpc.dll" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.XmlRpc.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Dependencies/Iviz.XmlRpc.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dependencies/Iviz.XmlRpc.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/MarkerDetection/MarkerDetector.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/MarkerDetection/MarkerDetector.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ROS/AdvertisedService.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/AdvertisedService.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ROS/AdvertisedTopic.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/AdvertisedTopic.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ROS/BagListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/BagListener.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ROS/ConnectionManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/ConnectionManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ROS/IListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/IListener.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ROS/ISender.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/ISender.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ROS/RosConnection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/RosConnection.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ROS/RosSenderStats.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/RosSenderStats.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ROS/RosServerManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/RosServerManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ROS/RoslibConnection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/RoslibConnection.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/ROS/SubscribedTopic.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/SubscribedTopic.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Scenes/UI XR.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/UI XR.unity" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/XR/Settings/Open XR Package Settings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/XR/Settings/Open XR Package Settings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/XR/Settings/OpenXR Editor Settings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/XR/Settings/OpenXR Editor Settings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/XR/XRGeneralSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/XR/XRGeneralSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/QualitySettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/QualitySettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-2021.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-2021.dwlt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_roslib/POCOs/ErrorMessage.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_roslib/POCOs/ErrorMessage.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_roslib/RosClient.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_roslib/RosClient.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_roslib/RosPublisher.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_roslib/RosPublisher.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_roslib/SenderManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_roslib/SenderManager.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_roslib/SenderQueue.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_roslib/SenderQueue.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_rosmaster_lib/RosMasterServer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_rosmaster_lib/RosMasterServer.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../iviz_utils.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Msgs.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Msgs.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Msgs.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Msgs.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Roslib.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Roslib.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Roslib.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Roslib.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Rosmaster.Lib.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Rosmaster.Lib.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Rosmaster.Lib.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Rosmaster.Lib.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Urdf.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Urdf.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Urdf.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Urdf.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Utils.deps.json" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Utils.deps.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Utils.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Utils.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Utils.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.Utils.pdb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.XmlRpc.dll" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.XmlRpc.dll" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.XmlRpc.pdb" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils/Publish/Iviz.XmlRpc.pdb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -221,9 +86,11 @@
     <setting file="file://$PROJECT_DIR$/../iviz_roslib/RosSubscriber.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.timeline@1.6.2/Editor/Manipulators/EditModeInputHandler.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../iviz_tools/TaskUtils.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/01f935354d2d45e883b449a9cac178122a00/a0/f33efff8/PoseDataFlags.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../iviz_urdf/Urdf/Geometry.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/Controls/Processors/AxisDeadzoneProcessor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.mathematics@1.2.4/Unity.Mathematics/float2.gen.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2cd731dc9ead4944b6744fe721102092f000/71/ba5f00ad/InputDevice.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.interaction.toolkit@1.0.0-pre.8/Runtime/Interaction/XRInteractionEvents.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/UIBehaviour.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.interaction.toolkit@1.0.0-pre.8/Runtime/Interaction/XRInteractionManager.cs" root0="SKIP_HIGHLIGHTING" />
@@ -234,10 +101,12 @@
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventSystem.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/Plugins/UI/ExtendedPointerEventData.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.timeline@1.6.2/Editor/Animation/CurvesProxy.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2cd731dc9ead4944b6744fe721102092f000/76/c3db1b87/CommonUsages.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.interaction.toolkit@1.0.0-pre.8/Runtime/Interaction/Controllers/XRController.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.interaction.toolkit@1.0.0-pre.8/Runtime/Interaction/Controllers/ActionBasedController.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/Plugins/UI/InputSystemUIInputModule.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.collab-proxy@1.13.5/Editor/PlasticSCM/Views/IncomingChanges/Developer/IncomingChangesViewMenu.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/2cd731dc9ead4944b6744fe721102092f000/21/bc020ad9/InputTrackingState.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.interaction.toolkit@1.0.0-pre.8/Runtime/Interaction/Interactors/XRBaseInteractor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.collab-proxy@1.13.5/Editor/PlasticSCM/Views/IncomingChanges/Developer/IsCurrent.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.openxr@1.2.8/Editor/FeatureSupport/OpenXRFeatureUICommon.cs" root0="SKIP_HIGHLIGHTING" />
@@ -362,10 +231,10 @@
       </option>
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="11008">
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="9260">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" value="11008" />
+      <option name="pid" value="9260" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
