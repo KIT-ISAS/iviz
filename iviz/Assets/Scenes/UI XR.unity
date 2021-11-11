@@ -1878,7 +1878,7 @@ Camera:
   m_TargetDisplay: 0
   m_TargetEye: 3
   m_HDR: 1
-  m_AllowMSAA: 1
+  m_AllowMSAA: 0
   m_AllowDynamicResolution: 0
   m_ForceIntoRT: 0
   m_OcclusionCulling: 1
@@ -2566,7 +2566,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &190738224
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4163,7 +4163,7 @@ MonoBehaviour:
   m_ModelDeSelectTransition: 
   handType: 0
   cameraTransform: {fileID: 141168998}
-  shoulderToCamera: {x: -0.1, y: -0.2, z: -0.05}
+  shoulderToCamera: {x: -0.1, y: -0.3, z: -0.05}
 --- !u!114 &302158277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10596,7 +10596,7 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
-  m_SmoothMovement: 0
+  m_SmoothMovement: 1
   m_FollowTightness: 10
   m_SnapThresholdDistance: 10
   m_Reticle: {fileID: 0}
@@ -10833,7 +10833,7 @@ MonoBehaviour:
   m_ModelDeSelectTransition: 
   handType: 1
   cameraTransform: {fileID: 141168998}
-  shoulderToCamera: {x: 0.1, y: -0.2, z: -0.05}
+  shoulderToCamera: {x: 0.1, y: -0.3, z: -0.05}
 --- !u!1 &864485052
 GameObject:
   m_ObjectHideFlags: 0

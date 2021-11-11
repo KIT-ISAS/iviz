@@ -20,6 +20,11 @@ namespace Iviz.Controllers
         protected override bool MatchesDevice(InputDeviceCharacteristics characteristics,
             List<InputFeatureUsage> usages)
         {
+            if (!enabled)
+            {
+                return false;
+            }
+            
             return HasFlag(characteristics, InputDeviceCharacteristics.EyeTracking)
                    && usages.Contains((InputFeatureUsage) GazePosition)
                    && usages.Contains((InputFeatureUsage) GazeRotation);
@@ -35,20 +40,27 @@ namespace Iviz.Controllers
 
             controllerState.poseDataFlags = PoseDataFlags.NoData;
 
-            if (!TryGetDevice(out var device) 
-                || !device.TryGetFeatureValue(CommonUsages.trackingState, out var trackingState))
+            if (!TryGetDevice(out var device))
             {
                 return;
             }
 
-            if (HasFlag(trackingState, InputTrackingState.Rotation)
-                && device.TryGetFeatureValue(GazeRotation, out controllerState.rotation))
+            if (!device.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracking) || !isTracking)
+            {
+                return;
+            }
+            
+            if (device.TryGetFeatureValue(GazeRotation, out controllerState.rotation))
             {
                 controllerState.poseDataFlags |= PoseDataFlags.Rotation;
             }
 
-            if (HasFlag(trackingState, InputTrackingState.Position)
-                && device.TryGetFeatureValue(GazePosition, out controllerState.position))
+            if (device.TryGetFeatureValue(CommonUsages.deviceRotation, out controllerState.rotation))
+            {
+                controllerState.poseDataFlags |= PoseDataFlags.Rotation;
+            }
+
+            if (device.TryGetFeatureValue(GazePosition, out controllerState.position))
             {
                 controllerState.poseDataFlags |= PoseDataFlags.Position;
             }

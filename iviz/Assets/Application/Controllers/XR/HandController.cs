@@ -59,11 +59,11 @@ namespace Iviz.Controllers
             if (!TryGetDevice(out var device)
                 || !device.TryGetFeatureValue(HandData, out var hand))
             {
-                ModelVisible = false;
+                //ModelVisible = false;
                 return;
             }
 
-            ModelVisible = true;
+            //ModelVisible = true;
 
             for (int i = 0; i < 5; i++)
             {
@@ -142,6 +142,7 @@ namespace Iviz.Controllers
                 
                 modelRoot = new GameObject(name + " Model");
                 modelRoot.transform.SetParentLocal(transform.parent);
+                modelRoot.SetActive(false);
                 return modelRoot.transform;
             }
         }

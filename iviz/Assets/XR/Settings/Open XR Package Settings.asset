@@ -399,7 +399,7 @@ MonoBehaviour:
   - {fileID: -3311836866457605244}
   - {fileID: -3361518945356105488}
   m_renderMode: 1
-  m_depthSubmissionMode: 2
+  m_depthSubmissionMode: 0
 --- !u!114 &-4014290693589982037
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1325,7 +1325,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c8f1ce8139888c4ab621f6b3c8bb558, type: 3}
   m_Name: MotionControllerFeaturePlugin Standalone
   m_EditorClassIdentifier: 
-  m_enabled: 1
+  m_enabled: 0
   nameUi: Motion Controller Model
   version: 1.1.2
   featureIdInternal: com.microsoft.openxr.feature.controller
