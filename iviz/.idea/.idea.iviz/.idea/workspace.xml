@@ -5,25 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="68ca9c34-1010-45bb-a44d-d538d3269f03" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.iviz/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.iviz/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARFoundationController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARFoundationController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/TfListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/TfListener.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/XR/HandController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/XR/HandController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/XR/XRController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/XR/XRController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/AggregatedMeshMarkerResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/AggregatedMeshMarkerResource.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/LineWithColor.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/LineWithColor.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/GameThread.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/GameThread.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Core/ResourceManagers/SceneModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/ResourceManagers/SceneModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleListPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleListPanel.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Core/Settings.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Settings.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Internal/Controllers/AR.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Controllers/AR.prefab" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/UI XR.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/UI XR.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/XR/Settings/Open XR Package Settings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/XR/Settings/Open XR Package Settings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/XR/XRGeneralSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/XR/XRGeneralSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/manifest.json.backup" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-2021.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-2021.dwlt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../iviz_utils.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils.sln.DotSettings.user" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -89,6 +73,7 @@
     <setting file="file://$PROJECT_DIR$/../iviz_msgs/std_msgs/msg/Header.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.postprocessing@3.1.1/PostProcessing/Runtime/Utils/RuntimeUtilities.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.textmeshpro@3.0.6/Scripts/Editor/TMP_SDFShaderGUI.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/Controls/InputProcessor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/Controls/InputControl.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../iviz_tools/StreamUtils.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../iviz_urdf/Urdf/UrdfFile.cs" root0="SKIP_HIGHLIGHTING" />
@@ -267,7 +252,7 @@
       <workItem from="1636483900177" duration="22712000" />
       <workItem from="1636547730578" duration="445000" />
       <workItem from="1636552120103" duration="10714000" />
-      <workItem from="1636652336837" duration="2031000" />
+      <workItem from="1636652336837" duration="2372000" />
     </task>
     <servers />
   </component>

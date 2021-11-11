@@ -152,7 +152,7 @@ namespace Iviz.App
                     : (instanceObject = GameObject.Find("ModuleList Panel")) != null
                       && (instance = instanceObject.GetComponent<ModuleListPanel>()) != null
                         ? instance
-                        : throw new InvalidOperationException("Module list panel has not been set!");
+                        : throw new MissingAssetFieldException("Module list panel has not been set!");
             }
         }
 

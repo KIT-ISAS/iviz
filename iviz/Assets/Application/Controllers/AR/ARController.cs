@@ -276,7 +276,7 @@ namespace Iviz.Controllers
             ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
             ARJoystick.PointerUp += OnARJoystickPointerUp;
-            ARJoystick.Close += () => ModuleListPanel.Instance.ARSidePanel.ToggleARJoystick();
+            ARJoystick.Close += ModuleListPanel.Instance.ARSidePanel.ToggleARJoystick;
 
             GuiInputModule.Instance.UpdateQualityLevel();
 
