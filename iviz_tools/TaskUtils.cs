@@ -11,6 +11,8 @@ namespace Iviz.Tools
     /// </summary>
     public static class TaskUtils
     {
+        const string GenericExceptionFormat = "{0}: Exception thrown.{1}";
+
         public static Task StartLongTask(Func<Task> task, CancellationToken token = default)
         {
             // need some logging here
@@ -92,7 +94,7 @@ namespace Iviz.Tools
                 Task result = await (task, timeoutTask).WhenAny();
                 if (result != task)
                 {
-                    Logger.LogErrorFormat<object>("{0}: Task wait timed out", caller);
+                    Logger.LogErrorFormat<object>(GenericExceptionFormat, caller);
                     return;
                 }
 
@@ -123,7 +125,7 @@ namespace Iviz.Tools
             {
                 if (e is not OperationCanceledException)
                 {
-                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                    Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
                 }
             }
         }
@@ -138,7 +140,7 @@ namespace Iviz.Tools
             {
                 if (e is not OperationCanceledException)
                 {
-                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                    Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
                 }
             }
         }        
@@ -158,13 +160,13 @@ namespace Iviz.Tools
             {
                 if (e is AggregateException && e.InnerException != null)
                 {
-                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e.InnerException);
+                    Logger.LogErrorFormat(GenericExceptionFormat, caller, e.InnerException);
                     return;
                 }
 
                 if (e is not OperationCanceledException)
                 {
-                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                    Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
                 }
             }
         }
@@ -223,7 +225,7 @@ namespace Iviz.Tools
             {
                 if (e is not OperationCanceledException)
                 {
-                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                    Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
                 }
             }
         }
@@ -238,7 +240,7 @@ namespace Iviz.Tools
             {
                 if (e is OperationCanceledException)
                 {
-                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                    Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
                 }
             }
 
@@ -255,7 +257,7 @@ namespace Iviz.Tools
             {
                 if (e is not OperationCanceledException)
                 {
-                    Logger.LogErrorFormat("{0}: Error in task wait: {1}", caller, e);
+                    Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
                 }
             }
         }
