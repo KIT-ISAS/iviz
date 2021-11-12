@@ -64,7 +64,7 @@ namespace Iviz.App
             }
 
             var masterApi = client.RosMasterClient;
-            builder.Append("<b>== Master</b> (").Append(masterApi.TotalRequests.ToString("N0"))
+            builder.Append("<b>Master</b> (").Append(masterApi.TotalRequests.ToString("N0"))
                 .Append(" queries | Ping ")
                 .Append(masterApi.AvgTimeInQueueInMs).Append(" ms)")
                 .AppendLine();
@@ -117,10 +117,14 @@ namespace Iviz.App
                     builder.Append("  [");
                     if (receiver.RemoteUri == client.CallerUri)
                     {
-                        builder.Append("<i>Me</i> @ ");
+                        builder.Append("<i>Me</i>] @ ");
+                    }
+                    else if (receiver.RemoteId != null)
+                    {
+                        builder.Append(receiver.RemoteId).Append("] @ ");
                     }
 
-                    builder.Append(receiver.RemoteUri.Host).Append(':').Append(receiver.RemoteUri.Port).Append(']');
+                    builder.Append(receiver.RemoteUri.Host).Append(':').Append(receiver.RemoteUri.Port);
 
                     switch (receiver.Status)
                     {
@@ -195,11 +199,11 @@ namespace Iviz.App
                     builder.Append("  ");
                     if (sender.RemoteId == client.CallerId)
                     {
-                        builder.Append("[<i>Me</i> @ ");
+                        builder.Append("[<i>Me</i>] @ ");
                     }
                     else
                     {
-                        builder.Append("[").Append(sender.RemoteId).Append(" @ ");
+                        builder.Append("[").Append(sender.RemoteId).Append("] @ ");
                     }
 
                     builder.Append(sender.RemoteEndpoint != default
@@ -207,8 +211,8 @@ namespace Iviz.App
                         : "(Unknown address)");
 
                     builder.Append(sender.TransportType == TransportType.Tcp
-                        ? "] TCP"
-                        : "] UDP"
+                        ? " TCP"
+                        : " UDP"
                     );
 
                     if (isAlive)

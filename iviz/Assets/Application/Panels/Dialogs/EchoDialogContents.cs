@@ -7,7 +7,7 @@ namespace Iviz.App
     {
         [SerializeField] TrashButtonWidget close = null;
         [SerializeField] ToggleButtonWidget pause = null;
-        [SerializeField] DropdownWidget topics = null;
+        [SerializeField] InputFieldWithHintsWidget topics = null;
         [SerializeField] TMP_Text text = null;
         [SerializeField] TMP_Text publishers = null;
         [SerializeField] TMP_Text messages = null;
@@ -15,7 +15,7 @@ namespace Iviz.App
 
         public TrashButtonWidget Close => close;
         public ToggleButtonWidget Pause => pause;
-        public DropdownWidget Topics => topics;
+        public InputFieldWithHintsWidget Topics => topics;
         public TMP_Text Text => text;
         public TMP_Text Publishers => publishers;
         public TMP_Text Messages => messages;

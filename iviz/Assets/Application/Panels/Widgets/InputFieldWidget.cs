@@ -12,13 +12,13 @@ namespace Iviz.App
     public sealed class InputFieldWidget : MonoBehaviour, IWidget
     {
         [SerializeField] TMP_Text? label = null;
-        [SerializeField] InputField? text = null;
-        [SerializeField] Text? placeholder = null;
+        [SerializeField] TMP_InputField? text = null;
+        [SerializeField] TMP_Text? placeholder = null;
         [SerializeField] Image? textImage = null;
 
         TMP_Text Label => label.AssertNotNull(nameof(label));
-        InputField Text => text.AssertNotNull(nameof(text));
-        Text Placeholder => placeholder.AssertNotNull(nameof(placeholder));
+        TMP_InputField Text => text.AssertNotNull(nameof(text));
+        TMP_Text Placeholder => placeholder.AssertNotNull(nameof(placeholder));
         Image TextImage => textImage.AssertNotNull(nameof(textImage));
         
         public string Title
@@ -64,7 +64,7 @@ namespace Iviz.App
             }
         }
 
-        InputField.ContentType ContentType
+        TMP_InputField.ContentType ContentType
         {
             get => Text.contentType;
             set => Text.contentType = value;
@@ -118,7 +118,7 @@ namespace Iviz.App
             return this;
         }
 
-        public InputFieldWidget SetContentType(InputField.ContentType contentType)
+        public InputFieldWidget SetContentType(TMP_InputField.ContentType contentType)
         {
             ContentType = contentType;
             return this;

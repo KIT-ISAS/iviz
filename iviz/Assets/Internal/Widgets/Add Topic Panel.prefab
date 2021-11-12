@@ -240,7 +240,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   contentObject: {fileID: 7786611109904658291}
   emptyText: {fileID: 7786611111092987678}
-  titleText: {fileID: 0}
+  titleText: {fileID: 1494745776547545452}
   closeButton: {fileID: 843236670540645312}
   canvas: {fileID: 7786611111125302770}
   selectAll: {fileID: 4762483244921922708}
@@ -1349,6 +1349,18 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 6682994567340516074}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1494745776547545452 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5188326523275551622, guid: a4a8590ebbf694fdca0a0d67674f3307,
+    type: 3}
+  m_PrefabInstance: {fileID: 6682994567340516074}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7786611110930013068
 PrefabInstance:
   m_ObjectHideFlags: 0

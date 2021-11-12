@@ -13,6 +13,7 @@
         public SliderWidget FrameSize { get; private set; }
         public ToggleWidget ConnectToParent { get; private set; }
         public ToggleWidget KeepAllFrames { get; private set; }
+        public ToggleWidget FlipZ { get; private set; }
         public SenderWidget Sender { get; private set; }
         public SenderWidget TapSender { get; private set; }
 
@@ -30,6 +31,7 @@
             //ShowAxes = p.AddToggle("Show Frames");
             ShowFrameLabels = p.AddToggle("Show Frame Names");
             ConnectToParent = p.AddToggle("Connect Children to Parents");
+            FlipZ = p.AddToggle("Make Z Point Down");
             FrameSize = p.AddSlider("Frame Size").SetMinValue(0.01f).SetMaxValue(0.5f).SetNumberOfSteps(49);
             //FrameLabelSize = p.AddSlider("Frame Names Size").SetMinValue(0.01f).SetMaxValue(0.5f).SetNumberOfSteps(49);
             Sender = p.AddSender();

@@ -120,11 +120,6 @@ namespace Iviz.Core
             return p.rotation * v + p.position;
         }
 
-        //public static Vector3 MultiplyDirection(this in Pose p, in Vector3 v)
-        //{
-        //    return p.rotation * v;
-        //}
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pose Multiply(this in Pose p, Pose o)
         {
@@ -153,9 +148,11 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pose Inverse(this Pose p)
         {
-            Quaternion q = Quaternion.Inverse(p.rotation);
-            p.rotation = q;
-            p.position = q * -p.position;
+            ref var rotation = ref p.rotation;
+            rotation.x = -rotation.x;
+            rotation.y = -rotation.y;
+            rotation.z = -rotation.z;
+            p.position = rotation * -p.position;
             return p;
         }
 
@@ -224,11 +221,13 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T AssertNotNull<T>(this T? o, string name,
             [CallerFilePath] string? caller = null,
-            [CallerLineNumber] int lineNumber = 0) where T : UnityEngine.Object =>
-            o != null
+            [CallerLineNumber] int lineNumber = 0) where T : UnityEngine.Object
+        {
+            return o != null
                 ? o
                 : throw new MissingAssetFieldException($"Asset '{name}' has not been set!\n" +
                                                        $"At: {caller} line {lineNumber}");
+        }
 
         public static Color WithAlpha(this Color c, float alpha)
         {
@@ -283,7 +282,6 @@ namespace Iviz.Core
             c.y = y;
             return c;
         }
-
 
         public static Color WithSaturation(this in Color c, float saturation)
         {

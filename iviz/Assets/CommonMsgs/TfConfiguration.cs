@@ -22,5 +22,6 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public HashSet<string> BlacklistedFrames { get; set; } = new();
         [DataMember] public string FixedFrameId { get; set; } = "";
+        [DataMember] public bool FlipZ { get; set; } = false;
     }
 }

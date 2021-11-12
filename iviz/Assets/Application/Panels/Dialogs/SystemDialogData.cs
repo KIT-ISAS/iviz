@@ -514,7 +514,7 @@ namespace Iviz.App
 
             for (int i = 0; i < HostAliases.Length; i++)
             {
-                if (HostAliases[i] is not var (hostname, address))
+                if (HostAliases[i] is not ({ } hostname, { } address))
                 {
                     return;
                 }

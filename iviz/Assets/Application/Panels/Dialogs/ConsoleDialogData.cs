@@ -110,15 +110,16 @@ namespace Iviz.App
         {
             ProcessLog();
             dialog.FromField.Hints = ExtraFields.Concat(ids);
-            dialog.BottomText.text = UpdateStats();
+            UpdateStats();
         }
 
-        static string UpdateStats()
+        void UpdateStats()
         {
             var listener = ConnectionManager.LogListener;
             if (listener == null)
             {
-                return "Error: No Log Listener";
+                dialog.BottomText.SetText("Error: No Log Listener");
+                return;
             }
 
             var description = BuilderPool.Rent();
@@ -129,7 +130,7 @@ namespace Iviz.App
                 description.Append(" | ").Append(listener.Stats.MessagesPerSecond).Append(" Hz | ")
                     .Append(kbPerSecond).Append(" kB/s");
 
-                return description.ToString();
+                dialog.BottomText.SetText(description);
             }
             finally
             {
@@ -170,7 +171,7 @@ namespace Iviz.App
         void HandleMessage(in Log log)
         {
             if (log.Level < (byte)minLogLevel
-                || idCode is FromIdCode.None or FromIdCode.Me 
+                || idCode is FromIdCode.None or FromIdCode.Me
                 || log.Name == ConnectionManager.MyId)
             {
                 return;
@@ -302,9 +303,24 @@ namespace Iviz.App
 
                         string levelColor = ColorFromLevel(messageLevel);
 
-                        description
-                            .Append("<color=").Append(levelColor).Append(">")
-                            .Append(message.SourceId ?? "[Me]").Append(": </color></b>");
+                        description.Append("<color=").Append(levelColor).Append(">");
+
+                        description.Append(message.SourceId ?? "Me");
+
+                        switch (messageLevel)
+                        {
+                            case LogLevel.Warn:
+                                description.Append(" [W]");
+                                break;
+                            case LogLevel.Error:
+                                description.Append(" [E]");
+                                break;
+                            case LogLevel.Fatal:
+                                description.Append(" [F]");
+                                break;
+                        }
+
+                        description.Append(": </color></b>");
 
 
                         if (message.SourceId == null || message.Message.Length < MaxMessageLength)

@@ -3,6 +3,7 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
@@ -241,6 +242,57 @@ namespace Iviz.Core
                     description.Append(mbPerSecond).Append(" MB/s");
                     break;
             }
+        }
+
+        public enum PoseFormat
+        {
+            OnlyPosition,
+            WithoutRoll,
+            All
+        }
+
+        public static void FormatPose(in UnityEngine.Pose unityPose, StringBuilder description,
+            PoseFormat format = PoseFormat.All)
+        {
+            var (pX, pY, pZ) = unityPose.position.Unity2RosVector3();
+            string px = pX == 0 ? "0" : pX.ToString("#,0.###", UnityUtils.Culture);
+            string py = pY == 0 ? "0" : pY.ToString("#,0.###", UnityUtils.Culture);
+            string pz = pZ == 0 ? "0" : pZ.ToString("#,0.###", UnityUtils.Culture);
+
+            description.Append(px).Append(", ").Append(py).Append(", ").Append(pz);
+
+            if (format == PoseFormat.OnlyPosition)
+            {
+                return;
+            }
+
+            description.AppendLine();
+            
+            var (rXr, rYr, rZr) = (-unityPose.rotation.eulerAngles).Unity2RosVector3();
+            double rX = RegularizeAngle(rXr);
+            double rY = RegularizeAngle(rYr);
+            double rZ = RegularizeAngle(rZr);
+
+            string rx = rX == 0 ? "0" : rX.ToString("#,0.##", UnityUtils.Culture);
+            string ry = rY == 0 ? "0" : rY.ToString("#,0.##", UnityUtils.Culture);
+            string rz = rZ == 0 ? "0" : rZ.ToString("#,0.##", UnityUtils.Culture);
+
+            if (format == PoseFormat.All)
+            {
+                description.Append("r: ").Append(rx).Append(", ");
+            }
+
+            description.Append("p: ").Append(ry).Append(", y: ").Append(rz);
+        }
+
+        static double RegularizeAngle(double angle)
+        {
+            return angle switch
+            {
+                <= -180 => angle + 360,
+                > 180 => angle - 360,
+                _ => angle
+            };
         }
     }
 }

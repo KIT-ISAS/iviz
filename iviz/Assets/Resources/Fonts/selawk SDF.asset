@@ -5423,7 +5423,7 @@ MonoBehaviour:
     italicTypeface: {fileID: 0}
   - regularTypeface: {fileID: 0}
     italicTypeface: {fileID: 0}
-  - regularTypeface: {fileID: 11400000, guid: c49b078992aac4e1e869989726e60dd6, type: 2}
+  - regularTypeface: {fileID: 11400000, guid: aa1b19b70aaaec64ca679106ea501e96, type: 2}
     italicTypeface: {fileID: 0}
   - regularTypeface: {fileID: 0}
     italicTypeface: {fileID: 0}

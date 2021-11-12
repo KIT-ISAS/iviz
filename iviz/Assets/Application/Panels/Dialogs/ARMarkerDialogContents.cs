@@ -6,6 +6,7 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -79,7 +80,7 @@ namespace Iviz.App
                 widget.EndEdit += value => SizesEndEdit?.Invoke(row,
                     float.TryParse(value, NumberStyles.Float, BuiltIns.Culture, out float i) ? i : -1);
                 widget.PlaceholderText = "0";
-                widget.SetContentType(InputField.ContentType.DecimalNumber);
+                widget.SetContentType(TMP_InputField.ContentType.DecimalNumber);
             }
 
 

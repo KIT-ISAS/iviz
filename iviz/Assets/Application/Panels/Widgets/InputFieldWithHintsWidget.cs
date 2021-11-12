@@ -1,7 +1,10 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
+using Iviz.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,14 +12,26 @@ namespace Iviz.App
 {
     public sealed class InputFieldWithHintsWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] InputFieldWidget input = null;
-        [SerializeField] Dropdown dropdown = null;
-        Dropdown reserve = null;
+        [SerializeField] InputFieldWidget? input = null;
+        [SerializeField] TMP_Dropdown? dropdown = null;
+        [SerializeField] Image? image = null;
 
-        [NotNull]
+        readonly List<TMP_Dropdown.OptionData> optionDatas = new();
+
+        InputFieldWidget Input => input.AssertNotNull(nameof(input));
+
+        TMP_Dropdown Dropdown
+        {
+            get => dropdown.AssertNotNull(nameof(dropdown));
+            set => dropdown = value.CheckedNull() ?? throw new NullReferenceException("Cannot set dropdown to null!");
+        }
+
+        public event Action<string>? EndEdit;
+        public event Action<int>? ValueChanged;
+
         public string Title
         {
-            get => input.Title;
+            get => Input.Title;
             set
             {
                 if (value == null)
@@ -24,14 +39,13 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                input.Title = value;
+                Input.Title = value;
             }
         }
 
-        [NotNull]
         public string Value
         {
-            get => input.Value;
+            get => Input.Value;
             set
             {
                 if (value == null)
@@ -39,14 +53,13 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                input.Value = value;
+                Input.Value = value;
             }
         }
 
-        [NotNull]
         public string Placeholder
         {
-            get => input.PlaceholderText;
+            get => Input.PlaceholderText;
             set
             {
                 if (value == null)
@@ -54,57 +67,69 @@ namespace Iviz.App
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                input.PlaceholderText = value;
+                Input.PlaceholderText = value;
             }
         }
 
         public bool Interactable
         {
-            get => input.Interactable;
+            get => Input.Interactable;
             set
             {
-                input.Interactable = value;
-                dropdown.interactable = value;
+                Input.Interactable = value;
+                Dropdown.interactable = value;
             }
         }
 
-        readonly List<Dropdown.OptionData> optionDatas = new List<Dropdown.OptionData>();
-
-        [NotNull]
         public IEnumerable<string> Hints
         {
             get => optionDatas.Select(x => x.text);
             set
             {
                 optionDatas.Clear();
-                optionDatas.AddRange(value.Select(x => new Dropdown.OptionData(x)));
-                dropdown.options = optionDatas;
+                optionDatas.AddRange(value.Select(x => new TMP_Dropdown.OptionData(x)));
+                Dropdown.options = optionDatas;
+
+                CheckPreferredWidth();
             }
+        }
+
+        void CheckPreferredWidth()
+        {
+            // this is really hackish, go to the spawned item list, traverse all texts and find the preferred width
+            // I can't stand Unity's content size fitters, half the time they give out negative widths
+            if (Dropdown.transform.childCount < 3)
+            {
+                return;
+            }
+
+            var content = (RectTransform)Dropdown.transform.GetChild(2).GetChild(0).GetChild(0);
+            float max = content.GetComponentsInChildren<TMP_Text>().Max(text => text.preferredWidth);
+            content.sizeDelta = content.sizeDelta.WithX(max + 20);
         }
 
         void Awake()
         {
-            input.EndEdit += OnEndEdit;
-            dropdown.onValueChanged.AddListener(OnValueChanged);
-            reserve = Instantiate(dropdown.gameObject, transform).GetComponent<Dropdown>();
-            reserve.gameObject.SetActive(false);
+            Input.EndEdit += OnEndEdit;
+            
+            // this is actually an image with transparency 0, just so that TMP allows us to select index -1
+            Dropdown.placeholder = image;
+            
+            Dropdown.onValueChanged.AddListener(OnValueChanged);
+            Dropdown.value = -1;
         }
-
-        public event Action<string> EndEdit;
 
         void OnValueChanged(int i)
         {
-            input.Value = optionDatas[i].text;
+            if (i == -1)
+            {
+                return;
+            }
+            
+            Input.Value = optionDatas[i].text;
             EndEdit?.Invoke(optionDatas[i].text);
-
-            // awkward workaround for the fact that Unity won't allow the selection to be reset
-            // however, we want the user to be able to select the same item multiple times
-            // so we simply destroy the widget and recreate a saved version with no selection
-            Destroy(dropdown.gameObject);
-            dropdown = Instantiate(reserve.gameObject, transform).GetComponent<Dropdown>();
-            dropdown.gameObject.SetActive(true);
-            dropdown.onValueChanged.AddListener(OnValueChanged);
-            dropdown.options = optionDatas;
+            ValueChanged?.Invoke(i);
+            Dropdown.value = -1;
         }
 
         void OnEndEdit(string f)
@@ -117,42 +142,36 @@ namespace Iviz.App
             EndEdit = null;
         }
 
-        [NotNull]
         public InputFieldWithHintsWidget SetInteractable(bool f)
         {
             Interactable = f;
             return this;
         }
 
-        [NotNull]
-        public InputFieldWithHintsWidget SetValue([NotNull] string f)
+        public InputFieldWithHintsWidget SetValue(string f)
         {
             Value = f;
             return this;
         }
 
-        [NotNull]
-        public InputFieldWithHintsWidget SetPlaceholder([NotNull] string f)
+        public InputFieldWithHintsWidget SetPlaceholder(string f)
         {
             Placeholder = f;
             return this;
         }
 
-        [NotNull]
-        public InputFieldWithHintsWidget SetLabel([NotNull] string f)
+        public InputFieldWithHintsWidget SetLabel(string f)
         {
             Title = f;
             return this;
         }
 
-        [NotNull]
-        public InputFieldWithHintsWidget SetOptions([NotNull] IEnumerable<string> f)
+        public InputFieldWithHintsWidget SetOptions(IEnumerable<string> f)
         {
             Hints = f;
             return this;
         }
 
-        [NotNull]
         public InputFieldWithHintsWidget SubscribeEndEdit(Action<string> f)
         {
             EndEdit += f;

@@ -282,7 +282,7 @@ namespace Iviz.Controllers
             config.SourceParameter = "";
             Robot = null;
 
-            if (string.IsNullOrEmpty(value))
+            if (value is null or "")
             {
                 config.SavedRobotName = "";
                 HelpText = "[No Robot Loaded]";
@@ -299,12 +299,12 @@ namespace Iviz.Controllers
             catch (OperationCanceledException)
             {
                 HelpText = "<b>Error:</b> Task cancelled";
-                Core.RosLogger.Debug($"{this}: Error while loading parameter '{value}': Task cancelled or timed out");
+                RosLogger.Debug($"{this}: Error while loading parameter '{value}': Task cancelled or timed out");
                 return;
             }
             catch (Exception e)
             {
-                Core.RosLogger.Debug($"{this}: Error while loading parameter '{value}'", e);
+                RosLogger.Debug($"{this}: Error while loading parameter '{value}'", e);
                 HelpText = "<b>Error:</b> Failed to retrieve parameter";
                 return;
             }
@@ -312,13 +312,13 @@ namespace Iviz.Controllers
             if (errorMsg != null)
             {
                 HelpText = $"<b>Error:</b> {errorMsg}";
-                Core.RosLogger.Debug($"{this}: Error while loading parameter '{value}': {errorMsg}");
+                RosLogger.Debug($"{this}: Error while loading parameter '{value}': {errorMsg}");
                 return;
             }
 
             if (!parameterValue.TryGetString(out string robotDescription))
             {
-                Core.RosLogger.Debug($"{this}: Parameter '{value}' was not string!");
+                RosLogger.Debug($"{this}: Parameter '{value}' was not string!");
                 HelpText = "<b>Error:</b> Expected string parameter";
                 return;
             }
@@ -337,7 +337,7 @@ namespace Iviz.Controllers
             config.SavedRobotName = "";
             Robot = null;
 
-            if (string.IsNullOrEmpty(robotName))
+            if (robotName is null or "")
             {
                 config.SourceParameter = "";
                 HelpText = "[No Robot Loaded]";
@@ -347,7 +347,7 @@ namespace Iviz.Controllers
             (bool result, string? robotDescription) = await Resource.TryGetRobotAsync(robotName);
             if (!result)
             {
-                Core.RosLogger.Debug($"{this}: Failed to load robot!");
+                RosLogger.Debug($"{this}: Failed to load robot!");
                 HelpText = "[Failed to Load Saved Robot]";
                 return;
             }
@@ -359,9 +359,9 @@ namespace Iviz.Controllers
 
         bool LoadRobotFromDescription(string? description)
         {
-            if (string.IsNullOrEmpty(description))
+            if (description is null or "")
             {
-                Core.RosLogger.Debug($"{this}: Empty parameter '{description}'");
+                RosLogger.Debug($"{this}: Empty parameter '{description}'");
                 HelpText = "[Robot Description is Empty]";
                 return false;
             }
@@ -374,7 +374,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Core.RosLogger.Debug($"{this}: Error parsing description'", e);
+                RosLogger.Debug($"{this}: Error parsing description'", e);
                 HelpText = "[Failed to Parse Description]";
                 return false;
             }
@@ -449,7 +449,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                Core.RosLogger.Error($"{this}: Error in CheckRobotStartTask", e);
+                RosLogger.Error($"{this}: Error in CheckRobotStartTask", e);
             }
         }
 

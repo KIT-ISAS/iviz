@@ -1300,6 +1300,16 @@ PrefabInstance:
       propertyPath: m_HorizontalAlignment
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 522362152547573158, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -1.8806152
+      objectReference: {fileID: 0}
+    - target: {fileID: 522362152547573158, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -17.7
+      objectReference: {fileID: 0}
     - target: {fileID: 3511868748028889201, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
         type: 3}
       propertyPath: m_Text
@@ -1517,6 +1527,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: -7.4999847
       objectReference: {fileID: 0}
+    - target: {fileID: 2893643721740773612, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
+        type: 3}
+      propertyPath: m_text
+      value: Quality in Virtual View
+      objectReference: {fileID: 0}
     - target: {fileID: 3511868748028889201, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
         type: 3}
       propertyPath: m_Text
@@ -1664,6 +1679,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8946395366815307243}
     m_Modifications:
+    - target: {fileID: 1477175557363197883, guid: acadcb7373d690e4f8a24b69ac6aa362,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -22.579
+      objectReference: {fileID: 0}
+    - target: {fileID: 1477175557363197883, guid: acadcb7373d690e4f8a24b69ac6aa362,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -10.763
+      objectReference: {fileID: 0}
     - target: {fileID: 5338011060698270012, guid: acadcb7373d690e4f8a24b69ac6aa362,
         type: 3}
       propertyPath: m_Text
@@ -1899,6 +1924,11 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7474008110452021684, guid: acadcb7373d690e4f8a24b69ac6aa362,
+        type: 3}
+      propertyPath: m_text
+      value: Background Color
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: acadcb7373d690e4f8a24b69ac6aa362, type: 3}
 --- !u!224 &607159117798155934 stripped
@@ -2080,6 +2110,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.x
       value: -7.4999847
+      objectReference: {fileID: 0}
+    - target: {fileID: 2893643721740773612, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
+        type: 3}
+      propertyPath: m_text
+      value: Network Read Rate
       objectReference: {fileID: 0}
     - target: {fileID: 3511868748028889201, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
         type: 3}
@@ -2383,6 +2418,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: -7.4999847
       objectReference: {fileID: 0}
+    - target: {fileID: 2893643721740773612, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
+        type: 3}
+      propertyPath: m_text
+      value: Quality in AR View
+      objectReference: {fileID: 0}
     - target: {fileID: 3511868748028889201, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
         type: 3}
       propertyPath: m_Text
@@ -2535,6 +2575,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: -7.4999847
       objectReference: {fileID: 0}
+    - target: {fileID: 2893643721740773612, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
+        type: 3}
+      propertyPath: m_text
+      value: Target Frame Rate
+      objectReference: {fileID: 0}
     - target: {fileID: 3511868748028889201, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
         type: 3}
       propertyPath: m_Text
@@ -2682,6 +2727,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8946395366815307243}
     m_Modifications:
+    - target: {fileID: 1576725590496134203, guid: f4814752b52a24c4eb60c6322f4e24ab,
+        type: 3}
+      propertyPath: m_text
+      value: Sun Direction
+      objectReference: {fileID: 0}
     - target: {fileID: 2236944324981096086, guid: f4814752b52a24c4eb60c6322f4e24ab,
         type: 3}
       propertyPath: m_Text
@@ -2814,6 +2864,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f4814752b52a24c4eb60c6322f4e24ab, type: 3}
+--- !u!224 &4860747938174042764 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 2236944325299982082, guid: f4814752b52a24c4eb60c6322f4e24ab,
+    type: 3}
+  m_PrefabInstance: {fileID: 6665293896329153934}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &4860747938174042767 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2236944325299982081, guid: f4814752b52a24c4eb60c6322f4e24ab,
@@ -2826,12 +2882,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 269c7caab2571b148b26756f4905a071, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!224 &4860747938174042764 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 2236944325299982082, guid: f4814752b52a24c4eb60c6322f4e24ab,
-    type: 3}
-  m_PrefabInstance: {fileID: 6665293896329153934}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8946395367353777194
 PrefabInstance:
   m_ObjectHideFlags: 0
