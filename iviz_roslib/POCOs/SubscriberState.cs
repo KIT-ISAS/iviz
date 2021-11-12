@@ -12,6 +12,7 @@ namespace Iviz.Roslib
     {
         [DataMember] public Uri RemoteUri { get; }
         [DataMember] public abstract TransportType? TransportType { get; }
+        [DataMember] public string? RemoteId { get; internal set; }
         [DataMember] public ReceiverStatus Status { get; internal set; }
         [DataMember] public Endpoint EndPoint { get; internal set; }
         [DataMember] public Endpoint RemoteEndpoint { get; internal set; }

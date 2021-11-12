@@ -22,9 +22,9 @@ namespace Iviz.Roslib
         readonly CancellationTokenSource runningTs = new();
         readonly Task task;
         readonly ReceiverManager<T> manager;
-        
+
         int receiveBufferSize = 8192;
-        
+
         long numReceived;
         long numDropped;
         long bytesReceived;
@@ -46,6 +46,7 @@ namespace Iviz.Roslib
         public string Type => topicInfo.Type;
         public int MaxPacketSize { get; }
         public UdpClient UdpClient { get; }
+        public string? RemoteId { get; }
 
         public UdpReceiver(ReceiverManager<T> manager, RpcUdpTopicResponse response, UdpClient client, Uri remoteUri,
             TopicInfo<T> topicInfo)
@@ -90,6 +91,11 @@ namespace Iviz.Roslib
             RosHeader = responseHeader.ToArray();
 
             var dictionary = RosUtils.CreateHeaderDictionary(responseHeader);
+            if (dictionary.TryGetValue("callerid", out string remoteCallerId))
+            {
+                RemoteId = remoteCallerId;
+            }
+
             if (dictionary.TryGetValue("error", out string? message)) // TODO: improve error handling here
             {
                 ErrorDescription = new ErrorMessage($"Partner sent error message: [{message}]");
@@ -119,6 +125,7 @@ namespace Iviz.Roslib
 
         public SubscriberReceiverState State => new UdpReceiverState(RemoteUri)
         {
+            RemoteId = RemoteId,
             Status = Status,
             EndPoint = Endpoint,
             RemoteEndpoint = RemoteEndpoint,
@@ -310,10 +317,10 @@ namespace Iviz.Roslib
                 numDropped++;
                 return;
             }
-            
+
             T message = generator.DeserializeFromArray(array, offset: offset + 4);
             manager.MessageCallback(message, this);
-            
+
             CheckBufferSize(rcvLength);
         }
 
@@ -323,13 +330,13 @@ namespace Iviz.Roslib
             {
                 return;
             }
-            
+
             int recommendedSize = RosUtils.GetRecommendedBufferSize(rcvLength, receiveBufferSize);
             if (recommendedSize == receiveBufferSize)
             {
                 return;
             }
-            
+
             receiveBufferSize = recommendedSize;
             UdpClient.Client.ReceiveBufferSize = recommendedSize;
             Logger.LogDebugFormat("{0}: Large message received. Changing buffer size to {1} kB.", this,
