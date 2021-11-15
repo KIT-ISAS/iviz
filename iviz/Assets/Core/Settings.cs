@@ -95,16 +95,16 @@ namespace Iviz.Core
         public static string SavedRobotsPath => savedRobotsPath ??= $"{PersistentDataPath}/robots";
         public static string ResourcesFilePath => resourcesFilePath ??= $"{PersistentDataPath}/resources.json";
 
-        static GameObject FindMainCamera() =>
+        public static GameObject FindMainCamera() =>
             GameObject.FindWithTag("MainCamera").CheckedNull()
             ?? GameObject.Find("MainCamera").CheckedNull()
-            ?? throw new NullReferenceException("Failed to find camera!");
+            ?? throw new MissingAssetFieldException("Failed to find camera!");
 
         public static Camera MainCamera
         {
             get => mainCamera != null
                 ? mainCamera
-                : mainCamera = FindMainCamera().GetComponent<Camera>();
+                : mainCamera = FindMainCamera().GetComponent<Camera>().AssertNotNull(nameof(mainCamera));
             set
             {
                 mainCamera = value.CheckedNull() ?? throw new NullReferenceException("Camera cannot be null!");
@@ -128,7 +128,8 @@ namespace Iviz.Core
         public static ISettingsManager SettingsManager =>
             (UnityEngine.Object?)settingsManager != null
                 ? settingsManager
-                : settingsManager = FindMainCamera().GetComponent<ISettingsManager>();
+                : settingsManager = FindMainCamera().GetComponent<ISettingsManager>()
+                                    ?? throw new MissingAssetFieldException("Failed to find SettingsManager!");
 
         public static IScreenCaptureManager? ScreenCaptureManager { get; set; }
 

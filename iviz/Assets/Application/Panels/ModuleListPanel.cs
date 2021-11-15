@@ -152,7 +152,7 @@ namespace Iviz.App
                     : (instanceObject = GameObject.Find("ModuleList Panel")) != null
                       && (instance = instanceObject.GetComponent<ModuleListPanel>()) != null
                         ? instance
-                        : throw new InvalidOperationException("Module list panel has not been set!");
+                        : throw new MissingAssetFieldException("Module list panel has not been set!");
             }
         }
 
@@ -906,7 +906,8 @@ namespace Iviz.App
 
                 var currentCamera = Settings.MainCameraTransform;
                 var cameraPose = TfListener.RelativePoseToFixedFrame(currentCamera.AsPose());
-                TfLog.FormatPose(cameraPose, description, false);
+                RosUtils.FormatPose(cameraPose, description,
+                    TfListener.Instance.FlipZ ? RosUtils.PoseFormat.All : RosUtils.PoseFormat.WithoutRoll);
                 cameraText.SetText(description);
             }
             finally

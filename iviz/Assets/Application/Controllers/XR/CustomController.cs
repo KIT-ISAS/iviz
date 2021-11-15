@@ -52,6 +52,15 @@ namespace Iviz.Controllers
         {
             cachedUsages.Clear();
             newDevice.TryGetFeatureUsages(cachedUsages);
+            
+            /*
+            Debug.Log(newDevice.name);
+            foreach (var featureUsage in cachedUsages)
+            {
+                Debug.Log("*****    " + featureUsage.name);
+            }
+            */
+            
             if (MatchesDevice(newDevice.characteristics, cachedUsages))
             {
                 device = newDevice;

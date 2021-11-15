@@ -325,9 +325,9 @@ namespace Iviz.Controllers
                     }
                 }
 
-                if (!TryGetField(msg.Fields, "x", out PointField? xField) || xField.Datatype != PointField.FLOAT32 ||
-                    !TryGetField(msg.Fields, "y", out PointField? yField) || yField.Datatype != PointField.FLOAT32 ||
-                    !TryGetField(msg.Fields, "z", out PointField? zField) || zField.Datatype != PointField.FLOAT32)
+                if (!TryGetField(msg.Fields, "x", out var xField) || xField.Datatype != PointField.FLOAT32 ||
+                    !TryGetField(msg.Fields, "y", out var yField) || yField.Datatype != PointField.FLOAT32 ||
+                    !TryGetField(msg.Fields, "z", out var zField) || zField.Datatype != PointField.FLOAT32)
                 {
                     RosLogger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
                     IsProcessing = false;
@@ -351,7 +351,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                bool rgbaHint = iSize == 4 && (iField.Name == "rgb" || iField.Name == "rgba");
+                bool rgbaHint = iSize == 4 && iField.Name is "rgb" or "rgba";
                 var header = msg.Header;
                 int numPoints = (int) (msg.Width * msg.Height);
 
@@ -466,7 +466,7 @@ namespace Iviz.Controllers
             }
         }
 
-        unsafe void GeneratePointBufferXYZ([NotNull] PointCloud2 msg, [NotNull] byte[] dataSrc, int iOffset, int iType)
+        unsafe void GeneratePointBufferXYZ(PointCloud2 msg, byte[] dataSrc, int iOffset, int iType)
         {
             const float maxPositionMagnitude = PointListResource.MaxPositionMagnitude;
 

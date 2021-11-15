@@ -140,20 +140,19 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
             panel.Save.ValueChanged += f =>
             {
-                if (string.IsNullOrEmpty(RobotController.Robot?.Name) ||
-                    string.IsNullOrEmpty(RobotController.Robot.Description))
+                var robot = RobotController.Robot;
+                if (robot is null || string.IsNullOrEmpty(robot.Name) || string.IsNullOrEmpty(robot.Description))
                 {
                     return;
                 }
 
                 if (f)
                 {
-                    Resource.External.AddRobotResourceAsync(RobotController.Robot.Name,
-                        RobotController.Robot.Description);
+                    Resource.External.AddRobotResourceAsync(robot.Name, robot.Description);
                 }
                 else
                 {
-                    Resource.External.RemoveRobotResource(RobotController.Robot.Name);
+                    Resource.External.RemoveRobotResource(robot.Name);
                 }
             };
 

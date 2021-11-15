@@ -42,6 +42,7 @@ namespace Iviz.Roslib
         public ReceiverStatus Status { get; private set; }
         public ErrorMessage? ErrorDescription { get; private set; }
         public TcpClient? TcpClient { get; private set; }
+        public string? RemoteId { get; private set; }
 
         public TcpReceiver(ReceiverManager<T> manager,
             Uri remoteUri, Endpoint remoteEndpoint, TopicInfo<T> topicInfo,
@@ -59,6 +60,7 @@ namespace Iviz.Roslib
 
         public SubscriberReceiverState State => new TcpReceiverState(RemoteUri)
         {
+            RemoteId = RemoteId,
             Status = Status,
             RequestNoDelay = requestNoDelay,
             EndPoint = Endpoint,
@@ -255,6 +257,12 @@ namespace Iviz.Roslib
 
             List<string> responseHeader = RosUtils.ParseHeader(readBuffer.Array, receivedLength);
             var dictionary = RosUtils.CreateHeaderDictionary(responseHeader);
+            
+            if (dictionary.TryGetValue("callerid", out string remoteCallerId))
+            {
+                RemoteId = remoteCallerId;
+            }
+            
             if (dictionary.TryGetValue("error", out string? message)) // TODO: improve error handling here
             {
                 throw new RosHandshakeException($"Partner sent error message: [{message}]");

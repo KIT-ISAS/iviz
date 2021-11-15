@@ -34,7 +34,6 @@ namespace Iviz.Roslib
         readonly ConcurrentDictionary<string, IRosPublisher> publishersByTopic = new();
         readonly ConcurrentDictionary<string, IServiceCaller> subscribedServicesByName = new();
         readonly ConcurrentDictionary<string, IServiceRequestManager> publishedServicesByName = new();
-
         readonly string namespacePrefix;
 
         public delegate void ShutdownActionCall(string callerId, string reason);
@@ -249,7 +248,7 @@ namespace Iviz.Roslib
             }
 
 
-            Logger.LogDebugFormat("** {0}: Initialized.", this);
+            Logger.LogDebugFormat("{0}: Initialized.", this);
 
             if (!ensureCleanSlate)
             {
@@ -262,7 +261,7 @@ namespace Iviz.Roslib
             }
             catch (Exception)
             {
-                Logger.LogDebugFormat("** {0}: EnsureCleanState failed.", this);
+                Logger.LogDebugFormat("{0}: EnsureCleanState failed.", this);
                 listener.Dispose();
                 throw;
             }
@@ -320,14 +319,14 @@ namespace Iviz.Roslib
             {
                 string absolutePath = Uri.UnescapeDataString(client.CallerUri.AbsolutePath);
                 client.CallerUri =
-                    new Uri($"http://{client.CallerUri.Host}:{client.listener.ListenerPort}{absolutePath}");
+                    new Uri($"http://{client.CallerUri.Host}:{client.listener.ListenerPort.ToString()}{absolutePath}");
 
                 // caller uri has changed;
                 client.RosMasterClient = new RosMasterClient(client.MasterUri, client.CallerId, client.CallerUri);
                 client.Parameters = new ParameterClient(client.RosMasterClient);
             }
 
-            Logger.LogFormat("** {0}: Initialized.", client);
+            Logger.LogDebugFormat("{0}: Initialized.", client);
 
             if (!ensureCleanSlate)
             {
@@ -340,7 +339,7 @@ namespace Iviz.Roslib
             }
             catch (Exception)
             {
-                Logger.LogDebugFormat("** {0}: EnsureCleanState failed.", client);
+                Logger.LogDebugFormat("{0}: EnsureCleanState failed.", client);
                 await client.listener.DisposeAsync();
                 throw;
             }
@@ -1518,7 +1517,7 @@ namespace Iviz.Roslib
         {
             if (!TryGetSubscriber(topic, out IRosSubscriber? subscriber))
             {
-                Logger.LogDebugFormat("** {0}: PublisherUpdate called for nonexisting topic '{1}'", this, topic);
+                Logger.LogDebugFormat("{0}: PublisherUpdate called for nonexisting topic '{1}'", this, topic);
                 return;
             }
 
@@ -1996,7 +1995,7 @@ namespace Iviz.Roslib
 
         public override string ToString()
         {
-            return $"[RosClient MyUri='{CallerUri}' MyId='{CallerId}' MasterUri='{MasterUri}']";
+            return $"[RosClient '{CallerId}' MasterUri='{MasterUri}']";
         }
     }
 }

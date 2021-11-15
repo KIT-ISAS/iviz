@@ -33,24 +33,45 @@ namespace Iviz.Controllers
         public const string DefaultTopic = "/tf";
         public const string MapFrameId = "map";
 
-        uint tapSeq;
+        static TfListener? instance;
         static uint tfSeq;
+
+        uint tapSeq;
+        Pose worldPose = Pose.identity;
 
         readonly TfConfiguration config = new();
 
         readonly ConcurrentQueue<(TransformStamped[] frame, bool isStatic)> messageList = new();
 
         readonly Dictionary<string, TfFrame> frames = new();
-        readonly FrameNode keepAllListener;
-        readonly FrameNode staticListener;
-        readonly FrameNode fixedFrameListener;
+        readonly FrameNode keepAllListenerNode;
+        readonly FrameNode staticListenerNode;
+        readonly FrameNode fixedFrameListenerNode;
 
         readonly TfFrame mapFrame;
         readonly TfFrame rootFrame;
         readonly TfFrame originFrame;
         readonly TfFrame unityFrame;
 
+        public static bool HasInstance => instance != null;
+        public static TfListener Instance => instance ?? throw new NullReferenceException("No TFListener was set!");
+        public static TfFrame RootFrame => Instance.rootFrame;
+        public static TfFrame OriginFrame => Instance.originFrame;
+        public static TfFrame UnityFrame => Instance.unityFrame;
+        public static TfFrame ListenersFrame => OriginFrame;
+        public override TfFrame Frame => FixedFrame;
+        public static TfFrame DefaultFrame => OriginFrame;
+
+        public static IEnumerable<string> FramesUsableAsHints =>
+            Instance.frames.Values.Where(IsFrameUsableAsHint).Select(frame => frame.Id);
+
+        public override IModuleData ModuleData { get; }
+        public IListener? ListenerStatic { get; private set; }
+        public Sender<TFMessage> Publisher { get; }
+        public Sender<PoseStamped> TapPublisher { get; }
         public TfFrame FixedFrame { get; private set; }
+
+        public event Action? ResetFrames;
 
         public static float RootScale
         {
@@ -71,9 +92,9 @@ namespace Iviz.Controllers
             var defaultListener = FrameNode.Instantiate("[.]");
             unityFrame.AddListener(defaultListener);
 
-            keepAllListener = FrameNode.Instantiate("[TFNode]");
-            staticListener = FrameNode.Instantiate("[TFStatic]");
-            fixedFrameListener = FrameNode.Instantiate("[TFFixedFrame]");
+            keepAllListenerNode = FrameNode.Instantiate("[TFNode]");
+            staticListenerNode = FrameNode.Instantiate("[TFStatic]");
+            fixedFrameListenerNode = FrameNode.Instantiate("[TFFixedFrame]");
             defaultListener.transform.parent = unityFrame.Transform;
 
             rootFrame = Add(CreateFrameObject("/", unityFrame.Transform, unityFrame));
@@ -100,11 +121,8 @@ namespace Iviz.Controllers
 
             GameThread.LateEveryFrame += LateUpdate;
 
-            if (GuiInputModule.Instance != null)
-            {
-                GuiInputModule.Instance.ShortClick += i => OnClick(i, true);
-                GuiInputModule.Instance.LongClick += i => OnClick(i, false);
-            }
+            GuiInputModule.Instance.ShortClick += i => OnClick(i, true);
+            GuiInputModule.Instance.LongClick += i => OnClick(i, false);
         }
 
         void OnClick(ClickInfo clickInfo, bool isShortClick)
@@ -167,7 +185,7 @@ namespace Iviz.Controllers
             {
                 if (Instance.FixedFrame != null)
                 {
-                    Instance.FixedFrame.RemoveListener(Instance.fixedFrameListener);
+                    Instance.FixedFrame.RemoveListener(Instance.fixedFrameListenerNode);
                 }
 
                 if (string.IsNullOrEmpty(value))
@@ -179,31 +197,11 @@ namespace Iviz.Controllers
                 }
 
                 Instance.Config.FixedFrameId = value;
-                var frame = GetOrCreateFrame(value, Instance.fixedFrameListener);
+                var frame = GetOrCreateFrame(value, Instance.fixedFrameListenerNode);
                 Instance.FixedFrame = frame;
                 OriginFrame.Transform.SetLocalPose(frame.OriginWorldPose.Inverse());
             }
         }
-
-        static TfListener? instance;
-        public static bool HasInstance => instance != null;
-        public static TfListener Instance => instance ?? throw new NullReferenceException("No TFListener was set!");
-        public Sender<TFMessage> Publisher { get; }
-        public Sender<PoseStamped> TapPublisher { get; }
-
-        public IListener? ListenerStatic { get; private set; }
-
-        public static TfFrame RootFrame => Instance.rootFrame;
-        public static TfFrame OriginFrame => Instance.originFrame;
-        public static TfFrame UnityFrame => Instance.unityFrame;
-        public static TfFrame ListenersFrame => OriginFrame;
-        public override TfFrame Frame => FixedFrame;
-        public static TfFrame DefaultFrame => OriginFrame;
-
-        public static IEnumerable<string> FramesUsableAsHints =>
-            Instance.frames.Values.Where(IsFrameUsableAsHint).Select(frame => frame.Id);
-
-        public override IModuleData ModuleData { get; }
 
         public TfConfiguration Config
         {
@@ -218,7 +216,14 @@ namespace Iviz.Controllers
                 KeepAllFrames = value.KeepAllFrames;
                 FixedFrameId = value.FixedFrameId;
                 PreferUdp = value.PreferUdp;
+                FlipZ = value.FlipZ;
             }
+        }
+
+        public bool FlipZ
+        {
+            get => config.FlipZ;
+            set => config.FlipZ = value;
         }
 
         public bool FramesVisible
@@ -289,7 +294,7 @@ namespace Iviz.Controllers
                 {
                     foreach (TfFrame frame in frames.Values)
                     {
-                        frame.AddListener(keepAllListener);
+                        frame.AddListener(keepAllListenerNode);
                     }
                 }
                 else
@@ -299,13 +304,13 @@ namespace Iviz.Controllers
                     var framesCopy = frames.Values.ToList();
                     foreach (TfFrame frame in framesCopy)
                     {
-                        frame.RemoveListener(keepAllListener);
+                        frame.RemoveListener(keepAllListenerNode);
                     }
                 }
             }
         }
 
-        public bool PreferUdp
+        bool PreferUdp
         {
             get => config.PreferUdp;
             set
@@ -341,6 +346,8 @@ namespace Iviz.Controllers
         void ProcessMessages()
         {
             TfFrame? lastChild = null;
+            bool keepAllFrames = KeepAllFrames;
+
             while (messageList.TryDequeue(out var value))
             {
                 var (transforms, isStatic) = value;
@@ -365,15 +372,15 @@ namespace Iviz.Controllers
                     }
                     else if (isStatic)
                     {
-                        child = GetOrCreateFrame(childId, staticListener);
-                        if (config.KeepAllFrames)
+                        child = GetOrCreateFrame(childId, staticListenerNode);
+                        if (keepAllFrames)
                         {
-                            child.AddListener(keepAllListener);
+                            child.AddListener(keepAllListenerNode);
                         }
                     }
-                    else if (config.KeepAllFrames)
+                    else if (keepAllFrames)
                     {
-                        child = GetOrCreateFrame(childId, keepAllListener);
+                        child = GetOrCreateFrame(childId, keepAllListenerNode);
                     }
                     else if (!TryGetFrameImpl(childId, out child))
                     {
@@ -412,18 +419,31 @@ namespace Iviz.Controllers
         {
             base.ResetController();
 
+            ResetFrames?.Invoke();
+
             ListenerStatic?.Reset();
             Publisher.Reset();
 
+            GuiInputModule.Instance.CameraViewOverride = null;
+            GuiInputModule.Instance.OrbitCenterOverride = null;
+
             bool prevKeepAllFrames = KeepAllFrames;
-            KeepAllFrames = false;
 
             var framesCopy = frames.Values.ToList();
-            foreach (TfFrame frame in framesCopy)
+            foreach (var frame in framesCopy)
             {
-                frame.RemoveListener(staticListener);
+                if (frame.SetParent(OriginFrame))
+                {
+                    frame.SetPose(Pose.identity);
+                }
             }
 
+            foreach (var frame in framesCopy)
+            {
+                frame.RemoveListener(staticListenerNode);
+            }
+
+            KeepAllFrames = false;
             KeepAllFrames = prevKeepAllFrames;
         }
 
@@ -550,27 +570,45 @@ namespace Iviz.Controllers
             }
 
             frames.Remove(frame.Id);
-
             frame.DestroySelf();
         }
+
+        void ProcessWorldOffset()
+        {
+            var newWorldPose = FixedFrame.OriginWorldPose;
+
+            if (FlipZ)
+            {
+                var rotateAroundForward = new Quaternion(0, 0, 1, 0); // 180 deg around forward axis
+                newWorldPose.rotation = rotateAroundForward * newWorldPose.rotation;
+                newWorldPose.position = rotateAroundForward * newWorldPose.position;
+            }
+
+            if (newWorldPose.EqualsApprox(worldPose))
+            {
+                return;
+            }
+            
+            worldPose = newWorldPose;
+            OriginFrame.Transform.SetLocalPose(newWorldPose.Inverse());
+        } 
 
         void LateUpdate()
         {
             ProcessMessages();
-
-            Pose worldPose = FixedFrame.OriginWorldPose;
-            if (!worldPose.IsApproxIdentity())
-            {
-                OriginFrame.Transform.SetLocalPose(worldPose.Inverse());
-            }
+            ProcessWorldOffset();
         }
+        
 
         public override void StopController()
         {
             base.StopController();
-            staticListener.DestroySelf();
-            Publisher.Stop();
+
             GameThread.LateEveryFrame -= LateUpdate;
+            ListenerStatic?.Stop();
+            staticListenerNode.DestroySelf();
+            Publisher.Stop();
+            ResetFrames = null;
             instance = null;
         }
 
@@ -590,7 +628,6 @@ namespace Iviz.Controllers
             Transform fixedFrame = Instance.FixedFrame.Transform;
             return fixedFrame.InverseTransformPoint(unityPosition);
         }
-
 
         public static Pose RelativePoseToOrigin(in Pose unityPose)
         {

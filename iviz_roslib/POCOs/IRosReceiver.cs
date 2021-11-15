@@ -9,6 +9,7 @@ namespace Iviz.Roslib
     /// </summary>
     public interface IRosReceiver : IRosConnection
     {
+        string? RemoteId { get; }
         /// <summary>
         /// The ROS uri of the remote publisher
         /// </summary>

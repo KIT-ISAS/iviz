@@ -40,6 +40,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6019251946498178308}
   - {fileID: 6019251946659006208}
@@ -64,9 +65,13 @@ MonoBehaviour:
   arSessionOrigin: {fileID: 6019251946659006209}
   arLight: {fileID: 978464836206565950}
   fovDisplay: {fileID: 749892901891460485}
-  setupModeFrame: {fileID: 0}
   meshPrefab: {fileID: 5788955150932201956, guid: bdf5db9ca5b184ad7aa45f6e7f60f921,
     type: 3}
+  cameraManager: {fileID: 6019251948242916435}
+  occlusionManager: {fileID: 6350551399145372016}
+  planeManager: {fileID: 2073293449537332265}
+  raycaster: {fileID: 8591553869344813422}
+  anchorManager: {fileID: 4719233709103785922}
 --- !u!1 &2024736478269814889
 GameObject:
   m_ObjectHideFlags: 0
@@ -94,6 +99,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6019251946659006208}
   m_RootOrder: 2
@@ -157,6 +163,7 @@ Light:
   m_UseColorTemperature: 0
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
+  m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
   m_ShadowAngle: 0
 --- !u!1 &6019251946498178307
@@ -187,6 +194,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2586147710159433609}
   m_RootOrder: 0
@@ -249,6 +257,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 749892901891460482}
   - {fileID: 6019251948242916437}
@@ -358,6 +367,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4653990593114288910}
   m_Father: {fileID: 6019251946659006208}
@@ -480,6 +490,7 @@ MonoBehaviour:
   m_HumanSegmentationStencilMode: 0
   m_HumanSegmentationDepthMode: 0
   m_EnvironmentDepthMode: 0
+  m_EnvironmentDepthTemporalSmoothing: 1
   m_OcclusionPreferenceMode: 0
 --- !u!1 &6174123620095790151
 GameObject:
@@ -508,6 +519,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2586147710159433609}
   m_RootOrder: 2

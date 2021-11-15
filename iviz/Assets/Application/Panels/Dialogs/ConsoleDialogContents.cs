@@ -16,7 +16,7 @@ namespace Iviz.App
         [SerializeField] DropdownWidget? timeFormat = null;
         [SerializeField] DropdownWidget? messageFormat = null;
         [SerializeField] TMP_Text? text = null;
-        [SerializeField] Text? bottomText = null;
+        [SerializeField] TMP_Text? bottomText = null;
 
         public TrashButtonWidget Close => close.AssertNotNull(nameof(close));
         public ToggleButtonWidget Pause => pause.AssertNotNull(nameof(pause));
@@ -25,7 +25,7 @@ namespace Iviz.App
         DropdownWidget TimeFormat => timeFormat.AssertNotNull(nameof(timeFormat));
         DropdownWidget MessageFormat => messageFormat.AssertNotNull(nameof(messageFormat));
         public TMP_Text Text => text.AssertNotNull(nameof(text));
-        public Text BottomText => bottomText.AssertNotNull(nameof(bottomText));
+        public TMP_Text BottomText => bottomText.AssertNotNull(nameof(bottomText));
 
         public override void ClearSubscribers()
         {

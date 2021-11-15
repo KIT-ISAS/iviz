@@ -15,6 +15,13 @@ namespace Iviz.App
 {
     public sealed class TfLog : MonoBehaviour, IWidget
     {
+        enum PoseDisplayType
+        {
+            ToRoot,
+            ToParent,
+            ToFixed
+        }
+
         [SerializeField] TMP_Text tfText = null;
         [SerializeField] TMP_Text tfName = null;
         [SerializeField] GameObject content = null;
@@ -24,33 +31,24 @@ namespace Iviz.App
         [SerializeField] Button lockPivot = null;
         [SerializeField] Button fixedFrame = null;
 
-        //[SerializeField] Button lock1PV = null;
         [SerializeField] Text trailText = null;
         [SerializeField] Text lockPivotText = null;
 
-        //[SerializeField] Text lock1PVText = null;
         [SerializeField] LinkResolver tfLink = null;
 
         [SerializeField] DropdownWidget showAs = null;
         [SerializeField] DropdownWidget poseAs = null;
 
+        readonly List<TfNode> nodes = new();
+
         bool showAsTree = true;
-
-        enum PoseDisplayType
-        {
-            ToRoot,
-            ToParent,
-            ToFixed
-        }
-
         PoseDisplayType poseDisplay;
+        FrameNode placeHolder;
 
         uint? descriptionHash;
         uint? textHash;
 
-        readonly List<TfNode> nodes = new List<TfNode>();
 
-        FrameNode placeHolder;
         bool isInitialized;
         [CanBeNull] TfFrame selectedFrame;
 
@@ -90,7 +88,6 @@ namespace Iviz.App
                 trail.interactable = interactable;
                 lockPivot.interactable = interactable;
                 fixedFrame.interactable = interactable;
-                //lock1PV.interactable = interactable;
 
                 Flush();
                 if (value != null)
@@ -129,6 +126,18 @@ namespace Iviz.App
                 poseDisplay = (PoseDisplayType)i;
                 UpdateFrameText();
             };
+
+            TfListener.Instance.ResetFrames += OnResetFrames;
+        }
+
+        void OnDestroy()
+        {
+            TfListener.Instance.ResetFrames -= OnResetFrames;
+        }
+
+        void OnResetFrames()
+        {
+            SelectedFrame = null;
         }
 
         void Initialize()
@@ -149,18 +158,15 @@ namespace Iviz.App
             trail.interactable = false;
             lockPivot.interactable = false;
             fixedFrame.interactable = false;
-            //lock1PV.interactable = false;
-            SelectedFrame = TfListener.GetOrCreateFrame("map");
 
             UpdateFrameButtons();
         }
 
         void OnLinkClicked([CanBeNull] string frameId)
         {
-            SelectedFrame =
-                frameId == null || !TfListener.TryGetFrame(frameId, out TfFrame frame)
-                    ? null
-                    : frame;
+            SelectedFrame = frameId == null || !TfListener.TryGetFrame(frameId, out TfFrame frame)
+                ? null
+                : frame;
         }
 
         public void Flush()
@@ -268,24 +274,15 @@ namespace Iviz.App
                             ? "[no parent]"
                             : SelectedFrame.Parent.Id);
 
-                    Pose pose;
-                    switch (poseDisplay)
+                    Pose pose = poseDisplay switch
                     {
-                        case PoseDisplayType.ToRoot:
-                            pose = SelectedFrame.OriginWorldPose;
-                            break;
-                        case PoseDisplayType.ToFixed:
-                            pose = TfListener.RelativePoseToFixedFrame(SelectedFrame.AbsoluteUnityPose);
-                            break;
-                        case PoseDisplayType.ToParent:
-                            pose = SelectedFrame.Transform.AsLocalPose();
-                            break;
-                        default:
-                            pose = Pose.identity; // shouldn't happen
-                            break;
-                    }
+                        PoseDisplayType.ToRoot => SelectedFrame.OriginWorldPose,
+                        PoseDisplayType.ToFixed => TfListener.RelativePoseToFixedFrame(SelectedFrame.AbsoluteUnityPose),
+                        PoseDisplayType.ToParent => SelectedFrame.Transform.AsLocalPose(),
+                        _ => Pose.identity
+                    };
 
-                    FormatPose(pose, description);
+                    RosUtils.FormatPose(pose, description);
                 }
 
                 uint newHash = Crc32Calculator.Compute(description);
@@ -301,38 +298,6 @@ namespace Iviz.App
             {
                 BuilderPool.Return(description);
             }
-        }
-
-        public static void FormatPose(in Pose unityPose, [NotNull] StringBuilder description, bool withRoll = true)
-        {
-            var (pX, pY, pZ) = unityPose.position.Unity2RosVector3();
-            string px = pX == 0 ? "0" : pX.ToString("#,0.###", UnityUtils.Culture);
-            string py = pY == 0 ? "0" : pY.ToString("#,0.###", UnityUtils.Culture);
-            string pz = pZ == 0 ? "0" : pZ.ToString("#,0.###", UnityUtils.Culture);
-
-            var (rXr, rYr, rZr) = (-unityPose.rotation.eulerAngles).Unity2RosVector3();
-            double rX = RegularizeAngle(rXr);
-            double rY = RegularizeAngle(rYr);
-            double rZ = RegularizeAngle(rZr);
-
-            string rx = rX == 0 ? "0" : rX.ToString("#,0.##", UnityUtils.Culture);
-            string ry = rY == 0 ? "0" : rY.ToString("#,0.##", UnityUtils.Culture);
-            string rz = rZ == 0 ? "0" : rZ.ToString("#,0.##", UnityUtils.Culture);
-
-            description.Append(px).Append(", ").Append(py).Append(", ").AppendLine(pz);
-            if (withRoll)
-            {
-                description.Append("r: ").Append(rx).Append(", ");
-            }
-
-            description.Append("p: ").Append(ry).Append(", y: ").Append(rz);
-        }
-
-        static double RegularizeAngle(double angle)
-        {
-            if (angle < -180) return angle + 360;
-            if (angle > 180) return angle - 360;
-            return angle;
         }
 
         public void UpdateFrameButtons()
@@ -504,8 +469,7 @@ namespace Iviz.App
         {
             Write(str, 0, false);
         }
-
-
+        
         public int CompareTo(TfNode other)
         {
             return string.CompareOrdinal(name, other.name);

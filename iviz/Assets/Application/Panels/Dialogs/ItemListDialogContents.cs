@@ -7,6 +7,7 @@ using System.Linq;
 using Iviz.Displays;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using TMPro;
 
 namespace Iviz.App
 {
@@ -34,7 +35,7 @@ namespace Iviz.App
 
         [SerializeField] GameObject contentObject = null;
         [SerializeField] Text emptyText = null;
-        [SerializeField] Text titleText = null;
+        [SerializeField] TMP_Text titleText = null;
         [SerializeField] TrashButtonWidget closeButton = null;
         [SerializeField] Canvas canvas = null;
 

@@ -33,7 +33,6 @@ namespace Iviz.Ros
         readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new();
         readonly Dictionary<string, IAdvertisedService> servicesByTopic = new();
         readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new();
-
         readonly List<(string hostname, string address)> hostAliases = new();
 
         IReadOnlyCollection<string> cachedParameters = EmptyParameters;
@@ -230,9 +229,9 @@ namespace Iviz.Ros
                     ntpTask = NtpCheckerTask(Client.MasterUri.Host, token);
                 });
 
-                RosLogger.Debug("*** Connected!");
-
+                RosLogger.Debug("Connected!");
                 RosLogger.Internal("<b>Connected!</b>");
+                
                 LogConnectionCheck(token);
 
                 return true;
@@ -1137,6 +1136,45 @@ namespace Iviz.Ros
                 ? basePublisher.NumSubscribers
                 : 0;
         }
+
+        /*
+        public bool TryResolveIdFromUri(Uri uri, out string topicName)
+        {
+            if (resolver == null)
+            {
+                topicName = "";
+                return false;
+            }
+
+            if (resolver.TryGetId(uri.ToString(), out topicName))
+            {
+                return true;
+            }
+            
+            Task.Run(async () =>
+            {
+                if (!Connected || connectionTs.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                try
+                {
+                    var client = new RosNodeClient(Client.CallerId, Client.CallerUri, uri);
+                    client.
+                    cachedParameters = await Client.RosMasterClient.LookupNode() .GetParameterNamesAsync(tokenSource.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception e)
+                {
+                    RosLogger.Error("Exception during RoslibConnection.GetSystemParameterList(): ", e);
+                }
+            }, connectionTs.Token);
+        }
+        */
+
 
         internal override void Stop()
         {

@@ -1,8 +1,8 @@
-﻿using System.Runtime.CompilerServices;
+﻿#nullable enable
+
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using System.Runtime.InteropServices;
-using Iviz.Core;
-using JetBrains.Annotations;
 using Unity.Mathematics;
 
 namespace Iviz.Displays
@@ -65,7 +65,6 @@ namespace Iviz.Displays
             f.c1 = end.f;
         }
 
-        [NotNull]
         public override readonly string ToString()
         {
             return $"[x={f.c0.x} y={f.c0.y} z={f.c0.z} i={f.c0.w} c={ColorA} ---- " +

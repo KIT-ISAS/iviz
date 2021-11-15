@@ -1,11 +1,10 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Resources;
-using Iviz.Roslib;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -15,8 +14,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class TfModuleData : ListenerModuleData
     {
-        [NotNull] readonly TfListener listener;
-        [NotNull] readonly TfPanelContents panel;
+        readonly TfListener listener;
+        readonly TfPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -24,7 +23,7 @@ namespace Iviz.App
         public override ModuleType ModuleType => ModuleType.TF;
         public override IConfiguration Configuration => listener.Config;
 
-        public TfModuleData([NotNull] ModuleDataConstructor constructor) :
+        public TfModuleData(ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<TfConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
@@ -43,7 +42,7 @@ namespace Iviz.App
             UpdateModuleButton();
         }
 
-        public void UpdateConfiguration([NotNull] TfConfiguration configuration)
+        public void UpdateConfiguration(TfConfiguration configuration)
         {
             listener.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
@@ -58,6 +57,7 @@ namespace Iviz.App
             panel.ShowFrameLabels.Value = listener.FrameLabelsVisible;
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
             panel.KeepAllFrames.Value = listener.KeepAllFrames;
+            panel.FlipZ.Value = listener.FlipZ;
             panel.Sender.Set(listener.Publisher);
             panel.TapSender.Set(listener.TapPublisher);
             //panel.PreferUdp.Value = listener.PreferUdp;
@@ -67,6 +67,7 @@ namespace Iviz.App
             panel.FrameSize.ValueChanged += f => listener.FrameSize = f;
             panel.ConnectToParent.ValueChanged += f => listener.ParentConnectorVisible = f;
             panel.KeepAllFrames.ValueChanged += f => listener.KeepAllFrames = f;
+            panel.FlipZ.ValueChanged += f => listener.FlipZ = f;
             panel.ResetButton.Clicked += () => listener.ResetController();
             //panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
         }

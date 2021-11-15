@@ -162,10 +162,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Visible = value;
-                if (GuiInputModule.Instance != null)
-                {
-                    GuiInputModule.Instance.DisableCameraLock();
-                }
+                GuiInputModule.Instance.DisableCameraLock();
 
                 TfListener.RootFrame.Transform.SetPose(value ? WorldPose : Pose.identity);
                 ARCameraViewChanged?.Invoke(value);
@@ -279,12 +276,9 @@ namespace Iviz.Controllers
             ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
             ARJoystick.PointerUp += OnARJoystickPointerUp;
-            ARJoystick.Close += () => ModuleListPanel.Instance.ARSidePanel.ToggleARJoystick();
+            ARJoystick.Close += ModuleListPanel.Instance.ARSidePanel.ToggleARJoystick;
 
-            if (GuiInputModule.Instance != null)
-            {
-                GuiInputModule.Instance.UpdateQualityLevel();
-            }
+            GuiInputModule.Instance.UpdateQualityLevel();
 
             MarkerSender = new Sender<DetectedARMarkerArray>("~markers");
             ColorSender = new Sender<Image>("~color/image_color");
@@ -450,7 +444,7 @@ namespace Iviz.Controllers
         {
             DetectedARMarker ToMarker(IMarkerCorners marker) => new()
             {
-                Type = (byte) marker.Type,
+                Type = (byte)marker.Type,
                 Header = new Header(markerSeq++, screenshot.Timestamp, TfListener.FixedFrameId),
                 Code = marker.Code,
                 CameraPose = TfListener.RelativePoseToFixedFrame(ARPoseToUnity(screenshot.CameraPose))

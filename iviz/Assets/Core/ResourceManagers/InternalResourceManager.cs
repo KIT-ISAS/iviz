@@ -33,20 +33,20 @@ namespace Iviz.Resources
         public InternalResourceManager()
         {
             string? robotsFile = UnityEngine.Resources.Load<TextAsset>("Package/iviz/resources")?.text;
-            if (string.IsNullOrEmpty(robotsFile))
+            if (robotsFile is null or "")
             {
                 RosLogger.Warn($"{this}: Empty resource file!");
                 robotDescriptions = new Dictionary<string, string>().AsReadOnly();
                 return;
             }
 
-            Dictionary<string, string> robots = JsonConvert.DeserializeObject<Dictionary<string, string>>(robotsFile);
-            Dictionary<string, string> tmpRobotDescriptions = new Dictionary<string, string>();
+            var robots = JsonConvert.DeserializeObject<Dictionary<string, string>>(robotsFile);
+            var tmpRobotDescriptions = new Dictionary<string, string>();
             foreach (var (key, value) in robots)
             {
                 string? robotDescription =
                     UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/" + value)?.text;
-                if (string.IsNullOrEmpty(robotDescription))
+                if (robotDescription is null or "")
                 {
                     RosLogger.Info($"{this}: Empty or null description file {value}!");
                     continue;

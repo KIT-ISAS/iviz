@@ -32,16 +32,11 @@ namespace Iviz.Controllers
         [SerializeField] Light? arLight = null;
         [SerializeField] ARCameraFovDisplay? fovDisplay = null;
         [SerializeField] MeshFilter? meshPrefab = null;
-
-        AxisFrameResource? setupModeFrame;
-        Camera? mainCamera;
-        ARCameraManager? cameraManager;
-        ARSession? session;
-        ARPlaneManager? planeManager;
-        ARRaycastManager? raycaster;
-        ARAnchorManager? anchorManager;
-        AROcclusionManager? occlusionManager;
-        ARAnchorResource? worldAnchor;
+        [SerializeField] ARCameraManager? cameraManager = null;
+        [SerializeField] AROcclusionManager? occlusionManager = null;
+        [SerializeField] ARPlaneManager? planeManager = null;
+        [SerializeField] ARRaycastManager? raycaster = null;
+        [SerializeField] ARAnchorManager? anchorManager = null;
 
         readonly CancellationTokenSource tokenSource = new();
 
@@ -49,12 +44,21 @@ namespace Iviz.Controllers
         int defaultCullingMask;
         uint colorSeq, depthSeq;
         float? lastAnchorMoved;
-        float lastScreenCapture = 0;
+        float lastScreenCapture;
+
+        AxisFrameResource? setupModeFrame;
+        Camera? mainCamera;
+        ARAnchorResource? worldAnchor;
 
         Camera ArCamera => arCamera.AssertNotNull(nameof(arCamera));
         Light ArLight => arLight.AssertNotNull(nameof(arLight));
         ARSessionOrigin ArSessionOrigin => arSessionOrigin.AssertNotNull(nameof(arSessionOrigin));
-        ARSession ArSession => arSession.AssertNotNull(nameof(arSession));
+        ARSession Session => arSession.AssertNotNull(nameof(arSession));
+        ARCameraManager CameraManager => cameraManager.AssertNotNull(nameof(cameraManager));
+        AROcclusionManager OcclusionManager => occlusionManager.AssertNotNull(nameof(occlusionManager));
+        ARPlaneManager PlaneManager => planeManager.AssertNotNull(nameof(planeManager));
+        ARRaycastManager Raycaster => raycaster.AssertNotNull(nameof(raycaster));
+        ARAnchorManager AnchorManager => anchorManager.AssertNotNull(nameof(anchorManager));
 
         AxisFrameResource SetupModeFrame => setupModeFrame != null
             ? setupModeFrame
@@ -62,40 +66,7 @@ namespace Iviz.Controllers
 
         Camera MainCamera => mainCamera != null
             ? mainCamera
-            : (mainCamera = GameObject.Find("MainCamera").GetComponent<Camera>().AssertNotNull(nameof(mainCamera)));
-
-        ARCameraManager CameraManager =>
-            cameraManager != null
-                ? cameraManager
-                : (cameraManager = ArCamera.GetComponent<ARCameraManager>().AssertNotNull(nameof(cameraManager)));
-
-        ARSession Session =>
-            session != null
-                ? session
-                : (session = GetComponentInChildren<ARSession>().AssertNotNull(nameof(session)));
-
-        AROcclusionManager OcclusionManager =>
-            occlusionManager != null
-                ? occlusionManager
-                : (occlusionManager =
-                    GetComponentInChildren<AROcclusionManager>().AssertNotNull(nameof(occlusionManager)));
-
-        ARPlaneManager PlaneManager =>
-            planeManager != null
-                ? planeManager
-                : (planeManager = ArSessionOrigin.GetComponent<ARPlaneManager>().AssertNotNull(nameof(planeManager)));
-
-        ARRaycastManager Raycaster =>
-            raycaster != null
-                ? raycaster
-                : (raycaster = ArSessionOrigin.GetComponent<ARRaycastManager>().AssertNotNull(nameof(raycaster)));
-
-        ARAnchorManager AnchorManager =>
-            anchorManager != null
-                ? anchorManager
-                : (anchorManager = ArSessionOrigin.GetComponent<ARAnchorManager>()
-                    .AssertNotNull(nameof(anchorManager)));
-
+            : (mainCamera = Settings.FindMainCamera().GetComponent<Camera>());
 
         public string Description
         {
@@ -182,10 +153,7 @@ namespace Iviz.Controllers
                 else
                 {
                     RenderSettings.ambientMode = AmbientMode.Trilight;
-                    if (Settings.SettingsManager != null)
-                    {
-                        Settings.SettingsManager.BackgroundColor = Settings.SettingsManager.BackgroundColor;
-                    }
+                    Settings.SettingsManager.BackgroundColor = Settings.SettingsManager.BackgroundColor;
                 }
             }
         }
@@ -301,10 +269,7 @@ namespace Iviz.Controllers
             Settings.ScreenCaptureManager =
                 new ARFoundationScreenCaptureManager(CameraManager, ArCamera.transform, OcclusionManager);
 
-            if (GuiInputModule.Instance != null)
-            {
-                GuiInputModule.Instance.LongClick += TriggerPulse;
-            }
+            GuiInputModule.Instance.LongClick += TriggerPulse;
 
             RaiseARActiveChanged();
         }
@@ -324,7 +289,7 @@ namespace Iviz.Controllers
             bool meshingEnabled = EnableMeshing;
             var occlusionQuality = OcclusionQuality;
             EnableMeshing = false;
-            ArSession.Reset();
+            Session.Reset();
             ResetSetupMode();
 
             await Task.Delay(200);
@@ -467,7 +432,7 @@ namespace Iviz.Controllers
             SetWorldPose(newPose, RootMover.Anchor);
         }
 
-        public bool TryGetRaycastHit(in Ray ray, out Pose hit)
+        bool TryGetRaycastHit(in Ray ray, out Pose hit)
         {
             if (ArSessionOrigin.trackablesParent == null)
             {
@@ -563,17 +528,10 @@ namespace Iviz.Controllers
 
         void TriggerPulse(ClickInfo clickInfo)
         {
-            if (!Visible)
+            if (Visible && clickInfo.TryGetARRaycastResults(out var results))
             {
-                return;
+                ARMeshLines.TriggerPulse(results[0].Position);
             }
-
-            if (!clickInfo.TryGetARRaycastResults(out var results))
-            {
-                return;
-            }
-
-            ARMeshLines.TriggerPulse(results[0].Position);
         }
 
         async void CaptureScreenForPublish(CancellationToken token)
@@ -672,10 +630,7 @@ namespace Iviz.Controllers
             tokenSource.Cancel();
             ArSet.Clicked -= ArSetOnClicked;
             WorldPoseChanged -= OnWorldPoseChanged;
-            if (GuiInputModule.Instance != null)
-            {
-                GuiInputModule.Instance.LongClick -= TriggerPulse;
-            }
+            GuiInputModule.Instance.LongClick -= TriggerPulse;
 
             if (fovDisplay != null)
             {

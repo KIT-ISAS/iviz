@@ -336,6 +336,11 @@ namespace Iviz.Controllers
             {
                 return false;
             }
+            
+            if (!IsAlive)
+            {
+                return false; // destroying!
+            }
 
             TfFrame? oldParent = Parent;
 

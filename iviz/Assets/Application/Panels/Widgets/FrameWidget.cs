@@ -1,7 +1,10 @@
 ﻿#nullable enable
 
+using System.Text;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Tools;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,8 +12,8 @@ namespace Iviz.App
 {
     public sealed class FrameWidget : DraggableButtonWidget
     {
-        [SerializeField] Text? text = null;
-        Text Text => text.AssertNotNull(nameof(text));
+        [SerializeField] TMP_Text? text = null;
+        TMP_Text Text => text.AssertNotNull(nameof(text));
 
         TfFrame? frame;
         IHasFrame? owner;
@@ -45,21 +48,32 @@ namespace Iviz.App
                 }
 
                 frame = value;
-                string newText;
-                if (frame == null)
+
+
+                var description = BuilderPool.Rent();
+                try
                 {
-                    newText = "<i>➤ (none)</i>";
+                    if (frame == null)
+                    {
+                        description.Append("<i>(none)</i>");
+                    }
+                    else if (TfListener.FixedFrameId == frame.Id)
+                    {
+                        description.Append("<b>").Append(frame.Id).Append("</b> <i>[Fixed]</i>");
+                    }
+                    else
+                    {
+                        description.Append("<b>").Append(frame.Id).Append("</b>\n");
+                        RosUtils.FormatPose(frame.OriginWorldPose, description, RosUtils.PoseFormat.OnlyPosition);
+                    }
+
+                    Text.SetText(description);
                 }
-                else if (TfListener.FixedFrameId == frame.Id)
+                finally
                 {
-                    newText = $"<b>➤{frame.Id}</b> <i>[Fixed]</i>";
-                }
-                else
-                {
-                    newText = $"<b>➤{frame.Id}</b>";
+                    BuilderPool.Return(description);
                 }
 
-                Text.text = newText;
                 UpdateStats();
             }
         }

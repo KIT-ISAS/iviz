@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Iviz.Core;
@@ -115,7 +116,7 @@ namespace Iviz.App
             ResetPanelPosition();
 
             dialog.Close.Clicked += Close;
-            dialog.Topics.ValueChanged += (i, _) =>
+            dialog.Topics.ValueChanged += i =>
             {
                 if (i == 0)
                 {
@@ -129,7 +130,7 @@ namespace Iviz.App
 
                 while (!messageQueue.IsEmpty)
                 {
-                    messageQueue.TryDequeue(out var __);
+                    messageQueue.TryDequeue(out _);
                 }
 
                 queueIsDirty = false;
@@ -152,7 +153,7 @@ namespace Iviz.App
         void UpdateOptions()
         {
             CreateTopicList();
-            dialog.Topics.Options = entries.Select(entry => entry.Description);
+            dialog.Topics.Hints = entries.Select(entry => entry.Description);
         }
 
         public override void UpdatePanel()
@@ -240,7 +241,7 @@ namespace Iviz.App
             }
         }
 
-        sealed class TopicEntry : IComparable<TopicEntry>
+        sealed class TopicEntry : IComparable<TopicEntry>, IEquatable<TopicEntry>
         {
             public static readonly TopicEntry Empty = new();
             public string Topic { get; }
@@ -272,6 +273,13 @@ namespace Iviz.App
                 return ReferenceEquals(this, other)
                     ? 0
                     : string.Compare(Topic, other.Topic, StringComparison.Ordinal);
+            }
+
+            public bool Equals(TopicEntry? other)
+            {
+                if (ReferenceEquals(null, other)) return false;
+                if (ReferenceEquals(this, other)) return true;
+                return Topic == other.Topic;
             }
         }
 

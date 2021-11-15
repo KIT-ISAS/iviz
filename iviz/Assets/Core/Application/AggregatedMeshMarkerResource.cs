@@ -1,8 +1,10 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -16,33 +18,29 @@ namespace Iviz.Displays
         [SerializeField] float smoothness = 0.5f;
         [SerializeField] float metallic = 0.5f;
 
-        BoxCollider boxCollider;
-        [NotNull] BoxCollider Collider => boxCollider != null ? boxCollider : boxCollider = GetComponent<BoxCollider>();
+        BoxCollider? boxCollider;
 
-        [NotNull]
+        BoxCollider Collider => boxCollider != null
+            ? boxCollider
+            : boxCollider = GetComponent<BoxCollider>().AssertNotNull(nameof(boxCollider));
+
         public string Name
         {
             get => gameObject.name;
             set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
-        }        
-        
-        [NotNull]
+        }
+
         public IReadOnlyList<MeshTrianglesResource> Children
         {
             get => children;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                children = value.ToArray();
+                children = (value ?? throw new ArgumentNullException(nameof(value))).ToArray();
                 Layer = Layer;
             }
         }
 
-        [NotNull] public Bounds? Bounds => new Bounds(Collider.center, Collider.size);
+        public Bounds Bounds => new Bounds(Collider.center, Collider.size);
 
         public int Layer
         {
@@ -98,8 +96,8 @@ namespace Iviz.Displays
                 }
             }
         }
-        
-        
+
+
         public float Smoothness
         {
             get => smoothness;

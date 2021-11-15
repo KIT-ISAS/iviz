@@ -94,7 +94,7 @@ namespace Iviz.Controllers
             var pivot = cameraTransform.TransformPoint(shoulderToCamera);
             var controllerRotation = Quaternion.LookRotation(controllerPosition - pivot);
 
-            var cameraOffsetTransform = cameraTransform.parent;
+            var cameraOffsetTransform = transform.parent;
             controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
             controllerState.position = cameraOffsetTransform.InverseTransformPoint(controllerPosition);
             controllerState.rotation = controllerRotation;
@@ -118,8 +118,7 @@ namespace Iviz.Controllers
             }
 
             bool isPressed = Vector3.Distance(thumb.Transform.position, index.Transform.position) < 0.025f;
-            //var color = isPressed ? Color.white : Color.white.WithAlpha(0.3f);
-            var color = Color.white;
+            var color = isPressed ? Color.white : Color.white.WithAlpha(0.3f);
             var scale = new Vector3(0.005f, 0.005f, 0.001f) * (isPressed ? 2 : 1);
 
             thumb.Color = color;
@@ -142,6 +141,7 @@ namespace Iviz.Controllers
                 
                 modelRoot = new GameObject(name + " Model");
                 modelRoot.transform.SetParentLocal(transform.parent);
+                modelRoot.SetActive(false);
                 return modelRoot.transform;
             }
         }
@@ -176,7 +176,7 @@ namespace Iviz.Controllers
         {
             var boneObject = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, RootTransform);
             boneObject.transform.localScale = new Vector3(0.005f, 0.005f, 0.001f);
-            boneObject.Color = Color.white;
+            boneObject.Color = Color.white.WithAlpha(0.3f);
             boneObject.EmissiveColor = Color.blue;
             return boneObject;
         }

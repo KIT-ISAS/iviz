@@ -56,7 +56,7 @@ namespace Iviz.Displays
 
             float baseFrameSize = TfListener.Instance.FrameSize;
             float frameSize = baseFrameSize * clampedSize;
-            float labelSize = baseFrameSize * Mathf.Max(size * 0.375f / 2, 0.25f);
+            float labelSize = baseFrameSize * Mathf.Max(size * 0.375f / 2, 0.15f);
 
             axisResource.AxisLength = frameSize;
             tooltip.Scale = labelSize;
