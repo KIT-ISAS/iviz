@@ -143,7 +143,7 @@ namespace Iviz.XmlRpc
             return string.Concat(entries);
         }
 
-        internal static XmlRpcValue ProcessResponse(string inData)
+        internal static XmlRpcValue ProcessResponseOfMethodCall(string inData)
         {
             var document = new XmlDocument();
             try
@@ -227,7 +227,7 @@ namespace Iviz.XmlRpc
             string outData = CreateRequest(method, args);
             string inData;
 
-            using HttpRequest request = new(callerUri, remoteUri);
+            using var request = new HttpRequest(callerUri, remoteUri);
             try
             {
                 await request.StartAsync(token);
@@ -243,7 +243,7 @@ namespace Iviz.XmlRpc
                 throw new RpcConnectionException($"Error while calling RPC method '{method}' at {remoteUri}", e);
             }
 
-            return ProcessResponse(inData);
+            return ProcessResponseOfMethodCall(inData);
         }
 
         /// <summary>
@@ -296,14 +296,14 @@ namespace Iviz.XmlRpc
 
             try
             {
-                var (methodName, args) = ParseResponseXml(inData);
+                var (methodName, args) = ProcessResponseOfMethodResponse(inData);
 
                 if (!methods.TryGetValue(methodName, out var method))
                 {
                     throw new ParseException($"Unknown function '{methodName}' or invalid arguments");
                 }
 
-                XmlRpcArg response = (XmlRpcArg)method(args);
+                var response = method(args);
 
                 string outData = "<?xml version=\"1.0\"?>\n" +
                                  "<methodResponse>\n" +
@@ -346,12 +346,20 @@ namespace Iviz.XmlRpc
             }
         }
 
-        static (string methodName, XmlRpcValue[] args) ParseResponseXml(string inData)
+        static (string methodName, XmlRpcValue[] args) ProcessResponseOfMethodResponse(string inData)
         {
-            XmlDocument document = new();
-            document.LoadXml(inData);
-
-            XmlNode? root = document.FirstChild;
+            var document = new XmlDocument();
+            
+            try
+            {
+                document.LoadXml(inData);
+            }
+            catch (XmlException e)
+            {
+                throw new ParseException("XML response could not be parsed", e);
+            }
+            
+            var root = document.FirstChild;
             while (root != null && root.Name != "methodCall")
             {
                 root = root.NextSibling;

@@ -39,7 +39,7 @@ namespace Iviz.XmlRpc
         /// <exception cref="ParseException">The HTTP request could not be understood</exception>
         /// <exception cref="TimeoutException">Thrown if the timeout wait expired</exception>
         /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
-        public async Task<string> GetRequestAsync(CancellationToken token = default)
+        public async ValueTask<string> GetRequestAsync(CancellationToken token = default)
         {
             return (await HttpRequest.ReadIncomingDataAsync(client, false, token)).inData;
         }

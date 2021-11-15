@@ -138,7 +138,7 @@ namespace Iviz.XmlRpc
                 }
             }
 
-            return XmlRpcService.ProcessResponse(inData);
+            return XmlRpcService.ProcessResponseOfMethodCall(inData);
         }
 
         async Task<HttpRequest> EnsureValidRequester(Uri callerUri, CancellationToken token)
