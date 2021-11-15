@@ -94,7 +94,7 @@ namespace Iviz.Tools
                 Task result = await (task, timeoutTask).WhenAny();
                 if (result != task)
                 {
-                    Logger.LogErrorFormat<object>(GenericExceptionFormat, caller);
+                    Logger.LogErrorFormat<object>(GenericExceptionFormat, caller, new TimeoutException());
                     return;
                 }
 

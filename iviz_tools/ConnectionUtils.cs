@@ -82,6 +82,10 @@ namespace Iviz.Tools
             client.Connect(resolvedHostname, port);
         }
 
+        /// <summary>
+        /// Checks if socket is connected and can transmit data.
+        /// <seealso href="https://stackoverflow.com/questions/2661764/how-to-check-if-a-socket-is-connected-disconnected-in-c">See here for more info</seealso>
+        /// </summary>
         public static bool CheckIfAlive(this Socket? socket) =>
             socket is { Connected: true } && !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0);
 
