@@ -82,7 +82,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Process([NotNull] DetectedARMarker detectedMarker)
+        public void Process([NotNull] ARMarker detectedMarker)
         {
             var key = ((ARMarkerType) detectedMarker.Type, detectedMarker.Code);
             if (!markers.TryGetValue(key, out var executableMarker))
@@ -163,7 +163,7 @@ namespace Iviz.Controllers
             frames.Clear();
         }
 
-        static Msgs.GeometryMsgs.Pose SolvePnp([NotNull] DetectedARMarker marker)
+        static Msgs.GeometryMsgs.Pose SolvePnp([NotNull] ARMarker marker)
         {
             float sizeInMm = (float) marker.MarkerSizeInMm;
             float sizeInM = sizeInMm / 1000f;
@@ -174,7 +174,6 @@ namespace Iviz.Controllers
             return MarkerDetector.SolvePnp(imageCorners, intrinsic, sizeInM);
         }
 
-        [NotNull]
         public override string ToString() => "[ARMarkerExecutor]";
     }
 }

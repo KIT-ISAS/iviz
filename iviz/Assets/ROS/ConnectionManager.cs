@@ -52,8 +52,8 @@ namespace Iviz.Ros
             }
         }
 
-        public static string? MyId => Connection.MyId;
-        public static bool IsConnected => Connection.ConnectionState == ConnectionState.Connected;
+        public static string? MyId => instance != null ? Connection.MyId : null;
+        public static bool IsConnected => instance != null && Connection.ConnectionState == ConnectionState.Connected;
         public static IListener? LogListener => instance != null ? instance.logListener : null;
         public static ISender? LogSender => instance != null ? instance.logSender : null;
 

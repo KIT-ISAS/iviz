@@ -62,7 +62,7 @@ namespace Iviz.App.Tests
                 (int) qr.Corners[0].X, texture.height - 1 - (int) qr.Corners[0].Y);
 
 
-            var detectedMarker = new DetectedARMarker
+            var detectedMarker = new ARMarker
             {
                 Type = (byte) ARMarkerType.QrCode,
                 Header = new Header(0, default, TfListener.FixedFrameId),

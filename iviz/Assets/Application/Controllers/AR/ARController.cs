@@ -77,8 +77,8 @@ namespace Iviz.Controllers
             Setup
         }
 
-        const string HeadFrameId = "~ar_head";
-        protected const string CameraFrameId = "~ar_camera";
+        const string HeadFrameId = "~xr/head";
+        protected const string CameraFrameId = "~xr/camera";
 
         static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
         static ARJoystick ARJoystick => ModuleListPanel.Instance.ARJoystick;
@@ -103,7 +103,7 @@ namespace Iviz.Controllers
             : (canvas = GameObject.Find("Canvas").GetComponent<Canvas>().AssertNotNull(nameof(canvas)));
 
         public ARMarkerExecutor MarkerExecutor { get; } = new();
-        public Sender<DetectedARMarkerArray>? MarkerSender { get; private set; }
+        public Sender<ARMarkerArray>? MarkerSender { get; private set; }
         public Sender<Image>? ColorSender { get; private set; }
         public Sender<Image>? DepthSender { get; private set; }
         public Sender<Image>? DepthConfidenceSender { get; private set; }
@@ -158,6 +158,9 @@ namespace Iviz.Controllers
             }
         }
 
+        /// <summary>
+        /// Is the AR View enabled?
+        /// </summary>
         public virtual bool Visible
         {
             get => config.Visible;
@@ -282,12 +285,12 @@ namespace Iviz.Controllers
 
             GuiInputModule.Instance.UpdateQualityLevel();
 
-            MarkerSender = new Sender<DetectedARMarkerArray>("~markers");
-            ColorSender = new Sender<Image>("~color/image_color");
-            DepthSender = new Sender<Image>("~depth/image");
-            DepthConfidenceSender = new Sender<Image>("~depth/image_confidence");
-            ColorInfoSender = new Sender<CameraInfo>("~color/camera_info");
-            DepthInfoSender = new Sender<CameraInfo>("~depth/camera_info");
+            MarkerSender = new Sender<ARMarkerArray>("~xr/markers");
+            ColorSender = new Sender<Image>("~xr/color/image_color");
+            DepthSender = new Sender<Image>("~xr/depth/image");
+            DepthConfidenceSender = new Sender<Image>("~xr/depth/image_confidence");
+            ColorInfoSender = new Sender<CameraInfo>("~xr/color/camera_info");
+            DepthInfoSender = new Sender<CameraInfo>("~xr/depth/camera_info");
 
             detector.MarkerDetected += OnMarkerDetected;
 
@@ -415,6 +418,10 @@ namespace Iviz.Controllers
             UpdateWorldPose(new Pose(WorldPosition, rotation), mover);
         }
 
+        /// <summary>
+        /// Compensates the offset between AR View and Virtual View when AR is enabled. 
+        /// </summary>
+        /// <param name="unityPose">The pose to compensate</param>
         public static Pose ARPoseToUnity(in Pose unityPose)
         {
             if (Instance == null || Instance.Visible)
@@ -444,7 +451,7 @@ namespace Iviz.Controllers
 
         void OnMarkerDetected(Screenshot screenshot, IMarkerCorners[] markers)
         {
-            DetectedARMarker ToMarker(IMarkerCorners marker) => new()
+            ARMarker ToMarker(IMarkerCorners marker) => new()
             {
                 Type = (byte)marker.Type,
                 Header = new Header(markerSeq++, screenshot.Timestamp, TfListener.FixedFrameId),
@@ -464,7 +471,7 @@ namespace Iviz.Controllers
                 MarkerExecutor.Process(marker);
             }
 
-            MarkerSender?.Publish(new DetectedARMarkerArray(array));
+            MarkerSender?.Publish(new ARMarkerArray(array));
 
             foreach (var corners in markers)
             {

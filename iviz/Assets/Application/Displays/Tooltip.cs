@@ -14,15 +14,15 @@ namespace Iviz.Displays
     {
         [SerializeField] BoxCollider? boxCollider = null;
         [SerializeField] TMP_Text? text = null;
-        RoundedPlaneResource? cube;
+        RoundedPlaneResource? background;
         uint? prevTextHash;
         Transform? mTransform;
 
         BoxCollider BoxCollider => boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
         TMP_Text Text => text.AssertNotNull(nameof(text));
 
-        RoundedPlaneResource Cube =>
-            cube != null ? cube : cube = ResourcePool.RentDisplay<RoundedPlaneResource>(Transform);
+        RoundedPlaneResource Background =>
+            background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneResource>(Transform);
 
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         public Bounds? Bounds => new Bounds(BoxCollider.center, BoxCollider.size);
@@ -34,7 +34,7 @@ namespace Iviz.Displays
             {
                 gameObject.layer = value;
                 Text.gameObject.layer = value;
-                Cube.Layer = value;
+                Background.Layer = value;
             }
         }
         
@@ -50,7 +50,7 @@ namespace Iviz.Displays
 
         public Color BackgroundColor
         {
-            set => Cube.Color = value;
+            set => Background.Color = value;
         }
 
         public Color MainColor
@@ -100,8 +100,8 @@ namespace Iviz.Displays
 
         void UpdateSize()
         {
-            Cube.Size = new Vector2(Text.preferredWidth + 5f, Text.preferredHeight + 2f);
-            BoxCollider.size = Cube.Bounds.size;
+            Background.Size = new Vector2(Text.preferredWidth + 5f, Text.preferredHeight + 2f);
+            BoxCollider.size = Background.Bounds.size;
         }
 
         public void Suspend()
@@ -111,7 +111,7 @@ namespace Iviz.Displays
 
         void IRecyclable.SplitForRecycle()
         {
-            Cube.ReturnToPool();
+            Background.ReturnToPool();
         }
 
         public void PointToCamera()

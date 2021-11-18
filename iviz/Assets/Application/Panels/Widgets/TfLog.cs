@@ -23,8 +23,8 @@ namespace Iviz.App
             ToFixed
         }
 
-        [SerializeField] TMP_Text tfText = null;
-        [SerializeField] TMP_Text tfName = null;
+        [SerializeField] [CanBeNull] TMP_Text tfText = null;
+        [SerializeField] [CanBeNull] TMP_Text tfName = null;
         [SerializeField] GameObject content = null;
         [SerializeField] Button gotoButton = null;
         [SerializeField] Button trail = null;
@@ -35,11 +35,16 @@ namespace Iviz.App
         [SerializeField] Text trailText = null;
         [SerializeField] Text lockPivotText = null;
 
-        [SerializeField] LinkResolver tfLink = null;
+        [SerializeField] [CanBeNull] LinkResolver tfLink = null;
+        [SerializeField] [CanBeNull] DropdownWidget showAs = null;
+        [SerializeField] [CanBeNull] DropdownWidget poseAs = null;
 
-        [SerializeField] DropdownWidget showAs = null;
-        [SerializeField] DropdownWidget poseAs = null;
-
+        [NotNull] TMP_Text TfText => tfText.AssertNotNull(nameof(tfText)); 
+        [NotNull] TMP_Text TfName => tfName.AssertNotNull(nameof(tfName)); 
+        [NotNull] DropdownWidget ShowAs => showAs.AssertNotNull(nameof(showAs)); 
+        [NotNull] DropdownWidget PoseAs => poseAs.AssertNotNull(nameof(poseAs)); 
+        [NotNull] LinkResolver TfLink => tfLink.AssertNotNull(nameof(tfLink)); 
+        
         readonly List<TfNode> nodes = new();
 
         bool showAsTree = true;
@@ -103,25 +108,25 @@ namespace Iviz.App
         {
             Initialize();
 
-            showAs.Options = new[]
+            ShowAs.Options = new[]
             {
                 "Show as Tree",
                 "Show as List",
             };
-            poseAs.Options = new[]
+            PoseAs.Options = new[]
             {
                 "Pose to Root",
                 "Relative to Parent",
                 "Relative to Fixed"
             };
 
-            showAs.ValueChanged += (i, _) =>
+            ShowAs.ValueChanged += (i, _) =>
             {
                 showAsTree = i == 0;
                 Flush();
             };
 
-            poseAs.ValueChanged += (i, _) =>
+            PoseAs.ValueChanged += (i, _) =>
             {
                 poseDisplay = (PoseDisplayType)i;
                 UpdateFrameText();
@@ -149,7 +154,7 @@ namespace Iviz.App
 
             isInitialized = true;
 
-            tfLink.LinkClicked += OnLinkClicked;
+            TfLink.LinkClicked += OnLinkClicked;
             SelectedFrame = null;
 
             placeHolder = FrameNode.Instantiate("TFLog Placeholder");
@@ -200,10 +205,10 @@ namespace Iviz.App
                 }
 
                 descriptionHash = newHash;
-                tfText.SetText(description);
+                TfText.SetText(description);
                 RectTransform cTransform = (RectTransform)content.transform;
-                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, tfText.preferredWidth + 10);
-                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, tfText.preferredHeight + 10);
+                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, TfText.preferredWidth + 10);
+                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, TfText.preferredHeight + 10);
             }
             finally
             {
@@ -233,11 +238,11 @@ namespace Iviz.App
                 }
 
                 descriptionHash = newHash;
-                tfText.SetText(description);
+                TfText.SetText(description);
 
                 var cTransform = (RectTransform)content.transform;
-                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, tfText.preferredWidth + 10);
-                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, tfText.preferredHeight + 10);
+                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, TfText.preferredWidth + 10);
+                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, TfText.preferredHeight + 10);
             }
             finally
             {
@@ -297,7 +302,7 @@ namespace Iviz.App
                 }
 
                 textHash = newHash;
-                tfName.SetText(description);
+                TfName.SetText(description);
             }
             finally
             {
