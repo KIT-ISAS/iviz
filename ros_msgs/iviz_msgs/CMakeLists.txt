@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 add_message_files(DIRECTORY msg)
+add_service_files(DIRECTORY srv)
 
 generate_messages(
 	DEPENDENCIES
