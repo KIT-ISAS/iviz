@@ -42,10 +42,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.SerializeStructArray(Colors, 0);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Colors is null) throw new System.NullReferenceException(nameof(Colors));
@@ -63,8 +59,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE3POz8kvMjaKjlVIBrGKubhsqQy4fIPdrRQyyzKr4nOL04v1nSE2cpVm5pVYKBRB6XQo" +
-                "nQSlE7m4AEmfKA6bAAAA";
+                "H4sIAAAAAAAACnPOz8kvMjaKjlVIBrGKuXi5bKkMeLl8g92tFDLLMqvic4vTi/WdIXbycpVm5pVYKBRB" +
+                "6XQonQSlE4FuAQCrK24SnwAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

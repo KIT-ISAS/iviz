@@ -39,12 +39,6 @@ namespace Iviz.Msgs.GridMapMsgs
             set => Response = (ProcessFileResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -101,10 +95,6 @@ namespace Iviz.Msgs.GridMapMsgs
             b.Serialize(TopicName);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (FilePath is null) throw new System.NullReferenceException(nameof(FilePath));
@@ -152,10 +142,6 @@ namespace Iviz.Msgs.GridMapMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

@@ -39,12 +39,6 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (GetCaptureResolutionsResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -83,10 +77,6 @@ namespace Iviz.Msgs.IvizMsgs
         public static readonly GetCaptureResolutionsRequest Singleton = new GetCaptureResolutionsRequest();
     
         public void RosSerialize(ref Buffer b)
-        {
-        }
-        
-        public void Dispose()
         {
         }
         
@@ -151,10 +141,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Success);
             b.Serialize(Message);
             b.SerializeArray(Resolutions, 0);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

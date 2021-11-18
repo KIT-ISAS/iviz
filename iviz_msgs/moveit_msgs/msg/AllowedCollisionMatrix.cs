@@ -71,10 +71,6 @@ namespace Iviz.Msgs.MoveitMsgs
             b.SerializeStructArray(DefaultEntryValues, 0);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (EntryNames is null) throw new System.NullReferenceException(nameof(EntryNames));
@@ -118,13 +114,13 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE61SzU7DMAy+9yks7QLSNMSOSBwmQIgDXOCG0OQ27hqRxl2SbuztcZKWbYzd6KFSa/v7" +
-                "syfw1hAY7QNwDWSD24HFljxoC0FKLQanvwovb7t6/8gty9RSFJM0ra3SG616NKmq98NoDG9JQcVGKDTb" +
-                "EW4Cft2joyn4XduS/KumsNWhAS/IwE6RA/RHbIsMdjdiPcTaj6INmj5LerKASukQ6QInHb/5QQdPphbK" +
-                "qNEzNLghkNnYrKjG3oQhjIQLNTsgrJqDhGaJqz7jsza4Au1h3ZMEohIAQofaxZxzwhf2egp2fpl4McR2" +
-                "y0Fae6vGBM8qj8WsjetB+Cl7xdZriVIESBIlZR7OorMVESFxDzJ8R5Wuo96BPh1GSeJuFr2WLBuSARSB" +
-                "dg6ywGO1qV1whGFI0WeljnyMNElquz4IQ9o2Wli83AN35DAurNgf2gCwPDyBktmclMbN3/7zUzy/Pt5A" +
-                "yxvSYdn6lb/68wLF7rYhMelSjrLA/R6qhqpPsRONk8XSkBo9jJ/FNwT/SIGCAwAA";
+                "H4sIAAAAAAAACq1SvU7DMBDeI+UdTuoCUlVERySGChBigAU2hKpLfG4sHDu1nZa+PWc7oS2lGxkiJXf3" +
+                "/d1N4K0h0MoHsBLIBLcDgy15UAYCl1oMTn0Vnt9m9f6RW5appSgmaVoZoTZK9KhTVe2HUWu7JQG11Uyh" +
+                "rBnhJuDXPTqagt+1LfG/egpbFRrwjAzWCXKA/ohtkcHuRqyHWPtRtEHdZ0lPBlAIFSJdsEnHb35QwZOW" +
+                "TBk1egsNbgh4NjYLktjrMISRcEFaB4R1c5DQLHHJMz6lxhUoD+ueOBCRABA6VC7mnBO+MNdTMPPLxIsh" +
+                "thsbuLU3YkzwrPJYzNqsHISfstfWeMVRsgBOoqLMwwJie7bCIjjuQYbvqFYy6h3o02FUxO5m0WtleUM8" +
+                "gCzQzIEXeKw2tTMOMwwp+qzUkY+RJklt1wdmSNtGA4uXe7AdOYwLK/aHNgAsD0+gslaflIbNl8XtPz9l" +
+                "8fz6eAOt3ZAKy9av/NWfN1iy421D7JOXy1HyDverqBuqP9lR9E4GK01itDF+lsU31UlzX4YDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

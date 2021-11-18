@@ -46,10 +46,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.Serialize(V);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
         }
@@ -69,7 +65,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE1NW8E0tzlBwLCkpykwqLUlVCKksSOVKy8lPLDE2UiiFs8q4uADIua4VKwAAAA==";
+                "H4sIAAAAAAAAClNW8E0tzlBwLCkpykwqLUlVCKksSOVKy8lPLDE2UiiFs8q4eLkAb3Q86CwAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

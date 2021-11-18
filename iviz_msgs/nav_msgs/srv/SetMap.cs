@@ -39,12 +39,6 @@ namespace Iviz.Msgs.NavMsgs
             set => Response = (SetMapResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -100,10 +94,6 @@ namespace Iviz.Msgs.NavMsgs
             InitialPose.RosSerialize(ref b);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Map is null) throw new System.NullReferenceException(nameof(Map));
@@ -152,10 +142,6 @@ namespace Iviz.Msgs.NavMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

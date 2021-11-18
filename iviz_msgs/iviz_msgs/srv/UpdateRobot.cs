@@ -39,12 +39,6 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (UpdateRobotResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -106,10 +100,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Id);
             Configuration.RosSerialize(ref b);
             b.SerializeArray(ValidFields, 0);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()
@@ -178,10 +168,6 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Serialize(Success);
             b.Serialize(Message);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

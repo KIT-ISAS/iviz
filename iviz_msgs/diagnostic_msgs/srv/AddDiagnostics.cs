@@ -39,12 +39,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
             set => Response = (AddDiagnosticsResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -109,10 +103,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.Serialize(LoadNamespace);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (LoadNamespace is null) throw new System.NullReferenceException(nameof(LoadNamespace));
@@ -168,10 +158,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
             b.Serialize(Success);
             b.Serialize(Message);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

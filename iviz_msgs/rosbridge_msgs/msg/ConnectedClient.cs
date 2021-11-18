@@ -46,10 +46,6 @@ namespace Iviz.Msgs.RosbridgeMsgs
             b.Serialize(ConnectionTime);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (IpAddress is null) throw new System.NullReferenceException(nameof(IpAddress));
@@ -67,7 +63,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAEysuKcrMS1fILIhPTEkpSi0u5irJzE1VSM7Py0tNLsnMz4sH8bm4AFvLoaQoAAAA";
+                "H4sIAAAAAAAACisuKcrMS1fILIhPTEkpSi0u5irJzE1VSM7Py0tNLsnMz4sH8bl4uQDjuYuBKQAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

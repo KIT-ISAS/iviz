@@ -39,12 +39,6 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetMotionPlanResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -96,10 +90,6 @@ namespace Iviz.Msgs.MoveitMsgs
             MotionPlanRequest.RosSerialize(ref b);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (MotionPlanRequest is null) throw new System.NullReferenceException(nameof(MotionPlanRequest));
@@ -147,10 +137,6 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             MotionPlanResponse.RosSerialize(ref b);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

@@ -39,12 +39,6 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetStateValidityResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -102,10 +96,6 @@ namespace Iviz.Msgs.MoveitMsgs
             RobotState.RosSerialize(ref b);
             b.Serialize(GroupName);
             Constraints.RosSerialize(ref b);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()
@@ -193,10 +183,6 @@ namespace Iviz.Msgs.MoveitMsgs
             b.SerializeArray(Contacts, 0);
             b.SerializeArray(CostSources, 0);
             b.SerializeArray(ConstraintResult, 0);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

@@ -39,12 +39,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (TestRequestOnlyResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -93,10 +87,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             b.Serialize(Data);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
         }
@@ -136,10 +126,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public static readonly TestRequestOnlyResponse Singleton = new TestRequestOnlyResponse();
     
         public void RosSerialize(ref Buffer b)
-        {
-        }
-        
-        public void Dispose()
         {
         }
         

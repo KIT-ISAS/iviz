@@ -72,10 +72,6 @@ namespace Iviz.Msgs.Rosapi
             b.SerializeArray(Constvalues, 0);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Type is null) throw new System.NullReferenceException(nameof(Type));
@@ -132,8 +128,8 @@ namespace Iviz.Msgs.Rosapi
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAEysuKcrMS1coqSxI5SoGs6NjFdIyU3NS8hJzU4vRxEDKirky80qMjWBCiUVFiZU5qXkI" +
-                "lakVibkFOch6k/PzikvQzAOLlSXmlAIFuQB/w6D2hgAAAA==";
+                "H4sIAAAAAAAACisuKcrMS1coqSxI5SoGs6NjFdIyU3NS8hJzU4vRxEDKirky80qMjWBCiUVFiZU5qXkI" +
+                "lakVibkFOch6k/PzikvQzAOLlSXmlAIFebkAOlzavYcAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

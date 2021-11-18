@@ -50,10 +50,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.SerializeArray(Descriptor, 0);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Descriptor is null) throw new System.NullReferenceException(nameof(Descriptor));
@@ -76,9 +72,9 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7XQsQrCQAwG4D1PEfABhFYcBFedBMFuIhKuaRtoL8clg/XptRQ66KqZ/vxLPtKyDux5" +
-                "vA/W2vqsEh17DeSiEczruT/0Sl4W1xvWbCFLcs0A+x8PnC7HHbbfIlhh1Ylh0Ogk0dA7xqQmkxK1QXpv" +
-                "k1wiNpkZLVFgaCb1doOPJY1Lev6L//mz+WJZYE1O8AKMerHtbwEAAA==";
+                "H4sIAAAAAAAACrWQsQrCUAxF98D7h4AfIFRxEFx1EgTdRCS8pm2gfSkvGaxfr6XQQVe900mWnNyatWPP" +
+                "w72z2pYnleTYaiQXTWBeTvt9q+Sr4nrDki1m6V0zBNj9OAGO58MW62+nAAu8NGIYNTlJMvSGsVeTURS1" +
+                "QnpPo7wkrDIzWk+RoRrFN2t8zDTM9PzfB5/FhenoqsCSnAK8AIvQHs12AQAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

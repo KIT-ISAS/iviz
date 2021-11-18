@@ -39,12 +39,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (TestMultipleRequestFieldsResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -106,10 +100,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             b.Serialize(@bool);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (@string is null) throw new System.NullReferenceException(nameof(@string));
@@ -147,10 +137,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public static readonly TestMultipleRequestFieldsResponse Singleton = new TestMultipleRequestFieldsResponse();
     
         public void RosSerialize(ref Buffer b)
-        {
-        }
-        
-        public void Dispose()
         {
         }
         

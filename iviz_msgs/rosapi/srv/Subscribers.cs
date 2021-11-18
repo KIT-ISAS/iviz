@@ -39,12 +39,6 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (SubscribersResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -94,10 +88,6 @@ namespace Iviz.Msgs.Rosapi
             b.Serialize(Topic);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Topic is null) throw new System.NullReferenceException(nameof(Topic));
@@ -144,10 +134,6 @@ namespace Iviz.Msgs.Rosapi
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(Subscribers_, 0);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

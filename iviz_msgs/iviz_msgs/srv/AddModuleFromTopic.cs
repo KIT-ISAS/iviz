@@ -39,12 +39,6 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (AddModuleFromTopicResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -98,10 +92,6 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Serialize(Topic);
             b.Serialize(Id);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()
@@ -160,10 +150,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Success);
             b.Serialize(Message);
             b.Serialize(Id);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

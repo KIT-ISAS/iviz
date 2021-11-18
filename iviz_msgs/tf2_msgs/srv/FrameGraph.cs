@@ -39,12 +39,6 @@ namespace Iviz.Msgs.Tf2Msgs
             set => Response = (FrameGraphResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -83,10 +77,6 @@ namespace Iviz.Msgs.Tf2Msgs
         public static readonly FrameGraphRequest Singleton = new FrameGraphRequest();
     
         public void RosSerialize(ref Buffer b)
-        {
-        }
-        
-        public void Dispose()
         {
         }
         
@@ -138,10 +128,6 @@ namespace Iviz.Msgs.Tf2Msgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(FrameYaml);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

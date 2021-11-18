@@ -39,12 +39,6 @@ namespace Iviz.Msgs.SensorMsgs
             set => Response = (SetCameraInfoResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -101,10 +95,6 @@ namespace Iviz.Msgs.SensorMsgs
             CameraInfo.RosSerialize(ref b);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (CameraInfo is null) throw new System.NullReferenceException(nameof(CameraInfo));
@@ -156,10 +146,6 @@ namespace Iviz.Msgs.SensorMsgs
         {
             b.Serialize(Success);
             b.Serialize(StatusMessage);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

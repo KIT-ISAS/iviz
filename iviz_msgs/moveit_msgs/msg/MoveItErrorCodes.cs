@@ -69,10 +69,6 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Val);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
         }
@@ -92,14 +88,14 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE32ST4vbMBDF7/4UhsLeDM2f3e0efFAcJatGnslKcmBPg1tMa5p1WjsN9Nt3FKTgNaU+" +
-                "yFjvp/HozWu782KeXupjknxIT5emr4/H9Evzvb60pz5pr6qtikJam8/C90YoXRmZP/knCZt7LQAUbMmr" +
-                "cp1nkVZwEFqtqUSnEMhzeTYP4miTAiicXNPqlSQclEEoJTgqngVsZZ4twrECwRnUt38tw34FYqUlOSTx" +
-                "UikjyUqwaIiLijy7D5RTJf8CK5dnD7F7I2W5d77Wo3fi57Huurb7lt6lP9queavP7dch7Ztfv5vhnDZ9" +
-                "f+qH6I4TxhGvTvIVqECtleVLsQMf/4EcFGp+W9oL98w0WGeEAmeZn0Uztyj0tNh8rP2vymIMjqR4yM9m" +
-                "mUymszVY7QlEyS7P7qfipBIjDxPE4ArDFVl9nKhawS4W/zTRcPVZFi6qT9794c9wbt7e27wxDBA3AHaD" +
-                "pqQYwmw+u4UimMVxkcXOZ5HzcGDOh4LB6OCoV79etWhaCIyCDd60pe9pFIN3fQGS2pFFXbnrnBY8xL/m" +
-                "qA9zVQMAAA==";
+                "H4sIAAAAAAAACn2ST4vbMBDF74b9DoZAb4Y62T/tQQfFUbJq5JlUkgN7Et7FbM1mndZOA/32HQUpeE2p" +
+                "DzLS+2k0enptd1rM03N9SJJZejw3fX04pM/Nj/rcHvukvaimKgphDMvDfM2lqrRgX/2XhMWd4gASNs6r" +
+                "YsWySEvYcyVXrkQrEZznWDYP4mjRBZBbsXLLJydgLzVCKcC64pHDRrBsEbYVCFajup51G9Yr4EslnEXH" +
+                "v1dSC2cEGNSOinKW3QXKypKOwMqy7D52r4Uod3Qyyx68Ez8Pdde13Wv6KX1ru+a9PrUvQ9o3v343wylt" +
+                "+v7YD9Edy7V1NFpBV3AFKiUNXYoc+PwPZC9R0d+4HbePRIOxmkuwhvg8mrlBrqbF5mPtf1UWY3AkxU3+" +
+                "bW6TyetsNFY7B7wkl/O7qTipRMj9BNG4xHBFluUPE1VJ2MbiXyYaLr+JwkaV8jRLhz/DqXn/aPNaE+Co" +
+                "ATBr1OXl6X0Is3kM2tUsiosotj6LlIc9cT4UBEYHR7368aJF00JgJKzxqpFZs3EMPvQF6OTWGVSVTzJF" +
+                "NE9ukr+x2Iw0VgMAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

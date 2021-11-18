@@ -39,12 +39,6 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetCartesianPathResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -147,10 +141,6 @@ namespace Iviz.Msgs.MoveitMsgs
             PathConstraints.RosSerialize(ref b);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (StartState is null) throw new System.NullReferenceException(nameof(StartState));
@@ -234,10 +224,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Solution.RosSerialize(ref b);
             b.Serialize(Fraction);
             ErrorCode.RosSerialize(ref b);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

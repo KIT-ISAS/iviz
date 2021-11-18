@@ -39,12 +39,6 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             set => Response = (GetObjectInformationResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -96,10 +90,6 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             Type.RosSerialize(ref b);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Type is null) throw new System.NullReferenceException(nameof(Type));
@@ -148,10 +138,6 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         public void RosSerialize(ref Buffer b)
         {
             Information.RosSerialize(ref b);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

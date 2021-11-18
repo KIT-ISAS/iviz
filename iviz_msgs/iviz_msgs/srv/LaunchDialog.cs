@@ -39,12 +39,6 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (LaunchDialogResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -92,10 +86,6 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref Buffer b)
         {
             Dialog.RosSerialize(ref b);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()
@@ -154,10 +144,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Success);
             b.Serialize(Message);
             Feedback.RosSerialize(ref b);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

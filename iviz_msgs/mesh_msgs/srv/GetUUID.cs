@@ -39,12 +39,6 @@ namespace Iviz.Msgs.MeshMsgs
             set => Response = (GetUUIDResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -83,10 +77,6 @@ namespace Iviz.Msgs.MeshMsgs
         public static readonly GetUUIDRequest Singleton = new GetUUIDRequest();
     
         public void RosSerialize(ref Buffer b)
-        {
-        }
-        
-        public void Dispose()
         {
         }
         
@@ -138,10 +128,6 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Uuid);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()
