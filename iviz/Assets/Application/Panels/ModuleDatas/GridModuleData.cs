@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System.Collections.Generic;
+using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Newtonsoft.Json;

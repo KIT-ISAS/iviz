@@ -1,4 +1,5 @@
 ﻿using System;
+using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;

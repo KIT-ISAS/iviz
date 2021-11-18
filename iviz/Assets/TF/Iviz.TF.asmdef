@@ -1,0 +1,18 @@
+{
+    "name": "Iviz.TF",
+    "rootNamespace": "",
+    "references": [
+        "GUID:31a80e3fb3ac64b8385cd739784d42de",
+        "GUID:0775440a70b5e459d9534389409d8fa8",
+        "GUID:a31a12e3f7d4f4bdcb9d6fbb0a5aa248"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

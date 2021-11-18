@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.App.ARDialogs;
+using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
@@ -131,6 +133,7 @@ namespace Iviz.Controllers
                 {
                     switch (msg.Type)
                     {
+                        /*
                         case WidgetType.Tooltip when tooltipData.Object is Tooltip widget:
                             widget.AttachTo(msg.Header.FrameId);
                             widget.Transform.SetLocalPose(msg.Pose.Ros2Unity());
@@ -142,6 +145,7 @@ namespace Iviz.Controllers
                             }
 
                             return;
+                            */
                     }
 
                     goto case ActionType.Add;
@@ -195,14 +199,16 @@ namespace Iviz.Controllers
                             widget = disc;
                             break;
                         }
+                        /*
                         case WidgetType.Tooltip:
                         {
                             info = Resource.Displays.Tooltip;
                             var tooltip = ResourcePool.RentDisplay<Tooltip>();
                             tooltip.Caption = msg.Caption;
-                            widget = tooltip;
+                            //widget = tooltip;
                             break;
                         }
+                        */
                         case WidgetType.TargetArea:
                         {
                             info = Resource.Displays.TargetArea;

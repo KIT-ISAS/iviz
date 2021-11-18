@@ -13,6 +13,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Ros;
+using Iviz.Roslib;
 using Iviz.Tools;
 using Newtonsoft.Json;
 using TMPro;
@@ -27,12 +28,12 @@ namespace Iviz.App
         static readonly JsonSerializer JsonSerializer = JsonSerializer.CreateDefault(
             new JsonSerializerSettings
             {
-                Converters = {new ClampJsonConverter(MaxMessageLength)}
+                Converters = { new ClampJsonConverter(MaxMessageLength) }
             });
 
         readonly EchoDialogContents dialog;
         readonly Dictionary<string, Type> topicTypes = new();
-        readonly ConcurrentQueue<(string DateTime, IMessage Msg)> messageQueue = new();
+        readonly ConcurrentQueue<(string DateTime, string? CallerId, IMessage Msg)> messageQueue = new();
         readonly List<TopicEntry> entries = new();
 
         IListener? listener;
@@ -98,9 +99,9 @@ namespace Iviz.App
             entries.Sort();
         }
 
-        bool Handler(IMessage msg)
+        bool Handler(IMessage msg, IRosReceiver receiver)
         {
-            messageQueue.Enqueue((GameThread.NowFormatted, msg));
+            messageQueue.Enqueue((GameThread.NowFormatted, receiver.RemoteId, msg));
             if (messageQueue.Count > MaxMessages)
             {
                 messageQueue.TryDequeue(out _);
@@ -194,12 +195,19 @@ namespace Iviz.App
 
             var description = BuilderPool.Rent();
             var stringWriter = new StringWriter(description, CultureInfo.InvariantCulture);
-            var jsonTextWriter = new BoldJsonWriter(stringWriter) {Formatting = Formatting.Indented};
+            var jsonTextWriter = new BoldJsonWriter(stringWriter) { Formatting = Formatting.Indented };
             try
             {
-                foreach (var (timeFormatted, msg) in messageQueue)
+                foreach (var (timeFormatted, callerId, msg) in messageQueue)
                 {
-                    description.Append("<b>").Append(timeFormatted).Append("</b> ");
+                    description.Append("<b>[").Append(timeFormatted).Append("]");
+                    if (callerId != null)
+                    {
+                        description.Append(" ").Append(callerId);
+                    }
+
+                    description.AppendLine(":</b>");
+
                     JsonSerializer.Serialize(jsonTextWriter, msg, null);
                     description.AppendLine();
                 }
@@ -297,13 +305,13 @@ namespace Iviz.App
 
                 var methodInfo = typeof(TMP_Text).GetMethod(nameof(TMP_Text.SetText),
                     BindingFlags.Instance | BindingFlags.NonPublic,
-                    null, new[] {typeof(StringBuilder), typeof(int), typeof(int)}, null);
+                    null, new[] { typeof(StringBuilder), typeof(int), typeof(int) }, null);
                 if (methodInfo == null)
                 {
                     throw new NullReferenceException("Missing SetText in TMP_Text!"); // can't really happen
                 }
 
-                setTextFn = (Action<TMP_Text, StringBuilder, int, int>) methodInfo.CreateDelegate(
+                setTextFn = (Action<TMP_Text, StringBuilder, int, int>)methodInfo.CreateDelegate(
                     typeof(Action<TMP_Text, StringBuilder, int, int>));
                 return setTextFn;
             }

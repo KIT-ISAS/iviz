@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
@@ -404,14 +406,15 @@ namespace Iviz.Controllers
                     int xMax = Math.Min(xMin + MaxTileSize, numCellsX);
                     int yMin = v * MaxTileSize;
                     int yMax = Math.Min(yMin + MaxTileSize, numCellsY);
-                    OccupancyGridResource.Rect rect = new OccupancyGridResource.Rect(xMin, xMax, yMin, yMax);
+                    
+                    var rect = new OccupancyGridResource.Rect(xMin, xMax, yMin, yMax);
 
                     var texture = textureTiles[i];
                     tasks.Add(Task.Run(() =>
                     {
                         try
                         {
-                            texture.Set(data, cellSize, numCellsX, numCellsY, rect, pose);
+                            texture.Set(data, cellSize, numCellsX, rect, pose);
                         }
                         catch (Exception e)
                         {

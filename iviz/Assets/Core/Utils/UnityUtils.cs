@@ -2,16 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using Iviz.Tools;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Iviz.Displays;
 using Iviz.Msgs;
-using Iviz.Resources;
 using Unity.Mathematics;
 using UnityEngine;
 using Color32 = UnityEngine.Color32;
@@ -190,14 +185,6 @@ namespace Iviz.Core
             Quaternion.Lerp(p.rotation, o.rotation, t)
         );
 
-        public static Pose LocalLerp(this Transform p, in Pose o, float t)
-        {
-            return new(
-                Vector3.Lerp(p.localPosition, o.position, t),
-                Quaternion.Lerp(p.localRotation, o.rotation, t)
-            );
-        }
-
         public static ArraySegment<T> AsSegment<T>(this T[] ts)
         {
             return new ArraySegment<T>(ts);
@@ -223,7 +210,11 @@ namespace Iviz.Core
             [CallerFilePath] string? caller = null,
             [CallerLineNumber] int lineNumber = 0) where T : UnityEngine.Object
         {
+#if UNITY_EDITOR
             return o != null
+#else
+            return o is not null
+#endif
                 ? o
                 : throw new MissingAssetFieldException($"Asset '{name}' has not been set!\n" +
                                                        $"At: {caller} line {lineNumber}");
@@ -283,6 +274,12 @@ namespace Iviz.Core
             return c;
         }
 
+        public static Vector2 XZ(this in Vector3 c)
+        {
+            return new Vector2(c.x, c.z);
+        }
+
+
         public static Color WithSaturation(this in Color c, float saturation)
         {
             Color.RGBToHSV(c, out float h, out _, out float v);
@@ -341,322 +338,41 @@ namespace Iviz.Core
         }
 
         public static T[] ExtractArray<T>(this List<T> list) => (T[])ExtractArrayFromList(list);
-    }
 
-    public static class ResourceUtils
-    {
-        public static void ReturnToPool<T>(this T? resource) where T : MonoBehaviour, IDisplay
+        public static void PlaneIntersection(in Ray plane, in Ray ray, out Vector3 intersection, out float scaleRay)
         {
-            if (resource == null)
-            {
-                return;
-            }
-
-            resource.Suspend();
-            ResourcePool.ReturnDisplay(resource);
+            scaleRay = Vector3.Dot(ray.origin - plane.origin, plane.direction) /
+                       Vector3.Dot(-ray.direction, plane.direction);
+            intersection = ray.origin + scaleRay * ray.direction;
         }
 
-        public static void ReturnToPool(this IDisplay? resource, Info<GameObject> info)
+        public static void ClosestPointBetweenLines(in Ray ray, in Ray other, out float scaleRay, out float scaleOther)
         {
-            if (resource == null)
-            {
-                return;
-            }
+            /*
+            Matrix4x4 m = Matrix4x4.identity;
+            m.SetColumn(0, ray.direction);
+            m.SetColumn(1, Vector3.Cross(ray.direction, other.direction));
+            m.SetColumn(2, -other.direction);
+            */
+            /*
+            var m = new Matrix4x4(
+                ray.direction,
+                Vector3.Cross(ray.direction, other.direction),
+                -other.direction,
+                new Vector4(0, 0, 0, 1));
+            
+            var mInv = Matrix4x4.identity;
+            Matrix4x4.Inverse3DAffine(m, ref mInv);
+            */
 
-            resource.Suspend();
-            ResourcePool.Return(info, ((MonoBehaviour)resource).gameObject);
-        }
+            var m = new float3x3(
+                ray.direction,
+                Vector3.Cross(ray.direction, other.direction),
+                -other.direction
+            );
+            var mInv = math.inverse(m);
 
-        public static ReadOnlyDictionary<T, TU> AsReadOnly<T, TU>(this Dictionary<T, TU> t)
-        {
-            return new ReadOnlyDictionary<T, TU>(t);
-        }
-
-        public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> source)
-        {
-            return source.Select((item, index) => (item, index));
-        }
-
-        public static T EnsureComponent<T>(this GameObject gameObject) where T : Component =>
-            gameObject.TryGetComponent(out T comp) ? comp : gameObject.AddComponent<T>();
-
-        public static T Instantiate<T>(this Info<GameObject> o, Transform? parent = null)
-        {
-            var component = o.Instantiate(parent).GetComponent<T>();
-            if (component == null)
-            {
-                throw new NullReferenceException("While instantiating " + o + " the component " +
-                                                 typeof(T).Name + " was not found.");
-            }
-
-            return component;
-        }
-    }
-
-    public static class BoundsUtils
-    {
-        [return: NotNullIfNotNull("resource")]
-        public static Transform? GetTransform(this IDisplay? resource)
-        {
-            return ((MonoBehaviour?)resource)?.transform;
-        }
-
-        static readonly Vector3[] CubePoints =
-        {
-            Vector3.right + Vector3.up + Vector3.forward,
-            Vector3.right + Vector3.up - Vector3.forward,
-            Vector3.right - Vector3.up + Vector3.forward,
-            Vector3.right - Vector3.up - Vector3.forward,
-            -Vector3.right + Vector3.up + Vector3.forward,
-            -Vector3.right + Vector3.up - Vector3.forward,
-            -Vector3.right - Vector3.up + Vector3.forward,
-            -Vector3.right - Vector3.up - Vector3.forward,
-        };
-
-        static Bounds TransformBound(this in Bounds bounds, in Pose pose, Vector3 scale)
-        {
-            if (pose == Pose.identity)
-            {
-                return scale == Vector3.one
-                    ? bounds
-                    : new Bounds(Vector3.Scale(scale, bounds.center), Vector3.Scale(scale, bounds.size));
-            }
-
-            if (pose.rotation == Quaternion.identity)
-            {
-                return scale == Vector3.one
-                    ? new Bounds(bounds.center + pose.position, bounds.size)
-                    : new Bounds(Vector3.Scale(scale, bounds.center) + pose.position,
-                        Vector3.Scale(scale, bounds.size));
-            }
-
-            Vector3 positionMin = float.MaxValue * Vector3.one;
-            Vector3 positionMax = float.MinValue * Vector3.one;
-            Vector3 boundsCenter = bounds.center;
-            Vector3 boundsExtents = bounds.extents;
-
-            if (scale == Vector3.one)
-            {
-                foreach (Vector3 point in CubePoints)
-                {
-                    Vector3 position = pose.rotation * Vector3.Scale(point, boundsExtents);
-                    positionMin = Vector3.Min(positionMin, position);
-                    positionMax = Vector3.Max(positionMax, position);
-                }
-
-                return new Bounds(
-                    pose.position + pose.rotation * boundsCenter + (positionMax + positionMin) / 2,
-                    positionMax - positionMin);
-            }
-
-            foreach (Vector3 point in CubePoints)
-            {
-                Vector3 localPoint = boundsCenter + Vector3.Scale(point, boundsExtents);
-                Vector3 position = pose.rotation * Vector3.Scale(localPoint, scale);
-                positionMin = Vector3.Min(positionMin, position);
-                positionMax = Vector3.Max(positionMax, position);
-            }
-
-            return new Bounds(pose.position + (positionMax + positionMin) / 2, positionMax - positionMin);
-        }
-
-        static Bounds TransformBound(this in Bounds bounds, Transform transform)
-        {
-            return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
-        }
-
-        static Bounds TransformBoundWithInverse(this in Bounds bounds, Transform transform)
-        {
-            var (x, y, z) = transform.localScale;
-            return TransformBound(bounds, transform.AsLocalPose().Inverse(),
-                new Vector3(1f / x, 1f / y, 1f / z));
-        }
-
-        public static Bounds? TransformBoundWithInverse(this in Bounds? bounds, Transform transform)
-        {
-            if (transform == null)
-            {
-                throw new ArgumentNullException(nameof(transform));
-            }
-
-            return bounds == null ? null : TransformBoundWithInverse(bounds.Value, transform);
-        }
-
-        public static Bounds? TransformBound(this in Bounds? bounds, Transform transform)
-        {
-            if (transform == null)
-            {
-                throw new ArgumentNullException(nameof(transform));
-            }
-
-            return bounds == null ? null : TransformBound(bounds.Value, transform);
-        }
-
-
-        public static Bounds? CombineBounds(this IEnumerable<Bounds?> enumOfBounds)
-        {
-            if (enumOfBounds == null)
-            {
-                throw new ArgumentNullException(nameof(enumOfBounds));
-            }
-
-            Bounds? result = null;
-            using var it = enumOfBounds.GetEnumerator();
-            while (it.MoveNext())
-            {
-                Bounds? bounds = it.Current;
-                if (bounds == null)
-                {
-                    continue;
-                }
-
-                if (result == null)
-                {
-                    result = bounds;
-                }
-                else
-                {
-                    result.Value.Encapsulate(bounds.Value);
-                }
-            }
-
-            return result;
-        }
-
-        static readonly Plane[] PlaneCache = new Plane[6];
-
-        public static bool IsVisibleFromMainCamera(this in Bounds bounds)
-        {
-            GeometryUtility.CalculateFrustumPlanes(Settings.MainCamera, PlaneCache);
-            return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
-        }
-    }
-
-    public static class MeshUtils
-    {
-        public static void SetVertices(this Mesh mesh, in Rent<Vector3> ps)
-        {
-            mesh.SetVertices(ps.Array, 0, ps.Length);
-        }
-
-        public static void SetNormals(this Mesh mesh, in Rent<Vector3> ps)
-        {
-            mesh.SetNormals(ps.Array, 0, ps.Length);
-        }
-
-        public static void SetTangents(this Mesh mesh, in Rent<Vector4> ps)
-        {
-            mesh.SetTangents(ps.Array, 0, ps.Length);
-        }
-
-        public static void SetIndices(this Mesh mesh, in Rent<int> ps, MeshTopology topology, int subMesh)
-        {
-            mesh.SetIndices(ps.Array, 0, ps.Length, topology, subMesh);
-        }
-
-        public static void SetColors(this Mesh mesh, in Rent<Color> ps)
-        {
-            mesh.SetColors(ps.Array, 0, ps.Length);
-        }
-
-        public static void SetColors(this Mesh mesh, in Rent<Color32> ps)
-        {
-            mesh.SetColors(ps.Array, 0, ps.Length);
-        }
-
-        public static void SetUVs(this Mesh mesh, in Rent<Vector2> ps)
-        {
-            mesh.SetUVs(0, ps.Array, 0, ps.Length);
-        }
-
-        public static void SetUVs(this Mesh mesh, in Rent<Vector3> ps)
-        {
-            mesh.SetUVs(0, ps.Array, 0, ps.Length);
-        }
-
-        public static void SetUVs(this Mesh mesh, int channel, in Rent<Vector3> ps)
-        {
-            mesh.SetUVs(channel, ps.Array, 0, ps.Length);
-        }
-
-        public static void SetTriangles(this Mesh mesh, in Rent<int> ps, int subMesh = 0)
-        {
-            mesh.SetTriangles(ps.Array, 0, ps.Length, subMesh);
-        }
-    }
-
-    public static class MeshRendererUtils
-    {
-        static MaterialPropertyBlock? propBlock;
-        static MaterialPropertyBlock PropBlock => propBlock ??= new MaterialPropertyBlock();
-
-        static readonly int ColorPropId = Shader.PropertyToID("_Color");
-        static readonly int EmissiveColorPropId = Shader.PropertyToID("_EmissiveColor");
-        static readonly int MainTexStPropId = Shader.PropertyToID("_MainTex_ST_");
-        static readonly int BumpMapStPropId = Shader.PropertyToID("_BumpMap_ST_");
-        static readonly int SmoothnessPropId = Shader.PropertyToID("_Smoothness");
-        static readonly int MetallicPropId = Shader.PropertyToID("_Metallic");
-
-        public static void SetPropertyColor(this MeshRenderer meshRenderer, in Color color, int id = 0)
-        {
-            if (meshRenderer == null)
-            {
-                throw new ArgumentNullException(nameof(meshRenderer));
-            }
-
-            meshRenderer.GetPropertyBlock(PropBlock, id);
-            PropBlock.SetColor(ColorPropId, color);
-            meshRenderer.SetPropertyBlock(PropBlock, id);
-        }
-
-        public static void SetPropertyEmissiveColor(this MeshRenderer meshRenderer, in Color color,
-            int id = 0)
-        {
-            if (meshRenderer == null)
-            {
-                throw new ArgumentNullException(nameof(meshRenderer));
-            }
-
-            meshRenderer.GetPropertyBlock(PropBlock, id);
-            PropBlock.SetColor(EmissiveColorPropId, color);
-            meshRenderer.SetPropertyBlock(PropBlock, id);
-        }
-
-        public static void SetPropertySmoothness(this MeshRenderer meshRenderer, float smoothness, int id = 0)
-        {
-            if (meshRenderer == null)
-            {
-                throw new ArgumentNullException(nameof(meshRenderer));
-            }
-
-            meshRenderer.GetPropertyBlock(PropBlock, id);
-            PropBlock.SetFloat(SmoothnessPropId, smoothness);
-            meshRenderer.SetPropertyBlock(PropBlock, id);
-        }
-
-        public static void SetPropertyMetallic(this MeshRenderer meshRenderer, float metallic, int id = 0)
-        {
-            if (meshRenderer == null)
-            {
-                throw new ArgumentNullException(nameof(meshRenderer));
-            }
-
-            meshRenderer.GetPropertyBlock(PropBlock, id);
-            PropBlock.SetFloat(MetallicPropId, metallic);
-            meshRenderer.SetPropertyBlock(PropBlock, id);
-        }
-
-        public static void ResetPropertyTextureScale(this MeshRenderer meshRenderer)
-        {
-            if (meshRenderer == null)
-            {
-                throw new ArgumentNullException(nameof(meshRenderer));
-            }
-
-            meshRenderer.GetPropertyBlock(PropBlock, 0);
-            PropBlock.SetVector(MainTexStPropId, new Vector4(1, 1, 0, 0));
-            PropBlock.SetVector(BumpMapStPropId, new Vector4(1, 1, 0, 0));
-            meshRenderer.SetPropertyBlock(PropBlock, 0);
+            (scaleRay, _, scaleOther) = math.mul(mInv, other.origin - ray.origin);
         }
 
         public static void Deconstruct(this in Vector3 v, out float x, out float y, out float z) =>
@@ -680,15 +396,11 @@ namespace Iviz.Core
         public static void Deconstruct(this in Pose p, out Vector3 position, out Quaternion rotation) =>
             (position, rotation) = (p.position, p.rotation);
 
+        public static void Deconstruct(this in Ray r, out Vector3 origin, out Vector3 direction) =>
+            (origin, direction) = (r.origin, r.direction);
+
         public static void Deconstruct(this in Msgs.GeometryMsgs.TransformStamped p,
             out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp) =>
             (parentId, childId, transform, stamp) = (p.Header.FrameId, p.ChildFrameId, p.Transform, p.Header.Stamp);
-    }
-
-    public class MissingAssetFieldException : Exception
-    {
-        public MissingAssetFieldException(string message) : base(message)
-        {
-        }
     }
 }

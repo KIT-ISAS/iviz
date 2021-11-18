@@ -1,6 +1,7 @@
 ﻿using Iviz.Roslib;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using Iviz.Ros;

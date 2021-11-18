@@ -236,15 +236,15 @@ namespace Iviz.Editor
             foreach (var resource in resources)
             {
                 BoxCollider collider = resource.GetComponent<BoxCollider>();
-                collider.center = resource.LocalBounds.center;
-                collider.size = resource.LocalBounds.size;
+                collider.center = resource.Bounds.center;
+                collider.size = resource.Bounds.size;
                 collider.enabled = false;
 
                 //DestroyImmediate(resource);
                 resource.enabled = false;
             }
 
-            foreach (var marker in obj.GetComponentsInChildren<AggregatedMeshMarkerResource>())
+            foreach (var marker in obj.GetComponentsInChildren<MeshMarkerHolderResource>())
             {
                 //DestroyImmediate(marker);
                 marker.enabled = false;

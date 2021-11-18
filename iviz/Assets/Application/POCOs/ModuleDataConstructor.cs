@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Roslib.Utils;
 

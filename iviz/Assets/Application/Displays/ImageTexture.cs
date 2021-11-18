@@ -1,12 +1,12 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using BitMiracle.LibJpeg;
+using Iviz.Common;
 using Iviz.Core;
-using Iviz.Msgs;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
@@ -21,13 +21,13 @@ namespace Iviz.Displays
         static readonly int IntensityID = Shader.PropertyToID("_IntensityTexture");
         static readonly int MainTexID = Shader.PropertyToID("_MainTex");
 
-        [CanBeNull] byte[] bitmapBuffer;
+        byte[]? bitmapBuffer;
         Vector2 intensityBounds;
         bool flipMinMax;
 
-        public event Action<Texture2D> TextureChanged;
-        public event Action<Texture2D> ColormapChanged;
-        
+        public event Action<Texture2D?>? TextureChanged;
+        public event Action<Texture2D?>? ColormapChanged;
+
         public Vector2 IntensityBounds
         {
             get => intensityBounds;
@@ -56,7 +56,7 @@ namespace Iviz.Displays
                 }
             }
         }
-        
+
         public bool FlipMinMax
         {
             get => flipMinMax;
@@ -67,9 +67,9 @@ namespace Iviz.Displays
             }
         }
 
-        [CanBeNull] public Texture2D Texture { get; private set; }
-        [NotNull] public Material Material { get; }
-        [NotNull] public string Description { get; private set; } = "";
+        public Texture2D? Texture { get; private set; }
+        public Material Material { get; }
+        public string Description { get; private set; } = "";
         public bool IsMono { get; private set; }
         public int Width => Texture != null ? Texture.width : 0;
         public int Height => Texture != null ? Texture.height : 0;
@@ -88,14 +88,14 @@ namespace Iviz.Displays
             }
         }
 
-        [NotNull] public Texture2D ColormapTexture => Resource.Colormaps.Textures[Colormap];
+        public Texture2D ColormapTexture => Resource.Colormaps.Textures[Colormap];
 
         public ImageTexture()
         {
             Material = Resource.Materials.ImagePreview.Instantiate();
         }
 
-        static int? FieldSizeFromEncoding([NotNull] string encoding)
+        static int? FieldSizeFromEncoding(string encoding)
         {
             switch (encoding.ToUpperInvariant())
             {
@@ -132,8 +132,7 @@ namespace Iviz.Displays
             }
         }
 
-        [CanBeNull]
-        static string EncodingFromPng([NotNull] BigGustave.Png png)
+        static string? EncodingFromPng(BigGustave.Png png)
         {
             switch (png.Header.ColorType)
             {
@@ -166,7 +165,7 @@ namespace Iviz.Displays
             return null;
         }
 
-        public void ProcessPng([NotNull] byte[] data, [NotNull] Action onFinished)
+        public void ProcessPng(byte[] data, Action onFinished)
         {
             if (data == null)
             {
@@ -183,7 +182,7 @@ namespace Iviz.Displays
                 try
                 {
                     var png = BigGustave.Png.Open(data);
-                    string encoding = EncodingFromPng(png);
+                    string? encoding = EncodingFromPng(png);
                     if (encoding == null)
                     {
                         RosLogger.Error($"{this}: Ignoring PNG with unsupported encoding '{png.Header.ColorType}'");
@@ -234,7 +233,7 @@ namespace Iviz.Displays
             });
         }
 
-        public void ProcessJpg([NotNull] byte[] data, [NotNull] Action onFinished)
+        public void ProcessJpg(byte[] data, Action onFinished)
         {
             if (data == null)
             {
@@ -252,7 +251,7 @@ namespace Iviz.Displays
                 {
                     JpegImage image = new JpegImage(new MemoryStream(data));
 
-                    string encoding;
+                    string? encoding;
                     int reqSize = image.Height * image.Width;
                     switch (image.Colorspace)
                     {
@@ -336,24 +335,24 @@ namespace Iviz.Displays
             });
         }
 
-        public void Set(int width, int height, [NotNull] string encoding, [NotNull] byte[] data)
+        public void Set(int width, int height, string encoding, byte[] data)
         {
             if (data == null)
             {
                 throw new ArgumentNullException(nameof(data));
             }
-            
+
             Set(width, height, encoding, data.AsSegment());
         }
 
-        public void Set(int width, int height, [NotNull] string encoding, in ArraySegment<byte> data,
+        public void Set(int width, int height, string encoding, in ArraySegment<byte> data,
             bool generateMipmaps = false)
         {
             if (encoding == null)
             {
                 throw new ArgumentNullException(nameof(encoding));
             }
-            
+
             int size = width * height;
             int? bpp = FieldSizeFromEncoding(encoding);
 
@@ -417,7 +416,7 @@ namespace Iviz.Displays
             ApplyTexture(width, height, data, encoding, size * bpp.Value, generateMipmaps);
         }
 
-        void ApplyTexture(int width, int height, in ArraySegment<byte> data, [NotNull] string encoding, int length,
+        void ApplyTexture(int width, int height, in ArraySegment<byte> data, string encoding, int length,
             bool generateMipmaps)
         {
             bool alreadyCopied = false;
@@ -503,7 +502,7 @@ namespace Iviz.Displays
                 throw new InvalidOperationException($"{this}: Skipping copy. Possible buffer overflow.");
             }
 
-            byte* dstPtr = (byte*) dst.GetUnsafePtr();
+            byte* dstPtr = (byte*)dst.GetUnsafePtr();
             fixed (byte* srcPtr = &src.Array[src.Offset])
             {
                 byte* srcPtrOff = srcPtr + 1;
@@ -530,7 +529,7 @@ namespace Iviz.Displays
                 throw new InvalidOperationException($"{this}: Skipping copy. Possible buffer overflow.");
             }
 
-            byte* dstPtr = (byte*) dst.GetUnsafePtr();
+            byte* dstPtr = (byte*)dst.GetUnsafePtr();
             fixed (byte* srcPtr0 = &src.Array[src.Offset])
             {
                 byte* srcPtr = srcPtr0;
@@ -545,7 +544,6 @@ namespace Iviz.Displays
             }
         }
 
-        [NotNull]
         Texture2D EnsureSize(int width, int height, TextureFormat format)
         {
             if (Texture != null &&

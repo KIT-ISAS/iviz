@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using System.Runtime.CompilerServices;
-using System.Runtime.Serialization;
 using System.Text;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
@@ -17,45 +16,6 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Core
 {
-    [DataContract]
-    public struct SerializableColor
-    {
-        [DataMember] public float R { get; set; }
-        [DataMember] public float G { get; set; }
-        [DataMember] public float B { get; set; }
-        [DataMember] public float A { get; set; }
-
-        public SerializableColor(float r, float g, float b, float a)
-        {
-            R = r;
-            G = g;
-            B = b;
-            A = a;
-        }
-
-        public static implicit operator Color(in SerializableColor i) => new(i.R, i.G, i.B, i.A);
-
-        public static implicit operator SerializableColor(in Color color) => new(color.r, color.g, color.b, color.a);
-    }
-
-    [DataContract]
-    public struct SerializableVector3
-    {
-        [DataMember] public float X { get; set; }
-        [DataMember] public float Y { get; set; }
-        [DataMember] public float Z { get; set; }
-
-        public SerializableVector3(float x, float y, float z)
-        {
-            X = x;
-            Y = y;
-            Z = z;
-        }
-
-        public static implicit operator Vector3(in SerializableVector3 i) => new(i.X, i.Y, i.Z);
-        public static implicit operator SerializableVector3(in Vector3 v) => new(v.x, v.y, v.z);
-    }
-
     public static class RosUtils
     {
         static readonly Quaternion XFrontToZFront = (0.5, -0.5, 0.5, -0.5);

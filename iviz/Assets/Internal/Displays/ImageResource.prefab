@@ -28,6 +28,7 @@ Transform:
   m_LocalRotation: {x: -0.49999985, y: -0.5000002, z: -0.50000024, w: 0.49999985}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1306565704514684067}
   - {fileID: 1306565704373658695}
@@ -88,6 +89,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1066434273854107125}
   m_Father: {fileID: 0}
@@ -106,7 +108,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   boxCollider: {fileID: 2560784202415664666}
-  front: {fileID: 2628557699317536340}
+  front: {fileID: 5766033239396999442}
   billboard: {fileID: 7954079755484087815}
   scale: 1
 --- !u!1001 &7979687757113801136
@@ -312,15 +314,15 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: -5726619432290973881, guid: 9ba6887d9413647c49a9ad75f5c7a9a8, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 9ba6887d9413647c49a9ad75f5c7a9a8, type: 3}
---- !u!1 &2628557699317536340 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5388285313566478080, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
-    type: 3}
-  m_PrefabInstance: {fileID: 7979687757509630292}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &1306565704373658695 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8979140994947841299, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
+    type: 3}
+  m_PrefabInstance: {fileID: 7979687757509630292}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &5766033239396999442 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4519532731062777926, guid: 9ba6887d9413647c49a9ad75f5c7a9a8,
     type: 3}
   m_PrefabInstance: {fileID: 7979687757509630292}
   m_PrefabAsset: {fileID: 0}

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Common;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.MarkerDetection;

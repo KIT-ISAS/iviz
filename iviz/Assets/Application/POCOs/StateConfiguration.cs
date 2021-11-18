@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 

@@ -1,0 +1,16 @@
+{
+    "name": "Iviz.Joystick",
+    "rootNamespace": "",
+    "references": [
+        "GUID:31a80e3fb3ac64b8385cd739784d42de"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

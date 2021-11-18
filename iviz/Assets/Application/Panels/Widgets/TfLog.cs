@@ -6,6 +6,7 @@ using TMPro;
 using System;
 using System.Linq;
 using Iviz.Controllers;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Tools;
@@ -47,8 +48,7 @@ namespace Iviz.App
 
         uint? descriptionHash;
         uint? textHash;
-
-
+        
         bool isInitialized;
         [CanBeNull] TfFrame selectedFrame;
 
@@ -235,8 +235,7 @@ namespace Iviz.App
                 descriptionHash = newHash;
                 tfText.SetText(description);
 
-                RectTransform cTransform = (RectTransform)content.transform;
-                //cTransform.sizeDelta = new Vector2(tfText.preferredWidth + 10, tfText.preferredHeight + 10);
+                var cTransform = (RectTransform)content.transform;
                 cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, tfText.preferredWidth + 10);
                 cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, tfText.preferredHeight + 10);
             }
@@ -253,16 +252,17 @@ namespace Iviz.App
                 return;
             }
 
+            var frame = SelectedFrame;
             var description = BuilderPool.Rent();
             try
             {
-                if (SelectedFrame == null)
+                if (frame == null)
                 {
                     description.Append("<color=grey>[none]</color>");
                 }
                 else
                 {
-                    string id = SelectedFrame.Id;
+                    string id = frame.Id;
                     description.Append("<b>[")
                         .Append(id)
                         .AppendLine(id == TfListener.FixedFrameId
@@ -270,15 +270,20 @@ namespace Iviz.App
                             : "]</b>");
 
                     description.AppendLine(
-                        SelectedFrame.Parent == null || SelectedFrame.Parent == TfListener.OriginFrame
+                        frame.Parent == null || frame.Parent == TfListener.OriginFrame
                             ? "[no parent]"
-                            : SelectedFrame.Parent.Id);
+                            : frame.Parent.Id);
+
+                    if (frame.LastCallerId != null)
+                    {
+                        description.Append("[").Append(frame.LastCallerId).AppendLine("]");
+                    }
 
                     Pose pose = poseDisplay switch
                     {
-                        PoseDisplayType.ToRoot => SelectedFrame.OriginWorldPose,
-                        PoseDisplayType.ToFixed => TfListener.RelativePoseToFixedFrame(SelectedFrame.AbsoluteUnityPose),
-                        PoseDisplayType.ToParent => SelectedFrame.Transform.AsLocalPose(),
+                        PoseDisplayType.ToRoot => frame.OriginWorldPose,
+                        PoseDisplayType.ToFixed => TfListener.RelativePoseToFixedFrame(frame.AbsoluteUnityPose),
+                        PoseDisplayType.ToParent => frame.Transform.AsLocalPose(),
                         _ => Pose.identity
                     };
 

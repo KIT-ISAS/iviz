@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
 
@@ -21,6 +22,7 @@ namespace Iviz.App
         static readonly string[] ModelServerModesNames = {"Off", "On", "On + File"};
 
         readonly SettingsDialogContents panel;
+        readonly Controllers.ModelService modelService = new();
         public override IDialogPanelContents Panel => panel;
 
         static ISettingsManager SettingsManager => Settings.SettingsManager ??
@@ -158,13 +160,13 @@ namespace Iviz.App
                 switch ((ModelServerModes) i)
                 {
                     case ModelServerModes.Off:
-                        ModuleListPanel.ModelService.Dispose();
+                        modelService.Stop();
                         break;
                     case ModelServerModes.On:
-                        _ = ModuleListPanel.ModelService.Restart(false);
+                        _ = modelService.RestartAsync(false);
                         break;
                     case ModelServerModes.OnWithFile:
-                        _ = ModuleListPanel.ModelService.Restart(true);
+                        _ = modelService.RestartAsync(true);
                         break;
                 }
 
@@ -172,14 +174,13 @@ namespace Iviz.App
             };
         }
 
-        static string UpdateModelServiceLabel()
+        string UpdateModelServiceLabel()
         {
             if (Settings.IsMobile)
             {
                 return "<b>Model Service:</b> Off (Mobile)";
             }
 
-            var modelService = ModuleListPanel.ModelService;
             if (!modelService.IsEnabled)
             {
                 return "<b>Model Service:</b> Off";

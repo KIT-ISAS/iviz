@@ -1,14 +1,15 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
+using Iviz.Common;
 using Iviz.Core;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class OccupancyGridResource : DisplayWrapperResource, ISupportsTint
+    public sealed class OccupancyGridResource : DisplayWrapperResource, ISupportsTint, IRecyclable
     {
         const int MaxSize = 10000;
 
@@ -16,10 +17,13 @@ namespace Iviz.Displays
         [SerializeField] int numCellsY;
         [SerializeField] float cellSize;
 
-        readonly NativeList<float4> pointBuffer = new NativeList<float4>();
-        MeshListResource resource;
+        readonly NativeList<float4> pointBuffer = new();
+        MeshListResource? resource;
+        
+        MeshListResource Resource =>
+            resource != null ? resource : (resource = ResourcePool.RentDisplay<MeshListResource>(transform));        
 
-        protected override IDisplay Display => resource;
+        protected override IDisplay Display => Resource;
 
         public int NumCellsX
         {
@@ -31,7 +35,7 @@ namespace Iviz.Displays
                     return;
                 }
 
-                if (value < 0 || value > MaxSize)
+                if (value is < 0 or > MaxSize)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
@@ -50,7 +54,7 @@ namespace Iviz.Displays
                     return;
                 }
 
-                if (value < 0 || value > MaxSize)
+                if (value is < 0 or > MaxSize)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }
@@ -70,38 +74,36 @@ namespace Iviz.Displays
                 }
 
                 cellSize = value;
-                resource.ElementScale = value;
+                Resource.ElementScale = value;
             }
         }
 
         public bool OcclusionOnly
         {
-            get => resource.OcclusionOnly;
-            set => resource.OcclusionOnly = value;
+            get => Resource.OcclusionOnly;
+            set => Resource.OcclusionOnly = value;
         }
 
         public ColormapId Colormap
         {
-            get => resource.Colormap;
-            set => resource.Colormap = value;
+            get => Resource.Colormap;
+            set => Resource.Colormap = value;
         }
 
         public bool FlipMinMax
         {
-            get => resource.FlipMinMax;
-            set => resource.FlipMinMax = value;
+            get => Resource.FlipMinMax;
+            set => Resource.FlipMinMax = value;
         }
 
         public bool IsProcessing { get; private set; }
 
-        public int NumValidValues => resource != null ? resource.Size : 0;
+        public int NumValidValues => Resource != null ? Resource.Size : 0;
 
         void Awake()
         {
-            resource = ResourcePool.RentDisplay<MeshListResource>(transform);
-
-            resource.OverrideIntensityBounds = true;
-            resource.IntensityBounds = new Vector2(0, 1);
+            Resource.OverrideIntensityBounds = true;
+            Resource.IntensityBounds = new Vector2(0, 1);
 
             NumCellsX = 10;
             NumCellsY = 10;
@@ -109,18 +111,18 @@ namespace Iviz.Displays
 
             Colormap = ColormapId.gray;
 
-            resource.MeshResource = Resource.Displays.Cube;
-            resource.UseColormap = true;
-            resource.UseIntensityForScaleY = true;
-            resource.CastShadows = false; // fix weird shadow bug
+            Resource.MeshResource = Resources.Resource.Displays.Cube;
+            Resource.UseColormap = true;
+            Resource.UseIntensityForScaleY = true;
+            Resource.CastShadows = false; // fix weird shadow bug
 
             Layer = LayerType.IgnoreRaycast;
         }
 
         public Color Tint
         {
-            get => resource.Tint;
-            set => resource.Tint = value;
+            get => Resource.Tint;
+            set => Resource.Tint = value;
         }
 
         public override void Suspend()
@@ -156,8 +158,8 @@ namespace Iviz.Displays
 
             GameThread.PostImmediate(() =>
             {
-                resource.transform.SetLocalPose(pose);
-                resource.SetDirect(pointBuffer);
+                Resource.transform.SetLocalPose(pose);
+                Resource.SetDirect(pointBuffer);
                 IsProcessing = false;
             });
         }
@@ -166,6 +168,11 @@ namespace Iviz.Displays
         {
             pointBuffer.Dispose();
         }
+        
+        public void SplitForRecycle()
+        {
+            resource.ReturnToPool();
+        }        
 
         public readonly struct Rect
         {

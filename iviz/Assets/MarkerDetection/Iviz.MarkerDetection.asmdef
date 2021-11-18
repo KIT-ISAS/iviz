@@ -1,8 +1,10 @@
 {
     "name": "Iviz.MarkerDetection",
+    "rootNamespace": "",
     "references": [
         "GUID:31a80e3fb3ac64b8385cd739784d42de",
-        "GUID:d8b63aba1907145bea998dd612889d6b"
+        "GUID:d8b63aba1907145bea998dd612889d6b",
+        "GUID:0775440a70b5e459d9534389409d8fa8"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

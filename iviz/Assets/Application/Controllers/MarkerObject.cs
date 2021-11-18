@@ -4,6 +4,7 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.StdMsgs;
@@ -215,7 +216,7 @@ namespace Iviz.Controllers
                 description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append(" secs").AppendLine();
             }
 
-            if (msg.Type < 0 || msg.Type > (int) MarkerType.TriangleList)
+            if (msg.Type is < 0 or > (int) MarkerType.TriangleList)
             {
                 // out!
                 StopLoadResourceTask();
@@ -366,7 +367,6 @@ namespace Iviz.Controllers
 
             if (HasSameHash(msg))
             {
-                //Debug.Log("Same message!");
                 return;
             }
 
@@ -697,7 +697,6 @@ namespace Iviz.Controllers
             if (resource != null)
             {
                 Layer = LayerType.IgnoreRaycast;
-                resource.Name = gameObject.name;
                 BoundsChanged?.Invoke();
                 return; // all OK
             }

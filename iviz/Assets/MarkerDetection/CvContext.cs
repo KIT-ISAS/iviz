@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using AOT;
+using Iviz.Common;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
@@ -272,7 +273,7 @@ namespace Iviz.MarkerDetection
 
         public static Pose SolvePnp(IReadOnlyList<Vector2f> input,
             IReadOnlyList<Vector3f> output,
-            in Intrinsic intrinsic,
+            Intrinsic intrinsic,
             SolvePnPMethod method = SolvePnPMethod.Iterative)
         {
             if (input == null)

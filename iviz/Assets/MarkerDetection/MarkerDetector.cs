@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Common;
 using Iviz.Core;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;

@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.App;
+using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
@@ -23,8 +25,8 @@ namespace Iviz.Controllers
     {
         const float AnchorPauseTimeInSec = 2;
 
-        static AnchorToggleButton ArSet => ModuleListPanel.AnchorCanvas.ArSet;
-        static GameObject ArInfoPanel => ModuleListPanel.AnchorCanvas.ArInfoPanel;
+        static AnchorToggleButton ARSet => ModuleListPanel.Instance.AnchorCanvasPanel.ARSet;
+        static GameObject ARInfoPanel => ModuleListPanel.Instance.AnchorCanvasPanel.ARInfoPanel;
 
         [SerializeField] Camera? arCamera = null;
         [SerializeField] ARSession? arSession = null;
@@ -50,9 +52,9 @@ namespace Iviz.Controllers
         Camera? mainCamera;
         ARAnchorResource? worldAnchor;
 
-        Camera ArCamera => arCamera.AssertNotNull(nameof(arCamera));
-        Light ArLight => arLight.AssertNotNull(nameof(arLight));
-        ARSessionOrigin ArSessionOrigin => arSessionOrigin.AssertNotNull(nameof(arSessionOrigin));
+        Camera ARCamera => arCamera.AssertNotNull(nameof(arCamera));
+        Light ARLight => arLight.AssertNotNull(nameof(arLight));
+        ARSessionOrigin ARSessionOrigin => arSessionOrigin.AssertNotNull(nameof(arSessionOrigin));
         ARSession Session => arSession.AssertNotNull(nameof(arSession));
         ARCameraManager CameraManager => cameraManager.AssertNotNull(nameof(cameraManager));
         AROcclusionManager OcclusionManager => occlusionManager.AssertNotNull(nameof(occlusionManager));
@@ -62,7 +64,7 @@ namespace Iviz.Controllers
 
         AxisFrameResource SetupModeFrame => setupModeFrame != null
             ? setupModeFrame
-            : (setupModeFrame = ResourcePool.RentDisplay<AxisFrameResource>(ArCamera.transform));
+            : (setupModeFrame = ResourcePool.RentDisplay<AxisFrameResource>(ARCamera.transform));
 
         Camera MainCamera => mainCamera != null
             ? mainCamera
@@ -140,10 +142,10 @@ namespace Iviz.Controllers
             {
                 base.Visible = value;
                 MainCamera.gameObject.SetActive(!value);
-                ArCamera.enabled = value;
-                ArLight.gameObject.SetActive(value);
-                ArSet.Visible = SetupModeEnabled;
-                Settings.MainCamera = value ? ArCamera : MainCamera;
+                ARCamera.enabled = value;
+                ARLight.gameObject.SetActive(value);
+                ARSet.Visible = SetupModeEnabled;
+                Settings.MainCamera = value ? ARCamera : MainCamera;
                 Canvas.worldCamera = Settings.MainCamera;
 
                 if (value)
@@ -164,17 +166,17 @@ namespace Iviz.Controllers
             private set
             {
                 setupModeEnabled = value;
-                ArSet.Visible = value;
-                ArSet.State = value;
+                ARSet.Visible = value;
+                ARSet.State = value;
 
                 if (value)
                 {
-                    ArCamera.cullingMask = (1 << LayerType.ARSetupMode) | (1 << LayerType.UI);
-                    ArInfoPanel.SetActive(true);
+                    ARCamera.cullingMask = (1 << LayerType.ARSetupMode) | (1 << LayerType.UI);
+                    ARInfoPanel.SetActive(true);
                 }
                 else
                 {
-                    ArCamera.cullingMask = defaultCullingMask;
+                    ARCamera.cullingMask = defaultCullingMask;
                     var (sourcePosition, sourceRotation) = SetupModeFrame.transform.AsPose();
                     Pose pose = new Pose
                     {
@@ -202,7 +204,7 @@ namespace Iviz.Controllers
                 base.EnableMeshing = value;
                 if (value)
                 {
-                    MeshManager = ArCamera.gameObject.EnsureComponent<ARMeshManager>();
+                    MeshManager = ARCamera.gameObject.EnsureComponent<ARMeshManager>();
                     MeshManager.meshPrefab = meshPrefab;
                     MeshManager.normals = false;
                 }
@@ -237,13 +239,13 @@ namespace Iviz.Controllers
             base.Awake();
             Instance = this;
 
-            Settings.ARCamera = ArCamera;
+            Settings.ARCamera = ARCamera;
 
-            MeshManager = ArCamera.gameObject.EnsureComponent<ARMeshManager>();
+            MeshManager = ARCamera.gameObject.EnsureComponent<ARMeshManager>();
 
             lastAnchorMoved = Time.time;
 
-            defaultCullingMask = ArCamera.cullingMask;
+            defaultCullingMask = ARCamera.cullingMask;
 
             CameraManager.frameReceived += args => ProcessLights(args.lightEstimation);
 
@@ -260,14 +262,14 @@ namespace Iviz.Controllers
             SetupModeEnabled = true;
             SetupModeFrame.AxisLength = 0.5f * TfListener.Instance.FrameSize;
 
-            ArSet.Clicked += ArSetOnClicked;
-            ArSet.Visible = false;
-            ArInfoPanel.SetActive(true);
+            ARSet.Clicked += ArSetOnClicked;
+            ARSet.Visible = false;
+            ARInfoPanel.SetActive(true);
 
             WorldPoseChanged += OnWorldPoseChanged;
 
             Settings.ScreenCaptureManager =
-                new ARFoundationScreenCaptureManager(CameraManager, ArCamera.transform, OcclusionManager);
+                new ARFoundationScreenCaptureManager(CameraManager, ARCamera.transform, OcclusionManager);
 
             GuiInputModule.Instance.LongClick += TriggerPulse;
 
@@ -342,21 +344,21 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var cameraTransform = ArCamera.transform;
+            var cameraTransform = ARCamera.transform;
             SetupModeFrame.Transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
             var ray = new Ray(cameraTransform.position, cameraTransform.forward);
             if (TryGetRaycastHit(ray, out Pose hit))
             {
                 SetupModeFrame.Transform.position = hit.position;
                 SetupModeFrame.Tint = Color.white;
-                ArSet.Visible = true;
-                ArInfoPanel.SetActive(false);
+                ARSet.Visible = true;
+                ARInfoPanel.SetActive(false);
             }
             else
             {
                 SetupModeFrame.Transform.localPosition = new Vector3(0, 0, 0.5f);
                 SetupModeFrame.Tint = Color.white.WithAlpha(0.3f);
-                ArSet.Visible = false;
+                ARSet.Visible = false;
             }
         }
 
@@ -434,7 +436,7 @@ namespace Iviz.Controllers
 
         bool TryGetRaycastHit(in Ray ray, out Pose hit)
         {
-            if (ArSessionOrigin.trackablesParent == null)
+            if (ARSessionOrigin.trackablesParent == null)
             {
                 // not initialized yet!
                 hit = default;
@@ -464,7 +466,7 @@ namespace Iviz.Controllers
 
         public bool TryGetRaycastHits(in Ray ray, [NotNullWhen(true)] out List<ARRaycastHit>? hits)
         {
-            if (ArSessionOrigin.trackablesParent == null)
+            if (ARSessionOrigin.trackablesParent == null)
             {
                 // not initialized yet!
                 hits = null;
@@ -488,8 +490,8 @@ namespace Iviz.Controllers
                 var color = Mathf.CorrelatedColorTemperatureToRGB(lightEstimation.averageColorTemperature.Value);
                 float intensity = lightEstimation.averageBrightness.Value;
 
-                ArLight.color = color;
-                ArLight.intensity = intensity;
+                ARLight.color = color;
+                ARLight.intensity = intensity;
 
                 // ambient light is only to prevent complete blacks
                 RenderSettings.ambientMode = AmbientMode.Flat;
@@ -508,13 +510,13 @@ namespace Iviz.Controllers
             // ARKit front camera (unused)
             if (lightEstimation.mainLightDirection.HasValue)
             {
-                ArLight.transform.rotation = Quaternion.LookRotation(lightEstimation.mainLightDirection.Value);
+                ARLight.transform.rotation = Quaternion.LookRotation(lightEstimation.mainLightDirection.Value);
             }
 
             // ARKit front camera (unused)
             if (lightEstimation.mainLightColor.HasValue)
             {
-                ArLight.color = lightEstimation.mainLightColor.Value;
+                ARLight.color = lightEstimation.mainLightColor.Value;
             }
 
             // Android only I think
@@ -628,7 +630,7 @@ namespace Iviz.Controllers
         {
             base.StopController();
             tokenSource.Cancel();
-            ArSet.Clicked -= ArSetOnClicked;
+            ARSet.Clicked -= ArSetOnClicked;
             WorldPoseChanged -= OnWorldPoseChanged;
             GuiInputModule.Instance.LongClick -= TriggerPulse;
 
@@ -637,8 +639,8 @@ namespace Iviz.Controllers
                 Destroy(fovDisplay.gameObject);
             }
 
-            ArSet.Visible = false;
-            ArInfoPanel.SetActive(false);
+            ARSet.Visible = false;
+            ARInfoPanel.SetActive(false);
 
             Settings.ARCamera = null;
             Settings.ScreenCaptureManager = null;

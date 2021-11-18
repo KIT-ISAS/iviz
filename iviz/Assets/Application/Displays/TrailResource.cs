@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class TrailResource : DisplayWrapperResource
+    public sealed class TrailResource : DisplayWrapperResource, IRecyclable
     {
         const int MeasurementsPerSecond = 32;
 
@@ -143,6 +143,11 @@ namespace Iviz.Displays
 
             return true;
         }
+        
+        public void SplitForRecycle()
+        {
+            resource.ReturnToPool();
+        }        
 
         public override void Suspend()
         {

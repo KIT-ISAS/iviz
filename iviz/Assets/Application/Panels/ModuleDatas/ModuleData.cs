@@ -1,20 +1,21 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
+using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Resources;
-using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public abstract class ModuleData : IModuleData
     {
-        [NotNull] protected static ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
+        protected static ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
         protected static DataPanelManager DataPanelManager => ModuleListPanel.DataPanelManager;
 
         string buttonText = "";
 
-        [NotNull]
         public string ButtonText
         {
             get => buttonText;
@@ -25,7 +26,6 @@ namespace Iviz.App
             }
         }
 
-        [NotNull]
         string Description
         {
             get
@@ -42,16 +42,16 @@ namespace Iviz.App
             }
         }
 
-        [NotNull] public string Topic { get; }
-        [NotNull] protected string Type { get; }
+        public string Topic { get; }
+        protected string Type { get; }
         public abstract ModuleType ModuleType { get; }
-        [NotNull] public abstract DataPanelContents Panel { get; }
-        [NotNull] public abstract IController Controller { get; }
-        [NotNull] public abstract IConfiguration Configuration { get; }
+        public abstract DataPanelContents Panel { get; }
+        public abstract IController Controller { get; }
+        public abstract IConfiguration Configuration { get; }
 
         protected bool IsSelected => DataPanelManager.SelectedModuleData == this;
         
-        protected ModuleData([NotNull] string topic, [NotNull] string type)
+        protected ModuleData(string topic, string type)
         {
             Topic = topic ?? throw new ArgumentNullException(nameof(topic));
             Type = type ?? throw new ArgumentNullException(nameof(type));
@@ -132,7 +132,7 @@ namespace Iviz.App
 
         public abstract void UpdateConfiguration(string configAsJson, IEnumerable<string> fields);
 
-        public abstract void AddToState([NotNull] StateConfiguration config);
+        public abstract void AddToState(StateConfiguration config);
 
         public virtual void Stop()
         {
@@ -144,14 +144,12 @@ namespace Iviz.App
             Controller.ResetController();
         }
 
-        [NotNull]
         public override string ToString()
         {
             return $"[{ModuleType} guid={Configuration.Id}]";
         }
 
-        [NotNull]
-        public static ModuleData CreateFromResource([NotNull] ModuleDataConstructor c)
+        public static ModuleData CreateFromResource(ModuleDataConstructor c)
         {
             if (c is null)
             {

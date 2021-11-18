@@ -20,7 +20,7 @@ namespace Iviz.Displays
 {
     public static class SceneModel
     {
-        public static async ValueTask<AggregatedMeshMarkerResource> CreateAsync(string uriString,
+        public static async ValueTask<MeshMarkerHolderResource> CreateAsync(string uriString,
             Model msg, IExternalServiceProvider? provider, CancellationToken token)
         {
             if (uriString is null)
@@ -56,7 +56,7 @@ namespace Iviz.Displays
             }
         }
 
-        static async ValueTask<AggregatedMeshMarkerResource> CreateImpl(string uriString, Model msg,
+        static async ValueTask<MeshMarkerHolderResource> CreateImpl(string uriString, Model msg,
             IExternalServiceProvider? provider, CancellationToken token, GameObject root)
         {
             root.transform.localRotation =
@@ -64,7 +64,7 @@ namespace Iviz.Displays
                     ? Quaternion.Euler(0, -90, 0)
                     : Quaternion.Euler(90, 0, 90);
 
-            var marker = root.AddComponent<AggregatedMeshMarkerResource>();
+            var marker = root.AddComponent<MeshMarkerHolderResource>();
             var children = new List<MeshTrianglesResource>();
             var templateMeshes = new List<MeshTrianglesResource>();
 
@@ -208,11 +208,13 @@ namespace Iviz.Displays
             }
 
             marker.Children = children;
+            marker.UpdateBounds();
 
+            /*
             var parentCollider = root.EnsureComponent<BoxCollider>();
 
-            var markerChildren = marker.Children
-                .Select(resource => TransformBoundsUntil(resource.LocalBounds, resource.Transform, root.transform));
+            var markerChildren = children
+                .Select(resource => TransformBoundsUntil(resource.Bounds, resource.Transform, root.transform));
             var nullableRootBounds = markerChildren.CombineBounds();
 
             if (nullableRootBounds is { } rootBounds)
@@ -220,6 +222,7 @@ namespace Iviz.Displays
                 parentCollider.center = rootBounds.center;
                 parentCollider.size = rootBounds.size;
             }
+            */
 
             return marker;
         }

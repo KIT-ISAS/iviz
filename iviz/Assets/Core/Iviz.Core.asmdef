@@ -1,14 +1,13 @@
 {
     "name": "Iviz.Core",
+    "rootNamespace": "Iviz",
     "references": [
         "GUID:2665a8d13d1b3f18800f46e256720795",
         "GUID:d8b63aba1907145bea998dd612889d6b",
         "GUID:0775440a70b5e459d9534389409d8fa8"
     ],
     "includePlatforms": [],
-    "excludePlatforms": [
-        "PS5"
-    ],
+    "excludePlatforms": [],
     "allowUnsafeCode": true,
     "overrideReferences": false,
     "precompiledReferences": [],

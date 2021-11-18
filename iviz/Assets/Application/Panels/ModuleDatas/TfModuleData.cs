@@ -2,8 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Newtonsoft.Json;
 
@@ -12,16 +14,15 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="TfPanelContents"/> 
     /// </summary>
-    public sealed class TfModuleData : ListenerModuleData
+    public sealed class TfModuleData : ModuleData
     {
         readonly TfListener listener;
         readonly TfPanelContents panel;
 
-        protected override ListenerController Listener => listener;
-
         public override DataPanelContents Panel => panel;
         public override ModuleType ModuleType => ModuleType.TF;
         public override IConfiguration Configuration => listener.Config;
+        public override IController Controller => listener;
 
         public TfModuleData(ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<TfConfiguration>()?.Topic ?? constructor.Topic,
@@ -38,10 +39,15 @@ namespace Iviz.App
                 listener.Config.Topic = Topic;
             }
 
-            listener.StartListening();
             UpdateModuleButton();
         }
 
+        public override void Stop()
+        {
+            base.Stop();
+            listener.StopController();
+        }
+        
         public void UpdateConfiguration(TfConfiguration configuration)
         {
             listener.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -114,5 +120,10 @@ namespace Iviz.App
         {
             config.Tf = listener.Config;
         }
+        
+        public override string ToString()
+        {
+            return $"[{ModuleType} Topic='{Topic}' [{Type}] guid={Configuration.Id}]";
+        }        
     }
 }

@@ -1,4 +1,5 @@
-﻿using Iviz.Roslib;
+﻿#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,8 +8,10 @@ using System.Linq;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -18,9 +21,7 @@ using Newtonsoft.Json;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
-using UnityEngine.XR.Interaction.Toolkit.UI;
 using Quaternion = UnityEngine.Quaternion;
 
 namespace Iviz.App
@@ -29,119 +30,10 @@ namespace Iviz.App
     {
         public const int ModuleDataCaptionWidth = 200;
 
-        [SerializeField] DataLabelWidget masterUriStr = null;
-        [SerializeField] TopButtonWidget dragButton = null;
-        [SerializeField] TrashButtonWidget masterUriButton = null;
-        [SerializeField] TrashButtonWidget connectButton = null;
-        [SerializeField] TrashButtonWidget stopButton = null;
-        [SerializeField] Image topPanel = null;
-        [SerializeField] Button save = null;
-        [SerializeField] Button load = null;
-        [SerializeField] Image status = null;
+        static ModuleListPanel? instance;
 
-        [SerializeField] AnchorCanvas anchorCanvas = null;
-        [SerializeField] GameObject contentObject = null;
-        [SerializeField] DataPanelManager dataPanelManager = null;
-        [SerializeField] DialogPanelManager dialogPanelManager = null;
-        [SerializeField] Button addDisplayByTopic = null;
-        [SerializeField] Button addDisplay = null;
-        [SerializeField] Button showTfTree = null;
-        [SerializeField] Button enableAR = null;
-        [SerializeField] Button showNetwork = null;
-        [SerializeField] Button showConsole = null;
-        [SerializeField] Button showSettings = null;
-        [SerializeField] Button showEcho = null;
-        [SerializeField] Button showSystem = null;
-        [SerializeField] Button middleHideGuiButton = null;
+        static event Action? InitFinished;
 
-        [SerializeField] Button recordBag = null;
-        [SerializeField] Text recordBagText = null;
-        [SerializeField] Image recordBagImage = null;
-
-        [SerializeField] Sprite connectedSprite = null;
-        [SerializeField] Sprite connectingSprite = null;
-        [SerializeField] Sprite disconnectedSprite = null;
-        [SerializeField] Sprite questionSprite = null;
-
-        [SerializeField] Text bottomTime = null;
-        [SerializeField] Text bottomBattery = null;
-        [SerializeField] Text bottomFps = null;
-        [SerializeField] Text bottomBandwidth = null;
-
-        [FormerlySerializedAs("joystick")] [SerializeField]
-        TwistJoystick twistJoystick = null;
-
-        [SerializeField] ARJoystick arJoystick = null;
-
-        [SerializeField] Canvas contentCanvas = null;
-        [SerializeField] GameObject moduleListCanvas = null;
-        [SerializeField] GameObject dataPanelCanvas = null;
-
-        [SerializeField] GameObject imageCanvasHolder = null;
-
-        [SerializeField] ARSidePanel arSidePanel = null;
-        [SerializeField] Canvas rootCanvas = null;
-
-        [SerializeField] TMP_Text cameraText = null;
-
-        [ItemNotNull] readonly List<ModuleData> moduleDatas = new();
-        [ItemNotNull] readonly HashSet<string> topicsWithModule = new();
-
-        int frameCounter;
-        bool allGuiVisible = true;
-
-        DialogData[] dialogDatas;
-        DialogData availableModules;
-        DialogData availableTopics;
-
-        ConnectionDialogData connectionData;
-
-        LoadConfigDialogData loadConfigData;
-        SaveConfigDialogData saveConfigData;
-        TfDialogData tfTreeData;
-        MarkerDialogData markerData;
-        NetworkDialogData networkData;
-        ConsoleDialogData consoleData;
-        SettingsDialogData settingsData;
-        EchoDialogData echoData;
-        SystemDialogData systemData;
-        ARMarkerDialogData arMarkerData;
-
-        readonly HashSet<ImageDialogData> imageDatas = new();
-
-        public Controllers.ModelService ModelService { get; private set; }
-        ControllerService controllerService;
-        ModuleListButtons buttons;
-
-        [SerializeField] GameObject menuObject = null;
-        IMenuDialogContents menuDialog;
-
-        bool initialized;
-        static event Action InitFinished;
-
-        public ModuleListPanel()
-        {
-            ModuleDatas = moduleDatas.AsReadOnly();
-        }
-
-        public bool AllGuiVisible
-        {
-            get => allGuiVisible;
-            set
-            {
-                allGuiVisible = value;
-                BottomHideGuiButton.State = value;
-
-                moduleListCanvas.SetActive(value);
-                dataPanelCanvas.SetActive(value);
-                dialogPanelManager.Active = value;
-                arSidePanel.Visible = !value;
-            }
-        }
-
-        [CanBeNull] static ModuleListPanel instance;
-
-        [NotNull]
         public static ModuleListPanel Instance
         {
             get
@@ -156,25 +48,83 @@ namespace Iviz.App
             }
         }
 
-        public static AnchorCanvas AnchorCanvas => Instance.anchorCanvas;
+        public static float CanvasScale => Instance.rootCanvas.scaleFactor;
 
-        [NotNull] AnchorToggleButton BottomHideGuiButton => anchorCanvas.HideGui;
-        [NotNull] Button LeftHideGuiButton => anchorCanvas.SideHideGui;
-        Button MiddleHideGuiButton => middleHideGuiButton;
+        [SerializeField] Button? middleHideGuiButton = null;
 
-        [NotNull] AnchorToggleButton InteractableButton => anchorCanvas.Interact;
-        [NotNull] public Button UnlockButton => anchorCanvas.Unlock;
-        public DataPanelManager DataPanelManager => dataPanelManager;
-        [NotNull] public DialogPanelManager DialogPanelManager => dialogPanelManager;
-        public TwistJoystick TwistJoystick => twistJoystick;
-        public ARJoystick ARJoystick => arJoystick;
-        public ARSidePanel ARSidePanel => arSidePanel;
-        [NotNull] public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
-        [NotNull] TfModuleData TfData => (TfModuleData)moduleDatas[0];
-        [NotNull] public IEnumerable<string> DisplayedTopics => topicsWithModule;
-        [NotNull] ModuleListButtons Buttons => buttons ??= new ModuleListButtons(contentObject);
+        [SerializeField] AnchorCanvasPanel? anchorCanvasPanel = null;
+        [SerializeField] UpperCanvasPanel? upperCanvasPanel = null;
+        [SerializeField] ARSidePanel? arSidePanel = null;
+        [SerializeField] DataPanelManager? dataPanelManager = null;
+        [SerializeField] DialogPanelManager? dialogPanelManager = null;
+        [SerializeField] ARJoystick? arJoystick = null;
+        [SerializeField] TwistJoystick? twistJoystick = null;
+        [SerializeField] GameObject? contentObject = null;
 
+        [SerializeField] TMP_Text cameraText = null;
+        [SerializeField] Text bottomTime = null;
+        [SerializeField] Text bottomBattery = null;
+        [SerializeField] Text bottomFps = null;
+        [SerializeField] Text bottomBandwidth = null;
+
+        [SerializeField] GameObject moduleListCanvas = null;
+        [SerializeField] GameObject dataPanelCanvas = null;
+        [SerializeField] GameObject imageCanvasHolder = null;
+
+        [SerializeField] Canvas rootCanvas = null;
+
+        [SerializeField] GameObject menuObject = null;
+
+        readonly List<ModuleData> moduleDatas = new();
+        readonly HashSet<string> topicsWithModule = new();
+        readonly HashSet<ImageDialogData> imageDatas = new();
+
+        int frameCounter;
+        bool allGuiVisible = true;
+        bool initialized;
         bool sceneInteractable;
+
+        ModuleListButtons? buttons;
+        DialogManager? dialogs;
+        IMenuDialogContents? menuDialog;
+
+        public AnchorCanvasPanel AnchorCanvasPanel => anchorCanvasPanel.AssertNotNull(nameof(anchorCanvasPanel));
+
+        UpperCanvasPanel UpperCanvas => upperCanvasPanel.AssertNotNull(nameof(upperCanvasPanel));
+        AnchorToggleButton BottomHideGuiButton => AnchorCanvasPanel.BottomHideGui;
+        Button LeftHideGuiButton => AnchorCanvasPanel.LeftHideGui;
+        Button MiddleHideGuiButton => middleHideGuiButton.AssertNotNull(nameof(middleHideGuiButton));
+        AnchorToggleButton InteractableButton => AnchorCanvasPanel.Interact;
+
+        ModuleListButtons Buttons =>
+            buttons ??= new ModuleListButtons(contentObject.AssertNotNull(nameof(contentObject)));
+
+        DialogManager Dialogs => dialogs ??= new DialogManager();
+        TfModuleData TfData => (TfModuleData)moduleDatas[0];
+        public Button UnlockButton => AnchorCanvasPanel.Unlock;
+        public DataPanelManager DataPanelManager => dataPanelManager.AssertNotNull(nameof(dataPanelManager));
+
+        public DialogPanelManager DialogPanelManager => dialogPanelManager.AssertNotNull(nameof(dialogPanelManager));
+
+        public TwistJoystick TwistJoystick => twistJoystick.AssertNotNull(nameof(twistJoystick));
+        public ARJoystick ARJoystick => arJoystick.AssertNotNull(nameof(arJoystick));
+        public ARSidePanel ARSidePanel => arSidePanel.AssertNotNull(nameof(arSidePanel));
+        public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
+        public IEnumerable<string> DisplayedTopics => topicsWithModule;
+
+        public bool AllGuiVisible
+        {
+            get => allGuiVisible;
+            set
+            {
+                allGuiVisible = value;
+                BottomHideGuiButton.State = value;
+                moduleListCanvas.SetActive(value);
+                dataPanelCanvas.SetActive(value);
+                DialogPanelManager.Active = value;
+                ARSidePanel.Visible = !value;
+            }
+        }
 
         public bool SceneInteractable
         {
@@ -189,7 +139,6 @@ namespace Iviz.App
             }
         }
 
-
         public bool UnlockButtonVisible
         {
             get => UnlockButton.gameObject.activeSelf;
@@ -198,15 +147,17 @@ namespace Iviz.App
 
         bool KeepReconnecting
         {
-            get => ConnectionManager.Connection.KeepReconnecting;
             set
             {
                 ConnectionManager.Connection.KeepReconnecting = value;
-                status.enabled = value;
+                UpperCanvas.Status.enabled = value;
             }
         }
 
-        public static float CanvasScale => Instance.rootCanvas.scaleFactor;
+        public ModuleListPanel()
+        {
+            ModuleDatas = moduleDatas.AsReadOnly();
+        }
 
         void Awake()
         {
@@ -222,36 +173,17 @@ namespace Iviz.App
             GameThread.EveryFrame -= UpdateFpsCounter;
             GameThread.EveryFastTick -= UpdateCameraStats;
 
-            foreach (var dialogData in dialogDatas)
+            foreach (var dialogData in Dialogs.DialogDatas)
             {
                 dialogData.FinalizePanel();
             }
         }
 
-        [NotNull]
-        static string MasterUriToString([CanBeNull] Uri uri) =>
-            uri == null || uri.AbsolutePath.Length == 0 ? $"{uri}" : $"{uri.Host}:{uri.Port.ToString()}";
+        static string MasterUriToString(Uri? uri) =>
+            uri is null || uri.AbsolutePath.Length == 0 ? "" : $"{uri.Host}:{uri.Port.ToString()}";
 
         void Start()
         {
-            availableModules = new AddModuleDialogData();
-            availableTopics = new AddTopicDialogData();
-
-            dialogDatas = new DialogData[]
-            {
-                tfTreeData = new TfDialogData(),
-                loadConfigData = new LoadConfigDialogData(),
-                saveConfigData = new SaveConfigDialogData(),
-                markerData = new MarkerDialogData(),
-                networkData = new NetworkDialogData(),
-                connectionData = new ConnectionDialogData(),
-                consoleData = new ConsoleDialogData(),
-                settingsData = new SettingsDialogData(),
-                echoData = new EchoDialogData(),
-                systemData = new SystemDialogData(),
-                arMarkerData = new ARMarkerDialogData(),
-            };
-
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
 
@@ -266,8 +198,8 @@ namespace Iviz.App
                 CreateModule(ModuleType.Grid);
             }
 
-            save.onClick.AddListener(saveConfigData.Show);
-            load.onClick.AddListener(loadConfigData.Show);
+            UpperCanvas.Save.onClick.AddListener(Dialogs.SaveConfigData.Show);
+            UpperCanvas.Load.onClick.AddListener(Dialogs.LoadConfigData.Show);
 
             BottomHideGuiButton.Clicked += OnHideGuiButtonClick;
             BottomHideGuiButton.State = true;
@@ -285,20 +217,20 @@ namespace Iviz.App
             InteractableButton.Visible = false;
             InteractableButton.Clicked += () => SceneInteractable = !SceneInteractable;
 
-            addDisplayByTopic.onClick.AddListener(availableTopics.Show);
-            addDisplay.onClick.AddListener(availableModules.Show);
-            showTfTree.onClick.AddListener(tfTreeData.Show);
-            enableAR.onClick.AddListener(OnToggleARClicked);
-            showNetwork.onClick.AddListener(networkData.Show);
-            showConsole.onClick.AddListener(consoleData.Show);
-            showSettings.onClick.AddListener(settingsData.Show);
-            showEcho.onClick.AddListener(echoData.Show);
-            recordBag.onClick.AddListener(OnStartRecordBag);
-            showSystem.onClick.AddListener(systemData.Show);
+            UpperCanvas.AddDisplayByTopic.onClick.AddListener(Dialogs.AvailableTopics.Show);
+            UpperCanvas.AddModule.onClick.AddListener(Dialogs.AvailableModules.Show);
+            UpperCanvas.ShowTfTree.onClick.AddListener(Dialogs.TfTreeData.Show);
+            UpperCanvas.EnableAR.onClick.AddListener(OnToggleARClicked);
+            UpperCanvas.ShowNetwork.onClick.AddListener(Dialogs.NetworkData.Show);
+            UpperCanvas.ShowConsole.onClick.AddListener(Dialogs.ConsoleData.Show);
+            UpperCanvas.ShowSettings.onClick.AddListener(Dialogs.SettingsData.Show);
+            UpperCanvas.ShowEcho.onClick.AddListener(Dialogs.EchoData.Show);
+            UpperCanvas.RecordBag.onClick.AddListener(OnStartRecordBag);
+            UpperCanvas.ShowSystem.onClick.AddListener(Dialogs.SystemData.Show);
 
-            masterUriStr.Text = MasterUriToString(connectionData.MasterUri);
-            masterUriButton.Clicked += connectionData.Show;
-            dragButton.Dragged += OnHideGuiButtonClick;
+            var connectionData = Dialogs.ConnectionData;
+            UpperCanvas.MasterUriStr.Text = MasterUriToString(connectionData.MasterUri);
+            UpperCanvas.MasterUriButton.Clicked += connectionData.Show;
 
             ConnectionManager.Connection.MasterUri = connectionData.MasterUri;
             ConnectionManager.Connection.MyUri = connectionData.MyUri;
@@ -312,17 +244,17 @@ namespace Iviz.App
                 if (uri == null)
                 {
                     RosLogger.Internal("<b>Error:</b> Failed to set master uri. Reason: Uri is not valid.");
-                    masterUriStr.Text = "(?) →";
+                    UpperCanvas.MasterUriStr.Text = "(?) →";
                 }
                 else if (RosServerManager.IsActive)
                 {
                     RosLogger.Internal($"Changing master uri to local master '{uri}'");
-                    masterUriStr.Text = MasterUriToString(uri);
+                    UpperCanvas.MasterUriStr.Text = MasterUriToString(uri);
                 }
                 else
                 {
                     RosLogger.Internal($"Changing master uri to '{uri}'");
-                    masterUriStr.Text = MasterUriToString(uri);
+                    UpperCanvas.MasterUriStr.Text = MasterUriToString(uri);
                 }
             };
             connectionData.MyIdChanged += id =>
@@ -349,7 +281,7 @@ namespace Iviz.App
                     : $"Changing caller uri to '{uri}'"
                 );
             };
-            stopButton.Clicked += () =>
+            UpperCanvas.StopButton.Clicked += () =>
             {
                 RosLogger.Internal(
                     ConnectionManager.IsConnected
@@ -359,7 +291,7 @@ namespace Iviz.App
                 KeepReconnecting = false;
                 ConnectionManager.Connection.Disconnect();
             };
-            connectButton.Clicked += () =>
+            UpperCanvas.ConnectButton.Clicked += () =>
             {
                 RosLogger.Internal(
                     ConnectionManager.IsConnected ? "Reconnection requested." : "Connection requested."
@@ -377,8 +309,7 @@ namespace Iviz.App
             GameThread.EveryFastTick += UpdateCameraStats;
             UpdateFpsStats();
 
-            controllerService = new ControllerService();
-            ModelService = new Controllers.ModelService();
+            ServiceFunctions.Start();
 
             menuDialog = menuObject.GetComponent<IMenuDialogContents>();
             menuObject.SetActive(false);
@@ -435,28 +366,28 @@ namespace Iviz.App
             if (ConnectionManager.Connection.BagListener != null)
             {
                 ConnectionManager.Connection.BagListener = null;
-                recordBagImage.color = Color.black;
-                recordBagText.text = "Rec Bag";
+                UpperCanvas.RecordBagImage.color = Color.black;
+                UpperCanvas.RecordBagText.text = "Rec Bag";
             }
             else
             {
                 string filename = $"iviz-{GameThread.Now:yyyy-MM-dd-HH-mm-ss}.bag";
                 Directory.CreateDirectory(Settings.BagsFolder);
                 ConnectionManager.Connection.BagListener = new BagListener($"{Settings.BagsFolder}/{filename}");
-                recordBagImage.color = Color.red;
-                recordBagText.text = "0 MB";
+                UpperCanvas.RecordBagImage.color = Color.red;
+                UpperCanvas.RecordBagText.text = "0 MB";
             }
         }
 
         void OnConnectionStateChanged(ConnectionState state)
         {
-            status.rectTransform.localRotation = Quaternion.identity;
+            UpperCanvas.Status.rectTransform.localRotation = Quaternion.identity;
 
             if (ConnectionManager.Connection.MasterUri == null ||
                 ConnectionManager.Connection.MyUri == null ||
                 ConnectionManager.Connection.MyId == null)
             {
-                status.sprite = questionSprite;
+                UpperCanvas.Status.sprite = UpperCanvas.QuestionSprite;
                 return;
             }
 
@@ -464,19 +395,19 @@ namespace Iviz.App
             {
                 case ConnectionState.Connected:
                     GameThread.EverySecond -= RotateSprite;
-                    status.sprite = connectedSprite;
-                    topPanel.color = RosServerManager.IsActive
+                    UpperCanvas.Status.sprite = UpperCanvas.ConnectedSprite;
+                    UpperCanvas.TopPanel.color = RosServerManager.IsActive
                         ? Resource.Colors.ConnectionPanelOwnMaster
                         : Resource.Colors.ConnectionPanelConnected;
                     SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
                     GameThread.EverySecond -= RotateSprite;
-                    status.sprite = disconnectedSprite;
-                    topPanel.color = Resource.Colors.ConnectionPanelDisconnected;
+                    UpperCanvas.Status.sprite = UpperCanvas.DisconnectedSprite;
+                    UpperCanvas.TopPanel.color = Resource.Colors.ConnectionPanelDisconnected;
                     break;
                 case ConnectionState.Connecting:
-                    status.sprite = connectingSprite;
+                    UpperCanvas.Status.sprite = UpperCanvas.ConnectingSprite;
 
                     GameThread.EverySecond += RotateSprite;
                     break;
@@ -485,7 +416,7 @@ namespace Iviz.App
 
         void OnConnectionWarningChanged(bool value)
         {
-            topPanel.color = value
+            UpperCanvas.TopPanel.color = value
                 ? Resource.Colors.ConnectionPanelWarning
                 : RosServerManager.IsActive
                     ? Resource.Colors.ConnectionPanelOwnMaster
@@ -494,7 +425,7 @@ namespace Iviz.App
 
         void RotateSprite()
         {
-            status.rectTransform.Rotate(new Vector3(0, 0, 10.0f), Space.Self);
+            UpperCanvas.Status.rectTransform.Rotate(new Vector3(0, 0, 10.0f), Space.Self);
         }
 
         void OnHideGuiButtonClick()
@@ -513,7 +444,7 @@ namespace Iviz.App
             LeftHideGuiButton.gameObject.SetActive(isMobile);
         }
 
-        public async void SaveStateConfiguration([NotNull] string file)
+        public async void SaveStateConfiguration(string file)
         {
             if (file == null)
             {
@@ -545,7 +476,7 @@ namespace Iviz.App
             RosLogger.Debug("DisplayListPanel: Writing config to " + Settings.SavedFolder + "/" + file);
         }
 
-        public async void LoadStateConfiguration([NotNull] string file, CancellationToken token = default)
+        public async void LoadStateConfiguration(string file, CancellationToken token = default)
         {
             if (file == null)
             {
@@ -605,18 +536,15 @@ namespace Iviz.App
                 Debug.Log("Using settings from " + path);
 
                 string text = File.ReadAllText(path);
-                ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(text);
+                var config = JsonConvert.DeserializeObject<ConnectionConfiguration?>(text);
                 if (config == null)
                 {
                     return; // empty text
                 }
 
-                connectionData.MasterUri = string.IsNullOrEmpty(config.MasterUri)
-                    ? null
-                    : new Uri(config.MasterUri);
-                connectionData.MyUri = string.IsNullOrEmpty(config.MyUri)
-                    ? null
-                    : new Uri(config.MyUri);
+                var connectionData = Dialogs.ConnectionData;
+                connectionData.MasterUri = string.IsNullOrEmpty(config.MasterUri) ? null : new Uri(config.MasterUri);
+                connectionData.MyUri = string.IsNullOrEmpty(config.MyUri) ? null : new Uri(config.MyUri);
                 connectionData.MyId = config.MyId;
                 if (config.LastMasterUris.Count != 0)
                 {
@@ -628,13 +556,12 @@ namespace Iviz.App
                 var validHostAliases = config.HostAliases
                     .Where(alias => alias is { Hostname: { }, Address: { } })
                     .ToArray();
-                systemData.HostAliases = validHostAliases;
+                Dialogs.SystemData.HostAliases = validHostAliases;
 
-                var validHostPairs =
-                    validHostAliases.Select(alias => (alias.Hostname, alias.Address));
+                var validHostPairs = validHostAliases.Select(alias => (alias!.Hostname, alias.Address));
                 ConnectionManager.Connection.SetHostAliases(validHostPairs);
 
-                arMarkerData.Configuration = config.MarkersConfiguration;
+                Dialogs.ARMarkerData.Configuration = config.MarkersConfiguration;
             }
             catch (Exception e) when
                 (e is IOException or SecurityException or JsonException)
@@ -646,21 +573,21 @@ namespace Iviz.App
 
         async void SaveSimpleConfiguration()
         {
-            connectionData.UpdateLastMasterUris();
+            Dialogs.ConnectionData.UpdateLastMasterUris();
+
+            var config = new ConnectionConfiguration
+            {
+                MasterUri = Dialogs.ConnectionData.MasterUri?.ToString() ?? "",
+                MyUri = Dialogs.ConnectionData.MyUri?.ToString() ?? "",
+                MyId = Dialogs.ConnectionData.MyId ?? "",
+                LastMasterUris = new List<Uri>(Dialogs.ConnectionData.LastMasterUris),
+                Settings = Settings.SettingsManager.Config,
+                HostAliases = Dialogs.SystemData.HostAliases,
+                MarkersConfiguration = Dialogs.ARMarkerData.Configuration,
+            };
 
             try
             {
-                ConnectionConfiguration config = new()
-                {
-                    MasterUri = connectionData.MasterUri?.ToString() ?? "",
-                    MyUri = connectionData.MyUri?.ToString() ?? "",
-                    MyId = connectionData.MyId ?? "",
-                    LastMasterUris = new List<Uri>(connectionData.LastMasterUris),
-                    Settings = Settings.SettingsManager.Config,
-                    HostAliases = systemData.HostAliases,
-                    MarkersConfiguration = arMarkerData.Configuration,
-                };
-
                 string text = JsonConvert.SerializeObject(config, Formatting.Indented);
                 await FileUtils.WriteAllTextAsync(Settings.SimpleConfigurationPath, text, default);
             }
@@ -684,8 +611,8 @@ namespace Iviz.App
                 string inText = File.ReadAllText(path);
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
                 config.Settings = Settings.SettingsManager.Config;
-                config.HostAliases = systemData.HostAliases;
-                config.MarkersConfiguration = arMarkerData.Configuration;
+                config.HostAliases = Dialogs.SystemData.HostAliases;
+                config.MarkersConfiguration = Dialogs.ARMarkerData.Configuration;
                 string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
                 File.WriteAllText(path, outText);
             }
@@ -704,7 +631,7 @@ namespace Iviz.App
             }
         }
 
-        public int NumMastersInCache => connectionData.LastMasterUris.Count;
+        public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
 
         public async ValueTask ClearMastersCacheAsync(CancellationToken token = default)
         {
@@ -714,7 +641,7 @@ namespace Iviz.App
                 return;
             }
 
-            connectionData.LastMasterUris = new List<Uri>();
+            Dialogs.ConnectionData.LastMasterUris = new List<Uri>();
 
             try
             {
@@ -756,12 +683,8 @@ namespace Iviz.App
             InteractableButton.Visible = ModuleDatas.Any(module => module is IInteractableModuleData);
         }
 
-        [NotNull]
-        public ModuleData CreateModule(ModuleType resource,
-            [NotNull] string topic = "",
-            [NotNull] string type = "",
-            [CanBeNull] IConfiguration configuration = null,
-            [CanBeNull] string requestedId = null)
+        public ModuleData CreateModule(ModuleType resource, string topic = "", string type = "",
+            IConfiguration? configuration = null, string? requestedId = null)
         {
             if (topic == null)
             {
@@ -796,8 +719,7 @@ namespace Iviz.App
             return moduleData;
         }
 
-        [NotNull]
-        public ModuleData CreateModuleForTopic([NotNull] string topic, [NotNull] string type)
+        public ModuleData CreateModuleForTopic(string topic, string type)
         {
             if (topic == null)
             {
@@ -817,7 +739,7 @@ namespace Iviz.App
             return CreateModule(resource, topic, type);
         }
 
-        public void RemoveModule([NotNull] ModuleData entry)
+        public void RemoveModule(ModuleData entry)
         {
             if (entry == null)
             {
@@ -842,7 +764,7 @@ namespace Iviz.App
         }
 
 
-        public void UpdateModuleButton([NotNull] ModuleData entry, [NotNull] string content)
+        public void UpdateModuleButton(ModuleData entry, string content)
         {
             if (entry == null)
             {
@@ -858,7 +780,7 @@ namespace Iviz.App
             Buttons.UpdateButton(index, content);
         }
 
-        public void RegisterDisplayedTopic([NotNull] string topic)
+        public void RegisterDisplayedTopic(string topic)
         {
             if (topic == null)
             {
@@ -868,27 +790,26 @@ namespace Iviz.App
             topicsWithModule.Add(topic);
         }
 
-        [NotNull]
-        public ImageDialogData CreateImageDialog([NotNull] ImageDialogListener caller)
+        public ImageDialogData CreateImageDialog(ImageDialogListener caller)
         {
             var newImageData = new ImageDialogData(caller, imageCanvasHolder.transform);
             imageDatas.Add(newImageData);
             return newImageData;
         }
 
-        public void DisposeImageDialog([NotNull] ImageDialogData dialogData)
+        public void DisposeImageDialog(ImageDialogData dialogData)
         {
             imageDatas.Remove(dialogData);
         }
 
-        public void ShowMarkerDialog([NotNull] IMarkerDialogListener caller)
+        public void ShowMarkerDialog(IMarkerDialogListener caller)
         {
-            markerData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));
+            Dialogs.MarkerData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));
         }
 
         public void ShowARMarkerDialog()
         {
-            arMarkerData.Show();
+            Dialogs.ARMarkerData.Show();
         }
 
         void UpdateCameraStats()
@@ -934,7 +855,7 @@ namespace Iviz.App
             if (bagListener != null)
             {
                 long bagSizeMb = bagListener.Length / (1024 * 1024);
-                recordBagText.text = $"{bagSizeMb.ToString()} MB";
+                UpperCanvas.RecordBagText.text = $"{bagSizeMb.ToString()} MB";
             }
 
             var state = SystemInfo.batteryStatus;
@@ -958,7 +879,6 @@ namespace Iviz.App
             }
         }
 
-        [NotNull]
         static string FormatBandwidth(long speedB)
         {
             if (speedB >= 1024 * 1024)
@@ -976,12 +896,16 @@ namespace Iviz.App
             frameCounter++;
         }
 
-        public void ShowMenu([NotNull] MenuEntryList menuEntries, [NotNull] Action<uint> callback,
-            Vector3 unityPositionHint)
+        public void ShowMenu(MenuEntryList menuEntries, Action<uint> callback, Vector3 unityPositionHint)
         {
             if (menuEntries == null)
             {
                 throw new ArgumentNullException(nameof(menuEntries));
+            }
+
+            if (menuDialog == null)
+            {
+                throw new NullReferenceException("Menu dialog has not been set!");
             }
 
             menuDialog.Set(menuEntries, unityPositionHint, callback);

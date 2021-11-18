@@ -1,50 +1,78 @@
+#nullable enable
+
 using Iviz.Controllers;
-using Iviz.Displays;
-using Iviz.Resources;
+using Iviz.Controllers.TF;
+using Iviz.Core;
 using UnityEngine;
 
-namespace Application.Displays
+namespace Iviz.Displays
 {
+    [RequireComponent(typeof(AxisFrameResource))]
     public class CameraOverlayDisplay : MonoBehaviour
     {
         static readonly Quaternion BaseTransform = Quaternion.AngleAxis(90, Vector3.up);
+
+        [SerializeField] AxisFrameResource? resource = null;
+        [SerializeField] Camera? parentCamera = null;
+        [SerializeField] Camera? grandparentCamera = null;
+
+        Vector3 settings;
         
-        AxisFrameResource resource;
-        [SerializeField] Camera parentCamera;
-        [SerializeField] Camera grandparentCamera;
-        
+        Transform? mTransform;
+        AxisFrameResource Resource => resource.AssertNotNull(nameof(resource));
+        Camera ParentCamera => parentCamera.AssertNotNull(nameof(parentCamera));
+
+        Camera GrandparentCamera => grandparentCamera != null
+            ? grandparentCamera
+            : grandparentCamera = ParentCamera.transform.parent.GetComponent<Camera>()
+                .AssertNotNull(nameof(grandparentCamera));
+
+        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+
         void Start()
         {
-            resource = GetComponent<AxisFrameResource>();
-            resource.ColorX = Resource.Colors.CameraOverlayAxisX;
-            resource.ColorY = Resource.Colors.CameraOverlayAxisY;
-            resource.ColorZ = Resource.Colors.CameraOverlayAxisZ;
+            Resource.ColorX = Resources.Resource.Colors.CameraOverlayAxisX;
+            Resource.ColorY = Resources.Resource.Colors.CameraOverlayAxisY;
+            Resource.ColorZ = Resources.Resource.Colors.CameraOverlayAxisZ;
+            Resource.AxisLength = 0.001f;
+            Resource.Layer = gameObject.layer;
+            CheckSettings();
+        }
 
-            resource.AxisLength = 0.001f;
-            resource.Layer = gameObject.layer;
+        void CheckSettings()
+        {
+            var newSettings = new Vector3(
+                ParentCamera.pixelWidth,
+                ParentCamera.pixelHeight,
+                ParentCamera.nearClipPlane
+            );
 
-            parentCamera = transform.parent.GetComponent<Camera>();
-            Vector3 point = new Vector3(
-                0.9f * parentCamera.pixelWidth,
-                0.9f * parentCamera.pixelHeight,
-                parentCamera.nearClipPlane + resource.AxisLength);
-            Vector3 widgetWorldPos = parentCamera.ScreenToWorldPoint(point);
-            transform.position = widgetWorldPos;
-
-            grandparentCamera = parentCamera.transform.parent.GetComponentInParent<Camera>();
+            if (newSettings == settings)
+            {
+                return;
+            }
+            
+            settings = newSettings;
+            var point = new Vector3(
+                0.9f * newSettings.x,
+                0.9f * newSettings.y,
+                newSettings.z + Resource.AxisLength);
+            var widgetWorldPos = ParentCamera.ScreenToWorldPoint(point);
+            Transform.position = widgetWorldPos;
         }
 
         void LateUpdate()
         {
-            bool isParentEnabled = grandparentCamera.enabled;
-            if (resource.Visible != isParentEnabled)
+            bool isParentEnabled = GrandparentCamera.enabled;
+            if (Resource.Visible != isParentEnabled)
             {
-                parentCamera.enabled = isParentEnabled;
-                resource.Visible = isParentEnabled;
+                ParentCamera.enabled = isParentEnabled;
+                Resource.Visible = isParentEnabled;
                 return;
             }
 
-            transform.rotation = TfListener.RootFrame.transform.rotation * BaseTransform;
+            CheckSettings();
+            Transform.rotation = TfListener.OriginFrame.Transform.rotation * BaseTransform;
         }
     }
 }

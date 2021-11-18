@@ -18,7 +18,7 @@ namespace Iviz.Ros
 
         readonly ConcurrentQueue<T> messageQueue = new();
         readonly Action<T>? delayedHandler;
-        readonly Func<T, bool>? directHandler;
+        readonly Func<T, IRosReceiver, bool>? directHandler;
         readonly List<T> tmpMessageBag = new(32);
         readonly bool callbackInGameThread;
 
@@ -49,7 +49,7 @@ namespace Iviz.Ros
         public (int active, int total) NumPublishers => Connection.GetNumPublishers(Topic);
         public int MaxQueueSize { get; set; } = 1;
         public bool Subscribed { get; private set; }
-        
+
         Listener(string topic, RosTransportHint transportHint)
         {
             if (string.IsNullOrWhiteSpace(topic))
@@ -76,7 +76,7 @@ namespace Iviz.Ros
             Subscribed = true;
         }
 
-        public Listener(string topic, Func<T, bool> handler,
+        public Listener(string topic, Func<T, IRosReceiver, bool> handler,
             RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
         {
             directHandler = handler ?? throw new ArgumentNullException(nameof(handler));
@@ -85,13 +85,19 @@ namespace Iviz.Ros
             Subscribed = true;
         }
 
-        // used by EchoDialogData
-        [Preserve]
-        public Listener(string topic, Func<IMessage, bool> handler, RosTransportHint transportHint)
-            : this(topic, (T msg) => handler(msg), transportHint)
+        public Listener(string topic, Func<T, bool> handler,
+            RosTransportHint transportHint = RosTransportHint.PreferTcp) :
+            this(topic, (t, _) => handler(t), transportHint)
         {
         }
-        
+
+        // used by EchoDialogData
+        [Preserve]
+        public Listener(string topic, Func<IMessage, IRosReceiver, bool> handler, RosTransportHint transportHint)
+            : this(topic, (T msg, IRosReceiver receiver) => handler(msg, receiver), transportHint)
+        {
+        }
+
         public void Stop()
         {
             GameThread.EverySecond -= UpdateStats;
@@ -153,7 +159,7 @@ namespace Iviz.Ros
             Unsuspend();
         }
 
-        internal void EnqueueMessage(in T msg)
+        internal void EnqueueMessage(in T msg, IRosReceiver receiver)
         {
             if (!Subscribed)
             {
@@ -166,7 +172,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            CallHandlerDirect(msg);
+            CallHandlerDirect(msg, receiver);
         }
 
         void CallHandlerDelayed()
@@ -175,7 +181,7 @@ namespace Iviz.Ros
             {
                 return;
             }
-            
+
             tmpMessageBag.Clear();
             while (messageQueue.TryDequeue(out T t))
             {
@@ -193,7 +199,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.RosLogger.Error($"{this} Error during callback: ", e);
+                    RosLogger.Error($"{this} Error during callback: ", e);
                 }
             }
 
@@ -202,7 +208,7 @@ namespace Iviz.Ros
             recentMsgs += messageQueue.Count;
         }
 
-        void CallHandlerDirect(in T msg)
+        void CallHandlerDirect(in T msg, IRosReceiver receiver)
         {
             if (directHandler == null)
             {
@@ -216,7 +222,7 @@ namespace Iviz.Ros
             try
             {
                 Interlocked.Add(ref lastMsgBytes, msg.RosMessageLength);
-                processed = directHandler(msg);
+                processed = directHandler(msg, receiver);
             }
             catch (Exception e)
             {
@@ -278,14 +284,14 @@ namespace Iviz.Ros
             return $"[Listener {Topic} [{Type}]]";
         }
     }
-    
+
     public static class Listener
     {
-        public static IListener Create(string topicName, Func<IMessage, bool> handler, Type csType)
+        public static IListener Create(string topicName, Func<IMessage, IRosReceiver, bool> handler, Type csType)
         {
             Type listenerType = typeof(Listener<>).MakeGenericType(csType);
             return (IListener)Activator.CreateInstance(listenerType,
                 topicName, handler, RosTransportHint.PreferTcp);
-        } 
+        }
     }
 }

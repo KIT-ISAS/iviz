@@ -84,12 +84,18 @@ namespace Iviz.App
         public event Action<string>? ValueChanged;
         public event Action<string>? EndEdit;
 
-        public void OnValueChanged(string f)
+        void Awake()
+        {
+            Text.onValueChanged.AddListener(OnValueChanged);
+            Text.onEndEdit.AddListener(OnEndEdit);
+        }
+        
+        void OnValueChanged(string f)
         {
             ValueChanged?.Invoke(f);
         }
 
-        public void OnEndEdit(string f)
+        void OnEndEdit(string f)
         {
             EndEdit?.Invoke(f);
         }

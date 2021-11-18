@@ -1,19 +1,11 @@
 ﻿#nullable  enable
 
 using System;
-using System.Text;
+using Iviz.Common;
 using Iviz.Tools;
 
 namespace Iviz.App
 {
-    public interface IMarkerDialogListener
-    {
-        string Topic { get; }
-        void GenerateLog(StringBuilder description);
-        string BriefDescription { get; }
-        void Reset();
-    }
-
     public sealed class MarkerDialogData : DialogData
     {
         readonly MarkerDialogContents panel;

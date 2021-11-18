@@ -89,37 +89,24 @@ namespace Iviz.Displays
             }
         }
 
-        public static void ReturnDisplay<T>(T resource) where T : MonoBehaviour, IDisplay
+        internal static void ReturnDisplay(IDisplay resource)
         {
             if (resource == null)
             {
                 throw new ArgumentNullException(nameof(resource));
             }
 
-            if (!Resource.Displays.TryGetResource(typeof(T), out var info))
+            if (resource is not MonoBehaviour behaviour)
+            {
+                throw new ArgumentException("Argument is not a MonoBehavior");
+            }
+
+            if (!Resource.Displays.TryGetResource(resource.GetType(), out var info))
             {
                 throw new ResourceNotFoundException("Cannot find unique display type for resource");
             }
 
-            Return(info, resource.gameObject);
-        }
-
-        public static bool TryReturnDisplay(IDisplay resource)
-        {
-            if (resource is not MonoBehaviour behaviour)
-            {
-                return false;
-            }
-
-            if (!Resource.Displays.TryGetResource(resource.GetType(), out Info<GameObject>? info))
-            {
-                Debug.Log($"ResourcePool: Could not find display for '{behaviour.gameObject.name}'");
-                Destroy(behaviour.gameObject);
-                return false;
-            }
-
             Return(info, behaviour.gameObject);
-            return true;
         }
 
         void CheckForDead()

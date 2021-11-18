@@ -59,8 +59,7 @@ namespace Iviz.Core
             uint hash = startHash;
             for (int i = 0; i < value.Length; i++)
             {
-                // indexing is fast as long as there is one chunk
-                uint val = value[i]; 
+                uint val = value[i]; // indexing is fast as long as there is only one chunk 
                 hash = (hash >> 8) ^ Table[val ^ hash & 0xff];
             }
 

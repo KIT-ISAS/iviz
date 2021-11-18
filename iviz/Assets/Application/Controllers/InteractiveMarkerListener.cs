@@ -1,14 +1,17 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Iviz.App;
+using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
-using JetBrains.Annotations;
 using UnityEngine;
 using Pose = UnityEngine.Pose;
 using Vector3 = UnityEngine.Vector3;
@@ -20,25 +23,16 @@ namespace Iviz.Controllers
         const string FeedbackFormatStr = "{0}/feedback";
         const string UpdateFullFormatStr = "{0}/update_full";
 
-        readonly InteractiveMarkerConfiguration config = new InteractiveMarkerConfiguration();
-
-        readonly Dictionary<string, InteractiveMarkerObject> interactiveMarkers =
-            new Dictionary<string, InteractiveMarkerObject>();
-
+        readonly InteractiveMarkerConfiguration config = new();
+        readonly Dictionary<string, InteractiveMarkerObject> interactiveMarkers = new();
         readonly FrameNode node;
 
         uint feedSeq;
         bool interactable;
 
-        public InteractiveMarkerListener([NotNull] IModuleData moduleData)
-        {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            node = FrameNode.Instantiate("[InteractiveMarkerListener]");
-        }
-
-        public Listener<InteractiveMarkerInit> FullListener { get; private set; }
-        public Sender<InteractiveMarkerFeedback> Publisher { get; private set; }
-        [NotNull] public override TfFrame Frame => TfListener.DefaultFrame;
+        public Listener<InteractiveMarkerInit>? FullListener { get; private set; }
+        public Sender<InteractiveMarkerFeedback>? Publisher { get; private set; }
+        public override TfFrame Frame => TfListener.DefaultFrame;
         public override IModuleData ModuleData { get; }
 
         public InteractiveMarkerConfiguration Config
@@ -118,19 +112,12 @@ namespace Iviz.Controllers
         {
             get
             {
-                string markerStr;
-                switch (interactiveMarkers.Count)
+                string markerStr = interactiveMarkers.Count switch
                 {
-                    case 0:
-                        markerStr = "<b>No interactive markers →</b>";
-                        break;
-                    case 1:
-                        markerStr = "<b>1 interactive marker →</b>";
-                        break;
-                    default:
-                        markerStr = $"<b>{interactiveMarkers.Values.Count.ToString()} interactive markers →</b>";
-                        break;
-                }
+                    0 => "<b>No interactive markers →</b>",
+                    1 => "<b>1 interactive marker →</b>",
+                    _ => $"<b>{interactiveMarkers.Values.Count.ToString()} interactive markers →</b>"
+                };
 
                 int totalErrors = 0, totalWarnings = 0;
                 foreach (InteractiveMarkerObject marker in interactiveMarkers.Values)
@@ -145,35 +132,28 @@ namespace Iviz.Controllers
                     return $"{markerStr}\nNo errors";
                 }
 
-                string errorStr, warnStr;
-                switch (totalErrors)
+                string errorStr = totalErrors switch
                 {
-                    case 0:
-                        errorStr = "No errors";
-                        break;
-                    case 1:
-                        errorStr = "1 error";
-                        break;
-                    default:
-                        errorStr = $"{totalErrors} errors";
-                        break;
-                }
+                    0 => "No errors",
+                    1 => "1 error",
+                    _ => $"{totalErrors} errors"
+                };
 
-                switch (totalWarnings)
+                string warnStr = totalWarnings switch
                 {
-                    case 0:
-                        warnStr = "No warnings";
-                        break;
-                    case 1:
-                        warnStr = "1 warning";
-                        break;
-                    default:
-                        warnStr = $"{totalWarnings} warnings";
-                        break;
-                }
+                    0 => "No warnings",
+                    1 => "1 warning",
+                    _ => $"{totalWarnings} warnings"
+                };
 
                 return $"{markerStr}\n{errorStr}, {warnStr}";
             }
+        }
+
+        public InteractiveMarkerListener(IModuleData moduleData)
+        {
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+            node = FrameNode.Instantiate("[InteractiveMarkerListener]");
         }
 
         public void Reset()
@@ -190,7 +170,7 @@ namespace Iviz.Controllers
             if (config.Topic.HasSuffix("/update"))
             {
                 int lastSlash = config.Topic.LastIndexOf('/');
-                root = config.Topic.Substring(0, lastSlash);
+                root = config.Topic[..lastSlash];
             }
             else
             {
@@ -214,7 +194,7 @@ namespace Iviz.Controllers
             }
 
             interactiveMarkers.Clear();
-            Publisher.Stop();
+            Publisher?.Stop();
 
             node.DestroySelf();
         }
@@ -227,7 +207,7 @@ namespace Iviz.Controllers
             Publisher?.Reset();
         }
 
-        void HandlerUpdate([NotNull] InteractiveMarkerUpdate msg)
+        void HandlerUpdate(InteractiveMarkerUpdate msg)
         {
             if (msg.Type == InteractiveMarkerUpdate.KEEP_ALIVE)
             {
@@ -256,17 +236,17 @@ namespace Iviz.Controllers
             }
         }
 
-        void HandlerUpdateFull([NotNull] InteractiveMarkerInit msg)
+        void HandlerUpdateFull(InteractiveMarkerInit msg)
         {
             foreach (var marker in msg.Markers)
             {
                 CreateInteractiveMarker(marker);
             }
 
-            FullListener.Suspend();
+            FullListener?.Suspend();
         }
 
-        void CreateInteractiveMarker([NotNull] InteractiveMarker msg)
+        void CreateInteractiveMarker(InteractiveMarker msg)
         {
             string id = msg.Name;
             if (interactiveMarkers.TryGetValue(id, out InteractiveMarkerObject existingMarkerObject))
@@ -291,12 +271,12 @@ namespace Iviz.Controllers
             return gameObject.AddComponent<InteractiveMarkerObject>();
         }
 
-        static void DeleteMarkerObject([NotNull] InteractiveMarkerObject marker)
+        static void DeleteMarkerObject(InteractiveMarkerObject marker)
         {
             marker.DestroySelf();
         }
 
-        void UpdateInteractiveMarkerPose([NotNull] InteractiveMarkerPose msg)
+        void UpdateInteractiveMarkerPose(InteractiveMarkerPose msg)
         {
             string id = msg.Name;
             if (!interactiveMarkers.TryGetValue(id, out InteractiveMarkerObject im))
@@ -307,7 +287,7 @@ namespace Iviz.Controllers
             im.Set(msg.Header.FrameId, msg.Pose);
         }
 
-        void DestroyInteractiveMarker([NotNull] string id)
+        void DestroyInteractiveMarker(string id)
         {
             if (!interactiveMarkers.TryGetValue(id, out InteractiveMarkerObject interactiveMarker))
             {
@@ -319,13 +299,12 @@ namespace Iviz.Controllers
         }
 
         internal void OnInteractiveControlObjectMouseEvent(
-            [NotNull] string interactiveMarkerId, [NotNull] string controlId, [CanBeNull] string frameId,
+            string interactiveMarkerId, string controlId, string? frameId,
             in Pose relativeControlPose, in Vector3? position,
             MouseEventType eventType)
         {
-            InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
-            (
-                (feedSeq++, frameId),
+            var msg = new InteractiveMarkerFeedback(
+                (feedSeq++, frameId ?? ""),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
@@ -335,17 +314,17 @@ namespace Iviz.Controllers
                 position?.Unity2RosPoint() ?? Point.Zero,
                 position != null
             );
-            Publisher.Publish(msg);
+            Publisher?.Publish(msg);
             RosLogger.Debug($"{this}: ButtonFeedback Marker:{interactiveMarkerId} Type:{eventType}");
         }
 
         internal void OnInteractiveControlObjectMoved(
-            [NotNull] string interactiveMarkerId, [NotNull] string controlId,
-            [CanBeNull] string frameId, in Pose relativeControlPose)
+            string interactiveMarkerId, string controlId,
+            string? frameId, in Pose relativeControlPose)
         {
-            InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
+            var msg = new InteractiveMarkerFeedback
             (
-                (feedSeq++, frameId),
+                (feedSeq++, frameId ?? ""),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
@@ -355,17 +334,16 @@ namespace Iviz.Controllers
                 Point.Zero,
                 false
             );
-            Publisher.Publish(msg);
-            //Logger.Debug($"{this}: PoseFeedback Marker:{interactiveMarkerId} UnityPose:{relativeControlPose}");
+            Publisher?.Publish(msg);
         }
 
         internal void OnInteractiveControlObjectMenuSelect(
-            [NotNull] string interactiveMarkerId, [CanBeNull] string frameId,
+            string interactiveMarkerId, string? frameId,
             uint menuEntryId, in Pose relativeControlPose)
         {
-            InteractiveMarkerFeedback msg = new InteractiveMarkerFeedback
+            var msg = new InteractiveMarkerFeedback
             (
-                (feedSeq++, frameId),
+                (feedSeq++, frameId ?? ""),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 "",
@@ -375,7 +353,7 @@ namespace Iviz.Controllers
                 Point.Zero,
                 false
             );
-            Publisher.Publish(msg);
+            Publisher?.Publish(msg);
             RosLogger.Debug($"{this}: MenuFeedback Marker:{interactiveMarkerId} Entry:{menuEntryId}");
         }
 

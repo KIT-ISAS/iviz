@@ -1,40 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
+﻿using System.Collections.Generic;
 using System.Text;
+using Iviz.Common;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs;
-using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace Iviz.App
 {
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum ARMarkerAction
-    {
-        None,
-        Publish,
-        Origin
-    }
-
-    [DataContract]
-    public sealed class ARExecutableMarker : JsonToString
-    {
-        [DataMember] public ARMarkerType Type { get; set; }
-        [DataMember] public ARMarkerAction Action { get; set; }
-        [DataMember, NotNull] public string Code { get; set; } = "";
-        [DataMember] public float SizeInMm { get; set; }
-    }
-
-    [DataContract]
-    public sealed class ARMarkersConfiguration : JsonToString
-    {
-        [DataMember] public float MaxMarkerDistanceInM { get; set; } = 0.5f;
-        [DataMember, NotNull] public ARExecutableMarker[] Markers { get; set; } = Array.Empty<ARExecutableMarker>();
-    }
 
     public sealed class ARMarkerDialogData : DialogData
     {

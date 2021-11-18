@@ -1,5 +1,7 @@
+using System.Threading;
 using Iviz.App.ARDialogs;
 using Iviz.Controllers;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
@@ -9,16 +11,14 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class ClickedPoseHighlighter : DisplayWrapperResource
+    public class ClickedPoseHighlighter : MonoBehaviour, IDisplay, IRecyclable
     {
-        const float HighlightDuration = 1.0f;
-
         MeshMarkerResource flatSphere;
         Tooltip tooltip;
+        [CanBeNull] CancellationTokenSource tokenSource;
 
-        float? highlightFrameStart;
-
-        protected override IDisplay Display => flatSphere;
+        Transform mTransform;
+        [NotNull] Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         void Awake()
         {
@@ -27,16 +27,15 @@ namespace Iviz.Displays
             flatSphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, Transform);
             flatSphere.ShadowsEnabled = false;
             flatSphere.EmissiveColor = Color.white;
-            flatSphere.Layer = LayerType.IgnoreRaycast;
 
             tooltip = ResourcePool.RentDisplay<Tooltip>(Transform);
-            tooltip.Layer = LayerType.IgnoreRaycast;
-            tooltip.UseAnimation = false;
+            
+            Layer = LayerType.IgnoreRaycast;
         }
 
         public void HighlightPose(in Pose absolutePose)
         {
-            highlightFrameStart = Time.time;
+            //highlightFrameStart = Time.time;
             flatSphere.Color = Color.white.WithAlpha(0.3f);
             tooltip.CaptionColor = Color.white;
             tooltip.BackgroundColor = Resource.Colors.HighlighterBackground;
@@ -65,35 +64,51 @@ namespace Iviz.Displays
             string pz = pZ.ToString("#,0.0", UnityUtils.Culture);
 
             tooltip.Caption = $"{px}, {py}, {pz}";
+
+            tokenSource = new CancellationTokenSource();
+            Animator.Spawn(tokenSource.Token, 1.0f, UpdateFrame);
         }
 
-        void Update()
+        void UpdateFrame(float t)
         {
-            if (highlightFrameStart == null)
+            if (t >= 1)
             {
-                return;
-            }
-
-            float srcAlpha = 1 - (Time.time - highlightFrameStart.Value) / HighlightDuration;
-            if (srcAlpha < 0)
-            {
-                highlightFrameStart = null;
                 this.ReturnToPool();
                 return;
             }
 
-            float alpha = Mathf.Sqrt(srcAlpha);
+            float alpha = Mathf.Sqrt(1 - t);
             tooltip.CaptionColor = Color.white.WithAlpha(alpha);
             tooltip.BackgroundColor = Resource.Colors.HighlighterBackground.WithAlpha(alpha);
             flatSphere.Color = Color.white.WithAlpha(0.3f * alpha);
         }
 
-        public override void Suspend()
+        public void Suspend()
         {
-            highlightFrameStart = null;
+            tokenSource?.Cancel();
+            tokenSource = null;
         }
 
-        public override void SplitForRecycle()
+        public bool Visible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
+        }
+
+        public int Layer
+        {
+            get => gameObject.layer;
+            set
+            {
+                gameObject.layer = value;
+                flatSphere.Layer = value;
+                tooltip.Layer = value;
+            } 
+        }
+        
+        public Bounds? Bounds => flatSphere.Bounds;
+        
+        public void SplitForRecycle()
         {
             flatSphere.ShadowsEnabled = true;
             flatSphere.EmissiveColor = Color.black;

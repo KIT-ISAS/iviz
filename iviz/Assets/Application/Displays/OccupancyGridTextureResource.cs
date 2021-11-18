@@ -1,10 +1,9 @@
+#nullable enable
+
 using System;
-using Iviz.Controllers;
+using Iviz.Common;
 using Iviz.Core;
-using Iviz.Msgs;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -14,34 +13,35 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshRenderer))]
     public sealed class OccupancyGridTextureResource : MarkerResourceWithColormap
     {
-        [CanBeNull] static Texture2D atlasLarge;
+        static readonly int AtlasTex = Shader.PropertyToID("_AtlasTex");
+
+        static Texture2D? atlasLarge;
+        static Texture2D? atlasLargeFlipped;
 
         static AppAssetHolder AssetHolder =>
             UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
-        
-        [NotNull]
+
         static Texture2D AtlasLarge => (atlasLarge != null)
             ? atlasLarge
             : atlasLarge = AssetHolder.AtlasLarge;
 
-        [CanBeNull] static Texture2D atlasLargeFlipped;
-
-        [NotNull]
         static Texture2D AtlasLargeFlipped => (atlasLargeFlipped != null)
             ? atlasLargeFlipped
             : atlasLargeFlipped = AssetHolder.AtlasLargeFlip;
 
-        static readonly int AtlasTex = Shader.PropertyToID("_AtlasTex");
+        [SerializeField] Texture2D? texture = null;
+        [SerializeField] MeshRenderer? meshRenderer = null;
 
-        [SerializeField] Texture2D texture = null;
-        Material material;
-        [NotNull] sbyte[] buffer = Array.Empty<sbyte>();
+        Material? material;
+        sbyte[] buffer = Array.Empty<sbyte>();
         uint? previousHash;
+        bool newFlipMinMax;
+        
+        Material Material => material != null
+            ? material
+            : material = Resource.Materials.OccupancyGridTexture.Instantiate();
 
-        [SerializeField] MeshRenderer meshRenderer = null;
-
-        [NotNull]
-        MeshRenderer MeshRenderer => meshRenderer;
+        MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
 
         bool IsProcessing { get; set; }
 
@@ -53,36 +53,32 @@ namespace Iviz.Displays
             set { }
         }
 
-        bool newFlipMinMax;
-
         public override bool FlipMinMax
         {
             get => newFlipMinMax;
             set
             {
                 newFlipMinMax = value;
-                material.SetTexture(AtlasTex, value ? AtlasLargeFlipped : AtlasLarge);
+                Material.SetTexture(AtlasTex, value ? AtlasLargeFlipped : AtlasLarge);
             }
         }
 
         protected override void Awake()
         {
-            material = Resource.Materials.OccupancyGridTexture.Instantiate();
-
-            MeshRenderer.sharedMaterial = material;
+            MeshRenderer.sharedMaterial = Material;
 
             base.Awake();
             Colormap = ColormapId.hsv;
             FlipMinMax = false;
         }
 
-        void EnsureSize(int sizeX, int sizeY)
+        Texture2D EnsureSize(int sizeX, int sizeY)
         {
             if (texture != null)
             {
                 if (texture.width == sizeX && texture.height == sizeY)
                 {
-                    return;
+                    return texture;
                 }
 
                 Destroy(texture);
@@ -94,25 +90,20 @@ namespace Iviz.Displays
                 filterMode = FilterMode.Point,
                 wrapMode = TextureWrapMode.Clamp,
             };
-            material.mainTexture = texture;
+            Material.mainTexture = texture;
+
+            return texture;
         }
 
-        public void Set([NotNull] sbyte[] values, float cellSize, int numCellsX, int numCellsY,
-            OccupancyGridResource.Rect? inBounds, Pose pose)
+        public void Set(sbyte[] values, float cellSize, int numCellsX, OccupancyGridResource.Rect bounds, Pose pose)
         {
             if (values == null)
             {
                 throw new ArgumentNullException(nameof(values));
             }
 
-            if (values.Length < numCellsX * numCellsY)
-            {
-                throw new ArgumentException("Values argument is too small", nameof(values));
-            }
-
             IsProcessing = true;
 
-            var bounds = inBounds ?? new OccupancyGridResource.Rect(0, numCellsX, 0, numCellsY);
             int segmentWidth = bounds.Width;
             int segmentHeight = bounds.Height;
 
@@ -157,23 +148,22 @@ namespace Iviz.Displays
             {
                 MeshRenderer.enabled = true;
 
-                Transform mTransform = transform;
-                //Vector3 rosCenter = new Vector3(width / 2 - cellSize / 2, height / 2 - cellSize / 2, 0);
-                Vector3 rosCenter =
-                    new Vector3(bounds.XMax + bounds.XMin - 1, bounds.YMax + bounds.YMin - 1, 0) * (cellSize / 2);
+                var mTransform = transform;
+                var rosCenter = new Vector3(
+                    bounds.XMax + bounds.XMin - 1,
+                    bounds.YMax + bounds.YMin - 1,
+                    0) * (cellSize / 2);
                 rosCenter.z += 0.001f;
 
-                Pose offset = new Pose(rosCenter.Ros2Unity(), Quaternion.Euler(0, 90, 0));
-                Pose newPose = pose.Multiply(offset);
+                var offset = new Pose(rosCenter.Ros2Unity(), Quaternion.Euler(0, 90, 0));
+                var newPose = pose.Multiply(offset);
                 mTransform.SetLocalPose(newPose);
                 mTransform.localScale = new Vector3(totalHeight, totalWidth, 1).Ros2Unity().Abs();
 
-                EnsureSize(segmentWidth, segmentHeight);
-                var array = texture.GetRawTextureData<sbyte>();
-                //Debug.Log("Native array: " + array.Length);
-
-                array.CopyFrom(buffer);
-                texture.Apply(false);
+                var validatedTexture = EnsureSize(segmentWidth, segmentHeight);
+                validatedTexture.GetRawTextureData<sbyte>().CopyFrom(buffer);
+                validatedTexture.Apply(false);
+                
                 IsProcessing = false;
             });
         }
@@ -193,13 +183,13 @@ namespace Iviz.Displays
                     for (int u = bounds.XMin; u < bounds.XMax; u++, srcPtr++, dstPtr++)
                     {
                         *dstPtr = *srcPtr;
-                        hash = Crc32Calculator.Update(hash, (byte) *srcPtr);
+                        hash = Crc32Calculator.Update(hash, (byte)*srcPtr);
                         numValidValues += (*srcPtr >> 8) + 1;
                     }
                 }
             }
 
-            return (hash, (int) numValidValues);
+            return (hash, (int)numValidValues);
         }
 
         void OnDestroy()
@@ -232,7 +222,7 @@ namespace Iviz.Displays
             MeshRenderer.enabled = true;
         }
 
-        static unsafe void CreateMipmaps([NotNull] sbyte[] array, int width, int height)
+        static unsafe void CreateMipmaps(sbyte[] array, int width, int height)
         {
             fixed (sbyte* srcPtr = array)
             {
@@ -251,7 +241,7 @@ namespace Iviz.Displays
                     width /= 2;
                     height /= 2;
                 }
-                
+
                 //Debug.Log("Mipmap used " + (srcMipmap - srcPtr) + " expected: " + array.Length);
             }
         }
@@ -278,7 +268,7 @@ namespace Iviz.Displays
             {
                 throw new InvalidOperationException("NYI!");
             }
-            
+
             for (int v = 0; v < height; v += 2)
             {
                 sbyte* row0 = src + width * v;
@@ -289,7 +279,7 @@ namespace Iviz.Displays
                     int b = row0[1];
                     int c = row1[0];
                     int d = row1[1];
-                    *dst = (sbyte) Fuse(a, b, c, d);
+                    *dst = (sbyte)Fuse(a, b, c, d);
                 }
             }
         }
@@ -326,15 +316,12 @@ namespace Iviz.Displays
 
             int sum = valueA + valueB + valueC + valueD;
             */
-            switch (numValid)
+            return numValid switch
             {
-                case 2:
-                    return sum >> 1; // sum / 2
-                case 3:
-                    return (sum * 21845) >> 16; // sum * (65536/3) / 65536
-                default:
-                    return sum >> 2; // sum / 4
-            }
+                2 => sum >> 1, // sum / 2
+                3 => (sum * 21845) >> 16, // sum * (65536/3) / 65536
+                _ => sum >> 2
+            };
         }
     }
 }

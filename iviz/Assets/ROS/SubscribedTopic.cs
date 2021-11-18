@@ -132,13 +132,13 @@ namespace Iviz.Ros
             Subscriber = null;
         }
 
-        void Callback(in T msg, IRosReceiver _)
+        void Callback(in T msg, IRosReceiver receiver)
         {
             foreach (var listener in listeners)
             {
                 try
                 {
-                    listener.EnqueueMessage(in msg);
+                    listener.EnqueueMessage(in msg, receiver);
                 }
                 catch (Exception e)
                 {

@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.App;
 using Iviz.App.ARDialogs;
+using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.MarkerDetection;

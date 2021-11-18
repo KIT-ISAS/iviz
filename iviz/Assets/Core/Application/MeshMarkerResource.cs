@@ -15,7 +15,7 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
     [RequireComponent(typeof(BoxCollider))]
-    public class MeshMarkerResource : MarkerResource, ISupportsTint, ISupportsAROcclusion, ISupportsPbr
+    public class MeshMarkerResource : MarkerResource, ISupportsColor, ISupportsTint, ISupportsAROcclusion, ISupportsPbr
     {
         static readonly int MainTex = Shader.PropertyToID("_MainTex");
 
@@ -39,6 +39,15 @@ namespace Iviz.Displays
 
         MeshFilter MeshFilter => meshFilter != null ? meshFilter : meshFilter = GetComponent<MeshFilter>();
 
+        public new Bounds Bounds
+        {
+            get => new(BoxCollider.center, BoxCollider.size);
+            protected set
+            {
+                BoxCollider.center = value.center;
+                BoxCollider.size = value.size;
+            }
+        }
 
         public Texture2D? DiffuseTexture
         {
@@ -120,11 +129,11 @@ namespace Iviz.Displays
             set
             {
                 shadowsEnabled = value;
-                MainRenderer.shadowCastingMode = value ? ShadowCastingMode.On : ShadowCastingMode.Off;   
-                MainRenderer.receiveShadows = value;   
+                MainRenderer.shadowCastingMode = value ? ShadowCastingMode.On : ShadowCastingMode.Off;
+                MainRenderer.receiveShadows = value;
             }
         }
-        
+
         public Mesh Mesh
         {
             get => MeshFilter.sharedMesh;
@@ -141,7 +150,7 @@ namespace Iviz.Displays
                 && sharedMaterial.HasProperty(MainTex)
                 && sharedMaterial.mainTexture != null)
             {
-                diffuseTexture = (Texture2D) sharedMaterial.mainTexture;
+                diffuseTexture = (Texture2D)sharedMaterial.mainTexture;
             }
 
             Color = color;
@@ -256,6 +265,7 @@ namespace Iviz.Displays
             SetEffectiveColor();
         }
 
+#if UNITY_EDITOR
         // should only be used by the asset saver!
         public void SetMaterialValuesDirect(Texture2D texture, Color emissiveColor, Color color, Color tint)
         {
@@ -264,5 +274,6 @@ namespace Iviz.Displays
             this.color = color;
             this.tint = tint;
         }
+#endif
     }
 }

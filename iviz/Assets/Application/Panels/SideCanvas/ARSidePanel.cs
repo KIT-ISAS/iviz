@@ -1,5 +1,6 @@
 using System;
 using Iviz.Controllers;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -27,13 +28,9 @@ namespace Iviz.App
 
         [SerializeField] PopupButton reset = null;
 
-        //[SerializeField] PopupButton pin;
-        //[SerializeField] PopupButton meshVisible;
         [SerializeField] PopupButton meshEnabled = null;
-
         [SerializeField] PopupButton meshReset = null;
 
-        //[SerializeField] PopupButton meshPing;
         [SerializeField] PopupButton qrEnabled = null;
         [SerializeField] PopupButton arucoEnabled = null;
         [SerializeField] PopupButton occlusionEnabled = null;

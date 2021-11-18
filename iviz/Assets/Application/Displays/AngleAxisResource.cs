@@ -1,19 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#nullable enable
+
 using Iviz.Core;
 using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class AngleAxisResource : DisplayWrapperResource, ISupportsTint
+    public sealed class AngleAxisResource : DisplayWrapperResource, ISupportsTint, IRecyclable
     {
-        readonly NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
+        readonly NativeList<LineWithColor> lines = new();
 
         Color color;
-        LineResource resource;
+        LineResource? resource;
 
-        protected override IDisplay Display => resource;
+        LineResource Resource =>
+            resource != null ? resource : (resource = ResourcePool.RentDisplay<LineResource>(transform));
+        
+        protected override IDisplay Display => Resource;
 
         public Color Color
         {
@@ -27,7 +30,7 @@ namespace Iviz.Displays
                     lines[i] = new LineWithColor(prevLine.A, prevLine.B, color);
                 }
 
-                resource.Set(lines, color.a < 1);
+                Resource.Set(lines, color.a < 1);
             }
         }
 
@@ -38,21 +41,20 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            resource = ResourcePool.RentDisplay<LineResource>(transform);
-            resource.ElementScale = 0.01f;
+            Resource.ElementScale = 0.01f;
             Color = Color.yellow;
             Layer = LayerType.IgnoreRaycast;
         }
 
         public void Reset()
         {
-            resource.Visible = false;
+            Resource.Visible = false;
         }
 
         public Color Tint
         {
-            get => resource.Tint;
-            set => resource.Tint = value;
+            get => Resource.Tint;
+            set => Resource.Tint = value;
         }
 
         public void Set(in Quaternion q, float scale = 0.3f)
@@ -80,11 +82,11 @@ namespace Iviz.Displays
             if (Mathf.Approximately(angle, 0) ||
                 Mathf.Approximately(axis.MagnitudeSq(), 0))
             {
-                resource.Visible = false;
+                Resource.Visible = false;
                 return;
             }
 
-            resource.Visible = true;
+            Resource.Visible = true;
 
             angle *= -1;
 
@@ -114,20 +116,26 @@ namespace Iviz.Displays
 
             lines.Add(new LineWithColor(Vector3.zero, 1.2f * v0, Color));
 
+            const float scaleFromAngle = 0.02f;
+
             for (int i = 1; i <= n; i++)
             {
                 float a = i / (float) n * angle;
                 float ax = Mathf.Cos(a);
                 float ay = Mathf.Sin(a);
                 v1 = ax * dirx + ay * diry;
-                //float iScale = 1.01f;
-                v1 *= 1 + a * 0.02f;
+                v1 *= 1 + a * scaleFromAngle;
                 lines.Add(new LineWithColor(v0, v1, Color));
                 v0 = v1;
             }
 
             lines.Add(new LineWithColor(Vector3.zero, 1.2f * v1, Color));
-            resource.Set(lines, Color.a < 1);
+            Resource.Set(lines, Color.a < 1);
         }
+        
+        public void SplitForRecycle()
+        {
+            resource.ReturnToPool();
+        }        
     }
 }

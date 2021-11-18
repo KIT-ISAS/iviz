@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text;
 using Iviz.App;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.VisualizationMsgs;

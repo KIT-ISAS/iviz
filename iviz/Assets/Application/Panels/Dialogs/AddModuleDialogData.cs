@@ -1,14 +1,15 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
 using System.Linq;
+using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Tools;
-using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public sealed class AddModuleDialogData : DialogData
     {
-        static readonly List<(string Caption, ModuleType Module)> Modules = new List<(string, ModuleType)>
+        static readonly (string Caption, ModuleType Module)[] Modules =
         {
             ("<b>AugmentedReality</b>\nManager for augmented reality", ModuleType.AugmentedReality),
             ("<b>Robot</b>\nRobot from the parameter server", ModuleType.Robot),
@@ -23,7 +24,7 @@ namespace Iviz.App
             ModuleType.Joystick
         };
 
-        [NotNull] readonly ItemListDialogContents itemList;
+        readonly ItemListDialogContents itemList;
         public override IDialogPanelContents Panel => itemList;
 
         public AddModuleDialogData()
@@ -53,7 +54,7 @@ namespace Iviz.App
         {
             var moduleData = ModuleListPanel.CreateModule(Modules[index].Module);
             Close();
-            
+
             if (moduleData is not ARModuleData)
             {
                 moduleData.ShowPanel();

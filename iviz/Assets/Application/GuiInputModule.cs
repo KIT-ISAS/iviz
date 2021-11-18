@@ -3,15 +3,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Common;
 using Iviz.Controllers;
+using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Displays;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.Rendering.PostProcessing;
+using Pose = UnityEngine.Pose;
+using Quaternion = UnityEngine.Quaternion;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
+using Transform = UnityEngine.Transform;
+using Vector3 = UnityEngine.Vector3;
 
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
 // ReSharper disable HeuristicUnreachableCode
@@ -80,6 +88,9 @@ namespace Iviz.App
 
         static Camera MainCamera => Settings.MainCamera;
 
+        Leash? leash;
+        Leash Leash => leash != null ? leash : (leash = ResourcePool.RentDisplay<Leash>());
+
         public event Action<ClickInfo>? PointerDown;
         public event Action<ClickInfo>? ShortClick;
         public event Action<ClickInfo>? LongClick;
@@ -128,6 +139,8 @@ namespace Iviz.App
                 draggedObject?.OnEndDragging();
                 draggedObject = value;
                 draggedObject?.OnStartDragging();
+
+                Leash.Visible = draggedObject != null;
             }
         }
 
@@ -140,6 +153,12 @@ namespace Iviz.App
         void Awake()
         {
             EnhancedTouchSupport.Enable();
+            Leash.Color = Color.white.WithAlpha(0.75f);
+        }
+
+        void OnDestroy()
+        {
+            TfListener.Instance.ResetFrames -= OnResetFrames;
         }
 
         void Start()
@@ -162,6 +181,8 @@ namespace Iviz.App
             mainLight = GameObject.Find("MainLight")?.GetComponent<Light>();
 
             StartOrbiting();
+
+            ModuleListPanel.CallAfterInitialized(() => TfListener.Instance.ResetFrames += OnResetFrames);
         }
 
         void LateUpdate()
@@ -231,6 +252,12 @@ namespace Iviz.App
             GameThread.EveryFrame += UpdateEvenIfInactive;
         }
 
+        void OnResetFrames()
+        {
+            CameraViewOverride = null;
+            OrbitCenterOverride = null;
+        }
+
         public int SunDirection
         {
             get => config.SunDirection;
@@ -264,9 +291,9 @@ namespace Iviz.App
             set
             {
                 config.QualityInView = value;
-                
+
                 QualityType qualityToUse = Settings.IsHololens ? QualityType.Low : value;
-                
+
                 if (ARController.IsActive)
                 {
                     return;
@@ -416,24 +443,19 @@ namespace Iviz.App
 
                 prevPointerDown |= altPointerIsDown;
 
-                //pointerIsDown = Input.touchCount == 1;
-                //altPointerIsDown = Input.touchCount == 2;
                 pointerIsDown = activeTouches.Count == 1;
                 altPointerIsDown = activeTouches.Count == 2;
 
                 if (altPointerIsDown)
                 {
-                    //altPointerPosition = (Input.GetTouch(0).position + Input.GetTouch(1).position) / 2;
                     altPointerPosition = (activeTouches[0].screenPosition + activeTouches[1].screenPosition) / 2;
                 }
 
                 distancePointerAndAlt = altPointerIsDown
-                    //? Vector2.Distance(Input.GetTouch(0).position, Input.GetTouch(1).position)
                     ? Vector2.Distance(activeTouches[0].screenPosition, activeTouches[1].screenPosition)
                     : 0;
                 if (pointerIsDown || altPointerIsDown)
                 {
-                    //pointerPosition = Input.GetTouch(0).position;
                     pointerPosition = activeTouches[0].screenPosition;
 
                     if (!prevPointerDown)
@@ -441,19 +463,16 @@ namespace Iviz.App
                         pointerIsOnGui = IsPointerOnGui(pointerPosition) ||
                                          altPointerIsDown && IsPointerOnGui(altPointerPosition);
                         pointerDownTime = Time.time;
-                        //pointerDownStart = Input.GetTouch(0).position;
                         pointerDownStart = activeTouches[0].screenPosition;
                     }
                 }
             }
             else
             {
-                //pointerIsDown = Input.GetMouseButton(1);
                 pointerIsDown = Mouse.current.rightButton.isPressed;
 
                 if (pointerIsDown)
                 {
-                    //pointerPosition = Input.mousePosition;
                     pointerPosition = Mouse.current.position.ReadValue();
 
                     if (!prevPointerDown)
@@ -469,6 +488,7 @@ namespace Iviz.App
                 }
             }
 
+            // are we dragging?
             if (!pointerIsDown)
             {
                 DraggedObject = null;
@@ -476,29 +496,40 @@ namespace Iviz.App
 
             if (DraggedObject != null)
             {
-                DraggedObject.OnPointerMove(pointerPosition);
+                Ray pointerRay = Settings.MainCamera.ScreenPointToRay(pointerPosition);
+                DraggedObject.OnPointerMove(pointerRay);
+                Leash.Set(pointerRay, DraggedObject.ReferencePoint);
+                return;
             }
-            else if (!pointerIsOnGui)
-            {
-                bool anyPointerDown = pointerIsDown || altPointerIsDown;
-                if (!prevPointerDown && anyPointerDown)
-                {
-                    PointerDown?.Invoke(new ClickInfo(pointerPosition));
-                }
 
-                if (prevPointerDown
-                    && !anyPointerDown
-                    && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
+            // check if we are clicking something interesting
+            if (pointerIsOnGui)
+            {
+                return;
+            }
+
+            bool anyPointerDown = pointerIsDown || altPointerIsDown;
+            if (!prevPointerDown && anyPointerDown)
+            {
+                var clickInfo = new ClickInfo(pointerPosition);
+                PointerDown?.Invoke(clickInfo);
+            }
+
+            if (prevPointerDown
+                && !anyPointerDown
+                && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
+            {
+                var clickInfo = new ClickInfo(pointerPosition);
+                float timeDown = Time.time - pointerDownTime;
+                if (timeDown < shortClickTime)
                 {
-                    float timeDown = Time.time - pointerDownTime;
-                    if (timeDown < shortClickTime)
-                    {
-                        ShortClick?.Invoke(new ClickInfo(pointerPosition));
-                    }
-                    else if (timeDown > longClickTime)
-                    {
-                        LongClick?.Invoke(new ClickInfo(pointerPosition));
-                    }
+                    ShortClick?.Invoke(clickInfo);
+                    OnClick(clickInfo, true);
+                }
+                else if (timeDown > longClickTime)
+                {
+                    LongClick?.Invoke(clickInfo);
+                    OnClick(clickInfo, false);
                 }
             }
         }
@@ -544,15 +575,9 @@ namespace Iviz.App
                 return;
             }
 
-            Vector2 pointerDiff;
-            if (pointerIsAlreadyMoving)
-            {
-                pointerDiff = pointerPosition - lastPointerPosition;
-            }
-            else
-            {
-                pointerDiff = Vector2.zero;
-            }
+            var pointerDiff = pointerIsAlreadyMoving
+                ? pointerPosition - lastPointerPosition
+                : Vector2.zero;
 
             lastPointerPosition = pointerPosition;
             pointerIsAlreadyMoving = true;
@@ -562,16 +587,13 @@ namespace Iviz.App
 
             orbitX += pointerDiff.x * orbitCoeff;
             orbitY -= pointerDiff.y * orbitCoeff;
-            if (orbitY > 90)
-            {
-                orbitY = 90;
-            }
 
-            if (orbitY < -90)
+            orbitY = orbitY switch
             {
-                orbitY = -90;
-            }
-
+                > 90 => 90,
+                < -90 => -90,
+                _ => orbitY
+            };
 
             if (Keyboard.current[Key.W].isPressed)
             {
@@ -750,16 +772,13 @@ namespace Iviz.App
                 float distanceToFrame = (Transform.position - position).magnitude;
                 float zoomRadius = Mathf.Min(Mathf.Max(distanceToFrame, minDistanceLookAt), maxDistanceLookAt);
                 lookAtCameraTargetPose = lookAtCameraStartPose.WithPosition(position - Transform.forward * zoomRadius);
-                //Transform.position = position - Transform.forward * 3;
             }
             else
             {
                 orbitCenter = position;
                 orbitRadius = Mathf.Min(Mathf.Max(orbitRadius, minDistanceLookAt), maxDistanceLookAt);
-                lookAtCameraTargetPose =
-                    lookAtCameraStartPose.WithPosition(-orbitRadius * (Transform.rotation * Vector3.forward) +
-                                                       orbitCenter);
-                //Transform.position = -orbitRadius * (Transform.rotation * Vector3.forward) + orbitCenter;
+                lookAtCameraTargetPose = lookAtCameraStartPose.WithPosition(
+                    -orbitRadius * (Transform.rotation * Vector3.forward) + orbitCenter);
             }
         }
 
@@ -768,12 +787,12 @@ namespace Iviz.App
             var pVelocity = new Vector3Int();
             if (Keyboard.current[Key.W].isPressed)
             {
-                pVelocity += new Vector3Int(0, 0, 1);
+                pVelocity += Vector3Int.forward;
             }
 
             if (Keyboard.current[Key.S].isPressed)
             {
-                pVelocity += new Vector3Int(0, 0, -1);
+                pVelocity += Vector3Int.back;
             }
 
             if (Keyboard.current[Key.A].isPressed)
@@ -797,6 +816,65 @@ namespace Iviz.App
             }
 
             return pVelocity;
+        }
+
+        uint tapSeq;
+
+        void OnClick(ClickInfo clickInfo, bool isShortClick)
+        {
+            if (clickInfo.TryGetRaycastResults(out var hitResults))
+            {
+                Vector3 hitPoint = hitResults[0].Position;
+                bool anyHighlighted = false;
+                foreach (var (hitObject, position, _) in hitResults)
+                {
+                    if (Vector3.Distance(position, hitPoint) > 1
+                        || !TryGetHighlightable(hitObject, out var toHighlight))
+                    {
+                        continue;
+                    }
+
+                    toHighlight.Highlight();
+                    anyHighlighted = true;
+                }
+
+                if (anyHighlighted)
+                {
+                    return;
+                }
+            }
+
+            Pose poseToHighlight;
+            if (clickInfo.TryGetARRaycastResults(out var arHitResults))
+            {
+                poseToHighlight = arHitResults[0].CreatePose();
+            }
+            else if (hitResults.Length != 0)
+            {
+                poseToHighlight = hitResults[0].CreatePose();
+            }
+            else
+            {
+                return;
+            }
+
+            ResourcePool.RentDisplay<ClickedPoseHighlighter>().HighlightPose(poseToHighlight);
+            if (!isShortClick)
+            {
+                var poseStamped = new PoseStamped(
+                    (tapSeq++, TfListener.FixedFrameId),
+                    TfListener.RelativePoseToFixedFrame(poseToHighlight).Unity2RosPose()
+                );
+                TfListener.Instance.TapPublisher.Publish(poseStamped);
+            }
+        }
+
+
+        static bool TryGetHighlightable(GameObject gameObject, out IHighlightable h)
+        {
+            Transform parent;
+            return gameObject.TryGetComponent(out h) ||
+                   (parent = gameObject.transform.parent) != null && parent.TryGetComponent(out h);
         }
     }
 }

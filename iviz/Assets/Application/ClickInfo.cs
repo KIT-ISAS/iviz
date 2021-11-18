@@ -13,7 +13,7 @@ using UnityEngine.XR.ARFoundation;
 
 namespace Iviz.App
 {
-    public readonly struct ClickHitResult
+    public sealed class ClickHitResult
     {
         public GameObject GameObject { get; }
         public Vector3 Position { get; }
@@ -40,9 +40,9 @@ namespace Iviz.App
             var side = Mathf.Approximately(Vector3.forward.Cross(Normal).MagnitudeSq(), 0)
                 ? Vector3.right
                 : Vector3.forward;
-            
+
             var forward = side.Cross(Normal);
-            
+
             return new Pose(Position, Quaternion.LookRotation(forward, Normal));
         }
 
@@ -57,7 +57,7 @@ namespace Iviz.App
         ClickHitResult[]? unityHits;
 
         public ClickInfo(in Vector2 cursorPosition) => this.cursorPosition = cursorPosition;
-        
+
         public bool TryGetARRaycastResults(out ClickHitResult[] hits)
         {
             if (arHits != null)
@@ -97,7 +97,8 @@ namespace Iviz.App
             var raycaster = Settings.MainCamera.GetComponent<PhysicsRaycaster>();
             var oldMask = raycaster.eventMask;
 
-            raycaster.eventMask = oldMask | (1 << LayerType.Default) | (1 << LayerType.Collider);
+            raycaster.eventMask = (oldMask | (1 << LayerType.Default) | (1 << LayerType.Collider)) 
+                                  & ~(1 << LayerType.Clickable);
 
             var results = new List<RaycastResult>();
             var eventData = new PointerEventData(null)

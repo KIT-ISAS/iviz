@@ -1,12 +1,12 @@
 using System.Collections.Generic;
+using Iviz.Common;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace Iviz.App
+namespace Iviz.Displays
 {
     public sealed class DisplayTesterBehaviour : MonoBehaviour
     {

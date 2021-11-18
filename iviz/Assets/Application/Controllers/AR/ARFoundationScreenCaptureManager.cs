@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Common;
 using Iviz.Core;
 using Iviz.Tools;
 using Unity.Collections;
@@ -27,14 +28,24 @@ namespace Iviz.Controllers
             {
                 if (intrinsic != null)
                 {
-                    return intrinsic.Value;
+                    return intrinsic;
                 }
 
-                intrinsic = (cameraManager.TryGetIntrinsics(out var intrinsics)
-                    ? new Intrinsic(intrinsics.focalLength.x, intrinsics.principalPoint.x,
-                        intrinsics.focalLength.y, intrinsics.principalPoint.y)
-                    : default);
-                return intrinsic.Value;
+                if (cameraManager.TryGetIntrinsics(out var intrinsics))
+                {
+                    return intrinsic = new Intrinsic(intrinsics.focalLength.x, intrinsics.principalPoint.x,
+                        intrinsics.focalLength.y, intrinsics.principalPoint.y);
+                }
+
+                // shouldn't happen
+                if (cameraManager.currentConfiguration is not { } configuration)
+                {
+                    throw new InvalidOperationException("AR subsystem is not set!");
+                }
+
+                const float fovInRad = 60;
+                return intrinsic = new Intrinsic(fovInRad, configuration.width, configuration.height);
+
             }
         }
 
@@ -271,7 +282,8 @@ namespace Iviz.Controllers
                     NativeArray<byte>.Copy(array, bytes, array.Length);
 
                     float scale = colorWidth == null ? 1 : width / (float)colorWidth.Value;
-                    var screenshot = new Screenshot(ScreenshotFormat.Mono8, width, height, Intrinsic.Scale(scale), pose, bytes);
+                    var screenshot = new Screenshot(ScreenshotFormat.Mono8, width, height, Intrinsic.Scale(scale), pose,
+                        bytes);
                     Task.Run(() =>
                     {
                         MirrorX<byte>(screenshot.Bytes, screenshot.Width, screenshot.Height);

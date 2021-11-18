@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Iviz.Common;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs.IvizCommonMsgs;

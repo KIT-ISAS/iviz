@@ -17,23 +17,6 @@ namespace Iviz.Displays
         public bool FlipWinding { get; set; }
 
         Mesh? mesh;
-        Bounds localBounds;
-
-        public Bounds LocalBounds
-        {
-            get => localBounds;
-            private set
-            {
-                localBounds = value;
-                if (!HasBoxCollider)
-                {
-                    return;
-                }
-
-                BoxCollider.center = localBounds.center;
-                BoxCollider.size = localBounds.size;
-            }
-        }
 
         void OnDestroy()
         {
@@ -47,7 +30,7 @@ namespace Iviz.Displays
         {
             base.Awake();
             Color = Color;
-            LocalBounds = LocalBounds;
+            Bounds = Bounds;
         }
 
         Mesh EnsureOwnMesh(int numPointsNeeded)
@@ -66,7 +49,7 @@ namespace Iviz.Displays
                 return mesh;
             }
 
-            Mesh tmpMesh = new Mesh
+            var tmpMesh = new Mesh
             {
                 indexFormat = indexFormat,
                 name = "MeshTrianglesResource Mesh"
@@ -95,7 +78,7 @@ namespace Iviz.Displays
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
-            Mesh ownMesh = EnsureOwnMesh(points.Length);
+            var ownMesh = EnsureOwnMesh(points.Length);
 
             ownMesh.Clear();
             ownMesh.SetVertices(points);
@@ -128,7 +111,7 @@ namespace Iviz.Displays
 
             ownMesh.RecalculateNormals();
 
-            LocalBounds = ownMesh.bounds;
+            Bounds = ownMesh.bounds;
         }
 
         public void Set(
@@ -155,7 +138,7 @@ namespace Iviz.Displays
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
-            Mesh ownMesh = EnsureOwnMesh(points.Length);
+            var ownMesh = EnsureOwnMesh(points.Length);
 
             ownMesh.Clear();
             ownMesh.SetVertices(points);
@@ -197,7 +180,7 @@ namespace Iviz.Displays
                 ownMesh.RecalculateTangents();
             }
             
-            LocalBounds = ownMesh.bounds;
+            Bounds = ownMesh.bounds;
         }
 
         public override void Suspend()

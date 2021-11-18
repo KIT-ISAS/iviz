@@ -1,34 +1,35 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Linq;
 using System.Runtime.Serialization;
-using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Roslib.Utils;
-using JetBrains.Annotations;
 using UnityEngine;
-using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.Controllers
 {
     [DataContract]
     public sealed class DepthCloudConfiguration : JsonToString, IConfiguration
     {
-        [DataMember, NotNull] public string ColorTopic { get; set; } = "";
+        [DataMember] public string ColorTopic { get; set; } = "";
 
-        [DataMember, NotNull] public string DepthTopic { get; set; } = "";
+        [DataMember] public string DepthTopic { get; set; } = "";
 
-        [DataMember, NotNull] public string Id { get; set; } = Guid.NewGuid().ToString();
+        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.DepthCloud;
         [DataMember] public bool Visible { get; set; } = true;
     }
 
     public sealed class DepthCloudController : IController, IHasFrame
     {
-        readonly DepthCloudConfiguration config = new DepthCloudConfiguration();
+        readonly DepthCloudConfiguration config = new();
         readonly FrameNode node;
         readonly DepthCloudResource projector;
         readonly ImageTexture depthImageTexture;
@@ -38,14 +39,14 @@ namespace Iviz.Controllers
         TextureFormat? lastDepthFormat;
 
         public IModuleData ModuleData { get; }
-        public TfFrame Frame => node.Parent;
+        public TfFrame? Frame => node.Parent;
 
-        [CanBeNull] public IListener DepthListener { get; private set; }
-        [CanBeNull] public Listener<CameraInfo> DepthInfoListener { get; private set; }
-        [CanBeNull] public IListener ColorListener { get; private set; }
+        Listener<CameraInfo>? depthInfoListener;
+        public IListener? DepthListener { get; private set; }
+        public IListener? ColorListener { get; private set; }
 
-        [NotNull] public Material ColorMaterial => colorImageTexture.Material;
-        [NotNull] public Material DepthMaterial => depthImageTexture.Material;
+        public Material ColorMaterial => colorImageTexture.Material;
+        public Material DepthMaterial => depthImageTexture.Material;
 
         public Vector2Int ColorImageSize => colorImageTexture.Texture != null
             ? new Vector2Int(colorImageTexture.Texture.width, colorImageTexture.Texture.height)
@@ -55,7 +56,7 @@ namespace Iviz.Controllers
             ? new Vector2Int(depthImageTexture.Texture.width, depthImageTexture.Texture.height)
             : Vector2Int.zero;
 
-        public DepthCloudController([NotNull] IModuleData moduleData)
+        public DepthCloudController(IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             depthImageTexture = new ImageTexture();
@@ -93,7 +94,6 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
         public DepthCloudConfiguration Config
         {
             get => config;
@@ -115,7 +115,6 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
         public string ColorTopic
         {
             get => config.ColorTopic;
@@ -141,7 +140,7 @@ namespace Iviz.Controllers
                 }
 
                 var topicInfos = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
-                string type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == colorTopic)?.Type;
+                string? type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == colorTopic)?.Type;
                 switch (type)
                 {
                     case Image.RosMessageType:
@@ -157,7 +156,6 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
         public string DepthTopic
         {
             get => config.DepthTopic;
@@ -171,8 +169,8 @@ namespace Iviz.Controllers
                 DepthListener?.Stop();
                 DepthListener = null;
 
-                DepthInfoListener?.Stop();
-                DepthInfoListener = null;
+                depthInfoListener?.Stop();
+                depthInfoListener = null;
 
                 string depthTopic = value.Trim();
                 config.DepthTopic = value;
@@ -183,15 +181,14 @@ namespace Iviz.Controllers
                 }
 
                 var topicInfos = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
-                string type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == depthTopic)?.Type;
+                string? type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == depthTopic)?.Type;
                 switch (type)
                 {
                     case Image.RosMessageType:
                         DepthListener = new Listener<Image>(depthTopic, DepthHandler);
                         break;
                     case CompressedImage.RosMessageType:
-                        DepthListener = new Listener<CompressedImage>(depthTopic, DepthHandlerCompressed)
-                            { MaxQueueSize = 1 };
+                        DepthListener = new Listener<CompressedImage>(depthTopic, DepthHandlerCompressed);
                         break;
                     default:
                         config.DepthTopic = "";
@@ -199,14 +196,13 @@ namespace Iviz.Controllers
                 }
 
                 int lastSlash = depthTopic.LastIndexOf('/');
-                string root = lastSlash != -1 ? depthTopic.Substring(0, lastSlash) : "";
+                string root = lastSlash != -1 ? depthTopic[..lastSlash] : "";
                 string infoTopic = $"{root}/camera_info";
 
-                DepthInfoListener = new Listener<CameraInfo>(infoTopic, InfoHandler, RosTransportHint.PreferUdp);
+                depthInfoListener = new Listener<CameraInfo>(infoTopic, InfoHandler, RosTransportHint.PreferUdp);
             }
         }
 
-        [NotNull]
         public string Description
         {
             get
@@ -231,7 +227,7 @@ namespace Iviz.Controllers
             }
         }
 
-        bool DepthHandler([NotNull] Image msg)
+        bool DepthHandler(Image msg)
         {
             if (DepthIsProcessing)
             {
@@ -258,7 +254,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool DepthHandlerCompressed([NotNull] CompressedImage msg)
+        bool DepthHandlerCompressed(CompressedImage msg)
         {
             if (DepthIsProcessing)
             {
@@ -297,7 +293,7 @@ namespace Iviz.Controllers
         {
             TextureFormat? format = depthImageTexture.Texture != null
                 ? depthImageTexture.Texture.format
-                : (TextureFormat?)null;
+                : null;
 
             if (format == lastDepthFormat)
             {
@@ -305,18 +301,15 @@ namespace Iviz.Controllers
             }
 
             lastDepthFormat = format;
-            switch (format)
+            depthImageTexture.IntensityBounds = format switch
             {
-                case TextureFormat.RFloat:
-                    depthImageTexture.IntensityBounds = new Vector2(0, 5);
-                    break;
-                case TextureFormat.R16:
-                    depthImageTexture.IntensityBounds = new Vector2(0, 5000 / 65535f);
-                    break;
-            }
+                TextureFormat.RFloat => new Vector2(0, 5),
+                TextureFormat.R16 => new Vector2(0, 5000 / 65535f),
+                _ => depthImageTexture.IntensityBounds
+            };
         }
 
-        bool ColorHandler([NotNull] Image msg)
+        bool ColorHandler(Image msg)
         {
             if (ColorIsProcessing)
             {
@@ -336,7 +329,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool ColorHandlerCompressed([NotNull] CompressedImage msg)
+        bool ColorHandlerCompressed(CompressedImage msg)
         {
             if (ColorIsProcessing)
             {
@@ -364,7 +357,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        void InfoHandler([NotNull] CameraInfo info)
+        void InfoHandler(CameraInfo info)
         {
             projector.Intrinsic = new Intrinsic(info.K);
         }

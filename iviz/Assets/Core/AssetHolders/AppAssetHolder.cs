@@ -69,6 +69,7 @@ namespace Iviz.Displays
         public Material OccupancyGridClipMat;
 
         public GameObject RoundedPlane;
+        public GameObject Leash;
 
         public AudioClip Click;
         public AudioClip Screenshot;

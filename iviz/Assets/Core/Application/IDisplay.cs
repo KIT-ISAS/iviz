@@ -27,8 +27,6 @@ namespace Iviz.Displays
         /// Gets or sets whether the display is visible. 
         /// </summary>
         bool Visible { get; set; }
-        
-        string Name { get; set; }
     }
     
     /// <summary>
@@ -39,7 +37,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Gets or sets whether the occlusion mode is active. 
         /// </summary>
-        bool OcclusionOnly { get; set; }
+        bool OcclusionOnly { set; }
     }
 
     /// <summary>
@@ -50,12 +48,18 @@ namespace Iviz.Displays
         /// <summary>
         /// Gets or sets the color tint.
         /// </summary>
-        Color Tint { get; set; }
+        Color Tint { set; }
+    }
+    
+    public interface ISupportsColor
+    {
+        Color Color { set; }
+        Color EmissiveColor { set; }
     }
     
     public interface ISupportsPbr
     {
-        float Metallic { get; set; }
-        float Smoothness { get; set; }
+        float Metallic { set; }
+        float Smoothness { set; }
     }    
 }

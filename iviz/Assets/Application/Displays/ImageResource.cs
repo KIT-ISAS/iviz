@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+
 using Iviz.Core;
 using UnityEngine;
 
@@ -6,20 +7,27 @@ namespace Iviz.Displays
 {
     public sealed class ImageResource : MarkerResource
     {
-        [SerializeField] GameObject front = null;
-        [SerializeField] Billboard billboard = null;
+        [SerializeField] MeshRenderer? front = null;
+        [SerializeField] Billboard? billboard = null;
         [SerializeField] float scale = 1;
 
+        ImageTexture? texture;
         Pose billboardStartPose;
-        ImageTexture texture;
         Vector3 offset;
 
-        public ImageTexture Texture
+        Billboard Billboard => billboard.AssertNotNull(nameof(billboard));
+        MeshRenderer Front => front.AssertNotNull(nameof(front));
+
+        public ImageTexture? Texture
         {
             get => texture;
             set
             {
-                if (texture != null) texture.TextureChanged -= OnTextureChanged;
+                if (texture != null)
+                {
+                    texture.TextureChanged -= OnTextureChanged;
+                }
+                
                 texture = value;
                 if (texture != null)
                 {
@@ -31,19 +39,19 @@ namespace Iviz.Displays
 
         public override int Layer
         {
-            get => billboard.gameObject.layer;
-            set => billboard.gameObject.layer = value;
+            get => Billboard.gameObject.layer;
+            set => Billboard.gameObject.layer = value;
         }
 
         public bool BillboardEnabled
         {
-            get => billboard.enabled;
+            get => Billboard.enabled;
             set
             {
-                billboard.enabled = value;
+                Billboard.enabled = value;
                 if (!value)
                 {
-                    billboard.transform.SetLocalPose(new Pose(Offset, billboardStartPose.rotation));
+                    Billboard.transform.SetLocalPose(new Pose(Offset, billboardStartPose.rotation));
                 }
             }
         }
@@ -54,7 +62,7 @@ namespace Iviz.Displays
             set
             {
                 offset = value;
-                billboard.transform.localPosition = value;
+                Billboard.transform.localPosition = value;
             }
         }
 
@@ -70,42 +78,34 @@ namespace Iviz.Displays
 
         float Width => Scale;
         float Height => Width * AspectRatio;
-        float AspectRatio => Texture == null || Texture.Width == 0 ? 1 : (float) Texture.Height / Texture.Width;
+        float AspectRatio => Texture == null || Texture.Width == 0 ? 1 : (float)Texture.Height / Texture.Width;
 
         protected override void Awake()
         {
-            BoxCollider = billboard.GetComponent<BoxCollider>();
+            BoxCollider = Billboard.GetComponent<BoxCollider>();
             base.Awake();
 
-            billboard.UseAbsoluteOffset = false;
-            billboardStartPose = billboard.transform.AsLocalPose();
+            Billboard.UseAbsoluteOffset = false;
+            billboardStartPose = Billboard.transform.AsLocalPose();
         }
 
         public void Set(int width, int height, int bpp, byte[] data, bool generateMipmaps = false)
         {
-            if (Texture == null)
-            {
-                Texture = new ImageTexture();
-            }
+            Texture ??= new ImageTexture();
 
-            string encoding;
-            switch (bpp)
+            string? encoding = bpp switch
             {
-                case 1:
-                    encoding = "mono8";
-                    break;
-                case 2:
-                    encoding = "mono16";
-                    break;
-                case 3:
-                    encoding = "rgb8";
-                    break;
-                case 4:
-                    encoding = "rgba8";
-                    break;
-                default:
-                    Debug.LogWarning("ImageResource: Set function could not find encoding!");
-                    return;
+                1 => "mono8",
+                2 => "mono16",
+                3 => "rgb8",
+                4 => "rgba8",
+                _ => null
+            };
+
+            if (encoding is null)
+            {
+                Debug.LogWarning("ImageResource: Set function could not find encoding!");
+                return;
             }
 
             Texture.Set(width, height, encoding, data.AsSegment(), generateMipmaps);
@@ -123,10 +123,10 @@ namespace Iviz.Displays
 
         void UpdateSides()
         {
-            billboard.transform.localScale = new Vector3(Width, Height, 1);
+            Billboard.transform.localScale = new Vector3(Width, Height, 1);
         }
 
-        void OnTextureChanged(Texture2D newTexture)
+        void OnTextureChanged(Texture2D? newTexture)
         {
             UpdateSides();
 
@@ -135,7 +135,10 @@ namespace Iviz.Displays
                 newTexture.wrapMode = TextureWrapMode.Clamp;
             }
 
-            front.GetComponent<MeshRenderer>().sharedMaterial = Texture.Material;
+            if (Texture != null)
+            {
+                Front.sharedMaterial = Texture.Material;
+            }
         }
     }
 }

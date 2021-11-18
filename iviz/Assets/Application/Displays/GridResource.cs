@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
+using Iviz.Common;
 using Iviz.Controllers;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
@@ -140,23 +142,13 @@ namespace Iviz.Displays
         {
             base.Awake();
 
-            /*
-            mesh = new Mesh {name = "Grid Mesh"};
-            GetComponent<MeshFilter>().sharedMesh = mesh;
-            meshRenderer = GetComponent<MeshRenderer>();
-            meshRenderer.sharedMaterial = Resource.Materials.Grid.Object;
-            meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            */
-            //meshRenderer.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
-
             interiorObject = Resource.Displays.Cube.Instantiate(transform);
             interiorObject.name = "Grid Interior";
             interiorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
             interiorObject.layer = LayerType.IgnoreRaycast;
             interiorRenderer = interiorObject.GetComponent<MeshRenderer>();
             interiorRenderer.sharedMaterial =
-                Settings.SettingsManager == null
-                || Settings.SettingsManager.QualityInView == QualityType.VeryLow
+                Settings.SettingsManager.QualityInView == QualityType.VeryLow
                     ? Resource.Materials.GridInteriorSimple.Object
                     : Resource.Materials.GridInterior.Object;
 
@@ -216,21 +208,23 @@ namespace Iviz.Displays
 
         void UpdatePosition(int x, int z, float offsetY)
         {
+            const float zPosForX = 3e-4f;
+            const float zPosForY = 2e-4f; // prevent z-fighting
+
             transform.localPosition = new Vector3(x, offsetY, z);
-
-
+            
             int baseHoriz = Mathf.FloorToInt((z + 5) / 10f) * 10;
             for (int i = 0; i < horizontals.Count; i++)
             {
                 float za = (i - (horizontals.Count - 1f) / 2) * 10;
-                horizontals[i].transform.localPosition = new Vector3(0, baseHoriz + za - z, -0.002f);
+                horizontals[i].transform.localPosition = new Vector3(0, baseHoriz + za - z, -zPosForX);
             }
 
             int baseVert = Mathf.FloorToInt((x + 5) / 10f) * 10;
             for (int i = 0; i < verticals.Count; i++)
             {
                 float xa = (i - (verticals.Count - 1f) / 2) * 10;
-                verticals[i].transform.localPosition = new Vector3(baseVert + xa - x, 0, -0.003f);
+                verticals[i].transform.localPosition = new Vector3(baseVert + xa - x, 0, -zPosForY);
             }
 
             lastX = x;
@@ -253,9 +247,9 @@ namespace Iviz.Displays
             {
                 while (horizontals.Count != size)
                 {
-                    horizontals[horizontals.Count - 1].ReturnToPool(Resource.Displays.Square);
+                    horizontals[^1].ReturnToPool(Resource.Displays.Square);
                     horizontals.RemoveAt(horizontals.Count - 1);
-                    verticals[verticals.Count - 1].ReturnToPool(Resource.Displays.Square);
+                    verticals[^1].ReturnToPool(Resource.Displays.Square);
                     verticals.RemoveAt(verticals.Count - 1);
                 }
             }

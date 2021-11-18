@@ -3,6 +3,8 @@
 using UnityEngine;
 using System;
 using System.Runtime.Serialization;
+using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Resources;
@@ -28,8 +30,6 @@ namespace Iviz.Controllers
         //[DataMember] public int NumberOfGridCells { get; set; } = 90;
         [DataMember] public bool InteriorVisible { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
-        //[DataMember] public bool PublishLongTapPosition { get; set; } = false;
-        //[DataMember] public string TapTopic { get; set; } = "~clicked_point";
         [DataMember] public bool HideInARMode { get; set; } = true;
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
@@ -42,7 +42,7 @@ namespace Iviz.Controllers
 
         public IModuleData ModuleData { get; }
 
-        readonly GridConfiguration config = new GridConfiguration();
+        readonly GridConfiguration config = new();
 
         public GridConfiguration Config
         {
@@ -61,7 +61,6 @@ namespace Iviz.Controllers
                 InteriorVisible = value.InteriorVisible;
                 FollowCamera = value.FollowCamera;
                 HideInARMode = value.HideInARMode;
-                //PublishLongTapPosition = value.PublishLongTapPosition;
                 Offset = value.Offset;
             }
         }
@@ -199,7 +198,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Offset = value;
-                node.transform.localPosition = ((Vector3) value).Ros2Unity();
+                node.transform.localPosition = ((Vector3)value).Ros2Unity();
                 UpdateMesh();
             }
         }
@@ -248,7 +247,7 @@ namespace Iviz.Controllers
             const int numberOfGridCells = 90;
             const float gridCellSize = 1;
             const float totalSize = numberOfGridCells * gridCellSize;
-            
+
             reflectionProbe.size = new Vector3(totalSize * 2, 20f, totalSize * 2);
             reflectionProbe.RenderProbe();
         }
@@ -266,10 +265,7 @@ namespace Iviz.Controllers
 
         public void OnSettingsChanged()
         {
-            if (Settings.SettingsManager != null)
-            {
-                reflectionProbe.backgroundColor = Settings.SettingsManager.BackgroundColor;
-            }
+            reflectionProbe.backgroundColor = Settings.SettingsManager.BackgroundColor;
         }
     }
 }

@@ -3,6 +3,8 @@ using System;
 using Iviz.Msgs.SensorMsgs;
 using System.Runtime.Serialization;
 using Iviz.App;
+using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Roslib;
@@ -63,8 +65,7 @@ namespace Iviz.Controllers
             }
         }        
 
-        readonly ImageModuleData moduleData;
-        public override IModuleData ModuleData => moduleData;
+        public override IModuleData ModuleData { get; }
 
         readonly ImageConfiguration config = new ImageConfiguration();
 
@@ -184,7 +185,7 @@ namespace Iviz.Controllers
         {
             imageTexture = new ImageTexture();
             node = FrameNode.Instantiate("[ImageNode]");
-            this.moduleData = (ImageModuleData) (moduleData ?? throw new ArgumentNullException(nameof(moduleData)));
+            ModuleData = (moduleData ?? throw new ArgumentNullException(nameof(moduleData)));
             billboard = ResourcePool.RentDisplay<ImageResource>();
             billboard.Texture = imageTexture;
             billboard.Parent = node.transform;

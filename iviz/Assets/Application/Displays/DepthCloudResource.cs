@@ -1,8 +1,10 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Runtime.InteropServices;
+using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -10,35 +12,34 @@ namespace Iviz.Displays
 {
     public sealed class DepthCloudResource : MarkerResource
     {
-        //static readonly int PQuad = Shader.PropertyToID("_Quad");
         static readonly int PColor = Shader.PropertyToID("_ColorTexture");
         static readonly int PDepth = Shader.PropertyToID("_DepthTexture");
         static readonly int PPoints = Shader.PropertyToID("_Points");
         static readonly int PIntensity = Shader.PropertyToID("_IntensityTexture");
-        static readonly int PIntensityCoeff = Shader.PropertyToID("_IntensityCoeff");
-        static readonly int PIntensityAdd = Shader.PropertyToID("_IntensityAdd");
         static readonly int PropPointSize = Shader.PropertyToID("_PointSize");
         static readonly int PropPosSt = Shader.PropertyToID("_Pos_ST");
         static readonly int PLocalToWorld = Shader.PropertyToID("_LocalToWorld");
         static readonly int PWorldToLocal = Shader.PropertyToID("_WorldToLocal");
-        static readonly int PScale = Shader.PropertyToID("_Scale");
         static readonly int PDepthScale = Shader.PropertyToID("_DepthScale");
 
-        [SerializeField] Material material = null;
+        [SerializeField] Material? material = null;
         [SerializeField] int width;
         [SerializeField] int height;
-        Intrinsic intrinsic;
+        Intrinsic? intrinsic;
         float pointSize;
 
-        [CanBeNull] ImageTexture colorImage;
-        [CanBeNull] ImageTexture depthImage;
-        [CanBeNull] ComputeBuffer pointComputeBuffer;
+        ImageTexture? colorImage;
+        ImageTexture? depthImage;
+        ComputeBuffer? pointComputeBuffer;
 
-        [NotNull] Vector2[] uvs = Array.Empty<Vector2>();
+        Vector2[] uvs = Array.Empty<Vector2>();
 
+        Material Material => material != null
+            ? material
+            : (material = Resource.Materials.DepthCloud.Instantiate());
+        
         public Intrinsic Intrinsic
         {
-            get => intrinsic;
             set
             {
                 if (value.Equals(intrinsic))
@@ -46,7 +47,7 @@ namespace Iviz.Displays
                     return;
                 }
 
-                intrinsic = value;
+                intrinsic = value ?? throw new ArgumentNullException(nameof(value));
                 if (DepthImage != null)
                 {
                     UpdatePosValues(DepthImage.Texture);
@@ -54,8 +55,7 @@ namespace Iviz.Displays
             }
         }
 
-        [CanBeNull]
-        public ImageTexture ColorImage
+        public ImageTexture? ColorImage
         {
             get => colorImage;
             set
@@ -78,8 +78,7 @@ namespace Iviz.Displays
             }
         }
 
-        [CanBeNull]
-        public ImageTexture DepthImage
+        public ImageTexture? DepthImage
         {
             get => depthImage;
             set
@@ -109,21 +108,20 @@ namespace Iviz.Displays
         {
             base.Awake();
             Layer = LayerType.IgnoreRaycast;
-            material = Resource.Materials.DepthCloud.Instantiate();
         }
 
         void Update()
         {
-            if (DepthImage?.Texture == null)
+            if (DepthImage?.Texture == null || Material == null)
             {
                 return;
             }
 
-            material.SetFloat(PropPointSize, Transform.lossyScale.x * pointSize);
-            material.SetMatrix(PLocalToWorld, Transform.localToWorldMatrix);
-            material.SetMatrix(PWorldToLocal, Transform.worldToLocalMatrix);
+            Material.SetFloat(PropPointSize, Transform.lossyScale.x * pointSize);
+            Material.SetMatrix(PLocalToWorld, Transform.localToWorldMatrix);
+            Material.SetMatrix(PWorldToLocal, Transform.worldToLocalMatrix);
 
-            Graphics.DrawProcedural(material, WorldBounds, MeshTopology.Quads, 4, uvs.Length,
+            Graphics.DrawProcedural(Material, WorldBounds, MeshTopology.Quads, 4, uvs.Length,
                 castShadows: ShadowCastingMode.Off, receiveShadows: false, layer: gameObject.layer);
         }
 
@@ -149,23 +147,23 @@ namespace Iviz.Displays
             DepthImage = DepthImage;
         }
 
-        void UpdateColorTexture([CanBeNull] Texture2D texture)
+        void UpdateColorTexture(Texture2D? texture)
         {
-            material.SetTexture(PColor, texture);
+            Material.SetTexture(PColor, texture);
 
             if (texture == null)
             {
-                material.EnableKeyword("USE_INTENSITY");
+                Material.EnableKeyword("USE_INTENSITY");
             }
             else
             {
-                material.DisableKeyword("USE_INTENSITY");
+                Material.DisableKeyword("USE_INTENSITY");
             }
         }
 
-        void UpdateDepthTexture([CanBeNull] Texture2D texture)
+        void UpdateDepthTexture(Texture2D? texture)
         {
-            material.SetTexture(PDepth, texture);
+            Material.SetTexture(PDepth, texture);
 
             UpdatePointComputeBuffers(texture);
             UpdatePosValues(texture);
@@ -179,16 +177,16 @@ namespace Iviz.Displays
             {
                 case TextureFormat.RFloat:
                     depthImage.IntensityBounds = new Vector2(0, 5);
-                    material.SetFloat(PDepthScale, 1);
+                    Material.SetFloat(PDepthScale, 1);
                     break;
                 case TextureFormat.R16:
                     depthImage.IntensityBounds = new Vector2(0, 5000 / 65535f);
-                    material.SetFloat(PDepthScale, 65.535f);
+                    Material.SetFloat(PDepthScale, 65.535f);
                     break;
             }
         }
 
-        void UpdatePointComputeBuffers([CanBeNull] Texture2D sourceTexture)
+        void UpdatePointComputeBuffers(Texture2D? sourceTexture)
         {
             if (sourceTexture == null
                 || sourceTexture.width == width && sourceTexture.height == height)
@@ -213,12 +211,12 @@ namespace Iviz.Displays
             pointComputeBuffer?.Release();
             pointComputeBuffer = new ComputeBuffer(uvs.Length, Marshal.SizeOf<Vector2>());
             pointComputeBuffer.SetData(uvs, 0, 0, uvs.Length);
-            material.SetBuffer(PPoints, pointComputeBuffer);
+            Material.SetBuffer(PPoints, pointComputeBuffer);
         }
 
-        void UpdateColormap([CanBeNull] Texture2D texture)
+        void UpdateColormap(Texture2D? texture)
         {
-            material.SetTexture(PIntensity, texture);
+            Material.SetTexture(PIntensity, texture);
         }
 
         /*
@@ -229,11 +227,16 @@ namespace Iviz.Displays
         }
         */
 
-        void UpdatePosValues([CanBeNull] Texture2D texture)
+        void UpdatePosValues(Texture? texture)
         {
             if (texture == null)
             {
                 return;
+            }
+
+            if (intrinsic == null)
+            {
+                throw new InvalidOperationException("Intrinsic has not been set!");
             }
 
             float posMulX = texture.width / intrinsic.Fx;
@@ -244,11 +247,11 @@ namespace Iviz.Displays
 
             pointSize = 1f / intrinsic.Fx;
 
-            material.SetVector(PropPosSt, new Vector4(posMulX, posMulY, posAddX, posAddY));
+            Material.SetVector(PropPosSt, new Vector4(posMulX, posMulY, posAddX, posAddY));
 
             const float maxDepthForBounds = 5.0f;
-            Vector3 size = new Vector3(posMulX, 1, posMulY) * maxDepthForBounds;
-            Vector3 center = new Vector3(0, maxDepthForBounds / 2, 0);
+            var size = new Vector3(posMulX, 1, posMulY) * maxDepthForBounds;
+            var center = new Vector3(0, maxDepthForBounds / 2, 0);
 
             BoxCollider.center = center;
             BoxCollider.size = size;
@@ -264,8 +267,8 @@ namespace Iviz.Displays
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
 
-            material.SetTexture(PColor, null);
-            material.SetTexture(PDepth, null);
+            Material.SetTexture(PColor, null);
+            Material.SetTexture(PDepth, null);
 
             width = 0;
             height = 0;

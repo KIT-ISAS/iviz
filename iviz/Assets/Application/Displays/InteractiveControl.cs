@@ -1,6 +1,8 @@
 using System;
 using Iviz.App;
+using Iviz.Common;
 using Iviz.Controllers;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Resources;
@@ -44,8 +46,8 @@ namespace Iviz.Displays
         [SerializeField] Transform targetTransform;
         [SerializeField] InteractionModeType interactionMode;
 
-        DraggableTranslation colliderDraggableTranslation;
-        DraggablePlane colliderDraggablePlane;
+        LineDraggable colliderDraggableTranslation;
+        PlaneDraggable colliderDraggablePlane;
 
         BoundaryFrame frame;
 
@@ -120,7 +122,7 @@ namespace Iviz.Displays
 
                 foreach (var resource in allResources)
                 {
-                    var draggable = resource.GetComponent<DraggableRotation>();
+                    var draggable = resource.GetComponent<RotationDraggable>();
                     if (draggable != null)
                     {
                         draggable.DoesRotationReset = value;
@@ -152,7 +154,7 @@ namespace Iviz.Displays
 
                 foreach (var resource in allResources)
                 {
-                    var draggable = resource.GetComponent<DraggableRotation>();
+                    var draggable = resource.GetComponent<RotationDraggable>();
                     if (draggable != null)
                     {
                         draggable.DoesRotationReset = value;
@@ -206,7 +208,7 @@ namespace Iviz.Displays
                     holderCollider.enabled = true;
                     if (colliderDraggableTranslation == null)
                     {
-                        colliderDraggableTranslation = gameObject.AddComponent<DraggableTranslation>();
+                        colliderDraggableTranslation = gameObject.AddComponent<LineDraggable>();
                         colliderDraggableTranslation.TargetTransform = TargetTransform;
                         colliderDraggableTranslation.Moved += RaiseMoved;
                         colliderDraggableTranslation.PointerDown += PointerDown;
@@ -219,7 +221,7 @@ namespace Iviz.Displays
                     holderCollider.enabled = true;
                     if (colliderDraggablePlane == null)
                     {
-                        colliderDraggablePlane = gameObject.AddComponent<DraggablePlane>();
+                        colliderDraggablePlane = gameObject.AddComponent<PlaneDraggable>();
                         colliderDraggablePlane.TargetTransform = TargetTransform;
                         colliderDraggablePlane.Moved += RaiseMoved;
                         colliderDraggablePlane.PointerDown += PointerDown;

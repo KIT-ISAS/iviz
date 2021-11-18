@@ -3,6 +3,8 @@
 using System;
 using System.Runtime.Serialization;
 using Iviz.App;
+using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
