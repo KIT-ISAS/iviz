@@ -65,6 +65,14 @@ namespace Iviz.Tools
             }
         }        
 
+        public static void LogDebugFormat<TT, TU, TV, TW>(string format, TT? arg1, TU? arg2, TV? arg3, TW? arg4)
+        {
+            if (LogDebug != None)
+            {
+                LogDebug(string.Format(format, arg1, arg2, arg3, arg4));
+            }
+        }        
+
         public static void LogDebugFormat(string format, params object?[] objs)
         {
             if (LogDebug != None)

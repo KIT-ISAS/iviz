@@ -275,8 +275,8 @@ namespace Iviz.Roslib
                         else
                         {
                             Logger.LogDebugFormat(
-                                "{0}: Partner sent UDPROS packet {1}/{2} (id {4}), but I was expecting {3}/{2} (id {5})." +
-                                " Dropping packet.", this, blockNr, totalBlocks, expectedBlockNr, msgId, expectedMsgId);
+                                "{0}: Partner sent UDPROS packet {1}/{2}, but I was expecting {3}/{2}." +
+                                " Dropping packet.", this, blockNr, totalBlocks, expectedBlockNr);
                             MarkDropped();
                             continue;
                         }
