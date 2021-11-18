@@ -565,8 +565,6 @@ namespace Iviz.RosMaster
                 return ErrorResponse("Failed to parse arguments");
             }
 
-            //Console.WriteLine("**** Delete " + key);
-
             parameters.Remove(key);
             return DefaultOkResponse;
         }
