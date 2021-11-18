@@ -65,6 +65,7 @@ namespace Iviz.Msgs
 
             bool WriteArray<T>(T[] array, Action<T> writerDel)
             {
+                writer.WriteStartArray();
                 if (array.Length > maxArrayLengthForUnmanaged)
                 {
                     JValue.CreateComment(
@@ -72,7 +73,6 @@ namespace Iviz.Msgs
                         .WriteTo(writer);
                 }
 
-                writer.WriteStartArray();
                 for (int i = 0; i < Math.Min(array.Length, maxArrayLengthForUnmanaged); i++)
                 {
                     writerDel(array[i]);
@@ -85,20 +85,21 @@ namespace Iviz.Msgs
 
             bool WriteObjectArray(Array array)
             {
+                writer.WriteStartArray();
                 if (array.Length > maxArrayLength)
                 {
                     JValue.CreateComment($"<i>(Showing {maxArrayLength.ToString()}/{array.Length.ToString()})</i>")
                         .WriteTo(writer);
                 }
 
-                var shortArray = new JArray();
                 for (int i = 0; i < Math.Min(array.Length, maxArrayLength); i++)
                 {
                     object? element = array.GetValue(i);
-                    shortArray.Add(element == null ? JValue.CreateNull() : JToken.FromObject(element, serializer));
+                    JToken.FromObject(element, serializer).WriteTo(writer);
                 }
 
-                JToken.FromObject(shortArray, serializer).WriteTo(writer);
+                writer.WriteEndArray();
+
                 return true;
             }
         }

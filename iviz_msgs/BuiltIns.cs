@@ -129,7 +129,7 @@ namespace Iviz.Msgs
         /// <summary>
         /// Checks if the size of the ROS message type is fixed, and returns it.
         /// </summary>
-        /// <param name="T">The message type. Should derive from IMessage.</param>
+        /// <typeparam name="T">The message type. Should derive from IMessage.</typeparam>
         /// <param name="size">The fixed size, if it exists.</param>
         /// <returns>True if the message has a fixed size.</returns>
         /// <exception cref="ArgumentNullException">Thrown if the type is null.</exception>
@@ -267,7 +267,6 @@ namespace Iviz.Msgs
             return Buffer.Deserialize(generator, bytes, size, offset);
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int GetArraySize<T>(T[]? array) where T : IMessage
         {
             if (array == null)
@@ -284,7 +283,6 @@ namespace Iviz.Msgs
             return size;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int GetArraySize(string[]? array)
         {
             if (array == null)
