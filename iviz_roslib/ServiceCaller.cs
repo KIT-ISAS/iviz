@@ -21,7 +21,7 @@ namespace Iviz.Roslib
 
         bool disposed;
 
-        public bool IsAlive => tcpClient.Connected;
+        public bool IsAlive => tcpClient.Client.CheckIfAlive();
         public string ServiceType => serviceInfo.Service;
         public Uri? RemoteUri { get; private set; }
 
@@ -32,7 +32,7 @@ namespace Iviz.Roslib
 
             tcpClient = new TcpClient(AddressFamily.InterNetworkV6)
             {
-                Client = {DualMode = true},
+                Client = { DualMode = true },
                 ReceiveTimeout = DefaultTimeoutInMs,
                 SendTimeout = DefaultTimeoutInMs
             };
@@ -145,7 +145,7 @@ namespace Iviz.Roslib
             uint sendLength = requestMsg.SerializeToArray(writeBuffer.Array);
 
             await tcpClient.WriteChunkAsync(BitConverter.GetBytes(sendLength), 4, token);
-            await tcpClient.WriteChunkAsync(writeBuffer.Array, (int) sendLength, token);
+            await tcpClient.WriteChunkAsync(writeBuffer.Array, (int)sendLength, token);
 
             byte statusByte = await ReadOneByteAsync(token);
 
