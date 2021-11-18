@@ -9,11 +9,12 @@ using Iviz.Tools;
 
 namespace Iviz.Ntp
 {
-    public class NtpQuery
+    public sealed class NtpQuery
     {
         static readonly DateTime EpochTime = new(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        public static async ValueTask<TimeSpan> GetNetworkTimeOffsetAsync(string ntpServer, CancellationToken token = default)
+        public static async ValueTask<TimeSpan> GetNetworkTimeOffsetAsync(string ntpServer,
+            CancellationToken token = default)
         {
             if (string.IsNullOrEmpty(ntpServer))
             {
@@ -22,16 +23,15 @@ namespace Iviz.Ntp
 
             const int maxFailures = 3;
             const int minSuccess = 10;
-            
+
             var offsets = new List<TimeSpan>();
             int numFailures = 0;
-            
+
             while (offsets.Count < minSuccess)
             {
                 try
                 {
-                    TimeSpan offset = await GetNetworkTimeOffsetOneShotAsync(ntpServer, token);
-                    //Console.WriteLine(offset.TotalMilliseconds);
+                    var offset = await GetNetworkTimeOffsetOneShotAsync(ntpServer, token);
                     offsets.Add(offset);
                     numFailures = 0;
                 }
@@ -49,7 +49,7 @@ namespace Iviz.Ntp
             }
 
             offsets.Sort(); // TODO: implement fancier filtering
-            
+
             long mean = 0L;
             long remainder = 0L;
             int minIndex = offsets.Count / 3;
@@ -63,17 +63,18 @@ namespace Iviz.Ntp
                 mean += remainder / n;
                 remainder %= n;
             }
-            
-            return new TimeSpan(mean); 
+
+            return new TimeSpan(mean);
         }
-        
-        public static async ValueTask<TimeSpan> GetNetworkTimeOffsetOneShotAsync(string ntpServer, CancellationToken token = default)
+
+        public static async ValueTask<TimeSpan> GetNetworkTimeOffsetOneShotAsync(string ntpServer,
+            CancellationToken token = default)
         {
             if (string.IsNullOrEmpty(ntpServer))
             {
                 throw new ArgumentNullException(nameof(ntpServer));
             }
-            
+
             using var ntpDataRent = new Rent<byte>(48);
             byte[] ntpData = ntpDataRent.Array;
             var ntpDataSegment = new ArraySegment<byte>(ntpData, 0, 48);
@@ -99,7 +100,7 @@ namespace Iviz.Ntp
                 await AwaitWithTimeout(socket.ReceiveAsync(ntpDataSegment, SocketFlags.None), timerTask);
                 t3 = DateTime.UtcNow;
             }
-            
+
             var t1 = ToDateTime(BitConverter.ToUInt32(ntpData, 32), BitConverter.ToUInt32(ntpData, 36));
             var t2 = ToDateTime(BitConverter.ToUInt32(ntpData, 40), BitConverter.ToUInt32(ntpData, 44));
 
@@ -125,10 +126,10 @@ namespace Iviz.Ntp
             {
                 throw new TimeoutException("NTP call did not return in time");
             }
-            
+
             return await task;
-        }        
-        
+        }
+
         static DateTime ToDateTime(uint chunk1, uint chunk2)
         {
             ulong secondsInt = SwapEndianness(chunk1);
