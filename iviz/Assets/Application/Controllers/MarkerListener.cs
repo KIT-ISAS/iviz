@@ -139,7 +139,7 @@ namespace Iviz.Controllers
             {
                 Marker.RosMessageType => new Listener<Marker>(config.Topic, Handler, rosTransportHint),
                 MarkerArray.RosMessageType => new Listener<MarkerArray>(config.Topic, Handler, rosTransportHint),
-                _ => null
+                _ => throw new InvalidOperationException("Invalid message type")
             };
 
             GameThread.EverySecond += CheckDeadMarkers;
@@ -384,18 +384,18 @@ namespace Iviz.Controllers
 
         static void DeleteMarkerObject(MarkerObject markerToDelete)
         {
-            markerToDelete.DestroySelf();
+            markerToDelete.Stop();
         }
 
         MarkerObject CreateMarkerObject(in (string, int) id, int msgType)
         {
-            var marker = new GameObject("MarkerObject").AddComponent<MarkerObject>();
-            marker.Parent = TfListener.ListenersFrame;
-            marker.OcclusionOnly = RenderAsOcclusionOnly;
-            marker.Tint = Tint;
-            marker.Visible = Visible && config.VisibleMask[msgType];
-            marker.Layer = LayerType.IgnoreRaycast;
-            marker.TriangleListFlipWinding = TriangleListFlipWinding;
+            var marker = new MarkerObject(TfListener.ListenersFrame)
+            {
+                OcclusionOnly = RenderAsOcclusionOnly,
+                Tint = Tint,
+                Visible = Visible && config.VisibleMask[msgType],
+                TriangleListFlipWinding = TriangleListFlipWinding
+            };
             markers[id] = marker;
             return marker;
         }

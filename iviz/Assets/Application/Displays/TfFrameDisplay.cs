@@ -65,7 +65,7 @@ namespace Iviz.Displays
                 }
 
                 label = ResourcePool.RentDisplay<TextMarkerResource>(Transform);
-                label.Name = "[Label]";
+                label.gameObject.name = "[Label]";
                 label.Text = Id;
                 label.ElementSize = 0.5f * LabelSize * FrameSize;
                 label.Visible = !ForceInvisible && LabelVisible && Visible;

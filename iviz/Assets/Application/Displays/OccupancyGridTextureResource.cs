@@ -9,7 +9,6 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    [RequireComponent(typeof(BoxCollider))]
     [RequireComponent(typeof(MeshRenderer))]
     public sealed class OccupancyGridTextureResource : MarkerResourceWithColormap
     {

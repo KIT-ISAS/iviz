@@ -274,12 +274,6 @@ namespace Iviz.Core
             return c;
         }
 
-        public static Vector2 XZ(this in Vector3 c)
-        {
-            return new Vector2(c.x, c.z);
-        }
-
-
         public static Color WithSaturation(this in Color c, float saturation)
         {
             Color.RGBToHSV(c, out float h, out _, out float v);
@@ -348,26 +342,9 @@ namespace Iviz.Core
 
         public static void ClosestPointBetweenLines(in Ray ray, in Ray other, out float scaleRay, out float scaleOther)
         {
-            /*
-            Matrix4x4 m = Matrix4x4.identity;
-            m.SetColumn(0, ray.direction);
-            m.SetColumn(1, Vector3.Cross(ray.direction, other.direction));
-            m.SetColumn(2, -other.direction);
-            */
-            /*
-            var m = new Matrix4x4(
-                ray.direction,
-                Vector3.Cross(ray.direction, other.direction),
-                -other.direction,
-                new Vector4(0, 0, 0, 1));
-            
-            var mInv = Matrix4x4.identity;
-            Matrix4x4.Inverse3DAffine(m, ref mInv);
-            */
-
             var m = new float3x3(
                 ray.direction,
-                Vector3.Cross(ray.direction, other.direction),
+                ray.direction.Cross(other.direction),
                 -other.direction
             );
             var mInv = math.inverse(m);
@@ -375,30 +352,65 @@ namespace Iviz.Core
             (scaleRay, _, scaleOther) = math.mul(mInv, other.origin - ray.origin);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void AddInPlace(this ref Vector3 v, in Vector3 o)
+        {
+            v.x += o.x;
+            v.y += o.y;
+            v.z += o.z;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 Mult(this in Vector3 v, Vector3 o)
+        {
+            o.x *= v.x;
+            o.y *= v.y;
+            o.z *= v.z;
+            return o;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 Mult(this in Vector3Int v, Vector3 o)
+        {
+            o.x *= v.x;
+            o.y *= v.y;
+            o.z *= v.z;
+            return o;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Vector3 v, out float x, out float y, out float z) =>
             (x, y, z) = (v.x, v.y, v.z);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Vector3Int v, out int x, out int y, out int z) =>
             (x, y, z) = (v.x, v.y, v.z);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this Vector2 v, out float x, out float y) =>
             (x, y) = (v.x, v.y);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in float3 v, out float x, out float y, out float z) =>
             (x, y, z) = (v.x, v.y, v.z);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Vector4 v, out float x, out float y, out float z, out float w) =>
             (x, y, z, w) = (v.x, v.y, v.z, v.w);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Bounds b, out Vector3 center, out Vector3 size) =>
             (center, size) = (b.center, b.size);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Pose p, out Vector3 position, out Quaternion rotation) =>
             (position, rotation) = (p.position, p.rotation);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Ray r, out Vector3 origin, out Vector3 direction) =>
             (origin, direction) = (r.origin, r.direction);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Msgs.GeometryMsgs.TransformStamped p,
             out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp) =>
             (parentId, childId, transform, stamp) = (p.Header.FrameId, p.ChildFrameId, p.Transform, p.Header.Stamp);

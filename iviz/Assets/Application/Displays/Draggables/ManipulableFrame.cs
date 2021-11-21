@@ -3,8 +3,6 @@
 using System.Linq;
 using Iviz.Common;
 using Iviz.Core;
-using JetBrains.Annotations;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays

@@ -12,7 +12,8 @@ using UnityEngine.UI;
 namespace Iviz.App.ARDialogs
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class ARButton : MarkerResource, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IRecyclable
+    public sealed class ARButton : MarkerResource, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler,
+        IRecyclable
     {
         [SerializeField] Texture2D[] icons = null;
         [SerializeField] TextMesh text = null;
@@ -90,8 +91,8 @@ namespace Iviz.App.ARDialogs
             {
                 icon = value;
                 Material.mainTexture = value == ButtonIcon.Backward
-                    ? icons[(int) ButtonIcon.Forward]
-                    : icons[(int) value];
+                    ? icons[(int)ButtonIcon.Forward]
+                    : icons[(int)value];
                 (float x, _, float z) = iconMeshRenderer.transform.localRotation.eulerAngles;
 
                 Quaternion rotation;
@@ -112,19 +113,10 @@ namespace Iviz.App.ARDialogs
             }
         }
 
-        protected override void Awake()
+        void Awake()
         {
             Icon = Icon;
             iconMeshRenderer.material = Material;
-
-            if (Settings.IsHololens)
-            {
-                var meshRenderers = transform.GetComponentsInChildren<MeshRenderer>();
-                foreach (var meshRenderer in meshRenderers)
-                {
-                    meshRenderer.material = Resource.Materials.Lit.Object;
-                }
-            }
         }
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
@@ -143,7 +135,7 @@ namespace Iviz.App.ARDialogs
         void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
         {
             Frame.Bounds = new Bounds(colliderForFrame.center,
-                Vector3.Scale(colliderForFrame.size, colliderForFrame.transform.localScale));
+                colliderForFrame.size.Mult(colliderForFrame.transform.localScale));
             Frame.Visible = true;
         }
 

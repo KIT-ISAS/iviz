@@ -32,7 +32,7 @@ namespace Iviz.App
 
         public ClickHitResult(in ARRaycastHit r) : this(r.trackable.gameObject, r.pose.position,
             ((ARPlane)r.trackable).normal)
-        {
+        { 
         }
 
         public Pose CreatePose()

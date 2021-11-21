@@ -4,7 +4,92 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="68ca9c34-1010-45bb-a44d-d538d3269f03" name="Default Changelist" comment="" />
+    <list default="true" id="68ca9c34-1010-45bb-a44d-d538d3269f03" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.iviz/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.iviz/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/ClickInfo.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/ClickInfo.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARFoundationScreenCaptureManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/AR/ARFoundationScreenCaptureManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/ImageListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/ImageListener.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/InteractiveMarkerControlObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/InteractiveMarkerControlObject.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/InteractiveMarkerListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/InteractiveMarkerListener.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/InteractiveMarkerObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/InteractiveMarkerObject.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/JoystickController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/JoystickController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/LaserScanListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/LaserScanListener.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/MarkerListener.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/MarkerListener.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/MarkerObject.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/MarkerObject.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/XR/IvizInfo.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/XR/IvizInfo.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/XR/XRInteractorObject.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/XR/XRInteractorObject.cs.meta" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Controllers/XR/XRUtils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Controllers/XR/XRUtils.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/ARDialogs/ARButton.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/ARDialogs/ARButton.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/ARDialogs/ARDialog.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/ARDialogs/ARDialog.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/ArrowResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/ArrowResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/AxisFrameResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/AxisFrameResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/BoundaryFrame.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/BoundaryFrame.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/ClickedPoseHighlighter.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/ClickedPoseHighlighter.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/DepthCloudResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/DepthCloudResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/Draggables/ManipulableFrame.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/Draggables/ManipulableFrame.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/Draggables/SelectionFrame.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/Draggables/SelectionFrame.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/GridMapResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/GridMapResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/GridResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/GridResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/ImageResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/ImageResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/Leash.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/Leash.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/OccupancyGridTextureResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/OccupancyGridTextureResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/RadialScanResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/RadialScanResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/RoundedPlaneResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/RoundedPlaneResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/TfFrameDisplay.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/TfFrameDisplay.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/Tooltip.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/Tooltip.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Displays/TrailResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Displays/TrailResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Editor/SavedAssetLoader.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Editor/SavedAssetLoader.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/GuiInputModule.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/GuiInputModule.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/DialogPanelManager.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/DialogPanelManager.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/MarkerMenuDialogContents.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/Dialogs/MarkerMenuDialogContents.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/JoystickModuleData.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleDatas/JoystickModuleData.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Application/Panels/ModuleListPanel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Application/Panels/ModuleListPanel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/IDisplay.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/IDisplay.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/LineResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/LineResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/MarkerResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/MarkerResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/MarkerResourceWithColormap.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/MarkerResourceWithColormap.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/MeshListResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/MeshListResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/MeshMarkerHolderResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/MeshMarkerHolderResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/MeshMarkerResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/MeshMarkerResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/MeshTrianglesResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/MeshTrianglesResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/MinMaxJob.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/MinMaxJob.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Application/PointListResource.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Application/PointListResource.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Common/MenuEntryList.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Common/MenuEntryList.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Displays/Cube.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Displays/Cube.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Displays/Cylinder.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Displays/Cylinder.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Displays/Line.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Displays/Line.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Displays/MeshList.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Displays/MeshList.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Displays/MeshTriangles.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Displays/MeshTriangles.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Displays/Plane.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Displays/Plane.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Displays/PointList.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Displays/PointList.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Displays/Sphere.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Displays/Sphere.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Displays/Text.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Displays/Text.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/ResourceManagers/SceneModel.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/ResourceManagers/SceneModel.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Utils/BoundsUtils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Utils/BoundsUtils.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Core/Utils/UnityUtils.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Core/Utils/UnityUtils.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/ARCameraFovDisplay.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/ARCameraFovDisplay.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/Arrow.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/Arrow.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/ArrowShort.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/ArrowShort.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/AxisFrameResource.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/AxisFrameResource.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/DepthImageResource.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/DepthImageResource.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/Grid.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/Grid.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/GridMap.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/GridMap.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/OccupancyGridTextureResource.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/OccupancyGridTextureResource.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/Pyramid.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/Pyramid.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/Rounded Plane.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/Rounded Plane.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/Selection Frame.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/Selection Frame.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Displays/Triangle.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Displays/Triangle.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Widgets/Markers Panel.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Widgets/Markers Panel.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Internal/Widgets/System Info Panel.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Internal/Widgets/System Info Panel.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ROS/RoslibConnection.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ROS/RoslibConnection.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Resources/Fonts/selawkl SDF.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/Fonts/selawkl SDF.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/UI AR.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/UI AR.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UserSettings/Layouts/default-2021.dwlt" beforeDir="false" afterPath="$PROJECT_DIR$/UserSettings/Layouts/default-2021.dwlt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../iviz_msgs/Extensions.cs" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_msgs/Extensions.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../iviz_utils.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/../iviz_utils.sln.DotSettings.user" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,6 +108,7 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/InputSystem.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/Plugins/PlayerInput/InputValue.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.timeline@1.6.2/Editor/Manipulators/EditModeInputHandler.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/bc3985d37b0241b48fc21474b2de25bda7e00/b9/1193f399/JTokenWriter.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.mathematics@1.2.5/Unity.Mathematics/matrix.gen.cs" root0="SKIP_HIGHLIGHTING" />
@@ -54,6 +140,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/bcdae09e18bb451690b5babba3e1396c156600/2c/9c83adc0/Quaternion.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.interaction.toolkit@1.0.0-pre.8/Runtime/Interaction/Interactables/XRBaseInteractable.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/InputModules/StandaloneInputModule.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/IL/0db57d93060a4947bc33f69c868416f5469000/62/68036bfa/02000292.il" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.interaction.toolkit@1.0.0-pre.8/Runtime/Interaction/Interactables/XRSimpleInteractable.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.collab-proxy@1.13.5/Editor/PlasticSCM/Configuration/SSOCredentialsDialog.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.timeline@1.6.2/Editor/Window/TimelineWindow_Breadcrumbs.cs" root0="SKIP_HIGHLIGHTING" />
@@ -112,6 +199,7 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/IL/bcc5812275784407baf46188038600a71d1c00/02/b3c598e9/02000006.il" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/bcc5812275784407baf46188038600a71d1c00/54/2510b367/Buffer.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/Plugins/UI/ExtendedPointerEventData.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.timeline@1.6.2/Editor/Utilities/TrackModifier.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.collab-proxy@1.13.5/Editor/PlasticSCM/Views/PendingChanges/PendingChangesTab_Operations.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.mathematics@1.2.5/Tests/Tests/Shared/TestPlane.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/bcdae09e18bb451690b5babba3e1396c156600/b4/b6b61f82/Bounds.cs" root0="SKIP_HIGHLIGHTING" />
@@ -131,7 +219,7 @@
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.collab-proxy@1.13.5/Editor/PlasticSCM/Views/IncomingChanges/Developer/IncomingChangesViewMenu.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/Actions/InputActionReference.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.postprocessing@3.1.1/PostProcessing/Editor/PostProcessDebugEditor.cs" root0="SKIP_HIGHLIGHTING" />
-    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/0db57d93060a4947bc33f69c868416f5469000/bc/a0a134c1/CancellationTokenSource.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/0db57d93060a4947bc33f69c868416f5469000/bc/a0a134c1/CancellationTokenSource.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/EventSystem.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/9aa7f61bf64f4b5aa82e494eb93d8636be00/dc/448efd20/TaskUtils.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/Actions/InputActionProperty.cs" root0="SKIP_HIGHLIGHTING" />
@@ -139,7 +227,9 @@
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ugui@1.0.0/Runtime/EventSystem/UIBehaviour.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/Samples~/SimpleDemo/SimpleController_UsingPlayerInput.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.textmeshpro@3.0.6/Scripts/Runtime/TMP_FontAsset.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/IL/5a41d6b7189842eca409fd0b1c3e3dcf17bf78/bf/d5bd1748/020009B7pdb.il" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/Actions/InputActionAsset.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/860f076a5da741e1bef710e36eeb615dc000/c8/068b26b3/Rent`1.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../iviz_msgs/std_msgs/msg/ColorRGBA.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../iviz_urdf/Urdf/Geometry.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.arfoundation@4.2.1/Runtime/AR/ARCameraManager.cs" root0="SKIP_HIGHLIGHTING" />
@@ -149,6 +239,7 @@
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.timeline@1.6.2/Editor/Animation/CurvesProxy.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.test-framework@1.1.29/UnityEditor.TestRunner/Api/ExecutionSettings.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.interaction.toolkit@1.0.0-pre.8/Runtime/AR/Gestures/GestureTouchesUtility.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/bcdae09e18bb451690b5babba3e1396c156600/57/6223e5c6/Color.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.burst@1.6.1/Tests/Runtime/Unity.Burst.Tests/TestCompilerAttribute.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/5a41d6b7189842eca409fd0b1c3e3dcf17bf78/6/System.Threading.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.ugui@1.0.0/Runtime/UI/Core/Image.cs" root0="SKIP_HIGHLIGHTING" />
@@ -174,6 +265,7 @@
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.inputsystem@1.1.1/InputSystem/Controls/Processors/AxisDeadzoneProcessor.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/5a41d6b7189842eca409fd0b1c3e3dcf17bf78/32/System.Collections.Concurrent.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../iviz_msgs/geometry_msgs/msg/TransformStamped.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/IL/5a41d6b7189842eca409fd0b1c3e3dcf17bf78/ca/0776ae8b/020009A0pdb.il" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.openxr@1.2.8/Runtime/OpenXRDiagnosticReport.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.unity.xr.arfoundation@4.2.1/Runtime/AR/ARTrackedImageManager.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/DecompilerCache/decompiler/de38abde50b44d379e3b8efbe6048eeb6e00/c9/a2f12e0c/Canvas.cs" root0="SKIP_HIGHLIGHTING" />
@@ -283,10 +375,10 @@
       </option>
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="13082">
       <option name="allowRunningInParallel" value="false" />
-      <option name="listenPortForConnections" value="true" />
-      <option name="pid" />
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" value="13082" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
@@ -316,6 +408,7 @@
       <workItem from="1636888675448" duration="47966000" />
       <workItem from="1637051811125" duration="32916000" />
       <workItem from="1637222577745" duration="17723000" />
+      <workItem from="1637531697853" duration="1446000" />
     </task>
     <servers />
   </component>

@@ -26,7 +26,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Gets or sets whether the display is visible. 
         /// </summary>
-        bool Visible { get; set; }
+        bool Visible { set; }
     }
     
     /// <summary>

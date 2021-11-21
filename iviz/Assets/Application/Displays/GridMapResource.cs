@@ -126,8 +126,8 @@ namespace Iviz.Displays
             }
 
 
-            BoxCollider.center = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
-            BoxCollider.size = new Vector3(1, 1, max - min).Ros2Unity().Abs();
+            Collider.center = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
+            Collider.size = new Vector3(1, 1, max - min).Ros2Unity().Abs();
 
             var span = new Vector2(min, max);
             MeasuredIntensityBounds = span;

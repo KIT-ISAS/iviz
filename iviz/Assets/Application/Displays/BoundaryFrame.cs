@@ -33,7 +33,7 @@ namespace Iviz.Controllers
             Bounds = new Bounds(Vector3.zero, Vector3.one);
             GetComponent<BoxCollider>().enabled = false;
 
-            Name = "Boundary Frame";
+            gameObject.name = "Boundary Frame";
         }
 
         public float FrameAxisLength
@@ -52,14 +52,6 @@ namespace Iviz.Controllers
                 CreateSelectionFrame();
                 Bounds = Bounds;
             }
-        }
-
-
-        [NotNull]
-        public string Name
-        {
-            get => gameObject.name;
-            set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
         }
 
         public bool Visible
@@ -188,7 +180,7 @@ namespace Iviz.Controllers
         {
             var frameLink =
                 ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, frameLinkHolder.transform);
-            frameLink.Name = "Cube";
+            frameLink.gameObject.name = "Cube";
             frameLink.EmissiveColor = (Color / 2).WithAlpha(1);
             frameLink.Color = Color;
             frameLink.ShadowsEnabled = false;

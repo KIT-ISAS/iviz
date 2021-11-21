@@ -80,7 +80,7 @@ namespace Iviz.Displays
 
                 MeshTrianglesResource meshResource = obj.AddComponent<MeshTrianglesResource>();
 
-                meshResource.Name = mesh.Name;
+                meshResource.gameObject.name = mesh.Name;
 
                 var meshColors = mesh.ColorChannels.Length != 0
                     ? mesh.ColorChannels[0].Colors
@@ -209,20 +209,6 @@ namespace Iviz.Displays
 
             marker.Children = children;
             marker.UpdateBounds();
-
-            /*
-            var parentCollider = root.EnsureComponent<BoxCollider>();
-
-            var markerChildren = children
-                .Select(resource => TransformBoundsUntil(resource.Bounds, resource.Transform, root.transform));
-            var nullableRootBounds = markerChildren.CombineBounds();
-
-            if (nullableRootBounds is { } rootBounds)
-            {
-                parentCollider.center = rootBounds.center;
-                parentCollider.size = rootBounds.size;
-            }
-            */
 
             return marker;
         }

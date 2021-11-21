@@ -1,51 +1,30 @@
-﻿using System;
-using System.Runtime.Serialization;
+﻿#nullable enable
+
 using Iviz.Common;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
-using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public sealed class LaserScanConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public ModuleType ModuleType => ModuleType.LaserScan;
-        [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public float PointSize { get; set; } = 0.03f;
-        [DataMember] public ColormapId Colormap { get; set; } = ColormapId.hsv;
-        [DataMember] public bool UseIntensity { get; set; } = false;
-        [DataMember] public bool UseLines { get; set; } = false;
-        [DataMember] public bool ForceMinMax { get; set; } = false;
-        [DataMember] public float MinIntensity { get; set; } = 0;
-        [DataMember] public float MaxIntensity { get; set; } = 1;
-        [DataMember] public bool FlipMinMax { get; set; } = false;
-    }
-
     public sealed class LaserScanListener : ListenerController
     {
         readonly RadialScanResource resource;
         readonly FrameNode node;
-
+        readonly LaserScanConfiguration config = new();
+        
         public override IModuleData ModuleData { get; }
 
-        public override TfFrame Frame => node.Parent;
+        public override TfFrame? Frame => node.Parent;
 
         public Vector2 MeasuredIntensityBounds => resource.MeasuredIntensityBounds;
 
         public int Size => resource.Size;
 
-        readonly LaserScanConfiguration config = new LaserScanConfiguration();
         public LaserScanConfiguration Config
         {
             get => config;
@@ -155,7 +134,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public LaserScanListener([NotNull] IModuleData moduleData)
+        public LaserScanListener(IModuleData moduleData)
         {
             ModuleData = moduleData;
 
@@ -170,7 +149,7 @@ namespace Iviz.Controllers
             node.name = "[" + config.Topic + "]";
         }
 
-        void Handler([NotNull] LaserScan msg)
+        void Handler(LaserScan msg)
         {
             node.AttachTo(msg.Header);
 

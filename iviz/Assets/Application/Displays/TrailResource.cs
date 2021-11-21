@@ -33,7 +33,7 @@ namespace Iviz.Displays
         static LineResource CreateLineResource(Transform transform)
         {
             var resource = ResourcePool.RentDisplay<LineResource>(transform);
-            resource.Name = "[Line for Trail]";
+            resource.gameObject.name = "[Line for Trail]";
             resource.ElementScale = 0.01f;
             return resource;
         }

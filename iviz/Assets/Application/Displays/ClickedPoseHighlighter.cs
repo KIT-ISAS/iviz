@@ -110,9 +110,6 @@ namespace Iviz.Displays
         
         public void SplitForRecycle()
         {
-            flatSphere.ShadowsEnabled = true;
-            flatSphere.EmissiveColor = Color.black;
-            flatSphere.OverrideMaterial(null);
             flatSphere.ReturnToPool(Resource.Displays.Sphere);
             tooltip.ReturnToPool();
         }

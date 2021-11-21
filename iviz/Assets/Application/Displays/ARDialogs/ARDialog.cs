@@ -403,10 +403,8 @@ namespace Iviz.App.ARDialogs
 
         Vector3 BaseDisplacement => -socketPosition * Scale;
 
-        protected override void Awake()
+        void Awake()
         {
-            base.Awake();
-
             connector.Start = () => Transform.localPosition - BaseDisplacement;
             connector.End = () =>
             {

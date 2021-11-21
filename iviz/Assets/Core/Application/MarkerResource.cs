@@ -6,59 +6,24 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
+    [RequireComponent(typeof(BoxCollider))]
     public abstract class MarkerResource : MonoBehaviour, IDisplay
     {
-        Transform? mTransform;
+        [SerializeField] Transform? m_Transform;
         [SerializeField] BoxCollider? boxCollider;
-        bool colliderEnabled = true;
 
-        protected bool HasBoxCollider => boxCollider != null || TryGetBoxCollider(out boxCollider);
+        public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
 
-        bool TryGetBoxCollider([NotNullWhen(true)] out BoxCollider? bc) => (bc = GetComponent<BoxCollider>()) != null;
+        protected BoxCollider Collider =>
+            boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
 
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        protected Bounds WorldBounds => Collider.bounds;
 
-        protected BoxCollider BoxCollider
-        {
-            get => boxCollider != null || TryGetBoxCollider(out boxCollider)
-                ? boxCollider
-                : throw new NullReferenceException("This asset has no box collider!");
-            set => boxCollider = value != null
-                ? value
-                : throw new ArgumentNullException(nameof(value), "Cannot set a null box collider!");
-        }
-
-        protected Bounds WorldBounds => BoxCollider.bounds;
-
-        public string Name
-        {
-            get => gameObject.name;
-            set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
-        }
-
-        public Transform Parent
-        {
-            get => Transform.parent;
-            set => Transform.parent = value;
-        }
-
-        protected virtual void Awake()
-        {
-        }
-
-        public Bounds? Bounds => HasBoxCollider ? new Bounds(BoxCollider.center, BoxCollider.size) : null;
+        public virtual Bounds? Bounds => new(Collider.center, Collider.size);
 
         public bool ColliderEnabled
         {
-            get => colliderEnabled;
-            set
-            {
-                colliderEnabled = value;
-                if (HasBoxCollider)
-                {
-                    BoxCollider.enabled = value;
-                }
-            }
+            set => Collider.enabled = value;
         }
 
         public virtual bool Visible

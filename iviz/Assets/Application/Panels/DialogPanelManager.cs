@@ -29,6 +29,7 @@ namespace Iviz.App
     public class DialogPanelManager : MonoBehaviour
     {
         readonly Dictionary<DialogPanelType, IDialogPanelContents> panelByType = new();
+        readonly HashSet<DialogData> detachedDialogDatas = new();
 
         DialogData? selectedDialogData;
         bool started;
@@ -75,8 +76,8 @@ namespace Iviz.App
             gameObject.SetActive(true);
             started = true;
 
-            GameThread.EverySecond += UpdateSelected;
-            GameThread.EveryFastTick += UpdateSelectedFast;
+            GameThread.EverySecond += UpdateAll;
+            GameThread.EveryFastTick += UpdateAllFast;
         }
 
         T CreatePanel<T>(Info<GameObject> source) where T : IDialogPanelContents
@@ -92,32 +93,58 @@ namespace Iviz.App
 
         void OnDestroy()
         {
-            GameThread.EverySecond -= UpdateSelected;
-            GameThread.EveryFastTick -= UpdateSelectedFast;
+            GameThread.EverySecond -= UpdateAll;
+            GameThread.EveryFastTick -= UpdateAllFast;
         }
 
-        void UpdateSelected()
+        void UpdateAll()
+        {
+            if (selectedDialogData != null)
+            {
+                UpdateDialogData(selectedDialogData);
+            }
+
+            foreach (var dialogData in detachedDialogDatas)
+            {
+                UpdateDialogData(dialogData);
+            }
+        }
+
+        void UpdateDialogData(DialogData dialogData)
         {
             try
             {
-                selectedDialogData?.UpdatePanel();
+                dialogData.UpdatePanel();
             }
             catch (Exception e)
             {
                 RosLogger.Error($"{this}: Exception during UpdatePanel:", e);
-            }
+            }            
         }
 
-        void UpdateSelectedFast()
+        void UpdateAllFast()
+        {
+            if (selectedDialogData != null)
+            {
+                UpdateDialogDataFast(selectedDialogData);
+            }
+
+            foreach (var dialogData in detachedDialogDatas)
+            {
+                UpdateDialogDataFast(dialogData);
+            }
+        }
+        
+        void UpdateDialogDataFast(DialogData dialogData)
         {
             try
             {
-                selectedDialogData?.UpdatePanelFast();
+                dialogData.UpdatePanelFast();
             }
             catch (Exception e)
             {
-                Core.RosLogger.Error($"{this}: Exception during UpdatePanel:", e);
-            }
+                RosLogger.Error($"{this}: Exception during UpdatePanelFast:", e);
+            }            
         }
 
         public T GetPanelByType<T>(DialogPanelType resource) where T : IDialogPanelContents
@@ -196,6 +223,7 @@ namespace Iviz.App
             {
                 HidePanel(deselected);
                 deselected.Detached = false;
+                detachedDialogDatas.Remove(deselected);
             }
 
             if (selectedDialogData == deselected)
@@ -223,6 +251,7 @@ namespace Iviz.App
                 return;
             }
             
+            detachedDialogDatas.Add(selectedDialogData);
             selectedDialogData.Detached = true;
             selectedDialogData = null;
         } 

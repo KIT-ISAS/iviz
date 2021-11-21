@@ -164,7 +164,7 @@ namespace Iviz.Controllers
 
         public override void StartListening()
         {
-            Listener = new Listener<InteractiveMarkerUpdate>(config.Topic, HandlerUpdate) {MaxQueueSize = 50};
+            Listener = new Listener<InteractiveMarkerUpdate>(config.Topic, HandlerUpdate) { MaxQueueSize = 50 };
 
             string root;
             if (config.Topic.HasSuffix("/update"))
@@ -190,7 +190,7 @@ namespace Iviz.Controllers
 
             foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
             {
-                DeleteMarkerObject(markerObject);
+                markerObject.Stop();
             }
 
             interactiveMarkers.Clear();
@@ -255,25 +255,14 @@ namespace Iviz.Controllers
                 return;
             }
 
-            InteractiveMarkerObject newMarkerObject = CreateInteractiveMarkerObject();
-            newMarkerObject.Initialize(this, id);
-            newMarkerObject.Parent = TfListener.ListenersFrame;
-            newMarkerObject.Visible = Visible;
-            newMarkerObject.Interactable = Interactable;
-            newMarkerObject.transform.SetParentLocal(node.transform);
+            var newMarkerObject = new InteractiveMarkerObject(this, id, TfListener.ListenersFrame)
+            {
+                Visible = Visible,
+                Interactable = Interactable
+            };
+            newMarkerObject.Transform.SetParentLocal(node.transform);
             interactiveMarkers[id] = newMarkerObject;
             newMarkerObject.Set(msg);
-        }
-
-        static InteractiveMarkerObject CreateInteractiveMarkerObject()
-        {
-            GameObject gameObject = new GameObject("InteractiveMarkerObject");
-            return gameObject.AddComponent<InteractiveMarkerObject>();
-        }
-
-        static void DeleteMarkerObject(InteractiveMarkerObject marker)
-        {
-            marker.DestroySelf();
         }
 
         void UpdateInteractiveMarkerPose(InteractiveMarkerPose msg)
@@ -294,7 +283,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            interactiveMarker.DestroySelf();
+            interactiveMarker.Stop();
             interactiveMarkers.Remove(id);
         }
 
@@ -308,7 +297,7 @@ namespace Iviz.Controllers
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
-                (byte) eventType,
+                (byte)eventType,
                 relativeControlPose.Unity2RosPose(),
                 0,
                 position?.Unity2RosPoint() ?? Point.Zero,
@@ -361,7 +350,7 @@ namespace Iviz.Controllers
         {
             foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
             {
-                DeleteMarkerObject(markerObject);
+                markerObject.Stop();
             }
 
             interactiveMarkers.Clear();

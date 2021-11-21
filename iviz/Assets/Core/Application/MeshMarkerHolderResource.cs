@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Core;
-using Iviz.Resources;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -14,9 +13,8 @@ namespace Iviz.Displays
         ISupportsTint, ISupportsPbr
     {
         [SerializeField] protected MeshMarkerResource[] children = Array.Empty<MeshMarkerResource>();
-
-        BoxCollider? boxCollider;
-        Transform? mTransform;
+        [SerializeField] BoxCollider? boxCollider;
+        [SerializeField] Transform? m_Transform;
 
         protected BoxCollider Collider => boxCollider != null
             ? boxCollider
@@ -32,11 +30,9 @@ namespace Iviz.Displays
             }
         }
 
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
 
-        public Bounds Bounds => new(Collider.center, Collider.size);
-
-        Bounds? IDisplay.Bounds => Bounds;
+        public Bounds? Bounds => children.Length == 0 ? null : new Bounds(Collider.center, Collider.size);
 
         public int Layer
         {
@@ -132,7 +128,7 @@ namespace Iviz.Displays
             }
         }
 
-        public Color EmissiveColor
+        public virtual Color EmissiveColor
         {
             set
             {
@@ -157,14 +153,21 @@ namespace Iviz.Displays
             }
         }
 
+        public bool ColliderEnabled
+        {
+            set => Collider.enabled = value;
+        }
+
         public void UpdateBounds()
         {
             var markerChildren = children.Select(resource =>
-                (Bounds?)BoundsUtils.TransformBoundsUntil(resource.Bounds, resource.Transform, Transform));
+                BoundsUtils.TransformBoundsUntil(resource.Bounds, resource.Transform, Transform));
             var nullableRootBounds = markerChildren.CombineBounds();
 
             if (nullableRootBounds is not { } rootBounds)
             {
+                Collider.center = Vector3.zero;
+                Collider.size = Vector3.zero;
                 return;
             }
 
@@ -174,6 +177,7 @@ namespace Iviz.Displays
 
         public virtual void Suspend()
         {
+            Visible = true;
         }
     }
 }

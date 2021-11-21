@@ -28,7 +28,7 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.App
 {
-    public sealed class GuiInputModule : FrameNode, ISettingsManager
+    public sealed class GuiInputModule : MonoBehaviour, ISettingsManager
     {
         const float MinShadowDistance = 4;
 
@@ -90,6 +90,9 @@ namespace Iviz.App
 
         Leash? leash;
         Leash Leash => leash != null ? leash : (leash = ResourcePool.RentDisplay<Leash>());
+        
+        Transform? mTransform;
+        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         public event Action<ClickInfo>? PointerDown;
         public event Action<ClickInfo>? ShortClick;
@@ -655,7 +658,7 @@ namespace Iviz.App
                 if (orbitRadius < 0.5f)
                 {
                     float diff = 0.5f - orbitRadius;
-                    orbitCenter += diff * (q * Vector3.forward);
+                    orbitCenter.AddInPlace(diff * (q * Vector3.forward));
                     orbitRadius = 0.5f;
                 }
 
@@ -724,9 +727,9 @@ namespace Iviz.App
             Vector3Int baseInput = GetBaseInput();
             float deltaTime = Time.deltaTime;
 
-            Vector3 speed = deltaTime * Vector3.Scale(baseInput, MainSpeed * DirectionWeight);
+            Vector3 speed = deltaTime * baseInput.Mult(MainSpeed * DirectionWeight);
 
-            accel += Vector3.Scale(baseInput, MainAccel * DirectionWeight) * deltaTime;
+            accel.AddInPlace(baseInput.Mult(MainAccel * DirectionWeight) * deltaTime);
             if (baseInput.x == 0)
             {
                 accel.x *= BrakeCoeff;
@@ -754,7 +757,7 @@ namespace Iviz.App
                 }
             }
 
-            speed += deltaTime * accel;
+            speed.AddInPlace(deltaTime * accel);
 
             Transform.position += Transform.rotation * speed;
         }
@@ -787,32 +790,32 @@ namespace Iviz.App
             var pVelocity = new Vector3Int();
             if (Keyboard.current[Key.W].isPressed)
             {
-                pVelocity += Vector3Int.forward;
+                pVelocity.z++;
             }
 
             if (Keyboard.current[Key.S].isPressed)
             {
-                pVelocity += Vector3Int.back;
+                pVelocity.z--;
             }
 
             if (Keyboard.current[Key.A].isPressed)
             {
-                pVelocity += Vector3Int.left;
+                pVelocity.x--;
             }
 
             if (Keyboard.current[Key.D].isPressed)
             {
-                pVelocity += Vector3Int.right;
+                pVelocity.x++;
             }
 
             if (Keyboard.current[Key.Q].isPressed)
             {
-                pVelocity += Vector3Int.down;
+                pVelocity.y--;
             }
 
             if (Keyboard.current[Key.E].isPressed)
             {
-                pVelocity += Vector3Int.up;
+                pVelocity.y++;
             }
 
             return pVelocity;

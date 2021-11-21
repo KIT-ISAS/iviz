@@ -138,10 +138,8 @@ namespace Iviz.Displays
 
         public bool FollowCamera { get; set; } = true;
 
-        protected override void Awake()
+        void Awake()
         {
-            base.Awake();
-
             interiorObject = Resource.Displays.Cube.Instantiate(transform);
             interiorObject.name = "Grid Interior";
             interiorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
@@ -239,8 +237,8 @@ namespace Iviz.Displays
             interiorObject.transform.localScale = new Vector3(totalSize, totalSize, interiorHeight);
             interiorObject.transform.localPosition = new Vector3(0, 0, interiorHeight / 2);
 
-            BoxCollider.size = new Vector3(totalSize, totalSize, interiorHeight);
-            BoxCollider.center = new Vector3(0, 0, interiorHeight / 2);
+            Collider.size = new Vector3(totalSize, totalSize, interiorHeight);
+            Collider.center = new Vector3(0, 0, interiorHeight / 2);
 
             int size = NumberOfGridCells / 10;
             if (horizontals.Count > size)

@@ -437,11 +437,11 @@ namespace Iviz.Ros
             {
                 if (e is OperationCanceledException or IOException)
                 {
-                    RosLogger.Debug("[NtpChecker] Failed to read NTP clock from the master.", e);
+                    RosLogger.Debug("[NtpChecker] Master does not appear to have an NTP clock running.");
                 }
                 else
                 {
-                    RosLogger.Error("[NtpChecker] Failed to read NTP clock from the master.", e);
+                    RosLogger.Error("[NtpChecker] Failed to read NTP clock from the master. Reason: ", e);
                 }
 
                 return;

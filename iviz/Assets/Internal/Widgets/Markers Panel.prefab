@@ -813,7 +813,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 6349721972206973760}
   m_HandleRect: {fileID: 6349721972206973791}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -1756,6 +1756,28 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6349721972936953080}
     m_Modifications:
+    - target: {fileID: 1384428322456353893, guid: 9c542219a0eec15448e8897cc2fc232d,
+        type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 7ab7bd6bfe316484d8697f049b23fb2c,
+        type: 2}
+    - target: {fileID: 1384428322456353893, guid: 9c542219a0eec15448e8897cc2fc232d,
+        type: 3}
+      propertyPath: m_fontStyle
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1384428322456353893, guid: 9c542219a0eec15448e8897cc2fc232d,
+        type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: -6388908872585162227, guid: 7ab7bd6bfe316484d8697f049b23fb2c,
+        type: 2}
+    - target: {fileID: 2666184248650205346, guid: 9c542219a0eec15448e8897cc2fc232d,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -1.4350004
+      objectReference: {fileID: 0}
     - target: {fileID: 4751418848485331710, guid: 9c542219a0eec15448e8897cc2fc232d,
         type: 3}
       propertyPath: m_FontData.m_RichText

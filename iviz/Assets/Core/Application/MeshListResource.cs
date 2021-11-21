@@ -148,6 +148,8 @@ namespace Iviz.Displays
                 UpdateScale();
             }
         }
+        
+        public override Bounds? Bounds => Size == 0 ? null : base.Bounds;
 
         protected override void Awake()
         {
@@ -174,7 +176,7 @@ namespace Iviz.Displays
 
             UpdateTransform();
 
-            Bounds worldBounds = BoxCollider.bounds;
+            Bounds worldBounds = Collider.bounds;
             Properties.SetVector(BoundaryCenterID, worldBounds.center);
 
             Material material = FindMaterial();
@@ -317,8 +319,8 @@ namespace Iviz.Displays
         {
             if (Size == 0)
             {
-                BoxCollider.size = Vector3.zero;
-                BoxCollider.center = Vector3.zero;
+                Collider.size = Vector3.zero;
+                Collider.center = Vector3.zero;
 
                 MeasuredIntensityBounds = Vector2.zero;
                 if (!OverrideIntensityBounds)
@@ -354,18 +356,22 @@ namespace Iviz.Displays
             Bounds baseMeshBounds = mesh.bounds;
             Bounds meshBounds = new Bounds
             {
-                center = Vector3.Scale(baseMeshBounds.center + preTranslation, meshScale),
-                size = Vector3.Scale(baseMeshBounds.size, meshScale)
+                center = meshScale.Mult(baseMeshBounds.center + preTranslation),
+                size = meshScale.Mult(baseMeshBounds.size)
             };
 
-            BoxCollider.size = pointBounds.size + meshBounds.size;
-            BoxCollider.center = pointBounds.center + meshBounds.center;
+            Collider.size = pointBounds.size + meshBounds.size;
+            Collider.center = pointBounds.center + meshBounds.center;
 
             MeasuredIntensityBounds = span;
             if (!OverrideIntensityBounds)
             {
                 IntensityBounds = span;
             }
+        }
+
+        protected override void UpdateProperties()
+        {
         }
 
         protected override void Rebuild()

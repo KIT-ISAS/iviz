@@ -27,13 +27,15 @@ namespace Iviz.Displays
 
         readonly NativeList<LineWithColor> lineBuffer = new();
         readonly NativeList<PointWithColor> pointBuffer = new();
-
-        (float angleMin, float angleIncrement, int length) cacheProperties;
         readonly List<Vector2> cache = new();
 
         LineResource? lines;
         PointListResource? pointCloud;
-
+        (float angleMin, float angleIncrement, int length) cacheProperties;
+        bool colliderEnabled;
+        bool visible = true;
+        int layer;
+        
         LineResource Lines => lines != null
             ? lines
             : (lines = ResourcePool.RentDisplay<LineResource>(transform));
@@ -41,16 +43,6 @@ namespace Iviz.Displays
         PointListResource PointCloud => pointCloud != null
             ? pointCloud
             : (pointCloud = ResourcePool.RentDisplay<PointListResource>(transform));
-
-        bool colliderEnabled;
-        bool visible = true;
-        int layer;
-
-        public string Name
-        {
-            get => gameObject.name;
-            set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
-        }
 
         public int Size
         {
@@ -184,20 +176,7 @@ namespace Iviz.Displays
                 }
             }
         }
-
-        void Awake()
-        {
-            PointCloud.UseColormap = true;
-            Lines.UseColormap = true;
-
-            MinIntensity = 0;
-            MaxIntensity = 1;
-            UseLines = true;
-            Colormap = ColormapId.hsv;
-            PointSize = 0.01f;
-            MaxLineDistance = 0.3f;
-        }
-
+        
         public Bounds? Bounds => UseLines ? Lines.Bounds : PointCloud.Bounds;
 
         public int Layer
@@ -211,17 +190,6 @@ namespace Iviz.Displays
             }
         }
 
-        public bool ColliderEnabled
-        {
-            get => colliderEnabled;
-            set
-            {
-                colliderEnabled = value;
-                Lines.ColliderEnabled = value;
-                PointCloud.ColliderEnabled = value;
-            }
-        }
-
         public bool Visible
         {
             get => visible;
@@ -232,7 +200,20 @@ namespace Iviz.Displays
                 Lines.Visible = value && UseLines;
             }
         }
+        
+        void Awake()
+        {
+            PointCloud.UseColormap = true;
+            Lines.UseColormap = true;
 
+            MinIntensity = 0;
+            MaxIntensity = 1;
+            UseLines = true;
+            Colormap = ColormapId.hsv;
+            PointSize = 0.01f;
+            MaxLineDistance = 0.3f;
+        }
+        
         public void Suspend()
         {
             PointCloud.Suspend();
@@ -288,9 +269,9 @@ namespace Iviz.Displays
                 for (int i = 0; i < ranges.Length; i++)
                 {
                     float a = angleMin + angleIncrement * i;
-                    Vector3 rosPos = new(Mathf.Cos(a), Mathf.Sin(a), 0);
-                    Vector3 unityPos = rosPos.Ros2Unity();
-                    cache.Add(new Vector2(unityPos.x, unityPos.z));
+                    var rosPos = new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0);
+                    var (x, _, z) = rosPos.Ros2Unity();
+                    cache.Add(new Vector2(x, z));
                 }
             }
 
@@ -305,8 +286,7 @@ namespace Iviz.Displays
                     continue;
                 }
 
-                float x = cache[i].x;
-                float z = cache[i].y;
+                var (x, z) = cache[i];
                 pointBuffer.Add(new PointWithColor(
                     x * range, 0, z * range,
                     useIntensity ? intensities[i] : range));
@@ -336,8 +316,8 @@ namespace Iviz.Displays
 
             for (int i = 0; i < numPoints - 1; i++)
             {
-                PointWithColor pA = pointBuffer[i];
-                PointWithColor pB = pointBuffer[i + 1];
+                var pA = pointBuffer[i];
+                var pB = pointBuffer[i + 1];
                 if ((pB.Position - pA.Position).MaxAbsCoeff() < maxLineDistance)
                 {
                     lineBuffer.Add(new LineWithColor(pA, pB));
@@ -346,8 +326,8 @@ namespace Iviz.Displays
 
             if (numPoints != 0)
             {
-                PointWithColor pA = pointBuffer[numPoints - 1];
-                PointWithColor pB = pointBuffer[0];
+                var pA = pointBuffer[numPoints - 1];
+                var pB = pointBuffer[0];
                 if ((pB.Position - pA.Position).MaxAbsCoeff() < maxLineDistance)
                 {
                     lineBuffer.Add(new LineWithColor(pA, pB));

@@ -27,7 +27,7 @@ namespace Iviz.Displays
                 }
 
                 size = value;
-                Collider.size = Bounds.size;
+                Collider.size = value;
                 RebuildSize();
             }
         }

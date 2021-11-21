@@ -864,7 +864,7 @@ namespace Iviz.App
                 case -1:
                     bottomBattery.text = "---";
                     break;
-                case 1 when state == BatteryStatus.Full || state == BatteryStatus.Charging:
+                case 1 when state is BatteryStatus.Full or BatteryStatus.Charging:
                     bottomBattery.text = "<color=#005500>Full</color>";
                     break;
                 case 1:

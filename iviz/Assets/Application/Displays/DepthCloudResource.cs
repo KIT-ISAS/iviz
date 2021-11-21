@@ -104,9 +104,8 @@ namespace Iviz.Displays
             }
         }
 
-        protected override void Awake()
+        void Awake()
         {
-            base.Awake();
             Layer = LayerType.IgnoreRaycast;
         }
 
@@ -219,14 +218,6 @@ namespace Iviz.Displays
             Material.SetTexture(PIntensity, texture);
         }
 
-        /*
-        void UpdateIntensityValues(float intensityCoeff, float intensityAdd)
-        {
-            material.SetFloat(PIntensityCoeff, intensityCoeff);
-            material.SetFloat(PIntensityAdd, intensityAdd);
-        }
-        */
-
         void UpdatePosValues(Texture? texture)
         {
             if (texture == null)
@@ -234,11 +225,8 @@ namespace Iviz.Displays
                 return;
             }
 
-            if (intrinsic == null)
-            {
-                throw new InvalidOperationException("Intrinsic has not been set!");
-            }
-
+            intrinsic ??= new Intrinsic(70.45f * Mathf.Deg2Rad, texture.width, texture.height);
+            
             float posMulX = texture.width / intrinsic.Fx;
             float posMulY = texture.height / intrinsic.Fy;
 
@@ -253,8 +241,8 @@ namespace Iviz.Displays
             var size = new Vector3(posMulX, 1, posMulY) * maxDepthForBounds;
             var center = new Vector3(0, maxDepthForBounds / 2, 0);
 
-            BoxCollider.center = center;
-            BoxCollider.size = size;
+            Collider.center = center;
+            Collider.size = size;
         }
 
         public override void Suspend()

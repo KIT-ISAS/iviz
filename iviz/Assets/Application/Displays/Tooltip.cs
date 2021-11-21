@@ -46,6 +46,7 @@ namespace Iviz.Displays
         void Awake()
         {
             Layer = LayerType.IgnoreRaycast;
+            Background.Radius = 2f;
         }
 
         public Color BackgroundColor
@@ -101,7 +102,7 @@ namespace Iviz.Displays
         void UpdateSize()
         {
             Background.Size = new Vector2(Text.preferredWidth + 5f, Text.preferredHeight + 2f);
-            BoxCollider.size = Background.Bounds.size;
+            BoxCollider.size = Background.Bounds!.Value.size;
         }
 
         public void Suspend()

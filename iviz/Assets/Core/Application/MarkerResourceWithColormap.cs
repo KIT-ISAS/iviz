@@ -1,6 +1,7 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using Iviz.Common;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -12,7 +13,6 @@ namespace Iviz.Displays
     /// Instanced elements can be shown either with colors or with intensities and colormap textures.
     /// </summary>
     /// 
-    [RequireComponent(typeof(BoxCollider))]
     public abstract class MarkerResourceWithColormap : MarkerResource, ISupportsTint
     {
         static readonly int IntensityCoeffId = Shader.PropertyToID("_IntensityCoeff");
@@ -28,10 +28,9 @@ namespace Iviz.Displays
         [SerializeField] Color tint;
         [SerializeField] float elementScale = 1.0f;
 
-        MaterialPropertyBlock properties;
+        MaterialPropertyBlock? properties;
 
-        [NotNull]
-        protected MaterialPropertyBlock Properties => properties ?? (properties = new MaterialPropertyBlock());
+        protected MaterialPropertyBlock Properties => properties ??= new MaterialPropertyBlock();
 
         /// <summary>
         /// Whether to use the element color or the element intensity overlaid with a colormap. 
@@ -62,7 +61,7 @@ namespace Iviz.Displays
             set
             {
                 intensityBounds = value;
-                var intensitySpan = intensityBounds.y - intensityBounds.x;
+                float intensitySpan = intensityBounds.y - intensityBounds.x;
 
                 float coeff, add;
                 if (Mathf.Approximately(intensitySpan, 0))
@@ -122,9 +121,8 @@ namespace Iviz.Displays
             }
         }
 
-        protected override void Awake()
+        protected virtual void Awake()
         {
-            base.Awake();
             Tint = Color.white;
             IntensityBounds = new Vector2(0, 1);
             Layer = LayerType.IgnoreRaycast;
@@ -175,9 +173,7 @@ namespace Iviz.Displays
             UpdateProperties();
         }
 
-        protected virtual void UpdateProperties()
-        {
-        }
+        protected abstract void UpdateProperties();
 
         protected abstract void Rebuild();
     }

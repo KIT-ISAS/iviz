@@ -34,27 +34,26 @@ namespace Iviz.Core
             {
                 return scale == Vector3.one
                     ? bounds
-                    : new Bounds(Vector3.Scale(scale, bounds.center), Vector3.Scale(scale, bounds.size));
+                    : new Bounds(scale.Mult(bounds.center), scale.Mult(bounds.size));
             }
 
             if (pose.rotation == Quaternion.identity)
             {
                 return scale == Vector3.one
                     ? new Bounds(bounds.center + pose.position, bounds.size)
-                    : new Bounds(Vector3.Scale(scale, bounds.center) + pose.position,
-                        Vector3.Scale(scale, bounds.size));
+                    : new Bounds(scale.Mult(bounds.center) + pose.position, scale.Mult(bounds.size));
             }
 
-            Vector3 positionMin = float.MaxValue * Vector3.one;
-            Vector3 positionMax = float.MinValue * Vector3.one;
-            Vector3 boundsCenter = bounds.center;
-            Vector3 boundsExtents = bounds.extents;
+            var positionMin = float.MaxValue * Vector3.one;
+            var positionMax = float.MinValue * Vector3.one;
+            var boundsCenter = bounds.center;
+            var boundsExtents = bounds.extents;
 
             if (scale == Vector3.one)
             {
                 foreach (Vector3 point in CubePoints)
                 {
-                    Vector3 position = pose.rotation * Vector3.Scale(point, boundsExtents);
+                    Vector3 position = pose.rotation * point.Mult(boundsExtents);
                     positionMin = Vector3.Min(positionMin, position);
                     positionMax = Vector3.Max(positionMax, position);
                 }
@@ -66,8 +65,8 @@ namespace Iviz.Core
 
             foreach (Vector3 point in CubePoints)
             {
-                Vector3 localPoint = boundsCenter + Vector3.Scale(point, boundsExtents);
-                Vector3 position = pose.rotation * Vector3.Scale(localPoint, scale);
+                var localPoint = boundsCenter + point.Mult(boundsExtents);
+                var position = pose.rotation * localPoint.Mult(scale);
                 positionMin = Vector3.Min(positionMin, position);
                 positionMax = Vector3.Max(positionMax, position);
             }
@@ -138,7 +137,12 @@ namespace Iviz.Core
             return result;
         }
 
-        public static Bounds TransformBoundsUntil(Bounds bounds, Transform transform, Transform endTransform)
+        public static Bounds? TransformBoundsUntil(Bounds? bounds, Transform transform, Transform endTransform)
+        {
+            return bounds is { } notNullBounds ? TransformBoundsUntil(notNullBounds, transform, endTransform) : null;
+        }
+
+        static Bounds TransformBoundsUntil(Bounds bounds, Transform transform, Transform endTransform)
         {
             while (transform != endTransform)
             {
@@ -147,7 +151,7 @@ namespace Iviz.Core
             }
 
             return bounds;
-        }         
+        }
 
         static readonly Plane[] PlaneCache = new Plane[6];
 

@@ -1,18 +1,26 @@
-﻿using Iviz.Core;
+﻿#nullable enable
+
+using Iviz.Core;
 using UnityEngine;
 using Iviz.Resources;
 using JetBrains.Annotations;
 
 namespace Iviz.Displays
 {
-    [RequireComponent(typeof(BoxCollider))]
-    public sealed class AxisFrameResource : MarkerResource, IRecyclable, ISupportsAROcclusion, ISupportsTint
+    public sealed class AxisFrameResource : MeshMarkerHolderResource, IRecyclable
     {
         static readonly string[] Names = {"Axis-X", "Axis-Y", "Axis-Z"};
 
-        readonly MeshMarkerResource[] axisObjects = new MeshMarkerResource[3];
-
         float axisLength;
+
+        MeshMarkerResource[] Frames => children.Length != 0
+            ? children
+            : children = new[]
+            {
+                ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, Transform),
+                ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, Transform),
+                ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, Transform),
+            };
 
         public float AxisLength
         {
@@ -26,93 +34,39 @@ namespace Iviz.Displays
 
         public Color ColorX
         {
-            get => axisObjects[0].Color;
-            set => axisObjects[0].Color = value;
+            get => Frames[0].Color;
+            set => Frames[0].Color = value;
         }
 
         public Color ColorY
         {
-            get => axisObjects[1].Color;
-            set => axisObjects[1].Color = value;
+            get => Frames[1].Color;
+            set => Frames[1].Color = value;
         }
 
         public Color ColorZ
         {
-            get => axisObjects[2].Color;
-            set => axisObjects[2].Color = value;
-        }
-
-
-        public override int Layer
-        {
-            get => base.Layer;
-            set
-            {
-                base.Layer = value;
-                axisObjects[0].Layer = value;
-                axisObjects[1].Layer = value;
-                axisObjects[2].Layer = value;
-            }
-        }
-
-        bool occlusionOnly;
-
-        public bool OcclusionOnly
-        {
-            get => occlusionOnly;
-            set
-            {
-                occlusionOnly = value;
-                axisObjects[0].OcclusionOnly = value;
-                axisObjects[1].OcclusionOnly = value;
-                axisObjects[2].OcclusionOnly = value;
-            }
-        }
-
-        Color tint;
-
-        public Color Tint
-        {
-            get => tint;
-            set
-            {
-                tint = value;
-                axisObjects[0].Tint = value;
-                axisObjects[1].Tint = value;
-                axisObjects[2].Tint = value;
-            }
-        }
-
-        public bool ShadowsEnabled
-        {
-            set
-            {
-                axisObjects[0].ShadowsEnabled = value;
-                axisObjects[1].ShadowsEnabled = value;
-                axisObjects[2].ShadowsEnabled = value;
-            }
+            get => Frames[2].Color;
+            set => Frames[2].Color = value;
         }
 
         public float Emissive
         {
             set
             {
-                axisObjects[0].EmissiveColor = value * axisObjects[0].Color;
-                axisObjects[1].EmissiveColor = value * axisObjects[1].Color;
-                axisObjects[2].EmissiveColor = value * axisObjects[2].Color;
+                Frames[0].EmissiveColor = value * Frames[0].Color;
+                Frames[1].EmissiveColor = value * Frames[1].Color;
+                Frames[2].EmissiveColor = value * Frames[2].Color;
             }
         }
 
-        protected override void Awake()
+        void Awake()
         {
-            base.Awake();
-
             for (int i = 0; i < 3; i++)
             {
-                axisObjects[i] = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, transform);
-                axisObjects[i].gameObject.name = Names[i];
-                axisObjects[i].ColliderEnabled = false;
-                axisObjects[i].Layer = Layer;
+                Frames[i].gameObject.name = Names[i];
+                Frames[i].ColliderEnabled = false;
+                Frames[i].Layer = Layer;
             }
 
             AxisLength = 0.25f;
@@ -124,29 +78,30 @@ namespace Iviz.Displays
 
         void UpdateFrameMesh(float newFrameAxisLength, float newFrameAxisWidth)
         {
-            axisObjects[0].transform.localScale = new Vector3(newFrameAxisLength, newFrameAxisWidth, newFrameAxisWidth);
-            axisObjects[0].transform.localPosition = -0.5f * newFrameAxisLength * Vector3.right;
-            axisObjects[1].transform.localScale = new Vector3(newFrameAxisWidth, newFrameAxisWidth, newFrameAxisLength);
-            axisObjects[1].transform.localPosition = newFrameAxisLength * new Vector3(0, 0.001f, -0.5f);
-            axisObjects[2].transform.localScale = new Vector3(newFrameAxisWidth, newFrameAxisLength, newFrameAxisWidth);
-            axisObjects[2].transform.localPosition = newFrameAxisLength * new Vector3(0.001f, 0.5f, 0.001f);
+            var frames = Frames;
+            frames[0].Transform.localScale = new Vector3(newFrameAxisLength, newFrameAxisWidth, newFrameAxisWidth);
+            frames[0].Transform.localPosition = -0.5f * newFrameAxisLength * Vector3.right;
+            frames[1].Transform.localScale = new Vector3(newFrameAxisWidth, newFrameAxisWidth, newFrameAxisLength);
+            frames[1].Transform.localPosition = newFrameAxisLength * new Vector3(0, 0.001f, -0.5f);
+            frames[2].Transform.localScale = new Vector3(newFrameAxisWidth, newFrameAxisLength, newFrameAxisWidth);
+            frames[2].Transform.localPosition = newFrameAxisLength * new Vector3(0.001f, 0.5f, 0.001f);
 
-            BoxCollider.center = 0.5f * (newFrameAxisLength - newFrameAxisWidth / 2) * new Vector3(-1, 1, -1);
-            BoxCollider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
+            Collider.center = 0.5f * (newFrameAxisLength - newFrameAxisWidth / 2) * new Vector3(-1, 1, -1);
+            Collider.size = (newFrameAxisLength + newFrameAxisWidth / 2) * Vector3.one;
         }
 
-        public void OverrideMaterial([CanBeNull] Material material)
+        public void OverrideMaterial(Material? material)
         {
-            axisObjects[0].OverrideMaterial(material);
-            axisObjects[1].OverrideMaterial(material);
-            axisObjects[2].OverrideMaterial(material);
+            Frames[0].OverrideMaterial(material);
+            Frames[1].OverrideMaterial(material);
+            Frames[2].OverrideMaterial(material);
         }
 
         public void SplitForRecycle()
         {
-            axisObjects[0].ReturnToPool(Resource.Displays.Cube);
-            axisObjects[1].ReturnToPool(Resource.Displays.Cube);
-            axisObjects[2].ReturnToPool(Resource.Displays.Cube);
+            Frames[0].ReturnToPool(Resource.Displays.Cube);
+            Frames[1].ReturnToPool(Resource.Displays.Cube);
+            Frames[2].ReturnToPool(Resource.Displays.Cube);
         }
 
         public override void Suspend()

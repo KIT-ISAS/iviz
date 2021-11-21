@@ -1,47 +1,36 @@
-﻿using System;
-using System.Runtime.Serialization;
+﻿#nullable enable
+
+using System;
 using Iviz.Common;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
-using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public sealed class JoystickConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string JoyTopic { get; set; } = "";
-        [DataMember] public bool PublishJoy { get; set; }
-        [DataMember] public string TwistTopic { get; set; } = "";
-        [DataMember] public bool PublishTwist { get; set; } = true;
-        [DataMember] public bool UseTwistStamped { get; set; }
-        [DataMember] public SerializableVector3 MaxSpeed { get; set; } = Vector3.one * 0.25f;
-        [DataMember, NotNull] public string AttachToFrame { get; set; } = TfListener.MapFrameId;
-        [DataMember] public bool XIsFront { get; set; } = true;
-        [DataMember, NotNull] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public ModuleType ModuleType => ModuleType.Joystick;
-        [DataMember] public bool Visible { get; set; } = true;
-    }
-
-
     public sealed class JoystickController : IController
     {
-        readonly JoystickConfiguration config = new JoystickConfiguration();
+        readonly JoystickConfiguration config = new();
+        readonly TwistJoystick joystick;
+
         uint joySeq;
         uint twistSeq;
 
-        TwistJoystick joystick;
+        public Sender<Joy>? SenderJoy { get; private set; }
+        public ISender? SenderTwist { get; private set; }
 
-        public JoystickController([NotNull] IModuleData moduleData)
+        public JoystickController(IModuleData moduleData, TwistJoystick joystick)
         {
             ModuleData = moduleData;
+
+            this.joystick = joystick;
+            this.joystick.Changed += PublishData;
+
             Config = new JoystickConfiguration();
         }
 
@@ -91,44 +80,13 @@ namespace Iviz.Controllers
             }
         }
 
-        public TwistJoystick Joystick
-        {
-            get => joystick;
-            set
-            {
-                if (joystick == value)
-                {
-                    return;
-                }
-
-                if (joystick != null)
-                {
-                    joystick.Changed -= PublishData;
-                }
-
-                joystick = value;
-
-                if (joystick != null)
-                {
-                    joystick.Changed += PublishData;
-                    Joystick.Visible = Visible;
-                }
-            }
-        }
-
-        public Sender<Joy> SenderJoy { get; private set; }
-        public ISender SenderTwist { get; private set; }
-
         public bool Visible
         {
             get => config.Visible;
             set
             {
                 config.Visible = value;
-                if (Joystick != null)
-                {
-                    Joystick.Visible = value;
-                }
+                joystick.Visible = value;
             }
         }
 
@@ -168,11 +126,10 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
         public string AttachToFrame
         {
             get => config.AttachToFrame;
-            set => config.AttachToFrame = value;
+            set => config.AttachToFrame = string.IsNullOrEmpty(value) ? TfListener.FixedFrameId : value;
         }
 
         public bool XIsFront
@@ -194,7 +151,6 @@ namespace Iviz.Controllers
             SenderJoy?.Stop();
             SenderTwist?.Stop();
             Visible = false;
-            Joystick = null;
         }
 
         public void ResetController()
@@ -209,10 +165,7 @@ namespace Iviz.Controllers
                 SenderJoy = null;
             }
 
-            if (SenderJoy is null)
-            {
-                SenderJoy = new Sender<Joy>(JoyTopic);
-            }
+            SenderJoy ??= new Sender<Joy>(JoyTopic);
         }
 
         void RebuildTwist()
@@ -228,12 +181,9 @@ namespace Iviz.Controllers
                 SenderTwist = null;
             }
 
-            if (SenderTwist == null)
-            {
-                SenderTwist = UseTwistStamped
-                    ? (ISender) new Sender<TwistStamped>(TwistTopic)
-                    : new Sender<Twist>(TwistTopic);
-            }
+            SenderTwist ??= UseTwistStamped
+                ? new Sender<TwistStamped>(TwistTopic)
+                : new Sender<Twist>(TwistTopic);
         }
 
         void PublishData(TwistJoystick.Source _, Vector2 __)
@@ -245,12 +195,12 @@ namespace Iviz.Controllers
 
             if (SenderTwist != null)
             {
-                Vector2 leftDir = Joystick.Left;
-                Vector2 rightDir = Joystick.Right;
+                Vector2 leftDir = joystick.Left;
+                Vector2 rightDir = joystick.Right;
 
                 Vector2 linear = XIsFront ? new Vector2(leftDir.y, -leftDir.x) : new Vector2(leftDir.x, leftDir.y);
 
-                Twist twist = (
+                var twist = new Twist(
                     (linear.x * MaxSpeed.x, linear.y * MaxSpeed.y, 0),
                     (0, 0, -rightDir.x * MaxSpeed.z)
                 );
@@ -258,7 +208,7 @@ namespace Iviz.Controllers
                 if (UseTwistStamped)
                 {
                     string frameId = string.IsNullOrEmpty(AttachToFrame) ? TfListener.FixedFrameId : AttachToFrame;
-                    TwistStamped twistStamped = new TwistStamped(
+                    var twistStamped = new TwistStamped(
                         (twistSeq++, frameId),
                         twist
                     );
@@ -266,19 +216,19 @@ namespace Iviz.Controllers
                 }
                 else
                 {
-                    ((Sender<Twist>) SenderTwist).Publish(twist);
+                    ((Sender<Twist>)SenderTwist).Publish(twist);
                 }
             }
 
             if (SenderJoy != null)
             {
-                Vector2 leftDir = Joystick.Left;
-                Vector2 rightDir = Joystick.Right;
+                Vector2 leftDir = joystick.Left;
+                Vector2 rightDir = joystick.Right;
 
                 string frameId = string.IsNullOrEmpty(AttachToFrame) ? TfListener.FixedFrameId : AttachToFrame;
-                Joy joy = new Joy(
+                var joy = new Joy(
                     (joySeq++, frameId),
-                    new[] {leftDir.x, leftDir.y, rightDir.x, rightDir.y},
+                    new[] { leftDir.x, leftDir.y, rightDir.x, rightDir.y },
                     Array.Empty<int>()
                 );
                 SenderJoy.Publish(joy);

@@ -5,19 +5,27 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class ImageResource : MarkerResource
+    public sealed class ImageResource : MonoBehaviour, IDisplay
     {
         [SerializeField] MeshRenderer? front = null;
         [SerializeField] Billboard? billboard = null;
         [SerializeField] float scale = 1;
 
+        Transform? mTransform;
         ImageTexture? texture;
+        BoxCollider? boxCollider = null;
         Pose billboardStartPose;
         Vector3 offset;
 
         Billboard Billboard => billboard.AssertNotNull(nameof(billboard));
         MeshRenderer Front => front.AssertNotNull(nameof(front));
 
+        BoxCollider Collider =>
+            boxCollider != null ? boxCollider : (boxCollider = Billboard.GetComponent<BoxCollider>());
+
+        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        
+        
         public ImageTexture? Texture
         {
             get => texture;
@@ -27,7 +35,7 @@ namespace Iviz.Displays
                 {
                     texture.TextureChanged -= OnTextureChanged;
                 }
-                
+
                 texture = value;
                 if (texture != null)
                 {
@@ -37,7 +45,9 @@ namespace Iviz.Displays
             }
         }
 
-        public override int Layer
+        public Bounds? Bounds => new Bounds(Collider.center, Collider.size);
+
+        public int Layer
         {
             get => Billboard.gameObject.layer;
             set => Billboard.gameObject.layer = value;
@@ -80,11 +90,8 @@ namespace Iviz.Displays
         float Height => Width * AspectRatio;
         float AspectRatio => Texture == null || Texture.Width == 0 ? 1 : (float)Texture.Height / Texture.Width;
 
-        protected override void Awake()
+        void Awake()
         {
-            BoxCollider = Billboard.GetComponent<BoxCollider>();
-            base.Awake();
-
             Billboard.UseAbsoluteOffset = false;
             billboardStartPose = Billboard.transform.AsLocalPose();
         }
@@ -111,14 +118,19 @@ namespace Iviz.Displays
             Texture.Set(width, height, encoding, data.AsSegment(), generateMipmaps);
         }
 
-        public override void Suspend()
+        public void Suspend()
         {
-            base.Suspend();
-
+            Visible = true;
             Texture = null;
             Offset = Vector3.zero;
             BillboardEnabled = false;
             Scale = 1;
+        }
+
+        public bool Visible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
         }
 
         void UpdateSides()

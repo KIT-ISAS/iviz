@@ -1,15 +1,14 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.SensorMsgs;
-using Iviz.Resources;
 using Iviz.Ros;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -19,25 +18,24 @@ namespace Iviz.App
     /// </summary>
     public sealed class JoystickModuleData : ModuleData
     {
-        [NotNull] readonly JoystickController controller;
-        [NotNull] readonly JoystickPanelContents panel;
+        readonly JoystickController controller;
+        readonly JoystickPanelContents panel;
 
         public override ModuleType ModuleType => ModuleType.Joystick;
         public override DataPanelContents Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public JoystickModuleData([NotNull] ModuleDataConstructor constructor) :
+        public JoystickModuleData(ModuleDataConstructor constructor) :
             base(constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<JoystickPanelContents>(ModuleType.Joystick);
 
-            controller = new JoystickController(this);
+            controller = new JoystickController(this, ModuleListPanel.TwistJoystick);
             if (constructor.Configuration != null)
             {
                 controller.Config = (JoystickConfiguration)constructor.Configuration;
             }
-            controller.Joystick = ModuleListPanel.TwistJoystick;
 
             UpdateModuleButton();
         }

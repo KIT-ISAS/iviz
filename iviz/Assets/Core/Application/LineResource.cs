@@ -99,6 +99,8 @@ namespace Iviz.Displays
                                                             (f.c0 - f.c1).MaxAbsCoeff3() > MinLineLength &&
                                                             f.c0.MaxAbsCoeff3() < MaxPositionMagnitude &&
                                                             f.c1.MaxAbsCoeff3() < MaxPositionMagnitude;
+        
+        public override Bounds? Bounds => Size == 0 ? null : base.Bounds;
 
         /// <summary>
         /// Sets the lines with the given list.
@@ -267,7 +269,7 @@ namespace Iviz.Displays
 
             Properties.SetFloat(ScaleID, ElementScale);
 
-            Bounds worldBounds = BoxCollider.bounds;
+            Bounds worldBounds = Collider.bounds;
 
             Material material;
             if (MaterialOverride != null)
@@ -375,8 +377,8 @@ namespace Iviz.Displays
         void CalculateBounds()
         {
             MinMaxJob.CalculateBounds(lineBuffer.AsArray(), Size, out Bounds bounds, out Vector2 span);
-            BoxCollider.center = bounds.center;
-            BoxCollider.size = bounds.size + ElementScale * Vector3.one;
+            Collider.center = bounds.center;
+            Collider.size = bounds.size + ElementScale * Vector3.one;
 
             MeasuredIntensityBounds = span;
             if (!OverrideIntensityBounds)
@@ -387,8 +389,8 @@ namespace Iviz.Displays
 
         void CalculateBoundsEmpty()
         {
-            BoxCollider.center = Vector3.zero;
-            BoxCollider.size = Vector3.zero;
+            Collider.center = Vector3.zero;
+            Collider.size = Vector3.zero;
 
             MeasuredIntensityBounds = Vector2.zero;
             if (!OverrideIntensityBounds)

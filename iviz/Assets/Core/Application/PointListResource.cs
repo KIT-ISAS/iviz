@@ -62,6 +62,8 @@ namespace Iviz.Displays
                 }
             }
         }
+        
+        public override Bounds? Bounds => Size == 0 ? null : base.Bounds;
 
         protected override void Awake()
         {
@@ -205,10 +207,7 @@ namespace Iviz.Displays
             pointBuffer.Dispose();
         }
 
-        public override string ToString()
-        {
-            return "[PointListResource '" + Name + "']";
-        }
+        public override string ToString() => "[PointListResource '" + gameObject.name + "']";
 
         /// <summary>
         ///     Sets the list of points.
@@ -300,8 +299,8 @@ namespace Iviz.Displays
             }
 
             MinMaxJob.CalculateBounds(pointBuffer.AsArray(), Size, out Bounds bounds, out Vector2 span);
-            BoxCollider.center = bounds.center;
-            BoxCollider.size = bounds.size + ElementScale * Vector3.one;
+            Collider.center = bounds.center;
+            Collider.size = bounds.size + ElementScale * Vector3.one;
             MeasuredIntensityBounds = span;
             if (!OverrideIntensityBounds)
             {
@@ -311,8 +310,8 @@ namespace Iviz.Displays
 
         void CalculateBoundsEmpty()
         {
-            BoxCollider.center = Vector3.zero;
-            BoxCollider.size = Vector3.zero;
+            Collider.center = Vector3.zero;
+            Collider.size = Vector3.zero;
             MeasuredIntensityBounds = Vector2.zero;
             if (!OverrideIntensityBounds)
             {

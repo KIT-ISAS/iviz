@@ -28,6 +28,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -44,9 +45,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf30c3ffe05bf4d48aee0b9cd9a8f66d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Transform: {fileID: 1287237009152467754}
+  boxCollider: {fileID: 1287237009152467732}
   material: {fileID: 0}
-  pointSize_: 1
-  fovAngle_: 0
   width: 0
   height: 0
 --- !u!65 &1287237009152467732

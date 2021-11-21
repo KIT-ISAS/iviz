@@ -18,19 +18,15 @@ namespace Iviz.Displays
 
         Mesh? mesh;
 
+        public override Bounds? Bounds =>
+            mesh != null && mesh.vertexCount != 0 ? new Bounds(Collider.center, Collider.size) : null;
+
         void OnDestroy()
         {
             if (mesh != null)
             {
                 Destroy(mesh);
             }
-        }
-
-        protected override void Awake()
-        {
-            base.Awake();
-            Color = Color;
-            Bounds = Bounds;
         }
 
         Mesh EnsureOwnMesh(int numPointsNeeded)
@@ -111,7 +107,8 @@ namespace Iviz.Displays
 
             ownMesh.RecalculateNormals();
 
-            Bounds = ownMesh.bounds;
+            Collider.center = ownMesh.bounds.center;
+            Collider.size = ownMesh.bounds.size;
         }
 
         public void Set(
@@ -164,13 +161,13 @@ namespace Iviz.Displays
 
             ownMesh.SetTriangles(triangles);
 
-            
+
             if (normals.Length == 0)
             {
                 ownMesh.RecalculateNormals();
             }
-            
-            
+
+
             if (tangents.Length != 0)
             {
                 ownMesh.SetTangents(tangents);
@@ -179,8 +176,9 @@ namespace Iviz.Displays
             {
                 ownMesh.RecalculateTangents();
             }
-            
-            Bounds = ownMesh.bounds;
+
+            Collider.center = ownMesh.bounds.center;
+            Collider.size = ownMesh.bounds.size;
         }
 
         public override void Suspend()

@@ -11,14 +11,13 @@ namespace Iviz.App
         const int MaxPanelSizeInEntries = 7;
         
         MenuEntryList menuEntryList;
-        MenuEntryList.EntryDescription[] currentEntries;
+        MenuEntryDescription[] currentEntries;
 
-        IEnumerable<MenuEntryList.EntryDescription> CurrentEntries
+        MenuEntryDescription[] CurrentEntries
         {
-            get => currentEntries;
             set
             {
-                currentEntries = value.ToArray();
+                currentEntries = value;
                 Items = currentEntries.Select(DescriptionToString);
                 TrimPanelSize(MaxPanelSizeInEntries);
             }
@@ -39,16 +38,16 @@ namespace Iviz.App
         {
             callback = newCallback ?? throw new ArgumentNullException(nameof(newCallback));
             menuEntryList = menu ?? throw new ArgumentNullException(nameof(menu));
-            CurrentEntries = menuEntryList.GetDescriptionsFor(null);
+            CurrentEntries = menuEntryList.GetDescriptionsForRoot();
             gameObject.SetActive(true);
         }
 
         void OnItemClicked(int id, int _)
         {
             var entry = currentEntries[id];
-            if (entry.LinkedEntry != null)
+            if (!entry.IsLeaf)
             {
-                CurrentEntries = menuEntryList.GetDescriptionsFor(entry.LinkedEntry);
+                CurrentEntries = entry.GetChildDescriptions();
             }
             else
             {
@@ -58,23 +57,17 @@ namespace Iviz.App
         }
 
         [NotNull]
-        static string DescriptionToString([NotNull] MenuEntryList.EntryDescription description)
+        static string DescriptionToString([NotNull] MenuEntryDescription description)
         {
-            switch (description.Type)
+            return description.Type switch
             {
-                case MenuEntryList.EntryType.Forward:
-                    return $"<b>{description.Title}  →</b>";
-                case MenuEntryList.EntryType.Off:
-                    return $"<b>{description.Title}</b>\nOff";
-                case MenuEntryList.EntryType.On:
-                    return $"<b>{description.Title}</b>\nOn";
-                case MenuEntryList.EntryType.Default:
-                    return $"<b>{description.Title}</b>";
-                case MenuEntryList.EntryType.Back:
-                    return $"<b>← {description.Title}</b>";
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                MenuEntryList.EntryType.Forward => $"<b>{description.Title}  →</b>",
+                MenuEntryList.EntryType.Off => $"<b>{description.Title}</b>\nOff",
+                MenuEntryList.EntryType.On => $"<b>{description.Title}</b>\nOn",
+                MenuEntryList.EntryType.Default => $"<b>{description.Title}</b>",
+                MenuEntryList.EntryType.Back => $"<b>← {description.Title}</b>",
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
 
         void Close()

@@ -5,7 +5,6 @@ using Iviz.Core;
 using Iviz.Resources;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.Serialization;
 
 namespace Iviz.Displays
 {
@@ -14,7 +13,6 @@ namespace Iviz.Displays
     /// </summary>
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    [RequireComponent(typeof(BoxCollider))]
     public class MeshMarkerResource : MarkerResource, ISupportsColor, ISupportsTint, ISupportsAROcclusion, ISupportsPbr
     {
         static readonly int MainTex = Shader.PropertyToID("_MainTex");
@@ -29,25 +27,14 @@ namespace Iviz.Displays
         [SerializeField] float metallic = 0.5f;
         [SerializeField] MeshRenderer? mainRenderer;
         [SerializeField] MeshFilter? meshFilter;
+        [SerializeField] bool autoSelectMaterial = true;
 
         Material? textureMaterial;
         Material? textureMaterialAlpha;
-        [SerializeField] bool autoSelectMaterial = true;
-        bool shadowsEnabled = true;
 
         MeshRenderer MainRenderer => mainRenderer != null ? mainRenderer : mainRenderer = GetComponent<MeshRenderer>();
 
         MeshFilter MeshFilter => meshFilter != null ? meshFilter : meshFilter = GetComponent<MeshFilter>();
-
-        public new Bounds Bounds
-        {
-            get => new(BoxCollider.center, BoxCollider.size);
-            protected set
-            {
-                BoxCollider.center = value.center;
-                BoxCollider.size = value.size;
-            }
-        }
 
         public Texture2D? DiffuseTexture
         {
@@ -105,30 +92,18 @@ namespace Iviz.Displays
 
         public float Smoothness
         {
-            get => smoothness;
-            set
-            {
-                smoothness = value;
-                MainRenderer.SetPropertySmoothness(smoothness);
-            }
+            set => MainRenderer.SetPropertySmoothness(value);
         }
 
         public float Metallic
         {
-            get => metallic;
-            set
-            {
-                metallic = value;
-                MainRenderer.SetPropertyMetallic(metallic);
-            }
+            set => MainRenderer.SetPropertyMetallic(value);
         }
 
         public bool ShadowsEnabled
         {
-            get => shadowsEnabled;
             set
             {
-                shadowsEnabled = value;
                 MainRenderer.shadowCastingMode = value ? ShadowCastingMode.On : ShadowCastingMode.Off;
                 MainRenderer.receiveShadows = value;
             }
@@ -140,10 +115,8 @@ namespace Iviz.Displays
             set => MeshFilter.sharedMesh = value != null ? value : throw new NullReferenceException("Mesh is null");
         }
 
-        protected override void Awake()
+        protected virtual void Awake()
         {
-            base.Awake();
-
             var sharedMaterial = MainRenderer.sharedMaterial;
             if (diffuseTexture == null
                 && sharedMaterial != null

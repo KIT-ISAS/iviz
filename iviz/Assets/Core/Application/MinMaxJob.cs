@@ -19,8 +19,8 @@ namespace Iviz.Displays
 
             public void Execute()
             {
-                float4 min = new float4(float.MaxValue);
-                float4 max = new float4(float.MinValue);
+                var min = new float4(float.MaxValue);
+                var max = new float4(float.MinValue);
                 for (int i = 0; i < input.Length; i++)
                 {
                     min = math.min(min, input[i]);
@@ -37,21 +37,19 @@ namespace Iviz.Displays
             out Bounds bounds,
             out Vector2 intensitySpan)
         {
-            using (var output = new NativeArray<float4>(2, Allocator.Persistent))
+            using var output = new NativeArray<float4>(2, Allocator.Persistent);
+            var job = new MinMaxJobPoints
             {
-                MinMaxJobPoints job = new MinMaxJobPoints
-                {
-                    input = pointBuffer.Slice(0, size),
-                    output = output
-                };
-                job.Schedule().Complete();
+                input = pointBuffer.Slice(0, size),
+                output = output
+            };
+            job.Schedule().Complete();
 
-                Vector3 positionMin = output[0].xyz;
-                Vector3 positionMax = output[1].xyz;
+            Vector3 positionMin = output[0].xyz;
+            Vector3 positionMax = output[1].xyz;
 
-                bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
-                intensitySpan = new Vector2(output[0].w, output[1].w);
-            }
+            bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
+            intensitySpan = new Vector2(output[0].w, output[1].w);
         }
 
         [BurstCompile(CompileSynchronously = true)]
@@ -65,8 +63,8 @@ namespace Iviz.Displays
 
             public void Execute()
             {
-                float4 min = new float4(float.MaxValue);
-                float4 max = new float4(float.MinValue);
+                var min = new float4(float.MaxValue);
+                var max = new float4(float.MinValue);
                 for (int i = 0; i < input.Length; i++)
                 {
                     min = math.min(min, input[i].c0);
@@ -85,21 +83,19 @@ namespace Iviz.Displays
             out Bounds bounds,
             out Vector2 intensitySpan)
         {
-            using (var output = new NativeArray<float4>(2, Allocator.Persistent))
+            using var output = new NativeArray<float4>(2, Allocator.Persistent);
+            var job = new MinMaxJobLines
             {
-                MinMaxJobLines job = new MinMaxJobLines
-                {
-                    input = pointBuffer.Slice(0, size),
-                    output = output
-                };
-                job.Schedule().Complete();
+                input = pointBuffer.Slice(0, size),
+                output = output
+            };
+            job.Schedule().Complete();
 
-                Vector3 positionMin = output[0].xyz;
-                Vector3 positionMax = output[1].xyz;
+            Vector3 positionMin = output[0].xyz;
+            Vector3 positionMax = output[1].xyz;
 
-                bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
-                intensitySpan = new Vector2(output[0].w, output[1].w);
-            }
+            bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
+            intensitySpan = new Vector2(output[0].w, output[1].w);
         }
     }
 

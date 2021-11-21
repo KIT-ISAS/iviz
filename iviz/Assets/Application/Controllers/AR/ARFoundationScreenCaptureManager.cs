@@ -22,6 +22,13 @@ namespace Iviz.Controllers
 
         Intrinsic? intrinsic;
 
+        Screenshot? lastColor;
+        Screenshot? lastDepth;
+        Screenshot? lastConfidence;
+
+        public event Action<Screenshot>? ScreenshotColor;
+        public event Action<Screenshot>? ScreenshotDepth;
+
         Intrinsic Intrinsic
         {
             get
@@ -45,16 +52,10 @@ namespace Iviz.Controllers
 
                 const float fovInRad = 60;
                 return intrinsic = new Intrinsic(fovInRad, configuration.width, configuration.height);
-
             }
         }
 
-        Screenshot? lastColor;
-        Screenshot? lastDepth;
-        Screenshot? lastConfidence;
-
-        public event Action<Screenshot>? ScreenshotColor;
-        public event Action<Screenshot>? ScreenshotDepth;
+        public bool Started => true;
 
         public ARFoundationScreenCaptureManager(
             ARCameraManager cameraManager,
@@ -72,8 +73,6 @@ namespace Iviz.Controllers
                 : throw new ArgumentNullException(nameof(occlusionManager));
         }
 
-        public bool Started => true;
-
         public IEnumerable<(int width, int height)> GetResolutions()
         {
             var configuration = cameraManager.subsystem.currentConfiguration;
@@ -87,9 +86,7 @@ namespace Iviz.Controllers
 
         public ValueTask StopAsync() => default;
 
-        public ValueTask<Screenshot?> CaptureColorAsync(
-            int reuseCaptureAgeInMs = 0,
-            CancellationToken token = default)
+        public ValueTask<Screenshot?> CaptureColorAsync(int reuseCaptureAgeInMs = 0, CancellationToken token = default)
         {
             if (reuseCaptureAgeInMs > 0
                 && lastColor != null

@@ -1,6 +1,5 @@
 #nullable enable
 
-using System;
 using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Resources;
@@ -89,6 +88,7 @@ namespace Iviz.Displays
                 resource.Mesh = QuadMesh;
                 resource.Transform.SetParentLocal(transform);
                 resource.ColliderEnabled = false;
+                resource.ShadowsEnabled = false;
                 resource.Layer = LayerType.IgnoreRaycast;
                 objects[i] = resource;
             }
@@ -100,6 +100,7 @@ namespace Iviz.Displays
                 resource.Mesh = CornerMesh;
                 resource.Transform.SetParentLocal(transform);
                 resource.ColliderEnabled = false;
+                resource.ShadowsEnabled = false;
                 resource.Layer = LayerType.IgnoreRaycast;
                 objects[3 + i] = resource;
             }

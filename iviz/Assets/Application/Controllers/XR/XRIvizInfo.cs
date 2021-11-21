@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public class IvizInfo : MonoBehaviour
+    public sealed class XRIvizInfo : MonoBehaviour
     {
         [SerializeField] bool isXREnabled;
         [SerializeField] bool isHololens;
