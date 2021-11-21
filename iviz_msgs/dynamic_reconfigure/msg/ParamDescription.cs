@@ -61,10 +61,6 @@ namespace Iviz.Msgs.DynamicReconfigure
             b.Serialize(EditMethod);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
@@ -95,8 +91,8 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAEysuKcrMS1fIS8xN5SqGsEsqC1K5SjPzSoyNFHJSy1JzYBIpqcXJRZkFJZn5eTCh1JTM" +
-                "kvjc1JKM/BQuLgC4Qc3XTAAAAA==";
+                "H4sIAAAAAAAACisuKcrMS1fIS8xN5SqGsEsqC1K5SjPzSoyNFHJSy1JzYBIpqcXJRZkFJZn5eTCh1JTM" +
+                "kvjc1JKM/BQuXi4Aq2b7uE0AAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

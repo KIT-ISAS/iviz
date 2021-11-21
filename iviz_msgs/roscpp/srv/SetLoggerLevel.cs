@@ -39,12 +39,6 @@ namespace Iviz.Msgs.Roscpp
             set => Response = (SetLoggerLevelResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -99,10 +93,6 @@ namespace Iviz.Msgs.Roscpp
             b.Serialize(Level);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Logger is null) throw new System.NullReferenceException(nameof(Logger));
@@ -141,10 +131,6 @@ namespace Iviz.Msgs.Roscpp
         public static readonly SetLoggerLevelResponse Singleton = new SetLoggerLevelResponse();
     
         public void RosSerialize(ref Buffer b)
-        {
-        }
-        
-        public void Dispose()
         {
         }
         

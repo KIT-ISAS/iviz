@@ -39,12 +39,6 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (GetModelTextureResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -92,10 +86,6 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Uri);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()
@@ -153,10 +143,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Success);
             Image.RosSerialize(ref b);
             b.Serialize(Message);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

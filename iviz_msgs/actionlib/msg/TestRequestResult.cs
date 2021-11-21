@@ -45,10 +45,6 @@ namespace Iviz.Msgs.Actionlib
             b.Serialize(IsSimpleServer);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
         }
@@ -68,7 +64,7 @@ namespace Iviz.Msgs.Actionlib
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE8vMKzE2UijJSI0vSi0uzSnhSsrPz1HILI4vzswtyEmNL04tKkst4gIAoJWh1ycAAAA=";
+                "H4sIAAAAAAAACsvMKzE2UijJSI0vSi0uzSnhSsrPz1HILI4vzswtyEmNL04tKkst4uUCACmSl6soAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

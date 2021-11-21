@@ -30,7 +30,7 @@ namespace Iviz.Displays
                 }
 
                 size = value;
-                Collider.size = Bounds.size;
+                Collider.size = new Vector3(size.x, 0.001f, size.y);
                 Rebuild();
             }
         }
@@ -148,8 +148,6 @@ namespace Iviz.Displays
         
         void Awake()
         {
-            Layer = LayerType.IgnoreRaycast;
-            Collider.enabled = false;
             if (children.Length == 0)
             {
                 Rebuild();

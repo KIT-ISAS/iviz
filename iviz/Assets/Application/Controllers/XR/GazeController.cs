@@ -17,6 +17,8 @@ namespace Iviz.Controllers
         static readonly InputFeatureUsage<Vector3> GazePosition = new("gazePosition");
         static readonly InputFeatureUsage<Quaternion> GazeRotation = new("gazeRotation");
 
+        public Pose? Pose { get; private set; }
+        
         protected override bool MatchesDevice(InputDeviceCharacteristics characteristics,
             List<InputFeatureUsage> usages)
         {
@@ -33,6 +35,9 @@ namespace Iviz.Controllers
         protected override void UpdateTrackingInput(XRControllerState? controllerState)
         {
             base.UpdateTrackingInput(controllerState);
+            
+            Pose = null;
+            
             if (controllerState == null)
             {
                 return;
@@ -49,13 +54,8 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
-            if (device.TryGetFeatureValue(GazeRotation, out controllerState.rotation))
-            {
-                controllerState.poseDataFlags |= PoseDataFlags.Rotation;
-            }
 
-            if (device.TryGetFeatureValue(CommonUsages.deviceRotation, out controllerState.rotation))
+            if (device.TryGetFeatureValue(GazeRotation, out controllerState.rotation))
             {
                 controllerState.poseDataFlags |= PoseDataFlags.Rotation;
             }
@@ -64,6 +64,12 @@ namespace Iviz.Controllers
             {
                 controllerState.poseDataFlags |= PoseDataFlags.Position;
             }
+
+            if (controllerState.poseDataFlags == (PoseDataFlags.Position | PoseDataFlags.Rotation))
+            {
+                Pose = new Pose(controllerState.position, controllerState.rotation);
+            }
+
         }
 
         protected override void UpdateInput(XRControllerState? controllerState)

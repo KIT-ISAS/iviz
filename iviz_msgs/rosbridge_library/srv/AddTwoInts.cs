@@ -39,12 +39,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (AddTwoIntsResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -97,10 +91,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             b.Serialize(B);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
         }
@@ -148,10 +138,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Sum);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

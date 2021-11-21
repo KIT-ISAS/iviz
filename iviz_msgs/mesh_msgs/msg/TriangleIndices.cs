@@ -43,10 +43,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.SerializeStructArray(VertexIndices, 3);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (VertexIndices is null) throw new System.NullReferenceException(nameof(VertexIndices));
@@ -68,8 +64,8 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE1NWcElNy8zLLMnMz1PIT1NIVCgpykzMS89JVS9WKEstKslMTi3mKs3MKzE2ijaOBQul" +
-                "VsRn5qWAJbgAjDTRWEAAAAA=";
+                "H4sIAAAAAAAAClNWcElNy8zLLMnMz1PIT1NIVCgpykzMS89JVS9WKEstKslMTi3mKs3MKzE2ijaOBQul" +
+                "VsRn5qWAJXi5AGuOwJlBAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

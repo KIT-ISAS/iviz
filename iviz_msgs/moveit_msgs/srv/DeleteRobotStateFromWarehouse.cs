@@ -39,12 +39,6 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (DeleteRobotStateFromWarehouseResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -99,10 +93,6 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Robot);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Name is null) throw new System.NullReferenceException(nameof(Name));
@@ -141,10 +131,6 @@ namespace Iviz.Msgs.MoveitMsgs
         public static readonly DeleteRobotStateFromWarehouseResponse Singleton = new DeleteRobotStateFromWarehouseResponse();
     
         public void RosSerialize(ref Buffer b)
-        {
-        }
-        
-        public void Dispose()
         {
         }
         

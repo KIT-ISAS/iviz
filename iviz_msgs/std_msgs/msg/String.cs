@@ -42,10 +42,6 @@ namespace Iviz.Msgs.StdMsgs
             b.Serialize(Data);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Data is null) throw new System.NullReferenceException(nameof(Data));
@@ -63,7 +59,7 @@ namespace Iviz.Msgs.StdMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAEysuKcrMS1dISSxJ5OICADpmzaUNAAAA";
+                "H4sIAAAAAAAACisuKcrMS1dISSxJ5OLlAgCAhD+7DgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

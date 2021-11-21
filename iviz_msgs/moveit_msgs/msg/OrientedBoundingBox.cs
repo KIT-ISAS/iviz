@@ -47,10 +47,6 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Extents);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
         }
@@ -70,14 +66,14 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71UTUvDQBC9768Y8KJQKrTiQfAgHsSDoOhdtsk0GUx24s7Gpv31zm4+aulBEGlOk52P" +
-                "fe/NzJ5BKBEaFgReJ3vFnSmQawx++15LIZfP0RtDjDlLIdgFdEF+ZMzAirQ1uSKdZOpGDyRgQzpgTwW5" +
-                "o7rkwnIxljPm9p8/8/T6cAPHZJTGHXhsPIpebAOxi1ySCuRg7RFBGpvhDDKu43E++CnFWpdHRmPuHEyi" +
-                "MgWYl9Yqf5fq7uNORVChKMO3UuXPWO8mJ2OXaeRq9S9CPqBr1hXbcH0F3WRtJ2t3Gvh76UYOU6N0mg70" +
-                "PAQf/z73uq/Z13PzC6PR2pywNcvF35pzvqFQgq7LivrVU1UyEk25mGvFxwBJKx3YGnMd2MDQ6jz3k7kp" +
-                "0eOXrqReI7SqoloS0Ka5HmDNAbTOXvVUyeWD1BILNp5rDjFZZeYGvV1RRWGbUsfMGkVsgTElR6HC9WCC" +
-                "/UBoG6jUPXRMUTnQzub6bmh2xQOxiCc9HeziDlqJSqR3xfbvlO0x31fc5vHuvpGqTTdZ28namW/1kU6A" +
-                "5QQAAA==";
+                "H4sIAAAAAAAACr1UPYsbMRDtBf4PA9ckcDhghxSBFCHFcUXgQtIHeXe8HrKr2Wi0sX2/Pk/aD8dcEQjB" +
+                "qkbSfL33RrqjdGDq1Zh0X+ydnlzD2nGK5++dNfbmKd9mF+fuigufEodkf0TckzcbOglNOalwzZHEyKdy" +
+                "oFEaCS/ySkjbzZzOrdyH/7xW7vPXh/f0Es4KSD5S5D6yobZPoiHDKURIoH1kJut9xfdUaZeP6+leiq8P" +
+                "2EeZY9fkCprFwX0ZPCgIJe/F73YY0UwG+e0AESpFeQk2az1CAByPXe76CrHbt+rTu7d0WqzzYj3fCsGF" +
+                "vwXGIhfG6orV6/7z7ueF/b3Gbu3+Amq2jjcVaLv5R4leHSUdCE9nJ+MzBDGVGEJer5HxEe6ZLkxuxzUm" +
+                "NykNGOynkul44Mi/8DxRxmTXZsIssS8DXly2mzUR8lyIL5lCPbGNLhUltdOUg8G09hz9TlpJ5xI6R3Zs" +
+                "5hs4GdVs0oSxmeR/MA09tbieRENXgSBujT8E0a1OwHI/5RvRkB+jt8xE+WP8+Gf5sedPrQ51rj1qCW4m" +
+                "pWFNSsN6Xrnf2KGCAfIEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

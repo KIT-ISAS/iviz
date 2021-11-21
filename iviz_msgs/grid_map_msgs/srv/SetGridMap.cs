@@ -39,12 +39,6 @@ namespace Iviz.Msgs.GridMapMsgs
             set => Response = (SetGridMapResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -95,10 +89,6 @@ namespace Iviz.Msgs.GridMapMsgs
             Map.RosSerialize(ref b);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Map is null) throw new System.NullReferenceException(nameof(Map));
@@ -137,10 +127,6 @@ namespace Iviz.Msgs.GridMapMsgs
         public static readonly SetGridMapResponse Singleton = new SetGridMapResponse();
     
         public void RosSerialize(ref Buffer b)
-        {
-        }
-        
-        public void Dispose()
         {
         }
         

@@ -42,10 +42,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             b.SerializeStructArray(Durations, 0);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Durations is null) throw new System.NullReferenceException(nameof(Durations));
@@ -63,7 +59,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE0spLUosyczPi45VSIEyi7kADvrU2BUAAAA=";
+                "H4sIAAAAAAAACkspLUosyczPi45VSIEyi3m5AKlp9poWAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

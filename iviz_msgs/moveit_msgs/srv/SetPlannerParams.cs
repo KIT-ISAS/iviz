@@ -39,12 +39,6 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (SetPlannerParamsResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -112,10 +106,6 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Replace);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (PlannerConfig is null) throw new System.NullReferenceException(nameof(PlannerConfig));
@@ -165,10 +155,6 @@ namespace Iviz.Msgs.MoveitMsgs
         public static readonly SetPlannerParamsResponse Singleton = new SetPlannerParamsResponse();
     
         public void RosSerialize(ref Buffer b)
-        {
-        }
-        
-        public void Dispose()
         {
         }
         

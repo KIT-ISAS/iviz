@@ -39,12 +39,6 @@ namespace Iviz.Msgs.Rosapi
             set => Response = (ServicesResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -83,10 +77,6 @@ namespace Iviz.Msgs.Rosapi
         public static readonly ServicesRequest Singleton = new ServicesRequest();
     
         public void RosSerialize(ref Buffer b)
-        {
-        }
-        
-        public void Dispose()
         {
         }
         
@@ -138,10 +128,6 @@ namespace Iviz.Msgs.Rosapi
         public void RosSerialize(ref Buffer b)
         {
             b.SerializeArray(Services_, 0);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

@@ -39,12 +39,6 @@ namespace Iviz.Msgs.MeshMsgs
             set => Response = (GetVertexCostsResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -94,10 +88,6 @@ namespace Iviz.Msgs.MeshMsgs
             b.Serialize(Uuid);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Uuid is null) throw new System.NullReferenceException(nameof(Uuid));
@@ -144,10 +134,6 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosSerialize(ref Buffer b)
         {
             MeshVertexCostsStamped.RosSerialize(ref b);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

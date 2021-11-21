@@ -10,7 +10,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 namespace Iviz.Controllers
 {
     /// <summary>
-    /// A simplified version of <see cref="XRController"/> for devices that do not have a <see cref="XRNode"/>.
+    /// A simplified version of <see cref="XRMainController"/> for devices that do not have a <see cref="XRNode"/>.
     /// Instead we just wait for a device that "looks like" what we need.  
     /// </summary>
     public abstract class CustomController : XRBaseController
@@ -23,6 +23,8 @@ namespace Iviz.Controllers
         protected abstract bool MatchesDevice(InputDeviceCharacteristics characteristics,
             List<InputFeatureUsage> usages);
 
+        public bool HasDevice => device != null;
+        
         protected bool TryGetDevice(out InputDevice outDevice)
         {
             if (device != null)

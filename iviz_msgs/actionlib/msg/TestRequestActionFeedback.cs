@@ -51,10 +51,6 @@ namespace Iviz.Msgs.Actionlib
             Feedback.RosSerialize(ref b);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Status is null) throw new System.NullReferenceException(nameof(Status));
@@ -75,24 +71,24 @@ namespace Iviz.Msgs.Actionlib
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71WXXPaRhR916/YGR5id2rSJv1IPcMDBeLQcRKPTfvqWa0u0rbSiu4HmH/fc1dCCAca" +
-                "HpIw2AJ799yz5557974jmZEVRXwkUnldm1Knj5XL3cubWpYPXvrghIuPZEHO39O/AY+3RFkq1T9i2X5I" +
-                "Rl/4lbx/uLlG5Kxh867hOBCgZDJpM1GRl5n0UixrHEHnBdmrktZUMt1qRZmI//XbFbkhNi4K7QTeORmy" +
-                "siy3Ijgs8rVQdVUFo5X0JLyu6GA/dmojpFhJ67UKpbRYX9tMG16+tLIiRsfbsTRGkZhPr7HGOFLBaxDa" +
-                "AkFZkk6bHP8USdDGv37FG5LBYlNf4SvlSEQXXPhCeiZLTytLjnlKd40Y3zWHGwIb4hCiZE5cxL894qu7" +
-                "FAgCCrSqVSEuwPxu64vaAJDEWlot05IYWEEBoL7gTS8ue8gmQhtp6h18g7iPcQ6s6XD5TFcFclby6V3I" +
-                "ISAWrmy91hmWptsIokpNxgu4z0q7TXhXEzIZvGWNsQi7YkbwlM7VSiMBmdhoXyTOW0aP2XjUWfKV3Hiy" +
-                "QhL+iMzmeHB8TvCbXdk0X+5mH6bzDzdi9xqJH/CbbUlxmyikE1vybMiUWB/VJL4VqImNnNs16qDBHE8W" +
-                "879moof54yEmZyRYC2VhwpRYo7OA7+5ns/d3i9m0A351CGxJEawNWyLlsAf/JTYGIZceTtaeT285QfQU" +
-                "68Dkifif1wA/MElUoTEcqnJVEiNo73YoIHqxIFuh+kpuBZ4uW8oPf04ms9m0R/n1IeUNkKUqNDFtFxSr" +
-                "sAzcB44JcSrM+PeP93tdOMxPR8KkdTx6FqIt99yPRsoCfVYadoWrUQZLqctg6RS9+9kfs0mP30j8/Ck9" +
-                "S3+T8iccEAuqDv65Xb7/PMeUlERPjZhdsIA+6SWYcodAp9ZmLUudnTpA67yuUkbil2/gvM56pvaxCPfm" +
-                "65LXKTwZ397uK3kkfj2XYEq4qugow3PURU4+zdYhabPUtuJLja8P3+8CkQllB4fo2+TNFzjEeTKzKQ7K" +
-                "rwnA18YJT9x+fFj0oUbitwg4Njsx2tsDSCJD1hiEGhFkJwGjDJspwMHgZRZ1S8+oPcfYNavNkm40jo/K" +
-                "keZZ60wG47KsN3Ee4YUoBct1211WINNeVFxjojdg8ZaM0pDnLGO7yNOTT77hVTafJo0DmhGkFcl5Tjef" +
-                "J97JkHRTaMwW8T7utZToDsp4FprH0SW0d8xznbCfDPsHpyTHAmHEoWqFXJUldjOma5K3IYTuoHfWgyXJ" +
-                "ckuJjPqjQssf3aUdL9CKQW97mIXdyMpuxA7MV6H0GCedkzk1qXErUnqp1a4YIgM3bNF51msWgFQVYlGg" +
-                "z2msGu6Sx0PI107dyyMDeZL8B69nW1jVCwAA";
+                "H4sIAAAAAAAACr1WTXPbNhC9c8b/ATM6xO7UTpv0I/WMDqqkOMo4icdWe/WAxIpEC4IqAErWv+9bUKSo" +
+                "WprokFpjm5IMvH14+3axH0gqcqKIj0RmQVfW6PSx9Ll/fVNJ8xBkqL3w8ZHMyYd7+qfG4z2RSmX2t1hs" +
+                "35wlw2/8Oks+PdxcI7Zq+HyILM+SgQArq6RToqQglQxSLCqcQucFuUtDKzLMuFySEvG/YbMkf4WN80J7" +
+                "gZ+cLDlpzEbUHotCJbKqLGurMxlIBF3S3n7s1FZIsZQu6Kw20mF95ZS2vHzhZEmMjh/P6tiMxGxyjTXW" +
+                "U1YHDUIbIGSOpNc2xz9FUmsb3r7hDclgvq4u8ZFy5KILLkIhA5Olp6Ujzzylv0aM75rDXQEb6hCiKC/O" +
+                "43eP+OgvBIKAAi2rrBDnYH63CUVlAUhiJZ2WqSEGzqAAUF/xplcXPWSmfS2stFUL3yDuYpwCaztcPtNl" +
+                "gZwZPr2vcwiIhUtXrbTC0nQTQTKjyQYBAzrpNgnvakImg/esMRZhV8wIntL7KtNIgBJrHYrEB8foMRuP" +
+                "WiX/myGPlslZwu+R3BwPpsA5ftcWT/Phbvp5Mvt8I9rXUPyAv+xMittEIb3YUGBPpsQSZU3utxo1wZF2" +
+                "t0LFNpij8Xz251T0MH/cx+Sk1M5BXPgwJZbpJOC7++n00918OumA3+wDO8oI7oYzkXU4hL+J7UHIRYCZ" +
+                "deDTO84RPcVSsHmyI/r8NcAvfBJVaDyHwlwaYgQdfIsCoudzciUK0HA3CHSxpfzwx3g8nU56lN/uU14D" +
+                "WWaFRpdQsGLGKixqbgWHhDgWZvT7l/udLhzmpwNh0ioeXdXRmTvuByOpmr4qDbvCV6iEhdSmdnSM3v30" +
+                "43Tc4zcUPz+n5+gvypjfQTpcU1Ud/muX77/OMaVMoq1GzC5YjVYZJJhyk0Cz1nYljVbHDrB1XlcpQ/HL" +
+                "Czivs56tQizCnfm65HUKj0e3t7tKHopfTyWYEm4rOsjwFHWRk+fZ2idtF9qVfK/xDdKlIbZmZkJq7xB9" +
+                "m7z7Boc4TWY2xV75NQH45jjiidsvD/M+1FD8FgFHthVje4EASShkjUGoEUF2EjDKVTMIeBjcqKhbekLt" +
+                "ecauWG2WdK1xfFQOYu23zmQwMqZax5GEF6IU8Kba3Vcgs72ruMZEb8ziLYrSOs9Zxu2iQE8hedHbbDbh" +
+                "IYtN0AwiW5184IzzkeLNDFXXhcaEEW/lXleJBiHFE9EsDjBxxjogFfaTZQvhoORZIww6VC6RLmOwmzF9" +
+                "k781IXQH3boPriTHXSUy6g8MW/5atUMGujHoodH1E9HOrmxI7MCUVZuAodJ7mXOGkR2/pEwvdNbWQ2Tg" +
+                "2UCMzhNfswCkyjrWBVqdxqqrNn9Y9QLZe31gNj9D3H8ByIilBOILAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

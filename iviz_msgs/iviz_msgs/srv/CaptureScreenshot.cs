@@ -39,12 +39,6 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (CaptureScreenshotResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -91,10 +85,6 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Compress);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()
@@ -179,10 +169,6 @@ namespace Iviz.Msgs.IvizMsgs
             b.SerializeStructArray(Intrinsics, 9);
             b.Serialize(Pose);
             b.SerializeStructArray(Data, 0);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

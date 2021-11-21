@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class FixedDistanceDraggable : ScreenDraggable
+    public sealed class FixedDistanceDraggable : XRScreenDraggable
     {
         [SerializeField] Collider? rayCollider;
 

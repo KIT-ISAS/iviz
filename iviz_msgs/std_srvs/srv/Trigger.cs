@@ -39,12 +39,6 @@ namespace Iviz.Msgs.StdSrvs
             set => Response = (TriggerResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -83,10 +77,6 @@ namespace Iviz.Msgs.StdSrvs
         public static readonly TriggerRequest Singleton = new TriggerRequest();
     
         public void RosSerialize(ref Buffer b)
-        {
-        }
-        
-        public void Dispose()
         {
         }
         
@@ -142,10 +132,6 @@ namespace Iviz.Msgs.StdSrvs
         {
             b.Serialize(Success);
             b.Serialize(Message);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()

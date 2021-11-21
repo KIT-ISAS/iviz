@@ -39,12 +39,6 @@ namespace Iviz.Msgs.DynamicReconfigure
             set => Response = (ReconfigureResponse)value;
         }
         
-        public void Dispose()
-        {
-            Request.Dispose();
-            Response.Dispose();
-        }
-        
         string IService.RosType => RosServiceType;
         
         /// <summary> Full ROS name of this service. </summary>
@@ -94,10 +88,6 @@ namespace Iviz.Msgs.DynamicReconfigure
             Config.RosSerialize(ref b);
         }
         
-        public void Dispose()
-        {
-        }
-        
         public void RosValidate()
         {
             if (Config is null) throw new System.NullReferenceException(nameof(Config));
@@ -145,10 +135,6 @@ namespace Iviz.Msgs.DynamicReconfigure
         public void RosSerialize(ref Buffer b)
         {
             Config.RosSerialize(ref b);
-        }
-        
-        public void Dispose()
-        {
         }
         
         public void RosValidate()
