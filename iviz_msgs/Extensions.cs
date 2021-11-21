@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
@@ -82,12 +83,14 @@ namespace Iviz.Msgs
         public static Transform Rotate(this in Transform t, in Quaternion rotation) =>
             new(rotation * t.Translation, rotation * t.Rotation);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Transform t, out Vector3 Translation, out Quaternion Rotation)
         {
             Translation = t.Translation;
             Rotation = t.Rotation;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Pose t, out Point Position, out Quaternion Orientation)
         {
             Position = t.Position;
@@ -102,6 +105,7 @@ namespace Iviz.Msgs
         public static ColorRGBA Interpolate(this in ColorRGBA c, in ColorRGBA v, float f) =>
             new ColorRGBA(c.R + f * (v.R - c.R), c.G + f * (v.G - c.G), c.B + f * (v.B - c.B), c.A + f * (v.A - c.A));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in ColorRGBA v, out float R, out float G, out float B, out float A) =>
             (R, G, B, A) = (v.R, v.G, v.B, v.A);
 
@@ -109,6 +113,7 @@ namespace Iviz.Msgs
         public static Point WithY(this in Point p, double y) => new(p.X, y, p.Z);
         public static Point WithZ(this in Point p, double z) => new(p.X, p.Y, z);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Point v, out double X, out double Y, out double Z) =>
             (X, Y, Z) = (v.X, v.Y, v.Z);
 
@@ -119,12 +124,15 @@ namespace Iviz.Msgs
         public static Point32 AsPoint32(this in Vector3 p) => new((float) p.X, (float) p.Y, (float) p.Z);
         public static Point32 AsPoint32(this in Point p) => new((float) p.X, (float) p.Y, (float) p.Z);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Vector3 v, out double X, out double Y, out double Z) =>
             (X, Y, Z) = (v.X, v.Y, v.Z);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Vector3f v, out float X, out float Y, out float Z) =>
             (X, Y, Z) = (v.X, v.Y, v.Z);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Vector2f v, out float X, out float Y) => (X, Y) = (v.X, v.Y);
 
         public static Quaternion WithX(this in Quaternion p, double x) => new(x, p.Y, p.Z, p.W);
@@ -146,6 +154,7 @@ namespace Iviz.Msgs
 
         public static Header WithNextSeq(this in Header h) => new(h.Seq + 1, time.Now(), h.FrameId ?? "");
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Header h, out uint Seq, out time Stamp, out string FrameId) =>
             (Seq, Stamp, FrameId) = (h.Seq, h.Stamp, h.FrameId ?? "");
 
@@ -161,6 +170,7 @@ namespace Iviz.Msgs
         public static TransformStamped WithChildFrameId(this in TransformStamped ts, string? s) =>
             new(ts.Header, s ?? "", ts.Transform);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in TransformStamped t, out Header Header, out string ChildFrameId,
             out Transform Transform)
         {
