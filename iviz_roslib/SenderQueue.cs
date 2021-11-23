@@ -19,10 +19,9 @@ namespace Iviz.Roslib
         readonly List<Entry?> sendQueue = new();
         int messagesInQueue;
         
-        
         public long MaxQueueSizeInBytes { get; set; } = 50000;
 
-        public int Count => messageQueue.Count;
+        public int Count => messagesInQueue;
 
         public SenderQueue(IRosSender sender) => this.sender = sender;
 
