@@ -13,7 +13,7 @@ namespace Iviz.Displays
 
         Transform? mTransform;
         ImageTexture? texture;
-        BoxCollider? boxCollider = null;
+        BoxCollider? boxCollider;
         Pose billboardStartPose;
         Vector3 offset;
 
@@ -88,7 +88,7 @@ namespace Iviz.Displays
 
         float Width => Scale;
         float Height => Width * AspectRatio;
-        float AspectRatio => Texture == null || Texture.Width == 0 ? 1 : (float)Texture.Height / Texture.Width;
+        float AspectRatio => Texture != null && Texture.Width != 0 ? (float)Texture.Height / Texture.Width : 1;
 
         void Awake()
         {

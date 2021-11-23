@@ -1,4 +1,6 @@
-﻿using Iviz.Core;
+﻿#nullable enable
+
+using Iviz.Core;
 using UnityEngine;
 
 namespace Iviz.Displays

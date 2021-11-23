@@ -147,7 +147,7 @@ namespace Iviz.Displays
             {
                 MeshRenderer.enabled = true;
 
-                var mTransform = transform;
+                var mTransform = Transform;
                 var rosCenter = new Vector3(
                     bounds.XMax + bounds.XMin - 1,
                     bounds.YMax + bounds.YMin - 1,

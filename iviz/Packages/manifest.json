@@ -2,7 +2,7 @@
   "dependencies": {
     "com.microsoft.mixedreality.openxr": "file:MixedReality/com.microsoft.mixedreality.openxr-1.1.2.tgz",
     "com.unity.burst": "1.6.1",
-    "com.unity.collab-proxy": "1.13.5",
+    "com.unity.collab-proxy": "1.15.1",
     "com.unity.ext.nunit": "1.0.6",
     "com.unity.ide.rider": "3.0.7",
     "com.unity.mathematics": "1.2.5",

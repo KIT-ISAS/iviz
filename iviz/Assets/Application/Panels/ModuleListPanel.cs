@@ -48,7 +48,7 @@ namespace Iviz.App
             }
         }
 
-        public static float CanvasScale => Instance.rootCanvas.scaleFactor;
+        public static float CanvasScale => Instance.RootCanvas.scaleFactor;
 
         [SerializeField] Button? middleHideGuiButton = null;
 
@@ -60,6 +60,7 @@ namespace Iviz.App
         [SerializeField] ARJoystick? arJoystick = null;
         [SerializeField] TwistJoystick? twistJoystick = null;
         [SerializeField] GameObject? contentObject = null;
+        [SerializeField] Canvas? rootCanvas = null;
 
         [SerializeField] TMP_Text cameraText = null;
         [SerializeField] Text bottomTime = null;
@@ -71,7 +72,6 @@ namespace Iviz.App
         [SerializeField] GameObject dataPanelCanvas = null;
         [SerializeField] GameObject imageCanvasHolder = null;
 
-        [SerializeField] Canvas rootCanvas = null;
 
         [SerializeField] GameObject menuObject = null;
 
@@ -88,8 +88,6 @@ namespace Iviz.App
         DialogManager? dialogs;
         IMenuDialogContents? menuDialog;
 
-        public AnchorCanvasPanel AnchorCanvasPanel => anchorCanvasPanel.AssertNotNull(nameof(anchorCanvasPanel));
-
         UpperCanvasPanel UpperCanvas => upperCanvasPanel.AssertNotNull(nameof(upperCanvasPanel));
         AnchorToggleButton BottomHideGuiButton => AnchorCanvasPanel.BottomHideGui;
         Button LeftHideGuiButton => AnchorCanvasPanel.LeftHideGui;
@@ -101,11 +99,11 @@ namespace Iviz.App
 
         DialogManager Dialogs => dialogs ??= new DialogManager();
         TfModuleData TfData => (TfModuleData)moduleDatas[0];
+        Canvas RootCanvas => rootCanvas.AssertNotNull(nameof(rootCanvas));
+        public AnchorCanvasPanel AnchorCanvasPanel => anchorCanvasPanel.AssertNotNull(nameof(anchorCanvasPanel));
         public Button UnlockButton => AnchorCanvasPanel.Unlock;
         public DataPanelManager DataPanelManager => dataPanelManager.AssertNotNull(nameof(dataPanelManager));
-
         public DialogPanelManager DialogPanelManager => dialogPanelManager.AssertNotNull(nameof(dialogPanelManager));
-
         public TwistJoystick TwistJoystick => twistJoystick.AssertNotNull(nameof(twistJoystick));
         public ARJoystick ARJoystick => arJoystick.AssertNotNull(nameof(arJoystick));
         public ARSidePanel ARSidePanel => arSidePanel.AssertNotNull(nameof(arSidePanel));
@@ -318,7 +316,7 @@ namespace Iviz.App
 
             if (Settings.IsXR)
             {
-                rootCanvas.ProcessCanvasForXR();
+                RootCanvas.ProcessCanvasForXR();
             }
 
             initialized = true;

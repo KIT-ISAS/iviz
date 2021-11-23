@@ -47,8 +47,6 @@ namespace Iviz.Common
         public bool Equals(Intrinsic? other) =>
             other != null && (Fx, Cx, Fy, Cy) == (other.Fx, other.Cx, other.Fy, other.Cy);
 
-        bool IEquatable<Intrinsic>.Equals(Intrinsic other) => Equals(other);
-
         public override int GetHashCode() => (Fx, Cx, Fy, Cy).GetHashCode();
     }
 }
