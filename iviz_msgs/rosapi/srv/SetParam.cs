@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Rosapi
 {
-    [DataContract (Name = "rosapi/SetParam")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SetParam : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SetParamRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SetParamResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SetParam()
         {
             Request = new SetParamRequest();
             Response = SetParamResponse.Singleton;
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SetParam(SetParamRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Rosapi
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosapi/SetParam";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "bc6ccc4a57f61779c8eaae61e9f422e0";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,36 +56,30 @@ namespace Iviz.Msgs.Rosapi
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "value")] public string Value;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetParamRequest()
         {
             Name = string.Empty;
             Value = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetParamRequest(string Name, string Value)
         {
             this.Name = Name;
             this.Value = Value;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetParamRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
             Value = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetParamRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetParamRequest(ref b);
         
-        SetParamRequest IDeserializable<SetParamRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SetParamRequest(ref b);
-        }
+        SetParamRequest IDeserializable<SetParamRequest>.RosDeserialize(ref Buffer b) => new SetParamRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -108,25 +102,19 @@ namespace Iviz.Msgs.Rosapi
     public sealed class SetParamResponse : IResponse, IDeserializable<SetParamResponse>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetParamResponse()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetParamResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        SetParamResponse IDeserializable<SetParamResponse>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        SetParamResponse IDeserializable<SetParamResponse>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly SetParamResponse Singleton = new SetParamResponse();
     
@@ -138,7 +126,7 @@ namespace Iviz.Msgs.Rosapi
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

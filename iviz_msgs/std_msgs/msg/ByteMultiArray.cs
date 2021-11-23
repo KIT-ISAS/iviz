@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [Preserve, DataContract (Name = "std_msgs/ByteMultiArray")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class ByteMultiArray : IDeserializable<ByteMultiArray>, IMessage
     {
         // Please look at the MultiArrayLayout message definition for
@@ -12,36 +12,30 @@ namespace Iviz.Msgs.StdMsgs
         [DataMember (Name = "layout")] public MultiArrayLayout Layout; // specification of data layout
         [DataMember (Name = "data")] public byte[] Data; // array of data
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ByteMultiArray()
         {
             Layout = new MultiArrayLayout();
             Data = System.Array.Empty<byte>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ByteMultiArray(MultiArrayLayout Layout, byte[] Data)
         {
             this.Layout = Layout;
             this.Data = Data;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ByteMultiArray(ref Buffer b)
         {
             Layout = new MultiArrayLayout(ref b);
             Data = b.DeserializeStructArray<byte>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ByteMultiArray(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ByteMultiArray(ref b);
         
-        ByteMultiArray IDeserializable<ByteMultiArray>.RosDeserialize(ref Buffer b)
-        {
-            return new ByteMultiArray(ref b);
-        }
+        ByteMultiArray IDeserializable<ByteMultiArray>.RosDeserialize(ref Buffer b) => new ByteMultiArray(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -60,25 +54,25 @@ namespace Iviz.Msgs.StdMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "std_msgs/ByteMultiArray";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "70ea476cbcfd65ac2f68f3cda1e891fe";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1UXWvbMBR9N+Q/XJKXNkuzfJSyFvIQKOylhcEGY4RQVOs6VmJLQZKbZb9+R/5O+zom" +
-                "DLbv5zlHVxrRt4yFY8qMOZDw5FOm5yLzam2tOD+Jsyk85eyc2DFJTpRWXhlNibHRiKSJi5y1F6UNj8gy" +
-                "ykO6COluGkUfilFWv6s1InfkWCUqroskJIUXdVT0eva82TbBYZXedo2o7NSkRdEgWv3jNYiev399IOfl" +
-                "S+527vN7RgMI8QOydbwhVJwJy44E7VizVXHlvZEKcjnwFFkHXKDAUViv4gJZFUF/PvKU6LGJRynLZKxk" +
-                "y5ISa3JCa7aUG+eR7w0prev/C9nbEpAR7aHYulWscdHRmiMDAbuoUNovFyWKF5MkjntbdRRSKr0jzjhs" +
-                "O0D5gEX7Tn+Uj2PMi7GOXGqKTNL66ef613d6ZTpZ5T1rQCVgz90lCOetkowKQstmKkC25HkTePViE2UD" +
-                "zxHh6YS/UpP95HBNqxLMps/hU0h+qVps5tuxurQstuM9LIdtNAoUgAUghJUTWt7EqYC0Gd3dzn7ffpmR" +
-                "ysNhOCmfggiw4QS9AWdsMmOpDnaocirZg3bHRbiHsgE6b2bbaSZeURdwhymrXeqHncupPwzNV4SOPWuJ" +
-                "FtblGGjGAc2K7hfzu9mM6Eobz3VkLSYpR/sCypXloHaJ/bouOO8jOCnp02HnaQGgUc96AQDv+f2icS/6" +
-                "5Wodhp2vLbjs2dpypSwfd9JywpgkjHe4mYLk1pwmtMcH9C5yPSmn5RD+q47T/3oFPDYTOYgCF5yNWgKc" +
-                "luoLou/UG4a+Hd7miNWChCuw3p13gXQVDgpuAipw7brrNrFSLSRWXx9TB9FfG58dY9sFAAA=";
+                "H4sIAAAAAAAAE71U32vbMBB+919xJC9tlmb5Ucpa6ENgsJcWBh2MEkJRrXOsRLaCJDfL/vp9kh3bafc4" +
+                "ZgyW73R33/fpTkP6rlk4Jm3MjoQnnzM9VtqrpbXi+CCOpvJUsHNiwyQ5U6XyypSUGZsMSZq0Krj0Itrw" +
+                "Cq2pCOEihLtJknxIRrr51s+Q3J5Tlam0SZKRFF40u5LXo+fVmnpP9FIXHiudwpIkuf/HT/L49O2OnJcv" +
+                "hdu4z+/5QIUf0KwjDZVSLSw7ErThkq1Ka++VVNDKgaTQHWqBBHthvUorRNXs/HHPE6Kvp/1IZZmMlWxZ" +
+                "UmZNQajMlgrjAgBvSJVl83+meZsCGqI85Fq2cp1ctLdmz0DALqlU6RfziOLFZJnj3jnthZSq3BBrDmfu" +
+                "QrsAS+k78ZE+TdEsxjpyuam0pOXDz+XzE70yHazynktAJWAv3DkI562SjAyilKeWANnI8yrw6u3NlA08" +
+                "h4S3E/5Cjbfj3SXdRzCrPodPIfilLrGarUfq3DJfj7aw7NbJMFAAFoAQVo5pcZXmAtJqurme/rr+MiVV" +
+                "hEk4KJ+DCLBhfN6AMzXaWGo2O2Q5RPag3XER7i4WQOXVdD3R4hV5AXeQs9rkftC5nPrNFFyo2LNGtLAu" +
+                "RkAzCmju6XY+u5lOiS5K47nZ2YhJytG2gnIxHdSO2C+bhLM+goOSPh90nhYACvWsZwDwnd3OT+55P12j" +
+                "w6DztQkXPVubLsry8SQtZ4xOQnuHaylIbs1hTFssoHdVlOPYLbvwX1ec/Mf5b2crCUQwGA1/jEq9guIb" +
+                "9YaObzv3NF+NGuHya47m3Ua6CFOCa4AqXLjusg2sJQuB9eovNf4A8nBJftQFAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

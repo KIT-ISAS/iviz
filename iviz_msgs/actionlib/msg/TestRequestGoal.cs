@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
 {
-    [Preserve, DataContract (Name = "actionlib/TestRequestGoal")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class TestRequestGoal : IDeserializable<TestRequestGoal>, IGoal<TestRequestActionGoal>
     {
         public const int TERMINATE_SUCCESS = 0;
@@ -22,13 +22,13 @@ namespace Iviz.Msgs.Actionlib
         [DataMember (Name = "delay_terminate")] public duration DelayTerminate; // Delays terminating for this amount of time
         [DataMember (Name = "pause_status")] public duration PauseStatus; // Pauses the status messages for this amount of time
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestRequestGoal()
         {
             ResultText = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TestRequestGoal(int TerminateStatus, bool IgnoreCancel, string ResultText, int TheResult, bool IsSimpleClient, duration DelayAccept, duration DelayTerminate, duration PauseStatus)
         {
             this.TerminateStatus = TerminateStatus;
@@ -41,7 +41,7 @@ namespace Iviz.Msgs.Actionlib
             this.PauseStatus = PauseStatus;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestRequestGoal(ref Buffer b)
         {
             TerminateStatus = b.Deserialize<int>();
@@ -54,15 +54,9 @@ namespace Iviz.Msgs.Actionlib
             PauseStatus = b.Deserialize<duration>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TestRequestGoal(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TestRequestGoal(ref b);
         
-        TestRequestGoal IDeserializable<TestRequestGoal>.RosDeserialize(ref Buffer b)
-        {
-            return new TestRequestGoal(ref b);
-        }
+        TestRequestGoal IDeserializable<TestRequestGoal>.RosDeserialize(ref Buffer b) => new TestRequestGoal(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -85,18 +79,18 @@ namespace Iviz.Msgs.Actionlib
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "actionlib/TestRequestGoal";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "db5d00ba98302d6c6dd3737e9a03ceea";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACmXOSwrCMBSF4XnAPXQJPocZaLyDirYlqeAsxPaigZiW5BZ09yq+wEz/jwPHeppNsxrk" +
-                "Li+WNWi1FwKU4mNm/2S5KmUNaz5JRMIGxJOmCW1LBXyW5LUsKz5PMhwEVHVeFnzxNsJwsd4Q6kiGhsiO" +
-                "Xecye/JdQN0Y36BjkYL1pyxgHBxpwit9xmfUr/qeRR3tpXePpbPoibVDMGQ7n7XozE2bpsE+qd8LP+jN" +
-                "ED+PRuwOHYVPLUMBAAA=";
+                "H4sIAAAAAAAAE2XOwQqCQBSF4b1P4SOU1nIWpndRlIpO0G6Y9GID4ygzV6i3r8gMmu3/ceAoQ3EUcqhO" +
+                "+zzhIOpzmkJds1Wg/iTZFRWHjK09qeAA6Zsij45FDSz2clYVJdt4GS4plHxf5Gw7G6HtlZGEwpGkyQXX" +
+                "YdCh6sxgUTTSNKgDR1aZLrToJk2C8E7f8Q3Fp84zJ5zqR/1aaoWGgnayktRgwha1fAjZNDh6dbnwg1FO" +
+                "bnn0BHB1ZNxCAQAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

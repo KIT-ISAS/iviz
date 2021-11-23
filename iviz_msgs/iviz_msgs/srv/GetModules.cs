@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/GetModules")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetModules : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetModulesRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetModulesResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetModules()
         {
             Request = GetModulesRequest.Singleton;
             Response = new GetModulesResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetModules(GetModulesRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/GetModules";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "854d12ba02315a7b73d8ac45d1a68e74";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,25 +55,19 @@ namespace Iviz.Msgs.IvizMsgs
     {
         // Gets a list of modules
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetModulesRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetModulesRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        GetModulesRequest IDeserializable<GetModulesRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        GetModulesRequest IDeserializable<GetModulesRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly GetModulesRequest Singleton = new GetModulesRequest();
     
@@ -85,7 +79,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -98,33 +92,27 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "configs")] public string[] Configs; // List of module configurations in JSON encoding
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetModulesResponse()
         {
             Configs = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetModulesResponse(string[] Configs)
         {
             this.Configs = Configs;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetModulesResponse(ref Buffer b)
         {
             Configs = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetModulesResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetModulesResponse(ref b);
         
-        GetModulesResponse IDeserializable<GetModulesResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetModulesResponse(ref b);
-        }
+        GetModulesResponse IDeserializable<GetModulesResponse>.RosDeserialize(ref Buffer b) => new GetModulesResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

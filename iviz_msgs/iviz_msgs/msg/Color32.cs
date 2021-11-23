@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = "iviz_msgs/Color32")]
+    [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
     public struct Color32 : IMessage, System.IEquatable<Color32>, IDeserializable<Color32>
     {
@@ -15,7 +15,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "b")] public byte B;
         [DataMember (Name = "a")] public byte A;
     
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Color32(byte R, byte G, byte B, byte A)
         {
             this.R = R;
@@ -24,22 +24,16 @@ namespace Iviz.Msgs.IvizMsgs
             this.A = A;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Color32(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Color32(ref b);
-        }
+        public readonly ISerializable RosDeserialize(ref Buffer b) => new Color32(ref b);
         
-        readonly Color32 IDeserializable<Color32>.RosDeserialize(ref Buffer b)
-        {
-            return new Color32(ref b);
-        }
+        readonly Color32 IDeserializable<Color32>.RosDeserialize(ref Buffer b) => new Color32(ref b);
         
         public override readonly int GetHashCode() => (R, G, B, A).GetHashCode();
         
@@ -60,22 +54,22 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 4;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
         public readonly string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "iviz_msgs/Color32";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "3a89b17adab5bedef0b554f03235d9b3";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACivNzCuxUCjiKgXT6VA6CUoncvFyAQDL60QxIgAAAA==";
+                "H4sIAAAAAAAAEyvNzCuxUCjiKgXT6VA6CUoncnEBACHBa7shAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

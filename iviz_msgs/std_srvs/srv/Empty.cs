@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdSrvs
 {
-    [DataContract (Name = "std_srvs/Empty")]
+    [DataContract (Name = RosServiceType)]
     public sealed class Empty : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public EmptyRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public EmptyResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public Empty()
         {
             Request = EmptyRequest.Singleton;
             Response = EmptyResponse.Singleton;
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public Empty(EmptyRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.StdSrvs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "std_srvs/Empty";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.StdSrvs
     public sealed class EmptyRequest : IRequest<Empty, EmptyResponse>, IDeserializable<EmptyRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public EmptyRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal EmptyRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        EmptyRequest IDeserializable<EmptyRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        EmptyRequest IDeserializable<EmptyRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly EmptyRequest Singleton = new EmptyRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -96,25 +90,19 @@ namespace Iviz.Msgs.StdSrvs
     public sealed class EmptyResponse : IResponse, IDeserializable<EmptyResponse>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public EmptyResponse()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal EmptyResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        EmptyResponse IDeserializable<EmptyResponse>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        EmptyResponse IDeserializable<EmptyResponse>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly EmptyResponse Singleton = new EmptyResponse();
     
@@ -126,7 +114,7 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

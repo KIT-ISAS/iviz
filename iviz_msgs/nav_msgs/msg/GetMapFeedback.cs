@@ -4,30 +4,24 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
 {
-    [Preserve, DataContract (Name = "nav_msgs/GetMapFeedback")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class GetMapFeedback : IDeserializable<GetMapFeedback>, IFeedback<GetMapActionFeedback>
     {
         // no feedback
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetMapFeedback()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetMapFeedback(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        GetMapFeedback IDeserializable<GetMapFeedback>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        GetMapFeedback IDeserializable<GetMapFeedback>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly GetMapFeedback Singleton = new GetMapFeedback();
     
@@ -39,23 +33,22 @@ namespace Iviz.Msgs.NavMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "nav_msgs/GetMapFeedback";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
+        /// MD5 hash of a compact representation of the message.
+        [Preserve] public const string RosMd5Sum = BuiltIns.EmptyMd5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuPlAgCshaIUAgAAAA==";
-                
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        [Preserve] public const string RosDependenciesBase64 = BuiltIns.EmptyDependenciesBase64;
+    
         public override string ToString() => Extensions.ToString(this);
     }
 }

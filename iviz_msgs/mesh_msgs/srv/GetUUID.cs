@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = "mesh_msgs/GetUUID")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetUUID : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetUUIDRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetUUIDResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetUUID()
         {
             Request = GetUUIDRequest.Singleton;
             Response = new GetUUIDResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetUUID(GetUUIDRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MeshMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "mesh_msgs/GetUUID";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "18ad0215778d252d8f14959901273e8d";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class GetUUIDRequest : IRequest<GetUUID, GetUUIDResponse>, IDeserializable<GetUUIDRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetUUIDRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetUUIDRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        GetUUIDRequest IDeserializable<GetUUIDRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        GetUUIDRequest IDeserializable<GetUUIDRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly GetUUIDRequest Singleton = new GetUUIDRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.MeshMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -97,33 +91,27 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetUUIDResponse()
         {
             Uuid = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetUUIDResponse(string Uuid)
         {
             this.Uuid = Uuid;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetUUIDResponse(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetUUIDResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetUUIDResponse(ref b);
         
-        GetUUIDResponse IDeserializable<GetUUIDResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetUUIDResponse(ref b);
-        }
+        GetUUIDResponse IDeserializable<GetUUIDResponse>.RosDeserialize(ref Buffer b) => new GetUUIDResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

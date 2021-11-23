@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
 {
-    [Preserve, DataContract (Name = "visualization_msgs/MenuEntry")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class MenuEntry : IDeserializable<MenuEntry>, IMessage
     {
         // MenuEntry message.
@@ -55,14 +55,14 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte ROSLAUNCH = 2;
         [DataMember (Name = "command_type")] public byte CommandType;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public MenuEntry()
         {
             Title = string.Empty;
             Command = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public MenuEntry(uint Id, uint ParentId, string Title, string Command, byte CommandType)
         {
             this.Id = Id;
@@ -72,7 +72,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             this.CommandType = CommandType;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal MenuEntry(ref Buffer b)
         {
             Id = b.Deserialize<uint>();
@@ -82,15 +82,9 @@ namespace Iviz.Msgs.VisualizationMsgs
             CommandType = b.Deserialize<byte>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new MenuEntry(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new MenuEntry(ref b);
         
-        MenuEntry IDeserializable<MenuEntry>.RosDeserialize(ref Buffer b)
-        {
-            return new MenuEntry(ref b);
-        }
+        MenuEntry IDeserializable<MenuEntry>.RosDeserialize(ref Buffer b) => new MenuEntry(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -111,27 +105,27 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "visualization_msgs/MenuEntry";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "b90ec63024573de83b57aa93eb39be2d";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACp1UTW/bMAy9B9h/INLDVqBfSzdgKJBD16ZbsbUbuvUcyDYTC7ElT5LT5t/vUbITZz0U" +
-                "2Mmi/PhIPpI6oDs27cwEt6GavVdLPhmNDmim8pJuTWCn8qDXfKfcil0PoVJ5UoaUc2pDdvGSxJ+A5JJy" +
-                "W1UMAmuGKM2egl1yKEFZsM+dzpgUPGogTn2b9d/+yCGn4JiPKJS2XZb48AbhmXywjgvSSIYWlQogiVmd" +
-                "EP0uOToB49o8tEBrT44bx55RWkHZhpZ6rc2SWOqVUIQ/biMshm6vybR1hiSVKcA/bhDRhLkuxrTQXBUS" +
-                "xDbHFa+5io5SmWSF9EBhDcwnHUraOtKUzuAlSuw5WFew1CFo1AJ/7cCQmGGRVzXTE9TeVt67JDikNkFp" +
-                "I8X0AvyMUUHTR6pbH0g1DStHGS+gXIpEeamrAuDU+2dVNxVf4HhMMeVzHGm/iHgTdKgY1njRmvEOPnkN" +
-                "7mxmw8DhwwuHyb5D4yYD+MfX4Og1TvDA9RdMLzROzY3jUOmV1K29VAhOJJ8OMa3IBAMh+2OiE2kwERgh" +
-                "1Y8FFPx3cqS5ojIGujX6T8uDloJAuuRsdRQnymOWq4IMmiz9wGSMWm3C+QRldtGwNdLcVGuykMAu3BHp" +
-                "BemQsuq2BSncJmC3UQmaMGFvXuHvOQykDHaQxfZ61BOddlRR6RH2SsYtGbLvbtkCFmS7UWldS5HaFDpX" +
-                "3bZ1l/OwaZjeZVzZp8OepvsnRFdDWNxwUMo2iw0RYDfWeJbHQ8e1KdnspOkmPlacVzpfcSHP0c1sdv35" +
-                "8urbBWqWfTYvH7gb5iJT+Wr70MXtFc55ZJxDIhEM9cVo8fKtR78kwMOPXw+P9xfEz5y3gWXOvcNmJBa1" +
-                "VQdvDtLd7m3SKT4o9E5lds2HHdv3y8f7q6/7hJVqTV7+F6e09dNWhulZd5HSnr7fmSnudNLdDLs2ejP6" +
-                "C8VQ0aM0BgAA";
+                "H4sIAAAAAAAAE51Uy27bMBC8+ysWzqEJkFedFigC+JAmThu0Tou0OQeUtLYIS6RKUk78950lJVtuDgF6" +
+                "Epeand3ZBw9ozqadmeA2VLP3asmno9EBzVRe0p0J7FQe9Jrnyq3Y9RAqlSdlSDmnNmQXr0n8KUiuKLdV" +
+                "xSCwZojS7CnYJYcSlAX73OmMScGjBuLMt1n/7Y8ccgqO+ZhCadtliQ9vEJ7JB+u4II1kaFGpAJKY1SnR" +
+                "75KjEzCuzUMLtPbkuHHsGdIKyja01GttlsSiV0IRiwxhMXR3Q6atMySpTAH+cYOIJjzpYkwLzVUhQWxz" +
+                "UvGaq+goyiQrpAcKa2A+61DS1pGmdA6veR+pd7CuYNEhaGiBv3ZgSMywyKua6RnV3irvXRIcpTZBaSNi" +
+                "+gL8jFFB00eqWx9INQ0rRxkvbMpUO8pLXRUAp96/qLqp+BLHE4opX+BI+yLiTdChYljjRWvGO/jkLbiz" +
+                "mQ0Dhw+vHCb7Do2bDOAf34Kj1zjBA9dfML2ocWpuHIdKr0S39qIQnEg+HWJakQkGQvbHRCelwURoIevG" +
+                "AhX8d3KkuVJlDHRr9J+WBy0FgXTJ2eo4TpTHLFcFGTRZ+oHJGLXahIsJZHbRsDXS3KQ1WUhgF+6Y9IJ0" +
+                "SFl124IU7hKw26gETZiwN6/w9xwGpQx2kMX2etQTnXVUsdIj7JWMWzJk392yBSzIdkNpXYtIbQqdq27b" +
+                "usunsGmYDjOu7PNRT9P9E6LrISxuuI9liDaKALuxxrM8HjquTclmV5pu4qPivNL5igt5jm5ns5vPV9ff" +
+                "LqFZ9tm8fuBumYtM5avtQxe3VzifIqOUSAoGfTFavHzn0S8J8PDj18Pj/SXxC+dtYJlz77AZiUVtq4M3" +
+                "B+lu9zbVKT4odKgyu+ajju371eP99dd9wkq1Ji//i1Pa+mlbhul5d5HSnr7fmSnudNLdDLs2Gv0F7VRe" +
+                "/DMGAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

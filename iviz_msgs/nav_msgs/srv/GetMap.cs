@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract (Name = "nav_msgs/GetMap")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetMap : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetMapRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetMapResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetMap()
         {
             Request = GetMapRequest.Singleton;
             Response = new GetMapResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetMap(GetMapRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.NavMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "nav_msgs/GetMap";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "6cdd0a18e0aff5b0a3ca2326a89b54ff";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,25 +55,19 @@ namespace Iviz.Msgs.NavMsgs
     {
         // Get the map as a nav_msgs/OccupancyGrid
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetMapRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetMapRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        GetMapRequest IDeserializable<GetMapRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        GetMapRequest IDeserializable<GetMapRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly GetMapRequest Singleton = new GetMapRequest();
     
@@ -85,7 +79,7 @@ namespace Iviz.Msgs.NavMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -98,33 +92,27 @@ namespace Iviz.Msgs.NavMsgs
     {
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetMapResponse()
         {
             Map = new NavMsgs.OccupancyGrid();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetMapResponse(NavMsgs.OccupancyGrid Map)
         {
             this.Map = Map;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetMapResponse(ref Buffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetMapResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetMapResponse(ref b);
         
-        GetMapResponse IDeserializable<GetMapResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetMapResponse(ref b);
-        }
+        GetMapResponse IDeserializable<GetMapResponse>.RosDeserialize(ref Buffer b) => new GetMapResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

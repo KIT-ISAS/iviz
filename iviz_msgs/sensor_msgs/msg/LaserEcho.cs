@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [Preserve, DataContract (Name = "sensor_msgs/LaserEcho")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class LaserEcho : IDeserializable<LaserEcho>, IMessage
     {
         // This message is a submessage of MultiEchoLaserScan and is not intended
@@ -12,33 +12,27 @@ namespace Iviz.Msgs.SensorMsgs
         [DataMember (Name = "echoes")] public float[] Echoes; // Multiple values of ranges or intensities.
         // Each array represents data from the same angle increment.
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public LaserEcho()
         {
             Echoes = System.Array.Empty<float>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public LaserEcho(float[] Echoes)
         {
             this.Echoes = Echoes;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal LaserEcho(ref Buffer b)
         {
             Echoes = b.DeserializeStructArray<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new LaserEcho(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new LaserEcho(ref b);
         
-        LaserEcho IDeserializable<LaserEcho>.RosDeserialize(ref Buffer b)
-        {
-            return new LaserEcho(ref b);
-        }
+        LaserEcho IDeserializable<LaserEcho>.RosDeserialize(ref Buffer b) => new LaserEcho(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -54,18 +48,17 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "sensor_msgs/LaserEcho";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "8bc5ae449b200fba4d552b4225586696";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACmWOsQ7CMBBD90j8g6XuHeAb2GCCDTEcjdtGSpPq7orE3xOEmPBkn6zn63Cdk2GhmUxE" +
-                "swLbHr9cR5y37Ok4zPUkRr0MUiAlfpqlOlJxlsgYOnjFg9iMEcZVVJz51Ycw5ip+2N/uYKPQgO4LXTPx" +
-                "lLy1U9tRKdPH6ZdpyROtD/hTh6MMM0RVXlCuSmNxQxQXjFoX+EyYLGyPTm0jlUG5tE6/C28kkSwo8AAA" +
-                "AA==";
+                "H4sIAAAAAAAAE2WOsQ7CMBBD93yFpe4d4BvYYIINMRyN20ZKk+ruitS/Jwgx4ck+Wc/X4TYnw0IzmYhm" +
+                "BbY9f7mOuGzZ02mY61mMeh2kQEr8NEt1pOIskTF08IonsRkjjKuoOPPehzDmKn483B9go9CA7gtdM/GS" +
+                "vLVT21Ep08fpl2nJE60P+FOHkwwzRFV2KFelsbghigtGrQt8JkwWtkentpHKoFxapw9vt18nv+8AAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

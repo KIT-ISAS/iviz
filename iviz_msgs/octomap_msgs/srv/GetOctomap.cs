@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.OctomapMsgs
 {
-    [DataContract (Name = "octomap_msgs/GetOctomap")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetOctomap : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetOctomapRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetOctomapResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetOctomap()
         {
             Request = GetOctomapRequest.Singleton;
             Response = new GetOctomapResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetOctomap(GetOctomapRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.OctomapMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "octomap_msgs/GetOctomap";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "be9d2869d24fe40d6bc21ac21f6bb2c5";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,25 +55,19 @@ namespace Iviz.Msgs.OctomapMsgs
     {
         // Get the map as a octomap
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetOctomapRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetOctomapRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        GetOctomapRequest IDeserializable<GetOctomapRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        GetOctomapRequest IDeserializable<GetOctomapRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly GetOctomapRequest Singleton = new GetOctomapRequest();
     
@@ -85,7 +79,7 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -98,33 +92,27 @@ namespace Iviz.Msgs.OctomapMsgs
     {
         [DataMember (Name = "map")] public OctomapMsgs.Octomap Map;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetOctomapResponse()
         {
             Map = new OctomapMsgs.Octomap();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetOctomapResponse(OctomapMsgs.Octomap Map)
         {
             this.Map = Map;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetOctomapResponse(ref Buffer b)
         {
             Map = new OctomapMsgs.Octomap(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetOctomapResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetOctomapResponse(ref b);
         
-        GetOctomapResponse IDeserializable<GetOctomapResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetOctomapResponse(ref b);
-        }
+        GetOctomapResponse IDeserializable<GetOctomapResponse>.RosDeserialize(ref Buffer b) => new GetOctomapResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

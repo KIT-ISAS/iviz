@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GridMapMsgs
 {
-    [DataContract (Name = "grid_map_msgs/GetGridMap")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetGridMap : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetGridMapRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetGridMapResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetGridMap()
         {
             Request = new GetGridMapRequest();
             Response = new GetGridMapResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetGridMap(GetGridMapRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.GridMapMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "grid_map_msgs/GetGridMap";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "802c2cbc7b10fada2d44db75ddb8c738";
         
         public override string ToString() => Extensions.ToString(this);
@@ -66,14 +66,14 @@ namespace Iviz.Msgs.GridMapMsgs
         // Requested layers. If empty, get all layers.
         [DataMember (Name = "layers")] public string[] Layers;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetGridMapRequest()
         {
             FrameId = string.Empty;
             Layers = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetGridMapRequest(string FrameId, double PositionX, double PositionY, double LengthX, double LengthY, string[] Layers)
         {
             this.FrameId = FrameId;
@@ -84,7 +84,7 @@ namespace Iviz.Msgs.GridMapMsgs
             this.Layers = Layers;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetGridMapRequest(ref Buffer b)
         {
             FrameId = b.DeserializeString();
@@ -95,15 +95,9 @@ namespace Iviz.Msgs.GridMapMsgs
             Layers = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetGridMapRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetGridMapRequest(ref b);
         
-        GetGridMapRequest IDeserializable<GetGridMapRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetGridMapRequest(ref b);
-        }
+        GetGridMapRequest IDeserializable<GetGridMapRequest>.RosDeserialize(ref Buffer b) => new GetGridMapRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -136,33 +130,27 @@ namespace Iviz.Msgs.GridMapMsgs
         // Submap
         [DataMember (Name = "map")] public GridMapMsgs.GridMap Map;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetGridMapResponse()
         {
             Map = new GridMapMsgs.GridMap();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetGridMapResponse(GridMapMsgs.GridMap Map)
         {
             this.Map = Map;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetGridMapResponse(ref Buffer b)
         {
             Map = new GridMapMsgs.GridMap(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetGridMapResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetGridMapResponse(ref b);
         
-        GetGridMapResponse IDeserializable<GetGridMapResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetGridMapResponse(ref b);
-        }
+        GetGridMapResponse IDeserializable<GetGridMapResponse>.RosDeserialize(ref Buffer b) => new GetGridMapResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

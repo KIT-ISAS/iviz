@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [Preserve, DataContract (Name = "geometry_msgs/Quaternion")]
+    [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
     public struct Quaternion : IMessage, System.IEquatable<Quaternion>, IDeserializable<Quaternion>
     {
@@ -16,7 +16,7 @@ namespace Iviz.Msgs.GeometryMsgs
         [DataMember (Name = "z")] public double Z;
         [DataMember (Name = "w")] public double W;
     
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Quaternion(double X, double Y, double Z, double W)
         {
             this.X = X;
@@ -25,22 +25,16 @@ namespace Iviz.Msgs.GeometryMsgs
             this.W = W;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Quaternion(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Quaternion(ref b);
-        }
+        public readonly ISerializable RosDeserialize(ref Buffer b) => new Quaternion(ref b);
         
-        readonly Quaternion IDeserializable<Quaternion>.RosDeserialize(ref Buffer b)
-        {
-            return new Quaternion(ref b);
-        }
+        readonly Quaternion IDeserializable<Quaternion>.RosDeserialize(ref Buffer b) => new Quaternion(ref b);
         
         public override readonly int GetHashCode() => (X, Y, Z, W).GetHashCode();
         
@@ -61,23 +55,23 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 32;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
         public readonly string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "geometry_msgs/Quaternion";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "a779879fadf0160734f906b8c19c7004";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACj3JPQqAMAxA4T3gHQLuTuJJvECQFAOa1DTiz+m1S7fv8XqcVynonJ0LaxQkRXP5SSGm" +
-                "KIrJmbFkWrjWcVKwa33JfB8A0mYU04h309P0Nl3QwQc5jmFPbgAAAA==";
+                "H4sIAAAAAAAAEz3JTQqAQAhA4b2nENq3ik7SBSQcEkonNfo5fbWZ3fd4HU6LBDpX52DNQFI0l4+UYoqi" +
+                "WJwZo9LMf+0HJbv+r5hvPUBZjXIc8Gq6m56mE+AFLI5yL20AAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

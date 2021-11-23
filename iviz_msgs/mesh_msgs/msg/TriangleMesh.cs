@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [Preserve, DataContract (Name = "mesh_msgs/TriangleMesh")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class TriangleMesh : IDeserializable<TriangleMesh>, IMessage
     {
         //# Definition of a triangle mesh
@@ -19,7 +19,7 @@ namespace Iviz.Msgs.MeshMsgs
         [DataMember (Name = "textures")] public SensorMsgs.Image[] Textures;
         [DataMember (Name = "clusters")] public MeshMsgs.MeshFaceCluster[] Clusters;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TriangleMesh()
         {
             Triangles = System.Array.Empty<TriangleIndices>();
@@ -33,7 +33,7 @@ namespace Iviz.Msgs.MeshMsgs
             Clusters = System.Array.Empty<MeshMsgs.MeshFaceCluster>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TriangleMesh(TriangleIndices[] Triangles, GeometryMsgs.Point[] Vertices, GeometryMsgs.Point[] VertexNormals, StdMsgs.ColorRGBA[] VertexColors, StdMsgs.ColorRGBA[] TriangleColors, GeometryMsgs.Point[] VertexTextureCoords, MeshMsgs.MeshMaterial[] FaceMaterials, SensorMsgs.Image[] Textures, MeshMsgs.MeshFaceCluster[] Clusters)
         {
             this.Triangles = Triangles;
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.MeshMsgs
             this.Clusters = Clusters;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TriangleMesh(ref Buffer b)
         {
             Triangles = b.DeserializeArray<TriangleIndices>();
@@ -77,15 +77,9 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TriangleMesh(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TriangleMesh(ref b);
         
-        TriangleMesh IDeserializable<TriangleMesh>.RosDeserialize(ref Buffer b)
-        {
-            return new TriangleMesh(ref b);
-        }
+        TriangleMesh IDeserializable<TriangleMesh>.RosDeserialize(ref Buffer b) => new TriangleMesh(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -152,35 +146,35 @@ namespace Iviz.Msgs.MeshMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "mesh_msgs/TriangleMesh";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "b112c5b670c2c3e8b1571aae11ccc3da";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1XS2/cNhC+C/B/ILAH24nXDuKiCFwUfdhNugcDQeNbUCy40khiS5EySe3Dv77fUKJ2" +
-                "16/kUFvY9VLkzDfDeXsyEVdUKqOCskbYUkgRnJKm0iQa8nWW3QyvM1OonPzXv0cCLyZCKx+Ybdz7SYSa" +
-                "hDIFrcVS6g5UjkpyIljRWh/leJyLJbnAgOJImiK+0XpurGuk9idClaJSSzLHWUW2oeA288ZX/uyzVSZA" +
-                "h5F7EuXJPHRSb3dDLYNo5L8kujYSxLtMbMvipb54BnWrReZD0Z9fWm3dX59+/21Lk/PWEyTJGInoWWH4" +
-                "hs4xrXWFz1jRnu4aq2sZCGAa5KXMad4M7xBMxlvXU84aWRHL7aHug3wE56XuPFhBlPcrnx1kP//Pz0F2" +
-                "/eXThdhKvxc7B9nT0XboR+9lHQx0/v7r+WgjhFM8eDGVH/EQK3tTKy9ya4JUCFqOoxTCvfItE3Iwl45I" +
-                "+BaGzkptZfjxB7EeV5txdfdyN3gYiAe92PP3wo2ralwtxpV8jUjYDeaDwcEpXtm9tH4klWB6rLKFtVrU" +
-                "0qdUeUEj3k+qMQhwE4/3bTBIIzqT26ZFvnkqhGJyUB+9OxHvjgVYUIGCbaeaygA2Z1ADETQDXZb9SbLA" +
-                "Vt3/DM9EDNtBQWKQTSt8bTtdiAUXudtODeHH51u4xL73jFilkw2MXOxAcSHMUTDjEePk+HXyKSDrVIUo" +
-                "B13P8BAoJwPnfhvp7Tox97mDrsBpBfw6JlJsHs/d6e1mH6CwK/N9jHf7jPja2JS0NNEE30SY9TSjOWty" +
-                "cAqa197ugHQZzTAzpX0KLoWU9N7mCrlRiJUK9VYPDrZSqzw8hcCUC6rlUlnHEdchj1BdqchShtUUDbtl" +
-                "6YH77ZO+TSq0W9M1i959zq5SAYY6BfR5wB23H2VGvnaN8VnMGhKaKm7K/RRQQkdCxhTKVELCclw2FcYM" +
-                "7/KzCDxPx/40b9ssGnxjO7GSfaAgH0whXaHuYDRhaIUdx2iARmM8Ef/AsWBz1k87jxb3K08n/tTbzuUE" +
-                "oopODYXoMmR6wTlMjVRatM5yYWfFIm5S5DTLBhGj5skUf6QNXLtVa9JeTKcir6UxpOFbaXB4gsxBBsaV" +
-                "h9qPO5I9iVGFu4htolPTVNULj+OSMmjcBZ3tlqj7VsO0xp77AK/MF6rCFdFbB89x+8KfQgYpxrNfkqcx" +
-                "EbR7Cn3stOZYgA9NhSCABotNGHrzB4wREWiHYZjA4Aen1vG0vzJLPorwb2JsHb9CC+zrHtfuL0PIwCFB" +
-                "RpU5DGtEPzlU5iVcFassci+ehk1L/jQVfXxgKKSx1huBiEKmW8R403QGRS/QtkonfnDCUhgMJI8ynZYO" +
-                "9IgBZZg81ghGx8fTbQfPkZhdXXCie8q7gIkXkuBqRzKG4+xKjC6i22xys7JTvFK11yKGTBS0Tt1I+gvI" +
-                "eNNf7hTY3NsgpYjOwN4cr/4YHmIVqLV5LY6g+edNqLm7IAaXEr16gfzkEQgWAOohMx0e7yCz2hfCSGMT" +
-                "fI+4lfE9sGbE5TtNkUOF5tv7roIBQYj8XKoCpItNBMm1Qr9BmiycdJssNsMoMpt8jA1qG+vciPcLbErp" +
-                "VLFfa/zZGcMRmsMqzbrDfJ8G3fE/laSslgvS0PQ/lGuWzLANAAA=";
+                "H4sIAAAAAAAAE71XS2/cNhC+61cMsAfbidcOkqIIXBR92HW6BwNB41tQLLjSSGJLkTJJ7cO/vh9JUet3" +
+                "c6gr7Hopcuab4bw9m9EF11JLL40mU5Mgb6XQjWLq2LVFcT2+LnQlS3Zf/5wIHM1ISecD27T3A/mWSeqK" +
+                "t7QWagCV5ZoteUO9cVGOwzmt2foASIdCV/GNt0ttbCeUOyZZUyPXrI+Khk3H3u6WnWvc6WcjtYcOE/cs" +
+                "yhOlH4Ta7/pWeOrE30xDHwniXWamD+KFOnsBda9F4XyVzs+NMvaPT7/+sqcpw9YzJNkYmehFYfj6wQZa" +
+                "YytXBEUT3RVWV8IzwBTIa1HyshvfIZi1MzZRLjrRcJCboB6CXILzXA0OrCAq08oVxY//8VNcffl0RnvZ" +
+                "DyKneD7UDtzkumKAdT68//phMpAc2V9J3yecA02vW+moNNoLqV2MoBy8SfM+0IUwri0zuR4mLmplhP/+" +
+                "O9pOq920un0t9R8HYJL54T3ZadVMq9W0Eq8fAHcjePRrjtFlrBBPpA/FnClWxihqhcvp8Wrme5hG2fe4" +
+                "hcPrPgaEpkGXpuuRYI4rkiP14btjendEYEHJ8aafK6492KxG0UOsjHRF8TuLCltt+hmfGY3bXkKiF11P" +
+                "rjWDqmgVqtrNIMeoC+d7OHrqmbBqKzpYuLoDFSpfiQoZjwJOiV8rngMyVjYyhnpieAxUsvbpgi8jvd1m" +
+                "5pQyaAMhm4DfxvyJ3eKlO73d3QeozEZ/G+PtfUZ8TexCSuhogn9FWCSayZwtWzgF3ere7oh0Hs2w0LV5" +
+                "Di6HlHDOlBJ5UdFG+navRwi2WsnSP4cQKFfcirU0NkTcgCRCReWqyOnVcjTsniUBp+3j1Bcl+qseulVy" +
+                "nzWbXHShTgV9HnHH7SeZkaxDp1GbQ9YwKW5CF05tv4aOjIyppG5IWI7VUmKucLY8jcDLfOxOyr4vosF3" +
+                "ZqCNSIGCfNCVsJW8hdFI8wY7NqDVoUHjOn/BsWCzxs0Hh572cxhH3Ikzgy0ZRA2faPbRZUj0KuQwd0Iq" +
+                "6q0J9TwoFnGzIidFMYqYNM+m+C1v4Nq93LJyNJ9T2QqtWcG3QuPwGJmDDIwrB7WfdmTwJGaT0DxMF52a" +
+                "x6gkPM5HUqNTV3x6t0I9tFqb/P4RXlmuZIMrop+OngtdC38q4QVNZz9lT2ME6O8pdDkoFWIBPtQNggAa" +
+                "rHZ+7McfMTdEoDsM48gFP1i5jafpykHyYYR/E2Pr6NU7X6p6iIMvY7zAG15EfUMMtgh9tijLa/gpllgk" +
+                "Xjz1u57dSa74+MBKyGGldjSEEo8QRMHvBo2K53lfojM/OGEmDAMizC6DEpbiFCd1II8FIqDj4/hmgNuY" +
+                "FhdnIcsdl4PHfAtJ8LNlEWNxcUGTf/immF1vzByv3NzrD2MaEm9zKxLuDDLepMudADv0NUipoiewt8Sr" +
+                "O4J7ggrcm7KlQ2j+eedbkyrpWqBJr1T0Hsq7AupBYDo4uoOsI7QW2mT4hLiX8S2wesINd5ojgSoVbu+G" +
+                "RsSqhuRcywqkq10EKZVEs0GOrKywuyJ2wiiymF3G7rQP9NCF71fXnM+5XP8/U8+dkbuY5cU42Y6jfB5r" +
+                "p39KsqZKrFgVxT9oNdMTmg0AAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Rosapi
 {
-    [DataContract (Name = "rosapi/TopicsAndRawTypes")]
+    [DataContract (Name = RosServiceType)]
     public sealed class TopicsAndRawTypes : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public TopicsAndRawTypesRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public TopicsAndRawTypesResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public TopicsAndRawTypes()
         {
             Request = TopicsAndRawTypesRequest.Singleton;
             Response = new TopicsAndRawTypesResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public TopicsAndRawTypes(TopicsAndRawTypesRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Rosapi
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosapi/TopicsAndRawTypes";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "e1432466c8f64316723276ba07c59d12";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.Rosapi
     public sealed class TopicsAndRawTypesRequest : IRequest<TopicsAndRawTypes, TopicsAndRawTypesResponse>, IDeserializable<TopicsAndRawTypesRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TopicsAndRawTypesRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TopicsAndRawTypesRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        TopicsAndRawTypesRequest IDeserializable<TopicsAndRawTypesRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        TopicsAndRawTypesRequest IDeserializable<TopicsAndRawTypesRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly TopicsAndRawTypesRequest Singleton = new TopicsAndRawTypesRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.Rosapi
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -99,7 +93,7 @@ namespace Iviz.Msgs.Rosapi
         [DataMember (Name = "types")] public string[] Types;
         [DataMember (Name = "typedefs_full_text")] public string[] TypedefsFullText;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TopicsAndRawTypesResponse()
         {
             Topics = System.Array.Empty<string>();
@@ -107,7 +101,7 @@ namespace Iviz.Msgs.Rosapi
             TypedefsFullText = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TopicsAndRawTypesResponse(string[] Topics, string[] Types, string[] TypedefsFullText)
         {
             this.Topics = Topics;
@@ -115,7 +109,7 @@ namespace Iviz.Msgs.Rosapi
             this.TypedefsFullText = TypedefsFullText;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TopicsAndRawTypesResponse(ref Buffer b)
         {
             Topics = b.DeserializeStringArray();
@@ -123,15 +117,9 @@ namespace Iviz.Msgs.Rosapi
             TypedefsFullText = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TopicsAndRawTypesResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TopicsAndRawTypesResponse(ref b);
         
-        TopicsAndRawTypesResponse IDeserializable<TopicsAndRawTypesResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new TopicsAndRawTypesResponse(ref b);
-        }
+        TopicsAndRawTypesResponse IDeserializable<TopicsAndRawTypesResponse>.RosDeserialize(ref Buffer b) => new TopicsAndRawTypesResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

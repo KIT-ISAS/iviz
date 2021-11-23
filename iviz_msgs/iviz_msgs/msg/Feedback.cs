@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = "iviz_msgs/Feedback")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class Feedback : IDeserializable<Feedback>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -17,7 +17,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale;
         [DataMember (Name = "trajectory")] public IvizMsgs.Trajectory Trajectory;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public Feedback()
         {
             VizId = string.Empty;
@@ -25,7 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
             Trajectory = new IvizMsgs.Trajectory();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Feedback(in StdMsgs.Header Header, string VizId, string Id, int FeedbackType, int EntryId, in GeometryMsgs.Point Position, in GeometryMsgs.Quaternion Orientation, in GeometryMsgs.Vector3 Scale, IvizMsgs.Trajectory Trajectory)
         {
             this.Header = Header;
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Trajectory = Trajectory;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal Feedback(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -53,15 +53,9 @@ namespace Iviz.Msgs.IvizMsgs
             Trajectory = new IvizMsgs.Trajectory(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Feedback(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new Feedback(ref b);
         
-        Feedback IDeserializable<Feedback>.RosDeserialize(ref Buffer b)
-        {
-            return new Feedback(ref b);
-        }
+        Feedback IDeserializable<Feedback>.RosDeserialize(ref Buffer b) => new Feedback(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -98,27 +92,27 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "iviz_msgs/Feedback";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "e539fa42d3d53e71b91f9252687bd4b3";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1VTU/bQBC9W8p/GIkDUIVUolUPSD1UQm05VKIC9VJVaGJP7C32rtldJ5hf3zfrxBBI" +
-                "RQ+FyFL2Y+bN99sQi6smlOHtV+FCPFXpLwvRG1vS0txdmWKzw8rY+O6YFiLFnPPrq9i3sj4TG32vwqW4" +
-                "RnSdYM8drql1wUTj7KPL7x1H8RYX5LwBAu8Q+iF5dP4dhZxrGFOX0vml59/pqqc4LrNskn38z79J9u3i" +
-                "ywmF7UxNsj26iGwL9gXBXS44Mi0cUmjKSvxRLUupocVNKwWlW01XmEHxsjKB8JVixXNd99QFCEVHuWua" +
-                "zpociaFoGtnSh6axxNSyjybvavaQd74wVsUXnhtRdHxBbjqxudDZ6QlkbJC8iwYO9UDIvXDQgp6dUtYN" +
-                "5YNCtne5ckfYSolGGI1TrDiqs3LbegnqJ4cT2HgzBDcDNrIjsFIEOkhnV9iGQ4IRuCCtyys6gOfnfaxQ" +
-                "61gJLdkbnteiwChsDdR9Vdo/fICsbp+QZes28APivY1/gbUjrsZ0VKFmtUYfuhIJhGDr3dIUEJ33CSSv" +
-                "tRepNnPPaCnVGkxme581xxCCVqoI/jkElxsUoKCVidVmWFI1dB5erCF3DNpk01vIVmRjQ4pnM33kFto8" +
-                "aSKRtoUXxNVyLtmidhw/vKfbcdWPq7vXiuCeDcYwvGjLoRhI8xZHbPuvu5t7LsEQNrPsmaA2q9Vrhbfm" +
-                "sZ2x0TJdbkc100E+S6PnLAa3EUbhwBGjJhQL46GKqGdAFS+IXaZkIhVOAlkXgdHwNSAFc6Da3LYAAxl5" +
-                "tqEesoljqBzIrJxNaVWJHaS0jxPrJJ4yOXlTmmLQ1CSPykzr6KYUF8eYg7oefB6MoQkB4t1Qu8MZnS2o" +
-                "dx2tNCAs/JoeHc1l9CuNcXRuqty4htj1toCmApfaAyGCmZ8r/ItVe9fLNHnyGgb5+UsHUkLiFWxGog0v" +
-                "+Hg9dUP78NN9Kw2lBEGob9t9ONVHSY+L9f1AJqDRhxOJbn301v/ldZ9kfwAPQHBvdAgAAA==";
+                "H4sIAAAAAAAAE71VTWvbQBC961cM5JCkOC4kpYdAD4XQNodCSkIvpZixNJa2kXaV3ZUd9df3zcqW48Ql" +
+                "PTQxAu/HzJvvtyEWsyaU4e0X4UI8VekvC9EbW9LS/J6ZYrPDyth4dkoLkWLO+e0s9q2sz8RG36twKa4R" +
+                "XSfYK4dral0w0Tj76PJbx1G8xQU5b4DAe4S+Sx6dP6OQcw1j6lI6v/H8K131FMdllmUf/vMv+3r9+ZzC" +
+                "bp6yA7qObAv2BcFXLjgyLRzyZ8pK/EktS6mhxE0rBaVbzVWYQvGmMoHwlWLFc1331AUIRUe5a5rOmhxZ" +
+                "oWga2dGHprHE1LKPJu9q9pB3vjBWxReeG1F0fEHuOrG50OXFOWRskLyLBg71QMi9cNBqXl5Q1g21g0J2" +
+                "cLNyJ9hKiS4YjVOsOKqzct96Ceonh3PYeDMENwU2kiOwUgQ6SmczbMMxwQhckNblFR3B86s+Vih0rISW" +
+                "7A3Pa1FgVLUG6qEqHR4/QLYJ2rJ1G/gBcWvjX2DtiKsxnVSoWa3Rh65EAiHYerc0BUTnfQLJa21Eqs3c" +
+                "M/pJtQaT2cEnzTGEoJUqgn8OweUGBShoZWK1mZRUDR2GF+rGPTO2aSykKrKxIQWzmTtyC+2cNIvI2cIL" +
+                "gmo5l2xRO47v39H9uOrH1e/XcX/LApsYvGizoQxI8A417Dqvu7sthWD8mmn2TESb1ep1YluT177AaJnu" +
+                "dkOa6vxepolzFvPaCKNkoIZRE4qF8VBFyFOgihcELhMykQongazTXmj4FpCC9ldtbluAsRKlDfWQShxD" +
+                "5Uim5XRCq0rsIKXtm8gm0ZPJyZvSFIOmZnhUZloHN6G4OEX71/Xg82AM7QcQ74bCHU/pckG962ilAWHh" +
+                "16zoaC6jX2l6o3MTpcQ1xL73BOwUuNQGCBF8/GzVX6bU+96iJ89fkB8/dQ4lJC7BZiTX8GKv1VMnkMiP" +
+                "2ybiDSmoY7sdONFXSI+L9f1AIODNh4OIPn30sv/lLc/+ANuWZw5hCAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

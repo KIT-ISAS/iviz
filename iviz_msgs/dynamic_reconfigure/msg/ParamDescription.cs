@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DynamicReconfigure
 {
-    [Preserve, DataContract (Name = "dynamic_reconfigure/ParamDescription")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class ParamDescription : IDeserializable<ParamDescription>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
@@ -13,7 +13,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         [DataMember (Name = "description")] public string Description;
         [DataMember (Name = "edit_method")] public string EditMethod;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ParamDescription()
         {
             Name = string.Empty;
@@ -22,7 +22,7 @@ namespace Iviz.Msgs.DynamicReconfigure
             EditMethod = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ParamDescription(string Name, string Type, uint Level, string Description, string EditMethod)
         {
             this.Name = Name;
@@ -32,7 +32,7 @@ namespace Iviz.Msgs.DynamicReconfigure
             this.EditMethod = EditMethod;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ParamDescription(ref Buffer b)
         {
             Name = b.DeserializeString();
@@ -42,15 +42,9 @@ namespace Iviz.Msgs.DynamicReconfigure
             EditMethod = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ParamDescription(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ParamDescription(ref b);
         
-        ParamDescription IDeserializable<ParamDescription>.RosDeserialize(ref Buffer b)
-        {
-            return new ParamDescription(ref b);
-        }
+        ParamDescription IDeserializable<ParamDescription>.RosDeserialize(ref Buffer b) => new ParamDescription(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -83,16 +77,16 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "dynamic_reconfigure/ParamDescription";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "7434fcb9348c13054e0c3b267c8cb34d";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACisuKcrMS1fIS8xN5SqGsEsqC1K5SjPzSoyNFHJSy1JzYBIpqcXJRZkFJZn5eTCh1JTM" +
-                "kvjc1JKM/BQuXi4Aq2b7uE0AAAA=";
+                "H4sIAAAAAAAAEysuKcrMS1fIS8xN5SqGsEsqC1K5SjPzSoyNFHJSy1JzYBIpqcXJRZkFJZn5eTCh1JTM" +
+                "kvjc1JKM/BQuLgC4Qc3XTAAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

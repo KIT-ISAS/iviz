@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = "iviz_msgs/Mesh")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class Mesh : IDeserializable<Mesh>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
@@ -17,7 +17,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "faces")] public Triangle[] Faces;
         [DataMember (Name = "material_index")] public uint MaterialIndex;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public Mesh()
         {
             Name = string.Empty;
@@ -30,7 +30,7 @@ namespace Iviz.Msgs.IvizMsgs
             Faces = System.Array.Empty<Triangle>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Mesh(string Name, Vector3f[] Vertices, Vector3f[] Normals, Vector3f[] Tangents, Vector3f[] BiTangents, TexCoords[] TexCoords, ColorChannel[] ColorChannels, Triangle[] Faces, uint MaterialIndex)
         {
             this.Name = Name;
@@ -44,7 +44,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.MaterialIndex = MaterialIndex;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal Mesh(ref Buffer b)
         {
             Name = b.DeserializeString();
@@ -66,15 +66,9 @@ namespace Iviz.Msgs.IvizMsgs
             MaterialIndex = b.Deserialize<uint>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Mesh(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new Mesh(ref b);
         
-        Mesh IDeserializable<Mesh>.RosDeserialize(ref Buffer b)
-        {
-            return new Mesh(ref b);
-        }
+        Mesh IDeserializable<Mesh>.RosDeserialize(ref Buffer b) => new Mesh(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -129,18 +123,18 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "iviz_msgs/Mesh";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "a5cea1d5d993b3cd934f9a3c7f16378c";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1SwQrCMAy9F/oP/QNhu4jgaQdPnhQvIiXWbBa6FNo66r7eznVj3mW95OWloa958cFp" +
-                "agRBi+yCKlhX1teb6NAFrdAvObKuBfNDBaAGKfxwdy1n+oyxstY9/HAXo1TfhFXWWFc9gQhNqqghlWrM" +
-                "U5PTqd9gqtQwaHhpCmUhWgiYSkZqemBknO3/fDg7ng47oTvdy9Y3fjP9irPaWBg0xBm9Z9SvIWWeJF/O" +
-                "Os9zhfeXlvHRwLKYvFtPQVnw7zpshcuxyfGeI6ziRl7RUUzaAZjAKCMBlXR8ANsqFdZdAwAA";
+                "H4sIAAAAAAAAE71SOw7CMAzdc4rcAKldEBJTByYmEAtCkZu6JVLqSEmoSk9PCknU7kAWPz/H8ufZeauo" +
+                "4wQ9sgtKb2zZXm98QOuVRLfkyNge9IryQB2SX3G1Epk+41gZYxs3/8VRyLfDKqONre5AhDpE5OwK+fFD" +
+                "klUhX2OItDD38FDky4L34DGEtFDU4MjY/suPHU+HHVeDmkTvOrdJM7FWG5gbGDN6ZjT9vo+8xOWW4yZ/" +
+                "Xnwp1Ue3skiS/at8WbxPYMtttF20dbTwBxHiUaZjhATqBCRjL5ZmGPZNAwAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

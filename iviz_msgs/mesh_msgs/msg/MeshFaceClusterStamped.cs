@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [Preserve, DataContract (Name = "mesh_msgs/MeshFaceClusterStamped")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class MeshFaceClusterStamped : IDeserializable<MeshFaceClusterStamped>, IMessage
     {
         // header
@@ -16,14 +16,14 @@ namespace Iviz.Msgs.MeshMsgs
         // overwrite existing labeled faces
         [DataMember (Name = "override")] public bool @override;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public MeshFaceClusterStamped()
         {
             Uuid = string.Empty;
             Cluster = new MeshFaceCluster();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public MeshFaceClusterStamped(in StdMsgs.Header Header, string Uuid, MeshFaceCluster Cluster, bool @override)
         {
             this.Header = Header;
@@ -32,7 +32,7 @@ namespace Iviz.Msgs.MeshMsgs
             this.@override = @override;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal MeshFaceClusterStamped(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -41,15 +41,9 @@ namespace Iviz.Msgs.MeshMsgs
             @override = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new MeshFaceClusterStamped(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new MeshFaceClusterStamped(ref b);
         
-        MeshFaceClusterStamped IDeserializable<MeshFaceClusterStamped>.RosDeserialize(ref Buffer b)
-        {
-            return new MeshFaceClusterStamped(ref b);
-        }
+        MeshFaceClusterStamped IDeserializable<MeshFaceClusterStamped>.RosDeserialize(ref Buffer b) => new MeshFaceClusterStamped(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -79,22 +73,22 @@ namespace Iviz.Msgs.MeshMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshFaceClusterStamped";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "e9b5993e06e78f5ff36e4050fa2e88c6";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACrVTTWvbQBC9C/wfBnRIUnAK7c3QU0PaHAKF5FaKGe+OpYHVrrofdvTv+1aK0pBTD40R" +
-                "WLt6782br5Z6YSuxSdnuh9Slj9/n83rdtDRI6qkUtcBE9d3yjg9fXUkZmHsAbtnI85nM8z0g4STxHDUL" +
-                "yZOmXNmOD+LE0hGM1BxCcDMqqpVm03z5z79Nc//wbUdvstvA2kNmbzla5JfZcmY6BqStXS9x6+QkDiwe" +
-                "Rlidv+ZplHQN4mOvifB04iWycxOVBFAOZMIwFK+GkW9W1O01H0z1xDRyzGqKYxQqhGjVV/gx8iBVHU+S" +
-                "30W8Ebq72QHjk5iSFYYmKJgonGod726oKerz50+V0LSP57DFUTp04CU45Z5zNStPY5RUfXLaIcaHJblr" +
-                "aKM6gig20eV8t8cxXRGCwIKMwfR0Cec/ptwHD0GhE0flg5MqbFABqF5U0sXVK+Vqe0eefVjlF8W/Mf5F" +
-                "1r/o1py2PXrmavapdCgggGMMJ4yOpcM0ixin4jM5PUSOU1NZS8imva01BgisuSP455SCUTTA0llzv074" +
-                "3I09pvzdBrIu1TKRb7YHo7nu1dLdn7/mVdmrt1o3pg1j1uDZrWbnhYLTP6lMa8TLAwAA";
+                "H4sIAAAAAAAAE7VTTWvcMBC961cM+JCksCm0t4WeGtLmECgkt1KWsTRrD8iSK8m78b/vkx2nIaceGiOw" +
+                "Pt57891QL+wkmVzcYchd/vh9OW/XpqFBck/TpA6YpKFb93j46qdcgLkH4JatPJ/JPt8DEk+SzkmLkDxp" +
+                "LpXtuRUvjo5gZNPG6BdUUifGfPnPn7l/+LanN7HBr4fCwXFyCK6w48J0jIhZu17SzstJPEg8jPBzeS3z" +
+                "KPkaxMdeM2F1EiSx9zNNGaASycZhmIJaRrBFkbTXfDA1ENPIqaidPCNLMSanocKPiQep6lhZfk8SrNDd" +
+                "zR6YkMVOReHQDAWbhHNN4t0NmUlD+fypEkzzeI47HKVD+l+MU+m5VGflaUySq5+c97DxYQ3uGtpIjsCK" +
+                "y3S53B1wzFcEI3BBxmh7uoTnP+bSxwBBoRMn5dZLFbbIAFQvKuni6pVyWKQDh7jJr4p/bfyLbHjRrTHt" +
+                "etTM1+jz1CGBAI4pntA3jtp5EbFeJRTy2iZOs6ms1aRpbmuOAQJrqQj+nHO0igI4Omvpt/ZeqnGoLf4+" +
+                "3VjnaW3HN4Njmm2zlvbnr2VIDhqc1llp4lg0Bvabp8soGfMHCtWNf8QDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

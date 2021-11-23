@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract (Name = "rosbridge_library/AddTwoInts")]
+    [DataContract (Name = RosServiceType)]
     public sealed class AddTwoInts : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public AddTwoIntsRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public AddTwoIntsResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public AddTwoInts()
         {
             Request = new AddTwoIntsRequest();
             Response = new AddTwoIntsResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public AddTwoInts(AddTwoIntsRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosbridge_library/AddTwoInts";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "6a2e34150c00229791cc89ff309fff21";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,34 +56,28 @@ namespace Iviz.Msgs.RosbridgeLibrary
         [DataMember (Name = "a")] public long A;
         [DataMember (Name = "b")] public long B;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public AddTwoIntsRequest()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public AddTwoIntsRequest(long A, long B)
         {
             this.A = A;
             this.B = B;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal AddTwoIntsRequest(ref Buffer b)
         {
             A = b.Deserialize<long>();
             B = b.Deserialize<long>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new AddTwoIntsRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new AddTwoIntsRequest(ref b);
         
-        AddTwoIntsRequest IDeserializable<AddTwoIntsRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new AddTwoIntsRequest(ref b);
-        }
+        AddTwoIntsRequest IDeserializable<AddTwoIntsRequest>.RosDeserialize(ref Buffer b) => new AddTwoIntsRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -95,7 +89,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 16;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -108,32 +102,26 @@ namespace Iviz.Msgs.RosbridgeLibrary
     {
         [DataMember (Name = "sum")] public long Sum;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public AddTwoIntsResponse()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public AddTwoIntsResponse(long Sum)
         {
             this.Sum = Sum;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal AddTwoIntsResponse(ref Buffer b)
         {
             Sum = b.Deserialize<long>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new AddTwoIntsResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new AddTwoIntsResponse(ref b);
         
-        AddTwoIntsResponse IDeserializable<AddTwoIntsResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new AddTwoIntsResponse(ref b);
-        }
+        AddTwoIntsResponse IDeserializable<AddTwoIntsResponse>.RosDeserialize(ref Buffer b) => new AddTwoIntsResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -144,7 +132,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;

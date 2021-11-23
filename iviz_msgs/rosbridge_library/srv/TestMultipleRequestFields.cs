@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract (Name = "rosbridge_library/TestMultipleRequestFields")]
+    [DataContract (Name = RosServiceType)]
     public sealed class TestMultipleRequestFields : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public TestMultipleRequestFieldsRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public TestMultipleRequestFieldsResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public TestMultipleRequestFields()
         {
             Request = new TestMultipleRequestFieldsRequest();
             Response = TestMultipleRequestFieldsResponse.Singleton;
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public TestMultipleRequestFields(TestMultipleRequestFieldsRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosbridge_library/TestMultipleRequestFields";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "6cce9fb727dd0f31d504d7d198a1f4ef";
         
         public override string ToString() => Extensions.ToString(this);
@@ -58,13 +58,13 @@ namespace Iviz.Msgs.RosbridgeLibrary
         [DataMember (Name = "string")] public string @string;
         [DataMember (Name = "bool")] public bool @bool;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestMultipleRequestFieldsRequest()
         {
             @string = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TestMultipleRequestFieldsRequest(int @int, float @float, string @string, bool @bool)
         {
             this.@int = @int;
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             this.@bool = @bool;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestMultipleRequestFieldsRequest(ref Buffer b)
         {
             @int = b.Deserialize<int>();
@@ -82,15 +82,9 @@ namespace Iviz.Msgs.RosbridgeLibrary
             @bool = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TestMultipleRequestFieldsRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TestMultipleRequestFieldsRequest(ref b);
         
-        TestMultipleRequestFieldsRequest IDeserializable<TestMultipleRequestFieldsRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new TestMultipleRequestFieldsRequest(ref b);
-        }
+        TestMultipleRequestFieldsRequest IDeserializable<TestMultipleRequestFieldsRequest>.RosDeserialize(ref Buffer b) => new TestMultipleRequestFieldsRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -114,25 +108,19 @@ namespace Iviz.Msgs.RosbridgeLibrary
     public sealed class TestMultipleRequestFieldsResponse : IResponse, IDeserializable<TestMultipleRequestFieldsResponse>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestMultipleRequestFieldsResponse()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestMultipleRequestFieldsResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        TestMultipleRequestFieldsResponse IDeserializable<TestMultipleRequestFieldsResponse>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        TestMultipleRequestFieldsResponse IDeserializable<TestMultipleRequestFieldsResponse>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly TestMultipleRequestFieldsResponse Singleton = new TestMultipleRequestFieldsResponse();
     
@@ -144,7 +132,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/ApplyPlanningScene")]
+    [DataContract (Name = RosServiceType)]
     public sealed class ApplyPlanningScene : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public ApplyPlanningSceneRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public ApplyPlanningSceneResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public ApplyPlanningScene()
         {
             Request = new ApplyPlanningSceneRequest();
             Response = new ApplyPlanningSceneResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public ApplyPlanningScene(ApplyPlanningSceneRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/ApplyPlanningScene";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "60a182de67a2bc514fbbc64e682bcaaa";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.MoveitMsgs
     {
         [DataMember (Name = "scene")] public PlanningScene Scene;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ApplyPlanningSceneRequest()
         {
             Scene = new PlanningScene();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ApplyPlanningSceneRequest(PlanningScene Scene)
         {
             this.Scene = Scene;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ApplyPlanningSceneRequest(ref Buffer b)
         {
             Scene = new PlanningScene(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ApplyPlanningSceneRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ApplyPlanningSceneRequest(ref b);
         
-        ApplyPlanningSceneRequest IDeserializable<ApplyPlanningSceneRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new ApplyPlanningSceneRequest(ref b);
-        }
+        ApplyPlanningSceneRequest IDeserializable<ApplyPlanningSceneRequest>.RosDeserialize(ref Buffer b) => new ApplyPlanningSceneRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -104,32 +98,26 @@ namespace Iviz.Msgs.MoveitMsgs
     {
         [DataMember (Name = "success")] public bool Success;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ApplyPlanningSceneResponse()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ApplyPlanningSceneResponse(bool Success)
         {
             this.Success = Success;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ApplyPlanningSceneResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ApplyPlanningSceneResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ApplyPlanningSceneResponse(ref b);
         
-        ApplyPlanningSceneResponse IDeserializable<ApplyPlanningSceneResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new ApplyPlanningSceneResponse(ref b);
-        }
+        ApplyPlanningSceneResponse IDeserializable<ApplyPlanningSceneResponse>.RosDeserialize(ref Buffer b) => new ApplyPlanningSceneResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -140,7 +128,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

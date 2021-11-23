@@ -4,24 +4,24 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeMsgs
 {
-    [Preserve, DataContract (Name = "rosbridge_msgs/ConnectedClients")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class ConnectedClients : IDeserializable<ConnectedClients>, IMessage
     {
         [DataMember (Name = "clients")] public ConnectedClient[] Clients;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ConnectedClients()
         {
             Clients = System.Array.Empty<ConnectedClient>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ConnectedClients(ConnectedClient[] Clients)
         {
             this.Clients = Clients;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ConnectedClients(ref Buffer b)
         {
             Clients = b.DeserializeArray<ConnectedClient>();
@@ -31,15 +31,9 @@ namespace Iviz.Msgs.RosbridgeMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ConnectedClients(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ConnectedClients(ref b);
         
-        ConnectedClients IDeserializable<ConnectedClients>.RosDeserialize(ref Buffer b)
-        {
-            return new ConnectedClients(ref b);
-        }
+        ConnectedClients IDeserializable<ConnectedClients>.RosDeserialize(ref Buffer b) => new ConnectedClients(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -60,16 +54,16 @@ namespace Iviz.Msgs.RosbridgeMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "rosbridge_msgs/ConnectedClients";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "d0d53b0c0aa23aa7e4cf52f49bca4b69";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACnPOz8tLTS5JTXHOyUzNK4mOVUgGM4q5eLlsqQx4uXyD3a0UivKLk4oyU9JT43OL04v1" +
-                "nVFdwMtVXFKUmZeukFkQn5iSUpRaXMxVkpmbqpAMUZeZnxcP4gPdBwAMDjqfvAAAAA==";
+                "H4sIAAAAAAAAE3POz8tLTS5JTXHOyUzNK4mOVUgGM4q5uGypDLh8g92tFIryi5OKMlPSU+Nzi9OL9Z1R" +
+                "7ecqLinKzEtXyCyIT0xJKUotLuYqycxNVUiGKMvMz4sH8bm4AIb8WuK4AAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

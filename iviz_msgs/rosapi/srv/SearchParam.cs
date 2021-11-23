@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Rosapi
 {
-    [DataContract (Name = "rosapi/SearchParam")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SearchParam : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SearchParamRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SearchParamResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SearchParam()
         {
             Request = new SearchParamRequest();
             Response = new SearchParamResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SearchParam(SearchParamRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Rosapi
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosapi/SearchParam";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "dfadc39f113c1cc6d7759508d8461d5a";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.Rosapi
     {
         [DataMember (Name = "name")] public string Name;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SearchParamRequest()
         {
             Name = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SearchParamRequest(string Name)
         {
             this.Name = Name;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SearchParamRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SearchParamRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SearchParamRequest(ref b);
         
-        SearchParamRequest IDeserializable<SearchParamRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SearchParamRequest(ref b);
-        }
+        SearchParamRequest IDeserializable<SearchParamRequest>.RosDeserialize(ref Buffer b) => new SearchParamRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -103,33 +97,27 @@ namespace Iviz.Msgs.Rosapi
     {
         [DataMember (Name = "global_name")] public string GlobalName;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SearchParamResponse()
         {
             GlobalName = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SearchParamResponse(string GlobalName)
         {
             this.GlobalName = GlobalName;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SearchParamResponse(ref Buffer b)
         {
             GlobalName = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SearchParamResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SearchParamResponse(ref b);
         
-        SearchParamResponse IDeserializable<SearchParamResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new SearchParamResponse(ref b);
-        }
+        SearchParamResponse IDeserializable<SearchParamResponse>.RosDeserialize(ref Buffer b) => new SearchParamResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

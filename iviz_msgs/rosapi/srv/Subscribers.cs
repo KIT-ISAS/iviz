@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Rosapi
 {
-    [DataContract (Name = "rosapi/Subscribers")]
+    [DataContract (Name = RosServiceType)]
     public sealed class Subscribers : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SubscribersRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SubscribersResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public Subscribers()
         {
             Request = new SubscribersRequest();
             Response = new SubscribersResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public Subscribers(SubscribersRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Rosapi
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosapi/Subscribers";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "cb387b68f5b29bc1456398ee8476b973";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.Rosapi
     {
         [DataMember (Name = "topic")] public string Topic;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SubscribersRequest()
         {
             Topic = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SubscribersRequest(string Topic)
         {
             this.Topic = Topic;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SubscribersRequest(ref Buffer b)
         {
             Topic = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SubscribersRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SubscribersRequest(ref b);
         
-        SubscribersRequest IDeserializable<SubscribersRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SubscribersRequest(ref b);
-        }
+        SubscribersRequest IDeserializable<SubscribersRequest>.RosDeserialize(ref Buffer b) => new SubscribersRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -103,33 +97,27 @@ namespace Iviz.Msgs.Rosapi
     {
         [DataMember (Name = "subscribers")] public string[] Subscribers_;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SubscribersResponse()
         {
             Subscribers_ = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SubscribersResponse(string[] Subscribers_)
         {
             this.Subscribers_ = Subscribers_;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SubscribersResponse(ref Buffer b)
         {
             Subscribers_ = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SubscribersResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SubscribersResponse(ref b);
         
-        SubscribersResponse IDeserializable<SubscribersResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new SubscribersResponse(ref b);
-        }
+        SubscribersResponse IDeserializable<SubscribersResponse>.RosDeserialize(ref Buffer b) => new SubscribersResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

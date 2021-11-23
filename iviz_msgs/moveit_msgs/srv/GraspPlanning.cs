@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/GraspPlanning")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GraspPlanning : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GraspPlanningRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GraspPlanningResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GraspPlanning()
         {
             Request = new GraspPlanningRequest();
             Response = new GraspPlanningResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GraspPlanning(GraspPlanningRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/GraspPlanning";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "6c1eec2555db251f88e13e06d2a82f0f";
         
         public override string ToString() => Extensions.ToString(this);
@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MoveitMsgs
         // and that can be moved in the course of grasping
         [DataMember (Name = "movable_obstacles")] public CollisionObject[] MovableObstacles;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GraspPlanningRequest()
         {
             GroupName = string.Empty;
@@ -78,7 +78,7 @@ namespace Iviz.Msgs.MoveitMsgs
             MovableObstacles = System.Array.Empty<CollisionObject>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GraspPlanningRequest(string GroupName, CollisionObject Target, string[] SupportSurfaces, Grasp[] CandidateGrasps, CollisionObject[] MovableObstacles)
         {
             this.GroupName = GroupName;
@@ -88,7 +88,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.MovableObstacles = MovableObstacles;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GraspPlanningRequest(ref Buffer b)
         {
             GroupName = b.DeserializeString();
@@ -106,15 +106,9 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GraspPlanningRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GraspPlanningRequest(ref b);
         
-        GraspPlanningRequest IDeserializable<GraspPlanningRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GraspPlanningRequest(ref b);
-        }
+        GraspPlanningRequest IDeserializable<GraspPlanningRequest>.RosDeserialize(ref Buffer b) => new GraspPlanningRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -173,21 +167,21 @@ namespace Iviz.Msgs.MoveitMsgs
         // whether an error occurred
         [DataMember (Name = "error_code")] public MoveItErrorCodes ErrorCode;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GraspPlanningResponse()
         {
             Grasps = System.Array.Empty<Grasp>();
             ErrorCode = new MoveItErrorCodes();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GraspPlanningResponse(Grasp[] Grasps, MoveItErrorCodes ErrorCode)
         {
             this.Grasps = Grasps;
             this.ErrorCode = ErrorCode;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GraspPlanningResponse(ref Buffer b)
         {
             Grasps = b.DeserializeArray<Grasp>();
@@ -198,15 +192,9 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GraspPlanningResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GraspPlanningResponse(ref b);
         
-        GraspPlanningResponse IDeserializable<GraspPlanningResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GraspPlanningResponse(ref b);
-        }
+        GraspPlanningResponse IDeserializable<GraspPlanningResponse>.RosDeserialize(ref Buffer b) => new GraspPlanningResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

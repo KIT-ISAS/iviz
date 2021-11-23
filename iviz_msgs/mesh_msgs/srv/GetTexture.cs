@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = "mesh_msgs/GetTexture")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetTexture : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetTextureRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetTextureResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetTexture()
         {
             Request = new GetTextureRequest();
             Response = new GetTextureResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetTexture(GetTextureRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MeshMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "mesh_msgs/GetTexture";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "48823554c65f6c317f12f79207ce78ac";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,35 +56,29 @@ namespace Iviz.Msgs.MeshMsgs
         [DataMember (Name = "uuid")] public string Uuid;
         [DataMember (Name = "texture_index")] public uint TextureIndex;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetTextureRequest()
         {
             Uuid = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetTextureRequest(string Uuid, uint TextureIndex)
         {
             this.Uuid = Uuid;
             this.TextureIndex = TextureIndex;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetTextureRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
             TextureIndex = b.Deserialize<uint>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetTextureRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetTextureRequest(ref b);
         
-        GetTextureRequest IDeserializable<GetTextureRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetTextureRequest(ref b);
-        }
+        GetTextureRequest IDeserializable<GetTextureRequest>.RosDeserialize(ref Buffer b) => new GetTextureRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -107,33 +101,27 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "texture")] public MeshMsgs.MeshTexture Texture;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetTextureResponse()
         {
             Texture = new MeshMsgs.MeshTexture();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetTextureResponse(MeshMsgs.MeshTexture Texture)
         {
             this.Texture = Texture;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetTextureResponse(ref Buffer b)
         {
             Texture = new MeshMsgs.MeshTexture(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetTextureResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetTextureResponse(ref b);
         
-        GetTextureResponse IDeserializable<GetTextureResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetTextureResponse(ref b);
-        }
+        GetTextureResponse IDeserializable<GetTextureResponse>.RosDeserialize(ref Buffer b) => new GetTextureResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

@@ -4,20 +4,20 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [Preserve, DataContract (Name = "std_msgs/MultiArrayDimension")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class MultiArrayDimension : IDeserializable<MultiArrayDimension>, IMessage
     {
         [DataMember (Name = "label")] public string Label; // label of given dimension
         [DataMember (Name = "size")] public uint Size; // size of given dimension (in type units)
         [DataMember (Name = "stride")] public uint Stride; // stride of given dimension
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public MultiArrayDimension()
         {
             Label = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public MultiArrayDimension(string Label, uint Size, uint Stride)
         {
             this.Label = Label;
@@ -25,7 +25,7 @@ namespace Iviz.Msgs.StdMsgs
             this.Stride = Stride;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal MultiArrayDimension(ref Buffer b)
         {
             Label = b.DeserializeString();
@@ -33,15 +33,9 @@ namespace Iviz.Msgs.StdMsgs
             Stride = b.Deserialize<uint>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new MultiArrayDimension(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new MultiArrayDimension(ref b);
         
-        MultiArrayDimension IDeserializable<MultiArrayDimension>.RosDeserialize(ref Buffer b)
-        {
-            return new MultiArrayDimension(ref b);
-        }
+        MultiArrayDimension IDeserializable<MultiArrayDimension>.RosDeserialize(ref Buffer b) => new MultiArrayDimension(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -59,16 +53,16 @@ namespace Iviz.Msgs.StdMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "std_msgs/MultiArrayDimension";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "4cd0c83a8683deae40ecdac60e53bfa8";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACmWNsQqAMAwF94L/8MBFV/0ipbEEaiqmFfTrDSou3W644zTvLAFxmikCaD9KCwIfJPC8" +
-                "kigncYUljwOULzLRzIdqER0L8rkRinDW/g/t5C218KU6bdwNQPULfY8AAAA=";
+                "H4sIAAAAAAAAE22NMQqAMBAEe1+xYKOtvkjJGRbiRbxE0NcrUWy0m2KGsbRSPcIwSgBQPxQneG6icJxF" +
+                "jVGrTE19B+MhKGahr4iGirQvgqxM1r7hdXJSwpt+HicAFGWdjgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

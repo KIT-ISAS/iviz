@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract (Name = "rosbridge_library/TestEmpty")]
+    [DataContract (Name = RosServiceType)]
     public sealed class TestEmpty : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public TestEmptyRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public TestEmptyResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public TestEmpty()
         {
             Request = TestEmptyRequest.Singleton;
             Response = TestEmptyResponse.Singleton;
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public TestEmpty(TestEmptyRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosbridge_library/TestEmpty";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.RosbridgeLibrary
     public sealed class TestEmptyRequest : IRequest<TestEmpty, TestEmptyResponse>, IDeserializable<TestEmptyRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestEmptyRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestEmptyRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        TestEmptyRequest IDeserializable<TestEmptyRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        TestEmptyRequest IDeserializable<TestEmptyRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly TestEmptyRequest Singleton = new TestEmptyRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -96,25 +90,19 @@ namespace Iviz.Msgs.RosbridgeLibrary
     public sealed class TestEmptyResponse : IResponse, IDeserializable<TestEmptyResponse>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestEmptyResponse()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestEmptyResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        TestEmptyResponse IDeserializable<TestEmptyResponse>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        TestEmptyResponse IDeserializable<TestEmptyResponse>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly TestEmptyResponse Singleton = new TestEmptyResponse();
     
@@ -126,7 +114,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

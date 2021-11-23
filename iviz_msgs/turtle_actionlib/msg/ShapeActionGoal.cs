@@ -4,21 +4,21 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TurtleActionlib
 {
-    [Preserve, DataContract (Name = "turtle_actionlib/ShapeActionGoal")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class ShapeActionGoal : IDeserializable<ShapeActionGoal>, IActionGoal<ShapeGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
         [DataMember (Name = "goal")] public ShapeGoal Goal { get; set; }
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ShapeActionGoal()
         {
             GoalId = new ActionlibMsgs.GoalID();
             Goal = new ShapeGoal();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ShapeActionGoal(in StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, ShapeGoal Goal)
         {
             this.Header = Header;
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.TurtleActionlib
             this.Goal = Goal;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ShapeActionGoal(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
@@ -34,15 +34,9 @@ namespace Iviz.Msgs.TurtleActionlib
             Goal = new ShapeGoal(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ShapeActionGoal(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ShapeActionGoal(ref b);
         
-        ShapeActionGoal IDeserializable<ShapeActionGoal>.RosDeserialize(ref Buffer b)
-        {
-            return new ShapeActionGoal(ref b);
-        }
+        ShapeActionGoal IDeserializable<ShapeActionGoal>.RosDeserialize(ref Buffer b) => new ShapeActionGoal(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -63,24 +57,24 @@ namespace Iviz.Msgs.TurtleActionlib
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "turtle_actionlib/ShapeActionGoal";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "dbfccd187f2ec9c593916447ffd6cc77";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACrVUwWobMRC9C/wPAz4kKdiB9mboLTTxoVCw72YsjXdFtNJWo7Xrv+/Tru2k0EMPjVlY" +
-                "pJ1582beG78IO8nUji/DtvgUg9/vOm308TlxWD9Rg9fOO7NpuZd6N97MzNf//JuZ75vnFWlxU/mXkdTM" +
-                "zGlTODrOjjop7LgwHRJI+6aVvAhylIAs7npxNH4t5150icRt65XwNBIlcwhnGhRBJZFNXTdEb7kIFd/J" +
-                "H/nI9JGYes7F2yFwRnzKzscafsjcSUXHo/JzkGiF1k8rxEQVOxQPQmcg2CysPjb4SGbwsXz5XBPMfHtK" +
-                "Cxylwehvxam0XCpZ+dVn0cqTdYUan6bmlsDGdARVnNL9eLfDUR8IRUBB+mRbugfzH+fSpghAoSNnz/sg" +
-                "FdhiAkC9q0l3D++QK+0VRY7pCj8hvtX4F9h4w609LVpoFmr3OjQYIAL7nI7eIXR/HkFs8BILwW+Z89nU" +
-                "rKmkmX+rM0YQskZF8GbVZD0EcHTypTVackUf1aj2/DBD/nUrqi236GGSTts0BIdDypX1ZCmCnKfWQ5Ox" +
-                "j7o0dGKlXD2j6KN6aD1KProSU+F4qQad8xHuOLUSyRdCr6LVt7CGdH0hzBzZFVMn45wEpW/QtBesCCiQ" +
-                "lVwY4lVG70d84e/dVRZMGPSgTHobNR1E3J7tK5g5ZMCXQyhYQ1VuZNSBtBfrD95ODV4Y6PKCXndkCgCp" +
-                "btACZoTFQ9TyKiGiPk69MuQSZHcT8fH2NzYzZtpJcY2oOYTE9ZTZ+UFn5jee4dLAGwUAAA==";
+                "H4sIAAAAAAAAE7VUwWobMRC96ysGfEhSiAPtzdBbaJJDoeDczVga74pqpa1Ga3f/vk9a202hhx4as7BI" +
+                "O/Pmzbw3fhZ2kqlvL8O2+BSD3+8G7fThKXF4eaQOr513ZtvzKPWu3ZjP//lnvm6fNqTFLcWfF0or2haO" +
+                "jrOjQQo7LkyHBMa+6yXfBzlKQBIPozhqX8s8iq6R+Np7JTydRMkcwkyTIqgksmkYpugtF6HiB/kjH5k+" +
+                "EtPIuXg7Bc6IT9n5WMMPmQep6HhUfkwSrdDL4wYxUcVOxYPQDASbhdXHDh/JTD6WTx9rglm9ntI9jtJh" +
+                "7tfiVHoulaz8HLNo5cm6QY0PS3NrYGM4gipO6bbd7XDUO0IRUJAx2Z5uwfzbXPoUASh05Ox5H6QCW0wA" +
+                "qDc16ebuDXJs0JFjusAviL9r/AtsvOLWnu57aBZq9zp1GCACx5yO3iF0PzcQG7zEQjBb5jybmrWUNKsv" +
+                "dcYIQlZTBG9WTdZDAEcnX3qjJVf0pkb15ju58a8L0ax1Jkvapyk4HFKW1ldrBFqeeg9BWhN1XejESrka" +
+                "RtFENdBL07tZEiPheC4GkfMR1jj1EskXQqOi1bTwhQxjIQwc2RVTF9ecBKWv0LSXQ+XCZCUXhnKV0dv5" +
+                "nvl7d9EE4wW9uRa5zpkOIm7P9juYOWTAlFMo2EFV7qSJQDqK9QdvlwbPDHR9Rq8LsgSA1DBpATPC1iFq" +
+                "fdGvKvdO0pUplyC7q4IP178vY5ZtFNeJmkNIXE+ZnZ/U/ALCRbiJEQUAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

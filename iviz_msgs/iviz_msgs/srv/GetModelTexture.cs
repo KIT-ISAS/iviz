@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/GetModelTexture")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetModelTexture : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetModelTextureRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetModelTextureResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetModelTexture()
         {
             Request = new GetModelTextureRequest();
             Response = new GetModelTextureResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetModelTexture(GetModelTextureRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/GetModelTexture";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "0d382728fb593e7fac7232b27f8a271f";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "uri")] public string Uri;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetModelTextureRequest()
         {
             Uri = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetModelTextureRequest(string Uri)
         {
             this.Uri = Uri;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetModelTextureRequest(ref Buffer b)
         {
             Uri = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetModelTextureRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetModelTextureRequest(ref b);
         
-        GetModelTextureRequest IDeserializable<GetModelTextureRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetModelTextureRequest(ref b);
-        }
+        GetModelTextureRequest IDeserializable<GetModelTextureRequest>.RosDeserialize(ref Buffer b) => new GetModelTextureRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -105,14 +99,14 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "image")] public SensorMsgs.CompressedImage Image;
         [DataMember (Name = "message")] public string Message;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetModelTextureResponse()
         {
             Image = new SensorMsgs.CompressedImage();
             Message = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetModelTextureResponse(bool Success, SensorMsgs.CompressedImage Image, string Message)
         {
             this.Success = Success;
@@ -120,7 +114,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Message = Message;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetModelTextureResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
@@ -128,15 +122,9 @@ namespace Iviz.Msgs.IvizMsgs
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetModelTextureResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetModelTextureResponse(ref b);
         
-        GetModelTextureResponse IDeserializable<GetModelTextureResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetModelTextureResponse(ref b);
-        }
+        GetModelTextureResponse IDeserializable<GetModelTextureResponse>.RosDeserialize(ref Buffer b) => new GetModelTextureResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

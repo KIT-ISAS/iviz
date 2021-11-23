@@ -4,37 +4,31 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [Preserve, DataContract (Name = "std_msgs/UInt64")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class UInt64 : IDeserializable<UInt64>, IMessage
     {
         [DataMember (Name = "data")] public ulong Data;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public UInt64()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public UInt64(ulong Data)
         {
             this.Data = Data;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal UInt64(ref Buffer b)
         {
             Data = b.Deserialize<ulong>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new UInt64(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new UInt64(ref b);
         
-        UInt64 IDeserializable<UInt64>.RosDeserialize(ref Buffer b)
-        {
-            return new UInt64(ref b);
-        }
+        UInt64 IDeserializable<UInt64>.RosDeserialize(ref Buffer b) => new UInt64(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -45,22 +39,22 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "std_msgs/UInt64";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "1b2a79973e8bf53d7b53acb71299cb57";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACivNzCsxM1FISSxJ5OUCAC2IQbwNAAAA";
+                "H4sIAAAAAAAAEyvNzCsxM1FISSxJ5AIAPtIFtgwAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

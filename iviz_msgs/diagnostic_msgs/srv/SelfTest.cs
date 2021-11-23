@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DiagnosticMsgs
 {
-    [DataContract (Name = "diagnostic_msgs/SelfTest")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SelfTest : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SelfTestRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SelfTestResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SelfTest()
         {
             Request = SelfTestRequest.Singleton;
             Response = new SelfTestResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SelfTest(SelfTestRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "diagnostic_msgs/SelfTest";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "ac21b1bab7ab17546986536c22eb34e9";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.DiagnosticMsgs
     public sealed class SelfTestRequest : IRequest<SelfTest, SelfTestResponse>, IDeserializable<SelfTestRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SelfTestRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SelfTestRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        SelfTestRequest IDeserializable<SelfTestRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        SelfTestRequest IDeserializable<SelfTestRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly SelfTestRequest Singleton = new SelfTestRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -99,14 +93,14 @@ namespace Iviz.Msgs.DiagnosticMsgs
         [DataMember (Name = "passed")] public byte Passed;
         [DataMember (Name = "status")] public DiagnosticStatus[] Status;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SelfTestResponse()
         {
             Id = string.Empty;
             Status = System.Array.Empty<DiagnosticStatus>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SelfTestResponse(string Id, byte Passed, DiagnosticStatus[] Status)
         {
             this.Id = Id;
@@ -114,7 +108,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             this.Status = Status;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SelfTestResponse(ref Buffer b)
         {
             Id = b.DeserializeString();
@@ -126,15 +120,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SelfTestResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SelfTestResponse(ref b);
         
-        SelfTestResponse IDeserializable<SelfTestResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new SelfTestResponse(ref b);
-        }
+        SelfTestResponse IDeserializable<SelfTestResponse>.RosDeserialize(ref Buffer b) => new SelfTestResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

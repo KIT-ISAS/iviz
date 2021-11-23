@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/GetCartesianPath")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetCartesianPath : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetCartesianPathRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetCartesianPathResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetCartesianPath()
         {
             Request = new GetCartesianPathRequest();
             Response = new GetCartesianPathResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetCartesianPath(GetCartesianPathRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/GetCartesianPath";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "5c9a54219f0d91a804e7670bc0e118f1";
         
         public override string ToString() => Extensions.ToString(this);
@@ -80,7 +80,7 @@ namespace Iviz.Msgs.MoveitMsgs
         // Specify additional constraints to be met by the Cartesian path
         [DataMember (Name = "path_constraints")] public Constraints PathConstraints;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetCartesianPathRequest()
         {
             StartState = new RobotState();
@@ -90,7 +90,7 @@ namespace Iviz.Msgs.MoveitMsgs
             PathConstraints = new Constraints();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetCartesianPathRequest(in StdMsgs.Header Header, RobotState StartState, string GroupName, string LinkName, GeometryMsgs.Pose[] Waypoints, double MaxStep, double JumpThreshold, bool AvoidCollisions, Constraints PathConstraints)
         {
             this.Header = Header;
@@ -104,7 +104,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.PathConstraints = PathConstraints;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetCartesianPathRequest(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -118,15 +118,9 @@ namespace Iviz.Msgs.MoveitMsgs
             PathConstraints = new Constraints(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetCartesianPathRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetCartesianPathRequest(ref b);
         
-        GetCartesianPathRequest IDeserializable<GetCartesianPathRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetCartesianPathRequest(ref b);
-        }
+        GetCartesianPathRequest IDeserializable<GetCartesianPathRequest>.RosDeserialize(ref Buffer b) => new GetCartesianPathRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -182,7 +176,7 @@ namespace Iviz.Msgs.MoveitMsgs
         // The error code of the computation
         [DataMember (Name = "error_code")] public MoveItErrorCodes ErrorCode;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetCartesianPathResponse()
         {
             StartState = new RobotState();
@@ -190,7 +184,7 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode = new MoveItErrorCodes();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetCartesianPathResponse(RobotState StartState, RobotTrajectory Solution, double Fraction, MoveItErrorCodes ErrorCode)
         {
             this.StartState = StartState;
@@ -199,7 +193,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.ErrorCode = ErrorCode;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetCartesianPathResponse(ref Buffer b)
         {
             StartState = new RobotState(ref b);
@@ -208,15 +202,9 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetCartesianPathResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetCartesianPathResponse(ref b);
         
-        GetCartesianPathResponse IDeserializable<GetCartesianPathResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetCartesianPathResponse(ref b);
-        }
+        GetCartesianPathResponse IDeserializable<GetCartesianPathResponse>.RosDeserialize(ref Buffer b) => new GetCartesianPathResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

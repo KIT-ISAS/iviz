@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/PlannerParams")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class PlannerParams : IDeserializable<PlannerParams>, IMessage
     {
         // parameter names (same size as values)
@@ -14,7 +14,7 @@ namespace Iviz.Msgs.MoveitMsgs
         // parameter description (can be empty)
         [DataMember (Name = "descriptions")] public string[] Descriptions;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public PlannerParams()
         {
             Keys = System.Array.Empty<string>();
@@ -22,7 +22,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Descriptions = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public PlannerParams(string[] Keys, string[] Values, string[] Descriptions)
         {
             this.Keys = Keys;
@@ -30,7 +30,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.Descriptions = Descriptions;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal PlannerParams(ref Buffer b)
         {
             Keys = b.DeserializeStringArray();
@@ -38,15 +38,9 @@ namespace Iviz.Msgs.MoveitMsgs
             Descriptions = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new PlannerParams(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new PlannerParams(ref b);
         
-        PlannerParams IDeserializable<PlannerParams>.RosDeserialize(ref Buffer b)
-        {
-            return new PlannerParams(ref b);
-        }
+        PlannerParams IDeserializable<PlannerParams>.RosDeserialize(ref Buffer b) => new PlannerParams(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -87,16 +81,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/PlannerParams";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "cebdf4927996b9026bcf59a160d64145";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACl3LMQ5AQBRF0f4n9vASDWsSxcePTDAm84aE1SOaobrNPSWCRl0sWYS/S1S8A7rToMSu" +
-                "82ashSk6PzYtJjsoUmbsXX7u2TL1Pl83GPvoQnKrR9WrR2ewJaQjc9lDKeQCIxWT+K4AAAA=";
+                "H4sIAAAAAAAAE13LMQ6AIBAF0Z5T/IQGz2QsVtwYoiBh0QRPL4YGraaZpxEpkefMCaFWYKQG4m4GCS7a" +
+                "T5ZBSU4urOOEjYsopTvWlp97t0615+sWFptczO4IMJYCZgb7mEvnuqfqB1KvtWCtAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

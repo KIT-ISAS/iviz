@@ -4,42 +4,36 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DynamicReconfigure
 {
-    [Preserve, DataContract (Name = "dynamic_reconfigure/StrParameter")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class StrParameter : IDeserializable<StrParameter>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "value")] public string Value;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public StrParameter()
         {
             Name = string.Empty;
             Value = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public StrParameter(string Name, string Value)
         {
             this.Name = Name;
             this.Value = Value;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal StrParameter(ref Buffer b)
         {
             Name = b.DeserializeString();
             Value = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new StrParameter(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new StrParameter(ref b);
         
-        StrParameter IDeserializable<StrParameter>.RosDeserialize(ref Buffer b)
-        {
-            return new StrParameter(ref b);
-        }
+        StrParameter IDeserializable<StrParameter>.RosDeserialize(ref Buffer b) => new StrParameter(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -57,15 +51,15 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "dynamic_reconfigure/StrParameter";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "bc6ccc4a57f61779c8eaae61e9f422e0";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACisuKcrMS1fIS8xN5SqGsMsSc0pTuXi5AKjK6LgbAAAA";
+                "H4sIAAAAAAAAEysuKcrMS1fIS8xN5SqGsMsSc0pTubgAuEJhxBoAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

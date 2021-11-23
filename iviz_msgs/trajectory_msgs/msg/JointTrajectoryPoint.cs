@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TrajectoryMsgs
 {
-    [Preserve, DataContract (Name = "trajectory_msgs/JointTrajectoryPoint")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class JointTrajectoryPoint : IDeserializable<JointTrajectoryPoint>, IMessage
     {
         // Each trajectory point specifies either positions[, velocities[, accelerations]]
@@ -16,7 +16,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         [DataMember (Name = "effort")] public double[] Effort;
         [DataMember (Name = "time_from_start")] public duration TimeFromStart;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public JointTrajectoryPoint()
         {
             Positions = System.Array.Empty<double>();
@@ -25,7 +25,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             Effort = System.Array.Empty<double>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public JointTrajectoryPoint(double[] Positions, double[] Velocities, double[] Accelerations, double[] Effort, duration TimeFromStart)
         {
             this.Positions = Positions;
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             this.TimeFromStart = TimeFromStart;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal JointTrajectoryPoint(ref Buffer b)
         {
             Positions = b.DeserializeStructArray<double>();
@@ -45,15 +45,9 @@ namespace Iviz.Msgs.TrajectoryMsgs
             TimeFromStart = b.Deserialize<duration>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new JointTrajectoryPoint(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new JointTrajectoryPoint(ref b);
         
-        JointTrajectoryPoint IDeserializable<JointTrajectoryPoint>.RosDeserialize(ref Buffer b)
-        {
-            return new JointTrajectoryPoint(ref b);
-        }
+        JointTrajectoryPoint IDeserializable<JointTrajectoryPoint>.RosDeserialize(ref Buffer b) => new JointTrajectoryPoint(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -86,18 +80,18 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "trajectory_msgs/JointTrajectoryPoint";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "f3cd1e1c4d320c79d6985c904ae5dcd3";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClWPsY7CQAxE+5X4B0u0iOp0/RXXUF+HImQ2s7BoE6O1g46/xwlSEpqV5o29M97SL8cr" +
-                "WeUbokl90l1yb6R3xJwylJDtiupYs2Xp9bijB4pEVxgFx4iCypPZNGFL8jmNlKRaQ/6Sf7XOMqEzCP+I" +
-                "g6Hd++5PKXN2Sw8ug1fgCsr9tKzcwQNab8Q6kdvUt3eu49BhlH9zxL7TSwipCNv317FZiq3Ycs4Kfpy1" +
-                "4u9rQju8LbLc4ZSqdCc1dmMTXu0FwIBTAQAA";
+                "H4sIAAAAAAAAE1WPsQ7CMAxE93yFJVbEhNgZWJjZUIVMeoGgtEaxi+DvcYsEZYl07+zceUE7jleyyjdE" +
+                "k/qiu+TeSO+IOWUoIdsV1bFmy9LrcUkPFImuMAqOEQWVJ7NpwoLkfxopSbWG/CX/ap5lQmcQnoiDoV35" +
+                "7raUb3ZLDy6DV+AKyv20rNzBA1pvxDqR29S3d67j0H6Uh2/EqtNLCKkI22Z9bH7FZux3zgz+nTXjn2tC" +
+                "O3wsstzhlKp0JzV2I7wBGsNsNFIBAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

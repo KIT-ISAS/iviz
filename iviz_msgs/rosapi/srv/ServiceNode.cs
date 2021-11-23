@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Rosapi
 {
-    [DataContract (Name = "rosapi/ServiceNode")]
+    [DataContract (Name = RosServiceType)]
     public sealed class ServiceNode : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public ServiceNodeRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public ServiceNodeResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public ServiceNode()
         {
             Request = new ServiceNodeRequest();
             Response = new ServiceNodeResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public ServiceNode(ServiceNodeRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Rosapi
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosapi/ServiceNode";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "bd2a0a45fd7a73a86c8d6051d5a6db8a";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.Rosapi
     {
         [DataMember (Name = "service")] public string Service;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ServiceNodeRequest()
         {
             Service = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ServiceNodeRequest(string Service)
         {
             this.Service = Service;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ServiceNodeRequest(ref Buffer b)
         {
             Service = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ServiceNodeRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ServiceNodeRequest(ref b);
         
-        ServiceNodeRequest IDeserializable<ServiceNodeRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new ServiceNodeRequest(ref b);
-        }
+        ServiceNodeRequest IDeserializable<ServiceNodeRequest>.RosDeserialize(ref Buffer b) => new ServiceNodeRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -103,33 +97,27 @@ namespace Iviz.Msgs.Rosapi
     {
         [DataMember (Name = "node")] public string Node;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ServiceNodeResponse()
         {
             Node = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ServiceNodeResponse(string Node)
         {
             this.Node = Node;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ServiceNodeResponse(ref Buffer b)
         {
             Node = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ServiceNodeResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ServiceNodeResponse(ref b);
         
-        ServiceNodeResponse IDeserializable<ServiceNodeResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new ServiceNodeResponse(ref b);
-        }
+        ServiceNodeResponse IDeserializable<ServiceNodeResponse>.RosDeserialize(ref Buffer b) => new ServiceNodeResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

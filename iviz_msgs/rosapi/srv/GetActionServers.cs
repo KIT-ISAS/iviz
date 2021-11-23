@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Rosapi
 {
-    [DataContract (Name = "rosapi/GetActionServers")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetActionServers : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetActionServersRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetActionServersResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetActionServers()
         {
             Request = GetActionServersRequest.Singleton;
             Response = new GetActionServersResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetActionServers(GetActionServersRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Rosapi
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosapi/GetActionServers";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "46807ba271844ac5ba4730a47556b236";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.Rosapi
     public sealed class GetActionServersRequest : IRequest<GetActionServers, GetActionServersResponse>, IDeserializable<GetActionServersRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetActionServersRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetActionServersRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        GetActionServersRequest IDeserializable<GetActionServersRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        GetActionServersRequest IDeserializable<GetActionServersRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly GetActionServersRequest Singleton = new GetActionServersRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.Rosapi
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -97,33 +91,27 @@ namespace Iviz.Msgs.Rosapi
     {
         [DataMember (Name = "action_servers")] public string[] ActionServers;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetActionServersResponse()
         {
             ActionServers = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetActionServersResponse(string[] ActionServers)
         {
             this.ActionServers = ActionServers;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetActionServersResponse(ref Buffer b)
         {
             ActionServers = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetActionServersResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetActionServersResponse(ref b);
         
-        GetActionServersResponse IDeserializable<GetActionServersResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetActionServersResponse(ref b);
-        }
+        GetActionServersResponse IDeserializable<GetActionServersResponse>.RosDeserialize(ref Buffer b) => new GetActionServersResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

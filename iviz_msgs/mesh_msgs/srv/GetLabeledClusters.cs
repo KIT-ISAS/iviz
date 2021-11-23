@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = "mesh_msgs/GetLabeledClusters")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetLabeledClusters : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetLabeledClustersRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetLabeledClustersResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetLabeledClusters()
         {
             Request = new GetLabeledClustersRequest();
             Response = new GetLabeledClustersResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetLabeledClusters(GetLabeledClustersRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MeshMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "mesh_msgs/GetLabeledClusters";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "d4165053db3e9b1ffe9db49f0702734c";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetLabeledClustersRequest()
         {
             Uuid = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetLabeledClustersRequest(string Uuid)
         {
             this.Uuid = Uuid;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetLabeledClustersRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetLabeledClustersRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetLabeledClustersRequest(ref b);
         
-        GetLabeledClustersRequest IDeserializable<GetLabeledClustersRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetLabeledClustersRequest(ref b);
-        }
+        GetLabeledClustersRequest IDeserializable<GetLabeledClustersRequest>.RosDeserialize(ref Buffer b) => new GetLabeledClustersRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -103,19 +97,19 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "clusters")] public MeshFaceCluster[] Clusters;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetLabeledClustersResponse()
         {
             Clusters = System.Array.Empty<MeshFaceCluster>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetLabeledClustersResponse(MeshFaceCluster[] Clusters)
         {
             this.Clusters = Clusters;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetLabeledClustersResponse(ref Buffer b)
         {
             Clusters = b.DeserializeArray<MeshFaceCluster>();
@@ -125,15 +119,9 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetLabeledClustersResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetLabeledClustersResponse(ref b);
         
-        GetLabeledClustersResponse IDeserializable<GetLabeledClustersResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetLabeledClustersResponse(ref b);
-        }
+        GetLabeledClustersResponse IDeserializable<GetLabeledClustersResponse>.RosDeserialize(ref Buffer b) => new GetLabeledClustersResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

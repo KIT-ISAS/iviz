@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DiagnosticMsgs
 {
-    [Preserve, DataContract (Name = "diagnostic_msgs/DiagnosticStatus")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class DiagnosticStatus : IDeserializable<DiagnosticStatus>, IMessage
     {
         // This message holds the status of an individual component of the robot.
@@ -20,7 +20,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         [DataMember (Name = "hardware_id")] public string HardwareId; // a hardware unique string
         [DataMember (Name = "values")] public KeyValue[] Values; // an array of values associated with the status
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public DiagnosticStatus()
         {
             Name = string.Empty;
@@ -29,7 +29,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             Values = System.Array.Empty<KeyValue>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public DiagnosticStatus(byte Level, string Name, string Message, string HardwareId, KeyValue[] Values)
         {
             this.Level = Level;
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             this.Values = Values;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal DiagnosticStatus(ref Buffer b)
         {
             Level = b.Deserialize<byte>();
@@ -53,15 +53,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new DiagnosticStatus(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new DiagnosticStatus(ref b);
         
-        DiagnosticStatus IDeserializable<DiagnosticStatus>.RosDeserialize(ref Buffer b)
-        {
-            return new DiagnosticStatus(ref b);
-        }
+        DiagnosticStatus IDeserializable<DiagnosticStatus>.RosDeserialize(ref Buffer b) => new DiagnosticStatus(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -99,20 +93,20 @@ namespace Iviz.Msgs.DiagnosticMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "diagnostic_msgs/DiagnosticStatus";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "d0ce08bc6e5ba34c7754f563a9cabaf1";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACq1STU/DMAy9R9p/sLQ74+OG1MMOE4cBQ90EB4SQ25rWWpuU2G21f0/SrmIXbkSK/By/" +
-                "59hOlnCoWKAhESwJKlcXAloRiKJ2Au4L0ALbgnsuOqwhd03rLFmNoUj0LnN6ZZZgwn5xIpzVBDX1VI9y" +
-                "15JHZWfFZCcl2G2T6wm9rdPn5GbCmzTdpcnt5OwP68dNcmcmb0wFy7O9zAhkuyZiKgAz1xMYUc+2BIsN" +
-                "BQlCQZJ7bkf2uWAl0dVvG55a5zWIZu08iz/k02BmcoW+GNDTJxejYPahs/zdRXakmS2dXrHu6P0D+mgl" +
-                "ki2g93iKic+HKOJyHvsZWKvL+8zCJP+8FuZp/3APBWNpnSjnn42UspprXcw9HukUyh0qVFAHNWbhGTT+" +
-                "mrHqECALPdNwMcMpEgcyoaBTj/kRwiN5UG4o9PMDS9UTGHwCAAA=";
+                "H4sIAAAAAAAAE61STW+DMAy951dY6n3dx20Shx6qHfbRiVbbYZoqQzywCgmLDYh/PwJF62W3RYr8HL/n" +
+                "2E5WcChZoCYRLAhKX1kBLQlEUVsB/wXogJ3ljm2LFeS+brwjpzEUicFnXq/MCsy4X70IZxVBRR1Vk9w3" +
+                "FFDZOzHZoAS7x+R6Ru+b9CW5mfE2TXdpcjs7+8PmaZvcmdmbUsHqbC8zArm2jpgsYOY7AiMa2BXgsKZR" +
+                "gmBJ8sDNxD4XrCS6/m0jUOODjqJFu8ziD/k8mIVcYrA9BjqynQSLD63j7zayI8080vCGVUsfn9BFK5Hs" +
+                "AEPAISY+H6KIz3nqp2ctL+8zJvnnZZ73D/dgGQvnRTk/1lLIeql0afBEw1hrX6KCeqgwG99A45eZSh4D" +
+                "5KBj6i8GOEfiNGY06jRgfoLxhQIo12TMD2XzWS14AgAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

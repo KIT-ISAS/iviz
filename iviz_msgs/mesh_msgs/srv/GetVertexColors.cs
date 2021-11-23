@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = "mesh_msgs/GetVertexColors")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetVertexColors : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetVertexColorsRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetVertexColorsResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetVertexColors()
         {
             Request = new GetVertexColorsRequest();
             Response = new GetVertexColorsResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetVertexColors(GetVertexColorsRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MeshMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "mesh_msgs/GetVertexColors";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "f9925939094ed9c8a413184db9bca5b3";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetVertexColorsRequest()
         {
             Uuid = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetVertexColorsRequest(string Uuid)
         {
             this.Uuid = Uuid;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetVertexColorsRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetVertexColorsRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetVertexColorsRequest(ref b);
         
-        GetVertexColorsRequest IDeserializable<GetVertexColorsRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetVertexColorsRequest(ref b);
-        }
+        GetVertexColorsRequest IDeserializable<GetVertexColorsRequest>.RosDeserialize(ref Buffer b) => new GetVertexColorsRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -103,33 +97,27 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "mesh_vertex_colors_stamped")] public MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetVertexColorsResponse()
         {
             MeshVertexColorsStamped = new MeshMsgs.MeshVertexColorsStamped();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetVertexColorsResponse(MeshMsgs.MeshVertexColorsStamped MeshVertexColorsStamped)
         {
             this.MeshVertexColorsStamped = MeshVertexColorsStamped;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetVertexColorsResponse(ref Buffer b)
         {
             MeshVertexColorsStamped = new MeshMsgs.MeshVertexColorsStamped(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetVertexColorsResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetVertexColorsResponse(ref b);
         
-        GetVertexColorsResponse IDeserializable<GetVertexColorsResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetVertexColorsResponse(ref b);
-        }
+        GetVertexColorsResponse IDeserializable<GetVertexColorsResponse>.RosDeserialize(ref Buffer b) => new GetVertexColorsResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [Preserve, DataContract (Name = "geometry_msgs/Transform")]
+    [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
     public struct Transform : IMessage, System.IEquatable<Transform>, IDeserializable<Transform>
     {
@@ -14,29 +14,23 @@ namespace Iviz.Msgs.GeometryMsgs
         [DataMember (Name = "translation")] public Vector3 Translation;
         [DataMember (Name = "rotation")] public Quaternion Rotation;
     
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Transform(in Vector3 Translation, in Quaternion Rotation)
         {
             this.Translation = Translation;
             this.Rotation = Rotation;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Transform(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Transform(ref b);
-        }
+        public readonly ISerializable RosDeserialize(ref Buffer b) => new Transform(ref b);
         
-        readonly Transform IDeserializable<Transform>.RosDeserialize(ref Buffer b)
-        {
-            return new Transform(ref b);
-        }
+        readonly Transform IDeserializable<Transform>.RosDeserialize(ref Buffer b) => new Transform(ref b);
         
         public override readonly int GetHashCode() => (Translation, Rotation).GetHashCode();
         
@@ -57,27 +51,27 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 56;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
         public readonly string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "geometry_msgs/Transform";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "ac9eff44abf714214112b05d54a3cf9b";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1Sy0rEQBC8B/YfCvaiECKoeBA8yx4ERfEqs0knO5hMx55eY/x6O5s18QVexJwqk65K" +
-                "V9UscbfxEUKtUKSgEbohqLgQS5YGa9KOKEA7Rs4shQ9OCaW4hiJ8MESE2LqcsiS5p1xZTkZ+7dRzSG62" +
-                "RpBgEMI6ni2Siz9+FsnV7eU5KuKGVPqHJlbxaL/OIll+c+nwvPv4xQJsdKWwWQ51j4ZcUCjPTCMWXoxq" +
-                "NjJTJSHLiVJ4RcEWSWA1jcY9miSFaFkyXNuamPsYy3BslAPKqixFt7GId1M+VDZoChUFEp9DfOWLuZCJ" +
-                "7LB3l0LLY3S+rsedx59ZiybyHvhhhlWJnrfoBkMGBIVT24it4Wkvt66HfTnFdlh8J/E50Wv2xrfqo6vI" +
-                "sotKrrDiy5qdnp3iZUL9hF7/qe35ov1YeACLNzgm+Kn24e1pvqZDzr95mlBnl/kNSp54Z0UDAAA=";
+                "H4sIAAAAAAAAE71SwUrDQBC971cM9KIQIqh4EDxLD4KieJVpMkkXk504OzXGr3e2aROrghcxp5fNvJc3" +
+                "7+0CHtY+glAnFCloBF0TqGCIFUsLK9KeKID2DAWzlD6gElSCLUXwwRARxA4Lyp17pEJZzkZ+g+o5uLuN" +
+                "ESQYBGEdz9zVHz/u5v76EmrillSGpzbW8WRnxi2+rYjwuv32xT/Y6FLBZjk0A7SEQUF5Zhqx9GJU2yE3" +
+                "VRKykCgDr1Cy5RFYTaPFZ5OkECmxsetMDD9nko6NckR5nWfQry3f7ZQPtQ2aQk2BxBcgvvbl3MZERtgt" +
+                "l4FWp9D7phk9jz+zCk1kn/ZxDssKBt5AnxYyIFCiYhJa0eQLV03yyxlskvGtxGGgt+yNb71HrMmyi0pY" +
+                "WutVw6gX5/A2oWFC7/9S9XzHfmo7AIs3OMZ30Hl6e5kvaAr514X2qHfuA/8+ZJE+AwAA";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

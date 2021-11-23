@@ -4,21 +4,21 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
 {
-    [Preserve, DataContract (Name = "actionlib_tutorials/FibonacciActionGoal")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class FibonacciActionGoal : IDeserializable<FibonacciActionGoal>, IActionGoal<FibonacciGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
         [DataMember (Name = "goal")] public FibonacciGoal Goal { get; set; }
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public FibonacciActionGoal()
         {
             GoalId = new ActionlibMsgs.GoalID();
             Goal = new FibonacciGoal();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public FibonacciActionGoal(in StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, FibonacciGoal Goal)
         {
             this.Header = Header;
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.ActionlibTutorials
             this.Goal = Goal;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal FibonacciActionGoal(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
@@ -34,15 +34,9 @@ namespace Iviz.Msgs.ActionlibTutorials
             Goal = new FibonacciGoal(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new FibonacciActionGoal(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new FibonacciActionGoal(ref b);
         
-        FibonacciActionGoal IDeserializable<FibonacciActionGoal>.RosDeserialize(ref Buffer b)
-        {
-            return new FibonacciActionGoal(ref b);
-        }
+        FibonacciActionGoal IDeserializable<FibonacciActionGoal>.RosDeserialize(ref Buffer b) => new FibonacciActionGoal(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -63,24 +57,24 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "actionlib_tutorials/FibonacciActionGoal";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "006871c7fa1d0e3d5fe2226bf17b2a94";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1UTWvcQAy9G/Y/CPaQpJANtLeF3kI+DoVCcg/yjNYWtWfc0Xjd/fd9Y+9uEuihh6bG" +
-                "YMaWnp70nvwg7CVROz8qdllj6LR+6a2xm/vI3eMtNXi8qK/utI6BndPyfn67qr7+42tVfXu635Jlv1B4" +
-                "mImtqjU9ZQ6ek6deMnvOTLsI4tq0kq472UuHLO4H8TR/zYdBbIPE51aNcDcSJHHXHWg0BOVILvb9GNRx" +
-                "Fsray7t8ZGogpoFTVjd2nBAfk9dQwneJeynouE1+jhKc0OPtFjHBxI1ZQegABJeETUODj1SNGvKXzyWh" +
-                "Wj9P8RpHaTD+c3HKLedCVn4NSazwZNuixqeluQ2wMR1BFW90Ob97wdGuCEVAQYboWroE8++H3MYAQKE9" +
-                "J+W6kwLsMAGgXpSki6s3yIX2lgKHeIJfEF9r/A1sOOOWnq5baNaV7m1sMEAEDinu1SO0PswgrlMJmeC5" +
-                "xOlQlaylZLW+KzNGELJmRfBks+gUAniaNLeV5VTQZzWKRT/MkH/cjGLLZ/SwSGdtHDuPQ0yF9WIpgpxT" +
-                "q9Bk7qMsDU1slIpnDH0UDz3Oks+uxFQ4HKtB57SHO6ZWAmkm9CpWfAtrSD9kwsyRXTBtMc4kKH2Gplqw" +
-                "IqBATlJmiFcYvR3xkb/6kyyYME0MZeLrqGkn4mt2P8DMIwO+HLuMNTTjRmYdyAZxulO3NHhkYJsjetmR" +
-                "JQCk+tEymBEWD1Gbk4SI+h/q5RHyKAZ28+5vtqqqZTWx4OV38xvitqXgFwUAAA==";
+                "H4sIAAAAAAAAE7VUTWvbQBC961cM+JCkEAfam6G3kI9DoZDczXh3LA2VdtWdlV39+75d2W4CPfTQCIFY" +
+                "aebNm3lv9CTsJVFXHw27rDH0utsO1trdY+T++Z5aPLbqmwfdxcDOaXlf3zZf//PVfHt53JBlvxB4Wmit" +
+                "6CVz8Jw8DZLZc2baR7DWtpN028tBeiTxMIqn+jXPo9gaia+dGuFuJUjivp9pMgTlSC4OwxTUcRbKOsi7" +
+                "fGRqIKaRU1Y39ZwQH5PXUML3iQcp6LhNfk4SnNDz/QYxwcRNWUFoBoJLwqahxUdqJg35y+eS0Kxej/EW" +
+                "R2kx+0txyh3nQlZ+jUms8GTboManpbk1sDEcQRVvdF3fbXG0G0IRUJAxuo6uwfz7nLsYACh04KS866UA" +
+                "O0wAqFcl6ermDXKo0IFDPMMviH9q/AtsuOCWnm47aNaX7m1qMUAEjike1CN0N1cQ16uETDBc4jQ3JWsp" +
+                "2aweyowRhKyqCJ5sFp1CAE9HzV1jORX0qkbx5we58a9LUa11IkvWxan3OMQkta/aCLQ8dgpBahNlXejI" +
+                "RqkYxtBEMdBz1btaEiPhcCoGkdMB1jh2EkgzoVGxYlr4QoYxEwaO7IJpi2uOgtIXaNrJvnBhcpIyQ7nC" +
+                "6O18T/zVnzXBeEFvLkUuc6a9iN+x+wFmHhkw5dRn7KAZt1JFIBvF6V7d0uCJga1P6GVBlgCQGibLYEbY" +
+                "OkStz/oV5T5cujxBHMW47t79xZpmWUqsNv4zvwGgtZZWDQUAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

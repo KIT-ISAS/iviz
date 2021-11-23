@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Rosapi
 {
-    [DataContract (Name = "rosapi/TopicsForType")]
+    [DataContract (Name = RosServiceType)]
     public sealed class TopicsForType : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public TopicsForTypeRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public TopicsForTypeResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public TopicsForType()
         {
             Request = new TopicsForTypeRequest();
             Response = new TopicsForTypeResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public TopicsForType(TopicsForTypeRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Rosapi
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosapi/TopicsForType";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "56f77ff6da756dd27c1ed16ec721072a";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.Rosapi
     {
         [DataMember (Name = "type")] public string Type;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TopicsForTypeRequest()
         {
             Type = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TopicsForTypeRequest(string Type)
         {
             this.Type = Type;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TopicsForTypeRequest(ref Buffer b)
         {
             Type = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TopicsForTypeRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TopicsForTypeRequest(ref b);
         
-        TopicsForTypeRequest IDeserializable<TopicsForTypeRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new TopicsForTypeRequest(ref b);
-        }
+        TopicsForTypeRequest IDeserializable<TopicsForTypeRequest>.RosDeserialize(ref Buffer b) => new TopicsForTypeRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -103,33 +97,27 @@ namespace Iviz.Msgs.Rosapi
     {
         [DataMember (Name = "topics")] public string[] Topics;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TopicsForTypeResponse()
         {
             Topics = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TopicsForTypeResponse(string[] Topics)
         {
             this.Topics = Topics;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TopicsForTypeResponse(ref Buffer b)
         {
             Topics = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TopicsForTypeResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TopicsForTypeResponse(ref b);
         
-        TopicsForTypeResponse IDeserializable<TopicsForTypeResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new TopicsForTypeResponse(ref b);
-        }
+        TopicsForTypeResponse IDeserializable<TopicsForTypeResponse>.RosDeserialize(ref Buffer b) => new TopicsForTypeResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

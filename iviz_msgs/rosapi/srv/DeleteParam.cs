@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Rosapi
 {
-    [DataContract (Name = "rosapi/DeleteParam")]
+    [DataContract (Name = RosServiceType)]
     public sealed class DeleteParam : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public DeleteParamRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public DeleteParamResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public DeleteParam()
         {
             Request = new DeleteParamRequest();
             Response = DeleteParamResponse.Singleton;
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public DeleteParam(DeleteParamRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Rosapi
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosapi/DeleteParam";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "c1f3d28f1b044c871e6eff2e9fc3c667";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.Rosapi
     {
         [DataMember (Name = "name")] public string Name;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public DeleteParamRequest()
         {
             Name = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public DeleteParamRequest(string Name)
         {
             this.Name = Name;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal DeleteParamRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new DeleteParamRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new DeleteParamRequest(ref b);
         
-        DeleteParamRequest IDeserializable<DeleteParamRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new DeleteParamRequest(ref b);
-        }
+        DeleteParamRequest IDeserializable<DeleteParamRequest>.RosDeserialize(ref Buffer b) => new DeleteParamRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -102,25 +96,19 @@ namespace Iviz.Msgs.Rosapi
     public sealed class DeleteParamResponse : IResponse, IDeserializable<DeleteParamResponse>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public DeleteParamResponse()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal DeleteParamResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        DeleteParamResponse IDeserializable<DeleteParamResponse>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        DeleteParamResponse IDeserializable<DeleteParamResponse>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly DeleteParamResponse Singleton = new DeleteParamResponse();
     
@@ -132,7 +120,7 @@ namespace Iviz.Msgs.Rosapi
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

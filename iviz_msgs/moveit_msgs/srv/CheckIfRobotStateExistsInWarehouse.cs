@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/CheckIfRobotStateExistsInWarehouse")]
+    [DataContract (Name = RosServiceType)]
     public sealed class CheckIfRobotStateExistsInWarehouse : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public CheckIfRobotStateExistsInWarehouseRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public CheckIfRobotStateExistsInWarehouseResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public CheckIfRobotStateExistsInWarehouse()
         {
             Request = new CheckIfRobotStateExistsInWarehouseRequest();
             Response = new CheckIfRobotStateExistsInWarehouseResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public CheckIfRobotStateExistsInWarehouse(CheckIfRobotStateExistsInWarehouseRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/CheckIfRobotStateExistsInWarehouse";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "3b47364b81dd44f643fa67c9cd127486";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,36 +56,30 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "name")] public string Name;
         [DataMember (Name = "robot")] public string Robot;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public CheckIfRobotStateExistsInWarehouseRequest()
         {
             Name = string.Empty;
             Robot = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public CheckIfRobotStateExistsInWarehouseRequest(string Name, string Robot)
         {
             this.Name = Name;
             this.Robot = Robot;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal CheckIfRobotStateExistsInWarehouseRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
             Robot = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new CheckIfRobotStateExistsInWarehouseRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new CheckIfRobotStateExistsInWarehouseRequest(ref b);
         
-        CheckIfRobotStateExistsInWarehouseRequest IDeserializable<CheckIfRobotStateExistsInWarehouseRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new CheckIfRobotStateExistsInWarehouseRequest(ref b);
-        }
+        CheckIfRobotStateExistsInWarehouseRequest IDeserializable<CheckIfRobotStateExistsInWarehouseRequest>.RosDeserialize(ref Buffer b) => new CheckIfRobotStateExistsInWarehouseRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -109,32 +103,26 @@ namespace Iviz.Msgs.MoveitMsgs
     {
         [DataMember (Name = "exists")] public bool Exists;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public CheckIfRobotStateExistsInWarehouseResponse()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public CheckIfRobotStateExistsInWarehouseResponse(bool Exists)
         {
             this.Exists = Exists;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal CheckIfRobotStateExistsInWarehouseResponse(ref Buffer b)
         {
             Exists = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new CheckIfRobotStateExistsInWarehouseResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new CheckIfRobotStateExistsInWarehouseResponse(ref b);
         
-        CheckIfRobotStateExistsInWarehouseResponse IDeserializable<CheckIfRobotStateExistsInWarehouseResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new CheckIfRobotStateExistsInWarehouseResponse(ref b);
-        }
+        CheckIfRobotStateExistsInWarehouseResponse IDeserializable<CheckIfRobotStateExistsInWarehouseResponse>.RosDeserialize(ref Buffer b) => new CheckIfRobotStateExistsInWarehouseResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -145,7 +133,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

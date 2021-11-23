@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/GetFile")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetFile : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetFileRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetFileResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetFile()
         {
             Request = new GetFileRequest();
             Response = new GetFileResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetFile(GetFileRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/GetFile";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "08088c7144705ee9cf37b287c931476d";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,33 +56,27 @@ namespace Iviz.Msgs.IvizMsgs
         // Retrieves a file
         [DataMember (Name = "uri")] public string Uri; // Uri of the file. Example: package://some_package/file.dae
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetFileRequest()
         {
             Uri = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetFileRequest(string Uri)
         {
             this.Uri = Uri;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetFileRequest(ref Buffer b)
         {
             Uri = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetFileRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetFileRequest(ref b);
         
-        GetFileRequest IDeserializable<GetFileRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetFileRequest(ref b);
-        }
+        GetFileRequest IDeserializable<GetFileRequest>.RosDeserialize(ref Buffer b) => new GetFileRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -106,14 +100,14 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "bytes")] public byte[] Bytes; // The content of the file as byte array
         [DataMember (Name = "message")] public string Message; // An error message if success is false
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetFileResponse()
         {
             Bytes = System.Array.Empty<byte>();
             Message = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetFileResponse(bool Success, byte[] Bytes, string Message)
         {
             this.Success = Success;
@@ -121,7 +115,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Message = Message;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetFileResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
@@ -129,15 +123,9 @@ namespace Iviz.Msgs.IvizMsgs
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetFileResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetFileResponse(ref b);
         
-        GetFileResponse IDeserializable<GetFileResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetFileResponse(ref b);
-        }
+        GetFileResponse IDeserializable<GetFileResponse>.RosDeserialize(ref Buffer b) => new GetFileResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

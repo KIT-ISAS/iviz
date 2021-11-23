@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/StopCapture")]
+    [DataContract (Name = RosServiceType)]
     public sealed class StopCapture : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public StopCaptureRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public StopCaptureResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public StopCapture()
         {
             Request = StopCaptureRequest.Singleton;
             Response = new StopCaptureResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public StopCapture(StopCaptureRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/StopCapture";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "937c9679a518e3a18d831e57125ea522";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class StopCaptureRequest : IRequest<StopCapture, StopCaptureResponse>, IDeserializable<StopCaptureRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public StopCaptureRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal StopCaptureRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        StopCaptureRequest IDeserializable<StopCaptureRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        StopCaptureRequest IDeserializable<StopCaptureRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly StopCaptureRequest Singleton = new StopCaptureRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -98,35 +92,29 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public StopCaptureResponse()
         {
             Message = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public StopCaptureResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal StopCaptureResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new StopCaptureResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new StopCaptureResponse(ref b);
         
-        StopCaptureResponse IDeserializable<StopCaptureResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new StopCaptureResponse(ref b);
-        }
+        StopCaptureResponse IDeserializable<StopCaptureResponse>.RosDeserialize(ref Buffer b) => new StopCaptureResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

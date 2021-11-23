@@ -4,41 +4,35 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
 {
-    [Preserve, DataContract (Name = "actionlib_tutorials/AveragingResult")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class AveragingResult : IDeserializable<AveragingResult>, IResult<AveragingActionResult>
     {
         //result definition
         [DataMember (Name = "interior_angle")] public float InteriorAngle;
         [DataMember (Name = "apothem")] public float Apothem;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public AveragingResult()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public AveragingResult(float InteriorAngle, float Apothem)
         {
             this.InteriorAngle = InteriorAngle;
             this.Apothem = Apothem;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal AveragingResult(ref Buffer b)
         {
             InteriorAngle = b.Deserialize<float>();
             Apothem = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new AveragingResult(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new AveragingResult(ref b);
         
-        AveragingResult IDeserializable<AveragingResult>.RosDeserialize(ref Buffer b)
-        {
-            return new AveragingResult(ref b);
-        }
+        AveragingResult IDeserializable<AveragingResult>.RosDeserialize(ref Buffer b) => new AveragingResult(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -50,22 +44,22 @@ namespace Iviz.Msgs.ActionlibTutorials
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "actionlib_tutorials/AveragingResult";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "b06c6e2225f820dbc644270387cd1a7c";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuNKy8lPLDE2UsjMK0ktyswvik/MS89J5YIJJxbkl2Sk5vJyAQDg6GOSKQAAAA==";
+                "H4sIAAAAAAAAE+NKy8lPLDE2UsjMK0ktyswvik/MS89J5YIJJxbkl2Sk5nIBAEOeaCAoAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

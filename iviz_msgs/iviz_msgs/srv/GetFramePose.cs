@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/GetFramePose")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetFramePose : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetFramePoseRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetFramePoseResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetFramePose()
         {
             Request = new GetFramePoseRequest();
             Response = new GetFramePoseResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetFramePose(GetFramePoseRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/GetFramePose";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "80ebc02508d7723ac1b22636270c4ba6";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,33 +56,27 @@ namespace Iviz.Msgs.IvizMsgs
         // Gets the absolute pose of a TF frame w.r.t. the map frame
         [DataMember (Name = "frames")] public string[] Frames; // Frame ids
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetFramePoseRequest()
         {
             Frames = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetFramePoseRequest(string[] Frames)
         {
             this.Frames = Frames;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetFramePoseRequest(ref Buffer b)
         {
             Frames = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetFramePoseRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetFramePoseRequest(ref b);
         
-        GetFramePoseRequest IDeserializable<GetFramePoseRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetFramePoseRequest(ref b);
-        }
+        GetFramePoseRequest IDeserializable<GetFramePoseRequest>.RosDeserialize(ref Buffer b) => new GetFramePoseRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -109,36 +103,30 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "is_valid")] public bool[] IsValid; // Whether the entry is valid
         [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses; // The absolute poses
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetFramePoseResponse()
         {
             IsValid = System.Array.Empty<bool>();
             Poses = System.Array.Empty<GeometryMsgs.Pose>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetFramePoseResponse(bool[] IsValid, GeometryMsgs.Pose[] Poses)
         {
             this.IsValid = IsValid;
             this.Poses = Poses;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetFramePoseResponse(ref Buffer b)
         {
             IsValid = b.DeserializeStructArray<bool>();
             Poses = b.DeserializeStructArray<GeometryMsgs.Pose>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetFramePoseResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetFramePoseResponse(ref b);
         
-        GetFramePoseResponse IDeserializable<GetFramePoseResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetFramePoseResponse(ref b);
-        }
+        GetFramePoseResponse IDeserializable<GetFramePoseResponse>.RosDeserialize(ref Buffer b) => new GetFramePoseResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

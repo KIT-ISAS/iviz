@@ -4,39 +4,33 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/ExecuteTrajectoryResult")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class ExecuteTrajectoryResult : IDeserializable<ExecuteTrajectoryResult>, IResult<ExecuteTrajectoryActionResult>
     {
         // Error code - encodes the overall reason for failure
         [DataMember (Name = "error_code")] public MoveItErrorCodes ErrorCode;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ExecuteTrajectoryResult()
         {
             ErrorCode = new MoveItErrorCodes();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ExecuteTrajectoryResult(MoveItErrorCodes ErrorCode)
         {
             this.ErrorCode = ErrorCode;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ExecuteTrajectoryResult(ref Buffer b)
         {
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ExecuteTrajectoryResult(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ExecuteTrajectoryResult(ref b);
         
-        ExecuteTrajectoryResult IDeserializable<ExecuteTrajectoryResult>.RosDeserialize(ref Buffer b)
-        {
-            return new ExecuteTrajectoryResult(ref b);
-        }
+        ExecuteTrajectoryResult IDeserializable<ExecuteTrajectoryResult>.RosDeserialize(ref Buffer b) => new ExecuteTrajectoryResult(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -49,29 +43,29 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode.RosValidate();
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/ExecuteTrajectoryResult";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "1f7ab918f5d0c5312f25263d3d688122";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACq1TTY/TMBC9W+p/iFSJWwRp9wOQfHBTN2vq2MV2KnEahSVaIvoBSajEv2e82FU2Qpzw" +
-                "wXH8nmfGb54JKc+XRgy8685dfv7S9Enjl/CIazIj9D+PGSlt8T45YtJ2gGP/1L+eFjAj7WlYLpJLfSBk" +
-                "niDa1YdD8rn5Wl/acxdQW+U5t5Zm4X/DhKwMp+/8IGFzJ5lSQhXgUb6maWQLtWdSrKHUTmgFnkfTRQBH" +
-                "mxCIzPE1rD4BV3thtCq5cpA/MFVwmi7DsVwrZ7S85roJ+5ViK8nBaWAfK2E4WK6sNoBBGU1vA8uJElPo" +
-                "ytH0LlZvOC93mJmm916J74f6dGpPT8mr5Ft7ao710D72Sdf8+Nn0w5+29VEdx4wDnB3HK0CupRQWL4UK" +
-                "vPkLZS+0xK+FHXMPyFbWGSaUs8jPopiFZnIabDHG/hVlOSaOoHjI9+aGTLpTGF3tQLESVc5up+AkElLu" +
-                "JhSjVzpckabZ/QSVQm1j8LcTTK8+8NxFFP00T/pf/dAcX8q8MUgALEDZjTblc+u9CdNFNNpVLLQLz7fe" +
-                "i+iHPfK8KZAYFRzV6udnLIoWDCPURl8xFGs+tsGLupQGsQWrZeWdjBbN8Cn/BlLTgTvrAwAA";
+                "H4sIAAAAAAAAE61Sy47TMBTd+ysiIbGLoI+ZYZCycFM3Y+r4FtupxOoqDNEQ0QckoRJ/z/VgV5kIscIL" +
+                "x/E5vo9zD2Pl+dLIQXTducvPX5o+afwRH+nMWPafFytt8T45Usp2wGP/1L+ZpmftaVjMk0t9YOxVQmBX" +
+                "Hw7J5+ZrfWnPXUBtlefC2mwW/jdcqsqI7N4vFi53imstdYEeFessjWyp91zJNZbgJGj0vCydB3B0iYHI" +
+                "nVjj6hMKvZcGdCm0w/yB60Jk6SI8y0E7A+qaaxnuK81XSqAD5B8raQRaoS0YpKA8S28Cy8mSUkDlsvQ2" +
+                "Vm+EKHfOx7rzSnw/1KdTe3pKXiff2lNzrIf2sU+65sfPph/+zCxqZx03Dml3glrAHJSSlpoiBd7+hbKX" +
+                "oOhrccfdA7G1dYZL7SzxZ1HMAriaBpuPsX9FWYyJIyg+8rNZssl0CgPVDjUvSeXZzRScRCLK7YRiYAWh" +
+                "RULvJqiSehuDv5tgsPogchfRe69+/6sfmuNLmTeGCEgFaLsBU2I0YTqfXU0RxCK7iHzrvUh+2BPPm4KI" +
+                "UcFRrX5/xqJowTBSb+CKLX1NIxu8qEsDyi1aUJV7ntOChvgbNkfH6+cDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

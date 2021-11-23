@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [Preserve, DataContract (Name = "sensor_msgs/PointField")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class PointField : IDeserializable<PointField>, IMessage
     {
         // This message holds the description of one point entry in the
@@ -22,13 +22,13 @@ namespace Iviz.Msgs.SensorMsgs
         [DataMember (Name = "datatype")] public byte Datatype; // Datatype enumeration, see above
         [DataMember (Name = "count")] public uint Count; // How many elements in the field
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public PointField()
         {
             Name = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public PointField(string Name, uint Offset, byte Datatype, uint Count)
         {
             this.Name = Name;
@@ -37,7 +37,7 @@ namespace Iviz.Msgs.SensorMsgs
             this.Count = Count;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal PointField(ref Buffer b)
         {
             Name = b.DeserializeString();
@@ -46,15 +46,9 @@ namespace Iviz.Msgs.SensorMsgs
             Count = b.Deserialize<uint>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new PointField(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new PointField(ref b);
         
-        PointField IDeserializable<PointField>.RosDeserialize(ref Buffer b)
-        {
-            return new PointField(ref b);
-        }
+        PointField IDeserializable<PointField>.RosDeserialize(ref Buffer b) => new PointField(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -73,19 +67,19 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "sensor_msgs/PointField";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "268eacb2962780ceac86cbd17e328150";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACk2QQU7DMBBF95G4w5eyRUhNS8gmiwqEQEIti3IA04wbS7Ensieg3B47SWm8Gj0/z4x/" +
-                "jlNrAiyFoC6ElrsmQFpCQ+HsTS+GHViDHaFn4wTkxI8wLllZjs8EnzsemuK/i2ZvlTxkQ7yq8H44VYin" +
-                "xmYhXwuqUdycTTmR7cpJqMbu5myLyXlcOQnVKBfy+nHcJ1TjaU3KXSRVlgXxxl3glKW0EZDjkOr4QW2o" +
-                "a6Y38TlrHUhm4TjX2rNFEOUl2XMUsd1wlmUQGiVKxj52zvFyrckNlrxKMd4jEEF98w9d55x5iG3mOW/8" +
-                "C6vcCOrIxpDDkvGy2V32BwU69jirAQAA";
+                "H4sIAAAAAAAAE02Qz06EMBCH7zzFL+FqTJZdkQsHozGamF0P6wNUGJYmtEPaQcPb20LXZU6Tr9/86eQ4" +
+                "99rDkPfqQuh5aD2kJ7TkG6dH0WzBHdgSRtZWQFbcDG2jleX4jPB54Kkt/rt07IyS+2wKTxXej+cKIWrs" +
+                "EvlKqEZxc3blQvYbJ6Iah5uzLxbnYeNEVKNM5PXj9BRRjcctKQ+BVFnmxWl7gVWGsESOY8zDBztNQ7vU" +
+                "hHLuOk+yCqc17xwbeFFOor2eIrSbGkmD0CpRMo8Ui16uOdnJkFPxjHfwRFDf/EPXOQ1PVtIib/wLo+wM" +
+                "GsiEI/t047RZ9gctJPa/qgEAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

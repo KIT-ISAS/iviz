@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/GetPositionIK")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetPositionIK : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetPositionIKRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetPositionIKResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetPositionIK()
         {
             Request = new GetPositionIKRequest();
             Response = new GetPositionIKResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetPositionIK(GetPositionIKRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/GetPositionIK";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "0661ea3324398c69f5a971d0ec55657e";
         
         public override string ToString() => Extensions.ToString(this);
@@ -57,33 +57,27 @@ namespace Iviz.Msgs.MoveitMsgs
         // The inverse kinematics request
         [DataMember (Name = "ik_request")] public PositionIKRequest IkRequest;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetPositionIKRequest()
         {
             IkRequest = new PositionIKRequest();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetPositionIKRequest(PositionIKRequest IkRequest)
         {
             this.IkRequest = IkRequest;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetPositionIKRequest(ref Buffer b)
         {
             IkRequest = new PositionIKRequest(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetPositionIKRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetPositionIKRequest(ref b);
         
-        GetPositionIKRequest IDeserializable<GetPositionIKRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetPositionIKRequest(ref b);
-        }
+        GetPositionIKRequest IDeserializable<GetPositionIKRequest>.RosDeserialize(ref Buffer b) => new GetPositionIKRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -109,36 +103,30 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "solution")] public RobotState Solution;
         [DataMember (Name = "error_code")] public MoveItErrorCodes ErrorCode;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetPositionIKResponse()
         {
             Solution = new RobotState();
             ErrorCode = new MoveItErrorCodes();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetPositionIKResponse(RobotState Solution, MoveItErrorCodes ErrorCode)
         {
             this.Solution = Solution;
             this.ErrorCode = ErrorCode;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetPositionIKResponse(ref Buffer b)
         {
             Solution = new RobotState(ref b);
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetPositionIKResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetPositionIKResponse(ref b);
         
-        GetPositionIKResponse IDeserializable<GetPositionIKResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetPositionIKResponse(ref b);
-        }
+        GetPositionIKResponse IDeserializable<GetPositionIKResponse>.RosDeserialize(ref Buffer b) => new GetPositionIKResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdSrvs
 {
-    [DataContract (Name = "std_srvs/SetBool")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SetBool : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SetBoolRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SetBoolResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SetBool()
         {
             Request = new SetBoolRequest();
             Response = new SetBoolResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SetBool(SetBoolRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.StdSrvs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "std_srvs/SetBool";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "09fb03525b03e7ea1fd3992bafd87e16";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,32 +55,26 @@ namespace Iviz.Msgs.StdSrvs
     {
         [DataMember (Name = "data")] public bool Data; // e.g. for hardware enabling / disabling
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetBoolRequest()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetBoolRequest(bool Data)
         {
             this.Data = Data;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetBoolRequest(ref Buffer b)
         {
             Data = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetBoolRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetBoolRequest(ref b);
         
-        SetBoolRequest IDeserializable<SetBoolRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SetBoolRequest(ref b);
-        }
+        SetBoolRequest IDeserializable<SetBoolRequest>.RosDeserialize(ref Buffer b) => new SetBoolRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -91,7 +85,7 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -105,35 +99,29 @@ namespace Iviz.Msgs.StdSrvs
         [DataMember (Name = "success")] public bool Success; // indicate successful run of triggered service
         [DataMember (Name = "message")] public string Message; // informational, e.g. for error messages
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetBoolResponse()
         {
             Message = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetBoolResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetBoolResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetBoolResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetBoolResponse(ref b);
         
-        SetBoolResponse IDeserializable<SetBoolResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new SetBoolResponse(ref b);
-        }
+        SetBoolResponse IDeserializable<SetBoolResponse>.RosDeserialize(ref Buffer b) => new SetBoolResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

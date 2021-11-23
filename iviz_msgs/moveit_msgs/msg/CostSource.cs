@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/CostSource")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class CostSource : IDeserializable<CostSource>, IMessage
     {
         // The density of the cost source
@@ -15,12 +15,12 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "aabb_min")] public GeometryMsgs.Vector3 AabbMin;
         [DataMember (Name = "aabb_max")] public GeometryMsgs.Vector3 AabbMax;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public CostSource()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public CostSource(double CostDensity, in GeometryMsgs.Vector3 AabbMin, in GeometryMsgs.Vector3 AabbMax)
         {
             this.CostDensity = CostDensity;
@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.AabbMax = AabbMax;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal CostSource(ref Buffer b)
         {
             CostDensity = b.Deserialize<double>();
@@ -36,15 +36,9 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Deserialize(out AabbMax);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new CostSource(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new CostSource(ref b);
         
-        CostSource IDeserializable<CostSource>.RosDeserialize(ref Buffer b)
-        {
-            return new CostSource(ref b);
-        }
+        CostSource IDeserializable<CostSource>.RosDeserialize(ref Buffer b) => new CostSource(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -57,28 +51,28 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 56;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/CostSource";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "abb7e013237dacaaa8b97e704102f908";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACq2SQWvcQAyF7wP7Hx7kksDGhab0EMghuZQcCoWWXBfZlp2h9siM5Oy6v74a77JtIOQU" +
-                "n2SNvqcnzVzg1zOj5aTRFkgH899G1KAy54ZDNwjZ1y9rbneqC+FixV5kmEd+g0JUZJ4yKyfjFqSg5BAd" +
-                "ol7TEPvkyVrm1MbUe3DA5f39w8PVSbfERUInbmIXS+0C20vpFE0h0yTuo7TMibOG0LOMbHnZjdrrpydu" +
-                "TPINiOp6N8b0/jkdwibcffC3Cd9/frvFm30365j/r8jXg5f1EDGhy8w+OzVcwUsfrexC0rBgZEoGk3+k" +
-                "g23MjkZJVVle5k4yb31PaIUVScw1Rvrtkn57XGiaJhcjWKakAxW2pB255Kqvttg/czpWlfuh4qJn33Rs" +
-                "kGMf2yPpjcYzTDhNt4V1n7GPw3D0fGzmD8RFstgKXFV47LDIjH0ZyIOMlswdCWq3ePJF9VD8yhZzMb5K" +
-                "vN7oD4nOj6xKvb+6pMbUVuH8ag/naDlHfzbhL1WeDMH2AgAA";
+                "H4sIAAAAAAAAE62SwUrEQAyG7/MUAS8KawUVD4IHvYgHQVC8LmmbdoPtpExSd+vTm+kuVUE82VOayfcn" +
+                "+WeO4GVDUFNUtgmkAfPfStRAZUwVhaYTtKvLObc+1IVwNGPv0o09/UIBKyQaEilFoxpQAaNDuGM9xY7b" +
+                "6MlSxlhzbD3YwfHt7d3dyUE3x1lCB6q44Vw7gW0ld2JTkGEQnyO3TJGShtCS9GRpWvfa6tkrVSbpAhDL" +
+                "ct1z/PscdyHc/PMXHp/vr+HXrvOO3/1xb+B9PgOO0CQiXxwrKsBLHywbIbGboCeMBiZfpIM1J0dZYpGd" +
+                "S9RIopWbBLWQQhRzjR7fXNKvjjKNw+BiCJYwaoeZzWlHjqloixVsNxT3VflyME/RktvMFSRuud6T3qhf" +
+                "YITDciuw5hy23HX7mffN/HW4SBKbgZMCHhqYZIRtXsiDBDUaZqGSlrmw7PK8soIxDz5L/DT0Sdj5nlSx" +
+                "9ScX1QjrIixPdrdE0xJ9hE9Jgca98gIAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

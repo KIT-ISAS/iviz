@@ -4,39 +4,33 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/ExecuteTrajectoryFeedback")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class ExecuteTrajectoryFeedback : IDeserializable<ExecuteTrajectoryFeedback>, IFeedback<ExecuteTrajectoryActionFeedback>
     {
         // The internal state that the move group action currently is in
         [DataMember (Name = "state")] public string State;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ExecuteTrajectoryFeedback()
         {
             State = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ExecuteTrajectoryFeedback(string State)
         {
             this.State = State;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ExecuteTrajectoryFeedback(ref Buffer b)
         {
             State = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ExecuteTrajectoryFeedback(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ExecuteTrajectoryFeedback(ref b);
         
-        ExecuteTrajectoryFeedback IDeserializable<ExecuteTrajectoryFeedback>.RosDeserialize(ref Buffer b)
-        {
-            return new ExecuteTrajectoryFeedback(ref b);
-        }
+        ExecuteTrajectoryFeedback IDeserializable<ExecuteTrajectoryFeedback>.RosDeserialize(ref Buffer b) => new ExecuteTrajectoryFeedback(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -52,15 +46,15 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/ExecuteTrajectoryFeedback";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "af6d3a99f0fbeb66d3248fa4b3e675fb";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuPiKi4pysxLVyguSSxJ5eUCAAJzrWgQAAAA";
+                "H4sIAAAAAAAAE+PiKi4pysxLVyguSSxJ5QIAXR/O4Q8AAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

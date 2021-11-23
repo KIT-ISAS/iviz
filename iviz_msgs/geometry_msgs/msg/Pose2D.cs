@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [Preserve, DataContract (Name = "geometry_msgs/Pose2D")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class Pose2D : IDeserializable<Pose2D>, IMessage
     {
         // Deprecated
@@ -16,12 +16,12 @@ namespace Iviz.Msgs.GeometryMsgs
         [DataMember (Name = "y")] public double Y;
         [DataMember (Name = "theta")] public double Theta;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public Pose2D()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Pose2D(double X, double Y, double Theta)
         {
             this.X = X;
@@ -29,7 +29,7 @@ namespace Iviz.Msgs.GeometryMsgs
             this.Theta = Theta;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal Pose2D(ref Buffer b)
         {
             X = b.Deserialize<double>();
@@ -37,15 +37,9 @@ namespace Iviz.Msgs.GeometryMsgs
             Theta = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Pose2D(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new Pose2D(ref b);
         
-        Pose2D IDeserializable<Pose2D>.RosDeserialize(ref Buffer b)
-        {
-            return new Pose2D(ref b);
-        }
+        Pose2D IDeserializable<Pose2D>.RosDeserialize(ref Buffer b) => new Pose2D(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -58,30 +52,30 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 24;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "geometry_msgs/Pose2D";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "938fa65709584ad8e77d238529be13b8";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClVSvY7bMAzeA/QdCNyQpbihLboXyJLthvYBGIuO2cqSIFHJ+e37Uc4F7WCApvjz/fCF" +
-                "TlKqTGwSDi/0FoWbUMdni9DcY6SvJyq5yesB7+dEV0lSOVLuldCY11VSYNOcSBtZHs38bK0+vkmyvSTP" +
-                "JDepmy2arsQp0JwrfTlRKzLprBNxKVGnUd1o5T87EmRrLlWBkxD9lmkv0ISNXlAiJxnD8KeVJo5Tj48x" +
-                "l26Ui+nKMW50V0AbqOptnw6cmtC77iBDr44OeyZpDeHOfaa70MLoKQwFokSaclFpzgoUoALbVvA/KNKv" +
-                "8yCYsaFS0SJRAXFsh2TUCyWR4JvAYcwNHcKCktSZsdrzJWb7R7JX+oHWLff/5tzVFkoovMiQ9RLlwwlQ" +
-                "s5xj+9DZcxM8HiBh2ewCbMeKbF5LFBModOOo4TNx803HsIPDwCrqNXDcSG1fG3SepY5MKt3azrmbx690" +
-                "tmMbyCCZqTtSMX/hGp7k3AAA8xsjYHQYHS57euM7Sa3IPoylN69a4QpfcRTY5OIi8i9W4bA96Ppb1Evl" +
-                "6gbZwgbasNavBXfq88ANxsLZn56Rdz8JF4Ydi45LGFww4Xm+SDnYlZPOOQb0zzGzff9G789oe0YAZ3z4" +
-                "dPgLC2rvdmYDAAA=";
+                "H4sIAAAAAAAAE1VSvY7bMAze8xQEbshSZLgW3Qtkue2G9gEYm47ZypIgUcn57ftRygXtYICm+PP98IXO" +
+                "kotMbDIfXug9CFehhs9WoaWFQF/PlFOV0wHvb5GuEqVwoNQKoTFtm8SZTVMkrWSpN/Oztfj4KtFGSVpI" +
+                "blJ2WzVeieNMSyr0eqaaZdJFJ+Kcg069utLGfwYSZEvKRYGTEP2WaRRoxEYvyIGj9GH400ITh6mFx5hL" +
+                "M0rZdOMQdroroHVU5TamA6dG9G4D5NyKo8OeSWpFOLgvdBdaGT2ZoUCQQFPKKtVZgQJUYNsz/jtF+vXW" +
+                "CSZsKJQ1S1BA7NshGbVMUWT2TeDQ584NwoKSlIWx2vM5JPtHshP9QOue2n9z7morRRRepMt6CfLpBKhZ" +
+                "SqF+6uy5CR53kLBscQH2Y0E2bTmICRS6cdD5C3H1Tcd5gMPAIuo1cNxIbayddVmk9EzMzerg3MzjE73Z" +
+                "sXZkkMzUHSmYv3KZn+TcgNdxYwSMDqPZ8GXnO0kpyD6MpXev2uAKX6VvcnER+ReK8Lw/6Ppb0Evh4gbZ" +
+                "ygbasNavRYca4AZj4exPz8iHn4QLw45F+yV0LpjwPF+kHOzGUZcUZvQvIbF9/0Yfz2h/RgBnfDj8Bc9+" +
+                "JaJlAwAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

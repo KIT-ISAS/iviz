@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = "iviz_msgs/Triangle")]
+    [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
     public struct Triangle : IMessage, System.IEquatable<Triangle>, IDeserializable<Triangle>
     {
@@ -14,7 +14,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "b")] public uint B;
         [DataMember (Name = "c")] public uint C;
     
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Triangle(uint A, uint B, uint C)
         {
             this.A = A;
@@ -22,22 +22,16 @@ namespace Iviz.Msgs.IvizMsgs
             this.C = C;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Triangle(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Triangle(ref b);
-        }
+        public readonly ISerializable RosDeserialize(ref Buffer b) => new Triangle(ref b);
         
-        readonly Triangle IDeserializable<Triangle>.RosDeserialize(ref Buffer b)
-        {
-            return new Triangle(ref b);
-        }
+        readonly Triangle IDeserializable<Triangle>.RosDeserialize(ref Buffer b) => new Triangle(ref b);
         
         public override readonly int GetHashCode() => (A, B, C).GetHashCode();
         
@@ -58,22 +52,22 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 12;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
         public readonly string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "iviz_msgs/Triangle";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "7fbd9596e2fe5bfb3fb6622c0cdf3da9";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACivNzCsxNlJI5CqFMJJgjGQuXi4Aa8Y1xR0AAAA=";
+                "H4sIAAAAAAAAEyvNzCsxNlJI5CqFMJJgjGQuLgA3MPMeHAAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

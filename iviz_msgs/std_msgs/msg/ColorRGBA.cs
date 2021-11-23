@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [Preserve, DataContract (Name = "std_msgs/ColorRGBA")]
+    [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
     public struct ColorRGBA : IMessage, System.IEquatable<ColorRGBA>, IDeserializable<ColorRGBA>
     {
@@ -15,7 +15,7 @@ namespace Iviz.Msgs.StdMsgs
         [DataMember (Name = "b")] public float B;
         [DataMember (Name = "a")] public float A;
     
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ColorRGBA(float R, float G, float B, float A)
         {
             this.R = R;
@@ -24,22 +24,16 @@ namespace Iviz.Msgs.StdMsgs
             this.A = A;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal ColorRGBA(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ColorRGBA(ref b);
-        }
+        public readonly ISerializable RosDeserialize(ref Buffer b) => new ColorRGBA(ref b);
         
-        readonly ColorRGBA IDeserializable<ColorRGBA>.RosDeserialize(ref Buffer b)
-        {
-            return new ColorRGBA(ref b);
-        }
+        readonly ColorRGBA IDeserializable<ColorRGBA>.RosDeserialize(ref Buffer b) => new ColorRGBA(ref b);
         
         public override readonly int GetHashCode() => (R, G, B, A).GetHashCode();
         
@@ -60,22 +54,22 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 16;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
         public readonly string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "std_msgs/ColorRGBA";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "a29a96539573343b1310c73607334b00";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACkvLyU8sMTZSKOJKg7LS4awkOCuRi5cLAGB4EzcqAAAA";
+                "H4sIAAAAAAAAE0vLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

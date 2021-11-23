@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [Preserve, DataContract (Name = "sensor_msgs/PointCloud2")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class PointCloud2 : IDeserializable<PointCloud2>, IMessage
     {
         // This message holds a collection of N-dimensional points, which may
@@ -29,14 +29,14 @@ namespace Iviz.Msgs.SensorMsgs
         [DataMember (Name = "data")] public byte[] Data; // Actual point data, size is (row_step*height)
         [DataMember (Name = "is_dense")] public bool IsDense; // True if there are no invalid points
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public PointCloud2()
         {
             Fields = System.Array.Empty<PointField>();
             Data = System.Array.Empty<byte>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public PointCloud2(in StdMsgs.Header Header, uint Height, uint Width, PointField[] Fields, bool IsBigendian, uint PointStep, uint RowStep, byte[] Data, bool IsDense)
         {
             this.Header = Header;
@@ -50,7 +50,7 @@ namespace Iviz.Msgs.SensorMsgs
             this.IsDense = IsDense;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal PointCloud2(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -68,15 +68,9 @@ namespace Iviz.Msgs.SensorMsgs
             IsDense = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new PointCloud2(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new PointCloud2(ref b);
         
-        PointCloud2 IDeserializable<PointCloud2>.RosDeserialize(ref Buffer b)
-        {
-            return new PointCloud2(ref b);
-        }
+        PointCloud2 IDeserializable<PointCloud2>.RosDeserialize(ref Buffer b) => new PointCloud2(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -115,32 +109,32 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "sensor_msgs/PointCloud2";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "1158d486dd51d683ce2f1be655c3c181";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACrVWXW/bNhR9F5D/cFE/1C5sD3G6LAhgDMWCrAG6tECzp2EwKJGWiFGkSlJOtV+/c0nJ" +
-                "drY+7GETbFi6uvfc70PP6KnRgVoVgqgVNc7IQIIqZ4yqonaW3J4eV1K3ygY8CkOd0zaGJT03umqoFUMx" +
-                "g76NQlsSUuqY1bTdO9+KhBF6aIpAliUGtkBgvDgsScVqjSAUUBIySREFIaYQnVeSzQSV2go/UGlcCeMY" +
-                "yIjB9dBVofK6hFo5UEwgHIpCgBw4JPRqrxWSekXCezGsC6jA2+irMq6X2SMSoVKR87Ww+k8gbiTNdYuq" +
-                "rIz+Qy3whi4lrOc90pAKsS3W9OkEE85sETTMk3WYkDvvZF+lUDlM0SovkEAXGwoohvPhWKcQAe/YY0Th" +
-                "V26/2htdNzFHDxEnl41y8KL60mvUE8VekrAyZV45xInCRUV7D3f0cEdzNIWuOI3cxsW6eK8EsqEm/bCD" +
-                "zR0C8H0Ve58cxZflWtNDluXioVPHgiyBwnFCCJzLFMmzlsgQWmxilK3x9A3Qosf91WYEmJ6SMcd0NzY6" +
-                "w1SNsFaZMKWq/TQQmEFWGOcl1YaHZl2kRt3zKPz2O+WRKIrSOUO4dNiVulZWamFpRg/sBRFn8+nFj1NQ" +
-                "Oe4dmtTBdkYfjkmJMSVEUQ5RhaOFd8+T/t8t8Oql/g0CTJ6na0bv0Itp89K7JQXMGVd1PkG/yZVbjFkh" +
-                "JYkBUSeQJ9/DIlUefRX4WgfPB2G0HKehuCi2//F1Ufzy+edbDJTctaEO3+Vpu0BLP0d0T3gJ8okiJcyz" +
-                "2SAJ5VdGHZSBlWg7bEx6G4dOhXVaX+SND/qCFTJmoD5AKTpMfNv2Vlc88rw5L+xhyQxFnfBRV70R/h8b" +
-                "wuj4BPWlV7bihbllPgmq6qNGQAMQKq9E0LbmbZr6C4Ni9vTsVsxrNZbp6BzVFrwOpL52HiSbuOEWPt7k" +
-                "5NbARnUUvIBA5km2w2NYoMMcguocOGGOyD8NsXF5vA/Ca1GaNAAVKgDU12z0enGGzGHfkhXWTfAZ8eTj" +
-                "38DaI26iIiyeNJx96GsUEIqgtYOWRwbGOmvQLxldeqxgwVbZZTG7Tyx0Wi38ihBcpdEAJgqsOoiH0VM3" +
-                "dlr+jwOZ2DPP5IkbeC6/cSByXvmo6aYz0dmJv5AtqCYTD8wT2E/MaZsjSj4JM8fd0MPj0w2v5JYuR8mv" +
-                "o2hLm5PO5XWSXJ3psGhLb086V+AWSL4/02HRlq5Hyf2Hj+9YtKUfziXXbyG5KaZyW+7LSBOPfI8EE0dO" +
-                "A+72+6BiVviY7/fetdxYH1k7lyIfG6Oj1GNeWja6m+6V7fngyydVUCCi0h3U5KdyPWCyn/cgxlbYgZRR" +
-                "+PeBE30k9xzZRfEX+3XW+LwIAAA=";
+                "H4sIAAAAAAAAE7VV32/bNhB+119xqB9qF7GHpF0WBDCGYkHWAF1aoNnTMASUeLaJUaRLUsm0v37fkaLt" +
+                "bHvYwybYkHS6++73xxk97EyknmNUW6adtzqSos5by10y3pHf0P1Sm55dxKuytPfGpXhGzzvT7ahXYzOD" +
+                "vkvKOFJam1TUjNv40KuMEQdoqkhOJBa2QBC8NJ4Rp26FIBgoGZm0SooQU0w+sBYzRa1xKozUWt/COEWy" +
+                "avQDdDl2wbRQa0dKGURCYQQogUNCrzaGkdQrUiGocdVABd4mX531gy4ekQi1TD5slTN/APFC09z0qMrS" +
+                "mt94gS90rmE9H5CGZsS2WNHnI0w8sUXQMM/WsSLvg9dDl0OVMFXPQSGBfdpRRDF8iIc6xQR4Lx4TCr/0" +
+                "m+XGmu0uleghkuSKUQledV8HE3Ppz0g5nTPvPOJE4RLTJsAd3d3QHE2ht7oWOy5WzQdWyIZ2+SYOLm4Q" +
+                "QBi6NASuVTwp14ruiqwUD506FOQMKBInhMA5z5E8G40MoSUmlt0Wb/8A2gx4fnsxAdS3bCwx3UyNLjDd" +
+                "TjnHNtZUTagDgRkUhWlecm1kaFZNbtStjMIvv1IZiaZpvbeEy8TH1mzZaaMczehOvCDiYl4/fF+DKnE/" +
+                "okl72M7o4yEpNaWEKNoxcTxYBP9c9f9qgU8v9a8QYPZcrxm9Ry/q5uVvZxQxZ1LVeYV+Uyq3mLJCShoD" +
+                "wkeQhzDAIlcefVX4Ow/PT8oaPU1D06z/46v56cuP1xgn/djHbfymzBr6+SWhdSpoME9SOVsZzB0y4LC0" +
+                "/MQWRqrf87SdadxzXOXdRdL4oSnYH2tHGiKUkse49/3gTCfzLmvzwh6WQk+0VyGZbrAq/G09BB2/yF8H" +
+                "dp1sy7WQSeRuSAYBjUDoAqto3FZWqTYXBs3s4dkvhdS2HI7OUWolu0D8+z6AYTMxXMPHm5LcCtgoDsML" +
+                "2GOeZY94jQu0V0LgvQchzBH55zHtfJntJxWMam3ufocKAPW1GL1enCC7DO2U8xW+IB59/BtYd8DNPISt" +
+                "01ayj8MWBYQiOO3J6AP9YpcNuJesaQP2rxGr4rKZ3WYKOu4V7ipG3xk0QFgCew7WEfTcjUej/7dpzMRZ" +
+                "BvJIC3W2Xh6FklQ5ZPb1NPSuMhdSDeNEOTDPWD8Im10cUMoZWNjtiu7uH65kGdd0Pkl+nkRrujjqnF9m" +
+                "ydsTHRGt6d1RR1gFkm9PdES0pstJcvvx03sRrem7U8nlO0iumlprJ02ZCOJelYMls2Odbr/ZRE5F4VN5" +
+                "3gTfS1dDEu1SinJgTI5yg2VjxeimPrMb5MgrZ1RkUFDrn7j66fzg0hTIB1Bir9xIbLnPZ/lE6yWy5k8H" +
+                "yKIrtQgAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

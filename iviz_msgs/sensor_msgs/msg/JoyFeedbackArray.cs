@@ -4,25 +4,25 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [Preserve, DataContract (Name = "sensor_msgs/JoyFeedbackArray")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class JoyFeedbackArray : IDeserializable<JoyFeedbackArray>, IMessage
     {
         // This message publishes values for multiple feedback at once. 
         [DataMember (Name = "array")] public JoyFeedback[] Array;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public JoyFeedbackArray()
         {
             Array = System.Array.Empty<JoyFeedback>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public JoyFeedbackArray(JoyFeedback[] Array)
         {
             this.Array = Array;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal JoyFeedbackArray(ref Buffer b)
         {
             Array = b.DeserializeArray<JoyFeedback>();
@@ -32,15 +32,9 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new JoyFeedbackArray(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new JoyFeedbackArray(ref b);
         
-        JoyFeedbackArray IDeserializable<JoyFeedbackArray>.RosDeserialize(ref Buffer b)
-        {
-            return new JoyFeedbackArray(ref b);
-        }
+        JoyFeedbackArray IDeserializable<JoyFeedbackArray>.RosDeserialize(ref Buffer b) => new JoyFeedbackArray(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -61,20 +55,20 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "sensor_msgs/JoyFeedbackArray";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "cde5730a895b1fc4dee6f91b754b213d";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACq1R0UrDMBR9D+wfDux11G4yELEvsiqTDWTqgxMZaXu7BtNkJOm2/r13dZX57n1Jcm5y" +
-                "zsm5Q7xWyqMm7+WWsGsyrXxFHnupG15K61A3OqidJpRERSbzL8gAa3KKIJ5s+3BGPz4hnZPtQCT/XAOx" +
-                "fHm8hSfjrdvUfuuvLnQHYogZ5Vo6gi0RKkJod92+NywaZcINXt+f080inYErQXyJrt6W94uU0fElev+2" +
-                "XqcrRifiDJ+YhTindlBao7K6gDRQBUxTZ+S6zEjm1a8NOh16LxG/To+y5kBHndlSOR+gqcDBNsyVEXMl" +
-                "8U/TU27N307vUBUnI3MTOBYV2v7vvc4IpbM14ihGsBhHTKhMrhuv9jw4zEsUtFc5U3qmkXlopNYtMmWk" +
-                "a0coHN9z8FWnHBzxzOO75HgXR1NIz2rliMmnJygZd4iJRKmtDNcTVjq7EmIgvgE0QAWKZAIAAA==";
+                "H4sIAAAAAAAAE61Ry07DMBC8+ytG6rUKKQgJIXKpCKiISqiUA0WocpJNY+HYlR9t8/dsQ4PKnb3YnrVn" +
+                "xrMjLBvl0ZL3ckPYxkIr35DHTurIS20d2qiD2mpCTVQVsvyCDLCmpATiyXYPJ/TjE9I52Ynsn0vMXx9v" +
+                "4cl469at3/iLM1Uxwj2VWjqCrREaQui2/X5wK6Iy4QbL95d8/ZzfgytDeo4u3ubT55zRyTk6fVut8gWj" +
+                "l+IEH5kFC/aR7ZXWaKyuIA1UBRPbglwfGMmy+bXRHwYvCb/OD7LlNMe92Vo5H6Cpwt5G5iqIubL0p+mp" +
+                "tOZvZ3CoqqORmQmcigrd8PdBZ4za2RZpkiJYTBImVKbU0asdTw2zGhXtVMmUnmlkGaLUukOhjHTdGJXj" +
+                "ew6+6ZWDIx54epcd7tLkGtKzWj1m8usjlE16xCSi1laGq0tWOrkSQnwDdkrRZGACAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

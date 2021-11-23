@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GridMapMsgs
 {
-    [DataContract (Name = "grid_map_msgs/SetGridMap")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SetGridMap : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SetGridMapRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SetGridMapResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SetGridMap()
         {
             Request = new SetGridMapRequest();
             Response = SetGridMapResponse.Singleton;
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SetGridMap(SetGridMapRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.GridMapMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "grid_map_msgs/SetGridMap";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "4f8e24cfd42bc1470fe765b7516ff7e5";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,33 +56,27 @@ namespace Iviz.Msgs.GridMapMsgs
         // map
         [DataMember (Name = "map")] public GridMapMsgs.GridMap Map;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetGridMapRequest()
         {
             Map = new GridMapMsgs.GridMap();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetGridMapRequest(GridMapMsgs.GridMap Map)
         {
             this.Map = Map;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetGridMapRequest(ref Buffer b)
         {
             Map = new GridMapMsgs.GridMap(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetGridMapRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetGridMapRequest(ref b);
         
-        SetGridMapRequest IDeserializable<SetGridMapRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SetGridMapRequest(ref b);
-        }
+        SetGridMapRequest IDeserializable<SetGridMapRequest>.RosDeserialize(ref Buffer b) => new SetGridMapRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -104,25 +98,19 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class SetGridMapResponse : IResponse, IDeserializable<SetGridMapResponse>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetGridMapResponse()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetGridMapResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        SetGridMapResponse IDeserializable<SetGridMapResponse>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        SetGridMapResponse IDeserializable<SetGridMapResponse>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly SetGridMapResponse Singleton = new SetGridMapResponse();
     
@@ -134,7 +122,7 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

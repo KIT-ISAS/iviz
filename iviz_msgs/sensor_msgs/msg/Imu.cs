@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [Preserve, DataContract (Name = "sensor_msgs/Imu")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class Imu : IDeserializable<Imu>, IMessage
     {
         // This is a message to hold data from an IMU (Inertial Measurement Unit)
@@ -28,7 +28,7 @@ namespace Iviz.Msgs.SensorMsgs
         [DataMember (Name = "linear_acceleration")] public GeometryMsgs.Vector3 LinearAcceleration;
         [DataMember (Name = "linear_acceleration_covariance")] public double[/*9*/] LinearAccelerationCovariance; // Row major x, y z 
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public Imu()
         {
             OrientationCovariance = new double[9];
@@ -36,7 +36,7 @@ namespace Iviz.Msgs.SensorMsgs
             LinearAccelerationCovariance = new double[9];
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Imu(in StdMsgs.Header Header, in GeometryMsgs.Quaternion Orientation, double[] OrientationCovariance, in GeometryMsgs.Vector3 AngularVelocity, double[] AngularVelocityCovariance, in GeometryMsgs.Vector3 LinearAcceleration, double[] LinearAccelerationCovariance)
         {
             this.Header = Header;
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.SensorMsgs
             this.LinearAccelerationCovariance = LinearAccelerationCovariance;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal Imu(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -60,15 +60,9 @@ namespace Iviz.Msgs.SensorMsgs
             LinearAccelerationCovariance = b.DeserializeStructArray<double>(9);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Imu(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new Imu(ref b);
         
-        Imu IDeserializable<Imu>.RosDeserialize(ref Buffer b)
-        {
-            return new Imu(ref b);
-        }
+        Imu IDeserializable<Imu>.RosDeserialize(ref Buffer b) => new Imu(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -95,32 +89,32 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "sensor_msgs/Imu";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "6a62c6daae103f4ff57a132d6f95cec2";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1W227jRgx9F+B/INYPiQvb6WaLAg3QhwUWbf0QYLuXvhStQUu0NBtpxjsziuN8fQ9n" +
-                "IltJs2iBXgID0YU8JA95OJrSh8YEwo+pkxC4FoqOGtdWVHFk2nrXEVtaXX+k85UVHw23dC0cei+d2Egf" +
-                "rYmzYlpM6XVZSiueo3E2UGhcD5SNkLHUXYTfL+ncuqh39VmYzYFakXcxmQPzVlpXmnh47Oi5ughSJvzV" +
-                "lmIjVLpb9oZtKeTyk26UDkq5sW5v52TiCGpr2lYqRTw3W+K2pYPrk6V6KAgCjHGFy2YMPCdZ1svMh5or" +
-                "O6ERwYtPfYi06yOeuyAAd7bONoZrrQ300Otx3h1Hb+40jGZyL94F2iPDXHQUv/MSkS4HejFy620q7UXm" +
-                "Dn3qEQ6BAJ+axeMYCa/h29RQ4HIIfQdM56l2MYrNtQTXoV6AeFz2vpSBauUnuVtHEqJBzqAR3s4eiU9R" +
-                "0XMlKNB5Ygh+Po1L5STYMzDjXdUjIUyR8waWqePK9wCLYdi1oFooSBzw6OshCjLHZMCueoZDFLd4ecqY" +
-                "/YhBk/qA/j6M9jFM2Uh5k4phNL3tU0GLlzoeGnBrfDjlMQwDgvwpfO5EZYKXmn31NN2hwGVR/CRcgeMm" +
-                "/SuKWsB79Id1F+pw8XMPI2+VlhFFxbZ1HL/95tfvfhs/Xo+ymNI7THDHn7SUjcMMIqXDnO6J7yQ8DfOL" +
-                "lNH5V8i57lv260Fy40BP3/3zaK2xAkAebYdxwGdefymmRkOwYlJ8/y//TYrr9z9eUYhVzj13a4KWv4/o" +
-                "sLYWlXFeicikMTUUs2gFNMGLux26nd7Gw07Csjgt1lqwNSHzg6o1qbZ0XddbU6qgMB/yyB+emEKmHWPV" +
-                "ltoK2DtfGZv057nDNE3VLMjnXpSi1Zsr2FisyT4aJHQAQukx6Dr/qzdU9FDEq0t1KKYf9m6hAqkxjMfg" +
-                "mFtOq1PuoJugeXK4QoyvcnFLYIMdQZQKOk/P1rgNM0IQpCA7B4WcI/O3B2zBLKPUw00LQQYqwQBQz9Tp" +
-                "bDZC1rSvyLJ1A3xGPMX4O7D2iKs1LRr0DHNVU+ghSzXEEro1FUw3h3yItKonDN/Gsz8U6pVDFtMflOO8" +
-                "N1JH9HA8SXpvYlMEaB/oqRtrU/13A/mlNTEZBsyLNiyt3yf7FaRtvaCqHYNO3H0+LRmMcIed9KBCujte" +
-                "HVcB3R+v9v9XeQ8L49na8HmgLx9XtVQZrNLgOouxx3GNnkJhR084VsbDFVUvgSpeULukjwM9n3C4RWB0" +
-                "fKNnD6aI4M27HcAgZc82tJlNPIZLOuHmtG9weiYrnYKk2aRyU5I3tYHI1VNJPjozPVQ3p7i9zIdzyjkH" +
-                "y4f48DU0Ww7H2V4LSidqXi7pJB/ySiKIzs1H3wGPGX3rIPXjh52xIWKv/VXjJ8UfzapddhYKAAA=";
+                "H4sIAAAAAAAAE71WTW/bRhC981cMooOlQpIbpwhQAz0UCNrqYCBtkl6KVBiRI3JjclfZXVqWf33e7IoS" +
+                "7SRogX4IAkSRO+/NvPnihN42JhC+TJ2EwLVQdNS4tqKKI9PWu47Y0urmHU1XVnw03NKNcOi9dGIjvbMm" +
+                "zopJMaEfy1Ja8RyNs4FC43qgbISMpe4y/HlFU+ui/qsvwmwO1Iq8i+k4MO+kdaWJh8eGnqvLIGXCX20p" +
+                "NkKlu2Nv2JZCLt/pRu4glFvr9nZOJo6gtqZtpVLEqdkSty0dXJ9OqoWCgGCMK1w2Y+A5ybJeZj30uKoT" +
+                "GhE8+NCHSLs+4r4LAnBn63zGcK2xzVScsd8dR2/ulUY9eRDvAu3hYQ46it95iXCXAz0bmfU2hfYsa4c8" +
+                "9aADEeBTsnjMkfAavksJBS6H0HfAdJ5qF6PYHEtwHeIFiMdl70sZpFZ9krl1JCEa+AwZYe3sSfjEipyr" +
+                "QIGmSSHY+VQulZNgL6CMd1UPh1BFzhucTBlXvQdYFMOuhdRCQeKAR98OLPAclcEqyOcaIrjF87PH7EcK" +
+                "mpQH5PdY2ieaspHyNgXDSHrbp4AWz7U8lHBrfDj7MRQDSD6jz5moTPBSs6+eujsEuCyKX4QraNykn6Ko" +
+                "BbpHf1h3oQ6Xv/Y45K3KMpKo2LaO48vv/vj+/fj2euTFhH5DBXf8QUPZONQgXDrM6YH4XsJTmt+ljM6/" +
+                "gM9137JfDy03Jnr67J+ztcYKAHk0HcaEX3j8NU5lA1lR/PAvf4qbNz9fU4hV9jznCvl+E5FezSvC4jwP" +
+                "4UZjarTLohVoBCPudnKclvGwk7CE4TBVa8HIRI8ftFVTy5au63prSu0mFIc8soclSpBpx5izpeYB552v" +
+                "jE3N57kTRcc3yMdeVJ/Vq2ucsZiRfTRw6ACE0qPKtfhXr6jo0Q4vrtSgmLzdu4V2R41KPJGjaDnNTblH" +
+                "04SQ5s41OL7JwS2BDXEELBWaPN1b42+YEUjgguwc2mMKz18fMAJzD6UEblpR4JLT8L1Qo4vZCNkmaMvW" +
+                "DfAZ8czxd2DtCVdjWjTIWavRhx49qQcxge5MhaObQ94grTYTKm/j2R8KtcqUxeQn1TgPjZQR3Yznft6b" +
+                "2BQBjQ/0lI21qf6ravzahBiqy4tmKw3eJ5PV6GgXhLTjMi3Rj+fxgvrtMI2O/Uf3p6vTEKCH09X+/4nt" +
+                "OCi+FBjeCvTZ45CW2gCrVLLOouCxpZFN9NbJEoaV8TBFyEugihcELumdQNcSdloERse3unJsSDuSdzuA" +
+                "oYk929BmKXEbJmmxzWnfYGmmU5r/1K2pv01J3tSmypaq8MmY6RjcnOL2Ku/k5HMmy7t7eAmaLYcttteA" +
+                "0iLNYyUt8MGvVP7Ruflo/T8W9LVDk5/e54wNEQPtL7P+CaR+DzoMCgAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [Preserve, DataContract (Name = "geometry_msgs/Point32")]
+    [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
     public struct Point32 : IMessage, System.IEquatable<Point32>, IDeserializable<Point32>
     {
@@ -21,7 +21,7 @@ namespace Iviz.Msgs.GeometryMsgs
         [DataMember (Name = "y")] public float Y;
         [DataMember (Name = "z")] public float Z;
     
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Point32(float X, float Y, float Z)
         {
             this.X = X;
@@ -29,22 +29,16 @@ namespace Iviz.Msgs.GeometryMsgs
             this.Z = Z;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Point32(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Point32(ref b);
-        }
+        public readonly ISerializable RosDeserialize(ref Buffer b) => new Point32(ref b);
         
-        readonly Point32 IDeserializable<Point32>.RosDeserialize(ref Buffer b)
-        {
-            return new Point32(ref b);
-        }
+        readonly Point32 IDeserializable<Point32>.RosDeserialize(ref Buffer b) => new Point32(ref b);
         
         public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
         
@@ -65,26 +59,26 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 12;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
         public readonly string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "geometry_msgs/Point32";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "cc153912f1453b708d221682bc23d9ac";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACj1QMW7DMAzcDfQPB2RpgSJD8oRO3Tr0A7JF20RlURDppunrSylpAA0UeXe84wGfKysm" +
-                "yRY4K2wlFFE2lgyZEfzH2cAZcyWCljDR84VtxfmEkU0bqlSaWJ3ychwOeHe4wluybRQpwgS7Ej660mWl" +
-                "St9U2xrlMZFrq1GITahDzqcj4Dr+urm7Uo6hu/KOC5Yqm1gjG1UpVMPIie3aqf/MjVTD4iBFJOUl38xY" +
-                "+CLsBcnHt0TNVYb6Ds6Ls5PcgzU/imCQPNErgrZLtCNNwRP1A3XPb0n22HYPc5LgEfDzqK6P6vdp+ANL" +
-                "+MezcQEAAA==";
+                "H4sIAAAAAAAAEz1QO27DMAzdfYoHZGmBIkNyhE7dOvQCskXbRGVREOmk6elLKWkADRTJ9+MBXysrJskW" +
+                "OCtsJRRRNpYMmRH8x9nAGXMlgpYw0cuVbcX5hJFN21apNLE65PU4HPDh6wpvybZRpAgT7Er47EzXlSpd" +
+                "qDYZ5TGRc6tRiI2or5xPR8B5/HVzD6YcQ3flHScsVTaxBjaqUqiGkRPbrUP/kRuphoUaJJLyku9mLHwT" +
+                "9oLk43ui5ipDXYPz4ugkj2DNjyIYJE/0hqDtEu1IU/BE/UDd83uSPTbtYU4SPAJ+ntXtWf0Of3eAjDBw" +
+                "AQAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

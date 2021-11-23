@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ObjectRecognitionMsgs
 {
-    [Preserve, DataContract (Name = "object_recognition_msgs/ObjectType")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class ObjectType : IDeserializable<ObjectType>, IMessage
     {
         //################################################# OBJECT ID #########################################################
@@ -31,36 +31,30 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         //   module: 'tabletop'
         [DataMember (Name = "db")] public string Db;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ObjectType()
         {
             Key = string.Empty;
             Db = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ObjectType(string Key, string Db)
         {
             this.Key = Key;
             this.Db = Db;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ObjectType(ref Buffer b)
         {
             Key = b.DeserializeString();
             Db = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ObjectType(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ObjectType(ref b);
         
-        ObjectType IDeserializable<ObjectType>.RosDeserialize(ref Buffer b)
-        {
-            return new ObjectType(ref b);
-        }
+        ObjectType IDeserializable<ObjectType>.RosDeserialize(ref Buffer b) => new ObjectType(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -78,24 +72,23 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "object_recognition_msgs/ObjectType";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "ac757ec5be1998b0167e7efcda79e3cf";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACpVSwW7bMAy9B9g/EM3Bl8IF1nZYfWuSDlvRrRiSy06BbDG2Fll0JXppMOzfR1n2kLWn" +
-                "6mL4iXzv8VHz+VsPPC7u75Yb+LKCN/dOZzabw5IcK+MCGLcj3yo25ECV1DNwg8DHDoF2oGBHvdNA5U+s" +
-                "OIdNQ0FuDwQBOcSKTnnVIqMPwFSjNHvonXnq0R5B4844BOVEMVFE7Y0I7PEYu6PWqUIxIKkfjEbHZmeE" +
-                "0bjhoja/0IEuZ4G9cXVkmQh1eWolMHnUoIJMcL9+/HZRUdt5DEHAH7dfHyAR5HDrRmVRA00YwBFDq/Yo" +
-                "EzqZ9WC4mVKpyAtHR05Lr+hqxapUAXO4y+v8PLpMZFuPFdXOxFQFZqiUA0u0B2v2WMDZ7ywmnBXZkvqq" +
-                "WS2yc8g8EQvSMHfFxYWlSllJm7M/Z2lEL4lEe2LDSQyRW1lI24sfsRiXc5KCklwNZ9JkKtkaSV7YSVms" +
-                "t/hsSmMNH/MxwdfWtzIwphBrdOhNBatFehsDSZzKo9KjsmzK6hAfVy85OQZ8Vm1nMRSCfRKD47DxFwaa" +
-                "Av4FMGAxAsFeRlBc33y8ShUVWSsuxZzUvXYci6LS+vsDyNoCNmRlr+Oe/hNeP9nPU0XiHqQgO9Th8kNC" +
-                "OvKCXF9dvh9+pdrHAmMtHcYKFcKBvH4BO1lBHGQS2CarId22pHsb78WWRaYumx60PO13s7/LC4hgFgQA" +
-                "AA==";
+                "H4sIAAAAAAAAE5VSwW7bMAy95yuI5uBL4QBrO2y+NUmHrehWDM1lp0C2GFuLLLoS3TQY9u+jLLvI2lN1" +
+                "MfxEvvf4qPn8vQful7c3qw18W8O7e6czm81hRY6VcQGM25FvFRtyoErqGbhB4GOHQDtQsKPeaaDyN1ac" +
+                "w6ahILcHgoAcYkWnvGqR0QdgqlGaPfTOPPZoj6BxZxyCcqKYKKL2RgT2eIzdUetUoRiQ1A9Go2OzM8Jo" +
+                "3HBRmyd0oMtZYG9cHVkmQl2eWglMHjWoIBPcPtz/WFTUdh5DEPDX9fc7SAQ5XLtRWdRAEwZwxNCqPcqE" +
+                "TmY9GG6mVCrywtGR09IrulqxKlXAHG7yOj+PLhPZ1mNFtTMxVYEZKuXAEu3Bmj0WcPYniwlnRbaivmrW" +
+                "y+wcMk/EgjTMXbFYWKqUlbQ5+3uWRvSSSLQnNtxTTIacspC2Fz9iMS7nJAUluRrOpMlUsjWSvLCTslhv" +
+                "8dmUxho+5mOCb61vZWBMIdbo0JsK1sv0NgaSOJVHpUdl2ZTVIT6uXnJyDPis2s5iKAT7IgbHYeMvDDQF" +
+                "vAQwYDECwV5HUFx9/nSZKiqyVlyKOal76zgblR5+3oGsLWBDVr/s6T/hh0f7dapI3IMUZIc6XHxMSEde" +
+                "kKvLiw/Dr1T7WGCspcNYoUI4kNevYCcriINMAttkNaTblnRv473YssjUZdODlqc9+wcQ+4upFQQAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

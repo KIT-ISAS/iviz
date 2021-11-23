@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/ListRobotStatesInWarehouse")]
+    [DataContract (Name = RosServiceType)]
     public sealed class ListRobotStatesInWarehouse : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public ListRobotStatesInWarehouseRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public ListRobotStatesInWarehouseResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public ListRobotStatesInWarehouse()
         {
             Request = new ListRobotStatesInWarehouseRequest();
             Response = new ListRobotStatesInWarehouseResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public ListRobotStatesInWarehouse(ListRobotStatesInWarehouseRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/ListRobotStatesInWarehouse";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "dc02fa289e68670e9d392985a0235ee6";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,36 +56,30 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "regex")] public string Regex;
         [DataMember (Name = "robot")] public string Robot;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ListRobotStatesInWarehouseRequest()
         {
             Regex = string.Empty;
             Robot = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ListRobotStatesInWarehouseRequest(string Regex, string Robot)
         {
             this.Regex = Regex;
             this.Robot = Robot;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ListRobotStatesInWarehouseRequest(ref Buffer b)
         {
             Regex = b.DeserializeString();
             Robot = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ListRobotStatesInWarehouseRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ListRobotStatesInWarehouseRequest(ref b);
         
-        ListRobotStatesInWarehouseRequest IDeserializable<ListRobotStatesInWarehouseRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new ListRobotStatesInWarehouseRequest(ref b);
-        }
+        ListRobotStatesInWarehouseRequest IDeserializable<ListRobotStatesInWarehouseRequest>.RosDeserialize(ref Buffer b) => new ListRobotStatesInWarehouseRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -109,33 +103,27 @@ namespace Iviz.Msgs.MoveitMsgs
     {
         [DataMember (Name = "states")] public string[] States;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ListRobotStatesInWarehouseResponse()
         {
             States = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ListRobotStatesInWarehouseResponse(string[] States)
         {
             this.States = States;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ListRobotStatesInWarehouseResponse(ref Buffer b)
         {
             States = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ListRobotStatesInWarehouseResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ListRobotStatesInWarehouseResponse(ref b);
         
-        ListRobotStatesInWarehouseResponse IDeserializable<ListRobotStatesInWarehouseResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new ListRobotStatesInWarehouseResponse(ref b);
-        }
+        ListRobotStatesInWarehouseResponse IDeserializable<ListRobotStatesInWarehouseResponse>.RosDeserialize(ref Buffer b) => new ListRobotStatesInWarehouseResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

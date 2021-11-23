@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/QueryPlannerInterfaces")]
+    [DataContract (Name = RosServiceType)]
     public sealed class QueryPlannerInterfaces : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public QueryPlannerInterfacesRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public QueryPlannerInterfacesResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public QueryPlannerInterfaces()
         {
             Request = QueryPlannerInterfacesRequest.Singleton;
             Response = new QueryPlannerInterfacesResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public QueryPlannerInterfaces(QueryPlannerInterfacesRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/QueryPlannerInterfaces";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "acd3317a4c5631f33127fb428209db05";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.MoveitMsgs
     public sealed class QueryPlannerInterfacesRequest : IRequest<QueryPlannerInterfaces, QueryPlannerInterfacesResponse>, IDeserializable<QueryPlannerInterfacesRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public QueryPlannerInterfacesRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal QueryPlannerInterfacesRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        QueryPlannerInterfacesRequest IDeserializable<QueryPlannerInterfacesRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        QueryPlannerInterfacesRequest IDeserializable<QueryPlannerInterfacesRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly QueryPlannerInterfacesRequest Singleton = new QueryPlannerInterfacesRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -98,19 +92,19 @@ namespace Iviz.Msgs.MoveitMsgs
         // The planning instances that could be used in the benchmark
         [DataMember (Name = "planner_interfaces")] public PlannerInterfaceDescription[] PlannerInterfaces;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public QueryPlannerInterfacesResponse()
         {
             PlannerInterfaces = System.Array.Empty<PlannerInterfaceDescription>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public QueryPlannerInterfacesResponse(PlannerInterfaceDescription[] PlannerInterfaces)
         {
             this.PlannerInterfaces = PlannerInterfaces;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal QueryPlannerInterfacesResponse(ref Buffer b)
         {
             PlannerInterfaces = b.DeserializeArray<PlannerInterfaceDescription>();
@@ -120,15 +114,9 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new QueryPlannerInterfacesResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new QueryPlannerInterfacesResponse(ref b);
         
-        QueryPlannerInterfacesResponse IDeserializable<QueryPlannerInterfacesResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new QueryPlannerInterfacesResponse(ref b);
-        }
+        QueryPlannerInterfacesResponse IDeserializable<QueryPlannerInterfacesResponse>.RosDeserialize(ref Buffer b) => new QueryPlannerInterfacesResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

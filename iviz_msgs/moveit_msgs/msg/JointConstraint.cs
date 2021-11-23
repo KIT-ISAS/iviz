@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/JointConstraint")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class JointConstraint : IDeserializable<JointConstraint>, IMessage
     {
         // Constrain the position of a joint to be within a certain bound
@@ -16,13 +16,13 @@ namespace Iviz.Msgs.MoveitMsgs
         // A weighting factor for this constraint (denotes relative importance to other constraints. Closer to zero means less important)
         [DataMember (Name = "weight")] public double Weight;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public JointConstraint()
         {
             JointName = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public JointConstraint(string JointName, double Position, double ToleranceAbove, double ToleranceBelow, double Weight)
         {
             this.JointName = JointName;
@@ -32,7 +32,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.Weight = Weight;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal JointConstraint(ref Buffer b)
         {
             JointName = b.DeserializeString();
@@ -42,15 +42,9 @@ namespace Iviz.Msgs.MoveitMsgs
             Weight = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new JointConstraint(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new JointConstraint(ref b);
         
-        JointConstraint IDeserializable<JointConstraint>.RosDeserialize(ref Buffer b)
-        {
-            return new JointConstraint(ref b);
-        }
+        JointConstraint IDeserializable<JointConstraint>.RosDeserialize(ref Buffer b) => new JointConstraint(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -70,18 +64,18 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/JointConstraint";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "c02a15146bec0ce13564807805b008f0";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACm1Qy07DMBC8W+IfRuoFxOOEuKN+BqqqjbNpFjneyrskEl+Pk4KpEAdf5rUz3mGv2byQ" +
-                "ZPjIOKuJi2boAMK7Sna4omMs4mMVESIXX+WdfuQ+VK/k00V5zDRxCLstaaO/vRRH4Zl7iOGtnXisbOJC" +
-                "OfKx46TLw+/5+yuOOp35EIak5C/PTdOAP8p/8C19LfaKheU0+lp5oOhaMNRXlxniz0c4bnvO6mwonMhl" +
-                "Zsh01jq7hq2TtA4sVwZ7wj6pVaySn1wUE1M2JDZrVr9rzS4lbsIXxRVKyH4BAAA=";
+                "H4sIAAAAAAAAE21Qy07DMBC8+ytG6qUI6AlxR/0MhKqNs2kWOd7KXhKJr2eTgqkQB1/mtTPe4ai5WiHJ" +
+                "sJFx0SommqEDCO8q2WCKjrGIjS4iRC62yjv9yH1wr+TzVXnKNHEIuy1po7+9FEfhmXtIxWs78ehs4kI5" +
+                "8qnjpMvD7/n7G446nfktDEnJnp+apgF/lP/gW/pa7AULy3m0tfJA0bRg8OfLKuLPRxj2PWc1riicyGRm" +
+                "yHRRn+1h6yT1geXGUA84Jq2OOfnJRTEx5YrEtTar3bVm1xLhC72gSgx9AQAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

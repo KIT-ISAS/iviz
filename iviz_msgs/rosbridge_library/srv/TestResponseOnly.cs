@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract (Name = "rosbridge_library/TestResponseOnly")]
+    [DataContract (Name = RosServiceType)]
     public sealed class TestResponseOnly : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public TestResponseOnlyRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public TestResponseOnlyResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public TestResponseOnly()
         {
             Request = TestResponseOnlyRequest.Singleton;
             Response = new TestResponseOnlyResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public TestResponseOnly(TestResponseOnlyRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosbridge_library/TestResponseOnly";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "da5909fbe378aeaf85e547e830cc1bb7";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.RosbridgeLibrary
     public sealed class TestResponseOnlyRequest : IRequest<TestResponseOnly, TestResponseOnlyResponse>, IDeserializable<TestResponseOnlyRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestResponseOnlyRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestResponseOnlyRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        TestResponseOnlyRequest IDeserializable<TestResponseOnlyRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        TestResponseOnlyRequest IDeserializable<TestResponseOnlyRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly TestResponseOnlyRequest Singleton = new TestResponseOnlyRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -97,32 +91,26 @@ namespace Iviz.Msgs.RosbridgeLibrary
     {
         [DataMember (Name = "data")] public int Data;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestResponseOnlyResponse()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TestResponseOnlyResponse(int Data)
         {
             this.Data = Data;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestResponseOnlyResponse(ref Buffer b)
         {
             Data = b.Deserialize<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TestResponseOnlyResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TestResponseOnlyResponse(ref b);
         
-        TestResponseOnlyResponse IDeserializable<TestResponseOnlyResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new TestResponseOnlyResponse(ref b);
-        }
+        TestResponseOnlyResponse IDeserializable<TestResponseOnlyResponse>.RosDeserialize(ref Buffer b) => new TestResponseOnlyResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -133,7 +121,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;

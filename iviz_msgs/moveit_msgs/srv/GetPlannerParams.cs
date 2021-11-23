@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/GetPlannerParams")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetPlannerParams : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetPlannerParamsRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetPlannerParamsResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetPlannerParams()
         {
             Request = new GetPlannerParamsRequest();
             Response = new GetPlannerParamsResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetPlannerParams(GetPlannerParamsRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/GetPlannerParams";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "b3ec1aca2b1471e3eea051c548c69810";
         
         public override string ToString() => Extensions.ToString(this);
@@ -58,36 +58,30 @@ namespace Iviz.Msgs.MoveitMsgs
         // Optional name of planning group (return global defaults if empty)
         [DataMember (Name = "group")] public string Group;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetPlannerParamsRequest()
         {
             PlannerConfig = string.Empty;
             Group = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetPlannerParamsRequest(string PlannerConfig, string Group)
         {
             this.PlannerConfig = PlannerConfig;
             this.Group = Group;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetPlannerParamsRequest(ref Buffer b)
         {
             PlannerConfig = b.DeserializeString();
             Group = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetPlannerParamsRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetPlannerParamsRequest(ref b);
         
-        GetPlannerParamsRequest IDeserializable<GetPlannerParamsRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetPlannerParamsRequest(ref b);
-        }
+        GetPlannerParamsRequest IDeserializable<GetPlannerParamsRequest>.RosDeserialize(ref Buffer b) => new GetPlannerParamsRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -112,33 +106,27 @@ namespace Iviz.Msgs.MoveitMsgs
         // parameters as key-value pairs
         [DataMember (Name = "params")] public PlannerParams Params;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetPlannerParamsResponse()
         {
             Params = new PlannerParams();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetPlannerParamsResponse(PlannerParams Params)
         {
             this.Params = Params;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetPlannerParamsResponse(ref Buffer b)
         {
             Params = new PlannerParams(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetPlannerParamsResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetPlannerParamsResponse(ref b);
         
-        GetPlannerParamsResponse IDeserializable<GetPlannerParamsResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetPlannerParamsResponse(ref b);
-        }
+        GetPlannerParamsResponse IDeserializable<GetPlannerParamsResponse>.RosDeserialize(ref Buffer b) => new GetPlannerParamsResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

@@ -4,42 +4,36 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [Preserve, DataContract (Name = "mesh_msgs/VectorField")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class VectorField : IDeserializable<VectorField>, IMessage
     {
         [DataMember (Name = "positions")] public GeometryMsgs.Point[] Positions;
         [DataMember (Name = "vectors")] public GeometryMsgs.Vector3[] Vectors;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public VectorField()
         {
             Positions = System.Array.Empty<GeometryMsgs.Point>();
             Vectors = System.Array.Empty<GeometryMsgs.Vector3>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public VectorField(GeometryMsgs.Point[] Positions, GeometryMsgs.Vector3[] Vectors)
         {
             this.Positions = Positions;
             this.Vectors = Vectors;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal VectorField(ref Buffer b)
         {
             Positions = b.DeserializeStructArray<GeometryMsgs.Point>();
             Vectors = b.DeserializeStructArray<GeometryMsgs.Vector3>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new VectorField(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new VectorField(ref b);
         
-        VectorField IDeserializable<VectorField>.RosDeserialize(ref Buffer b)
-        {
-            return new VectorField(ref b);
-        }
+        VectorField IDeserializable<VectorField>.RosDeserialize(ref Buffer b) => new VectorField(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -57,20 +51,20 @@ namespace Iviz.Msgs.MeshMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "mesh_msgs/VectorField";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "9da8d62df10048ede4a91e419a35679d";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1SwUrFMBC8B/oPC14USgUVD4JneQdBULyIyL52mwbbbMnus9avd9s+Kg8ensSetsnM" +
-                "ZGYST9yRpvGtEy/nDxyivrxCzxI0cBTnD/afqVROl4b4mCdxmbv94y9z9493N3DEWOZO4KkJAiVHxRAF" +
-                "tKHVK3ANaH8GhBChTkQgPZbk6pZRr6/gc53Gdfr6rwT76tYMifpEQlHFXC9tHtouwKAbyyLAsR2hI7Rk" +
-                "yj9MI1YhGdXSF6ZKiWpOlENQqJgEIqtpdPhukhSFJjb2vYkhaMIoLc7N2bJRTqnwRQ5DQ3FBhegNaAqe" +
-                "IqVQQgo+VAvTDupWMsI+XQ5aX8AQ2nbxvBxmt2QiiXUmnBWwqWHkHQxTIBsSVKjmiGFrFve+cNtOfjmH" +
-                "3WR8ljjyJqwWEfRk3YkSVoX7/boz9w0AiLXb8gIAAA==";
+                "H4sIAAAAAAAAE71SwUrFQAy871cEvCiUCioeBM/yDoKgeBGRvDbdt9gmZZPns369afusiIIXsad0d2Z2" +
+                "ZnYjSUeWh6dOox7fSGJ7eIReNFkS1hC/7N9TZZJPHfEyTRrC5R9/4fr26gLid1vhAO42SaESNkysYBta" +
+                "jII0gP7nOEgMTSYC7bGi0LSCdn4Gr8s0LNPb/9jft/YRIFOfSYlN3fLc41fPJTh05UEUhNsBOkKPZfLJ" +
+                "dGKdslM9eumqlKmRTAUkg1pIgWXsq8NnlyRWGtnY9y6GYBlZW5xq82WnHFIZywJ2G+IZlTg60BUiMeVU" +
+                "QU4x1TPTD+oWMsI+XAHWnMAute3seT7Mr8hFsthEOCph1cAgW9iNgXzIUKPhKLSmxReu29GvFLAdjU8S" +
+                "P7wHr0UVI3l3aoR1GX6563c9vu0P6wIAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

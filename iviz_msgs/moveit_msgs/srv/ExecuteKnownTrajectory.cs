@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/ExecuteKnownTrajectory")]
+    [DataContract (Name = RosServiceType)]
     public sealed class ExecuteKnownTrajectory : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public ExecuteKnownTrajectoryRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public ExecuteKnownTrajectoryResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public ExecuteKnownTrajectory()
         {
             Request = new ExecuteKnownTrajectoryRequest();
             Response = new ExecuteKnownTrajectoryResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public ExecuteKnownTrajectory(ExecuteKnownTrajectoryRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/ExecuteKnownTrajectory";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "e30b86cbd13304832e894dc994795e33";
         
         public override string ToString() => Extensions.ToString(this);
@@ -60,35 +60,29 @@ namespace Iviz.Msgs.MoveitMsgs
         // Set this to true if the service should block until the execution is complete
         [DataMember (Name = "wait_for_execution")] public bool WaitForExecution;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ExecuteKnownTrajectoryRequest()
         {
             Trajectory = new RobotTrajectory();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ExecuteKnownTrajectoryRequest(RobotTrajectory Trajectory, bool WaitForExecution)
         {
             this.Trajectory = Trajectory;
             this.WaitForExecution = WaitForExecution;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ExecuteKnownTrajectoryRequest(ref Buffer b)
         {
             Trajectory = new RobotTrajectory(ref b);
             WaitForExecution = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ExecuteKnownTrajectoryRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ExecuteKnownTrajectoryRequest(ref b);
         
-        ExecuteKnownTrajectoryRequest IDeserializable<ExecuteKnownTrajectoryRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new ExecuteKnownTrajectoryRequest(ref b);
-        }
+        ExecuteKnownTrajectoryRequest IDeserializable<ExecuteKnownTrajectoryRequest>.RosDeserialize(ref Buffer b) => new ExecuteKnownTrajectoryRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -113,33 +107,27 @@ namespace Iviz.Msgs.MoveitMsgs
         // Error code - encodes the overall reason for failure
         [DataMember (Name = "error_code")] public MoveItErrorCodes ErrorCode;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ExecuteKnownTrajectoryResponse()
         {
             ErrorCode = new MoveItErrorCodes();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ExecuteKnownTrajectoryResponse(MoveItErrorCodes ErrorCode)
         {
             this.ErrorCode = ErrorCode;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ExecuteKnownTrajectoryResponse(ref Buffer b)
         {
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ExecuteKnownTrajectoryResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ExecuteKnownTrajectoryResponse(ref b);
         
-        ExecuteKnownTrajectoryResponse IDeserializable<ExecuteKnownTrajectoryResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new ExecuteKnownTrajectoryResponse(ref b);
-        }
+        ExecuteKnownTrajectoryResponse IDeserializable<ExecuteKnownTrajectoryResponse>.RosDeserialize(ref Buffer b) => new ExecuteKnownTrajectoryResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -152,7 +140,7 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode.RosValidate();
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;

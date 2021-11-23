@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/CaptureScreenshot")]
+    [DataContract (Name = RosServiceType)]
     public sealed class CaptureScreenshot : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public CaptureScreenshotRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public CaptureScreenshotResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public CaptureScreenshot()
         {
             Request = new CaptureScreenshotRequest();
             Response = new CaptureScreenshotResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public CaptureScreenshot(CaptureScreenshotRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/CaptureScreenshot";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "3846b8955f5006a6c3a2585f806a8d1c";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,32 +55,26 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "compress")] public bool Compress;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public CaptureScreenshotRequest()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public CaptureScreenshotRequest(bool Compress)
         {
             this.Compress = Compress;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal CaptureScreenshotRequest(ref Buffer b)
         {
             Compress = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new CaptureScreenshotRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new CaptureScreenshotRequest(ref b);
         
-        CaptureScreenshotRequest IDeserializable<CaptureScreenshotRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new CaptureScreenshotRequest(ref b);
-        }
+        CaptureScreenshotRequest IDeserializable<CaptureScreenshotRequest>.RosDeserialize(ref Buffer b) => new CaptureScreenshotRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -91,7 +85,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -112,7 +106,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
         [DataMember (Name = "data")] public byte[] Data;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public CaptureScreenshotResponse()
         {
             Message = string.Empty;
@@ -120,7 +114,7 @@ namespace Iviz.Msgs.IvizMsgs
             Data = System.Array.Empty<byte>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public CaptureScreenshotResponse(bool Success, string Message, in StdMsgs.Header Header, int Width, int Height, int Bpp, double[] Intrinsics, in GeometryMsgs.Pose Pose, byte[] Data)
         {
             this.Success = Success;
@@ -134,7 +128,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Data = Data;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal CaptureScreenshotResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
@@ -148,15 +142,9 @@ namespace Iviz.Msgs.IvizMsgs
             Data = b.DeserializeStructArray<byte>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new CaptureScreenshotResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new CaptureScreenshotResponse(ref b);
         
-        CaptureScreenshotResponse IDeserializable<CaptureScreenshotResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new CaptureScreenshotResponse(ref b);
-        }
+        CaptureScreenshotResponse IDeserializable<CaptureScreenshotResponse>.RosDeserialize(ref Buffer b) => new CaptureScreenshotResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

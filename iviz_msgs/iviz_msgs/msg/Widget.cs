@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = "iviz_msgs/Widget")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class Widget : IDeserializable<Widget>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -17,14 +17,14 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
         [DataMember (Name = "caption")] public string Caption;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public Widget()
         {
             Id = string.Empty;
             Caption = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Widget(in StdMsgs.Header Header, byte Action, string Id, byte Type, in StdMsgs.ColorRGBA MainColor, in StdMsgs.ColorRGBA SecondaryColor, double Scale, in GeometryMsgs.Pose Pose, string Caption)
         {
             this.Header = Header;
@@ -38,7 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Caption = Caption;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal Widget(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -52,15 +52,9 @@ namespace Iviz.Msgs.IvizMsgs
             Caption = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Widget(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new Widget(ref b);
         
-        Widget IDeserializable<Widget>.RosDeserialize(ref Buffer b)
-        {
-            return new Widget(ref b);
-        }
+        Widget IDeserializable<Widget>.RosDeserialize(ref Buffer b) => new Widget(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -94,24 +88,24 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "iviz_msgs/Widget";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "3b0c5b861de617f50925ad80644446b3";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1UwW4TMRC9W8o/jNRDW0SCBIhDJA6FitIDUqG9RxPvZNeS197a3rTL1/PsZDcEkOBA" +
-                "G62y4/XM85s3M46pWrWxjq8+C1cSqCkvtR6SEOtkvFMxBeNqMtXuaxo6UVPYR299+Hb14YJaNm6l8/JP" +
-                "u1G0dxWHYe+ysZ7Tu7cUNVtRtfhWEjZL1I2PQh3+xqM1d4WJmqn3//k3U19ur5b0iwwzdUK3iTPhisCM" +
-                "K05MGw99TN1ImFvZikUUt51UVHazLnGBwLvGRMJTi5PA1g7URzglT9q3be+M5iyjaeUoHpHGEVPHIRnd" +
-                "Ww7w96EyLrtvAreS0fFEue/FaaHryyV8HLTtkwGhAQg6CMcs2vUlqd649OZ1DlAndw9+jqXUqPJ0OKWG" +
-                "UyYrj12QmHlyXOKMF7vkFsBe7osX6ax8W2EZzwmHgIJ0Xjd0BuY3Q2q8A6DQloPhtZUMjPpaoJ7moNPz" +
-                "n5Az7SU5dn6E3yEezvgXWDfh5pzmDWpmc/axryEgHLvgt6aC63ooINoacYmsWQd0o8pRuyPVyaesMZwQ" +
-                "VSqCN8fotUEBKnowqRkbslRjhYl4+oacRmi2mxmUcz89sOrJWk8WPx2p38c0D8oFBcnNA1k5jyn5TZne" +
-                "3M6bIJC3Yy0vc/fnz9V+3xRf1It8MGPsgtSNR5dODuprD/WDK7gHv+fLEWRm41CjTRNuuVgaaUoB6WBq" +
-                "C+ujjNV4xz1O1jBZ358rg4N+UxpTudDfR6oe88+r+4P6uP3ahfpLUqP1gPR+AERhZ9hbBgAA";
+                "H4sIAAAAAAAAE71UwW7bMAy96ysI9NB2WDJgG3YIsEO3Yl0PA7K194CRGVuALLmSnNT7+j0psdNgA7bD" +
+                "2sCIKYl8enwkHVO1amMd33wVriRQU15qPSQh1sl4p2IKxtVkqv1uGjrB3iHss7c+/Lj5dEUtG7fSefmn" +
+                "0yjau4rDcHDZWM/pw3uKmq2oWnwrCYclaumjUIe/8WrNXWGi1Mf//FPf7m4WFE9FUGd0lzizrQi0uOLE" +
+                "tPEQx9SNhJmVrVgEcdtJReU0ixLnCLxvTCQ8tTgJbO1AfYRT8qR92/bOaM4amlZO4hFpHDF1HJLRveUA" +
+                "fx8q47L7JnArGR1PlIdenBa6vV7Ax0HYPhkQGoCgg3DMit1ek+qNS+/e5gB1dr/zMyylRomnyyk1nDJZ" +
+                "eeyCxMyT4wJ3vNonNwf24lC5SBdlb4VlvCRcAgrSed3QBZgvh9R4B0ChLQfDaysZGMW1QD3PQeeXT5Bd" +
+                "gXbs/Ai/Rzze8S+wbsLNOc0a1Mzm7GNfQ0A4dsFvTQXX9VBAtDXiElmzDmhFlaP2V6qzL1ljOCGqVARv" +
+                "jtFrgwJUtDOpGbuxVGOFcXjubpymZz8tqGWYrHqy1pPFz8Xo9/GE5FcUJLcNBOU8neQ3ZWhzI2+CQNiO" +
+                "tbzOfZ+3q8O5Kb6oFPlgxtg5qaVHf04O6nsP3YMruEe/l0oQVMZZRncmfNli6Z+JP3LBsBbKJ+lO37XH" +
+                "yRom6+fL0D9KN+YwFQo9faLnKfm8ejjqji9eO1d/yWi0dkr9AjyVAORLBgAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

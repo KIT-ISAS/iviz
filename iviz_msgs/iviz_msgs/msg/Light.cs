@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = "iviz_msgs/Light")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class Light : IDeserializable<Light>, IMessage
     {
         public const byte POINT = 0;
@@ -20,13 +20,13 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "inner_angle")] public float InnerAngle;
         [DataMember (Name = "outer_angle")] public float OuterAngle;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public Light()
         {
             Name = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Light(string Name, byte Type, bool CastShadows, in Color32 Diffuse, float Range, in Vector3f Position, in Vector3f Direction, float InnerAngle, float OuterAngle)
         {
             this.Name = Name;
@@ -40,7 +40,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.OuterAngle = OuterAngle;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal Light(ref Buffer b)
         {
             Name = b.DeserializeString();
@@ -54,15 +54,9 @@ namespace Iviz.Msgs.IvizMsgs
             OuterAngle = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Light(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new Light(ref b);
         
-        Light IDeserializable<Light>.RosDeserialize(ref Buffer b)
-        {
-            return new Light(ref b);
-        }
+        Light IDeserializable<Light>.RosDeserialize(ref Buffer b) => new Light(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -86,18 +80,18 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "iviz_msgs/Light";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "c08cec0d4c9fe9b11d0596f99987e126";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr2QzwrCMAzG74G9Q9/AfxcRdpApMtBtOPE6OtfOwGyk7dT59HZY5wuIvXxffmlCEmhR" +
-                "2TnL0jg5sJCN4R2v4v06OsRpstw6OvE0z9L+0xTAWI2qZopfhM/Z7iqgJGrYiRtbmDOv6G4goob0bMoq" +
-                "lLI1AmRD3LpYc1ULOIqTdWnJrmTQIqkvqVA726NPCSoldOHqmm8bau3AAAIIf/wC2OWbBcMbPouLqc3I" +
-                "7xP4rbXX2mvplf9jls+tguEcj8F1g3u6UV5yTNi35gEAAA==";
+                "H4sIAAAAAAAAE7WQzwrCMAzG73mKvoE6LyLsICoyUDfc8Dqq62agNqPt/LOnt2JXX0Bz+b780oQm0KGy" +
+                "M5alyb5gMRvDJ18lh/WySNL9YuvoxNM8S9+PIgBjNaqGKX4VvmafrYATkWRnbmxpLryiu4ElSdLTiFVY" +
+                "150RUEvi1uWaq0bAUZytK9esJYMWSX1JhdrZNxpaUCmhS9cnv2Oos4G5iH8csMs3c4Y37MuraczIb+NX" +
+                "1l4bryev/P8fGc4UDvEI7hlcD/AC0NcUX98BAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

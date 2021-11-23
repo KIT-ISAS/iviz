@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/JointLimits")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class JointLimits : IDeserializable<JointLimits>, IMessage
     {
         // This message contains information about limits of a particular joint (or control dimension)
@@ -25,13 +25,13 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "max_acceleration")] public double MaxAcceleration;
         // min_acceleration is assumed to be -max_acceleration
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public JointLimits()
         {
             JointName = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public JointLimits(string JointName, bool HasPositionLimits, double MinPosition, double MaxPosition, bool HasVelocityLimits, double MaxVelocity, bool HasAccelerationLimits, double MaxAcceleration)
         {
             this.JointName = JointName;
@@ -44,7 +44,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.MaxAcceleration = MaxAcceleration;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal JointLimits(ref Buffer b)
         {
             JointName = b.DeserializeString();
@@ -57,15 +57,9 @@ namespace Iviz.Msgs.MoveitMsgs
             MaxAcceleration = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new JointLimits(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new JointLimits(ref b);
         
-        JointLimits IDeserializable<JointLimits>.RosDeserialize(ref Buffer b)
-        {
-            return new JointLimits(ref b);
-        }
+        JointLimits IDeserializable<JointLimits>.RosDeserialize(ref Buffer b) => new JointLimits(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -88,19 +82,18 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/JointLimits";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "8ca618c7329ea46142cbc864a2efe856";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACm2RQW6EMAxF90i9w5dm0y66q3qS7pFhzOAqiUexqejtmw4wwDDL+P8XPyUnfPViiGxG" +
-                "F0aryUmSQVKnOZKLJlCjgyNIFDdoB8KVsks7BMr4VkmOV803NmvAWSInK+BbZZ4lXaZOnShyVZ3geWBI" +
-                "B+95pnsyXNXktm3aUzVaripBvQT1HJQbohSpdEak8cB1Qck/P/47d3Qd0rgONyqrxg8HbcV/DxpLsNWg" +
-                "8aG/W7REk/D9iPLcZDZEPsMVDeN9136qRW3LgfP0H49q23DRm+yO2M5wG8+WO+K56Y56qf4ARzGoPUIC" +
-                "AAA=";
+                "H4sIAAAAAAAAE22QQW6EMAxF95ziS7NpF91VPUn3yIQwuEriUWyqmds3HWAggmX8/4uffMH3yIroVenq" +
+                "4SQZcVJwGiRHMpYE6mQyBI5sChlAuFE2dlOgjB/hZHiT/GSzBPQcfdICvjdqmdN17rSJom+aCyxPHjzA" +
+                "Rr/QIyluovzcNu9pOilflaBdg3YJyg+Ri1TqEel+4IYgZF+f/50Xug3pvg13KpvGrw/i2B4HjTXYa5T1" +
+                "db9atEaz8OuJcm5SnaLvYYLO46Nqn2qRcz74TKcX2oer3mx3xCrDfbxYVsS5aUU1f+p1quFBAgAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

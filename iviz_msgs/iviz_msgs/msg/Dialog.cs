@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = "iviz_msgs/Dialog")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class Dialog : IDeserializable<Dialog>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -25,7 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "dialog_displacement")] public GeometryMsgs.Vector3 DialogDisplacement;
         [DataMember (Name = "tf_displacement")] public GeometryMsgs.Vector3 TfDisplacement;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public Dialog()
         {
             Id = string.Empty;
@@ -34,7 +34,7 @@ namespace Iviz.Msgs.IvizMsgs
             MenuEntries = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Dialog(in StdMsgs.Header Header, byte Action, string Id, duration Lifetime, double Scale, byte Type, byte Buttons, byte Icon, in StdMsgs.ColorRGBA BackgroundColor, string Title, string Caption, ushort CaptionAlignment, string[] MenuEntries, byte BindingType, in GeometryMsgs.Vector3 TfOffset, in GeometryMsgs.Vector3 DialogDisplacement, in GeometryMsgs.Vector3 TfDisplacement)
         {
             this.Header = Header;
@@ -56,7 +56,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.TfDisplacement = TfDisplacement;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal Dialog(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -78,15 +78,9 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out TfDisplacement);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Dialog(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new Dialog(ref b);
         
-        Dialog IDeserializable<Dialog>.RosDeserialize(ref Buffer b)
-        {
-            return new Dialog(ref b);
-        }
+        Dialog IDeserializable<Dialog>.RosDeserialize(ref Buffer b) => new Dialog(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -136,27 +130,27 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "iviz_msgs/Dialog";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "55f9895157fe16b721a27e4c5483f8ef";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACrVVTW/UMBC9R9r/MFIPtKhdxIc4VOLAh4AekBBUXBCKJvYkserYwXZawq/n2ckGikDi" +
-                "QFeRYjvz3oznzczGpOshdvHBW2Etgfryqpo5CbFKxrsqpmBcR0ZXegqcj8iaVpIZpGqt5/T0CUXFVhZU" +
-                "msd11UwpeReXjVGFavX20lsfPrx58ZwaVldd8JPTtcqHB3fJJDCuG8VjCWUyLj18etjWbE3nBnFptfv8" +
-                "hbCbapwEI6vjxjiNb3WJqxM/SArzEsUnUcmHx5Ta2rdtlPSX79qw9V2tTRwtKyke/8p0y6raVc/+829X" +
-                "vfv45px+E25XHdHHxE5z0EhCYs2JqfVQ1HS9hDMr12KB4mEUTeVrzkjcA3jZm0h4OnES2NqZpgij5En5" +
-                "YZicUZyFheC38EAaR0wjh2TUZDnA3gdkO5u3gQfJ7HiifJ3EKaGLV+ewcVHUlAwCmsGggnDMKl+8oqLw" +
-                "40cZUB1d3vgzbKVDXW7OKfWccrDybQwSc5wcz+Hj/nK5PbiRHYEXHem4nNXYxhOCE4Qgo1c9HSPy93Pq" +
-                "UcypF7rmYLixKNOI6rIWrPcy6N7JL8w57HNy7PyBfmH86eNfaN3Gm+901kMzm28fpw4JhOEY/LXRMG3m" +
-                "QqKsQSmh55rAYa4yanFZHb3OOYYRUEURvDlGrwwE0HRjUn/ooKJGjR6++4Lcenu3jAfIGbZVt62abcV3" +
-                "F9Qfu3R3KPkguYSQXKSNrsvHXNFtEGR4RA/vc/FelHLzDsU6CEMJ9MWGBFCbACjm0R6sEgRNJ6dkEmkv" +
-                "kZxP4Bj4CpQC7QloHkeQoQEDu2iXkYpjQI5l3+1P6aYXNFa2ytqVTiu9aRQF0xm0ZkbC0bCBmdbbnWII" +
-                "PYL21i4xL85QSCAJPhXAyZ4uWpr9RDf5QliEdSR4ahDiGlcp3eT9aZ4HK8XtjL73aFCkJUbuUOUuJkyj" +
-                "fbX9L3zbVvO2+r6rfgC1ynVEdgYAAA==";
+                "H4sIAAAAAAAAE7VVTY/UOBC951eUNAdm0EwjPsRhJA67ixbmsBJaEBeEoopdSSwcO9iVGbK/fp+d7sBI" +
+                "IHGAVqTYTr1X5XpV1VltO+UhP3otbCXRWF9Nt6oQG3UxNFmTCwM529glcTki73pRN0nT+8j6/Bllw142" +
+                "lK7zcdUtqjHkbeNMpTp6+yv6mP599ecf1LH5NKS4BNuacnhyp07BeNwYnmsoiwv6+Plp27J3Q5gk6NHu" +
+                "w0fCbmlxkpwcHXcuWHxra1yDxEk0rVsU78VoTE9J+zb2fRb9wXfr2MehtS7Pno1Ujz9kumfVNC9+8a/5" +
+                "5+2ra8r3ZWvO6K1ysJwsMqBsWZn6CDndMEq68nIrHiCeZrFUv5Z05AOA70aXCc8gQRJ7v9KSYaSRTJym" +
+                "JTjDRVWofQ8PpAvENHNSZxbPCfYxIdXFvE88SWHHk+XzIsEI3by8hk3IYhZ1CGgFg0nCuUh885KqvE+f" +
+                "FEBz9u4uXmErA4pyd046spZg5cucJJc4OV/Dx8PtcgdwIzkCLzbTeT1rsc0XBCcIQeZoRjpH5G9WHVHJ" +
+                "OgrdcnLceSnEqGMP1gcF9ODiG+ZQqQOHeKLfGL/6+BnasPOWO12N0MyX2+dlQAJhOKd46yxMu7WSGO9Q" +
+                "R2i4LnFam4LaXDZnf5ccwwioqgjenHM0DgJYunM6ntqnqtGigX93Ne5tvQ0GaJn21bCvun3Fvyui73bn" +
+                "qdiTlOJBWpEwuq3fSi33SZDbGa17KGV7UwstBpTpJAwN0BE7EkDrktQBeQCrJEG7ySU5JRslU4gKjok/" +
+                "gVKgekHzPIMMrZc4ZL9NUhwDci6H4XBJd6OEzaqoVnusdqUzlNzg7IaEo2kHMx0vd4nZ8wSqe7/FvDlD" +
+                "CYEkRa2AiwPd9LTGhe7KhbBIx2EQqZM9rlq0GuNlmQRHivsJfRPRmkhLzjygvkNWjKFDs/8dfNlX6776" +
+                "r/kfZ+WsWGwGAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

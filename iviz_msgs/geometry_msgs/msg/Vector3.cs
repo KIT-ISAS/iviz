@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [Preserve, DataContract (Name = "geometry_msgs/Vector3")]
+    [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
     public struct Vector3 : IMessage, System.IEquatable<Vector3>, IDeserializable<Vector3>
     {
@@ -20,7 +20,7 @@ namespace Iviz.Msgs.GeometryMsgs
         [DataMember (Name = "y")] public double Y;
         [DataMember (Name = "z")] public double Z;
     
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Vector3(double X, double Y, double Z)
         {
             this.X = X;
@@ -28,22 +28,16 @@ namespace Iviz.Msgs.GeometryMsgs
             this.Z = Z;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Vector3(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Vector3(ref b);
-        }
+        public readonly ISerializable RosDeserialize(ref Buffer b) => new Vector3(ref b);
         
-        readonly Vector3 IDeserializable<Vector3>.RosDeserialize(ref Buffer b)
-        {
-            return new Vector3(ref b);
-        }
+        readonly Vector3 IDeserializable<Vector3>.RosDeserialize(ref Buffer b) => new Vector3(ref b);
         
         public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
         
@@ -64,26 +58,26 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 24;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
         public readonly string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "geometry_msgs/Vector3";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "4a842b65f413084dc2b10fb484ea7f17";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACkWQwUrFQAxF9wX/4cLbKJQRVPyHt3PxcCt5bTodbCclk2etX2/aSt1dhpyTmznh0qcC" +
-                "5Um5cLYCwhc3JoqU0SkzykQNB1QnnA0+K3lYMDJlg8k/6WCb1NEkObiVlTtRrpEMrXBBFnPHSJ+u5Fx4" +
-                "pWmaXEYwpVwGWtn12ZF7DjHUmHvO+1TK0QfdEDmzpgaaYmp30heNB0x43w54rmHdE+Y0DHvnfZn17BIV" +
-                "24CHgHOHRW6Y14M8KFoybyS4esW/XnQd1r5S47YW3xSRZWTT5WMssTy+SXJ+5FIosv9dMaY2VFU3CNnr" +
-                "C76PtBzp5676BVNGoPyAAQAA";
+                "H4sIAAAAAAAAE0WQQWrEMAxF9znFh9m0EFJoS+8wuy7KbIsmUTymjhVkTdP09JUTSHcfo/f05RM+brFA" +
+                "eVYunK2A8M29iSJmjMqMMlPPHZoTzgaflZxWTEzZYPJPOjhEdTRK7tzKyqMot4iGQbggi7ljoi9Xci5c" +
+                "aZpnlxFMKZdEla3PjjxwF7oWy43zPhVz8EE3BM6ssYfGEIed9EXTARMu2wEvLWx8xhJT2jvvy+zGLlGx" +
+                "DXjscB6xyh1LPciDYiCjKrry0YuuqfaVFvdafFMElolN18+phPL0LtH5iUuhwP53xZiGrmnGJGRvr/g5" +
+                "0nqk3+YP1MrAiH8BAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/ChangeControlDimensions")]
+    [DataContract (Name = RosServiceType)]
     public sealed class ChangeControlDimensions : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public ChangeControlDimensionsRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public ChangeControlDimensionsResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public ChangeControlDimensions()
         {
             Request = new ChangeControlDimensionsRequest();
             Response = new ChangeControlDimensionsResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public ChangeControlDimensions(ChangeControlDimensionsRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/ChangeControlDimensions";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "35b43a24f32e4654e4afa7596399fc3c";
         
         public override string ToString() => Extensions.ToString(this);
@@ -64,12 +64,12 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "control_y_rotation")] public bool ControlYRotation;
         [DataMember (Name = "control_z_rotation")] public bool ControlZRotation;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ChangeControlDimensionsRequest()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ChangeControlDimensionsRequest(bool ControlXTranslation, bool ControlYTranslation, bool ControlZTranslation, bool ControlXRotation, bool ControlYRotation, bool ControlZRotation)
         {
             this.ControlXTranslation = ControlXTranslation;
@@ -80,7 +80,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.ControlZRotation = ControlZRotation;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ChangeControlDimensionsRequest(ref Buffer b)
         {
             ControlXTranslation = b.Deserialize<bool>();
@@ -91,15 +91,9 @@ namespace Iviz.Msgs.MoveitMsgs
             ControlZRotation = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ChangeControlDimensionsRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ChangeControlDimensionsRequest(ref b);
         
-        ChangeControlDimensionsRequest IDeserializable<ChangeControlDimensionsRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new ChangeControlDimensionsRequest(ref b);
-        }
+        ChangeControlDimensionsRequest IDeserializable<ChangeControlDimensionsRequest>.RosDeserialize(ref Buffer b) => new ChangeControlDimensionsRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -115,7 +109,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 6;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -128,32 +122,26 @@ namespace Iviz.Msgs.MoveitMsgs
     {
         [DataMember (Name = "success")] public bool Success;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ChangeControlDimensionsResponse()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ChangeControlDimensionsResponse(bool Success)
         {
             this.Success = Success;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ChangeControlDimensionsResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ChangeControlDimensionsResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ChangeControlDimensionsResponse(ref b);
         
-        ChangeControlDimensionsResponse IDeserializable<ChangeControlDimensionsResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new ChangeControlDimensionsResponse(ref b);
-        }
+        ChangeControlDimensionsResponse IDeserializable<ChangeControlDimensionsResponse>.RosDeserialize(ref Buffer b) => new ChangeControlDimensionsResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -164,7 +152,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

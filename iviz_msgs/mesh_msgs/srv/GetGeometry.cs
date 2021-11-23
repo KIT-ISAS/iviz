@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = "mesh_msgs/GetGeometry")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetGeometry : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetGeometryRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetGeometryResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetGeometry()
         {
             Request = new GetGeometryRequest();
             Response = new GetGeometryResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetGeometry(GetGeometryRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MeshMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "mesh_msgs/GetGeometry";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "e21c42f8a3978429fcbcd1c03ddeb4e3";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetGeometryRequest()
         {
             Uuid = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetGeometryRequest(string Uuid)
         {
             this.Uuid = Uuid;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetGeometryRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetGeometryRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetGeometryRequest(ref b);
         
-        GetGeometryRequest IDeserializable<GetGeometryRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetGeometryRequest(ref b);
-        }
+        GetGeometryRequest IDeserializable<GetGeometryRequest>.RosDeserialize(ref Buffer b) => new GetGeometryRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -103,33 +97,27 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "mesh_geometry_stamped")] public MeshMsgs.MeshGeometryStamped MeshGeometryStamped;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetGeometryResponse()
         {
             MeshGeometryStamped = new MeshMsgs.MeshGeometryStamped();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetGeometryResponse(MeshMsgs.MeshGeometryStamped MeshGeometryStamped)
         {
             this.MeshGeometryStamped = MeshGeometryStamped;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetGeometryResponse(ref Buffer b)
         {
             MeshGeometryStamped = new MeshMsgs.MeshGeometryStamped(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetGeometryResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetGeometryResponse(ref b);
         
-        GetGeometryResponse IDeserializable<GetGeometryResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetGeometryResponse(ref b);
-        }
+        GetGeometryResponse IDeserializable<GetGeometryResponse>.RosDeserialize(ref Buffer b) => new GetGeometryResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

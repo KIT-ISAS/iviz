@@ -4,37 +4,31 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
 {
-    [Preserve, DataContract (Name = "actionlib/TestFeedback")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class TestFeedback : IDeserializable<TestFeedback>, IFeedback<TestActionFeedback>
     {
         [DataMember (Name = "feedback")] public int Feedback;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestFeedback()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TestFeedback(int Feedback)
         {
             this.Feedback = Feedback;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestFeedback(ref Buffer b)
         {
             Feedback = b.Deserialize<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TestFeedback(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TestFeedback(ref b);
         
-        TestFeedback IDeserializable<TestFeedback>.RosDeserialize(ref Buffer b)
-        {
-            return new TestFeedback(ref b);
-        }
+        TestFeedback IDeserializable<TestFeedback>.RosDeserialize(ref Buffer b) => new TestFeedback(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -45,22 +39,22 @@ namespace Iviz.Msgs.Actionlib
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "actionlib/TestFeedback";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "49ceb5b32ea3af22073ede4a0328249e";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACsvMKzE2UkhLTU1JSkzO5uLlAgCyE96eEQAAAA==";
+                "H4sIAAAAAAAAE8vMKzE2UkhLTU1JSkzO5uICAIj0iCsQAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

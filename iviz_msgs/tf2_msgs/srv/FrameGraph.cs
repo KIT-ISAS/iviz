@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Tf2Msgs
 {
-    [DataContract (Name = "tf2_msgs/FrameGraph")]
+    [DataContract (Name = RosServiceType)]
     public sealed class FrameGraph : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public FrameGraphRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public FrameGraphResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public FrameGraph()
         {
             Request = FrameGraphRequest.Singleton;
             Response = new FrameGraphResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public FrameGraph(FrameGraphRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Tf2Msgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "tf2_msgs/FrameGraph";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "437ea58e9463815a0d511c7326b686b0";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.Tf2Msgs
     public sealed class FrameGraphRequest : IRequest<FrameGraph, FrameGraphResponse>, IDeserializable<FrameGraphRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public FrameGraphRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal FrameGraphRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        FrameGraphRequest IDeserializable<FrameGraphRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        FrameGraphRequest IDeserializable<FrameGraphRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly FrameGraphRequest Singleton = new FrameGraphRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.Tf2Msgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -97,33 +91,27 @@ namespace Iviz.Msgs.Tf2Msgs
     {
         [DataMember (Name = "frame_yaml")] public string FrameYaml;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public FrameGraphResponse()
         {
             FrameYaml = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public FrameGraphResponse(string FrameYaml)
         {
             this.FrameYaml = FrameYaml;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal FrameGraphResponse(ref Buffer b)
         {
             FrameYaml = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new FrameGraphResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new FrameGraphResponse(ref b);
         
-        FrameGraphResponse IDeserializable<FrameGraphResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new FrameGraphResponse(ref b);
-        }
+        FrameGraphResponse IDeserializable<FrameGraphResponse>.RosDeserialize(ref Buffer b) => new FrameGraphResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

@@ -4,21 +4,21 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
 {
-    [Preserve, DataContract (Name = "actionlib/TestRequestActionGoal")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class TestRequestActionGoal : IDeserializable<TestRequestActionGoal>, IActionGoal<TestRequestGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
         [DataMember (Name = "goal")] public TestRequestGoal Goal { get; set; }
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestRequestActionGoal()
         {
             GoalId = new ActionlibMsgs.GoalID();
             Goal = new TestRequestGoal();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TestRequestActionGoal(in StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, TestRequestGoal Goal)
         {
             this.Header = Header;
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.Actionlib
             this.Goal = Goal;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestRequestActionGoal(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
@@ -34,15 +34,9 @@ namespace Iviz.Msgs.Actionlib
             Goal = new TestRequestGoal(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TestRequestActionGoal(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TestRequestActionGoal(ref b);
         
-        TestRequestActionGoal IDeserializable<TestRequestActionGoal>.RosDeserialize(ref Buffer b)
-        {
-            return new TestRequestActionGoal(ref b);
-        }
+        TestRequestActionGoal IDeserializable<TestRequestActionGoal>.RosDeserialize(ref Buffer b) => new TestRequestActionGoal(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -72,27 +66,26 @@ namespace Iviz.Msgs.Actionlib
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "actionlib/TestRequestActionGoal";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "1889556d3fef88f821c7cb004e4251f3";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1UwU7bQBC9W8o/jMQBWgloob0g5UDBhVSFoCSVerMmu4O9qr3r7q4J+fu+tROgTQ89" +
-                "tLUsrbwz8+bNvBlfC2vxVPVHxioaZ2uzLJpQhuMrx/XkkkochdHZQkKcyfcOR7L096Ns/JefUXYzvzqj" +
-                "EPVA4rqnNsr2aB7ZavaaGomsOTLdO1A3ZSX+sJYHqRHFTSuaemtctxKOELioTCC8pVjxXNdr6gKcoiPl" +
-                "mqazRnEUiqaRn+IRaSwxteyjUV3NHv7Oa2OT+73nRhI63pC6YpXQ5PIMPjaI6qIBoTUQlBcOxpYwUtYZ" +
-                "G09PUkC2t1i5Q3xKCQGeklOsOCay8th6CYknhzPkeD0UdwRsdEeQRQc66O8KfIZXhCSgIK1TFR2A+d06" +
-                "Vs4CUOiBveFlLQlYoQNA3U9B+69eICfaZ2TZui38gPic409g7RNuqumwgmZ1qj50JRoIx9a7B6Phulz3" +
-                "IKo2YiNh6jz7dZaihpTZ3sfUYzghqlcEJ4fglIEAmlYmVlmIPqH3aqQh/WcD+dvdSGO5QA2DdKFyXa3x" +
-                "4XxiPYwUQc5VZaBJX0daGlpxID9skug0Q5Ne8n4q0RW2m2zQ2T9gOlaVWDKRUKuENLcYDWnaSOg5ohNm" +
-                "GAZnJUj9BE1LwYqAAinxkSFeYvSyxRv+Rm9lQYdBD8q451bTvYhesvoGZhoRmMuujljDELiUXgcKrShz" +
-                "b9RQ4IZBONqgpx0ZHECq6UIEM8LiwetoKyG8/oN6x7/8xUbZsJGLfHYzuT1f5MX8y8VFPp+P3+xYzj9M" +
-                "Z4v8cvx2xzLLP+UXyXSyY/o8nefj053ry9n0bvxu5zr/epHfLSbT2/H7jS2Kb/o/TgHFYheypXM1mdJC" +
-                "2EIxFrTednDQpYjyGLfBlRTD7SYsFME0bY3Ifusy3XnuJ01LzeuClZJ25/aJwrOhZQzrhtEo+wEpu+v1" +
-                "RgYAAA==";
+                "H4sIAAAAAAAAE7VUwW7bMAy9+ysI9LB2QNOt3S4FcugSr82wNkXiAbsZjMTYwmTJk+Sk/vtRcpJ2yw47" +
+                "rIYBwSL5+MhH+o5QkoM6HRmKoKzRalU2vvIXtxb1bAoVH6WSWUE+LOhnx0e0pPts/J+f7H55ew0+yIHC" +
+                "3UDsBJYBjUQnoaGAEgPC2jJvVdXkzjVtSHMQNi1JSNbQt+RHHFjUygO/FRlyqHUPnWenYEHYpumMEhgI" +
+                "gmrot3iOVAYQWnRBiU6jY3/rpDLRfe2woYjOr48tMYJgNr1mH+NJdEExoZ4RhCP0ylRshKxTJlxdxoDs" +
+                "pNjac/6kirt/SA6hxhDJ0lPryEee6K85x9uhuBFjc3OIs0gPp+mu5E9/BpyEKVBrRQ2nzPyxD7U1DEiw" +
+                "QadwpSkCC+4Ao76JQW/OXiCbBG3Q2D38gPic419gzQE31nRes2Y6Vu+7ihvIjq2zGyXZddUnEKEVmQA8" +
+                "cg5dn8WoIWV28jn2mJ04KinCJ3pvhWIBJGxVqDMfXERPasQJfaVp/OtapNHakQVf205L/rCOUl2pENZy" +
+                "WysWJBUR1wW26MENO0QyDtAs6Z1GkluCZpeMRXYbHo1tTQZUAC6UfBxangtq2gDccI6OmH6Ymi1x6gM0" +
+                "rGgduSAIcgFZucjoZX93/JXca8LtZXp9THLoM6yJ5ArFD2YmOYKHstOBd9B7rCiJAL4lodZKDAXuGPjR" +
+                "Dj0uyODApJrOB2YGvHXsNdrrF5V7beku/vh7ZcMuFvnifvZwU+Tl8ttkki+X43dHlptP80WRT8fvjyyL" +
+                "/Es+iabLI9PX+TIfXx1dTxfzx/GHo+v8+yR/LGbzh/HHnS2Qa9K/pmS5QuezlbUaVGVY1VIgr6bet28Q" +
+                "pQz0FPbBNZXD7S7Ml141rebItG+Z7BymMZOksS9RCGqPbg8Ung0t8qTuGf0COLBiMzwGAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

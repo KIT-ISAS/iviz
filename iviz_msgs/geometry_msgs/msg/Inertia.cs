@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [Preserve, DataContract (Name = "geometry_msgs/Inertia")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class Inertia : IDeserializable<Inertia>, IMessage
     {
         // Mass [kg]
@@ -22,12 +22,12 @@ namespace Iviz.Msgs.GeometryMsgs
         [DataMember (Name = "iyz")] public double Iyz;
         [DataMember (Name = "izz")] public double Izz;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public Inertia()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Inertia(double M, in GeometryMsgs.Vector3 Com, double Ixx, double Ixy, double Ixz, double Iyy, double Iyz, double Izz)
         {
             this.M = M;
@@ -40,7 +40,7 @@ namespace Iviz.Msgs.GeometryMsgs
             this.Izz = Izz;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal Inertia(ref Buffer b)
         {
             M = b.Deserialize<double>();
@@ -53,15 +53,9 @@ namespace Iviz.Msgs.GeometryMsgs
             Izz = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Inertia(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new Inertia(ref b);
         
-        Inertia IDeserializable<Inertia>.RosDeserialize(ref Buffer b)
-        {
-            return new Inertia(ref b);
-        }
+        Inertia IDeserializable<Inertia>.RosDeserialize(ref Buffer b) => new Inertia(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -79,28 +73,28 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 80;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "geometry_msgs/Inertia";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "1d26e4bb6c83ff141c5cf0d883c2b0fe";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACq1STUsDMRS8B/ofBnpRqCtU8SD05EF6KAgWL1Ildt9uQzd5S5La7tIf78tuvwSPBgKP" +
-                "ycxk3kuGmOkQ8L4uF6qoWMeHe1ilhngiF8mDC9iOYBeqJLYUffNpQxlu32gZ2d9hyR1/6shHozEnF9gn" +
-                "wxv7MV7ISVp7mN1OdiO7xT7xMelQQZq0e/TIbTvEtAk9xhKHi7q5qNtz3VzgzQXetmqgJv+8Bmr2+vyI" +
-                "P+cykG7mKxPgqfYUZJoBGt/dIYxD4YkQar2kDGkcEcJlVzWwpF1E5LNShLnxIjXsMnElTwV7GsFE5EwB" +
-                "jqN4WL0WS5k/JbWuazHTiF67UOmkTbBIrigrsxG2K3I9y7hSiOJQkryiWcKb0uS9Ui6yJ7HGobsRYjHG" +
-                "1lRVn7m/LK5ITDzHTnCdYVqg4Q22qSEpPHIdJRHjSyIecumvKuXlETYpeGfxe6IvbERvKQRdkswuRNJ5" +
-                "pk6Pe/4W58dvB+oHH8CTFtsCAAA=";
+                "H4sIAAAAAAAAE61STUsDMRC951c86EVhXaGKB6EnD9JDQbB4kSrT3dlt6CYpSWq7S3+8k137IXg0MDC8" +
+                "vPcyHxlhRiHgfV0vVNU4ig/3MEqN8MQ2soerYHqCWaianeHo208T6nD7xkV0/g6F6/lTyz5qwpxtcD4Z" +
+                "3piP8UJu0jlA7/cSrUSHQ+Jj0qOCtCkG9MjtekR3CT2WJQ4XeXuRd+e8vcDbC7zrlJr881Gz1+dH/DkV" +
+                "aWW+0gGeN56DjDKA8NXfQVtUnhlhQwXnSLOIEK6zTQvDZCOiOytFWGovUu1sLq7suXKeM+iI0nGAdVE8" +
+                "DK3FUobPSU2bjZgRoicbGkraBIvkivM6z7BbsR1Y2tZCFIeaZYW6gNe1LgelPGROYsJPcxliNcZON81Q" +
+                "8/BYXLGYeBd7wXWOaYXWbbFLDUniUVKkZLTkU120bFK9LsM2Fd5b/B7oi9OiNxwC1SyzC5GpzNVps+c/" +
+                "cd58p74BX6ix6tcCAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

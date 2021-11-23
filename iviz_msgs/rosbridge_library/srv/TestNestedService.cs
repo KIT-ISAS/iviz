@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract (Name = "rosbridge_library/TestNestedService")]
+    [DataContract (Name = RosServiceType)]
     public sealed class TestNestedService : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public TestNestedServiceRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public TestNestedServiceResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public TestNestedService()
         {
             Request = new TestNestedServiceRequest();
             Response = new TestNestedServiceResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public TestNestedService(TestNestedServiceRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosbridge_library/TestNestedService";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "063d2b71e58b5225a457d4ee09dab6f6";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,32 +56,26 @@ namespace Iviz.Msgs.RosbridgeLibrary
         //request definition
         [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestNestedServiceRequest()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TestNestedServiceRequest(in GeometryMsgs.Pose Pose)
         {
             this.Pose = Pose;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestNestedServiceRequest(ref Buffer b)
         {
             b.Deserialize(out Pose);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TestNestedServiceRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TestNestedServiceRequest(ref b);
         
-        TestNestedServiceRequest IDeserializable<TestNestedServiceRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new TestNestedServiceRequest(ref b);
-        }
+        TestNestedServiceRequest IDeserializable<TestNestedServiceRequest>.RosDeserialize(ref Buffer b) => new TestNestedServiceRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -92,7 +86,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 56;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -106,33 +100,27 @@ namespace Iviz.Msgs.RosbridgeLibrary
         //response definition
         [DataMember (Name = "data")] public StdMsgs.Float64 Data;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestNestedServiceResponse()
         {
             Data = new StdMsgs.Float64();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TestNestedServiceResponse(StdMsgs.Float64 Data)
         {
             this.Data = Data;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestNestedServiceResponse(ref Buffer b)
         {
             Data = new StdMsgs.Float64(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TestNestedServiceResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TestNestedServiceResponse(ref b);
         
-        TestNestedServiceResponse IDeserializable<TestNestedServiceResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new TestNestedServiceResponse(ref b);
-        }
+        TestNestedServiceResponse IDeserializable<TestNestedServiceResponse>.RosDeserialize(ref Buffer b) => new TestNestedServiceResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -145,7 +133,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Data.RosValidate();
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;

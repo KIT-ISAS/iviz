@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/KinematicSolverInfo")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class KinematicSolverInfo : IDeserializable<KinematicSolverInfo>, IMessage
     {
         // A list of joints in the kinematic tree
@@ -14,7 +14,7 @@ namespace Iviz.Msgs.MoveitMsgs
         // A list of links that the kinematics node provides solutions for
         [DataMember (Name = "link_names")] public string[] LinkNames;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public KinematicSolverInfo()
         {
             JointNames = System.Array.Empty<string>();
@@ -22,7 +22,7 @@ namespace Iviz.Msgs.MoveitMsgs
             LinkNames = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public KinematicSolverInfo(string[] JointNames, MoveitMsgs.JointLimits[] Limits, string[] LinkNames)
         {
             this.JointNames = JointNames;
@@ -30,7 +30,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.LinkNames = LinkNames;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal KinematicSolverInfo(ref Buffer b)
         {
             JointNames = b.DeserializeStringArray();
@@ -42,15 +42,9 @@ namespace Iviz.Msgs.MoveitMsgs
             LinkNames = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new KinematicSolverInfo(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new KinematicSolverInfo(ref b);
         
-        KinematicSolverInfo IDeserializable<KinematicSolverInfo>.RosDeserialize(ref Buffer b)
-        {
-            return new KinematicSolverInfo(ref b);
-        }
+        KinematicSolverInfo IDeserializable<KinematicSolverInfo>.RosDeserialize(ref Buffer b) => new KinematicSolverInfo(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -92,21 +86,20 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/KinematicSolverInfo";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "cc048557c0f9795c392dd80f8bb00489";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACq2SP0/DQAzF90j5Dpa6wIBYEAMSAxMSggk2hCI3cVrT3Dk6X6ry7XH+NUlbNrLdPb/n" +
-                "n31ZwRNUrBGkhG9hHxXYQ9wS7NiTw8g5xECUaAzsN59ffVXm0ZEmq1O3nRxbRi4hkNbiCzNBlC6xr+id" +
-                "TvbEMXO60duX9v61M1p+n7CIrtjv1CIwLskUvBQEdZA9F6SgUjWRxSuUEibi1j4Ap8njP39p8vb+/AB/" +
-                "zJPaHB9bVrDmihuyxfiIbITsjbGdQjzgWprj6mxehBqDzddUGIatXUnovEEqKNiRVzNeDzPO3iSxhjE0" +
-                "BFzOdr5FhVqUu27DgtdiUSZko5ANgiU4+wfQF+DwcOYrK8F4f9fWHK3TJR6myxnKhLGnSnKOP2cYozDH" +
-                "wMNJ/aLRKPXAxyPYulG1cVS0f96a4GZRfREL85wqCv17nKLNxRGvpzu3LQjn8kC5cFwmXbjS5Bd/C9qD" +
-                "owMAAA==";
+                "H4sIAAAAAAAAE62SP0/DQAzF93wKSywwIBbEgMTAhIRggg2hyE3c1vTuHJ0vVfn2OH+a5GjZyHZnv+ef" +
+                "X+4CHsGxJpA1fAmHpMAB0pZgx4E8Jq4gRaJCU+Sw+fgcusqAnrS4+K22k2fzqCRG0kZCbSJI0jsOHYPS" +
+                "y544lV43evPc3b/0QvMfHDJrx2GnZoEpJ1MIUhM0UfZck4KKaxNLUFhLnIk7+QhcPPzzV7y+Pd3DH9vY" +
+                "Eu9bVrDJihuyVEJCDl3EBtitIAFwJe2Umy2L0GC05VqHcYzsUmKvjeKgZk9BTXg1Lrj4IYUNTLEl4PUi" +
+                "8C0qNKLcTxvTXYlZWaE8FsqxYA7eHgCGGjweTnRrJ5jubrueSTpf4mG+XKDMGHtyUnH6PsE4FpYYNj7v" +
+                "zwYdSwPwdASLG1VbT3X37FYE11n3WSysKnIU8WxCy2I5Pc6O7lSWES7LI2WmOE+aqYofqZinDp8DAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

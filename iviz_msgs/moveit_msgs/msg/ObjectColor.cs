@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/ObjectColor")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class ObjectColor : IDeserializable<ObjectColor>, IMessage
     {
         // The object id for which we specify color
@@ -12,35 +12,29 @@ namespace Iviz.Msgs.MoveitMsgs
         // The value of the color
         [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ObjectColor()
         {
             Id = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ObjectColor(string Id, in StdMsgs.ColorRGBA Color)
         {
             this.Id = Id;
             this.Color = Color;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ObjectColor(ref Buffer b)
         {
             Id = b.DeserializeString();
             b.Deserialize(out Color);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ObjectColor(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ObjectColor(ref b);
         
-        ObjectColor IDeserializable<ObjectColor>.RosDeserialize(ref Buffer b)
-        {
-            return new ObjectColor(ref b);
-        }
+        ObjectColor IDeserializable<ObjectColor>.RosDeserialize(ref Buffer b) => new ObjectColor(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -57,17 +51,17 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/ObjectColor";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "ec3bd6f103430e64b2ae706a67d8488e";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClNWCMlIVchPykpNLlHITFFIyy9SKM/ITM5QKE9VKC5ITc5Mq1RIzs/JL+IqLinKzEsH" +
-                "KuLiUgbrKkvMKQXqTVMoAXJgalLic4vTi/WdQdwgdydHqAQvly2VAS+Xb7C7lQKmjbxcaTn5iSXGRgpF" +
-                "cFY6nJUEZyUCHQUA6omyKf8AAAA=";
+                "H4sIAAAAAAAAE1NWCMlIVchPykpNLlHITFFIyy9SKM/ITM5QKE9VKC5ITc5Mq1RIzs/JL+IqLinKzEsH" +
+                "KuLiUgbrKkvMKQXqTVMoAXJgalLic4vTi/WdQdwgdydHqASXLZUBl2+wu5UCpn1caTn5iSXGRgpFcFY6" +
+                "nJUEZyVycQEAkGygffsAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

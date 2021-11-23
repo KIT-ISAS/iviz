@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = "sensor_msgs/SetCameraInfo")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SetCameraInfo : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SetCameraInfoRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SetCameraInfoResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SetCameraInfo()
         {
             Request = new SetCameraInfoRequest();
             Response = new SetCameraInfoResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SetCameraInfo(SetCameraInfoRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "sensor_msgs/SetCameraInfo";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "bef1df590ed75ed1f393692395e15482";
         
         public override string ToString() => Extensions.ToString(this);
@@ -62,33 +62,27 @@ namespace Iviz.Msgs.SensorMsgs
         // the region that the camera is currently capturing.
         [DataMember (Name = "camera_info")] public SensorMsgs.CameraInfo CameraInfo; // The camera_info to store
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetCameraInfoRequest()
         {
             CameraInfo = new SensorMsgs.CameraInfo();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetCameraInfoRequest(SensorMsgs.CameraInfo CameraInfo)
         {
             this.CameraInfo = CameraInfo;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetCameraInfoRequest(ref Buffer b)
         {
             CameraInfo = new SensorMsgs.CameraInfo(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetCameraInfoRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetCameraInfoRequest(ref b);
         
-        SetCameraInfoRequest IDeserializable<SetCameraInfoRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SetCameraInfoRequest(ref b);
-        }
+        SetCameraInfoRequest IDeserializable<SetCameraInfoRequest>.RosDeserialize(ref Buffer b) => new SetCameraInfoRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -112,35 +106,29 @@ namespace Iviz.Msgs.SensorMsgs
         [DataMember (Name = "success")] public bool Success; // True if the call succeeded
         [DataMember (Name = "status_message")] public string StatusMessage; // Used to give details about success
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetCameraInfoResponse()
         {
             StatusMessage = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetCameraInfoResponse(bool Success, string StatusMessage)
         {
             this.Success = Success;
             this.StatusMessage = StatusMessage;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetCameraInfoResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             StatusMessage = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetCameraInfoResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetCameraInfoResponse(ref b);
         
-        SetCameraInfoResponse IDeserializable<SetCameraInfoResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new SetCameraInfoResponse(ref b);
-        }
+        SetCameraInfoResponse IDeserializable<SetCameraInfoResponse>.RosDeserialize(ref Buffer b) => new SetCameraInfoResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

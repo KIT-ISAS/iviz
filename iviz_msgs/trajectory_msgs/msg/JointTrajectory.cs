@@ -4,21 +4,21 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TrajectoryMsgs
 {
-    [Preserve, DataContract (Name = "trajectory_msgs/JointTrajectory")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class JointTrajectory : IDeserializable<JointTrajectory>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "joint_names")] public string[] JointNames;
         [DataMember (Name = "points")] public JointTrajectoryPoint[] Points;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public JointTrajectory()
         {
             JointNames = System.Array.Empty<string>();
             Points = System.Array.Empty<JointTrajectoryPoint>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public JointTrajectory(in StdMsgs.Header Header, string[] JointNames, JointTrajectoryPoint[] Points)
         {
             this.Header = Header;
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             this.Points = Points;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal JointTrajectory(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -38,15 +38,9 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new JointTrajectory(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new JointTrajectory(ref b);
         
-        JointTrajectory IDeserializable<JointTrajectory>.RosDeserialize(ref Buffer b)
-        {
-            return new JointTrajectory(ref b);
-        }
+        JointTrajectory IDeserializable<JointTrajectory>.RosDeserialize(ref Buffer b) => new JointTrajectory(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -83,24 +77,24 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "trajectory_msgs/JointTrajectory";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "65b4f94a94d1ed67169da35a02f33d3f";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACrVUTYvbMBC9C/IfBnLY3dKk0JYeAj0U+rEtFBY2tyWYiTSOtciSK8nZ9b/vk72buKWH" +
-                "HlpjkKWZefNm5snXwkYiNeOiUo7WH+52dB+sz5XnVpL6Vr63ke9F5xCHm7KFS1fWpBbq/T9+Fur77ZcN" +
-                "pWyqNh3Sq+uR20It6TazNxwNtZLZcGaqA7jbQyNx5eQoDlHcdmJotOahk7RG4LaxifAexEtk5wbqE5xy" +
-                "IB3atvdWcxbKFuXO4xFpPTF1HLPVveMI/xCN9cW9jmhPQceb5EcvXgt9/biBj0+i+2xBaACCjsIJfYWR" +
-                "VI+uvXldAtRy+xBW2MoBEzglp9xwLmTlsYuSCk9OG+R4MRW3Bja6I8hiEl2OZxW26YqQBBSkC7qhSzC/" +
-                "GXITPACFjhwt750UYI0OAPWiBF1czZAL7Q159uEZfkI85/gbWH/CLTWtGszMlepTf0AD4djFcLQGrvth" +
-                "BNHOis/k7D5yHFSJmlKq5efSYzghapwIVk4paIsBGHqwuXnS7DSNypr/J8h8ugKTLv90L4pKPzHaf3ae" +
-                "LgqlTrStrWCuYI2BdyHZbCGVu5cEoaCmDCs2rLU4yHQ07nZAhMjn3lJD9nk3ir/0b5YLit5DAY9FfmKK" +
-                "OD84XIqn3Abzcj0ocMTEpgmm0mBoGow4jSfj3YcKoMfi9FuZa9SuVO0C53dvx9/AE7HZ2bmc2eEvZc3O" +
-                "p2qU6SfTKJqqjqGtoAEYFuoneXdohKQEAAA=";
+                "H4sIAAAAAAAAE7VUTYvbMBC961cM5LC7pUmhLT0Eeij0Y1soLGxuSzATaRJrkSVXkrPrf98neZt4Sw89" +
+                "tMYgS/PmzdeTr4WNRGrrolKO1h/utnQfrM+N506S+la+N5HvRecQx5uyBaQva1Lq/T9+1PfbL2tK2TRd" +
+                "OqRX11NmC7rN7A1HQ51kNpyZ9gGJ20MrcenkKA5O3PViqFrz2EtawXHT2kR4D+IlsnMjDQmgHEiHrhu8" +
+                "1ZyFskWtc394Wk9MPcds9eA4Ah+isb7A9xG9Kex4k/wYxGuhrx/XwPgkesgWCY1g0FE4oakwkhrQsjev" +
+                "i4NabB7CEls5oP2n4JRbziVZeeyjpJInpzVivJiKW4EbzRFEMYku61mDbboiBEEK0gfd0iUyvxlzGzwI" +
+                "hY4cLe+cFGKNDoD1ojhdXM2YfaX27MMv+onxHONvaP2Jt9S0bDEzV6pPwwENBLCP4WgNoLuxkmhnxWdy" +
+                "dhc5jqp4TSHV4nPpMUDwqhPByikFbTEAQw82t0+CnabRWPO/1JhP6p9E+acrgZI/MXp/xk5XhFIv2u6t" +
+                "YKhIGdPuQ7LZQid3LwkqQUEZVmxYa3HQaDVut2AMz9Gyh+bztiq/NG8WC3LeYfyPRXtiijI/OHeKbTAs" +
+                "NyAFjlJkXZxT6S4EjYw41ZN666ne+gL6rcoVSldq7wLnd2/rD+ApsdnZuZzZ4bOyZudTNcoMk6kqptnH" +
+                "0DUQAAzqJ1kk7fqdBAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

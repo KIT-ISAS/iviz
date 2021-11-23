@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosgraphMsgs
 {
-    [Preserve, DataContract (Name = "rosgraph_msgs/Clock")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class Clock : IDeserializable<Clock>, IMessage
     {
         // roslib/Clock is used for publishing simulated time in ROS. 
@@ -12,32 +12,26 @@ namespace Iviz.Msgs.RosgraphMsgs
         // For more information, see http://www.ros.org/wiki/Clock
         [DataMember (Name = "clock")] public time Clock_;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public Clock()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Clock(time Clock_)
         {
             this.Clock_ = Clock_;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal Clock(ref Buffer b)
         {
             Clock_ = b.Deserialize<time>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Clock(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new Clock(ref b);
         
-        Clock IDeserializable<Clock>.RosDeserialize(ref Buffer b)
-        {
-            return new Clock(ref b);
-        }
+        Clock IDeserializable<Clock>.RosDeserialize(ref Buffer b) => new Clock(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -48,24 +42,24 @@ namespace Iviz.Msgs.RosgraphMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "rosgraph_msgs/Clock";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "a9c97c1d230cfc112e270351a944ee47";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACiWOzQrCMBCE7wXfYaBXSe5eBa+C+gJtXJul+SnZDcG3N623gZlvZkaULIFnew3ZrWBB" +
-                "FXrjkwu2OgcWz2mBcKxh0m4oRwInPO5Pg2HEy3ckksi00B7bwhcux1gTuw4I1BNcLYWSHrDp0K23x1z2" +
-                "oj4UJ+WczhAieNXtYm1rzfRfJpfFNl75/244xt0hT8MPtFQxo7oAAAA=";
+                "H4sIAAAAAAAAEyWOsQrDMBBD93yFIGux966FroW2P5C41/iI7Qs+G5O/r5NuAulJGpFFA8/2FsStYEVV" +
+                "+uArGVudA6vntEA51jCVbhSOBE54Pl4Gw4i370gk1WmhI7aFHU5irIldBxTFE1zNmVI5YdOhe2+Pko+i" +
+                "PhSnwpIuUCL4Urarta01038ZyYttvPL/3XCOu1MOP+0lWhy5AAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

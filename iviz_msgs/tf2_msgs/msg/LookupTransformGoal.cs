@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Tf2Msgs
 {
-    [Preserve, DataContract (Name = "tf2_msgs/LookupTransformGoal")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class LookupTransformGoal : IDeserializable<LookupTransformGoal>, IGoal<LookupTransformActionGoal>
     {
         //Simple API
@@ -18,7 +18,7 @@ namespace Iviz.Msgs.Tf2Msgs
         //Whether or not to use the advanced API
         [DataMember (Name = "advanced")] public bool Advanced;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public LookupTransformGoal()
         {
             TargetFrame = string.Empty;
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.Tf2Msgs
             FixedFrame = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public LookupTransformGoal(string TargetFrame, string SourceFrame, time SourceTime, duration Timeout, time TargetTime, string FixedFrame, bool Advanced)
         {
             this.TargetFrame = TargetFrame;
@@ -38,7 +38,7 @@ namespace Iviz.Msgs.Tf2Msgs
             this.Advanced = Advanced;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal LookupTransformGoal(ref Buffer b)
         {
             TargetFrame = b.DeserializeString();
@@ -50,15 +50,9 @@ namespace Iviz.Msgs.Tf2Msgs
             Advanced = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new LookupTransformGoal(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new LookupTransformGoal(ref b);
         
-        LookupTransformGoal IDeserializable<LookupTransformGoal>.RosDeserialize(ref Buffer b)
-        {
-            return new LookupTransformGoal(ref b);
-        }
+        LookupTransformGoal IDeserializable<LookupTransformGoal>.RosDeserialize(ref Buffer b) => new LookupTransformGoal(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -91,16 +85,16 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "tf2_msgs/LookupTransformGoal";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "35e3720468131d675a18bb6f3e5f22f8";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACjWMQQrAIAwE7wv9gz8rqUYRqoEYS59fbNPb7jAMhmntJRhpYduzUmM4GzI1sjOrjX+y" +
-                "NtJUsio9rCfTgM/x0ut4KNebk3eAQ+QMlC7qkRM2PP13H52DAAAA";
+                "H4sIAAAAAAAAEzWMQQqAMAwE7/uK/kyiTUvANpCm4vOlGm+7wzAYbtJrcrLKvhWjxgg2dNrBwVwa/2Rt" +
+                "5Gnkoj2tp9OBz4nS60SoyM05OsCueibKF/WDM/AACrcOXIIAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

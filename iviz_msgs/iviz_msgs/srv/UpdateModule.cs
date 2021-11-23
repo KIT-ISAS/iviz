@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/UpdateModule")]
+    [DataContract (Name = RosServiceType)]
     public sealed class UpdateModule : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public UpdateModuleRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public UpdateModuleResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public UpdateModule()
         {
             Request = new UpdateModuleRequest();
             Response = new UpdateModuleResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public UpdateModule(UpdateModuleRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/UpdateModule";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "9b8bbde938619f17558ceabafe5f3a13";
         
         public override string ToString() => Extensions.ToString(this);
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "fields")] public string[] Fields; // The fields to be updated
         [DataMember (Name = "config")] public string Config; // Configuration encoded in JSON
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public UpdateModuleRequest()
         {
             Id = string.Empty;
@@ -66,7 +66,7 @@ namespace Iviz.Msgs.IvizMsgs
             Config = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public UpdateModuleRequest(string Id, string[] Fields, string Config)
         {
             this.Id = Id;
@@ -74,7 +74,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Config = Config;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal UpdateModuleRequest(ref Buffer b)
         {
             Id = b.DeserializeString();
@@ -82,15 +82,9 @@ namespace Iviz.Msgs.IvizMsgs
             Config = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new UpdateModuleRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new UpdateModuleRequest(ref b);
         
-        UpdateModuleRequest IDeserializable<UpdateModuleRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new UpdateModuleRequest(ref b);
-        }
+        UpdateModuleRequest IDeserializable<UpdateModuleRequest>.RosDeserialize(ref Buffer b) => new UpdateModuleRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -130,35 +124,29 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "success")] public bool Success; // Whether the retrieval succeeded
         [DataMember (Name = "message")] public string Message; // An error message if success is false
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public UpdateModuleResponse()
         {
             Message = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public UpdateModuleResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal UpdateModuleResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new UpdateModuleResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new UpdateModuleResponse(ref b);
         
-        UpdateModuleResponse IDeserializable<UpdateModuleResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new UpdateModuleResponse(ref b);
-        }
+        UpdateModuleResponse IDeserializable<UpdateModuleResponse>.RosDeserialize(ref Buffer b) => new UpdateModuleResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

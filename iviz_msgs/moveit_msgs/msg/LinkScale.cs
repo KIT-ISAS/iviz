@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/LinkScale")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class LinkScale : IDeserializable<LinkScale>, IMessage
     {
         //name for the link
@@ -12,35 +12,29 @@ namespace Iviz.Msgs.MoveitMsgs
         // scaling to apply to the link
         [DataMember (Name = "scale")] public double Scale;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public LinkScale()
         {
             LinkName = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public LinkScale(string LinkName, double Scale)
         {
             this.LinkName = LinkName;
             this.Scale = Scale;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal LinkScale(ref Buffer b)
         {
             LinkName = b.DeserializeString();
             Scale = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new LinkScale(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new LinkScale(ref b);
         
-        LinkScale IDeserializable<LinkScale>.RosDeserialize(ref Buffer b)
-        {
-            return new LinkScale(ref b);
-        }
+        LinkScale IDeserializable<LinkScale>.RosDeserialize(ref Buffer b) => new LinkScale(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -57,16 +51,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/LinkScale";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "19faf226446bfb2f645a4da6f2a56166";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClPOS8xNVUjLL1IoyUhVyMnMy+YqLinKzEsHs+NBslxcygrFyYlAfrpCSb5CYkFBTiWI" +
-                "AdeQlpOfWGJmAlaUysXLBQCnDlJkVAAAAA==";
+                "H4sIAAAAAAAAE1POS8xNVUjLL1IoyUhVyMnMy+YqLinKzEsHs+NBslxcygrFyYk5IMGSfIXEgoKcShAD" +
+                "riEtJz+xxMwErAioGgCWgqioUwAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

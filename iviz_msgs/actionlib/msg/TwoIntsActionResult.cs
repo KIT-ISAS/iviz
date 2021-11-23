@@ -4,21 +4,21 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
 {
-    [Preserve, DataContract (Name = "actionlib/TwoIntsActionResult")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class TwoIntsActionResult : IDeserializable<TwoIntsActionResult>, IActionResult<TwoIntsResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "status")] public ActionlibMsgs.GoalStatus Status { get; set; }
         [DataMember (Name = "result")] public TwoIntsResult Result { get; set; }
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TwoIntsActionResult()
         {
             Status = new ActionlibMsgs.GoalStatus();
             Result = new TwoIntsResult();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TwoIntsActionResult(in StdMsgs.Header Header, ActionlibMsgs.GoalStatus Status, TwoIntsResult Result)
         {
             this.Header = Header;
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.Actionlib
             this.Result = Result;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TwoIntsActionResult(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
@@ -34,15 +34,9 @@ namespace Iviz.Msgs.Actionlib
             Result = new TwoIntsResult(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TwoIntsActionResult(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TwoIntsActionResult(ref b);
         
-        TwoIntsActionResult IDeserializable<TwoIntsActionResult>.RosDeserialize(ref Buffer b)
-        {
-            return new TwoIntsActionResult(ref b);
-        }
+        TwoIntsActionResult IDeserializable<TwoIntsActionResult>.RosDeserialize(ref Buffer b) => new TwoIntsActionResult(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -63,32 +57,32 @@ namespace Iviz.Msgs.Actionlib
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "actionlib/TwoIntsActionResult";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "3ba7dea8b8cddcae4528ade4ef74b6e7";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1W0XIaNxR93xn+QTM8xO7UTpukaeoZHiimDh0n8di0rx6tdNlVq9VSSQvm73uuFhao" +
-                "YcJDagZ7wZbOPTr33Kv7kaQmL8r0yKSKpnbW5I9VKMLrm1rahyhjE0RIj2y6rCcuhnsKjY3Cp0cvG3zj" +
-                "Vy/79HBzhZi65fExsetlfQE2TkuvRUVRahmlmNVgb4qS/IWlBVlmWs1Ji/TfuJpTuMTGaWmCwLsgR15a" +
-                "uxJNwKJYC1VXVeOMkpFENBXt7cdO44QUc+mjUY2VHutrr43j5TMvK2J0vAP905BTJCbXV1jjAqkmGhBa" +
-                "AUF5ksG4Av8UWWNcfPuGN2R96HmBr1QgB11wEUsZmSw9zSEx85ThCjG+aw93CWyoQ4iigzhLf3vE13Au" +
-                "EAQUaF6rUpyB+d0qlrUDIImF9EbmlhhYQQGgvuJNr853kJn2lXDS1Rv4FnEb4xRY1+HymS5K5Mzy6UNT" +
-                "QEAsnPt6YTSW5qsEoqwhFwWM56VfZbyrDZn1f2ONsQi7UkbwlCHUyiABWixNLLMQPaOnbDwanf1vhjxa" +
-                "Hr2MPyO5BR5MgXP8YVM07Ze78efryecbsXkNxA/4zc6ktE2UMogVRfZkTiyRanO/1qgNjrT7BSq1xRyO" +
-                "ppM/x2IH88d9TE5K4z3EhQ9zYplOAr67H48/3U3H1x3wm31gT4rgbjgTWYdD+C8ogBCFnEWY2UQ+vecc" +
-                "0VMqBVdkW6LPX338wCdJhdZzKMy5JUYwMWxQQPRsSr5CAVruBpHO15Qf/hiNxuPrHcpv9ykvgSxVadAl" +
-                "NKyoWIVZw63gkBDHwgx//XK/1YXDvDsQJq/T0XWTnLnlfjCSbuir0rArQo1KmEljG0/H6N2Pfx+PdvgN" +
-                "xE/P6Xn6ixTzO0iHa6pu4n/t8v3XOeakJNpqwuyCNWiVUYIpNwk0a+MW0hp97ABr53WVMhDvX8B5nfVc" +
-                "HVMRbs3XJa9TeDS8vd1W8kD8fCrBnHBb0UGGp6iLnDzP1j5pNzO+4nuNb5AuDak1MxPSe4fYtcmHb3CI" +
-                "02RmU+yVXxuAb44jnrj98jDdhRqIXxLg0G3EWF8gQBIaWWMQakWQnQSMctkOAgEGtzrplp9Qe4Gxa1ab" +
-                "JV0aHB+Vg1j7rTPrD62tl2kk4YUoBXyot/cVyKzvKq4xsTNe8RZNeVMULON6UaSnmL3obTa55iGLTdAO" +
-                "ImudQuSM85HSzQxVl6XBhJFu5Z2ukgxCmieiSRpg0ox1QCrsJ8cWwkEpsEYYdKiaI13WYjdjhjZ/S0Lo" +
-                "DnrjPriSPHeVxGh3YFjzN3ozZKAbgx4a3W4iZkQ6l+pvNiR2tIMshsoQZMEZRnbCnJSZGbWph8QgsIEY" +
-                "nSe+dgFIVU2qC7Q6g1WXm/xh1Qtk7/XeTN7LUDHv36HAql72LxLm0xXdCwAA";
+                "H4sIAAAAAAAAE71WwXLbNhC98yswo0PsTq20SZqmntFBlVRHGSfx2EqvHpBYkWhBUAVAyfr7vgUpinKs" +
+                "RIckGtu0JODtw9u3i31LUpETRXwkMgu6skan96XP/fOrSpq7IEPthY+PZLGp5jb4W/K1CcLFRzL6xq/k" +
+                "/d3VJSKqhsXbhttAgIpV0ilRUpBKBimWFajrvCB3YWhNhmmWK1Iifhu2K/JDbFwU2gv85GTJSWO2ovZY" +
+                "FCqRVWVZW53JQCLokg72Y6e2QoqVdEFntZEO6yuntOXlSydLYnT8ePqvJpuRmE8vscZ6yuqgQWgLhMyR" +
+                "9Nrm+FIktbbh5QvekAwg5gXeUo4EdMFFKGRgsvSwgr7MU/pLxPipOdwQ2BCHEEV5cRY/u8dbfy4QBBRo" +
+                "VWWFOAPzm20oKgtAEmvptEwNMXAGBYD6jDc9O+8h2whtpa128A3iPsYpsLbD5TNdFMiZ4dP7OoeAWLhy" +
+                "1VorLE23ESQzmmwQcJ2TbpvwriZkMviLNcYi7IoZwVN6X2UaCVBio0OR+OAYPWbjXqvkO7nxaGUk/C8y" +
+                "m+PB8TnBb3bl0ry5mX2Yzj9cid1rJH7BX7YlxW2ikF5sKbAhU2J9sibxrUBNbOTcrVEHDeZ4spj/PRM9" +
+                "zF8PMTkjtXNQFiZMiTU6CfjmdjZ7f7OYTTvgF4fAjjKCtWFLpBz24E/gfh+EXAY4WQc+veME0UOsA5sn" +
+                "4guvAX5hkqhCYzhU5coQI+jgdyggerYgV6L6DLeCQOct5btPk8lsNu1RfnlIeQNkmRWamLavM1ZhWXMf" +
+                "eEqIY2HGf3683evCYV49ESat4tFVHW255/5kJFXTV6VhV/gKZbCU2tSOjtG7nb2bTXr8RuK3z+k5+oey" +
+                "cMQBsaCqOjy2y89f55hSJtFTI2YXrEafDBJMuUOgU2u7lkarYwdonddVyki8/gHO66xnqxCLcG++Lnmd" +
+                "wpPx9fW+kkfi91MJpoSrip5keIq6yMnn2TokbZfalXyp8fUR+l0gMiF1cIi+Td58g0OcJjOb4qD8mgB8" +
+                "bRzxxPXHu0UfaiT+iIBjuxOjvT2AJBSyxiDUiCA7CRhl2EwBHgY3KuqWnlB7nrErVpsl3WgcH5Uj7aPW" +
+                "mQzGxlSbOI/wQpSC47rtLiuQaS8qrjHRG6x4i6K0znOWsV0U6CEkP/Aqm0+TxgHNCNKK5AOnm88T72RI" +
+                "uik0Zot4H/daSnQHKZ6F5nF0qds75rFO2E+W/YNTkmeBMOJQuUKujMFuxvRN8jaE0B30znqwJDluKZFR" +
+                "f1Ro+aO7tOMFWjHobQ+zsCRSqcz+ZTdiRzO/Ypz0XubUpMavKNNLne2KITLwwxadZ71mAUiVdSwK9DmN" +
+                "VcNd8ngI+d6pe34wiCeoldevUFpl8j8DF3zl0AsAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

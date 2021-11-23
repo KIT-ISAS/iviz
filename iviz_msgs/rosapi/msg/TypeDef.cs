@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Rosapi
 {
-    [Preserve, DataContract (Name = "rosapi/TypeDef")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class TypeDef : IDeserializable<TypeDef>, IMessage
     {
         [DataMember (Name = "type")] public string Type;
@@ -15,7 +15,7 @@ namespace Iviz.Msgs.Rosapi
         [DataMember (Name = "constnames")] public string[] Constnames;
         [DataMember (Name = "constvalues")] public string[] Constvalues;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TypeDef()
         {
             Type = string.Empty;
@@ -27,7 +27,7 @@ namespace Iviz.Msgs.Rosapi
             Constvalues = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TypeDef(string Type, string[] Fieldnames, string[] Fieldtypes, int[] Fieldarraylen, string[] Examples, string[] Constnames, string[] Constvalues)
         {
             this.Type = Type;
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.Rosapi
             this.Constvalues = Constvalues;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TypeDef(ref Buffer b)
         {
             Type = b.DeserializeString();
@@ -51,15 +51,9 @@ namespace Iviz.Msgs.Rosapi
             Constvalues = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TypeDef(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TypeDef(ref b);
         
-        TypeDef IDeserializable<TypeDef>.RosDeserialize(ref Buffer b)
-        {
-            return new TypeDef(ref b);
-        }
+        TypeDef IDeserializable<TypeDef>.RosDeserialize(ref Buffer b) => new TypeDef(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -120,16 +114,16 @@ namespace Iviz.Msgs.Rosapi
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "rosapi/TypeDef";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "80597571d79bbeef6c9c4d98f30116a0";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACisuKcrMS1coqSxI5SoGs6NjFdIyU3NS8hJzU4vRxEDKirky80qMjWBCiUVFiZU5qXkI" +
-                "lakVibkFOch6k/PzikvQzAOLlSXmlAIFebkAOlzavYcAAAA=";
+                "H4sIAAAAAAAAEysuKcrMS1coqSxI5SoGs6NjFdIyU3NS8hJzU4vRxEDKirky80qMjWBCiUVFiZU5qXkI" +
+                "lakVibkFOch6k/PzikvQzAOLlSXmlAIFuQB/w6D2hgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

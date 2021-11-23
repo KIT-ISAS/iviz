@@ -4,38 +4,32 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [Preserve, DataContract (Name = "std_msgs/String")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class String : IDeserializable<String>, IMessage
     {
         [DataMember (Name = "data")] public string Data;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public String()
         {
             Data = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public String(string Data)
         {
             this.Data = Data;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal String(ref Buffer b)
         {
             Data = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new String(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new String(ref b);
         
-        String IDeserializable<String>.RosDeserialize(ref Buffer b)
-        {
-            return new String(ref b);
-        }
+        String IDeserializable<String>.RosDeserialize(ref Buffer b) => new String(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -51,15 +45,15 @@ namespace Iviz.Msgs.StdMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "std_msgs/String";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "992ce8a1687cec8c8bd883ec73ca41d1";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACisuKcrMS1dISSxJ5OLlAgCAhD+7DgAAAA==";
+                "H4sIAAAAAAAAEysuKcrMS1dISSxJ5OICADpmzaUNAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

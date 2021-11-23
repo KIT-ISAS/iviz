@@ -4,39 +4,33 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/ExecuteTrajectoryGoal")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class ExecuteTrajectoryGoal : IDeserializable<ExecuteTrajectoryGoal>, IGoal<ExecuteTrajectoryActionGoal>
     {
         // The trajectory to execute
         [DataMember (Name = "trajectory")] public RobotTrajectory Trajectory;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ExecuteTrajectoryGoal()
         {
             Trajectory = new RobotTrajectory();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ExecuteTrajectoryGoal(RobotTrajectory Trajectory)
         {
             this.Trajectory = Trajectory;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ExecuteTrajectoryGoal(ref Buffer b)
         {
             Trajectory = new RobotTrajectory(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ExecuteTrajectoryGoal(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ExecuteTrajectoryGoal(ref b);
         
-        ExecuteTrajectoryGoal IDeserializable<ExecuteTrajectoryGoal>.RosDeserialize(ref Buffer b)
-        {
-            return new ExecuteTrajectoryGoal(ref b);
-        }
+        ExecuteTrajectoryGoal IDeserializable<ExecuteTrajectoryGoal>.RosDeserialize(ref Buffer b) => new ExecuteTrajectoryGoal(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -53,34 +47,34 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/ExecuteTrajectoryGoal";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "054c09e62210d7faad2f9fffdad07b57";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACsVXTW/cNhC9E/B/IOBD7GK9BpIiBwM9BEjTukDQtFn0EhgLrjSSmEikQlJeb39935D6" +
-                "WtlGAqRxFgusKM7Xm3kz5Iq/7c6GjVMfKQvWHWQYH8WJ+OV//pyIt+9/u5KNvSUdto0v/eXC/4mYAkgC" +
-                "f1ht5gF+5PV2FuZS4W1XB/36zzdLxYbfb3NbbO+Z+G5IvwDmRPxOKicnq/gjfHDalB9uepBGNeTFQucd" +
-                "LyHS8q//fqH7kKeYU4gn4lS+D8rkyuWyoaByFZQsLGLXZUXuoqZbqqGlmpZyGXfDoSW/huKm0l7iW5Ih" +
-                "p+r6IDsPoWBlZpumMzpTgWTQgDvXh6Y2UslWuaCzrlYO8tbl2rB44ZAeto6vp88dmYzk9esryBhPWRc0" +
-                "AjrAQuZIeeQVm1J0yNqL56wgTjd7e4EllajA6FyGSgUOlu5aR57jVP4KPn5K4NawjewQvORensV3Wyz9" +
-                "uYQThECtzSp5hsjfHUJlDQySvFVOq11NbDhDBmD1GSs9O59Z5rCvpFHGDuaTxcnH15g1o13GdFGhZjWj" +
-                "912JBEKwdfZW5xDdHaKRrNZkgqz1zinuJ2gll+L0DecYQtCKFcGv8t5mGgXI5V6HqudsqsZW5z+sl2Jf" +
-                "MEt/VUj/JJwaRfqWMl1oQl0RNQreWq+DBlU+rCSIAkwBu1ioLKMaNI2bNzewaI+lqQDtw00kP+dv5guM" +
-                "3oEBd0w/ypmcr+p69J2jXnWHEJRDxVIFPScYnEZEysc3sffBAvCRhRYw18AuRFFbFV7+HMdAH9js3QRn" +
-                "9vII1ux9QiPyLm1F0mwLZ5stOICNJ6vnI3ObS7pBWtKIZAYOsyOltefwYi5IsD5uOCrIxdEQef1AzQbk" +
-                "fjGMuXhQ5yGA9kjJsQXGUTxILnCQ9KWa2TojJl9iHPcK7xkPp03UPx/omSRUbdE5i3D2GoxB29ddzijA" +
-                "FacO7His9OVU38vjqp6m4VX1TIrcqsmUoRrINVqbsWwVk3WklAg5iHHT85RdsjMaW4uHj61HyvlUx9dX" +
-                "sut4aiwrmyH/A8tmtZRnHY4JK19KGDwXJVkciIOjzSAFkKOGF4nF6Hu2iRmhhi49zMbDwE7rdInWRxxT" +
-                "ypdu9tqH416/5wLkmdHj2/wcE+0HjItHspzGA3pt7NRE46lYOwp7IkS6t/fGRJywhSPQvlUZbhPin8iL" +
-                "F0m/jhjFXx0UnGG4zqZJ8FQ4+3AeQskM4s0FBG7U6zh9rMH1pyHFI8pOmlDMtYMqYKwTY5AnWkkdZG6R" +
-                "EmMDbDTqE0wSbhOsrdq2HnsgpYVfQ+WM1uV6JfcVUhyl+DYQ727xtqczySTLF5Mw2pQ9upUMxfM0+GLM" +
-                "yRmqCCNDws/X8rqQB9vJPQPCg+svmfHIHeKKl6Fg7YpPid7EcUZjxyMt3quST2EfMO5R+P5ElHfj02F8" +
-                "+veJqj0R7cGCo1MdX9VSBo/KzqvPE005z1/CJIan/ZM1Lc+SEdlwv/bTJDyGtHP2E0iFcjHRPC6ohnCD" +
-                "5cNKmTL+HeB/BviHMTRtLzKtezkA/A/jmQ1p6Q4AAA==";
+                "H4sIAAAAAAAAE8VXTW/cNhC981cQ8CF2sV4DSZGDgR4KpGldIGjaGLkExoIrjSQmEqmQlDfbX983pL5t" +
+                "IwHabBcLrCjO15t5M+SKv+zehlunPlIWrDvKMD4K8dN//BFv3v16LRt7TzrsGl/6q5V3MXlP+79bbebR" +
+                "feT1Ljyt8Karg371x+u1YsPvd7ktdg9MfCeYX4EifiOVk5NV/BE+OG3KD3c9QqMa8mKl8paXEGn513+v" +
+                "uH3IU8ApQHEm3wVlcuVy2VBQuQpKFhaB67Iid1nTPdVQUk1LuYy74diS30LxttJe4luSIafq+ig7D6Fg" +
+                "ZWabpjM6U4Fk0MA614emNlLJVrmgs65WDvLW5dqweOGQG7aOr6fPHZmM5M2ra8gYT1kXNAI6wkLmSHkk" +
+                "FZtSdEjZi+esIM5uD/YSSyqR/tG5DJUKHCx9aR15jlP5a/j4IYHbwjaSQ/CSe3ke3+2w9BcSThACtTar" +
+                "5Dkif3sMlTUwSPJeOa32NbHhDBmA1Wes9OxiZtlE00YZO5hPFicf32LWjHYZ02WFmtWM3nclEgjB1tl7" +
+                "nUN0f4xGslqTCbLWe6e4k6CVXIqz15xjCEErVgS/ynubaRQglwcdqp6wqRo7nf9PXRRbApB/Ucj9JJta" +
+                "RPqWMl1oQlERMqrdWq+DBk8+bCRYAkABu1ioLKMaHI2bd3ewaJfSVIDz4S4yn5M38wU671H+L8w9ypmZ" +
+                "P9f16DtHseoOIShHTGtW9pxdEBoRKR/fxK6XsetZaIVyC+hCFLVV4eWPcQD0gc3eTXBmLxewZu8TGpF3" +
+                "aSsyZlc42+xAAGycqJhPDOs4OaifjMy9YWqknPbsXU0ECb7HDUcFuTgUIqMfKdgA269mMFcO6tz+aIyU" +
+                "GVtgEMXD4xKHR1+nma1zYuYlunGX8J7xcNpE/YuBm0lC1RY9swrnoEEXNHzd5YwCRHHqyI7HMl9Nxb1a" +
+                "lvQsja2qp1EkVk2mDNXArNHajGKbmKyFUmLjIMbtLqPxJTWjsa14/LR6opqnObW+kVqLebEua4bkDxSb" +
+                "FVKedy2z76WEvQtRksU5OPi5HaSAcNTwIlEYHc82MR3U0J/H2WAYqGmdLnWk2pTvtZuD9mHZ5Q9cmEW7" +
+                "/zs/S5adfFA8kePhSjH2qB96qa/UnsKBCGEe7IMBEQdr4QiEb1WGG4R4HznxIunXEaD4s4OCM4zV2TQD" +
+                "TgOyD+YRiMwd3lvFz/15E4eONbjvNKR4MtlJE4q5dlAFhm3iCpJEG6mDzC3yYSy3QqM+wSTh+sDaqm3r" +
+                "kf11X3TLKue0LbcbeaiQ3yjFx3+8rMXrnc4k0ytfDcBoU/bgNjIUz9O8izEnZyghjAzZvtjKm0IebScP" +
+                "DAgPrr9VxmN2iCvefoK1Gz4cehPLhMZWR1q8VyWfvD5gym/HY1R+GZ+O49PfJyn1xLHHqm24T8fzZ1Fz" +
+                "Xn2eCMpJ/iqg4elwol7lATLAGq7Sfpp+Szx7Zz8Rg4wU87iLGsJllU8nZcp48+c/AfgzMfRqLzKtezkh" +
+                "/gHqm2rqyg4AAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

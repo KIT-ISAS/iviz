@@ -4,41 +4,35 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TurtleActionlib
 {
-    [Preserve, DataContract (Name = "turtle_actionlib/ShapeResult")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class ShapeResult : IDeserializable<ShapeResult>, IResult<ShapeActionResult>
     {
         //result definition
         [DataMember (Name = "interior_angle")] public float InteriorAngle;
         [DataMember (Name = "apothem")] public float Apothem;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ShapeResult()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ShapeResult(float InteriorAngle, float Apothem)
         {
             this.InteriorAngle = InteriorAngle;
             this.Apothem = Apothem;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ShapeResult(ref Buffer b)
         {
             InteriorAngle = b.Deserialize<float>();
             Apothem = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ShapeResult(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ShapeResult(ref b);
         
-        ShapeResult IDeserializable<ShapeResult>.RosDeserialize(ref Buffer b)
-        {
-            return new ShapeResult(ref b);
-        }
+        ShapeResult IDeserializable<ShapeResult>.RosDeserialize(ref Buffer b) => new ShapeResult(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -50,22 +44,22 @@ namespace Iviz.Msgs.TurtleActionlib
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "turtle_actionlib/ShapeResult";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "b06c6e2225f820dbc644270387cd1a7c";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuNKy8lPLDE2UsjMK0ktyswvik/MS89J5YIJJxbkl2Sk5vJyAQDg6GOSKQAAAA==";
+                "H4sIAAAAAAAAE+NKy8lPLDE2UsjMK0ktyswvik/MS89J5YIJJxbkl2Sk5nIBAEOeaCAoAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

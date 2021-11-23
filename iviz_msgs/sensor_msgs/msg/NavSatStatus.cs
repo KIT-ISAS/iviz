@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [Preserve, DataContract (Name = "sensor_msgs/NavSatStatus")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class NavSatStatus : IDeserializable<NavSatStatus>, IMessage
     {
         // Navigation Satellite fix status for any Global Navigation Satellite System
@@ -24,34 +24,28 @@ namespace Iviz.Msgs.SensorMsgs
         public const ushort SERVICE_GALILEO = 8;
         [DataMember (Name = "service")] public ushort Service;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public NavSatStatus()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public NavSatStatus(sbyte Status, ushort Service)
         {
             this.Status = Status;
             this.Service = Service;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal NavSatStatus(ref Buffer b)
         {
             Status = b.Deserialize<sbyte>();
             Service = b.Deserialize<ushort>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new NavSatStatus(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new NavSatStatus(ref b);
         
-        NavSatStatus IDeserializable<NavSatStatus>.RosDeserialize(ref Buffer b)
-        {
-            return new NavSatStatus(ref b);
-        }
+        NavSatStatus IDeserializable<NavSatStatus>.RosDeserialize(ref Buffer b) => new NavSatStatus(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -63,28 +57,28 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 3;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "sensor_msgs/NavSatStatus";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "331cdbddfa4bc96ffc3b9ad98900a54c";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACo2RT0/CQBDF7038DpNwlggxxosmRZGQIBjrv5vZttN2kmWX7M6CfHtnoVVBD+6tM32/" +
-                "mXmvB3O1ploxWQOZYtSaGKGiD/CsOHiorANltjDRNlf679+zrWdcJkkPXhvkBh2wBRt4FVi0oEK9RMNY" +
-                "7rjkoURGtyQjlXwLueUGRBW7guDtCkVV7kpaeQamJUJJVYVOMCRbFNY5LOIWHjZSBflCWmPZB0iF0c5Z" +
-                "K00lbBo03TXXV5A9pU/P2fvd9K2fJGT4sqvMF7EIVwCnA2hfD4JRucZ4UISurKc49kDYquI7OxD+vPtA" +
-                "kY3STvZj1IbECN+5eporL9IWsrP8gDH5ZgyPGLWzwZR/AZIdYW9GzGtEHOOoyJCpxSkqmn8kDZ5qo/Te" +
-                "e6GEOEeSjIm1STgxN8iwwQVk48eX6c34ffKQtTYNfrVmi3maxfbwuHWzuH/Yt867G8kUOpToYYR0a0P/" +
-                "Fy2dTWfjhUguv5bw6NZUYHKSfALQV8nU8wIAAA==";
+                "H4sIAAAAAAAAE42RT0/DMAzF7/0UlnZmYgghLiB1MKZJY0OUfzeUtm5rKUumxNnYt8ehLWyMA7nV7vvZ" +
+                "fm8AC7WhWjFZA5li1JoYoaIP8Kw4eKisA2V2MNU2V/rv37OdZ1wlyQBeG+QGHbAFG3gdWLSgQr1Cw1h+" +
+                "cclDiYxuRUYq+Q5yyw2IKnYFwbs1iqr8KmnlGZhWCCVVFTrBkGxRWOewiFt42EoV5Atpg+UQIBVGN2ej" +
+                "NJWwbdD011xfQfaUPj1n73ezt2GSkOHLvrJYxiJcAZyMoHsDCEblGuNBEbq2nuLYA2Gniu/0QLh/94Ei" +
+                "G6e9bG/UlsQI37t6kisv0g6ijqZOfxhnvxi1s8GUfwFaQmtGzGtMHOOoyJCpxSkqmn8kDZ5qo3TrvVCC" +
+                "b5OMiXVJODE3yLDRBWSTx5fZzeR9+pB1No2OWvPlIs1i++x362Z5/9C2zvsbyRQ6lOhhjHRrw/CIls5n" +
+                "88lSJJffS3h0GyowST4B7Ndp4/ICAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

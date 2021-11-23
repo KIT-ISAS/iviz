@@ -4,41 +4,35 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [Preserve, DataContract (Name = "mesh_msgs/VectorFieldStamped")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class VectorFieldStamped : IDeserializable<VectorFieldStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "vector_field")] public MeshMsgs.VectorField VectorField;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public VectorFieldStamped()
         {
             VectorField = new MeshMsgs.VectorField();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public VectorFieldStamped(in StdMsgs.Header Header, MeshMsgs.VectorField VectorField)
         {
             this.Header = Header;
             this.VectorField = VectorField;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal VectorFieldStamped(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             VectorField = new MeshMsgs.VectorField(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new VectorFieldStamped(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new VectorFieldStamped(ref b);
         
-        VectorFieldStamped IDeserializable<VectorFieldStamped>.RosDeserialize(ref Buffer b)
-        {
-            return new VectorFieldStamped(ref b);
-        }
+        VectorFieldStamped IDeserializable<VectorFieldStamped>.RosDeserialize(ref Buffer b) => new VectorFieldStamped(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -56,25 +50,25 @@ namespace Iviz.Msgs.MeshMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "mesh_msgs/VectorFieldStamped";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "3d9fc2de2c0939ad4bbe0890ccb68ce5";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1UTWvbQBC9L/g/DOQQpzgqJKUHQ28lrQ+FQEIvpZixNJKWrnbV3ZUd9df37cpRk2JK" +
-                "D02NwCvtvDdvPkOstl1owuuPwpV4avOf6iS00/fPUkbnb7SYivb5vK3Ti1qod//4t1Cf7j6sKTyXtFBn" +
-                "dBfZVuwr6iRyxZGpdtCqm1b8pZG9GKC466WifBvHXkIB4H2rA+FpxIpnY0YaAoyio9J13WB1yVEoasT7" +
-                "FA+ktsTUs4+6HAx72DtfaZvMa8+dJHY8Qb4PYkuhzfs1bGyQcogagkYwlF44aNvgktSgbby+SgB1dn9w" +
-                "l3iVBhmfnVNsOSax8tB7CUknhzV8vJqCK8CN7Ai8VIGW+dsWr+GC4AQSpHdlS0sovx1j6ywIhfbsNe+M" +
-                "JOISGQDreQKdXzxhTrLXZNm6R/qJ8ZePv6G1M2+K6bJFzUyKPgwNEgjD3ru9rmC6GzNJabTYSEbvPPtR" +
-                "JdTkUp3dpBzDCKhcEfxzCK7UKEBFBx1bFaJP7LkaW/2CDXlyGBaqEYd29ON0detQ0C9fqXdBR41G+O1+" +
-                "gl7DYpqi8HJ6TwhbPM4CqhtZ25Dz/6iVXJ2aPRmmvq+9oA49l6Jq4zi+fUMP82mcTz/+VwTH1M0xeEnz" +
-                "gc5BTxyz+Vx2kSZzk2fJWUxiJ4zIMPQzEsBKe0ARfQFW8YKNIivSkSongayL4Oj4GygFjU1Ac9+DDNvF" +
-                "sw2Gc+bwGZClFE2xokMr2BrJKjVmXiN58eiSvG409k5CwlE3g5mO0a0o1ldobGMmzZMzVAkk3sUMuCho" +
-                "U9PoBjqkgHDwx33naAeJR115LqNzq7TsjhQneiL1deAGI2xDxKot1J/LvVA/AbRA7ictBgAA";
+                "H4sIAAAAAAAAE71UTWvcMBC9+1cM5JCkbFxISg8LvZW0ORQCCb2UssxKY1tUllxJ3o376/sk77pJCbSH" +
+                "pothZWvemzefMelNH9v4+qOwlkBd+at6id38/bOo5MO1EatpV86bJr9U1bt//Ks+3X1YU3wqqDqhu8RO" +
+                "c9DUS2LNianxEGraTsKFlZ1YgLgfRFO5TdMgsQbwvjOR8LTiJLC1E40RRsmT8n0/OqM4CSWDYB/jgTSO" +
+                "mAYOyajRcoC9D9q4bN4E7iWz44nyfRSnhG7er2HjoqgxGQiawKCCcDSuxSVVo3Hp6jIDqpP7vb/Aq7RI" +
+                "9+KcUscpi5WHIUjMOjmu4ePVHFwNbiRH4EVHOivfNniN5wQnkCCDVx2dQfntlDrvQCi042B4ayUTK2QA" +
+                "rKcZdHr+iNkVasfOH+lnxl8+/obWLbw5posONbM5+ji2SCAMh+B3RsN0OxUSZY24RNZsA4epyqjZZXVy" +
+                "nXMMI6BKRfDPMXplUABNe5O6KqaQ2Us1NubFuvHZOaha8ejFMM03tx7V/PKVBh9NMuiC3+5n5BUs5vmJ" +
+                "LyX2GVnHKUBdExsXS+aPQsk3uc2zXe74JggqMLCSqrGe09s39LCcpuX04//IP2TtGECQPBZoGLTCIY9P" +
+                "Ndd5IG/KCHmHAeyFERZmfUECqE0AFKHXYJUgWCSyIpNIe4nkfM5Xz99AKejnjOZhABmWSmAXLZe04TMg" +
+                "Z1K39Yr2nbjZKvdj2R5l3xhFwbRGz0g46hcw0yG4FaXmEv1s7ax5doYSgST4VADnNd00NPmR9jkgHMJh" +
+                "zXnayqKrjGPyfpV33IHimX7IDR25xeS6mLBg6+oPtf4JFgGUXiAGAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

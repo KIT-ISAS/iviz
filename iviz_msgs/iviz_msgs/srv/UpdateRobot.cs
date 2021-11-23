@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/UpdateRobot")]
+    [DataContract (Name = RosServiceType)]
     public sealed class UpdateRobot : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public UpdateRobotRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public UpdateRobotResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public UpdateRobot()
         {
             Request = new UpdateRobotRequest();
             Response = new UpdateRobotResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public UpdateRobot(UpdateRobotRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/UpdateRobot";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "7e6f65767dc26bdb9812dffefc4efaa1";
         
         public override string ToString() => Extensions.ToString(this);
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "configuration")] public IvizMsgs.RobotConfiguration Configuration;
         [DataMember (Name = "valid_fields")] public string[] ValidFields;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public UpdateRobotRequest()
         {
             Id = string.Empty;
@@ -66,7 +66,7 @@ namespace Iviz.Msgs.IvizMsgs
             ValidFields = System.Array.Empty<string>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public UpdateRobotRequest(int Operation, string Id, IvizMsgs.RobotConfiguration Configuration, string[] ValidFields)
         {
             this.Operation = Operation;
@@ -75,7 +75,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.ValidFields = ValidFields;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal UpdateRobotRequest(ref Buffer b)
         {
             Operation = b.Deserialize<int>();
@@ -84,15 +84,9 @@ namespace Iviz.Msgs.IvizMsgs
             ValidFields = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new UpdateRobotRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new UpdateRobotRequest(ref b);
         
-        UpdateRobotRequest IDeserializable<UpdateRobotRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new UpdateRobotRequest(ref b);
-        }
+        UpdateRobotRequest IDeserializable<UpdateRobotRequest>.RosDeserialize(ref Buffer b) => new UpdateRobotRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -134,35 +128,29 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "success")] public bool Success;
         [DataMember (Name = "message")] public string Message;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public UpdateRobotResponse()
         {
             Message = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public UpdateRobotResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal UpdateRobotResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new UpdateRobotResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new UpdateRobotResponse(ref b);
         
-        UpdateRobotResponse IDeserializable<UpdateRobotResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new UpdateRobotResponse(ref b);
-        }
+        UpdateRobotResponse IDeserializable<UpdateRobotResponse>.RosDeserialize(ref Buffer b) => new UpdateRobotResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

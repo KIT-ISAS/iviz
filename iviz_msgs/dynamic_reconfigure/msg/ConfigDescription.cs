@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DynamicReconfigure
 {
-    [Preserve, DataContract (Name = "dynamic_reconfigure/ConfigDescription")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class ConfigDescription : IDeserializable<ConfigDescription>, IMessage
     {
         [DataMember (Name = "groups")] public Group[] Groups;
@@ -12,7 +12,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         [DataMember (Name = "min")] public Config Min;
         [DataMember (Name = "dflt")] public Config Dflt;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ConfigDescription()
         {
             Groups = System.Array.Empty<Group>();
@@ -21,7 +21,7 @@ namespace Iviz.Msgs.DynamicReconfigure
             Dflt = new Config();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ConfigDescription(Group[] Groups, Config Max, Config Min, Config Dflt)
         {
             this.Groups = Groups;
@@ -30,7 +30,7 @@ namespace Iviz.Msgs.DynamicReconfigure
             this.Dflt = Dflt;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ConfigDescription(ref Buffer b)
         {
             Groups = b.DeserializeArray<Group>();
@@ -43,15 +43,9 @@ namespace Iviz.Msgs.DynamicReconfigure
             Dflt = new Config(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ConfigDescription(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ConfigDescription(ref b);
         
-        ConfigDescription IDeserializable<ConfigDescription>.RosDeserialize(ref Buffer b)
-        {
-            return new ConfigDescription(ref b);
-        }
+        ConfigDescription IDeserializable<ConfigDescription>.RosDeserialize(ref Buffer b) => new ConfigDescription(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -91,19 +85,19 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "dynamic_reconfigure/ConfigDescription";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "757ce9d44ba8ddd801bb30bc456f946f";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACsWUwWrEIBCG7wN5B99goS09LPTSBkIPCws5lrK4cZIKRoOOS/ftq0nTaNneSuIl4y+S" +
-                "75/5sbLGD2/vrItfBy9Gt7JjPf/8KaWeS9EqggKe/nkVcKirPRNXzXvZnCw24++8xV0VqQpwZKXuWDjH" +
-                "uabrgHDklvclusbKgaTRwccQJSS0DqSm+7sooCb2vZNiXQO/Cf/24idAhRdU84FYLs4SCkmnYPDDrOxk" +
-                "ykABz8ao49zk0PBz2Dt41ZSKwYuDmmyqBQMOSuPPClNZjIqDcdQ1ccIljasazIzlc4oe2YUrj+sipV3N" +
-                "iaawbICUDvVmmDdgKvNQ5VitMpweH7bgWiJ9I04u6surlD5WgfILw41+cpcFAAA=";
+                "H4sIAAAAAAAAE72UQWrDMBBF93MK3aDQli4K2TQB00Uh4GUJQbHGrkCWjGYUmttXsuNETtpdkTYefSH8" +
+                "/sxHlXdh+NyJLn0J1s62uhO9/L6U2s6lag0DrP55wUddvQp1srLXzd5jM/4seHyoEhMQe207EY9xrvk0" +
+                "IGyll/0GqfF6YO1sNDEkCRk9gbb89JgEtCzOO61K0t/y/WkkTHQGj2jmA3V/D5XmfXT35YramGYPb86Z" +
+                "7dze2OpD3BO8W87FaISgZp9rkZ5g48LBYC6rUSEYZ1yzZLyGsKC7ha3FhJJBcZQmYEmevKELnCkjxXny" +
+                "Yf4W4OJAN0laMLXGSX55Lg91DfF9hGiULw9Q/i4B/AA3YEEyfgUAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/GetStateValidity")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetStateValidity : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetStateValidityRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetStateValidityResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetStateValidity()
         {
             Request = new GetStateValidityRequest();
             Response = new GetStateValidityResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetStateValidity(GetStateValidityRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/GetStateValidity";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "0c7c937b6a056e7ae5fded13d8e9b242";
         
         public override string ToString() => Extensions.ToString(this);
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "group_name")] public string GroupName;
         [DataMember (Name = "constraints")] public Constraints Constraints;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetStateValidityRequest()
         {
             RobotState = new RobotState();
@@ -65,7 +65,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Constraints = new Constraints();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetStateValidityRequest(RobotState RobotState, string GroupName, Constraints Constraints)
         {
             this.RobotState = RobotState;
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.Constraints = Constraints;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetStateValidityRequest(ref Buffer b)
         {
             RobotState = new RobotState(ref b);
@@ -81,15 +81,9 @@ namespace Iviz.Msgs.MoveitMsgs
             Constraints = new Constraints(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetStateValidityRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetStateValidityRequest(ref b);
         
-        GetStateValidityRequest IDeserializable<GetStateValidityRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetStateValidityRequest(ref b);
-        }
+        GetStateValidityRequest IDeserializable<GetStateValidityRequest>.RosDeserialize(ref Buffer b) => new GetStateValidityRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -129,7 +123,7 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "cost_sources")] public CostSource[] CostSources;
         [DataMember (Name = "constraint_result")] public ConstraintEvalResult[] ConstraintResult;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetStateValidityResponse()
         {
             Contacts = System.Array.Empty<ContactInformation>();
@@ -137,7 +131,7 @@ namespace Iviz.Msgs.MoveitMsgs
             ConstraintResult = System.Array.Empty<ConstraintEvalResult>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetStateValidityResponse(bool Valid, ContactInformation[] Contacts, CostSource[] CostSources, ConstraintEvalResult[] ConstraintResult)
         {
             this.Valid = Valid;
@@ -146,7 +140,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.ConstraintResult = ConstraintResult;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetStateValidityResponse(ref Buffer b)
         {
             Valid = b.Deserialize<bool>();
@@ -167,15 +161,9 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetStateValidityResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetStateValidityResponse(ref b);
         
-        GetStateValidityResponse IDeserializable<GetStateValidityResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetStateValidityResponse(ref b);
-        }
+        GetStateValidityResponse IDeserializable<GetStateValidityResponse>.RosDeserialize(ref Buffer b) => new GetStateValidityResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

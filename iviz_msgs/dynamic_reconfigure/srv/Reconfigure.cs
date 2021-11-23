@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DynamicReconfigure
 {
-    [DataContract (Name = "dynamic_reconfigure/Reconfigure")]
+    [DataContract (Name = RosServiceType)]
     public sealed class Reconfigure : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public ReconfigureRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public ReconfigureResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public Reconfigure()
         {
             Request = new ReconfigureRequest();
             Response = new ReconfigureResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public Reconfigure(ReconfigureRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "dynamic_reconfigure/Reconfigure";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "bb125d226a21982a4a98760418dc2672";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.DynamicReconfigure
     {
         [DataMember (Name = "config")] public Config Config;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ReconfigureRequest()
         {
             Config = new Config();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ReconfigureRequest(Config Config)
         {
             this.Config = Config;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ReconfigureRequest(ref Buffer b)
         {
             Config = new Config(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ReconfigureRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ReconfigureRequest(ref b);
         
-        ReconfigureRequest IDeserializable<ReconfigureRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new ReconfigureRequest(ref b);
-        }
+        ReconfigureRequest IDeserializable<ReconfigureRequest>.RosDeserialize(ref Buffer b) => new ReconfigureRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -104,33 +98,27 @@ namespace Iviz.Msgs.DynamicReconfigure
     {
         [DataMember (Name = "config")] public Config Config;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ReconfigureResponse()
         {
             Config = new Config();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ReconfigureResponse(Config Config)
         {
             this.Config = Config;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ReconfigureResponse(ref Buffer b)
         {
             Config = new Config(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ReconfigureResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ReconfigureResponse(ref b);
         
-        ReconfigureResponse IDeserializable<ReconfigureResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new ReconfigureResponse(ref b);
-        }
+        ReconfigureResponse IDeserializable<ReconfigureResponse>.RosDeserialize(ref Buffer b) => new ReconfigureResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [Preserve, DataContract (Name = "sensor_msgs/JoyFeedback")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class JoyFeedback : IDeserializable<JoyFeedback>, IMessage
     {
         // Declare of the type of feedback
@@ -19,12 +19,12 @@ namespace Iviz.Msgs.SensorMsgs
         // actually binary, driver should treat 0<=x<0.5 as off, 0.5<=x<=1 as on.
         [DataMember (Name = "intensity")] public float Intensity;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public JoyFeedback()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public JoyFeedback(byte Type, byte Id, float Intensity)
         {
             this.Type = Type;
@@ -32,7 +32,7 @@ namespace Iviz.Msgs.SensorMsgs
             this.Intensity = Intensity;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal JoyFeedback(ref Buffer b)
         {
             Type = b.Deserialize<byte>();
@@ -40,15 +40,9 @@ namespace Iviz.Msgs.SensorMsgs
             Intensity = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new JoyFeedback(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new JoyFeedback(ref b);
         
-        JoyFeedback IDeserializable<JoyFeedback>.RosDeserialize(ref Buffer b)
-        {
-            return new JoyFeedback(ref b);
-        }
+        JoyFeedback IDeserializable<JoyFeedback>.RosDeserialize(ref Buffer b) => new JoyFeedback(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -61,26 +55,26 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 6;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "sensor_msgs/JoyFeedback";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "f4dcd73460360d98f36e55ee7f2e46f1";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClWPQWvDIBiG78L+wwu9hpB0FHZoLqU5FDoYpT2sl2H0k8iMFjVt8+9nsmZ0nvT59Hlf" +
-                "F9iSMNwTnEJsCXG4THtFJBsuvlmvbXzD8fOj/trXW6RVoXimh9P7Zl8nWj7Tzel8rg+JLtkDj2bGFji2" +
-                "OuCmjUHrjAS30BK27xryUM6DuGj/atB4mLvk6XV9593FUDaVVdqHCEMSN9cnV0PJVRW/w0DC2f+TuaGW" +
-                "Y5GdjWSDjsP89zkng/KuQ5EXiA5lnoTaCtMHfaUc2ClIumqRlCFpuIg9N2ZAoy33Qwbp0z2P0E7J0ROP" +
-                "KNbVfV3kK/CQ0lSW5KsRVeVEbM6UcTy+LlPSoxVjL+wHXvepM58BAAA=";
+                "H4sIAAAAAAAAE1WPQWvCMBiG7/kVL3gtpTqEHexF1oPgYIge5mWkyRcaFhNJUrX/fp+dHS6n5PmS530z" +
+                "wxspJyMhGOSOkIfzuDdEupXqW/TW51fsPz+ar23zBl41qme6O7yvtw3T+TNdH47HZsd0IR74bhZihn1n" +
+                "E67WOXTBaUgPq+H7U0sRJkSQVN1fjfEwdSn5dXOTp7OjYixrbEwZjjSuoWdXS+yqq99hIhX8/8nU0Op7" +
+                "kY3P5JPNw/T3KaeAieGEqqyQA+YlC61Xrk/2QiWwMdB0sYqViTVS5V46N6C1XsahgI58LyJ1Y3KOJDOq" +
+                "VX1bVeUSMnGaKVi+vKN6PhJfCuOCzC8LTnq0EkL8AOJe5DueAQAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

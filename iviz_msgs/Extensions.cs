@@ -121,8 +121,8 @@ namespace Iviz.Msgs
         public static Vector3 WithY(this in Vector3 p, double y) => new(p.X, y, p.Z);
         public static Vector3 WithZ(this in Vector3 p, double z) => new(p.X, p.Y, z);
 
-        public static Point32 AsPoint32(this in Vector3 p) => new((float) p.X, (float) p.Y, (float) p.Z);
-        public static Point32 AsPoint32(this in Point p) => new((float) p.X, (float) p.Y, (float) p.Z);
+        public static Point32 AsPoint32(this in Vector3 p) => new((float)p.X, (float)p.Y, (float)p.Z);
+        public static Point32 AsPoint32(this in Point p) => new((float)p.X, (float)p.Y, (float)p.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Vector3 v, out double X, out double Y, out double Z) =>

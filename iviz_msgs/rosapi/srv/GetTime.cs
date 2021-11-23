@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Rosapi
 {
-    [DataContract (Name = "rosapi/GetTime")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetTime : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetTimeRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetTimeResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetTime()
         {
             Request = GetTimeRequest.Singleton;
             Response = new GetTimeResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetTime(GetTimeRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Rosapi
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosapi/GetTime";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "556a4fb76023a469987922359d08a844";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.Rosapi
     public sealed class GetTimeRequest : IRequest<GetTime, GetTimeResponse>, IDeserializable<GetTimeRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetTimeRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetTimeRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        GetTimeRequest IDeserializable<GetTimeRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        GetTimeRequest IDeserializable<GetTimeRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly GetTimeRequest Singleton = new GetTimeRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.Rosapi
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -97,32 +91,26 @@ namespace Iviz.Msgs.Rosapi
     {
         [DataMember (Name = "time")] public time Time;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetTimeResponse()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetTimeResponse(time Time)
         {
             this.Time = Time;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetTimeResponse(ref Buffer b)
         {
             Time = b.Deserialize<time>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetTimeResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetTimeResponse(ref b);
         
-        GetTimeResponse IDeserializable<GetTimeResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetTimeResponse(ref b);
-        }
+        GetTimeResponse IDeserializable<GetTimeResponse>.RosDeserialize(ref Buffer b) => new GetTimeResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -133,7 +121,7 @@ namespace Iviz.Msgs.Rosapi
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;

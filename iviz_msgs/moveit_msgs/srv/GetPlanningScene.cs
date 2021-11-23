@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/GetPlanningScene")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetPlanningScene : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetPlanningSceneRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetPlanningSceneResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetPlanningScene()
         {
             Request = new GetPlanningSceneRequest();
             Response = new GetPlanningSceneResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetPlanningScene(GetPlanningSceneRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/GetPlanningScene";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "2745cf315b4eb5fb00e5befa8714d64d";
         
         public override string ToString() => Extensions.ToString(this);
@@ -57,33 +57,27 @@ namespace Iviz.Msgs.MoveitMsgs
         // All scene components are returned if none are specified
         [DataMember (Name = "components")] public PlanningSceneComponents Components;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetPlanningSceneRequest()
         {
             Components = new PlanningSceneComponents();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetPlanningSceneRequest(PlanningSceneComponents Components)
         {
             this.Components = Components;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetPlanningSceneRequest(ref Buffer b)
         {
             Components = new PlanningSceneComponents(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetPlanningSceneRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetPlanningSceneRequest(ref b);
         
-        GetPlanningSceneRequest IDeserializable<GetPlanningSceneRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetPlanningSceneRequest(ref b);
-        }
+        GetPlanningSceneRequest IDeserializable<GetPlanningSceneRequest>.RosDeserialize(ref Buffer b) => new GetPlanningSceneRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -96,7 +90,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Components.RosValidate();
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -109,33 +103,27 @@ namespace Iviz.Msgs.MoveitMsgs
     {
         [DataMember (Name = "scene")] public PlanningScene Scene;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetPlanningSceneResponse()
         {
             Scene = new PlanningScene();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetPlanningSceneResponse(PlanningScene Scene)
         {
             this.Scene = Scene;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetPlanningSceneResponse(ref Buffer b)
         {
             Scene = new PlanningScene(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetPlanningSceneResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetPlanningSceneResponse(ref b);
         
-        GetPlanningSceneResponse IDeserializable<GetPlanningSceneResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetPlanningSceneResponse(ref b);
-        }
+        GetPlanningSceneResponse IDeserializable<GetPlanningSceneResponse>.RosDeserialize(ref Buffer b) => new GetPlanningSceneResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

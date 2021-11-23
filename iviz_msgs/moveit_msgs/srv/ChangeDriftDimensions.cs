@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/ChangeDriftDimensions")]
+    [DataContract (Name = RosServiceType)]
     public sealed class ChangeDriftDimensions : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public ChangeDriftDimensionsRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public ChangeDriftDimensionsResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public ChangeDriftDimensions()
         {
             Request = new ChangeDriftDimensionsRequest();
             Response = new ChangeDriftDimensionsResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public ChangeDriftDimensions(ChangeDriftDimensionsRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/ChangeDriftDimensions";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "0d34c8d563fea2efff65829c37132a15";
         
         public override string ToString() => Extensions.ToString(this);
@@ -68,12 +68,12 @@ namespace Iviz.Msgs.MoveitMsgs
         // from the jog control frame to a unique drift frame, so the robot can drift along off-principal axes
         [DataMember (Name = "transform_jog_frame_to_drift_frame")] public GeometryMsgs.Transform TransformJogFrameToDriftFrame;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ChangeDriftDimensionsRequest()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ChangeDriftDimensionsRequest(bool DriftXTranslation, bool DriftYTranslation, bool DriftZTranslation, bool DriftXRotation, bool DriftYRotation, bool DriftZRotation, in GeometryMsgs.Transform TransformJogFrameToDriftFrame)
         {
             this.DriftXTranslation = DriftXTranslation;
@@ -85,7 +85,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.TransformJogFrameToDriftFrame = TransformJogFrameToDriftFrame;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ChangeDriftDimensionsRequest(ref Buffer b)
         {
             DriftXTranslation = b.Deserialize<bool>();
@@ -97,15 +97,9 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Deserialize(out TransformJogFrameToDriftFrame);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ChangeDriftDimensionsRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ChangeDriftDimensionsRequest(ref b);
         
-        ChangeDriftDimensionsRequest IDeserializable<ChangeDriftDimensionsRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new ChangeDriftDimensionsRequest(ref b);
-        }
+        ChangeDriftDimensionsRequest IDeserializable<ChangeDriftDimensionsRequest>.RosDeserialize(ref Buffer b) => new ChangeDriftDimensionsRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -122,7 +116,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 62;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -135,32 +129,26 @@ namespace Iviz.Msgs.MoveitMsgs
     {
         [DataMember (Name = "success")] public bool Success;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ChangeDriftDimensionsResponse()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ChangeDriftDimensionsResponse(bool Success)
         {
             this.Success = Success;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ChangeDriftDimensionsResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ChangeDriftDimensionsResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ChangeDriftDimensionsResponse(ref b);
         
-        ChangeDriftDimensionsResponse IDeserializable<ChangeDriftDimensionsResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new ChangeDriftDimensionsResponse(ref b);
-        }
+        ChangeDriftDimensionsResponse IDeserializable<ChangeDriftDimensionsResponse>.RosDeserialize(ref Buffer b) => new ChangeDriftDimensionsResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -171,7 +159,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

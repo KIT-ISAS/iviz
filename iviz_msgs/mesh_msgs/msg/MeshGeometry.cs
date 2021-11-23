@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [Preserve, DataContract (Name = "mesh_msgs/MeshGeometry")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class MeshGeometry : IDeserializable<MeshGeometry>, IMessage
     {
         // Mesh Geometry Message
@@ -12,7 +12,7 @@ namespace Iviz.Msgs.MeshMsgs
         [DataMember (Name = "vertex_normals")] public GeometryMsgs.Point[] VertexNormals;
         [DataMember (Name = "faces")] public MeshMsgs.TriangleIndices[] Faces;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public MeshGeometry()
         {
             Vertices = System.Array.Empty<GeometryMsgs.Point>();
@@ -20,7 +20,7 @@ namespace Iviz.Msgs.MeshMsgs
             Faces = System.Array.Empty<MeshMsgs.TriangleIndices>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public MeshGeometry(GeometryMsgs.Point[] Vertices, GeometryMsgs.Point[] VertexNormals, MeshMsgs.TriangleIndices[] Faces)
         {
             this.Vertices = Vertices;
@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MeshMsgs
             this.Faces = Faces;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal MeshGeometry(ref Buffer b)
         {
             Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
@@ -40,15 +40,9 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new MeshGeometry(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new MeshGeometry(ref b);
         
-        MeshGeometry IDeserializable<MeshGeometry>.RosDeserialize(ref Buffer b)
-        {
-            return new MeshGeometry(ref b);
-        }
+        MeshGeometry IDeserializable<MeshGeometry>.RosDeserialize(ref Buffer b) => new MeshGeometry(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -82,18 +76,18 @@ namespace Iviz.Msgs.MeshMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshGeometry";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "9a7ed3efa2a35ef81abaf7dcc675ed20";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACrVRPQvCQAzdD/ofAg6OghUHwU0Qh4Kgm4gcmmsDvVy5nKL+eu9oqQ7qpJny8fJ4LxlA" +
-                "gVLBEp3F4G+pEl2iKrvGwUopo7UjDrs9XNAHOqJ8GeP1wM5bXYuykbkFbD1pLmtc8SmtR6jRiSZT8x9H" +
-                "porNcgZv9GVqANuKBI6OgyYWCBVC44QCOQZnQMcqAoEYjEcEaaJIZWqnw3QC1z679dn9fw4+Hi/5WKAh" +
-                "ftEdOshQni86Ryv5eJf3b6F2P0p+AAkSDCr1AQAA";
+                "H4sIAAAAAAAAE7VRsQrCQAzd7ysCDo6CFQfBTSgOBcFuRcpRc22gzZXLKa1f7xVLdVAnzfSSvISXvBkk" +
+                "KBXEaBv0rh8y0SWqcizkjZSyOFhin53gis5TgfKljV3O1jW6FtWEzQ9C6khzWeOez8N4oBo9rFHbH4dK" +
+                "jvEG3qhTM0grEigse00s4CuE1gp5sgzWgA5Z4AExGIcI0gaFytRW+/UKugn1E7r9S/7Hv4UjdmiIX0T7" +
+                "kTGXpzmXcEe0zKLJEBrH1R0jxS0C7gEAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

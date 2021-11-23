@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/LaunchDialog")]
+    [DataContract (Name = RosServiceType)]
     public sealed class LaunchDialog : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public LaunchDialogRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public LaunchDialogResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public LaunchDialog()
         {
             Request = new LaunchDialogRequest();
             Response = new LaunchDialogResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public LaunchDialog(LaunchDialogRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/LaunchDialog";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "106553f64c8ef760e23ed6e9e0dea9e7";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.IvizMsgs
     {
         [DataMember (Name = "dialog")] public IvizMsgs.Dialog Dialog;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public LaunchDialogRequest()
         {
             Dialog = new IvizMsgs.Dialog();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public LaunchDialogRequest(IvizMsgs.Dialog Dialog)
         {
             this.Dialog = Dialog;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal LaunchDialogRequest(ref Buffer b)
         {
             Dialog = new IvizMsgs.Dialog(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new LaunchDialogRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new LaunchDialogRequest(ref b);
         
-        LaunchDialogRequest IDeserializable<LaunchDialogRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new LaunchDialogRequest(ref b);
-        }
+        LaunchDialogRequest IDeserializable<LaunchDialogRequest>.RosDeserialize(ref Buffer b) => new LaunchDialogRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -106,14 +100,14 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "message")] public string Message;
         [DataMember (Name = "feedback")] public IvizMsgs.Feedback Feedback;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public LaunchDialogResponse()
         {
             Message = string.Empty;
             Feedback = new IvizMsgs.Feedback();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public LaunchDialogResponse(bool Success, string Message, IvizMsgs.Feedback Feedback)
         {
             this.Success = Success;
@@ -121,7 +115,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Feedback = Feedback;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal LaunchDialogResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
@@ -129,15 +123,9 @@ namespace Iviz.Msgs.IvizMsgs
             Feedback = new IvizMsgs.Feedback(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new LaunchDialogResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new LaunchDialogResponse(ref b);
         
-        LaunchDialogResponse IDeserializable<LaunchDialogResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new LaunchDialogResponse(ref b);
-        }
+        LaunchDialogResponse IDeserializable<LaunchDialogResponse>.RosDeserialize(ref Buffer b) => new LaunchDialogResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

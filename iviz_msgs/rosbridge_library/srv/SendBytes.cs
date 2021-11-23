@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract (Name = "rosbridge_library/SendBytes")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SendBytes : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SendBytesRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SendBytesResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SendBytes()
         {
             Request = new SendBytesRequest();
             Response = new SendBytesResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SendBytes(SendBytesRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosbridge_library/SendBytes";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "d875457256decc7436099d9d612ebf8a";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,32 +55,26 @@ namespace Iviz.Msgs.RosbridgeLibrary
     {
         [DataMember (Name = "count")] public long Count;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SendBytesRequest()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SendBytesRequest(long Count)
         {
             this.Count = Count;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SendBytesRequest(ref Buffer b)
         {
             Count = b.Deserialize<long>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SendBytesRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SendBytesRequest(ref b);
         
-        SendBytesRequest IDeserializable<SendBytesRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SendBytesRequest(ref b);
-        }
+        SendBytesRequest IDeserializable<SendBytesRequest>.RosDeserialize(ref Buffer b) => new SendBytesRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -91,7 +85,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -104,33 +98,27 @@ namespace Iviz.Msgs.RosbridgeLibrary
     {
         [DataMember (Name = "data")] public string Data;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SendBytesResponse()
         {
             Data = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SendBytesResponse(string Data)
         {
             this.Data = Data;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SendBytesResponse(ref Buffer b)
         {
             Data = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SendBytesResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SendBytesResponse(ref b);
         
-        SendBytesResponse IDeserializable<SendBytesResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new SendBytesResponse(ref b);
-        }
+        SendBytesResponse IDeserializable<SendBytesResponse>.RosDeserialize(ref Buffer b) => new SendBytesResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

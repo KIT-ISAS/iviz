@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = "mesh_msgs/GetVertexCosts")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetVertexCosts : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetVertexCostsRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetVertexCostsResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetVertexCosts()
         {
             Request = new GetVertexCostsRequest();
             Response = new GetVertexCostsResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetVertexCosts(GetVertexCostsRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MeshMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "mesh_msgs/GetVertexCosts";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "d0fc06ce39b58884e8cdf147765b9d6b";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "uuid")] public string Uuid;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetVertexCostsRequest()
         {
             Uuid = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetVertexCostsRequest(string Uuid)
         {
             this.Uuid = Uuid;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetVertexCostsRequest(ref Buffer b)
         {
             Uuid = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetVertexCostsRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetVertexCostsRequest(ref b);
         
-        GetVertexCostsRequest IDeserializable<GetVertexCostsRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetVertexCostsRequest(ref b);
-        }
+        GetVertexCostsRequest IDeserializable<GetVertexCostsRequest>.RosDeserialize(ref Buffer b) => new GetVertexCostsRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -103,33 +97,27 @@ namespace Iviz.Msgs.MeshMsgs
     {
         [DataMember (Name = "mesh_vertex_costs_stamped")] public MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetVertexCostsResponse()
         {
             MeshVertexCostsStamped = new MeshMsgs.MeshVertexCostsStamped();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetVertexCostsResponse(MeshMsgs.MeshVertexCostsStamped MeshVertexCostsStamped)
         {
             this.MeshVertexCostsStamped = MeshVertexCostsStamped;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetVertexCostsResponse(ref Buffer b)
         {
             MeshVertexCostsStamped = new MeshMsgs.MeshVertexCostsStamped(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetVertexCostsResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetVertexCostsResponse(ref b);
         
-        GetVertexCostsResponse IDeserializable<GetVertexCostsResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetVertexCostsResponse(ref b);
-        }
+        GetVertexCostsResponse IDeserializable<GetVertexCostsResponse>.RosDeserialize(ref Buffer b) => new GetVertexCostsResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

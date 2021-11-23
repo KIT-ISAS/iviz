@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/SetPlannerParams")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SetPlannerParams : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SetPlannerParamsRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SetPlannerParamsResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SetPlannerParams()
         {
             Request = new SetPlannerParamsRequest();
             Response = SetPlannerParamsResponse.Singleton;
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SetPlannerParams(SetPlannerParamsRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/SetPlannerParams";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "86762d89189c5f52cda7680fdbceb1db";
         
         public override string ToString() => Extensions.ToString(this);
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.MoveitMsgs
         // replace params or augment existing ones?
         [DataMember (Name = "replace")] public bool Replace;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetPlannerParamsRequest()
         {
             PlannerConfig = string.Empty;
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Params = new PlannerParams();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetPlannerParamsRequest(string PlannerConfig, string Group, PlannerParams Params, bool Replace)
         {
             this.PlannerConfig = PlannerConfig;
@@ -79,7 +79,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.Replace = Replace;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetPlannerParamsRequest(ref Buffer b)
         {
             PlannerConfig = b.DeserializeString();
@@ -88,15 +88,9 @@ namespace Iviz.Msgs.MoveitMsgs
             Replace = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetPlannerParamsRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetPlannerParamsRequest(ref b);
         
-        SetPlannerParamsRequest IDeserializable<SetPlannerParamsRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SetPlannerParamsRequest(ref b);
-        }
+        SetPlannerParamsRequest IDeserializable<SetPlannerParamsRequest>.RosDeserialize(ref Buffer b) => new SetPlannerParamsRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -132,25 +126,19 @@ namespace Iviz.Msgs.MoveitMsgs
     public sealed class SetPlannerParamsResponse : IResponse, IDeserializable<SetPlannerParamsResponse>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetPlannerParamsResponse()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetPlannerParamsResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        SetPlannerParamsResponse IDeserializable<SetPlannerParamsResponse>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        SetPlannerParamsResponse IDeserializable<SetPlannerParamsResponse>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly SetPlannerParamsResponse Singleton = new SetPlannerParamsResponse();
     
@@ -162,7 +150,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

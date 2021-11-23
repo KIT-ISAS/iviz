@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Roscpp
 {
-    [DataContract (Name = "roscpp/SetLoggerLevel")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SetLoggerLevel : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SetLoggerLevelRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SetLoggerLevelResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SetLoggerLevel()
         {
             Request = new SetLoggerLevelRequest();
             Response = SetLoggerLevelResponse.Singleton;
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SetLoggerLevel(SetLoggerLevelRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Roscpp
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "roscpp/SetLoggerLevel";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "51da076440d78ca1684d36c868df61ea";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,36 +56,30 @@ namespace Iviz.Msgs.Roscpp
         [DataMember (Name = "logger")] public string Logger;
         [DataMember (Name = "level")] public string Level;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetLoggerLevelRequest()
         {
             Logger = string.Empty;
             Level = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetLoggerLevelRequest(string Logger, string Level)
         {
             this.Logger = Logger;
             this.Level = Level;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetLoggerLevelRequest(ref Buffer b)
         {
             Logger = b.DeserializeString();
             Level = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetLoggerLevelRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetLoggerLevelRequest(ref b);
         
-        SetLoggerLevelRequest IDeserializable<SetLoggerLevelRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SetLoggerLevelRequest(ref b);
-        }
+        SetLoggerLevelRequest IDeserializable<SetLoggerLevelRequest>.RosDeserialize(ref Buffer b) => new SetLoggerLevelRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -108,25 +102,19 @@ namespace Iviz.Msgs.Roscpp
     public sealed class SetLoggerLevelResponse : IResponse, IDeserializable<SetLoggerLevelResponse>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetLoggerLevelResponse()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetLoggerLevelResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        SetLoggerLevelResponse IDeserializable<SetLoggerLevelResponse>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        SetLoggerLevelResponse IDeserializable<SetLoggerLevelResponse>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly SetLoggerLevelResponse Singleton = new SetLoggerLevelResponse();
     
@@ -138,7 +126,7 @@ namespace Iviz.Msgs.Roscpp
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

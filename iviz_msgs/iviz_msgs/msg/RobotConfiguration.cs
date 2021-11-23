@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = "iviz_msgs/RobotConfiguration")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class RobotConfiguration : IDeserializable<RobotConfiguration>, IMessage
     {
         [DataMember (Name = "source_parameter")] public string SourceParameter;
@@ -19,7 +19,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "id")] public string Id;
         [DataMember (Name = "visible")] public bool Visible;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public RobotConfiguration()
         {
             SourceParameter = string.Empty;
@@ -29,7 +29,7 @@ namespace Iviz.Msgs.IvizMsgs
             Id = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public RobotConfiguration(string SourceParameter, string SavedRobotName, string FramePrefix, string FrameSuffix, bool AttachedToTf, bool RenderAsOcclusionOnly, in StdMsgs.ColorRGBA Tint, float Metallic, float Smoothness, string Id, bool Visible)
         {
             this.SourceParameter = SourceParameter;
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Visible = Visible;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal RobotConfiguration(ref Buffer b)
         {
             SourceParameter = b.DeserializeString();
@@ -61,15 +61,9 @@ namespace Iviz.Msgs.IvizMsgs
             Visible = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new RobotConfiguration(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new RobotConfiguration(ref b);
         
-        RobotConfiguration IDeserializable<RobotConfiguration>.RosDeserialize(ref Buffer b)
-        {
-            return new RobotConfiguration(ref b);
-        }
+        RobotConfiguration IDeserializable<RobotConfiguration>.RosDeserialize(ref Buffer b) => new RobotConfiguration(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -110,18 +104,18 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "iviz_msgs/RobotConfiguration";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "3794bb74650c9f56ddc4ca7447266716";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACq2OQYrDMAxF94bcwTcYmO4KXczMoqvZtAcQiiOnBscqkhLa29chU0PpdrT6PImvpyap" +
-                "jF55lkBwRcGJjMTpH8eFBhDu2aDU1ZPH9Q6uQjHdXpnOcWU9c/ZohuFSC4zB4saEykACqMAh5FkTF+CS" +
-                "77VlgElH/fjhzHI6fn95S8VczIy2+/TVC3NOoQGdmO1SSPVpkIbtx5I09Zmc69zhn6dzv+fj3r/Lds1L" +
-                "Whpb6lvCKvUABmeA6XUBAAA=";
+                "H4sIAAAAAAAAE62OMQ7CMAxF95wiN0CCDYkBGDqxwAEsN3VKpDRGtlvB7SmCRkKsePp6tr6fmqTSe+VR" +
+                "AsENBQcyEqcfjhN1INyyQZlXC4+vO7gJxXT/ZjrGF2uZs0czDNe5wBgsvplQ6UgAFTiEPGriAlzyY27p" +
+                "YNBeV0fOLOfmsPeWirmYGW2z9rMX5pxCBTow27WQ6mKQuvePKWlqMznndn8ed7o0W/+rWqWkpr6mtiZ0" +
+                "7gmdyuiccQEAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

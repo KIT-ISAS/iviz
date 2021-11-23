@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.OctomapMsgs
 {
-    [DataContract (Name = "octomap_msgs/BoundingBoxQuery")]
+    [DataContract (Name = RosServiceType)]
     public sealed class BoundingBoxQuery : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public BoundingBoxQueryRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public BoundingBoxQueryResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public BoundingBoxQuery()
         {
             Request = new BoundingBoxQueryRequest();
             Response = BoundingBoxQueryResponse.Singleton;
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public BoundingBoxQuery(BoundingBoxQueryRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.OctomapMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "octomap_msgs/BoundingBoxQuery";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "93aa3d73b866f04880927745f4aab303";
         
         public override string ToString() => Extensions.ToString(this);
@@ -59,34 +59,28 @@ namespace Iviz.Msgs.OctomapMsgs
         // maximum corner point of axis-aligned bounding box in global frame
         [DataMember (Name = "max")] public GeometryMsgs.Point Max;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public BoundingBoxQueryRequest()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public BoundingBoxQueryRequest(in GeometryMsgs.Point Min, in GeometryMsgs.Point Max)
         {
             this.Min = Min;
             this.Max = Max;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal BoundingBoxQueryRequest(ref Buffer b)
         {
             b.Deserialize(out Min);
             b.Deserialize(out Max);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new BoundingBoxQueryRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new BoundingBoxQueryRequest(ref b);
         
-        BoundingBoxQueryRequest IDeserializable<BoundingBoxQueryRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new BoundingBoxQueryRequest(ref b);
-        }
+        BoundingBoxQueryRequest IDeserializable<BoundingBoxQueryRequest>.RosDeserialize(ref Buffer b) => new BoundingBoxQueryRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -98,7 +92,7 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 48;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -110,25 +104,19 @@ namespace Iviz.Msgs.OctomapMsgs
     public sealed class BoundingBoxQueryResponse : IResponse, IDeserializable<BoundingBoxQueryResponse>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public BoundingBoxQueryResponse()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal BoundingBoxQueryResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        BoundingBoxQueryResponse IDeserializable<BoundingBoxQueryResponse>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        BoundingBoxQueryResponse IDeserializable<BoundingBoxQueryResponse>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly BoundingBoxQueryResponse Singleton = new BoundingBoxQueryResponse();
     
@@ -140,7 +128,7 @@ namespace Iviz.Msgs.OctomapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

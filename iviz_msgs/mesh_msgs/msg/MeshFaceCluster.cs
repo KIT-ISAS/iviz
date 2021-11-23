@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [Preserve, DataContract (Name = "mesh_msgs/MeshFaceCluster")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class MeshFaceCluster : IDeserializable<MeshFaceCluster>, IMessage
     {
         //Cluster
@@ -12,36 +12,30 @@ namespace Iviz.Msgs.MeshMsgs
         //optional
         [DataMember (Name = "label")] public string Label;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public MeshFaceCluster()
         {
             FaceIndices = System.Array.Empty<uint>();
             Label = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public MeshFaceCluster(uint[] FaceIndices, string Label)
         {
             this.FaceIndices = FaceIndices;
             this.Label = Label;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal MeshFaceCluster(ref Buffer b)
         {
             FaceIndices = b.DeserializeStructArray<uint>();
             Label = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new MeshFaceCluster(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new MeshFaceCluster(ref b);
         
-        MeshFaceCluster IDeserializable<MeshFaceCluster>.RosDeserialize(ref Buffer b)
-        {
-            return new MeshFaceCluster(ref b);
-        }
+        MeshFaceCluster IDeserializable<MeshFaceCluster>.RosDeserialize(ref Buffer b) => new MeshFaceCluster(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -59,16 +53,16 @@ namespace Iviz.Msgs.MeshMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshFaceCluster";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "9e0f40b9dcf1de10d00e57182c9d138f";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClN2ziktLkkt4irNzCsxNoqOVUhLTE6Nz8xLyUxOLeZSzi8oyczPS8zhKi4pysxLV8hJ" +
-                "TErN4eLlAgD6InZCOAAAAA==";
+                "H4sIAAAAAAAAE1N2ziktLkkt4irNzCsxNoqOVUhLTE6Nz8xLyUxOLeZSzi8oyczPS8zhKi4pysxLV8hJ" +
+                "TErN4eICAKZztFU3AAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

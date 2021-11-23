@@ -4,21 +4,21 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
 {
-    [Preserve, DataContract (Name = "actionlib/TwoIntsActionGoal")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class TwoIntsActionGoal : IDeserializable<TwoIntsActionGoal>, IActionGoal<TwoIntsGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
         [DataMember (Name = "goal_id")] public ActionlibMsgs.GoalID GoalId { get; set; }
         [DataMember (Name = "goal")] public TwoIntsGoal Goal { get; set; }
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TwoIntsActionGoal()
         {
             GoalId = new ActionlibMsgs.GoalID();
             Goal = new TwoIntsGoal();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TwoIntsActionGoal(in StdMsgs.Header Header, ActionlibMsgs.GoalID GoalId, TwoIntsGoal Goal)
         {
             this.Header = Header;
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.Actionlib
             this.Goal = Goal;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TwoIntsActionGoal(ref Buffer b)
         {
             Header = new StdMsgs.Header(ref b);
@@ -34,15 +34,9 @@ namespace Iviz.Msgs.Actionlib
             Goal = new TwoIntsGoal(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TwoIntsActionGoal(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TwoIntsActionGoal(ref b);
         
-        TwoIntsActionGoal IDeserializable<TwoIntsActionGoal>.RosDeserialize(ref Buffer b)
-        {
-            return new TwoIntsActionGoal(ref b);
-        }
+        TwoIntsActionGoal IDeserializable<TwoIntsActionGoal>.RosDeserialize(ref Buffer b) => new TwoIntsActionGoal(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -63,24 +57,24 @@ namespace Iviz.Msgs.Actionlib
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "actionlib/TwoIntsActionGoal";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "684a2db55d6ffb8046fb9d6764ce0860";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1UwYrbMBC9C/IPAznsbiFZaEsPgd6W7uZQKGzuYSJNbFFbcjVyXP99n+wku4Ueetg2" +
-                "GITsmTdv5r3Jk7CTRPV0GLbZx9D4w77VSu8fIzfbB6pw7L0zuyFuQ9bydnq3MJ/f+LcwX58fN6TZzQSe" +
-                "JloLs6TnzMFxctRKZseZ6RhB21e1pFUjJ2mQxW0njqaveexE10jc1V4JTyVBEjfNSL0iKEeysW374C1n" +
-                "oexb+S0fmT4QU8cpe9s3nBAfk/OhhB8Tt1LQ8aj86CVYoe3DBjFBxfbZg9AIBJuE1YcKH8n0PuQP70uC" +
-                "WWKWK1ylwvCvxSnXnAtZ+dkl0cKTdYMa7+bm1sDGdARVnNLt9G6Pq94RioCCdNHWdAvm38ZcxwBAoRMn" +
-                "z4dGCrDFBIB6U5Ju7l4hF9obChziBX5GfKnxN7Dhilt6WtXQrCnda19hgAjsUjx5h9DDOIHYxkvIBMcl" +
-                "TqMpWXNJs/xSZowgZE2K4GTVaD0EcDT4XBvNqaBPahSD/jND/nEvii136GGWTuvYNw6XmArr2VIEOYfa" +
-                "Q5Opj7I0NLBSKp5R9FE8tJ0kn1yJqXA4V4PO6QR3DLUE8pnQq2jxLawhbZcJM0d2wdTZOIOg9BWaDoIV" +
-                "AQWykjJDvMLo9YjP/L27yKIIHhjKxJdR01HEHdh+BzOHDPiybzLWUJUrmXQg7cT6o7dzg2cGuj6jlx2Z" +
-                "A0Cq7TWDGWHxELW+SIio/6De/at/sIUx2L9PH4nP52FhfgHUaK/1DQUAAA==";
+                "H4sIAAAAAAAAE7VUwYrbMBC9+ysGctjdwmahLT0Eelu6m0OhsHsPY2lii9qSq5Hj+u/7JDtpCj300A0G" +
+                "IXvmzZt5b/IsbCVSW46KTXLBd64+9Nrow1Pgbv9IDY6Ds9XrFPY+aX5b3lWf//Ov+vrytCNNdin/vJDa" +
+                "0Etibzla6iWx5cR0DODsmlbifScn6ZDE/SCWytc0D6JbJL62TglPI14id91MoyIoBTKh70fvDCeh5Hr5" +
+                "Ix+ZzhPTwDE5M3YcER+idT6HHyP3ktHxqPwYxRuh/eMOMV7FjMmB0AwEE4XV+QYfqRqdTx/e54Rqg0He" +
+                "4yoNJn8pTqnllMnKzyGKZp6sO9R4tzS3BTaGI6hilW7LuwOuekcoAgoyBNPSLZh/m1MbPACFThwd151k" +
+                "YIMJAPUmJ93cXSH7Au3ZhzP8gvi7xr/A+gtu7um+hWZd7l7HBgNE4BDDyVmE1nMBMZ0Tnwh2ixznKmct" +
+                "JavNlzxjBCGrKIKTVYNxEMDS5FJbaYoZvaiR3flGbvzrShRrrWRJ2zB2FpcQpfRVGoGWU+sgSGkirwtN" +
+                "rBSzYRRNZAPti97FkhgJ+7UYRI4nWGNqxZNLhEZFs2nhC+mHRBg4sjOmLq6ZBKUv0FTLMXNhMhITQ7nM" +
+                "6Hq+K39nz5pgvKA35yKXOdNRxNZsvoOZRQZMOXYJO6jKjRQRSAcx7ujM0uDKQLcrel6QJQCk+lETmBG2" +
+                "DlHbs35ZubeW7uHqn6uqsHmfPhKvZ139AhcLN+IDBQAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

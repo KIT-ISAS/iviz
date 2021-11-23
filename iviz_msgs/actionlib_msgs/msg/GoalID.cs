@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibMsgs
 {
-    [Preserve, DataContract (Name = "actionlib_msgs/GoalID")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class GoalID : IDeserializable<GoalID>, IMessage
     {
         // The stamp should store the time at which this goal was requested.
@@ -16,35 +16,29 @@ namespace Iviz.Msgs.ActionlibMsgs
         // specified must be unique.
         [DataMember (Name = "id")] public string Id;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GoalID()
         {
             Id = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GoalID(time Stamp, string Id)
         {
             this.Stamp = Stamp;
             this.Id = Id;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GoalID(ref Buffer b)
         {
             Stamp = b.Deserialize<time>();
             Id = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GoalID(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GoalID(ref b);
         
-        GoalID IDeserializable<GoalID>.RosDeserialize(ref Buffer b)
-        {
-            return new GoalID(ref b);
-        }
+        GoalID IDeserializable<GoalID>.RosDeserialize(ref Buffer b) => new GoalID(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -61,18 +55,18 @@ namespace Iviz.Msgs.ActionlibMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "actionlib_msgs/GoalID";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "302881f31927c1df708a2dbab0e80ee8";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACj2PTW7EIAyF90hzhyfNPveYfS/ggBOsJpBiM9HcviaNuuTxfj4/8ZUZarQf0Fz7lvxR" +
-                "G8NcNtkZZDizxOyKKNZKG05SNP7prMZpCk+8DP7XlRPmD6iAokktUG5vbp7nAjFYE1ZYxdGY98NA2+bp" +
-                "0elyHkvs0//VmHkZLITIzUjKRRQurAs5eHrwS/LK+pbk9eR4nzFCqjUKGWNhTjPFbydLnmisfTPsrEor" +
-                "4xTL0IOjLBL/DrwJdLrbPXQbHGrvak6GXsRdU1A/q6zDFR7hFzUY0x9QAQAA";
+                "H4sIAAAAAAAAEz2PS5LDIAxE95yiq7L3PbKfC8ggG1VscJCIK7cf4XHNkqY/Tw/8ZIYa7Qc0174lf9TG" +
+                "MJdNdgYZziwxuyKKtdKGkxSN353VOE3hgafB/7pywvwFFVA0qQXK7cPN81wgBmvCCqs4GvN+GGjbPD06" +
+                "Xc5jiX36vxozL4OFELkZSbmIwoV1IQdPD35JXlk/kryeHO87Rki1RiFjLMxppvhysuSJxto3w86qtDJO" +
+                "sQw9OMoi8e/Am0Cnu91Dt8Gh9q7mZOhF3DUF9bPKOlwh/AJcvpWYTwEAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

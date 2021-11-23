@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract (Name = "nav_msgs/SetMap")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SetMap : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SetMapRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SetMapResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SetMap()
         {
             Request = new SetMapRequest();
             Response = new SetMapResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SetMap(SetMapRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.NavMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "nav_msgs/SetMap";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "c36922319011e63ed7784112ad4fdd32";
         
         public override string ToString() => Extensions.ToString(this);
@@ -57,36 +57,30 @@ namespace Iviz.Msgs.NavMsgs
         [DataMember (Name = "map")] public NavMsgs.OccupancyGrid Map;
         [DataMember (Name = "initial_pose")] public GeometryMsgs.PoseWithCovarianceStamped InitialPose;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetMapRequest()
         {
             Map = new NavMsgs.OccupancyGrid();
             InitialPose = new GeometryMsgs.PoseWithCovarianceStamped();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetMapRequest(NavMsgs.OccupancyGrid Map, GeometryMsgs.PoseWithCovarianceStamped InitialPose)
         {
             this.Map = Map;
             this.InitialPose = InitialPose;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetMapRequest(ref Buffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
             InitialPose = new GeometryMsgs.PoseWithCovarianceStamped(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetMapRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetMapRequest(ref b);
         
-        SetMapRequest IDeserializable<SetMapRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SetMapRequest(ref b);
-        }
+        SetMapRequest IDeserializable<SetMapRequest>.RosDeserialize(ref Buffer b) => new SetMapRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -112,32 +106,26 @@ namespace Iviz.Msgs.NavMsgs
     {
         [DataMember (Name = "success")] public bool Success;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetMapResponse()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetMapResponse(bool Success)
         {
             this.Success = Success;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetMapResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetMapResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetMapResponse(ref b);
         
-        SetMapResponse IDeserializable<SetMapResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new SetMapResponse(ref b);
-        }
+        SetMapResponse IDeserializable<SetMapResponse>.RosDeserialize(ref Buffer b) => new SetMapResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -148,7 +136,7 @@ namespace Iviz.Msgs.NavMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

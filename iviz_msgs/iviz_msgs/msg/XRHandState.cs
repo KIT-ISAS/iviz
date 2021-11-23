@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = "iviz_msgs/XRHandState")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class XRHandState : IDeserializable<XRHandState>, IMessage
     {
         [DataMember (Name = "is_valid")] public bool IsValid;
@@ -16,7 +16,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "ring")] public GeometryMsgs.Transform[] Ring;
         [DataMember (Name = "little")] public GeometryMsgs.Transform[] Little;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public XRHandState()
         {
             Thumb = System.Array.Empty<GeometryMsgs.Transform>();
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.IvizMsgs
             Little = System.Array.Empty<GeometryMsgs.Transform>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public XRHandState(bool IsValid, in StdMsgs.Header Header, in GeometryMsgs.Transform Palm, GeometryMsgs.Transform[] Thumb, GeometryMsgs.Transform[] Index, GeometryMsgs.Transform[] Middle, GeometryMsgs.Transform[] Ring, GeometryMsgs.Transform[] Little)
         {
             this.IsValid = IsValid;
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Little = Little;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal XRHandState(ref Buffer b)
         {
             IsValid = b.Deserialize<bool>();
@@ -52,15 +52,9 @@ namespace Iviz.Msgs.IvizMsgs
             Little = b.DeserializeStructArray<GeometryMsgs.Transform>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new XRHandState(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new XRHandState(ref b);
         
-        XRHandState IDeserializable<XRHandState>.RosDeserialize(ref Buffer b)
-        {
-            return new XRHandState(ref b);
-        }
+        XRHandState IDeserializable<XRHandState>.RosDeserialize(ref Buffer b) => new XRHandState(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -99,26 +93,26 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "iviz_msgs/XRHandState";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "7e63e355743ca3360c1e27ce5a4ea185";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1UwW7UMBC9R9p/GKmHtqhdpII4rMQNAT0gFbXigtBqNp5NLBw7tSe7DV/Pc9JmW2gX" +
-                "DtDVSnHiec8zb954FYIjm5YbdtYUH4WNRKqHR1FJaERjv2xSlV5eRfZpHWJDLbvmqc2v30jrrlnt2bfe" +
-                "yM2e/cYa42RPQLS+2rPtrCrwxax4+49/s+LT5YcFJTXjqaNcs+KALpW94WgIObFhZUIyVNuqlnjqZCMO" +
-                "KG5aMTTsat9KmgN4VdsE/akSL5Gd66lLCNJAZWiaztuSVUhtIw/wQFpPjFZEtWXnOCI+RGN9Dl9HbiSz" +
-                "45/kuhNfCp2/WyDGJyk7tUioB0MZhRPUxCYVnfX66iwDioOrbTjFq1Rww3Q4Osuak5WbNkrKeXJa4IwX" +
-                "Y3FzcEMdwSkm0dHwbYnXdEw4BClIG8qajpD5Ra918CAU2nC0vHKSiUsoANbDDDo8vsec016QZx/u6EfG" +
-                "3Rl/Q+sn3lzTaY2euVx96ioIiMA2ho01CF31A0nprHiFo1aRY19k1HhkcfA+a4wgoIaO4MkphdKiAYa2" +
-                "VusiaXbq2I0lpuu/GfKJWZjd+StK7hcqSUNVOk3ySnQrAsG24Tf/wJYeK0HFLZewU/FFSg3x1Yh3rDb4" +
-                "4nMHQPRYUgw6fnumOm/TeaxKps2w+UsJeR7OBwcHD/83wmguRm1CAmhsBBRlzMEqUaCTnJBVMgGS+KDg" +
-                "aPg7KAV2ymhuW5DxfVnyZ0COZF7NT2hbQ+IhKtthGN5h3G2Jq6yyZteQCcx0W90J6foMdnJuzHk8DF0E" +
-                "yZ3gx3M6X1MfOtrmgrCIt7dMQIenvIZp0BBO8hVzS/FQ0YuAmYcsKXGFwfFJccGh8WsXWN+8pptp1U+r" +
-                "H8/U7Z3RHm24pxDzrI4KPmh7frve2TTr/KeaptUWZv4Jc8wTBSMHAAA=";
+                "H4sIAAAAAAAAE71UwW7TQBC9+ytG6qEtSoNUEIdK3BDQA1JRKy4IRRPvxF6x3nV3x0nN1/PWTpwW2sAB" +
+                "GkXy2jPvzcybmV2G4MimxZqdNcVHYSOR6uFRVBIa0dgvmlSllzeRfVqF2FDLrnnK+PUbad01ywN2643c" +
+                "HbA31hgnBxyi9dUBs7OqwBfF23/8Kz5df7igpGaMOYpVHNG1sjccDSEhNqxMyIRqW9USz5ysxQHETSuG" +
+                "Bqv2raQ5gDe1TRCfKvES2bmeugQnDVSGpum8LVmF1DbyAA+k9cToQ1Rbdo4j/EM01mf3VeRGMjv+SW47" +
+                "8aXQ5bsL+PgkZacWCfVgKKNwgpQwUtFZr6/OM6A4utmEM7xKhVGYgqOtrDlZuWujpJwnpwvEeDEWNwc3" +
+                "xBFEMYlOhm8LvKZTQhCkIG0oazpB5le91sGDUGjN0fLSSSYuoQBYjzPo+PQesx+oPfuwox8Z9zH+htZP" +
+                "vLmmsxo9c7n61FUQEI5tDGtr4LrsB5LSWfGKcVpGjn2RUWPI4uh91hhOQA0dwZNTCqVFAwxtrNZF0jym" +
+                "YzcWWK3/NI1PrMFuuKLkZqGMNJSk0w4vRTciUGsTfhuelMdrFQXltlxiloovUmqIr0a8Y7XBF587AKLH" +
+                "kWLQ8duzFLlN5pESmdaD7Zf88yZcDrMbPCa/EUZbsWQTEkBjI6CoYQ5WiQKRZEZWyQTo4YOCo+HvoBQM" +
+                "UkZz24KM72uSPwNyIvNqPqNNDX0HrzwIw9oOi25L3GCVNftuTGCmbXEz0tU5Bsm5MecxGFoIkp3ap3O6" +
+                "XFEfOtrkgnCI2/sloL1TXsMeaAizfLlsKR4KehWw7ZAlJa6wMj4pbjZ0feUC65vXdDed+un041lavZ+x" +
+                "x7rtKcS8oqN8D3qe3273A5pF/mNBu9OmKH4CmywSUBYHAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

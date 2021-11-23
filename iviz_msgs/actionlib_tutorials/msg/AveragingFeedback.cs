@@ -4,30 +4,24 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
 {
-    [Preserve, DataContract (Name = "actionlib_tutorials/AveragingFeedback")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class AveragingFeedback : IDeserializable<AveragingFeedback>, IFeedback<AveragingActionFeedback>
     {
         //feedback
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public AveragingFeedback()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal AveragingFeedback(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        AveragingFeedback IDeserializable<AveragingFeedback>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        AveragingFeedback IDeserializable<AveragingFeedback>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly AveragingFeedback Singleton = new AveragingFeedback();
     
@@ -39,22 +33,22 @@ namespace Iviz.Msgs.ActionlibTutorials
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "actionlib_tutorials/AveragingFeedback";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
+        /// MD5 hash of a compact representation of the message.
+        [Preserve] public const string RosMd5Sum = BuiltIns.EmptyMd5Sum;
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuPi5QIAl8utpwMAAAA=";
+                "H4sIAAAAAAAAE+PiAgBrE+NbAgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

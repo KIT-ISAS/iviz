@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/GetCaptureResolutions")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetCaptureResolutions : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetCaptureResolutionsRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetCaptureResolutionsResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetCaptureResolutions()
         {
             Request = GetCaptureResolutionsRequest.Singleton;
             Response = new GetCaptureResolutionsResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetCaptureResolutions(GetCaptureResolutionsRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/GetCaptureResolutions";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "e375c70c9e7caf58991e78dd0f791c3a";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetCaptureResolutionsRequest : IRequest<GetCaptureResolutions, GetCaptureResolutionsResponse>, IDeserializable<GetCaptureResolutionsRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetCaptureResolutionsRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetCaptureResolutionsRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        GetCaptureResolutionsRequest IDeserializable<GetCaptureResolutionsRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        GetCaptureResolutionsRequest IDeserializable<GetCaptureResolutionsRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly GetCaptureResolutionsRequest Singleton = new GetCaptureResolutionsRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -99,14 +93,14 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "message")] public string Message;
         [DataMember (Name = "resolutions")] public Vector2i[] Resolutions;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetCaptureResolutionsResponse()
         {
             Message = string.Empty;
             Resolutions = System.Array.Empty<Vector2i>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetCaptureResolutionsResponse(bool Success, string Message, Vector2i[] Resolutions)
         {
             this.Success = Success;
@@ -114,7 +108,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Resolutions = Resolutions;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetCaptureResolutionsResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
@@ -126,15 +120,9 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetCaptureResolutionsResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetCaptureResolutionsResponse(ref b);
         
-        GetCaptureResolutionsResponse IDeserializable<GetCaptureResolutionsResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetCaptureResolutionsResponse(ref b);
-        }
+        GetCaptureResolutionsResponse IDeserializable<GetCaptureResolutionsResponse>.RosDeserialize(ref Buffer b) => new GetCaptureResolutionsResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

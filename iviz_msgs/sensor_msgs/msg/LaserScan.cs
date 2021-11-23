@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [Preserve, DataContract (Name = "sensor_msgs/LaserScan")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class LaserScan : IDeserializable<LaserScan>, IMessage
     {
         // Single scan from a planar laser range-finder
@@ -32,14 +32,14 @@ namespace Iviz.Msgs.SensorMsgs
         // device does not provide intensities, please leave
         // the array empty.
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public LaserScan()
         {
             Ranges = System.Array.Empty<float>();
             Intensities = System.Array.Empty<float>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public LaserScan(in StdMsgs.Header Header, float AngleMin, float AngleMax, float AngleIncrement, float TimeIncrement, float ScanTime, float RangeMin, float RangeMax, float[] Ranges, float[] Intensities)
         {
             this.Header = Header;
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.SensorMsgs
             this.Intensities = Intensities;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal LaserScan(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -69,15 +69,9 @@ namespace Iviz.Msgs.SensorMsgs
             Intensities = b.DeserializeStructArray<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new LaserScan(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new LaserScan(ref b);
         
-        LaserScan IDeserializable<LaserScan>.RosDeserialize(ref Buffer b)
-        {
-            return new LaserScan(ref b);
-        }
+        LaserScan IDeserializable<LaserScan>.RosDeserialize(ref Buffer b) => new LaserScan(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -112,30 +106,30 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "sensor_msgs/LaserScan";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "90c7ef2dc6895d81024acba2ac42f369";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACq1VTY/jNgy9G5j/QCCHTYpJCnRvwbanou0eWhSYPXUQBIxM28LKlkeSk3F/fR/lfLiD" +
-                "bnYPDYIEtshH8ZF8XNCT7WonFA13VAXfElPvuONAjqMECtzVsq5sV0ooFsWCPlY0+oEaPgpx51NzNgIO" +
-                "lXK0RuhkU0OlrSoJ0iU6CIytD7SUTb1BgOiBDygOgcfVIwIKYpEGIZiZIJwAPoNoJUau5ZGi7RCA+95Z" +
-                "w8n6LgLnZJ2jlj8Dgm1w43T1dezF2Moa4hiHts/WxAc/JEqNjVRy4qL4TRipUTP9zT4LShZxE7c92Q4u" +
-                "cjGCrz6xeRlstIqbTclXVMwR6A0cfCobYgJf4wVSid/c8boHCIgqMALn370tH1ERVBNZBgFnHIcgJR78" +
-                "AGa/drXeay6o6l/Er0hxaeCWJBjnzeeTjWDfVjjE0dCv7qHl+v8twU/XQQNoc1Q+nDjgOs7jSSO+5kBf" +
-                "Rioq5zm9/2GC2bfI9xoDdQnpjA/eL1TSc+By99aRX2+OAiq+zQ2tFqTV9oMbXg0OU1FaRNYePEg6iXQX" +
-                "mtUunmGuONoVc5hzT33BN4rxXRl3tFaiMWQh363D4N1rgkitP4Lgx6mr8zAchIaI0oMxqzXsvcO0gPap" +
-                "yL67hwhe3pewhGe8pqI32efL35pmnoqez3K4cZAF5N+1w4Nth3Y6oiO7Qei53b11mVcND//pcvF53k1H" +
-                "cZbHZKtTrqa0/MMn2U6+kT7MLgbN+WkWNDZ+cKVyiGIbtKyUq1kcJbRTFqdgi+uL8RxrUsGb/AydTXG3" +
-                "obN03q3mWUFLD3CIK/UBtS1lHvSql/g9ytemOmssCeRv3BQPxY//8+eh+P3p1y2msdy3sY7fT2r6AFF+" +
-                "wpiUOu+tJM7EQACosTUWxtrJUZzOcNujS/NpGnuJGzh+0i7GtxZ0PjvIeW7l5Mn4tgWZEH65afPFH54o" +
-                "JbYXdMGaPKvG+1DaTs2zQio6vlFeBtER/vjzFjYdenZQ4UOkPKuMJVPjkIoBtGvvy0ux+HTya61CjQVw" +
-                "Wwyp4aSXldc+YEep2sYtYnw3JbcBNtiZhoKW+d0ej3F13mTSe9PQEjf/c0yNLhLU7MjB8gEKBWADBoD6" +
-                "Tp3erWbIeu0tdVjBF/gJ8RbjW2AVZcLVnNYNauY0+zjUIBCG5wbEOIwZxDirUubsIXAYi6wBOWSx+CXv" +
-                "outqVW9sXm8sClDmpVDEFPIqOO8rNOQ/GuuXZ4IIAAA=";
+                "H4sIAAAAAAAAE61VTY/jNgy9+1cQyGGTYpIC3dug7Wmx7RxaFJg9dRAMGJmOhZUljyQn4/76Psr5cBed" +
+                "7B7WCBIoJh/FR/JxQY/W751QMuypiaEjpt6x50iOk0SK7PeybqyvJVaLakEPDY1hoJYPQuxDbk9GwKFa" +
+                "DtYIHW1uqbZNI1F8pp3A2IZIS9nsNwiQAvABxTHyuLpDQEEs0iAEMxOFM8BnEJ2kxHu5o2Q9AnDfO2s4" +
+                "2+ATcI7WOer4MyDYRjdOV1+nXoxtrCFOaej6Yk28C0Om3NpENWeuqt+FkRq108/sWVC2iJu568l6uMjZ" +
+                "CL56YvMy2GQVt5hSaKiit55F8WlsTBl8jWdIJX5zw+sWoNWSMQKX72db36EiqCayjALOOA1RahzCAGa/" +
+                "drU+aC6o6t/Er0hxaeCWJRoXzOejTWDfNniJV0O/uoVW6v+PxDBdBw2gzdGEeOSI67iAk0Z8LYHeRqoa" +
+                "Fzi//2mCee6Q7yUG6hLzCR+8n6mkp8j19ktHfr06Cqj4Nje0WpRO2w9u+GtwmIraIrL24E7yUcSfaVa7" +
+                "dIK54GhXzGFOPfWGbxITfJ22tFaiMWSx3M1j8G41QaIuHEDw3dTVZRh2QkNC6cGY1Rr2wWFaQPtU5OBv" +
+                "IYKX9zUs4ZkuqehNnsvlr00zT0Xfz3K4clAE5L+1w8F2Qze9ogO7Qeip237pMq8aDv/rcvZ52k6v0iyP" +
+                "yVanXE1p+WfIcj/5Jvp5djFozq+zoKkNg6uVQxTboGWlXs3iKKFeWZyCLS5/jKdYkwpe5WfwNqfthk7S" +
+                "ebOaJwWtA8AhrtRH1LaWedCLXuL7IF+b6qKxJJC/cVNVv3znp/rj8bd7zGL93KV9+nHSUijyI2ak1mHv" +
+                "JHNhBdNPrd1jW6ydHMRREVa0aHmbx17SBo6ftIXx2Qvanh20vPRxDmRC14FJo6vhIsxn/6qIIVYXRMGa" +
+                "MqgmhFhbr+ZFHhUdnyQvg+j8Pny4h41Hww6qek4VWTdP0jF5+EDVAM618eWlWnw6hrWWYA/1v26F3HLW" +
+                "y8prH7GgVGrTPWL8MCW3ATbImSaCluW/ZxzT6rTGpA+mpSVu/teY2zAthANHyzvIE4ANGADqO3V6t5oh" +
+                "+wLtsX/P8BPiNca3wPoLrua0blEzp9mnYc9ly526D7MwFhDjrOqYs7vIcayKAJSQ1eJjWUSXvareWLvB" +
+                "WBSgLhuhSjmWPXBaVlX1L6uTjed+CAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

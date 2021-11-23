@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/LoadMap")]
+    [DataContract (Name = RosServiceType)]
     public sealed class LoadMap : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public LoadMapRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public LoadMapResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public LoadMap()
         {
             Request = new LoadMapRequest();
             Response = new LoadMapResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public LoadMap(LoadMapRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/LoadMap";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "93a4bc4c60dc17e2a69e3fcaaa25d69d";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.MoveitMsgs
     {
         [DataMember (Name = "filename")] public string Filename;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public LoadMapRequest()
         {
             Filename = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public LoadMapRequest(string Filename)
         {
             this.Filename = Filename;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal LoadMapRequest(ref Buffer b)
         {
             Filename = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new LoadMapRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new LoadMapRequest(ref b);
         
-        LoadMapRequest IDeserializable<LoadMapRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new LoadMapRequest(ref b);
-        }
+        LoadMapRequest IDeserializable<LoadMapRequest>.RosDeserialize(ref Buffer b) => new LoadMapRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -103,32 +97,26 @@ namespace Iviz.Msgs.MoveitMsgs
     {
         [DataMember (Name = "success")] public bool Success;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public LoadMapResponse()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public LoadMapResponse(bool Success)
         {
             this.Success = Success;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal LoadMapResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new LoadMapResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new LoadMapResponse(ref b);
         
-        LoadMapResponse IDeserializable<LoadMapResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new LoadMapResponse(ref b);
-        }
+        LoadMapResponse IDeserializable<LoadMapResponse>.RosDeserialize(ref Buffer b) => new LoadMapResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -139,7 +127,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

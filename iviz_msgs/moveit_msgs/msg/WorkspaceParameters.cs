@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/WorkspaceParameters")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class WorkspaceParameters : IDeserializable<WorkspaceParameters>, IMessage
     {
         // This message contains a set of parameters useful in
@@ -18,12 +18,12 @@ namespace Iviz.Msgs.MoveitMsgs
         // The maximum corner of the box, with respect to the robot starting pose
         [DataMember (Name = "max_corner")] public GeometryMsgs.Vector3 MaxCorner;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public WorkspaceParameters()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public WorkspaceParameters(in StdMsgs.Header Header, in GeometryMsgs.Vector3 MinCorner, in GeometryMsgs.Vector3 MaxCorner)
         {
             this.Header = Header;
@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.MaxCorner = MaxCorner;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal WorkspaceParameters(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -39,15 +39,9 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Deserialize(out MaxCorner);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new WorkspaceParameters(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new WorkspaceParameters(ref b);
         
-        WorkspaceParameters IDeserializable<WorkspaceParameters>.RosDeserialize(ref Buffer b)
-        {
-            return new WorkspaceParameters(ref b);
-        }
+        WorkspaceParameters IDeserializable<WorkspaceParameters>.RosDeserialize(ref Buffer b) => new WorkspaceParameters(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -64,27 +58,27 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/WorkspaceParameters";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "d639a834e7b1f927e9f1d6c30e920016";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACrVVsW7bQAzdBfgfCGRIUiQukBQdAnQL2mYoECBB14CWKOnQ01G9O9lWv76PZ0dJgQ4d" +
-                "Gi+WdXyPj+Tj+YQee5dokJS4E6o1ZHYhEVOSTNrSyJEHyRITTUnayZML1YmdZhc6mkbKvdBW/TQInTFt" +
-                "dH+OENr1ru7LWdSNZkIS9l530lBWGnQr6+qY3C3UGvwMpAQaPYdgCVqNiN44LyYlJ9ME4AsxJ9qJ9+sK" +
-                "b2+ldUHKYWuyLThKK1FCLYXKjiARhcaAmqqvwo1E6suXUTwiYHBhGqbhGGQkR9gF7VzuQZlGqbMV8qIj" +
-                "ZcgzxaMmqTpRdC3OT0Pq0vvviNZ4bcRPB9IlFe/d26Ti/XOqVfXpP39W1beHLzfQ0RySHrq4Qk0PmUPD" +
-                "sYGjMjecuXS9d10v8dLLVrypH0bYoJzmeZT02gmdQDKcMpsnildqHYYpuJozJuvg1Nd4IGE2Lt5w9eQ5" +
-                "Il5j44KFFxMYe3Hsz6nY4O72xnyepJ6yg6AZDHUUTtbRu1uqJhfy9ZUBqpPHnV7ip3QYzpIco+DiaNmP" +
-                "GJDp5HSDHO8Oxa3Bje4IsjSJzsq7J/xM54QkkCCjYjnOoPx+zr2Gww5xdLyBz0FcowNgPTXQ6fkrZpN9" +
-                "Q4GDPtMfGF9y/AttWHitpsseM/NWfZo6NBCBY9StaxC6mQtJ7Z2ETN5tIse5MtQhZXXyuSxatvGVidii" +
-                "p6S1wwCaYuIq5VhW2SKfXPN2hvzrKqye3RXFpoU67HrblkMzTxsFxYxcy9p8clcmW26iQRhFw4ILEsDG" +
-                "RUCdhrUtMG4XjXJBLlOjkihoBsfAP0ApaDMBzeMIMng9ckieDWuvATmTdbfGptuNV6KsTcXUZQ1cTdF1" +
-                "DltgSCQaFjDTsboLyu0V2uyPt+chGWYGkqi5AM7XdNfSrBPtrCA8xOP2KW0g8airuCSrXtjqHSn+7Oi9" +
-                "YheWPwv8T2QsPm7e1ivnjx9ovzzNy9OvVfUbEt0eoWUGAAA=";
+                "H4sIAAAAAAAAE7VVsW7bQAzd9RUEMjQpHBdIig4BugVtMxQIkKBrQEuUdOjpqN6dbKtf38eTo6RAhw6t" +
+                "F8s6vsdH8vF8Ro+9SzRIStwJ1Royu5CIKUkmbWnkyINkiYmmJO3kyYXqzE6zCx1NI+VeaK9+GoTOmXZ6" +
+                "vEAIHXpX9+Us6k4zIQl7rwdpKCsNupctaEpyt1Jr8DOQEmj0HIIlaDUieue8mJScTBOAL8Sc6CDebyu8" +
+                "vZXWBSmHrcm24CitRAm1FCo7gkQUGgNqqr4INxKpL19VUSQ0uDAN03AKMpITbEMHl3tQplHqbIW86EgZ" +
+                "8kzxqEmqThRdi/PTkLr07huiNV4b8dNCuqbio/s/qfi4pvr4jz/V14fPN1DRLCmXHqKgh8yh4djATpkb" +
+                "zlxa3ruul3jpZS/epA8jPFBO8zxKem2DTqAXNpnNEMUotQ7DFFzNGWN1sOlrPJBwGhdjuHryHBGvsXHB" +
+                "wosDjL3Y9cdUPHB3e2MmT1JP2UHQDIY6Cidr590tVZML+frKANXZ40Ev8VM6TGZNjjlwsbMcR0zHdHK6" +
+                "QY63S3FbcKM5gixNovPy7gk/0wUhCSTIqNiMcyi/n3OvYVkgjo53MDmIa3QArG8M9ObiFXMo1IGDPtMv" +
+                "jC85/oY2rLxW02WPmXmrPk0dGojAMereNQjdzYWk9k5CJu92keNcGWpJWZ19KluWbXxlIrblKWntMICm" +
+                "OLhKOZY9tsgn1/wvN/5xC56tFcVGhSLsYtuXM3NOGwWVjFzL1kxyV8Za7qBBOJSlW5EANi4C6jRsbXVx" +
+                "r2iUDblMjUqioBkcA38HpaDHhuZxBBmMHjkkz4a114Ccy7bbbpa7rkRZj4qjyw64mqLrXLMgkWhYwUyn" +
+                "4jaU2yv02J/uzSUZBgaSqLkALrZ019KsEx2sIDzE0+op7WTVVSySVTe2dyeK3xt6r1iE9W8C/xAZS487" +
+                "t/XK+cN7Oq5P8/r0s/oF+N16rV4GAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

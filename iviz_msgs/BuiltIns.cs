@@ -50,6 +50,10 @@ namespace Iviz.Msgs
 
         public static readonly CultureInfo Culture = Defaults.Culture;
         
+        public const string EmptyMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
+    
+        public const string EmptyDependenciesBase64 = "H4sIAAAAAAAAE+MCAJMG1zIBAAAA";
+        
         static string GetClassStringConstant(Type type, string name)
         {
             Type? currentType = type;

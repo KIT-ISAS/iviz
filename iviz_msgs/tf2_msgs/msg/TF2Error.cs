@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Tf2Msgs
 {
-    [Preserve, DataContract (Name = "tf2_msgs/TF2Error")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class TF2Error : IDeserializable<TF2Error>, IMessage
     {
         public const byte NO_ERROR = 0;
@@ -17,35 +17,29 @@ namespace Iviz.Msgs.Tf2Msgs
         [DataMember (Name = "error")] public byte Error;
         [DataMember (Name = "error_string")] public string ErrorString;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TF2Error()
         {
             ErrorString = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TF2Error(byte Error, string ErrorString)
         {
             this.Error = Error;
             this.ErrorString = ErrorString;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TF2Error(ref Buffer b)
         {
             Error = b.Deserialize<byte>();
             ErrorString = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TF2Error(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TF2Error(ref b);
         
-        TF2Error IDeserializable<TF2Error>.RosDeserialize(ref Buffer b)
-        {
-            return new TF2Error(ref b);
-        }
+        TF2Error IDeserializable<TF2Error>.RosDeserialize(ref Buffer b) => new TF2Error(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -62,17 +56,17 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "tf2_msgs/TF2Error";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "bc6848fd6fd750c92e38575618a4917d";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACkXKywrCMBCF4X3Ad8gjeMeNi1BjGUxmyjgpdpWVSDctxPb9BRvj8vzfmfthOmmkaJmJ" +
-                "9Vmv1fxNjugWmpI3OVeEaCuBFqQruM1oH8KmIWcECIvusgK2xsElGq6DtyjlsM8HAW8p/Pvh19ng/Urs" +
-                "ixxVpmdKY1LvKfXDaxlxGWqlPpexWmnbAAAA";
+                "H4sIAAAAAAAAE0XKuw7CMAyF4T1PkUfgLhaGqARkkdiVcSqYMiHUpUihfX8kasJ4/u9M/TDuLVL2zMT2" +
+                "YBdm+qZAdEltzUvNDSH6RqADuVdcKfqbsGspOAHCqmtVwM4FOGbH5xQ9Sj1s9CAQPaV/3/46O7yeiGOV" +
+                "nVF6lPIq5j2WfnjOI8/DmA8cjH3N2gAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

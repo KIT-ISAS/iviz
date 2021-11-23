@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GridMapMsgs
 {
-    [DataContract (Name = "grid_map_msgs/ProcessFile")]
+    [DataContract (Name = RosServiceType)]
     public sealed class ProcessFile : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public ProcessFileRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public ProcessFileResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public ProcessFile()
         {
             Request = new ProcessFileRequest();
             Response = new ProcessFileResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public ProcessFile(ProcessFileRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.GridMapMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "grid_map_msgs/ProcessFile";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "03f389710f49a6dd2a8b447bb2850cd6";
         
         public override string ToString() => Extensions.ToString(this);
@@ -58,36 +58,30 @@ namespace Iviz.Msgs.GridMapMsgs
         // For ROS bags: topic name that should be processed (optional).
         [DataMember (Name = "topic_name")] public string TopicName;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ProcessFileRequest()
         {
             FilePath = string.Empty;
             TopicName = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ProcessFileRequest(string FilePath, string TopicName)
         {
             this.FilePath = FilePath;
             this.TopicName = TopicName;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ProcessFileRequest(ref Buffer b)
         {
             FilePath = b.DeserializeString();
             TopicName = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ProcessFileRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ProcessFileRequest(ref b);
         
-        ProcessFileRequest IDeserializable<ProcessFileRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new ProcessFileRequest(ref b);
-        }
+        ProcessFileRequest IDeserializable<ProcessFileRequest>.RosDeserialize(ref Buffer b) => new ProcessFileRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -112,32 +106,26 @@ namespace Iviz.Msgs.GridMapMsgs
         // True if file processing was successful.
         [DataMember (Name = "success")] public bool Success;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public ProcessFileResponse()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public ProcessFileResponse(bool Success)
         {
             this.Success = Success;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal ProcessFileResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new ProcessFileResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new ProcessFileResponse(ref b);
         
-        ProcessFileResponse IDeserializable<ProcessFileResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new ProcessFileResponse(ref b);
-        }
+        ProcessFileResponse IDeserializable<ProcessFileResponse>.RosDeserialize(ref Buffer b) => new ProcessFileResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -148,7 +136,7 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

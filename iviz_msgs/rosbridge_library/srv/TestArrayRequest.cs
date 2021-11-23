@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract (Name = "rosbridge_library/TestArrayRequest")]
+    [DataContract (Name = RosServiceType)]
     public sealed class TestArrayRequest : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public TestArrayRequestRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public TestArrayRequestResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public TestArrayRequest()
         {
             Request = new TestArrayRequestRequest();
             Response = TestArrayRequestResponse.Singleton;
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public TestArrayRequest(TestArrayRequestRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "rosbridge_library/TestArrayRequest";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "3d7cfb7e4aa0844868966efa8a264398";
         
         public override string ToString() => Extensions.ToString(this);
@@ -55,33 +55,27 @@ namespace Iviz.Msgs.RosbridgeLibrary
     {
         [DataMember (Name = "int")] public int[] @int;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestArrayRequestRequest()
         {
             @int = System.Array.Empty<int>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TestArrayRequestRequest(int[] @int)
         {
             this.@int = @int;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestArrayRequestRequest(ref Buffer b)
         {
             @int = b.DeserializeStructArray<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TestArrayRequestRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TestArrayRequestRequest(ref b);
         
-        TestArrayRequestRequest IDeserializable<TestArrayRequestRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new TestArrayRequestRequest(ref b);
-        }
+        TestArrayRequestRequest IDeserializable<TestArrayRequestRequest>.RosDeserialize(ref Buffer b) => new TestArrayRequestRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -102,25 +96,19 @@ namespace Iviz.Msgs.RosbridgeLibrary
     public sealed class TestArrayRequestResponse : IResponse, IDeserializable<TestArrayRequestResponse>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TestArrayRequestResponse()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TestArrayRequestResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        TestArrayRequestResponse IDeserializable<TestArrayRequestResponse>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        TestArrayRequestResponse IDeserializable<TestArrayRequestResponse>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly TestArrayRequestResponse Singleton = new TestArrayRequestResponse();
     
@@ -132,7 +120,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GridMapMsgs
 {
-    [DataContract (Name = "grid_map_msgs/GetGridMapInfo")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetGridMapInfo : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetGridMapInfoRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetGridMapInfoResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetGridMapInfo()
         {
             Request = GetGridMapInfoRequest.Singleton;
             Response = new GetGridMapInfoResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetGridMapInfo(GetGridMapInfoRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.GridMapMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "grid_map_msgs/GetGridMapInfo";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "a0be1719725f7fd7b490db4d64321ff2";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.GridMapMsgs
     public sealed class GetGridMapInfoRequest : IRequest<GetGridMapInfo, GetGridMapInfoResponse>, IDeserializable<GetGridMapInfoRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetGridMapInfoRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetGridMapInfoRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        GetGridMapInfoRequest IDeserializable<GetGridMapInfoRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        GetGridMapInfoRequest IDeserializable<GetGridMapInfoRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly GetGridMapInfoRequest Singleton = new GetGridMapInfoRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -98,33 +92,27 @@ namespace Iviz.Msgs.GridMapMsgs
         // Grid map info
         [DataMember (Name = "info")] public GridMapMsgs.GridMapInfo Info;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetGridMapInfoResponse()
         {
             Info = new GridMapMsgs.GridMapInfo();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetGridMapInfoResponse(GridMapMsgs.GridMapInfo Info)
         {
             this.Info = Info;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetGridMapInfoResponse(ref Buffer b)
         {
             Info = new GridMapMsgs.GridMapInfo(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetGridMapInfoResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetGridMapInfoResponse(ref b);
         
-        GetGridMapInfoResponse IDeserializable<GetGridMapInfoResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetGridMapInfoResponse(ref b);
-        }
+        GetGridMapInfoResponse IDeserializable<GetGridMapInfoResponse>.RosDeserialize(ref Buffer b) => new GetGridMapInfoResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/GetPositionFK")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetPositionFK : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetPositionFKRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetPositionFKResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetPositionFK()
         {
             Request = new GetPositionFKRequest();
             Response = new GetPositionFKResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetPositionFK(GetPositionFKRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/GetPositionFK";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "03d4858215085d70e74807025d68dc4c";
         
         public override string ToString() => Extensions.ToString(this);
@@ -62,14 +62,14 @@ namespace Iviz.Msgs.MoveitMsgs
         // A robot state consisting of joint names and joint positions to be used for forward kinematics
         [DataMember (Name = "robot_state")] public RobotState RobotState;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetPositionFKRequest()
         {
             FkLinkNames = System.Array.Empty<string>();
             RobotState = new RobotState();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetPositionFKRequest(in StdMsgs.Header Header, string[] FkLinkNames, RobotState RobotState)
         {
             this.Header = Header;
@@ -77,7 +77,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.RobotState = RobotState;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetPositionFKRequest(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -85,15 +85,9 @@ namespace Iviz.Msgs.MoveitMsgs
             RobotState = new RobotState(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetPositionFKRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetPositionFKRequest(ref b);
         
-        GetPositionFKRequest IDeserializable<GetPositionFKRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetPositionFKRequest(ref b);
-        }
+        GetPositionFKRequest IDeserializable<GetPositionFKRequest>.RosDeserialize(ref Buffer b) => new GetPositionFKRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -136,7 +130,7 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "fk_link_names")] public string[] FkLinkNames;
         [DataMember (Name = "error_code")] public MoveItErrorCodes ErrorCode;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetPositionFKResponse()
         {
             PoseStamped = System.Array.Empty<GeometryMsgs.PoseStamped>();
@@ -144,7 +138,7 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode = new MoveItErrorCodes();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetPositionFKResponse(GeometryMsgs.PoseStamped[] PoseStamped, string[] FkLinkNames, MoveItErrorCodes ErrorCode)
         {
             this.PoseStamped = PoseStamped;
@@ -152,7 +146,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.ErrorCode = ErrorCode;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetPositionFKResponse(ref Buffer b)
         {
             PoseStamped = b.DeserializeArray<GeometryMsgs.PoseStamped>();
@@ -164,15 +158,9 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetPositionFKResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetPositionFKResponse(ref b);
         
-        GetPositionFKResponse IDeserializable<GetPositionFKResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetPositionFKResponse(ref b);
-        }
+        GetPositionFKResponse IDeserializable<GetPositionFKResponse>.RosDeserialize(ref Buffer b) => new GetPositionFKResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

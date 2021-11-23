@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DiagnosticMsgs
 {
-    [DataContract (Name = "diagnostic_msgs/AddDiagnostics")]
+    [DataContract (Name = RosServiceType)]
     public sealed class AddDiagnostics : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public AddDiagnosticsRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public AddDiagnosticsResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public AddDiagnostics()
         {
             Request = new AddDiagnosticsRequest();
             Response = new AddDiagnosticsResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public AddDiagnostics(AddDiagnosticsRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "diagnostic_msgs/AddDiagnostics";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "e6ac9bbde83d0d3186523c3687aecaee";
         
         public override string ToString() => Extensions.ToString(this);
@@ -70,33 +70,27 @@ namespace Iviz.Msgs.DiagnosticMsgs
         // loaded into the namespace.
         [DataMember (Name = "load_namespace")] public string LoadNamespace;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public AddDiagnosticsRequest()
         {
             LoadNamespace = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public AddDiagnosticsRequest(string LoadNamespace)
         {
             this.LoadNamespace = LoadNamespace;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal AddDiagnosticsRequest(ref Buffer b)
         {
             LoadNamespace = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new AddDiagnosticsRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new AddDiagnosticsRequest(ref b);
         
-        AddDiagnosticsRequest IDeserializable<AddDiagnosticsRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new AddDiagnosticsRequest(ref b);
-        }
+        AddDiagnosticsRequest IDeserializable<AddDiagnosticsRequest>.RosDeserialize(ref Buffer b) => new AddDiagnosticsRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -124,35 +118,29 @@ namespace Iviz.Msgs.DiagnosticMsgs
         // Message with additional information about the success or failure
         [DataMember (Name = "message")] public string Message;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public AddDiagnosticsResponse()
         {
             Message = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public AddDiagnosticsResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal AddDiagnosticsResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new AddDiagnosticsResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new AddDiagnosticsResponse(ref b);
         
-        AddDiagnosticsResponse IDeserializable<AddDiagnosticsResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new AddDiagnosticsResponse(ref b);
-        }
+        AddDiagnosticsResponse IDeserializable<AddDiagnosticsResponse>.RosDeserialize(ref Buffer b) => new AddDiagnosticsResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

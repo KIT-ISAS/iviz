@@ -4,38 +4,32 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
 {
-    [Preserve, DataContract (Name = "actionlib_tutorials/FibonacciGoal")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class FibonacciGoal : IDeserializable<FibonacciGoal>, IGoal<FibonacciActionGoal>
     {
         //goal definition
         [DataMember (Name = "order")] public int Order;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public FibonacciGoal()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public FibonacciGoal(int Order)
         {
             this.Order = Order;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal FibonacciGoal(ref Buffer b)
         {
             Order = b.Deserialize<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new FibonacciGoal(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new FibonacciGoal(ref b);
         
-        FibonacciGoal IDeserializable<FibonacciGoal>.RosDeserialize(ref Buffer b)
-        {
-            return new FibonacciGoal(ref b);
-        }
+        FibonacciGoal IDeserializable<FibonacciGoal>.RosDeserialize(ref Buffer b) => new FibonacciGoal(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -46,22 +40,22 @@ namespace Iviz.Msgs.ActionlibTutorials
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "actionlib_tutorials/FibonacciGoal";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "6889063349a00b249bd1661df429d822";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuPKzCsxNlLIL0pJLeLlAgCjM1cmDgAAAA==";
+                "H4sIAAAAAAAAE+PKzCsxNlLIL0pJLeICAL/qDR8NAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

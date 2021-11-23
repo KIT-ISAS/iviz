@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/SaveRobotStateToWarehouse")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SaveRobotStateToWarehouse : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SaveRobotStateToWarehouseRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SaveRobotStateToWarehouseResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SaveRobotStateToWarehouse()
         {
             Request = new SaveRobotStateToWarehouseRequest();
             Response = new SaveRobotStateToWarehouseResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SaveRobotStateToWarehouse(SaveRobotStateToWarehouseRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/SaveRobotStateToWarehouse";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "555cb479e433361a8f0a29f1cd7f3ad2";
         
         public override string ToString() => Extensions.ToString(this);
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "robot")] public string Robot;
         [DataMember (Name = "state")] public MoveitMsgs.RobotState State;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SaveRobotStateToWarehouseRequest()
         {
             Name = string.Empty;
@@ -65,7 +65,7 @@ namespace Iviz.Msgs.MoveitMsgs
             State = new MoveitMsgs.RobotState();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SaveRobotStateToWarehouseRequest(string Name, string Robot, MoveitMsgs.RobotState State)
         {
             this.Name = Name;
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.State = State;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SaveRobotStateToWarehouseRequest(ref Buffer b)
         {
             Name = b.DeserializeString();
@@ -81,15 +81,9 @@ namespace Iviz.Msgs.MoveitMsgs
             State = new MoveitMsgs.RobotState(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SaveRobotStateToWarehouseRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SaveRobotStateToWarehouseRequest(ref b);
         
-        SaveRobotStateToWarehouseRequest IDeserializable<SaveRobotStateToWarehouseRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SaveRobotStateToWarehouseRequest(ref b);
-        }
+        SaveRobotStateToWarehouseRequest IDeserializable<SaveRobotStateToWarehouseRequest>.RosDeserialize(ref Buffer b) => new SaveRobotStateToWarehouseRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -125,32 +119,26 @@ namespace Iviz.Msgs.MoveitMsgs
     {
         [DataMember (Name = "success")] public bool Success;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SaveRobotStateToWarehouseResponse()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SaveRobotStateToWarehouseResponse(bool Success)
         {
             this.Success = Success;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SaveRobotStateToWarehouseResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SaveRobotStateToWarehouseResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SaveRobotStateToWarehouseResponse(ref b);
         
-        SaveRobotStateToWarehouseResponse IDeserializable<SaveRobotStateToWarehouseResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new SaveRobotStateToWarehouseResponse(ref b);
-        }
+        SaveRobotStateToWarehouseResponse IDeserializable<SaveRobotStateToWarehouseResponse>.RosDeserialize(ref Buffer b) => new SaveRobotStateToWarehouseResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -161,7 +149,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

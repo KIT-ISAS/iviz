@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
 {
-    [Preserve, DataContract (Name = "nav_msgs/MapMetaData")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class MapMetaData : IDeserializable<MapMetaData>, IMessage
     {
         // This hold basic information about the characterists of the OccupancyGrid
@@ -20,12 +20,12 @@ namespace Iviz.Msgs.NavMsgs
         // cell (0,0) in the map.
         [DataMember (Name = "origin")] public GeometryMsgs.Pose Origin;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public MapMetaData()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public MapMetaData(time MapLoadTime, float Resolution, uint Width, uint Height, in GeometryMsgs.Pose Origin)
         {
             this.MapLoadTime = MapLoadTime;
@@ -35,7 +35,7 @@ namespace Iviz.Msgs.NavMsgs
             this.Origin = Origin;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal MapMetaData(ref Buffer b)
         {
             MapLoadTime = b.Deserialize<time>();
@@ -45,15 +45,9 @@ namespace Iviz.Msgs.NavMsgs
             b.Deserialize(out Origin);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new MapMetaData(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new MapMetaData(ref b);
         
-        MapMetaData IDeserializable<MapMetaData>.RosDeserialize(ref Buffer b)
-        {
-            return new MapMetaData(ref b);
-        }
+        MapMetaData IDeserializable<MapMetaData>.RosDeserialize(ref Buffer b) => new MapMetaData(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -68,28 +62,28 @@ namespace Iviz.Msgs.NavMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 76;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "nav_msgs/MapMetaData";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "10cfc8a2818024d3248802c00c95f11b";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1TPU/DMBDdLfU/nNQFpJJWgBiQGJg6VRTBVlWV6zjxSbEdbEeh/HrOzkdbGFhQIw++" +
-                "87u7956dKbwr9KBslcOeexSAprBO84DWAN/bJkBQEoTijosgHfrgwRYp+SJEU3MjDkuHOWNT6iUhoJbA" +
-                "A7QKhUowzWtouYfK8lzmLAEot4vxLkZ9ZcQ56W3VpOEbPReyqrasIGC4uz05o4JVbIp5ULCJKL9lDZqI" +
-                "SskeoCSWKvxEdNl+qHVYohkURQobPQNajufbDDp7aMVTJ3l101pHXtXWy76IGsX+cLWYLa7JvqFRxkpp" +
-                "tQzusNO+9PN1KknjJuzpn78JW70tH+H3xAnReybmNbknTejulYgnAUS2cFKCr7mQMxBWx3Ten2P3BgzF" +
-                "DofaDNjako8jgL02nN6FSX2POHYxjUQmikwXJSyNR9Nd1yiB5HCKIuszxSy9rId7+Bx3h3H3dSkFR/9G" +
-                "GeN1ebL/1NVz/jH6OLof/9uM/SFq2LUk7xu4GlT8/QMAAA==";
+                "H4sIAAAAAAAAE71TPU8DMQzd8yssdQGpXCtADEgMTJ0qimCrqipN3EukS3IkOR3l1+PkPtrCwIJ6yhDb" +
+                "z/bzc24C70oHUK6SsONBC9B277zhUTsLfOeaCFEhCMU9FxG9DjGA22fnixBNza04LLyWjE2oFkLUBoFH" +
+                "aJUWKsMMr6HlASrHJUqWAeTbJnubrD4z4TwGVzW5+drMBFbVhu0JGO9uT2KUsExFtYwK1gkVNqzRNqGy" +
+                "swco1KWKPxGdt2/qvC61HSZKFNZmCnQ8l5sCOnnopKhHXt20zpNWtQvYJ1GhVB+u5tP5Nck3FCpYic5g" +
+                "9IetCWWYrXJKbsee/vljy7fFI/zuR9yeiXZN0qGN3VKJdWZPTPceEULNBU5BOJPcso/r7gFYmSgPuQWw" +
+                "lSMRRwB7bTg9CpvrHnHsQgMSlbxG2o9w1FvbblEjf5qFk5Uon43bvamHe/gcb4fx9nUZ+kfphhnGRQUS" +
+                "/lTPc/LJ+jjqnn7Xgv0x0XBrGfsGRIxpGPMDAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

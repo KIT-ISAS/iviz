@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/SetFixedFrame")]
+    [DataContract (Name = RosServiceType)]
     public sealed class SetFixedFrame : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public SetFixedFrameRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public SetFixedFrameResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public SetFixedFrame()
         {
             Request = new SetFixedFrameRequest();
             Response = new SetFixedFrameResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public SetFixedFrame(SetFixedFrameRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/SetFixedFrame";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "7b2e77c05fb1342786184d949a9f06ed";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,33 +56,27 @@ namespace Iviz.Msgs.IvizMsgs
         // Sets the fixed frame
         [DataMember (Name = "id")] public string Id; // Id of the frame
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetFixedFrameRequest()
         {
             Id = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetFixedFrameRequest(string Id)
         {
             this.Id = Id;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetFixedFrameRequest(ref Buffer b)
         {
             Id = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetFixedFrameRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetFixedFrameRequest(ref b);
         
-        SetFixedFrameRequest IDeserializable<SetFixedFrameRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new SetFixedFrameRequest(ref b);
-        }
+        SetFixedFrameRequest IDeserializable<SetFixedFrameRequest>.RosDeserialize(ref Buffer b) => new SetFixedFrameRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -105,35 +99,29 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "success")] public bool Success; // Whether the operation succeeded
         [DataMember (Name = "message")] public string Message; // An error message if success is false
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public SetFixedFrameResponse()
         {
             Message = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public SetFixedFrameResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal SetFixedFrameResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new SetFixedFrameResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new SetFixedFrameResponse(ref b);
         
-        SetFixedFrameResponse IDeserializable<SetFixedFrameResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new SetFixedFrameResponse(ref b);
-        }
+        SetFixedFrameResponse IDeserializable<SetFixedFrameResponse>.RosDeserialize(ref Buffer b) => new SetFixedFrameResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

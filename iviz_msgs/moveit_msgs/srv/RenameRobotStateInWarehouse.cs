@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/RenameRobotStateInWarehouse")]
+    [DataContract (Name = RosServiceType)]
     public sealed class RenameRobotStateInWarehouse : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public RenameRobotStateInWarehouseRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public RenameRobotStateInWarehouseResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public RenameRobotStateInWarehouse()
         {
             Request = new RenameRobotStateInWarehouseRequest();
             Response = RenameRobotStateInWarehouseResponse.Singleton;
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public RenameRobotStateInWarehouse(RenameRobotStateInWarehouseRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/RenameRobotStateInWarehouse";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "073dc05c3fd313b947cea483c25c46b0";
         
         public override string ToString() => Extensions.ToString(this);
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "new_name")] public string NewName;
         [DataMember (Name = "robot")] public string Robot;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public RenameRobotStateInWarehouseRequest()
         {
             OldName = string.Empty;
@@ -65,7 +65,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Robot = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public RenameRobotStateInWarehouseRequest(string OldName, string NewName, string Robot)
         {
             this.OldName = OldName;
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.Robot = Robot;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal RenameRobotStateInWarehouseRequest(ref Buffer b)
         {
             OldName = b.DeserializeString();
@@ -81,15 +81,9 @@ namespace Iviz.Msgs.MoveitMsgs
             Robot = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new RenameRobotStateInWarehouseRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new RenameRobotStateInWarehouseRequest(ref b);
         
-        RenameRobotStateInWarehouseRequest IDeserializable<RenameRobotStateInWarehouseRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new RenameRobotStateInWarehouseRequest(ref b);
-        }
+        RenameRobotStateInWarehouseRequest IDeserializable<RenameRobotStateInWarehouseRequest>.RosDeserialize(ref Buffer b) => new RenameRobotStateInWarehouseRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -123,25 +117,19 @@ namespace Iviz.Msgs.MoveitMsgs
     public sealed class RenameRobotStateInWarehouseResponse : IResponse, IDeserializable<RenameRobotStateInWarehouseResponse>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public RenameRobotStateInWarehouseResponse()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal RenameRobotStateInWarehouseResponse(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        RenameRobotStateInWarehouseResponse IDeserializable<RenameRobotStateInWarehouseResponse>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        RenameRobotStateInWarehouseResponse IDeserializable<RenameRobotStateInWarehouseResponse>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly RenameRobotStateInWarehouseResponse Singleton = new RenameRobotStateInWarehouseResponse();
     
@@ -153,7 +141,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;

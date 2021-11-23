@@ -4,41 +4,35 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
 {
-    [Preserve, DataContract (Name = "actionlib_tutorials/AveragingGoal")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class AveragingGoal : IDeserializable<AveragingGoal>, IGoal<AveragingActionGoal>
     {
         //goal definition
         [DataMember (Name = "edges")] public int Edges;
         [DataMember (Name = "radius")] public float Radius;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public AveragingGoal()
         {
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public AveragingGoal(int Edges, float Radius)
         {
             this.Edges = Edges;
             this.Radius = Radius;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal AveragingGoal(ref Buffer b)
         {
             Edges = b.Deserialize<int>();
             Radius = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new AveragingGoal(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new AveragingGoal(ref b);
         
-        AveragingGoal IDeserializable<AveragingGoal>.RosDeserialize(ref Buffer b)
-        {
-            return new AveragingGoal(ref b);
-        }
+        AveragingGoal IDeserializable<AveragingGoal>.RosDeserialize(ref Buffer b) => new AveragingGoal(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -50,22 +44,22 @@ namespace Iviz.Msgs.ActionlibTutorials
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "actionlib_tutorials/AveragingGoal";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "3b9202ab7292cebe5a95ab2bf6b9c091";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuPKzCsxNlJITUlPLeZKy8lPBPGKElMyS4t5uQBro2RtHQAAAA==";
+                "H4sIAAAAAAAAE+PKzCsxNlJITUlPLeZKy8lPBPGKElMyS4u5AJplSSgcAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

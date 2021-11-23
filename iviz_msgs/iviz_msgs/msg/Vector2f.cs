@@ -6,36 +6,30 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = "iviz_msgs/Vector2f")]
+    [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
     public struct Vector2f : IMessage, System.IEquatable<Vector2f>, IDeserializable<Vector2f>
     {
         [DataMember (Name = "x")] public float X;
         [DataMember (Name = "y")] public float Y;
     
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Vector2f(float X, float Y)
         {
             this.X = X;
             this.Y = Y;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal Vector2f(ref Buffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Vector2f(ref b);
-        }
+        public readonly ISerializable RosDeserialize(ref Buffer b) => new Vector2f(ref b);
         
-        readonly Vector2f IDeserializable<Vector2f>.RosDeserialize(ref Buffer b)
-        {
-            return new Vector2f(ref b);
-        }
+        readonly Vector2f IDeserializable<Vector2f>.RosDeserialize(ref Buffer b) => new Vector2f(ref b);
         
         public override readonly int GetHashCode() => (X, Y).GetHashCode();
         
@@ -56,22 +50,22 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 8;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
         public readonly string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "iviz_msgs/Vector2f";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "ff8d7d66dd3e4b731ef14a45d38888b6";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACkvLyU8sMTZSqOBKg7IquXi5AEfQDhcWAAAA";
+                "H4sIAAAAAAAAE0vLyU8sMTZSqOBKg7IqubgAEeFgKBUAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

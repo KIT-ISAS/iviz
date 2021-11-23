@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdSrvs
 {
-    [DataContract (Name = "std_srvs/Trigger")]
+    [DataContract (Name = RosServiceType)]
     public sealed class Trigger : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public TriggerRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public TriggerResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public Trigger()
         {
             Request = TriggerRequest.Singleton;
             Response = new TriggerResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public Trigger(TriggerRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.StdSrvs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "std_srvs/Trigger";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "937c9679a518e3a18d831e57125ea522";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.StdSrvs
     public sealed class TriggerRequest : IRequest<Trigger, TriggerResponse>, IDeserializable<TriggerRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TriggerRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TriggerRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        TriggerRequest IDeserializable<TriggerRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        TriggerRequest IDeserializable<TriggerRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly TriggerRequest Singleton = new TriggerRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -98,35 +92,29 @@ namespace Iviz.Msgs.StdSrvs
         [DataMember (Name = "success")] public bool Success; // indicate successful run of triggered service
         [DataMember (Name = "message")] public string Message; // informational, e.g. for error messages
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public TriggerResponse()
         {
             Message = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public TriggerResponse(bool Success, string Message)
         {
             this.Success = Success;
             this.Message = Message;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal TriggerResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new TriggerResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new TriggerResponse(ref b);
         
-        TriggerResponse IDeserializable<TriggerResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new TriggerResponse(ref b);
-        }
+        TriggerResponse IDeserializable<TriggerResponse>.RosDeserialize(ref Buffer b) => new TriggerResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

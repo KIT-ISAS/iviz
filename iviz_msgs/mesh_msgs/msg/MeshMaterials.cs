@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [Preserve, DataContract (Name = "mesh_msgs/MeshMaterials")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class MeshMaterials : IDeserializable<MeshMaterials>, IMessage
     {
         // Mesh Attribute Message
@@ -13,7 +13,7 @@ namespace Iviz.Msgs.MeshMsgs
         [DataMember (Name = "cluster_materials")] public uint[] ClusterMaterials;
         [DataMember (Name = "vertex_tex_coords")] public MeshMsgs.MeshVertexTexCoords[] VertexTexCoords;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public MeshMaterials()
         {
             Clusters = System.Array.Empty<MeshMsgs.MeshFaceCluster>();
@@ -22,7 +22,7 @@ namespace Iviz.Msgs.MeshMsgs
             VertexTexCoords = System.Array.Empty<MeshMsgs.MeshVertexTexCoords>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public MeshMaterials(MeshMsgs.MeshFaceCluster[] Clusters, MeshMsgs.MeshMaterial[] Materials, uint[] ClusterMaterials, MeshMsgs.MeshVertexTexCoords[] VertexTexCoords)
         {
             this.Clusters = Clusters;
@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MeshMsgs
             this.VertexTexCoords = VertexTexCoords;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal MeshMaterials(ref Buffer b)
         {
             Clusters = b.DeserializeArray<MeshMsgs.MeshFaceCluster>();
@@ -52,15 +52,9 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new MeshMaterials(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new MeshMaterials(ref b);
         
-        MeshMaterials IDeserializable<MeshMaterials>.RosDeserialize(ref Buffer b)
-        {
-            return new MeshMaterials(ref b);
-        }
+        MeshMaterials IDeserializable<MeshMaterials>.RosDeserialize(ref Buffer b) => new MeshMaterials(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -107,19 +101,19 @@ namespace Iviz.Msgs.MeshMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshMaterials";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "e151c9a065aae90d545559129a79a70a";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr2TwWrDMAyG7wK/gyEPMNhugx66wHrKZSu7lGGcRE0NTlwsu2RvPznNHJax21aD4bf0" +
-                "Cz7JdiErpJPchuBNHQOmI+kOoeew6qmju2R41g2WNlJAf3iXzVXRylRpDhpt2dHPkiCaITzcL0VqSX2v" +
-                "fkMfcNzjWDrnW+KKyxRRaTdTDARs/ngJqF53j/LXbgUUs1o6OXJamaE1DRIU7hyMG7QF4hEOnbS6Rnsr" +
-                "0q+Ri5lO8rBC9BMejozUXr2ls86/7J62skkKauesPGlSs///eOkHgoCjdTrB+qy6rOqs9K2GuHp5fOXr" +
-                "T7H/OGPmilldmPATdWydaUEDAAA=";
+                "H4sIAAAAAAAAE72TQWrDMBBF93MKgQ8QaHeFLBJDs/KmCdmEIsbyxBHIVtBIwb19JMdRqEt3bQSCr9Ef" +
+                "ePORClERn8TKe6fr4CkdGVuCLpZlxy0vkuEdFZUmsCd3+BTqpnhmqjAWNZro6CbJEHTvX18eTfJx9b17" +
+                "T87TsKOhtNY1HDsuY0WmrcYawPKPF1TbzZv4dVYo7iKPcYy3UveNVsRQ2LPXtkcDHPPrW2GwJvMczHva" +
+                "E5qIMfngRjYaIk9zs5bWWPexWa+ESgpqa404IcvJ/1+wPwHgaCwmUpdVm1WdFT4nvtlzg2L+EXZfZ8pQ" +
+                "IasLwBX0cFhyNAMAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

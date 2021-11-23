@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = "moveit_msgs/GetMotionPlan")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetMotionPlan : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetMotionPlanRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetMotionPlanResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetMotionPlan()
         {
             Request = new GetMotionPlanRequest();
             Response = new GetMotionPlanResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetMotionPlan(GetMotionPlanRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "moveit_msgs/GetMotionPlan";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "657e571ceabcb225c850c02c2249a1e1";
         
         public override string ToString() => Extensions.ToString(this);
@@ -57,33 +57,27 @@ namespace Iviz.Msgs.MoveitMsgs
         // planner and the output it provides
         [DataMember (Name = "motion_plan_request")] public MotionPlanRequest MotionPlanRequest;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetMotionPlanRequest()
         {
             MotionPlanRequest = new MotionPlanRequest();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetMotionPlanRequest(MotionPlanRequest MotionPlanRequest)
         {
             this.MotionPlanRequest = MotionPlanRequest;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetMotionPlanRequest(ref Buffer b)
         {
             MotionPlanRequest = new MotionPlanRequest(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetMotionPlanRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetMotionPlanRequest(ref b);
         
-        GetMotionPlanRequest IDeserializable<GetMotionPlanRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetMotionPlanRequest(ref b);
-        }
+        GetMotionPlanRequest IDeserializable<GetMotionPlanRequest>.RosDeserialize(ref Buffer b) => new GetMotionPlanRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -106,33 +100,27 @@ namespace Iviz.Msgs.MoveitMsgs
     {
         [DataMember (Name = "motion_plan_response")] public MotionPlanResponse MotionPlanResponse;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetMotionPlanResponse()
         {
             MotionPlanResponse = new MotionPlanResponse();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetMotionPlanResponse(MotionPlanResponse MotionPlanResponse)
         {
             this.MotionPlanResponse = MotionPlanResponse;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetMotionPlanResponse(ref Buffer b)
         {
             MotionPlanResponse = new MotionPlanResponse(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetMotionPlanResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetMotionPlanResponse(ref b);
         
-        GetMotionPlanResponse IDeserializable<GetMotionPlanResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetMotionPlanResponse(ref b);
-        }
+        GetMotionPlanResponse IDeserializable<GetMotionPlanResponse>.RosDeserialize(ref Buffer b) => new GetMotionPlanResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

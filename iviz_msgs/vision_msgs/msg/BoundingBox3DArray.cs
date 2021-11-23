@@ -4,26 +4,26 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [Preserve, DataContract (Name = "vision_msgs/BoundingBox3DArray")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class BoundingBox3DArray : IDeserializable<BoundingBox3DArray>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "boxes")] public VisionMsgs.BoundingBox3D[] Boxes;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public BoundingBox3DArray()
         {
             Boxes = System.Array.Empty<VisionMsgs.BoundingBox3D>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public BoundingBox3DArray(in StdMsgs.Header Header, VisionMsgs.BoundingBox3D[] Boxes)
         {
             this.Header = Header;
             this.Boxes = Boxes;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal BoundingBox3DArray(ref Buffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
@@ -34,15 +34,9 @@ namespace Iviz.Msgs.VisionMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new BoundingBox3DArray(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new BoundingBox3DArray(ref b);
         
-        BoundingBox3DArray IDeserializable<BoundingBox3DArray>.RosDeserialize(ref Buffer b)
-        {
-            return new BoundingBox3DArray(ref b);
-        }
+        BoundingBox3DArray IDeserializable<BoundingBox3DArray>.RosDeserialize(ref Buffer b) => new BoundingBox3DArray(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -64,29 +58,29 @@ namespace Iviz.Msgs.VisionMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "vision_msgs/BoundingBox3DArray";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "9e1a3932308592aa1b20232d818486db";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1WwW7bRhC9E9A/DOCD7UJWgLjIwUAPDYS0PhR1kaCXojBG5IjchtxVZpeSma/vm6VE" +
-                "m4jT9tBYICCSO/Nm3pvZWcZU3Xexjq9+Fq5Eqcl/xd5FF/y48jb0vnK+fhsertd//Emb8CBxUfzwP/8W" +
-                "xS/vf7qhOE9oUZzR+8S+Yq2ok8QVJ6ZtQKaubkSvWtlLCy/udlJRXk3DTuIKjh8aFwlXLV6U23agPsIo" +
-                "BSpD1/XelZyEkutk5g9P54lpx5pc2bessA8KDcx8q9yJoeOK8qkXXwrdrm9g46OUfXJIaABCqcIRumGR" +
-                "it75dP3aHIqzD4dwhUepofcUnFLDyZKVh51KtDw53iDGdyO5FbChjiBKFekiv7vHY7wkBEEKsgtlQxfI" +
-                "/G5ITfAAFNqzOt60YsAlFADquTmdXz5BtrRvyLMPJ/gR8THGf4H1E65xumpQs9bYx76GgDDcadi7Cqab" +
-                "IYOUrROfqHUbZR0K8xpDFmfvTGMYwStXBP8cYygdClDRwaWmiEkNPVfj3lXFN2vIr24Fa80f6XqNDTG+" +
-                "tZ0xlrFkTxuhXYguwdlq6SvSkHL+DAeUOkE7CIAmuHhD61/fmXRriOAtXqSwHQUwUFZI7a3/ReMygzGq" +
-                "1JfNEjjU8WDhOldrDpACoAhmATor+rj8yLUss4M51hIApUMmBYSxqNs+9YrOzhtHjNgp/xwwqJWL83PO" +
-                "TebERy7FDPvVHVrqtHLEje6zPAewfMow9qqnNTMMm7+kTOcnxTI9ZIds5/F+h1XQ6xzk27XElxzHXlCx" +
-                "rftUJcvReG1VwByFQBUwe+x1dVx/VuEVFXcBM2IyKH7rUVr1GffR7uU4IpnFaaRiSCR26FErzUQBdDAz" +
-                "c9YzxsW2DZzefE8P090w3X1+KQaP+k00pnJhusxUnedvT58e1cfZ02GT/DOp093hpegdG/9ZbrTPi3NW" +
-                "6LAzus0nTvA4rzphFA5H4+QJx8opXHM/YuuqgLvkiVMFiYTxAoyOPwISUwsDOxDvdgDDGazsYzuqiddw" +
-                "uZBVvVrSoRF0u1nZ3s6HbT6eXUnqaofhZZ4m8uTMdGS3pLR9jfHftmPOYzA0IUDycIXD5YputzSEng5G" +
-                "CDd6/CoINiNPeeXTK4WwtE+CI8QzLQ9ZYsTshHYx4YPk3wq/KP4Gg2OLUlEJAAA=";
+                "H4sIAAAAAAAAE71WwW7cRgy96ysI+GC7WG+AuMjBQA8NFml9KOoiQS9FYXAlrjSNNLPhjHatfH0fRyvZ" +
+                "Qp20h8YLAStpyEe+Rw5HMVX3Xazjq5+FK1Fq8l9xcNEFP668Db2vnK/fhofrzR9/0jY8SCx++J9/xS/v" +
+                "f7qhuEynOKP3iX3FWlEniStOTLuANF3diF61cpAWTtztpaK8moa9xDUcPzQuEq5avCi37UB9hFEKVIau" +
+                "670rOQkl18nCH57OE9OeNbmyb1lhHxQCmPlOuRNDxxXlUy++FLrd3MDGRyn75JDQAIRShSNEwyIVvfPp" +
+                "+rU5FGcfjuEKj1JD7Dk4pYaTJSsPe5VoeXK8QYzvRnJrYEMcQZQq0kV+d4/HeEkIghRkH8qGLpD53ZCa" +
+                "4AEodGB1vG3FgEsoANRzczq/fILsM7RnHyb4EfExxn+B9TOucbpqULPW2Me+hoAw3Gs4uAqm2yGDlK0T" +
+                "n6h1W2UdCvMaQxZn70xjGMErVwT/HGMoHQpQ0dGlpohJDT1X495VxTfqxi/uAvD8ka432ArjS9sTYw1L" +
+                "9rQV2ofoEnytkL4iDSknz3BAnROEA3t0wMUb2vz6znTbQAFv4SKF3cjeQFnF+hHNLxpXGYxRor5sVsCh" +
+                "jgcL17lac4AUAEUwCxBZ0cTlR65llR3MsZYAKB0yp5UhWzF2feoVbZ13jRixKf8cMKjVivNzzk2WxEcu" +
+                "xQL71R36aVo54Ub3WZ4DWD1lGHvVac0Mw/YvKdP5pFimh+yQ7TLe77AKep2DfKt++CfD3AgqtmmfSmQJ" +
+                "GqmdCmijCigBpo69rk7rz8q7puIuYDrMBsVvPeqqPuM+2r0UQaQyTVLMhsQO3WlFmfMHF4zKnPKCbrFr" +
+                "A6c339PDfDfMd59fJv1H6SYOc6EwURZ6LpO3p0+PuuO86bA3vs5ouju+DLdTtz9HjA55bUlpbQfWbT5i" +
+                "gscB1QmjZDgLZ084Vk7hmtsQ21UFxCVPmSpIJIwUYHT8EZCYVGLevN8DDIeuso/tKCVew+VC1vV6RcdG" +
+                "/Ghl+zmfrvk8diWpq101eprCszPTidyK0u415n3bjjmPwdB+AMkDFQ6Xa7rd0RB6Ohoh3OjpMyDYXJzy" +
+                "ysdVCmFl3wAniGd6HbLEiHkJ7WLCB8i/Vv1vdVxpJD4JAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

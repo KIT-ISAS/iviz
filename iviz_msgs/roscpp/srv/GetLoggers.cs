@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Roscpp
 {
-    [DataContract (Name = "roscpp/GetLoggers")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetLoggers : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetLoggersRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetLoggersResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetLoggers()
         {
             Request = GetLoggersRequest.Singleton;
             Response = new GetLoggersResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetLoggers(GetLoggersRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.Roscpp
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "roscpp/GetLoggers";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "32e97e85527d4678a8f9279894bb64b0";
         
         public override string ToString() => Extensions.ToString(this);
@@ -54,25 +54,19 @@ namespace Iviz.Msgs.Roscpp
     public sealed class GetLoggersRequest : IRequest<GetLoggers, GetLoggersResponse>, IDeserializable<GetLoggersRequest>
     {
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetLoggersRequest()
         {
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetLoggersRequest(ref Buffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
         
-        GetLoggersRequest IDeserializable<GetLoggersRequest>.RosDeserialize(ref Buffer b)
-        {
-            return Singleton;
-        }
+        GetLoggersRequest IDeserializable<GetLoggersRequest>.RosDeserialize(ref Buffer b) => Singleton;
         
         public static readonly GetLoggersRequest Singleton = new GetLoggersRequest();
     
@@ -84,7 +78,7 @@ namespace Iviz.Msgs.Roscpp
         {
         }
     
-        /// <summary> Constant size of this message. </summary>
+        /// Constant size of this message.
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -97,19 +91,19 @@ namespace Iviz.Msgs.Roscpp
     {
         [DataMember (Name = "loggers")] public Logger[] Loggers;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetLoggersResponse()
         {
             Loggers = System.Array.Empty<Logger>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetLoggersResponse(Logger[] Loggers)
         {
             this.Loggers = Loggers;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetLoggersResponse(ref Buffer b)
         {
             Loggers = b.DeserializeArray<Logger>();
@@ -119,15 +113,9 @@ namespace Iviz.Msgs.Roscpp
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetLoggersResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetLoggersResponse(ref b);
         
-        GetLoggersResponse IDeserializable<GetLoggersResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetLoggersResponse(ref b);
-        }
+        GetLoggersResponse IDeserializable<GetLoggersResponse>.RosDeserialize(ref Buffer b) => new GetLoggersResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

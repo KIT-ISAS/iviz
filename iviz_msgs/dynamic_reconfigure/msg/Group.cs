@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DynamicReconfigure
 {
-    [Preserve, DataContract (Name = "dynamic_reconfigure/Group")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class Group : IDeserializable<Group>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
@@ -13,7 +13,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         [DataMember (Name = "parent")] public int Parent;
         [DataMember (Name = "id")] public int Id;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public Group()
         {
             Name = string.Empty;
@@ -21,7 +21,7 @@ namespace Iviz.Msgs.DynamicReconfigure
             Parameters = System.Array.Empty<ParamDescription>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public Group(string Name, string Type, ParamDescription[] Parameters, int Parent, int Id)
         {
             this.Name = Name;
@@ -31,7 +31,7 @@ namespace Iviz.Msgs.DynamicReconfigure
             this.Id = Id;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal Group(ref Buffer b)
         {
             Name = b.DeserializeString();
@@ -45,15 +45,9 @@ namespace Iviz.Msgs.DynamicReconfigure
             Id = b.Deserialize<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new Group(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new Group(ref b);
         
-        Group IDeserializable<Group>.RosDeserialize(ref Buffer b)
-        {
-            return new Group(ref b);
-        }
+        Group IDeserializable<Group>.RosDeserialize(ref Buffer b) => new Group(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -89,17 +83,17 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "dynamic_reconfigure/Group";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "9e8cd9e9423c94823db3614dd8b1cf7a";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACisuKcrMS1fIS8xN5SqGsEsqC1K5AhKLEnNdUouTizILSjLz86JjFQpAQqklqUXFXJl5" +
-                "JcZGIIHUvBIFKC8zhYuXy5bKgJfLN9jdSiGlEujAzOT4otTk/Ly0zPTSolR9dBfywtyP4ZdSiANzUstS" +
-                "c2ASKQiNMKHUlMySeKAHM/JBPgEAwKAfeRkBAAA=";
+                "H4sIAAAAAAAAEysuKcrMS1fIS8xN5SqGsEsqC1K5AhKLEnNdUouTizILSjLz86JjFQpAQqklqUXFXJl5" +
+                "JcZGIIHUvBIFKC8zhYvLlsqAyzfY3UohpRLovMzk+KLU5Py8tMz00qJUfXT3wRyP4ZFSiOtyUstSc2AS" +
+                "KZj6UlMyS+KBvsvIB3oDAFF6cKsVAQAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

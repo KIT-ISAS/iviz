@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/AddModule")]
+    [DataContract (Name = RosServiceType)]
     public sealed class AddModule : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public AddModuleRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public AddModuleResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public AddModule()
         {
             Request = new AddModuleRequest();
             Response = new AddModuleResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public AddModule(AddModuleRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/AddModule";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "9c05ee8917d1e268371f79ef13584f64";
         
         public override string ToString() => Extensions.ToString(this);
@@ -57,36 +57,30 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "module_type")] public string ModuleType; // Module type
         [DataMember (Name = "id")] public string Id; // Requested id to identify this module, or empty to autogenerate
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public AddModuleRequest()
         {
             ModuleType = string.Empty;
             Id = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public AddModuleRequest(string ModuleType, string Id)
         {
             this.ModuleType = ModuleType;
             this.Id = Id;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal AddModuleRequest(ref Buffer b)
         {
             ModuleType = b.DeserializeString();
             Id = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new AddModuleRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new AddModuleRequest(ref b);
         
-        AddModuleRequest IDeserializable<AddModuleRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new AddModuleRequest(ref b);
-        }
+        AddModuleRequest IDeserializable<AddModuleRequest>.RosDeserialize(ref Buffer b) => new AddModuleRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -112,14 +106,14 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "message")] public string Message; // An error message if success is false
         [DataMember (Name = "id")] public string Id; // An id identifying this module, or empty if error
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public AddModuleResponse()
         {
             Message = string.Empty;
             Id = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public AddModuleResponse(bool Success, string Message, string Id)
         {
             this.Success = Success;
@@ -127,7 +121,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Id = Id;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal AddModuleResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
@@ -135,15 +129,9 @@ namespace Iviz.Msgs.IvizMsgs
             Id = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new AddModuleResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new AddModuleResponse(ref b);
         
-        AddModuleResponse IDeserializable<AddModuleResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new AddModuleResponse(ref b);
-        }
+        AddModuleResponse IDeserializable<AddModuleResponse>.RosDeserialize(ref Buffer b) => new AddModuleResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {

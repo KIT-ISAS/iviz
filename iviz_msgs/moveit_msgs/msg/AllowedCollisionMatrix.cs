@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = "moveit_msgs/AllowedCollisionMatrix")]
+    [Preserve, DataContract (Name = RosMessageType)]
     public sealed class AllowedCollisionMatrix : IDeserializable<AllowedCollisionMatrix>, IMessage
     {
         // The list of entry names in the matrix
@@ -22,7 +22,7 @@ namespace Iviz.Msgs.MoveitMsgs
         [DataMember (Name = "default_entry_names")] public string[] DefaultEntryNames;
         [DataMember (Name = "default_entry_values")] public bool[] DefaultEntryValues;
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public AllowedCollisionMatrix()
         {
             EntryNames = System.Array.Empty<string>();
@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MoveitMsgs
             DefaultEntryValues = System.Array.Empty<bool>();
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public AllowedCollisionMatrix(string[] EntryNames, AllowedCollisionEntry[] EntryValues, string[] DefaultEntryNames, bool[] DefaultEntryValues)
         {
             this.EntryNames = EntryNames;
@@ -40,7 +40,7 @@ namespace Iviz.Msgs.MoveitMsgs
             this.DefaultEntryValues = DefaultEntryValues;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal AllowedCollisionMatrix(ref Buffer b)
         {
             EntryNames = b.DeserializeStringArray();
@@ -53,15 +53,9 @@ namespace Iviz.Msgs.MoveitMsgs
             DefaultEntryValues = b.DeserializeStructArray<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new AllowedCollisionMatrix(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new AllowedCollisionMatrix(ref b);
         
-        AllowedCollisionMatrix IDeserializable<AllowedCollisionMatrix>.RosDeserialize(ref Buffer b)
-        {
-            return new AllowedCollisionMatrix(ref b);
-        }
+        AllowedCollisionMatrix IDeserializable<AllowedCollisionMatrix>.RosDeserialize(ref Buffer b) => new AllowedCollisionMatrix(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -106,21 +100,21 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public string RosType => RosMessageType;
     
-        /// <summary> Full ROS name of this message. </summary>
+        /// Full ROS name of this message.
         [Preserve] public const string RosMessageType = "moveit_msgs/AllowedCollisionMatrix";
     
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "aedce13587eef0d79165a075659c1879";
     
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACq1SvU7DMBDeI+UdTuoCUlVERySGChBigAU2hKpLfG4sHDu1nZa+PWc7oS2lGxkiJXf3" +
-                "/d1N4K0h0MoHsBLIBLcDgy15UAYCl1oMTn0Vnt9m9f6RW5appSgmaVoZoTZK9KhTVe2HUWu7JQG11Uyh" +
-                "rBnhJuDXPTqagt+1LfG/egpbFRrwjAzWCXKA/ohtkcHuRqyHWPtRtEHdZ0lPBlAIFSJdsEnHb35QwZOW" +
-                "TBk1egsNbgh4NjYLktjrMISRcEFaB4R1c5DQLHHJMz6lxhUoD+ueOBCRABA6VC7mnBO+MNdTMPPLxIsh" +
-                "thsbuLU3YkzwrPJYzNqsHISfstfWeMVRsgBOoqLMwwJie7bCIjjuQYbvqFYy6h3o02FUxO5m0WtleUM8" +
-                "gCzQzIEXeKw2tTMOMwwp+qzUkY+RJklt1wdmSNtGA4uXe7AdOYwLK/aHNgAsD0+gslaflIbNl8XtPz9l" +
-                "8fz6eAOt3ZAKy9av/NWfN1iy421D7JOXy1HyDverqBuqP9lR9E4GK01itDF+lsU31UlzX4YDAAA=";
+                "H4sIAAAAAAAAE61SzU7DMAy+9yks7QLSNMSOSBwmQIgDXOCG0OQ27hqRxl2SbuztcZKWbYzd6KFSa/v7" +
+                "syfw1hAY7QNwDWSD24HFljxoC0FKLQanvwovb7t6/8gty9RSFJM0ra3SG616NKmq98NoDG9JQcVGKDTb" +
+                "EW4Cft2joyn4XduS/KumsNWhAS/IwE6RA/RHbIsMdjdiPcTaj6INmj5LerKASukQ6QInHb/5QQdPphbK" +
+                "qNEzNLghkNnYrKjG3oQhjIQLNTsgrJqDhGaJqz7jsza4Au1h3ZMEohIAQofaxZxzwhf2egp2fpl4McR2" +
+                "y0Fae6vGBM8qj8WsjetB+Cl7xdZriVIESBIlZR7OorMVESFxDzJ8R5Wuo96BPh1GSeJuFr2WLBuSARSB" +
+                "dg6ywGO1qV1whGFI0WeljnyMNElquz4IQ9o2Wli83AN35DAurNgf2gCwPDyBktmclMbN3/7zUzy/Pt5A" +
+                "yxvSYdn6lb/68wLF7rYhMelSjrLA/R6qhqpPsRONk8XSkBo9jJ/FNwT/SIGCAwAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

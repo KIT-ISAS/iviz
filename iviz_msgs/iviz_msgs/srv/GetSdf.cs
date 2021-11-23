@@ -2,23 +2,23 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = "iviz_msgs/GetSdf")]
+    [DataContract (Name = RosServiceType)]
     public sealed class GetSdf : IService
     {
-        /// <summary> Request message. </summary>
+        /// Request message.
         [DataMember] public GetSdfRequest Request { get; set; }
         
-        /// <summary> Response message. </summary>
+        /// Response message.
         [DataMember] public GetSdfResponse Response { get; set; }
         
-        /// <summary> Empty constructor. </summary>
+        /// Empty constructor.
         public GetSdf()
         {
             Request = new GetSdfRequest();
             Response = new GetSdfResponse();
         }
         
-        /// <summary> Setter constructor. </summary>
+        /// Setter constructor.
         public GetSdf(GetSdfRequest request)
         {
             Request = request;
@@ -41,10 +41,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         string IService.RosType => RosServiceType;
         
-        /// <summary> Full ROS name of this service. </summary>
+        /// Full ROS name of this service.
         [Preserve] public const string RosServiceType = "iviz_msgs/GetSdf";
         
-        /// <summary> MD5 hash of a compact representation of the service. </summary>
+        /// MD5 hash of a compact representation of the service.
         [Preserve] public const string RosMd5Sum = "4268e0641c7ff6b587e46790f433e3ba";
         
         public override string ToString() => Extensions.ToString(this);
@@ -56,33 +56,27 @@ namespace Iviz.Msgs.IvizMsgs
         // Retrieves a scene, which can contain one or multiple 3D models and lights
         [DataMember (Name = "uri")] public string Uri; // Uri of the file. Example: package://some_package/file.world
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetSdfRequest()
         {
             Uri = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetSdfRequest(string Uri)
         {
             this.Uri = Uri;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetSdfRequest(ref Buffer b)
         {
             Uri = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetSdfRequest(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetSdfRequest(ref b);
         
-        GetSdfRequest IDeserializable<GetSdfRequest>.RosDeserialize(ref Buffer b)
-        {
-            return new GetSdfRequest(ref b);
-        }
+        GetSdfRequest IDeserializable<GetSdfRequest>.RosDeserialize(ref Buffer b) => new GetSdfRequest(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
@@ -106,14 +100,14 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "scene")] public Scene Scene; // The scene
         [DataMember (Name = "message")] public string Message; // An error message if success is false
     
-        /// <summary> Constructor for empty message. </summary>
+        /// Constructor for empty message.
         public GetSdfResponse()
         {
             Scene = new Scene();
             Message = string.Empty;
         }
         
-        /// <summary> Explicit constructor. </summary>
+        /// Explicit constructor.
         public GetSdfResponse(bool Success, Scene Scene, string Message)
         {
             this.Success = Success;
@@ -121,7 +115,7 @@ namespace Iviz.Msgs.IvizMsgs
             this.Message = Message;
         }
         
-        /// <summary> Constructor with buffer. </summary>
+        /// Constructor with buffer.
         internal GetSdfResponse(ref Buffer b)
         {
             Success = b.Deserialize<bool>();
@@ -129,15 +123,9 @@ namespace Iviz.Msgs.IvizMsgs
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b)
-        {
-            return new GetSdfResponse(ref b);
-        }
+        public ISerializable RosDeserialize(ref Buffer b) => new GetSdfResponse(ref b);
         
-        GetSdfResponse IDeserializable<GetSdfResponse>.RosDeserialize(ref Buffer b)
-        {
-            return new GetSdfResponse(ref b);
-        }
+        GetSdfResponse IDeserializable<GetSdfResponse>.RosDeserialize(ref Buffer b) => new GetSdfResponse(ref b);
     
         public void RosSerialize(ref Buffer b)
         {
