@@ -203,13 +203,13 @@ namespace Iviz.MsgsGen
             string md5Property = GetMd5();
             return new[]
             {
-                "/// <summary> Request message. </summary>",
+                "/// Request message.",
                 $"[DataMember] public {Name}Request Request {{ get; set; }}",
                 "",
-                "/// <summary> Response message. </summary>",
+                "/// Response message.",
                 $"[DataMember] public {Name}Response Response {{ get; set; }}",
                 "",
-                "/// <summary> Empty constructor. </summary>",
+                "/// Empty constructor.",
                 $"public {Name}()",
                 "{",
                 fixedSizeReq == 0
@@ -220,7 +220,7 @@ namespace Iviz.MsgsGen
                     : $"    Response = new {Name}Response();",
                 "}",
                 "",
-                "/// <summary> Setter constructor. </summary>",
+                "/// Setter constructor.",
                 $"public {Name}({Name}Request request)",
                 "{",
                 "    Request = request;",
@@ -245,10 +245,10 @@ namespace Iviz.MsgsGen
                 "",
                 "string IService.RosType => RosServiceType;",
                 "",
-                "/// <summary> Full ROS name of this service. </summary>",
+                "/// Full ROS name of this service.",
                 $"[Preserve] public const string RosServiceType = \"{RosPackage}/{Name}\";",
                 "",
-                "/// <summary> MD5 hash of a compact representation of the service. </summary>",
+                "/// MD5 hash of a compact representation of the service.",
                 $"[Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};",
                 "",
                 "public override string ToString() => Extensions.ToString(this);",
@@ -265,7 +265,7 @@ namespace Iviz.MsgsGen
             str.AppendLine("");
             str.AppendLine($"namespace Iviz.Msgs.{CsPackage}");
             str.AppendLine("{");
-            str.AppendLine($"    [DataContract (Name = \"{RosPackage}/{Name}\")]");
+            str.AppendLine($"    [DataContract (Name = RosServiceType)]");
             str.AppendLine($"    public sealed class {Name} : IService");
             str.AppendLine("    {");
 

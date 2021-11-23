@@ -344,7 +344,7 @@ namespace Iviz.MsgsGen
             {
                 return new[]
                 {
-                    "/// <summary> Constant size of this message. </summary>",
+                    "/// Constant size of this message.",
                     $"[Preserve] public const int RosFixedMessageLength = {fixedSize};",
                     "",
                     $"public {readOnlyId}int RosMessageLength => RosFixedMessageLength;"
@@ -480,7 +480,7 @@ namespace Iviz.MsgsGen
 
             if (!forceStruct)
             {
-                lines.Add("/// <summary> Constructor for empty message. </summary>");
+                lines.Add("/// Constructor for empty message.");
                 lines.Add($"public {name}()");
                 lines.Add("{");
                 foreach (VariableElement variable in variables)
@@ -532,7 +532,7 @@ namespace Iviz.MsgsGen
 
             if (variables.Any())
             {
-                lines.Add("/// <summary> Explicit constructor. </summary>");
+                lines.Add("/// Explicit constructor.");
 
                 string args = string.Join(", ", variables.Select(ParamToArg));
                 lines.Add($"public {name}({args})");
@@ -558,7 +558,7 @@ namespace Iviz.MsgsGen
                 lines.Add("");
             }
 
-            lines.Add("/// <summary> Constructor with buffer. </summary>");
+            lines.Add("/// Constructor with buffer.");
             if (forceStruct)
             {
                 lines.Add("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
@@ -681,32 +681,15 @@ namespace Iviz.MsgsGen
 
 
             string readOnlyId = forceStruct ? "readonly " : "";
-            lines.Add($"public {readOnlyId}ISerializable RosDeserialize(ref Buffer b)");
-            lines.Add("{");
-            if (variables.Any())
-            {
-                lines.Add($"    return new {name}(ref b);");
-            }
-            else
-            {
-                lines.Add("    return Singleton;");
-            }
+            lines.Add(variables.Any()
+                ? $"public {readOnlyId}ISerializable RosDeserialize(ref Buffer b) => new {name}(ref b);"
+                : $"public {readOnlyId}ISerializable RosDeserialize(ref Buffer b) => Singleton;");
 
-            lines.Add("}");
             lines.Add("");
 
-            lines.Add($"{readOnlyId}{name} IDeserializable<{name}>.RosDeserialize(ref Buffer b)");
-            lines.Add("{");
-            if (variables.Any())
-            {
-                lines.Add($"    return new {name}(ref b);");
-            }
-            else
-            {
-                lines.Add("    return Singleton;");
-            }
-
-            lines.Add("}");
+            lines.Add(variables.Any()
+                ? $"{readOnlyId}{name} IDeserializable<{name}>.RosDeserialize(ref Buffer b) => new {name}(ref b);"
+                : $"{readOnlyId}{name} IDeserializable<{name}>.RosDeserialize(ref Buffer b) => Singleton;");
 
             if (forceStruct)
             {
@@ -787,9 +770,9 @@ namespace Iviz.MsgsGen
                         {
                             if (forceStruct)
                             {
-                                    lines.Add(variable.CsClassName == "string"
-                                        ? $"    b.SerializeArray({variable.CsFieldName} ?? System.Array.Empty<string>(), {variable.ArraySize});"
-                                        : $"    b.SerializeStructArray({variable.CsFieldName} ?? System.Array.Empty<{variable.CsClassName}>(), {variable.ArraySize});");
+                                lines.Add(variable.CsClassName == "string"
+                                    ? $"    b.SerializeArray({variable.CsFieldName} ?? System.Array.Empty<string>(), {variable.ArraySize});"
+                                    : $"    b.SerializeStructArray({variable.CsFieldName} ?? System.Array.Empty<{variable.CsClassName}>(), {variable.ArraySize});");
                             }
                             else
                             {
@@ -935,19 +918,23 @@ namespace Iviz.MsgsGen
             return str.ToString();
         }
 
-        static IEnumerable<string> Compress(string catDependencies)
+        static string Compress(string catDependencies)
         {
-            var lines = new List<string>();
             var inputBytes = Utf8.GetBytes(catDependencies);
 
-            using MemoryStream outputStream = new MemoryStream();
+            using var outputStream = new MemoryStream();
 
-            using (GZipStream gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
+            using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
             {
                 gZipStream.Write(inputBytes, 0, inputBytes.Length);
             }
 
-            string base64 = Convert.ToBase64String(outputStream.ToArray());
+            return Convert.ToBase64String(outputStream.ToArray());
+        }
+
+        static IEnumerable<string> Split(string base64)
+        {
+            var lines = new List<string>();
 
             const int lineWidth = 80;
             for (int i = 0; i < base64.Length; i += lineWidth)
@@ -984,7 +971,7 @@ namespace Iviz.MsgsGen
         IEnumerable<string> CreateClassContent()
         {
             var lines = new List<string>();
-            lines.Add($"[Preserve, DataContract (Name = \"{RosPackage}/{Name}\")]");
+            lines.Add($"[Preserve, DataContract (Name = RosMessageType)]");
             if (ForceStruct)
             {
                 lines.Add("[StructLayout(LayoutKind.Sequential)]");
@@ -1052,27 +1039,46 @@ namespace Iviz.MsgsGen
             lines.Add($"    public {readOnlyId}string RosType => RosMessageType;");
 
             lines.Add("");
-            lines.Add("    /// <summary> Full ROS name of this message. </summary>");
+            lines.Add("    /// Full ROS name of this message.");
             lines.Add($"    [Preserve] public const string RosMessageType = \"{RosPackage}/{Name}\";");
 
 
             lines.Add("");
 
-            lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
-            lines.Add(
-                $"    [Preserve] public const string RosMd5Sum = {(Md5Hash.Length == 0 ? "null" : $"\"{Md5Hash}\"")};");
+            const string emptyMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
+            const string emptyDependenciesBase64 = "H4sIAAAAAAAAE+MCAJMG1zIBAAAA";
+
+            lines.Add("    /// MD5 hash of a compact representation of the message.");
+
+            string md5Hash = Md5Hash switch
+            {
+                "" => "null",
+                emptyMd5Sum => "BuiltIns.EmptyMd5Sum",
+                _ => $"\"{Md5Hash}\""
+            };
+            lines.Add($"    [Preserve] public const string RosMd5Sum = {md5Hash};");
 
             lines.Add("");
 
             lines.Add(
-                "    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
-            lines.Add("    [Preserve] public const string RosDependenciesBase64 =");
+                "    /// Base64 of the GZip'd compression of the concatenated dependencies file.");
 
             string catDependencies = CreateCatDependencies();
-            var compressedDeps = Compress(catDependencies);
-            foreach (string entry in compressedDeps)
+            string compressedDeps = Compress(catDependencies);
+            if (compressedDeps == emptyDependenciesBase64)
             {
-                lines.Add($"            {entry}");
+                lines.Add(
+                    "    [Preserve] public const string RosDependenciesBase64 = BuiltIns.EmptyDependenciesBase64;");
+                lines.Add("");
+            }
+            else
+            {
+                lines.Add("    [Preserve] public const string RosDependenciesBase64 =");
+                var splitDeps = Split(compressedDeps);
+                foreach (string entry in splitDeps)
+                {
+                    lines.Add($"            {entry}");
+                }
             }
 
             lines.Add("    public override string ToString() => Extensions.ToString(this);");
@@ -1109,7 +1115,7 @@ namespace Iviz.MsgsGen
             var dependencies = new List<ClassInfo>();
             AddDependencies(dependencies);
 
-            StringBuilder builder = new StringBuilder(100);
+            var builder = new StringBuilder(100);
             builder.AppendLine(fullMessageText);
 
             foreach (ClassInfo classInfo in dependencies)
@@ -1119,14 +1125,14 @@ namespace Iviz.MsgsGen
                 builder.AppendLine(classInfo.fullMessageText);
             }
 
-            return builder.ToString();
+            return builder.ToString().Replace("\r", "");
         }
 
         public string Md5Hash => md5 ??= CalculateMd5();
 
         string CalculateMd5()
         {
-            StringBuilder str = new StringBuilder(100);
+            var str = new StringBuilder(100);
 
             var md5Constants = elements
                 .OfType<ConstantElement>()
