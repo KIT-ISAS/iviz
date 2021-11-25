@@ -238,7 +238,7 @@ namespace Iviz.Tools
             }
             catch (Exception e)
             {
-                if (e is OperationCanceledException)
+                if (e is not OperationCanceledException)
                 {
                     Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
                 }
