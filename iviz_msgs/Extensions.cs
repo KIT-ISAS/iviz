@@ -57,10 +57,19 @@ namespace Iviz.Msgs
                 : AngleAxis(angle, rod / angle);
         }
 
-        public static Quaternion Normalize(in Quaternion q)
+        public static Quaternion Normalize(Quaternion q)
         {
             double norm = System.Math.Sqrt(q.X * q.X + q.Y * q.Y + q.Z * q.Z + q.W * q.W);
-            return norm == 0 ? q : new Quaternion(q.X / norm, q.Y / norm, q.Z / norm, q.W / norm);
+            if (norm == 0)
+            {
+                return q;
+            }
+
+            q.X /= norm;
+            q.Y /= norm;
+            q.Z /= norm;
+            q.W /= norm;
+            return q;
         }
 
         public static Pose WithPosition(this in Pose pose, in Point position) => new(position, pose.Orientation);
@@ -205,7 +214,7 @@ namespace Iviz.Msgs
         public static Vector3 operator *(VectorUnitX _, double f) => new Vector3(f, 0, 0);
         public static Vector3 operator -(VectorUnitX _) => new Vector3(-1, 0, 0);
         public static Vector3 operator /(VectorUnitX _, double f) => new Vector3(1 / f, 0, 0);
-        public static string ToString(in Vector3 _) => $"{{\"x\": 1, \"y\": 0, \"z\": 0}}";
+        public static string ToString(in Vector3 _) => "{{\"x\": 1, \"y\": 0, \"z\": 0}}";
     }
 
     public readonly struct VectorUnitY
@@ -215,7 +224,7 @@ namespace Iviz.Msgs
         public static Vector3 operator *(VectorUnitY _, double f) => new Vector3(0, f, 0);
         public static Vector3 operator -(VectorUnitY _) => new Vector3(0, -1, 0);
         public static Vector3 operator /(VectorUnitY _, double f) => new Vector3(0, 1 / f, 0);
-        public static string ToString(in Vector3 _) => $"{{\"x\": 0, \"y\": 1, \"z\": 0}}";
+        public static string ToString(in Vector3 _) => "{{\"x\": 0, \"y\": 1, \"z\": 0}}";
     }
 
     public readonly struct VectorUnitZ
@@ -226,7 +235,7 @@ namespace Iviz.Msgs
         public static Vector3 operator -(VectorUnitZ _) => new Vector3(0, 0, -1);
         public static Vector3 operator /(VectorUnitZ _, double f) => new Vector3(0, 0, 1 / f);
         public Vector3 Cross(in Vector3 v) => new Vector3(-v.Y, v.X, 0);
-        public static string ToString(in Vector3 _) => $"{{\"x\": 0, \"y\": 0, \"z\": 1}}";
+        public static string ToString(in Vector3 _) => "{{\"x\": 0, \"y\": 0, \"z\": 1}}";
     }
 
     public readonly struct VectorOne
