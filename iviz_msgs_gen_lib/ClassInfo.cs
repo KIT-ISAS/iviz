@@ -25,7 +25,7 @@ namespace Iviz.MsgsGen
     public sealed class ClassInfo
     {
         public const string DependencySeparator =
-            "================================================================================";
+            "================================================================================"; // 80 '='
 
         internal const int UninitializedSize = -2;
         const int UnknownSizeAtCompileTime = -1;
@@ -891,29 +891,29 @@ namespace Iviz.MsgsGen
 
         public string ToCsString()
         {
-            StringBuilder str = new StringBuilder(200);
+            var str = new StringBuilder(200);
 
-            str.AppendLine("/* This file was created automatically, do not edit! */");
-            str.AppendLine();
+            str.AppendNLine("/* This file was created automatically, do not edit! */");
+            str.AppendNLine();
 
             if (ForceStruct)
             {
-                str.AppendLine("using System.Runtime.InteropServices;");
-                str.AppendLine("using System.Runtime.CompilerServices;");
+                str.AppendNLine("using System.Runtime.InteropServices;");
+                str.AppendNLine("using System.Runtime.CompilerServices;");
             }
 
-            str.AppendLine("using System.Runtime.Serialization;");
-            str.AppendLine();
+            str.AppendNLine("using System.Runtime.Serialization;");
+            str.AppendNLine();
 
-            str.AppendLine($"namespace Iviz.Msgs.{CsPackage}");
-            str.AppendLine("{");
+            str.AppendNLine($"namespace Iviz.Msgs.{CsPackage}");
+            str.AppendNLine("{");
 
             foreach (string entry in CreateClassContent())
             {
-                str.Append("    ").AppendLine(entry);
+                str.Append("    ").AppendNLine(entry);
             }
 
-            str.AppendLine("}");
+            str.AppendNLine("}");
 
             return str.ToString();
         }
@@ -924,7 +924,7 @@ namespace Iviz.MsgsGen
 
             using var outputStream = new MemoryStream();
 
-            using (var gZipStream = new GZipStream(outputStream, CompressionMode.Compress))
+            using (var gZipStream = new GZipStream(outputStream, CompressionLevel.Optimal))
             {
                 gZipStream.Write(inputBytes, 0, inputBytes.Length);
             }
@@ -1116,13 +1116,14 @@ namespace Iviz.MsgsGen
             AddDependencies(dependencies);
 
             var builder = new StringBuilder(100);
-            builder.AppendLine(fullMessageText);
+            
+            builder.AppendNLine(fullMessageText);
 
             foreach (ClassInfo classInfo in dependencies)
             {
-                builder.AppendLine(DependencySeparator);
-                builder.AppendLine($"MSG: {classInfo.RosPackage}/{classInfo.Name}");
-                builder.AppendLine(classInfo.fullMessageText);
+                builder.AppendNLine(DependencySeparator);
+                builder.AppendNLine($"MSG: {classInfo.RosPackage}/{classInfo.Name}");
+                builder.AppendNLine(classInfo.fullMessageText);
             }
 
             return builder.ToString().Replace("\r", "");
@@ -1174,6 +1175,21 @@ namespace Iviz.MsgsGen
             }
 
             return sBuilder.ToString();
+        }
+    }
+
+    static class StringBuilderUtils
+    {
+        public static StringBuilder AppendNLine(this StringBuilder str, string s)
+        {
+            str.Append(s).Append('\n');
+            return str;
+        }
+        
+        public static StringBuilder AppendNLine(this StringBuilder str)
+        {
+            str.Append('\n');
+            return str;
         }
     }
 }
