@@ -10,7 +10,7 @@
 	{
         //Pass 
         //{
-		    Tags { "Queue"="Transparent+1" "RenderType"="Transparent"}
+		    //Tags { "Queue"="Transparent+1" "RenderType"="Transparent"}
 			ZWrite On
     
             CGPROGRAM
@@ -31,7 +31,7 @@
     
             void surf(Input IN, inout SurfaceOutputStandard o) {
                 o.Albedo = UNITY_ACCESS_INSTANCED_PROP(Props, _Color).rgb * IN.color;
-            	o.Alpha = 0.15;
+            	o.Alpha = 1;
                 o.Metallic = _Metallic;
                 o.Smoothness = _Smoothness;
                 o.Emission = UNITY_ACCESS_INSTANCED_PROP(Props, _EmissiveColor).rgb;

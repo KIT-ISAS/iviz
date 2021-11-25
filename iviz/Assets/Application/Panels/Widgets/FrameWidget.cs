@@ -106,9 +106,8 @@ namespace Iviz.App
                 return;
             }
 
-            GuiInputModule.Instance.LookAt(Frame.AbsoluteUnityPose.position);
-
             Frame.Highlight();
+            GuiInputModule.Instance.LookAt(Frame.Transform);
         }
 
         protected override void OnRevealedRight()

@@ -53,9 +53,6 @@ namespace Iviz.Displays
         public GameObject PositionDisc;
         public GameObject PositionDisc3D;
         
-        public GameObject TfFrameHighlighter;
-        public GameObject ClickedPoseHighlighter;
-
         public Material LineConnectorMaterial;
         public Material TextMaterial;
 

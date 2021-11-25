@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
+using Animator = Iviz.Core.Animator;
 
 namespace Iviz.Displays
 {

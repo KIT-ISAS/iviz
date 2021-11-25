@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -7,15 +9,11 @@ namespace Iviz.App
 {
     public sealed class LinkResolver : MonoBehaviour, IPointerClickHandler
     {
-        TMP_Text text;
+        [SerializeField] TMP_Text? text;
 
-        public event Action<string> LinkClicked;
-        public event Action<string> LinkDoubleClicked;
+        TMP_Text Text => text != null ? text : text = GetComponent<TMP_Text>();
 
-        void Awake()
-        {
-            text = GetComponent<TMP_Text>();
-        }
+        public event Action<string>? LinkClicked;
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {
@@ -25,14 +23,10 @@ namespace Iviz.App
                 return;
             }
             
-            TMP_LinkInfo linkInfo = text.textInfo.linkInfo[linkIndex];
+            var linkInfo = Text.textInfo.linkInfo[linkIndex];
             if (eventData.clickCount == 1)
             {
                 LinkClicked?.Invoke(linkInfo.GetLinkID());
-            }
-            else
-            {
-                LinkDoubleClicked?.Invoke(linkInfo.GetLinkID());
             }
         }
     }

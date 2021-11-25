@@ -1,5 +1,6 @@
 #nullable enable
 
+using System;
 using Iviz.Core;
 using UnityEngine;
 
@@ -9,8 +10,13 @@ namespace Iviz.Displays
     {
         [SerializeField] Collider? rayCollider;
 
-        Collider RayCollider => rayCollider.AssertNotNull(nameof(rayCollider));  
-        public float? Damping { get; set; }
+        public Collider RayCollider
+        {
+            get => rayCollider.AssertNotNull(nameof(rayCollider));
+            set => rayCollider = value != null ? value : throw new ArgumentNullException(nameof(value));
+        }
+
+        public float? Damping { get; set; } = 0.2f;
         float distance;
         
         protected override void OnPointerMove(in Ray pointerRay)

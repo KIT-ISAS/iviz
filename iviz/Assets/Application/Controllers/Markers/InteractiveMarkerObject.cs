@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Iviz.App;
+using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
@@ -18,7 +19,6 @@ namespace Iviz.Controllers
         const string ErrorStr = "<color=red>Error:</color> ";
 
         readonly Dictionary<string, InteractiveMarkerControlObject> controls = new();
-        readonly HashSet<string> controlsToDelete = new();
         readonly StringBuilder description = new(250);
         readonly FrameNode node;
         readonly InteractiveMarkerListener listener;
@@ -126,7 +126,7 @@ namespace Iviz.Controllers
             numErrors = 0;
 
             description.Clear();
-            description.Append("<color=blue><b>** InteractiveMarker ");
+            description.Append("<color=blue><b>** ");
 
             if (string.IsNullOrEmpty(msg.Name))
             {
@@ -161,11 +161,7 @@ namespace Iviz.Controllers
 
             node.AttachTo(msg.Header);
 
-            controlsToDelete.Clear();
-            foreach (string controlId in controls.Keys)
-            {
-                controlsToDelete.Add(controlId);
-            }
+            var controlsToDelete = new HashSet<string>(controls.Keys);
 
             int numUnnamed = 0;
             foreach (var controlMsg in msg.Controls)
@@ -205,6 +201,7 @@ namespace Iviz.Controllers
                 controls.Remove(controlId);
             }
 
+            /*
             // update the dimensions of the controls
             var totalBounds =
                 controls.Values
@@ -253,6 +250,8 @@ namespace Iviz.Controllers
                     description.Append(WarnStr).Append("Menu requested without a control").AppendLine();
                 }
             }
+            */
+            
         }
 
         internal void ShowMenu(Vector3 unityPositionHint)
@@ -315,7 +314,6 @@ namespace Iviz.Controllers
             }
 
             controls.Clear();
-            controlsToDelete.Clear();
 
             text.ReturnToPool();
 

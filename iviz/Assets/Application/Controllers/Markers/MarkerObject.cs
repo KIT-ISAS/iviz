@@ -1,9 +1,12 @@
 ﻿#nullable enable
 
 using System;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Common;
+using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
@@ -17,31 +20,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public enum MarkerType
-    {
-        Invalid = -1,
-        Arrow = Marker.ARROW,
-        Cube = Marker.CUBE,
-        Sphere = Marker.SPHERE,
-        Cylinder = Marker.CYLINDER,
-        LineStrip = Marker.LINE_STRIP,
-        LineList = Marker.LINE_LIST,
-        CubeList = Marker.CUBE_LIST,
-        SphereList = Marker.SPHERE_LIST,
-        Points = Marker.POINTS,
-        TextViewFacing = Marker.TEXT_VIEW_FACING,
-        MeshResource = Marker.MESH_RESOURCE,
-        TriangleList = Marker.TRIANGLE_LIST,
-    }
-
-    public enum MouseEventType
-    {
-        Click = InteractiveMarkerFeedback.BUTTON_CLICK,
-        Down = InteractiveMarkerFeedback.MOUSE_DOWN,
-        Up = InteractiveMarkerFeedback.MOUSE_UP
-    }
-
-    public sealed class MarkerObject
+    public sealed class MarkerObject : IHasBounds
     {
         const string WarnStr = "<color=yellow>Warning:</color> ";
         const string ErrorStr = "<color=red>Error:</color> ";
@@ -69,9 +48,9 @@ namespace Iviz.Controllers
 
         bool occlusionOnly;
         bool triangleListFlipWinding;
-        float metallic;
-        float smoothness;
-        Color tint;
+        float metallic = 0.5f;
+        float smoothness = 0.5f;
+        Color tint = Color.white;
 
         public event Action? BoundsChanged;
 
@@ -79,8 +58,10 @@ namespace Iviz.Controllers
         MarkerPointHelper PointHelper => pointHelper ??= new MarkerPointHelper();
         public DateTime ExpirationTime { get; private set; }
         public MarkerType MarkerType { get; private set; }
-        public Bounds? Bounds => resource?.Bounds.TransformBound(resource.GetTransform());
         public Transform Transform => node.transform;
+
+        Bounds? IHasBounds.Bounds => resource?.Bounds;
+        Transform? IHasBounds.BoundsTransform => resource?.GetTransform();
 
         public bool OcclusionOnly
         {
@@ -140,6 +121,8 @@ namespace Iviz.Controllers
             set => node.gameObject.SetActive(value);
         }
 
+        public string NodeName => node.gameObject.name;
+
         public bool TriangleListFlipWinding
         {
             get => triangleListFlipWinding;
@@ -183,9 +166,12 @@ namespace Iviz.Controllers
             numErrors = 0;
 
             description.Length = 0;
-            description.Append("<color=#800000ff><b>").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/")
-                .Append(id.Id)
-                .Append("</b></color>").AppendLine();
+
+            description.Append("<color=#800000ff>")
+                .Append("<link=").Append(NodeName).Append(">")
+                .Append("<b><u>").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/").Append(id.Id)
+                .Append("</u></b></link></color>")
+                .AppendLine();
 
             description.Append("Type: <b>");
             description.Append(DescriptionFromType(msg));
@@ -271,6 +257,8 @@ namespace Iviz.Controllers
                     CreateTriangleList(msg);
                     break;
             }
+
+            BoundsChanged?.Invoke();
         }
 
         T ValidateResource<T>() where T : MarkerResource =>
@@ -282,8 +270,8 @@ namespace Iviz.Controllers
         {
             description.Append("Color: ");
 
-            string alpha = c.A.ToString(FloatFormat); 
-            
+            string alpha = c.A.ToString(FloatFormat);
+
             switch (c.R, c.G, c.B)
             {
                 case (1, 1, 1):
@@ -403,7 +391,7 @@ namespace Iviz.Controllers
                 using var colors = new Rent<Color>(srcColors.Length);
                 for (int i = 0; i < srcColors.Length; i++)
                 {
-                    ref var color = ref colors.Array[i]; 
+                    ref var color = ref colors.Array[i];
                     (color.r, color.g, color.b, color.a) = srcColors[i];
                 }
 
@@ -721,7 +709,7 @@ namespace Iviz.Controllers
                 Smoothness = Smoothness;
                 Metallic = Metallic;
                 OcclusionOnly = OcclusionOnly;
-                BoundsChanged?.Invoke();
+                // BoundsChanged?.Invoke() gets called later
                 return; // all OK
             }
 
@@ -824,27 +812,6 @@ namespace Iviz.Controllers
             runningTs = null;
         }
 
-        static string DescriptionFromType(Marker msg)
-        {
-            return msg.Type() switch
-            {
-                MarkerType.Arrow => "Arrow",
-                MarkerType.Cylinder => "Cylinder",
-                MarkerType.Cube => "Cube",
-                MarkerType.Sphere => "Sphere",
-                MarkerType.TextViewFacing => "Text_View_Facing",
-                MarkerType.LineStrip => "LineStrip",
-                MarkerType.LineList => "LineList",
-                MarkerType.MeshResource => "MeshResource",
-                MarkerType.CubeList => "CubeList",
-                MarkerType.SphereList => "SphereList",
-                MarkerType.Points => "Points",
-                MarkerType.TriangleList => "TriangleList",
-                MarkerType.Invalid => "Invalid",
-                _ => $"Unknown ({msg.Type.ToString()})"
-            };
-        }
-
         public void GenerateLog(StringBuilder baseDescription)
         {
             if (baseDescription == null)
@@ -881,7 +848,7 @@ namespace Iviz.Controllers
             hash = Crc32Calculator.Compute(msg.Colors, hash);
             if (useScale)
             {
-                hash = Crc32Calculator.Compute(msg.Scale, hash);
+                return Crc32Calculator.Compute(msg.Scale, hash);
             }
 
             return hash;
@@ -906,9 +873,31 @@ namespace Iviz.Controllers
             resource.ReturnToPool(resourceInfo);
             resource = null;
             resourceInfo = null;
+            BoundsChanged?.Invoke();
         }
 
         public override string ToString() => $"[MarkerObject {node.name}]";
+
+        static string DescriptionFromType(Marker msg)
+        {
+            return msg.Type() switch
+            {
+                MarkerType.Arrow => "Arrow",
+                MarkerType.Cylinder => "Cylinder",
+                MarkerType.Cube => "Cube",
+                MarkerType.Sphere => "Sphere",
+                MarkerType.TextViewFacing => "Text_View_Facing",
+                MarkerType.LineStrip => "LineStrip",
+                MarkerType.LineList => "LineList",
+                MarkerType.MeshResource => "MeshResource",
+                MarkerType.CubeList => "CubeList",
+                MarkerType.SphereList => "SphereList",
+                MarkerType.Points => "Points",
+                MarkerType.TriangleList => "TriangleList",
+                MarkerType.Invalid => "Invalid",
+                _ => $"Unknown ({msg.Type.ToString()})"
+            };
+        }
     }
 
 

@@ -55,8 +55,6 @@ namespace Iviz.Resources
         public Info<GameObject> PositionDisc3D { get; }
         public Info<GameObject> PositionDisc { get; }
         public Info<GameObject> ARMarkerHighlighter { get; }
-        public Info<GameObject> ClickedPoseHighlighter { get; }
-        public Info<GameObject> TfFrameHighlighter { get; }
         public Info<GameObject> RoundedPlane { get; }
         public Info<GameObject> Leash { get; }
 
@@ -108,9 +106,6 @@ namespace Iviz.Resources
             TargetArea = new Info<GameObject>(appAssetHolder.TargetArea);
             PositionDisc3D = new Info<GameObject>(appAssetHolder.PositionDisc3D);
             PositionDisc = new Info<GameObject>(appAssetHolder.PositionDisc);
-
-            ClickedPoseHighlighter = new Info<GameObject>(appAssetHolder.ClickedPoseHighlighter);
-            TfFrameHighlighter = new Info<GameObject>(appAssetHolder.TfFrameHighlighter);
 
             RoundedPlane = new Info<GameObject>(appAssetHolder.RoundedPlane);
             Leash = new Info<GameObject>(appAssetHolder.Leash);

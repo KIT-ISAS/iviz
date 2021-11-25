@@ -2,10 +2,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using Iviz.App;
 using Iviz.Common;
+using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
@@ -242,6 +244,12 @@ namespace Iviz.Controllers
         public void Reset()
         {
             DestroyAllMarkers();
+        }
+
+        public bool TryGetMarkerFromId(string id, [NotNullWhen(true)] out IHasBounds? frame)
+        {
+            frame = markers.Values.FirstOrDefault(marker => marker.NodeName == id);
+            return frame != null;
         }
 
         public override void ResetController()

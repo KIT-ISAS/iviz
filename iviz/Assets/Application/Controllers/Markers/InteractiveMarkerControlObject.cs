@@ -3,6 +3,301 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Iviz.Controllers.Markers;
+using Iviz.Controllers.TF;
+using Iviz.Core;
+using Iviz.Displays;
+using Iviz.Msgs.VisualizationMsgs;
+using Iviz.Resources;
+using UnityEngine;
+
+namespace Iviz.Controllers
+{
+    public sealed class InteractiveMarkerControlObject
+    {
+        const string WarnStr = "<b>Warning:</b> ";
+        const string ErrorStr = "<color=red>Error:</color> ";
+        const string FloatFormat = "#,0.###";
+
+        readonly StringBuilder description = new(250);
+        readonly Dictionary<(string Ns, int Id), MarkerObject> markers = new();
+        readonly FrameNode node;
+        readonly InteractiveMarkerObject parent;
+        readonly string rosId;
+
+        bool visible;
+        bool interactable;
+        int numWarnings;
+        int numErrors;
+        
+        public Transform Transform => node.transform;
+
+        public bool Visible
+        {
+            get => visible;
+            set
+            {
+                visible = value;
+                foreach (var marker in markers.Values)
+                {
+                    marker.Visible = value;
+                }
+            }
+        }
+
+        public bool Interactable
+        {
+            get => interactable;
+            set
+            {
+                interactable = value;
+            }
+        }
+
+        public InteractiveMarkerControlObject(InteractiveMarkerObject parentObject, string realId)
+        {
+            node = FrameNode.Instantiate("[InteractiveMarkerControlObject]");
+
+            parent = parentObject;
+            rosId = realId;
+
+            Interactable = true;
+        }
+
+        public void Set(InteractiveMarkerControl msg)
+        {
+            node.gameObject.name = $"[ControlObject '{msg.Name}']";
+
+            numErrors = 0;
+            numWarnings = 0;
+
+            description.Clear();
+            description.Append("<color=#000080ff><b>* Control ");
+            if (string.IsNullOrEmpty(msg.Name))
+            {
+                description.Append("(empty name)");
+            }
+            else
+            {
+                description.Append("'").Append(msg.Name).Append("'");
+            }
+
+            description.Append("</b></color>").AppendLine();
+
+            string msgDescription = msg.Description.Length != 0
+                ? msg.Description.Replace("\t", "\\t").Replace("\n", "\\n")
+                : "[]";
+            description.Append("Description: ").Append(msgDescription).AppendLine();
+            description.Append("Orientation: ")
+                .Append(msg.Orientation.X.ToString(FloatFormat)).Append(" | ")
+                .Append(msg.Orientation.Y.ToString(FloatFormat)).Append(" | ")
+                .Append(msg.Orientation.Z.ToString(FloatFormat)).Append(" | ")
+                .Append(msg.Orientation.W.ToString(FloatFormat)).AppendLine();
+
+
+            Transform.localRotation = msg.Orientation.Ros2Unity();
+
+            description.Append("InteractionMode: ").Append(InteractionModeToString(msg.InteractionMode)).AppendLine();
+            description.Append("OrientationMode: ").Append(OrientationModeToString(msg.OrientationMode)).AppendLine();
+
+            UpdateMarkers(msg.Markers);
+            RecalculateBounds();
+
+            if (ValidateInteractionMode(msg.InteractionMode) is {} interactionMode 
+                && ValidateOrientationMode(msg.OrientationMode) is {} orientationMode)
+            {
+                UpdateInteractionMode(interactionMode, orientationMode, msg.IndependentMarkerOrientation);
+            }
+
+            if (markers.Count == 0)
+            {
+                description.Append("Markers: Empty").AppendLine();
+            }
+            else
+            {
+                description.Append("Markers: ").Append(markers.Count).AppendLine();
+            }
+        }
+
+
+
+        void UpdateInteractionMode(InteractionMode interactionMode, OrientationMode orientationMode,
+            bool independentMarkerOrientation)
+        {
+            if (interactionMode is < 0 or > InteractionMode.MoveRotate3D)
+            {
+                description.Append(ErrorStr).Append("Unknown interaction mode ").Append((int)interactionMode)
+                    .AppendLine();
+                numErrors++;
+            }
+            else if (interactionMode == InteractionMode.None)
+            {
+            }
+            else
+            {
+            }
+
+            if (orientationMode is < 0 or > OrientationMode.ViewFacing)
+            {
+                description.Append(ErrorStr).Append("Unknown orientation mode ").Append((int)orientationMode)
+                    .AppendLine();
+                numErrors++;
+                return;
+            }
+        }
+
+        void ClearMarkers()
+        {
+            foreach (var markerObject in markers.Values)
+            {
+                DeleteMarkerObject(markerObject);
+            }
+
+            markers.Clear();
+        }
+
+        void UpdateMarkers(Marker[] msg)
+        {
+            int numUnnamed = 0;
+
+            foreach (Marker marker in msg)
+            {
+                var markerId = marker.Ns.Length == 0 && marker.Id == 0
+                    ? ("Unnamed-", numUnnamed++)
+                    : MarkerListener.IdFromMessage(marker);
+                switch (marker.Action)
+                {
+                    case Marker.ADD:
+                        MarkerObject markerObject;
+                        if (markers.TryGetValue(markerId, out MarkerObject existingMarker))
+                        {
+                            markerObject = existingMarker;
+                        }
+                        else
+                        {
+                            markerObject = CreateMarkerObject();
+                            markers[markerId] = markerObject;
+                        }
+
+                        _ = markerObject.SetAsync(marker); // TODO: deal with mesh loading
+                        if (string.IsNullOrEmpty(marker.Header.FrameId))
+                        {
+                            markerObject.Transform.SetParentLocal(node.Transform);
+                        }
+
+                        break;
+                    case Marker.DELETE:
+                        if (markers.TryGetValue(markerId, out MarkerObject markerToDelete))
+                        {
+                            DeleteMarkerObject(markerToDelete);
+                            markers.Remove(markerId);
+                        }
+
+                        break;
+                }
+
+                if (numUnnamed > 1)
+                {
+                    description.Append(WarnStr).Append(numUnnamed).Append(" interactive markers have empty ids")
+                        .AppendLine();
+                    numWarnings++;
+                }
+            }
+        }
+
+        public void Stop()
+        {
+            ClearMarkers();
+
+            node.DestroySelf();
+        }
+
+        public void GenerateLog(StringBuilder baseDescription)
+        {
+            baseDescription.Append(description);
+            foreach (var marker in markers.Values)
+            {
+                marker.GenerateLog(baseDescription);
+            }
+        }
+
+        public void GetErrorCount(out int totalErrors, out int totalWarnings)
+        {
+            totalErrors = numErrors;
+            totalWarnings = numWarnings;
+
+            foreach (var marker in markers.Values)
+            {
+                marker.GetErrorCount(out int newNumErrors, out int newNumWarnings);
+                totalErrors += newNumErrors;
+                totalWarnings += newNumWarnings;
+            }
+        }
+
+        void DeleteMarkerObject(MarkerObject marker)
+        {
+            marker.BoundsChanged -= RecalculateBounds;
+            marker.Stop();
+        }
+
+        MarkerObject CreateMarkerObject()
+        {
+            var markerObject = new MarkerObject(TfListener.ListenersFrame)
+            {
+                Visible = visible
+            };
+            markerObject.BoundsChanged += RecalculateBounds;
+            return markerObject;
+        }
+
+        void RecalculateBounds()
+        {
+        }
+
+        static InteractionMode? ValidateInteractionMode(int mode) =>
+            mode is < 0 or > (int)InteractionMode.MoveRotate3D ? null : (InteractionMode?)mode;
+
+        static OrientationMode? ValidateOrientationMode(int mode) =>
+            mode is < 0 or > (int)OrientationMode.ViewFacing ? null : (OrientationMode?)mode;        
+
+        static string OrientationModeToString(int mode)
+        {
+            return (OrientationMode)mode switch
+            {
+                OrientationMode.Inherit => "Inherit",
+                OrientationMode.Fixed => "Fixed",
+                OrientationMode.ViewFacing => "ViewFacing",
+                _ => $"Unknown ({mode.ToString()})"
+            };
+        }
+        
+        static string InteractionModeToString(int mode)
+        {
+            return (InteractionMode)mode switch
+            {
+                InteractionMode.None => "None",
+                InteractionMode.Menu => "Menu",
+                InteractionMode.Button => "Button",
+                InteractionMode.MoveAxis => "MoveAxis",
+                InteractionMode.MovePlane => "MovePlane",
+                InteractionMode.RotateAxis => "RotateAxis",
+                InteractionMode.MoveRotate => "MoveRotate",
+                InteractionMode.Move3D => "Move3D",
+                InteractionMode.Rotate3D => "Rotate3D",
+                InteractionMode.MoveRotate3D => "MoveRotate3D",
+                _ => $"Unknown ({mode.ToString()})"
+            };
+        }
+    }
+}
+
+/*
+
+#nullable enable
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
@@ -297,7 +592,7 @@ namespace Iviz.Controllers
             markers.Clear();
         }
 
-        void UpdateMarkers(IEnumerable<Marker> msg)
+        void UpdateMarkers(Marker[] msg)
         {
             int numUnnamed = 0;
 
@@ -467,3 +762,5 @@ namespace Iviz.Controllers
         }
     }
 }
+
+*/

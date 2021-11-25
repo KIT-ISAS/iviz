@@ -2,10 +2,9 @@
 
 using System;
 using System.Threading;
-using Iviz.Core;
 using UnityEngine;
 
-namespace Iviz.Displays
+namespace Iviz.Core
 {
     public sealed class Animator
     {
@@ -36,8 +35,15 @@ namespace Iviz.Displays
             }
 
             float t = Mathf.Min((GameThread.GameTime - startTime) / duration, 1);
-            callback(t);
-            
+            try
+            {
+                callback(t);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Error during Animator", e);
+            }
+
             if (t >= 1)
             {
                 GameThread.EveryFrame -= FrameUpdate;

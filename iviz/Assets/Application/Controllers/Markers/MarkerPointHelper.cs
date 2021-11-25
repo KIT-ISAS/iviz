@@ -9,7 +9,7 @@ using Iviz.Msgs.VisualizationMsgs;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Iviz.Controllers
+namespace Iviz.Controllers.Markers
 {
     internal class MarkerPointHelper
     {

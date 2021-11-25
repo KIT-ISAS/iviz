@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using Iviz.App;
 using Iviz.Common;
+using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
@@ -98,13 +99,26 @@ namespace Iviz.Controllers
             {
                 throw new ArgumentNullException(nameof(description));
             }
-
-            foreach (InteractiveMarkerObject interactiveMarker in interactiveMarkers.Values)
+         
+            const int maxToDisplay = 50;
+            
+            int i = 0;
+            foreach (var interactiveMarker in interactiveMarkers.Values)
             {
                 interactiveMarker.GenerateLog(description);
                 description.AppendLine();
+                if (i++ > maxToDisplay)
+                {
+                    break;
+                }
             }
 
+            if (interactiveMarkers.Count > maxToDisplay)
+            {
+                description.Append("<i>... and ").Append(interactiveMarkers.Count - maxToDisplay).Append(" more.</i>")
+                    .AppendLine();
+            }
+            
             description.AppendLine().AppendLine();
         }
 
@@ -160,6 +174,11 @@ namespace Iviz.Controllers
         {
             DestroyAllMarkers();
             FullListener?.Unsuspend();
+        }
+
+        public bool TryGetMarkerFromId(string id, out IHasBounds? frame)
+        {
+            throw new NotImplementedException();
         }
 
         public override void StartListening()

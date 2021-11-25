@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Iviz.Common;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
@@ -15,6 +16,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.Rendering.PostProcessing;
+using Animator = UnityEngine.Animator;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
@@ -36,7 +38,7 @@ namespace Iviz.App
         const float MainAccel = 5f;
         const float BrakeCoeff = 0.9f;
 
-        const float AnimationTime = 0.3f;
+        const float LookAtAnimationTime = 0.3f;
 
         static readonly string[] QualityInViewOptions =
             { "Very Low", "Low", "Medium", "High", "Very High", "Ultra", "Mega" };
@@ -61,9 +63,8 @@ namespace Iviz.App
 
         bool pointerMotionIsInvalid;
 
-        float? lookAtAnimationStart;
-        Pose lookAtCameraStartPose;
-        Pose lookAtCameraTargetPose;
+        CancellationTokenSource? lookAtTokenSource;
+        uint tapSeq;
 
         Light? mainLight;
 
@@ -90,9 +91,11 @@ namespace Iviz.App
 
         Leash? leash;
         Leash Leash => leash != null ? leash : (leash = ResourcePool.RentDisplay<Leash>());
-        
+
         Transform? mTransform;
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+
+        bool IsLookAtAnimationRunning => lookAtTokenSource is { IsCancellationRequested: false };
 
         public event Action<ClickInfo>? PointerDown;
         public event Action<ClickInfo>? ShortClick;
@@ -100,14 +103,14 @@ namespace Iviz.App
 
         public TfFrame? OrbitCenterOverride
         {
-            get => lookAtAnimationStart != null ? null : orbitCenterOverride;
+            get => IsLookAtAnimationRunning ? null : orbitCenterOverride;
             set
             {
                 orbitCenterOverride = value;
                 if (value != null)
                 {
                     CameraViewOverride = null;
-                    LookAt(value.AbsoluteUnityPose.position);
+                    LookAt(value.Transform);
                 }
 
                 ModuleListPanel.Instance.UnlockButtonVisible = value;
@@ -324,7 +327,7 @@ namespace Iviz.App
             set
             {
                 config.TargetFps = value;
-                UnityEngine.Application.targetFrameRate = value;
+                Application.targetFrameRate = value;
             }
         }
 
@@ -419,6 +422,7 @@ namespace Iviz.App
                 return;
             }
 
+            /*
             if (lookAtAnimationStart != null)
             {
                 float diff = Time.time - lookAtAnimationStart.Value;
@@ -439,6 +443,7 @@ namespace Iviz.App
                     return;
                 }
             }
+            */
 
             if (Settings.IsPhone)
             {
@@ -643,8 +648,8 @@ namespace Iviz.App
 
             orbitRadius += altDistanceDiff * radiusCoeff;
 
-            Transform mTransform = Transform;
-            Quaternion q = mTransform.rotation;
+            Transform t = Transform;
+            Quaternion q = t.rotation;
 
             if (!allowPivotMotion)
             {
@@ -664,12 +669,12 @@ namespace Iviz.App
 
                 float orbitScale = 0.75f * orbitRadius;
                 orbitCenter -= tangentCoeff * pointerAltDiff.x * orbitScale *
-                               mTransform.TransformDirection(Vector3.right);
+                               t.TransformDirection(Vector3.right);
                 orbitCenter += tangentCoeff * pointerAltDiff.y * orbitScale *
-                               mTransform.TransformDirection(Vector3.down);
+                               t.TransformDirection(Vector3.down);
             }
 
-            mTransform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
+            t.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
         }
 
         void ProcessTurning()
@@ -762,27 +767,52 @@ namespace Iviz.App
             Transform.position += Transform.rotation * speed;
         }
 
-        public void LookAt(in Vector3 position)
+        public void LookAt(Transform targetTransform)
         {
-            lookAtAnimationStart = Time.time;
-            lookAtCameraStartPose = Transform.AsPose();
-
-            float minDistanceLookAt = 0.5f / 0.125f * TfListener.Instance.FrameSize;
-            float maxDistanceLookAt = 3.0f / 0.125f * TfListener.Instance.FrameSize;
-
-            if (!Settings.IsPhone)
+            Vector3 CalculateTargetCameraPosition()
             {
-                float distanceToFrame = (Transform.position - position).magnitude;
-                float zoomRadius = Mathf.Min(Mathf.Max(distanceToFrame, minDistanceLookAt), maxDistanceLookAt);
-                lookAtCameraTargetPose = lookAtCameraStartPose.WithPosition(position - Transform.forward * zoomRadius);
+                var position = targetTransform.position;
+
+                float minDistanceLookAt = 0.5f / 0.125f * TfListener.Instance.FrameSize;
+                float maxDistanceLookAt = 3.0f / 0.125f * TfListener.Instance.FrameSize;
+
+                if (!Settings.IsPhone)
+                {
+                    float distanceToFrame = (Transform.position - position).magnitude;
+                    float zoomRadius = Mathf.Min(Mathf.Max(distanceToFrame, minDistanceLookAt), maxDistanceLookAt);
+                    return position - Transform.forward * zoomRadius;
+                }
+                else
+                {
+                    orbitCenter = position;
+                    orbitRadius = Mathf.Min(Mathf.Max(orbitRadius, minDistanceLookAt), maxDistanceLookAt);
+                    return -orbitRadius * (Transform.rotation * Vector3.forward) + orbitCenter;
+                }
             }
-            else
+
+
+            lookAtTokenSource?.Cancel();
+            var newToken = lookAtTokenSource = new CancellationTokenSource();
+            
+            Core.Animator.Spawn(lookAtTokenSource.Token, LookAtAnimationTime, t =>
             {
-                orbitCenter = position;
-                orbitRadius = Mathf.Min(Mathf.Max(orbitRadius, minDistanceLookAt), maxDistanceLookAt);
-                lookAtCameraTargetPose = lookAtCameraStartPose.WithPosition(
-                    -orbitRadius * (Transform.rotation * Vector3.forward) + orbitCenter);
-            }
+                var lookAtCameraStartPose = Transform.AsPose();
+                var lookAtCameraTargetPose = lookAtCameraStartPose.WithPosition(CalculateTargetCameraPosition());
+                if (t >= 1)
+                {
+                    newToken.Cancel();
+                    Transform.SetPose(lookAtCameraTargetPose);
+                    if (OrbitCenterOverride != null)
+                    {
+                        StartOrbiting();
+                    }
+                }
+                else
+                {
+                    var currentPose = lookAtCameraStartPose.Lerp(lookAtCameraTargetPose, Mathf.Sqrt(t));
+                    Transform.SetPose(currentPose);
+                }
+            });
         }
 
         static Vector3Int GetBaseInput()
@@ -820,8 +850,6 @@ namespace Iviz.App
 
             return pVelocity;
         }
-
-        uint tapSeq;
 
         void OnClick(ClickInfo clickInfo, bool isShortClick)
         {
@@ -861,7 +889,8 @@ namespace Iviz.App
                 return;
             }
 
-            ResourcePool.RentDisplay<ClickedPoseHighlighter>().HighlightPose(poseToHighlight);
+            new ClickedPoseHighlighter().Highlight(poseToHighlight);
+            
             if (!isShortClick)
             {
                 var poseStamped = new PoseStamped(
@@ -878,6 +907,16 @@ namespace Iviz.App
             Transform parent;
             return gameObject.TryGetComponent(out h) ||
                    (parent = gameObject.transform.parent) != null && parent.TryGetComponent(out h);
+        }
+
+        public static void HighlightBoundary(IHasBounds bounds)
+        {
+            if (bounds == null)
+            {
+                throw new ArgumentNullException(nameof(bounds));
+            }
+            
+            
         }
     }
 }

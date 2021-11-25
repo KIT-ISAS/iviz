@@ -277,7 +277,7 @@ namespace Iviz.Displays
 
         public override void Highlight()
         {
-            ResourcePool.RentDisplay<TfFrameHighlighter>().HighlightFrame(this);
+            new TfFrameHighlighter().Highlight(this);
         }
     }
 }

@@ -209,6 +209,7 @@ namespace Iviz.Displays
                     if (colliderDraggableTranslation == null)
                     {
                         colliderDraggableTranslation = gameObject.AddComponent<LineDraggable>();
+                        colliderDraggableTranslation.RayCollider = holderCollider;
                         colliderDraggableTranslation.TargetTransform = TargetTransform;
                         colliderDraggableTranslation.Moved += RaiseMoved;
                         colliderDraggableTranslation.PointerDown += PointerDown;
@@ -222,6 +223,7 @@ namespace Iviz.Displays
                     if (colliderDraggablePlane == null)
                     {
                         colliderDraggablePlane = gameObject.AddComponent<PlaneDraggable>();
+                        colliderDraggablePlane.RayCollider = holderCollider;
                         colliderDraggablePlane.TargetTransform = TargetTransform;
                         colliderDraggablePlane.Moved += RaiseMoved;
                         colliderDraggablePlane.PointerDown += PointerDown;
@@ -595,8 +597,6 @@ namespace Iviz.Displays
             frame.Bounds = new Bounds(Vector3.zero, 0.5f * Vector3.one);
             frame.Layer = LayerType.IgnoreRaycast;
             frame.Color = FrameInactiveColor;
-
-            InteractionMode = InteractionModeType.MovePlaneYzRotateAxisX;
         }
 
         void LateUpdate()

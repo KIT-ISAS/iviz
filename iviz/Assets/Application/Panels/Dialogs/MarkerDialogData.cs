@@ -1,4 +1,4 @@
-﻿#nullable  enable
+﻿#nullable enable
 
 using System;
 using Iviz.Common;
@@ -29,8 +29,21 @@ namespace Iviz.App
             panel.Label.Text = $"<b>Topic:</b> {Listener.Topic}";
             panel.Close.Clicked += Close;
             panel.ResetAll += Listener.Reset;
+            panel.LinkClicked += markerId => HighlightMarker(Listener, markerId);
 
             UpdatePanel();
+        }
+
+        static void HighlightMarker(IMarkerDialogListener listener, string markerId)
+        {
+            if (!listener.TryGetMarkerFromId(markerId, out var bounds)
+                || bounds.BoundsTransform is not { } transform)
+            {
+                return;
+            }
+
+            //Frame.Highlight();
+            GuiInputModule.Instance.LookAt(transform);
         }
 
         public override void UpdatePanel()

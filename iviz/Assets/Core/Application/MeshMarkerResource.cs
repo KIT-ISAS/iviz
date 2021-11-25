@@ -21,13 +21,12 @@ namespace Iviz.Displays
         [SerializeField] Texture2D? bumpTexture;
         [SerializeField] Color emissiveColor = Color.black;
         [SerializeField] Color color = Color.white;
-        [SerializeField] Color tint = Color.white;
-        [SerializeField] bool occlusionOnly;
-        [SerializeField] float smoothness = Settings.IsHololens ? 0.25f : 0.5f;
-        [SerializeField] float metallic = 0.5f;
         [SerializeField] MeshRenderer? mainRenderer;
         [SerializeField] MeshFilter? meshFilter;
-        [SerializeField] bool autoSelectMaterial = true;
+        
+        Color tint = Color.white;
+        bool occlusionOnly;
+        bool autoSelectMaterial = true;
 
         Material? textureMaterial;
         Material? textureMaterialAlpha;
@@ -129,8 +128,6 @@ namespace Iviz.Displays
             Color = color;
             EmissiveColor = emissiveColor;
             Tint = tint;
-            Metallic = metallic;
-            Smoothness = smoothness;
 
             MainRenderer.ResetPropertyTextureScale();
         }
@@ -174,6 +171,7 @@ namespace Iviz.Displays
         {
             base.Suspend();
             Color = Color.white;
+            Tint = Color.white;
             EmissiveColor = Color.black;
             ColliderEnabled = true;
             OcclusionOnly = false;

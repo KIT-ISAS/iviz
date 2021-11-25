@@ -1726,7 +1726,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tfText: {fileID: 5665220328991533606}
   tfName: {fileID: 5369842800856050051}
-  content: {fileID: 4994521176675770907}
+  contentTransform: {fileID: 4994521176675770906}
   gotoButton: {fileID: 965606883632757928}
   trail: {fileID: 5774384180977255938}
   lockPivot: {fileID: 3598663867421720321}
@@ -1980,6 +1980,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16fafcaa92cbb4fd29ed7e50c20724ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  text: {fileID: 5665220328991533606}
 --- !u!1 &6756031104578884147
 GameObject:
   m_ObjectHideFlags: 0
