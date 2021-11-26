@@ -146,11 +146,11 @@ namespace Iviz.Roslib
             }
         }
 
-        async Task<TcpClient?> StartTcpConnection()
+        async ValueTask<TcpClient?> StartTcpConnection()
         {
             Logger.LogDebugFormat("{0}: Trying to connect!", this);
 
-            TcpClient newTcpClient = new(AddressFamily.InterNetworkV6) { Client = { DualMode = true } };
+            var newTcpClient = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } };
             (string hostname, int port) = RemoteEndpoint;
 
             try

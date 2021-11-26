@@ -160,7 +160,7 @@ namespace Iviz.Roslib
             service.Response = service.Response.DeserializeFromArray(readBuffer.Array, readBuffer.Length);
         }
 
-        async Task<byte> ReadOneByteAsync(CancellationToken token)
+        async ValueTask<byte> ReadOneByteAsync(CancellationToken token)
         {
             byte[] statusBuffer = new byte[1];
             if (!await tcpClient.ReadChunkAsync(statusBuffer, 1, token))
