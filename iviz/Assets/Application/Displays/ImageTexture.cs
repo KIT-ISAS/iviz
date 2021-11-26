@@ -370,7 +370,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            Description = $"{width.ToString()}x{height.ToString()} pixels | {encoding}";
+            Description = $"{width.ToString()}x{height.ToString()} px | {encoding}";
 
             switch (encoding.ToUpperInvariant())
             {

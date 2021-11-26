@@ -9,49 +9,53 @@ namespace Iviz.Displays
     public sealed class FixedDistanceDraggable : XRScreenDraggable
     {
         [SerializeField] Collider? rayCollider;
+        Vector3 lastControllerPosition;
+        float distance;
 
-        public Collider RayCollider
-        {
-            get => rayCollider.AssertNotNull(nameof(rayCollider));
-            set => rayCollider = value != null ? value : throw new ArgumentNullException(nameof(value));
-        }
+        Collider RayCollider => rayCollider.AssertNotNull(nameof(rayCollider));
 
         public float? Damping { get; set; } = 0.2f;
-        float distance;
-        
+
+        public float? ForwardScale { get; set; }
+
         protected override void OnPointerMove(in Ray pointerRay)
         {
             Transform mTransform = Transform;
             Transform mTarget = TargetTransform;
 
-            if (needsStart)
+            if (ReferencePointLocal is not {} referencePointLocal)
             {
-                if (!RayCollider.bounds.IntersectRay(pointerRay, out distance))
+                if (!RayCollider.TryIntersectRay(pointerRay, out var intersectionWorld))
                 {
                     return; // shouldn't happen
                 }
-                
-                var intersectionWorld = pointerRay.origin + distance * pointerRay.direction;
-                var intersectionLocal = mTransform.InverseTransformPoint(intersectionWorld);
-                
-                startIntersection = intersectionLocal;
-                needsStart = false;
+
+                distance = Vector3.Distance(pointerRay.origin, intersectionWorld);
+                lastControllerPosition = pointerRay.origin;
+                ReferencePointLocal = mTransform.InverseTransformPoint(intersectionWorld);
             }
             else
             {
-                var intersectionWorld = pointerRay.origin + distance * pointerRay.direction;
-                var intersectionLocal = mTransform.InverseTransformPoint(intersectionWorld);
-
-                var deltaPosition = intersectionLocal - startIntersection;
-                if (Damping is { } damping)
+                if (interactorTransform != null
+                    && ForwardScale is { } forwardScale)
                 {
-                    deltaPosition *= damping;
+                    float deltaDistance = Vector3.Dot(interactorTransform.forward,
+                        lastControllerPosition - pointerRay.origin);
+                    distance = Mathf.Max(0.1f,  distance - forwardScale * deltaDistance);
                 }
 
-                Vector3 deltaPositionWorld = mTransform.TransformVector(deltaPosition);
-                mTarget.position += deltaPositionWorld;
+
+                var intersectionWorld = pointerRay.origin + distance * pointerRay.direction;
+                var referencePointWorld = mTransform.TransformPoint(referencePointLocal);
+                var deltaPositionWorld = intersectionWorld - referencePointWorld;
+
+                mTarget.position += Damping is { } damping 
+                    ? damping * deltaPositionWorld 
+                    : deltaPositionWorld; 
+
+                lastControllerPosition = pointerRay.origin;
                 RaiseMoved();
-            }            
+            }
         }
     }
 }

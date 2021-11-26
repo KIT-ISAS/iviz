@@ -3,7 +3,7 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 
-namespace Iviz.Controllers
+namespace Iviz.Controllers.XR
 {
     public static class XRUtils
     {

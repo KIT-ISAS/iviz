@@ -7,16 +7,12 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class RotationDraggable : ScreenDraggable
+    public sealed class RotationDraggable : XRScreenDraggable
     {
         [SerializeField] Vector3 normal;
         [SerializeField] Collider? rayCollider;
 
-        public Collider RayCollider
-        {
-            get => rayCollider.AssertNotNull(nameof(rayCollider));
-            set => rayCollider = value != null ? value : throw new ArgumentNullException(nameof(value));
-        }
+        Collider RayCollider => rayCollider.AssertNotNull(nameof(rayCollider));
 
         public float? Damping { get; set; } = 0.2f;
         public bool DoesRotationReset { get; set; }
@@ -26,47 +22,47 @@ namespace Iviz.Displays
             Transform mTransform = Transform;
             Transform mTarget = TargetTransform;
 
-            if (needsStart)
+            if (ReferencePointLocal is not {} referencePointLocal)
             {
-                if (!RayCollider.bounds.IntersectRay(pointerRay, out float distance))
+                if (!RayCollider.TryIntersectRay(pointerRay, out Vector3 intersectionWorld))
                 {
                     return; // shouldn't happen
                 }
 
-                var intersectionWorld = pointerRay.origin + distance * pointerRay.direction;
-                var intersectionLocal = mTransform.InverseTransformPoint(intersectionWorld);
-
-                startIntersection = intersectionLocal;
-                needsStart = false;
+                ReferencePointLocal = mTransform.InverseTransformPoint(intersectionWorld);
             }
             else
             {
-                var normalRay = new Ray(mTransform.TransformPoint(startIntersection), mTransform.TransformDirection(normal));
+                var normalRay = new Ray(mTransform.TransformPoint(referencePointLocal),
+                    mTransform.TransformDirection(normal));
 
-                UnityUtils.PlaneIntersection(normalRay, pointerRay, out Vector3 intersection, out float cameraDistance);
+                UnityUtils.PlaneIntersection(normalRay, pointerRay, out Vector3 intersectionWorld,
+                    out float cameraDistance);
+
                 if (cameraDistance < 0)
                 {
                     return;
                 }
 
-                var localIntersection = mTransform.InverseTransformPoint(intersection);
+                var intersectionLocal = mTransform.InverseTransformPoint(intersectionWorld);
 
                 var m = new float3x3(
-                    startIntersection.Normalized(),
-                    localIntersection.Normalized(),
+                    referencePointLocal.Normalized(),
+                    intersectionLocal.Normalized(),
                     normal);
+
                 float det = math.determinant(m);
-
                 float angle = Mathf.Asin(det) * Mathf.Rad2Deg;
-                if (Damping is { } damping)
-                {
-                    angle *= damping;
-                }
+                float dampenedAngle = Damping is { } damping
+                    ? damping * angle
+                    : angle;
 
-                var q = Quaternion.AngleAxis(angle, mTarget.InverseTransformDirection(normalRay.direction));
-                mTarget.rotation *= q;
+                var deltaRotation =
+                    Quaternion.AngleAxis(dampenedAngle, mTarget.InverseTransformDirection(normalRay.direction));
+
+                mTarget.rotation *= deltaRotation;
                 RaiseMoved();
-                
+
                 /*
                 if (DoesRotationReset)
                 {

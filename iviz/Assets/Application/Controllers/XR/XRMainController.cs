@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
@@ -19,7 +18,7 @@ using Transform = UnityEngine.Transform;
  * unselect description system info
  */
 
-namespace Iviz.Controllers
+namespace Iviz.Controllers.XR
 {
     public sealed class XRMainController : MonoBehaviour
     {
@@ -45,6 +44,10 @@ namespace Iviz.Controllers
         [CanBeNull] Sender<XRHandState> leftHandSender;
         [CanBeNull] Sender<XRHandState> rightHandSender;
 
+        [NotNull] Sender<XRGazeState> GazeSender => gazeSender ??= new Sender<XRGazeState>("~xr/gaze");
+        [NotNull] Sender<XRHandState> LeftHandSender => leftHandSender ??= new Sender<XRHandState>("~xr/left_hand");
+        [NotNull] Sender<XRHandState> RightHandSender => rightHandSender ??= new Sender<XRHandState>("~xr/right_hand");
+        
         void Start()
         {
             TfListener.ResolveFrame(HeadFrameId).ForceInvisible = true;
@@ -52,14 +55,9 @@ namespace Iviz.Controllers
 
         void Update()
         {
-            gazeSender ??= new Sender<XRGazeState>("~xr/gaze");
-            UpdateGazeSender(gazeSender);
-
-            leftHandSender ??= new Sender<XRHandState>("~xr/left_hand");
-            UpdateHandSender(leftHand.HandState, leftHandSender, ref leftHandSeqNr, ref leftHandActive);
-
-            rightHandSender ??= new Sender<XRHandState>("~xr/right_hand");
-            UpdateHandSender(rightHand.HandState, rightHandSender, ref rightHandSeqNr, ref rightHandActive);
+            UpdateGazeSender(GazeSender);
+            UpdateHandSender(leftHand.HandState, LeftHandSender, ref leftHandSeqNr, ref leftHandActive);
+            UpdateHandSender(rightHand.HandState, RightHandSender, ref rightHandSeqNr, ref rightHandActive);
 
             TfListener.Publish(HeadFrameId, Settings.MainCameraTransform.AsPose());
         }

@@ -52,6 +52,7 @@ namespace Iviz.Displays
 
             Draggable.Transform.localPosition = (sizeY + headerHeight + 0.01f) / 2 * Vector3.up; 
             Draggable.Damping = 0.2f;
+            Draggable.ForwardScale = 5f;
             Draggable.StateChanged += () =>
             {
                 Frame.Visible = Draggable.IsDragging || Draggable.IsHovering;

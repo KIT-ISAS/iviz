@@ -14,28 +14,43 @@ namespace Iviz.Displays
             resource != null ? resource : (resource = ResourcePool.RentDisplay<LineResource>(transform));
 
         protected override IDisplay Display => Resource;
+
         public Color Color { get; set; } = Color.white;
+
+        public float Width
+        {
+            get => Resource.ElementScale;
+            set => Resource.ElementScale = value;
+        }
 
         void Awake()
         {
             Resource.ElementScale = 0.005f;
+            Resource.RenderType = LineResource.LineRenderType.AlwaysCapsule;
         }
 
         public void Set(in Ray pointerRay, in Vector3 target)
         {
             var (start, tangent) = pointerRay;
-            var direction = (target - start).normalized;
+            float distance = Vector3.Distance(target, start);
+
+            if (Mathf.Approximately(distance, 0))
+            {
+                Resource.Reset();
+                return;
+            }
+            
+            var direction = (target - start) / distance;
             var tangentReflected = tangent - Vector3.Dot(tangent, direction) * 2 * direction;
 
-            const float dirScale = 0.5f;
+            //float dirScale = Mathf.Min(0.5f, distance / 3);
+            float dirScale =  distance / 3;
 
             var f = new float3x4(
                 start,
                 start + dirScale * tangent,
                 target + dirScale * tangentReflected,
                 target);
-
-            Resource.ElementScale = 0.005f;
 
             var colorBase = Color;
 
@@ -71,9 +86,15 @@ namespace Iviz.Displays
                     (l1.x, l1.y, l1.z) = p + 0.75f * delta;
 
                     color.a = (byte)(AlphaFromDistance(q, c0, c3) * colorA * 255);
+
                     l1.w = PointWithColor.RecastToFloat(color);
 
-                    array.Add(line);
+                    //if (color.a > 10)
+                    {
+                        array.Add(line);
+                    }
+                    
+
 
                     p = q;
                     l0.w = l1.w;
@@ -114,7 +135,7 @@ namespace Iviz.Displays
             return a;
         }
 
-        public void SplitForRecycle()
+        void IRecyclable.SplitForRecycle()
         {
             resource.ReturnToPool();
         }

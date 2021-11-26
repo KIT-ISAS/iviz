@@ -16,9 +16,9 @@ namespace Iviz.Displays
             get => rayCollider.AssertNotNull(nameof(rayCollider));
             set => rayCollider = value != null ? value : throw new ArgumentNullException(nameof(value));
         }
-        
+
         public float? Damping { get; set; } = 0.2f;
-        
+
         public Vector3 Normal
         {
             get => normal;
@@ -27,41 +27,42 @@ namespace Iviz.Displays
 
         protected override void OnPointerMove(in Ray pointerRay)
         {
-            Transform mTransform = Transform; 
+            Transform mTransform = Transform;
             Transform mTarget = TargetTransform;
 
-            if (needsStart)
+            if (ReferencePointLocal is not {} referencePointLocal)
             {
-                if (!RayCollider.bounds.IntersectRay(pointerRay, out float distance))
+                if (!RayCollider.TryIntersectRay(pointerRay, out Vector3 intersectionWorld))
                 {
                     return; // shouldn't happen
                 }
-                
-                var intersectionWorld = pointerRay.origin + distance * pointerRay.direction;
-                var intersectionLocal = mTransform.InverseTransformPoint(intersectionWorld);
-                
-                startIntersection = intersectionLocal;
-                needsStart = false;
+
+                ReferencePointLocal = mTransform.InverseTransformPoint(intersectionWorld);
             }
             else
             {
-                var normalRay = new Ray(mTransform.TransformPoint(startIntersection), mTransform.TransformDirection(normal));
+                var normalRay = new Ray(mTransform.TransformPoint(referencePointLocal),
+                    mTransform.TransformDirection(normal));
 
-                UnityUtils.PlaneIntersection(normalRay, pointerRay, out Vector3 intersection, out float cameraDistance);
+                UnityUtils.PlaneIntersection(normalRay, pointerRay, out Vector3 intersectionWorld,
+                    out float cameraDistance);
+                
                 if (cameraDistance < 0)
                 {
                     return;
                 }
 
+                var referencePointWorld = mTransform.TransformPoint(referencePointLocal);
+                var deltaPositionWorld = intersectionWorld - referencePointWorld;
+                /*
                 var localIntersection = mTransform.InverseTransformPoint(intersection);
-                var deltaPosition = localIntersection - startIntersection;
-                if (Damping is { } damping)
-                {
-                    deltaPosition *= damping;
-                }
-
+                var deltaPosition = localIntersection - referencePointLocal;
                 var deltaPositionWorld = mTransform.TransformVector(deltaPosition);
-                mTarget.position += deltaPositionWorld;
+                */
+
+                mTarget.position += Damping is { } damping
+                    ? damping * deltaPositionWorld
+                    : deltaPositionWorld;
                 RaiseMoved();
             }
         }

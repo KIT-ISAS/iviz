@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class LineDraggable : ScreenDraggable
+    public sealed class LineDraggable : XRScreenDraggable
     {
         [SerializeField] Vector3 line = new Vector3(0, 0, 1);
         [SerializeField] Collider? rayCollider;
@@ -24,22 +24,18 @@ namespace Iviz.Displays
             Transform mTransform = transform;
             Transform mTarget = TargetTransform;
 
-            if (needsStart)
+            if (ReferencePointLocal is not {} referencePointLocal)
             {
-                if (!RayCollider.bounds.IntersectRay(pointerRay, out float distance))
+                if (!RayCollider.TryIntersectRay(pointerRay, out var intersectionWorld))
                 {
                     return; // shouldn't happen
                 }
 
-                var intersectionWorld = pointerRay.origin + distance * pointerRay.direction;
-                var intersectionLocal = mTransform.InverseTransformPoint(intersectionWorld);
-
-                startIntersection = intersectionLocal;
-                needsStart = false;
+                ReferencePointLocal = mTransform.InverseTransformPoint(intersectionWorld);
             }
             else
             {
-                var axisRay = new Ray(mTransform.TransformPoint(startIntersection), mTransform.TransformDirection(line));
+                var axisRay = new Ray(mTransform.TransformPoint(referencePointLocal), mTransform.TransformDirection(line));
 
                 UnityUtils.ClosestPointBetweenLines(axisRay, pointerRay, out float axisDistance,
                     out float cameraDistance);
@@ -49,14 +45,11 @@ namespace Iviz.Displays
                     return;
                 }
 
-                if (Damping is { } damping)
-                {
-                    axisDistance *= damping;
-                }
+                var deltaPositionWorld = axisDistance * axisRay.direction;
 
-                Vector3 deltaPosition = axisDistance * axisRay.direction;
-                //mTarget.position += deltaPosition - startIntersection;
-                mTarget.position += deltaPosition;
+                mTarget.position += Damping is { } damping
+                    ? damping * deltaPositionWorld
+                    : deltaPositionWorld;
                 RaiseMoved();
             }
         }

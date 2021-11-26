@@ -47,6 +47,7 @@ namespace Iviz.App
         static readonly Vector3 DirectionWeight = new(1.5f, 1.5f, 1);
 
         static GuiInputModule? instance;
+        static uint tapSeq;
 
         public static GuiInputModule Instance =>
             instance != null
@@ -64,7 +65,6 @@ namespace Iviz.App
         bool pointerMotionIsInvalid;
 
         CancellationTokenSource? lookAtTokenSource;
-        uint tapSeq;
 
         Light? mainLight;
 
@@ -506,7 +506,11 @@ namespace Iviz.App
             {
                 Ray pointerRay = Settings.MainCamera.ScreenPointToRay(pointerPosition);
                 DraggedObject.OnPointerMove(pointerRay);
-                Leash.Set(pointerRay, DraggedObject.ReferencePoint);
+                if (DraggedObject.ReferencePoint is { } referencePoint)
+                {
+                    Leash.Set(pointerRay, referencePoint);
+                }
+
                 return;
             }
 
@@ -793,7 +797,7 @@ namespace Iviz.App
 
             lookAtTokenSource?.Cancel();
             var newToken = lookAtTokenSource = new CancellationTokenSource();
-            
+
             Core.Animator.Spawn(lookAtTokenSource.Token, LookAtAnimationTime, t =>
             {
                 var lookAtCameraStartPose = Transform.AsPose();
@@ -853,6 +857,11 @@ namespace Iviz.App
 
         void OnClick(ClickInfo clickInfo, bool isShortClick)
         {
+            TriggerEnvironmentClick(clickInfo, isShortClick);
+        }
+
+        public static void TriggerEnvironmentClick(ClickInfo clickInfo, bool isShortClick)
+        {
             if (clickInfo.TryGetRaycastResults(out var hitResults))
             {
                 Vector3 hitPoint = hitResults[0].Position;
@@ -890,7 +899,7 @@ namespace Iviz.App
             }
 
             new ClickedPoseHighlighter().Highlight(poseToHighlight);
-            
+
             if (!isShortClick)
             {
                 var poseStamped = new PoseStamped(
@@ -900,8 +909,7 @@ namespace Iviz.App
                 TfListener.Instance.TapPublisher.Publish(poseStamped);
             }
         }
-
-
+        
         static bool TryGetHighlightable(GameObject gameObject, out IHighlightable h)
         {
             Transform parent;
@@ -915,8 +923,6 @@ namespace Iviz.App
             {
                 throw new ArgumentNullException(nameof(bounds));
             }
-            
-            
         }
     }
 }

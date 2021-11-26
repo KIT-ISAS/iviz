@@ -161,5 +161,18 @@ namespace Iviz.Core
             GeometryUtility.CalculateFrustumPlanes(Settings.MainCamera, PlaneCache);
             return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
         }
+
+        public static bool TryIntersectRay(this Collider collider, Ray pointerRay, out Vector3 intersection)
+        {
+            if (collider.Raycast(pointerRay, out var hitInfo, 100))
+            {
+                intersection = hitInfo.point;
+                return true;
+            }
+
+            intersection = Vector3.zero;
+            return false;
+        }
+
     }
 }

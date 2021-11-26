@@ -11,12 +11,15 @@ namespace Iviz.Displays
 {
     public abstract class ScreenDraggable : MonoBehaviour, IScreenDraggable,
         IPointerEnterHandler, IPointerExitHandler,
-        IPointerDownHandler, IPointerUpHandler 
+        IPointerDownHandler, IPointerUpHandler
     {
         [SerializeField] Transform? targetTransform = null;
         Transform? mTransform;
-        protected bool needsStart;
-        protected Vector3 startIntersection;
+
+        protected Transform? interactorTransform;
+
+        //protected bool needsStart;
+        //protected Vector3 referencePointLocal;
 
         public bool IsHovering { get; private set; }
         public bool IsDragging { get; private set; }
@@ -29,8 +32,14 @@ namespace Iviz.Displays
         public event Action? StateChanged;
 
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
-        public Vector3 ReferencePoint => Transform.TransformPoint(startIntersection);
-        
+
+        protected Vector3? ReferencePointLocal { get; set; }
+
+        public Vector3? ReferencePoint => ReferencePointLocal is { } referencePointLocal
+            ? Transform.TransformPoint(referencePointLocal)
+            : null;
+
+
         public Transform TargetTransform
         {
             get => targetTransform.CheckedNull() ?? Transform;
@@ -45,7 +54,7 @@ namespace Iviz.Displays
 
         void IScreenDraggable.OnStartDragging()
         {
-            needsStart = true;
+            ReferencePointLocal = null;
             IsDragging = true;
             StartDragging?.Invoke();
             StateChanged?.Invoke();
@@ -57,9 +66,10 @@ namespace Iviz.Displays
             EndDragging?.Invoke();
             StateChanged?.Invoke();
         }
-        
+
         void IPointerDownHandler.OnPointerDown(PointerEventData _)
         {
+            interactorTransform = Settings.MainCameraTransform;
             StartSelected();
         }
 
@@ -72,6 +82,7 @@ namespace Iviz.Displays
         void IPointerUpHandler.OnPointerUp(PointerEventData _)
         {
             EndSelected();
+            interactorTransform = null;
         }
 
         protected void EndSelected()
@@ -79,12 +90,12 @@ namespace Iviz.Displays
             GuiInputModule.Instance.TryUnsetDraggedObject(this);
             PointerUp?.Invoke();
         }
-        
+
         void IScreenDraggable.OnPointerMove(in Ray pointerRay)
         {
             OnPointerMove(pointerRay);
         }
-        
+
         protected abstract void OnPointerMove(in Ray pointerRay);
 
         protected void RaiseMoved()
