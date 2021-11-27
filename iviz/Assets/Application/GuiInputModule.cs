@@ -794,7 +794,7 @@ namespace Iviz.App
             lookAtTokenSource?.Cancel();
             var newToken = lookAtTokenSource = new CancellationTokenSource();
             
-            Core.Animator.Spawn(lookAtTokenSource.Token, LookAtAnimationTime, t =>
+            Core.FAnimator.Spawn(lookAtTokenSource.Token, LookAtAnimationTime, t =>
             {
                 var lookAtCameraStartPose = Transform.AsPose();
                 var lookAtCameraTargetPose = lookAtCameraStartPose.WithPosition(CalculateTargetCameraPosition());
@@ -889,7 +889,7 @@ namespace Iviz.App
                 return;
             }
 
-            new ClickedPoseHighlighter().Highlight(poseToHighlight);
+            FAnimator.Start(new ClickedPoseHighlighter(poseToHighlight));
             
             if (!isShortClick)
             {
@@ -907,16 +907,6 @@ namespace Iviz.App
             Transform parent;
             return gameObject.TryGetComponent(out h) ||
                    (parent = gameObject.transform.parent) != null && parent.TryGetComponent(out h);
-        }
-
-        public static void HighlightBoundary(IHasBounds bounds)
-        {
-            if (bounds == null)
-            {
-                throw new ArgumentNullException(nameof(bounds));
-            }
-            
-            
         }
     }
 }

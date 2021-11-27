@@ -7,7 +7,6 @@ using JetBrains.Annotations;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
-using Animator = Iviz.Core.Animator;
 
 namespace Iviz.Displays
 {
@@ -69,7 +68,7 @@ namespace Iviz.Displays
             tokenSource = new CancellationTokenSource();
 
             Quaternion start = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
-            Animator.Spawn(tokenSource.Token, 0.25f, t =>
+            FAnimator.Spawn(tokenSource.Token, 0.25f, t =>
             {
                 var (x, _, z) = transform.position - Settings.MainCameraTransform.position;
                 Quaternion end = quaternion.Euler(0, Mathf.PI / 2 - Mathf.Atan2(z, x), 0);
