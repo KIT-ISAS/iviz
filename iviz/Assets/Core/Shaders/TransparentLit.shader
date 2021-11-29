@@ -10,7 +10,6 @@
             "Queue"="Transparent" "RenderType"="Transparent"
         }
         LOD 200
-        ZWrite On
 
         CGPROGRAM
         #pragma surface surf Standard addshadow fullforwardshadows alpha:fade

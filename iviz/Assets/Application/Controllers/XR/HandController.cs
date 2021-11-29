@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
@@ -12,7 +13,7 @@ using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.Interaction.Toolkit;
 
-namespace Iviz.Controllers
+namespace Iviz.Controllers.XR
 {
     public enum HandType
     {
@@ -42,15 +43,36 @@ namespace Iviz.Controllers
         readonly List<Bone> boneList = new();
         readonly MeshMarkerResource?[] fingerTips = new MeshMarkerResource?[5];
         readonly MeshMarkerResource?[] fingerBases = new MeshMarkerResource?[5];
+        readonly HandState cachedHandState = new();
 
         [SerializeField] HandType handType;
         [SerializeField] Transform? cameraTransform;
         [SerializeField] Vector3 shoulderToCamera = new(-0.1f, -0.2f, -0.05f);
+
         GameObject? modelRoot;
 
-        readonly HandState cachedHandState = new();
-
         public HandState? HandState { get; private set; }
+
+        Transform RootTransform
+        {
+            get
+            {
+                if (modelRoot != null)
+                {
+                    return modelRoot.transform;
+                }
+
+                modelRoot = new GameObject(name + " Model");
+                modelRoot.transform.SetParentLocal(transform.parent);
+                modelRoot.SetActive(false);
+                return modelRoot.transform;
+            }
+        }
+
+        bool ModelVisible
+        {
+            set => RootTransform.gameObject.SetActive(value);
+        }
 
         protected override bool MatchesDevice(InputDeviceCharacteristics characteristics,
             List<InputFeatureUsage> usages)
@@ -68,6 +90,8 @@ namespace Iviz.Controllers
             base.UpdateTrackingInput(controllerState);
             HandState = null;
             ModelVisible = false;
+            IsActiveInFrame = false;
+            HasCursor = false;
 
             if (controllerState == null)
             {
@@ -114,61 +138,24 @@ namespace Iviz.Controllers
             }
 
             ModelVisible = true;
+            IsActiveInFrame = true;
             HandState = cachedHandState;
-
-            /*
-            for (int i = 0; i < 5; i++)
-            {
-                var finger = (HandFinger)i;
-                if (!hand.TryGetFingerBones(finger, boneList))
-                {
-                    fingerTips[i] = null;
-                    fingerBases[i] = null;
-                    continue;
-                }
-
-                fingerTips[i] = HandleBone(boneList[^1]);
-                fingerBases[i] = HandleBone(boneList[^3]);
-            }
-
-            ModelVisible = true;
-
-            for (int i = 0; i < 5; i++)
-            {
-                var finger = (HandFinger)i;
-                if (!hand.TryGetFingerBones(finger, boneList))
-                {
-                    fingerTips[i] = null;
-                    fingerBases[i] = null;
-                    continue;
-                }
-
-                fingerTips[i] = HandleBone(boneList[^1]);
-                fingerBases[i] = HandleBone(boneList[^3]);
-            }
-
-            Pose? palmPose = hand.TryGetRootBone(out var palm)
-                ? HandleBone(palm).transform.AsPose()
-                : null;
-
-            if (cameraTransform == null
-                || palmPose is not { } palmReference
-                || fingerBases[0]?.Transform.AsPose() is not { } thumbReference)
-            {
-                return;
-            }
-            */
 
             if (cameraTransform == null)
             {
                 return;
             }
 
+            /*
             for (int i = 0; i < 5; i++)
             {
                 HandleBone(ref fingerTips[i], HandState.fingers[i][^1]);
                 HandleBone(ref fingerBases[i], HandState.fingers[i][^3]);
             }
+            */
+
+            HandleBone(ref fingerTips[0], HandState.fingers[0][^1]);
+            HandleBone(ref fingerTips[1], HandState.fingers[1][^1]);
 
 
             var cameraOffset = transform.parent;
@@ -179,16 +166,22 @@ namespace Iviz.Controllers
             var controllerPosition = palmPosition + palmRotation *
                 ((handType == HandType.Left ? palmOffset : -palmOffset) * Vector3.right);
             var pivot = cameraTransform.TransformPoint(shoulderToCamera);
-            var controllerRotation = Quaternion.LookRotation(controllerPosition - pivot);
+            var controllerForward = controllerPosition - pivot;
+            var controllerRotation = Quaternion.LookRotation(controllerForward);
 
             controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
             controllerState.position = cameraOffset.InverseTransformPoint(controllerPosition);
             controllerState.rotation = controllerRotation;
+
+            HasCursor = Vector3.Dot(palmRotation * Vector3.up, cameraTransform.forward) < 0;
         }
 
         /// <inheritdoc />
         protected override void UpdateInput(XRControllerState? controllerState)
         {
+            const float distanceTransitionToOpen = 0.04f;
+            const float distanceTransitionToClose = 0.025f;
+
             base.UpdateInput(controllerState);
             if (controllerState == null)
             {
@@ -203,62 +196,29 @@ namespace Iviz.Controllers
                 return;
             }
 
-            bool isPressed = Vector3.Distance(thumb.Transform.position, index.Transform.position) < 0.025f;
-            var color = isPressed ? Color.white : Color.white.WithAlpha(0.3f);
-            var scale = new Vector3(0.005f, 0.005f, 0.001f) * (isPressed ? 2 : 1);
+            float distance = Vector3.Distance(thumb.Transform.position, index.Transform.position);
+            bool newButtonState = distance < (ButtonState ? distanceTransitionToOpen : distanceTransitionToClose);
+
+            ButtonDown = newButtonState && !ButtonState;
+            ButtonUp = !newButtonState && ButtonState;
+            ButtonState = newButtonState;
+
+            controllerState.selectInteractionState.SetFrameState(ButtonState);
+            controllerState.uiPressInteractionState.SetFrameState(ButtonState);
+
+            
+            
+            // --------
+            
+            var color = ButtonState ? Color.white : Color.white.WithAlpha(0.3f);
+            var scale = new Vector3(0.005f, 0.005f, 0.001f) * (ButtonState ? 2 : 1);
 
             thumb.Color = color;
             thumb.Transform.localScale = scale;
             index.Color = color;
             index.Transform.localScale = scale;
 
-            controllerState.selectInteractionState.SetFrameState(isPressed);
-            controllerState.uiPressInteractionState.SetFrameState(isPressed);
         }
-
-        Transform RootTransform
-        {
-            get
-            {
-                if (modelRoot != null)
-                {
-                    return modelRoot.transform;
-                }
-
-                modelRoot = new GameObject(name + " Model");
-                modelRoot.transform.SetParentLocal(transform.parent);
-                modelRoot.SetActive(false);
-                return modelRoot.transform;
-            }
-        }
-
-        bool ModelVisible
-        {
-            set => RootTransform.gameObject.SetActive(value);
-        }
-
-        /*
-        MeshMarkerResource HandleBone(Bone bone)
-        {
-            MeshMarkerResource boneObject;
-            if (bones.TryGetValue(bone, out var existingObject))
-            {
-                boneObject = existingObject;
-            }
-            else
-            {
-                bones[bone] = boneObject = CreateBoneObject();
-            }
-
-            var localPose = new Pose();
-            if (bone.TryGetPosition(out localPose.position) && bone.TryGetRotation(out localPose.rotation))
-            {
-                boneObject.transform.SetLocalPose(localPose);
-            }
-
-            return boneObject;
-        }
-        */
 
         void HandleBone(ref MeshMarkerResource? resource, in Pose pose)
         {

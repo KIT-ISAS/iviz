@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using Iviz.Controllers.XR;
 using Iviz.Core;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -9,7 +10,6 @@ namespace Iviz.Displays
     public abstract class XRScreenDraggable : ScreenDraggable
     {
         XRSimpleInteractable? interactable;
-        Transform? interactor;
 
         protected void Start()
         {
@@ -25,7 +25,7 @@ namespace Iviz.Displays
 
         void OnSelectEntered(SelectEnterEventArgs args)
         {
-            interactor = args.interactor.transform;
+            interactorTransform = args.interactor.transform;
             StartSelected();
             GameThread.EveryFrame += TriggerPointerMove;
         }
@@ -34,16 +34,17 @@ namespace Iviz.Displays
         {
             GameThread.EveryFrame -= TriggerPointerMove;
             EndSelected();
+            interactorTransform = null;
         }
 
         void TriggerPointerMove()
         {
-            if (interactor == null)
+            if (interactorTransform == null)
             {
                 return;
             }
             
-            var ray = new Ray(interactor.position, interactor.forward); 
+            var ray = new Ray(interactorTransform.position, interactorTransform.forward); 
             OnPointerMove(ray);
         }
     }

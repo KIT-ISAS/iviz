@@ -7,7 +7,7 @@ using UnityEngine.SpatialTracking;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
-namespace Iviz.Controllers
+namespace Iviz.Controllers.XR
 {
     /// <summary>
     /// A simplified version of <see cref="XRMainController"/> for devices that do not have a <see cref="XRNode"/>.
@@ -23,7 +23,13 @@ namespace Iviz.Controllers
         protected abstract bool MatchesDevice(InputDeviceCharacteristics characteristics,
             List<InputFeatureUsage> usages);
 
+        public bool IsActiveInFrame { get; protected set; }
+        public bool HasCursor { get; protected set; }
         public bool HasDevice => device != null;
+
+        public bool ButtonState { get; protected set; }
+        public bool ButtonUp { get; protected set; }
+        public bool ButtonDown { get; protected set; }
         
         protected bool TryGetDevice(out InputDevice outDevice)
         {
@@ -54,14 +60,6 @@ namespace Iviz.Controllers
         {
             cachedUsages.Clear();
             newDevice.TryGetFeatureUsages(cachedUsages);
-            
-            /*
-            Debug.Log(newDevice.name);
-            foreach (var featureUsage in cachedUsages)
-            {
-                Debug.Log("*****    " + featureUsage.name);
-            }
-            */
             
             if (MatchesDevice(newDevice.characteristics, cachedUsages))
             {

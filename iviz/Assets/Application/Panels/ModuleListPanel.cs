@@ -12,6 +12,7 @@ using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
+using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Ros;

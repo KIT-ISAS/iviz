@@ -141,7 +141,7 @@ namespace Iviz.XmlRpc
             return XmlRpcService.ProcessResponseOfMethodCall(inData);
         }
 
-        async Task<HttpRequest> EnsureValidRequester(Uri callerUri, CancellationToken token)
+        async ValueTask<HttpRequest> EnsureValidRequester(Uri callerUri, CancellationToken token)
         {
             const int waitTimeInMs = 750;
 

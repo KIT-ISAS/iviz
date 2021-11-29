@@ -229,18 +229,20 @@ namespace Iviz.Core
             description.AppendLine();
             
             var (rXr, rYr, rZr) = (-unityPose.rotation.eulerAngles).Unity2RosVector3();
-            double rX = RegularizeAngle(rXr);
-            double rY = RegularizeAngle(rYr);
-            double rZ = RegularizeAngle(rZr);
-
-            string rx = rX == 0 ? "0" : rX.ToString("#,0.##", UnityUtils.Culture);
-            string ry = rY == 0 ? "0" : rY.ToString("#,0.##", UnityUtils.Culture);
-            string rz = rZ == 0 ? "0" : rZ.ToString("#,0.##", UnityUtils.Culture);
 
             if (format == PoseFormat.All)
             {
+                double rX = RegularizeAngle(rXr);
+                string rx = rX == 0 ? "0" : rX.ToString("#,0.#", UnityUtils.Culture);
+            
                 description.Append("r: ").Append(rx).Append(", ");
             }
+
+            double rY = RegularizeAngle(rYr);
+            double rZ = RegularizeAngle(rZr);
+
+            string ry = rY == 0 ? "0" : rY.ToString("#,0.#", UnityUtils.Culture);
+            string rz = rZ == 0 ? "0" : rZ.ToString("#,0.#", UnityUtils.Culture);
 
             description.Append("p: ").Append(ry).Append(", y: ").Append(rz);
         }

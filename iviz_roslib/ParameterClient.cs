@@ -185,28 +185,28 @@ namespace Iviz.Roslib.XmlRpc
         {
             XmlRpcArg[] args = {CallerId, key};
             var response = MethodCall("deleteParam", args);
-            return new DefaultResponse(response);
+            return DefaultResponse.Create(response);
         }
 
         async ValueTask<DefaultResponse> DeleteParamAsync(string key, CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId, key};
             var response = await MethodCallAsync("deleteParam", args, token);
-            return new DefaultResponse(response);
+            return DefaultResponse.Create(response);
         }
 
         DefaultResponse SetParam(string key, XmlRpcArg value)
         {
             XmlRpcArg[] args = {CallerId, key, value};
             var response = MethodCall("setParam", args);
-            return new DefaultResponse(response);
+            return DefaultResponse.Create(response);
         }
 
         async ValueTask<DefaultResponse> SetParamAsync(string key, XmlRpcArg value, CancellationToken token = default)
         {
             XmlRpcArg[] args = {CallerId, key, value};
             var response = await MethodCallAsync("setParam", args, token);
-            return new DefaultResponse(response);
+            return DefaultResponse.Create(response);
         }
 
         GetParamResponse GetParam(string key)
@@ -238,7 +238,7 @@ namespace Iviz.Roslib.XmlRpc
         }
 
 
-        SubscribeParamResponse SubscribeParam(string key, CancellationToken token = default)
+        SubscribeParamResponse SubscribeParam(string key)
         {
             XmlRpcArg[] args = {CallerId, key, CallerUri};
             var response = MethodCall("subscribeParam", args);
@@ -319,10 +319,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                base.responseCode = code;
+                responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (base.responseCode == StatusCode.Error)
+                if (responseCode == StatusCode.Error)
                 {
                     return;
                 }
@@ -346,10 +346,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                base.responseCode = code;
+                responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (base.responseCode == StatusCode.Error)
+                if (responseCode == StatusCode.Error)
                 {
                     return;
                 }
@@ -379,10 +379,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                base.responseCode = code;
+                responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (base.responseCode == StatusCode.Error)
+                if (responseCode == StatusCode.Error)
                 {
                     return;
                 }
@@ -406,10 +406,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                base.responseCode = code;
+                responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (base.responseCode == StatusCode.Error)
+                if (responseCode == StatusCode.Error)
                 {
                     return;
                 }
@@ -439,10 +439,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                base.responseCode = code;
+                responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (base.responseCode == StatusCode.Error)
+                if (responseCode == StatusCode.Error)
                 {
                     return;
                 }
@@ -472,10 +472,10 @@ namespace Iviz.Roslib.XmlRpc
                     return;
                 }
 
-                base.responseCode = code;
+                responseCode = code;
                 StatusMessage = statusMessage;
 
-                if (base.responseCode == StatusCode.Error)
+                if (responseCode == StatusCode.Error)
                 {
                     return;
                 }

@@ -6,13 +6,15 @@ using System.Linq;
 using System.Text;
 using Iviz.Msgs.VisualizationMsgs;
 
-namespace Iviz.App
+namespace Iviz.Core
 {
     public sealed class MenuEntryList
     {
         readonly Entry root;
 
         public int Count { get; }
+
+        public StringBuilder? ErrorMessages { get; }
 
         public enum EntryType
         {
@@ -22,11 +24,18 @@ namespace Iviz.App
             Forward,
             Back
         }
+        
+        enum CheckboxState
+        {
+            NotACheckbox,
+            True,
+            False
+        }
 
         internal sealed class Entry
         {
             readonly string title;
-            readonly bool? checkboxState;
+            readonly CheckboxState checkboxState;
             
             public uint Id { get; }
             public Entry? Parent { get; set; }
@@ -36,7 +45,7 @@ namespace Iviz.App
             {
                 Id = 0;
                 title = "Root";
-                checkboxState = null;
+                checkboxState = CheckboxState.NotACheckbox;
             }
             
             public Entry(MenuEntry entry)
@@ -48,50 +57,44 @@ namespace Iviz.App
 
             public string Description => checkboxState switch
             {
-                null when Children.Count != 0 => title,
-                not null => title[4..],
+                CheckboxState.NotACheckbox when Children.Count != 0 => title,
+                CheckboxState.True or CheckboxState.False => title[4..],
                 _ => title
             };
 
             public EntryType Type => checkboxState switch
             {
-                null when Children.Count != 0 => EntryType.Forward,
-                true => EntryType.On,
-                false => EntryType.Off,
+                CheckboxState.NotACheckbox when Children.Count != 0 => EntryType.Forward,
+                CheckboxState.True => EntryType.On,
+                CheckboxState.False => EntryType.Off,
                 _ => EntryType.Default
             };
         }
 
-        public MenuEntryList(MenuEntry[] menu, StringBuilder description, out int numErrors)
+        public MenuEntryList(MenuEntry[] menu)
         {
             if (menu == null)
             {
                 throw new ArgumentNullException(nameof(menu));
             }
 
-            if (description == null)
-            {
-                throw new ArgumentNullException(nameof(description));
-            }
-
             root = new Entry();
             
             var entries = new Dictionary<uint, Entry> { [0] = root };
 
-            numErrors = 0;
             foreach (var menuEntry in menu)
             {
                 if (menuEntry.Id == 0)
                 {
-                    description.Append("A menu entry uses the reserved id 0").AppendLine();
-                    numErrors++;
+                    ErrorMessages ??= new StringBuilder();
+                    ErrorMessages.Append("A menu entry uses the reserved id 0").AppendLine();
                     continue;
                 }
 
                 if (entries.ContainsKey(menuEntry.Id))
                 {
-                    description.Append("Duplicate menu entries for id ").Append(menuEntry.Id).AppendLine();
-                    numErrors++;
+                    ErrorMessages ??= new StringBuilder();
+                    ErrorMessages.Append("Duplicate menu entries for id ").Append(menuEntry.Id).AppendLine();
                 }
 
                 entries[menuEntry.Id] = new Entry(menuEntry);
@@ -101,9 +104,9 @@ namespace Iviz.App
             {
                 if (!entries.TryGetValue(menuEntry.ParentId, out var parentEntry))
                 {
-                    description.Append("Menu entry ").Append(menuEntry.Id).Append(" has unknown parent ")
+                    ErrorMessages ??= new StringBuilder();
+                    ErrorMessages.Append("Menu entry ").Append(menuEntry.Id).Append(" has unknown parent ")
                         .Append(menuEntry.ParentId).AppendLine();
-                    numErrors++;
                     continue;
                 }
 
@@ -118,19 +121,18 @@ namespace Iviz.App
         public MenuEntryDescription[] GetDescriptionsForRoot() =>
             root.Children.Select(child => new MenuEntryDescription(child)).ToArray();
 
-        static bool? GetCheckboxState(string name)
+        static CheckboxState GetCheckboxState(string name)
         {
             if (name.Length < 4 || name[0] != '[' || name[2] != ']' || name[3] != ' ')
             {
-                return null;
+                return CheckboxState.NotACheckbox;
             }
 
             return name[1] switch
             {
-                ' ' => false,
-                'X' => true,
-                'x' => true,
-                _ => null
+                ' ' => CheckboxState.False,
+                'X' or 'x' => CheckboxState.True,
+                _ => CheckboxState.NotACheckbox
             };
         }
     }

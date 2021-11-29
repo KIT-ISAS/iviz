@@ -225,7 +225,8 @@ namespace Iviz.Displays
                 return;
             }
 
-            intrinsic ??= new Intrinsic(70.45f * Mathf.Deg2Rad, texture.width, texture.height);
+            // create default intrinsic so we can at least see something
+            intrinsic ??= new Intrinsic(60 * Mathf.Deg2Rad, texture.width, texture.height);
             
             float posMulX = texture.width / intrinsic.Fx;
             float posMulY = texture.height / intrinsic.Fy;

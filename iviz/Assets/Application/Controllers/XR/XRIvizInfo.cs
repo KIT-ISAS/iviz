@@ -1,7 +1,9 @@
+#nullable enable
+
 using Iviz.Core;
 using UnityEngine;
 
-namespace Iviz.Controllers
+namespace Iviz.Controllers.XR
 {
     public sealed class XRIvizInfo : MonoBehaviour
     {

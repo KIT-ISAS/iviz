@@ -495,10 +495,7 @@ namespace Iviz.Controllers
             ShowARJoystick = false;
             Instance = null;
 
-            if (GuiInputModule.Instance != null)
-            {
-                GuiInputModule.Instance.UpdateQualityLevel();
-            }
+            GuiInputModule.Instance.UpdateQualityLevel();
 
             MarkerSender?.Stop();
             detector.Dispose();

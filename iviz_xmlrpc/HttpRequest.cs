@@ -69,7 +69,7 @@ namespace Iviz.XmlRpc
             return (header, dstBytes, (int)outputStream.Position);
         }
 
-        internal async Task<int> SendRequestAsync(string msgIn, bool keepAlive, bool gzipped, CancellationToken token)
+        internal async ValueTask<int> SendRequestAsync(string msgIn, bool keepAlive, bool gzipped, CancellationToken token)
         {
             if (gzipped)
             {
@@ -95,7 +95,7 @@ namespace Iviz.XmlRpc
             return content.Length;
         }
 
-        static async Task<int> ReadHeaderAsync(TcpClient client, byte[] buffer, CancellationToken token)
+        static async ValueTask<int> ReadHeaderAsync(TcpClient client, byte[] buffer, CancellationToken token)
         {
             byte[] singleByte = new byte[1];
             int pos = 0;
@@ -184,12 +184,12 @@ namespace Iviz.XmlRpc
             return (length.Value, encoding, connectionClose ?? false);
         }
 
-        internal Task<(string, int, bool)> GetResponseAsync(CancellationToken token)
+        internal ValueTask<(string, int, bool)> GetResponseAsync(CancellationToken token)
         {
             return ReadIncomingDataAsync(client, true, token);
         }
 
-        internal static async Task<(string inData, int length, bool shouldClose)>
+        internal static async ValueTask<(string inData, int length, bool shouldClose)>
             ReadIncomingDataAsync(TcpClient client, bool isRequest, CancellationToken token)
         {
             const int maxHeaderSize = 8192;

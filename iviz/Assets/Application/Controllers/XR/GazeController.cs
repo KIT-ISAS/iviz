@@ -7,7 +7,7 @@ using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.OpenXR;
 
-namespace Iviz.Controllers
+namespace Iviz.Controllers.XR
 {
     /// <summary>
     /// Custom controller for Gaze. Probably will be deprecated once the toolbox implements it. 
@@ -37,6 +37,7 @@ namespace Iviz.Controllers
             base.UpdateTrackingInput(controllerState);
             
             Pose = null;
+            IsActiveInFrame = false;
             
             if (controllerState == null)
             {
@@ -45,12 +46,9 @@ namespace Iviz.Controllers
 
             controllerState.poseDataFlags = PoseDataFlags.NoData;
 
-            if (!TryGetDevice(out var device))
-            {
-                return;
-            }
-
-            if (!device.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracking) || !isTracking)
+            if (!TryGetDevice(out var device) 
+                || !device.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracking) 
+                || !isTracking)
             {
                 return;
             }
@@ -67,6 +65,7 @@ namespace Iviz.Controllers
 
             if (controllerState.poseDataFlags == (PoseDataFlags.Position | PoseDataFlags.Rotation))
             {
+                IsActiveInFrame = true;
                 Pose = new Pose(controllerState.position, controllerState.rotation);
             }
 

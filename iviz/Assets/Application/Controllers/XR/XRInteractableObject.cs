@@ -4,7 +4,7 @@ using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Inputs.Simulation;
 
-namespace Iviz.Controllers
+namespace Iviz.Controllers.XR
 {
     [RequireComponent(typeof(XRSimpleInteractable))]
     public class XRInteractableObject : MonoBehaviour

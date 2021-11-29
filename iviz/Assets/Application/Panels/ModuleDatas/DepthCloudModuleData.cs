@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
 using JetBrains.Annotations;
@@ -17,18 +17,18 @@ namespace Iviz.App
     {
         const string NoneStr = "<none>";
 
-        [NotNull] readonly DepthCloudController controller;
-        [NotNull] readonly DepthCloudPanelContents panel;
+        readonly DepthCloudController controller;
+        readonly DepthCloudPanelContents panel;
 
-        [CanBeNull] ImageDialogData colorDialogData;
-        [CanBeNull] ImageDialogData depthDialogData;
+        ImageDialogData? colorDialogData;
+        ImageDialogData? depthDialogData;
 
         public override DataPanelContents Panel => panel;
         public override ModuleType ModuleType => ModuleType.DepthCloud;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public DepthCloudModuleData([NotNull] ModuleDataConstructor constructor) :
+        public DepthCloudModuleData(ModuleDataConstructor constructor) :
             base(constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<DepthCloudPanelContents>(ModuleType.DepthCloud);
@@ -115,8 +115,7 @@ namespace Iviz.App
             };
         }
 
-        [NotNull]
-        static string SanitizeTitle([CanBeNull] string topic) => string.IsNullOrEmpty(topic) ? "[Empty]" : topic;
+        static string SanitizeTitle(string? topic) => topic is null or "" ? "[Empty]" : topic;
 
         public override void UpdatePanel()
         {
@@ -132,13 +131,11 @@ namespace Iviz.App
             panel.Description.Text = controller.Description;
         }
 
-        [NotNull]
         static List<string> GetImageTopics()
         {
             var topics = new List<string> { NoneStr };
             topics.AddRange(ConnectionManager.Connection.GetSystemPublishedTopicTypes()
-                .Where(topicInfo => topicInfo.Type == Image.RosMessageType ||
-                                    topicInfo.Type == CompressedImage.RosMessageType)
+                .Where(topicInfo => topicInfo.Type is Image.RosMessageType or CompressedImage.RosMessageType)
                 .Select(topicInfo => topicInfo.Topic)
             );
             return topics;
@@ -189,8 +186,8 @@ namespace Iviz.App
 
         sealed class ColorImageDialogListener : ImageDialogListener
         {
-            [NotNull] readonly DepthCloudModuleData moduleData;
-            public ColorImageDialogListener([NotNull] DepthCloudModuleData moduleData) => this.moduleData = moduleData;
+            readonly DepthCloudModuleData moduleData;
+            public ColorImageDialogListener(DepthCloudModuleData moduleData) => this.moduleData = moduleData;
             public override Material Material => moduleData.controller.ColorMaterial;
             public override Vector2Int ImageSize => moduleData.controller.ColorImageSize;
             protected override void Stop() => moduleData.OnDialogClosed(DialogData);
@@ -198,8 +195,8 @@ namespace Iviz.App
 
         sealed class DepthImageDialogListener : ImageDialogListener
         {
-            [NotNull] readonly DepthCloudModuleData moduleData;
-            public DepthImageDialogListener([NotNull] DepthCloudModuleData moduleData) => this.moduleData = moduleData;
+            readonly DepthCloudModuleData moduleData;
+            public DepthImageDialogListener(DepthCloudModuleData moduleData) => this.moduleData = moduleData;
             public override Material Material => moduleData.controller.DepthMaterial;
             public override Vector2Int ImageSize => moduleData.controller.DepthImageSize;
             protected override void Stop() => moduleData.OnDialogClosed(DialogData);

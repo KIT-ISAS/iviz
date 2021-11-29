@@ -154,23 +154,12 @@ namespace Iviz.Roslib.XmlRpc
 
         internal RequestTopicResponse(XmlRpcValue[] a)
         {
-            if (a.Length < 3 ||
-                !a[0].TryGetInteger(out int code) ||
-                !a[1].TryGetString(out string statusMessage))
-            {
-                MarkError();
-                return;
-            }
-
-            responseCode = code;
-            StatusMessage = statusMessage;
-
-            if (responseCode == StatusCode.Error)
+            if (!TryGetValueFromArgs(a, out var value))
             {
                 return;
             }
-
-            if (!a[2].TryGetArray(out XmlRpcValue[] protocolInfo))
+            
+            if (!value.TryGetArray(out XmlRpcValue[] protocolInfo))
             {
                 MarkError();
                 return;
@@ -226,18 +215,18 @@ namespace Iviz.Roslib.XmlRpc
 
         internal GetMasterUriResponse(XmlRpcValue[] a)
         {
-            if (a.Length != 3
-                || !a[0].TryGetInteger(out int code)
-                || !a[1].TryGetString(out string statusMessage)
-                || !a[2].TryGetString(out string uriStr)
+            if (!TryGetValueFromArgs(a, out var value))
+            {
+                return;
+            }
+            
+            if (!value.TryGetString(out string uriStr) 
                 || !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
             {
                 MarkError();
                 return;
             }
 
-            responseCode = code;
-            StatusMessage = statusMessage;
             Uri = responseCode == StatusCode.Error ? null : uri;
         }
     }
@@ -248,17 +237,17 @@ namespace Iviz.Roslib.XmlRpc
 
         internal GetPidResponse(XmlRpcValue[] a)
         {
-            if (a.Length != 3
-                || !a[0].TryGetInteger(out int code)
-                || !a[1].TryGetString(out string statusMessage)
-                || !a[2].TryGetInteger(out int pid))
+            if (!TryGetValueFromArgs(a, out var value))
+            {
+                return;
+            }
+            
+            if (!value.TryGetInteger(out int pid))
             {
                 MarkError();
                 return;
             }
 
-            responseCode = code;
-            StatusMessage = statusMessage;
             Pid = pid;
         }
     }
