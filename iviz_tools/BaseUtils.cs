@@ -153,10 +153,14 @@ namespace Iviz.Tools
             return bytes.Resize(size);
         }
 
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NETSTANDARD2_1
         static FieldInfo? chunkField;
 
+#if NETSTANDARD2_0
         internal static char[] GetMainChunk(this StringBuilder str)
+#else
+        internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
+#endif
         {
             if (chunkField == null)
             {
@@ -166,21 +170,6 @@ namespace Iviz.Tools
             }
 
             return (char[])chunkField.GetValue(str)!;
-        }
-#elif NETSTANDARD2_1
-        static FieldInfo? chunkField;
-
-        internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
-        {
-            if (chunkField == null)
-            {
-                chunkField =
-                    typeof(StringBuilder).GetField("m_ChunkChars", BindingFlags.NonPublic | BindingFlags.Instance)
-                    ?? throw new InvalidOperationException("Failed to find StringBuilder chunk field!");
-            }
-
-            char[] mainChunk = (char[])chunkField.GetValue(str)!;
-            return mainChunk;
         }
 #else
         internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
