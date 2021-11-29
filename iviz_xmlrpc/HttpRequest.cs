@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Tools;
@@ -32,21 +34,24 @@ namespace Iviz.XmlRpc
             return client.TryConnectAsync(remoteUri.Host, remoteUri.Port, token);
         }
 
-        string CreateRequest(string msgIn, bool keepAlive)
+        Rent<byte> CreateRequest(int msgLength, bool keepAlive)
         {
-            return $"POST {Uri.UnescapeDataString(remoteUri.AbsolutePath)} " +
-                   (keepAlive ? "HTTP/1.1\r\n" : "HTTP/1.0\r\n") +
-                   "User-Agent: iviz XML-RPC\r\n" +
-                   $"Host: {callerUri.Host}\r\n" +
-                   $"Content-Length: {Defaults.UTF8.GetByteCount(msgIn).ToString()}\r\n" +
-                   "Accept-Encoding: gzip\r\n" +
-                   "Content-Type: text/xml; charset=utf-8\r\n" +
-                   $"\r\n{msgIn}";
+            using var str = BuilderPool.Rent();
+
+            str.Append("POST ").Append(Uri.UnescapeDataString(remoteUri.AbsolutePath)).Append(" ");
+            str.Append(keepAlive ? "HTTP/1.1\r\n" : "HTTP/1.0\r\n");
+            str.Append("User-Agent: iviz XML-RPC\r\n");
+            str.Append($"Host: ").Append(callerUri.Host).Append("\r\n");
+            str.Append($"Content-Length: ").Append(msgLength).Append("\r\n");
+            str.Append("Accept-Encoding: gzip\r\n");
+            str.Append("Content-Type: text/xml; charset=utf-8\r\n");
+            str.Append("\r\n");
+
+            return str.AsRent();
         }
 
-        (string, Rent<byte>, int length) CreateRequestGzipped(string msgIn, bool keepAlive = false)
+        (Rent<byte>, Rent<byte>) CreateRequestGzipped(in Rent<byte> srcBytes, bool keepAlive = false)
         {
-            using var srcBytes = msgIn.AsRent();
             var dstBytes = new Rent<byte>(srcBytes.Length);
 
             using var outputStream = new MemoryStream(dstBytes.Array);
@@ -55,44 +60,45 @@ namespace Iviz.XmlRpc
                 compressionStream.Write(srcBytes.Array, 0, srcBytes.Length);
             }
 
-            string header =
-                $"POST {Uri.UnescapeDataString(remoteUri.AbsolutePath)} " +
-                (keepAlive ? "HTTP/1.1\r\n" : "HTTP/1.0\r\n") +
-                "User-Agent: iviz XML-RPC\r\n" +
-                $"Host: {callerUri.Host}\r\n" +
-                "Accept-Encoding: gzip\r\n" +
-                "Content-Encoding: gzip\r\n" +
-                $"Content-Length: {outputStream.Position.ToString()}\r\n" +
-                "Content-Type: text/xml; charset=utf-8\r\n" +
-                "\r\n";
+            using var str = BuilderPool.Rent();
+            str.Append("POST ").Append(Uri.UnescapeDataString(remoteUri.AbsolutePath)).Append(" ");
+            str.Append(keepAlive ? "HTTP/1.1\r\n" : "HTTP/1.0\r\n");
+            str.Append("User-Agent: iviz XML-RPC\r\n");
+            str.Append("Host: ").Append(callerUri.Host).Append("\r\n");
+            str.Append("Accept-Encoding: gzip\r\n");
+            str.Append("Content-Encoding: gzip\r\n");
+            str.Append("Content-Length: ").Append(outputStream.Position).Append("\r\n");
+            str.Append("Content-Type: text/xml; charset=utf-8\r\n");
+            str.Append("\r\n");
+            
+            //Logger.Log(">> Header " + str);
 
-            return (header, dstBytes, (int)outputStream.Position);
+            return (str.AsRent(), dstBytes.Resize((int)outputStream.Position));
         }
 
-        internal async ValueTask<int> SendRequestAsync(string msgIn, bool keepAlive, bool gzipped, CancellationToken token)
+        internal async ValueTask<int> SendRequestAsync(Rent<byte> msgIn, bool keepAlive, bool gzipped,
+            CancellationToken token)
         {
             if (gzipped)
             {
-                var (header, payloadBytes, length) = CreateRequestGzipped(msgIn, keepAlive);
-                using (payloadBytes)
+                var (header, msgInCompressed) = CreateRequestGzipped(msgIn, keepAlive);
+                using (header)
+                using (msgInCompressed)
                 {
-                    using (var headerBytes = header.AsRent())
-                    {
-                        await client.WriteChunkAsync(headerBytes, token);
-                    }
-
-                    await client.WriteChunkAsync(payloadBytes.Array, length, token);
+                    await client.WriteChunkAsync(header, token);
+                    await client.WriteChunkAsync(msgInCompressed, token);
                 }
 
-                return length;
+                return header.Length + msgInCompressed.Length;
             }
+            else
+            {
+                using var header = CreateRequest(msgIn.Length, keepAlive);
+                await client.WriteChunkAsync(header, token);
+                await client.WriteChunkAsync(msgIn, token);
 
-            string content = CreateRequest(msgIn, keepAlive);
-            
-            using var contentBytes = content.AsRent();
-            await client.WriteChunkAsync(contentBytes, token);
-
-            return content.Length;
+                return header.Length + msgIn.Length;
+            }
         }
 
         static async ValueTask<int> ReadHeaderAsync(TcpClient client, byte[] buffer, CancellationToken token)
@@ -154,23 +160,24 @@ namespace Iviz.XmlRpc
                     throw new ParseException("Failed to parse header lines");
                 }
 
-                if (length == null && CheckHeaderLineForKey(line, "Content-Length", out string? lengthStr) &&
-                    int.TryParse(lengthStr, out int lengthVal))
+                if (length == null
+                    && CheckHeaderLineForKey(line, "Content-Length", out string? lengthStr)
+                    && int.TryParse(lengthStr, out int lengthVal))
                 {
                     length = lengthVal;
                 }
-                else if (encoding == null &&
-                         CheckHeaderLineForKey(line, "Content-Encoding", out string? tmpEncodingStr))
+                else if (encoding == null
+                         && CheckHeaderLineForKey(line, "Content-Encoding", out string? tmpEncodingStr))
                 {
                     encoding = tmpEncodingStr;
                 }
-                else if (connectionClose == null &&
-                         CheckHeaderLineForKey(line, "Connection", out string? connectionStr) &&
-                         connectionStr.Equals("close", StringComparison.InvariantCultureIgnoreCase))
+                else if (connectionClose == null
+                         && CheckHeaderLineForKey(line, "Connection", out string? connectionStr)
+                         && connectionStr.Equals("close", StringComparison.InvariantCultureIgnoreCase))
                 {
                     connectionClose = true;
                 }
-                else if (string.IsNullOrEmpty(line) || line == "\r")
+                else if (line is null or "" or "\r")
                 {
                     break;
                 }

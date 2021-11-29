@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -120,27 +121,24 @@ namespace Iviz.XmlRpc
             }
         }
 
-        internal static string CreateRequest(string method, XmlRpcArg[] args)
+        internal static Rent<byte> CreateRequest(string method, XmlRpcArg[] args)
         {
-            string[] entries = new string[4 + args.Length * 3];
-            entries[0] = "<?xml version=\"1.0\"?>\n" +
-                         "<methodCall>\n" +
-                         "<methodName>";
-            entries[1] = method;
-            entries[2] = "</methodName>\n" +
-                         "<params>\n";
-            int o = 3;
-            foreach (XmlRpcArg arg in args)
+            using var str = BuilderPool.Rent();
+            str.Append("<?xml version=\"1.0\"?>\n" +
+                       "<methodCall>\n");
+            str.Append("<methodName>").Append(method).Append("</methodName>\n");
+            
+            str.Append("<params>\n");
+            foreach (var arg in args)
             {
-                entries[o++] = "<param>";
-                entries[o++] = arg;
-                entries[o++] = "</param>\n";
+                str.Append("<param>").Append(arg.ToString()).Append("</param>\n");
             }
+            str.Append("</params>\n" +
+                       "</methodCall>\n");
 
-            entries[o] = "</params>\n" +
-                         "</methodCall>\n";
-
-            return string.Concat(entries);
+            //Logger.Log(">> Payload " + str);
+            
+            return str.AsRent();
         }
 
         internal static XmlRpcValue ProcessResponseOfMethodCall(string inData)
@@ -224,14 +222,16 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(args));
             }
 
-            string outData = CreateRequest(method, args);
             string inData;
-
-            using var request = new HttpRequest(callerUri, remoteUri);
+            
             try
             {
+                using var outData = CreateRequest(method, args);
+                using var request = new HttpRequest(callerUri, remoteUri);
+
                 await request.StartAsync(token);
                 await request.SendRequestAsync(outData, false, false, token);
+                
                 (inData, _, _) = await request.GetResponseAsync(token);
             }
             catch (OperationCanceledException)
@@ -305,17 +305,25 @@ namespace Iviz.XmlRpc
 
                 var response = method(args);
 
-                string outData = "<?xml version=\"1.0\"?>\n" +
-                                 "<methodResponse>\n" +
-                                 "<params>\n" +
-                                 "<param>\n" +
-                                 $"{response.ToString()}\n" +
-                                 "</param>\n" +
-                                 "</params>\n" +
-                                 "</methodResponse>\n" +
-                                 "\n";
+                Rent<byte> outData;
+                using (var str = BuilderPool.Rent())
+                {
+                    str.Append("<?xml version=\"1.0\"?>\n");
+                    str.Append("<methodResponse>\n");
+                    str.Append("<params>\n");
+                    str.Append("<param>\n");
+                    str.Append(response.ToString()).Append("\n");
+                    str.Append("</param>\n");
+                    str.Append("</params>\n");
+                    str.Append("</methodResponse>\n");
+                    str.Append("\n");
+                    outData = str.AsRent();
+                }
 
-                await httpContext.RespondAsync(outData, token: token);
+                using (outData)
+                {
+                    await httpContext.RespondAsync(outData, token: token);
+                }
 
                 if (lateCallbacks != null &&
                     lateCallbacks.TryGetValue(methodName, out var lateCallback))
@@ -325,14 +333,22 @@ namespace Iviz.XmlRpc
             }
             catch (ParseException e)
             {
-                string buffer = "<?xml version=\"1.0\"?>\n" +
-                                "<methodResponse>\n" +
-                                "<fault>\n" +
-                                $"{new XmlRpcArg(e.Message).ToString()}\n" +
-                                "</fault>\n" +
-                                "</methodResponse>\n";
+                Rent<byte> response;
+                using (var str = BuilderPool.Rent())
+                {
+                    str.Append("<?xml version=\"1.0\"?>\n");
+                    str.Append("<methodResponse>\n");
+                    str.Append("<fault>\n");
+                    str.Append(new XmlRpcArg(e.Message).ToString()).Append("\n");
+                    str.Append("</fault>\n");
+                    str.Append("</methodResponse>\n");
+                    response = str.AsRent();
+                }
 
-                await httpContext.RespondAsync(buffer, token: token);
+                using (response)
+                {
+                    await httpContext.RespondAsync(response, token: token);
+                }
             }
             catch (OperationCanceledException)
             {
@@ -349,7 +365,7 @@ namespace Iviz.XmlRpc
         static (string methodName, XmlRpcValue[] args) ProcessResponseOfMethodResponse(string inData)
         {
             var document = new XmlDocument();
-            
+
             try
             {
                 document.LoadXml(inData);
@@ -358,7 +374,7 @@ namespace Iviz.XmlRpc
             {
                 throw new ParseException("XML response could not be parsed", e);
             }
-            
+
             var root = document.FirstChild;
             while (root != null && root.Name != "methodCall")
             {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,22 +55,43 @@ namespace Iviz.XmlRpc
         /// <exception cref="ArgumentNullException">Thrown if msgOut is null</exception>
         /// <exception cref="TimeoutException">Thrown if the timeout wait expired</exception>
         /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
-        public ValueTask RespondAsync(string msgOut, int timeoutInMs = 2000, CancellationToken token = default)
+        public async ValueTask RespondAsync(Rent<byte> msgOut, int timeoutInMs = 2000, CancellationToken token = default)
         {
+            /*
             if (msgOut is null)
             {
                 throw new ArgumentNullException(nameof(msgOut));
             }
+            */
 
-            int msgOutLength = Defaults.UTF8.GetByteCount(msgOut);
+            //int msgOutLength = Defaults.UTF8.GetByteCount(msgOut);
+            /*
             string str = "HTTP/1.0 200 OK\r\n" +
                          "Server: iviz XML-RPC\r\n" +
                          "Connection: close\r\n" +
                          "Content-Type: text/xml; charset=utf-8\r\n" +
                          $"Content-Length: {msgOutLength.ToString()}\r\n\r\n" +
                          msgOut;
+                         */
 
-            return client.WriteChunkAsync(str, token, timeoutInMs);
+            Rent<byte> bytes;
+            using (var str = BuilderPool.Rent())
+            {
+                str.Append("HTTP/1.0 200 OK\r\n");
+                str.Append("Server: iviz XML-RPC\r\n");
+                str.Append("Connection: close\r\n");
+                str.Append("Content-Type: text/xml; charset=utf-8\r\n");
+                str.Append("Content-Length: ").Append(msgOut.Length).Append("\r\n\r\n");
+
+                bytes = str.AsRent();
+            }
+
+            using (bytes)
+            {
+                await client.WriteChunkAsync(bytes, token, timeoutInMs);
+            }
+
+            await client.WriteChunkAsync(msgOut, token, timeoutInMs);
         }
 
         /// <summary>
@@ -91,7 +113,8 @@ namespace Iviz.XmlRpc
                 "Content-Length: 0\r\n" +
                 "\r\n";
 
-            return client.WriteChunkAsync(errorMsg, token, timeoutInMs);
+            using var rent = errorMsg.AsRent();
+            return client.WriteChunkAsync(rent, token, timeoutInMs);
         }
     }
 }

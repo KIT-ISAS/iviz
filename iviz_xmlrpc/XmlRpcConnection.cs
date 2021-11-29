@@ -69,15 +69,13 @@ namespace Iviz.XmlRpc
 
             token.ThrowIfCancellationRequested();
 
-            string outData = XmlRpcService.CreateRequest(method, args);
-            string inData;
-
             Interlocked.Increment(ref queueSize);
             if (queueSize > 3)
             {
                 Logger.LogDebugFormat("{0} has reached queue size {1}", this, queueSize);
             }
 
+            string inData;
             using (await mutex.LockAsync(token))
             {
                 Interlocked.Decrement(ref queueSize);
@@ -88,12 +86,16 @@ namespace Iviz.XmlRpc
                     request = null;
                 }
 
-                DateTime start = DateTime.Now;
+                var start = DateTime.Now;
                 try
                 {
                     request ??= await EnsureValidRequester(callerUri, token);
 
-                    int deltaSent = await request.SendRequestAsync(outData, true, true, token);
+                    int deltaSent;
+                    using (var outData = XmlRpcService.CreateRequest(method, args))
+                    {
+                        deltaSent = await request.SendRequestAsync(outData, true, true, token);
+                    }
 
                     token.ThrowIfCancellationRequested();
 

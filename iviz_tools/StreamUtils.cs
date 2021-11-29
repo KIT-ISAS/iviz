@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -156,11 +157,9 @@ namespace Iviz.Tools
             }
         }
 
-        public static async ValueTask WriteChunkAsync(this TcpClient client, string text, CancellationToken token,
+        public static async ValueTask WriteChunkAsync(this TcpClient client, Rent<byte> bytes, CancellationToken token,
             int timeoutInMs = -1)
         {
-            using var bytes = text.AsRent();
-
             if (timeoutInMs == -1)
             {
                 await WriteChunkAsync(client, bytes, token);

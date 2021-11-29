@@ -17,7 +17,7 @@ namespace Iviz.Msgs
         public RosException(string msg) : base(msg)
         {
         }
-        
+
         public RosException(string msg, Exception e) : base(msg, e)
         {
         }
@@ -49,11 +49,11 @@ namespace Iviz.Msgs
         public static readonly UTF8Encoding UTF8 = Defaults.UTF8;
 
         public static readonly CultureInfo Culture = Defaults.Culture;
-        
+
         public const string EmptyMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
-    
+
         public const string EmptyDependenciesBase64 = "H4sIAAAAAAAAE+MCAJMG1zIBAAAA";
-        
+
         static string GetClassStringConstant(Type type, string name)
         {
             Type? currentType = type;
@@ -145,7 +145,7 @@ namespace Iviz.Msgs
                 throw new ArgumentNullException(nameof(type));
             }
 
-            int? constant = (int?) type.GetField("RosFixedMessageLength")?.GetRawConstantValue();
+            int? constant = (int?)type.GetField("RosFixedMessageLength")?.GetRawConstantValue();
             if (constant == null)
             {
                 size = default;
@@ -173,10 +173,10 @@ namespace Iviz.Msgs
             string dependenciesBase64 = GetDependenciesBase64(type);
             byte[] inputBytes = Convert.FromBase64String(dependenciesBase64);
 
-            StringBuilder str = new();
             using var outputBytes = new Rent<byte>(32);
             using var inputStream = new MemoryStream(inputBytes);
             using var gZipStream = new GZipStream(inputStream, CompressionMode.Decompress);
+            using var str = BuilderPool.Rent();
 
             int read;
             do
@@ -195,7 +195,7 @@ namespace Iviz.Msgs
                 throw new ArgumentNullException(nameof(name));
             }
 
-            StringBuilder str = new();
+            using var str = BuilderPool.Rent();
             str.Append(char.ToUpper(name[0], Culture));
             for (int i = 1; i < name.Length; i++)
             {
@@ -221,8 +221,8 @@ namespace Iviz.Msgs
         {
             string guessName = $"{assemblyName}.{RosNameToCs(fullRosMessageName)}, {assemblyName}";
             var type = Type.GetType(guessName);
-            if (type != null 
-                && typeof(IMessage).IsAssignableFrom(type) 
+            if (type != null
+                && typeof(IMessage).IsAssignableFrom(type)
                 && (type.IsValueType || type.GetConstructor(Type.EmptyTypes) != null))
             {
                 return type;
@@ -233,12 +233,12 @@ namespace Iviz.Msgs
 
         public static string ToJsonString(this ISerializable o, bool indented = true)
         {
-            return ToJsonString((object) o, indented);
+            return ToJsonString((object)o, indented);
         }
 
         public static string ToJsonString(this IService o, bool indented = true)
         {
-            return ToJsonString((object) o, indented);
+            return ToJsonString((object)o, indented);
         }
 
         public static string ToJsonString(object o, bool indented = true)
@@ -270,14 +270,14 @@ namespace Iviz.Msgs
         {
             return Buffer.Deserialize(generator, bytes, size, offset);
         }
-        
+
         internal static int GetArraySize<T>(T[]? array) where T : IMessage
         {
             if (array == null)
             {
                 return 0;
             }
-            
+
             int size = 0;
             for (int i = 0; i < array.Length; i++)
             {
@@ -286,14 +286,14 @@ namespace Iviz.Msgs
 
             return size;
         }
-        
+
         internal static int GetArraySize(string[]? array)
         {
             if (array == null)
             {
                 return 0;
             }
-            
+
             int size = 4 * array.Length;
             for (int i = 0; i < array.Length; i++)
             {
@@ -301,12 +301,12 @@ namespace Iviz.Msgs
             }
 
             return size;
-        }        
-        
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static int GetStringSize(string? s)
         {
-            return s == null ? 0 : UTF8.GetByteCount(s);            
-        } 
+            return s == null ? 0 : UTF8.GetByteCount(s);
+        }
     }
 }

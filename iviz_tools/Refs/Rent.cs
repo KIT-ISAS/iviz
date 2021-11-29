@@ -22,22 +22,24 @@ namespace Iviz.Tools
         public readonly int Length;
         public readonly T[] Array;
 
-        public Rent(int count)
+        public Rent(int length)
         {
-            switch (count)
+            switch (length)
             {
                 case < 0:
-                    throw new ArgumentException("Count cannot be negative", nameof(count));
+                    throw new ArgumentException("Count cannot be negative", nameof(length));
                 case 0:
                     Array = System.Array.Empty<T>();
                     Length = 0;
                     break;
                 default:
-                    Array = Pool.Rent(count);
-                    Length = count;
+                    Array = Pool.Rent(length);
+                    Length = length;
                     break;
             }
         }
+
+        Rent(T[] array, int length) => (Array, Length) = (array, length);
 
         public void Dispose()
         {
@@ -69,6 +71,8 @@ namespace Iviz.Tools
                 return ref Array[index];                
             }
         }
+
+        public Rent<T> Resize(int newLength) => new(Array, newLength);
 
         int IReadOnlyCollection<T>.Count => Length;
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();

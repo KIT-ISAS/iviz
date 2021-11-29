@@ -31,8 +31,8 @@ namespace Iviz.Tools
             {
                 LogDebug(string.Format(format, ExceptionToString(arg1)));
             }
-        }        
-        
+        }
+
         public static void LogDebugFormat<TT, TU>(string format, TT? arg1, TU? arg2)
         {
             if (LogDebug != None)
@@ -56,14 +56,14 @@ namespace Iviz.Tools
                 LogDebug(string.Format(format, arg1, arg2, arg3));
             }
         }
-        
+
         public static void LogDebugFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
         {
             if (LogDebug != None)
             {
                 LogDebug(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
             }
-        }        
+        }
 
         public static void LogDebugFormat<TT, TU, TV, TW>(string format, TT? arg1, TU? arg2, TV? arg3, TW? arg4)
         {
@@ -71,7 +71,7 @@ namespace Iviz.Tools
             {
                 LogDebug(string.Format(format, arg1, arg2, arg3, arg4));
             }
-        }        
+        }
 
         public static void LogDebugFormat(string format, params object?[] objs)
         {
@@ -109,14 +109,14 @@ namespace Iviz.Tools
                 Log(string.Format(format, arg1, arg2));
             }
         }
-        
+
         public static void LogFormat<TT>(string format, TT? arg1, Exception? arg2)
         {
             if (Log != None)
             {
                 Log(string.Format(format, arg1, ExceptionToString(arg2)));
             }
-        }        
+        }
 
         public static void LogFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
         {
@@ -125,14 +125,14 @@ namespace Iviz.Tools
                 Log(string.Format(format, arg1, arg2, arg3));
             }
         }
-        
+
         public static void LogFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
         {
             if (Log != None)
             {
                 Log(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
             }
-        }        
+        }
 
         public static void LogFormat(string format, params object?[] objs)
         {
@@ -170,14 +170,14 @@ namespace Iviz.Tools
                 LogError(string.Format(format, arg1, arg2));
             }
         }
-        
+
         public static void LogErrorFormat<TT>(string format, TT? arg1, Exception? arg2)
         {
             if (LogError != None)
             {
                 LogError(string.Format(format, arg1, ExceptionToString(arg2)));
             }
-        }        
+        }
 
         public static void LogErrorFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
         {
@@ -186,14 +186,14 @@ namespace Iviz.Tools
                 LogError(string.Format(format, arg1, arg2, arg3));
             }
         }
-        
+
         public static void LogErrorFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
         {
             if (LogError != None)
             {
                 LogError(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
             }
-        }        
+        }
 
         public static void LogErrorFormat(string format, params object?[] objs)
         {
@@ -220,30 +220,23 @@ namespace Iviz.Tools
                 return "[null exception]";
             }
 
-            var str = BuilderPool.Rent();
-            try
+            using var str = BuilderPool.Rent();
+            Exception? subException = e;
+
+            bool firstException = true;
+            while (subException != null)
             {
-                Exception? subException = e;
-
-                bool firstException = true;
-                while (subException != null)
+                if (subException is not AggregateException)
                 {
-                    if (subException is not AggregateException)
-                    {
-                        str.Append(firstException ? "\n[" : "\n   [");
-                        str.Append(subException.GetType().Name).Append("] ").Append(subException.CheckMessage());
-                        firstException = false;
-                    }
-
-                    subException = subException.InnerException;
+                    str.Append(firstException ? "\n[" : "\n   [");
+                    str.Append(subException.GetType().Name).Append("] ").Append(subException.CheckMessage());
+                    firstException = false;
                 }
 
-                return str.ToString();
+                subException = subException.InnerException;
             }
-            finally
-            {
-                BuilderPool.Return(str);
-            }
+
+            return str.ToString();
         }
     }
 }

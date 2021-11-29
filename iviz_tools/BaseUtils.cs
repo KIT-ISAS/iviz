@@ -4,6 +4,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 
 namespace Iviz.Tools
 {
@@ -114,10 +116,79 @@ namespace Iviz.Tools
 
         public static Rent<byte> AsRent(this string s)
         {
-            var bytes = new Rent<byte>(Defaults.UTF8.GetByteCount(s));
-            Defaults.UTF8.GetBytes(s, 0, s.Length, bytes.Array, 0);
-            return bytes;
+            var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(s.Length));
+            int size = Defaults.UTF8.GetBytes(s, 0, s.Length, bytes.Array, 0);
+            return bytes.Resize(size);
         }
+
+#if NETSTANDARD2_0
+        internal static Rent<byte> AsRent(this StringBuilder str, char[] mainChunk)
+#else
+        internal static Rent<byte> AsRent(this StringBuilder str, in ReadOnlyMemory<char> mainChunk)
+#endif
+        {
+            var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(str.Length));
+            int size;
+
+            if (mainChunk.Length >= str.Length)
+            {
+#if NETSTANDARD2_0
+                size = Defaults.UTF8.GetBytes(mainChunk, 0, str.Length, bytes.Array, 0);
+#else
+                size = Defaults.UTF8.GetBytes(mainChunk[..str.Length].Span, bytes.Array);
+#endif
+            }
+            else
+            {
+                // slow path
+                using var chars = new Rent<char>(str.Length);
+                for (int i = 0; i < str.Length; i++)
+                {
+                    chars.Array[i] = str[i];
+                }
+
+                size = Defaults.UTF8.GetBytes(chars.Array, 0, chars.Length, bytes.Array, 0);
+            }
+
+            return bytes.Resize(size);
+        }
+
+#if NETSTANDARD2_0
+        static FieldInfo? chunkField;
+
+        internal static char[] GetMainChunk(this StringBuilder str)
+        {
+            if (chunkField == null)
+            {
+                chunkField =
+                    typeof(StringBuilder).GetField("m_ChunkChars", BindingFlags.NonPublic | BindingFlags.Instance)
+                    ?? throw new InvalidOperationException("Failed to find StringBuilder chunk field!");
+            }
+
+            return (char[])chunkField.GetValue(str)!;
+        }
+#elif NETSTANDARD2_1
+        static FieldInfo? chunkField;
+
+        internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
+        {
+            if (chunkField == null)
+            {
+                chunkField =
+                    typeof(StringBuilder).GetField("m_ChunkChars", BindingFlags.NonPublic | BindingFlags.Instance)
+                    ?? throw new InvalidOperationException("Failed to find StringBuilder chunk field!");
+            }
+
+            char[] mainChunk = (char[])chunkField.GetValue(str)!;
+            return mainChunk;
+        }
+#else
+        internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
+        {
+            var e = str.GetChunks();
+            return !e.MoveNext() ? ReadOnlyMemory<char>.Empty : e.Current;
+        }
+#endif
 
         /// <summary>
         ///     A string hash that does not change every run unlike <see cref="string.GetHashCode()"/>
