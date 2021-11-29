@@ -1,15 +1,19 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Iviz.Common;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Displays.Highlighters;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
@@ -17,20 +21,21 @@ namespace Iviz.Controllers
     {
         const string WarnStr = "<b>Warning:</b> ";
         const string ErrorStr = "<color=red>Error:</color> ";
-        const string FloatFormat = "#,0.###";
 
-        readonly StringBuilder description = new(250);
         readonly Dictionary<(string Ns, int Id), MarkerObject> markers = new();
-        readonly FrameNode node;
+        readonly List<IBoundsControl> boundsControls = new();
+        readonly GameObject node;
         readonly InteractiveMarkerObject parent;
         readonly string rosId;
 
+        InteractiveMarkerControl? lastMessage;
+
         bool visible;
         bool interactable;
-        int numWarnings;
-        int numErrors;
-        
+
         public Transform Transform => node.transform;
+
+        public InteractionMode InteractionMode { get; private set; }
 
         public bool Visible
         {
@@ -45,125 +50,68 @@ namespace Iviz.Controllers
             }
         }
 
+        public float Scale
+        {
+            set => node.transform.localScale = value * Vector3.one;
+        }
+
         public bool Interactable
         {
             get => interactable;
             set
             {
                 interactable = value;
+                foreach (var control in boundsControls)
+                {
+                    control.Interactable = value;
+                }
             }
         }
 
-        public InteractiveMarkerControlObject(InteractiveMarkerObject parentObject, string realId)
+        public InteractiveMarkerControlObject(InteractiveMarkerObject parent, string rosId)
         {
-            node = FrameNode.Instantiate("[InteractiveMarkerControlObject]");
-
-            parent = parentObject;
-            rosId = realId;
-
+            this.rosId = rosId;
+            this.parent = parent;
+            node = new GameObject($"[ControlObject '{this.rosId}']");
+            Transform.SetParentLocal(parent.ControlNode);
             Interactable = true;
         }
 
         public void Set(InteractiveMarkerControl msg)
         {
-            node.gameObject.name = $"[ControlObject '{msg.Name}']";
-
-            numErrors = 0;
-            numWarnings = 0;
-
-            description.Clear();
-            description.Append("<color=#000080ff><b>* Control ");
-            if (string.IsNullOrEmpty(msg.Name))
-            {
-                description.Append("(empty name)");
-            }
-            else
-            {
-                description.Append("'").Append(msg.Name).Append("'");
-            }
-
-            description.Append("</b></color>").AppendLine();
-
-            string msgDescription = msg.Description.Length != 0
-                ? msg.Description.Replace("\t", "\\t").Replace("\n", "\\n")
-                : "[]";
-            description.Append("Description: ").Append(msgDescription).AppendLine();
-            description.Append("Orientation: ")
-                .Append(msg.Orientation.X.ToString(FloatFormat)).Append(" | ")
-                .Append(msg.Orientation.Y.ToString(FloatFormat)).Append(" | ")
-                .Append(msg.Orientation.Z.ToString(FloatFormat)).Append(" | ")
-                .Append(msg.Orientation.W.ToString(FloatFormat)).AppendLine();
-
+            lastMessage = msg;
 
             Transform.localRotation = msg.Orientation.Ros2Unity();
 
-            description.Append("InteractionMode: ").Append(InteractionModeToString(msg.InteractionMode)).AppendLine();
-            description.Append("OrientationMode: ").Append(OrientationModeToString(msg.OrientationMode)).AppendLine();
+            foreach (var control in boundsControls)
+            {
+                control.Stop();
+            }
+
+            boundsControls.Clear();
 
             UpdateMarkers(msg.Markers);
-            RecalculateBounds();
 
-            if (ValidateInteractionMode(msg.InteractionMode) is {} interactionMode 
-                && ValidateOrientationMode(msg.OrientationMode) is {} orientationMode)
+            if (ValidateInteractionMode(msg.InteractionMode) is not { } interactionMode
+                || ValidateOrientationMode(msg.OrientationMode) is not { } orientationMode)
             {
-                UpdateInteractionMode(interactionMode, orientationMode, msg.IndependentMarkerOrientation);
-            }
-
-            if (markers.Count == 0)
-            {
-                description.Append("Markers: Empty").AppendLine();
-            }
-            else
-            {
-                description.Append("Markers: ").Append(markers.Count).AppendLine();
-            }
-        }
-
-
-
-        void UpdateInteractionMode(InteractionMode interactionMode, OrientationMode orientationMode,
-            bool independentMarkerOrientation)
-        {
-            if (interactionMode is < 0 or > InteractionMode.MoveRotate3D)
-            {
-                description.Append(ErrorStr).Append("Unknown interaction mode ").Append((int)interactionMode)
-                    .AppendLine();
-                numErrors++;
-            }
-            else if (interactionMode == InteractionMode.None)
-            {
-            }
-            else
-            {
-            }
-
-            if (orientationMode is < 0 or > OrientationMode.ViewFacing)
-            {
-                description.Append(ErrorStr).Append("Unknown orientation mode ").Append((int)orientationMode)
-                    .AppendLine();
-                numErrors++;
+                InteractionMode = InteractionMode.None;
                 return;
             }
+
+            InteractionMode = interactionMode;
+            UpdateInteractionMode(orientationMode, msg.IndependentMarkerOrientation);
         }
 
-        void ClearMarkers()
-        {
-            foreach (var markerObject in markers.Values)
-            {
-                DeleteMarkerObject(markerObject);
-            }
-
-            markers.Clear();
-        }
 
         void UpdateMarkers(Marker[] msg)
         {
             int numUnnamed = 0;
 
-            foreach (Marker marker in msg)
+            foreach (var marker in msg)
             {
                 var markerId = marker.Ns.Length == 0 && marker.Id == 0
-                    ? ("Unnamed-", numUnnamed++)
+                    ? ("Unnamed", numUnnamed++)
                     : MarkerListener.IdFromMessage(marker);
                 switch (marker.Action)
                 {
@@ -175,56 +123,167 @@ namespace Iviz.Controllers
                         }
                         else
                         {
-                            markerObject = CreateMarkerObject();
+                            markerObject = new MarkerObject(TfListener.ListenersFrame, markerId)
+                            {
+                                Visible = Visible
+                            };
                             markers[markerId] = markerObject;
                         }
 
                         _ = markerObject.SetAsync(marker); // TODO: deal with mesh loading
                         if (string.IsNullOrEmpty(marker.Header.FrameId))
                         {
-                            markerObject.Transform.SetParentLocal(node.Transform);
+                            markerObject.Transform.SetParentLocal(Transform);
                         }
 
                         break;
                     case Marker.DELETE:
                         if (markers.TryGetValue(markerId, out MarkerObject markerToDelete))
                         {
-                            DeleteMarkerObject(markerToDelete);
+                            markerToDelete.Stop();
                             markers.Remove(markerId);
                         }
 
                         break;
                 }
-
-                if (numUnnamed > 1)
-                {
-                    description.Append(WarnStr).Append(numUnnamed).Append(" interactive markers have empty ids")
-                        .AppendLine();
-                    numWarnings++;
-                }
             }
         }
 
-        public void Stop()
+        void UpdateInteractionMode(OrientationMode orientationMode, bool independentMarkerOrientation)
         {
-            ClearMarkers();
+            var controlNode = parent.ControlNode;
 
-            node.DestroySelf();
+            if (markers.Count != 0)
+            {
+                Func<IHasBounds, IBoundsControl>? generator = InteractionMode switch
+                {
+                    InteractionMode.Button => (marker => new ClickableBoundsControl(marker, controlNode)),
+                    InteractionMode.MoveAxis => (marker => new LineBoundsControl(marker, controlNode)),
+                    InteractionMode.MovePlane or InteractionMode.MoveRotate =>
+                        (marker => new PlaneBoundsControl(marker, controlNode)),
+                    InteractionMode.RotateAxis => (marker => new RotationBoundsControl(marker, controlNode)),
+                    InteractionMode.Move3D => (marker => new FixedDistanceBoundsControl(marker, controlNode)),
+                    _ => null
+                };
+                if (generator != null)
+                {
+                    boundsControls.AddRange(markers.Values.Select(generator));
+                }
+            }
+            else
+            {
+                if (InteractionMode == InteractionMode.MoveAxis)
+                {
+                    boundsControls.Add(new LineWrapperBoundsControl(node.transform, controlNode));
+                }
+            }
+
+
+            foreach (var control in boundsControls)
+            {
+                control.Interactable = Interactable;
+
+                control.Moved += () => parent.OnMoved(rosId);
+
+                // disable external updates while dragging
+                control.PointerDown += () =>
+                {
+                    parent.PoseUpdateEnabled = false;
+                    parent.OnMouseEvent(rosId, null, MouseEventType.Down);
+                };
+                control.PointerUp += () =>
+                {
+                    parent.PoseUpdateEnabled = true;
+                    parent.OnMouseEvent(rosId, null, MouseEventType.Up);
+
+                    if (InteractionMode == InteractionMode.Button)
+                    {
+                        parent.OnMouseEvent(rosId, null, MouseEventType.Click);
+                    }
+                };
+            }
         }
 
-        public void GenerateLog(StringBuilder baseDescription)
+
+        public void Stop()
         {
-            baseDescription.Append(description);
+            foreach (var markerObject in markers.Values)
+            {
+                markerObject.Stop();
+            }
+
+            markers.Clear();
+            Object.Destroy(node);
+        }
+
+        public void GenerateLog(StringBuilder description)
+        {
+            if (lastMessage == null)
+            {
+                return;
+            }
+
+            description.Append("<color=#000080ff><b>* Control ");
+            if (string.IsNullOrEmpty(rosId))
+            {
+                description.Append("(empty name)");
+            }
+            else
+            {
+                description.Append("'").Append(rosId).Append("'");
+            }
+
+            description.Append("</b></color>").AppendLine();
+
+            string msgDescription = lastMessage.Description.Length != 0
+                ? lastMessage.Description.Replace("\t", "\\t").Replace("\n", "\\n")
+                : "[]";
+            description.Append("Description: ").Append(msgDescription).AppendLine();
+
+            description.Append("Orientation: [");
+            var unityRotation = lastMessage.Orientation.Ros2Unity();
+            RosUtils.FormatPose(Pose.identity.WithRotation(unityRotation), description,
+                RosUtils.PoseFormat.OnlyRotation);
+            description.AppendLine("]");
+
+            description.Append("InteractionMode: ").Append(InteractionModeToString(lastMessage.InteractionMode))
+                .AppendLine();
+            description.Append("OrientationMode: ").Append(OrientationModeToString(lastMessage.OrientationMode))
+                .AppendLine();
+
+            if (markers.Count == 0)
+            {
+                description.Append("Markers: Empty").AppendLine();
+            }
+            else
+            {
+                description.Append("Markers: ").Append(markers.Count).AppendLine();
+            }
+
+            if (ValidateInteractionMode(lastMessage.InteractionMode) is null)
+            {
+                description.Append(ErrorStr).Append("Unknown interaction mode ").Append(lastMessage.InteractionMode)
+                    .AppendLine();
+                return;
+            }
+
+            if (ValidateOrientationMode(lastMessage.OrientationMode) is null)
+            {
+                description.Append(ErrorStr).Append("Unknown orientation mode ").Append(lastMessage.OrientationMode)
+                    .AppendLine();
+                return;
+            }
+
             foreach (var marker in markers.Values)
             {
-                marker.GenerateLog(baseDescription);
+                marker.GenerateLog(description);
             }
         }
 
         public void GetErrorCount(out int totalErrors, out int totalWarnings)
         {
-            totalErrors = numErrors;
-            totalWarnings = numWarnings;
+            totalErrors = 0;
+            totalWarnings = 0;
 
             foreach (var marker in markers.Values)
             {
@@ -234,31 +293,11 @@ namespace Iviz.Controllers
             }
         }
 
-        void DeleteMarkerObject(MarkerObject marker)
-        {
-            marker.BoundsChanged -= RecalculateBounds;
-            marker.Stop();
-        }
-
-        MarkerObject CreateMarkerObject()
-        {
-            var markerObject = new MarkerObject(TfListener.ListenersFrame)
-            {
-                Visible = visible
-            };
-            markerObject.BoundsChanged += RecalculateBounds;
-            return markerObject;
-        }
-
-        void RecalculateBounds()
-        {
-        }
-
         static InteractionMode? ValidateInteractionMode(int mode) =>
             mode is < 0 or > (int)InteractionMode.MoveRotate3D ? null : (InteractionMode?)mode;
 
         static OrientationMode? ValidateOrientationMode(int mode) =>
-            mode is < 0 or > (int)OrientationMode.ViewFacing ? null : (OrientationMode?)mode;        
+            mode is < 0 or > (int)OrientationMode.ViewFacing ? null : (OrientationMode?)mode;
 
         static string OrientationModeToString(int mode)
         {
@@ -270,7 +309,7 @@ namespace Iviz.Controllers
                 _ => $"Unknown ({mode.ToString()})"
             };
         }
-        
+
         static string InteractionModeToString(int mode)
         {
             return (InteractionMode)mode switch

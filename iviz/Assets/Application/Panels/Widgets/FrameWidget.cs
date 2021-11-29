@@ -51,8 +51,7 @@ namespace Iviz.App
                 frame = value;
 
 
-                var description = BuilderPool.Rent();
-                try
+                using (var description = BuilderPool.Rent())
                 {
                     if (frame == null)
                     {
@@ -69,10 +68,6 @@ namespace Iviz.App
                     }
 
                     Text.SetText(description);
-                }
-                finally
-                {
-                    BuilderPool.Return(description);
                 }
 
                 UpdateStats();

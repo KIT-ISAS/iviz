@@ -2,7 +2,11 @@
 
 using System;
 using Iviz.Common;
+using Iviz.Core;
+using Iviz.Displays;
+using Iviz.Displays.Highlighters;
 using Iviz.Tools;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -36,14 +40,17 @@ namespace Iviz.App
 
         static void HighlightMarker(IMarkerDialogListener listener, string markerId)
         {
-            if (!listener.TryGetMarkerFromId(markerId, out var bounds)
+            if (!listener.TryGetBoundsFromId(markerId, out var bounds)
                 || bounds.BoundsTransform is not { } transform)
             {
                 return;
             }
 
-            //Frame.Highlight();
             GuiInputModule.Instance.LookAt(transform);
+            if (!bounds.HasPermanentHighlighter)
+            {
+                FAnimator.Start(new BoundsHighlighter(bounds));
+            }
         }
 
         public override void UpdatePanel()
@@ -53,16 +60,9 @@ namespace Iviz.App
                 return;
             }
 
-            var description = BuilderPool.Rent();
-            try
-            {
-                Listener.GenerateLog(description);
-                panel.Text.SetText(description);
-            }
-            finally
-            {
-                BuilderPool.Return(description);
-            }
+            using var description = BuilderPool.Rent();
+            Listener.GenerateLog(description);
+            panel.Text.SetText(description);
         }
 
 

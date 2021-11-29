@@ -4,6 +4,7 @@ using System;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Displays.Highlighters;
 using Iviz.Resources;
 using UnityEngine;
 
@@ -277,7 +278,7 @@ namespace Iviz.Displays
 
         public override void Highlight()
         {
-            new TfFrameHighlighter().Highlight(this);
+            FAnimator.Start(new TfFrameHighlighter(this));
         }
     }
 }

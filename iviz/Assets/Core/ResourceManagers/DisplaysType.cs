@@ -16,6 +16,7 @@ namespace Iviz.Resources
         public Info<GameObject> Cube { get; }
         public Info<GameObject> Cylinder { get; }
         public Info<GameObject> Sphere { get; }
+        public Info<GameObject> Pyramid { get; }
         public Info<GameObject> Text { get; }
         public Info<GameObject> LineConnector { get; }
         public Info<GameObject> BoundaryFrame { get; }
@@ -57,6 +58,8 @@ namespace Iviz.Resources
         public Info<GameObject> ARMarkerHighlighter { get; }
         public Info<GameObject> RoundedPlane { get; }
         public Info<GameObject> Leash { get; }
+        public Info<GameObject> Reticle { get; }
+        public Info<GameObject> SelectionFrame { get; }
 
         public DisplaysType()
         {
@@ -89,6 +92,8 @@ namespace Iviz.Resources
             GridMap = new Info<GameObject>(appAssetHolder.GridMap);
             OccupancyGridTextureResource = new Info<GameObject>(appAssetHolder.OccupancyGridTexture);
 
+            Pyramid = new Info<GameObject>(appAssetHolder.Pyramid);
+
             ARDialog = new Info<GameObject>(appAssetHolder.ARDialog);
             ARDialogIcon = new Info<GameObject>(appAssetHolder.ARDialogIcon);
             ARDialogMenu = new Info<GameObject>(appAssetHolder.ARDialogMenu);
@@ -109,6 +114,8 @@ namespace Iviz.Resources
 
             RoundedPlane = new Info<GameObject>(appAssetHolder.RoundedPlane);
             Leash = new Info<GameObject>(appAssetHolder.Leash);
+            Reticle = new Info<GameObject>(appAssetHolder.Reticle);
+            SelectionFrame = new Info<GameObject>(appAssetHolder.SelectionFrame);
 
             resourceByType = CreateTypeDictionary(this);
         }
@@ -124,7 +131,7 @@ namespace Iviz.Resources
                     continue;
                 }
 
-                Info<GameObject>? info = (Info<GameObject>?) property.GetValue(o);
+                var info = (Info<GameObject>?) property.GetValue(o);
                 if (info == null)
                 {
                     Debug.LogError("DisplaysType: Property " + property.Name + " has not been set!");

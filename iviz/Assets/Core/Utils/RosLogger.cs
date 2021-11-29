@@ -61,48 +61,39 @@ namespace Iviz.Core
 
         public static void Internal(string? msg, Exception? e)
         {
-            var str = BuilderPool.Rent();
-            try
+            string message;
+            using (var description = BuilderPool.Rent())
             {
-                InternalImpl(msg, e, str);
-            }
-            finally
-            {
-                BuilderPool.Return(str);
-            }
-        }
+                description.Append("<b>[")
+                    .Append(GameThread.NowFormatted)
+                    .Append("]</b> ")
+                    .Append(msg ?? NullMessage);
 
-        static void InternalImpl(string? msg, Exception? e, StringBuilder str)
-        {
-            str.Length = 0;
-            str.Append("<b>[")
-                .Append(GameThread.NowFormatted)
-                .Append("]</b> ")
-                .Append(msg ?? NullMessage);
-
-            if (e == null)
-            {
-                str.AppendLine().Append("<color=red>").Append(NullException).Append("</color>");
-            }
-            else
-            {
-                Exception? childException = e;
-                while (childException != null)
+                if (e == null)
                 {
-                    if (childException is not AggregateException)
-                    {
-                        str.AppendLine()
-                            .Append("<color=red>")
-                            .Append(childException.GetType().Name)
-                            .Append("</color> ")
-                            .Append(childException.CheckMessage());
-                    }
-
-                    childException = childException.InnerException;
+                    description.AppendLine().Append("<color=red>").Append(NullException).Append("</color>");
                 }
+                else
+                {
+                    Exception? childException = e;
+                    while (childException != null)
+                    {
+                        if (childException is not AggregateException)
+                        {
+                            description.AppendLine()
+                                .Append("<color=red>")
+                                .Append(childException.GetType().Name)
+                                .Append("</color> ")
+                                .Append(childException.CheckMessage());
+                        }
+
+                        childException = childException.InnerException;
+                    }
+                }
+
+                message = description.ToString();
             }
 
-            string message = str.ToString();
             LogInternal?.Invoke(message);
             UnityEngine.Debug.LogWarning(message);
         }
@@ -129,43 +120,34 @@ namespace Iviz.Core
 
         static void ExternalImpl(object? msg, LogLevel level, Exception? e)
         {
-            var str = BuilderPool.Rent();
-            try
+            string message;
+            using (var description = BuilderPool.Rent())
             {
-                ExternalImpl(msg, level, e, str);
-            }
-            finally
-            {
-                BuilderPool.Return(str);
-            }
-        }
+                description.Append(msg ?? NullMessage);
 
-        static void ExternalImpl(object? msg, LogLevel level, Exception? e, StringBuilder str)
-        {
-            str.Length = 0;
-            str.Append(msg ?? NullMessage);
-
-            if (e == null)
-            {
-                str.AppendLine().Append(NullException);
-            }
-            else
-            {
-                Exception? childException = e;
-                while (childException != null)
+                if (e == null)
                 {
-                    if (childException is not AggregateException)
-                    {
-                        str.AppendLine();
-                        str.Append("[").Append(childException.GetType().Name).Append("] ")
-                            .Append(childException.CheckMessage());
-                    }
-
-                    childException = childException.InnerException;
+                    description.AppendLine().Append(NullException);
                 }
+                else
+                {
+                    Exception? childException = e;
+                    while (childException != null)
+                    {
+                        if (childException is not AggregateException)
+                        {
+                            description.AppendLine();
+                            description.Append("[").Append(childException.GetType().Name).Append("] ")
+                                .Append(childException.CheckMessage());
+                        }
+
+                        childException = childException.InnerException;
+                    }
+                }
+                
+                message = description.ToString();
             }
 
-            string message = str.ToString();
             LogExternal?.Invoke(new LogMessage(level, message));
 
             if (!Settings.IsStandalone)
@@ -176,7 +158,7 @@ namespace Iviz.Core
                 }
                 else
                 {
-                    UnityEngine.Debug.LogWarning((string?) msg + e);
+                    UnityEngine.Debug.LogWarning((string?)msg + e);
                 }
             }
             else

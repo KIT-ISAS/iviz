@@ -10,6 +10,7 @@ using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Displays.Highlighters;
 using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
@@ -28,6 +29,7 @@ namespace Iviz.Controllers
 
         readonly StringBuilder description = new(250);
         readonly FrameNode node;
+        readonly (string Ns, int Id) id;
 
         IDisplay? resource;
         Info<GameObject>? resourceInfo;
@@ -35,12 +37,11 @@ namespace Iviz.Controllers
 
         MarkerLineHelper? lineHelper;
         MarkerPointHelper? pointHelper;
+        BoundsHighlighter? highlighter;
 
         Pose currentPose;
         Vector3 currentScale;
-
-        (string Ns, int Id) id;
-
+        
         int numErrors;
         int numWarnings;
 
@@ -52,16 +53,18 @@ namespace Iviz.Controllers
         float smoothness = 0.5f;
         Color tint = Color.white;
 
-        public event Action? BoundsChanged;
-
         MarkerLineHelper LineHelper => lineHelper ??= new MarkerLineHelper();
         MarkerPointHelper PointHelper => pointHelper ??= new MarkerPointHelper();
         public DateTime ExpirationTime { get; private set; }
         public MarkerType MarkerType { get; private set; }
-        public Transform Transform => node.transform;
+        public Transform Transform => node.Transform;
 
         Bounds? IHasBounds.Bounds => resource?.Bounds;
         Transform? IHasBounds.BoundsTransform => resource?.GetTransform();
+        bool IHasBounds.HasPermanentHighlighter => ShowDescription;
+        string IHasBounds.Caption => node.gameObject.name;
+
+        public event Action? BoundsChanged;
 
         public bool OcclusionOnly
         {
@@ -72,6 +75,23 @@ namespace Iviz.Controllers
                 if (resource is ISupportsAROcclusion arResource)
                 {
                     arResource.OcclusionOnly = value;
+                }
+            }
+        }
+
+        public bool ShowDescription
+        {
+            get => highlighter != null;
+            set
+            {
+                if (value)
+                {
+                    highlighter = new BoundsHighlighter(this, true);
+                }
+                else
+                {
+                    highlighter?.Dispose();
+                    highlighter = null;
                 }
             }
         }
@@ -142,10 +162,13 @@ namespace Iviz.Controllers
             }
         }
 
-        public MarkerObject(TfFrame parent)
+        public MarkerObject(TfFrame parent, (string Ns, int Id) id)
         {
             node = FrameNode.Instantiate("[MarkerObject]");
             node.Parent = parent;
+
+            this.id = id;
+            node.gameObject.name = $"{id.Ns}/{id.Id.ToString()}";
         }
 
         public async ValueTask SetAsync(Marker msg)
@@ -153,13 +176,6 @@ namespace Iviz.Controllers
             if (msg == null)
             {
                 throw new ArgumentNullException(nameof(msg));
-            }
-
-            (string Ns, int Id) newId = MarkerListener.IdFromMessage(msg);
-            if (id != newId)
-            {
-                id = newId;
-                node.gameObject.name = $"{id.Ns}/{id.Id.ToString()}";
             }
 
             numWarnings = 0;
@@ -288,6 +304,9 @@ namespace Iviz.Controllers
                     break;
                 case (0, 0, 1):
                     description.Append("Blue | ").Append(alpha);
+                    break;
+                case (0.5f, 0.5f, 0.5f):
+                    description.Append("Grey | ").Append(alpha);
                     break;
                 default:
                     description
@@ -858,6 +877,7 @@ namespace Iviz.Controllers
         {
             StopLoadResourceTask();
             DiscardResource();
+            ShowDescription = false;
             previousHash = null;
             BoundsChanged = null;
             node.DestroySelf();

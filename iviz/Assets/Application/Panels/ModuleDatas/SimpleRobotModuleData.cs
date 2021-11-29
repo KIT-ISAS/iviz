@@ -157,9 +157,9 @@ namespace Iviz.App
                 }
             };
 
-            RobotController.CheckRobotStartTask();
+            RobotController.UpdateStartTaskStatus();
 
-            RobotController.CheckRobotStartTask();
+            RobotController.UpdateStartTaskStatus();
             UpdateModuleButton();
         }
 
@@ -170,7 +170,7 @@ namespace Iviz.App
             panel.SourceParameter.Hints = GetParameterHints(tokenSource.Token);
 
             panel.HelpText.Text = RobotController.HelpText;
-            RobotController.CheckRobotStartTask();
+            RobotController.UpdateStartTaskStatus();
             UpdateModuleButton();
             panel.Save.Interactable = !string.IsNullOrEmpty(RobotController.Robot?.Name);
         }

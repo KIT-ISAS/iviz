@@ -1,6 +1,7 @@
 #nullable enable
 
 using System.Text;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
@@ -14,6 +15,7 @@ namespace Iviz.Displays
     {
         [SerializeField] BoxCollider? boxCollider = null;
         [SerializeField] TMP_Text? text = null;
+        
         RoundedPlaneResource? background;
         uint? prevTextHash;
         Transform? mTransform;
@@ -123,6 +125,17 @@ namespace Iviz.Displays
         void Update()
         {
             PointToCamera();
+        }
+
+        public static float GetRecommendedSize(in Vector3 unityPosition)
+        {
+            float distanceToCam = Settings.MainCameraTransform
+                .InverseTransformDirection(unityPosition - Settings.MainCameraTransform.position).z;
+            float size = 0.2f * distanceToCam;
+
+            float baseFrameSize = TfListener.Instance.FrameSize;
+            float labelSize = baseFrameSize * size * 0.375f / 2;
+            return labelSize;
         }
     }
 }

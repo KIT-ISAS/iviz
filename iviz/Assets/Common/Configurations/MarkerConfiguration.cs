@@ -19,6 +19,7 @@ namespace Iviz.Msgs.IvizCommonMsgs
         [DataMember] public string Type { get; set; } = "";
         [DataMember] public bool RenderAsOcclusionOnly { get; set; }
         [DataMember] public bool TriangleListFlipWinding { get; set; } = true;
+        [DataMember] public bool ShowDescriptions { get; set; } = false;
         [DataMember] public ColorRGBA Tint { get; set; } = ColorRGBA.White;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public bool PreferUdp { get; set; } = true;

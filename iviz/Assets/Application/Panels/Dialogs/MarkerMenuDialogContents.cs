@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿#nullable enable
+
+using UnityEngine;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using Iviz.Core;
+using Iviz.Tools;
 using JetBrains.Annotations;
 
 namespace Iviz.App
@@ -10,21 +12,19 @@ namespace Iviz.App
     {
         const int MaxPanelSizeInEntries = 7;
         
-        MenuEntryList menuEntryList;
-        MenuEntryDescription[] currentEntries;
+        MenuEntryDescription[] entries = Array.Empty<MenuEntryDescription>();
+        Action<uint>? callback;
 
-        MenuEntryDescription[] CurrentEntries
+        MenuEntryDescription[] Entries
         {
             set
             {
-                currentEntries = value;
-                Items = currentEntries.Select(DescriptionToString);
+                entries = value;
+                SetItems(entries.Select(DescriptionToString));
                 TrimPanelSize(MaxPanelSizeInEntries);
             }
         }
-
-        [CanBeNull] Action<uint> callback;
-
+        
         void Awake()
         {
             yOffset = 1;
@@ -34,20 +34,20 @@ namespace Iviz.App
             CloseClicked += Close;
         }
 
-        public void Set(MenuEntryList menu, Vector3 positionHint, Action<uint> newCallback)
+        public void Set(MenuEntryList menu, Vector3 _, Action<uint> newCallback)
         {
             callback = newCallback ?? throw new ArgumentNullException(nameof(newCallback));
-            menuEntryList = menu ?? throw new ArgumentNullException(nameof(menu));
-            CurrentEntries = menuEntryList.GetDescriptionsForRoot();
+            var menuEntryList = menu ?? throw new ArgumentNullException(nameof(menu));
+            Entries = menuEntryList.GetDescriptionsForRoot();
             gameObject.SetActive(true);
         }
 
         void OnItemClicked(int id, int _)
         {
-            var entry = currentEntries[id];
+            var entry = entries[id];
             if (!entry.IsLeaf)
             {
-                CurrentEntries = entry.GetChildDescriptions();
+                Entries = entry.GetChildDescriptions();
             }
             else
             {
@@ -56,8 +56,7 @@ namespace Iviz.App
             }
         }
 
-        [NotNull]
-        static string DescriptionToString([NotNull] MenuEntryDescription description)
+        static string DescriptionToString(MenuEntryDescription description)
         {
             return description.Type switch
             {

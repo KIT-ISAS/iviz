@@ -22,12 +22,7 @@ namespace Iviz.Controllers
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
         [DataMember] public SerializableColor GridColor { get; set; } = Resource.Colors.GridLine;
-
         [DataMember] public SerializableColor InteriorColor { get; set; } = Resource.Colors.GridInterior;
-
-        //[DataMember] public float GridLineWidth { get; set; } = 0.025f;
-        //[DataMember] public float GridCellSize { get; set; } = 1;
-        //[DataMember] public int NumberOfGridCells { get; set; } = 90;
         [DataMember] public bool InteriorVisible { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
         [DataMember] public bool HideInARMode { get; set; } = true;
@@ -53,11 +48,6 @@ namespace Iviz.Controllers
                 Visible = value.Visible;
                 GridColor = value.GridColor;
                 InteriorColor = value.InteriorColor;
-                /*
-                GridLineWidth = value.GridLineWidth;
-                GridCellSize = value.GridCellSize;
-                NumberOfGridCells = value.NumberOfGridCells;
-                */
                 InteriorVisible = value.InteriorVisible;
                 FollowCamera = value.FollowCamera;
                 HideInARMode = value.HideInARMode;
@@ -65,7 +55,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public GridOrientation Orientation
+        GridOrientation Orientation
         {
             get => config.Orientation;
             set
@@ -122,45 +112,6 @@ namespace Iviz.Controllers
             }
         }
 
-        /*
-        public float GridLineWidth
-        {
-            get => config.GridLineWidth;
-            set
-            {
-                config.GridLineWidth = value;
-                grid.GridLineWidth = value;
-                UpdateMesh();
-            }
-        }
-        */
-
-        /*
-        public float GridCellSize
-        {
-            get => config.GridCellSize;
-            set
-            {
-                config.GridCellSize = value;
-                grid.GridCellSize = value;
-                UpdateMesh();
-            }
-        }
-        */
-
-        /*
-        public int NumberOfGridCells
-        {
-            get => config.NumberOfGridCells;
-            set
-            {
-                config.NumberOfGridCells = value;
-                grid.NumberOfGridCells = value;
-                UpdateMesh();
-            }
-        }
-        */
-
         public bool InteriorVisible
         {
             get => config.InteriorVisible;
@@ -192,13 +143,13 @@ namespace Iviz.Controllers
             }
         }
 
-        public SerializableVector3 Offset
+        public Vector3 Offset
         {
             get => config.Offset;
             set
             {
                 config.Offset = value;
-                node.transform.localPosition = ((Vector3)value).Ros2Unity();
+                node.transform.localPosition = value.Ros2Unity();
                 UpdateMesh();
             }
         }
@@ -207,6 +158,7 @@ namespace Iviz.Controllers
         {
             grid = ResourcePool.RentDisplay<GridResource>();
             grid.name = "Grid";
+            grid.Layer = LayerType.Collider;
 
             node = FrameNode.Instantiate("GridNode");
             grid.transform.SetParentLocal(node.transform);
@@ -219,9 +171,7 @@ namespace Iviz.Controllers
             reflectionProbe.transform.localPosition = new Vector3(0, 2.0f, 0);
             reflectionProbe.nearClipPlane = 0.5f;
             reflectionProbe.farClipPlane = 100f;
-
             reflectionProbe.backgroundColor = Settings.MainCamera.backgroundColor;
-
             reflectionProbe.mode = ReflectionProbeMode.Realtime;
 
             if (Settings.IsMobile)
@@ -236,8 +186,6 @@ namespace Iviz.Controllers
             }
 
             UpdateMesh();
-
-            //GameThread.EverySecond += CheckProbeUpdate;
 
             Config = new GridConfiguration();
         }

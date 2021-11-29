@@ -8,7 +8,6 @@ using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.XR.ARFoundation;
 
 namespace Iviz.App
@@ -17,6 +16,12 @@ namespace Iviz.App
     {
         static readonly RaycastHit[] RaycastHitsBuffer = new RaycastHit[10];
 
+        class RaycastComparer : IComparer<RaycastHit>
+        {
+            public static readonly RaycastComparer Instance = new();
+            public int Compare(RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance);
+        }
+        
         readonly Ray ray;
         ClickHitResult[]? cachedARHits;
         ClickHitResult[]? cachedUnityHits;
@@ -61,6 +66,8 @@ namespace Iviz.App
                                   | (1 << LayerType.Clickable)
                                   | (1 << LayerType.TfAxis);
             int numHits = Physics.RaycastNonAlloc(ray, RaycastHitsBuffer, 100, layerMask);
+
+            Array.Sort(RaycastHitsBuffer, 0, numHits, RaycastComparer.Instance);
 
             cachedUnityHits = numHits == 0
                 ? Array.Empty<ClickHitResult>()

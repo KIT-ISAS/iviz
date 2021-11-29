@@ -813,27 +813,20 @@ namespace Iviz.App
 
         void UpdateCameraStats()
         {
-            var description = BuilderPool.Rent();
-            try
-            {
-                description.Append(
-                    Settings.IsXR
-                        ? "<b>XR View</b>\n"
-                        : ARController.IsVisible
-                            ? "<b>AR View</b>\n"
-                            : "<b>Virtual View</b>\n"
-                );
+            using var description = BuilderPool.Rent();
+            description.Append(
+                Settings.IsXR
+                    ? "<b>XR View</b>\n"
+                    : ARController.IsVisible
+                        ? "<b>AR View</b>\n"
+                        : "<b>Virtual View</b>\n"
+            );
 
-                var currentCamera = Settings.MainCameraTransform;
-                var cameraPose = TfListener.RelativePoseToFixedFrame(currentCamera.AsPose());
-                RosUtils.FormatPose(cameraPose, description,
-                    TfListener.Instance.FlipZ ? RosUtils.PoseFormat.All : RosUtils.PoseFormat.WithoutRoll);
-                cameraText.SetText(description);
-            }
-            finally
-            {
-                BuilderPool.Return(description);
-            }
+            var currentCamera = Settings.MainCameraTransform;
+            var cameraPose = TfListener.RelativePoseToFixedFrame(currentCamera.AsPose());
+            RosUtils.FormatPose(cameraPose, description,
+                TfListener.Instance.FlipZ ? RosUtils.PoseFormat.All : RosUtils.PoseFormat.AllWithoutRoll);
+            cameraText.SetText(description);
         }
 
         void UpdateFpsStats()

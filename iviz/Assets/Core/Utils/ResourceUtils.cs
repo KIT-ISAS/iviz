@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -44,9 +45,10 @@ namespace Iviz.Core
             return new ReadOnlyDictionary<T, TU>(t);
         }
 
-        public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> source)
-        {
-            return source.Select((item, index) => (item, index));
+        
+        public static WithIndexEnumerable<T> WithIndex<T>(this IEnumerable<T> source)
+        { 
+            return new WithIndexEnumerable<T>(source);
         }
 
         public static T EnsureComponent<T>(this GameObject gameObject) where T : Component =>
@@ -65,6 +67,30 @@ namespace Iviz.Core
         }
     }
 
+    public readonly struct WithIndexEnumerable<T>
+    {
+        readonly IEnumerable<T> a;
+
+        public struct Enumerator
+        {
+            readonly IEnumerator<T> a;
+            int index;
+
+            internal Enumerator(IEnumerator<T> a) => (this.a, index) = (a, -1);
+
+            public bool MoveNext()
+            {
+                ++index;
+                return a.MoveNext();
+            }
+
+            public (T, int) Current => (a.Current, index);
+        }
+
+        public WithIndexEnumerable(IEnumerable<T> a) => this.a = a;
+        public Enumerator GetEnumerator() => new(a.GetEnumerator());
+    }    
+    
     public class MissingAssetFieldException : Exception
     {
         public MissingAssetFieldException(string message) : base(message)

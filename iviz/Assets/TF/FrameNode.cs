@@ -26,6 +26,12 @@ namespace Iviz.Controllers.TF
             set => SetParent(value, true);
         }
 
+        public virtual bool Visible
+        {
+            get => gameObject.activeSelf; 
+            set => gameObject.SetActive(value);
+        }
+        
         public string? ParentId => parent != null ? parent.Id : null;
 
         protected string Name

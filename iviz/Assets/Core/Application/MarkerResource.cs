@@ -14,7 +14,7 @@ namespace Iviz.Displays
 
         public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
 
-        protected BoxCollider Collider =>
+        public BoxCollider Collider =>
             boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
 
         protected Bounds WorldBounds => Collider.bounds;

@@ -61,7 +61,7 @@ namespace Iviz.Displays
         {
             if (!Resource.Displays.TryGetResource(typeof(T), out var info))
             {
-                throw new ResourceNotFoundException("Cannot find unique display type for type " + nameof(T));
+                throw new ResourceNotFoundException("Cannot find unique display type for type " + typeof(T).Name);
             }
 
             return Rent<T>(info, parent);

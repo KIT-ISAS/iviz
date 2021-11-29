@@ -1,10 +1,13 @@
 ﻿#nullable enable
 
 using System.Collections.Generic;
+using System.Linq;
 using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
+using Iviz.Displays;
+using Iviz.Displays.Highlighters;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -54,24 +57,16 @@ namespace Iviz.App
             panel.Marker.MarkerListener = listener;
             panel.HideButton.State = listener.Visible;
             panel.TriangleListFlipWinding.Value = listener.TriangleListFlipWinding;
+            panel.ShowDescriptions.Value = listener.ShowDescriptions;
             panel.PreferUdp.Value = listener.PreferUdp;
 
             panel.Mask.Options = listener.GetMaskEntries();
 
-            panel.Tint.ValueChanged += f =>
-            {
-                Color color = f;
-                color.a = panel.Alpha.Value;
-                listener.Tint = color;
-            };
-            panel.Alpha.ValueChanged += f =>
-            {
-                Color color = panel.Tint.Value;
-                color.a = f;
-                listener.Tint = color;
-            };
+            panel.Tint.ValueChanged += f => listener.Tint = f.WithAlpha(panel.Alpha.Value);
+            panel.Alpha.ValueChanged += f => listener.Tint = panel.Tint.Value.WithAlpha(f);
             panel.OcclusionOnlyMode.ValueChanged += f => listener.RenderAsOcclusionOnly = f;
             panel.TriangleListFlipWinding.ValueChanged += f => listener.TriangleListFlipWinding = f;
+            panel.ShowDescriptions.ValueChanged += f => listener.ShowDescriptions = f;
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
@@ -83,6 +78,22 @@ namespace Iviz.App
                 panel.Mask.OverrideCaption("---");
             };
             panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
+
+            HighlightAll();
+        }
+
+        void HighlightAll()
+        {
+            const int maxHighlights = 50;
+            
+            var boundsToShow = listener.GetAllBounds()
+                .Where(bounds => !bounds.ShowDescription)
+                .Take(maxHighlights);
+            
+            foreach (var bounds in boundsToShow)
+            {
+                FAnimator.Start(new BoundsHighlighter(bounds));
+            }
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

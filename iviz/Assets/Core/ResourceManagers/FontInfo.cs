@@ -40,48 +40,40 @@ namespace Iviz.Resources
                 return str;
             }
 
-            var description = BuilderPool.Rent();
-            try
+            using var description = BuilderPool.Rent();
+            int usedWidth = 0;
+            int numLines = 0;
+            for (int i = 0; i < str.Length; i++)
             {
-                description.Length = 0;
-                int usedWidth = 0;
-                int numLines = 0;
-                for (int i = 0; i < str.Length; i++)
+                int charWidth = CharWidth(str[i]);
+                if (usedWidth + charWidth > usableWidth)
                 {
-                    int charWidth = CharWidth(str[i]);
-                    if (usedWidth + charWidth > usableWidth)
+                    if (i >= str.Length - 2)
                     {
-                        if (i >= str.Length - 2)
-                        {
-                            description.Append(str[i]);
-                            continue;
-                        }
+                        description.Append(str[i]);
+                        continue;
+                    }
 
-                        if (numLines != maxLines - 1)
-                        {
-                            description.Append("...\n  ").Append(str[i]);
-                            usedWidth = 2 * spaceWidth;
-                            numLines = 1;
-                        }
-                        else
-                        {
-                            description.Append("...");
-                            return description.ToString();
-                        }
+                    if (numLines != maxLines - 1)
+                    {
+                        description.Append("...\n  ").Append(str[i]);
+                        usedWidth = 2 * spaceWidth;
+                        numLines = 1;
                     }
                     else
                     {
-                        description.Append(str[i]);
-                        usedWidth += charWidth;
+                        description.Append("...");
+                        return description.ToString();
                     }
                 }
+                else
+                {
+                    description.Append(str[i]);
+                    usedWidth += charWidth;
+                }
+            }
 
-                return description.ToString();
-            }
-            finally
-            {
-                BuilderPool.Return(description);
-            }
+            return description.ToString();
         }
 
         int CharWidth(char c)

@@ -43,7 +43,7 @@ namespace Iviz.App
             files.AddRange(SavedFiles);
             files.Sort();
             files.Reverse();
-            itemList.Items = files.Select(file => file.Description);
+            itemList.SetItems(files.Select(file => file.Description));
         }
 
         void OnItemClicked(int index, int subIndex)

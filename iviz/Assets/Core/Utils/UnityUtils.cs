@@ -195,6 +195,17 @@ namespace Iviz.Core
             return new ArraySegment<T>(ts, offset, ts.Length - offset);
         }
 
+        public static Pose PoseFromUp(in Vector3 position, in Vector3 up)
+        {
+            var side = Mathf.Approximately(Vector3.forward.Cross(up).MagnitudeSq(), 0)
+                ? Vector3.right
+                : Vector3.forward;
+
+            var forward = side.Cross(up);
+
+            return new Pose(position, Quaternion.LookRotation(forward, up));            
+        }
+        
         /// <summary>
         /// Returns null if the Unity object is null or null-equivalent, otherwise returns the object itself.
         /// </summary>

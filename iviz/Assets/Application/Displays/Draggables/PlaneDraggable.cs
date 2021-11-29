@@ -9,19 +9,9 @@ namespace Iviz.Displays
     public sealed class PlaneDraggable : XRScreenDraggable
     {
         [SerializeField] Vector3 normal = Vector3.forward;
-        [SerializeField] Collider? rayCollider;
-
-        public Collider RayCollider
-        {
-            get => rayCollider.AssertNotNull(nameof(rayCollider));
-            set => rayCollider = value != null ? value : throw new ArgumentNullException(nameof(value));
-        }
-
-        public float? Damping { get; set; } = 0.2f;
 
         public Vector3 Normal
         {
-            get => normal;
             set => normal = value;
         }
 
@@ -30,14 +20,9 @@ namespace Iviz.Displays
             Transform mTransform = Transform;
             Transform mTarget = TargetTransform;
 
-            if (ReferencePointLocal is not {} referencePointLocal)
+            if (ReferencePointLocal is not { } referencePointLocal)
             {
-                if (!RayCollider.TryIntersectRay(pointerRay, out Vector3 intersectionWorld))
-                {
-                    return; // shouldn't happen
-                }
-
-                ReferencePointLocal = mTransform.InverseTransformPoint(intersectionWorld);
+                InitializeReferencePoint(pointerRay);
             }
             else
             {
@@ -46,7 +31,7 @@ namespace Iviz.Displays
 
                 UnityUtils.PlaneIntersection(normalRay, pointerRay, out Vector3 intersectionWorld,
                     out float cameraDistance);
-                
+
                 if (cameraDistance < 0)
                 {
                     return;
@@ -54,11 +39,6 @@ namespace Iviz.Displays
 
                 var referencePointWorld = mTransform.TransformPoint(referencePointLocal);
                 var deltaPositionWorld = intersectionWorld - referencePointWorld;
-                /*
-                var localIntersection = mTransform.InverseTransformPoint(intersection);
-                var deltaPosition = localIntersection - referencePointLocal;
-                var deltaPositionWorld = mTransform.TransformVector(deltaPosition);
-                */
 
                 mTarget.position += Damping is { } damping
                     ? damping * deltaPositionWorld

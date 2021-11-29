@@ -27,33 +27,26 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            var description = BuilderPool.Rent();
-            try
+            using var description = BuilderPool.Rent();
+            if (!ConnectionManager.IsConnected)
             {
-                if (!ConnectionManager.IsConnected)
-                {
-                    description.Append("<b>State: </b> Disconnected. Nothing to show!").AppendLine();
-                }
-                else
-                {
-                    try
-                    {
-                        GenerateReport(description, ConnectionManager.Connection.Client);
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        description.AppendLine("EE Interrupted!").AppendLine();
-                    }
-                }
-
-                description.AppendLine().AppendLine();
-
-                panel.Text.SetText(description);
+                description.Append("<b>State: </b> Disconnected. Nothing to show!").AppendLine();
             }
-            finally
+            else
             {
-                BuilderPool.Return(description);
+                try
+                {
+                    GenerateReport(description, ConnectionManager.Connection.Client);
+                }
+                catch (InvalidOperationException)
+                {
+                    description.Append("EE Interrupted!").AppendLine().AppendLine();
+                }
             }
+
+            description.AppendLine().AppendLine();
+
+            panel.Text.SetText(description);
         }
 
         static void GenerateReport(StringBuilder builder, RosClient? client)

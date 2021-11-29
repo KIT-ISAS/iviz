@@ -31,11 +31,10 @@ namespace Iviz.Core
         /// <summary>
         /// Is this being run on an Android or IOS device? (smartphone or tablet)
         /// </summary>
-        public const bool IsPhone =
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
-            true;
+        public const bool IsPhone = true;
 #else
-            false;
+        public static bool IsPhone => false;
 #endif
 
         public const bool IsIPhone =

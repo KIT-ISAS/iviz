@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using JetBrains.Annotations;
@@ -146,66 +147,71 @@ namespace Iviz.App
             }
         }
 
+        /*
         [NotNull]
         public IEnumerable<string> Items
         {
-            get => itemEntries.Select(x => x.Text);
             set
             {
-                if (value == null)
+
+        }
+        */
+
+        public void SetItems<T>([NotNull] T value) where T : IReadOnlyCollection<string>
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            if (buttonHeight == 0)
+            {
+                buttonHeight = BaseButtonHeight;
+            }
+
+            if (value.Count == itemEntries.Count)
+            {
+                foreach (var (str, i) in value.WithIndex())
                 {
-                    throw new ArgumentNullException(nameof(value));
+                    itemEntries[i].Text = str;
+                }
+            }
+            else if (value.Count < itemEntries.Count)
+            {
+                canvas.enabled = false;
+
+                int i = 0;
+                foreach (string str in value)
+                {
+                    itemEntries[i++].Text = str;
                 }
 
-                if (buttonHeight == 0)
+                for (int j = i; j < itemEntries.Count; j++)
                 {
-                    buttonHeight = BaseButtonHeight;
+                    itemEntries[j].Dispose();
                 }
 
-                if (value.Count() == itemEntries.Count)
+                itemEntries.RemoveRange(i, itemEntries.Count - i);
+                UpdateSize();
+                canvas.enabled = true;
+            }
+            else
+            {
+                canvas.enabled = false;
+                int i = 0;
+                foreach (string str in value)
                 {
-                    int i = 0;
-                    foreach (string str in value)
+                    if (i >= itemEntries.Count)
                     {
-                        itemEntries[i++].Text = str;
+                        itemEntries.Add(
+                            new ItemEntry(i, contentObject, buttonHeight, yOffset, ButtonType, RaiseClicked));
                     }
+
+                    itemEntries[i++].Text = str;
                 }
-                else if (value.Count() < itemEntries.Count)
-                {
-                    canvas.enabled = false;
-                    int i = 0;
-                    foreach (string str in value)
-                    {
-                        itemEntries[i++].Text = str;
-                    }
 
-                    for (int j = i; j < itemEntries.Count; j++)
-                    {
-                        itemEntries[j].Dispose();
-                    }
-
-                    itemEntries.RemoveRange(i, itemEntries.Count - i);
-                    UpdateSize();
-                    canvas.enabled = true;
-                }
-                else
-                {
-                    canvas.enabled = false;
-                    int i = 0;
-                    foreach (string str in value)
-                    {
-                        if (i >= itemEntries.Count)
-                        {
-                            itemEntries.Add(new ItemEntry(i, contentObject, buttonHeight, yOffset,
-                                ButtonType, RaiseClicked));
-                        }
-
-                        itemEntries[i++].Text = str;
-                    }
-
-                    UpdateSize();
-                    canvas.enabled = true;
-                }
+                UpdateSize();
+                canvas.enabled = true;
             }
         }
 

@@ -26,7 +26,6 @@ namespace Iviz.Controllers.TF
         }
 
         public virtual bool ForceInvisible { get; set; }
-        public virtual bool Visible { get; set; }
         public virtual bool LabelVisible { get; set; }
         public abstract bool ConnectorVisible { get; set; }
         public abstract float FrameSize { get; set; }

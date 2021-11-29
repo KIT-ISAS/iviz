@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Iviz.Tools;
@@ -65,8 +66,20 @@ namespace Iviz.Core
 
             return hash;
         }
+        
+        public static uint Compute(in BuilderPool.BuilderRent value, uint startHash = DefaultSeed)
+        {
+            return value.Length == value.Chunk.Length 
+                ? Compute(value.Chunk.Span, startHash) 
+                : Compute((StringBuilder) value);
+        }        
 
-        public static unsafe uint Compute<T>(T[] array, uint startHash = DefaultSeed) where T : unmanaged
+        public static uint Compute<T>(T[] array, uint startHash = DefaultSeed) where T : unmanaged
+        {
+            return Compute(new ReadOnlySpan<T>(array), startHash);
+        }
+
+        static unsafe uint Compute<T>(ReadOnlySpan<T> array, uint startHash = DefaultSeed) where T : unmanaged
         {
             fixed (T* ptr = array)
             {

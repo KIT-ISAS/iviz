@@ -35,11 +35,11 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             itemList.Title = "Add New Module";
-            itemList.Items = Modules.Select(tuple => tuple.Caption);
+            itemList.SetItems(Modules.Select(tuple => tuple.Caption));
             itemList.ItemClicked += OnItemClicked;
             itemList.CloseClicked += Close;
 
-            foreach (ModuleType module in UniqueModules)
+            foreach (var module in UniqueModules)
             {
                 bool hasModule = ModuleListPanel.ModuleDatas.Any(moduleData => moduleData.ModuleType == module);
                 if (hasModule)

@@ -9,6 +9,7 @@ using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Displays.Highlighters;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
 using UnityEngine;
@@ -16,17 +17,11 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.Rendering.PostProcessing;
-using Animator = UnityEngine.Animator;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 using Transform = UnityEngine.Transform;
 using Vector3 = UnityEngine.Vector3;
-
-// ReSharper disable ConditionIsAlwaysTrueOrFalse
-// ReSharper disable HeuristicUnreachableCode
-
-#pragma warning disable CS0162 // Unerreichbarer Code wurde entdeckt.
 
 namespace Iviz.App
 {
@@ -413,8 +408,6 @@ namespace Iviz.App
             const float longClickTime = 0.5f;
             const float maxDistanceForClickEvent = 20;
 
-            bool prevPointerDown = pointerIsDown;
-
             QualitySettings.shadowDistance = Mathf.Max(MinShadowDistance, 2 * MainCamera.transform.position.y);
 
             if (Settings.IsXR) // XR doesn't need cursor management
@@ -422,28 +415,7 @@ namespace Iviz.App
                 return;
             }
 
-            /*
-            if (lookAtAnimationStart != null)
-            {
-                float diff = Time.time - lookAtAnimationStart.Value;
-                if (diff > AnimationTime)
-                {
-                    Transform.SetPose(lookAtCameraTargetPose);
-                    lookAtAnimationStart = null;
-                    if (OrbitCenterOverride != null)
-                    {
-                        StartOrbiting();
-                    }
-                }
-                else
-                {
-                    float t = diff / AnimationTime;
-                    Pose currentPose = lookAtCameraStartPose.Lerp(lookAtCameraTargetPose, Mathf.Sqrt(t));
-                    Transform.SetPose(currentPose);
-                    return;
-                }
-            }
-            */
+            bool prevPointerDown = pointerIsDown;
 
             if (Settings.IsPhone)
             {
@@ -506,9 +478,10 @@ namespace Iviz.App
             {
                 Ray pointerRay = Settings.MainCamera.ScreenPointToRay(pointerPosition);
                 DraggedObject.OnPointerMove(pointerRay);
-                if (DraggedObject.ReferencePoint is { } referencePoint)
+                if (DraggedObject.ReferencePoint is { } referencePoint
+                    && DraggedObject.ReferenceNormal is { } referenceNormal)
                 {
-                    Leash.Set(pointerRay, referencePoint);
+                    Leash.Set(pointerRay, referencePoint, referenceNormal);
                 }
 
                 return;
@@ -773,50 +746,46 @@ namespace Iviz.App
 
         public void LookAt(Transform targetTransform)
         {
-            Vector3 CalculateTargetCameraPosition()
+            lookAtTokenSource?.Cancel();
+            CancellationTokenSource newToken = new();
+            lookAtTokenSource = newToken;
+
+            void Update(float t)
             {
-                var position = targetTransform.position;
+                var lookAtCameraStartPose = Transform.AsPose();
+                var lookAtCameraTargetPosition = CalculateTargetCameraPosition(targetTransform.position);
+                var lookAtCameraTargetPose = lookAtCameraStartPose.WithPosition(lookAtCameraTargetPosition);
+                var currentPose = lookAtCameraStartPose.Lerp(lookAtCameraTargetPose, Mathf.Sqrt(t));
+                Transform.SetPose(currentPose);
+            }
 
-                float minDistanceLookAt = 0.5f / 0.125f * TfListener.Instance.FrameSize;
-                float maxDistanceLookAt = 3.0f / 0.125f * TfListener.Instance.FrameSize;
-
-                if (!Settings.IsPhone)
+            void Dispose()
+            {
+                newToken.Cancel();
+                if (OrbitCenterOverride != null)
                 {
-                    float distanceToFrame = (Transform.position - position).magnitude;
-                    float zoomRadius = Mathf.Min(Mathf.Max(distanceToFrame, minDistanceLookAt), maxDistanceLookAt);
-                    return position - Transform.forward * zoomRadius;
-                }
-                else
-                {
-                    orbitCenter = position;
-                    orbitRadius = Mathf.Min(Mathf.Max(orbitRadius, minDistanceLookAt), maxDistanceLookAt);
-                    return -orbitRadius * (Transform.rotation * Vector3.forward) + orbitCenter;
+                    StartOrbiting();
                 }
             }
 
+            FAnimator.Spawn(lookAtTokenSource.Token, LookAtAnimationTime, Update, Dispose);
+        }
 
-            lookAtTokenSource?.Cancel();
-            var newToken = lookAtTokenSource = new CancellationTokenSource();
-            
-            Core.FAnimator.Spawn(lookAtTokenSource.Token, LookAtAnimationTime, t =>
+        Vector3 CalculateTargetCameraPosition(in Vector3 targetPosition)
+        {
+            float minDistanceLookAt = 0.5f / 0.125f * TfListener.Instance.FrameSize;
+            float maxDistanceLookAt = 3.0f / 0.125f * TfListener.Instance.FrameSize;
+
+            if (!Settings.IsPhone)
             {
-                var lookAtCameraStartPose = Transform.AsPose();
-                var lookAtCameraTargetPose = lookAtCameraStartPose.WithPosition(CalculateTargetCameraPosition());
-                if (t >= 1)
-                {
-                    newToken.Cancel();
-                    Transform.SetPose(lookAtCameraTargetPose);
-                    if (OrbitCenterOverride != null)
-                    {
-                        StartOrbiting();
-                    }
-                }
-                else
-                {
-                    var currentPose = lookAtCameraStartPose.Lerp(lookAtCameraTargetPose, Mathf.Sqrt(t));
-                    Transform.SetPose(currentPose);
-                }
-            });
+                float distanceToFrame = (Transform.position - targetPosition).magnitude;
+                float zoomRadius = Mathf.Min(Mathf.Max(distanceToFrame, minDistanceLookAt), maxDistanceLookAt);
+                return targetPosition - Transform.forward * zoomRadius;
+            }
+
+            orbitCenter = targetPosition;
+            orbitRadius = Mathf.Min(Mathf.Max(orbitRadius, minDistanceLookAt), maxDistanceLookAt);
+            return -orbitRadius * (Transform.rotation * Vector3.forward) + orbitCenter;
         }
 
         static Vector3Int GetBaseInput()
@@ -887,11 +856,16 @@ namespace Iviz.App
             Pose poseToHighlight;
             if (clickInfo.TryGetARRaycastResults(out var arHitResults))
             {
-                poseToHighlight = arHitResults[0].CreatePose();
+                poseToHighlight = arHitResults[0].AsPose();
             }
             else if (hitResults.Length != 0)
             {
-                poseToHighlight = hitResults[0].CreatePose();
+                if (hitResults.Any(result => result.GameObject.layer == LayerType.Clickable))
+                {
+                    return;
+                }
+
+                poseToHighlight = hitResults[0].AsPose();
             }
             else
             {
@@ -899,7 +873,7 @@ namespace Iviz.App
             }
 
             FAnimator.Start(new ClickedPoseHighlighter(poseToHighlight));
-            
+
             if (!isShortClick)
             {
                 var poseStamped = new PoseStamped(
@@ -909,7 +883,7 @@ namespace Iviz.App
                 TfListener.Instance.TapPublisher.Publish(poseStamped);
             }
         }
-        
+
         static bool TryGetHighlightable(GameObject gameObject, out IHighlightable h)
         {
             Transform parent;

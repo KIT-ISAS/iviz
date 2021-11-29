@@ -2,7 +2,7 @@ using Iviz.Msgs.VisualizationMsgs;
 
 namespace Iviz.Controllers.Markers
 {
-    internal enum InteractionMode
+    public enum InteractionMode
     {
         None = InteractiveMarkerControl.NONE,
         Menu = InteractiveMarkerControl.MENU,

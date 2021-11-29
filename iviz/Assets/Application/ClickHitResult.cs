@@ -27,8 +27,10 @@ namespace Iviz.App
         {
         }
 
-        public Pose CreatePose()
+        public Pose AsPose()
         {
+            return UnityUtils.PoseFromUp(Position, Normal);
+            /*
             var side = Mathf.Approximately(Vector3.forward.Cross(Normal).MagnitudeSq(), 0)
                 ? Vector3.right
                 : Vector3.forward;
@@ -36,6 +38,7 @@ namespace Iviz.App
             var forward = side.Cross(Normal);
 
             return new Pose(Position, Quaternion.LookRotation(forward, Normal));
+            */
         }
 
         public void Deconstruct(out GameObject gameObject, out Vector3 position, out Vector3 normal) =>

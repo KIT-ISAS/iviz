@@ -214,6 +214,7 @@ namespace Iviz.Core
             LateEveryFrame = null;
             EverySecond = null;
             LateEverySecond = null;
+            EveryFastTick = null;
 
             while (actionsQueue.Count != 0)
             {

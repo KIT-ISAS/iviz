@@ -29,6 +29,11 @@ namespace Iviz.Resources
                     return baseObject;
                 }
 
+                if (resourceName == null)
+                {
+                    throw new ResourceNotFoundException($"Cannot find resource [empty]");
+                }
+
                 baseObject = UnityEngine.Resources.Load<T>(resourceName);
                 if (baseObject == null)
                 {

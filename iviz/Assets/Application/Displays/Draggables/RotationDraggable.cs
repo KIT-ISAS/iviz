@@ -10,11 +10,7 @@ namespace Iviz.Displays
     public sealed class RotationDraggable : XRScreenDraggable
     {
         [SerializeField] Vector3 normal;
-        [SerializeField] Collider? rayCollider;
 
-        Collider RayCollider => rayCollider.AssertNotNull(nameof(rayCollider));
-
-        public float? Damping { get; set; } = 0.2f;
         public bool DoesRotationReset { get; set; }
 
         protected override void OnPointerMove(in Ray pointerRay)
@@ -24,12 +20,7 @@ namespace Iviz.Displays
 
             if (ReferencePointLocal is not {} referencePointLocal)
             {
-                if (!RayCollider.TryIntersectRay(pointerRay, out Vector3 intersectionWorld))
-                {
-                    return; // shouldn't happen
-                }
-
-                ReferencePointLocal = mTransform.InverseTransformPoint(intersectionWorld);
+                InitializeReferencePoint(pointerRay);
             }
             else
             {

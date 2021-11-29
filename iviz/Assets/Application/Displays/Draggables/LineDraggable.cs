@@ -9,16 +9,12 @@ namespace Iviz.Displays
     public sealed class LineDraggable : XRScreenDraggable
     {
         [SerializeField] Vector3 line = new Vector3(0, 0, 1);
-        [SerializeField] Collider? rayCollider;
 
-        public Collider RayCollider
+        public Vector3 Line
         {
-            get => rayCollider.AssertNotNull(nameof(rayCollider));
-            set => rayCollider = value != null ? value : throw new ArgumentNullException(nameof(value));
+            set => line = value;
         }
-
-        public float? Damping { get; set; } = 0.2f;
-
+        
         protected override void OnPointerMove(in Ray pointerRay)
         {
             Transform mTransform = transform;
@@ -26,12 +22,7 @@ namespace Iviz.Displays
 
             if (ReferencePointLocal is not {} referencePointLocal)
             {
-                if (!RayCollider.TryIntersectRay(pointerRay, out var intersectionWorld))
-                {
-                    return; // shouldn't happen
-                }
-
-                ReferencePointLocal = mTransform.InverseTransformPoint(intersectionWorld);
+                InitializeReferencePoint(pointerRay);
             }
             else
             {

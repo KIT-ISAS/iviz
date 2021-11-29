@@ -382,19 +382,22 @@ namespace Iviz.Controllers
             }
 
             Robot = newRobot;
-            async ValueTask LoadRobotAsync()
+            
+            async void LoadRobotAsync()
             {
-                await newRobot.StartAsync(ConnectionManager.ServiceProvider);
-                CheckRobotStartTask(true);
+                var task = newRobot.StartAsync(ConnectionManager.ServiceProvider).AsTask();
+                robotLoadingTask = task;
+                await task;
+                UpdateStartTaskStatus();
             }
 
-            robotLoadingTask = LoadRobotAsync().AsTask();
+            LoadRobotAsync();
             HelpText = "[Loading Robot...]";
-            CheckRobotStartTask();
+            UpdateStartTaskStatus();
             return true;
         }
 
-        public void CheckRobotStartTask(bool forceCompletion = false)
+        public void UpdateStartTaskStatus()
         {
             if (robotLoadingTask == null)
             {
@@ -403,9 +406,7 @@ namespace Iviz.Controllers
 
             try
             {
-                var status = forceCompletion 
-                    ? TaskStatus.RanToCompletion 
-                    : robotLoadingTask.Status;
+                var status = robotLoadingTask.Status;
                 switch (status)
                 {
                     case TaskStatus.Faulted:

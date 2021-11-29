@@ -11,6 +11,7 @@ using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Urdf;
 using Iviz.Tools;
+using Nito.AsyncEx;
 using UnityEngine;
 using Color = UnityEngine.Color;
 using Joint = Iviz.Urdf.Joint;
@@ -152,64 +153,23 @@ namespace Iviz.Displays
         /// For external 3D models, whether to keep the materials instead
         /// of replacing them with the provided colors.
         /// </param>
-        /// <param name="token">An optional cancellation token.</param>
-        public async ValueTask StartAsync(IExternalServiceProvider? provider = null,
-            bool keepMeshMaterials = true,
-            CancellationToken token = default)
+        public async ValueTask StartAsync(IExternalServiceProvider? provider = null, bool keepMeshMaterials = true)
         {
-            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
+            var rootMaterials = new Dictionary<string, Material>();
+            foreach (var material in robot.Materials)
+            {
+                rootMaterials[material.Name] = material;
+            }
+
             try
             {
-                var rootMaterials = new Dictionary<string, Material>();
-                foreach (var material in robot.Materials)
-                {
-                    rootMaterials[material.Name] = material;
-                }
-
-                await robot.Links
-                    .Select(link =>
-                        ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, tokenSource.Token)
-                            .AsTask())
-                    .WhenAll();
-
-                foreach (var joint in robot.Joints)
-                {
-                    ProcessJoint(joint);
-                }
-
-                if (linkObjects.Count == 0)
-                {
-                    RosLogger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
-                    return;
-                }
-
-                var keysWithoutParent = new HashSet<string>(linkObjects.Keys);
-                keysWithoutParent.RemoveWhere(linkParents.Keys.Contains);
-
-                BaseLink = keysWithoutParent.FirstOrDefault();
-                if (BaseLink != null)
-                {
-                    linkObjects[BaseLink].transform.SetParent(BaseLinkObject.transform, false);
-                }
-
-                LinkParents = linkParents.AsReadOnly();
-                LinkObjects = linkObjects.AsReadOnly();
-                Joints = joints.AsReadOnly();
-
-                Tint = tint;
-                OcclusionOnly = occlusionOnly;
-                Visible = visible;
-                Smoothness = smoothness;
-                Metallic = metallic;
-                ApplyAnyValidConfiguration();
-
-                string errorStr = numErrors == 0 ? "" : $"There were {numErrors.ToString()} errors.";
-                RosLogger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
-                            $"links and {Joints.Count.ToString()} joints. {errorStr}");
+                await robot.Links.Select(
+                    link => ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, runningTs.Token)
+                ).WhenAll();
             }
             catch (OperationCanceledException)
             {
-                RosLogger.Error($"{this}: Robot building canceled.");
+                RosLogger.Warn($"{this}: Robot building canceled.");
                 throw;
             }
             catch (Exception e)
@@ -217,6 +177,41 @@ namespace Iviz.Displays
                 RosLogger.Error($"{this}: Failed to construct '{Name}'", e);
                 throw;
             }
+
+            foreach (var joint in robot.Joints)
+            {
+                ProcessJoint(joint);
+            }
+
+            if (linkObjects.Count == 0)
+            {
+                RosLogger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
+                return;
+            }
+
+            var keysWithoutParent = new HashSet<string>(linkObjects.Keys);
+            keysWithoutParent.RemoveWhere(linkParents.Keys.Contains);
+
+            BaseLink = keysWithoutParent.FirstOrDefault();
+            if (BaseLink != null)
+            {
+                linkObjects[BaseLink].transform.SetParent(BaseLinkObject.transform, false);
+            }
+
+            LinkParents = linkParents.AsReadOnly();
+            LinkObjects = linkObjects.AsReadOnly();
+            Joints = joints.AsReadOnly();
+
+            Tint = tint;
+            OcclusionOnly = occlusionOnly;
+            Visible = visible;
+            Smoothness = smoothness;
+            Metallic = metallic;
+            ApplyAnyValidConfiguration();
+
+            string errorStr = numErrors == 0 ? "" : $"There were {numErrors.ToString()} errors.";
+            RosLogger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
+                           $"links and {Joints.Count.ToString()} joints. {errorStr}");
         }
 
         public void CancelTasks()
@@ -225,17 +220,18 @@ namespace Iviz.Displays
         }
 
 
-        async ValueTask ProcessLinkAsync(bool keepMeshMaterials,
+        Task ProcessLinkAsync(bool keepMeshMaterials,
             Link link,
             IReadOnlyDictionary<string, Material> rootMaterials,
             IExternalServiceProvider? provider,
             CancellationToken token)
         {
-            GameObject linkObject = new("Link:" + link.Name);
+            var linkObject = new GameObject("Link:" + link.Name);
             linkObject.transform.parent = BaseLinkObject.transform;
 
             linkObjects[link.Name ?? ""] = linkObject;
 
+            /*
             foreach (var collision in link.Collisions)
             {
                 await ProcessCollisionAsync(collision, linkObject, provider, token);
@@ -245,6 +241,21 @@ namespace Iviz.Displays
             {
                 await ProcessVisualAsync(keepMeshMaterials, visual, linkObject, rootMaterials, provider, token);
             }
+            */
+            var tasks = new List<Task>(link.Collisions.Count + link.Visuals.Count);
+            foreach (var collision in link.Collisions)
+            {
+                tasks.Add(ProcessCollisionAsync(collision, linkObject, provider, token).AsTask());
+            }
+
+            foreach (var visual in link.Visuals)
+            {
+                var task =
+                    ProcessVisualAsync(keepMeshMaterials, visual, linkObject, rootMaterials, provider, token).AsTask();
+                tasks.Add(task);
+            }
+
+            return tasks.WhenAll();
         }
 
         async ValueTask ProcessCollisionAsync(
@@ -347,7 +358,7 @@ namespace Iviz.Displays
                 {
                     info = await Resource.GetGameObjectResourceAsync(uri, provider, token);
                 }
-                catch (Exception e) when (!(e is OperationCanceledException))
+                catch (Exception e) when (e is not OperationCanceledException)
                 {
                     RosLogger.Error($"{this}: Failed to retrieve '{uri}'", e);
                     numErrors++;
@@ -489,10 +500,10 @@ namespace Iviz.Displays
                 linkObject.transform.parent = null;
             }
 
-            foreach (var entry in linkParentObjects)
+            foreach (var (linkObject, parentObject) in linkParentObjects)
             {
-                var mTransform = entry.Key.transform;
-                mTransform.parent = entry.Value.transform;
+                var mTransform = linkObject.transform;
+                mTransform.parent = parentObject.transform;
                 mTransform.localPosition = Vector3.zero;
                 mTransform.localRotation = Quaternion.identity;
             }
@@ -513,7 +524,7 @@ namespace Iviz.Displays
             Tint = Color.white;
             OcclusionOnly = false;
 
-            foreach ((var key, Color color) in originalColors)
+            foreach (var (key, color) in originalColors)
             {
                 key.Color = color;
             }
@@ -576,6 +587,7 @@ namespace Iviz.Displays
             return true;
         }
 
+        /*
         public void WriteJoints(JointState state)
         {
             WriteJoints(state.Name.Zip(state.Position));
@@ -593,6 +605,7 @@ namespace Iviz.Displays
                 TryWriteJoint(name, (float)position);
             }
         }
+        */
 
         public override string ToString()
         {

@@ -9,6 +9,8 @@ namespace Iviz.Common
     {
         Bounds? Bounds { get; }
         Transform? BoundsTransform { get; }
+        string? Caption { get; }
+        bool HasPermanentHighlighter { get; }
         event Action? BoundsChanged;
     }
 }

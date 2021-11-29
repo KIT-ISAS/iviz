@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
@@ -11,6 +12,7 @@ namespace Iviz.Common
         void GenerateLog(StringBuilder description);
         string BriefDescription { get; }
         void Reset();
-        bool TryGetMarkerFromId(string id, [NotNullWhen(true)] out IHasBounds? frame);
+        bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds);
+        IEnumerable<IHasBounds> GetAllBounds();
     }
 }

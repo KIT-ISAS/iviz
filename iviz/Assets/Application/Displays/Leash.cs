@@ -8,10 +8,13 @@ namespace Iviz.Displays
 {
     public sealed class Leash : DisplayWrapperResource, IRecyclable
     {
+        [SerializeField] MeshMarkerResource? reticle;
         LineResource? resource;
 
         LineResource Resource =>
             resource != null ? resource : (resource = ResourcePool.RentDisplay<LineResource>(transform));
+
+        MeshMarkerResource Reticle => reticle.AssertNotNull(nameof(reticle));
 
         protected override IDisplay Display => Resource;
 
@@ -19,7 +22,6 @@ namespace Iviz.Displays
 
         public float Width
         {
-            get => Resource.ElementScale;
             set => Resource.ElementScale = value;
         }
 
@@ -29,7 +31,24 @@ namespace Iviz.Displays
             Resource.RenderType = LineResource.LineRenderType.AlwaysCapsule;
         }
 
+        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal)
+        {
+            Reticle.Visible = true;
+            Reticle.Transform.SetPositionAndRotation(target, Quaternion.LookRotation(normal));
+
+            float scale = 0.03f * Vector3.Distance(target, Settings.MainCameraTransform.position);
+            Reticle.Transform.localScale = scale * Vector3.one;
+
+            BuildLeash(pointerRay, target);
+        }
+
         public void Set(in Ray pointerRay, in Vector3 target)
+        {
+            Reticle.Visible = false;
+            BuildLeash(pointerRay, target);
+        }
+
+        void BuildLeash(in Ray pointerRay, in Vector3 target)
         {
             var (start, tangent) = pointerRay;
             float distance = Vector3.Distance(target, start);
@@ -39,12 +58,11 @@ namespace Iviz.Displays
                 Resource.Reset();
                 return;
             }
-            
+
             var direction = (target - start) / distance;
             var tangentReflected = tangent - Vector3.Dot(tangent, direction) * 2 * direction;
 
-            //float dirScale = Mathf.Min(0.5f, distance / 3);
-            float dirScale =  distance / 3;
+            float dirScale = distance / 3;
 
             var f = new float3x4(
                 start,
@@ -53,6 +71,7 @@ namespace Iviz.Displays
                 target);
 
             var colorBase = Color;
+            int numSegments = (int)(math.length(start - target) * 16);
 
             Resource.SetDirect(array =>
             {
@@ -74,8 +93,6 @@ namespace Iviz.Displays
 
                 l0.w = PointWithColor.RecastToFloat(color);
 
-                int numSegments = (int)(math.length(c0 - c3) * 16);
-
                 for (int i = 0; i < numSegments; i++)
                 {
                     float t = (i + 1f) / numSegments;
@@ -89,19 +106,14 @@ namespace Iviz.Displays
 
                     l1.w = PointWithColor.RecastToFloat(color);
 
-                    //if (color.a > 10)
-                    {
-                        array.Add(line);
-                    }
-                    
-
+                    array.Add(line);
 
                     p = q;
                     l0.w = l1.w;
                 }
 
                 return true;
-            }, 32);
+            }, numSegments);
         }
 
         static float AlphaFromDistance(in float3 p, in float3 start, in float3 end)

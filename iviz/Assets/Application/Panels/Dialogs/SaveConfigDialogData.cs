@@ -41,7 +41,7 @@ namespace Iviz.App
             files.AddRange(LoadConfigDialogData.SavedFiles);
             files.Sort();
             files.Reverse();
-            panel.Items = files.Select(file => file.Description);
+            panel.SetItems(files.Select(file => file.Description));
         }
 
         void OnItemClicked(int index, int subIndex)

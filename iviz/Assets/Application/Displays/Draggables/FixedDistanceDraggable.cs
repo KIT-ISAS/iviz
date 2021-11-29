@@ -8,13 +8,8 @@ namespace Iviz.Displays
 {
     public sealed class FixedDistanceDraggable : XRScreenDraggable
     {
-        [SerializeField] Collider? rayCollider;
         Vector3 lastControllerPosition;
         float distance;
-
-        Collider RayCollider => rayCollider.AssertNotNull(nameof(rayCollider));
-
-        public float? Damping { get; set; } = 0.2f;
 
         public float? ForwardScale { get; set; }
 
@@ -25,14 +20,9 @@ namespace Iviz.Displays
 
             if (ReferencePointLocal is not {} referencePointLocal)
             {
-                if (!RayCollider.TryIntersectRay(pointerRay, out var intersectionWorld))
-                {
-                    return; // shouldn't happen
-                }
-
+                var intersectionWorld = InitializeReferencePoint(pointerRay);
                 distance = Vector3.Distance(pointerRay.origin, intersectionWorld);
                 lastControllerPosition = pointerRay.origin;
-                ReferencePointLocal = mTransform.InverseTransformPoint(intersectionWorld);
             }
             else
             {

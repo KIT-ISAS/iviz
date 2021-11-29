@@ -8,10 +8,9 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class SelectionFrame : MeshMarkerHolderResource, IRecyclable
+    public sealed class SelectionFrame : MeshMarkerHolderResource, IRecyclable
     {
         float columnWidth = 0.005f;
-
         Vector3 size = Vector3.one;
 
         public Vector3 Size
@@ -124,9 +123,9 @@ namespace Iviz.Displays
 
         public override void Suspend()
         {
-            OcclusionOnly = false;
-            ShadowsEnabled = false;
-            EmissiveColor = Color.black;
+            //OcclusionOnly = false;
+            //ShadowsEnabled = false;
+            //EmissiveColor = Color.black;
         }
 
         public string Name
@@ -143,6 +142,14 @@ namespace Iviz.Displays
             {
                 RebuildSize();
             }
+            
+            ShadowsEnabled = false;
+        }
+
+        public void SetBounds(in Bounds bounds)
+        {
+            Size = bounds.size;
+            Transform.localPosition = bounds.center;
         }
 
         public void SplitForRecycle()

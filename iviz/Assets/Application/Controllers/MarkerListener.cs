@@ -5,14 +5,12 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Msgs.VisualizationMsgs;
-using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Tools;
@@ -50,6 +48,7 @@ namespace Iviz.Controllers
                 Visible = value.Visible;
                 TriangleListFlipWinding = value.TriangleListFlipWinding;
                 PreferUdp = value.PreferUdp;
+                ShowDescriptions = value.ShowDescriptions;
 
                 if (value.VisibleMask.Length != config.VisibleMask.Length)
                 {
@@ -132,6 +131,19 @@ namespace Iviz.Controllers
                 }
             }
         }
+        
+        public bool ShowDescriptions
+        {
+            get => config.ShowDescriptions;
+            set
+            {
+                config.ShowDescriptions = value;
+                foreach (var marker in markers.Values)
+                {
+                    marker.ShowDescription = value;
+                }                
+            }
+        }        
 
         public override void StartListening()
         {
@@ -246,11 +258,15 @@ namespace Iviz.Controllers
             DestroyAllMarkers();
         }
 
-        public bool TryGetMarkerFromId(string id, [NotNullWhen(true)] out IHasBounds? frame)
+        public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
         {
-            frame = markers.Values.FirstOrDefault(marker => marker.NodeName == id);
-            return frame != null;
+            bounds = markers.Values.FirstOrDefault(marker => marker.NodeName == id);
+            return bounds != null;
         }
+        
+        public Dictionary<(string, int), MarkerObject>.ValueCollection GetAllBounds() => markers.Values;
+        
+        IEnumerable<IHasBounds> IMarkerDialogListener.GetAllBounds() => GetAllBounds();
 
         public override void ResetController()
         {
@@ -318,6 +334,8 @@ namespace Iviz.Controllers
 
         void HandleAsync()
         {
+            const int maxMarkersPerFrame = 100;
+            
             // ReSharper disable once InconsistentlySynchronizedField
             if (newMarkerBuffer.Count == 0)
             {
@@ -327,21 +345,41 @@ namespace Iviz.Controllers
             RentAndClear<Marker> newMarkers;
             lock (newMarkerBuffer)
             {
-                int i = 0;
-                newMarkers = new RentAndClear<Marker>(newMarkerBuffer.Count);
-                foreach (var marker in newMarkerBuffer.Values)
+                if (newMarkerBuffer.Count <= maxMarkersPerFrame)
                 {
-                    newMarkers[i++] = marker;
-                }
+                    newMarkers = new RentAndClear<Marker>(newMarkerBuffer.Count);
+                    foreach (var (marker, i) in newMarkerBuffer.Values.WithIndex())
+                    {
+                        newMarkers[i] = marker;
+                    }
 
-                newMarkerBuffer.Clear();
+                    newMarkerBuffer.Clear();
+                }
+                else
+                {
+                    using var ids = new RentAndClear<(string, int)>(maxMarkersPerFrame);
+                    newMarkers = new RentAndClear<Marker>(maxMarkersPerFrame);
+
+                    foreach (var ((key, value), i) in newMarkerBuffer.Take(maxMarkersPerFrame).WithIndex())
+                    {
+                        ids[i] = key;
+                        newMarkers[i] = value;
+                    }
+                    
+                    foreach (var id in ids)
+                    {
+                        newMarkerBuffer.Remove(id);
+                    }
+                }
             }
 
             using (newMarkers)
+            {
                 foreach (var marker in newMarkers)
                 {
                     HandleAsync(marker!);
                 }
+            }
         }
 
         void HandleAsync(Marker msg)
@@ -397,7 +435,7 @@ namespace Iviz.Controllers
 
         MarkerObject CreateMarkerObject(in (string, int) id, int msgType)
         {
-            var marker = new MarkerObject(TfListener.ListenersFrame)
+            var marker = new MarkerObject(TfListener.ListenersFrame, id)
             {
                 OcclusionOnly = RenderAsOcclusionOnly,
                 Tint = Tint,

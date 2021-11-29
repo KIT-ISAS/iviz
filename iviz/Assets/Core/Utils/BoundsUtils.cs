@@ -75,7 +75,7 @@ namespace Iviz.Core
             return new Bounds(pose.position + (positionMax + positionMin) / 2, positionMax - positionMin);
         }
 
-        static Bounds TransformBound(this in Bounds bounds, Transform transform)
+        public static Bounds TransformBound(this in Bounds bounds, Transform transform)
         {
             return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
         }
@@ -162,17 +162,18 @@ namespace Iviz.Core
             return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
         }
 
-        public static bool TryIntersectRay(this Collider collider, Ray pointerRay, out Vector3 intersection)
+        public static bool TryIntersectRay(this Collider collider, Ray pointerRay, out Vector3 intersection, out Vector3 normal)
         {
             if (collider.Raycast(pointerRay, out var hitInfo, 100))
             {
                 intersection = hitInfo.point;
+                normal = hitInfo.normal;
                 return true;
             }
 
             intersection = Vector3.zero;
+            normal = Vector3.zero;
             return false;
         }
-
     }
 }

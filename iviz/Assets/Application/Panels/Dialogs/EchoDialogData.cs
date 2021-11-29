@@ -169,15 +169,10 @@ namespace Iviz.App
             }
             else
             {
-                var description = BuilderPool.Rent();
-                try
+                using (var description = BuilderPool.Rent())
                 {
                     listener.WriteDescriptionTo(description);
                     dialog.Publishers.SetText(description);
-                }
-                finally
-                {
-                    BuilderPool.Return(description);
                 }
 
                 dialog.Messages.text = $"{listener.Stats.MessagesPerSecond.ToString()} msg/s";
@@ -193,44 +188,37 @@ namespace Iviz.App
                 return;
             }
 
-            var description = BuilderPool.Rent();
-            var stringWriter = new StringWriter(description, CultureInfo.InvariantCulture);
+            using var description = BuilderPool.Rent();
+            using var stringWriter = new StringWriter(description, CultureInfo.InvariantCulture);
             var jsonTextWriter = new BoldJsonWriter(stringWriter) { Formatting = Formatting.Indented };
-            try
+            foreach (var (timeFormatted, callerId, msg) in messageQueue)
             {
-                foreach (var (timeFormatted, callerId, msg) in messageQueue)
+                description.Append("<b>[").Append(timeFormatted).Append("]");
+                if (callerId != null)
                 {
-                    description.Append("<b>[").Append(timeFormatted).Append("]");
-                    if (callerId != null)
-                    {
-                        description.Append(" ").Append(callerId);
-                    }
-
-                    description.AppendLine(":</b>");
-
-                    JsonSerializer.Serialize(jsonTextWriter, msg, null);
-                    description.AppendLine();
+                    description.Append(" ").Append(callerId);
                 }
 
-                if (description.Length > MaxMessages * MaxMessageLength)
-                {
-                    SetText(dialog.Text, description,
-                        description.Length - MaxMessages * MaxMessageLength,
-                        MaxMessages * MaxMessageLength);
-                }
-                else
-                {
-                    dialog.Text.SetText(description);
-                }
+                description.Append(":</b>").AppendLine();
 
-                queueIsDirty = false;
+                JsonSerializer.Serialize(jsonTextWriter, msg, null);
+                description.AppendLine();
             }
-            finally
+
+            if (description.Length > MaxMessages * MaxMessageLength)
             {
-                stringWriter.Dispose();
-                BuilderPool.Return(description);
+                SetText(dialog.Text, description,
+                    description.Length - MaxMessages * MaxMessageLength,
+                    MaxMessages * MaxMessageLength);
             }
+            else
+            {
+                dialog.Text.SetText(description);
+            }
+
+            queueIsDirty = false;
         }
+
 
         sealed class BoldJsonWriter : JsonTextWriter
         {

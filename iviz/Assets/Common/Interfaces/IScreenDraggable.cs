@@ -16,6 +16,7 @@ namespace Iviz.Common
         void OnEndDragging();
         Transform TargetTransform { get; set; }
         Vector3? ReferencePoint { get; }
+        Vector3? ReferenceNormal { get; }
         bool IsHovering { get; }
         bool IsDragging { get; }
     }

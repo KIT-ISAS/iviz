@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using Iviz.Common;
 using Iviz.Core;
@@ -12,11 +14,11 @@ namespace Iviz.Displays.Highlighters
         readonly Transform nodeTransform;
         readonly BoxCollider collider;
 
-        [CanBeNull] SelectionFrame frame;
+        SelectionFrame? frame;
 
-        public event Action PointerDown;
-        public event Action PointerUp;
-        public event Action Moved;
+        public event Action? PointerDown;
+        public event Action? PointerUp;
+        public event Action? Moved;
 
         public bool Interactable
         {
@@ -34,7 +36,7 @@ namespace Iviz.Displays.Highlighters
             nodeTransform = node.transform;
         }
 
-        protected void InitializeDraggable<T>([NotNull] IHasBounds source, [NotNull] Transform target)
+        protected void InitializeDraggable<T>(IHasBounds source, Transform target)
             where T : ScreenDraggable
         {
             if (source.BoundsTransform is { } boundsTransform)
@@ -115,4 +117,44 @@ namespace Iviz.Displays.Highlighters
             UnityEngine.Object.Destroy(nodeTransform.gameObject);
         }
     }
+    
+    public sealed class ClickableBoundsControl : AttachedBoundsControl
+    {
+        public ClickableBoundsControl(IHasBounds source, Transform target)
+        {
+            InitializeDraggable<StaticDraggable>(source, target);
+        }
+    }
+    
+    public sealed class LineBoundsControl : AttachedBoundsControl
+    {
+        public LineBoundsControl(IHasBounds source, Transform target)
+        {
+            InitializeDraggable<LineDraggable>(source, target);
+        }
+    }
+    
+    public sealed class PlaneBoundsControl : AttachedBoundsControl
+    {
+        public PlaneBoundsControl(IHasBounds source, Transform target)
+        {
+            InitializeDraggable<PlaneDraggable>(source, target);
+        }
+    }
+    
+    public sealed class RotationBoundsControl : AttachedBoundsControl
+    {
+        public RotationBoundsControl(IHasBounds source, Transform target)
+        {
+            InitializeDraggable<RotationDraggable>(source, target);
+        }
+    }    
+    
+    public sealed class FixedDistanceBoundsControl : AttachedBoundsControl
+    {
+        public FixedDistanceBoundsControl(IHasBounds source, Transform target)
+        {
+            InitializeDraggable<FixedDistanceDraggable>(source, target);
+        }
+    }        
 }

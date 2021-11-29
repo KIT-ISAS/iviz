@@ -101,17 +101,6 @@ namespace Iviz.App
                     case nameof(GridConfiguration.InteriorColor):
                         GridController.InteriorColor = config.InteriorColor;
                         break;
-                    /*
-                    case nameof(GridConfiguration.GridLineWidth):
-                        controller.GridLineWidth = config.GridLineWidth;
-                        break;
-                    case nameof(GridConfiguration.GridCellSize):
-                        controller.GridCellSize = config.GridCellSize;
-                        break;
-                    case nameof(GridConfiguration.NumberOfGridCells):
-                        controller.NumberOfGridCells = config.NumberOfGridCells;
-                        break;
-                        */
                     case nameof(GridConfiguration.InteriorVisible):
                         GridController.InteriorVisible = config.InteriorVisible;
                         break;

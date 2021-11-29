@@ -12,16 +12,16 @@ namespace Iviz.App
     public sealed class LineLog : MonoBehaviour, IWidget
     {
         const int MaxLines = 100;
-        
+
         static readonly char[] Separators = { '\n' };
 
         [SerializeField] TMP_Text? text2 = null;
-        
+
         readonly List<string> lines = new();
         bool active = true;
 
         TMP_Text Text2 => text2.AssertNotNull(nameof(text2));
-        
+
         public bool Active
         {
             get => active;
@@ -66,25 +66,18 @@ namespace Iviz.App
                 lines.RemoveRange(0, overflow);
             }
 
-            var description = BuilderPool.Rent();
-            try
+            using var description = BuilderPool.Rent();
+            if (lines.Count != 0)
             {
-                if (lines.Count != 0)
+                description.Append(lines[0]);
+                foreach (string line in lines.Skip(1))
                 {
-                    description.Append(lines[0]);
-                    foreach (string line in lines.Skip(1))
-                    {
-                        description.Append('\n');
-                        description.Append(line);
-                    }
+                    description.Append('\n');
+                    description.Append(line);
                 }
+            }
 
-                Text2.SetText(description);
-            }
-            finally
-            {
-                BuilderPool.Return(description);
-            }
+            Text2.SetText(description);
         }
 
         public void ClearSubscribers()

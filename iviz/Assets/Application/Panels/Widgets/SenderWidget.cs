@@ -79,29 +79,22 @@ namespace Iviz.App
                 return;
             }
 
-            var description = BuilderPool.Rent();
-            try
-            {
-                description
-                    .Append(Resource.Font.Split(Topic ?? "", MaxTopicLength))
-                    .Append("\n<b>");
+            using var description = BuilderPool.Rent();
+            description
+                .Append(Resource.Font.Split(Topic ?? "", MaxTopicLength))
+                .Append("\n<b>");
 
-                sender.WriteDescriptionTo(description);
+            sender.WriteDescriptionTo(description);
 
-                description.Append(" | ")
-                    .Append(MessagesPerSecond)
-                    .Append(" Hz | ");
+            description.Append(" | ")
+                .Append(MessagesPerSecond)
+                .Append(" Hz | ");
 
-                RosUtils.WriteFormattedBandwidth(description, BytesPerSecond);
+            RosUtils.WriteFormattedBandwidth(description, BytesPerSecond);
 
-                description.Append("</b>");
+            description.Append("</b>");
 
-                Text.SetText(description);
-            }
-            finally
-            {
-                BuilderPool.Return(description);
-            }
+            Text.SetText(description);
 
             Panel.color = Resource.Colors.EnabledSender;
         }

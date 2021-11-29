@@ -3,18 +3,11 @@
 using System.Linq;
 using Iviz.Common;
 using Iviz.Core;
+using Iviz.Displays.Highlighters;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public enum RotationConstraintType
-    {
-        OnlyXY,
-        OnlyXZ,
-        OnlyYZ,
-        All,
-    }
-
     public class ManipulableFrame : MonoBehaviour, IDisplay, IRecyclable
     {
         [SerializeField] SelectionFrame? frame = null;
@@ -99,9 +92,9 @@ namespace Iviz.Displays
                 (XYResource.Visible, XZResource.Visible, YZResource.Visible) =
                     value switch
                     {
-                        RotationConstraintType.OnlyXY => (true, false, false),
-                        RotationConstraintType.OnlyXZ => (false, true, false),
-                        RotationConstraintType.OnlyYZ => (false, false, true),
+                        RotationConstraintType.XY => (true, false, false),
+                        RotationConstraintType.XZ => (false, true, false),
+                        RotationConstraintType.YZ => (false, false, true),
                         _ => (true, true, true),
                     };
             }
@@ -131,7 +124,7 @@ namespace Iviz.Displays
             XZRotation.StateChanged += () => UpdateMarker(XZResource, XZRotation);
             YZRotation.StateChanged += () => UpdateMarker(YZResource, YZRotation);
 
-            RotationConstraint = RotationConstraintType.OnlyXZ;
+            RotationConstraint = RotationConstraintType.XZ;
         }
 
         static void UpdateMarker(ISupportsColor resource, IScreenDraggable draggable)

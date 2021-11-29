@@ -5,79 +5,69 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Resources;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
-using Animator = Iviz.Core.Animator;
 
-namespace Iviz.Displays
+namespace Iviz.Displays.Highlighters
 {
-    public sealed class ClickedPoseHighlighter
+    public sealed class ClickedPoseHighlighter : IAnimatable
     {
         readonly FrameNode node;
-        readonly MeshMarkerResource flatSphere;
+        readonly MeshMarkerResource reticle;
         readonly Tooltip tooltip;
         readonly CancellationTokenSource tokenSource;
 
-        public ClickedPoseHighlighter()
+        public CancellationToken Token => tokenSource.Token;
+        public float Duration => 1;
+
+        public ClickedPoseHighlighter(in Pose unityPose)
         {
+            float labelSize = Tooltip.GetRecommendedSize(unityPose.position);
+            float frameSize = labelSize * 10;
+
             node = FrameNode.Instantiate("[Clicked Pose Highlighter]");
-            flatSphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.Transform);
-            flatSphere.ShadowsEnabled = false;
-            flatSphere.Color = Color.white.WithAlpha(0.3f);
-            flatSphere.EmissiveColor = Color.white;
-            flatSphere.Layer = LayerType.IgnoreRaycast;
+            node.Transform.SetPose(unityPose);
+
+            reticle = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Reticle, node.Transform);
+            reticle.ShadowsEnabled = false;
+            reticle.Color = Color.white.WithAlpha(0.3f);
+            reticle.EmissiveColor = Color.white;
+            reticle.Layer = LayerType.IgnoreRaycast;
+
+            var localPose = new Pose(0.002f * Vector3.up, Quaternion.AngleAxis(90, Vector3.left));
+            reticle.Transform.SetLocalPose(localPose);
+            reticle.Transform.localScale = frameSize * Vector3.one;
 
             tooltip = ResourcePool.RentDisplay<Tooltip>(node.Transform);
             tooltip.CaptionColor = Color.white;
             tooltip.BackgroundColor = Resource.Colors.HighlighterBackground;
             tooltip.Layer = LayerType.IgnoreRaycast;
-            
-            tokenSource = new CancellationTokenSource();
-        }
-
-        public void Highlight(in Pose absolutePose)
-        {
-            float distanceToCam = Settings.MainCameraTransform
-                .InverseTransformDirection(absolutePose.position - Settings.MainCameraTransform.position).z;
-            float size = 0.2f * distanceToCam;
-
-            float baseFrameSize = TfListener.Instance.FrameSize;
-            float frameSize = baseFrameSize * Mathf.Max(1, size);
-            float labelSize = baseFrameSize * size * 0.375f / 2;
-
-            node.Transform.SetPose(absolutePose);
-
-            flatSphere.Transform.localScale = new Vector3(frameSize, frameSize * 0.1f, frameSize);
-
             tooltip.Scale = labelSize;
             tooltip.Transform.localPosition = 2f * (frameSize * 0.3f + labelSize) * Vector3.up;
             tooltip.PointToCamera();
 
-            var (pX, pY, pZ) = TfListener.RelativePositionToFixedFrame(node.Transform.position).Unity2RosVector3();
-            string px = pX.ToString("#,0.0", UnityUtils.Culture);
-            string py = pY.ToString("#,0.0", UnityUtils.Culture);
-            string pz = pZ.ToString("#,0.0", UnityUtils.Culture);
+            tokenSource = new CancellationTokenSource();
 
-            tooltip.Caption = $"{px}, {py}, {pz}";
-
-            Animator.Spawn(tokenSource.Token, 1.0f, UpdateFrame);
+            using var description = BuilderPool.Rent();
+            RosUtils.FormatPose(unityPose, description, RosUtils.PoseFormat.OnlyPosition, 2);
+            tooltip.SetCaption(description);
         }
 
-        void UpdateFrame(float t)
+        public void Update(float t)
         {
-            if (t >= 1)
-            {
-                tokenSource.Cancel();
-                flatSphere.ReturnToPool(Resource.Displays.Sphere);
-                tooltip.ReturnToPool();
-                node.DestroySelf();
-                return;
-            }
-
             float alpha = Mathf.Sqrt(1 - t);
             tooltip.CaptionColor = Color.white.WithAlpha(alpha);
             tooltip.BackgroundColor = Resource.Colors.HighlighterBackground.WithAlpha(alpha);
-            flatSphere.Color = Color.white.WithAlpha(0.3f * alpha);
+            reticle.Color = Color.white.WithAlpha(0.3f * alpha);
+        }
+
+        public void Dispose()
+        {
+            tokenSource.Cancel();
+            reticle.ReturnToPool(Resource.Displays.Reticle);
+            tooltip.ReturnToPool();
+            node.DestroySelf();
         }
     }
 }

@@ -207,34 +207,49 @@ namespace Iviz.Core
         public enum PoseFormat
         {
             OnlyPosition,
-            WithoutRoll,
+            OnlyRotation,
+            AllWithoutRoll,
             All
         }
 
         public static void FormatPose(in UnityEngine.Pose unityPose, StringBuilder description,
-            PoseFormat format = PoseFormat.All)
+            PoseFormat format = PoseFormat.All, int positionPrecision = 3)
         {
-            var (pX, pY, pZ) = unityPose.position.Unity2RosVector3();
-            string px = pX == 0 ? "0" : pX.ToString("#,0.###", UnityUtils.Culture);
-            string py = pY == 0 ? "0" : pY.ToString("#,0.###", UnityUtils.Culture);
-            string pz = pZ == 0 ? "0" : pZ.ToString("#,0.###", UnityUtils.Culture);
+            if (format != PoseFormat.OnlyRotation)
+            {
+                var (pX, pY, pZ) = unityPose.position.Unity2RosVector3();
+                string positionFormat = positionPrecision switch
+                {
+                    3 => "#,0.###",
+                    2 => "#,0.##",
+                    1 => "#,0.#",
+                    _ => "#,0.",
+                };
 
-            description.Append(px).Append(", ").Append(py).Append(", ").Append(pz);
+                string px = pX == 0 ? "0" : pX.ToString(positionFormat, UnityUtils.Culture);
+                string py = pY == 0 ? "0" : pY.ToString(positionFormat, UnityUtils.Culture);
+                string pz = pZ == 0 ? "0" : pZ.ToString(positionFormat, UnityUtils.Culture);
+
+                description.Append(px).Append(", ").Append(py).Append(", ").Append(pz);
+            }
 
             if (format == PoseFormat.OnlyPosition)
             {
                 return;
             }
 
-            description.AppendLine();
-            
+            if (format != PoseFormat.OnlyRotation)
+            {
+                description.AppendLine();
+            }
+
             var (rXr, rYr, rZr) = (-unityPose.rotation.eulerAngles).Unity2RosVector3();
 
-            if (format == PoseFormat.All)
+            if (format is PoseFormat.All or PoseFormat.OnlyRotation)
             {
                 double rX = RegularizeAngle(rXr);
                 string rx = rX == 0 ? "0" : rX.ToString("#,0.#", UnityUtils.Culture);
-            
+
                 description.Append("r: ").Append(rx).Append(", ");
             }
 

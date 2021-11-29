@@ -22,12 +22,9 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             var linkInfo = Text.textInfo.linkInfo[linkIndex];
-            if (eventData.clickCount == 1)
-            {
-                LinkClicked?.Invoke(linkInfo.GetLinkID());
-            }
+            LinkClicked?.Invoke(linkInfo.GetLinkID());
         }
     }
 }

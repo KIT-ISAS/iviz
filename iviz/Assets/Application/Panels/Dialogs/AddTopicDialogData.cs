@@ -84,7 +84,7 @@ namespace Iviz.App
                 topics.RemoveAll(topic => topic.ResourceType == ModuleType.Invalid);
             }
 
-            panel.Items = topics.Select(topic => topic.ToString());
+            panel.SetItems(topics.Select(topic => topic.ToString()));
 
             if (showAll)
             {

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Iviz.App;
 using Iviz.Common;
@@ -102,15 +103,10 @@ namespace Iviz.Controllers
          
             const int maxToDisplay = 50;
             
-            int i = 0;
-            foreach (var interactiveMarker in interactiveMarkers.Values)
+            foreach (var interactiveMarker in interactiveMarkers.Values.Take(maxToDisplay))
             {
                 interactiveMarker.GenerateLog(description);
                 description.AppendLine();
-                if (i++ > maxToDisplay)
-                {
-                    break;
-                }
             }
 
             if (interactiveMarkers.Count > maxToDisplay)
@@ -176,7 +172,12 @@ namespace Iviz.Controllers
             FullListener?.Unsuspend();
         }
 
-        public bool TryGetMarkerFromId(string id, out IHasBounds? frame)
+        public bool TryGetBoundsFromId(string id, out IHasBounds? frame)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<IHasBounds> GetAllBounds()
         {
             throw new NotImplementedException();
         }
@@ -279,7 +280,6 @@ namespace Iviz.Controllers
                 Visible = Visible,
                 Interactable = Interactable
             };
-            newMarkerObject.Transform.SetParentLocal(node.transform);
             interactiveMarkers[id] = newMarkerObject;
             newMarkerObject.Set(msg);
         }
@@ -306,7 +306,7 @@ namespace Iviz.Controllers
             interactiveMarkers.Remove(id);
         }
 
-        internal void OnInteractiveControlObjectMouseEvent(
+        internal void OnControlMouseEvent(
             string interactiveMarkerId, string controlId, string? frameId,
             in Pose relativeControlPose, in Vector3? position,
             MouseEventType eventType)
@@ -326,7 +326,7 @@ namespace Iviz.Controllers
             RosLogger.Debug($"{this}: ButtonFeedback Marker:{interactiveMarkerId} Type:{eventType}");
         }
 
-        internal void OnInteractiveControlObjectMoved(
+        internal void OnControlMoved(
             string interactiveMarkerId, string controlId,
             string? frameId, in Pose relativeControlPose)
         {
@@ -345,7 +345,7 @@ namespace Iviz.Controllers
             Publisher?.Publish(msg);
         }
 
-        internal void OnInteractiveControlObjectMenuSelect(
+        internal void OnControlMenuSelect(
             string interactiveMarkerId, string? frameId,
             uint menuEntryId, in Pose relativeControlPose)
         {
@@ -362,7 +362,7 @@ namespace Iviz.Controllers
                 false
             );
             Publisher?.Publish(msg);
-            RosLogger.Debug($"{this}: MenuFeedback Marker:{interactiveMarkerId} Entry:{menuEntryId}");
+            RosLogger.Debug($"{this}: MenuFeedback Marker:{interactiveMarkerId} Entry:{menuEntryId.ToString()}");
         }
 
         void DestroyAllMarkers()

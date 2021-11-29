@@ -55,7 +55,9 @@ namespace Iviz.Displays
             Draggable.StateChanged += () =>
             {
                 Frame.Visible = Draggable.IsDragging || Draggable.IsHovering;
+                Frame.Color = Draggable.IsDragging ? Color.cyan : Color.white;
                 Frame.EmissiveColor = Draggable.IsDragging ? Color.blue : Color.black;
+                Frame.ColumnWidth = Draggable.IsDragging ? 0.01f : 0.005f;
             };
             
             Draggable.EndDragging += OnEndDragging;

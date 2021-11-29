@@ -19,22 +19,21 @@ namespace Iviz.Controllers
         const string ErrorStr = "<color=red>Error:</color> ";
 
         readonly Dictionary<string, InteractiveMarkerControlObject> controls = new();
-        readonly StringBuilder description = new(250);
         readonly FrameNode node;
         readonly InteractiveMarkerListener listener;
-        readonly TextMarkerResource text;
-        readonly Transform controlNode;
         readonly string rosId;
         MenuEntryList? menuEntries;
+        TextMarkerResource? text;
 
-        int numWarnings;
-        int numErrors;
         bool visible;
         Pose? bufferedPose;
         bool poseUpdateEnabled = true;
         bool interactable;
+        string? caption;
 
-        public Transform Transform => node.transform;
+        InteractiveMarker? lastMessage;
+
+        public Transform ControlNode { get; }
 
         internal bool PoseUpdateEnabled
         {
@@ -44,7 +43,7 @@ namespace Iviz.Controllers
                 poseUpdateEnabled = value;
                 if (poseUpdateEnabled && bufferedPose != null)
                 {
-                    controlNode.transform.SetLocalPose(bufferedPose.Value);
+                    ControlNode.transform.SetLocalPose(bufferedPose.Value);
                     bufferedPose = null;
                 }
             }
@@ -52,8 +51,27 @@ namespace Iviz.Controllers
 
         public bool DescriptionVisible
         {
-            get => text.Visible;
-            set => text.Visible = value;
+            get => text != null;
+            set
+            {
+                if (value)
+                {
+                    text = ResourcePool.RentDisplay<TextMarkerResource>(ControlNode);
+                    text.BillboardEnabled = true;
+                    text.BillboardOffset = Vector3.up * 0.1f;
+                    text.ElementSize = 0.1f;
+                    text.Visible = false;
+                    text.AlwaysVisible = true;
+                    if (caption != null)
+                    {
+                        text.Text = caption;
+                    }
+                }
+                else if (text != null)
+                {
+                    text.ReturnToPool();
+                }
+            }
         }
 
         Pose LocalPose
@@ -62,7 +80,7 @@ namespace Iviz.Controllers
             {
                 if (PoseUpdateEnabled)
                 {
-                    controlNode.transform.SetLocalPose(value);
+                    ControlNode.transform.SetLocalPose(value);
                 }
                 else
                 {
@@ -98,64 +116,31 @@ namespace Iviz.Controllers
             }
         }
 
-        public InteractiveMarkerObject(InteractiveMarkerListener newListener, string realId, TfFrame parent)
+        public InteractiveMarkerObject(InteractiveMarkerListener listener, string rosId, TfFrame parent)
         {
-            listener = newListener;
-            rosId = realId;
+            this.listener = listener;
+            this.rosId = rosId;
 
-            node = FrameNode.Instantiate("[InteractiveMarkerObject]");
+            node = FrameNode.Instantiate($"[InteractiveMarkerObject '{rosId}']");
             node.Parent = parent;
 
-            controlNode = new GameObject("[ControlNode]").transform;
-            controlNode.parent = Transform;
-
-            text = ResourcePool.RentDisplay<TextMarkerResource>(controlNode);
-            text.BillboardEnabled = true;
-            text.BillboardOffset = Vector3.up * 0.1f;
-            text.ElementSize = 0.1f;
-            text.Visible = false;
-            text.AlwaysVisible = true;
+            ControlNode = new GameObject("[ControlNode]").transform;
+            ControlNode.SetParentLocal(node.Transform);
 
             Interactable = true;
         }
 
         public void Set(InteractiveMarker msg)
         {
-            node.gameObject.name = msg.Name;
-            numWarnings = 0;
-            numErrors = 0;
+            lastMessage = msg;
 
-            description.Clear();
-            description.Append("<color=blue><b>** ");
-
-            if (string.IsNullOrEmpty(msg.Name))
+            caption = msg.Description.Length != 0 ? msg.Description : msg.Name;
+            if (text != null)
             {
-                description.Append("(empty name)");
-            }
-            else
-            {
-                description.Append("'").Append(msg.Name).Append("'");
+                text.Text = caption;
             }
 
-            description.Append("</b></color>").AppendLine();
-
-            string msgDescription = msg.Description.Length != 0
-                ? msg.Description.Replace("\t", "\\t").Replace("\n", "\\n")
-                : "[]";
-            description.Append("Description: ").Append(msgDescription).AppendLine();
-
-            text.Text = msg.Description.Length != 0 ? msg.Description : msg.Name;
-
-            if (Mathf.Approximately(msg.Scale, 0))
-            {
-                controlNode.localScale = Vector3.one;
-                description.Append("Scale: 0 <i>(1)</i>").AppendLine();
-            }
-            else
-            {
-                controlNode.localScale = msg.Scale * Vector3.one;
-                description.Append("Scale: ").Append(msg.Scale).AppendLine();
-            }
+            float defaultScale = Mathf.Approximately(msg.Scale, 0) ? 1 : msg.Scale;
 
             LocalPose = msg.Pose.Ros2Unity();
 
@@ -168,31 +153,28 @@ namespace Iviz.Controllers
             {
                 string controlId = controlMsg.Name.Length != 0
                     ? controlMsg.Name
-                    : $"[Unnamed-{(numUnnamed++).ToString()}]";
+                    : $"Unnamed/{(numUnnamed++).ToString()}";
 
+                controlsToDelete.Remove(controlId);
+
+                InteractiveMarkerControlObject controlObject;
                 if (controls.TryGetValue(controlId, out var existingControl))
                 {
-                    existingControl.Set(controlMsg);
-                    controlsToDelete.Remove(controlId);
-                    continue;
+                    controlObject = existingControl;
+                }
+                else
+                {
+                    controlObject = new InteractiveMarkerControlObject(this, controlId)
+                    {
+                        Visible = Visible,
+                        Interactable = Interactable
+                    };
+                    controls[controlId] = controlObject;
+                    controlObject.Transform.SetParentLocal(ControlNode);
                 }
 
-                var newControl = new InteractiveMarkerControlObject(this, controlMsg.Name)
-                {
-                    Visible = Visible,
-                    Interactable = Interactable
-                };
-                newControl.Transform.SetParentLocal(controlNode);
-                controls[controlId] = newControl;
-
-                newControl.Set(controlMsg);
-                controlsToDelete.Remove(controlId);
-            }
-
-            if (numUnnamed > 1)
-            {
-                description.Append(WarnStr).Append(numUnnamed).Append(" controls have empty ids").AppendLine();
-                numWarnings++;
+                controlObject.Set(controlMsg);
+                controlObject.Scale = controlObject.InteractionMode == InteractionMode.None ? defaultScale : 1;
             }
 
             foreach (string controlId in controlsToDelete)
@@ -201,42 +183,13 @@ namespace Iviz.Controllers
                 controls.Remove(controlId);
             }
 
+            if (msg.MenuEntries.Length != 0)
+            {
+                menuEntries = new MenuEntryList(msg.MenuEntries);
+            }
+
             /*
-            // update the dimensions of the controls
-            var totalBounds =
-                controls.Values
-                    .Select(control => control.Bounds.TransformBound(control.Transform))
-                    .CombineBounds();
-
-            foreach (var control in controls.Values)
             {
-                control.UpdateControlBounds(totalBounds);
-            }
-
-            {
-                var controlObject = controls.Values.FirstOrDefault(control =>
-                    control.ControlInteractionMode == InteractionModeType.ClickOnly);
-                var controlMarker = controlObject?.ControlMarker != null
-                    ? controlObject.ControlMarker
-                    : controls.Values.FirstOrDefault(control => control.ControlColliderCanInteract)?.ControlMarker;
-
-                if (controlMarker != null)
-                {
-                    controlMarker.SetColliderInteractable();
-                }
-            }
-
-            if (msg.MenuEntries.Length == 0)
-            {
-                return;
-            }
-
-            {
-                menuEntries = new MenuEntryList(msg.MenuEntries, description, out int newNumErrors);
-                numErrors += newNumErrors;
-
-                description.Append("+ ").Append(menuEntries.Count).Append(" menu entries").AppendLine();
-
                 var controlMarker = controls.Values
                     .FirstOrDefault(control => control.ControlMarker != null)
                     ?.ControlMarker;
@@ -251,7 +204,6 @@ namespace Iviz.Controllers
                 }
             }
             */
-            
         }
 
         internal void ShowMenu(Vector3 unityPositionHint)
@@ -277,9 +229,8 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            var pose = controlNode.AsLocalPose();
-            listener.OnInteractiveControlObjectMouseEvent(rosId, rosControlId,
-                node.Parent != null ? node.Parent.Id : null, pose, point, type);
+            listener.OnControlMouseEvent(rosId, rosControlId,
+                node.Parent != null ? node.Parent.Id : null, ControlNode.AsLocalPose(), point, type);
         }
 
         internal void OnMoved(string rosControlId)
@@ -289,9 +240,8 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            var pose = controlNode.AsLocalPose();
-            listener.OnInteractiveControlObjectMoved(rosId, rosControlId,
-                node.Parent != null ? node.Parent.Id : null, pose);
+            listener.OnControlMoved(rosId, rosControlId,
+                node.Parent != null ? node.Parent.Id : null, ControlNode.AsLocalPose());
         }
 
         void OnMenuClick(uint entryId)
@@ -301,9 +251,8 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            listener.OnInteractiveControlObjectMenuSelect(rosId,
-                node.Parent != null ? node.Parent.Id : null, entryId,
-                controlNode.AsLocalPose());
+            listener.OnControlMenuSelect(rosId,
+                node.Parent != null ? node.Parent.Id : null, entryId, ControlNode.AsLocalPose());
         }
 
         public void Stop()
@@ -317,27 +266,74 @@ namespace Iviz.Controllers
 
             text.ReturnToPool();
 
-            Object.Destroy(controlNode.gameObject);
+            Object.Destroy(ControlNode.gameObject);
             node.DestroySelf();
         }
 
-        public void GenerateLog(StringBuilder baseDescription)
+        public void GenerateLog(StringBuilder description)
         {
-            baseDescription.Append(description);
-            baseDescription.Append("Attached to: <i>").Append(node.Parent != null ? node.Parent.Id : "none")
+            if (lastMessage == null)
+            {
+                return;
+            }
+
+            description.Append("<color=blue><b>** ");
+
+            if (string.IsNullOrEmpty(lastMessage.Name))
+            {
+                description.Append("(empty name)");
+            }
+            else
+            {
+                description.Append("'").Append(lastMessage.Name).Append("'");
+            }
+
+            description.Append("</b></color>").AppendLine();
+
+            string msgDescription = lastMessage.Description.Length != 0
+                ? lastMessage.Description.Replace("\t", "\\t").Replace("\n", "\\n")
+                : "[]";
+            description.Append("Description: ").Append(msgDescription).AppendLine();
+
+            if (Mathf.Approximately(lastMessage.Scale, 0))
+            {
+                description.Append("Scale: 0 <i>(1)</i>").AppendLine();
+            }
+            else
+            {
+                description.Append("Scale: ").Append(lastMessage.Scale).AppendLine();
+            }
+
+            description.Append("Attached to: <i>").Append(node.Parent != null ? node.Parent.Id : "none")
                 .Append("</i>")
                 .AppendLine();
 
+
+            if (menuEntries != null)
+            {
+                description.Append("+ ").Append(menuEntries.Count).Append(" menu entries").AppendLine();
+                if (controls.Values.All(control => control.InteractionMode != InteractionMode.Menu))
+                {
+                    description.Append(WarnStr)
+                        .Append("Menu entries were set, but no control has interaction mode MENU").AppendLine();
+                }
+
+                if (menuEntries.ErrorMessages != null)
+                {
+                    description.Append(menuEntries.ErrorMessages);
+                }
+            }
+
             foreach (var control in controls.Values)
             {
-                control.GenerateLog(baseDescription);
+                control.GenerateLog(description);
             }
         }
 
         public void GetErrorCount(out int totalErrors, out int totalWarnings)
         {
-            totalErrors = numErrors;
-            totalWarnings = numWarnings;
+            totalErrors = 0;
+            totalWarnings = 0;
 
             foreach (var control in controls.Values)
             {

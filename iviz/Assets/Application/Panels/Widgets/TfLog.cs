@@ -197,8 +197,7 @@ namespace Iviz.App
 
         void UpdateFrameListAsTree()
         {
-            var description = BuilderPool.Rent();
-            try
+            using (var description = BuilderPool.Rent())
             {
                 new TfNode(TfListener.OriginFrame, SelectedFrame).Write(description);
 
@@ -211,25 +210,21 @@ namespace Iviz.App
 
                 descriptionHash = newHash;
                 TfText.SetText(description);
-                RectTransform cTransform = ContentTransform;
-                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, TfText.preferredWidth + 10);
-                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, TfText.preferredHeight + 10);
             }
-            finally
-            {
-                BuilderPool.Return(description);
-            }
+
+            RectTransform cTransform = ContentTransform;
+            cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, TfText.preferredWidth + 10);
+            cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, TfText.preferredHeight + 10);
         }
 
         void UpdateFrameListAsList()
         {
             nodes.Clear();
             new TfNode(TfListener.OriginFrame, SelectedFrame).AddTo(nodes);
-
-            var description = BuilderPool.Rent();
-            try
+            nodes.Sort();
+            
+            using (var description = BuilderPool.Rent())
             {
-                nodes.Sort();
                 foreach (var node in nodes)
                 {
                     node.WriteSingle(description);
@@ -244,15 +239,11 @@ namespace Iviz.App
 
                 descriptionHash = newHash;
                 TfText.SetText(description);
+            }
 
-                var cTransform = ContentTransform;
-                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, TfText.preferredWidth + 10);
-                cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, TfText.preferredHeight + 10);
-            }
-            finally
-            {
-                BuilderPool.Return(description);
-            }
+            var cTransform = ContentTransform;
+            cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, TfText.preferredWidth + 10);
+            cTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, TfText.preferredHeight + 10);
         }
 
         public void UpdateFrameText()
@@ -263,56 +254,51 @@ namespace Iviz.App
             }
 
             var frame = SelectedFrame;
-            var description = BuilderPool.Rent();
-            try
+            using var description = BuilderPool.Rent();
+            if (frame == null)
             {
-                if (frame == null)
-                {
-                    description.Append("<color=grey>[none]</color>");
-                }
-                else
-                {
-                    string id = frame.Id;
-                    description.Append("<b>[")
-                        .Append(id)
-                        .AppendLine(id == TfListener.FixedFrameId
-                            ? "]</b>  <i>[Fixed]</i>"
-                            : "]</b>");
+                description.Append("<color=grey>[none]</color>");
+            }
+            else
+            {
+                string id = frame.Id;
+                description.Append("<b>[")
+                    .Append(id)
+                    .Append(id == TfListener.FixedFrameId
+                        ? "]</b>  <i>[Fixed]</i>"
+                        : "]</b>")
+                    .AppendLine();
 
-                    description.AppendLine(
+                description.Append(
                         frame.Parent == null || frame.Parent == TfListener.OriginFrame
                             ? "[no parent]"
-                            : frame.Parent.Id);
+                            : frame.Parent.Id)
+                    .AppendLine();
 
-                    if (frame.LastCallerId != null)
-                    {
-                        description.Append("[").Append(frame.LastCallerId).AppendLine("]");
-                    }
-
-                    Pose pose = poseDisplay switch
-                    {
-                        PoseDisplayType.ToRoot => frame.OriginWorldPose,
-                        PoseDisplayType.ToFixed => TfListener.RelativePoseToFixedFrame(frame.AbsoluteUnityPose),
-                        PoseDisplayType.ToParent => frame.Transform.AsLocalPose(),
-                        _ => Pose.identity
-                    };
-
-                    RosUtils.FormatPose(pose, description);
-                }
-
-                uint newHash = Crc32Calculator.Compute(description);
-                if (newHash == textHash)
+                if (frame.LastCallerId != null)
                 {
-                    return;
+                    description.Append("[").Append(frame.LastCallerId).Append("]").AppendLine();
                 }
 
-                textHash = newHash;
-                TfName.SetText(description);
+                Pose pose = poseDisplay switch
+                {
+                    PoseDisplayType.ToRoot => frame.OriginWorldPose,
+                    PoseDisplayType.ToFixed => TfListener.RelativePoseToFixedFrame(frame.AbsoluteUnityPose),
+                    PoseDisplayType.ToParent => frame.Transform.AsLocalPose(),
+                    _ => Pose.identity
+                };
+
+                RosUtils.FormatPose(pose, description);
             }
-            finally
+
+            uint newHash = Crc32Calculator.Compute(description);
+            if (newHash == textHash)
             {
-                BuilderPool.Return(description);
+                return;
             }
+
+            textHash = newHash;
+            TfName.SetText(description);
         }
 
         public void UpdateFrameButtons()
@@ -392,7 +378,7 @@ namespace Iviz.App
         }
 
         // ------------------------------------------
-        
+
         readonly struct TfNode : IComparable<TfNode>
         {
             readonly string name;
@@ -407,10 +393,9 @@ namespace Iviz.App
                 selected = (frame == selectedFrame);
                 children = new TfNode[frame.Children.Count];
 
-                int i = 0;
-                foreach (var childFrame in frame.Children)
+                foreach (var (childFrame, i) in frame.Children.WithIndex())
                 {
-                    children[i++] = new TfNode(childFrame, selectedFrame);
+                    children[i] = new TfNode(childFrame, selectedFrame);
                 }
 
                 Array.Sort(children);

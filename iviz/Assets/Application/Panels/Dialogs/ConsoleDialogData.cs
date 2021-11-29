@@ -122,20 +122,13 @@ namespace Iviz.App
                 return;
             }
 
-            var description = BuilderPool.Rent();
-            try
-            {
-                listener.WriteDescriptionTo(description);
-                string kbPerSecond = (listener.Stats.BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
-                description.Append(" | ").Append(listener.Stats.MessagesPerSecond).Append(" Hz | ")
-                    .Append(kbPerSecond).Append(" kB/s");
+            using var description = BuilderPool.Rent();
+            listener.WriteDescriptionTo(description);
+            string kbPerSecond = (listener.Stats.BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
+            description.Append(" | ").Append(listener.Stats.MessagesPerSecond).Append(" Hz | ")
+                .Append(kbPerSecond).Append(" kB/s");
 
-                dialog.BottomText.SetText(description);
-            }
-            finally
-            {
-                BuilderPool.Return(description);
-            }
+            dialog.BottomText.SetText(description);
         }
 
 
@@ -243,105 +236,99 @@ namespace Iviz.App
                 return;
             }
 
-            var description = BuilderPool.Rent();
-            try
+            using var description = BuilderPool.Rent();
+            using (var messages = new RentAndClear<LogMessage>(messageQueue.Count))
+            using (var indices = new Rent<int>(MaxMessagesToPrint))
             {
-                using (var messages = new RentAndClear<LogMessage>(messageQueue.Count))
-                using (var indices = new Rent<int>(MaxMessagesToPrint))
+                int indexStart = 0;
+                int numIndices = 0;
+
+                messageQueue.CopyTo(messages.Array, 0);
+                for (int i = 0; i < messages.Length; i++)
                 {
-                    int indexStart = 0;
-                    int numIndices = 0;
-
-                    messageQueue.CopyTo(messages.Array, 0);
-                    for (int i = 0; i < messages.Length; i++)
+                    var message = messages[i];
+                    var messageLevel = message.Level;
+                    if (messageLevel < minLogLevel)
                     {
-                        var message = messages[i];
-                        var messageLevel = message.Level;
-                        if (messageLevel < minLogLevel)
-                        {
-                            continue;
-                        }
-
-                        if (idCode == FromIdCode.Me && message.SourceId != null ||
-                            idCode == FromIdCode.OnlyId && message.SourceId != id)
-                        {
-                            continue;
-                        }
-
-                        if (numIndices != MaxMessagesToPrint)
-                        {
-                            indices[numIndices] = i;
-                            numIndices++;
-                        }
-                        else
-                        {
-                            indices[indexStart] = i;
-                            indexStart = (indexStart + 1) % MaxMessagesToPrint;
-                        }
+                        continue;
                     }
 
-                    for (int i = 0; i < numIndices; i++)
+                    if (idCode == FromIdCode.Me && message.SourceId != null ||
+                        idCode == FromIdCode.OnlyId && message.SourceId != id)
                     {
-                        int index = indices[(indexStart + i) % MaxMessagesToPrint];
-                        var message = messages[index];
-                        var messageLevel = message.Level;
+                        continue;
+                    }
 
-                        if (message.Stamp == default)
-                        {
-                            description.Append("<b>[] ");
-                        }
-                        else
-                        {
-                            string dateAsStr = message.SourceId == null
-                                ? GameThread.NowFormatted
-                                : message.Stamp.ToString(message.Stamp.Date == GameThread.Now.Date
-                                    ? "HH:mm:ss.fff"
-                                    : "yy-MM-dd HH:mm:ss.fff");
-
-                            description.Append("<b>[").Append(dateAsStr).Append("] ");
-                        }
-
-                        string levelColor = ColorFromLevel(messageLevel);
-
-                        description.Append("<color=").Append(levelColor).Append(">");
-
-                        description.Append(message.SourceId ?? "Me");
-
-                        switch (messageLevel)
-                        {
-                            case LogLevel.Warn:
-                                description.Append(" [W]");
-                                break;
-                            case LogLevel.Error:
-                                description.Append(" [E]");
-                                break;
-                            case LogLevel.Fatal:
-                                description.Append(" [F]");
-                                break;
-                        }
-
-                        description.Append(": </color></b>");
-
-
-                        if (message.SourceId == null || message.Message.Length < MaxMessageLength)
-                        {
-                            description.Append(message.Message).AppendLine();
-                        }
-                        else
-                        {
-                            description.Append(message.Message, 0, MaxMessageLength).Append("<i>... +")
-                                .Append(message.Message.Length - MaxMessageLength).Append(" chars</i>").AppendLine();
-                        }
+                    if (numIndices != MaxMessagesToPrint)
+                    {
+                        indices[numIndices] = i;
+                        numIndices++;
+                    }
+                    else
+                    {
+                        indices[indexStart] = i;
+                        indexStart = (indexStart + 1) % MaxMessagesToPrint;
                     }
                 }
 
-                dialog.Text.SetText(description);
-                queueIsDirty = false;
+                for (int i = 0; i < numIndices; i++)
+                {
+                    int index = indices[(indexStart + i) % MaxMessagesToPrint];
+                    var message = messages[index];
+                    var messageLevel = message.Level;
+
+                    if (message.Stamp == default)
+                    {
+                        description.Append("<b>[] ");
+                    }
+                    else
+                    {
+                        string dateAsStr = message.SourceId == null
+                            ? GameThread.NowFormatted
+                            : message.Stamp.ToString(message.Stamp.Date == GameThread.Now.Date
+                                ? "HH:mm:ss.fff"
+                                : "yy-MM-dd HH:mm:ss.fff");
+
+                        description.Append("<b>[").Append(dateAsStr).Append("] ");
+                    }
+
+                    string levelColor = ColorFromLevel(messageLevel);
+
+                    description.Append("<color=").Append(levelColor).Append(">");
+
+                    description.Append(message.SourceId ?? "Me");
+
+                    switch (messageLevel)
+                    {
+                        case LogLevel.Warn:
+                            description.Append(" [W]");
+                            break;
+                        case LogLevel.Error:
+                            description.Append(" [E]");
+                            break;
+                        case LogLevel.Fatal:
+                            description.Append(" [F]");
+                            break;
+                    }
+
+                    description.Append(": </color></b>");
+
+
+                    if (message.SourceId == null || message.Message.Length < MaxMessageLength)
+                    {
+                        description.Append(message.Message).AppendLine();
+                    }
+                    else
+                    {
+                        description.Append(message.Message, 0, MaxMessageLength).Append("<i>... +")
+                            .Append(message.Message.Length - MaxMessageLength).Append(" chars</i>").AppendLine();
+                    }
+                }
             }
-            finally
-            {
-                BuilderPool.Return(description);
-            }
+
+            dialog.Text.SetText(description);
+            queueIsDirty = false;
         }
     }
 }
+

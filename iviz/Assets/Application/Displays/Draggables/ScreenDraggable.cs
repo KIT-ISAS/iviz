@@ -16,13 +16,19 @@ namespace Iviz.Displays
         [SerializeField] Transform? targetTransform = null;
         Transform? mTransform;
 
-        protected Transform? interactorTransform;
+        [SerializeField] Collider? rayCollider;
 
-        //protected bool needsStart;
-        //protected Vector3 referencePointLocal;
+        protected Transform? interactorTransform;
 
         public bool IsHovering { get; private set; }
         public bool IsDragging { get; private set; }
+        public float? Damping { get; set; } = 0.2f;
+
+        public Collider RayCollider
+        {
+            get => rayCollider.AssertNotNull(nameof(rayCollider));
+            set => rayCollider = value != null ? value : throw new ArgumentNullException(nameof(value));
+        }
 
         public event Action? Moved;
         public event Action? PointerDown;
@@ -34,9 +40,14 @@ namespace Iviz.Displays
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         protected Vector3? ReferencePointLocal { get; set; }
+        protected Vector3? ReferenceNormalLocal { get; set; }
 
         public Vector3? ReferencePoint => ReferencePointLocal is { } referencePointLocal
             ? Transform.TransformPoint(referencePointLocal)
+            : null;
+
+        public Vector3? ReferenceNormal => ReferenceNormalLocal is { } referenceNormalLocal
+            ? Transform.TransformDirection(referenceNormalLocal)
             : null;
 
 
@@ -52,6 +63,19 @@ namespace Iviz.Displays
             set => gameObject.SetActive(value);
         }
 
+
+        protected Vector3 InitializeReferencePoint(in Ray pointerRay)
+        {
+            if (!RayCollider.TryIntersectRay(pointerRay, out var intersectionWorld, out var normalWorld))
+            {
+                return default; // shouldn't happen
+            }
+
+            ReferencePointLocal = Transform.InverseTransformPoint(intersectionWorld);
+            ReferenceNormalLocal = Transform.InverseTransformDirection(normalWorld);
+            return intersectionWorld;
+        }        
+        
         void IScreenDraggable.OnStartDragging()
         {
             ReferencePointLocal = null;
@@ -121,6 +145,16 @@ namespace Iviz.Displays
         {
             IsHovering = false;
             StateChanged?.Invoke();
+        }
+
+        public void ClearSubscribers()
+        {
+            Moved = null;
+            PointerDown = null;
+            PointerUp = null;
+            StartDragging = null;
+            EndDragging = null;
+            StateChanged = null;
         }
     }
 }
