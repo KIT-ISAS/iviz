@@ -768,17 +768,35 @@ namespace Iviz.MsgsGen
                         }
                         else
                         {
-                            if (forceStruct)
+                            if (variable.ArraySize == 0)
                             {
-                                lines.Add(variable.CsClassName == "string"
-                                    ? $"    b.SerializeArray({variable.CsFieldName} ?? System.Array.Empty<string>(), {variable.ArraySize});"
-                                    : $"    b.SerializeStructArray({variable.CsFieldName} ?? System.Array.Empty<{variable.CsClassName}>(), {variable.ArraySize});");
+                                if (forceStruct)
+                                {
+                                    lines.Add(variable.CsClassName == "string"
+                                        ? $"    b.SerializeArray({variable.CsFieldName} ?? System.Array.Empty<string>());"
+                                        : $"    b.SerializeStructArray({variable.CsFieldName} ?? System.Array.Empty<{variable.CsClassName}>());");
+                                }
+                                else
+                                {
+                                    lines.Add(variable.CsClassName == "string"
+                                        ? $"    b.SerializeArray({variable.CsFieldName});"
+                                        : $"    b.SerializeStructArray({variable.CsFieldName});");
+                                }                                
                             }
                             else
                             {
-                                lines.Add(variable.CsClassName == "string"
-                                    ? $"    b.SerializeArray({variable.CsFieldName}, {variable.ArraySize});"
-                                    : $"    b.SerializeStructArray({variable.CsFieldName}, {variable.ArraySize});");
+                                if (forceStruct)
+                                {
+                                    lines.Add(variable.CsClassName == "string"
+                                        ? $"    b.SerializeArray({variable.CsFieldName} ?? System.Array.Empty<string>(), {variable.ArraySize});"
+                                        : $"    b.SerializeStructArray({variable.CsFieldName} ?? System.Array.Empty<{variable.CsClassName}>(), {variable.ArraySize});");
+                                }
+                                else
+                                {
+                                    lines.Add(variable.CsClassName == "string"
+                                        ? $"    b.SerializeArray({variable.CsFieldName}, {variable.ArraySize});"
+                                        : $"    b.SerializeStructArray({variable.CsFieldName}, {variable.ArraySize});");
+                                }                                
                             }
                         }
                     }
@@ -792,9 +810,18 @@ namespace Iviz.MsgsGen
                         }
                         else
                         {
-                            lines.Add(variable.ClassIsBlittable
-                                ? $"    b.SerializeStructArray({variable.CsFieldName}, {variable.ArraySize});"
-                                : $"    b.SerializeArray({variable.CsFieldName}, {variable.ArraySize});");
+                            if (variable.ArraySize == 0)
+                            {
+                                lines.Add(variable.ClassIsBlittable
+                                    ? $"    b.SerializeStructArray({variable.CsFieldName});"
+                                    : $"    b.SerializeArray({variable.CsFieldName});");
+                            }
+                            else
+                            {
+                                lines.Add(variable.ClassIsBlittable
+                                    ? $"    b.SerializeStructArray({variable.CsFieldName}, {variable.ArraySize});"
+                                    : $"    b.SerializeArray({variable.CsFieldName}, {variable.ArraySize});");
+                            }
                         }
                     }
                 }
