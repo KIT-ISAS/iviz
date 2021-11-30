@@ -178,7 +178,7 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(Height);
             b.Serialize(Width);
             b.Serialize(DistortionModel);
-            b.SerializeStructArray(D, 0);
+            b.SerializeStructArray(D);
             b.SerializeStructArray(K, 9);
             b.SerializeStructArray(R, 9);
             b.SerializeStructArray(P, 12);

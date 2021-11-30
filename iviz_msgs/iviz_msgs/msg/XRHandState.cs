@@ -61,11 +61,11 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(IsValid);
             Header.RosSerialize(ref b);
             b.Serialize(Palm);
-            b.SerializeStructArray(Thumb, 0);
-            b.SerializeStructArray(Index, 0);
-            b.SerializeStructArray(Middle, 0);
-            b.SerializeStructArray(Ring, 0);
-            b.SerializeStructArray(Little, 0);
+            b.SerializeStructArray(Thumb);
+            b.SerializeStructArray(Index);
+            b.SerializeStructArray(Middle);
+            b.SerializeStructArray(Ring);
+            b.SerializeStructArray(Little);
         }
         
         public void RosValidate()

@@ -128,7 +128,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Serialize(Success);
             b.Serialize(Message);
-            b.SerializeArray(Resolutions, 0);
+            b.SerializeArray(Resolutions);
         }
         
         public void RosValidate()

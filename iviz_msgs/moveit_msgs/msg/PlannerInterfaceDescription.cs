@@ -40,7 +40,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Name);
-            b.SerializeArray(PlannerIds, 0);
+            b.SerializeArray(PlannerIds);
         }
         
         public void RosValidate()

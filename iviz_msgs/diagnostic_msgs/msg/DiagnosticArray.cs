@@ -42,7 +42,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Status, 0);
+            b.SerializeArray(Status);
         }
         
         public void RosValidate()

@@ -36,7 +36,7 @@ namespace Iviz.Msgs.SensorMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeStructArray(Echoes, 0);
+            b.SerializeStructArray(Echoes);
         }
         
         public void RosValidate()

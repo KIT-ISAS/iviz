@@ -68,10 +68,10 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Name);
-            b.SerializeArray(JointConstraints, 0);
-            b.SerializeArray(PositionConstraints, 0);
-            b.SerializeArray(OrientationConstraints, 0);
-            b.SerializeArray(VisibilityConstraints, 0);
+            b.SerializeArray(JointConstraints);
+            b.SerializeArray(PositionConstraints);
+            b.SerializeArray(OrientationConstraints);
+            b.SerializeArray(VisibilityConstraints);
         }
         
         public void RosValidate()

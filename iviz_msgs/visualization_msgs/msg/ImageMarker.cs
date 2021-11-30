@@ -89,8 +89,8 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(Filled);
             b.Serialize(FillColor);
             b.Serialize(Lifetime);
-            b.SerializeStructArray(Points, 0);
-            b.SerializeStructArray(OutlineColors, 0);
+            b.SerializeStructArray(Points);
+            b.SerializeStructArray(OutlineColors);
         }
         
         public void RosValidate()

@@ -40,7 +40,7 @@ namespace Iviz.Msgs.StdMsgs
         public void RosSerialize(ref Buffer b)
         {
             Layout.RosSerialize(ref b);
-            b.SerializeStructArray(Data, 0);
+            b.SerializeStructArray(Data);
         }
         
         public void RosValidate()

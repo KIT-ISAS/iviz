@@ -49,7 +49,7 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Groups, 0);
+            b.SerializeArray(Groups);
             Max.RosSerialize(ref b);
             Min.RosSerialize(ref b);
             Dflt.RosSerialize(ref b);

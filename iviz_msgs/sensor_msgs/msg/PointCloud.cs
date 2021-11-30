@@ -53,8 +53,8 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeStructArray(Points, 0);
-            b.SerializeArray(Channels, 0);
+            b.SerializeStructArray(Points);
+            b.SerializeArray(Channels);
         }
         
         public void RosValidate()

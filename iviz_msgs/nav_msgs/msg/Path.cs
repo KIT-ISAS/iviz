@@ -42,7 +42,7 @@ namespace Iviz.Msgs.NavMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Poses, 0);
+            b.SerializeArray(Poses);
         }
         
         public void RosValidate()

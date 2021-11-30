@@ -130,7 +130,7 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Success);
-            b.SerializeStructArray(Bytes, 0);
+            b.SerializeStructArray(Bytes);
             b.Serialize(Message);
         }
         

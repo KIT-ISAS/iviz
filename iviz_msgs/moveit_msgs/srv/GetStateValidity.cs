@@ -168,9 +168,9 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Valid);
-            b.SerializeArray(Contacts, 0);
-            b.SerializeArray(CostSources, 0);
-            b.SerializeArray(ConstraintResult, 0);
+            b.SerializeArray(Contacts);
+            b.SerializeArray(CostSources);
+            b.SerializeArray(ConstraintResult);
         }
         
         public void RosValidate()

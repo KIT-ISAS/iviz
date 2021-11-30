@@ -58,12 +58,12 @@ namespace Iviz.Msgs.Rosapi
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Type);
-            b.SerializeArray(Fieldnames, 0);
-            b.SerializeArray(Fieldtypes, 0);
-            b.SerializeStructArray(Fieldarraylen, 0);
-            b.SerializeArray(Examples, 0);
-            b.SerializeArray(Constnames, 0);
-            b.SerializeArray(Constvalues, 0);
+            b.SerializeArray(Fieldnames);
+            b.SerializeArray(Fieldtypes);
+            b.SerializeStructArray(Fieldarraylen);
+            b.SerializeArray(Examples);
+            b.SerializeArray(Constnames);
+            b.SerializeArray(Constvalues);
         }
         
         public void RosValidate()

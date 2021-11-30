@@ -37,7 +37,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Clients, 0);
+            b.SerializeArray(Clients);
         }
         
         public void RosValidate()

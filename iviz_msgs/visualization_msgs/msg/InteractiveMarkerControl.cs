@@ -118,7 +118,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(OrientationMode);
             b.Serialize(InteractionMode);
             b.Serialize(AlwaysVisible);
-            b.SerializeArray(Markers, 0);
+            b.SerializeArray(Markers);
             b.Serialize(IndependentMarkerOrientation);
             b.Serialize(Description);
         }

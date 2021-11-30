@@ -34,7 +34,7 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeStructArray(Sequence, 0);
+            b.SerializeStructArray(Sequence);
         }
         
         public void RosValidate()

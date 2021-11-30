@@ -119,7 +119,7 @@ namespace Iviz.Msgs.Roscpp
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Loggers, 0);
+            b.SerializeArray(Loggers);
         }
         
         public void RosValidate()

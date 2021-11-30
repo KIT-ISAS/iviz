@@ -45,8 +45,8 @@ namespace Iviz.Msgs.TrajectoryMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(JointNames, 0);
-            b.SerializeArray(Points, 0);
+            b.SerializeArray(JointNames);
+            b.SerializeArray(Points);
         }
         
         public void RosValidate()

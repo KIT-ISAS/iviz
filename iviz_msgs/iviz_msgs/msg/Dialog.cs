@@ -96,7 +96,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Title);
             b.Serialize(Caption);
             b.Serialize(CaptionAlignment);
-            b.SerializeArray(MenuEntries, 0);
+            b.SerializeArray(MenuEntries);
             b.Serialize(BindingType);
             b.Serialize(TfOffset);
             b.Serialize(DialogDisplacement);

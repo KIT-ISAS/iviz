@@ -98,11 +98,11 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(Name);
             RobotState.RosSerialize(ref b);
             b.Serialize(RobotModelName);
-            b.SerializeArray(FixedFrameTransforms, 0);
+            b.SerializeArray(FixedFrameTransforms);
             AllowedCollisionMatrix.RosSerialize(ref b);
-            b.SerializeArray(LinkPadding, 0);
-            b.SerializeArray(LinkScale, 0);
-            b.SerializeArray(ObjectColors, 0);
+            b.SerializeArray(LinkPadding);
+            b.SerializeArray(LinkScale);
+            b.SerializeArray(ObjectColors);
             World.RosSerialize(ref b);
             b.Serialize(IsDiff);
         }

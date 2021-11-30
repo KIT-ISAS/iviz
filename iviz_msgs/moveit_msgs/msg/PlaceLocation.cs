@@ -67,7 +67,7 @@ namespace Iviz.Msgs.MoveitMsgs
             PlacePose.RosSerialize(ref b);
             PrePlaceApproach.RosSerialize(ref b);
             PostPlaceRetreat.RosSerialize(ref b);
-            b.SerializeArray(AllowedTouchObjects, 0);
+            b.SerializeArray(AllowedTouchObjects);
         }
         
         public void RosValidate()

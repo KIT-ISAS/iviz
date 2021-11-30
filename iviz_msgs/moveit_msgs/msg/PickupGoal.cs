@@ -109,14 +109,14 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(TargetName);
             b.Serialize(GroupName);
             b.Serialize(EndEffector);
-            b.SerializeArray(PossibleGrasps, 0);
+            b.SerializeArray(PossibleGrasps);
             b.Serialize(SupportSurfaceName);
             b.Serialize(AllowGripperSupportCollision);
-            b.SerializeArray(AttachedObjectTouchLinks, 0);
+            b.SerializeArray(AttachedObjectTouchLinks);
             b.Serialize(MinimizeObjectDistance);
             PathConstraints.RosSerialize(ref b);
             b.Serialize(PlannerId);
-            b.SerializeArray(AllowedTouchObjects, 0);
+            b.SerializeArray(AllowedTouchObjects);
             b.Serialize(AllowedPlanningTime);
             PlanningOptions.RosSerialize(ref b);
         }

@@ -47,9 +47,9 @@ namespace Iviz.Msgs.TrajectoryMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeStructArray(Transforms, 0);
-            b.SerializeStructArray(Velocities, 0);
-            b.SerializeStructArray(Accelerations, 0);
+            b.SerializeStructArray(Transforms);
+            b.SerializeStructArray(Velocities);
+            b.SerializeStructArray(Accelerations);
             b.Serialize(TimeFromStart);
         }
         

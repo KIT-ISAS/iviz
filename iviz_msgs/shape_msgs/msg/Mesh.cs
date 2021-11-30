@@ -44,8 +44,8 @@ namespace Iviz.Msgs.ShapeMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Triangles, 0);
-            b.SerializeStructArray(Vertices, 0);
+            b.SerializeArray(Triangles);
+            b.SerializeStructArray(Vertices);
         }
         
         public void RosValidate()

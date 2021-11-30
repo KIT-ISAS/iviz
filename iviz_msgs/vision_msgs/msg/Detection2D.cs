@@ -69,7 +69,7 @@ namespace Iviz.Msgs.VisionMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Results, 0);
+            b.SerializeArray(Results);
             Bbox.RosSerialize(ref b);
             SourceImg.RosSerialize(ref b);
             b.Serialize(IsTracking);

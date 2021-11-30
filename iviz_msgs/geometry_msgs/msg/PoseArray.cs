@@ -38,7 +38,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeStructArray(Poses, 0);
+            b.SerializeStructArray(Poses);
         }
         
         public void RosValidate()

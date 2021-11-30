@@ -42,7 +42,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Tables, 0);
+            b.SerializeArray(Tables);
         }
         
         public void RosValidate()

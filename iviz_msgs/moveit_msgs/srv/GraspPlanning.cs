@@ -114,9 +114,9 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             b.Serialize(GroupName);
             Target.RosSerialize(ref b);
-            b.SerializeArray(SupportSurfaces, 0);
-            b.SerializeArray(CandidateGrasps, 0);
-            b.SerializeArray(MovableObstacles, 0);
+            b.SerializeArray(SupportSurfaces);
+            b.SerializeArray(CandidateGrasps);
+            b.SerializeArray(MovableObstacles);
         }
         
         public void RosValidate()
@@ -198,7 +198,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Grasps, 0);
+            b.SerializeArray(Grasps);
             ErrorCode.RosSerialize(ref b);
         }
         

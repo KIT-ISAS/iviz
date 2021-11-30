@@ -62,7 +62,7 @@ namespace Iviz.Msgs.StdMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Dim, 0);
+            b.SerializeArray(Dim);
             b.Serialize(DataOffset);
         }
         

@@ -156,7 +156,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Bpp);
             b.SerializeStructArray(Intrinsics, 9);
             b.Serialize(Pose);
-            b.SerializeStructArray(Data, 0);
+            b.SerializeStructArray(Data);
         }
         
         public void RosValidate()

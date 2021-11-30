@@ -116,7 +116,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Configs, 0);
+            b.SerializeArray(Configs);
         }
         
         public void RosValidate()

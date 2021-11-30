@@ -105,8 +105,8 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(AvoidCollisions);
             b.Serialize(IkLinkName);
             PoseStamped.RosSerialize(ref b);
-            b.SerializeArray(IkLinkNames, 0);
-            b.SerializeArray(PoseStampedVector, 0);
+            b.SerializeArray(IkLinkNames);
+            b.SerializeArray(PoseStampedVector);
             b.Serialize(Timeout);
             b.Serialize(Attempts);
         }

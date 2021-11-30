@@ -43,7 +43,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(CollisionObjects, 0);
+            b.SerializeArray(CollisionObjects);
             Octomap.RosSerialize(ref b);
         }
         

@@ -68,9 +68,9 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Name);
             b.Serialize(Filename);
             b.Serialize(OrientationHint);
-            b.SerializeArray(Meshes, 0);
-            b.SerializeArray(Materials, 0);
-            b.SerializeArray(Nodes, 0);
+            b.SerializeArray(Meshes);
+            b.SerializeArray(Materials);
+            b.SerializeArray(Nodes);
         }
         
         public void RosValidate()

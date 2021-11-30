@@ -104,7 +104,7 @@ namespace Iviz.Msgs.MoveitMsgs
             PostGraspRetreat.RosSerialize(ref b);
             PostPlaceRetreat.RosSerialize(ref b);
             b.Serialize(MaxContactForce);
-            b.SerializeArray(AllowedTouchObjects, 0);
+            b.SerializeArray(AllowedTouchObjects);
         }
         
         public void RosValidate()

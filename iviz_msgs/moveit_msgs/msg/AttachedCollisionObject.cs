@@ -61,7 +61,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             b.Serialize(LinkName);
             Object.RosSerialize(ref b);
-            b.SerializeArray(TouchLinks, 0);
+            b.SerializeArray(TouchLinks);
             DetachPosture.RosSerialize(ref b);
             b.Serialize(Weight);
         }

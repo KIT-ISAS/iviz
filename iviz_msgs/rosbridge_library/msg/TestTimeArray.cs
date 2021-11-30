@@ -33,7 +33,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeStructArray(Times, 0);
+            b.SerializeStructArray(Times);
         }
         
         public void RosValidate()

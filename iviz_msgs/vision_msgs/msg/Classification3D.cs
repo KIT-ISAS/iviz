@@ -52,7 +52,7 @@ namespace Iviz.Msgs.VisionMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Results, 0);
+            b.SerializeArray(Results);
             SourceCloud.RosSerialize(ref b);
         }
         

@@ -128,7 +128,7 @@ namespace Iviz.Msgs.MoveitMsgs
             StartState.RosSerialize(ref b);
             b.Serialize(GroupName);
             b.Serialize(LinkName);
-            b.SerializeStructArray(Waypoints, 0);
+            b.SerializeStructArray(Waypoints);
             b.Serialize(MaxStep);
             b.Serialize(JumpThreshold);
             b.Serialize(AvoidCollisions);

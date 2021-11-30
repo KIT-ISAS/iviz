@@ -77,11 +77,11 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Height);
             b.Serialize(Width);
-            b.SerializeArray(Fields, 0);
+            b.SerializeArray(Fields);
             b.Serialize(IsBigendian);
             b.Serialize(PointStep);
             b.Serialize(RowStep);
-            b.SerializeStructArray(Data, 0);
+            b.SerializeStructArray(Data);
             b.Serialize(IsDense);
         }
         

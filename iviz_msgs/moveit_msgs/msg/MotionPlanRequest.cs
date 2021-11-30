@@ -98,7 +98,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             WorkspaceParameters.RosSerialize(ref b);
             StartState.RosSerialize(ref b);
-            b.SerializeArray(GoalConstraints, 0);
+            b.SerializeArray(GoalConstraints);
             PathConstraints.RosSerialize(ref b);
             TrajectoryConstraints.RosSerialize(ref b);
             b.Serialize(PlannerId);

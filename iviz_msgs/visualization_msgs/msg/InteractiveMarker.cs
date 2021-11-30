@@ -80,8 +80,8 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(Name);
             b.Serialize(Description);
             b.Serialize(Scale);
-            b.SerializeArray(MenuEntries, 0);
-            b.SerializeArray(Controls, 0);
+            b.SerializeArray(MenuEntries);
+            b.SerializeArray(Controls);
         }
         
         public void RosValidate()

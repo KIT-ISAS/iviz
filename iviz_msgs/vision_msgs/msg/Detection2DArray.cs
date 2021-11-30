@@ -44,7 +44,7 @@ namespace Iviz.Msgs.VisionMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Detections, 0);
+            b.SerializeArray(Detections);
         }
         
         public void RosValidate()

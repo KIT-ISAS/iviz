@@ -42,7 +42,7 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(MapUuid);
-            b.SerializeArray(Features, 0);
+            b.SerializeArray(Features);
         }
         
         public void RosValidate()

@@ -55,7 +55,7 @@ namespace Iviz.Msgs.OctomapMsgs
             b.Serialize(Binary);
             b.Serialize(Id);
             b.Serialize(Resolution);
-            b.SerializeStructArray(Data, 0);
+            b.SerializeStructArray(Data);
         }
         
         public void RosValidate()

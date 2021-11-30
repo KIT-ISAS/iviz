@@ -37,7 +37,7 @@ namespace Iviz.Msgs.Tf
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Transforms, 0);
+            b.SerializeArray(Transforms);
         }
         
         public void RosValidate()

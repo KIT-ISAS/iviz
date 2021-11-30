@@ -67,10 +67,10 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Name, 0);
-            b.SerializeStructArray(Position, 0);
-            b.SerializeStructArray(Velocity, 0);
-            b.SerializeStructArray(Effort, 0);
+            b.SerializeArray(Name);
+            b.SerializeStructArray(Position);
+            b.SerializeStructArray(Velocity);
+            b.SerializeStructArray(Effort);
         }
         
         public void RosValidate()

@@ -44,9 +44,9 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Keys, 0);
-            b.SerializeArray(Values, 0);
-            b.SerializeArray(Descriptions, 0);
+            b.SerializeArray(Keys);
+            b.SerializeArray(Values);
+            b.SerializeArray(Descriptions);
         }
         
         public void RosValidate()

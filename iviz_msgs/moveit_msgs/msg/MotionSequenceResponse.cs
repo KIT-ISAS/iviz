@@ -54,7 +54,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             ErrorCode.RosSerialize(ref b);
             SequenceStart.RosSerialize(ref b);
-            b.SerializeArray(PlannedTrajectories, 0);
+            b.SerializeArray(PlannedTrajectories);
             b.Serialize(PlanningTime);
         }
         

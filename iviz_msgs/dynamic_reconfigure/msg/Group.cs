@@ -53,7 +53,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         {
             b.Serialize(Name);
             b.Serialize(Type);
-            b.SerializeArray(Parameters, 0);
+            b.SerializeArray(Parameters);
             b.Serialize(Parent);
             b.Serialize(Id);
         }

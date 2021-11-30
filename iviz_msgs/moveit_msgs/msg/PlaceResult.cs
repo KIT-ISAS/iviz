@@ -63,8 +63,8 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             ErrorCode.RosSerialize(ref b);
             TrajectoryStart.RosSerialize(ref b);
-            b.SerializeArray(TrajectoryStages, 0);
-            b.SerializeArray(TrajectoryDescriptions, 0);
+            b.SerializeArray(TrajectoryStages);
+            b.SerializeArray(TrajectoryDescriptions);
             PlaceLocation.RosSerialize(ref b);
             b.Serialize(PlanningTime);
         }

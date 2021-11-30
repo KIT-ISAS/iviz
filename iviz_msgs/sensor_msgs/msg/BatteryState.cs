@@ -123,8 +123,8 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(PowerSupplyHealth);
             b.Serialize(PowerSupplyTechnology);
             b.Serialize(Present);
-            b.SerializeStructArray(CellVoltage, 0);
-            b.SerializeStructArray(CellTemperature, 0);
+            b.SerializeStructArray(CellVoltage);
+            b.SerializeStructArray(CellTemperature);
             b.Serialize(Location);
             b.Serialize(SerialNumber);
         }

@@ -67,9 +67,9 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             TrajectoryStart.RosSerialize(ref b);
             b.Serialize(GroupName);
-            b.SerializeArray(Trajectory, 0);
-            b.SerializeArray(Description, 0);
-            b.SerializeStructArray(ProcessingTime, 0);
+            b.SerializeArray(Trajectory);
+            b.SerializeArray(Description);
+            b.SerializeStructArray(ProcessingTime);
             ErrorCode.RosSerialize(ref b);
         }
         

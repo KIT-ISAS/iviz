@@ -58,10 +58,10 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Clusters, 0);
-            b.SerializeArray(Materials, 0);
-            b.SerializeStructArray(ClusterMaterials, 0);
-            b.SerializeArray(VertexTexCoords, 0);
+            b.SerializeArray(Clusters);
+            b.SerializeArray(Materials);
+            b.SerializeStructArray(ClusterMaterials);
+            b.SerializeArray(VertexTexCoords);
         }
         
         public void RosValidate()

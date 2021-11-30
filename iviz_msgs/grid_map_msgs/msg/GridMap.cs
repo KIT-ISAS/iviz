@@ -64,9 +64,9 @@ namespace Iviz.Msgs.GridMapMsgs
         public void RosSerialize(ref Buffer b)
         {
             Info.RosSerialize(ref b);
-            b.SerializeArray(Layers, 0);
-            b.SerializeArray(BasicLayers, 0);
-            b.SerializeArray(Data, 0);
+            b.SerializeArray(Layers);
+            b.SerializeArray(BasicLayers);
+            b.SerializeArray(Data);
             b.Serialize(OuterStartIndex);
             b.Serialize(InnerStartIndex);
         }

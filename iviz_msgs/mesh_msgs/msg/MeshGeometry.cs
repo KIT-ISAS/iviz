@@ -46,9 +46,9 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeStructArray(Vertices, 0);
-            b.SerializeStructArray(VertexNormals, 0);
-            b.SerializeArray(Faces, 0);
+            b.SerializeStructArray(Vertices);
+            b.SerializeStructArray(VertexNormals);
+            b.SerializeArray(Faces);
         }
         
         public void RosValidate()

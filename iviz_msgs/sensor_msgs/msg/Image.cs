@@ -73,7 +73,7 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(Encoding);
             b.Serialize(IsBigendian);
             b.Serialize(Step);
-            b.SerializeStructArray(Data, 0);
+            b.SerializeStructArray(Data);
         }
         
         public void RosValidate()

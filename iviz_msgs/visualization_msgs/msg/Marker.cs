@@ -112,8 +112,8 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(Color);
             b.Serialize(Lifetime);
             b.Serialize(FrameLocked);
-            b.SerializeStructArray(Points, 0);
-            b.SerializeStructArray(Colors, 0);
+            b.SerializeStructArray(Points);
+            b.SerializeStructArray(Colors);
             b.Serialize(Text);
             b.Serialize(MeshResource);
             b.Serialize(MeshUseEmbeddedMaterials);

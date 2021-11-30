@@ -125,7 +125,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Clusters, 0);
+            b.SerializeArray(Clusters);
         }
         
         public void RosValidate()

@@ -33,7 +33,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeStructArray(Coords, 0);
+            b.SerializeStructArray(Coords);
         }
         
         public void RosValidate()

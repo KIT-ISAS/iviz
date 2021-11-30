@@ -80,7 +80,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(ShininessStrength);
             b.Serialize(Reflectivity);
             b.Serialize(BlendMode);
-            b.SerializeArray(Textures, 0);
+            b.SerializeArray(Textures);
         }
         
         public void RosValidate()

@@ -51,7 +51,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(ModelId);
-            b.SerializeArray(Trajectory, 0);
+            b.SerializeArray(Trajectory);
             TrajectoryStart.RosSerialize(ref b);
         }
         

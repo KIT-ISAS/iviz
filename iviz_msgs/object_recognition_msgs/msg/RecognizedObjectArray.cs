@@ -49,8 +49,8 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(Objects, 0);
-            b.SerializeStructArray(Cooccurrence, 0);
+            b.SerializeArray(Objects);
+            b.SerializeStructArray(Cooccurrence);
         }
         
         public void RosValidate()

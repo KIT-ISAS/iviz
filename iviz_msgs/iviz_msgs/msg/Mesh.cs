@@ -73,13 +73,13 @@ namespace Iviz.Msgs.IvizMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Name);
-            b.SerializeStructArray(Vertices, 0);
-            b.SerializeStructArray(Normals, 0);
-            b.SerializeStructArray(Tangents, 0);
-            b.SerializeStructArray(BiTangents, 0);
-            b.SerializeArray(TexCoords, 0);
-            b.SerializeArray(ColorChannels, 0);
-            b.SerializeStructArray(Faces, 0);
+            b.SerializeStructArray(Vertices);
+            b.SerializeStructArray(Normals);
+            b.SerializeStructArray(Tangents);
+            b.SerializeStructArray(BiTangents);
+            b.SerializeArray(TexCoords);
+            b.SerializeArray(ColorChannels);
+            b.SerializeStructArray(Faces);
             b.Serialize(MaterialIndex);
         }
         

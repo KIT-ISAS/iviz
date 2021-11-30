@@ -100,12 +100,12 @@ namespace Iviz.Msgs.MoveitMsgs
             Header.RosSerialize(ref b);
             b.Serialize(Id);
             Type.RosSerialize(ref b);
-            b.SerializeArray(Primitives, 0);
-            b.SerializeStructArray(PrimitivePoses, 0);
-            b.SerializeArray(Meshes, 0);
-            b.SerializeStructArray(MeshPoses, 0);
-            b.SerializeArray(Planes, 0);
-            b.SerializeStructArray(PlanePoses, 0);
+            b.SerializeArray(Primitives);
+            b.SerializeStructArray(PrimitivePoses);
+            b.SerializeArray(Meshes);
+            b.SerializeStructArray(MeshPoses);
+            b.SerializeArray(Planes);
+            b.SerializeStructArray(PlanePoses);
             b.Serialize(Operation);
         }
         

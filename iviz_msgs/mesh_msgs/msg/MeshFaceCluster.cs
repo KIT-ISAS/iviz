@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeStructArray(FaceIndices, 0);
+            b.SerializeStructArray(FaceIndices);
             b.Serialize(Label);
         }
         

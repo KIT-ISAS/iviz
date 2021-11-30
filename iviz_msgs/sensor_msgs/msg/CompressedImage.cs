@@ -50,7 +50,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(Format);
-            b.SerializeStructArray(Data, 0);
+            b.SerializeStructArray(Data);
         }
         
         public void RosValidate()

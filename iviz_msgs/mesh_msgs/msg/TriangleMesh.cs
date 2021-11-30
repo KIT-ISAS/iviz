@@ -83,15 +83,15 @@ namespace Iviz.Msgs.MeshMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Triangles, 0);
-            b.SerializeStructArray(Vertices, 0);
-            b.SerializeStructArray(VertexNormals, 0);
-            b.SerializeStructArray(VertexColors, 0);
-            b.SerializeStructArray(TriangleColors, 0);
-            b.SerializeStructArray(VertexTextureCoords, 0);
-            b.SerializeArray(FaceMaterials, 0);
-            b.SerializeArray(Textures, 0);
-            b.SerializeArray(Clusters, 0);
+            b.SerializeArray(Triangles);
+            b.SerializeStructArray(Vertices);
+            b.SerializeStructArray(VertexNormals);
+            b.SerializeStructArray(VertexColors);
+            b.SerializeStructArray(TriangleColors);
+            b.SerializeStructArray(VertexTextureCoords);
+            b.SerializeArray(FaceMaterials);
+            b.SerializeArray(Textures);
+            b.SerializeArray(Clusters);
         }
         
         public void RosValidate()

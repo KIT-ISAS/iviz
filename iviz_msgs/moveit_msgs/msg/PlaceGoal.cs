@@ -95,13 +95,13 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             b.Serialize(GroupName);
             b.Serialize(AttachedObjectName);
-            b.SerializeArray(PlaceLocations, 0);
+            b.SerializeArray(PlaceLocations);
             b.Serialize(PlaceEef);
             b.Serialize(SupportSurfaceName);
             b.Serialize(AllowGripperSupportCollision);
             PathConstraints.RosSerialize(ref b);
             b.Serialize(PlannerId);
-            b.SerializeArray(AllowedTouchObjects, 0);
+            b.SerializeArray(AllowedTouchObjects);
             b.Serialize(AllowedPlanningTime);
             PlanningOptions.RosSerialize(ref b);
         }

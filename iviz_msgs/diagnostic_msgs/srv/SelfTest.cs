@@ -128,7 +128,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         {
             b.Serialize(Id);
             b.Serialize(Passed);
-            b.SerializeArray(Status, 0);
+            b.SerializeArray(Status);
         }
         
         public void RosValidate()

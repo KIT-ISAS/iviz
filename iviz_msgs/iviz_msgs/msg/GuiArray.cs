@@ -45,8 +45,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Dialogs, 0);
-            b.SerializeArray(Widgets, 0);
+            b.SerializeArray(Dialogs);
+            b.SerializeArray(Widgets);
         }
         
         public void RosValidate()

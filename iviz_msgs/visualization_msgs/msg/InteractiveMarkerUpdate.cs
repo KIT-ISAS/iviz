@@ -80,9 +80,9 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Serialize(ServerId);
             b.Serialize(SeqNum);
             b.Serialize(Type);
-            b.SerializeArray(Markers, 0);
-            b.SerializeArray(Poses, 0);
-            b.SerializeArray(Erases, 0);
+            b.SerializeArray(Markers);
+            b.SerializeArray(Poses);
+            b.SerializeArray(Erases);
         }
         
         public void RosValidate()

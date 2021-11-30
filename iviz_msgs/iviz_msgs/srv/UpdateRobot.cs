@@ -93,7 +93,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Operation);
             b.Serialize(Id);
             Configuration.RosSerialize(ref b);
-            b.SerializeArray(ValidFields, 0);
+            b.SerializeArray(ValidFields);
         }
         
         public void RosValidate()

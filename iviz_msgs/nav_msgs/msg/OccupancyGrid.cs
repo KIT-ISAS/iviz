@@ -47,7 +47,7 @@ namespace Iviz.Msgs.NavMsgs
         {
             Header.RosSerialize(ref b);
             Info.RosSerialize(ref b);
-            b.SerializeStructArray(Data, 0);
+            b.SerializeStructArray(Data);
         }
         
         public void RosValidate()

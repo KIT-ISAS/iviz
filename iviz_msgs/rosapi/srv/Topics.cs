@@ -119,8 +119,8 @@ namespace Iviz.Msgs.Rosapi
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Topics_, 0);
-            b.SerializeArray(Types, 0);
+            b.SerializeArray(Topics_);
+            b.SerializeArray(Types);
         }
         
         public void RosValidate()

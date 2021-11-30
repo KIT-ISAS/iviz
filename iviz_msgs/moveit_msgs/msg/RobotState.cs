@@ -56,7 +56,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             JointState.RosSerialize(ref b);
             MultiDofJointState.RosSerialize(ref b);
-            b.SerializeArray(AttachedCollisionObjects, 0);
+            b.SerializeArray(AttachedCollisionObjects);
             b.Serialize(IsDiff);
         }
         

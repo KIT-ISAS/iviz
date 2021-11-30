@@ -69,11 +69,11 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Bools, 0);
-            b.SerializeArray(Ints, 0);
-            b.SerializeArray(Strs, 0);
-            b.SerializeArray(Doubles, 0);
-            b.SerializeArray(Groups, 0);
+            b.SerializeArray(Bools);
+            b.SerializeArray(Ints);
+            b.SerializeArray(Strs);
+            b.SerializeArray(Doubles);
+            b.SerializeArray(Groups);
         }
         
         public void RosValidate()

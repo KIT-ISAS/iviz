@@ -41,7 +41,7 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Location);
-            b.SerializeArray(Descriptor, 0);
+            b.SerializeArray(Descriptor);
         }
         
         public void RosValidate()

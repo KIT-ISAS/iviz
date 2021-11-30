@@ -106,7 +106,7 @@ namespace Iviz.Msgs.GridMapMsgs
             b.Serialize(PositionY);
             b.Serialize(LengthX);
             b.Serialize(LengthY);
-            b.SerializeArray(Layers, 0);
+            b.SerializeArray(Layers);
         }
         
         public void RosValidate()

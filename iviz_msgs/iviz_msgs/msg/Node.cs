@@ -47,7 +47,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Name);
             b.Serialize(Parent);
             Transform.RosSerialize(ref b);
-            b.SerializeStructArray(Meshes, 0);
+            b.SerializeStructArray(Meshes);
         }
         
         public void RosValidate()

@@ -92,7 +92,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(FkLinkNames, 0);
+            b.SerializeArray(FkLinkNames);
             RobotState.RosSerialize(ref b);
         }
         
@@ -164,8 +164,8 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(PoseStamped, 0);
-            b.SerializeArray(FkLinkNames, 0);
+            b.SerializeArray(PoseStamped);
+            b.SerializeArray(FkLinkNames);
             ErrorCode.RosSerialize(ref b);
         }
         

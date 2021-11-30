@@ -49,7 +49,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(Pose);
-            b.SerializeStructArray(ConvexHull, 0);
+            b.SerializeStructArray(ConvexHull);
         }
         
         public void RosValidate()

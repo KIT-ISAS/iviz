@@ -63,7 +63,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             b.Serialize(Name);
             b.Serialize(Message);
             b.Serialize(HardwareId);
-            b.SerializeArray(Values, 0);
+            b.SerializeArray(Values);
         }
         
         public void RosValidate()

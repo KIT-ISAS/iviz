@@ -93,8 +93,8 @@ namespace Iviz.Msgs.SensorMsgs
             b.Serialize(ScanTime);
             b.Serialize(RangeMin);
             b.Serialize(RangeMax);
-            b.SerializeArray(Ranges, 0);
-            b.SerializeArray(Intensities, 0);
+            b.SerializeArray(Ranges);
+            b.SerializeArray(Intensities);
         }
         
         public void RosValidate()

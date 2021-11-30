@@ -43,7 +43,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.SerializeArray(StatusList, 0);
+            b.SerializeArray(StatusList);
         }
         
         public void RosValidate()

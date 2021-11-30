@@ -80,7 +80,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeArray(Frames, 0);
+            b.SerializeArray(Frames);
         }
         
         public void RosValidate()
@@ -130,8 +130,8 @@ namespace Iviz.Msgs.IvizMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.SerializeStructArray(IsValid, 0);
-            b.SerializeStructArray(Poses, 0);
+            b.SerializeStructArray(IsValid);
+            b.SerializeStructArray(Poses);
         }
         
         public void RosValidate()

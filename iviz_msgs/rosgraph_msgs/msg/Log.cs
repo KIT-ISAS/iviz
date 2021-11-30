@@ -85,7 +85,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             b.Serialize(File ?? string.Empty);
             b.Serialize(Function ?? string.Empty);
             b.Serialize(Line);
-            b.SerializeArray(Topics ?? System.Array.Empty<string>(), 0);
+            b.SerializeArray(Topics ?? System.Array.Empty<string>());
         }
         
         public readonly void RosValidate()

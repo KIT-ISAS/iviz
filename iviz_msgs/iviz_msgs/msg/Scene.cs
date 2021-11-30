@@ -56,8 +56,8 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Serialize(Name);
             b.Serialize(Filename);
-            b.SerializeArray(Includes, 0);
-            b.SerializeArray(Lights, 0);
+            b.SerializeArray(Includes);
+            b.SerializeArray(Lights);
         }
         
         public void RosValidate()

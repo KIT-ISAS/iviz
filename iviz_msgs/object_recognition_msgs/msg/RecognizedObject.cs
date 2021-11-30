@@ -81,9 +81,9 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             Header.RosSerialize(ref b);
             Type.RosSerialize(ref b);
             b.Serialize(Confidence);
-            b.SerializeArray(PointClouds, 0);
+            b.SerializeArray(PointClouds);
             BoundingMesh.RosSerialize(ref b);
-            b.SerializeStructArray(BoundingContours, 0);
+            b.SerializeStructArray(BoundingContours);
             Pose.RosSerialize(ref b);
         }
         
