@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 using Iviz.Tools;
 
@@ -91,40 +92,41 @@ namespace Iviz.XmlRpc
         {
         }
 
-        XmlRpcArg(XmlRpcArg[] f)
+        XmlRpcArg(XmlRpcArg[] fs)
         {
-            if (f == null)
+            if (fs == null)
             {
-                throw new ArgumentNullException(nameof(f));
+                throw new ArgumentNullException(nameof(fs));
             }
 
-            if (f.Length == 0)
+            if (fs.Length == 0)
             {
                 content = "<value><array><data></data></array></value>";
                 return;
             }
 
-            string?[] fs = new string[f.Length + 2];
-            fs[0] = "<value><array><data>";
-            for (int i = 0; i < f.Length; i++)
+            using var str = BuilderPool.Rent();
+            
+            str.Append("<value><array><data>");
+            foreach (var f in fs)
             {
-                fs[i + 1] = f[i].content;
+                str.Append(f.content);
             }
 
-            fs[f.Length + 1] = "</data></array></value>";
+            str.Append("</data></array></value>");
 
-            content = string.Concat(fs);
+            content = str.ToString();
         }
-
 
         XmlRpcArg((int code, string message, XmlRpcArg arg) f)
         {
-            content =
-                "<value><array><data>" +
-                new XmlRpcArg(f.code).content +
-                new XmlRpcArg(f.message).content +
-                f.arg.content +
-                "</data></array></value>";
+            using var str = BuilderPool.Rent();
+            str.Append("<value><array><data>");
+            str.Append(new XmlRpcArg(f.code).content);
+            str.Append(new XmlRpcArg(f.message).content);
+            str.Append(f.arg.content);
+            str.Append("</data></array></value>");
+            content = str.ToString();
         }
 
         XmlRpcArg((XmlRpcArg first, XmlRpcArg second) f)
@@ -138,12 +140,13 @@ namespace Iviz.XmlRpc
 
         XmlRpcArg((XmlRpcArg first, XmlRpcArg second, XmlRpcArg third) f)
         {
-            content =
-                "<value><array><data>" +
-                f.first.content +
-                f.second.content +
-                f.third.content +
-                "</data></array></value>";
+            using var str = BuilderPool.Rent();
+            str.Append("<value><array><data>");
+            str.Append(f.first.content);
+            str.Append(f.second.content);
+            str.Append(f.third.content);
+            str.Append("</data></array></value>");
+            content = str.ToString();
         }
 
         XmlRpcArg(XmlRpcArg[][] f) : this(f.Select(x => new XmlRpcArg(x)).ToArray())
@@ -179,21 +182,20 @@ namespace Iviz.XmlRpc
                 return;
             }
 
-            string?[] array = new string[2 + 5 * fs.Length];
-            array[0] = "<value><struct>";
+            using var str = BuilderPool.Rent();
+            str.Append("<value><struct>");
 
-            int j = 1;
             foreach (var (name, arg) in fs)
             {
-                array[j++] = "<member><name>";
-                array[j++] = name;
-                array[j++] = "</name>";
-                array[j++] = arg.content;
-                array[j++] = "</member>";
+                str.Append("<member><name>");
+                str.Append(name);
+                str.Append("</name>");
+                str.Append(arg.content);
+                str.Append("</member>");
             }
             
-            array[j] = "</struct></value>";
-            content = string.Concat(array);
+            str.Append("</struct></value>");
+            content = str.ToString();
         }
 
         public override string ToString()
@@ -232,8 +234,7 @@ namespace Iviz.XmlRpc
         public static implicit operator XmlRpcArg(string[][] f) => new(f);
 
         public static implicit operator XmlRpcArg((string, string) f) => new(f);
-
-
+        
         public static implicit operator XmlRpcArg((string, string)[] f) => new(f);
 
         public static implicit operator XmlRpcArg((string name, XmlRpcArg value)[] f) => new(f);
