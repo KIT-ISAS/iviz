@@ -31,18 +31,7 @@ namespace Iviz.App
                 constructor.GetConfiguration<ImageConfiguration>()?.Type ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<ImagePanelContents>(ModuleType.Image);
-            listener = new ImageListener(this);
-            if (constructor.Configuration != null)
-            {
-                listener.Config = (ImageConfiguration)constructor.Configuration;
-            }
-            else
-            {
-                listener.Config.Topic = Topic;
-                listener.Config.Type = Type;
-            }
-
-            listener.StartListening();
+            listener = new ImageListener(this, (ImageConfiguration?)constructor.Configuration, Topic, Type);
             UpdateModuleButton();
         }
 

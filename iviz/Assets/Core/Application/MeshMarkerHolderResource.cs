@@ -36,7 +36,7 @@ namespace Iviz.Displays
 
         public int Layer
         {
-            get => gameObject.layer;
+            protected get => gameObject.layer;
             set
             {
                 gameObject.layer = value;
@@ -128,7 +128,7 @@ namespace Iviz.Displays
             }
         }
 
-        public virtual Color EmissiveColor
+        public Color EmissiveColor
         {
             set
             {

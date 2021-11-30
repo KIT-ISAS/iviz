@@ -59,6 +59,7 @@ namespace Iviz.Resources
         public Info<GameObject> RoundedPlane { get; }
         public Info<GameObject> Leash { get; }
         public Info<GameObject> Reticle { get; }
+        public Info<GameObject> Ring { get; }
         public Info<GameObject> SelectionFrame { get; }
 
         public DisplaysType()
@@ -115,6 +116,7 @@ namespace Iviz.Resources
             RoundedPlane = new Info<GameObject>(appAssetHolder.RoundedPlane);
             Leash = new Info<GameObject>(appAssetHolder.Leash);
             Reticle = new Info<GameObject>(appAssetHolder.Reticle);
+            Ring = new Info<GameObject>(appAssetHolder.Ring);
             SelectionFrame = new Info<GameObject>(appAssetHolder.SelectionFrame);
 
             resourceByType = CreateTypeDictionary(this);

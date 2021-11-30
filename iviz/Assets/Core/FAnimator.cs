@@ -24,6 +24,7 @@ namespace Iviz.Core
 
             if (token.IsCancellationRequested)
             {
+                TryCallDispose();
                 return;
             }
 
@@ -44,11 +45,25 @@ namespace Iviz.Core
         {
             if (token.IsCancellationRequested)
             {
+                TryCallDispose();
                 GameThread.EveryFrame -= OnFrameUpdate;
                 return;
             }
 
             float t = Mathf.Min((GameThread.GameTime - startTime) / duration, 1);
+            TryCallUpdate(t);
+
+            if (t < 1)
+            {
+                return;
+            }
+            
+            TryCallDispose();
+            GameThread.EveryFrame -= OnFrameUpdate;
+        }
+
+        void TryCallUpdate(float t)
+        {
             try
             {
                 update(t);
@@ -56,13 +71,11 @@ namespace Iviz.Core
             catch (Exception e)
             {
                 RosLogger.Error($"{this}: Error during Animator update", e);
-            }
+            }            
+        }
 
-            if (t < 1)
-            {
-                return;
-            }
-
+        void TryCallDispose()
+        {
             try
             {
                 dispose?.Invoke();
@@ -70,9 +83,7 @@ namespace Iviz.Core
             catch (Exception e)
             {
                 RosLogger.Error($"{this}: Error during Animator dispose", e);
-            }
-
-            GameThread.EveryFrame -= OnFrameUpdate;
+            }            
         }
 
         public static void Spawn(CancellationToken token, float duration, Action<float> update, Action? dispose = null)

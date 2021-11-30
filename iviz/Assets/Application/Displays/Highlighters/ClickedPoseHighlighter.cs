@@ -65,6 +65,7 @@ namespace Iviz.Displays.Highlighters
         public void Dispose()
         {
             tokenSource.Cancel();
+            tokenSource.Dispose();
             reticle.ReturnToPool(Resource.Displays.Reticle);
             tooltip.ReturnToPool();
             node.DestroySelf();

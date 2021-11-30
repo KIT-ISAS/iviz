@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using Iviz.Tools;
 
@@ -38,6 +39,7 @@ namespace Iviz.Core
             return createTable;
         }
 
+        /*
         static unsafe uint CalculateHash(uint hash, byte* ptr, int size)
         {
             for (; size != 0; size--)
@@ -48,11 +50,15 @@ namespace Iviz.Core
 
             return hash;
         }
+        */
         
-        public static unsafe uint Compute<T>(T value, uint startHash = DefaultSeed) where T : unmanaged
+        public static uint Compute<T>(T value, uint startHash = DefaultSeed) where T : unmanaged
         {
-            T* ptr = &value;
-            return CalculateHash(startHash, (byte*) ptr, sizeof(T));
+            ReadOnlySpan<T> span = stackalloc T[] { value };
+            
+            //T* ptr = &value;
+            //return CalculateHash(startHash, (byte*) ptr, sizeof(T));
+            return Compute(MemoryMarshal.AsBytes(span), startHash);
         }
 
         public static uint Compute(StringBuilder value, uint startHash = DefaultSeed)
@@ -79,29 +85,40 @@ namespace Iviz.Core
             return Compute(new ReadOnlySpan<T>(array), startHash);
         }
 
-        static unsafe uint Compute<T>(ReadOnlySpan<T> array, uint startHash = DefaultSeed) where T : unmanaged
+        public static uint Compute(string array, uint startHash = DefaultSeed)
         {
+            return Compute(array.AsSpan(), startHash);
+        }
+
+        static uint Compute<T>(ReadOnlySpan<T> array, uint startHash = DefaultSeed) where T : unmanaged
+        {
+            return Compute(MemoryMarshal.AsBytes(array), startHash);
+            /*
             fixed (T* ptr = array)
             {
                 return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(T));
             }
+            */
         }
 
-        public static unsafe uint Compute(string array, uint startHash = DefaultSeed)
+        static uint Compute(ReadOnlySpan<byte> array, uint startHash = DefaultSeed)
         {
-            fixed (char* ptr = array)
+            uint hash = startHash;
+            foreach (byte b in array)
             {
-                return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(char));
+                uint val = b;
+                hash = (hash >> 8) ^ Table[val ^ hash & 0xff];
             }
-        }
 
-        public static unsafe uint Compute<T>(in Rent<T> array, uint startHash = DefaultSeed) where T : unmanaged
-        {
-            fixed (T* ptr = array.Array)
+            return hash;
+                
+            /*
+            fixed (T* ptr = array)
             {
                 return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(T));
             }
-        }        
+            */
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint Update(uint hash, byte val)    

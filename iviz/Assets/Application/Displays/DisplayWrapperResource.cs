@@ -14,7 +14,6 @@ namespace Iviz.Displays
 
         public string Name
         {
-            get => gameObject.name;
             set => gameObject.name = value;
         }
 
@@ -22,7 +21,6 @@ namespace Iviz.Displays
 
         public int Layer
         {
-            get => Display.Layer;
             set
             {
                 gameObject.layer = value;
@@ -34,9 +32,8 @@ namespace Iviz.Displays
         {
         }
 
-        public virtual bool Visible
+        public bool Visible
         {
-            get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
     }

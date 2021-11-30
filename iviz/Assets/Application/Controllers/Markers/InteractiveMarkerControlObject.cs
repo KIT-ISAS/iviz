@@ -10,6 +10,7 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.Highlighters;
+using Iviz.Msgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using UnityEngine;
@@ -81,8 +82,6 @@ namespace Iviz.Controllers
         {
             lastMessage = msg;
 
-            Transform.localRotation = msg.Orientation.Ros2Unity();
-
             foreach (var control in boundsControls)
             {
                 control.Stop();
@@ -100,7 +99,9 @@ namespace Iviz.Controllers
             }
 
             InteractionMode = interactionMode;
-            UpdateInteractionMode(orientationMode, msg.IndependentMarkerOrientation);
+
+            var orientation = msg.Orientation.Ros2Unity();
+            UpdateInteractionMode(orientation, orientationMode, msg.IndependentMarkerOrientation);
         }
 
 
@@ -149,20 +150,26 @@ namespace Iviz.Controllers
             }
         }
 
-        void UpdateInteractionMode(OrientationMode orientationMode, bool independentMarkerOrientation)
+        void UpdateInteractionMode(Quaternion orientation, OrientationMode orientationMode,
+            bool independentMarkerOrientation)
         {
+            var nodeTransform = node.transform;
             var controlNode = parent.ControlNode;
 
             if (markers.Count != 0)
             {
                 Func<IHasBounds, IBoundsControl>? generator = InteractionMode switch
                 {
-                    InteractionMode.Button => (marker => new ClickableBoundsControl(marker, controlNode)),
-                    InteractionMode.MoveAxis => (marker => new LineBoundsControl(marker, controlNode)),
+                    InteractionMode.Button or InteractionMode.Menu => 
+                        (marker => new ClickableBoundsControl(marker, controlNode)),
+                    InteractionMode.MoveAxis => 
+                        (marker => new LineBoundsControl(marker, controlNode, orientation)),
                     InteractionMode.MovePlane or InteractionMode.MoveRotate =>
-                        (marker => new PlaneBoundsControl(marker, controlNode)),
-                    InteractionMode.RotateAxis => (marker => new RotationBoundsControl(marker, controlNode)),
-                    InteractionMode.Move3D => (marker => new FixedDistanceBoundsControl(marker, controlNode)),
+                        (marker => new PlaneBoundsControl(marker, controlNode, orientation)),
+                    InteractionMode.RotateAxis => 
+                        (marker => new RotationBoundsControl(marker, controlNode, orientation)),
+                    InteractionMode.Move3D or InteractionMode.MoveRotate3D => 
+                        (marker => new FixedDistanceBoundsControl(marker, controlNode)),
                     _ => null
                 };
                 if (generator != null)
@@ -172,12 +179,20 @@ namespace Iviz.Controllers
             }
             else
             {
-                if (InteractionMode == InteractionMode.MoveAxis)
+                switch (InteractionMode)
                 {
-                    boundsControls.Add(new LineWrapperBoundsControl(node.transform, controlNode));
+                    case InteractionMode.MoveAxis:
+                        boundsControls.Add(new LineWrapperBoundsControl(nodeTransform, controlNode, orientation));
+                        break;
+                    case InteractionMode.RotateAxis:
+                        boundsControls.Add(new RotationWrapperBoundsControl(nodeTransform, controlNode, orientation));
+                        break;
+                    case InteractionMode.MoveRotate:
+                        boundsControls.Add(new LineWrapperBoundsControl(nodeTransform, controlNode, orientation));
+                        boundsControls.Add(new RotationWrapperBoundsControl(nodeTransform, controlNode, orientation));
+                        break;
                 }
             }
-
 
             foreach (var control in boundsControls)
             {
@@ -246,32 +261,41 @@ namespace Iviz.Controllers
                 RosUtils.PoseFormat.OnlyRotation);
             description.AppendLine("]");
 
-            description.Append("InteractionMode: ").Append(InteractionModeToString(lastMessage.InteractionMode))
+            description.Append("InteractionMode: ")
+                .Append(InteractionModeToString(lastMessage.InteractionMode))
                 .AppendLine();
-            description.Append("OrientationMode: ").Append(OrientationModeToString(lastMessage.OrientationMode))
-                .AppendLine();
-
-            if (markers.Count == 0)
-            {
-                description.Append("Markers: Empty").AppendLine();
-            }
-            else
-            {
-                description.Append("Markers: ").Append(markers.Count).AppendLine();
-            }
-
+            
             if (ValidateInteractionMode(lastMessage.InteractionMode) is null)
             {
-                description.Append(ErrorStr).Append("Unknown interaction mode ").Append(lastMessage.InteractionMode)
+                description.Append(ErrorStr)
+                    .Append("Unknown interaction mode ")
+                    .Append(lastMessage.InteractionMode)
                     .AppendLine();
-                return;
-            }
-
+            }            
+            
+            description.Append("OrientationMode: ")
+                .Append(OrientationModeToString(lastMessage.OrientationMode))
+                .AppendLine();
+            
             if (ValidateOrientationMode(lastMessage.OrientationMode) is null)
             {
-                description.Append(ErrorStr).Append("Unknown orientation mode ").Append(lastMessage.OrientationMode)
+                description.Append(ErrorStr)
+                    .Append("Unknown orientation mode ")
+                    .Append(lastMessage.OrientationMode)
                     .AppendLine();
-                return;
+            }            
+
+            switch (markers.Count)
+            {
+                case 0:
+                    description.Append("Markers: Empty").AppendLine();
+                    break;
+                case 1:
+                    description.Append("+1 marker ---").AppendLine();
+                    break;
+                default:
+                    description.Append("+").Append(markers.Count).Append(" markers ---").AppendLine();
+                    break;
             }
 
             foreach (var marker in markers.Values)
@@ -292,6 +316,8 @@ namespace Iviz.Controllers
                 totalWarnings += newNumWarnings;
             }
         }
+
+        internal IEnumerable<IHasBounds> GetAllBounds() => markers.Values;
 
         static InteractionMode? ValidateInteractionMode(int mode) =>
             mode is < 0 or > (int)InteractionMode.MoveRotate3D ? null : (InteractionMode?)mode;
@@ -326,6 +352,12 @@ namespace Iviz.Controllers
                 InteractionMode.MoveRotate3D => "MoveRotate3D",
                 _ => $"Unknown ({mode.ToString()})"
             };
+        }
+
+        static Color ColorFromOrientation(in Quaternion orientation, in Vector3 direction)
+        {
+            var (x, y, z) = orientation * direction;
+            return new Color(Mathf.Abs(x), Mathf.Abs(y), Mathf.Abs(z));
         }
     }
 }

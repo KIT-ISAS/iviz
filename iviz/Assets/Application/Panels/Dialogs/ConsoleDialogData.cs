@@ -298,21 +298,13 @@ namespace Iviz.App
 
                     description.Append(message.SourceId ?? "Me");
 
-                    switch (messageLevel)
+                    description.Append(messageLevel switch
                     {
-                        case LogLevel.Warn:
-                            description.Append(" [W]");
-                            break;
-                        case LogLevel.Error:
-                            description.Append(" [E]");
-                            break;
-                        case LogLevel.Fatal:
-                            description.Append(" [F]");
-                            break;
-                    }
-
-                    description.Append(": </color></b>");
-
+                        LogLevel.Warn => " [W]: </color></b>",
+                        LogLevel.Error => " [E]: </color></b>",
+                        LogLevel.Fatal => " [F]: </color></b>",
+                        _ => " : </color></b>",
+                    });
 
                     if (message.SourceId == null || message.Message.Length < MaxMessageLength)
                     {
@@ -320,8 +312,11 @@ namespace Iviz.App
                     }
                     else
                     {
-                        description.Append(message.Message, 0, MaxMessageLength).Append("<i>... +")
-                            .Append(message.Message.Length - MaxMessageLength).Append(" chars</i>").AppendLine();
+                        description.Append(message.Message, 0, MaxMessageLength)
+                            .Append("<i>... +")
+                            .Append(message.Message.Length - MaxMessageLength)
+                            .Append(" chars</i>")
+                            .AppendLine();
                     }
                 }
             }
@@ -331,4 +326,3 @@ namespace Iviz.App
         }
     }
 }
-

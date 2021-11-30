@@ -45,7 +45,7 @@ namespace Iviz.Controllers
         public ImageConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 config.Topic = value.Topic;
                 config.Type = value.Type;
@@ -151,24 +151,25 @@ namespace Iviz.Controllers
             }
         }
 
-        public ImageListener(IModuleData moduleData)
+        public ImageListener(IModuleData moduleData, ImageConfiguration? config, string topic, string type)
         {
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             imageTexture = new ImageTexture();
             node = FrameNode.Instantiate("[ImageNode]");
-            ModuleData = (moduleData ?? throw new ArgumentNullException(nameof(moduleData)));
             billboard = ResourcePool.RentDisplay<ImageResource>();
             billboard.Texture = imageTexture;
             billboard.Transform.SetParentLocal(node.transform);
-
-            Config = new ImageConfiguration();
-        }
-
-        public override void StartListening()
-        {
-            Listener = config.Type switch
+            
+            Config = config ?? new ImageConfiguration
             {
-                Image.RosMessageType => new Listener<Image>(config.Topic, Handler),
-                CompressedImage.RosMessageType => new Listener<CompressedImage>(config.Topic, HandlerCompressed),
+                Topic = topic,
+                Type = type
+            };
+
+            Listener = Config.Type switch
+            {
+                Image.RosMessageType => new Listener<Image>(Config.Topic, Handler),
+                CompressedImage.RosMessageType => new Listener<CompressedImage>(Config.Topic, HandlerCompressed),
                 _ => throw new InvalidOperationException("Invalid message type")
             };
         }

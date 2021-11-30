@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
@@ -27,7 +28,7 @@ namespace Iviz.App
 {
     public sealed class GuiInputModule : MonoBehaviour, ISettingsManager
     {
-        const float MinShadowDistance = 4;
+        const float MinShadowDistance = 10;
 
         const float MainSpeed = 2f;
         const float MainAccel = 5f;
@@ -408,20 +409,22 @@ namespace Iviz.App
             const float longClickTime = 0.5f;
             const float maxDistanceForClickEvent = 20;
 
-            QualitySettings.shadowDistance = Mathf.Max(MinShadowDistance, 2 * MainCamera.transform.position.y);
+            //QualitySettings.shadowDistance = Mathf.Max(MinShadowDistance, MainCamera.transform.position.y);
 
             if (Settings.IsXR) // XR doesn't need cursor management
             {
                 return;
             }
 
-            bool prevPointerDown = pointerIsDown;
+            bool prevPointerDown = !Settings.IsPhone
+                ? pointerIsDown
+                : pointerIsDown | altPointerIsDown;
 
             if (Settings.IsPhone)
             {
                 var activeTouches = Touch.activeTouches;
 
-                prevPointerDown |= altPointerIsDown;
+                //prevPointerDown |= altPointerIsDown;
 
                 pointerIsDown = activeTouches.Count == 1;
                 altPointerIsDown = activeTouches.Count == 2;
@@ -529,12 +532,12 @@ namespace Iviz.App
 
         void StartOrbiting()
         {
-            Vector3 diff = orbitCenter - Transform.position;
+            var diff = orbitCenter - Transform.position;
             orbitRadius = Mathf.Min(5, diff.magnitude);
             orbitX = Mathf.Atan2(diff.x, diff.z) * Mathf.Rad2Deg;
             orbitY = -Mathf.Atan2(diff.y, new Vector2(diff.x, diff.z).magnitude) * Mathf.Rad2Deg;
 
-            Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
+            var q = Quaternion.Euler(orbitY, orbitX, 0);
             Transform.SetPositionAndRotation(
                 -orbitRadius * (q * Vector3.forward) + orbitCenter,
                 q);
@@ -744,7 +747,7 @@ namespace Iviz.App
             Transform.position += Transform.rotation * speed;
         }
 
-        public void LookAt(Transform targetTransform)
+        public void LookAt(Transform targetTransform, Vector3? localOffset = null)
         {
             lookAtTokenSource?.Cancel();
             CancellationTokenSource newToken = new();
@@ -753,7 +756,11 @@ namespace Iviz.App
             void Update(float t)
             {
                 var lookAtCameraStartPose = Transform.AsPose();
-                var lookAtCameraTargetPosition = CalculateTargetCameraPosition(targetTransform.position);
+                var targetPosition = localOffset is { } validatedOffset
+                    ? targetTransform.TransformPoint(validatedOffset)
+                    : targetTransform.position;
+
+                var lookAtCameraTargetPosition = CalculateTargetCameraPosition(targetPosition);
                 var lookAtCameraTargetPose = lookAtCameraStartPose.WithPosition(lookAtCameraTargetPosition);
                 var currentPose = lookAtCameraStartPose.Lerp(lookAtCameraTargetPose, Mathf.Sqrt(t));
                 Transform.SetPose(currentPose);
@@ -773,8 +780,9 @@ namespace Iviz.App
 
         Vector3 CalculateTargetCameraPosition(in Vector3 targetPosition)
         {
-            float minDistanceLookAt = 0.5f / 0.125f * TfListener.Instance.FrameSize;
-            float maxDistanceLookAt = 3.0f / 0.125f * TfListener.Instance.FrameSize;
+            float baseScale = 1f / 0.125f * TfListener.Instance.FrameSize;
+            float minDistanceLookAt = 0.5f * baseScale;
+            float maxDistanceLookAt = 3.0f * baseScale;
 
             if (!Settings.IsPhone)
             {
@@ -829,27 +837,30 @@ namespace Iviz.App
             TriggerEnvironmentClick(clickInfo, isShortClick);
         }
 
-        public static void TriggerEnvironmentClick(ClickInfo clickInfo, bool isShortClick)
+        public static void TriggerEnvironmentClick(ClickInfo clickInfo, bool isShortClick = true)
         {
             if (clickInfo.TryGetRaycastResults(out var hitResults))
             {
-                Vector3 hitPoint = hitResults[0].Position;
-                bool anyHighlighted = false;
-                foreach (var (hitObject, position, _) in hitResults)
+                List<IHighlightable>? hits = null;
+                foreach (var (hitObject, _, _) in hitResults)
                 {
-                    if (Vector3.Distance(position, hitPoint) > 1
-                        || !TryGetHighlightable(hitObject, out var toHighlight))
+                    if (!TryGetHighlightable(hitObject, out var toHighlight))
                     {
                         continue;
                     }
 
-                    toHighlight.Highlight();
-                    anyHighlighted = true;
+                    hits ??= new List<IHighlightable>();
+                    hits.Add(toHighlight);
                 }
 
-                if (anyHighlighted)
+                switch (hits?.Count)
                 {
-                    return;
+                    case 1:
+                        hits[0].Highlight();
+                        return;
+                    case > 1:
+                        HighlightAll(hits);
+                        return;
                 }
             }
 
@@ -881,6 +892,20 @@ namespace Iviz.App
                     TfListener.RelativePoseToFixedFrame(poseToHighlight).Unity2RosPose()
                 );
                 TfListener.Instance.TapPublisher.Publish(poseStamped);
+            }
+        }
+
+        static async void HighlightAll(List<IHighlightable> hits)
+        {
+            foreach (var toHighlight in hits)
+            {
+                if (!toHighlight.IsAlive)
+                {
+                    continue;
+                }
+
+                toHighlight.Highlight();
+                await Task.Delay(1000);
             }
         }
 

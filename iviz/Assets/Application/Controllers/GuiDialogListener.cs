@@ -34,9 +34,8 @@ namespace Iviz.Controllers
         static GuiDialogListener defaultHandler;
 
         [NotNull]
-        public static GuiDialogListener DefaultHandler => defaultHandler ?? (defaultHandler = new GuiDialogListener());
-
-
+        public static GuiDialogListener DefaultHandler => defaultHandler ??= new GuiDialogListener();
+        
         [NotNull] public override TfFrame Frame => TfListener.Instance.FixedFrame;
 
         [CanBeNull] readonly IModuleData moduleData;
@@ -53,6 +52,8 @@ namespace Iviz.Controllers
 
         [CanBeNull] public Sender<Feedback> FeedbackSender { get; private set; }
 
+        public bool Interactable { get; set; }
+        
         public GuiDialogConfiguration Config
         {
             get => config;
@@ -63,19 +64,14 @@ namespace Iviz.Controllers
             }
         }
         
-        public bool Interactable { get; set; }
-
-        public override void StartListening()
+        public void StartListening()
         {
-            switch (config.Type)
+            Listener = config.Type switch
             {
-                case Dialog.RosMessageType:
-                    Listener = new Listener<Dialog>(config.Topic, Handler) {MaxQueueSize = 50};
-                    break;
-                case GuiArray.RosMessageType:
-                    Listener = new Listener<GuiArray>(config.Topic, Handler) {MaxQueueSize = 50};
-                    break;
-            }
+                Dialog.RosMessageType => new Listener<Dialog>(config.Topic, Handler) { MaxQueueSize = 50 },
+                GuiArray.RosMessageType => new Listener<GuiArray>(config.Topic, Handler) { MaxQueueSize = 50 },
+                _ => Listener
+            };
 
             FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");
         }

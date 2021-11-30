@@ -59,7 +59,6 @@ namespace Iviz.Displays
         }
         public int Layer
         {
-            get => gameObject.layer;
             set => gameObject.layer = value;
         }
 

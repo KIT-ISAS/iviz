@@ -121,7 +121,7 @@ namespace Iviz.Controllers
             Robot = null;
         }
 
-        public override void StartListening()
+        public void StartListening()
         {
             Listener = new Listener<JointState>(config.Topic, Handler);
         }

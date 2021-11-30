@@ -222,8 +222,8 @@ namespace Iviz.Controllers
 
             if (SenderJoy != null)
             {
-                Vector2 leftDir = joystick.Left;
-                Vector2 rightDir = joystick.Right;
+                var leftDir = joystick.Left;
+                var rightDir = joystick.Right;
 
                 string frameId = string.IsNullOrEmpty(AttachToFrame) ? TfListener.FixedFrameId : AttachToFrame;
                 var joy = new Joy(

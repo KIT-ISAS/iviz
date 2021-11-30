@@ -448,7 +448,6 @@ namespace Iviz.Displays
                 }
             }
         }
-
         Color ColorFromOrientation(in Msgs.GeometryMsgs.Vector3 direction)
         {
             var (x, y, z) = transform.parent.AsLocalPose().Unity2RosTransform() * direction;

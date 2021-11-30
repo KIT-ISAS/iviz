@@ -151,7 +151,6 @@ namespace Iviz.Displays
 
         public override void Suspend()
         {
-            base.Suspend();
             measurements.Clear();
             DataSource = null;
         }

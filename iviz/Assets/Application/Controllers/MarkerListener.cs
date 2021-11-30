@@ -20,6 +20,10 @@ namespace Iviz.Controllers
 {
     public sealed class MarkerListener : ListenerController, IMarkerDialogListener
     {
+        const int MaxMarkersTotal = 10000;
+        const int MaxMarkersPerFrame = 100;
+        const int MaxMarkersInLog = 50;
+
         readonly MarkerConfiguration config = new();
 
         /// List of markers
@@ -28,18 +32,13 @@ namespace Iviz.Controllers
         /// Temporary buffer to hold incoming marker messages from the network thread
         readonly Dictionary<(string Ns, int Id), Marker> newMarkerBuffer = new();
 
-        public MarkerListener(IModuleData moduleData)
-        {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-        }
-
         public override IModuleData ModuleData { get; }
         public override TfFrame Frame => TfListener.DefaultFrame;
 
         public MarkerConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 config.Topic = value.Topic;
                 config.Type = value.Type;
@@ -144,82 +143,16 @@ namespace Iviz.Controllers
                 }                
             }
         }        
-
-        public override void StartListening()
-        {
-            var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
-
-            Listener = config.Type switch
-            {
-                Marker.RosMessageType => new Listener<Marker>(config.Topic, Handler, rosTransportHint),
-                MarkerArray.RosMessageType => new Listener<MarkerArray>(config.Topic, Handler, rosTransportHint),
-                _ => throw new InvalidOperationException("Invalid message type")
-            };
-
-            GameThread.EverySecond += CheckDeadMarkers;
-            GameThread.EveryFrame += HandleAsync;
-        }
-
-        void CheckDeadMarkers()
-        {
-            var deadEntries = markers
-                .Where(entry => entry.Value.ExpirationTime < GameThread.Now)
-                .ToArray();
-            foreach (var (key, value) in deadEntries)
-            {
-                markers.Remove(key);
-                DeleteMarkerObject(value);
-            }
-        }
-
-        public override void StopController()
-        {
-            base.StopController();
-            DestroyAllMarkers();
-
-            GameThread.EverySecond -= CheckDeadMarkers;
-            GameThread.EveryFrame -= HandleAsync;
-        }
-
-        public string Topic => config.Topic;
-
-        public void GenerateLog(StringBuilder description)
-        {
-            const int maxToDisplay = 50;
-
-            if (description == null)
-            {
-                throw new ArgumentNullException(nameof(description));
-            }
-
-            int i = 0;
-            foreach (var marker in markers.Values)
-            {
-                marker.GenerateLog(description);
-                if (i++ > maxToDisplay)
-                {
-                    break;
-                }
-            }
-
-            if (markers.Count > maxToDisplay)
-            {
-                description.Append("<i>... and ").Append(markers.Count - maxToDisplay).Append(" more.</i>")
-                    .AppendLine();
-            }
-
-            description.AppendLine().AppendLine();
-        }
-
+        
         public string BriefDescription
         {
             get
             {
                 string markerStr = markers.Count switch
                 {
-                    0 => "<b>No markers →</b>",
-                    1 => "<b>1 marker →</b>",
-                    _ => $"<b>{markers.Count.ToString()} markers →</b>"
+                    0 => "<b>No markers</b>",
+                    1 => "<b>1 marker</b>",
+                    _ => $"<b>{markers.Count.ToString()} markers</b>"
                 };
 
                 int totalErrors = 0, totalWarnings = 0;
@@ -252,6 +185,76 @@ namespace Iviz.Controllers
                 return $"{markerStr}\n{errorStr}, {warnStr}";
             }
         }
+        
+        public string Topic => config.Topic;        
+        
+        public MarkerListener(IModuleData moduleData, MarkerConfiguration? config, string topic, string type)
+        {        
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+            
+            Config = config ?? new MarkerConfiguration
+            {
+                Topic = topic,
+                Type = type
+            };            
+
+            var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+
+            Listener = Config.Type switch
+            {
+                Marker.RosMessageType => new Listener<Marker>(Config.Topic, Handler, rosTransportHint),
+                MarkerArray.RosMessageType => new Listener<MarkerArray>(Config.Topic, Handler, rosTransportHint),
+                _ => throw new InvalidOperationException("Invalid message type")
+            };
+
+            GameThread.EverySecond += CheckDeadMarkers;
+            GameThread.EveryFrame += HandleAsync;
+        }
+        
+        void CheckDeadMarkers()
+        {
+            var deadEntries = markers
+                .Where(entry => entry.Value.ExpirationTime < GameThread.Now)
+                .ToArray();
+            foreach (var (key, value) in deadEntries)
+            {
+                markers.Remove(key);
+                DeleteMarkerObject(value);
+            }
+        }
+
+        public override void StopController()
+        {
+            base.StopController();
+            DestroyAllMarkers();
+
+            GameThread.EverySecond -= CheckDeadMarkers;
+            GameThread.EveryFrame -= HandleAsync;
+        }
+
+        public void GenerateLog(StringBuilder description)
+        {
+
+            if (description == null)
+            {
+                throw new ArgumentNullException(nameof(description));
+            }
+
+            foreach (var marker in markers.Values.Take(MaxMarkersInLog))
+            {
+                marker.GenerateLog(description);
+            }
+
+            if (markers.Count > MaxMarkersInLog)
+            {
+                description.Append("<i>... and ")
+                    .Append(markers.Count - MaxMarkersInLog)
+                    .Append(" more.</i>")
+                    .AppendLine();
+            }
+
+            description.AppendLine().AppendLine();
+        }
 
         public void Reset()
         {
@@ -260,7 +263,7 @@ namespace Iviz.Controllers
 
         public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
         {
-            bounds = markers.Values.FirstOrDefault(marker => marker.NodeName == id);
+            bounds = markers.Values.FirstOrDefault(marker => marker.UniqueNodeName == id);
             return bounds != null;
         }
         
@@ -288,6 +291,11 @@ namespace Iviz.Controllers
         {
             lock (newMarkerBuffer)
             {
+                if (newMarkerBuffer.Count > MaxMarkersTotal)
+                {
+                    return false;
+                }
+                
                 foreach (var marker in msg.Markers)
                 {
                     newMarkerBuffer[IdFromMessage(marker)] = marker;
@@ -301,6 +309,11 @@ namespace Iviz.Controllers
         {
             lock (newMarkerBuffer)
             {
+                if (newMarkerBuffer.Count > MaxMarkersTotal)
+                {
+                    return false;
+                }
+                
                 newMarkerBuffer[IdFromMessage(marker)] = marker;
             }
 
@@ -334,8 +347,6 @@ namespace Iviz.Controllers
 
         void HandleAsync()
         {
-            const int maxMarkersPerFrame = 100;
-            
             // ReSharper disable once InconsistentlySynchronizedField
             if (newMarkerBuffer.Count == 0)
             {
@@ -345,7 +356,7 @@ namespace Iviz.Controllers
             RentAndClear<Marker> newMarkers;
             lock (newMarkerBuffer)
             {
-                if (newMarkerBuffer.Count <= maxMarkersPerFrame)
+                if (newMarkerBuffer.Count <= MaxMarkersPerFrame)
                 {
                     newMarkers = new RentAndClear<Marker>(newMarkerBuffer.Count);
                     foreach (var (marker, i) in newMarkerBuffer.Values.WithIndex())
@@ -357,10 +368,10 @@ namespace Iviz.Controllers
                 }
                 else
                 {
-                    using var ids = new RentAndClear<(string, int)>(maxMarkersPerFrame);
-                    newMarkers = new RentAndClear<Marker>(maxMarkersPerFrame);
+                    using var ids = new RentAndClear<(string, int)>(MaxMarkersPerFrame);
+                    newMarkers = new RentAndClear<Marker>(MaxMarkersPerFrame);
 
-                    foreach (var ((key, value), i) in newMarkerBuffer.Take(maxMarkersPerFrame).WithIndex())
+                    foreach (var ((key, value), i) in newMarkerBuffer.Take(MaxMarkersPerFrame).WithIndex())
                     {
                         ids[i] = key;
                         newMarkers[i] = value;

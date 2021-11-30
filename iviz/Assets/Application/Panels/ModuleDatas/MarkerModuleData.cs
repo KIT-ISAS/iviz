@@ -32,18 +32,7 @@ namespace Iviz.App
                 constructor.GetConfiguration<MarkerConfiguration>()?.Type ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<MarkerPanelContents>(ModuleType.Marker);
-            listener = new MarkerListener(this);
-            if (constructor.Configuration == null)
-            {
-                listener.Config.Topic = Topic;
-                listener.Config.Type = Type;
-            }
-            else
-            {
-                listener.Config = (MarkerConfiguration)constructor.Configuration;
-            }
-
-            listener.StartListening();
+            listener = new MarkerListener(this, (MarkerConfiguration?)constructor.Configuration, Topic, Type);
             UpdateModuleButton();
         }
 

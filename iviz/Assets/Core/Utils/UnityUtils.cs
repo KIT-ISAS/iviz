@@ -6,7 +6,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Iviz.Msgs;
+using Iviz.Tools;
+using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using Color32 = UnityEngine.Color32;
@@ -83,6 +86,13 @@ namespace Iviz.Core
             p.x = Mathf.Abs(p.x);
             p.y = Mathf.Abs(p.y);
             p.z = Mathf.Abs(p.z);
+            return p;
+        }
+
+        public static Vector2 Abs(this Vector2 p)
+        {
+            p.x = Mathf.Abs(p.x);
+            p.y = Mathf.Abs(p.y);
             return p;
         }
 
@@ -425,5 +435,6 @@ namespace Iviz.Core
         public static void Deconstruct(this in Msgs.GeometryMsgs.TransformStamped p,
             out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp) =>
             (parentId, childId, transform, stamp) = (p.Header.FrameId, p.ChildFrameId, p.Transform, p.Header.Stamp);
+        
     }
 }

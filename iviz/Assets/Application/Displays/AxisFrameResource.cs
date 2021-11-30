@@ -3,6 +3,7 @@
 using Iviz.Core;
 using UnityEngine;
 using Iviz.Resources;
+using Iviz.Tools;
 using JetBrains.Annotations;
 
 namespace Iviz.Displays
@@ -34,19 +35,16 @@ namespace Iviz.Displays
 
         public Color ColorX
         {
-            get => Frames[0].Color;
             set => Frames[0].Color = value;
         }
 
         public Color ColorY
         {
-            get => Frames[1].Color;
             set => Frames[1].Color = value;
         }
 
         public Color ColorZ
         {
-            get => Frames[2].Color;
             set => Frames[2].Color = value;
         }
 
@@ -62,11 +60,11 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            for (int i = 0; i < 3; i++)
+            foreach (var (frame, frameName) in Frames.Zip(Names))
             {
-                Frames[i].gameObject.name = Names[i];
-                Frames[i].ColliderEnabled = false;
-                Frames[i].Layer = Layer;
+                frame.gameObject.name = frameName;
+                frame.ColliderEnabled = false;
+                frame.Layer = Layer;
             }
 
             AxisLength = 0.25f;
@@ -92,16 +90,18 @@ namespace Iviz.Displays
 
         public void OverrideMaterial(Material? material)
         {
-            Frames[0].OverrideMaterial(material);
-            Frames[1].OverrideMaterial(material);
-            Frames[2].OverrideMaterial(material);
+            foreach (var frame in Frames)
+            {
+                frame.OverrideMaterial(material);
+            }
         }
 
         public void SplitForRecycle()
         {
-            Frames[0].ReturnToPool(Resource.Displays.Cube);
-            Frames[1].ReturnToPool(Resource.Displays.Cube);
-            Frames[2].ReturnToPool(Resource.Displays.Cube);
+            foreach (var child in children)
+            {
+                child.ReturnToPool(Resource.Displays.Cube);
+            }
         }
 
         public override void Suspend()

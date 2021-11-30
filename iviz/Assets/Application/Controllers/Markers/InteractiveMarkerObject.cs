@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Iviz.App;
+using Iviz.Common;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -29,7 +30,7 @@ namespace Iviz.Controllers
         Pose? bufferedPose;
         bool poseUpdateEnabled = true;
         bool interactable;
-        string? caption;
+        string caption = "";
 
         InteractiveMarker? lastMessage;
 
@@ -51,7 +52,6 @@ namespace Iviz.Controllers
 
         public bool DescriptionVisible
         {
-            get => text != null;
             set
             {
                 if (value)
@@ -60,12 +60,9 @@ namespace Iviz.Controllers
                     text.BillboardEnabled = true;
                     text.BillboardOffset = Vector3.up * 0.1f;
                     text.ElementSize = 0.1f;
-                    text.Visible = false;
+                    text.Visible = true;
                     text.AlwaysVisible = true;
-                    if (caption != null)
-                    {
-                        text.Text = caption;
-                    }
+                    text.Text = caption;
                 }
                 else if (text != null)
                 {
@@ -342,5 +339,8 @@ namespace Iviz.Controllers
                 totalWarnings += newNumWarnings;
             }
         }
+
+        internal IEnumerable<IHasBounds> GetAllBounds() =>
+            controls.Values.SelectMany(control => control.GetAllBounds());
     }
 }

@@ -20,7 +20,7 @@ namespace Iviz.Displays.Highlighters
         readonly CancellationTokenSource tokenSource;
 
         public CancellationToken Token => tokenSource.Token;
-        public float Duration => 2;
+        public float Duration => 1;
 
         public TfFrameHighlighter(TfFrame frame)
         {
@@ -40,12 +40,18 @@ namespace Iviz.Displays.Highlighters
             tokenSource = new CancellationTokenSource();
 
             node.AttachTo(frame);
-            tooltip.PointToCamera();
+
+            if (!frame.IsAlive) // ?
+            {
+                node.Visible = false;
+                tokenSource.Cancel();
+            }
         }
 
         public void Update(float t)
         {
-            float distanceToCam = Settings.MainCameraTransform.InverseTransformPoint(node.Transform.position).z;
+            var nodePosition = node.Transform.position;
+            float distanceToCam = Settings.MainCameraTransform.InverseTransformPoint(nodePosition).z;
 
             float size = 0.25f * Mathf.Abs(distanceToCam);
             float clampedSize = Mathf.Max(size, 2);
@@ -61,9 +67,13 @@ namespace Iviz.Displays.Highlighters
             axisResource.Tint = color;
 
             tooltip.Scale = labelSize;
-            tooltip.Transform.localPosition = (1.2f * axisResource.AxisLength + 5 * labelSize) * Vector3.up;
+            tooltip.Transform.position = nodePosition + (1.2f * axisResource.AxisLength + 5 * labelSize) * Vector3.up;
             tooltip.CaptionColor = color;
             tooltip.BackgroundColor = Resource.Colors.HighlighterBackground.WithAlpha(alpha);
+            if (t == 0)
+            {
+                tooltip.PointToCamera();
+            }
 
             using var description = BuilderPool.Rent();
             description.Append("<b>").Append(node.ParentId).Append("</b>\n");
@@ -74,6 +84,7 @@ namespace Iviz.Displays.Highlighters
         public void Dispose()
         {
             tokenSource.Cancel();
+            tokenSource.Dispose();
             axisResource.ReturnToPool();
             tooltip.ReturnToPool();
             node.DestroySelf();

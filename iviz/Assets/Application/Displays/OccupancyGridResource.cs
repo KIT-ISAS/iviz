@@ -127,7 +127,6 @@ namespace Iviz.Displays
 
         public override void Suspend()
         {
-            base.Suspend();
             pointBuffer.Clear();
         }
 

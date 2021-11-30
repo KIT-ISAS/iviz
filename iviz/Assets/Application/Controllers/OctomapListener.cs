@@ -108,7 +108,7 @@ namespace Iviz.Controllers
             setterFunction = SetterFunction;
         }
 
-        public override void StartListening()
+        public void StartListening()
         {
             Listener = new Listener<Octomap>(config.Topic, Handler);
         }

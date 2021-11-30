@@ -29,16 +29,7 @@ namespace Iviz.App
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<TfPanelContents>(ModuleType.TF);
-            listener = new TfListener(this);
-            if (constructor.Configuration != null)
-            {
-                listener.Config = (TfConfiguration)constructor.Configuration;
-            }
-            else
-            {
-                listener.Config.Topic = Topic;
-            }
-
+            listener = new TfListener(this, (TfConfiguration?)constructor.Configuration, Topic);
             UpdateModuleButton();
         }
 
@@ -66,7 +57,6 @@ namespace Iviz.App
             panel.FlipZ.Value = listener.FlipZ;
             panel.Sender.Set(listener.Publisher);
             panel.TapSender.Set(listener.TapPublisher);
-            //panel.PreferUdp.Value = listener.PreferUdp;
 
             panel.HideButton.Clicked += ToggleVisible;
             panel.ShowFrameLabels.ValueChanged += f => listener.FrameLabelsVisible = f;
@@ -75,7 +65,6 @@ namespace Iviz.App
             panel.KeepAllFrames.ValueChanged += f => listener.KeepAllFrames = f;
             panel.FlipZ.ValueChanged += f => listener.FlipZ = f;
             panel.ResetButton.Clicked += () => listener.ResetController();
-            //panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
         }
 
         public override void Close()

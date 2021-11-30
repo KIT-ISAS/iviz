@@ -154,6 +154,7 @@ namespace Iviz.Displays
             if (autoSelectMaterial)
             {
                 MainRenderer.sharedMaterial = Resource.Materials.LitOcclusionOnly.Object;
+                MainRenderer.enabled = true;
             }
         }
 
@@ -219,6 +220,7 @@ namespace Iviz.Displays
             }
 
             MainRenderer.SetPropertyColor(effectiveColor);
+            MainRenderer.enabled = effectiveColor.a > 0;
         }
 
         public void OverrideMaterial(Material? material)
@@ -230,6 +232,7 @@ namespace Iviz.Displays
             else
             {
                 MainRenderer.sharedMaterial = material;
+                MainRenderer.enabled = true;
                 autoSelectMaterial = false;
             }
 

@@ -49,7 +49,6 @@ namespace Iviz.Displays
 
         public int Layer
         {
-            get => Billboard.gameObject.layer;
             set => Billboard.gameObject.layer = value;
         }
 

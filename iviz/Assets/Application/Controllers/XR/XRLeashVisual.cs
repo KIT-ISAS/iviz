@@ -76,7 +76,7 @@ namespace Iviz.Controllers.XR
 
             if (Controller.ButtonUp)
             {
-                GuiInputModule.TriggerEnvironmentClick(new ClickInfo(transformRay), true);
+                GuiInputModule.TriggerEnvironmentClick(new ClickInfo(transformRay));
             }
 
             const int layerMask = (1 << LayerType.Collider) 

@@ -1,15 +1,22 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using UnityEngine;
 using External;
+using Iviz.Core;
 
 namespace Iviz.Controllers
 {
     public sealed class TwistJoystick : MonoBehaviour
     {
-        [SerializeField] FixedJoystick left = null;
-        [SerializeField] FixedJoystick right = null;
-        [SerializeField] Canvas canvas = null;
+        [SerializeField] FixedJoystick? left;
+        [SerializeField] FixedJoystick? right;
+        [SerializeField] Canvas? canvas;
         bool visible;
+
+        FixedJoystick LeftJoystick => left.AssertNotNull(nameof(left));
+        FixedJoystick RightJoystick  => right.AssertNotNull(nameof(right));
+        Canvas JoystickCanvas => canvas.AssertNotNull(nameof(canvas));
 
         public enum Source
         {
@@ -17,27 +24,26 @@ namespace Iviz.Controllers
             Right
         }
 
-        public event Action<Source, Vector2> Changed;
+        public event Action<Source, Vector2>? Changed;
         
         public bool Visible
         {
-            get => visible;
             set
             {
                 visible = value;
-                canvas.gameObject.SetActive(visible);
+                JoystickCanvas.gameObject.SetActive(visible);
             }
         }
 
-        public Vector2 Left => left.Direction;
+        public Vector2 Left => LeftJoystick.Direction;
 
-        public Vector2 Right => right.Direction;
+        public Vector2 Right => RightJoystick.Direction;
 
         void Awake()
         {
             Visible = false;
-            left.Changed += direction => Changed?.Invoke(Source.Left, direction);
-            right.Changed += direction => Changed?.Invoke(Source.Right, direction);
+            LeftJoystick.Changed += direction => Changed?.Invoke(Source.Left, direction);
+            RightJoystick.Changed += direction => Changed?.Invoke(Source.Right, direction);
         }
     }
 }

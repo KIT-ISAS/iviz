@@ -240,7 +240,7 @@ namespace Iviz.Controllers
             Config = new OccupancyGridConfiguration();
         }
 
-        public override void StartListening()
+        public void StartListening()
         {
             Listener = new Listener<OccupancyGrid>(config.Topic, Handler);
         }

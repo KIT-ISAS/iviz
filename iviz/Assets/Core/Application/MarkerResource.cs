@@ -34,7 +34,6 @@ namespace Iviz.Displays
 
         public virtual int Layer
         {
-            get => gameObject.layer;
             set => gameObject.layer = value;
         }
 

@@ -143,7 +143,7 @@ namespace Iviz.Controllers
             Config = new LaserScanConfiguration();
         }
 
-        public override void StartListening()
+        public void StartListening()
         {
             Listener = new Listener<LaserScan>(config.Topic, Handler);
             node.name = "[" + config.Topic + "]";

@@ -142,7 +142,7 @@ namespace Iviz.Controllers
             Config = new PathConfiguration();
         }
 
-        public override void StartListening()
+        public void StartListening()
         {
             switch (config.Type)
             {

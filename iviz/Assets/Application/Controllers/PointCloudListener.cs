@@ -222,7 +222,7 @@ namespace Iviz.Controllers
 
         public ReadOnlyCollection<string> FieldNames { get; }
 
-        public override void StartListening()
+        public void StartListening()
         {
             Listener = new Listener<PointCloud2>(config.Topic, Handler);
             node.name = $"[{config.Topic}]";

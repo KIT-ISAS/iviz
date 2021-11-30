@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using Iviz.Common;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
@@ -27,6 +28,8 @@ namespace Iviz.Controllers
         const string ErrorStr = "<color=red>Error:</color> ";
         const string FloatFormat = "#,0.###";
 
+        static uint globalIdCounter;
+        
         readonly StringBuilder description = new(250);
         readonly FrameNode node;
         readonly (string Ns, int Id) id;
@@ -141,7 +144,7 @@ namespace Iviz.Controllers
             set => node.gameObject.SetActive(value);
         }
 
-        public string NodeName => node.gameObject.name;
+        public string UniqueNodeName { get; }
 
         public bool TriangleListFlipWinding
         {
@@ -169,6 +172,8 @@ namespace Iviz.Controllers
 
             this.id = id;
             node.gameObject.name = $"{id.Ns}/{id.Id.ToString()}";
+
+            UniqueNodeName = (++globalIdCounter).ToString();
         }
 
         public async ValueTask SetAsync(Marker msg)
@@ -184,7 +189,7 @@ namespace Iviz.Controllers
             description.Length = 0;
 
             description.Append("<color=#800000ff>")
-                .Append("<link=").Append(NodeName).Append(">")
+                .Append("<link=").Append(UniqueNodeName).Append(">")
                 .Append("<b><u>").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/").Append(id.Id)
                 .Append("</u></b></link></color>")
                 .AppendLine();
@@ -728,6 +733,12 @@ namespace Iviz.Controllers
                 Smoothness = Smoothness;
                 Metallic = Metallic;
                 OcclusionOnly = OcclusionOnly;
+
+                if (resource is PointListResource pointListResource)
+                {
+                    pointListResource.BoundsChanged += () => BoundsChanged?.Invoke();
+                }
+                
                 // BoundsChanged?.Invoke() gets called later
                 return; // all OK
             }
@@ -758,7 +769,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            Pose newPose = msg.Pose.Ros2Unity();
+            var newPose = msg.Pose.Ros2Unity();
             if (newPose == currentPose)
             {
                 return;

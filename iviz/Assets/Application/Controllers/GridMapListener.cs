@@ -188,7 +188,7 @@ namespace Iviz.Controllers
             Config = new GridMapConfiguration();
         }
 
-        public override void StartListening()
+        public void StartListening()
         {
             Listener = new Listener<GridMap>(config.Topic, Handler);
         }

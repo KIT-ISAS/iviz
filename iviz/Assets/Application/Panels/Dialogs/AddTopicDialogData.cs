@@ -1,8 +1,10 @@
-﻿using Iviz.Roslib;
+﻿#nullable enable
+
 using System.Collections.Generic;
 using System.Linq;
+using BigGustave;
 using Iviz.Common;
-using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
@@ -15,9 +17,6 @@ namespace Iviz.App
     {
         const int MaxLineWidth = 250;
 
-        readonly AddTopicDialogContents panel;
-        public override IDialogPanelContents Panel => panel;
-
         static readonly Color[] ColorList =
         {
             Color.Lerp(Color.yellow, Color.white, 0.95f),
@@ -28,7 +27,12 @@ namespace Iviz.App
             Color.Lerp(Color.blue, Color.white, 0.95f),
         };
 
-        readonly List<TopicWithResource> topics = new List<TopicWithResource>();
+        readonly AddTopicDialogContents panel;
+        readonly List<TopicWithResource> topics = new();
+        readonly List<TopicWithResource> newTopics = new();
+        uint? previousHash;
+
+        public override IDialogPanelContents Panel => panel;
 
         public AddTopicDialogData()
         {
@@ -36,7 +40,7 @@ namespace Iviz.App
             panel.ShowAll.Value = false;
         }
 
-        static IEnumerable<TopicWithResource> GetTopicCandidates()
+        static void GetTopicCandidates(List<TopicWithResource> result)
         {
             var newTopics = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
             foreach ((string topic, string msgType) in newTopics)
@@ -48,10 +52,11 @@ namespace Iviz.App
 
                 bool resourceFound =
                     Resource.ResourceByRosMessageType.TryGetValue(msgType, out ModuleType resource);
-                yield return new TopicWithResource(topic, msgType,
-                    resourceFound ? resource : ModuleType.Invalid);
+                result.Add(new TopicWithResource(topic, msgType,
+                    resourceFound ? resource : ModuleType.Invalid));
             }
         }
+
 
         public override void SetupPanel()
         {
@@ -65,11 +70,35 @@ namespace Iviz.App
             panel.SortByType.ValueChanged += _ => UpdatePanel();
         }
 
+        bool TopicsHaveChanged()
+        {
+            uint hash = Crc32Calculator.DefaultSeed;
+            foreach (var topic in newTopics)
+            {
+                hash = Crc32Calculator.Compute(topic.Topic, hash);
+                hash = Crc32Calculator.Compute(topic.Type, hash);
+            }
+
+            if (previousHash == hash)
+            {
+                return false;
+            }
+            
+            previousHash = hash;
+            return true;
+        }
+
         public override void UpdatePanel()
         {
-            topics.Clear();
+            newTopics.Clear();
+            GetTopicCandidates(newTopics);
+            if (!TopicsHaveChanged())
+            {
+                return;
+            }
 
-            topics.AddRange(GetTopicCandidates());
+            topics.Clear();
+            topics.AddRange(newTopics);
 
             topics.Sort((x, y) => string.CompareOrdinal(x.Topic, y.Topic));
             if (panel.SortByType.Value)
@@ -88,17 +117,17 @@ namespace Iviz.App
 
             if (showAll)
             {
-                foreach ((var item, TopicWithResource topic) in panel.Zip(topics))
+                foreach (var (item, topic) in panel.Zip(topics))
                 {
-                    item.Color = ColorList[(int) topic.ResourceType % ColorList.Length];
+                    item.Color = ColorList[(int)topic.ResourceType % ColorList.Length];
                     item.Interactable = topic.ResourceType != ModuleType.Invalid;
                 }
             }
             else
             {
-                foreach ((var item, TopicWithResource topic) in panel.Zip(topics))
+                foreach (var (item, topic) in panel.Zip(topics))
                 {
-                    item.Color = ColorList[(int) topic.ResourceType % ColorList.Length];
+                    item.Color = ColorList[(int)topic.ResourceType % ColorList.Length];
                 }
             }
 
@@ -119,7 +148,7 @@ namespace Iviz.App
                     .ElementAtOrDefault(index);
             }
 
-            if (clickedTopic.Topic == null)
+            if (clickedTopic.ResourceType == ModuleType.Invalid)
             {
                 return;
             }
@@ -128,7 +157,7 @@ namespace Iviz.App
             Close();
             moduleData.ShowPanel();
         }
-        
+
         readonly struct TopicWithResource
         {
             public string Topic { get; }
@@ -136,23 +165,22 @@ namespace Iviz.App
             public string ShortType { get; }
             public ModuleType ResourceType { get; }
 
-            public TopicWithResource([NotNull] string topic, [NotNull] string type, ModuleType resourceType)
+            public TopicWithResource(string topic, string type, ModuleType resourceType)
             {
                 Topic = topic;
                 Type = type;
                 ResourceType = resourceType;
 
                 int lastSlash = Type.LastIndexOf('/');
-                ShortType = (lastSlash == -1) ? Type : Type.Substring(lastSlash + 1);
+                ShortType = (lastSlash == -1) ? Type : Type[(lastSlash + 1)..];
             }
 
-            [NotNull]
             public override string ToString()
             {
                 string type = (ResourceType == ModuleType.Invalid) ? Type : ShortType;
                 return $"{Resource.Font.Split(Topic, MaxLineWidth)}\n" +
                        $"<b>{Resource.Font.Split(type, MaxLineWidth)}</b>";
             }
-        }        
+        }
     }
 }

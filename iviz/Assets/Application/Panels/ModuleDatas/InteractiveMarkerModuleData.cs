@@ -1,11 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using Iviz.Common;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Resources;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 
@@ -16,8 +14,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class InteractiveMarkerModuleData : ListenerModuleData, IInteractableModuleData
     {
-        [NotNull] readonly InteractiveMarkerListener listener;
-        [NotNull] readonly InteractiveMarkerPanelContents panel;
+        readonly InteractiveMarkerListener listener;
+        readonly InteractiveMarkerPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -26,30 +24,20 @@ namespace Iviz.App
 
         public override IConfiguration Configuration => listener.Config;
 
-        public InteractiveMarkerModuleData([NotNull] ModuleDataConstructor constructor) :
+        public InteractiveMarkerModuleData(ModuleDataConstructor constructor) :
             base(constructor.GetConfiguration<InteractiveMarkerConfiguration>()?.Topic ?? constructor.Topic,
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<InteractiveMarkerPanelContents>(
                 ModuleType.InteractiveMarker);
-            listener = new InteractiveMarkerListener(this);
-            if (constructor.Configuration != null)
-            {
-                listener.Config = (InteractiveMarkerConfiguration) constructor.Configuration;
-            }
-            else
-            {
-                listener.Config.Topic = Topic;
-            }
-
+            listener = new InteractiveMarkerListener(this,
+                (InteractiveMarkerConfiguration?)constructor.Configuration, Topic);
             Interactable = ModuleListPanel.SceneInteractable;
-            listener.StartListening();
             UpdateModuleButton();
         }
 
         public bool Interactable
         {
-            get => listener.Interactable;
             set => listener.Interactable = value;
         }
 

@@ -28,7 +28,7 @@ namespace Iviz.Controllers.TF
         const int MaxQueueSize = 10000;
 
         public const string DefaultTopic = "/tf";
-        public const string MapFrameId = "map";
+        const string MapFrameId = "map";
 
         static TfListener? instance;
         static uint tfSeq;
@@ -73,11 +73,10 @@ namespace Iviz.Controllers.TF
 
         public static float RootScale
         {
-            get => RootFrame.transform.localScale.x;
             set => RootFrame.transform.localScale = value * Vector3.one;
         }
 
-        public TfListener(IModuleData moduleData)
+        public TfListener(IModuleData moduleData, TfConfiguration? config, string topic)
         {
             instance = this;
 
@@ -119,7 +118,10 @@ namespace Iviz.Controllers.TF
                 PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
             ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
 
-            Config = new TfConfiguration();
+            Config = config ?? new TfConfiguration
+            {
+                Topic = topic
+            };            
 
             GameThread.LateEveryFrame += LateUpdate;
         }
@@ -353,8 +355,8 @@ namespace Iviz.Controllers.TF
 
         public void ResetController()
         {
-            Listener?.Reset();
-            ListenerStatic?.Reset();
+            Listener.Reset();
+            ListenerStatic.Reset();
             Publisher.Reset();
 
             ResetFrames?.Invoke();

@@ -41,6 +41,8 @@ namespace Iviz.Displays
 
         int Size => pointBuffer.Length;
 
+        public event Action? BoundsChanged;
+        
         public override bool UseColormap
         {
             get => base.UseColormap;
@@ -306,6 +308,8 @@ namespace Iviz.Displays
             {
                 IntensityBounds = span;
             }
+            
+            BoundsChanged?.Invoke();
         }
 
         void CalculateBoundsEmpty()
@@ -317,6 +321,8 @@ namespace Iviz.Displays
             {
                 IntensityBounds = Vector2.zero;
             }
+
+            BoundsChanged?.Invoke();
         }
 
         protected override void Rebuild()
@@ -348,6 +354,7 @@ namespace Iviz.Displays
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
             Properties.SetBuffer(PointsId, (ComputeBuffer?) null);
+            BoundsChanged = null;
         }
 
         protected override void UpdateProperties()

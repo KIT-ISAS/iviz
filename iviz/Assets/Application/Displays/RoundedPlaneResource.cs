@@ -19,6 +19,8 @@ namespace Iviz.Displays
         Vector2 size;
         float radius;
 
+        public new Bounds Bounds => new(Collider.center, Collider.size);
+
         public Vector2 Size
         {
             set
@@ -28,7 +30,7 @@ namespace Iviz.Displays
                     return;
                 }
 
-                size = value;
+                size = value.Abs();
                 Collider.size = new Vector3(size.x, 0.001f, size.y);
                 Rebuild();
             }
@@ -95,7 +97,7 @@ namespace Iviz.Displays
 
             for (int i = 0; i < 4; i++)
             {
-                var o = new GameObject { name = "Corner" };;
+                var o = new GameObject { name = "Corner" };
                 var resource = o.AddComponent<MeshMarkerResource>();
                 resource.Mesh = CornerMesh;
                 resource.Transform.SetParentLocal(transform);

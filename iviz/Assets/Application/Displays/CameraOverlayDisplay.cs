@@ -12,9 +12,9 @@ namespace Iviz.Displays
     {
         static readonly Quaternion BaseTransform = Quaternion.AngleAxis(90, Vector3.up);
 
-        [SerializeField] AxisFrameResource? resource = null;
-        [SerializeField] Camera? parentCamera = null;
-        [SerializeField] Camera? grandparentCamera = null;
+        [SerializeField] AxisFrameResource? resource;
+        [SerializeField] Camera? parentCamera;
+        [SerializeField] Camera? grandparentCamera;
 
         Vector3 settings;
         

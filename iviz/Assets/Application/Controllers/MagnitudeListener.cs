@@ -259,7 +259,7 @@ namespace Iviz.Controllers
             Config = new MagnitudeConfiguration();
         }
 
-        public override void StartListening()
+        public void StartListening()
         {
             frameNode.name = $"[{config.Topic}]";
 

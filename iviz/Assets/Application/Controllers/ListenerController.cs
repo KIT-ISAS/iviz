@@ -12,7 +12,7 @@ namespace Iviz.Controllers
     public abstract class ListenerController : IController, IHasFrame
     {
         /// <summary>
-        /// The ROS subscriber of this controller. Only active after <see cref="StartListening"/> is called.
+        /// The ROS subscriber of this controller.
         /// </summary>
         public IListener? Listener { get; protected set; }
 
@@ -20,15 +20,9 @@ namespace Iviz.Controllers
 
         public abstract IModuleData ModuleData { get; }
 
-        /// <summary>
-        /// Activates the listener and tells it to subscribe to the topic. 
-        /// </summary>
-        public abstract void StartListening();
-        
         public virtual void StopController()
         {
             Listener?.Stop();
-            Listener = null;
         }
 
         public virtual void ResetController()

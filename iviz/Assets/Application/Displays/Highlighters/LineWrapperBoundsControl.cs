@@ -18,19 +18,32 @@ namespace Iviz.Displays.Highlighters
         readonly GameObject node;
         readonly LineDraggable leftDraggable;
         readonly LineDraggable rightDraggable;
-
+        
+        Color outColor;
+        Color defaultColor;
+        Color highlightColor;
+        
         public event Action? PointerDown;
         public event Action? PointerUp;
         public event Action? Moved;
         
-        public float Width
+        public float Size
         {
             set
             {
-                leftDraggable.Transform.localPosition = (value / 2) * Vector3.back;
-                rightDraggable.Transform.localPosition = (value / 2) * Vector3.forward;
+                left.Transform.localPosition = (value / 2) * Vector3.back;
+                right.Transform.localPosition = (value / 2) * Vector3.forward;
             }
         }
+        
+        public float MarkerScale
+        {
+            set
+            {
+                left.Transform.localScale = value * Vector3.one;
+                right.Transform.localScale = value * Vector3.one;
+            }
+        }        
 
         public bool Interactable
         {
@@ -41,10 +54,21 @@ namespace Iviz.Displays.Highlighters
             }
         }
         
-        public LineWrapperBoundsControl(Transform parent, Transform target)
+        public Color Color
         {
-            node = new GameObject("[Axis Wrapper]");
+            set
+            {
+                outColor = value.WithSaturation(0.5f);
+                defaultColor = value.WithSaturation(0.75f);
+                highlightColor = value;
+            }
+        }
+        
+        public LineWrapperBoundsControl(Transform parent, Transform target, in Quaternion orientation)
+        {
+            node = new GameObject("[Line Wrapper]");
             node.transform.SetParentLocal(parent);
+            node.transform.localRotation = orientation;
 
             left = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Pyramid, node.transform);
             left.Transform.localRotation = BaseRotationLeft;
@@ -74,7 +98,7 @@ namespace Iviz.Displays.Highlighters
             rightDraggable.PointerUp += () => PointerUp?.Invoke();
             rightDraggable.Moved += () => Moved?.Invoke();        
             
-            Width = 1;
+            Size = 1;
             
             void OnStateChanged()
             {
@@ -87,7 +111,7 @@ namespace Iviz.Displays.Highlighters
                 }
                 else
                 {
-                    left.EmissiveColor = right.EmissiveColor = Color.black;
+                    left.EmissiveColor = right.EmissiveColor = Color.black.WithAlpha(0);
                     left.Color = right.Color = Color.white;
                 }
             }

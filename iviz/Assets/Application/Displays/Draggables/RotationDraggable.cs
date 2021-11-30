@@ -11,6 +11,11 @@ namespace Iviz.Displays
     {
         [SerializeField] Vector3 normal;
 
+        public Vector3 Normal
+        {
+            set => normal = value;
+        }
+        
         public bool DoesRotationReset { get; set; }
 
         protected override void OnPointerMove(in Ray pointerRay)

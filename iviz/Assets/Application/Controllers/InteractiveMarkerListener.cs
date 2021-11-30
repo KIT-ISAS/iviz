@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using Iviz.App;
@@ -32,18 +33,19 @@ namespace Iviz.Controllers
         uint feedSeq;
         bool interactable;
 
-        public Listener<InteractiveMarkerInit>? FullListener { get; private set; }
-        public Sender<InteractiveMarkerFeedback>? Publisher { get; private set; }
+        public Listener<InteractiveMarkerInit>? FullListener { get; }
+        public Sender<InteractiveMarkerFeedback>? Publisher { get; }
         public override TfFrame Frame => TfListener.DefaultFrame;
         public override IModuleData ModuleData { get; }
 
         public InteractiveMarkerConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 config.Topic = value.Topic;
                 DescriptionsVisible = value.DescriptionsVisible;
+                Visible = value.Visible;
             }
         }
 
@@ -58,7 +60,7 @@ namespace Iviz.Controllers
                 }
 
                 config.DescriptionsVisible = value;
-                foreach (InteractiveMarkerObject interactiveMarker in interactiveMarkers.Values)
+                foreach (var interactiveMarker in interactiveMarkers.Values)
                 {
                     interactiveMarker.DescriptionVisible = value;
                 }
@@ -100,9 +102,9 @@ namespace Iviz.Controllers
             {
                 throw new ArgumentNullException(nameof(description));
             }
-         
+
             const int maxToDisplay = 50;
-            
+
             foreach (var interactiveMarker in interactiveMarkers.Values.Take(maxToDisplay))
             {
                 interactiveMarker.GenerateLog(description);
@@ -111,10 +113,12 @@ namespace Iviz.Controllers
 
             if (interactiveMarkers.Count > maxToDisplay)
             {
-                description.Append("<i>... and ").Append(interactiveMarkers.Count - maxToDisplay).Append(" more.</i>")
+                description.Append("<i>... and ")
+                    .Append(interactiveMarkers.Count - maxToDisplay)
+                    .Append(" more.</i>")
                     .AppendLine();
             }
-            
+
             description.AppendLine().AppendLine();
         }
 
@@ -124,9 +128,9 @@ namespace Iviz.Controllers
             {
                 string markerStr = interactiveMarkers.Count switch
                 {
-                    0 => "<b>No interactive markers →</b>",
-                    1 => "<b>1 interactive marker →</b>",
-                    _ => $"<b>{interactiveMarkers.Values.Count.ToString()} interactive markers →</b>"
+                    0 => "<b>No interactive markers</b>",
+                    1 => "<b>1 interactive marker</b>",
+                    _ => $"<b>{interactiveMarkers.Values.Count.ToString()} interactive markers</b>"
                 };
 
                 int totalErrors = 0, totalWarnings = 0;
@@ -160,41 +164,27 @@ namespace Iviz.Controllers
             }
         }
 
-        public InteractiveMarkerListener(IModuleData moduleData)
+        public InteractiveMarkerListener(IModuleData moduleData, InteractiveMarkerConfiguration? config, string topic)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             node = FrameNode.Instantiate("[InteractiveMarkerListener]");
-        }
 
-        public void Reset()
-        {
-            DestroyAllMarkers();
-            FullListener?.Unsuspend();
-        }
+            Config = config ?? new InteractiveMarkerConfiguration
+            {
+                Topic = topic,
+            };
 
-        public bool TryGetBoundsFromId(string id, out IHasBounds? frame)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<IHasBounds> GetAllBounds()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void StartListening()
-        {
-            Listener = new Listener<InteractiveMarkerUpdate>(config.Topic, HandlerUpdate) { MaxQueueSize = 50 };
+            Listener = new Listener<InteractiveMarkerUpdate>(Config.Topic, HandlerUpdate) { MaxQueueSize = 50 };
 
             string root;
-            if (config.Topic.HasSuffix("/update"))
+            if (Config.Topic.HasSuffix("/update"))
             {
-                int lastSlash = config.Topic.LastIndexOf('/');
-                root = config.Topic[..lastSlash];
+                int lastSlash = Config.Topic.LastIndexOf('/');
+                root = Config.Topic[..lastSlash];
             }
             else
             {
-                root = config.Topic;
+                root = Config.Topic;
             }
 
             string feedbackTopic = string.Format(FeedbackFormatStr, root);
@@ -203,6 +193,21 @@ namespace Iviz.Controllers
             Publisher = new Sender<InteractiveMarkerFeedback>(feedbackTopic);
             FullListener = new Listener<InteractiveMarkerInit>(fullTopic, HandlerUpdateFull);
         }
+
+        public void Reset()
+        {
+            DestroyAllMarkers();
+            FullListener?.Unsuspend();
+        }
+
+        public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
+        {
+            bounds = GetAllBounds().FirstOrDefault(markerBounds => ((MarkerObject)markerBounds).UniqueNodeName == id);
+            return bounds != null;
+        }
+
+        public IEnumerable<IHasBounds> GetAllBounds() =>
+            interactiveMarkers.Values.SelectMany(interactiveMarker => interactiveMarker.GetAllBounds());
 
         public override void StopController()
         {

@@ -17,16 +17,12 @@ namespace Iviz.Displays
         /// <summary>
         /// Unity layer of the display.
         /// </summary>
-        int Layer { get; set; }
+        int Layer { set; }
         /// <summary>
         /// Tells the display that it is about to be sent to the Resource Pool, and that it should undo
         /// any changes that would prevent it from being reused.
         /// </summary>
         void Suspend();
-        /// <summary>
-        /// Gets or sets whether the display is visible. 
-        /// </summary>
-        bool Visible { set; }
     }
     
     /// <summary>

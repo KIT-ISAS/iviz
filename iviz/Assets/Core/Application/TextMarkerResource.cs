@@ -22,7 +22,6 @@ namespace Iviz.Displays
 
         public string Text
         {
-            get => TextMesh.text;
             set
             {
                 if (value == null)
@@ -36,33 +35,29 @@ namespace Iviz.Displays
 
         public Color Color
         {
-            get => TextMesh.color;
             set => TextMesh.color = value;
         }
 
         public bool BillboardEnabled
         {
-            get => Billboard.enabled;
             set => Billboard.enabled = value;
         }
 
         public Vector3 BillboardOffset
         {
-            get => Billboard.Offset;
             set => Billboard.Offset = value;
         }
 
         public float ElementSize
         {
-            get => transform.localScale.x;
             set => transform.localScale = Vector3.one * value;
         }
 
         public bool AlwaysVisible
         {
-            get => MeshRenderer.sharedMaterial == Resource.Materials.FontMaterial.Object;
-            set => MeshRenderer.sharedMaterial =
-                value ? Resource.Materials.FontMaterial.Object : Resource.Materials.FontMaterialZWrite.Object;
+            set => MeshRenderer.sharedMaterial = value 
+                ? Resource.Materials.FontMaterial.Object 
+                : Resource.Materials.FontMaterialZWrite.Object;
         }
 
         public override void Suspend()

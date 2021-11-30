@@ -181,7 +181,6 @@ namespace Iviz.Displays
 
         public int Layer
         {
-            get => layer;
             set
             {
                 layer = value;

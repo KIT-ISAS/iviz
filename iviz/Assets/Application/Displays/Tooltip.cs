@@ -31,7 +31,6 @@ namespace Iviz.Displays
 
         public int Layer
         {
-            get => gameObject.layer;
             set
             {
                 gameObject.layer = value;
@@ -48,7 +47,6 @@ namespace Iviz.Displays
         void Awake()
         {
             Layer = LayerType.IgnoreRaycast;
-            Background.Radius = 2f;
         }
 
         public Color BackgroundColor
@@ -104,7 +102,8 @@ namespace Iviz.Displays
         void UpdateSize()
         {
             Background.Size = new Vector2(Text.preferredWidth + 5f, Text.preferredHeight + 2f);
-            BoxCollider.size = Background.Bounds!.Value.size;
+            Background.Radius = 2f;
+            BoxCollider.size = Background.Bounds.size;
         }
 
         public void Suspend()
@@ -131,7 +130,7 @@ namespace Iviz.Displays
         {
             float distanceToCam = Settings.MainCameraTransform
                 .InverseTransformDirection(unityPosition - Settings.MainCameraTransform.position).z;
-            float size = 0.2f * distanceToCam;
+            float size = 0.2f * Mathf.Max(distanceToCam, 0);
 
             float baseFrameSize = TfListener.Instance.FrameSize;
             float labelSize = baseFrameSize * size * 0.375f / 2;

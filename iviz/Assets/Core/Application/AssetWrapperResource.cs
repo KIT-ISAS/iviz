@@ -10,7 +10,6 @@ namespace Iviz.Displays
     {
         public override int Layer
         {
-            get => base.Layer;
             set
             {
                 base.Layer = value;
