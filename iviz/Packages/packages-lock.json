@@ -9,6 +9,12 @@
         "com.unity.xr.arfoundation": "4.1.7"
       }
     },
+    "com.microsoft.mixedreality.worldlockingtools": {
+      "version": "file:MixedReality/com.microsoft.mixedreality.worldlockingtools-1.5.6.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {}
+    },
     "com.unity.burst": {
       "version": "1.6.1",
       "depth": 0,

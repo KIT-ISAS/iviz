@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Core;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -315,8 +314,8 @@ namespace Iviz.Displays
 
             for (int i = 0; i < numPoints - 1; i++)
             {
-                var pA = pointBuffer[i];
-                var pB = pointBuffer[i + 1];
+                ref var pA = ref pointBuffer[i];
+                ref var pB = ref pointBuffer[i + 1];
                 if ((pB.Position - pA.Position).MaxAbsCoeff() < maxLineDistance)
                 {
                     lineBuffer.Add(new LineWithColor(pA, pB));
@@ -325,8 +324,8 @@ namespace Iviz.Displays
 
             if (numPoints != 0)
             {
-                var pA = pointBuffer[numPoints - 1];
-                var pB = pointBuffer[0];
+                ref var pA = ref pointBuffer[numPoints - 1];
+                ref var pB = ref pointBuffer[0];
                 if ((pB.Position - pA.Position).MaxAbsCoeff() < maxLineDistance)
                 {
                     lineBuffer.Add(new LineWithColor(pA, pB));

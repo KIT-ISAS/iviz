@@ -3,8 +3,10 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using Iviz.Tools;
 
 namespace Iviz.Ros
 {
@@ -46,16 +48,16 @@ namespace Iviz.Ros
             string fullService = service[0] == '/' ? service : $"{client?.CallerId}/{service}";
             if (client != null)
             {
-                for (int t = 0; t < NumRetries; t++)
+                foreach (int t in ..NumRetries)
                 {
                     try
                     {
-                        await client.AdvertiseServiceAsync<T>(fullService, callCallback, token);
+                        await client.AdvertiseServiceAsync(fullService, callCallback, token);
                         break;
                     }
                     catch (RoslibException e)
                     {
-                        Core.RosLogger.Error($"Failed to advertise service (try {t}): ", e);
+                        RosLogger.Error($"Failed to advertise service (try {t.ToString()}): ", e);
                         await Task.Delay(WaitBetweenRetriesInMs, token);
                     }
                 }

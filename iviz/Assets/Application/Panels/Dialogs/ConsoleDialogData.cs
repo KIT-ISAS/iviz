@@ -125,7 +125,9 @@ namespace Iviz.App
             using var description = BuilderPool.Rent();
             listener.WriteDescriptionTo(description);
             string kbPerSecond = (listener.Stats.BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
-            description.Append(" | ").Append(listener.Stats.MessagesPerSecond).Append(" Hz | ")
+            description.Append(" | ")
+                .Append(listener.Stats.MessagesPerSecond)
+                .Append(" Hz | ")
                 .Append(kbPerSecond).Append(" kB/s");
 
             dialog.BottomText.SetText(description);

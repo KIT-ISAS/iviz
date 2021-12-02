@@ -112,12 +112,12 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.MyUri.Value = MyUri == null ? "" : MyUri.ToString();
-            panel.MyUri.Hints = RosClient.GetCallerUriCandidates(DefaultPort).Select(uri => uri.ToString());
+            panel.MyUri.SetHints(RosClient.GetCallerUriCandidates(DefaultPort).Select(uri => uri.ToString()));
             panel.MyId.Value = MyId ?? "";
             panel.MyId.Hints = new[] {DefaultMyId};
             panel.MasterUri.Value = MasterUri == null ? "" : MasterUri.ToString();
             panel.MasterUri.Interactable = !RosServerManager.IsActive;
-            panel.MasterUri.Hints = LastMasterUris.Select(uri => uri.ToString());
+            panel.MasterUri.SetHints(LastMasterUris.Select(uri => uri.ToString()));
             panel.LineLog.Active = true;
 
             panel.Close.Clicked += Close;

@@ -60,4 +60,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   children: []
   boxCollider: {fileID: 7741680106416222520}
-  mTransform: {fileID: 3679770859693412506}
+  m_Transform: {fileID: 3679770859693412506}

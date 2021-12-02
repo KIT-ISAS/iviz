@@ -23,7 +23,7 @@ namespace Iviz.Displays
         [SerializeField] Color color = Color.white;
         [SerializeField] MeshRenderer? mainRenderer;
         [SerializeField] MeshFilter? meshFilter;
-        
+
         Color tint = Color.white;
         bool occlusionOnly;
         bool autoSelectMaterial = true;
@@ -74,7 +74,7 @@ namespace Iviz.Displays
             get => emissiveColor;
             set
             {
-                emissiveColor = value;
+                emissiveColor = value.WithAlpha(0);
                 MainRenderer.SetPropertyEmissiveColor(emissiveColor);
             }
         }

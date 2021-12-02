@@ -1,6 +1,7 @@
 #nullable enable
 
 using Iviz.Core;
+using Iviz.Tools;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -93,7 +94,7 @@ namespace Iviz.Displays
 
                 l0.w = PointWithColor.RecastToFloat(color);
 
-                for (int i = 0; i < numSegments; i++)
+                foreach (int i in ..numSegments)
                 {
                     float t = (i + 1f) / numSegments;
                     (q.x, q.y, q.z) = Bezier(t, f);

@@ -1,6 +1,6 @@
 #nullable enable
 
-using System;
+using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.Highlighters
 {
-    public class LineWrapperBoundsControl : IBoundsControl
+    public sealed class LineWrapperBoundsControl : WrapperBoundsControl
     {
         static readonly Quaternion BaseRotationLeft = Quaternion.AngleAxis(-90, Vector3.up);
         static readonly Quaternion BaseRotationRight = Quaternion.AngleAxis(+90, Vector3.up);
@@ -19,15 +19,7 @@ namespace Iviz.Displays.Highlighters
         readonly LineDraggable leftDraggable;
         readonly LineDraggable rightDraggable;
         
-        Color outColor;
-        Color defaultColor;
-        Color highlightColor;
-        
-        public event Action? PointerDown;
-        public event Action? PointerUp;
-        public event Action? Moved;
-        
-        public float Size
+        float SizeZ
         {
             set
             {
@@ -36,7 +28,7 @@ namespace Iviz.Displays.Highlighters
             }
         }
         
-        public float MarkerScale
+        public override float MarkerScale
         {
             set
             {
@@ -45,7 +37,7 @@ namespace Iviz.Displays.Highlighters
             }
         }        
 
-        public bool Interactable
+        public override bool Interactable
         {
             set
             {
@@ -54,15 +46,18 @@ namespace Iviz.Displays.Highlighters
             }
         }
         
-        public Color Color
+        public override Bounds Bounds
         {
             set
             {
-                outColor = value.WithSaturation(0.5f);
-                defaultColor = value.WithSaturation(0.75f);
-                highlightColor = value;
+                node.transform.localPosition = value.center;
+
+                var rotation = node.transform.localRotation;
+                var bounds = value.TransformBound(Pose.identity.WithRotation(rotation), Vector3.one);
+
+                SizeZ = bounds.size.z;   
             }
-        }
+        }        
         
         public LineWrapperBoundsControl(Transform parent, Transform target, in Quaternion orientation)
         {
@@ -72,13 +67,13 @@ namespace Iviz.Displays.Highlighters
 
             left = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Pyramid, node.transform);
             left.Transform.localRotation = BaseRotationLeft;
-            left.Color = Color.white;
+            left.Color = Color.grey;
             left.Layer = LayerType.Clickable;
             left.ShadowsEnabled = false;
 
             right = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Pyramid, node.transform);
             right.Transform.localRotation = BaseRotationRight;
-            right.Color = Color.white;
+            right.Color = Color.grey;
             right.Layer = LayerType.Clickable;
             right.ShadowsEnabled = false;
 
@@ -86,19 +81,16 @@ namespace Iviz.Displays.Highlighters
             leftDraggable.TargetTransform = target;
             leftDraggable.Line = Vector3.left;
             leftDraggable.RayCollider = left.Collider;
-            leftDraggable.PointerDown += () => PointerDown?.Invoke();
-            leftDraggable.PointerUp += () => PointerUp?.Invoke();
-            leftDraggable.Moved += () => Moved?.Invoke();            
             
             rightDraggable = right.gameObject.AddComponent<LineDraggable>();
             rightDraggable.TargetTransform = target;
             rightDraggable.Line = Vector3.left;
             rightDraggable.RayCollider = right.Collider;
-            rightDraggable.PointerDown += () => PointerDown?.Invoke();
-            rightDraggable.PointerUp += () => PointerUp?.Invoke();
-            rightDraggable.Moved += () => Moved?.Invoke();        
+
+            RegisterDraggable(leftDraggable);
+            RegisterDraggable(rightDraggable);
             
-            Size = 1;
+            SizeZ = 1;
             
             void OnStateChanged()
             {
@@ -111,8 +103,8 @@ namespace Iviz.Displays.Highlighters
                 }
                 else
                 {
-                    left.EmissiveColor = right.EmissiveColor = Color.black.WithAlpha(0);
-                    left.Color = right.Color = Color.white;
+                    left.EmissiveColor = right.EmissiveColor = Color.black;
+                    left.Color = right.Color = Color.grey;
                 }
             }
 
@@ -120,8 +112,10 @@ namespace Iviz.Displays.Highlighters
             rightDraggable.StateChanged += OnStateChanged;
         }
 
-        public void Stop()
+        public override void Dispose()
         {
+            base.Dispose();
+            
             leftDraggable.ClearSubscribers();
             rightDraggable.ClearSubscribers();
             UnityEngine.Object.Destroy(leftDraggable);
@@ -131,15 +125,6 @@ namespace Iviz.Displays.Highlighters
             right.ReturnToPool(Resource.Displays.Pyramid);
             
             UnityEngine.Object.Destroy(node.gameObject);
-            
-            PointerDown = null;
-            PointerUp = null;
-            Moved = null;
         }
-        
-
     }
-
-
-
 }

@@ -10,7 +10,6 @@ namespace Iviz.App
         [SerializeField] TMP_Text text = null;
 
         public TrashButtonWidget Close => close;
-        //public Text Text => text;
         public TMP_Text Text => text;
 
         public override void ClearSubscribers()

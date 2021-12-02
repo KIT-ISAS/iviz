@@ -20,7 +20,6 @@ namespace Iviz.Displays
         static readonly int PropSquareCoeff = Shader.PropertyToID("_SquareCoeff");
         static readonly int PropTint = Shader.PropertyToID("_Tint");
 
-        //[SerializeField] Texture squareTexture = null;
         Texture2D inputTexture;
 
         [SerializeField] Material opaqueMaterial = null;

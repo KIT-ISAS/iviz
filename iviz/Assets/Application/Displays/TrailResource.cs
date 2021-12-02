@@ -128,7 +128,7 @@ namespace Iviz.Displays
             Color32 colorA = Color.WithAlpha(0);
             float scale = 255f / measurements.Count;
 
-            foreach ((Vector3 a, Vector3 b) in measurements)
+            foreach (var (a, b) in measurements)
             {
                 Color32 colorB = colorA.WithAlpha((byte) (i * scale));
                 LineWithColor line = new(a, colorA, b, colorB);

@@ -21,7 +21,7 @@ namespace Iviz.App
         static ARFoundationController Controller =>
             ARController.Instance.CheckedNull() ?? throw new NullReferenceException("AR Controller is not set");
 
-        [SerializeField] PopupButton openPanel = null;
+        //[SerializeField] PopupButton openPanel = null;
         [SerializeField] PopupButton arVisible = null;
         [SerializeField] PopupButton move = null;
         [SerializeField] PopupButton reposition = null;

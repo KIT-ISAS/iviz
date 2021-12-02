@@ -14,6 +14,7 @@ using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Controllers.XR;
 using Iviz.Core;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
@@ -51,31 +52,31 @@ namespace Iviz.App
 
         public static float CanvasScale => Instance.RootCanvas.scaleFactor;
 
-        [SerializeField] Button? middleHideGuiButton = null;
+        [SerializeField] Button? middleHideGuiButton;
 
-        [SerializeField] AnchorCanvasPanel? anchorCanvasPanel = null;
-        [SerializeField] UpperCanvasPanel? upperCanvasPanel = null;
-        [SerializeField] ARSidePanel? arSidePanel = null;
-        [SerializeField] DataPanelManager? dataPanelManager = null;
-        [SerializeField] DialogPanelManager? dialogPanelManager = null;
-        [SerializeField] ARJoystick? arJoystick = null;
-        [SerializeField] TwistJoystick? twistJoystick = null;
-        [SerializeField] GameObject? contentObject = null;
-        [SerializeField] Canvas? rootCanvas = null;
+        [SerializeField] AnchorCanvasPanel? anchorCanvasPanel;
+        [SerializeField] UpperCanvasPanel? upperCanvasPanel;
+        [SerializeField] ARSidePanel? arSidePanel;
+        [SerializeField] DataPanelManager? dataPanelManager;
+        [SerializeField] DialogPanelManager? dialogPanelManager;
+        [SerializeField] ARJoystick? arJoystick;
+        [SerializeField] TwistJoystick? twistJoystick;
+        [SerializeField] GameObject? contentObject;
+        [SerializeField] Canvas? rootCanvas;
+        [SerializeField] XRMainController? xrController;
 
-        [SerializeField] TMP_Text cameraText = null;
-        [SerializeField] Text bottomTime = null;
-        [SerializeField] Text bottomBattery = null;
-        [SerializeField] Text bottomFps = null;
-        [SerializeField] Text bottomBandwidth = null;
+        [SerializeField] TMP_Text cameraText;
+        [SerializeField] Text bottomTime;
+        [SerializeField] Text bottomBattery;
+        [SerializeField] Text bottomFps;
+        [SerializeField] Text bottomBandwidth;
 
-        [SerializeField] GameObject moduleListCanvas = null;
-        [SerializeField] GameObject dataPanelCanvas = null;
-        [SerializeField] GameObject imageCanvasHolder = null;
+        [SerializeField] GameObject moduleListCanvas;
+        [SerializeField] GameObject dataPanelCanvas;
+        [SerializeField] GameObject imageCanvasHolder;
 
-
-        [SerializeField] GameObject menuObject = null;
-
+        [SerializeField] GameObject menuObject;
+        
         readonly List<ModuleData> moduleDatas = new();
         readonly HashSet<string> topicsWithModule = new();
         readonly HashSet<ImageDialogData> imageDatas = new();
@@ -108,6 +109,7 @@ namespace Iviz.App
         public TwistJoystick TwistJoystick => twistJoystick.AssertNotNull(nameof(twistJoystick));
         public ARJoystick ARJoystick => arJoystick.AssertNotNull(nameof(arJoystick));
         public ARSidePanel ARSidePanel => arSidePanel.AssertNotNull(nameof(arSidePanel));
+        public XRMainController XRController => xrController.AssertNotNull(nameof(xrController));
         public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
@@ -317,6 +319,12 @@ namespace Iviz.App
 
             if (Settings.IsXR)
             {
+                if (xrController == null)
+                {
+                    throw new NullReferenceException("XR is enabled, but the XR controller is not set");
+                }
+
+                CreateModule(ModuleType.XR);
                 RootCanvas.ProcessCanvasForXR();
             }
 

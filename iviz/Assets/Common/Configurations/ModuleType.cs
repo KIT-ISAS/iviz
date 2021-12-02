@@ -28,5 +28,6 @@ namespace Iviz.Common
         Robot,
         Octomap,
         GuiDialog,
+        XR,
     }
 }

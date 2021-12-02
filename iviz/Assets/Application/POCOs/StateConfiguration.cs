@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using Iviz.Common;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
+using Iviz.Controllers.XR;
 
 namespace Iviz.App
 {
@@ -30,6 +31,7 @@ namespace Iviz.App
         [DataMember] public List<GuiDialogConfiguration> Dialogs { get; set; } = new();
         [DataMember] public ARConfiguration AR { get; set; } = new();
         [DataMember] public JoystickConfiguration Joystick { get; set; } = new();
+        [DataMember] public XRConfiguration XR { get; set; } = new();
 
         public IEnumerable<IEnumerable<IConfiguration>> CreateListOfEntries() => new IEnumerable<IConfiguration>[]
         {
@@ -50,6 +52,7 @@ namespace Iviz.App
             Dialogs,
             new[] { AR },
             new[] { Joystick },
+            new[] { XR },
         };
 
     }

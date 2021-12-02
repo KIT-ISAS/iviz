@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -83,7 +84,7 @@ namespace Iviz.Displays
         static MeshMarkerResource[] CreateObjects(Transform transform)
         {
             var objects = new MeshMarkerResource[7];
-            for (int i = 0; i < 3; i++)
+            foreach (int i in ..3)
             {
                 var o = new GameObject { name = "Frame" };
                 var resource = o.AddComponent<MeshMarkerResource>();
@@ -95,7 +96,7 @@ namespace Iviz.Displays
                 objects[i] = resource;
             }
 
-            for (int i = 0; i < 4; i++)
+            foreach (int i in 3..7)
             {
                 var o = new GameObject { name = "Corner" };
                 var resource = o.AddComponent<MeshMarkerResource>();
@@ -104,7 +105,7 @@ namespace Iviz.Displays
                 resource.ColliderEnabled = false;
                 resource.ShadowsEnabled = false;
                 resource.Layer = LayerType.IgnoreRaycast;
-                objects[3 + i] = resource;
+                objects[i] = resource;
             }
                 
             objects[0].Transform.localPosition = Vector3.zero;
@@ -123,7 +124,7 @@ namespace Iviz.Displays
             };
 
             const int numVertices = 10;
-            for (int i = 1; i < numVertices; i++)
+            foreach (int i in 1..numVertices)
             {
                 float angle = Mathf.PI / 2 * i / numVertices;
                 vertices.Add(new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)));
@@ -132,7 +133,7 @@ namespace Iviz.Displays
             vertices.Add(Vector3.forward);
 
             var indices = new List<int>();
-            for (int i = 0; i < numVertices; i++)
+            foreach (int i in ..numVertices)
             {
                 indices.Add(i + 1);
                 indices.Add(0);

@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Roslib;
+using Iviz.Tools;
 
 namespace Iviz.Ros
 {
@@ -14,7 +16,7 @@ namespace Iviz.Ros
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;
 
-        readonly HashSet<Sender<T>> senders = new HashSet<Sender<T>>();
+        readonly HashSet<Sender<T>> senders = new();
         readonly string topic;
         string? publisherId;
         
@@ -57,7 +59,7 @@ namespace Iviz.Ros
             token.ThrowIfCancellationRequested();
             if (client != null)
             {
-                for (int t = 0; t < NumRetries; t++)
+                foreach (int t in ..NumRetries)
                 {
                     try
                     {
@@ -68,7 +70,7 @@ namespace Iviz.Ros
                     }
                     catch (RoslibException e)
                     {
-                        Core.RosLogger.Error($"Failed to advertise topic (try {t}): ", e);
+                        RosLogger.Error($"Failed to advertise topic (try {t.ToString()}): ", e);
                         await Task.Delay(WaitBetweenRetriesInMs, token);
                     }
                 }

@@ -7,6 +7,7 @@ using System.Linq;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using TMPro;
 
@@ -106,12 +107,12 @@ namespace Iviz.App
                 }
             }
 
+            [NotNull]
             public string Text
             {
-                get => button.Caption;
                 set
                 {
-                    button.Caption = value;
+                    button.Caption = value ?? throw new NullReferenceException(nameof(value));
                     int lineBreaks = value.Count(x => x == '\n');
                     button.FontSize = lineBreaks switch
                     {
@@ -124,13 +125,11 @@ namespace Iviz.App
 
             public bool Interactable
             {
-                get => button.Interactable;
                 set => button.Interactable = value;
             }
 
             public Color Color
             {
-                get => button.Color;
                 set => button.Color = value;
             }
 
@@ -147,17 +146,7 @@ namespace Iviz.App
             }
         }
 
-        /*
-        [NotNull]
-        public IEnumerable<string> Items
-        {
-            set
-            {
-
-        }
-        */
-
-        public void SetItems<T>([NotNull] T value) where T : IReadOnlyCollection<string>
+        public void SetItems<T>([NotNull] T value) where T : IReadOnlyList<string>
         {
             if (value == null)
             {
@@ -171,35 +160,33 @@ namespace Iviz.App
 
             if (value.Count == itemEntries.Count)
             {
-                foreach (var (str, i) in value.WithIndex())
+                foreach (int i in ..value.Count)
                 {
-                    itemEntries[i].Text = str;
+                    itemEntries[i].Text = value[i];
                 }
             }
             else if (value.Count < itemEntries.Count)
             {
                 canvas.enabled = false;
 
-                int i = 0;
-                foreach (string str in value)
+                foreach (int i in ..value.Count)
                 {
-                    itemEntries[i++].Text = str;
+                    itemEntries[i].Text = value[i];
                 }
 
-                for (int j = i; j < itemEntries.Count; j++)
+                foreach (int i in value.Count..itemEntries.Count)
                 {
-                    itemEntries[j].Dispose();
+                    itemEntries[i].Dispose();
                 }
 
-                itemEntries.RemoveRange(i, itemEntries.Count - i);
+                itemEntries.RemoveRange(value.Count, itemEntries.Count - value.Count);
                 UpdateSize();
                 canvas.enabled = true;
             }
             else
             {
                 canvas.enabled = false;
-                int i = 0;
-                foreach (string str in value)
+                foreach (int i in ..value.Count)
                 {
                     if (i >= itemEntries.Count)
                     {
@@ -207,7 +194,7 @@ namespace Iviz.App
                             new ItemEntry(i, contentObject, buttonHeight, yOffset, ButtonType, RaiseClicked));
                     }
 
-                    itemEntries[i++].Text = str;
+                    itemEntries[i].Text = value[i];
                 }
 
                 UpdateSize();

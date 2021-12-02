@@ -48,15 +48,15 @@ namespace Iviz.Displays
 
         static MeshMarkerResource[] CreateObjects(Transform transform)
         {
-            var objects = new MeshMarkerResource[12];
-            foreach (ref var resource in objects.Ref())
+            MeshMarkerResource CreateObject()
             {
-                resource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, transform);
+                var resource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, transform);
                 resource.ShadowsEnabled = false;
                 resource.ColliderEnabled = false;
+                return resource;
             }
 
-            return objects;
+            return (..12).Select(CreateObject).ToArray();
         }
 
         void RebuildSize()
@@ -72,9 +72,9 @@ namespace Iviz.Displays
             children[2].Transform.localPosition = new Vector3(-halfSizeX, -halfSizeY, 0);
             children[3].Transform.localPosition = new Vector3(-halfSizeX, halfSizeY, 0);
 
-            for (int i = 0; i < 4; i++)
+            foreach (var child in children[..4])
             {
-                children[i].Transform.localScale = new Vector3(ColumnWidth, ColumnWidth, size.z);
+                child.Transform.localScale = new Vector3(ColumnWidth, ColumnWidth, size.z);
             }
 
             children[4].Transform.localPosition = new Vector3(0, halfSizeY, halfSizeZ);
@@ -82,9 +82,9 @@ namespace Iviz.Displays
             children[6].Transform.localPosition = new Vector3(0, -halfSizeY, -halfSizeZ);
             children[7].Transform.localPosition = new Vector3(0, halfSizeY, -halfSizeZ);
 
-            for (int i = 4; i < 8; i++)
+            foreach (var child in children[4..8])
             {
-                children[i].Transform.localScale = new Vector3(size.x, ColumnWidth, ColumnWidth);
+                child.Transform.localScale = new Vector3(size.x, ColumnWidth, ColumnWidth);
             }
 
             children[8].Transform.localPosition = new Vector3(halfSizeX, 0, halfSizeZ);
@@ -92,9 +92,9 @@ namespace Iviz.Displays
             children[10].Transform.localPosition = new Vector3(-halfSizeX, 0, -halfSizeZ);
             children[11].Transform.localPosition = new Vector3(halfSizeX, 0, -halfSizeZ);
 
-            for (int i = 8; i < 12; i++)
+            foreach (var child in children[8..12])
             {
-                children[i].Transform.localScale = new Vector3(ColumnWidth, size.y, ColumnWidth);
+                child.Transform.localScale = new Vector3(ColumnWidth, size.y, ColumnWidth);
             }
         }
 
@@ -105,19 +105,19 @@ namespace Iviz.Displays
                 children = CreateObjects(Transform);
             }
 
-            for (int i = 0; i < 4; i++)
+            foreach (var child in children[..4])
             {
-                children[i].Transform.localScale = new Vector3(ColumnWidth, ColumnWidth, size.z);
+                child.Transform.localScale = new Vector3(ColumnWidth, ColumnWidth, size.z);
             }
 
-            for (int i = 4; i < 8; i++)
+            foreach (var child in children[4..8])
             {
-                children[i].Transform.localScale = new Vector3(size.x, ColumnWidth, ColumnWidth);
+                child.Transform.localScale = new Vector3(size.x, ColumnWidth, ColumnWidth);
             }
 
-            for (int i = 8; i < 12; i++)
+            foreach (var child in children[8..12])
             {
-                children[i].Transform.localScale = new Vector3(ColumnWidth, size.y, ColumnWidth);
+                child.Transform.localScale = new Vector3(ColumnWidth, size.y, ColumnWidth);
             }            
         }
 

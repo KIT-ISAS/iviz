@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -213,9 +214,9 @@ namespace Iviz.Core
 
             var forward = side.Cross(up);
 
-            return new Pose(position, Quaternion.LookRotation(forward, up));            
+            return new Pose(position, Quaternion.LookRotation(forward, up));
         }
-        
+
         /// <summary>
         /// Returns null if the Unity object is null or null-equivalent, otherwise returns the object itself.
         /// </summary>
@@ -380,7 +381,7 @@ namespace Iviz.Core
             v.y += o.y;
             v.z += o.z;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Mult(this in Vector3 v, Vector3 o)
         {
@@ -389,7 +390,7 @@ namespace Iviz.Core
             o.z *= v.z;
             return o;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Mult(this in Vector3Int v, Vector3 o)
         {
@@ -398,7 +399,7 @@ namespace Iviz.Core
             o.z *= v.z;
             return o;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Vector3 v, out float x, out float y, out float z) =>
             (x, y, z) = (v.x, v.y, v.z);
@@ -435,6 +436,6 @@ namespace Iviz.Core
         public static void Deconstruct(this in Msgs.GeometryMsgs.TransformStamped p,
             out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp) =>
             (parentId, childId, transform, stamp) = (p.Header.FrameId, p.ChildFrameId, p.Transform, p.Header.Stamp);
-        
+
     }
 }

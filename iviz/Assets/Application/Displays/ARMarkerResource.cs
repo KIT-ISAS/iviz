@@ -35,7 +35,7 @@ namespace Iviz.Displays
 
         void UpdateRotation()
         {
-            Quaternion rotation = Quaternion.AngleAxis(-Angle, Vector3.up);
+            var rotation = Quaternion.AngleAxis(-Angle, Vector3.up);
             if (!Horizontal)
             {
                 rotation *= Quaternion.AngleAxis(90, Vector3.forward);

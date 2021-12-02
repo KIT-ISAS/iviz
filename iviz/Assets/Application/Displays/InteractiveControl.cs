@@ -13,6 +13,7 @@ using UnityEngine.PlayerLoop;
 
 namespace Iviz.Displays
 {
+    [Obsolete]
     public sealed class InteractiveControl : MonoBehaviour, IControlMarker, IPointerDownHandler, IPointerUpHandler,
         IPointerEnterHandler, IPointerExitHandler
     {

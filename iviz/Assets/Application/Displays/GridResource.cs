@@ -7,6 +7,7 @@ using Iviz.Core;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
 using Iviz.Resources;
+using Iviz.Tools;
 using JetBrains.Annotations;
 
 namespace Iviz.Displays
@@ -29,17 +30,19 @@ namespace Iviz.Displays
 
         GameObject interiorObject;
         MeshRenderer interiorRenderer;
-        readonly List<MeshMarkerResource> horizontals = new List<MeshMarkerResource>();
-        readonly List<MeshMarkerResource> verticals = new List<MeshMarkerResource>();
+        readonly List<MeshMarkerResource> horizontals = new();
+        readonly List<MeshMarkerResource> verticals = new();
 
-        public static readonly List<string> OrientationNames = new List<string> {"XY", "YZ", "XZ"};
+        int lastX = 0, lastZ = 0;
+        
+        public static readonly List<string> OrientationNames = new() { "XY", "YZ", "XZ" };
 
         static readonly Dictionary<GridOrientation, Quaternion> RotationByOrientation =
-            new Dictionary<GridOrientation, Quaternion>
+            new()
             {
-                {GridOrientation.XZ, Quaternion.identity},
-                {GridOrientation.XY, Quaternion.Euler(90, 0, 0)},
-                {GridOrientation.YZ, Quaternion.Euler(0, 90, 0)}
+                { GridOrientation.XZ, Quaternion.identity },
+                { GridOrientation.XY, Quaternion.Euler(90, 0, 0) },
+                { GridOrientation.YZ, Quaternion.Euler(0, 90, 0) }
             };
 
         GridOrientation orientation;
@@ -156,9 +159,11 @@ namespace Iviz.Displays
             interiorRenderer.receiveShadows = true;
 
 
+            /*
             // the grid "jumps" every meter to center itself under the camera
             // this breaks motion blur, so we tell the camera to ignore the motion of the grid
             interiorRenderer.motionVectorGenerationMode = MotionVectorGenerationMode.Camera; // camera only
+            */
 
             Orientation = GridOrientation.XY;
             GridColor = Color.white.WithAlpha(0.25f);
@@ -179,8 +184,6 @@ namespace Iviz.Displays
                     : Resource.Materials.GridInterior.Object;
         }
 
-        int lastX = 0, lastZ = 0;
-
         void Update()
         {
             if (!FollowCamera)
@@ -192,8 +195,8 @@ namespace Iviz.Displays
             switch (Orientation)
             {
                 case GridOrientation.XY:
-                    int x = (int) (camX + 0.5f);
-                    int z = (int) (camZ + 0.5f);
+                    int x = (int)(camX + 0.5f);
+                    int z = (int)(camZ + 0.5f);
                     float offsetY = transform.localPosition.y;
                     if (x != lastX || z != lastZ)
                     {
@@ -201,6 +204,7 @@ namespace Iviz.Displays
                     }
 
                     break;
+                // TODO: others
             }
         }
 
@@ -210,16 +214,16 @@ namespace Iviz.Displays
             const float zPosForY = 2e-4f; // prevent z-fighting
 
             transform.localPosition = new Vector3(x, offsetY, z);
-            
+
             int baseHoriz = Mathf.FloorToInt((z + 5) / 10f) * 10;
-            for (int i = 0; i < horizontals.Count; i++)
+            foreach (int i in ..horizontals.Count)
             {
                 float za = (i - (horizontals.Count - 1f) / 2) * 10;
                 horizontals[i].transform.localPosition = new Vector3(0, baseHoriz + za - z, -zPosForX);
             }
 
             int baseVert = Mathf.FloorToInt((x + 5) / 10f) * 10;
-            for (int i = 0; i < verticals.Count; i++)
+            foreach (int i in ..verticals.Count)
             {
                 float xa = (i - (verticals.Count - 1f) / 2) * 10;
                 verticals[i].transform.localPosition = new Vector3(baseVert + xa - x, 0, -zPosForY);
@@ -253,7 +257,7 @@ namespace Iviz.Displays
             }
             else if (horizontals.Count < size)
             {
-                for (int i = horizontals.Count; i < size; i++)
+                foreach (int _ in horizontals.Count..size)
                 {
                     var hResource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Square, transform);
                     hResource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
@@ -267,13 +271,13 @@ namespace Iviz.Displays
                 }
             }
 
-            foreach (MeshMarkerResource resource in horizontals)
+            foreach (var resource in horizontals)
             {
                 resource.transform.localScale = new Vector3(totalSize, 1, 2 * GridLineWidth);
                 resource.Color = Resource.Colors.GridGreenLine;
             }
 
-            foreach (MeshMarkerResource resource in verticals)
+            foreach (var resource in verticals)
             {
                 resource.transform.localScale = new Vector3(2 * GridLineWidth, 1, totalSize);
                 resource.Color = Resource.Colors.GridRedLine;

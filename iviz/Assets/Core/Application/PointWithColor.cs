@@ -19,10 +19,13 @@ namespace Iviz.Displays
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         internal static Color32 RecastToColor32(float f)
         {
+            return Unsafe.As<float, Color32>(ref f);
+            /*
             unsafe
             {
                 return *(Color32*) &f;
             }
+            */
         }
 
         /// <summary>
@@ -31,10 +34,13 @@ namespace Iviz.Displays
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public static float RecastToFloat(Color32 f)
         {
+            return Unsafe.As<Color32, float>(ref f);
+            /*
             unsafe
             {
                 return *(float*) &f;
             }
+            */
         }
 
         public float4 f;

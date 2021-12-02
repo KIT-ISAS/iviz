@@ -29,7 +29,7 @@ namespace Iviz.Core
             -Vector3.right - Vector3.up - Vector3.forward,
         };
 
-        static Bounds TransformBound(this in Bounds bounds, in Pose pose, Vector3 scale)
+        public static Bounds TransformBound(this in Bounds bounds, in Pose pose, in Vector3 scale)
         {
             if (pose == Pose.identity)
             {

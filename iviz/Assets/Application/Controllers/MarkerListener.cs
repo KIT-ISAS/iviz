@@ -219,7 +219,7 @@ namespace Iviz.Controllers
             foreach (var (key, value) in deadEntries)
             {
                 markers.Remove(key);
-                DeleteMarkerObject(value);
+                value.Stop();
             }
         }
 
@@ -281,7 +281,7 @@ namespace Iviz.Controllers
         {
             foreach (var marker in markers.Values)
             {
-                DeleteMarkerObject(marker);
+                marker.Stop();
             }
 
             markers.Clear();
@@ -401,19 +401,19 @@ namespace Iviz.Controllers
                 case Marker.ADD:
                     if (msg.Pose.HasNaN())
                     {
-                        RosLogger.Debug("MarkerListener: NaN in pose!");
+                        RosLogger.Debug($"{this}: NaN in pose!");
                         break;
                     }
 
                     if (msg.Scale.HasNaN())
                     {
-                        RosLogger.Debug("MarkerListener: NaN in scale!");
+                        RosLogger.Debug($"{this}: NaN in scale!");
                         break;
                     }
 
                     if (msg.Type >= config.VisibleMask.Length)
                     {
-                        RosLogger.Debug($"MarkerListener: Unknown type {msg.Type.ToString()}");
+                        RosLogger.Debug($"{this}: Unknown type {msg.Type.ToString()}");
                         break;
                     }
 
@@ -426,10 +426,16 @@ namespace Iviz.Controllers
                 case Marker.DELETE:
                     if (markers.TryGetValue(id, out var markerToDelete))
                     {
-                        DeleteMarkerObject(markerToDelete);
+                        markerToDelete.Stop();
                         markers.Remove(id);
                     }
 
+                    break;
+                case Marker.DELETEALL:
+                    DestroyAllMarkers();
+                    break;
+                default:
+                    RosLogger.Debug($"{this}: Unknown action {msg.Action.ToString()}");
                     break;
             }
         }
@@ -437,11 +443,6 @@ namespace Iviz.Controllers
         public static (string Ns, int Id) IdFromMessage(Marker marker)
         {
             return (marker.Ns, marker.Id);
-        }
-
-        static void DeleteMarkerObject(MarkerObject markerToDelete)
-        {
-            markerToDelete.Stop();
         }
 
         MarkerObject CreateMarkerObject(in (string, int) id, int msgType)

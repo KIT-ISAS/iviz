@@ -121,7 +121,7 @@ namespace Iviz.Controllers.TF
             Config = config ?? new TfConfiguration
             {
                 Topic = topic
-            };            
+            };
 
             GameThread.LateEveryFrame += LateUpdate;
         }
@@ -425,18 +425,26 @@ namespace Iviz.Controllers.TF
                 : $"{ConnectionManager.MyId}/{frameIdSuffix}";
         }
 
+        /*
         public static TfFrame ResolveFrame(string frameId, FrameNode? listener = null) =>
             GetOrCreateFrame(ResolveFrameId(frameId), listener);
+            */
 
         public static TfFrame GetOrCreateFrame(string frameId, FrameNode? listener = null)
         {
-            if (frameId == null)
+            if (frameId is null or "")
             {
                 throw new ArgumentNullException(nameof(frameId));
             }
 
-            string validatedFrameId = frameId.Length != 0 && frameId[0] == '/' ? frameId.Substring(1) : frameId;
-            TfFrame frame = Instance.GetOrCreateFrameImpl(validatedFrameId);
+            string validatedFrameId = frameId[0] switch
+            {
+                '~' => ResolveFrameId(frameId),
+                '/' => frameId[1..],
+                _ => frameId
+            };
+
+            var frame = Instance.GetOrCreateFrameImpl(validatedFrameId);
 
             if (listener != null)
             {
@@ -545,26 +553,12 @@ namespace Iviz.Controllers.TF
             instance = null;
         }
 
-        static void Publish(TFMessage msg)
-        {
-            Instance.Publisher.Publish(msg);
-        }
-
-        public static Vector3 RelativePositionToOrigin(in Vector3 unityPosition)
-        {
-            Transform originFrame = OriginFrame.Transform;
-            return originFrame.InverseTransformPoint(unityPosition);
-        }
-
-        public static Vector3 RelativePositionToFixedFrame(in Vector3 unityPosition)
-        {
-            Transform fixedFrame = Instance.FixedFrame.Transform;
-            return fixedFrame.InverseTransformPoint(unityPosition);
-        }
+        public static Vector3 RelativePositionToOrigin(in Vector3 unityPosition) =>
+            OriginFrame.Transform.InverseTransformPoint(unityPosition);
 
         public static Pose RelativePoseToOrigin(in Pose unityPose)
         {
-            Transform originFrame = OriginFrame.Transform;
+            var originFrame = OriginFrame.Transform;
             var (position, rotation) = unityPose;
             return new Pose(
                 originFrame.InverseTransformPoint(position),
@@ -574,7 +568,7 @@ namespace Iviz.Controllers.TF
 
         public static Pose RelativePoseToFixedFrame(in Pose unityPose)
         {
-            Transform fixedFrame = Instance.FixedFrame.Transform;
+            var fixedFrame = Instance.FixedFrame.Transform;
             var (position, rotation) = unityPose;
             return new Pose(
                 fixedFrame.InverseTransformPoint(position),
@@ -586,7 +580,7 @@ namespace Iviz.Controllers.TF
 
         public static void Publish(string childFrame, in Pose absoluteUnityPose)
         {
-            Pose relativePose = RelativePoseToFixedFrame(absoluteUnityPose);
+            var relativePose = RelativePoseToFixedFrame(absoluteUnityPose);
             Publish(FixedFrameId, childFrame, relativePose.Unity2RosTransform());
         }
 
@@ -613,7 +607,7 @@ namespace Iviz.Controllers.TF
 
             if (ConnectionManager.IsConnected)
             {
-                Publish(msg);
+                Instance.Publisher.Publish(msg);
             }
             else
             {

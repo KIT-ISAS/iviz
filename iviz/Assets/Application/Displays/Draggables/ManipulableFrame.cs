@@ -1,6 +1,7 @@
 #nullable enable
 
-using System.Linq;
+using System;
+using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Displays.Highlighters;
@@ -8,80 +9,33 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class ManipulableFrame : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class ManipulableFrame : MonoBehaviour, IHasBounds, IDisplay
     {
-        [SerializeField] SelectionFrame? frame = null;
-        [SerializeField] BoxCollider? boxCollider = null;
-        [SerializeField] FixedDistanceDraggable? draggable = null;
+        static readonly Quaternion ZtoX = Quaternion.Euler(0, 90, 0);
+        static readonly Quaternion ZtoY = Quaternion.Euler(90, 0, 0);
 
-        [SerializeField] MeshMarkerHolderResource? xyResource = null;
-        [SerializeField] MeshMarkerHolderResource? xzResource = null;
-        [SerializeField] MeshMarkerHolderResource? yzResource = null;
+        [SerializeField] TranslationConstraintType translationConstraint;
+        [SerializeField] RotationConstraintType rotationConstraint;
 
-        [SerializeField] RotationDraggable? xyRotation = null;
-        [SerializeField] RotationDraggable? xzRotation = null;
-        [SerializeField] RotationDraggable? yzRotation = null;
+        [SerializeField] Transform? childTransform;
+        [SerializeField] Bounds bounds;
 
-        Bounds bounds;
+        readonly List<WrapperBoundsControl> wrappers = new();
+        IBoundsControl? control;
 
-        SelectionFrame Frame => frame.AssertNotNull(nameof(frame));
-        BoxCollider Collider => boxCollider.AssertNotNull(nameof(boxCollider));
-        FixedDistanceDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
+        public event Action? BoundsChanged;
 
-        MeshMarkerHolderResource XYResource => xyResource.AssertNotNull(nameof(xyResource));
-        MeshMarkerHolderResource XZResource => xzResource.AssertNotNull(nameof(xzResource));
-        MeshMarkerHolderResource YZResource => yzResource.AssertNotNull(nameof(yzResource));
-
-        RotationDraggable XYRotation => xyRotation.AssertNotNull(nameof(xyRotation));
-        RotationDraggable XZRotation => xzRotation.AssertNotNull(nameof(xzRotation));
-        RotationDraggable YZRotation => yzRotation.AssertNotNull(nameof(yzRotation));
-
-        public Bounds Bounds
-        {
-            get => bounds;
-            set
-            {
-                bounds = value;
-                Frame.Size = bounds.size;
-                Frame.Transform.localPosition = bounds.center;
-                Collider.size = bounds.size;
-                Collider.center = bounds.center;
-
-                var (halfX, halfY, halfZ) = bounds.size / 2;
-
-                var xzChildren = XZResource.Children;
-                xzChildren[0].Transform.localPosition = new Vector3(halfX, 0, halfZ);
-                xzChildren[1].Transform.localPosition = new Vector3(-halfX, 0, halfZ);
-                xzChildren[2].Transform.localPosition = new Vector3(-halfX, 0, -halfZ);
-                xzChildren[3].Transform.localPosition = new Vector3(halfX, 0, -halfZ);
-                
-                var xyChildren = XYResource.Children;
-                xyChildren[0].Transform.localPosition = new Vector3(halfX, -halfY, 0);
-                xyChildren[1].Transform.localPosition = new Vector3(-halfX, -halfY, 0);
-                xyChildren[2].Transform.localPosition = new Vector3(-halfX, halfY, 0);
-                xyChildren[3].Transform.localPosition = new Vector3(halfX, -halfY, 0);
-                
-                var yzChildren = YZResource.Children;
-                yzChildren[0].Transform.localPosition = new Vector3(0, -halfY, -halfZ);
-                yzChildren[1].Transform.localPosition = new Vector3(0, -halfY, halfZ);
-                yzChildren[2].Transform.localPosition = new Vector3(0, halfY, halfZ);
-                yzChildren[3].Transform.localPosition = new Vector3(0, halfY, -halfZ);
-            }
-        }
-
-        public float ElementScale
+        public TranslationConstraintType TranslationConstraint
         {
             set
             {
-                var scaleVector = value * Vector3.one;
-                var resources = 
-                    XZResource.Children
-                    .Concat(YZResource.Children)
-                    .Concat(XZResource.Children);
-                foreach (var resource in resources)
+                if (translationConstraint == value)
                 {
-                    resource.Transform.localScale = scaleVector;
+                    return;
                 }
+
+                translationConstraint = value;
+                UpdateControls();
             }
         }
 
@@ -89,69 +43,179 @@ namespace Iviz.Displays
         {
             set
             {
-                (XYResource.Visible, XZResource.Visible, YZResource.Visible) =
-                    value switch
-                    {
-                        RotationConstraintType.XY => (true, false, false),
-                        RotationConstraintType.XZ => (false, true, false),
-                        RotationConstraintType.YZ => (false, false, true),
-                        _ => (true, true, true),
-                    };
+                if (rotationConstraint == value)
+                {
+                    return;
+                }
+
+                rotationConstraint = value;
+                UpdateControls();
             }
+        }
+
+        void UpdateControls()
+        {
+            control?.Dispose();
+            foreach (var wrapper in wrappers)
+            {
+                wrapper.Dispose();
+            }
+
+            wrappers.Clear();
+
+            var targetTransform = transform;
+
+            control = translationConstraint switch
+            {
+                0 => new StaticBoundsControl(this, targetTransform),
+                TranslationConstraintType.X =>
+                    new LineBoundsControl(this, targetTransform, ZtoX),
+                TranslationConstraintType.Y =>
+                    new LineBoundsControl(this, targetTransform, ZtoY),
+                TranslationConstraintType.Z =>
+                    new LineBoundsControl(this, targetTransform, Quaternion.identity),
+                TranslationConstraintType.X | TranslationConstraintType.Y =>
+                    new PlaneBoundsControl(this, targetTransform, Quaternion.identity),
+                TranslationConstraintType.X | TranslationConstraintType.Z =>
+                    new PlaneBoundsControl(this, targetTransform, ZtoY),
+                TranslationConstraintType.Y | TranslationConstraintType.Z =>
+                    new PlaneBoundsControl(this, targetTransform, ZtoX),
+                (TranslationConstraintType.X | TranslationConstraintType.Y | TranslationConstraintType.Z) or
+                    TranslationConstraintType.Everything =>
+                    new FixedDistanceBoundsControl(this, targetTransform),
+                _ => throw new ArgumentException("Invalid flag " + translationConstraint)
+            };
+
+            if (translationConstraint is not
+                (0 or TranslationConstraintType.X or TranslationConstraintType.Y or TranslationConstraintType.Z))
+            {
+                if ((translationConstraint & TranslationConstraintType.X) != 0)
+                {
+                    wrappers.Add(new LineWrapperBoundsControl(targetTransform, targetTransform, ZtoX));
+                }
+
+                if ((translationConstraint & TranslationConstraintType.Y) != 0)
+                {
+                    wrappers.Add(new LineWrapperBoundsControl(targetTransform, targetTransform, ZtoY));
+                }
+
+                if ((translationConstraint & TranslationConstraintType.Z) != 0)
+                {
+                    wrappers.Add(new LineWrapperBoundsControl(targetTransform, targetTransform, Quaternion.identity));
+                }
+            }
+
+            if ((rotationConstraint & RotationConstraintType.XY) != 0)
+            {
+                wrappers.Add(new RotationWrapperBoundsControl(targetTransform, targetTransform, Quaternion.identity));
+            }
+
+            if ((rotationConstraint & RotationConstraintType.YZ) != 0)
+            {
+                wrappers.Add(new RotationWrapperBoundsControl(targetTransform, targetTransform, ZtoX));
+            }
+
+            if ((rotationConstraint & RotationConstraintType.XZ) != 0)
+            {
+                wrappers.Add(new RotationWrapperBoundsControl(targetTransform, targetTransform, ZtoY));
+            }
+
+            control.StartDragging += () => OnStartDragging(control);
+            control.EndDragging += OnEndDragging;
+            
+            foreach (var wrapper in wrappers)
+            {
+                wrapper.StartDragging += () => OnStartDragging(wrapper);
+                wrapper.EndDragging += OnEndDragging;
+                wrapper.Bounds = bounds;
+            }
+        }
+
+        void OnStartDragging(IBoundsControl selectedControl)
+        {
+            if (control != null && control != selectedControl)
+            {
+                control.Interactable = false;
+            }
+
+            foreach (var wrapper in wrappers)
+            {
+                if (wrapper != selectedControl)
+                {
+                    wrapper.Interactable = false;
+                }
+            }
+        }
+
+        void OnEndDragging()
+        {
+            if (control != null)
+            {
+                control.Interactable = true;
+            }
+
+            foreach (var wrapper in wrappers)
+            {
+                wrapper.Interactable = true;
+            }
+        }
+
+        public Bounds Bounds
+        {
+            set
+            {
+                foreach (var wrapper in wrappers)
+                {
+                    wrapper.Bounds = value;
+                }
+
+                BoundsChanged?.Invoke();
+            }
+        }
+
+        int IDisplay.Layer
+        {
+            set { }
+        }
+
+        public void Suspend()
+        {
+            control?.Dispose();
+            foreach (var wrapper in wrappers)
+            {
+                wrapper.Dispose();
+            }
+
+            translationConstraint = 0;
+            rotationConstraint = 0;
         }
 
         void Awake()
         {
-            Frame.Color = Color.white.WithAlpha(0.25f);
-            Bounds = new Bounds(Vector3.zero, Vector3.one);
-
-            Draggable.Damping = 0.2f;
-            Draggable.StateChanged += () =>
-            {
-                bool anyRotationDragging = XYRotation.IsDragging || XZRotation.IsDragging || YZRotation.IsDragging; 
-                bool isDragging = Draggable.IsDragging;
-                bool isActive = isDragging || (Draggable.IsHovering & !anyRotationDragging);
-                Frame.Color = isActive ? Color.white : Color.white.WithAlpha(0.25f);
-                Frame.EmissiveColor = isDragging ? Color.blue : Color.black;
-                Frame.ColumnWidth = isActive ? 0.010f : 0.005f;
-            };
-
-            XYRotation.Damping = 0.1f;
-            XZRotation.Damping = 0.1f;
-            YZRotation.Damping = 0.1f;
-
-            XYRotation.StateChanged += () => UpdateMarker(XYResource, XYRotation);
-            XZRotation.StateChanged += () => UpdateMarker(XZResource, XZRotation);
-            YZRotation.StateChanged += () => UpdateMarker(YZResource, YZRotation);
-
-            RotationConstraint = RotationConstraintType.XZ;
+            UpdateControls();
         }
 
-        static void UpdateMarker(ISupportsColor resource, IScreenDraggable draggable)
-        {
-            bool isDragging = draggable.IsDragging;
-            bool isActive = isDragging || draggable.IsHovering;
-            resource.Color = isActive ? Color.white : Color.white.WithAlpha(0.25f);
-            resource.EmissiveColor = isDragging ? Color.blue : Color.black;
-        }
+        Bounds? IHasBounds.Bounds => bounds;
+        Transform IHasBounds.BoundsTransform => childTransform.AssertNotNull(nameof(childTransform));
+        string? IHasBounds.Caption => null;
+        bool IHasBounds.HasPermanentHighlighter => true;
+        Bounds? IDisplay.Bounds => bounds;
+    }
 
-        public int Layer { get; set; }
+    [Flags]
+    public enum RotationConstraintType
+    {
+        XY = 1,
+        XZ = 2,
+        YZ = 4,
+    }
 
-        public void Suspend()
-        {
-        }
-
-        public bool Visible
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        Bounds? IDisplay.Bounds => Bounds;
-
-        public void SplitForRecycle()
-        {
-            frame.ReturnToPool();
-        }
+    [Flags]
+    public enum TranslationConstraintType
+    {
+        Everything = -1,
+        X = 1,
+        Y = 2,
+        Z = 4,
     }
 }

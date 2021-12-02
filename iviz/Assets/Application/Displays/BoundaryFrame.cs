@@ -12,11 +12,6 @@ namespace Iviz.Controllers
     [RequireComponent(typeof(BoxCollider))]
     public sealed class BoundaryFrame : MonoBehaviour, IDisplay, IRecyclable
     {
-        static readonly Vector3[] Directions =
-        {
-            Vector3.right, Vector3.forward, Vector3.up
-        };
-
         readonly GameObject[] frames = new GameObject[8];
 
         Bounds bounds;

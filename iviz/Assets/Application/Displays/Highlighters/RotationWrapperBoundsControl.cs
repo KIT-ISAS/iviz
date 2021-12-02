@@ -8,7 +8,7 @@ using Object = UnityEngine.Object;
 
 namespace Iviz.Displays.Highlighters
 {
-    public class RotationWrapperBoundsControl : IBoundsControl
+    public sealed class RotationWrapperBoundsControl : WrapperBoundsControl
     {
         readonly MeshMarkerResource[] markers;
         readonly GameObject node;
@@ -20,21 +20,17 @@ namespace Iviz.Displays.Highlighters
 
         MeshMarkerResource? ring;
 
-        public event Action? PointerDown;
-        public event Action? PointerUp;
-        public event Action? Moved;
-
-        public bool Interactable
+        public override bool Interactable
         {
             set => node.SetActive(value);
         }
 
-        public float MarkerScale
+        public override float MarkerScale
         {
             set
             {
-                markerScale = value;
-                var scaleVector = new Vector3(value, 0.01f, value);
+                markerScale = value * 0.2f;
+                var scaleVector = new Vector3(markerScale, 0.01f, markerScale);
                 foreach (var marker in markers)
                 {
                     marker.Transform.localScale = scaleVector;
@@ -44,7 +40,7 @@ namespace Iviz.Displays.Highlighters
             }
         }
 
-        public float SizeX
+        float SizeX
         {
             set
             {
@@ -58,7 +54,7 @@ namespace Iviz.Displays.Highlighters
             }
         }
 
-        public float SizeY
+        float SizeY
         {
             set
             {
@@ -72,9 +68,24 @@ namespace Iviz.Displays.Highlighters
             }
         }
 
+        public override Bounds Bounds
+        {
+            set
+            {
+                node.transform.localPosition = value.center;
+
+                var rotation = node.transform.localRotation;
+                var bounds = value.TransformBound(Pose.identity.WithRotation(rotation), Vector3.one);
+                
+                SizeX = bounds.size.x + markerScale * 0.707f;
+                SizeY = bounds.size.y + markerScale * 0.707f;
+            }
+        }
+
         public RotationWrapperBoundsControl(Transform parent, Transform target, in Quaternion orientation)
         {
             node = new GameObject("[Rotation Wrapper]");
+            node.layer = LayerType.Clickable;
 
             var nodeTransform = node.transform;
             nodeTransform.SetParentLocal(parent);
@@ -86,9 +97,7 @@ namespace Iviz.Displays.Highlighters
             draggable.TargetTransform = target;
             draggable.Normal = Vector3.forward;
             draggable.RayCollider = collider;
-            draggable.PointerDown += () => PointerDown?.Invoke();
-            draggable.PointerUp += () => PointerUp?.Invoke();
-            draggable.Moved += () => Moved?.Invoke();
+            RegisterDraggable(draggable);
 
             markers = new[]
             {
@@ -100,7 +109,7 @@ namespace Iviz.Displays.Highlighters
 
             foreach (var marker in markers)
             {
-                marker.Color = Color.white;
+                marker.Color = Color.grey;
                 marker.Layer = LayerType.Clickable;
                 marker.ShadowsEnabled = false;
                 marker.Transform.localRotation = Quaternion.AngleAxis(90, Vector3.left);
@@ -121,7 +130,7 @@ namespace Iviz.Displays.Highlighters
                     foreach (var marker in markers)
                     {
                         marker.EmissiveColor = Color.black;
-                        marker.Color = Color.white;
+                        marker.Color = Color.grey;
                     }
                 }
 
@@ -141,7 +150,7 @@ namespace Iviz.Displays.Highlighters
 
             SizeX = 1;
             SizeY = 1;
-            MarkerScale = 0.25f;
+            MarkerScale = 1;
         }
 
         void RentRing(Transform nodeTransform)
@@ -172,8 +181,10 @@ namespace Iviz.Displays.Highlighters
             collider.size = new Vector3(sizeX + markerScale, sizeY + markerScale, 0.01f);
         }
 
-        public void Stop()
+        public override void Dispose()
         {
+            base.Dispose();
+            
             foreach (var marker in markers)
             {
                 marker.ReturnToPool(Resource.Displays.Cylinder);
@@ -182,10 +193,6 @@ namespace Iviz.Displays.Highlighters
             draggable.ClearSubscribers();
             ring.ReturnToPool(Resource.Displays.Ring);
             Object.Destroy(node);
-
-            PointerDown = null;
-            PointerUp = null;
-            Moved = null;
         }
     }
 }

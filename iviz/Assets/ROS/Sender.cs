@@ -17,7 +17,8 @@ namespace Iviz.Ros
 
         public string Topic { get; }
         public string Type { get; }
-        public int Id { get; internal set; }
+        int ISender.Id => Id;
+        internal int Id { get; set; }
         public RosSenderStats Stats { get; private set; }
         public int NumSubscribers { get; private set; }
 

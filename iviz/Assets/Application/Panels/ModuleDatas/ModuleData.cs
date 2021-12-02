@@ -176,6 +176,7 @@ namespace Iviz.App
                 ModuleType.GridMap => new GridMapModuleData(c),
                 ModuleType.Octomap => new OctomapModuleData(c),
                 ModuleType.GuiDialog => new GuiDialogModuleData(c),
+                ModuleType.XR => new XRModuleData(c),
                 _ => throw new ArgumentException("Failed to find a module of the given type: " + c.ModuleType)
             };
         }

@@ -18,8 +18,9 @@ namespace Iviz.Controllers.XR
         readonly List<InputFeatureUsage> cachedUsages = new();
         InputDevice? device;
 
-        protected static bool HasFlag(InputDeviceCharacteristics full, InputDeviceCharacteristics flag) => (full & flag) == flag;
-        protected static bool HasFlag(InputTrackingState full, InputTrackingState flag) => (full & flag) == flag;
+        protected static bool HasFlag(InputDeviceCharacteristics full, InputDeviceCharacteristics flag) =>
+            (full & flag) == flag;
+
         protected abstract bool MatchesDevice(InputDeviceCharacteristics characteristics,
             List<InputFeatureUsage> usages);
 
@@ -30,7 +31,7 @@ namespace Iviz.Controllers.XR
         public bool ButtonState { get; protected set; }
         public bool ButtonUp { get; protected set; }
         public bool ButtonDown { get; protected set; }
-        
+
         protected bool TryGetDevice(out InputDevice outDevice)
         {
             if (device != null)
@@ -42,7 +43,7 @@ namespace Iviz.Controllers.XR
             outDevice = default;
             return false;
         }
-        
+
         protected override void Awake()
         {
             base.Awake();
@@ -60,7 +61,7 @@ namespace Iviz.Controllers.XR
         {
             cachedUsages.Clear();
             newDevice.TryGetFeatureUsages(cachedUsages);
-            
+
             if (MatchesDevice(newDevice.characteristics, cachedUsages))
             {
                 device = newDevice;

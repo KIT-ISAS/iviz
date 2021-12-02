@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Tools;
 using UnityEngine;
 
 namespace Iviz.Core
@@ -169,7 +170,7 @@ namespace Iviz.Core
             }
 
             int queueSize = listenerQueue.Count;
-            for (int i = 0; i < queueSize; i++)
+            foreach (int _ in ..queueSize)
             {
                 if (!listenerQueue.TryDequeue(out Action action))
                 {

@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Tools;
@@ -50,7 +51,7 @@ namespace Iviz.Ros
             token.ThrowIfCancellationRequested();
             if (client != null)
             {
-                for (int t = 0; t < NumRetries; t++)
+                foreach (int t in ..NumRetries)
                 {
                     try
                     {
@@ -67,7 +68,7 @@ namespace Iviz.Ros
                     }
                     catch (RoslibException e)
                     {
-                        Core.RosLogger.Error($"Failed to subscribe to service (try {t.ToString()}): ", e);
+                        RosLogger.Error($"Failed to subscribe to service (try {t.ToString()}): ", e);
                         await Task.Delay(WaitBetweenRetriesInMs, token);
                     }
                 }
@@ -142,7 +143,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    Core.RosLogger.Error($"{this}: Error in callback", e);
+                    RosLogger.Error($"{this}: Error in callback", e);
                 }
             }
         }

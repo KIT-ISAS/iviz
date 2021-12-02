@@ -13,6 +13,7 @@ namespace Iviz.Controllers.XR
     {
         [SerializeField] XRRayInteractor? interactor;
         [SerializeField] CustomController? controller;
+        [SerializeField] float noHitLength = 1.6f;
 
         Transform? mTransform;
         Leash? leash;
@@ -66,33 +67,32 @@ namespace Iviz.Controllers.XR
                 return;
             }
 
-            if (Interactor.TryGetHitInfo(out var hitPosition, out var normal, out _, out _))
-            {
-                Leash.Color = Color.white;
-                Leash.Width = hoveringWidth;
-                Leash.Set(transformRay, hitPosition);
-                return;
-            }
-
             if (Controller.ButtonUp)
             {
                 GuiInputModule.TriggerEnvironmentClick(new ClickInfo(transformRay));
             }
 
-            const int layerMask = (1 << LayerType.Collider) 
-                                  | (1 << LayerType.Clickable) 
-                                  | (1 << LayerType.TfAxis);
-            if (Physics.Raycast(transformRay, out var hitInfo, 100, layerMask))
+            if (Interactor.TryGetHitInfo(out var hitPosition, out var hitNormal, out _, out _))
             {
                 Leash.Color = Color.white;
                 Leash.Width = hoveringWidth;
-                Leash.Set(transformRay, hitInfo.point);
+                Leash.Set(transformRay, hitPosition, hitNormal);
                 return;
             }
 
+            /*
+            if (Physics.Raycast(transformRay, out var hitInfo, 100, LayerType.RaycastLayerMask))
+            {
+                Leash.Color = Color.white;
+                Leash.Width = hoveringWidth;
+                Leash.Set(transformRay, hitInfo.point, hitInfo.normal);
+                return;
+            }
+            */
+
             Leash.Color = Color.white;
             Leash.Width = noHitWidth;
-            Leash.Set(transformRay, Transform.TransformPoint(Vector3.forward * 1.6f));
+            Leash.Set(transformRay, Transform.TransformPoint(Vector3.forward * noHitLength));
         }
     }
 }

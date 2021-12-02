@@ -9,7 +9,7 @@ namespace Iviz.Ros
     {
         string Topic { get; }
         string Type { get; }
-        int Id { get; }
+        internal int Id { get; }
         RosSenderStats Stats { get; }
         int NumSubscribers { get; }
         void Stop();

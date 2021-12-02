@@ -30,5 +30,10 @@ namespace Iviz.Resources
         /// Miscellaneous non-interactable colliders that can responds to events such as highlights 
         /// </summary>
         public const int Collider = 15;
+
+        public const int RaycastLayerMask = (1 << Collider)
+                                            | (1 << UI)
+                                            | (1 << Clickable)
+                                            | (1 << TfAxis);
     }
 }

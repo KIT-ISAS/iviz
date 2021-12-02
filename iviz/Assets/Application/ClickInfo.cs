@@ -16,7 +16,7 @@ namespace Iviz.App
     {
         static readonly RaycastHit[] RaycastHitsBuffer = new RaycastHit[10];
 
-        class RaycastComparer : IComparer<RaycastHit>
+        sealed class RaycastComparer : IComparer<RaycastHit>
         {
             public static readonly RaycastComparer Instance = new();
             public int Compare(RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance);
@@ -49,7 +49,8 @@ namespace Iviz.App
 
             hits = results
                 .Where(result => result.trackable is ARPlane)
-                .Select(result => new ClickHitResult(result)).ToArray();
+                .Select(result => new ClickHitResult(result))
+                .ToArray();
             cachedARHits = hits;
             return true;
         }
@@ -62,19 +63,19 @@ namespace Iviz.App
                 return hits.Length != 0;
             }
 
-            const int layerMask = (1 << LayerType.Collider)
-                                  | (1 << LayerType.Clickable)
-                                  | (1 << LayerType.TfAxis);
-            int numHits = Physics.RaycastNonAlloc(ray, RaycastHitsBuffer, 100, layerMask);
+            int numHits = Physics.RaycastNonAlloc(ray, RaycastHitsBuffer, 100, LayerType.RaycastLayerMask);
 
             Array.Sort(RaycastHitsBuffer, 0, numHits, RaycastComparer.Instance);
 
             cachedUnityHits = numHits == 0
                 ? Array.Empty<ClickHitResult>()
-                : RaycastHitsBuffer.Take(numHits).Select(result => new ClickHitResult(result)).ToArray();
+                : RaycastHitsBuffer.Take(numHits)
+                    .Select(result => new ClickHitResult(result))
+                    .ToArray();
             hits = cachedUnityHits;
 
             return cachedUnityHits.Length != 0;
         }
     }
+    
 }

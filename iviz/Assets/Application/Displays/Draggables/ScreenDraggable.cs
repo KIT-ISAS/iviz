@@ -14,9 +14,10 @@ namespace Iviz.Displays
         IPointerDownHandler, IPointerUpHandler
     {
         [SerializeField] Transform? targetTransform = null;
-        Transform? mTransform;
-
         [SerializeField] Collider? rayCollider;
+
+        Transform? mTransform;
+        Vector3? referenceNormalLocal;
 
         protected Transform? interactorTransform;
 
@@ -39,17 +40,15 @@ namespace Iviz.Displays
 
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
-        protected Vector3? ReferencePointLocal { get; set; }
-        protected Vector3? ReferenceNormalLocal { get; set; }
+        protected Vector3? ReferencePointLocal { get; private set; }
 
-        public Vector3? ReferencePoint => ReferencePointLocal is { } referencePointLocal
-            ? Transform.TransformPoint(referencePointLocal)
+        public Vector3? ReferencePoint => ReferencePointLocal is { } validatedPointLocal
+            ? Transform.TransformPoint(validatedPointLocal)
             : null;
 
-        public Vector3? ReferenceNormal => ReferenceNormalLocal is { } referenceNormalLocal
-            ? Transform.TransformDirection(referenceNormalLocal)
+        public Vector3? ReferenceNormal => referenceNormalLocal is { } validatedNormalLocal
+            ? Transform.TransformDirection(validatedNormalLocal)
             : null;
-
 
         public Transform TargetTransform
         {
@@ -72,7 +71,7 @@ namespace Iviz.Displays
             }
 
             ReferencePointLocal = Transform.InverseTransformPoint(intersectionWorld);
-            ReferenceNormalLocal = Transform.InverseTransformDirection(normalWorld);
+            referenceNormalLocal = Transform.InverseTransformDirection(normalWorld);
             return intersectionWorld;
         }        
         

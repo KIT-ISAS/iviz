@@ -7,9 +7,9 @@ namespace Iviz.App
 {
     public sealed class TfDialogContents : DetachablePanelContents
     {
-        [SerializeField] TrashButtonWidget? close = null;
-        [SerializeField] TfLog? tfLog = null;
-        [SerializeField] ToggleWidget? showOnlyUsed = null;
+        [SerializeField] TrashButtonWidget? close;
+        [SerializeField] TfLog? tfLog;
+        [SerializeField] ToggleWidget? showOnlyUsed;
 
         public TrashButtonWidget Close => close.AssertNotNull(nameof(close));
         public TfLog TfLog => tfLog.AssertNotNull(nameof(tfLog));

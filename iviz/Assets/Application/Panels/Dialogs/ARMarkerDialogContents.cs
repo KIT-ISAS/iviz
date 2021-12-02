@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Iviz.Common;
-using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs;
-using JetBrains.Annotations;
+using Iviz.Tools;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Iviz.App
 {
@@ -108,7 +105,7 @@ namespace Iviz.App
         {
             Initialize();
 
-            for (int id = 0; id < Codes.Count; id++)
+            foreach (int id in ..Codes.Count)
             {
                 Types[id].Index = (int) ARMarkerType.Unset;
                 Codes[id].Interactable = false;

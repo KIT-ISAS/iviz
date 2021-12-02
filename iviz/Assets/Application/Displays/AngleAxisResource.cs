@@ -57,7 +57,7 @@ namespace Iviz.Displays
             set => Resource.Tint = value;
         }
 
-        public void Set(in Quaternion q, float scale = 0.3f)
+        public void Set(Quaternion q, float scale = 0.3f)
         {
             q.ToAngleAxis(out float angle, out Vector3 axis);
             Set(angle * Mathf.Deg2Rad, axis, scale);

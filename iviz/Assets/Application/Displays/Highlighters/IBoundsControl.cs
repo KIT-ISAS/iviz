@@ -8,7 +8,9 @@ namespace Iviz.Displays.Highlighters
         event Action PointerDown;
         event Action PointerUp;
         event Action Moved;
+        event Action StartDragging;
+        event Action EndDragging;
         bool Interactable { set; }
-        void Stop();
+        void Dispose();
     }
 }

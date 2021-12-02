@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Core;
+using Iviz.Tools;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,9 +13,9 @@ namespace Iviz.App
 {
     public sealed class InputFieldWithHintsWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] InputFieldWidget? input = null;
-        [SerializeField] TMP_Dropdown? dropdown = null;
-        [SerializeField] Image? image = null;
+        [SerializeField] InputFieldWidget? input;
+        [SerializeField] TMP_Dropdown? dropdown;
+        [SerializeField] Image? image;
 
         readonly List<TMP_Dropdown.OptionData> optionDatas = new();
 
@@ -83,7 +84,6 @@ namespace Iviz.App
 
         public IEnumerable<string> Hints
         {
-            get => optionDatas.Select(x => x.text);
             set
             {
                 optionDatas.Clear();
@@ -92,6 +92,19 @@ namespace Iviz.App
 
                 CheckPreferredWidth();
             }
+        }
+
+        public void SetHints<T>(T hints) where T : IReadOnlyList<string>
+        {
+            optionDatas.Clear();
+            foreach (int i in ..hints.Count)
+            {
+                optionDatas.Add(new TMP_Dropdown.OptionData(hints[i]));
+            }
+
+            Dropdown.options = optionDatas;
+
+            CheckPreferredWidth();
         }
 
         void CheckPreferredWidth()
@@ -111,10 +124,10 @@ namespace Iviz.App
         void Awake()
         {
             Input.EndEdit += OnEndEdit;
-            
+
             // this is actually an image with transparency 0, just so that TMP allows us to select index -1
             Dropdown.placeholder = image;
-            
+
             Dropdown.onValueChanged.AddListener(OnValueChanged);
             Dropdown.value = -1;
         }
@@ -125,7 +138,7 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             Input.Value = optionDatas[i].text;
             EndEdit?.Invoke(optionDatas[i].text);
             ValueChanged?.Invoke(i);

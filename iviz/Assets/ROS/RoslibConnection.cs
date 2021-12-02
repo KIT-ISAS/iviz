@@ -27,6 +27,7 @@ namespace Iviz.Ros
         internal const int InvalidId = -1;
 
         static readonly IReadOnlyCollection<BriefTopicInfo> EmptyTopics = Array.Empty<BriefTopicInfo>();
+        static readonly Random Random = new();
 
         static readonly IReadOnlyCollection<string> EmptyParameters = Array.Empty<string>();
         readonly ConcurrentDictionary<int, IRosPublisher?> publishers = new();
@@ -361,7 +362,7 @@ namespace Iviz.Ros
             {
                 for (; !token.IsCancellationRequested; await Task.Delay(delayBetweenPingsInMs, token))
                 {
-                    DateTime now = GameThread.Now;
+                    var now = GameThread.Now;
                     LookupNodeResponse response;
                     try
                     {
@@ -462,8 +463,6 @@ namespace Iviz.Ros
                                  "Local published messages will use this offset.");
             }
         }
-
-        static readonly Random Random = new();
 
         static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 100), token);
 

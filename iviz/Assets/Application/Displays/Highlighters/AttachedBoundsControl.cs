@@ -18,7 +18,9 @@ namespace Iviz.Displays.Highlighters
         public event Action? PointerDown;
         public event Action? PointerUp;
         public event Action? Moved;
-
+        public event Action? StartDragging;
+        public event Action? EndDragging;
+        
         public bool Interactable
         {
             set => collider.enabled = value;
@@ -51,6 +53,9 @@ namespace Iviz.Displays.Highlighters
             draggable.PointerDown += () => PointerDown?.Invoke();
             draggable.PointerUp += () => PointerUp?.Invoke();
             draggable.Moved += () => Moved?.Invoke();
+            draggable.StartDragging += () => StartDragging?.Invoke();
+            draggable.EndDragging += () => EndDragging?.Invoke();
+
             draggable.StateChanged += () =>
             {
                 if ((draggable.IsDragging || draggable.IsHovering) && source.Bounds is { } validBounds)
@@ -109,11 +114,14 @@ namespace Iviz.Displays.Highlighters
             return draggable;
         }
 
-        public void Stop()
+        public void Dispose()
         {
             PointerDown = null;
             PointerUp = null;
             Moved = null;
+            StartDragging = null;
+            EndDragging = null;
+            
             if (frame != null)
             {
                 frame.ReturnToPool();
@@ -126,6 +134,14 @@ namespace Iviz.Displays.Highlighters
     public sealed class ClickableBoundsControl : AttachedBoundsControl
     {
         public ClickableBoundsControl(IHasBounds source, Transform target)
+        {
+            InitializeDraggable<StaticDraggable>(source, target);
+        }
+    }
+
+    public sealed class StaticBoundsControl : AttachedBoundsControl
+    {
+        public StaticBoundsControl(IHasBounds source, Transform target)
         {
             InitializeDraggable<StaticDraggable>(source, target);
         }

@@ -20,6 +20,7 @@ namespace Iviz.Displays
         TextMarkerResource? label;
         LineConnector? parentConnector;
         TrailResource? trail;
+        bool visible = true;
 
         AxisFrameResource Axis
         {
@@ -130,10 +131,10 @@ namespace Iviz.Displays
 
         public override bool Visible
         {
-            get => base.Visible;
+            get => visible;
             set
             {
-                base.Visible = value;
+                visible = value;
                 Axis.Visible = value && !ForceInvisible;
                 LabelVisible = LabelVisible;
                 TrailVisible = TrailVisible;

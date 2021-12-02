@@ -13,8 +13,8 @@ namespace Iviz.Displays
     [RequireComponent(typeof(BoxCollider))]
     public sealed class Tooltip : MonoBehaviour, IDisplay, IRecyclable
     {
-        [SerializeField] BoxCollider? boxCollider = null;
-        [SerializeField] TMP_Text? text = null;
+        [SerializeField] BoxCollider? boxCollider;
+        [SerializeField] TMP_Text? text;
         
         RoundedPlaneResource? background;
         uint? prevTextHash;

@@ -95,7 +95,6 @@ namespace Iviz.Controllers
         float? joyVelocityAngle;
         Vector3? joyVelocityPos;
         uint markerSeq;
-        TfFrame? cameraFrame;
         Canvas? canvas;
 
         protected Canvas Canvas => canvas != null
@@ -245,20 +244,7 @@ namespace Iviz.Controllers
         }
 
 
-        public TfFrame Frame
-        {
-            get
-            {
-                string frameId = TfListener.ResolveFrameId(HeadFrameId);
-                if (cameraFrame == null || frameId != cameraFrame.Id)
-                {
-                    cameraFrame = TfListener.ResolveFrame(HeadFrameId);
-                    cameraFrame.ForceInvisible = true;
-                }
-
-                return cameraFrame;
-            }
-        }
+        public TfFrame Frame => TfListener.GetOrCreateFrame(HeadFrameId);
 
         /// <summary>
         /// AR has been enabled / disabled
@@ -307,29 +293,32 @@ namespace Iviz.Controllers
 
         void OnARJoystickChangedAngle(float dA)
         {
-            if (joyVelocityAngle == null)
+            float newVelocityAngle;
+            if (joyVelocityAngle is not { } velocityAngle)
             {
-                joyVelocityAngle = 0;
+                newVelocityAngle = 0;
             }
-            else if (Sign(joyVelocityAngle.Value) != 0 && Sign(joyVelocityAngle.Value) != Sign(dA))
+            else if (Sign(velocityAngle) != 0 && Sign(velocityAngle) != Sign(dA))
             {
-                joyVelocityAngle = 0;
+                newVelocityAngle = 0;
             }
             else
             {
-                joyVelocityAngle += 0.02f * dA;
+                newVelocityAngle = velocityAngle + 0.02f * dA;
             }
+
+            joyVelocityAngle = newVelocityAngle;
 
             if (ARJoystick.IsGlobal)
             {
-                SetWorldAngle(WorldAngle + joyVelocityAngle!.Value, RootMover.ControlMarker);
+                SetWorldAngle(WorldAngle + newVelocityAngle, RootMover.ControlMarker);
             }
             else
             {
                 var arCameraPose = ARCamera.transform.AsPose();
                 Vector3 pivot = arCameraPose.Multiply(Vector3.forward);
 
-                Quaternion rotation = Quaternion.AngleAxis(joyVelocityAngle!.Value, Vector3.up);
+                Quaternion rotation = Quaternion.AngleAxis(newVelocityAngle, Vector3.up);
                 var pose = new Pose(rotation * (-pivot) + pivot, rotation);
 
                 SetWorldPose(pose.Multiply(WorldPose), RootMover.ControlMarker);
@@ -338,31 +327,33 @@ namespace Iviz.Controllers
 
         void OnARJoystickChangedPosition(Vector3 dPos)
         {
-            Vector3 deltaPosition = 0.0005f * dPos;
-            if (joyVelocityPos == null)
+            Vector3 newVelocityPos;
+            if (joyVelocityPos is not { } velocityPos)
             {
-                joyVelocityPos = Vector3.zero;
+                newVelocityPos = Vector3.zero;
             }
-            else if (Sign(joyVelocityPos.Value) != 0 && Sign(joyVelocityPos.Value) != Sign(dPos))
+            else if (Sign(velocityPos) != 0 && Sign(velocityPos) != Sign(dPos))
             {
-                joyVelocityPos = Vector3.zero;
+                newVelocityPos = Vector3.zero;
             }
             else
             {
-                joyVelocityPos = deltaPosition + joyVelocityPos.Value;
+                newVelocityPos = velocityPos + 0.0005f * dPos;
             }
+
+            joyVelocityPos = newVelocityPos;
 
             Vector3 deltaWorldPosition;
             if (ARJoystick.IsGlobal)
             {
-                deltaWorldPosition = WorldPose.rotation * joyVelocityPos!.Value.Ros2Unity();
+                deltaWorldPosition = WorldPose.rotation * newVelocityPos.Ros2Unity();
             }
             else
             {
                 var arCameraPose = ARPoseToUnity(ARCamera.transform.AsPose());
                 float rotY = arCameraPose.rotation.eulerAngles.y;
                 Quaternion cameraRotation = Quaternion.Euler(0, rotY, 0);
-                (float joyX, float joyY, float joyZ) = joyVelocityPos!.Value;
+                (float joyX, float joyY, float joyZ) = newVelocityPos;
                 deltaWorldPosition = cameraRotation * new Vector3(joyX, joyZ, joyY);
             }
 

@@ -772,10 +772,10 @@ namespace Iviz.Displays
             foreach (var include in scene.Includes)
             {
                 token.ThrowIfCancellationRequested();
-                GameObject child = new GameObject("Include");
+                var child = new GameObject("Include");
 
                 var m = new Matrix4x4();
-                for (int i = 0; i < 16; i++)
+                foreach (int i in ..16)
                 {
                     m[i] = include.Pose.M[i];
                 }

@@ -93,11 +93,6 @@ namespace Iviz.Core
                 throw new ArgumentNullException(nameof(update));
             }
 
-            if (dispose == null)
-            {
-                throw new ArgumentNullException(nameof(dispose));
-            }
-
             _ = new FAnimator(update, dispose, token, duration); // won't be GC'd as long as it remains in EveryFrame
         }
 

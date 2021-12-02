@@ -625,6 +625,7 @@ namespace Iviz.App
             const float radiusCoeff = -0.0025f;
             const float tangentCoeff = 0.001f;
             const float minOrbitRadius = 0.1f;
+            const float minDistanceToAdvance = 0.5f;
 
             orbitRadius += altDistanceDiff * radiusCoeff;
 
@@ -640,11 +641,12 @@ namespace Iviz.App
             }
             else
             {
-                if (orbitRadius < 0.5f)
+                if (orbitRadius < minDistanceToAdvance)
                 {
-                    float diff = 0.5f - orbitRadius;
+                    // move forward
+                    float diff = minDistanceToAdvance - orbitRadius;
                     orbitCenter.AddInPlace(diff * (q * Vector3.forward));
-                    orbitRadius = 0.5f;
+                    orbitRadius = minDistanceToAdvance;
                 }
 
                 float orbitScale = 0.75f * orbitRadius;
@@ -676,7 +678,6 @@ namespace Iviz.App
             {
                 return;
             }
-            //Debug.Log(alreadyMoving);
 
             Vector2 pointerDiff;
             if (pointerIsAlreadyMoving)

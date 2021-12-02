@@ -578,7 +578,7 @@ namespace Iviz.Controllers
                 var depth = depthTask != null ? await depthTask.Value : null;
                 var confidence = confidenceTask != null ? await confidenceTask.Value : null;
 
-                var frame = TfListener.ResolveFrame(CameraFrameId);
+                var frame = TfListener.GetOrCreateFrame(CameraFrameId);
                 frame.ForceInvisible = true;
                 string frameId = frame.Id;
 

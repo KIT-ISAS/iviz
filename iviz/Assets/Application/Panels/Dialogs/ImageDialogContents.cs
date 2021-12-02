@@ -10,9 +10,9 @@ namespace Iviz.App
 {
     public sealed class ImageDialogContents : DetachablePanelContents
     {
-        [SerializeField] TMP_Text? text = null;
-        [SerializeField] RawImage? previewImage = null;
-        [SerializeField] TrashButtonWidget? closeButton = null;
+        [SerializeField] TMP_Text? text;
+        [SerializeField] RawImage? previewImage;
+        [SerializeField] TrashButtonWidget? closeButton;
 
         Vector2Int imageSize;
 

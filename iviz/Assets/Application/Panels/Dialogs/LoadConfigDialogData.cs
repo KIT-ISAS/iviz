@@ -84,7 +84,7 @@ namespace Iviz.App
             get
             {
                 string fileName = FileName;
-                string simpleName = fileName.Substring(0, fileName.Length - LoadConfigDialogData.Suffix.Length);
+                string simpleName = fileName[..^LoadConfigDialogData.Suffix.Length];
                 string lastModified = Date.ToString("MM/dd/yyyy HH:mm");
                 return $"<b>{simpleName}</b>\n[{lastModified}]";
             }

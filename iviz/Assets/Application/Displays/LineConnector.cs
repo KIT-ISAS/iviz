@@ -12,16 +12,8 @@ namespace Iviz.Displays
         LineRenderer line;
         readonly Vector3[] positions = new Vector3[2];
         
-        [NotNull]
-        public string Name
-        {
-            get => gameObject.name;
-            set => gameObject.name = value ?? throw new ArgumentNullException(nameof(value));
-        }        
-        
         public float LineWidth
         {
-            get => line.startWidth;
             set
             {
                 line.startWidth = value;
@@ -30,8 +22,6 @@ namespace Iviz.Displays
         }
 
         public Bounds? Bounds => null;
-
-        public bool ColliderEnabled { get => false; set { } }
 
         void Awake()
         {

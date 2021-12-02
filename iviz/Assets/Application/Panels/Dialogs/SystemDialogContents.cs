@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Core;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using TMPro;
 using UnityEngine;
@@ -10,31 +12,31 @@ namespace Iviz.App
 {
     public sealed class SystemDialogContents : DetachablePanelContents
     {
-        [SerializeField] Button topics = null;
-        [SerializeField] Button services = null;
-        [SerializeField] Button @params = null;
-        [SerializeField] Button nodes = null;
-        [SerializeField] Button aliases = null;
+        [SerializeField] Button topics;
+        [SerializeField] Button services;
+        [SerializeField] Button @params;
+        [SerializeField] Button nodes;
+        [SerializeField] Button aliases;
 
-        [SerializeField] Text topicsText = null;
-        [SerializeField] Text servicesText = null;
-        [SerializeField] Text paramsText = null;
-        [SerializeField] Text nodesText = null;
-        [SerializeField] Text aliasesText = null;
+        [SerializeField] Text topicsText;
+        [SerializeField] Text servicesText;
+        [SerializeField] Text paramsText;
+        [SerializeField] Text nodesText;
+        [SerializeField] Text aliasesText;
 
-        [SerializeField] TMP_Text textTop = null;
-        [SerializeField] TMP_Text textBottom = null;
+        [SerializeField] TMP_Text textTop;
+        [SerializeField] TMP_Text textBottom;
 
-        [SerializeField] TrashButtonWidget close = null;
-        [SerializeField] LinkResolver link = null;
+        [SerializeField] TrashButtonWidget close;
+        [SerializeField] LinkResolver link;
 
-        [SerializeField] GameObject[] aliasesFields = null;
+        [SerializeField] GameObject[] aliasesFields;
 
         InputFieldWithHintsWidget[] hostnames;
         InputFieldWidget[] addresses;
 
-        [SerializeField] GameObject aliasesTab = null;
-        [SerializeField] GameObject infoTab = null;
+        [SerializeField] GameObject aliasesTab;
+        [SerializeField] GameObject infoTab;
 
         public TrashButtonWidget Close => close;
         public TMP_Text TextTop => textTop;
@@ -71,15 +73,15 @@ namespace Iviz.App
 
         Text TextForMode(ModeType m)
         {
-            switch (m)
+            return m switch
             {
-                case ModeType.Aliases: return aliasesText;
-                case ModeType.Nodes: return nodesText;
-                case ModeType.Params: return paramsText;
-                case ModeType.Services: return servicesText;
-                case ModeType.Topics: return topicsText;
-                default: throw new ArgumentException();
-            }
+                ModeType.Aliases => aliasesText,
+                ModeType.Nodes => nodesText,
+                ModeType.Params => paramsText,
+                ModeType.Services => servicesText,
+                ModeType.Topics => topicsText,
+                _ => throw new ArgumentException()
+            };
         }
 
         public event Action<ModeType> ModeChanged;
@@ -107,18 +109,14 @@ namespace Iviz.App
                 .Select(obj => obj.transform.GetChild(1).GetComponentInChildren<InputFieldWidget>())
                 .ToArray();
 
-            for (int i = 0; i < hostnames.Length; i++)
+            foreach (int i in ..hostnames.Length)
             {
-                int j = i;
-                var hostname = hostnames[i];
-                hostname.EndEdit += str => HostnameEndEdit?.Invoke(j, str);
+                hostnames[i].EndEdit += str => HostnameEndEdit?.Invoke(i, str);
             }
 
-            for (int i = 0; i < addresses.Length; i++)
+            foreach (int i in ..addresses.Length)
             {
-                int j = i;
-                var address = addresses[i];
-                address.EndEdit += str => AddressEndEdit?.Invoke(j, str);
+                addresses[i].EndEdit += str => AddressEndEdit?.Invoke(i, str);
             }
         }
 
