@@ -96,12 +96,12 @@ namespace Iviz.Roslib
                         case IOException:
                         case SocketException:
                         case TimeoutException:
-                            ErrorDescription = new ErrorMessage(e.CheckMessage());
+                            ErrorDescription = new ErrorMessage(e);
                             Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
                             shouldRetry = true;
                             break;
                         case RoslibException:
-                            ErrorDescription = new ErrorMessage(e.Message);
+                            ErrorDescription = new ErrorMessage(e);
                             Logger.LogErrorFormat(BaseUtils.GenericExceptionFormat, this, e);
                             break;
                         default:
@@ -258,7 +258,7 @@ namespace Iviz.Roslib
             List<string> responseHeader = RosUtils.ParseHeader(readBuffer.Array, receivedLength);
             var dictionary = RosUtils.CreateHeaderDictionary(responseHeader);
             
-            if (dictionary.TryGetValue("callerid", out string remoteCallerId))
+            if (dictionary.TryGetValue("callerid", out string? remoteCallerId))
             {
                 RemoteId = remoteCallerId;
             }

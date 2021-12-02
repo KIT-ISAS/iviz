@@ -82,7 +82,7 @@ namespace Iviz.Roslib
             }
             catch (RosInvalidHeaderException e)
             {
-                ErrorDescription = new ErrorMessage(e.Message);
+                ErrorDescription = new ErrorMessage(e);
                 Status = ReceiverStatus.Dead;
                 client.Dispose();
                 return;
@@ -91,7 +91,7 @@ namespace Iviz.Roslib
             RosHeader = responseHeader.ToArray();
 
             var dictionary = RosUtils.CreateHeaderDictionary(responseHeader);
-            if (dictionary.TryGetValue("callerid", out string remoteCallerId))
+            if (dictionary.TryGetValue("callerid", out string? remoteCallerId))
             {
                 RemoteId = remoteCallerId;
             }
@@ -113,7 +113,7 @@ namespace Iviz.Roslib
                 }
                 catch (RosHandshakeException e)
                 {
-                    ErrorDescription = new ErrorMessage(e.Message);
+                    ErrorDescription = new ErrorMessage(e);
                     Status = ReceiverStatus.Dead;
                     client.Dispose();
                     return;
@@ -167,11 +167,11 @@ namespace Iviz.Roslib
                     case IOException:
                     case SocketException:
                     case TimeoutException:
-                        ErrorDescription = new ErrorMessage(e.CheckMessage());
+                        ErrorDescription = new ErrorMessage(e);
                         Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
                         break;
                     case RoslibException:
-                        ErrorDescription = new ErrorMessage(e.Message);
+                        ErrorDescription = new ErrorMessage(e);
                         Logger.LogErrorFormat(BaseUtils.GenericExceptionFormat, this, e);
                         break;
                     default:

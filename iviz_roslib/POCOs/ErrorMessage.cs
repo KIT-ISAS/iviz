@@ -1,5 +1,7 @@
 using System;
+using System.Net.Sockets;
 using System.Runtime.Serialization;
+using Iviz.Tools;
 
 namespace Iviz.Roslib
 {
@@ -12,12 +14,15 @@ namespace Iviz.Roslib
         public ErrorMessage(string message)
         {
             Time = DateTime.Now;
-            
-            // check for weird mono bug
-            int terminatorIndex = message.IndexOf('\r'); 
-            Message = terminatorIndex != -1 ? message.Substring(0, terminatorIndex) : message;
-            
+            Message = message;
         } 
+
+        public ErrorMessage(Exception e)
+        {
+            Time = DateTime.Now;
+            Message = e.CheckMessage();
+        } 
+
         public void Deconstruct(out DateTime time, out string message) => (time, message) = (Time, Message);
         public override string ToString() => Message;
     }

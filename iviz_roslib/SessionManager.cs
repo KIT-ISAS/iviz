@@ -159,8 +159,8 @@ namespace Iviz.Roslib
                 {
                     OperationCanceledException => null,
                     ObjectDisposedException => null,
-                    XmlRpcException => new ErrorMessage(e.InnerException?.CheckMessage() ?? e.Message),
-                    _ => new ErrorMessage(e.Message)
+                    XmlRpcException => new ErrorMessage(e.InnerException ?? e),
+                    _ => new ErrorMessage(e)
                 };
             }
 
