@@ -79,5 +79,25 @@ namespace Iviz.Tools
 
             return rent;
         }
+        
+        public static IndexRangeEnumerable GetEnumerable(this Range range)
+        {
+            return new IndexRangeEnumerable(range);
+        }
+
+        public static IndexRangeEnumerable.Enumerator GetEnumerator(this Range range)
+        {
+            return range.GetEnumerable().GetEnumerator();
+        }
+
+        public static SelectEnumerable<IndexRangeEnumerable, int, T> Select<T>(this Range range, Func<int, T> f)
+        {
+            return range.GetEnumerable().Select(f);
+        }
+        
+        public static SelectEnumerable<IndexRangeEnumerable, int, T> Select<T>(this Range range, Func<T> a)
+        {
+            return range.GetEnumerable().Select(_ => a());
+        }
     }
 }

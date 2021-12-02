@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -46,6 +46,6 @@ namespace Iviz.Tools
 
         public RangeEnumerable<TA> Skip(int start) => new(a, this.start + start, a.Count);
 
-        public SelectEnumerable<RangeEnumerable<TA>, TA, TB> Select<TB>(Func<TA, TB> f) => new (this, f);
+        public SelectEnumerable<RangeEnumerable<TA>, TA, TB> Select<TB>(Func<TA, TB> f) => new(this, f);
     }
 }

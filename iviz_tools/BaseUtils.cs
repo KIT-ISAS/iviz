@@ -72,23 +72,7 @@ namespace Iviz.Tools
             return true;
         }
 
-        public static void PrintBuffer(byte[] bytes, int start, int size)
-        {
-            if (bytes == null)
-            {
-                throw new ArgumentNullException(nameof(bytes));
-            }
-
-            for (int i = 0; i < size; i++)
-            {
-                Logger.Log($"[{i}]: {(int)bytes[start + i]} --> {(char)bytes[start + i]}");
-            }
-        }
-
-        public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t)
-        {
-            return new(t);
-        }
+        public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t) => new(t);
 
         public static int Sum<T>(this T[] ts, Func<T, int> selector)
         {

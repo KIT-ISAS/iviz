@@ -102,11 +102,7 @@ namespace Iviz.Tools
                 return socket.EndReceive(await tcs.Task);
             }
 
-#if !NETSTANDARD2_0
             await using (token.Register(OnCanceled, tcs))
-#else
-            using (token.Register(OnCanceled, tcs))
-#endif
             {
                 return socket.EndReceive(await tcs.Task);
             }
@@ -147,18 +143,13 @@ namespace Iviz.Tools
                 return socket.EndSend(await tcs.Task);
             }
 
-#if !NETSTANDARD2_0
             await using (token.Register(OnCanceled, tcs))
-#else
-            using (token.Register(OnCanceled, tcs))
-#endif
             {
                 return socket.EndSend(await tcs.Task);
             }
         }
 
-        public static async ValueTask WriteChunkAsync(this TcpClient client, Rent<byte> bytes, CancellationToken token,
-            int timeoutInMs = -1)
+        public static async ValueTask WriteChunkAsync(this TcpClient client, Rent<byte> bytes, CancellationToken token, int timeoutInMs)
         {
             if (timeoutInMs == -1)
             {
@@ -189,7 +180,7 @@ namespace Iviz.Tools
             int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
 
             using var array = new Rent<byte>(totalLength + 4);
-            using var writer = new BinaryWriter(new MemoryStream(array.Array));
+            await using var writer = new BinaryWriter(new MemoryStream(array.Array));
 
             writer.Write(totalLength);
             WriteHeaderEntries(writer, contents);
@@ -218,10 +209,15 @@ namespace Iviz.Tools
 
         public static string CheckMessage(this Exception e)
         {
-            // fix mono bug!
-            if (e is not SocketException se || !se.Message.HasPrefix("mono-io-layer-error"))
+            if (e is not SocketException se)
             {
                 return e.Message;
+            } 
+            
+            // fix mono bug!
+            if (!se.Message.HasPrefix("mono-io-layer-error"))
+            {
+                return CheckSocketExceptionMessage(e.Message);
             }
 
             int fixedErrorCode = (se.ErrorCode is <= (int)SocketError.Success or >= (int)SocketError.OperationAborted)
@@ -229,7 +225,14 @@ namespace Iviz.Tools
                 : se.ErrorCode + 10000;
 
             // we only need the text, but the only way to get it is to create an exception
-            return new SocketException(fixedErrorCode).Message;
+            return CheckSocketExceptionMessage(new SocketException(fixedErrorCode).Message);
+        }
+
+        static string CheckSocketExceptionMessage(string message)
+        {
+            // in windows and hololens the socket error may be padded with \0s after a \r
+            int terminatorIndex = message.IndexOf('\r'); 
+            return terminatorIndex != -1 ? message[..terminatorIndex] : message;
         }
     }
 }

@@ -4,7 +4,7 @@
         <AssemblyName>Iviz.TfManager</AssemblyName>
         <RootNamespace>Iviz.TfManager</RootNamespace>
         <Nullable>enable</Nullable>
-        <TargetFrameworks>net5.0;netstandard2.0</TargetFrameworks>
+        <TargetFrameworks>net5.0;netstandard2.1</TargetFrameworks>
         <LangVersion>9</LangVersion>
     </PropertyGroup>
 
