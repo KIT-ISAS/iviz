@@ -47,8 +47,9 @@ namespace Iviz.Msgs.NavMsgs
         [Preserve] public const string RosMd5Sum = BuiltIns.EmptyMd5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
-        [Preserve] public const string RosDependenciesBase64 = BuiltIns.EmptyDependenciesBase64;
-    
+        [Preserve] public const string RosDependenciesBase64 =
+                "H4sIAAAAAAAACuMCAJMG1zIBAAAA";
+                
         public override string ToString() => Extensions.ToString(this);
     }
 }

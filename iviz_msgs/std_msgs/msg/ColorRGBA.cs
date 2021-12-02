@@ -45,9 +45,9 @@ namespace Iviz.Msgs.StdMsgs
         
         public static bool operator!=(in ColorRGBA a, in ColorRGBA b) => !a.Equals(b);
     
-        public readonly void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(this);
+            b.Serialize(ref this);
         }
         
         public readonly void RosValidate()
@@ -69,7 +69,7 @@ namespace Iviz.Msgs.StdMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE0vLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
+                "H4sIAAAAAAAACkvLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

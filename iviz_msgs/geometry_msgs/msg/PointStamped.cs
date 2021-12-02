@@ -37,7 +37,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public void RosSerialize(ref Buffer b)
         {
             Header.RosSerialize(ref b);
-            b.Serialize(Point);
+            b.Serialize(ref Point);
         }
         
         public void RosValidate()
@@ -56,14 +56,14 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7VTTYvcMAy9+1cI5rC7hdlCW3oY6K3041BY2L0PGltJDImdWsrspr++zw4zLfTSQxtM" +
-                "bMfWk97Ty46ehqhUZC6ikkyJ6SHHZPQcbcD3TookL+RzLiEmNqGu8CTEKZDFSdR4mt0X4SCFhja5DWGu" +
-                "b+c+/OPHfXv8fCC1cJy019dbZrejR0NJXAJNYhzYmLqMimI/SNmPcpaRWq0SqJ3aOoveI7ApgNFLksLj" +
-                "uNKiuGQZpKdpSdFX1leul3hExgS5Zi4W/TJy+UOkio6h8n1pIn79eMCdpOIXiyhoBYIvwhpTj0NyCxR7" +
-                "+6YGuN3Tc95jKz10vSYnG9hqsfJSO1brZD0gx6uN3D2wIY4gS1C6bd+O2OodIQlKkDn7gW5R+cNqQ04A" +
-                "FDpziXwapQJ7KADUmxp0c/cbcmrQiVO+wG+Iv3L8DWy64lZO+wE9Gyt7XXoIiItzyecYcPW0NhA/RviS" +
-                "xngqXFZXo7aUbvepGdFq+1pHMLNq9hENCM3ATq1U9NaNYwz/y429ZLiurJslm/0vxoJUxjFpIzNnjRYh" +
-                "T+6qc9pvAs26IiA1sxfXjZnt/Tt6ua7W6+qHcz8BR2MSRbADAAA=";
+                "H4sIAAAAAAAACrVTwWrcMBC96ysG9pCksCm0pYeF3kqbHgqB5L7MSmN7QJYczXgT9+s7krtuoZceGiMs" +
+                "ydK8efPmeQePAwsUmgoJJRVAuM+cFJ5ZB/veUaHkCXzOJXBCJegKjgSYAiiPJIrj5O4IAxUY2uRWhKm+" +
+                "nfv0nx/3/eHrAUTDcZRe3q6Z3Q4e1ChhCTCSYkBF6LIx4n6gso90pgiNKwVop7pMJLfulwI2ekpUMMYF" +
+                "ZrFLmq3ocZwT+1r1Vusl3iI5mVwTFmU/Ryx/iVTRbQg9zU3Eb58PdicJ+VnZCC2G4AuhcOrtENxsir1/" +
+                "VwPc7vE5721Lvem6JQcdUCtZeqkdqzxRDpbjzVrcrWGbOGRZgsB1+3a0rdyAJTEKNGU/wLUxv190yMkA" +
+                "Cc5YGE+RKrA3BQz1qgZd3fyBXGkfIGHKF/gV8XeOf4FNG26taT9Yz2KtXubeBLSLU8lnDnb1tDQQH9l8" +
+                "CZFPBcviatSa0u2+NCNqbV/riM0okj1bA0IzsBMtFb1148jhtdzYUzbXlWW1ZLP/xVgmlSInacVMWVjZ" +
+                "5MlddU77TUyzrpAVNaEn18WM+vEDvGyrZVv9cO4nR2MSRbADAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

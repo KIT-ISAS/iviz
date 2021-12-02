@@ -37,8 +37,8 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(Pose);
-            b.Serialize(Extents);
+            b.Serialize(ref Pose);
+            b.Serialize(ref Extents);
         }
         
         public void RosValidate()
@@ -60,14 +60,14 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71UTUvDQBC9768Y8KJQKrTiQfAgHsSDoOhdtsk0GUx24s7Gpv31zm4+aulBEGlOk52P" +
-                "fe/NzJ5BKBEaFgReJ3vFnSmQawx++15LIZfP0RtDjDlLIdgFdEF+ZMzAirQ1uSKdZOpGDyRgQzpgTwW5" +
-                "o7rkwnIxljPm9p8/8/T6cAPHZJTGHXhsPIpebAOxi1ySCuRg7RFBGpvhDDKu43E++CnFWpdHRmPuHEyi" +
-                "MgWYl9Yqf5fq7uNORVChKMO3UuXPWO8mJ2OXaeRq9S9CPqBr1hXbcH0F3WRtJ2t3Gvh76UYOU6N0mg70" +
-                "PAQf/z73uq/Z13PzC6PR2pywNcvF35pzvqFQgq7LivrVU1UyEk25mGvFxwBJKx3YGnMd2MDQ6jz3k7kp" +
-                "0eOXrqReI7SqoloS0Ka5HmDNAbTOXvVUyeWD1BILNp5rDjFZZeYGvV1RRWGbUsfMGkVsgTElR6HC9WCC" +
-                "/UBoG6jUPXRMUTnQzub6bmh2xQOxiCc9HeziDlqJSqR3xfbvlO0x31fc5vHuvpGqTTdZ28namW/1kU6A" +
-                "5QQAAA==";
+                "H4sIAAAAAAAACr1UTWsbMRC961cM5NJCcMAuOQRyCD2UHAop7b3Iu+P10F3NVqOt7fz6PGl37ZgcAqFY" +
+                "p5E0H++9GemK0papV2PSTbHXuncNa8cpHn531tjNU77NLs5dFRfeJw7JXkVckzcbOglNOalwzZHEyKdy" +
+                "oFEaCW/ySkir5ZzOufv/vNz3n9/u6C0Z0HigyH1kQ2GfREPmUlSQQJvITNb7iq+p0i4f19O9FF8fsI8y" +
+                "xy7IFSpHB/dj8OAfSt6T36UIAgoY/tpC/kpRW4LNXR7xg4vHLkM+o+s2rfp0+4X2R+twtJ4vA/8k3czh" +
+                "2ChM05me5+Dz7u9J943GbuHeYTRbuwu2ZrX8WHM+7SRtCc9lLePTgyqVGEI+L5DxEe5ZKwxsxzUGNikN" +
+                "mOenkmm35cj/8CRRxmTdZrUssS9zXVxWywUR8pxUL5lCPUkNlIqS2mnKwZBZe45+La2kQwmdIzs28w2c" +
+                "jGo2acIIJvk/TENPLa6njgFVIHS2xr+B6FYnYhlP+To05DfoLStR/hU//lN+xPy11aHOtcdGQpupzbCm" +
+                "NsN6di/1kU6A5QQAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

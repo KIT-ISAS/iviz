@@ -68,9 +68,9 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7XQwQqCYAwH8PueYtADBBYdgq51CoK6RcjQqYP8Jt8mZE+fYniojrnTf2OwHzOPEkqs" +
-                "qUnbVnKo2aq0ttKWeyZvI19vWIzJAHZ/LjieD1v8ugkla80eu3F6UgmOd83IRQOY5+/tu5Kvkl6Ys2VR" +
-                "Gtc4l/GHCBZ4qcQw0+AkwdArxkZNBiVqgdR3g1wCFpEZraGMoRjUmzU+ptRN6TkX//Nn48VVgjk5wQu3" +
+                "H4sIAAAAAAAACrXQwQqCYAwH8PueYtADBBodgq51CoK6RcjQqYP8Jt8mZE+fYnjIa+303xjsx8yjhAob" +
+                "arOukwIatjprrLL1gcm7yLc7llMygP2PC06X4w4XN6FibdhjP03PKsHxoTm5aADz4rP9UPI0GYQFWx6l" +
+                "dY3/MlZLEazwWothrsFJgqHXjK2ajErUEmnoRrkELCMzWks5Qzmqtxt8zqmf0+tf/O+fTRfTBAtygje3" +
                 "LIB6BQIAAA==";
                 
         public override string ToString() => Extensions.ToString(this);

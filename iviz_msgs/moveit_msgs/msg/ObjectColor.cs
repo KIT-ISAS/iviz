@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(Id);
-            b.Serialize(Color);
+            b.Serialize(ref Color);
         }
         
         public void RosValidate()
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE1NWCMlIVchPykpNLlHITFFIyy9SKM/ITM5QKE9VKC5ITc5Mq1RIzs/JL+IqLinKzEsH" +
+                "H4sIAAAAAAAAClNWCMlIVchPykpNLlHITFFIyy9SKM/ITM5QKE9VKC5ITc5Mq1RIzs/JL+IqLinKzEsH" +
                 "KuLiUgbrKkvMKQXqTVMoAXJgalLic4vTi/WdQdwgdydHqASXLZUBl2+wu5UCpn1caTn5iSXGRgpFcFY6" +
                 "nJUEZyVycQEAkGygffsAAAA=";
                 

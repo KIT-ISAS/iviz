@@ -49,9 +49,9 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public static bool operator!=(in Vector3 a, in Vector3 b) => !a.Equals(b);
     
-        public readonly void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(this);
+            b.Serialize(ref this);
         }
         
         public readonly void RosValidate()
@@ -73,11 +73,11 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE0WQQWrEMAxF9znFh9m0EFJoS+8wuy7KbIsmUTymjhVkTdP09JUTSHcfo/f05RM+brFA" +
-                "eVYunK2A8M29iSJmjMqMMlPPHZoTzgaflZxWTEzZYPJPOjhEdTRK7tzKyqMot4iGQbggi7ljoi9Xci5c" +
-                "aZpnlxFMKZdEla3PjjxwF7oWy43zPhVz8EE3BM6ssYfGEIed9EXTARMu2wEvLWx8xhJT2jvvy+zGLlGx" +
-                "DXjscB6xyh1LPciDYiCjKrry0YuuqfaVFvdafFMElolN18+phPL0LtH5iUuhwP53xZiGrmnGJGRvr/g5" +
-                "0nqk3+YP1MrAiH8BAAA=";
+                "H4sIAAAAAAAACkWQQU7EMAxF9z3Fl2YDUlUkQNxhdiwQW+Rp3UxEE1eOh1JOj9OisvuK/J6/c8LbNRYo" +
+                "z8qFsxUQvrg3UcSMUZlRZuq5Q3PC2eCzkqcViSkbTP5JB4eojkbJnVtZeRTlFtEwCBdkMXck+nQl58KV" +
+                "pnl2GcGUcpmosvXZkTvuQtdiuXLep2IOPuiGwJk19tAY4rCTvigdMOF9O+CphY2PWOI07Z33ZXZll6jY" +
+                "Btx3OI9Y5YalHuRBMZB5I8HFK/71ostU+0qLWy2+KQJLYtP1I5VQHl4lOp+4FArsf1eMaeiaZpyE7OUZ" +
+                "30daj/TT/ALUysCIfwEAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

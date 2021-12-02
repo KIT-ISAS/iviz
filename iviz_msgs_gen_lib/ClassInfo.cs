@@ -743,11 +743,11 @@ namespace Iviz.MsgsGen
 
             string readOnlyId = forceStruct ? "readonly " : "";
 
-            lines.Add($"public {readOnlyId}void RosSerialize(ref Buffer b)");
+            lines.Add($"public void RosSerialize(ref Buffer b)");
             lines.Add("{");
             if (isBlittable)
             {
-                lines.Add("    b.Serialize(this);");
+                lines.Add("    b.Serialize(ref this);");
             }
             else
             {
@@ -805,7 +805,7 @@ namespace Iviz.MsgsGen
                         if (!variable.IsArray)
                         {
                             lines.Add(variable.ClassIsBlittable
-                                ? $"    b.Serialize({variable.CsFieldName});"
+                                ? $"    b.Serialize(ref {variable.CsFieldName});"
                                 : $"    {variable.CsFieldName}.RosSerialize(ref b);");
                         }
                         else

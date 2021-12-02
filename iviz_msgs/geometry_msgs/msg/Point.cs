@@ -44,9 +44,9 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public static bool operator!=(in Point a, in Point b) => !a.Equals(b);
     
-        public readonly void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(this);
+            b.Serialize(ref this);
         }
         
         public readonly void RosValidate()
@@ -68,7 +68,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAEz3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
+                "H4sIAAAAAAAACj3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
                 "YA6dIsjBTUiv4Dp23EvP0kv0AQQdt/JVAAAA";
                 
         public override string ToString() => Extensions.ToString(this);

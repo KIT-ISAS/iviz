@@ -93,11 +93,11 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE72UQWrDMBBF93MK3aDQli4K2TQB00Uh4GUJQbHGrkCWjGYUmttXsuNETtpdkTYefSH8" +
-                "/sxHlXdh+NyJLn0J1s62uhO9/L6U2s6lag0DrP55wUddvQp1srLXzd5jM/4seHyoEhMQe207EY9xrvk0" +
-                "IGyll/0GqfF6YO1sNDEkCRk9gbb89JgEtCzOO61K0t/y/WkkTHQGj2jmA3V/D5XmfXT35YramGYPb86Z" +
-                "7dze2OpD3BO8W87FaISgZp9rkZ5g48LBYC6rUSEYZ1yzZLyGsKC7ha3FhJJBcZQmYEmevKELnCkjxXny" +
-                "Yf4W4OJAN0laMLXGSX55Lg91DfF9hGiULw9Q/i4B/AA3YEEyfgUAAA==";
+                "H4sIAAAAAAAACr2UQWrDMBBF93MK3aCQli4C2bQG00Uh4GUIQbHGrkCWjDQKze0r2XUiJemuSBuPvhB+" +
+                "f+aj2ho/7vasj18H70Z3smcD/76UUi+l6BQBbP55wWdTr5k4az7I9mCxnX7mLT7VkQkcWal7Fo5xqek8" +
+                "Imy55UOFrrVyJGl0MDFGCQmtA6npeRUF1MR+d1KUpL/l+9OIn+kUnlAtB+L+HgpJh+DuyxS1Mc8e3oxR" +
+                "26W9odXHsHfwoSkVgxEHDdlUC/QOKuOPClNZTIqDacYNccJrCAu6y2xlE4oG2YkrjyV50oZmOHNGivOk" +
+                "w3wU4OJAVZ6kjKlThtPrS3moa4jvI+Qm+fIApe8SwA83YEEyfgUAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -155,7 +155,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Height);
             b.Serialize(Bpp);
             b.SerializeStructArray(Intrinsics, 9);
-            b.Serialize(Pose);
+            b.Serialize(ref Pose);
             b.SerializeStructArray(Data);
         }
         

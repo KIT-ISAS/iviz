@@ -51,7 +51,7 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE42QsWrDQAyGdz/FD1lL29A5U3BDINjBTuYg+37sA/tsTteUvH2UUtqhgXSQkAT6PqEF" +
+                "H4sIAAAAAAAACo2QsWrDQAyGdz/FD1lL29A5U3BDINjBTuYg+37sA/tsTteUvH2UUtqhgXSQkAT6PqEF" +
                 "Dr1XjFSVjrDScY5sJdE9YR4oSnxYuOjPjKfG+peaQae445mDwgdNFPecZc0lEVW+Lov37eZY5af1rqxz" +
                 "rPAGLLCXKCMToyL1khBIB4F+sZAmNISmaZ5t3E6jqROHCz57BrS9hI7ur6E+lHsTLP8luNEtRcroQ/eA" +
                 "XB2LYltsDP56h91KuN37vW0oP/DXZV/80WTZFQaWm/hjAQAA";

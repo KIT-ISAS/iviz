@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MeshMsgs
         public void RosSerialize(ref Buffer b)
         {
             b.Serialize(TextureIndex);
-            b.Serialize(Color);
+            b.Serialize(ref Color);
             b.Serialize(HasTexture);
         }
         
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAEyvNzCsxNlIoSa0oKS1Kjc/MS0mt4CouSYnPLU4v1nfOz8kvCnJ3clRIBrG4kvLzcxQy" +
+                "H4sIAAAAAAAACivNzCsxNlIoSa0oKS1Kjc/MS0mt4CouSYnPLU4v1nfOz8kvCnJ3clRIBrG4kvLzcxQy" +
                 "Eovjoeq5uGypDLh8g92tFDAdwJWWk58IcmkRnJUOZyXBWYlcXABOlNZm0gAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);

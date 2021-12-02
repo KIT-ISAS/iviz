@@ -73,7 +73,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(FrameSuffix);
             b.Serialize(AttachedToTf);
             b.Serialize(RenderAsOcclusionOnly);
-            b.Serialize(Tint);
+            b.Serialize(ref Tint);
             b.Serialize(Metallic);
             b.Serialize(Smoothness);
             b.Serialize(Id);
@@ -112,7 +112,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE62OMQ7CMAxF95wiN0CCDYkBGDqxwAEsN3VKpDRGtlvB7SmCRkKsePp6tr6fmqTSe+VR" +
+                "H4sIAAAAAAAACq2OMQ7CMAxF95wiN0CCDYkBGDqxwAEsN3VKpDRGtlvB7SmCRkKsePp6tr6fmqTSe+VR" +
                 "AsENBQcyEqcfjhN1INyyQZlXC4+vO7gJxXT/ZjrGF2uZs0czDNe5wBgsvplQ6UgAFTiEPGriAlzyY27p" +
                 "YNBeV0fOLOfmsPeWirmYGW2z9rMX5pxCBTow27WQ6mKQuvePKWlqMznndn8ed7o0W/+rWqWkpr6mtiZ0" +
                 "7gmdyuiccQEAAA==";

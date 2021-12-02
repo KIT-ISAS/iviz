@@ -79,7 +79,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     
         public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(Pose);
+            b.Serialize(ref Pose);
         }
         
         public void RosValidate()

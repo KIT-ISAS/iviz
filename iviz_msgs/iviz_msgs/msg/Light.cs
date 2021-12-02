@@ -63,10 +63,10 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Name);
             b.Serialize(Type);
             b.Serialize(CastShadows);
-            b.Serialize(Diffuse);
+            b.Serialize(ref Diffuse);
             b.Serialize(Range);
-            b.Serialize(Position);
-            b.Serialize(Direction);
+            b.Serialize(ref Position);
+            b.Serialize(ref Direction);
             b.Serialize(InnerAngle);
             b.Serialize(OuterAngle);
         }
@@ -88,7 +88,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7WQzwrCMAzG73mKvoE6LyLsICoyUDfc8Dqq62agNqPt/LOnt2JXX0Bz+b780oQm0KGy" +
+                "H4sIAAAAAAAACrWQzwrCMAzG73mKvoE6LyLsICoyUDfc8Dqq62agNqPt/LOnt2JXX0Bz+b780oQm0KGy" +
                 "M5alyb5gMRvDJ18lh/WySNL9YuvoxNM8S9+PIgBjNaqGKX4VvmafrYATkWRnbmxpLryiu4ElSdLTiFVY" +
                 "150RUEvi1uWaq0bAUZytK9esJYMWSX1JhdrZNxpaUCmhS9cnv2Oos4G5iH8csMs3c4Y37MuraczIb+NX" +
                 "1l4bryev/P8fGc4UDvEI7hlcD/AC0NcUX98BAAA=";

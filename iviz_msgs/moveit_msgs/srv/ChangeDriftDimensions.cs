@@ -109,7 +109,7 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(DriftXRotation);
             b.Serialize(DriftYRotation);
             b.Serialize(DriftZRotation);
-            b.Serialize(TransformJogFrameToDriftFrame);
+            b.Serialize(ref TransformJogFrameToDriftFrame);
         }
         
         public void RosValidate()

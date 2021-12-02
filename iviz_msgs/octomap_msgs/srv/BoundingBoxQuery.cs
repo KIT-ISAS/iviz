@@ -84,8 +84,8 @@ namespace Iviz.Msgs.OctomapMsgs
     
         public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(Min);
-            b.Serialize(Max);
+            b.Serialize(ref Min);
+            b.Serialize(ref Max);
         }
         
         public void RosValidate()

@@ -43,9 +43,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public static bool operator!=(in Vector3f a, in Vector3f b) => !a.Equals(b);
     
-        public readonly void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref Buffer b)
         {
-            b.Serialize(this);
+            b.Serialize(ref this);
         }
         
         public readonly void RosValidate()
@@ -67,7 +67,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE0vLyU8sMTZSqOBKg7Iq4awqLi4A6Ofahh8AAAA=";
+                "H4sIAAAAAAAACkvLyU8sMTZSqOBKg7Iq4awqLi4A6Ofahh8AAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

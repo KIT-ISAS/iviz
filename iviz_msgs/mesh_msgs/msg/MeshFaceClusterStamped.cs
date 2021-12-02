@@ -81,14 +81,14 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7VTTWvcMBC961cM+JCksCm0t4WeGtLmECgkt1KWsTRrD8iSK8m78b/vkx2nIaceGiOw" +
-                "Pt57891QL+wkmVzcYchd/vh9OW/XpqFBck/TpA6YpKFb93j46qdcgLkH4JatPJ/JPt8DEk+SzkmLkDxp" +
-                "LpXtuRUvjo5gZNPG6BdUUifGfPnPn7l/+LanN7HBr4fCwXFyCK6w48J0jIhZu17SzstJPEg8jPBzeS3z" +
-                "KPkaxMdeM2F1EiSx9zNNGaASycZhmIJaRrBFkbTXfDA1ENPIqaidPCNLMSanocKPiQep6lhZfk8SrNDd" +
-                "zR6YkMVOReHQDAWbhHNN4t0NmUlD+fypEkzzeI47HKVD+l+MU+m5VGflaUySq5+c97DxYQ3uGtpIjsCK" +
-                "y3S53B1wzFcEI3BBxmh7uoTnP+bSxwBBoRMn5dZLFbbIAFQvKuni6pVyWKQDh7jJr4p/bfyLbHjRrTHt" +
-                "etTM1+jz1CGBAI4pntA3jtp5EbFeJRTy2iZOs6ms1aRpbmuOAQJrqQj+nHO0igI4Omvpt/ZeqnGoLf4+" +
-                "3VjnaW3HN4Njmm2zlvbnr2VIDhqc1llp4lg0Bvabp8soGfMHCtWNf8QDAAA=";
+                "H4sIAAAAAAAACrVTTWvcMBC961cM+JCksCm0t4WeGtLmECgkt1KWsTRrD8iSK8m78b/vkx2nIacemsWw" +
+                "lvzemzdfDfXCTpLJxR2G3OWP35fzdm0aGiT3NE3qgEkauvUdH776KRdg7gG4ZSvPZ7LP94DEk6Rz0iIk" +
+                "T5pLZXtuxYujIxjZtDH6BZXUiTFf/vPP3D9829Ob3ODroXBwnBySK+y4MB0jctaul7TzchIPEg8jfC5f" +
+                "yzxKvgbxsddMeDoJktj7maYMUIlk4zBMQS0j2aIo2ms+mBqIaeRU1E6eUaUYk9NQ4cfEg1R1PFl+TxKs" +
+                "0N3NHpiQxU5FYWiGgk3CuRbx7obMpKF8/lQJpnk8xx2O0qH8L8Gp9FyqWXkak+Tqk/MeMT6syV1DG8UR" +
+                "RHGZLpe7A475ihAEFmSMtqdLOP8xlz4GCAqdOCm3XqqwRQWgelFJF1evlKvtPQUOcZNfFf/G+BfZ8KJb" +
+                "c9r16Jmv2eepQwEBHFM8YW4ctfMiYr1KKOS1TZxmU1lrSNPc1hoDBNbSEfxzztEqGuDorKXfxnvpxqGO" +
+                "+PtMY92ndRzfLI5ptpe1tT9/LUty0OC07koTx6IxsN+cLqtkzB8K1Y1/xAMAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }
