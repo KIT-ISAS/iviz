@@ -64,9 +64,9 @@ namespace Iviz.Resources
 
         public DisplaysType()
         {
-            var assetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder").GetComponent<AssetHolder>();
-            var appAssetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder")
-                .GetComponent<AppAssetHolder>();
+            var assetHolder = Resource.Extras.AssetHolder;
+            var appAssetHolder = Resource.Extras.AppAssetHolder;
+
             Cube = new Info<GameObject>(assetHolder.Cube);
             Cylinder = new Info<GameObject>(assetHolder.Cylinder);
             Sphere = new Info<GameObject>(assetHolder.Sphere);

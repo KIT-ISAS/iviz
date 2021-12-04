@@ -134,35 +134,28 @@ namespace Iviz.Displays
 
         static string? EncodingFromPng(BigGustave.Png png)
         {
-            switch (png.Header.ColorType)
+            return png.Header.ColorType switch
             {
-                case BigGustave.ColorType.None:
-                    switch (png.Header.BitDepth)
-                    {
-                        case 8: return "mono8";
-                        case 16: return "mono16";
-                    }
-
-                    break;
-                case BigGustave.ColorType.ColorUsed:
-                    switch (png.Header.BitDepth)
-                    {
-                        case 8: return "rgb8";
-                        case 16: return "rgb16";
-                    }
-
-                    break;
-                case BigGustave.ColorType.AlphaChannelUsed:
-                    switch (png.Header.BitDepth)
-                    {
-                        case 8: return "rgba8";
-                        case 16: return "rgba16";
-                    }
-
-                    break;
-            }
-
-            return null;
+                BigGustave.ColorType.None => png.Header.BitDepth switch
+                {
+                    8 => "mono8",
+                    16 => "mono16",
+                    _ => null
+                },
+                BigGustave.ColorType.ColorUsed => png.Header.BitDepth switch
+                {
+                    8 => "rgb8",
+                    16 => "rgb16",
+                    _ => null
+                },
+                BigGustave.ColorType.AlphaChannelUsed => png.Header.BitDepth switch
+                {
+                    8 => "rgba8",
+                    16 => "rgba16",
+                    _ => null
+                },
+                _ => null
+            };
         }
 
         public void ProcessPng(byte[] data, Action onFinished)
@@ -249,7 +242,7 @@ namespace Iviz.Displays
             {
                 try
                 {
-                    JpegImage image = new JpegImage(new MemoryStream(data));
+                    var image = new JpegImage(new MemoryStream(data));
 
                     string? encoding;
                     int reqSize = image.Height * image.Width;
@@ -315,11 +308,13 @@ namespace Iviz.Displays
                         image.WriteBitmap(outStream);
                     }
 
+                    byte[] newBitmapBuffer = bitmapBuffer;
+                    
                     GameThread.PostInListenerQueue(() =>
                     {
                         try
                         {
-                            Set(image.Width, image.Height, encoding, bitmapBuffer.AsSegment(bmpHeaderLength));
+                            Set(image.Width, image.Height, encoding, newBitmapBuffer[bmpHeaderLength..]);
                         }
                         finally
                         {
@@ -335,18 +330,7 @@ namespace Iviz.Displays
             });
         }
 
-        public void Set(int width, int height, string encoding, byte[] data)
-        {
-            if (data == null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
-
-            Set(width, height, encoding, data.AsSegment());
-        }
-
-        public void Set(int width, int height, string encoding, in ArraySegment<byte> data,
-            bool generateMipmaps = false)
+        public void Set(int width, int height, string encoding, ReadOnlySpan<byte> data, bool generateMipmaps = false)
         {
             if (encoding == null)
             {
@@ -362,11 +346,11 @@ namespace Iviz.Displays
                 return;
             }
 
-            if (data.Count < size * bpp)
+            if (data.Length < size * bpp)
             {
                 RosLogger.Debug(
                     $"{this}: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
-                    $"received {data.Count.ToString()}");
+                    $"received {data.Length.ToString()}");
                 return;
             }
 
@@ -416,7 +400,7 @@ namespace Iviz.Displays
             ApplyTexture(width, height, data, encoding, size * bpp.Value, generateMipmaps);
         }
 
-        void ApplyTexture(int width, int height, in ArraySegment<byte> data, string encoding, int length,
+        void ApplyTexture(int width, int height, ReadOnlySpan<byte> data, string encoding, int length,
             bool generateMipmaps)
         {
             bool alreadyCopied = false;
@@ -432,7 +416,7 @@ namespace Iviz.Displays
                     if (!Settings.SupportsRGB24)
                     {
                         texture = EnsureSize(width, height, TextureFormat.RGBA32);
-                        CopyRgb24ToRgba32(data, texture.GetRawTextureData<byte>(), length);
+                        CopyRgb24ToRgba32(data, texture.GetRawTextureData<byte>().AsSpan(), length);
                         alreadyCopied = true;
                     }
                     else
@@ -457,7 +441,7 @@ namespace Iviz.Displays
                     if (!Settings.SupportsR16)
                     {
                         texture = EnsureSize(width, height, TextureFormat.R8);
-                        CopyR16ToR8(data, texture.GetRawTextureData<byte>(), length);
+                        CopyR16ToR8(data, texture.GetRawTextureData<byte>().AsSpan(), length);
                         alreadyCopied = true;
                     }
                     else
@@ -483,55 +467,48 @@ namespace Iviz.Displays
 
             if (!alreadyCopied)
             {
-                NativeArray<byte>.Copy(data.Array, data.Offset, texture.GetRawTextureData<byte>(), 0, length);
+                data[..length].CopyTo(texture.GetRawTextureData<byte>().AsSpan());
+                //NativeArray<byte>.Copy(data.Array, data.Offset, texture.GetRawTextureData<byte>(), 0, length);
             }
 
             texture.Apply(generateMipmaps);
         }
 
-        unsafe void CopyR16ToR8(in ArraySegment<byte> src, NativeArray<byte> dst, int lengthInBytes)
+        unsafe void CopyR16ToR8(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
         {
-            if (src.Array == null)
-            {
-                throw new NullReferenceException($"{this}: Source array in Copy() was null");
-            }
-
             int numElements = lengthInBytes / 2;
-            if (src.Offset + lengthInBytes > src.Count || numElements > dst.Length)
+            if (lengthInBytes > src.Length || numElements > dst.Length)
             {
                 throw new InvalidOperationException($"{this}: Skipping copy. Possible buffer overflow.");
             }
 
-            byte* dstPtr = (byte*)dst.GetUnsafePtr();
-            fixed (byte* srcPtr = &src.Array[src.Offset])
+            fixed (byte* dstPtr0 = src)
+            fixed (byte* srcPtr0 = dst)
             {
-                byte* srcPtrOff = srcPtr + 1;
+                byte* dstPtr = dstPtr0;
+                byte* srcPtr = srcPtr0 + 1;
 
                 for (int i = numElements; i >= 0; i--)
                 {
-                    *dstPtr = *srcPtrOff;
+                    *dstPtr = *srcPtr;
                     dstPtr++;
-                    srcPtrOff += 2;
+                    srcPtr += 2;
                 }
             }
         }
 
-        unsafe void CopyRgb24ToRgba32(in ArraySegment<byte> src, NativeArray<byte> dst, int lengthInBytes)
+        unsafe void CopyRgb24ToRgba32(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
         {
-            if (src.Array == null)
-            {
-                throw new NullReferenceException($"{this}: Source array in Copy() was null");
-            }
-
             int numElements = lengthInBytes / 3;
-            if (src.Offset + lengthInBytes > src.Count || numElements * 4 > dst.Length)
+            if (lengthInBytes > src.Length || numElements * 4 > dst.Length)
             {
                 throw new InvalidOperationException($"{this}: Skipping copy. Possible buffer overflow.");
             }
 
-            byte* dstPtr = (byte*)dst.GetUnsafePtr();
-            fixed (byte* srcPtr0 = &src.Array[src.Offset])
+            fixed (byte* dstPtr0 = dst)
+            fixed (byte* srcPtr0 = src)
             {
+                byte* dstPtr = dstPtr0;
                 byte* srcPtr = srcPtr0;
 
                 for (int i = numElements; i >= 0; i--)

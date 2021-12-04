@@ -105,7 +105,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Suspend()
+        void IDisplay.Suspend()
         {
         }
 

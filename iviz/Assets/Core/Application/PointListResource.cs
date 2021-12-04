@@ -215,7 +215,7 @@ namespace Iviz.Displays
         ///     Sets the list of points.
         /// </summary>
         /// <param name="points">The list of points.</param>
-        public void Set(NativeList<PointWithColor> points)
+        public void Set(ReadOnlySpan<PointWithColor> points)
         {
             if (points == null)
             {
@@ -226,8 +226,9 @@ namespace Iviz.Displays
             pointBuffer.Clear();
             if (points.Length != 0)
             {
-                foreach (ref readonly PointWithColor t in points.Ref())
+                for (int i = 0; i < points.Length; i++)
                 {
+                    ref readonly var t = ref points[i];
                     if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
                     {
                         continue;
@@ -245,7 +246,7 @@ namespace Iviz.Displays
         ///     Copies the list of points directly without checking.
         /// </summary>
         /// <param name="points">A native list with the points.</param>
-        public void SetDirect(NativeList<float4> points)
+        public void SetDirect(ReadOnlySpan<float4> points)
         {
             pointBuffer.Clear();
             pointBuffer.AddRange(points);

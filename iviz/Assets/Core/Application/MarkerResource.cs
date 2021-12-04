@@ -12,13 +12,9 @@ namespace Iviz.Displays
         [SerializeField] Transform? m_Transform;
         [SerializeField] BoxCollider? boxCollider;
 
-        public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
-
-        public BoxCollider Collider =>
-            boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
-
         protected Bounds WorldBounds => Collider.bounds;
-
+        public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
+        public BoxCollider Collider => boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
         public virtual Bounds? Bounds => new(Collider.center, Collider.size);
 
         public bool ColliderEnabled

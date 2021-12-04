@@ -18,7 +18,7 @@ namespace Iviz.Displays.Highlighters
         readonly GameObject node;
         readonly LineDraggable leftDraggable;
         readonly LineDraggable rightDraggable;
-        
+
         float SizeZ
         {
             set
@@ -27,7 +27,7 @@ namespace Iviz.Displays.Highlighters
                 right.Transform.localPosition = (value / 2) * Vector3.forward;
             }
         }
-        
+
         public override float MarkerScale
         {
             set
@@ -35,7 +35,7 @@ namespace Iviz.Displays.Highlighters
                 left.Transform.localScale = value * Vector3.one;
                 right.Transform.localScale = value * Vector3.one;
             }
-        }        
+        }
 
         public override bool Interactable
         {
@@ -45,7 +45,7 @@ namespace Iviz.Displays.Highlighters
                 right.Visible = value;
             }
         }
-        
+
         public override Bounds Bounds
         {
             set
@@ -55,10 +55,10 @@ namespace Iviz.Displays.Highlighters
                 var rotation = node.transform.localRotation;
                 var bounds = value.TransformBound(Pose.identity.WithRotation(rotation), Vector3.one);
 
-                SizeZ = bounds.size.z;   
+                SizeZ = bounds.size.z;
             }
-        }        
-        
+        }
+
         public LineWrapperBoundsControl(Transform parent, Transform target, in Quaternion orientation)
         {
             node = new GameObject("[Line Wrapper]");
@@ -67,13 +67,13 @@ namespace Iviz.Displays.Highlighters
 
             left = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Pyramid, node.transform);
             left.Transform.localRotation = BaseRotationLeft;
-            left.Color = Color.grey;
+            left.Color = Resource.Colors.DraggableDefaultColor;
             left.Layer = LayerType.Clickable;
             left.ShadowsEnabled = false;
 
             right = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Pyramid, node.transform);
             right.Transform.localRotation = BaseRotationRight;
-            right.Color = Color.grey;
+            right.Color = Resource.Colors.DraggableDefaultColor;
             right.Layer = LayerType.Clickable;
             right.ShadowsEnabled = false;
 
@@ -81,7 +81,7 @@ namespace Iviz.Displays.Highlighters
             leftDraggable.TargetTransform = target;
             leftDraggable.Line = Vector3.left;
             leftDraggable.RayCollider = left.Collider;
-            
+
             rightDraggable = right.gameObject.AddComponent<LineDraggable>();
             rightDraggable.TargetTransform = target;
             rightDraggable.Line = Vector3.left;
@@ -89,22 +89,26 @@ namespace Iviz.Displays.Highlighters
 
             RegisterDraggable(leftDraggable);
             RegisterDraggable(rightDraggable);
-            
+
             SizeZ = 1;
-            
+
             void OnStateChanged()
             {
                 bool anyDragging = leftDraggable.IsDragging || rightDraggable.IsDragging;
                 bool anyHovering = leftDraggable.IsHovering || rightDraggable.IsHovering;
                 if (anyDragging || anyHovering)
                 {
-                    left.EmissiveColor = right.EmissiveColor = anyDragging ? Color.blue : Color.black;
-                    left.Color = right.Color = anyDragging ? Color.cyan : Color.white;
+                    left.EmissiveColor = right.EmissiveColor = anyDragging 
+                        ? Resource.Colors.DraggableSelectedEmissive 
+                        : Color.black;
+                    left.Color = right.Color = anyDragging
+                        ? Resource.Colors.DraggableSelectedColor
+                        : Resource.Colors.DraggableHoverColor;
                 }
                 else
                 {
                     left.EmissiveColor = right.EmissiveColor = Color.black;
-                    left.Color = right.Color = Color.grey;
+                    left.Color = right.Color = Resource.Colors.DraggableDefaultColor;
                 }
             }
 
@@ -115,15 +119,15 @@ namespace Iviz.Displays.Highlighters
         public override void Dispose()
         {
             base.Dispose();
-            
+
             leftDraggable.ClearSubscribers();
             rightDraggable.ClearSubscribers();
             UnityEngine.Object.Destroy(leftDraggable);
             UnityEngine.Object.Destroy(rightDraggable);
-            
+
             left.ReturnToPool(Resource.Displays.Pyramid);
             right.ReturnToPool(Resource.Displays.Pyramid);
-            
+
             UnityEngine.Object.Destroy(node.gameObject);
         }
     }

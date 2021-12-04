@@ -175,10 +175,10 @@ namespace Iviz.Controllers.Markers
             c0.w = colorAsFloat; 
             c1.w = colorAsFloat; 
 
-            for (int i = 0; i < lPoints.Length / 2; i++)
+            for (int i = 0; i < lPoints.Length; i += 2)
             {
-                (c0.x, c0.y, c0.z) = lPoints[2 * i + 0].Ros2Unity();
-                (c1.x, c1.y, c1.z) = lPoints[2 * i + 1].Ros2Unity();
+                (c0.x, c0.y, c0.z) = lPoints[i + 0].Ros2Unity();
+                (c1.x, c1.y, c1.z) = lPoints[i + 1].Ros2Unity();
                 if (LineResource.IsElementValid(f))
                 {
                     lineBuffer.Add(f);
@@ -197,15 +197,15 @@ namespace Iviz.Controllers.Markers
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
             
-            for (int i = 0; i < lPoints.Length / 2; i++)
+            for (int i = 0; i < lPoints.Length; i += 2)
             {
-                (c0.x, c0.y, c0.z) = lPoints[2 * i + 0].Ros2Unity();
-                (c1.x, c1.y, c1.z) = lPoints[2 * i + 1].Ros2Unity();
+                (c0.x, c0.y, c0.z) = lPoints[i + 0].Ros2Unity();
+                (c1.x, c1.y, c1.z) = lPoints[i + 1].Ros2Unity();
 
                 if (LineResource.IsElementValid(f))
                 {
-                    c0.w = PointWithColor.RecastToFloat(lColors[2 * i + 0].ToUnityColor32());
-                    c1.w = PointWithColor.RecastToFloat(lColors[2 * i + 1].ToUnityColor32());
+                    c0.w = PointWithColor.RecastToFloat(lColors[i + 0].ToUnityColor32());
+                    c1.w = PointWithColor.RecastToFloat(lColors[i + 1].ToUnityColor32());
                     lineBuffer.Add(f);
                 }
             }
@@ -223,15 +223,15 @@ namespace Iviz.Controllers.Markers
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
 
-            for (int i = 0; i < lPoints.Length / 2; i++)
+            for (int i = 0; i < lPoints.Length; i += 2)
             {
-                (c0.x, c0.y, c0.z) = lPoints[2 * i + 0].Ros2Unity();
-                (c1.x, c1.y, c1.z) = lPoints[2 * i + 1].Ros2Unity();
+                (c0.x, c0.y, c0.z) = lPoints[i + 0].Ros2Unity();
+                (c1.x, c1.y, c1.z) = lPoints[i + 1].Ros2Unity();
 
                 if (LineResource.IsElementValid(f))
                 {
-                    c0.w = PointWithColor.RecastToFloat(color * lColors[2 * i + 0].ToUnityColor());
-                    c1.w = PointWithColor.RecastToFloat(color * lColors[2 * i + 1].ToUnityColor());
+                    c0.w = PointWithColor.RecastToFloat(color * lColors[i + 0].ToUnityColor());
+                    c1.w = PointWithColor.RecastToFloat(color * lColors[i + 1].ToUnityColor());
                     lineBuffer.Add(f);
                 }
             }

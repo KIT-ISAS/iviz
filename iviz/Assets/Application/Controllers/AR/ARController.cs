@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Threading;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
@@ -281,6 +282,8 @@ namespace Iviz.Controllers
             detector.MarkerDetected += OnMarkerDetected;
 
             Frame.ForceInvisible = true;
+            
+            pulseTokenSource?.Cancel();
         }
 
         protected static void RaiseARActiveChanged()
@@ -507,5 +510,33 @@ namespace Iviz.Controllers
             ARStateChanged = null;
             ARCameraViewChanged = null;
         }
+        
+        
+        static readonly int PulseCenter = Shader.PropertyToID("_PulseCenter");
+        static readonly int PulseTime = Shader.PropertyToID("_PulseTime");
+        static readonly int PulseDelta = Shader.PropertyToID("_PulseDelta");
+
+        static CancellationTokenSource? pulseTokenSource;
+        public static bool IsPulseActive => pulseTokenSource is { IsCancellationRequested: true };
+
+        public static void TriggerPulse(in Vector3 start)
+        {
+            pulseTokenSource?.Cancel();
+            pulseTokenSource = new CancellationTokenSource();
+
+            var material = Resources.Resource.Materials.LinePulse.Object;
+            material.SetVector(PulseCenter, start);
+            material.SetFloat(PulseDelta, 0.25f);
+
+            FAnimator.Spawn(pulseTokenSource.Token, 10,
+                static t =>
+                {
+                    float timeDiff = t * 10;
+                    var material = Resources.Resource.Materials.LinePulse.Object;
+                    material.SetFloat(PulseTime, (timeDiff - 0.5f));
+                },
+                static () => pulseTokenSource.Cancel()
+            );
+        }        
     }
 }

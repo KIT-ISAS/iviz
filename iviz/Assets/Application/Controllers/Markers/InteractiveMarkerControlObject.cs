@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
@@ -101,7 +102,7 @@ namespace Iviz.Controllers
             InteractionMode = interactionMode;
 
             var orientation = msg.Orientation.Ros2Unity();
-            UpdateInteractionMode(orientation, orientationMode, msg.IndependentMarkerOrientation);
+            UpdateInteractionMode(orientation, orientationMode);
         }
 
 
@@ -153,8 +154,7 @@ namespace Iviz.Controllers
             return markerObject;
         }
 
-        void UpdateInteractionMode(in Quaternion orientation, OrientationMode orientationMode,
-            bool independentMarkerOrientation)
+        void UpdateInteractionMode(in Quaternion orientation, OrientationMode orientationMode)
         {
             var nodeTransform = node.transform;
             var target = parent.ControlNode;
@@ -166,8 +166,8 @@ namespace Iviz.Controllers
                 {
                     var control = interactionMode switch
                     {
-                        InteractionMode.Button => new ClickableBoundsControl(marker, target),
-                        InteractionMode.Menu => new ClickableBoundsControl(marker, target),
+                        InteractionMode.Button => new StaticBoundsControl(marker),
+                        InteractionMode.Menu => new StaticBoundsControl(marker),
                         InteractionMode.MoveAxis => new LineBoundsControl(marker, target, orientation),
                         InteractionMode.MovePlane => new PlaneBoundsControl(marker, target, orientation),
                         InteractionMode.MoveRotate => new PlaneBoundsControl(marker, target, orientation),
@@ -211,7 +211,7 @@ namespace Iviz.Controllers
                     parent.PoseUpdateEnabled = false;
                     parent.OnMouseEvent(rosId, null, MouseEventType.Down);
                 };
-                
+
                 control.PointerUp += () =>
                 {
                     parent.PoseUpdateEnabled = true;
@@ -219,6 +219,7 @@ namespace Iviz.Controllers
 
                     if (InteractionMode == InteractionMode.Button)
                     {
+                        GuiInputModule.PlayClickAudio(parent.ControlNode.position);
                         parent.OnMouseEvent(rosId, null, MouseEventType.Click);
                     }
                 };
@@ -287,11 +288,24 @@ namespace Iviz.Controllers
                 .Append(OrientationModeToString(lastMessage.OrientationMode))
                 .AppendLine();
 
-            if (ValidateOrientationMode(lastMessage.OrientationMode) is null)
+            if (ValidateOrientationMode(lastMessage.OrientationMode) is not { } orientationMode)
             {
                 description.Append(ErrorStr)
                     .Append("Unknown orientation mode ")
                     .Append(lastMessage.OrientationMode)
+                    .AppendLine();
+            }
+            else if (orientationMode == OrientationMode.Fixed)
+            {
+                description.Append(WarnStr)
+                    .Append("OrientationMode FIXED not implemented")
+                    .AppendLine();
+            }
+
+            if (lastMessage.IndependentMarkerOrientation)
+            {
+                description.Append(WarnStr)
+                    .Append("IndependentMarkerOrientation not implemented")
                     .AppendLine();
             }
 

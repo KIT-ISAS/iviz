@@ -1,16 +1,14 @@
 #nullable enable
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Iviz.Msgs;
-using Iviz.Tools;
-using TMPro;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using Color32 = UnityEngine.Color32;
@@ -196,16 +194,6 @@ namespace Iviz.Core
             Quaternion.Lerp(p.rotation, o.rotation, t)
         );
 
-        public static ArraySegment<T> AsSegment<T>(this T[] ts)
-        {
-            return new ArraySegment<T>(ts);
-        }
-
-        public static ArraySegment<T> AsSegment<T>(this T[] ts, int offset)
-        {
-            return new ArraySegment<T>(ts, offset, ts.Length - offset);
-        }
-
         public static Pose PoseFromUp(in Vector3 position, in Vector3 up)
         {
             var side = Mathf.Approximately(Vector3.forward.Cross(up).MagnitudeSq(), 0)
@@ -338,7 +326,7 @@ namespace Iviz.Core
                     return extractArrayFromListTypeFn;
                 }
 
-                var assembly = Assembly.GetAssembly(typeof(Mesh));
+                var assembly = Assembly.GetAssembly(typeof(Mesh) /* any unity type */); 
                 var type = assembly?.GetType("UnityEngine.NoAllocHelpers");
                 var methodInfo = type?.GetMethod("ExtractArrayFromList", BindingFlags.Static | BindingFlags.Public);
                 if (methodInfo == null)
@@ -437,5 +425,25 @@ namespace Iviz.Core
             out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp) =>
             (parentId, childId, transform, stamp) = (p.Header.FrameId, p.ChildFrameId, p.Transform, p.Header.Stamp);
 
+
+        public static unsafe Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
+        {
+            return new Span<T>(array.GetUnsafePtr(), array.Length);
+        }
+        
+        public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this in NativeArray<T> array) where T : unmanaged
+        {
+            return new ReadOnlySpan<T>(array.GetUnsafeReadOnlyPtr(), array.Length);
+        }
+        
+        public static Span<T> AsSpan<T>(this List<T> list) where T : unmanaged
+        {
+            return list.ExtractArray()[..list.Count];
+        }
+        
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list) where T : unmanaged
+        {
+            return list.ExtractArray()[..list.Count];
+        }
     }
 }

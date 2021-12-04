@@ -8,6 +8,9 @@ namespace Iviz.Resources
     {
         static readonly int Tint = Shader.PropertyToID("_Tint");
 
+        public Texture2D AtlasLarge { get; }
+        public Texture2D AtlasLargeFlip { get; }
+        
         public Info<Material> FontMaterial { get; }
         public Info<Material> FontMaterialZWrite { get; }
 
@@ -54,10 +57,12 @@ namespace Iviz.Resources
 
         public MaterialsType()
         {
-            var assetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder").GetComponent<AssetHolder>();
-            var appAssetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder")
-                .GetComponent<AppAssetHolder>();
+            var assetHolder = Resource.Extras.AssetHolder;
+            var appAssetHolder = Resource.Extras.AppAssetHolder;
 
+            AtlasLarge = appAssetHolder.AtlasLarge.AssertNotNull(nameof(appAssetHolder.AtlasLarge));
+            AtlasLargeFlip = appAssetHolder.AtlasLargeFlip.AssertNotNull(nameof(appAssetHolder.AtlasLargeFlip));
+            
             FontMaterial = new Info<Material>(assetHolder.FontMaterial);
             FontMaterialZWrite = new Info<Material>(assetHolder.FontMaterialZWrite);
             

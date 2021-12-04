@@ -106,7 +106,7 @@ namespace Iviz.Displays
             BoxCollider.size = Background.Bounds.size;
         }
 
-        public void Suspend()
+        void IDisplay.Suspend()
         {
             Caption = "";
         }

@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
@@ -14,11 +15,6 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshFilter))]
     public sealed class ARMeshLines : MonoBehaviour, IDisplay
     {
-        static readonly int PulseCenter = Shader.PropertyToID("_PulseCenter");
-        static readonly int PulseTime = Shader.PropertyToID("_PulseTime");
-        static readonly int PulseDelta = Shader.PropertyToID("_PulseDelta");
-
-        static float? pulseStart;
         static GameObject? container;
 
         static bool TryGetMeshManager([NotNullWhen(true)] out ARMeshManager? meshManager)
@@ -32,45 +28,10 @@ namespace Iviz.Displays
             meshManager = null;
             return false;
         }
-
-        public static void TriggerPulse(in Vector3 start)
-        {
-            bool hasPulse = pulseStart != null;
-            pulseStart = Time.time;
-            if (!hasPulse)
-            {
-                GameThread.EveryFrame += UpdateStatic;
-                Debug.Log("adding to everyframe");
-            }
-
-            var material = Resources.Resource.Materials.LinePulse.Object;
-            material.SetVector(PulseCenter, start);
-            material.SetFloat(PulseDelta, 0.25f);
-        }
-
-        static void UpdateStatic()
-        {
-            if (pulseStart == null)
-            {
-                return;
-            }
-
-            float timeDiff = Time.time - pulseStart.Value;
-            if (timeDiff > 10)
-            {
-                pulseStart = null;
-                GameThread.EveryFrame -= UpdateStatic;
-                return;
-            }
-
-            var material = Resources.Resource.Materials.LinePulse.Object;
-            material.SetFloat(PulseTime, (timeDiff - 0.5f));
-        }
-
-
+        
         bool pulseMaterialSet;
-        readonly List<int> indices = new List<int>();
-        readonly List<Vector3> vertices = new List<Vector3>();
+        readonly List<int> indices = new();
+        readonly List<Vector3> vertices = new();
 
         Transform? mTransform;
         MeshFilter? meshFilter;
@@ -90,24 +51,20 @@ namespace Iviz.Displays
 
                 if (container == null)
                 {
-                    pulseStart = null;
                     container = new GameObject("AR Mesh Lines");
                 }
 
                 resource = ResourcePool.RentDisplay<LineResource>(container.transform);
                 resource.ElementScale = 0.001f;
                 resource.Visible = ARController.IsVisible;
-                resource.MaterialOverride = pulseStart != null
+                resource.MaterialOverride = ARController.IsPulseActive
                     ? Resources.Resource.Materials.LinePulse.Object
                     : Resources.Resource.Materials.LineMesh.Object;
 
                 return resource;
             }
-        } 
-
-
-        static readonly int Tint = Shader.PropertyToID("_Tint");
-
+        }
+        
         public Bounds? Bounds => Resource != null ? Resource.Bounds : null;
 
         public int Layer { get; set; }
@@ -126,7 +83,7 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            pulseMaterialSet = pulseStart != null;
+            pulseMaterialSet = ARController.IsPulseActive;
             MeshFilter.sharedMesh = new Mesh { name = "AR Mesh" };
             Resource.Visible = Visible;
 
@@ -150,8 +107,7 @@ namespace Iviz.Displays
 
         void OnARCameraViewChanged(bool value)
         {
-            bool hasPulse = pulseStart != null;
-            Resource.Visible = hasPulse || !value;
+            Resource.Visible = ARController.IsPulseActive || !value;
         }
 
         void OnManagerChanged(ARMeshesChangedEventArgs args)
@@ -175,7 +131,7 @@ namespace Iviz.Displays
                 Resource.Transform.SetPose(unityPose);
             }
 
-            bool hasPulse = pulseStart != null;
+            bool hasPulse = ARController.IsPulseActive;
             if (hasPulse && !pulseMaterialSet)
             {
                 Resource.MaterialOverride = Resources.Resource.Materials.LinePulse.Object;
@@ -200,10 +156,10 @@ namespace Iviz.Displays
             vertices.Clear();
             mesh.GetVertices(vertices);
 
-            Resource.SetDirect(DirectLineSetter);
+            Resource.SetDirect(DirectLineSetter, indices.Count);
         }
 
-        bool? DirectLineSetter([NotNull] NativeList<float4x2> lineBuffer)
+        bool? DirectLineSetter(NativeList<float4x2> lineBuffer)
         {
             var mesh = MeshFilter.sharedMesh;
             var topology = mesh.GetTopology(0);
@@ -212,6 +168,8 @@ namespace Iviz.Displays
 
             int count = indices.Count;
             lineBuffer.Resize(count);
+
+            var lines = lineBuffer.AsSpan();
             switch (topology)
             {
                 case MeshTopology.Triangles:
@@ -225,9 +183,9 @@ namespace Iviz.Displays
                         Vector3 b = mVertices[ib];
                         Vector3 c = mVertices[ic];
 
-                        Write(ref lineBuffer[i], a, b);
-                        Write(ref lineBuffer[i + 1], b, c);
-                        Write(ref lineBuffer[i + 2], c, a);
+                        Write(ref lines[i], a, b);
+                        Write(ref lines[i + 1], b, c);
+                        Write(ref lines[i + 2], c, a);
                     }
 
                     break;
@@ -244,10 +202,10 @@ namespace Iviz.Displays
                         Vector3 c = mVertices[ic];
                         Vector3 d = mVertices[id];
 
-                        Write(ref lineBuffer[i], a, b);
-                        Write(ref lineBuffer[i + 1], b, c);
-                        Write(ref lineBuffer[i + 2], c, d);
-                        Write(ref lineBuffer[i + 3], d, a);
+                        Write(ref lines[i], a, b);
+                        Write(ref lines[i + 1], b, c);
+                        Write(ref lines[i + 2], c, d);
+                        Write(ref lines[i + 3], d, a);
                     }
 
                     break;

@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
@@ -17,7 +18,7 @@ namespace Iviz.Displays
         [SerializeField] int numCellsY;
         [SerializeField] float cellSize;
 
-        readonly NativeList<float4> pointBuffer = new();
+        readonly List<float4> pointBuffer = new();
         MeshListResource? resource;
         
         MeshListResource Resource =>
@@ -137,7 +138,7 @@ namespace Iviz.Displays
 
             pointBuffer.Clear();
 
-            float4 mul = new float4(cellSize, cellSize, 0, 0.01f);
+            var mul = new float4(cellSize, cellSize, 0, 0.01f);
 
             for (int v = bounds.YMin; v < bounds.YMax; v++)
             {
@@ -150,7 +151,7 @@ namespace Iviz.Displays
                         continue;
                     }
 
-                    float4 p = new float4(u, v, 0, val) * mul;
+                    var p = new float4(u, v, 0, val) * mul;
                     pointBuffer.Add(p.Ros2Unity());
                 }
             }
@@ -158,16 +159,11 @@ namespace Iviz.Displays
             GameThread.PostImmediate(() =>
             {
                 Resource.transform.SetLocalPose(pose);
-                Resource.SetDirect(pointBuffer);
+                Resource.SetDirect(pointBuffer.AsReadOnlySpan());
                 IsProcessing = false;
             });
         }
 
-        void OnDestroy()
-        {
-            pointBuffer.Dispose();
-        }
-        
         public void SplitForRecycle()
         {
             resource.ReturnToPool();

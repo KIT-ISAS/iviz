@@ -445,7 +445,7 @@ namespace Iviz.Controllers
 
             var results = new List<ARRaycastHit>();
             Raycaster.Raycast(ray, results);
-            results.RemoveAll(rayHit => (rayHit.hitType & TrackableType.PlaneWithinPolygon) == 0);
+            results.RemoveAll(static rayHit => (rayHit.hitType & TrackableType.PlaneWithinPolygon) == 0);
 
             switch (results.Count)
             {
@@ -456,9 +456,18 @@ namespace Iviz.Controllers
                     hit = results[0].pose;
                     return true;
                 default:
-                    Vector3 origin = ray.origin;
-                    hit = results.Select(rayHit => ((rayHit.pose.position - origin).sqrMagnitude, rayHit)).Min().rayHit
-                        .pose;
+                    Pose minPose = default;
+                    float minDistance = float.MaxValue;
+                    foreach (var rayHit in results)
+                    {
+                        float currentDistance = (rayHit.pose.position - ray.origin).sqrMagnitude;
+                        if (currentDistance < minDistance)
+                        {
+                            (minDistance, minPose) = (currentDistance, rayHit.pose);
+                        }
+                    }
+
+                    hit = minPose;
                     return true;
             }
         }
@@ -499,14 +508,6 @@ namespace Iviz.Controllers
                 RenderSettings.ambientIntensity = 0.1f;
             }
 
-            /*
-            if (lightEstimation.colorCorrection.HasValue)
-            {
-                arLight.color = lightEstimation.colorCorrection.Value;
-                Debug.Log("Color correction: " + lightEstimation.colorCorrection);
-            }
-            */
-
             // ARKit front camera (unused)
             if (lightEstimation.mainLightDirection.HasValue)
             {
@@ -532,10 +533,10 @@ namespace Iviz.Controllers
         {
             if (Visible && clickInfo.TryGetARRaycastResults(out var results))
             {
-                ARMeshLines.TriggerPulse(results[0].Position);
+                ARController.TriggerPulse(results[0].Position);
             }
         }
-
+        
         async void CaptureScreenForPublish(CancellationToken token)
         {
             if (ColorSender == null

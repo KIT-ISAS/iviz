@@ -172,7 +172,7 @@ namespace Iviz.Ros
                 connectionTs.Cancel();
                 connectionTs = new CancellationTokenSource();
 
-                CancellationToken token = connectionTs.Token;
+                var token = connectionTs.Token;
 
                 RosClient newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
                 client = newClient;

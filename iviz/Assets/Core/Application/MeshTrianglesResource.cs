@@ -21,14 +21,6 @@ namespace Iviz.Displays
         public override Bounds? Bounds =>
             mesh != null && mesh.vertexCount != 0 ? new Bounds(Collider.center, Collider.size) : null;
 
-        void OnDestroy()
-        {
-            if (mesh != null)
-            {
-                Destroy(mesh);
-            }
-        }
-
         Mesh EnsureOwnMesh(int numPointsNeeded)
         {
             var indexFormat = numPointsNeeded >= MaxVerticesShort
@@ -85,20 +77,21 @@ namespace Iviz.Displays
 
             using (var triangles = new Rent<int>(points.Length))
             {
+                int[] array = triangles.Array;
                 if (FlipWinding)
                 {
                     for (int i = 0; i < triangles.Length; i += 3)
                     {
-                        triangles.Array[i] = i;
-                        triangles.Array[i + 1] = i + 2;
-                        triangles.Array[i + 2] = i + 1;
+                        array[i] = i;
+                        array[i + 1] = i + 2;
+                        array[i + 2] = i + 1;
                     }
                 }
                 else
                 {
                     for (int i = 0; i < triangles.Length; i++)
                     {
-                        triangles.Array[i] = i;
+                        array[i] = i;
                     }
                 }
 
@@ -189,5 +182,13 @@ namespace Iviz.Displays
                 mesh.Clear();
             }
         }
+
+        void OnDestroy()
+        {
+            if (mesh != null)
+            {
+                Destroy(mesh);
+            }
+        }        
     }
 }

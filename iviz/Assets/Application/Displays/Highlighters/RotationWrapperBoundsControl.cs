@@ -109,7 +109,7 @@ namespace Iviz.Displays.Highlighters
 
             foreach (var marker in markers)
             {
-                marker.Color = Color.grey;
+                marker.Color = Resource.Colors.DraggableDefaultColor;
                 marker.Layer = LayerType.Clickable;
                 marker.ShadowsEnabled = false;
                 marker.Transform.localRotation = Quaternion.AngleAxis(90, Vector3.left);
@@ -121,8 +121,12 @@ namespace Iviz.Displays.Highlighters
                 {
                     foreach (var marker in markers)
                     {
-                        marker.EmissiveColor = draggable.IsDragging ? Color.blue : Color.black;
-                        marker.Color = draggable.IsDragging ? Color.cyan : Color.white;
+                        marker.EmissiveColor = draggable.IsDragging 
+                            ? Resource.Colors.DraggableSelectedEmissive 
+                            : Color.black;
+                        marker.Color = draggable.IsDragging
+                            ? Resource.Colors.DraggableSelectedColor
+                            : Resource.Colors.DraggableHoverColor;
                     }
                 }
                 else
@@ -130,7 +134,7 @@ namespace Iviz.Displays.Highlighters
                     foreach (var marker in markers)
                     {
                         marker.EmissiveColor = Color.black;
-                        marker.Color = Color.grey;
+                        marker.Color = Resource.Colors.DraggableDefaultColor;
                     }
                 }
 
@@ -160,8 +164,8 @@ namespace Iviz.Displays.Highlighters
 
             float radius = Mathf.Sqrt(sizeX * sizeX + sizeY * sizeY) * 1.1f;
             ring.Transform.localScale = new Vector3(radius, radius, 0.001f);
-            ring.EmissiveColor = Color.blue;
-            ring.Color = Color.cyan.WithAlpha(0.25f);
+            ring.EmissiveColor = Resource.Colors.DraggableSelectedEmissive;
+            ring.Color = Resource.Colors.DraggableSelectedColor.WithAlpha(0.25f);
             ring.ShadowsEnabled = false;            
         }
 

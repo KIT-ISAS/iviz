@@ -18,12 +18,7 @@ namespace Iviz.Displays
 
         public float4x2 f;
 
-        public readonly float3 A => f.c0.xyz;
-
         readonly Color32 ColorA => PointWithColor.RecastToColor32(f.c0.w);
-
-        public readonly float3 B => f.c1.xyz;
-
         readonly Color32 ColorB => PointWithColor.RecastToColor32(f.c1.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -56,13 +51,6 @@ namespace Iviz.Displays
             f.c1.y = end.y;
             f.c1.z = end.z;
             f.c1.w = intensityB;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public LineWithColor(in PointWithColor start, in PointWithColor end)
-        {
-            f.c0 = start.f;
-            f.c1 = end.f;
         }
 
         public override readonly string ToString()

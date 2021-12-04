@@ -176,31 +176,31 @@ namespace Iviz.App.ARDialogs
                 return;
             }
 
-            button1.Active = false;
+            button1.Visible = false;
             if (button2 != null)
             {
-                button2.Active = false;
+                button2.Visible = false;
             }
 
             if (button3 != null)
             {
-                button3.Active = false;
+                button3.Visible = false;
             }
 
             switch (value)
             {
                 case ButtonType.Ok:
-                    button1.Active = true;
+                    button1.Visible = true;
                     button1.Icon = ARButton.ButtonIcon.Ok;
                     button1.Caption = "Ok";
                     break;
                 case ButtonType.Forward:
-                    button1.Active = true;
+                    button1.Visible = true;
                     button1.Icon = ARButton.ButtonIcon.Forward;
                     button1.Caption = "Ok";
                     break;
                 case ButtonType.Backward:
-                    button1.Active = true;
+                    button1.Visible = true;
                     button1.Icon = ARButton.ButtonIcon.Backward;
                     button1.Caption = "Back";
                     break;
@@ -210,10 +210,10 @@ namespace Iviz.App.ARDialogs
                         break;
                     }
 
-                    button2.Active = true;
+                    button2.Visible = true;
                     button2.Icon = ARButton.ButtonIcon.Ok;
                     button2.Caption = "Yes";
-                    button3.Active = true;
+                    button3.Visible = true;
                     button3.Icon = ARButton.ButtonIcon.Cross;
                     button3.Caption = "No";
                     break;
@@ -223,10 +223,10 @@ namespace Iviz.App.ARDialogs
                         break;
                     }
 
-                    button2.Active = true;
+                    button2.Visible = true;
                     button2.Icon = ARButton.ButtonIcon.Backward;
                     button2.Caption = "Back";
-                    button3.Active = true;
+                    button3.Visible = true;
                     button3.Icon = ARButton.ButtonIcon.Forward;
                     button3.Caption = "Forward";
                     break;
@@ -236,10 +236,10 @@ namespace Iviz.App.ARDialogs
                         break;
                     }
 
-                    button2.Active = true;
+                    button2.Visible = true;
                     button2.Icon = ARButton.ButtonIcon.Ok;
                     button2.Caption = "Ok";
-                    button3.Active = true;
+                    button3.Visible = true;
                     button3.Icon = ARButton.ButtonIcon.Cross;
                     button3.Caption = "Cancel";
                     break;
@@ -549,24 +549,8 @@ namespace Iviz.App.ARDialogs
             ButtonClicked = null;
             MenuEntryClicked = null;
 
-            SuspendButton(button1);
-            SuspendButton(button2);
-            SuspendButton(button3);
-            foreach (var menuButton in menuButtons)
-            {
-                SuspendButton(menuButton);
-            }
-
             Expired?.Invoke(this);
             Expired = null;
-        }
-
-        static void SuspendButton([CanBeNull] ARButton button)
-        {
-            if (button != null)
-            {
-                button.OnDialogDisabled();
-            }
         }
 
         [NotNull]

@@ -1,6 +1,7 @@
+#nullable enable
+
 using System;
 using Iviz.Core;
-using Iviz.Msgs;
 using Iviz.Tools;
 using JetBrains.Annotations;
 using Unity.Mathematics;
@@ -12,16 +13,6 @@ namespace Iviz.Displays
 {
     internal static class CapsuleLinesHelper
     {
-        static readonly Vector3[] CapsuleLines =
-        {
-            new Vector3(-0.5f, 0, 0),
-            new Vector3(0, 0.5f, 0.5f),
-            new Vector3(0, 0.5f, -0.5f),
-            new Vector3(0, -0.5f, -0.5f),
-            new Vector3(0, -0.5f, 0.5f),
-            new Vector3(0.5f, 0, 0)
-        };
-
         static readonly int[] CapsuleIndices =
         {
             0, 1, 2,
@@ -48,8 +39,7 @@ namespace Iviz.Displays
             9, 5, 8
         };
 
-        public static void CreateCapsulesFromSegments([NotNull] NativeList<float4x2> lineBuffer, float scale,
-            [NotNull] Mesh mesh)
+        public static void CreateCapsulesFromSegments(ReadOnlySpan<float4x2> lineBuffer, float scale, Mesh mesh)
         {
             if (lineBuffer == null)
             {
@@ -82,8 +72,10 @@ namespace Iviz.Displays
 
             const float minMagnitude = 1e-8f;
                 
-            foreach (ref readonly float4x2 line in lineBuffer.Ref())
+            //foreach (ref readonly float4x2 line in lineBuffer.Ref())
+            for (int l = 0; l < lineBuffer.Length; l++)
             {
+                ref readonly float4x2 line = ref lineBuffer[l];
                 Vector3 a = line.c0.xyz;
                 Vector3 b = line.c1.xyz;
                     

@@ -47,7 +47,7 @@ namespace Iviz.App
             }
 
             GuiInputModule.Instance.LookAt(transform);
-            if (!bounds.HasPermanentHighlighter)
+            if (bounds.AcceptsHighlighter)
             {
                 FAnimator.Start(new BoundsHighlighter(bounds));
             }

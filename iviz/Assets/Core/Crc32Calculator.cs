@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using Iviz.Tools;
@@ -39,25 +38,9 @@ namespace Iviz.Core
             return createTable;
         }
 
-        /*
-        static unsafe uint CalculateHash(uint hash, byte* ptr, int size)
-        {
-            for (; size != 0; size--)
-            {
-                uint val = *ptr++;
-                hash = (hash >> 8) ^ Table[val ^ hash & 0xff];
-            }
-
-            return hash;
-        }
-        */
-        
         public static uint Compute<T>(T value, uint startHash = DefaultSeed) where T : unmanaged
         {
             ReadOnlySpan<T> span = stackalloc T[] { value };
-            
-            //T* ptr = &value;
-            //return CalculateHash(startHash, (byte*) ptr, sizeof(T));
             return Compute(MemoryMarshal.AsBytes(span), startHash);
         }
 
@@ -90,15 +73,9 @@ namespace Iviz.Core
             return Compute(array.AsSpan(), startHash);
         }
 
-        static uint Compute<T>(ReadOnlySpan<T> array, uint startHash = DefaultSeed) where T : unmanaged
+        public static uint Compute<T>(ReadOnlySpan<T> array, uint startHash = DefaultSeed) where T : unmanaged
         {
             return Compute(MemoryMarshal.AsBytes(array), startHash);
-            /*
-            fixed (T* ptr = array)
-            {
-                return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(T));
-            }
-            */
         }
 
         static uint Compute(ReadOnlySpan<byte> array, uint startHash = DefaultSeed)
@@ -111,19 +88,6 @@ namespace Iviz.Core
             }
 
             return hash;
-                
-            /*
-            fixed (T* ptr = array)
-            {
-                return CalculateHash(startHash, (byte*) ptr, array.Length * sizeof(T));
-            }
-            */
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint Update(uint hash, byte val)    
-        {
-            return (hash >> 8) ^ Table[val ^ hash & 0xff];
-        } 
     }
 }

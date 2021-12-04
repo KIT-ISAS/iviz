@@ -36,5 +36,9 @@ namespace Iviz.Resources
 
         public Color HighlighterBackground { get; } = Color.blue.WithValue(0.5f).WithSaturation(0.25f);
 
+        public Color DraggableDefaultColor { get; } = Color.grey;
+        public Color DraggableHoverColor { get; } = Color.white;
+        public Color DraggableSelectedColor { get; } = Color.cyan;
+        public Color DraggableSelectedEmissive { get; } = Color.blue;
     }
 }

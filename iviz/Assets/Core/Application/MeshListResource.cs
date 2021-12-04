@@ -278,7 +278,7 @@ namespace Iviz.Displays
         /// Copies the array directly without checking.
         /// </summary>
         /// <param name="points">A native array with the positions and colors.</param>        
-        public void SetDirect([NotNull] NativeList<float4> points)
+        public void SetDirect(ReadOnlySpan<float4> points)
         {
             pointBuffer.Clear();
             pointBuffer.AddRange(points);

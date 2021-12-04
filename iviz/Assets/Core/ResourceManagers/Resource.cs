@@ -29,7 +29,7 @@ namespace Iviz.Resources
         static MaterialsType? materials;
         static ColormapsType? colormaps;
         static DisplaysType? displays;
-        static ControllersType? controllers;
+        static ExtrasType? controllers;
         static WidgetsType? widgets;
         static TexturedMaterialsType? texturedMaterials;
         static FontInfo? fontInfo;
@@ -71,12 +71,14 @@ namespace Iviz.Resources
                 {GuiArray.RosMessageType, ModuleType.GuiDialog},
             }.AsReadOnly();
 
+        public static readonly ColorScheme Colors = new();
+
         public static MaterialsType Materials => materials ??= new MaterialsType();
         public static ColormapsType Colormaps => colormaps ??= new ColormapsType();
         public static DisplaysType Displays => displays ??= new DisplaysType();
-        public static ControllersType Controllers => controllers ??= new ControllersType();
+        public static ExtrasType Extras => controllers ??= new ExtrasType();
         public static WidgetsType Widgets => widgets ??= new WidgetsType();
-        public static readonly ColorScheme Colors = new();
+
         public static TexturedMaterialsType TexturedMaterials => texturedMaterials ??= new TexturedMaterialsType();
         public static FontInfo Font => fontInfo ??= new FontInfo();
         public static InternalResourceManager Internal => internals ??= new InternalResourceManager();

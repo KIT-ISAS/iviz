@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
@@ -71,6 +73,7 @@ namespace Iviz.Displays
             foreach (var mesh in msg.Meshes)
             {
                 token.ThrowIfCancellationRequested();
+
                 var obj = new GameObject();
                 obj.AddComponent<MeshRenderer>();
                 obj.AddComponent<MeshFilter>();
@@ -78,7 +81,7 @@ namespace Iviz.Displays
 
                 obj.transform.SetParent(root.transform, false);
 
-                MeshTrianglesResource meshResource = obj.AddComponent<MeshTrianglesResource>();
+                var meshResource = obj.AddComponent<MeshTrianglesResource>();
 
                 meshResource.gameObject.name = mesh.Name;
 
@@ -109,11 +112,7 @@ namespace Iviz.Displays
                 using (var tangents = new Rent<Vector4>(mesh.Tangents.Length))
                 using (var triangles = new Rent<int>(mesh.Faces.Length * 3))
                 {
-                    for (int i = 0; i < vertices.Length; i++)
-                    {
-                        vertices.Array[i] = Assimp2Unity(mesh.Vertices[i]);
-                    }
-
+                    MemCopy(mesh.Vertices, vertices.Array, vertices.Length * 3 * sizeof(float));
                     MemCopy(mesh.Normals, normals.Array, normals.Length * 3 * sizeof(float));
                     MemCopy(meshColors, colors.Array, colors.Length * sizeof(int));
                     MemCopy(meshDiffuseTexCoords, diffuseTexCoords.Array, diffuseTexCoords.Length * 3 * sizeof(float));
@@ -122,7 +121,7 @@ namespace Iviz.Displays
 
                     for (int i = 0; i < mesh.Tangents.Length; i++)
                     {
-                        (float x, float y, float z) = mesh.Tangents[i];
+                        var (x, y, z) = mesh.Tangents[i];
                         tangents.Array[i] = new Vector4(x, y, z, -1);
                     }
 
@@ -175,32 +174,33 @@ namespace Iviz.Displays
                 var nodeObject = new GameObject($"Node:{node.Name}");
                 nodes.Add(nodeObject);
 
-                nodeObject.transform.SetParent(
+                var nodeObjectTransform = nodeObject.transform;
+                nodeObjectTransform.SetParent(
                     node.Parent == -1 ? root.transform : nodes[node.Parent].transform,
                     false);
 
-                Matrix4x4 m = new Matrix4x4();
-                for (int i = 0; i < 16; i++)
+                var m = new Matrix4x4();
+                foreach (int i in ..16)
                 {
                     m[i] = node.Transform.M[i];
                 }
 
-                nodeObject.transform.localRotation = m.rotation;
-                nodeObject.transform.localPosition = m.GetColumn(3);
-                nodeObject.transform.localScale = m.lossyScale;
+                nodeObjectTransform.localRotation = m.rotation;
+                nodeObjectTransform.localPosition = m.GetColumn(3);
+                nodeObjectTransform.localScale = m.lossyScale;
 
                 foreach (int meshId in node.Meshes)
                 {
                     if (!used[meshId])
                     {
-                        templateMeshes[meshId].transform.SetParent(nodeObject.transform, false);
+                        templateMeshes[meshId].transform.SetParent(nodeObjectTransform, false);
                         used[meshId] = true;
                     }
                     else
                     {
                         var newMesh = Object.Instantiate(
                             templateMeshes[meshId].gameObject,
-                            nodeObject.transform,
+                            nodeObjectTransform,
                             false);
                         children.Add(newMesh.GetComponent<MeshTrianglesResource>());
                     }
@@ -218,42 +218,24 @@ namespace Iviz.Displays
         {
             var uri = new Uri(uriString);
             string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
-            string? directoryName = Path.GetDirectoryName(uriPath);
-            if (!string.IsNullOrEmpty(directoryName) && Path.DirectorySeparatorChar == '\\')
-            {
-                directoryName = directoryName.Replace('\\', '/'); // windows!
-            }
+            string directoryName = Path.GetDirectoryName(uriPath) ?? "";
+            string validatedName = Path.DirectorySeparatorChar == '\\'
+                ? directoryName.Replace('\\', '/') // windows!
+                : directoryName;
 
-            string textureUri = $"{uri.Scheme}://{uri.Host}{directoryName}/{localPath}";
+            string textureUri = $"{uri.Scheme}://{uri.Host}{validatedName}/{localPath}";
             return Resource.GetTextureResourceAsync(textureUri, provider, token);
         }
 
-        static Bounds? TransformBoundsUntil(Bounds? bounds, Transform transform, Transform endTransform)
-        {
-            while (transform != endTransform)
-            {
-                bounds = bounds.TransformBound(transform);
-                transform = transform.parent;
-            }
+        //static Vector3 Assimp2Unity(in Vector3f vector3) => new(vector3.X, vector3.Y, vector3.Z);
 
-            return bounds;
-        }
-
-        static Vector3 Assimp2Unity(in Vector3f vector3) => new(vector3.X, vector3.Y, vector3.Z);
-
-        static unsafe void MemCopy<TA, TB>(TA[] src, TB[] dst, int sizeToCopy)
+        static void MemCopy<TA, TB>(TA[] src, TB[] dst, int sizeToCopy)
             where TA : unmanaged
             where TB : unmanaged
         {
-            if (dst.Length * sizeof(TB) < sizeToCopy || src.Length * sizeof(TA) < sizeToCopy)
-            {
-                throw new ArgumentException("Potential buffer overflow");
-            }
-
-            fixed (void* srcPtr = src, dstPtr = dst)
-            {
-                UnsafeUtility.MemCpy(dstPtr, srcPtr, sizeToCopy);
-            }
+            var srcPtr = MemoryMarshal.AsBytes(src.AsSpan())[..sizeToCopy];
+            var dstPtr = MemoryMarshal.AsBytes(dst.AsSpan());
+            srcPtr.CopyTo(dstPtr);
         }
     }
 }

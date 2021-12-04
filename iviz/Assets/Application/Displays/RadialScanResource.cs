@@ -24,8 +24,8 @@ namespace Iviz.Displays
         [SerializeField] bool useLines;
         [SerializeField] float maxLineDistance;
 
-        readonly NativeList<LineWithColor> lineBuffer = new();
-        readonly NativeList<PointWithColor> pointBuffer = new();
+        readonly List<LineWithColor> lineBuffer = new();
+        readonly List<PointWithColor> pointBuffer = new();
         readonly List<Vector2> cache = new();
 
         LineResource? lines;
@@ -212,7 +212,7 @@ namespace Iviz.Displays
             MaxLineDistance = 0.3f;
         }
         
-        public void Suspend()
+        void IDisplay.Suspend()
         {
             PointCloud.Suspend();
             Lines.Suspend();
@@ -222,12 +222,6 @@ namespace Iviz.Displays
         {
             PointCloud.ReturnToPool();
             Lines.ReturnToPool();
-        }
-
-        void OnDestroy()
-        {
-            lineBuffer.Dispose();
-            pointBuffer.Dispose();
         }
 
         public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax,
@@ -290,7 +284,7 @@ namespace Iviz.Displays
                     useIntensity ? intensities[i] : range));
             }
 
-            Size = pointBuffer.Length;
+            Size = pointBuffer.Count;
 
             if (!UseLines)
             {
@@ -304,35 +298,40 @@ namespace Iviz.Displays
 
         void SetPoints()
         {
-            PointCloud.Set(pointBuffer);
+            PointCloud.Set(pointBuffer.AsReadOnlySpan());
         }
 
         void SetLines()
         {
-            int numPoints = pointBuffer.Length;
+            var points = pointBuffer.AsReadOnlySpan();
+            int numPoints = points.Length;
             lineBuffer.Clear();
 
-            for (int i = 0; i < numPoints - 1; i++)
+            var line = new LineWithColor();
+            ref var pA = ref line.f.c0;
+            ref var pB = ref line.f.c1;
+            
+            for (int i = 0; i < points.Length - 1; i++)
             {
-                ref var pA = ref pointBuffer[i];
-                ref var pB = ref pointBuffer[i + 1];
-                if ((pB.Position - pA.Position).MaxAbsCoeff() < maxLineDistance)
+                pA = points[i].f;
+                pB = points[i + 1].f;
+                if ((pB - pA).MaxAbsCoeff3() < maxLineDistance)
                 {
-                    lineBuffer.Add(new LineWithColor(pA, pB));
+                    lineBuffer.Add(line);
                 }
             }
 
             if (numPoints != 0)
             {
-                ref var pA = ref pointBuffer[numPoints - 1];
-                ref var pB = ref pointBuffer[0];
-                if ((pB.Position - pA.Position).MaxAbsCoeff() < maxLineDistance)
+                pA = points[^1].f;
+                pB = points[0].f;
+                if ((pB - pA).MaxAbsCoeff3() < maxLineDistance)
                 {
-                    lineBuffer.Add(new LineWithColor(pA, pB));
+                    lineBuffer.Add(line);
                 }
             }
 
-            Lines.Set(lineBuffer, false);
+            Lines.Set(lineBuffer.AsReadOnlySpan(), false);
         }
     }
 }

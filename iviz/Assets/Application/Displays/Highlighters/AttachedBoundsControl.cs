@@ -20,7 +20,7 @@ namespace Iviz.Displays.Highlighters
         public event Action? Moved;
         public event Action? StartDragging;
         public event Action? EndDragging;
-        
+
         public bool Interactable
         {
             set => collider.enabled = value;
@@ -37,7 +37,7 @@ namespace Iviz.Displays.Highlighters
             nodeTransform = node.transform;
         }
 
-        protected T InitializeDraggable<T>(IHasBounds source, Transform target)
+        protected T InitializeDraggable<T>(IHasBounds source, Transform? target)
             where T : ScreenDraggable
         {
             if (source.BoundsTransform is { } boundsTransform)
@@ -49,7 +49,9 @@ namespace Iviz.Displays.Highlighters
 
             var draggable = nodeTransform.gameObject.AddComponent<T>();
             draggable.RayCollider = collider;
-            draggable.TargetTransform = target;
+            draggable.TargetTransform = target.CheckedNull() ??
+                                        source.BoundsTransform.CheckedNull() ??
+                                        throw new ArgumentNullException(nameof(target));
             draggable.PointerDown += () => PointerDown?.Invoke();
             draggable.PointerUp += () => PointerUp?.Invoke();
             draggable.Moved += () => Moved?.Invoke();
@@ -63,15 +65,18 @@ namespace Iviz.Displays.Highlighters
                     if (frame == null)
                     {
                         frame = ResourcePool.RentDisplay<SelectionFrame>(nodeTransform);
-                        frame.Color = Color.white;
                         frame.Size = validBounds.size;
                         frame.Transform.localPosition = validBounds.center;
                     }
 
                     frame.Visible = true;
-                    frame.EmissiveColor = draggable.IsDragging ? Color.blue : Color.black;
+                    frame.EmissiveColor = draggable.IsDragging
+                        ? Resource.Colors.DraggableSelectedEmissive
+                        : Color.black;
                     frame.ColumnWidth = draggable.IsDragging ? 0.01f : 0.005f;
-                    frame.Color = draggable.IsDragging ? Color.cyan : Color.white;
+                    frame.Color = draggable.IsDragging
+                        ? Resource.Colors.DraggableSelectedColor
+                        : Resource.Colors.DraggableHoverColor;
                 }
                 else if (frame != null)
                 {
@@ -121,7 +126,7 @@ namespace Iviz.Displays.Highlighters
             Moved = null;
             StartDragging = null;
             EndDragging = null;
-            
+
             if (frame != null)
             {
                 frame.ReturnToPool();
@@ -131,19 +136,11 @@ namespace Iviz.Displays.Highlighters
         }
     }
 
-    public sealed class ClickableBoundsControl : AttachedBoundsControl
-    {
-        public ClickableBoundsControl(IHasBounds source, Transform target)
-        {
-            InitializeDraggable<StaticDraggable>(source, target);
-        }
-    }
-
     public sealed class StaticBoundsControl : AttachedBoundsControl
     {
-        public StaticBoundsControl(IHasBounds source, Transform target)
+        public StaticBoundsControl(IHasBounds source)
         {
-            InitializeDraggable<StaticDraggable>(source, target);
+            InitializeDraggable<StaticDraggable>(source, null);
         }
     }
 

@@ -4,6 +4,7 @@ using System;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -13,29 +14,17 @@ namespace Iviz.Displays
     public sealed class OccupancyGridTextureResource : MarkerResourceWithColormap
     {
         static readonly int AtlasTex = Shader.PropertyToID("_AtlasTex");
+        static Texture2D AtlasLarge => Resource.Materials.AtlasLarge;
+        static Texture2D AtlasLargeFlipped => Resource.Materials.AtlasLargeFlip;
 
-        static Texture2D? atlasLarge;
-        static Texture2D? atlasLargeFlipped;
-
-        static AppAssetHolder AssetHolder =>
-            UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
-
-        static Texture2D AtlasLarge => (atlasLarge != null)
-            ? atlasLarge
-            : atlasLarge = AssetHolder.AtlasLarge;
-
-        static Texture2D AtlasLargeFlipped => (atlasLargeFlipped != null)
-            ? atlasLargeFlipped
-            : atlasLargeFlipped = AssetHolder.AtlasLargeFlip;
-
-        [SerializeField] Texture2D? texture = null;
-        [SerializeField] MeshRenderer? meshRenderer = null;
+        [SerializeField] Texture2D? texture;
+        [SerializeField] MeshRenderer? meshRenderer;
 
         Material? material;
         sbyte[] buffer = Array.Empty<sbyte>();
         uint? previousHash;
         bool newFlipMinMax;
-        
+
         Material Material => material != null
             ? material
             : material = Resource.Materials.OccupancyGridTexture.Instantiate();
@@ -162,17 +151,37 @@ namespace Iviz.Displays
                 var validatedTexture = EnsureSize(segmentWidth, segmentHeight);
                 validatedTexture.GetRawTextureData<sbyte>().CopyFrom(buffer);
                 validatedTexture.Apply(false);
-                
+
                 IsProcessing = false;
             });
         }
 
-        static unsafe (uint hash, int numValidValues)
+        static (uint hash, int numValidValues)
             Process(sbyte[] src, OccupancyGridResource.Rect bounds, int pitch, sbyte[] dest)
         {
             uint hash = Crc32Calculator.DefaultSeed;
             long numValidValues = 0;
 
+            int rowSize = bounds.XMax - bounds.XMin;
+            foreach (int v in ..(bounds.YMax - bounds.YMin))
+            {
+                int srcOffset = (v + bounds.YMin) * pitch + bounds.XMin;
+                int dstOffset = v * rowSize;
+
+                var srcSpan = new ReadOnlySpan<sbyte>(src, srcOffset, rowSize);
+                var dstSpan = new Span<sbyte>(dest, dstOffset, rowSize);
+
+                srcSpan.CopyTo(dstSpan);
+                hash = Crc32Calculator.Compute(srcSpan, hash);
+
+                foreach (sbyte u in srcSpan)
+                {
+                    //numValidValues += (u < 0) ? 1 : 0;
+                    numValidValues += (u >> 8) + 1;
+                }
+            }
+
+            /*
             fixed (sbyte* dstPtr0 = dest, srcPtr0 = src)
             {
                 sbyte* dstPtr = dstPtr0;
@@ -187,6 +196,8 @@ namespace Iviz.Displays
                     }
                 }
             }
+                        */
+
 
             return (hash, (int)numValidValues);
         }
@@ -221,8 +232,19 @@ namespace Iviz.Displays
             MeshRenderer.enabled = true;
         }
 
-        static unsafe void CreateMipmaps(sbyte[] array, int width, int height)
+        static void CreateMipmaps(sbyte[] array, int width, int height)
         {
+            var srcPtr = new Span<sbyte>(array);
+            while (width > 1 && height > 1)
+            {
+                int size = width * height;
+                var dstPtr = srcPtr.Slice(size, srcPtr.Length - size);
+                Reduce(srcPtr, width, height, dstPtr);
+                srcPtr = dstPtr;
+                width /= 2;
+                height /= 2;
+            }
+            /*
             fixed (sbyte* srcPtr = array)
             {
                 sbyte* maxPtr = srcPtr + array.Length;
@@ -240,9 +262,8 @@ namespace Iviz.Displays
                     width /= 2;
                     height /= 2;
                 }
-
-                //Debug.Log("Mipmap used " + (srcMipmap - srcPtr) + " expected: " + array.Length);
             }
+            */
         }
 
         static int CalculateAllMipmapsSize(int width, int height)
@@ -250,38 +271,67 @@ namespace Iviz.Displays
             int size = 0;
             while (width != 1 || height != 1)
             {
-                //Debug.Log(width + " " + height + " -> " + width * height);
                 size += width * height;
                 width = Math.Max(width / 2, 1);
                 height = Math.Max(height / 2, 1);
             }
 
-            //Debug.Log("Total: " + size);
             return size + 1;
         }
 
-
-        static unsafe void Reduce(sbyte* src, int width, int height, sbyte* dst)
+        static void Reduce(Span<sbyte> srcSpan, int width, int height, Span<sbyte> dstSpan)
         {
             if (width < 2 || height < 2)
             {
                 throw new InvalidOperationException("NYI!");
             }
 
-            for (int v = 0; v < height; v += 2)
+            int halfWidth = width / 2;
+            int halfHeight = height / 2;
+            for (int vSrc = 0, vDst = 0; vDst < halfHeight; vSrc += 2, vDst++)
             {
-                sbyte* row0 = src + width * v;
-                sbyte* row1 = row0 + width;
-                for (int u = 0; u < width; u += 2, row0 += 2, row1 += 2, dst++)
+                var row0 = srcSpan.Slice(width * vSrc, width);
+                var row1 = srcSpan.Slice(width * (vSrc + 1), width);
+                var rowDst = dstSpan.Slice(halfWidth * vDst, halfWidth);
+
+                for (int uSrc = 0, uDst = 0; uDst < halfWidth; uSrc += 2, uDst++)
                 {
-                    int a = row0[0];
-                    int b = row0[1];
-                    int c = row1[0];
-                    int d = row1[1];
-                    *dst = (sbyte)Fuse(a, b, c, d);
+                    int a = row0[uSrc + 0];
+                    int b = row0[uSrc + 1];
+                    int c = row1[uSrc + 0];
+                    int d = row1[uSrc + 1];
+                    rowDst[uDst] = (sbyte)Fuse(a, b, c, d);
                 }
             }
         }
+
+        /*
+        static unsafe void Reduce(Span<sbyte> srcSpan, int width, int height, Span<sbyte> dstSpan)
+        {
+            fixed (sbyte* src = srcSpan)
+            fixed (sbyte* dst = dstSpan)
+            {
+                if (width < 2 || height < 2)
+                {
+                    throw new InvalidOperationException("NYI!");
+                }
+
+                for (int v = 0; v < height; v += 2)
+                {
+                    sbyte* row0 = src + width * v;
+                    sbyte* row1 = row0 + width;
+                    for (int u = 0; u < width; u += 2, row0 += 2, row1 += 2, dst++)
+                    {
+                        int a = row0[0];
+                        int b = row0[1];
+                        int c = row1[0];
+                        int d = row1[1];
+                        *dst = (sbyte)Fuse(a, b, c, d);
+                    }
+                }
+            }
+        }
+        */
 
         static int Fuse(int a, int b, int c, int d)
         {

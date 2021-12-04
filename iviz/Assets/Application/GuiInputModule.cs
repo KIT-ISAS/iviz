@@ -916,5 +916,11 @@ namespace Iviz.App
             return gameObject.TryGetComponent(out h) ||
                    (parent = gameObject.transform.parent) != null && parent.TryGetComponent(out h);
         }
+
+        public static void PlayClickAudio(in Vector3 position)
+        {
+            var assetHolder = Resource.Extras.AppAssetHolder;
+            AudioSource.PlayClipAtPoint(assetHolder.Click, position);
+        }
     }
 }

@@ -50,8 +50,7 @@ namespace Iviz.Resources
 
         public WidgetsType()
         {
-            var assetHolder = UnityEngine.Resources.Load<GameObject>("Widget Asset Holder")
-                .GetComponent<WidgetAssetHolder>();
+            var assetHolder = Resource.Extras.WidgetAssetHolder;
 
             DraggableDisplayButton = new Info<GameObject>(assetHolder.DraggableDisplayButton);
             ItemButton = new Info<GameObject>(assetHolder.ItemButton);

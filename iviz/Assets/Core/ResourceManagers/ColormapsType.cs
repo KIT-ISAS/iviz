@@ -38,7 +38,7 @@ namespace Iviz.Resources
             };
             Names = names.AsReadOnly();
 
-            var assetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder").GetComponent<AssetHolder>();
+            var assetHolder = Resource.Extras.AssetHolder;
             Dictionary<ColormapId, Texture2D> textures = new Dictionary<ColormapId, Texture2D>()
             {
                 [ColormapId.autumn] = assetHolder.Autumn,

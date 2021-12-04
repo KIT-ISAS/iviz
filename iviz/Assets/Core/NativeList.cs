@@ -70,7 +70,7 @@ namespace Iviz.Core
             return ref UnsafeGet(prevLength);
         }
 
-        public void AddRange([NotNull] NativeList<T> otherArray)
+        public void AddRange(ReadOnlySpan<T> otherArray)
         {
             if (otherArray.Length == 0)
             {
@@ -78,27 +78,15 @@ namespace Iviz.Core
             }
             
             EnsureCapacity(length + otherArray.Length);
-            NativeArray<T>.Copy(otherArray.array, 0, array, length, otherArray.Length);
+            otherArray.CopyTo( array.AsSpan().Slice(length, otherArray.Length));
+            //NativeArray<T>.Copy(otherArray.array, 0, array, length, otherArray.Length);
             length += otherArray.Length;
         }
-
-        //public NativeArray<T>.Enumerator GetEnumerator() => AsArray().GetEnumerator();
 
         public NativeArray<T> AsArray() => length == 0 ? EmptyArray : array.GetSubArray(0, length);
 
         public int Length => length;
-
-
-        /*
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        int IReadOnlyCollection<T>.Count => length;
-
-        T IReadOnlyList<T>.this[int index] => index < length ? array[index] : throw new IndexOutOfRangeException();
-        */
-
+        
         public ref T this[int index]
         {
             get
@@ -111,6 +99,16 @@ namespace Iviz.Core
                 return ref UnsafeGet(index);
             }
         }
+        
+        public unsafe Span<T> AsSpan()
+        {
+            return new Span<T>(array.GetUnsafePtr(), array.Length);
+        }
+        
+        public unsafe ReadOnlySpan<T> AsReadOnlySpan()
+        {
+            return new ReadOnlySpan<T>(array.GetUnsafeReadOnlyPtr(), array.Length);
+        }        
 
         unsafe ref T UnsafeGet(int index) => ref *((T*) array.GetUnsafePtr() + index);
 
@@ -148,6 +146,11 @@ namespace Iviz.Core
             length = newSize;
         }
 
+        public static implicit operator ReadOnlySpan<T>([NotNull] NativeList<T> list)
+        {
+            return list.AsReadOnlySpan();  
+        } 
+        
         public RefEnumerable Ref() => new RefEnumerable(array, length);
 
         public readonly struct RefEnumerable

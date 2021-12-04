@@ -107,7 +107,7 @@ namespace Iviz.App.ARDialogs
             float expectedTime = startTime.Value + positions.Count * period;
             Vector3 currentPosition = Transform.localPosition;
             if (time < expectedTime && (positions.Count != 0 &&
-                                        Vector3.Distance(positions[positions.Count - 1], currentPosition) < 0.1f))
+                                        Vector3.Distance(positions[^1], currentPosition) < 0.1f))
             {
                 return;
             }
@@ -129,7 +129,6 @@ namespace Iviz.App.ARDialogs
             Lines.Reset();
             lineBuffer.Clear();
             startTime = null;
-            button.OnDialogDisabled();
             button.Transform.parent = Transform;
             Lines.Transform.parent = Transform;
         }

@@ -146,6 +146,17 @@ namespace Iviz.Displays
             StateChanged?.Invoke();
         }
 
+        void OnDisable()
+        {
+            GuiInputModule.Instance.TryUnsetDraggedObject(this);
+            if (IsHovering || IsDragging)
+            {
+                IsHovering = false;
+                IsDragging = false;
+                StateChanged?.Invoke();
+            }
+        }
+
         public void ClearSubscribers()
         {
             Moved = null;

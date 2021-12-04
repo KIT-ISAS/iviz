@@ -10,7 +10,7 @@ namespace Iviz.Common
         Bounds? Bounds { get; }
         Transform? BoundsTransform { get; }
         string? Caption { get; }
-        bool HasPermanentHighlighter { get; }
+        bool AcceptsHighlighter { get; }
         event Action? BoundsChanged;
     }
 }

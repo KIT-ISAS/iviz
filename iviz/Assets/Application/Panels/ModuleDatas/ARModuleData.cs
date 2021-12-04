@@ -29,7 +29,8 @@ namespace Iviz.App
         {
             panel = DataPanelManager.GetPanelByResourceType<ARPanelContents>(ModuleType.AugmentedReality);
 
-            controller = Resource.Controllers.AR.Instantiate<ARFoundationController>();
+            controller = Object.Instantiate(Resource.Extras.AppAssetHolder.ARPrefab)
+                .GetComponent<ARFoundationController>();
 
             controller.ModuleData = this;
             if (constructor.Configuration != null)

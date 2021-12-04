@@ -303,7 +303,7 @@ namespace Iviz.Displays
                 resource.Set(points);
             }
 
-            using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
+            using (var points = new NativeList<PointWithColor>())
             {
                 var resource = ResourcePool.RentDisplay<PointListResource>();
 

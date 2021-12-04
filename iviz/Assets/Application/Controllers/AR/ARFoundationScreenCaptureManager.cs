@@ -2,6 +2,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Common;
@@ -25,9 +27,6 @@ namespace Iviz.Controllers
         Screenshot? lastColor;
         Screenshot? lastDepth;
         Screenshot? lastConfidence;
-
-        public event Action<Screenshot>? ScreenshotColor;
-        public event Action<Screenshot>? ScreenshotDepth;
 
         Intrinsic Intrinsic
         {
@@ -136,7 +135,6 @@ namespace Iviz.Controllers
                     var screenshot = new Screenshot(ScreenshotFormat.Rgb, width, height, Intrinsic.Scale(0.5f), pose,
                         bytes);
                     lastColor = screenshot;
-                    ScreenshotColor?.Invoke(screenshot);
                     task.TrySetResult(screenshot);
                 });
             }
@@ -209,7 +207,6 @@ namespace Iviz.Controllers
                     {
                         MirrorX<float>(screenshot.Bytes, screenshot.Width, screenshot.Height);
                         lastDepth = screenshot;
-                        ScreenshotDepth?.Invoke(screenshot);
                         task.TrySetResult(screenshot);
                     }, token);
                 });
@@ -293,18 +290,33 @@ namespace Iviz.Controllers
             return task.Task.AsValueTask();
         }
 
-        static unsafe void MirrorX<T>(byte[] bytes, int width, int height) where T : unmanaged
+        static void MirrorX<T>(byte[] bytes, int width, int height) where T : unmanaged
         {
             if (bytes == null)
             {
                 throw new ArgumentNullException(nameof(bytes));
             }
 
-            if (width * height * sizeof(T) > bytes.Length)
+            if (width * height * Unsafe.SizeOf<T>() > bytes.Length)
             {
                 throw new ArgumentException("Sizes are not correct and might cause a buffer overflow!");
             }
 
+            var ptr = MemoryMarshal.Cast<byte, T>(bytes);
+
+            foreach (int v in ..height)
+            {
+                var row = ptr.Slice(v * width, width);
+                foreach (int u in ..(width / 2))
+                {
+                    ref T a = ref row[u];
+                    ref T b = ref row[^u];
+                    (a, b) = (b, a);
+                }
+            }
+
+
+            /*
             fixed (byte* bytesPtr = bytes)
             {
                 T* ptr = (T*)bytesPtr;
@@ -321,6 +333,7 @@ namespace Iviz.Controllers
                     }
                 }
             }
+            */
         }
     }
 }

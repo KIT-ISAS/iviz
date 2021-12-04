@@ -107,7 +107,7 @@ namespace Iviz.Displays
         /// </summary>
         /// <param name="lines">The line list.</param>
         /// <param name="overrideNeedsAlpha">A check of alpha colors will be done if <see cref="UseColormap"/> is disabled. Use this to override the check.</param>
-        public void Set(NativeList<LineWithColor> lines, bool? overrideNeedsAlpha = null)
+        public void Set(ReadOnlySpan<LineWithColor> lines, bool? overrideNeedsAlpha = null)
         {
             if (lines == null)
             {
@@ -116,31 +116,9 @@ namespace Iviz.Displays
 
             lineBuffer.EnsureCapacity(lines.Length);
             lineBuffer.Clear();
-            if (lines.Length != 0)
+            for (int i = 0; i < lines.Length; i++)
             {
-                foreach (ref readonly LineWithColor t in lines.Ref())
-                {
-                    if (IsElementValid(t))
-                    {
-                        lineBuffer.Add(t.f);
-                    }
-                }
-            }
-
-            UpdateLines(overrideNeedsAlpha);
-        }
-
-        public void Set(LineWithColor[] lines, bool? overrideNeedsAlpha = null)
-        {
-            if (lines == null)
-            {
-                throw new ArgumentNullException(nameof(lines));
-            }
-
-            lineBuffer.EnsureCapacity(lines.Length);
-            lineBuffer.Clear();
-            foreach (ref readonly LineWithColor t in lines.Ref())
-            {
+                ref readonly var t = ref lines[i];
                 if (IsElementValid(t))
                 {
                     lineBuffer.Add(t.f);
@@ -269,7 +247,7 @@ namespace Iviz.Displays
 
             Properties.SetFloat(ScaleID, ElementScale);
 
-            Bounds worldBounds = Collider.bounds;
+            var worldBounds = Collider.bounds;
 
             Material material;
             if (MaterialOverride != null)

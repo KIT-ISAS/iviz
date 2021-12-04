@@ -280,7 +280,7 @@ namespace Iviz.Controllers
             return false;
         }
 
-        bool FieldsEqual([NotNull] PointField[] fields)
+        bool FieldsEqual(PointField[] fields)
         {
             if (fieldNames.Count != fields.Length)
             {
@@ -298,7 +298,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        void ProcessMessage([NotNull] PointCloud2 msg)
+        void ProcessMessage(PointCloud2 msg)
         {
             try
             {
@@ -406,7 +406,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void GeneratePointBuffer([NotNull] PointCloud2 msg, [NotNull] byte[] dataSrc, int xOffset, int yOffset,
+        void GeneratePointBuffer(PointCloud2 msg, byte[] dataSrc, int xOffset, int yOffset,
             int zOffset, int iOffset,
             int iType, bool rgbaHint)
         {
@@ -421,7 +421,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void GeneratePointBufferSlow([NotNull] PointCloud2 msg, [NotNull] byte[] dataSrc,
+        void GeneratePointBufferSlow(PointCloud2 msg, byte[] dataSrc,
             int xOffset, int yOffset, int zOffset, int iOffset,
             int iType, bool rgbaHint)
         {

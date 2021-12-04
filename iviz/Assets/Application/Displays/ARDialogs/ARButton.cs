@@ -1,56 +1,50 @@
+#nullable enable
+
 using System;
+using Iviz.Common;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Displays.Highlighters;
 using Iviz.Resources;
-using Iviz.XmlRpc;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace Iviz.App.ARDialogs
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class ARButton : MarkerResource, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler,
-        IRecyclable
+    public sealed class ARButton : MonoBehaviour, IDisplay, IHasBounds, IRecyclable
     {
-        [SerializeField] Texture2D[] icons = null;
-        [SerializeField] TextMesh text = null;
-        [SerializeField] MeshRenderer iconMeshRenderer = null;
+        [SerializeField] Texture2D[] icons = Array.Empty<Texture2D>();
+        [SerializeField] TMP_Text? text;
+        [SerializeField] MeshRenderer? iconMeshRenderer;
+        [SerializeField] MeshMarkerResource? cylinder;
+        [SerializeField] RoundedPlaneResource? background;
+        [SerializeField] Transform? m_Transform;
+        [SerializeField] BoxCollider? boxCollider;
 
-        [SerializeField] Color backgroundColor = new Color(0, 0.2f, 0.5f);
-        [SerializeField] MeshMarkerResource background = null;
+        Color backgroundColor = Resource.Colors.HighlighterBackground;
+        ButtonIcon icon = ButtonIcon.Cross;
+        Material? material;
+        StaticBoundsControl? boundsControl;
 
-        [SerializeField] BoxCollider colliderForFrame = null;
+        RoundedPlaneResource Background =>
+            background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneResource>(Transform);
 
-        Material material;
+        TMP_Text Text => text.AssertNotNull(nameof(text));
+        MeshRenderer IconMeshRenderer => iconMeshRenderer.AssertNotNull(nameof(iconMeshRenderer));
+        Material Material => material != null ? material : material = Instantiate(IconMeshRenderer.material);
+        MeshMarkerResource Cylinder => cylinder.AssertNotNull(nameof(cylinder));
+        BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
 
-        [NotNull]
-        Material Material => material != null ? material : (material = Instantiate(iconMeshRenderer.material));
+        public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
+        public event Action? Clicked;
 
-        [CanBeNull] BoundaryFrame frame;
-
-        [NotNull]
-        BoundaryFrame Frame
-        {
-            get
-            {
-                if (frame != null)
-                {
-                    return frame;
-                }
-
-                frame = ResourcePool.RentDisplay<BoundaryFrame>(Transform);
-                frame.Color = Color.white.WithAlpha(0.5f);
-                return frame;
-            }
-        }
-
-        public event Action Clicked;
 
         public enum ButtonIcon
         {
+            None,
             Cross,
             Ok,
             Forward,
@@ -65,24 +59,26 @@ namespace Iviz.App.ARDialogs
                 backgroundColor = value;
                 if (background != null)
                 {
-                    // TODO
+                    background.Color = value;
                 }
             }
         }
 
+        Transform IHasBounds.BoundsTransform => Transform;
+        string? IHasBounds.Caption => null;
+        bool IHasBounds.AcceptsHighlighter => false;
+        public event Action? BoundsChanged;
+
         public string Caption
         {
-            get => text.text;
-            set => text.text = value;
+            set => Text.text = value;
         }
 
-        public bool Active
+        public bool Visible
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
-
-        ButtonIcon icon = ButtonIcon.Cross;
 
         public ButtonIcon Icon
         {
@@ -93,7 +89,7 @@ namespace Iviz.App.ARDialogs
                 Material.mainTexture = value == ButtonIcon.Backward
                     ? icons[(int)ButtonIcon.Forward]
                     : icons[(int)value];
-                (float x, _, float z) = iconMeshRenderer.transform.localRotation.eulerAngles;
+                (float x, _, float z) = IconMeshRenderer.transform.localRotation.eulerAngles;
 
                 Quaternion rotation;
                 switch (value)
@@ -109,59 +105,53 @@ namespace Iviz.App.ARDialogs
                         break;
                 }
 
-                iconMeshRenderer.transform.localRotation = rotation;
+                IconMeshRenderer.transform.localRotation = rotation;
             }
         }
 
         void Awake()
         {
             Icon = Icon;
-            iconMeshRenderer.material = Material;
+            IconMeshRenderer.material = Material;
+            boundsControl = new StaticBoundsControl(this);
+            Background.Size = new Vector2(1, 1);
+            Background.Radius = 0.3f;
+            Background.Color = BackgroundColor;
         }
 
-        void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
+        void OnClick()
         {
+            GuiInputModule.PlayClickAudio(Transform.position);
             Clicked?.Invoke();
-
-            var assetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder").GetComponent<AppAssetHolder>();
-            AudioSource.PlayClipAtPoint(assetHolder.Click, Transform.position);
         }
 
-        public void ClearSubscribers()
+        public void Stop()
         {
             Clicked = null;
-        }
-
-        void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
-        {
-            Frame.Bounds = new Bounds(colliderForFrame.center,
-                colliderForFrame.size.Mult(colliderForFrame.transform.localScale));
-            Frame.Visible = true;
-        }
-
-        void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
-        {
-            Frame.Visible = false;
-        }
-
-        void OnDisable()
-        {
-            if (frame != null)
-            {
-                frame.Visible = false;
-            }
-        }
-
-        public void OnDialogDisabled()
-        {
+            boundsControl?.Dispose();
         }
 
         public void SplitForRecycle()
         {
-            if (frame != null)
+        }
+
+        Bounds? IHasBounds.Bounds => Bounds;
+        Bounds? IDisplay.Bounds => Bounds;
+
+        Bounds Bounds
+        {
+            get => new(BoxCollider.center, BoxCollider.size);
+            set
             {
-                frame.ReturnToPool();
+                BoxCollider.center = value.center;
+                BoxCollider.size = value.size;
             }
+        }
+
+        public int Layer { get; set; }
+
+        void IDisplay.Suspend()
+        {
         }
     }
 }

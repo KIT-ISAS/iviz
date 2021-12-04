@@ -19,7 +19,7 @@ namespace Iviz.Resources
 
         public FontInfo()
         {
-            font = UnityEngine.Resources.Load<AssetHolder>("Asset Holder").BaseFont.AssertNotNull(nameof(font));
+            font = Resource.Extras.AssetHolder.BaseFont.AssertNotNull(nameof(font));
             dotWidth = CharWidth('.') * 3; // ...
             spaceWidth = CharWidth(' ');
         }

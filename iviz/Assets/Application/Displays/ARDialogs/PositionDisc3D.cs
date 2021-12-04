@@ -127,7 +127,6 @@ namespace Iviz.App.ARDialogs
         public override void Suspend()
         {
             base.Suspend();
-            button.OnDialogDisabled();
             button.Transform.parent = Transform;
             disc.Transform.localPosition = Vector3.zero;
             dragBack = false;

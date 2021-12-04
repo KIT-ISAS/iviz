@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Resources;
 using UnityEngine;
@@ -8,7 +9,7 @@ namespace Iviz.Displays
 {
     public sealed class AngleAxisResource : DisplayWrapperResource, ISupportsTint, IRecyclable
     {
-        readonly NativeList<LineWithColor> lines = new();
+        readonly List<LineWithColor> lines = new();
 
         Color color;
         LineResource? resource;
@@ -24,19 +25,19 @@ namespace Iviz.Displays
             set
             {
                 color = value;
-                for (int i = 0; i < lines.Length; i++)
+                
+                float colorAsFloat = PointWithColor.RecastToFloat(color);
+                
+                var linesAsSpan = lines.AsSpan();
+                for (int i = 0; i < linesAsSpan.Length; i++)
                 {
-                    LineWithColor prevLine = lines[i];
-                    lines[i] = new LineWithColor(prevLine.A, prevLine.B, color);
+                    ref var line = ref linesAsSpan[i];
+                    line.f.c0.w = colorAsFloat; 
+                    line.f.c1.w = colorAsFloat; 
                 }
 
-                Resource.Set(lines, color.a < 1);
+                Resource.Set(linesAsSpan, color.a < 1);
             }
-        }
-
-        void OnDestroy()
-        {
-            lines.Dispose();
         }
 
         void Awake()
@@ -79,8 +80,8 @@ namespace Iviz.Displays
 
         void Set(float angle, Vector3 axis, float scale = 0.3f)
         {
-            if (Mathf.Approximately(angle, 0) ||
-                Mathf.Approximately(axis.MagnitudeSq(), 0))
+            if (Mathf.Approximately(angle, 0) 
+                || Mathf.Approximately(axis.MagnitudeSq(), 0))
             {
                 Resource.Visible = false;
                 return;
@@ -104,14 +105,14 @@ namespace Iviz.Displays
                 notX = Vector3.right;
             }
 
-            Vector3 diry = notX.Cross(axis).Normalized();
-            Vector3 dirx = axis.Cross(diry).Normalized();
-            dirx *= scale;
-            diry *= scale;
+            Vector3 dirY = notX.Cross(axis).Normalized();
+            Vector3 dirX = axis.Cross(dirY).Normalized();
+            dirX *= scale;
+            dirY *= scale;
 
             int n = (int) (Mathf.Abs(angle) / (2 * Mathf.PI) * 32 + 1);
 
-            Vector3 v0 = dirx;
+            Vector3 v0 = dirX;
             Vector3 v1 = Vector3.zero;
 
             lines.Add(new LineWithColor(Vector3.zero, 1.2f * v0, Color));
@@ -123,14 +124,14 @@ namespace Iviz.Displays
                 float a = i / (float) n * angle;
                 float ax = Mathf.Cos(a);
                 float ay = Mathf.Sin(a);
-                v1 = ax * dirx + ay * diry;
+                v1 = ax * dirX + ay * dirY;
                 v1 *= 1 + a * scaleFromAngle;
                 lines.Add(new LineWithColor(v0, v1, Color));
                 v0 = v1;
             }
 
             lines.Add(new LineWithColor(Vector3.zero, 1.2f * v1, Color));
-            Resource.Set(lines, Color.a < 1);
+            Resource.Set(lines.AsReadOnlySpan(), Color.a < 1);
         }
         
         public void SplitForRecycle()

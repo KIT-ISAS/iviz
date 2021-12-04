@@ -114,10 +114,10 @@ namespace Iviz.Displays
                 return;
             }
 
-            Texture.Set(width, height, encoding, data.AsSegment(), generateMipmaps);
+            Texture.Set(width, height, encoding, data, generateMipmaps);
         }
 
-        public void Suspend()
+        void IDisplay.Suspend()
         {
             Visible = true;
             Texture = null;

@@ -64,7 +64,7 @@ namespace Iviz.Controllers
 
         Bounds? IHasBounds.Bounds => resource?.Bounds;
         Transform? IHasBounds.BoundsTransform => resource?.GetTransform();
-        bool IHasBounds.HasPermanentHighlighter => ShowDescription;
+        bool IHasBounds.AcceptsHighlighter => !ShowDescription;
         string IHasBounds.Caption => node.gameObject.name;
 
         public event Action? BoundsChanged;

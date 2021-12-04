@@ -67,7 +67,7 @@ namespace Iviz.Displays
 
             control = translationConstraint switch
             {
-                0 => new StaticBoundsControl(this, targetTransform),
+                0 => new StaticBoundsControl(this),
                 TranslationConstraintType.X =>
                     new LineBoundsControl(this, targetTransform, ZtoX),
                 TranslationConstraintType.Y =>
@@ -178,7 +178,7 @@ namespace Iviz.Displays
             set { }
         }
 
-        public void Suspend()
+        void IDisplay.Suspend()
         {
             control?.Dispose();
             foreach (var wrapper in wrappers)
@@ -198,7 +198,7 @@ namespace Iviz.Displays
         Bounds? IHasBounds.Bounds => bounds;
         Transform IHasBounds.BoundsTransform => childTransform.AssertNotNull(nameof(childTransform));
         string? IHasBounds.Caption => null;
-        bool IHasBounds.HasPermanentHighlighter => true;
+        bool IHasBounds.AcceptsHighlighter => true;
         Bounds? IDisplay.Bounds => bounds;
     }
 
