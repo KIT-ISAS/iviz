@@ -1,7 +1,6 @@
 using System.Runtime.Serialization;
 using Iviz.Msgs;
 using Newtonsoft.Json;
-using Buffer = Iviz.Msgs.Buffer;
 using ISerializable = Iviz.Msgs.ISerializable;
 
 namespace Iviz.MsgsWrapper

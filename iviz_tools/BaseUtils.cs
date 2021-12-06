@@ -74,6 +74,17 @@ namespace Iviz.Tools
 
         public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t) => new(t);
 
+        public static int Sum<T>(this ReadOnlySpan<T> ts, Func<T, int> selector)
+        {
+            int sum = 0;
+            foreach (T t in ts)
+            {
+                sum += selector(t);
+            }
+
+            return sum;
+        }
+
         public static int Sum<T>(this T[] ts, Func<T, int> selector)
         {
             int sum = 0;
@@ -137,14 +148,10 @@ namespace Iviz.Tools
             return bytes.Resize(size);
         }
 
-#if NETSTANDARD2_0 || NETSTANDARD2_1
+#if NETSTANDARD2_1
         static FieldInfo? chunkField;
 
-#if NETSTANDARD2_0
-        internal static char[] GetMainChunk(this StringBuilder str)
-#else
         internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
-#endif
         {
             if (chunkField == null)
             {

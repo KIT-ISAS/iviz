@@ -103,22 +103,5 @@ namespace Iviz.Msgs
         {
             return $"{{\"secs\":{Secs.ToString()},\"nsecs\":{Nsecs.ToString()}}}";
         }
-
-        /*
-        static long? cachedTicksDiff;
-        static DateTime ToLocalTime(DateTime utc)
-        {
-            if (cachedTicksDiff == null)
-            {
-                DateTime utcNow = DateTime.UtcNow;
-                DateTime now = utcNow.ToLocalTime();
-                cachedTicksDiff = now.Ticks - utcNow.Ticks;
-            }
-
-            return utc.Kind == DateTimeKind.Local
-                ? utc
-                : new DateTime(utc.Ticks + cachedTicksDiff.Value, DateTimeKind.Local);
-        }
-        */
     }
 }

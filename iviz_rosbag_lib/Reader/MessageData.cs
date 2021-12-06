@@ -6,7 +6,6 @@ using System.Runtime.Serialization;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Tools;
 using Newtonsoft.Json;
-using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.Rosbag.Reader
 {

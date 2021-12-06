@@ -13,17 +13,12 @@ namespace Iviz.Tools
 
         public readonly struct BuilderRent : IDisposable
         {
-#if NETSTANDARD2_0
-            static readonly ConcurrentBag<(StringBuilder builder, char[] chunk)> Pool = new();
-            public readonly char[] chunk;
-#else
             static readonly ConcurrentBag<(StringBuilder builder, ReadOnlyMemory<char> chunk)> Pool = new();
             readonly ReadOnlyMemory<char> chunk;
 
             public ReadOnlyMemory<char> Chunk => chunk.Length >= builder.Length
                 ? chunk[..builder.Length]
                 : chunk;
-#endif
 
             readonly StringBuilder builder;
 

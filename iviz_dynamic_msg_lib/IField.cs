@@ -1,6 +1,5 @@
 using Iviz.Msgs;
 using Newtonsoft.Json;
-using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.MsgsGen.Dynamic
 {

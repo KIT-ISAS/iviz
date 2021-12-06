@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Iviz.Msgs;
-using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.MsgsWrapper
 {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Iviz.Msgs;
-using Buffer = Iviz.Msgs.Buffer;
 using ISerializable = Iviz.Msgs.ISerializable;
 
 namespace Iviz.MsgsWrapper

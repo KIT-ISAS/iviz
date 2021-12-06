@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
 using Iviz.Msgs;
-using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.MsgsGen.Dynamic
 {

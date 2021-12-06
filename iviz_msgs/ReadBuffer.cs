@@ -190,6 +190,7 @@ namespace Iviz.Msgs
             }
 
             return count == 0 ? Array.Empty<T>() : new T[count];
+            // per entry deserialization happens outside
         }
         
         /// <summary>
@@ -203,7 +204,6 @@ namespace Iviz.Msgs
         /// <param name="buffer">
         /// The source byte array. 
         /// </param>
-        /// <typeparam name="T">Message type.</typeparam>
         /// <returns>The deserialized message.</returns>
         public static ISerializable Deserialize(ISerializable generator, ReadOnlySpan<byte> buffer)
         {

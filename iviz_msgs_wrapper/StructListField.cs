@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using Iviz.Msgs;
-using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.MsgsWrapper
 {

@@ -7,7 +7,6 @@ using Iviz.MsgsGen;
 using Iviz.MsgsGen.Dynamic;
 using Iviz.Tools;
 using NUnit.Framework;
-using Buffer = Iviz.Msgs.Buffer;
 
 namespace Iviz.UtilsTests
 {

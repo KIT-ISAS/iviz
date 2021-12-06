@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -189,11 +188,7 @@ namespace Iviz.Tools
 
         public static byte[] WriteHeaderToArray(ReadOnlySpan<string> contents)
         {
-            int totalLength = 4 * contents.Length;
-            foreach (string entry in contents)
-            {
-                totalLength += Defaults.UTF8.GetByteCount(entry);
-            }
+            int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
 
             byte[] array = new byte[totalLength];
             using var writer = new BinaryWriter(new MemoryStream(array));

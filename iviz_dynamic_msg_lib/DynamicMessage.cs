@@ -6,7 +6,6 @@ using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Newtonsoft.Json;
-using Buffer = Iviz.Msgs.Buffer;
 using ISerializable = Iviz.Msgs.ISerializable;
 
 
