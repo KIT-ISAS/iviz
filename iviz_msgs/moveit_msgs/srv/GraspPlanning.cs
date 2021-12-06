@@ -89,7 +89,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GraspPlanningRequest(ref Buffer b)
+        internal GraspPlanningRequest(ref ReadBuffer b)
         {
             GroupName = b.DeserializeString();
             Target = new CollisionObject(ref b);
@@ -106,11 +106,11 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GraspPlanningRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GraspPlanningRequest(ref b);
         
-        GraspPlanningRequest IDeserializable<GraspPlanningRequest>.RosDeserialize(ref Buffer b) => new GraspPlanningRequest(ref b);
+        public GraspPlanningRequest RosDeserialize(ref ReadBuffer b) => new GraspPlanningRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(GroupName);
             Target.RosSerialize(ref b);
@@ -182,7 +182,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GraspPlanningResponse(ref Buffer b)
+        internal GraspPlanningResponse(ref ReadBuffer b)
         {
             Grasps = b.DeserializeArray<Grasp>();
             for (int i = 0; i < Grasps.Length; i++)
@@ -192,11 +192,11 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GraspPlanningResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GraspPlanningResponse(ref b);
         
-        GraspPlanningResponse IDeserializable<GraspPlanningResponse>.RosDeserialize(ref Buffer b) => new GraspPlanningResponse(ref b);
+        public GraspPlanningResponse RosDeserialize(ref ReadBuffer b) => new GraspPlanningResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Grasps);
             ErrorCode.RosSerialize(ref b);

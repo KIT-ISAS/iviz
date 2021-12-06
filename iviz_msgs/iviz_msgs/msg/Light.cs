@@ -41,7 +41,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Light(ref Buffer b)
+        internal Light(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Type = b.Deserialize<byte>();
@@ -54,19 +54,19 @@ namespace Iviz.Msgs.IvizMsgs
             OuterAngle = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new Light(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Light(ref b);
         
-        Light IDeserializable<Light>.RosDeserialize(ref Buffer b) => new Light(ref b);
+        public Light RosDeserialize(ref ReadBuffer b) => new Light(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
             b.Serialize(Type);
             b.Serialize(CastShadows);
-            b.Serialize(ref Diffuse);
+            b.Serialize(in Diffuse);
             b.Serialize(Range);
-            b.Serialize(ref Position);
-            b.Serialize(ref Direction);
+            b.Serialize(in Position);
+            b.Serialize(in Direction);
             b.Serialize(InnerAngle);
             b.Serialize(OuterAngle);
         }
@@ -88,7 +88,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACrWQzwrCMAzG73mKvoE6LyLsICoyUDfc8Dqq62agNqPt/LOnt2JXX0Bz+b780oQm0KGy" +
+                "H4sIAAAAAAAAE7WQzwrCMAzG73mKvoE6LyLsICoyUDfc8Dqq62agNqPt/LOnt2JXX0Bz+b780oQm0KGy" +
                 "M5alyb5gMRvDJ18lh/WySNL9YuvoxNM8S9+PIgBjNaqGKX4VvmafrYATkWRnbmxpLryiu4ElSdLTiFVY" +
                 "150RUEvi1uWaq0bAUZytK9esJYMWSX1JhdrZNxpaUCmhS9cnv2Oos4G5iH8csMs3c4Y37MuraczIb+NX" +
                 "1l4bryev/P8fGc4UDvEI7hlcD/AC0NcUX98BAAA=";

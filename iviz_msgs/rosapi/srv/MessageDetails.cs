@@ -68,16 +68,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal MessageDetailsRequest(ref Buffer b)
+        internal MessageDetailsRequest(ref ReadBuffer b)
         {
             Type = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new MessageDetailsRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MessageDetailsRequest(ref b);
         
-        MessageDetailsRequest IDeserializable<MessageDetailsRequest>.RosDeserialize(ref Buffer b) => new MessageDetailsRequest(ref b);
+        public MessageDetailsRequest RosDeserialize(ref ReadBuffer b) => new MessageDetailsRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Type);
         }
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal MessageDetailsResponse(ref Buffer b)
+        internal MessageDetailsResponse(ref ReadBuffer b)
         {
             Typedefs = b.DeserializeArray<TypeDef>();
             for (int i = 0; i < Typedefs.Length; i++)
@@ -119,11 +119,11 @@ namespace Iviz.Msgs.Rosapi
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new MessageDetailsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MessageDetailsResponse(ref b);
         
-        MessageDetailsResponse IDeserializable<MessageDetailsResponse>.RosDeserialize(ref Buffer b) => new MessageDetailsResponse(ref b);
+        public MessageDetailsResponse RosDeserialize(ref ReadBuffer b) => new MessageDetailsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Typedefs);
         }

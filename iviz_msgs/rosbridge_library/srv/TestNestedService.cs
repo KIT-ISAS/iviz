@@ -68,18 +68,18 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestNestedServiceRequest(ref Buffer b)
+        internal TestNestedServiceRequest(ref ReadBuffer b)
         {
             b.Deserialize(out Pose);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TestNestedServiceRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestNestedServiceRequest(ref b);
         
-        TestNestedServiceRequest IDeserializable<TestNestedServiceRequest>.RosDeserialize(ref Buffer b) => new TestNestedServiceRequest(ref b);
+        public TestNestedServiceRequest RosDeserialize(ref ReadBuffer b) => new TestNestedServiceRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref Pose);
+            b.Serialize(in Pose);
         }
         
         public void RosValidate()
@@ -113,16 +113,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestNestedServiceResponse(ref Buffer b)
+        internal TestNestedServiceResponse(ref ReadBuffer b)
         {
             Data = new StdMsgs.Float64(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TestNestedServiceResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestNestedServiceResponse(ref b);
         
-        TestNestedServiceResponse IDeserializable<TestNestedServiceResponse>.RosDeserialize(ref Buffer b) => new TestNestedServiceResponse(ref b);
+        public TestNestedServiceResponse RosDeserialize(ref ReadBuffer b) => new TestNestedServiceResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Data.RosSerialize(ref b);
         }

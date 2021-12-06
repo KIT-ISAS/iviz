@@ -60,17 +60,17 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal GetTimeRequest(ref Buffer b)
+        internal GetTimeRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        GetTimeRequest IDeserializable<GetTimeRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public GetTimeRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly GetTimeRequest Singleton = new GetTimeRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -103,16 +103,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal GetTimeResponse(ref Buffer b)
+        internal GetTimeResponse(ref ReadBuffer b)
         {
             Time = b.Deserialize<time>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetTimeResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetTimeResponse(ref b);
         
-        GetTimeResponse IDeserializable<GetTimeResponse>.RosDeserialize(ref Buffer b) => new GetTimeResponse(ref b);
+        public GetTimeResponse RosDeserialize(ref ReadBuffer b) => new GetTimeResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Time);
         }

@@ -69,16 +69,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetFileRequest(ref Buffer b)
+        internal GetFileRequest(ref ReadBuffer b)
         {
             Uri = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetFileRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetFileRequest(ref b);
         
-        GetFileRequest IDeserializable<GetFileRequest>.RosDeserialize(ref Buffer b) => new GetFileRequest(ref b);
+        public GetFileRequest RosDeserialize(ref ReadBuffer b) => new GetFileRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Uri);
         }
@@ -116,18 +116,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetFileResponse(ref Buffer b)
+        internal GetFileResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Bytes = b.DeserializeStructArray<byte>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetFileResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetFileResponse(ref b);
         
-        GetFileResponse IDeserializable<GetFileResponse>.RosDeserialize(ref Buffer b) => new GetFileResponse(ref b);
+        public GetFileResponse RosDeserialize(ref ReadBuffer b) => new GetFileResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.SerializeStructArray(Bytes);

@@ -18,17 +18,17 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal SensorLevels(ref Buffer b)
+        internal SensorLevels(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        SensorLevels IDeserializable<SensorLevels>.RosDeserialize(ref Buffer b) => Singleton;
+        public SensorLevels RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly SensorLevels Singleton = new SensorLevels();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACo2QsWrDQAyGdz/FD1lL29A5U3BDINjBTuYg+37sA/tsTteUvH2UUtqhgXSQkAT6PqEF" +
+                "H4sIAAAAAAAAE42QsWrDQAyGdz/FD1lL29A5U3BDINjBTuYg+37sA/tsTteUvH2UUtqhgXSQkAT6PqEF" +
                 "Dr1XjFSVjrDScY5sJdE9YR4oSnxYuOjPjKfG+peaQae445mDwgdNFPecZc0lEVW+Lov37eZY5af1rqxz" +
                 "rPAGLLCXKCMToyL1khBIB4F+sZAmNISmaZ5t3E6jqROHCz57BrS9hI7ur6E+lHsTLP8luNEtRcroQ/eA" +
                 "XB2LYltsDP56h91KuN37vW0oP/DXZV/80WTZFQaWm/hjAQAA";

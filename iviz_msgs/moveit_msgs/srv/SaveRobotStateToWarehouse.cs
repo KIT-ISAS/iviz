@@ -74,18 +74,18 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal SaveRobotStateToWarehouseRequest(ref Buffer b)
+        internal SaveRobotStateToWarehouseRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Robot = b.DeserializeString();
             State = new MoveitMsgs.RobotState(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SaveRobotStateToWarehouseRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SaveRobotStateToWarehouseRequest(ref b);
         
-        SaveRobotStateToWarehouseRequest IDeserializable<SaveRobotStateToWarehouseRequest>.RosDeserialize(ref Buffer b) => new SaveRobotStateToWarehouseRequest(ref b);
+        public SaveRobotStateToWarehouseRequest RosDeserialize(ref ReadBuffer b) => new SaveRobotStateToWarehouseRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
             b.Serialize(Robot);
@@ -131,16 +131,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal SaveRobotStateToWarehouseResponse(ref Buffer b)
+        internal SaveRobotStateToWarehouseResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SaveRobotStateToWarehouseResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SaveRobotStateToWarehouseResponse(ref b);
         
-        SaveRobotStateToWarehouseResponse IDeserializable<SaveRobotStateToWarehouseResponse>.RosDeserialize(ref Buffer b) => new SaveRobotStateToWarehouseResponse(ref b);
+        public SaveRobotStateToWarehouseResponse RosDeserialize(ref ReadBuffer b) => new SaveRobotStateToWarehouseResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
         }

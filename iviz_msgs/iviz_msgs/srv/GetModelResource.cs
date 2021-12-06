@@ -69,16 +69,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetModelResourceRequest(ref Buffer b)
+        internal GetModelResourceRequest(ref ReadBuffer b)
         {
             Uri = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetModelResourceRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetModelResourceRequest(ref b);
         
-        GetModelResourceRequest IDeserializable<GetModelResourceRequest>.RosDeserialize(ref Buffer b) => new GetModelResourceRequest(ref b);
+        public GetModelResourceRequest RosDeserialize(ref ReadBuffer b) => new GetModelResourceRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Uri);
         }
@@ -116,18 +116,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetModelResourceResponse(ref Buffer b)
+        internal GetModelResourceResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Model = new Model(ref b);
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetModelResourceResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetModelResourceResponse(ref b);
         
-        GetModelResourceResponse IDeserializable<GetModelResourceResponse>.RosDeserialize(ref Buffer b) => new GetModelResourceResponse(ref b);
+        public GetModelResourceResponse RosDeserialize(ref ReadBuffer b) => new GetModelResourceResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             Model.RosSerialize(ref b);

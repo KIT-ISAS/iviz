@@ -26,18 +26,18 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// Constructor with buffer.
-        internal MultiArrayDimension(ref Buffer b)
+        internal MultiArrayDimension(ref ReadBuffer b)
         {
             Label = b.DeserializeString();
             Size = b.Deserialize<uint>();
             Stride = b.Deserialize<uint>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new MultiArrayDimension(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiArrayDimension(ref b);
         
-        MultiArrayDimension IDeserializable<MultiArrayDimension>.RosDeserialize(ref Buffer b) => new MultiArrayDimension(ref b);
+        public MultiArrayDimension RosDeserialize(ref ReadBuffer b) => new MultiArrayDimension(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Label);
             b.Serialize(Size);
@@ -61,8 +61,8 @@ namespace Iviz.Msgs.StdMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACm2NsQqAMAwFd7/igYuu+kVKYwnUVEwq6NcbVFx0u+GOU1tZItIwUgJQP5QnRN5IEHgm" +
-                "Uc5SFRbrOygf5KKbF31FNCywfSEUYdP2Df0UPPXwpp/HCQAUZZ2OAAAA";
+                "H4sIAAAAAAAAE22NMQqAMBAEe1+xYKOtvkjJGRbiRbxE0NcrUWy0m2KGsbRSPcIwSgBQPxQneG6icJxF" +
+                "jVGrTE19B+MhKGahr4iGirQvgqxM1r7hdXJSwpt+HicAFGWdjgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

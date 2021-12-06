@@ -24,17 +24,17 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal DoubleParameter(ref Buffer b)
+        internal DoubleParameter(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Value = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new DoubleParameter(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new DoubleParameter(ref b);
         
-        DoubleParameter IDeserializable<DoubleParameter>.RosDeserialize(ref Buffer b) => new DoubleParameter(ref b);
+        public DoubleParameter RosDeserialize(ref ReadBuffer b) => new DoubleParameter(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
             b.Serialize(Value);
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACisuKcrMS1fIS8xN5UrLyU8sMTNRKEvMKU3l4gIAQejvOBsAAAA=";
+                "H4sIAAAAAAAAEysuKcrMS1fIS8xN5UrLyU8sMTNRKEvMKU3l4gIAQejvOBsAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

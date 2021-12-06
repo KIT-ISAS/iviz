@@ -71,17 +71,17 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal SetParamRequest(ref Buffer b)
+        internal SetParamRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Value = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SetParamRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetParamRequest(ref b);
         
-        SetParamRequest IDeserializable<SetParamRequest>.RosDeserialize(ref Buffer b) => new SetParamRequest(ref b);
+        public SetParamRequest RosDeserialize(ref ReadBuffer b) => new SetParamRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
             b.Serialize(Value);
@@ -108,17 +108,17 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal SetParamResponse(ref Buffer b)
+        internal SetParamResponse(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        SetParamResponse IDeserializable<SetParamResponse>.RosDeserialize(ref Buffer b) => Singleton;
+        public SetParamResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly SetParamResponse Singleton = new SetParamResponse();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         

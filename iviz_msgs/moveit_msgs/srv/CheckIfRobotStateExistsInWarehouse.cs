@@ -71,17 +71,17 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal CheckIfRobotStateExistsInWarehouseRequest(ref Buffer b)
+        internal CheckIfRobotStateExistsInWarehouseRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Robot = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new CheckIfRobotStateExistsInWarehouseRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CheckIfRobotStateExistsInWarehouseRequest(ref b);
         
-        CheckIfRobotStateExistsInWarehouseRequest IDeserializable<CheckIfRobotStateExistsInWarehouseRequest>.RosDeserialize(ref Buffer b) => new CheckIfRobotStateExistsInWarehouseRequest(ref b);
+        public CheckIfRobotStateExistsInWarehouseRequest RosDeserialize(ref ReadBuffer b) => new CheckIfRobotStateExistsInWarehouseRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
             b.Serialize(Robot);
@@ -115,16 +115,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal CheckIfRobotStateExistsInWarehouseResponse(ref Buffer b)
+        internal CheckIfRobotStateExistsInWarehouseResponse(ref ReadBuffer b)
         {
             Exists = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new CheckIfRobotStateExistsInWarehouseResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CheckIfRobotStateExistsInWarehouseResponse(ref b);
         
-        CheckIfRobotStateExistsInWarehouseResponse IDeserializable<CheckIfRobotStateExistsInWarehouseResponse>.RosDeserialize(ref Buffer b) => new CheckIfRobotStateExistsInWarehouseResponse(ref b);
+        public CheckIfRobotStateExistsInWarehouseResponse RosDeserialize(ref ReadBuffer b) => new CheckIfRobotStateExistsInWarehouseResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Exists);
         }

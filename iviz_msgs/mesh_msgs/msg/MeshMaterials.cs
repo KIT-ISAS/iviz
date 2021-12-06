@@ -32,7 +32,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal MeshMaterials(ref Buffer b)
+        internal MeshMaterials(ref ReadBuffer b)
         {
             Clusters = b.DeserializeArray<MeshMsgs.MeshFaceCluster>();
             for (int i = 0; i < Clusters.Length; i++)
@@ -52,11 +52,11 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new MeshMaterials(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterials(ref b);
         
-        MeshMaterials IDeserializable<MeshMaterials>.RosDeserialize(ref Buffer b) => new MeshMaterials(ref b);
+        public MeshMaterials RosDeserialize(ref ReadBuffer b) => new MeshMaterials(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Clusters);
             b.SerializeArray(Materials);
@@ -109,11 +109,11 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr2TQWrDMBBF93MKgQ8QaHeFLBJDs/KmCdmEIsbyxBHIVtBIwb19JMdRqEt3bQSCr9Ef" +
+                "H4sIAAAAAAAAE72TQWrDMBBF93MKgQ8QaHeFLBJDs/KmCdmEIsbyxBHIVtBIwb19JMdRqEt3bQSCr9Ef" +
                 "ePORClERn8TKe6fr4CkdGVuCLpZlxy0vkuEdFZUmsCd3+BTqpnhmqjAWNZro6CbJEHTvX18eTfJx9b17" +
                 "T87TsKOhtNY1HDsuY0WmrcYawPKPF1TbzZv4dVYo7iKPcYy3UveNVsRQ2LPXtkcDHPPrW2GwJvMczHva" +
-                "E5qIMfngRjYaIk9zs5bWWPexWa+ESgpqa404IcvJ/1+w/AMAjsZiInVZtVnVWeFz4ps9NyjmH2H3daYM" +
-                "FbK6AFwB9HBYcjQDAAA=";
+                "E5qIMfngRjYaIk9zs5bWWPexWa+ESgpqa404IcvJ/1+wPwHgaCwmUpdVm1WdFT4nvtlzg2L+EXZfZ8pQ" +
+                "IasLwBX0cFhyNAMAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

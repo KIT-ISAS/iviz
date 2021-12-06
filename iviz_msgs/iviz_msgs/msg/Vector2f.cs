@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector2f : IMessage, System.IEquatable<Vector2f>, IDeserializable<Vector2f>
+    public struct Vector2f : IMessage, IDeserializable<Vector2f>
     {
         [DataMember (Name = "x")] public float X;
         [DataMember (Name = "y")] public float Y;
@@ -22,28 +22,24 @@ namespace Iviz.Msgs.IvizMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Vector2f(ref Buffer b)
+        internal Vector2f(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b) => new Vector2f(ref b);
+        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Vector2f(ref b);
         
-        readonly Vector2f IDeserializable<Vector2f>.RosDeserialize(ref Buffer b) => new Vector2f(ref b);
+        public readonly Vector2f RosDeserialize(ref ReadBuffer b) => new Vector2f(ref b);
         
-        public override readonly int GetHashCode() => (X, Y).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Vector2f s && Equals(s);
-        
-        public readonly bool Equals(Vector2f o) => (X, Y) == (o.X, o.Y);
+        public readonly bool Equals(in Vector2f o) => (X, Y) == (o.X, o.Y);
         
         public static bool operator==(in Vector2f a, in Vector2f b) => a.Equals(b);
         
         public static bool operator!=(in Vector2f a, in Vector2f b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref this);
+            b.Serialize(in this);
         }
         
         public readonly void RosValidate()
@@ -65,7 +61,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACkvLyU8sMTZSqOBKg7IqubgAEeFgKBUAAAA=";
+                "H4sIAAAAAAAAE0vLyU8sMTZSqOBKg7IqubgAEeFgKBUAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

@@ -60,17 +60,17 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// Constructor with buffer.
-        internal TriggerRequest(ref Buffer b)
+        internal TriggerRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        TriggerRequest IDeserializable<TriggerRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public TriggerRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly TriggerRequest Singleton = new TriggerRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -106,17 +106,17 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// Constructor with buffer.
-        internal TriggerResponse(ref Buffer b)
+        internal TriggerResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TriggerResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TriggerResponse(ref b);
         
-        TriggerResponse IDeserializable<TriggerResponse>.RosDeserialize(ref Buffer b) => new TriggerResponse(ref b);
+        public TriggerResponse RosDeserialize(ref ReadBuffer b) => new TriggerResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);

@@ -21,16 +21,16 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// Constructor with buffer.
-        internal TestGoal(ref Buffer b)
+        internal TestGoal(ref ReadBuffer b)
         {
             Goal = b.Deserialize<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TestGoal(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestGoal(ref b);
         
-        TestGoal IDeserializable<TestGoal>.RosDeserialize(ref Buffer b) => new TestGoal(ref b);
+        public TestGoal RosDeserialize(ref ReadBuffer b) => new TestGoal(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Goal);
         }
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.Actionlib
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACsvMKzE2UkjPT8zhAgAyerI5CwAAAA==";
+                "H4sIAAAAAAAAE8vMKzE2UkjPT8zhAgAyerI5CwAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

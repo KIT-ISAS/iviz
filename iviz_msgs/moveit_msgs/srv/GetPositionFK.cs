@@ -78,18 +78,18 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPositionFKRequest(ref Buffer b)
+        internal GetPositionFKRequest(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             FkLinkNames = b.DeserializeStringArray();
             RobotState = new RobotState(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetPositionFKRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPositionFKRequest(ref b);
         
-        GetPositionFKRequest IDeserializable<GetPositionFKRequest>.RosDeserialize(ref Buffer b) => new GetPositionFKRequest(ref b);
+        public GetPositionFKRequest RosDeserialize(ref ReadBuffer b) => new GetPositionFKRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
             b.SerializeArray(FkLinkNames);
@@ -147,7 +147,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPositionFKResponse(ref Buffer b)
+        internal GetPositionFKResponse(ref ReadBuffer b)
         {
             PoseStamped = b.DeserializeArray<GeometryMsgs.PoseStamped>();
             for (int i = 0; i < PoseStamped.Length; i++)
@@ -158,11 +158,11 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetPositionFKResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPositionFKResponse(ref b);
         
-        GetPositionFKResponse IDeserializable<GetPositionFKResponse>.RosDeserialize(ref Buffer b) => new GetPositionFKResponse(ref b);
+        public GetPositionFKResponse RosDeserialize(ref ReadBuffer b) => new GetPositionFKResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(PoseStamped);
             b.SerializeArray(FkLinkNames);

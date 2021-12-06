@@ -60,17 +60,17 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// Constructor with buffer.
-        internal SelfTestRequest(ref Buffer b)
+        internal SelfTestRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        SelfTestRequest IDeserializable<SelfTestRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public SelfTestRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly SelfTestRequest Singleton = new SelfTestRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// Constructor with buffer.
-        internal SelfTestResponse(ref Buffer b)
+        internal SelfTestResponse(ref ReadBuffer b)
         {
             Id = b.DeserializeString();
             Passed = b.Deserialize<byte>();
@@ -120,11 +120,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SelfTestResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SelfTestResponse(ref b);
         
-        SelfTestResponse IDeserializable<SelfTestResponse>.RosDeserialize(ref Buffer b) => new SelfTestResponse(ref b);
+        public SelfTestResponse RosDeserialize(ref ReadBuffer b) => new SelfTestResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Id);
             b.Serialize(Passed);

@@ -80,7 +80,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal SetPlannerParamsRequest(ref Buffer b)
+        internal SetPlannerParamsRequest(ref ReadBuffer b)
         {
             PlannerConfig = b.DeserializeString();
             Group = b.DeserializeString();
@@ -88,11 +88,11 @@ namespace Iviz.Msgs.MoveitMsgs
             Replace = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SetPlannerParamsRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetPlannerParamsRequest(ref b);
         
-        SetPlannerParamsRequest IDeserializable<SetPlannerParamsRequest>.RosDeserialize(ref Buffer b) => new SetPlannerParamsRequest(ref b);
+        public SetPlannerParamsRequest RosDeserialize(ref ReadBuffer b) => new SetPlannerParamsRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(PlannerConfig);
             b.Serialize(Group);
@@ -132,17 +132,17 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal SetPlannerParamsResponse(ref Buffer b)
+        internal SetPlannerParamsResponse(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        SetPlannerParamsResponse IDeserializable<SetPlannerParamsResponse>.RosDeserialize(ref Buffer b) => Singleton;
+        public SetPlannerParamsResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly SetPlannerParamsResponse Singleton = new SetPlannerParamsResponse();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         

@@ -74,17 +74,17 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ExecuteKnownTrajectoryRequest(ref Buffer b)
+        internal ExecuteKnownTrajectoryRequest(ref ReadBuffer b)
         {
             Trajectory = new RobotTrajectory(ref b);
             WaitForExecution = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ExecuteKnownTrajectoryRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ExecuteKnownTrajectoryRequest(ref b);
         
-        ExecuteKnownTrajectoryRequest IDeserializable<ExecuteKnownTrajectoryRequest>.RosDeserialize(ref Buffer b) => new ExecuteKnownTrajectoryRequest(ref b);
+        public ExecuteKnownTrajectoryRequest RosDeserialize(ref ReadBuffer b) => new ExecuteKnownTrajectoryRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Trajectory.RosSerialize(ref b);
             b.Serialize(WaitForExecution);
@@ -120,16 +120,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ExecuteKnownTrajectoryResponse(ref Buffer b)
+        internal ExecuteKnownTrajectoryResponse(ref ReadBuffer b)
         {
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ExecuteKnownTrajectoryResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ExecuteKnownTrajectoryResponse(ref b);
         
-        ExecuteKnownTrajectoryResponse IDeserializable<ExecuteKnownTrajectoryResponse>.RosDeserialize(ref Buffer b) => new ExecuteKnownTrajectoryResponse(ref b);
+        public ExecuteKnownTrajectoryResponse RosDeserialize(ref ReadBuffer b) => new ExecuteKnownTrajectoryResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             ErrorCode.RosSerialize(ref b);
         }

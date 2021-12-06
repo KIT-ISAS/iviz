@@ -72,17 +72,17 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal AddModuleFromTopicRequest(ref Buffer b)
+        internal AddModuleFromTopicRequest(ref ReadBuffer b)
         {
             Topic = b.DeserializeString();
             Id = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new AddModuleFromTopicRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddModuleFromTopicRequest(ref b);
         
-        AddModuleFromTopicRequest IDeserializable<AddModuleFromTopicRequest>.RosDeserialize(ref Buffer b) => new AddModuleFromTopicRequest(ref b);
+        public AddModuleFromTopicRequest RosDeserialize(ref ReadBuffer b) => new AddModuleFromTopicRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Topic);
             b.Serialize(Id);
@@ -122,18 +122,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal AddModuleFromTopicResponse(ref Buffer b)
+        internal AddModuleFromTopicResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
             Id = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new AddModuleFromTopicResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddModuleFromTopicResponse(ref b);
         
-        AddModuleFromTopicResponse IDeserializable<AddModuleFromTopicResponse>.RosDeserialize(ref Buffer b) => new AddModuleFromTopicResponse(ref b);
+        public AddModuleFromTopicResponse RosDeserialize(ref ReadBuffer b) => new AddModuleFromTopicResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);

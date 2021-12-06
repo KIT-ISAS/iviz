@@ -68,16 +68,16 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMaterialsRequest(ref Buffer b)
+        internal GetMaterialsRequest(ref ReadBuffer b)
         {
             Uuid = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetMaterialsRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetMaterialsRequest(ref b);
         
-        GetMaterialsRequest IDeserializable<GetMaterialsRequest>.RosDeserialize(ref Buffer b) => new GetMaterialsRequest(ref b);
+        public GetMaterialsRequest RosDeserialize(ref ReadBuffer b) => new GetMaterialsRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Uuid);
         }
@@ -110,16 +110,16 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMaterialsResponse(ref Buffer b)
+        internal GetMaterialsResponse(ref ReadBuffer b)
         {
             MeshMaterialsStamped = new MeshMsgs.MeshMaterialsStamped(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetMaterialsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetMaterialsResponse(ref b);
         
-        GetMaterialsResponse IDeserializable<GetMaterialsResponse>.RosDeserialize(ref Buffer b) => new GetMaterialsResponse(ref b);
+        public GetMaterialsResponse RosDeserialize(ref ReadBuffer b) => new GetMaterialsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             MeshMaterialsStamped.RosSerialize(ref b);
         }

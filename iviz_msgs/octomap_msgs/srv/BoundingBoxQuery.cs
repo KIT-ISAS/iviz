@@ -72,20 +72,20 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// Constructor with buffer.
-        internal BoundingBoxQueryRequest(ref Buffer b)
+        internal BoundingBoxQueryRequest(ref ReadBuffer b)
         {
             b.Deserialize(out Min);
             b.Deserialize(out Max);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new BoundingBoxQueryRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new BoundingBoxQueryRequest(ref b);
         
-        BoundingBoxQueryRequest IDeserializable<BoundingBoxQueryRequest>.RosDeserialize(ref Buffer b) => new BoundingBoxQueryRequest(ref b);
+        public BoundingBoxQueryRequest RosDeserialize(ref ReadBuffer b) => new BoundingBoxQueryRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref Min);
-            b.Serialize(ref Max);
+            b.Serialize(in Min);
+            b.Serialize(in Max);
         }
         
         public void RosValidate()
@@ -110,17 +110,17 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// Constructor with buffer.
-        internal BoundingBoxQueryResponse(ref Buffer b)
+        internal BoundingBoxQueryResponse(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        BoundingBoxQueryResponse IDeserializable<BoundingBoxQueryResponse>.RosDeserialize(ref Buffer b) => Singleton;
+        public BoundingBoxQueryResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly BoundingBoxQueryResponse Singleton = new BoundingBoxQueryResponse();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         

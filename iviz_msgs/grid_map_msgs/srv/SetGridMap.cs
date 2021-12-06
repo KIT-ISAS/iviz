@@ -69,16 +69,16 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// Constructor with buffer.
-        internal SetGridMapRequest(ref Buffer b)
+        internal SetGridMapRequest(ref ReadBuffer b)
         {
             Map = new GridMapMsgs.GridMap(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SetGridMapRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetGridMapRequest(ref b);
         
-        SetGridMapRequest IDeserializable<SetGridMapRequest>.RosDeserialize(ref Buffer b) => new SetGridMapRequest(ref b);
+        public SetGridMapRequest RosDeserialize(ref ReadBuffer b) => new SetGridMapRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Map.RosSerialize(ref b);
         }
@@ -104,17 +104,17 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// Constructor with buffer.
-        internal SetGridMapResponse(ref Buffer b)
+        internal SetGridMapResponse(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        SetGridMapResponse IDeserializable<SetGridMapResponse>.RosDeserialize(ref Buffer b) => Singleton;
+        public SetGridMapResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly SetGridMapResponse Singleton = new SetGridMapResponse();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         

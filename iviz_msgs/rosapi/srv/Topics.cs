@@ -60,17 +60,17 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal TopicsRequest(ref Buffer b)
+        internal TopicsRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        TopicsRequest IDeserializable<TopicsRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public TopicsRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly TopicsRequest Singleton = new TopicsRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -107,17 +107,17 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal TopicsResponse(ref Buffer b)
+        internal TopicsResponse(ref ReadBuffer b)
         {
             Topics_ = b.DeserializeStringArray();
             Types = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TopicsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TopicsResponse(ref b);
         
-        TopicsResponse IDeserializable<TopicsResponse>.RosDeserialize(ref Buffer b) => new TopicsResponse(ref b);
+        public TopicsResponse RosDeserialize(ref ReadBuffer b) => new TopicsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Topics_);
             b.SerializeArray(Types);

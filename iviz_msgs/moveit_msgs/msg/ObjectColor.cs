@@ -26,20 +26,20 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ObjectColor(ref Buffer b)
+        internal ObjectColor(ref ReadBuffer b)
         {
             Id = b.DeserializeString();
             b.Deserialize(out Color);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ObjectColor(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ObjectColor(ref b);
         
-        ObjectColor IDeserializable<ObjectColor>.RosDeserialize(ref Buffer b) => new ObjectColor(ref b);
+        public ObjectColor RosDeserialize(ref ReadBuffer b) => new ObjectColor(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Id);
-            b.Serialize(ref Color);
+            b.Serialize(in Color);
         }
         
         public void RosValidate()
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClNWCMlIVchPykpNLlHITFFIyy9SKM/ITM5QKE9VKC5ITc5Mq1RIzs/JL+IqLinKzEsH" +
+                "H4sIAAAAAAAAE1NWCMlIVchPykpNLlHITFFIyy9SKM/ITM5QKE9VKC5ITc5Mq1RIzs/JL+IqLinKzEsH" +
                 "KuLiUgbrKkvMKQXqTVMoAXJgalLic4vTi/WdQdwgdydHqASXLZUBl2+wu5UCpn1caTn5iSXGRgpFcFY6" +
                 "nJUEZyVycQEAkGygffsAAAA=";
                 

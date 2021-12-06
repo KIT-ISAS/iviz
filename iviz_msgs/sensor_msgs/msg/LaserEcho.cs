@@ -25,16 +25,16 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal LaserEcho(ref Buffer b)
+        internal LaserEcho(ref ReadBuffer b)
         {
             Echoes = b.DeserializeStructArray<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new LaserEcho(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LaserEcho(ref b);
         
-        LaserEcho IDeserializable<LaserEcho>.RosDeserialize(ref Buffer b) => new LaserEcho(ref b);
+        public LaserEcho RosDeserialize(ref ReadBuffer b) => new LaserEcho(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(Echoes);
         }
@@ -56,7 +56,7 @@ namespace Iviz.Msgs.SensorMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACmWOsQ7CMBBD93yFpe4d4BvYYIINMRyN20ZKk+ruitS/Jwgx4ck+Wc/X4TYnw0IzmYhm" +
+                "H4sIAAAAAAAAE2WOsQ7CMBBD93yFpe4d4BvYYIINMRyN20ZKk+ruitS/Jwgx4ck+Wc/X4TYnw0IzmYhm" +
                 "BbY9f7mOuGzZ02mY61mMeh2kQEr8NEt1pOIskTF08IonsRkjjKuoOPPehzDmKn483B9go9CA7gtdM/GS" +
                 "vLVT21Ep08fpl2nJE60P+FOHkwwzRFV2KFelsbghigtGrQt8JkwWtkentpHKoFxapw9vt18nv+8AAAA=";
                 

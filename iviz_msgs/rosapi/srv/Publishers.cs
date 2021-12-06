@@ -68,16 +68,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal PublishersRequest(ref Buffer b)
+        internal PublishersRequest(ref ReadBuffer b)
         {
             Topic = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new PublishersRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PublishersRequest(ref b);
         
-        PublishersRequest IDeserializable<PublishersRequest>.RosDeserialize(ref Buffer b) => new PublishersRequest(ref b);
+        public PublishersRequest RosDeserialize(ref ReadBuffer b) => new PublishersRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Topic);
         }
@@ -110,16 +110,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal PublishersResponse(ref Buffer b)
+        internal PublishersResponse(ref ReadBuffer b)
         {
             Publishers_ = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new PublishersResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PublishersResponse(ref b);
         
-        PublishersResponse IDeserializable<PublishersResponse>.RosDeserialize(ref Buffer b) => new PublishersResponse(ref b);
+        public PublishersResponse RosDeserialize(ref ReadBuffer b) => new PublishersResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Publishers_);
         }

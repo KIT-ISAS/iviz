@@ -22,7 +22,7 @@ namespace Iviz.Msgs
         /// <param name="b">
         /// Buffer object.
         /// </param>
-        void RosSerialize(ref Buffer b);
+        void RosSerialize(ref WriteBuffer b);
 
         /// <summary>
         /// Length of this message in bytes after serialization.
@@ -40,7 +40,7 @@ namespace Iviz.Msgs
         /// <param name="b">
         /// Buffer object.
         /// </param>
-        ISerializable RosDeserialize(ref Buffer b);
+        ISerializable RosDeserializeBase(ref ReadBuffer b);
     }
 
     public interface IDeserializable<out T> where T : ISerializable
@@ -51,6 +51,6 @@ namespace Iviz.Msgs
         /// <param name="b">
         /// Buffer object.
         /// </param>
-        T RosDeserialize(ref Buffer b);
+        T RosDeserialize(ref ReadBuffer b);
     }
 }

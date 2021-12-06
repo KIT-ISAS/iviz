@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Color32 : IMessage, System.IEquatable<Color32>, IDeserializable<Color32>
+    public struct Color32 : IMessage, IDeserializable<Color32>
     {
         [DataMember (Name = "r")] public byte R;
         [DataMember (Name = "g")] public byte G;
@@ -26,28 +26,24 @@ namespace Iviz.Msgs.IvizMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Color32(ref Buffer b)
+        internal Color32(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b) => new Color32(ref b);
+        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Color32(ref b);
         
-        readonly Color32 IDeserializable<Color32>.RosDeserialize(ref Buffer b) => new Color32(ref b);
+        public readonly Color32 RosDeserialize(ref ReadBuffer b) => new Color32(ref b);
         
-        public override readonly int GetHashCode() => (R, G, B, A).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Color32 s && Equals(s);
-        
-        public readonly bool Equals(Color32 o) => (R, G, B, A) == (o.R, o.G, o.B, o.A);
+        public readonly bool Equals(in Color32 o) => (R, G, B, A) == (o.R, o.G, o.B, o.A);
         
         public static bool operator==(in Color32 a, in Color32 b) => a.Equals(b);
         
         public static bool operator!=(in Color32 a, in Color32 b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref this);
+            b.Serialize(in this);
         }
         
         public readonly void RosValidate()
@@ -69,7 +65,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACivNzCuxUCjiKgXT6VA6CUoncnEBACHBa7shAAAA";
+                "H4sIAAAAAAAAEyvNzCuxUCjiKgXT6VA6CUoncnEBACHBa7shAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

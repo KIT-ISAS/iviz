@@ -24,17 +24,17 @@ namespace Iviz.Msgs.RosbridgeMsgs
         }
         
         /// Constructor with buffer.
-        internal ConnectedClient(ref Buffer b)
+        internal ConnectedClient(ref ReadBuffer b)
         {
             IpAddress = b.DeserializeString();
             ConnectionTime = b.Deserialize<time>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ConnectedClient(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ConnectedClient(ref b);
         
-        ConnectedClient IDeserializable<ConnectedClient>.RosDeserialize(ref Buffer b) => new ConnectedClient(ref b);
+        public ConnectedClient RosDeserialize(ref ReadBuffer b) => new ConnectedClient(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(IpAddress);
             b.Serialize(ConnectionTime);
@@ -57,7 +57,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACisuKcrMS1fILIhPTEkpSi0u5irJzE1VSM7Py0tNLsnMz4sH8bm4AFvLoaQoAAAA";
+                "H4sIAAAAAAAAEysuKcrMS1fILIhPTEkpSi0u5irJzE1VSM7Py0tNLsnMz4sH8bm4AFvLoaQoAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

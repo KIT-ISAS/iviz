@@ -24,17 +24,17 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// Constructor with buffer.
-        internal AveragingResult(ref Buffer b)
+        internal AveragingResult(ref ReadBuffer b)
         {
             InteriorAngle = b.Deserialize<float>();
             Apothem = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new AveragingResult(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AveragingResult(ref b);
         
-        AveragingResult IDeserializable<AveragingResult>.RosDeserialize(ref Buffer b) => new AveragingResult(ref b);
+        public AveragingResult RosDeserialize(ref ReadBuffer b) => new AveragingResult(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(InteriorAngle);
             b.Serialize(Apothem);
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuNKy8lPLDE2UsjMK0ktyswvik/MS89J5YIJJxbkl2Sk5nIBAEOeaCAoAAAA";
+                "H4sIAAAAAAAAE+NKy8lPLDE2UsjMK0ktyswvik/MS89J5YIJJxbkl2Sk5nIBAEOeaCAoAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -81,7 +81,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ChangeControlDimensionsRequest(ref Buffer b)
+        internal ChangeControlDimensionsRequest(ref ReadBuffer b)
         {
             ControlXTranslation = b.Deserialize<bool>();
             ControlYTranslation = b.Deserialize<bool>();
@@ -91,11 +91,11 @@ namespace Iviz.Msgs.MoveitMsgs
             ControlZRotation = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ChangeControlDimensionsRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ChangeControlDimensionsRequest(ref b);
         
-        ChangeControlDimensionsRequest IDeserializable<ChangeControlDimensionsRequest>.RosDeserialize(ref Buffer b) => new ChangeControlDimensionsRequest(ref b);
+        public ChangeControlDimensionsRequest RosDeserialize(ref ReadBuffer b) => new ChangeControlDimensionsRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(ControlXTranslation);
             b.Serialize(ControlYTranslation);
@@ -134,16 +134,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ChangeControlDimensionsResponse(ref Buffer b)
+        internal ChangeControlDimensionsResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ChangeControlDimensionsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ChangeControlDimensionsResponse(ref b);
         
-        ChangeControlDimensionsResponse IDeserializable<ChangeControlDimensionsResponse>.RosDeserialize(ref Buffer b) => new ChangeControlDimensionsResponse(ref b);
+        public ChangeControlDimensionsResponse RosDeserialize(ref ReadBuffer b) => new ChangeControlDimensionsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
         }

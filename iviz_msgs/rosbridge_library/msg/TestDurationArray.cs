@@ -22,16 +22,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestDurationArray(ref Buffer b)
+        internal TestDurationArray(ref ReadBuffer b)
         {
             Durations = b.DeserializeStructArray<duration>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TestDurationArray(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestDurationArray(ref b);
         
-        TestDurationArray IDeserializable<TestDurationArray>.RosDeserialize(ref Buffer b) => new TestDurationArray(ref b);
+        public TestDurationArray RosDeserialize(ref ReadBuffer b) => new TestDurationArray(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(Durations);
         }
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACkspLUosyczPi45VSIEyi7kADvrU2BUAAAA=";
+                "H4sIAAAAAAAAE0spLUosyczPi45VSIEyi7kADvrU2BUAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

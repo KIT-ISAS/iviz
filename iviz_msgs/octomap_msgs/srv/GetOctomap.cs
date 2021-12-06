@@ -61,17 +61,17 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// Constructor with buffer.
-        internal GetOctomapRequest(ref Buffer b)
+        internal GetOctomapRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        GetOctomapRequest IDeserializable<GetOctomapRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public GetOctomapRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly GetOctomapRequest Singleton = new GetOctomapRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -105,16 +105,16 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// Constructor with buffer.
-        internal GetOctomapResponse(ref Buffer b)
+        internal GetOctomapResponse(ref ReadBuffer b)
         {
             Map = new OctomapMsgs.Octomap(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetOctomapResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetOctomapResponse(ref b);
         
-        GetOctomapResponse IDeserializable<GetOctomapResponse>.RosDeserialize(ref Buffer b) => new GetOctomapResponse(ref b);
+        public GetOctomapResponse RosDeserialize(ref ReadBuffer b) => new GetOctomapResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Map.RosSerialize(ref b);
         }

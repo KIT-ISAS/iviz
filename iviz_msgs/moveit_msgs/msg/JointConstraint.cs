@@ -33,7 +33,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal JointConstraint(ref Buffer b)
+        internal JointConstraint(ref ReadBuffer b)
         {
             JointName = b.DeserializeString();
             Position = b.Deserialize<double>();
@@ -42,11 +42,11 @@ namespace Iviz.Msgs.MoveitMsgs
             Weight = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new JointConstraint(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JointConstraint(ref b);
         
-        JointConstraint IDeserializable<JointConstraint>.RosDeserialize(ref Buffer b) => new JointConstraint(ref b);
+        public JointConstraint RosDeserialize(ref ReadBuffer b) => new JointConstraint(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(JointName);
             b.Serialize(Position);
@@ -72,7 +72,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACm1Qy07DMBC8+ytG6qUI6AlxR/0MhKqNs2kWOd7KXhKJr2eTgqkQB1/mtTPe4ai5WiHJ" +
+                "H4sIAAAAAAAAE21Qy07DMBC8+ytG6qUI6AlxR/0MhKqNs2kWOd7KXhKJr2eTgqkQB1/mtTPe4ai5WiHJ" +
                 "sJFx0SommqEDCO8q2WCKjrGIjS4iRC62yjv9yH1wr+TzVXnKNHEIuy1po7+9FEfhmXtIxWs78ehs4kI5" +
                 "8qnjpMvD7/n7G446nfktDEnJnp+apgF/lP/gW/pa7AULy3m0tfJA0bRg8OfLKuLPRxj2PWc1riicyGRm" +
                 "yHRRn+1h6yT1geXGUA84Jq2OOfnJRTEx5YrEtTar3bVm1xLhC72gSgx9AQAA";

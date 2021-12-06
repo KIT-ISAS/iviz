@@ -60,17 +60,17 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal QueryPlannerInterfacesRequest(ref Buffer b)
+        internal QueryPlannerInterfacesRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        QueryPlannerInterfacesRequest IDeserializable<QueryPlannerInterfacesRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public QueryPlannerInterfacesRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly QueryPlannerInterfacesRequest Singleton = new QueryPlannerInterfacesRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -105,7 +105,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal QueryPlannerInterfacesResponse(ref Buffer b)
+        internal QueryPlannerInterfacesResponse(ref ReadBuffer b)
         {
             PlannerInterfaces = b.DeserializeArray<PlannerInterfaceDescription>();
             for (int i = 0; i < PlannerInterfaces.Length; i++)
@@ -114,11 +114,11 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new QueryPlannerInterfacesResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new QueryPlannerInterfacesResponse(ref b);
         
-        QueryPlannerInterfacesResponse IDeserializable<QueryPlannerInterfacesResponse>.RosDeserialize(ref Buffer b) => new QueryPlannerInterfacesResponse(ref b);
+        public QueryPlannerInterfacesResponse RosDeserialize(ref ReadBuffer b) => new QueryPlannerInterfacesResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(PlannerInterfaces);
         }

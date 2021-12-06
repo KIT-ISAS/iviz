@@ -45,7 +45,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal JointLimits(ref Buffer b)
+        internal JointLimits(ref ReadBuffer b)
         {
             JointName = b.DeserializeString();
             HasPositionLimits = b.Deserialize<bool>();
@@ -57,11 +57,11 @@ namespace Iviz.Msgs.MoveitMsgs
             MaxAcceleration = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new JointLimits(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JointLimits(ref b);
         
-        JointLimits IDeserializable<JointLimits>.RosDeserialize(ref Buffer b) => new JointLimits(ref b);
+        public JointLimits RosDeserialize(ref ReadBuffer b) => new JointLimits(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(JointName);
             b.Serialize(HasPositionLimits);
@@ -90,10 +90,10 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACm2RQXKDMAxF95ziz2TTLrrr9CTdMwJEUMe2MpboJLevGyBAyNL6/1lv7BO+BzFENqMz" +
-                "o9XkJMkgqdccyUUTqNHRESSKG7QH4ULZpR0DZfyoJMeb5jubNaCTyMkK+F6ZZ0nnqVMnilxVJ3geGdLD" +
-                "B57pgQwXNblvm/ZUjZarSlAvQT0H5YYoRSp1iHQ9cH1Q8q/P/84DXYd0XYcblVXjl4O24reDxhJsNej6" +
-                "1N8tWqJJ+HFEeW4yGyN3cEXD+Ni1X2pR23LgPP3Hs9o2XPQmuyO2M9zGs+WOeG26o6o/6nWq4UECAAA=";
+                "H4sIAAAAAAAAE22QQW6EMAxF95ziS7NpF91VPUn3yIQwuEriUWyqmds3HWAggmX8/4uffMH3yIroVenq" +
+                "4SQZcVJwGiRHMpYE6mQyBI5sChlAuFE2dlOgjB/hZHiT/GSzBPQcfdICvjdqmdN17rSJom+aCyxPHjzA" +
+                "Rr/QIyluovzcNu9pOilflaBdg3YJyg+Ri1TqEel+4IYgZF+f/50Xug3pvg13KpvGrw/i2B4HjTXYa5T1" +
+                "db9atEaz8OuJcm5SnaLvYYLO46Nqn2qRcz74TKcX2oer3mx3xCrDfbxYVsS5aUU1f+p1quFBAgAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

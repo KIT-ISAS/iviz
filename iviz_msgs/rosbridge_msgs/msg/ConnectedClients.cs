@@ -22,7 +22,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         }
         
         /// Constructor with buffer.
-        internal ConnectedClients(ref Buffer b)
+        internal ConnectedClients(ref ReadBuffer b)
         {
             Clients = b.DeserializeArray<ConnectedClient>();
             for (int i = 0; i < Clients.Length; i++)
@@ -31,11 +31,11 @@ namespace Iviz.Msgs.RosbridgeMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ConnectedClients(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ConnectedClients(ref b);
         
-        ConnectedClients IDeserializable<ConnectedClients>.RosDeserialize(ref Buffer b) => new ConnectedClients(ref b);
+        public ConnectedClients RosDeserialize(ref ReadBuffer b) => new ConnectedClients(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Clients);
         }
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACnPOz8tLTS5JTXHOyUzNK4mOVUgGM4q5uGypDLh8g92tFIryi5OKMlPSU+Nzi9OL9Z1R" +
+                "H4sIAAAAAAAAE3POz8tLTS5JTXHOyUzNK4mOVUgGM4q5uGypDLh8g92tFIryi5OKMlPSU+Nzi9OL9Z1R" +
                 "7ecqLinKzEtXyCyIT0xJKUotLuYqycxNVUiGKMvMz4sH8bm4AIb8WuK4AAAA";
                 
         public override string ToString() => Extensions.ToString(this);

@@ -74,18 +74,18 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal RenameRobotStateInWarehouseRequest(ref Buffer b)
+        internal RenameRobotStateInWarehouseRequest(ref ReadBuffer b)
         {
             OldName = b.DeserializeString();
             NewName = b.DeserializeString();
             Robot = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new RenameRobotStateInWarehouseRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RenameRobotStateInWarehouseRequest(ref b);
         
-        RenameRobotStateInWarehouseRequest IDeserializable<RenameRobotStateInWarehouseRequest>.RosDeserialize(ref Buffer b) => new RenameRobotStateInWarehouseRequest(ref b);
+        public RenameRobotStateInWarehouseRequest RosDeserialize(ref ReadBuffer b) => new RenameRobotStateInWarehouseRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(OldName);
             b.Serialize(NewName);
@@ -123,17 +123,17 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal RenameRobotStateInWarehouseResponse(ref Buffer b)
+        internal RenameRobotStateInWarehouseResponse(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        RenameRobotStateInWarehouseResponse IDeserializable<RenameRobotStateInWarehouseResponse>.RosDeserialize(ref Buffer b) => Singleton;
+        public RenameRobotStateInWarehouseResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly RenameRobotStateInWarehouseResponse Singleton = new RenameRobotStateInWarehouseResponse();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         

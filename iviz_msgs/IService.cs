@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace Iviz.Msgs
+﻿namespace Iviz.Msgs
 {
     /// <summary>
     /// Interface for all ROS services.
@@ -48,70 +46,5 @@ namespace Iviz.Msgs
     /// </summary>
     public interface IResponse : ISerializable
     {
-    }
-
-    namespace Internal
-    {
-        /// <summary>
-        /// Class that represents an empty service request.
-        /// </summary>
-        [DataContract]
-        public class EmptyRequest : IRequest, IDeserializable<EmptyRequest>
-        {
-            public ISerializable RosDeserialize(ref Buffer _)
-            {
-                return new EmptyRequest();
-            }
-
-            public void RosSerialize(ref Buffer _)
-            {
-            }
-
-            public int RosMessageLength => 0;
-
-            public void RosValidate()
-            {
-            }
-
-            public void Dispose()
-            {
-            }
-
-            EmptyRequest IDeserializable<EmptyRequest>.RosDeserialize(ref Buffer _)
-            {
-                return new();
-            }
-        }
-
-        /// <summary>
-        /// Class that represents an empty service response.
-        /// </summary>
-        [DataContract]
-        public class EmptyResponse : IResponse, IDeserializable<EmptyResponse>
-        {
-            public ISerializable RosDeserialize(ref Buffer _)
-            {
-                return new EmptyResponse();
-            }
-
-            public void RosSerialize(ref Buffer _)
-            {
-            }
-
-            public int RosMessageLength => 0;
-
-            public void RosValidate()
-            {
-            }
-            
-            public void Dispose()
-            {
-            }
-
-            EmptyResponse IDeserializable<EmptyResponse>.RosDeserialize(ref Buffer _)
-            {
-                return new();
-            }
-        }
     }
 }

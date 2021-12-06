@@ -23,16 +23,16 @@ namespace Iviz.Msgs.ShapeMsgs
         }
         
         /// Constructor with buffer.
-        internal MeshTriangle(ref Buffer b)
+        internal MeshTriangle(ref ReadBuffer b)
         {
             VertexIndices = b.DeserializeStructArray<uint>(3);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new MeshTriangle(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshTriangle(ref b);
         
-        MeshTriangle IDeserializable<MeshTriangle>.RosDeserialize(ref Buffer b) => new MeshTriangle(ref b);
+        public MeshTriangle RosDeserialize(ref ReadBuffer b) => new MeshTriangle(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(VertexIndices, 3);
         }
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.ShapeMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClNWcElNy8zLLMnMz1PIT1NIVCgpykzMS89JVS9WKEstKslMTi3mKs3MKzE2ijaOBQul" +
+                "H4sIAAAAAAAAE1NWcElNy8zLLMnMz1PIT1NIVCgpykzMS89JVS9WKEstKslMTi3mKs3MKzE2ijaOBQul" +
                 "VsRn5qWAJbgAjDTRWEAAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);

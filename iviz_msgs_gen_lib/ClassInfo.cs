@@ -564,7 +564,7 @@ namespace Iviz.MsgsGen
                 lines.Add("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
             }
 
-            lines.Add($"internal {name}(ref Buffer b)");
+            lines.Add($"internal {name}(ref ReadBuffer b)");
             lines.Add("{");
             if (structIsBlittable)
             {
@@ -580,7 +580,7 @@ namespace Iviz.MsgsGen
                     lines.Add("    Deserialize(ref b, out this);");
                     lines.Add("}");
                     lines.Add("");
-                    lines.Add($"internal static void Deserialize(ref Buffer b, out {name} h)");
+                    lines.Add($"internal static void Deserialize(ref ReadBuffer b, out {name} h)");
                     lines.Add("{");
                 }
 
@@ -679,20 +679,44 @@ namespace Iviz.MsgsGen
             lines.Add("}");
             lines.Add("");
 
-
             string readOnlyId = forceStruct ? "readonly " : "";
             lines.Add(variables.Any()
-                ? $"public {readOnlyId}ISerializable RosDeserialize(ref Buffer b) => new {name}(ref b);"
-                : $"public {readOnlyId}ISerializable RosDeserialize(ref Buffer b) => Singleton;");
+                ? $"{readOnlyId}ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new {name}(ref b);"
+                : $"{readOnlyId}ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;");
 
             lines.Add("");
 
             lines.Add(variables.Any()
-                ? $"{readOnlyId}{name} IDeserializable<{name}>.RosDeserialize(ref Buffer b) => new {name}(ref b);"
-                : $"{readOnlyId}{name} IDeserializable<{name}>.RosDeserialize(ref Buffer b) => Singleton;");
+                ? $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => new {name}(ref b);"
+                : $"public {readOnlyId}{name} RosDeserialize(ref ReadBuffer b) => Singleton;");
 
             if (forceStruct)
             {
+                string myVars = string.Join(", ", variables.Select(x => x.CsFieldName));
+
+                if (myVars.Length == 0)
+                {
+                    lines.Add("");
+                    lines.Add($"public readonly bool Equals(in {name} o) => true;");
+                    lines.Add("");
+                    lines.Add($"public static bool operator==(in {name} _, in {name} __) => true;");
+                    lines.Add("");
+                    lines.Add($"public static bool operator!=(in {name} _, in {name} __) => false;");
+                }
+                else
+                {
+                    string oVars = string.Join(", ", variables.Select(x => $"o.{x.CsFieldName}"));
+
+                    lines.Add("");
+                    lines.Add($"public readonly bool Equals(in {name} o) => ({myVars}) == ({oVars});");
+                    lines.Add("");
+                    lines.Add($"public static bool operator==(in {name} a, in {name} b) => a.Equals(b);");
+                    lines.Add("");
+                    lines.Add($"public static bool operator!=(in {name} a, in {name} b) => !a.Equals(b);");
+                }
+                
+                
+                /*
                 string myVars = string.Join(", ", variables.Select(x => x.CsFieldName));
 
                 if (myVars.Length == 0)
@@ -725,6 +749,7 @@ namespace Iviz.MsgsGen
                     lines.Add("");
                     lines.Add($"public static bool operator!=(in {name} a, in {name} b) => !a.Equals(b);");
                 }
+                */
             }
 
             if (!variables.Any())
@@ -743,11 +768,11 @@ namespace Iviz.MsgsGen
 
             string readOnlyId = forceStruct ? "readonly " : "";
 
-            lines.Add($"public void RosSerialize(ref Buffer b)");
+            lines.Add($"public {readOnlyId}void RosSerialize(ref WriteBuffer b)");
             lines.Add("{");
             if (isBlittable)
             {
-                lines.Add("    b.Serialize(ref this);");
+                lines.Add("    b.Serialize(in this);");
             }
             else
             {
@@ -805,7 +830,7 @@ namespace Iviz.MsgsGen
                         if (!variable.IsArray)
                         {
                             lines.Add(variable.ClassIsBlittable
-                                ? $"    b.Serialize(ref {variable.CsFieldName});"
+                                ? $"    b.Serialize(in {variable.CsFieldName});"
                                 : $"    {variable.CsFieldName}.RosSerialize(ref b);");
                         }
                         else
@@ -1003,8 +1028,8 @@ namespace Iviz.MsgsGen
             {
                 lines.Add("[StructLayout(LayoutKind.Sequential)]");
                 lines.Add(variables.Any(element => element.IsFixedSizeArray)
-                    ? $"public unsafe struct {Name} : IMessage, System.IEquatable<{Name}>, IDeserializable<{Name}>"
-                    : $"public struct {Name} : IMessage, System.IEquatable<{Name}>, IDeserializable<{Name}>");
+                    ? $"public unsafe struct {Name} : IMessage, IDeserializable<{Name}>"
+                    : $"public struct {Name} : IMessage, IDeserializable<{Name}>");
             }
             else
             {

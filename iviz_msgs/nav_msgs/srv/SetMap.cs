@@ -72,17 +72,17 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal SetMapRequest(ref Buffer b)
+        internal SetMapRequest(ref ReadBuffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
             InitialPose = new GeometryMsgs.PoseWithCovarianceStamped(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SetMapRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetMapRequest(ref b);
         
-        SetMapRequest IDeserializable<SetMapRequest>.RosDeserialize(ref Buffer b) => new SetMapRequest(ref b);
+        public SetMapRequest RosDeserialize(ref ReadBuffer b) => new SetMapRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Map.RosSerialize(ref b);
             InitialPose.RosSerialize(ref b);
@@ -118,16 +118,16 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal SetMapResponse(ref Buffer b)
+        internal SetMapResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SetMapResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetMapResponse(ref b);
         
-        SetMapResponse IDeserializable<SetMapResponse>.RosDeserialize(ref Buffer b) => new SetMapResponse(ref b);
+        public SetMapResponse RosDeserialize(ref ReadBuffer b) => new SetMapResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
         }

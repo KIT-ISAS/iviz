@@ -25,17 +25,17 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal ObjectRecognitionGoal(ref Buffer b)
+        internal ObjectRecognitionGoal(ref ReadBuffer b)
         {
             UseRoi = b.Deserialize<bool>();
             FilterLimits = b.DeserializeStructArray<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ObjectRecognitionGoal(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ObjectRecognitionGoal(ref b);
         
-        ObjectRecognitionGoal IDeserializable<ObjectRecognitionGoal>.RosDeserialize(ref Buffer b) => new ObjectRecognitionGoal(ref b);
+        public ObjectRecognitionGoal RosDeserialize(ref ReadBuffer b) => new ObjectRecognitionGoal(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(UseRoi);
             b.SerializeStructArray(FilterLimits);
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuNKys/PUSgtTo0vys/kSsvJTywxNoqOVUjLzClJLYrPyczNLCnmAgBz2M+rJgAAAA==";
+                "H4sIAAAAAAAAE+NKys/PUSgtTo0vys/kSsvJTywxNoqOVUjLzClJLYrPyczNLCnmAgBz2M+rJgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -60,17 +60,17 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal FrameGraphRequest(ref Buffer b)
+        internal FrameGraphRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        FrameGraphRequest IDeserializable<FrameGraphRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public FrameGraphRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly FrameGraphRequest Singleton = new FrameGraphRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -104,16 +104,16 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal FrameGraphResponse(ref Buffer b)
+        internal FrameGraphResponse(ref ReadBuffer b)
         {
             FrameYaml = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new FrameGraphResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FrameGraphResponse(ref b);
         
-        FrameGraphResponse IDeserializable<FrameGraphResponse>.RosDeserialize(ref Buffer b) => new FrameGraphResponse(ref b);
+        public FrameGraphResponse RosDeserialize(ref ReadBuffer b) => new FrameGraphResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(FrameYaml);
         }

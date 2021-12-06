@@ -25,21 +25,21 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal MeshMaterial(ref Buffer b)
+        internal MeshMaterial(ref ReadBuffer b)
         {
             TextureIndex = b.Deserialize<uint>();
             b.Deserialize(out Color);
             HasTexture = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new MeshMaterial(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterial(ref b);
         
-        MeshMaterial IDeserializable<MeshMaterial>.RosDeserialize(ref Buffer b) => new MeshMaterial(ref b);
+        public MeshMaterial RosDeserialize(ref ReadBuffer b) => new MeshMaterial(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(TextureIndex);
-            b.Serialize(ref Color);
+            b.Serialize(in Color);
             b.Serialize(HasTexture);
         }
         
@@ -62,7 +62,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACivNzCsxNlIoSa0oKS1Kjc/MS0mt4CouSYnPLU4v1nfOz8kvCnJ3clRIBrG4kvLzcxQy" +
+                "H4sIAAAAAAAAEyvNzCsxNlIoSa0oKS1Kjc/MS0mt4CouSYnPLU4v1nfOz8kvCnJ3clRIBrG4kvLzcxQy" +
                 "Eovjoeq5uGypDLh8g92tFDAdwJWWk58IcmkRnJUOZyXBWYlcXABOlNZm0gAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);

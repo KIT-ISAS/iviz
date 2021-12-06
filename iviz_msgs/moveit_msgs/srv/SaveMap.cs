@@ -68,16 +68,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal SaveMapRequest(ref Buffer b)
+        internal SaveMapRequest(ref ReadBuffer b)
         {
             Filename = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SaveMapRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SaveMapRequest(ref b);
         
-        SaveMapRequest IDeserializable<SaveMapRequest>.RosDeserialize(ref Buffer b) => new SaveMapRequest(ref b);
+        public SaveMapRequest RosDeserialize(ref ReadBuffer b) => new SaveMapRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Filename);
         }
@@ -109,16 +109,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal SaveMapResponse(ref Buffer b)
+        internal SaveMapResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SaveMapResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SaveMapResponse(ref b);
         
-        SaveMapResponse IDeserializable<SaveMapResponse>.RosDeserialize(ref Buffer b) => new SaveMapResponse(ref b);
+        public SaveMapResponse RosDeserialize(ref ReadBuffer b) => new SaveMapResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
         }

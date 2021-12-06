@@ -8,7 +8,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct ColorRGBA : IMessage, System.IEquatable<ColorRGBA>, IDeserializable<ColorRGBA>
+    public struct ColorRGBA : IMessage, IDeserializable<ColorRGBA>
     {
         [DataMember (Name = "r")] public float R;
         [DataMember (Name = "g")] public float G;
@@ -26,28 +26,24 @@ namespace Iviz.Msgs.StdMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ColorRGBA(ref Buffer b)
+        internal ColorRGBA(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b) => new ColorRGBA(ref b);
+        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ColorRGBA(ref b);
         
-        readonly ColorRGBA IDeserializable<ColorRGBA>.RosDeserialize(ref Buffer b) => new ColorRGBA(ref b);
+        public readonly ColorRGBA RosDeserialize(ref ReadBuffer b) => new ColorRGBA(ref b);
         
-        public override readonly int GetHashCode() => (R, G, B, A).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is ColorRGBA s && Equals(s);
-        
-        public readonly bool Equals(ColorRGBA o) => (R, G, B, A) == (o.R, o.G, o.B, o.A);
+        public readonly bool Equals(in ColorRGBA o) => (R, G, B, A) == (o.R, o.G, o.B, o.A);
         
         public static bool operator==(in ColorRGBA a, in ColorRGBA b) => a.Equals(b);
         
         public static bool operator!=(in ColorRGBA a, in ColorRGBA b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref this);
+            b.Serialize(in this);
         }
         
         public readonly void RosValidate()
@@ -69,7 +65,7 @@ namespace Iviz.Msgs.StdMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACkvLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
+                "H4sIAAAAAAAAE0vLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

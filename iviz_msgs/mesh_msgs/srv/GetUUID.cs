@@ -60,17 +60,17 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetUUIDRequest(ref Buffer b)
+        internal GetUUIDRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        GetUUIDRequest IDeserializable<GetUUIDRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public GetUUIDRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly GetUUIDRequest Singleton = new GetUUIDRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -104,16 +104,16 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetUUIDResponse(ref Buffer b)
+        internal GetUUIDResponse(ref ReadBuffer b)
         {
             Uuid = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetUUIDResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetUUIDResponse(ref b);
         
-        GetUUIDResponse IDeserializable<GetUUIDResponse>.RosDeserialize(ref Buffer b) => new GetUUIDResponse(ref b);
+        public GetUUIDResponse RosDeserialize(ref ReadBuffer b) => new GetUUIDResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Uuid);
         }

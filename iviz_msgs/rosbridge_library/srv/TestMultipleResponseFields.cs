@@ -60,17 +60,17 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestMultipleResponseFieldsRequest(ref Buffer b)
+        internal TestMultipleResponseFieldsRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        TestMultipleResponseFieldsRequest IDeserializable<TestMultipleResponseFieldsRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public TestMultipleResponseFieldsRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly TestMultipleResponseFieldsRequest Singleton = new TestMultipleResponseFieldsRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestMultipleResponseFieldsResponse(ref Buffer b)
+        internal TestMultipleResponseFieldsResponse(ref ReadBuffer b)
         {
             @int = b.Deserialize<int>();
             @float = b.Deserialize<float>();
@@ -118,11 +118,11 @@ namespace Iviz.Msgs.RosbridgeLibrary
             @bool = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TestMultipleResponseFieldsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestMultipleResponseFieldsResponse(ref b);
         
-        TestMultipleResponseFieldsResponse IDeserializable<TestMultipleResponseFieldsResponse>.RosDeserialize(ref Buffer b) => new TestMultipleResponseFieldsResponse(ref b);
+        public TestMultipleResponseFieldsResponse RosDeserialize(ref ReadBuffer b) => new TestMultipleResponseFieldsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(@int);
             b.Serialize(@float);

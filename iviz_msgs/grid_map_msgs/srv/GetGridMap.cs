@@ -85,7 +85,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// Constructor with buffer.
-        internal GetGridMapRequest(ref Buffer b)
+        internal GetGridMapRequest(ref ReadBuffer b)
         {
             FrameId = b.DeserializeString();
             PositionX = b.Deserialize<double>();
@@ -95,11 +95,11 @@ namespace Iviz.Msgs.GridMapMsgs
             Layers = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetGridMapRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetGridMapRequest(ref b);
         
-        GetGridMapRequest IDeserializable<GetGridMapRequest>.RosDeserialize(ref Buffer b) => new GetGridMapRequest(ref b);
+        public GetGridMapRequest RosDeserialize(ref ReadBuffer b) => new GetGridMapRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(FrameId);
             b.Serialize(PositionX);
@@ -143,16 +143,16 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// Constructor with buffer.
-        internal GetGridMapResponse(ref Buffer b)
+        internal GetGridMapResponse(ref ReadBuffer b)
         {
             Map = new GridMapMsgs.GridMap(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetGridMapResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetGridMapResponse(ref b);
         
-        GetGridMapResponse IDeserializable<GetGridMapResponse>.RosDeserialize(ref Buffer b) => new GetGridMapResponse(ref b);
+        public GetGridMapResponse RosDeserialize(ref ReadBuffer b) => new GetGridMapResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Map.RosSerialize(ref b);
         }

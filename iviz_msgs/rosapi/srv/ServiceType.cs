@@ -68,16 +68,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal ServiceTypeRequest(ref Buffer b)
+        internal ServiceTypeRequest(ref ReadBuffer b)
         {
             Service = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ServiceTypeRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServiceTypeRequest(ref b);
         
-        ServiceTypeRequest IDeserializable<ServiceTypeRequest>.RosDeserialize(ref Buffer b) => new ServiceTypeRequest(ref b);
+        public ServiceTypeRequest RosDeserialize(ref ReadBuffer b) => new ServiceTypeRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Service);
         }
@@ -110,16 +110,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal ServiceTypeResponse(ref Buffer b)
+        internal ServiceTypeResponse(ref ReadBuffer b)
         {
             Type = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ServiceTypeResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServiceTypeResponse(ref b);
         
-        ServiceTypeResponse IDeserializable<ServiceTypeResponse>.RosDeserialize(ref Buffer b) => new ServiceTypeResponse(ref b);
+        public ServiceTypeResponse RosDeserialize(ref ReadBuffer b) => new ServiceTypeResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Type);
         }

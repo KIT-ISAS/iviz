@@ -70,16 +70,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPlanningSceneRequest(ref Buffer b)
+        internal GetPlanningSceneRequest(ref ReadBuffer b)
         {
             Components = new PlanningSceneComponents(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetPlanningSceneRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPlanningSceneRequest(ref b);
         
-        GetPlanningSceneRequest IDeserializable<GetPlanningSceneRequest>.RosDeserialize(ref Buffer b) => new GetPlanningSceneRequest(ref b);
+        public GetPlanningSceneRequest RosDeserialize(ref ReadBuffer b) => new GetPlanningSceneRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Components.RosSerialize(ref b);
         }
@@ -116,16 +116,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPlanningSceneResponse(ref Buffer b)
+        internal GetPlanningSceneResponse(ref ReadBuffer b)
         {
             Scene = new PlanningScene(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetPlanningSceneResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPlanningSceneResponse(ref b);
         
-        GetPlanningSceneResponse IDeserializable<GetPlanningSceneResponse>.RosDeserialize(ref Buffer b) => new GetPlanningSceneResponse(ref b);
+        public GetPlanningSceneResponse RosDeserialize(ref ReadBuffer b) => new GetPlanningSceneResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Scene.RosSerialize(ref b);
         }

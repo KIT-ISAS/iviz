@@ -70,16 +70,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPositionIKRequest(ref Buffer b)
+        internal GetPositionIKRequest(ref ReadBuffer b)
         {
             IkRequest = new PositionIKRequest(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetPositionIKRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPositionIKRequest(ref b);
         
-        GetPositionIKRequest IDeserializable<GetPositionIKRequest>.RosDeserialize(ref Buffer b) => new GetPositionIKRequest(ref b);
+        public GetPositionIKRequest RosDeserialize(ref ReadBuffer b) => new GetPositionIKRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             IkRequest.RosSerialize(ref b);
         }
@@ -118,17 +118,17 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPositionIKResponse(ref Buffer b)
+        internal GetPositionIKResponse(ref ReadBuffer b)
         {
             Solution = new RobotState(ref b);
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetPositionIKResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPositionIKResponse(ref b);
         
-        GetPositionIKResponse IDeserializable<GetPositionIKResponse>.RosDeserialize(ref Buffer b) => new GetPositionIKResponse(ref b);
+        public GetPositionIKResponse RosDeserialize(ref ReadBuffer b) => new GetPositionIKResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Solution.RosSerialize(ref b);
             ErrorCode.RosSerialize(ref b);

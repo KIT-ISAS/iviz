@@ -23,16 +23,16 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal MeshVertexCosts(ref Buffer b)
+        internal MeshVertexCosts(ref ReadBuffer b)
         {
             Costs = b.DeserializeStructArray<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new MeshVertexCosts(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexCosts(ref b);
         
-        MeshVertexCosts IDeserializable<MeshVertexCosts>.RosDeserialize(ref Buffer b) => new MeshVertexCosts(ref b);
+        public MeshVertexCosts RosDeserialize(ref ReadBuffer b) => new MeshVertexCosts(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(Costs);
         }
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClNW8E0tzlBwLCkpykwqLUkFcYsT01O50nLyE0uMjaJjFZLzi0uKubgAIEHWRioAAAA=";
+                "H4sIAAAAAAAAE1NW8E0tzlBwLCkpykwqLUkFcYsT01O50nLyE0uMjaJjFZLzi0uKubgAIEHWRioAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

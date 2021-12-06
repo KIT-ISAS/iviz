@@ -69,16 +69,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMotionSequenceRequest(ref Buffer b)
+        internal GetMotionSequenceRequest(ref ReadBuffer b)
         {
             Request = new MotionSequenceRequest(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetMotionSequenceRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetMotionSequenceRequest(ref b);
         
-        GetMotionSequenceRequest IDeserializable<GetMotionSequenceRequest>.RosDeserialize(ref Buffer b) => new GetMotionSequenceRequest(ref b);
+        public GetMotionSequenceRequest RosDeserialize(ref ReadBuffer b) => new GetMotionSequenceRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Request.RosSerialize(ref b);
         }
@@ -113,16 +113,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMotionSequenceResponse(ref Buffer b)
+        internal GetMotionSequenceResponse(ref ReadBuffer b)
         {
             Response = new MotionSequenceResponse(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetMotionSequenceResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetMotionSequenceResponse(ref b);
         
-        GetMotionSequenceResponse IDeserializable<GetMotionSequenceResponse>.RosDeserialize(ref Buffer b) => new GetMotionSequenceResponse(ref b);
+        public GetMotionSequenceResponse RosDeserialize(ref ReadBuffer b) => new GetMotionSequenceResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Response.RosSerialize(ref b);
         }

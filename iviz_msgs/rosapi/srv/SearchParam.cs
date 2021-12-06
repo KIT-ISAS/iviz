@@ -68,16 +68,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal SearchParamRequest(ref Buffer b)
+        internal SearchParamRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SearchParamRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SearchParamRequest(ref b);
         
-        SearchParamRequest IDeserializable<SearchParamRequest>.RosDeserialize(ref Buffer b) => new SearchParamRequest(ref b);
+        public SearchParamRequest RosDeserialize(ref ReadBuffer b) => new SearchParamRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
         }
@@ -110,16 +110,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal SearchParamResponse(ref Buffer b)
+        internal SearchParamResponse(ref ReadBuffer b)
         {
             GlobalName = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SearchParamResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SearchParamResponse(ref b);
         
-        SearchParamResponse IDeserializable<SearchParamResponse>.RosDeserialize(ref Buffer b) => new SearchParamResponse(ref b);
+        public SearchParamResponse RosDeserialize(ref ReadBuffer b) => new SearchParamResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(GlobalName);
         }

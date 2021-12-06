@@ -61,17 +61,17 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetModulesRequest(ref Buffer b)
+        internal GetModulesRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        GetModulesRequest IDeserializable<GetModulesRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public GetModulesRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly GetModulesRequest Singleton = new GetModulesRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -105,16 +105,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetModulesResponse(ref Buffer b)
+        internal GetModulesResponse(ref ReadBuffer b)
         {
             Configs = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetModulesResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetModulesResponse(ref b);
         
-        GetModulesResponse IDeserializable<GetModulesResponse>.RosDeserialize(ref Buffer b) => new GetModulesResponse(ref b);
+        public GetModulesResponse RosDeserialize(ref ReadBuffer b) => new GetModulesResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Configs);
         }

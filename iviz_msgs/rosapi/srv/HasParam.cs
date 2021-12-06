@@ -68,16 +68,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal HasParamRequest(ref Buffer b)
+        internal HasParamRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new HasParamRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new HasParamRequest(ref b);
         
-        HasParamRequest IDeserializable<HasParamRequest>.RosDeserialize(ref Buffer b) => new HasParamRequest(ref b);
+        public HasParamRequest RosDeserialize(ref ReadBuffer b) => new HasParamRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
         }
@@ -109,16 +109,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal HasParamResponse(ref Buffer b)
+        internal HasParamResponse(ref ReadBuffer b)
         {
             Exists = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new HasParamResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new HasParamResponse(ref b);
         
-        HasParamResponse IDeserializable<HasParamResponse>.RosDeserialize(ref Buffer b) => new HasParamResponse(ref b);
+        public HasParamResponse RosDeserialize(ref ReadBuffer b) => new HasParamResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Exists);
         }

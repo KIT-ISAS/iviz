@@ -69,16 +69,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetFramePoseRequest(ref Buffer b)
+        internal GetFramePoseRequest(ref ReadBuffer b)
         {
             Frames = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetFramePoseRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetFramePoseRequest(ref b);
         
-        GetFramePoseRequest IDeserializable<GetFramePoseRequest>.RosDeserialize(ref Buffer b) => new GetFramePoseRequest(ref b);
+        public GetFramePoseRequest RosDeserialize(ref ReadBuffer b) => new GetFramePoseRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Frames);
         }
@@ -118,17 +118,17 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetFramePoseResponse(ref Buffer b)
+        internal GetFramePoseResponse(ref ReadBuffer b)
         {
             IsValid = b.DeserializeStructArray<bool>();
             Poses = b.DeserializeStructArray<GeometryMsgs.Pose>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetFramePoseResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetFramePoseResponse(ref b);
         
-        GetFramePoseResponse IDeserializable<GetFramePoseResponse>.RosDeserialize(ref Buffer b) => new GetFramePoseResponse(ref b);
+        public GetFramePoseResponse RosDeserialize(ref ReadBuffer b) => new GetFramePoseResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(IsValid);
             b.SerializeStructArray(Poses);

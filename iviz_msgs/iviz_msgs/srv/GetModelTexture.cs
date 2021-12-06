@@ -68,16 +68,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetModelTextureRequest(ref Buffer b)
+        internal GetModelTextureRequest(ref ReadBuffer b)
         {
             Uri = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetModelTextureRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetModelTextureRequest(ref b);
         
-        GetModelTextureRequest IDeserializable<GetModelTextureRequest>.RosDeserialize(ref Buffer b) => new GetModelTextureRequest(ref b);
+        public GetModelTextureRequest RosDeserialize(ref ReadBuffer b) => new GetModelTextureRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Uri);
         }
@@ -115,18 +115,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetModelTextureResponse(ref Buffer b)
+        internal GetModelTextureResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Image = new SensorMsgs.CompressedImage(ref b);
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetModelTextureResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetModelTextureResponse(ref b);
         
-        GetModelTextureResponse IDeserializable<GetModelTextureResponse>.RosDeserialize(ref Buffer b) => new GetModelTextureResponse(ref b);
+        public GetModelTextureResponse RosDeserialize(ref ReadBuffer b) => new GetModelTextureResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             Image.RosSerialize(ref b);

@@ -86,7 +86,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ChangeDriftDimensionsRequest(ref Buffer b)
+        internal ChangeDriftDimensionsRequest(ref ReadBuffer b)
         {
             DriftXTranslation = b.Deserialize<bool>();
             DriftYTranslation = b.Deserialize<bool>();
@@ -97,11 +97,11 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Deserialize(out TransformJogFrameToDriftFrame);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ChangeDriftDimensionsRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ChangeDriftDimensionsRequest(ref b);
         
-        ChangeDriftDimensionsRequest IDeserializable<ChangeDriftDimensionsRequest>.RosDeserialize(ref Buffer b) => new ChangeDriftDimensionsRequest(ref b);
+        public ChangeDriftDimensionsRequest RosDeserialize(ref ReadBuffer b) => new ChangeDriftDimensionsRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(DriftXTranslation);
             b.Serialize(DriftYTranslation);
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Serialize(DriftXRotation);
             b.Serialize(DriftYRotation);
             b.Serialize(DriftZRotation);
-            b.Serialize(ref TransformJogFrameToDriftFrame);
+            b.Serialize(in TransformJogFrameToDriftFrame);
         }
         
         public void RosValidate()
@@ -141,16 +141,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ChangeDriftDimensionsResponse(ref Buffer b)
+        internal ChangeDriftDimensionsResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ChangeDriftDimensionsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ChangeDriftDimensionsResponse(ref b);
         
-        ChangeDriftDimensionsResponse IDeserializable<ChangeDriftDimensionsResponse>.RosDeserialize(ref Buffer b) => new ChangeDriftDimensionsResponse(ref b);
+        public ChangeDriftDimensionsResponse RosDeserialize(ref ReadBuffer b) => new ChangeDriftDimensionsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
         }

@@ -71,18 +71,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal StartCaptureRequest(ref Buffer b)
+        internal StartCaptureRequest(ref ReadBuffer b)
         {
             ResolutionX = b.Deserialize<int>();
             ResolutionY = b.Deserialize<int>();
             WithHolograms = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new StartCaptureRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureRequest(ref b);
         
-        StartCaptureRequest IDeserializable<StartCaptureRequest>.RosDeserialize(ref Buffer b) => new StartCaptureRequest(ref b);
+        public StartCaptureRequest RosDeserialize(ref ReadBuffer b) => new StartCaptureRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(ResolutionX);
             b.Serialize(ResolutionY);
@@ -121,17 +121,17 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal StartCaptureResponse(ref Buffer b)
+        internal StartCaptureResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new StartCaptureResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureResponse(ref b);
         
-        StartCaptureResponse IDeserializable<StartCaptureResponse>.RosDeserialize(ref Buffer b) => new StartCaptureResponse(ref b);
+        public StartCaptureResponse RosDeserialize(ref ReadBuffer b) => new StartCaptureResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);

@@ -31,17 +31,17 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal TF2Error(ref Buffer b)
+        internal TF2Error(ref ReadBuffer b)
         {
             Error = b.Deserialize<byte>();
             ErrorString = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TF2Error(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TF2Error(ref b);
         
-        TF2Error IDeserializable<TF2Error>.RosDeserialize(ref Buffer b) => new TF2Error(ref b);
+        public TF2Error RosDeserialize(ref ReadBuffer b) => new TF2Error(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Error);
             b.Serialize(ErrorString);
@@ -64,7 +64,7 @@ namespace Iviz.Msgs.Tf2Msgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACkXKuw7CMAyF4T1PkUfgLhaGqARkkdiVcSqYMiHUpUihfX8kasJ4/u9M/TDuLVL2zMT2" +
+                "H4sIAAAAAAAAE0XKuw7CMAyF4T1PkUfgLhaGqARkkdiVcSqYMiHUpUihfX8kasJ4/u9M/TDuLVL2zMT2" +
                 "YBdm+qZAdEltzUvNDSH6RqADuVdcKfqbsGspOAHCqmtVwM4FOGbH5xQ9Sj1s9CAQPaV/3/46O7yeiGOV" +
                 "nVF6lPIq5j2WfnjOI8/DmA8cjH3N2gAAAA==";
                 

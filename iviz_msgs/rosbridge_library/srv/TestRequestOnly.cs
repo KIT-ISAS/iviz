@@ -67,16 +67,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestRequestOnlyRequest(ref Buffer b)
+        internal TestRequestOnlyRequest(ref ReadBuffer b)
         {
             Data = b.Deserialize<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TestRequestOnlyRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestRequestOnlyRequest(ref b);
         
-        TestRequestOnlyRequest IDeserializable<TestRequestOnlyRequest>.RosDeserialize(ref Buffer b) => new TestRequestOnlyRequest(ref b);
+        public TestRequestOnlyRequest RosDeserialize(ref ReadBuffer b) => new TestRequestOnlyRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Data);
         }
@@ -103,17 +103,17 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestRequestOnlyResponse(ref Buffer b)
+        internal TestRequestOnlyResponse(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        TestRequestOnlyResponse IDeserializable<TestRequestOnlyResponse>.RosDeserialize(ref Buffer b) => Singleton;
+        public TestRequestOnlyResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly TestRequestOnlyResponse Singleton = new TestRequestOnlyResponse();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         

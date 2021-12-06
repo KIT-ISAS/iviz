@@ -24,7 +24,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal Feature(ref Buffer b)
+        internal Feature(ref ReadBuffer b)
         {
             b.Deserialize(out Location);
             Descriptor = b.DeserializeArray<StdMsgs.Float32>();
@@ -34,13 +34,13 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new Feature(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Feature(ref b);
         
-        Feature IDeserializable<Feature>.RosDeserialize(ref Buffer b) => new Feature(ref b);
+        public Feature RosDeserialize(ref ReadBuffer b) => new Feature(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref Location);
+            b.Serialize(in Location);
             b.SerializeArray(Descriptor);
         }
         
@@ -66,7 +66,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACrXQsQrCQAwG4D1PEfABhFYcBFedBMFuIhKuaRtoL8clg/XptRQ66KqZ/vxLPtKyDux5" +
+                "H4sIAAAAAAAAE7XQsQrCQAwG4D1PEfABhFYcBFedBMFuIhKuaRtoL8clg/XptRQ66KqZ/vxLPtKyDux5" +
                 "vA/W2vqsEh17DeSiEczruT/0Sl4W1xvWbCFLcs0A+x8PnC7HHbbfIlhh1Ylh0Ogk0dA7xqQmkxK1QXpv" +
                 "k1wiNpkZLVFgaCb1doOPJY1Lev6L//mz+WJZYE1O8AKMerHtbwEAAA==";
                 

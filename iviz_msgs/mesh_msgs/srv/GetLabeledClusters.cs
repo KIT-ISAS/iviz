@@ -68,16 +68,16 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetLabeledClustersRequest(ref Buffer b)
+        internal GetLabeledClustersRequest(ref ReadBuffer b)
         {
             Uuid = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetLabeledClustersRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetLabeledClustersRequest(ref b);
         
-        GetLabeledClustersRequest IDeserializable<GetLabeledClustersRequest>.RosDeserialize(ref Buffer b) => new GetLabeledClustersRequest(ref b);
+        public GetLabeledClustersRequest RosDeserialize(ref ReadBuffer b) => new GetLabeledClustersRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Uuid);
         }
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetLabeledClustersResponse(ref Buffer b)
+        internal GetLabeledClustersResponse(ref ReadBuffer b)
         {
             Clusters = b.DeserializeArray<MeshFaceCluster>();
             for (int i = 0; i < Clusters.Length; i++)
@@ -119,11 +119,11 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetLabeledClustersResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetLabeledClustersResponse(ref b);
         
-        GetLabeledClustersResponse IDeserializable<GetLabeledClustersResponse>.RosDeserialize(ref Buffer b) => new GetLabeledClustersResponse(ref b);
+        public GetLabeledClustersResponse RosDeserialize(ref ReadBuffer b) => new GetLabeledClustersResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Clusters);
         }

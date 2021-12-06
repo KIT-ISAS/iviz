@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point32 : IMessage, System.IEquatable<Point32>, IDeserializable<Point32>
+    public struct Point32 : IMessage, IDeserializable<Point32>
     {
         // This contains the position of a point in free space(with 32 bits of precision).
         // It is recommeded to use Point wherever possible instead of Point32.  
@@ -31,28 +31,24 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Point32(ref Buffer b)
+        internal Point32(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b) => new Point32(ref b);
+        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Point32(ref b);
         
-        readonly Point32 IDeserializable<Point32>.RosDeserialize(ref Buffer b) => new Point32(ref b);
+        public readonly Point32 RosDeserialize(ref ReadBuffer b) => new Point32(ref b);
         
-        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Point32 s && Equals(s);
-        
-        public readonly bool Equals(Point32 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
+        public readonly bool Equals(in Point32 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
         
         public static bool operator==(in Point32 a, in Point32 b) => a.Equals(b);
         
         public static bool operator!=(in Point32 a, in Point32 b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref this);
+            b.Serialize(in this);
         }
         
         public readonly void RosValidate()
@@ -74,11 +70,11 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACj1QMW7DMAzc/YoDsrRAkSF5QqduHfoB2aJtorIoiHTS9PWllDSABoq8O97xgK+VFZNk" +
-                "C5wVthKKKBtLhswI/uNs4Iy5EkFLmOjlyrbifMLIpg1VKk2sTnk9Dgd8OFzhLdk2ihRhgl0Jn13pulKl" +
-                "C9W2RnlM5NpqFGIT6pDz6Qi4jr9u7qGUY+iuvOOCpcom1shGVQrVMHJiu3XqP3Mj1bA4SBFJecl3Mxa+" +
-                "CXtB8vE9UXOVob6D8+LsJI9gzY8iGCRP9Iag7RLtSFPwRP1A3fN7kj223cOcJHgE/Dyr27P6Hf4Ad4CM" +
-                "MHABAAA=";
+                "H4sIAAAAAAAAEz1QO27DMAzdfYoHZGmBIkNyhE7dOvQCskXbRGVREOmk6elLKWkADRTJ9+MBXysrJskW" +
+                "OCtsJRRRNpYMmRH8x9nAGXMlgpYw0cuVbcX5hJFN21apNLE65PU4HPDh6wpvybZRpAgT7Er47EzXlSpd" +
+                "qDYZ5TGRc6tRiI2or5xPR8B5/HVzD6YcQ3flHScsVTaxBjaqUqiGkRPbrUP/kRuphoUaJJLyku9mLHwT" +
+                "9oLk43ui5ipDXYPz4ugkj2DNjyIYJE/0hqDtEu1IU/BE/UDd83uSPTbtYU4SPAJ+ntXtWf0Of3eAjDBw" +
+                "AQAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

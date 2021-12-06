@@ -60,17 +60,17 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// Constructor with buffer.
-        internal GetLoggersRequest(ref Buffer b)
+        internal GetLoggersRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        GetLoggersRequest IDeserializable<GetLoggersRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public GetLoggersRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly GetLoggersRequest Singleton = new GetLoggersRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -104,7 +104,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// Constructor with buffer.
-        internal GetLoggersResponse(ref Buffer b)
+        internal GetLoggersResponse(ref ReadBuffer b)
         {
             Loggers = b.DeserializeArray<Logger>();
             for (int i = 0; i < Loggers.Length; i++)
@@ -113,11 +113,11 @@ namespace Iviz.Msgs.Roscpp
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetLoggersResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetLoggersResponse(ref b);
         
-        GetLoggersResponse IDeserializable<GetLoggersResponse>.RosDeserialize(ref Buffer b) => new GetLoggersResponse(ref b);
+        public GetLoggersResponse RosDeserialize(ref ReadBuffer b) => new GetLoggersResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Loggers);
         }

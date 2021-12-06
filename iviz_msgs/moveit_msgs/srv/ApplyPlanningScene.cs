@@ -68,16 +68,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ApplyPlanningSceneRequest(ref Buffer b)
+        internal ApplyPlanningSceneRequest(ref ReadBuffer b)
         {
             Scene = new PlanningScene(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ApplyPlanningSceneRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ApplyPlanningSceneRequest(ref b);
         
-        ApplyPlanningSceneRequest IDeserializable<ApplyPlanningSceneRequest>.RosDeserialize(ref Buffer b) => new ApplyPlanningSceneRequest(ref b);
+        public ApplyPlanningSceneRequest RosDeserialize(ref ReadBuffer b) => new ApplyPlanningSceneRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Scene.RosSerialize(ref b);
         }
@@ -110,16 +110,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ApplyPlanningSceneResponse(ref Buffer b)
+        internal ApplyPlanningSceneResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ApplyPlanningSceneResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ApplyPlanningSceneResponse(ref b);
         
-        ApplyPlanningSceneResponse IDeserializable<ApplyPlanningSceneResponse>.RosDeserialize(ref Buffer b) => new ApplyPlanningSceneResponse(ref b);
+        public ApplyPlanningSceneResponse RosDeserialize(ref ReadBuffer b) => new ApplyPlanningSceneResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
         }

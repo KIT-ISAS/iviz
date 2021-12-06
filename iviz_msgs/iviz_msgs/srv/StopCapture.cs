@@ -60,17 +60,17 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal StopCaptureRequest(ref Buffer b)
+        internal StopCaptureRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        StopCaptureRequest IDeserializable<StopCaptureRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public StopCaptureRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly StopCaptureRequest Singleton = new StopCaptureRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -106,17 +106,17 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal StopCaptureResponse(ref Buffer b)
+        internal StopCaptureResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new StopCaptureResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new StopCaptureResponse(ref b);
         
-        StopCaptureResponse IDeserializable<StopCaptureResponse>.RosDeserialize(ref Buffer b) => new StopCaptureResponse(ref b);
+        public StopCaptureResponse RosDeserialize(ref ReadBuffer b) => new StopCaptureResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);

@@ -73,17 +73,17 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// Constructor with buffer.
-        internal ProcessFileRequest(ref Buffer b)
+        internal ProcessFileRequest(ref ReadBuffer b)
         {
             FilePath = b.DeserializeString();
             TopicName = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ProcessFileRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileRequest(ref b);
         
-        ProcessFileRequest IDeserializable<ProcessFileRequest>.RosDeserialize(ref Buffer b) => new ProcessFileRequest(ref b);
+        public ProcessFileRequest RosDeserialize(ref ReadBuffer b) => new ProcessFileRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(FilePath);
             b.Serialize(TopicName);
@@ -118,16 +118,16 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// Constructor with buffer.
-        internal ProcessFileResponse(ref Buffer b)
+        internal ProcessFileResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ProcessFileResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileResponse(ref b);
         
-        ProcessFileResponse IDeserializable<ProcessFileResponse>.RosDeserialize(ref Buffer b) => new ProcessFileResponse(ref b);
+        public ProcessFileResponse RosDeserialize(ref ReadBuffer b) => new ProcessFileResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
         }

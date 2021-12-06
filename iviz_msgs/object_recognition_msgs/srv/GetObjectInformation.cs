@@ -70,16 +70,16 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal GetObjectInformationRequest(ref Buffer b)
+        internal GetObjectInformationRequest(ref ReadBuffer b)
         {
             Type = new ObjectRecognitionMsgs.ObjectType(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetObjectInformationRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetObjectInformationRequest(ref b);
         
-        GetObjectInformationRequest IDeserializable<GetObjectInformationRequest>.RosDeserialize(ref Buffer b) => new GetObjectInformationRequest(ref b);
+        public GetObjectInformationRequest RosDeserialize(ref ReadBuffer b) => new GetObjectInformationRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Type.RosSerialize(ref b);
         }
@@ -114,16 +114,16 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal GetObjectInformationResponse(ref Buffer b)
+        internal GetObjectInformationResponse(ref ReadBuffer b)
         {
             Information = new ObjectRecognitionMsgs.ObjectInformation(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetObjectInformationResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetObjectInformationResponse(ref b);
         
-        GetObjectInformationResponse IDeserializable<GetObjectInformationResponse>.RosDeserialize(ref Buffer b) => new GetObjectInformationResponse(ref b);
+        public GetObjectInformationResponse RosDeserialize(ref ReadBuffer b) => new GetObjectInformationResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Information.RosSerialize(ref b);
         }

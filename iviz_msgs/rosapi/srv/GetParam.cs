@@ -71,17 +71,17 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal GetParamRequest(ref Buffer b)
+        internal GetParamRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             @default = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetParamRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetParamRequest(ref b);
         
-        GetParamRequest IDeserializable<GetParamRequest>.RosDeserialize(ref Buffer b) => new GetParamRequest(ref b);
+        public GetParamRequest RosDeserialize(ref ReadBuffer b) => new GetParamRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
             b.Serialize(@default);
@@ -116,16 +116,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal GetParamResponse(ref Buffer b)
+        internal GetParamResponse(ref ReadBuffer b)
         {
             Value = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetParamResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetParamResponse(ref b);
         
-        GetParamResponse IDeserializable<GetParamResponse>.RosDeserialize(ref Buffer b) => new GetParamResponse(ref b);
+        public GetParamResponse RosDeserialize(ref ReadBuffer b) => new GetParamResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Value);
         }

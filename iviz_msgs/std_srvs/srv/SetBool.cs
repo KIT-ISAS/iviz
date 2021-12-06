@@ -67,16 +67,16 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// Constructor with buffer.
-        internal SetBoolRequest(ref Buffer b)
+        internal SetBoolRequest(ref ReadBuffer b)
         {
             Data = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SetBoolRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetBoolRequest(ref b);
         
-        SetBoolRequest IDeserializable<SetBoolRequest>.RosDeserialize(ref Buffer b) => new SetBoolRequest(ref b);
+        public SetBoolRequest RosDeserialize(ref ReadBuffer b) => new SetBoolRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Data);
         }
@@ -113,17 +113,17 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// Constructor with buffer.
-        internal SetBoolResponse(ref Buffer b)
+        internal SetBoolResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SetBoolResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetBoolResponse(ref b);
         
-        SetBoolResponse IDeserializable<SetBoolResponse>.RosDeserialize(ref Buffer b) => new SetBoolResponse(ref b);
+        public SetBoolResponse RosDeserialize(ref ReadBuffer b) => new SetBoolResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);

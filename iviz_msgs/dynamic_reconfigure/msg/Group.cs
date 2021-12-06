@@ -32,7 +32,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal Group(ref Buffer b)
+        internal Group(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Type = b.DeserializeString();
@@ -45,11 +45,11 @@ namespace Iviz.Msgs.DynamicReconfigure
             Id = b.Deserialize<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new Group(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Group(ref b);
         
-        Group IDeserializable<Group>.RosDeserialize(ref Buffer b) => new Group(ref b);
+        public Group RosDeserialize(ref ReadBuffer b) => new Group(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
             b.Serialize(Type);
@@ -91,7 +91,7 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACisuKcrMS1fIS8xN5SqGsEsqC1K5AhKLEnNdUouTizILSjLz86JjFQpAQqklqUXFXJl5" +
+                "H4sIAAAAAAAAEysuKcrMS1fIS8xN5SqGsEsqC1K5AhKLEnNdUouTizILSjLz86JjFQpAQqklqUXFXJl5" +
                 "JcZGIIHUvBIFKC8zhYvLlsqAyzfY3UohpRLovMzk+KLU5Py8tMz00qJUfXT3wRyP4ZFSiOtyUstSc2AS" +
                 "KZj6UlMyS+KBvsvIB3oDAFF6cKsVAQAA";
                 

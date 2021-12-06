@@ -68,16 +68,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal DeleteParamRequest(ref Buffer b)
+        internal DeleteParamRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new DeleteParamRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new DeleteParamRequest(ref b);
         
-        DeleteParamRequest IDeserializable<DeleteParamRequest>.RosDeserialize(ref Buffer b) => new DeleteParamRequest(ref b);
+        public DeleteParamRequest RosDeserialize(ref ReadBuffer b) => new DeleteParamRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
         }
@@ -102,17 +102,17 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal DeleteParamResponse(ref Buffer b)
+        internal DeleteParamResponse(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        DeleteParamResponse IDeserializable<DeleteParamResponse>.RosDeserialize(ref Buffer b) => Singleton;
+        public DeleteParamResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly DeleteParamResponse Singleton = new DeleteParamResponse();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         

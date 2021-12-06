@@ -105,7 +105,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetCartesianPathRequest(ref Buffer b)
+        internal GetCartesianPathRequest(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             StartState = new RobotState(ref b);
@@ -118,11 +118,11 @@ namespace Iviz.Msgs.MoveitMsgs
             PathConstraints = new Constraints(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetCartesianPathRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetCartesianPathRequest(ref b);
         
-        GetCartesianPathRequest IDeserializable<GetCartesianPathRequest>.RosDeserialize(ref Buffer b) => new GetCartesianPathRequest(ref b);
+        public GetCartesianPathRequest RosDeserialize(ref ReadBuffer b) => new GetCartesianPathRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
             StartState.RosSerialize(ref b);
@@ -194,7 +194,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetCartesianPathResponse(ref Buffer b)
+        internal GetCartesianPathResponse(ref ReadBuffer b)
         {
             StartState = new RobotState(ref b);
             Solution = new RobotTrajectory(ref b);
@@ -202,11 +202,11 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetCartesianPathResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetCartesianPathResponse(ref b);
         
-        GetCartesianPathResponse IDeserializable<GetCartesianPathResponse>.RosDeserialize(ref Buffer b) => new GetCartesianPathResponse(ref b);
+        public GetCartesianPathResponse RosDeserialize(ref ReadBuffer b) => new GetCartesianPathResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             StartState.RosSerialize(ref b);
             Solution.RosSerialize(ref b);

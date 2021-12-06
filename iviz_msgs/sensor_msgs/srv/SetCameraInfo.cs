@@ -75,16 +75,16 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal SetCameraInfoRequest(ref Buffer b)
+        internal SetCameraInfoRequest(ref ReadBuffer b)
         {
             CameraInfo = new SensorMsgs.CameraInfo(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SetCameraInfoRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetCameraInfoRequest(ref b);
         
-        SetCameraInfoRequest IDeserializable<SetCameraInfoRequest>.RosDeserialize(ref Buffer b) => new SetCameraInfoRequest(ref b);
+        public SetCameraInfoRequest RosDeserialize(ref ReadBuffer b) => new SetCameraInfoRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             CameraInfo.RosSerialize(ref b);
         }
@@ -120,17 +120,17 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal SetCameraInfoResponse(ref Buffer b)
+        internal SetCameraInfoResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             StatusMessage = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SetCameraInfoResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetCameraInfoResponse(ref b);
         
-        SetCameraInfoResponse IDeserializable<SetCameraInfoResponse>.RosDeserialize(ref Buffer b) => new SetCameraInfoResponse(ref b);
+        public SetCameraInfoResponse RosDeserialize(ref ReadBuffer b) => new SetCameraInfoResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(StatusMessage);

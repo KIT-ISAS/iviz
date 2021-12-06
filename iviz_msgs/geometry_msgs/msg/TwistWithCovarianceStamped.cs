@@ -25,17 +25,17 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal TwistWithCovarianceStamped(ref Buffer b)
+        internal TwistWithCovarianceStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Twist = new TwistWithCovariance(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TwistWithCovarianceStamped(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TwistWithCovarianceStamped(ref b);
         
-        TwistWithCovarianceStamped IDeserializable<TwistWithCovarianceStamped>.RosDeserialize(ref Buffer b) => new TwistWithCovarianceStamped(ref b);
+        public TwistWithCovarianceStamped RosDeserialize(ref ReadBuffer b) => new TwistWithCovarianceStamped(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
             Twist.RosSerialize(ref b);
@@ -59,20 +59,20 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1VTW/bMAy9+1cQyKHtkGRAO/QQYKcN23oYUKzFPjEUjM3YWm3Jk+Qm3q/fo+y4LdpD" +
-                "D1sDA7Fl8pF8fKRndFmZQF5aL0FsDMSWJETTcJSC4taESFsTK5hsxIvNhXLnfGEsDGjjuRG4wNI0cOOm" +
-                "XWYfhAvxVKW/7FIhvgDhjbthb1gREmyWvf7Hv+zjxfsVhVhcNaEML4c8shldRGTIvqBGIhccmTYO+Zmy" +
-                "Er+o5UZqSqmj4PQ29q2EZTZyg6sUK57ruqcuKCsOHDRNZ02uJEyl7/3haSwxteyjybua/QPOFB1XkN9d" +
-                "4vTs7Qo2NkjeRYOEeiDkXjgYW+IlZZ2x8eRYHbLZ5dYt8CglWJ6CU6w4arKy015qnhxWiPFiKG4JbJAj" +
-                "iFIEOkxnV3gMR4QgSEFal1d0iMzP+1g5C0Ch1LJ1LQqcgwGgHqjTwdEdZE17RZat28MPiLcxngJrJ1yt" +
-                "aVGhZ7VWH7oSBMKw9e7GFDBd9wkkrw0US7VZe/Z9pl5DyGz2LukyavtSR/DPIbjcJFWrnrMQvaKnblyZ" +
-                "4n+psRQH1fl+kOQjw7CX2b5tgdB+ZBpVAkhPUFTLYDNNYQcPHxnd75fZMFv7aZrRJ7ddNPwL2p7mmaMB" +
-                "5W6TCDvdnUJk0xRixL3ZpfhCzpvJHLoFKVF8UL1DyBuzk2LBu7ubIpmqjM+A7zFo8xTjji97Uf0d7ubU" +
-                "z+nPnLwbA/DadZG+kiI+OP72+PH3dHyUbWrH8fTVj5PTn3eKecb2Pblha++uxeIQ+8Jgs0LNAiXrtmRb" +
-                "prWgGwKb5rPk0fkTGk1un0e756lujJo98k1AifrufoFL3WBnaec4i43VCGMcUezkCcfCeLiqVFRm+Ig4" +
-                "L3PQQYUDc9YpnQ1fA1KwAAje3LYAwxb2bEM9SCAxSIeyLJdz2lZgNVnpAKd1mxa0ycmb0mA/qycCQeCj" +
-                "M9NYHES6OcYo1fWQ8xAMwgXIXnBHSzrbUO862mpBuPHjd8HRGimOeaX9FZ2bpyEZIO4Teu7Qe9ASApdY" +
-                "dTZEfJEwtqOEaTfd9dPdn+wv5KrBh5MHAAA=";
+                "H4sIAAAAAAAAE71VTW/bMAy9+1cQyKHNkGRAO+RQYKcN23oYUKzFPjEUjM3YWm3Jo+Qm3q/fk5y4KdpD" +
+                "D1sDA7Fl8pF8fKQndFUZTyqtihcbPLEl8cE0HKSgsDE+0MaECiZrUbG5UO6cFsbCgNbKjcAFlqaBGzft" +
+                "IvsgXIhSlf6yqwjxBQhv3C2r4YiQYLPs9T/+ZR8v35+RD8V140v/csgjm9BlQIasBTUSuODAtHbIz5SV" +
+                "6LyWW6kppY6C09vQt+IXcEzc4CrFinJd99T5yIoDB03TWZNHEsbS9/7wNJaYWtZg8q5mfcBZRMfl5XeX" +
+                "OD1/ewYb6yXvgkFCPRByFfbGlnhJWWdsOD2JDtnkauPmeJQSLI/BKVQcYrKyjb2MebI/Q4wXQ3ELYIMc" +
+                "QZTC03E6u8ajnxKCIAVpXV7RMTK/6EPlLACFUstWtUTgHAwA9Sg6HU0PkG2CtmzdHn5AvIvxFFg74saa" +
+                "5hV6VsfqfVeCQBi26m5NAdNVn0Dy2kCxVJuVsvZZ9BpCZpN3SZchti91BP/svctNUnXUc+aDRvTUjWtT" +
+                "/C81luKgOu0HST4yDHuZ7dvmCe1HpiFKAOkJimoZbKYp7OChgdH9fpENs7Wfpgl9cpt5w7+g7XGeORhQ" +
+                "7taJsOV2CZGNU4gRV7NN8YWcmtEcugUpQdRHvUPIa7OVYs7bw02RTKOMz4GvGLRZinHgyypRf8fbGfUz" +
+                "+jMjdbsAvHJdoK8UER8cf3v8+Hs6nmbr2nFYvvpxuvx5UMwztu/JDVupuxGLQ+wLg80KNQuUHLcl2zKt" +
+                "hbghsGk+Sx6cntLO5O55Z/c81e2i7us7/CagxPjufoGLuMHO085xFhurEcY4otjRE46FUbhGqUSZ4SPi" +
+                "VGaggwoH5qyLdDZ8A0jBAoje3LYAwxZWtr4eJJAYpGNZlIsZbSqwmqziAKd1mxa0yUlNaYrBE4Ga0Zlp" +
+                "VxxEuj7BKNX1kPMQDMIFyF5w0wWdr6l3HW1iQbjR3XfB0UrGvNL+Cs7N0pAMEPcJvXDoPWjxnkusOusD" +
+                "vkgY252EaTve9ePdn+wv5KrBh5MHAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

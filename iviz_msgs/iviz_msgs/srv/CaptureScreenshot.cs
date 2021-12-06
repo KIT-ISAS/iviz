@@ -67,16 +67,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal CaptureScreenshotRequest(ref Buffer b)
+        internal CaptureScreenshotRequest(ref ReadBuffer b)
         {
             Compress = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new CaptureScreenshotRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotRequest(ref b);
         
-        CaptureScreenshotRequest IDeserializable<CaptureScreenshotRequest>.RosDeserialize(ref Buffer b) => new CaptureScreenshotRequest(ref b);
+        public CaptureScreenshotRequest RosDeserialize(ref ReadBuffer b) => new CaptureScreenshotRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Compress);
         }
@@ -129,7 +129,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal CaptureScreenshotResponse(ref Buffer b)
+        internal CaptureScreenshotResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
@@ -142,11 +142,11 @@ namespace Iviz.Msgs.IvizMsgs
             Data = b.DeserializeStructArray<byte>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new CaptureScreenshotResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);
         
-        CaptureScreenshotResponse IDeserializable<CaptureScreenshotResponse>.RosDeserialize(ref Buffer b) => new CaptureScreenshotResponse(ref b);
+        public CaptureScreenshotResponse RosDeserialize(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
@@ -155,7 +155,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Height);
             b.Serialize(Bpp);
             b.SerializeStructArray(Intrinsics, 9);
-            b.Serialize(ref Pose);
+            b.Serialize(in Pose);
             b.SerializeStructArray(Data);
         }
         

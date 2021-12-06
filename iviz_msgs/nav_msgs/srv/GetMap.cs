@@ -61,17 +61,17 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMapRequest(ref Buffer b)
+        internal GetMapRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        GetMapRequest IDeserializable<GetMapRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public GetMapRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly GetMapRequest Singleton = new GetMapRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -105,16 +105,16 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMapResponse(ref Buffer b)
+        internal GetMapResponse(ref ReadBuffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetMapResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetMapResponse(ref b);
         
-        GetMapResponse IDeserializable<GetMapResponse>.RosDeserialize(ref Buffer b) => new GetMapResponse(ref b);
+        public GetMapResponse RosDeserialize(ref ReadBuffer b) => new GetMapResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Map.RosSerialize(ref b);
         }

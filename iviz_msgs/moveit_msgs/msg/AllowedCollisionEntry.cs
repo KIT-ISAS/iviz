@@ -23,16 +23,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal AllowedCollisionEntry(ref Buffer b)
+        internal AllowedCollisionEntry(ref ReadBuffer b)
         {
             Enabled = b.DeserializeStructArray<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new AllowedCollisionEntry(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AllowedCollisionEntry(ref b);
         
-        AllowedCollisionEntry IDeserializable<AllowedCollisionEntry>.RosDeserialize(ref Buffer b) => new AllowedCollisionEntry(ref b);
+        public AllowedCollisionEntry RosDeserialize(ref ReadBuffer b) => new AllowedCollisionEntry(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(Enabled);
         }
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClNWKM9ILclILVLIL1LIyy9RSM7PyckszszPU0jOSE3OzsxLV8gsVkjNS0zKSU3hSsrP" +
+                "H4sIAAAAAAAAE1NWKM9ILclILVLIL1LIyy9RSM7PyckszszPU0jOSE3OzsxLV8gsVkjNS0zKSU3hSsrP" +
                 "z4mOhXO5AEjNYe0/AAAA";
                 
         public override string ToString() => Extensions.ToString(this);

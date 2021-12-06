@@ -67,16 +67,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestRequestAndResponseRequest(ref Buffer b)
+        internal TestRequestAndResponseRequest(ref ReadBuffer b)
         {
             Data = b.Deserialize<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TestRequestAndResponseRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestRequestAndResponseRequest(ref b);
         
-        TestRequestAndResponseRequest IDeserializable<TestRequestAndResponseRequest>.RosDeserialize(ref Buffer b) => new TestRequestAndResponseRequest(ref b);
+        public TestRequestAndResponseRequest RosDeserialize(ref ReadBuffer b) => new TestRequestAndResponseRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Data);
         }
@@ -110,16 +110,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestRequestAndResponseResponse(ref Buffer b)
+        internal TestRequestAndResponseResponse(ref ReadBuffer b)
         {
             Data = b.Deserialize<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TestRequestAndResponseResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestRequestAndResponseResponse(ref b);
         
-        TestRequestAndResponseResponse IDeserializable<TestRequestAndResponseResponse>.RosDeserialize(ref Buffer b) => new TestRequestAndResponseResponse(ref b);
+        public TestRequestAndResponseResponse RosDeserialize(ref ReadBuffer b) => new TestRequestAndResponseResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Data);
         }

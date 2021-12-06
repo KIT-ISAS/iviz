@@ -39,7 +39,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal LookupTransformGoal(ref Buffer b)
+        internal LookupTransformGoal(ref ReadBuffer b)
         {
             TargetFrame = b.DeserializeString();
             SourceFrame = b.DeserializeString();
@@ -50,11 +50,11 @@ namespace Iviz.Msgs.Tf2Msgs
             Advanced = b.Deserialize<bool>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new LookupTransformGoal(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformGoal(ref b);
         
-        LookupTransformGoal IDeserializable<LookupTransformGoal>.RosDeserialize(ref Buffer b) => new LookupTransformGoal(ref b);
+        public LookupTransformGoal RosDeserialize(ref ReadBuffer b) => new LookupTransformGoal(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(TargetFrame);
             b.Serialize(SourceFrame);
@@ -93,7 +93,7 @@ namespace Iviz.Msgs.Tf2Msgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACjWMQQqAMAwE7/uK/kyiTUvANpCm4vOlGm+7wzAYbtJrcrLKvhWjxgg2dNrBwVwa/2Rt" +
+                "H4sIAAAAAAAAEzWMQQqAMAwE7/uK/kyiTUvANpCm4vOlGm+7wzAYbtJrcrLKvhWjxgg2dNrBwVwa/2Rt" +
                 "5Gnkoj2tp9OBz4nS60SoyM05OsCueibKF/WDM/AACrcOXIIAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);

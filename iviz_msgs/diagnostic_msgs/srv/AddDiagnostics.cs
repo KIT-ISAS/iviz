@@ -83,16 +83,16 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// Constructor with buffer.
-        internal AddDiagnosticsRequest(ref Buffer b)
+        internal AddDiagnosticsRequest(ref ReadBuffer b)
         {
             LoadNamespace = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new AddDiagnosticsRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddDiagnosticsRequest(ref b);
         
-        AddDiagnosticsRequest IDeserializable<AddDiagnosticsRequest>.RosDeserialize(ref Buffer b) => new AddDiagnosticsRequest(ref b);
+        public AddDiagnosticsRequest RosDeserialize(ref ReadBuffer b) => new AddDiagnosticsRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(LoadNamespace);
         }
@@ -132,17 +132,17 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// Constructor with buffer.
-        internal AddDiagnosticsResponse(ref Buffer b)
+        internal AddDiagnosticsResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new AddDiagnosticsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddDiagnosticsResponse(ref b);
         
-        AddDiagnosticsResponse IDeserializable<AddDiagnosticsResponse>.RosDeserialize(ref Buffer b) => new AddDiagnosticsResponse(ref b);
+        public AddDiagnosticsResponse RosDeserialize(ref ReadBuffer b) => new AddDiagnosticsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);

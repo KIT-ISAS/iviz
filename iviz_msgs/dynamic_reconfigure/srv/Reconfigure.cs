@@ -68,16 +68,16 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal ReconfigureRequest(ref Buffer b)
+        internal ReconfigureRequest(ref ReadBuffer b)
         {
             Config = new Config(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ReconfigureRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ReconfigureRequest(ref b);
         
-        ReconfigureRequest IDeserializable<ReconfigureRequest>.RosDeserialize(ref Buffer b) => new ReconfigureRequest(ref b);
+        public ReconfigureRequest RosDeserialize(ref ReadBuffer b) => new ReconfigureRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Config.RosSerialize(ref b);
         }
@@ -111,16 +111,16 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal ReconfigureResponse(ref Buffer b)
+        internal ReconfigureResponse(ref ReadBuffer b)
         {
             Config = new Config(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ReconfigureResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ReconfigureResponse(ref b);
         
-        ReconfigureResponse IDeserializable<ReconfigureResponse>.RosDeserialize(ref Buffer b) => new ReconfigureResponse(ref b);
+        public ReconfigureResponse RosDeserialize(ref ReadBuffer b) => new ReconfigureResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Config.RosSerialize(ref b);
         }

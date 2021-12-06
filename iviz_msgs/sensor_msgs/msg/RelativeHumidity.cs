@@ -31,18 +31,18 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal RelativeHumidity(ref Buffer b)
+        internal RelativeHumidity(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             RelativeHumidity_ = b.Deserialize<double>();
             Variance = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new RelativeHumidity(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RelativeHumidity(ref b);
         
-        RelativeHumidity IDeserializable<RelativeHumidity>.RosDeserialize(ref Buffer b) => new RelativeHumidity(ref b);
+        public RelativeHumidity RosDeserialize(ref ReadBuffer b) => new RelativeHumidity(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
             b.Serialize(RelativeHumidity_);
@@ -65,16 +65,16 @@ namespace Iviz.Msgs.SensorMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACq1Uy27bMBC88ysW0CFJAavuAz0Y6M195FCgQHI3NtJaIkqRKknZ1d93VopfaZv2UMKA" +
-                "LGp2dnd2SCrozvrGCUXhGv9oG0NHjFfH2e6E2qGztc0jJfEpxJJoLVvrJVFuEQVQoLClnmO27AwV1EdJ" +
-                "aYii23vOEmnHfYiUwxSSOA8Ik/px+wjnjLxZul7wGRulMfQZVYGgnR/nq6BsO0mZu14TKXMnrESd+Gwu" +
-                "sJerQI/cycbWZOcuXKi0D38getIz6ti6wPnd26MsmyOkoA8/phbO4n8R72/lQPJluVSFXpXL8nm0AlG3" +
-                "DwfN/yT48zRIhDo1FHKl33I9TgqNnSmw42jZV3JRkhZkPTIjXCfL6YQb/Dcf9t68/8/LfLn7tKKU602X" +
-                "mvRydoqBnzP7mmMNO2SuOTNt4bLWNq3EhZOdOJpcgzKnr3nsJZUIvG+1i0SNeDjQuZGGBBCGUoWuG7yF" +
-                "SeTkukM8Iq2HcycFq8FxBD5EHCaFT1ZTdvySfB9EJbldr4DxSapBbYJM1lc4gEkP4O2azAAx37zWAFPc" +
-                "78NCtW0w15Plc4vjgmJlNt+k+Qo5XszNleCGOIIsdaLraW+D13RDSIISpA9VS9eo/OuYW1hXfTvN7AGX" +
-                "AYgrKADWKw26ujlj1rJX5NmHA/3MeMrxL7TKMvNqT4sWM3PafRoaCAhgH8PO1oA+jBNJ5SyMSs4+RI6j" +
-                "0ag5pSk+qsYAIWqaCJ6cUqjsdMvsbW5NynG+3OaDb8xPiNWhcPkEAAA=";
+                "H4sIAAAAAAAAE61Uy27bMBC88ysW0CFJAavuAz0Y6M195FCgQHI31tLaIkqRKknZ9d93loofTZu0hwoG" +
+                "bMkzs7uzQ1FFd9ZvnVAUbvGLNjH0xLh1nO1OqBt729p8oCQ+hVgTLWVjvSTKHVgABQobGjhmy85QRUOU" +
+                "lMYo+njPWSLteAiRciiUxHkETdqHxyc4Z9TN0g8SFSK1MfQZXUGgm74ur4qy7SVl7gctpMq9sAr14rOh" +
+                "p68KM3IvK9uSnaZwodE5/FHo0czoY+MC53dvT7asTpCKPvwoI1zwfzPvb+3A8nk9V4de1fP6ebQC0bcP" +
+                "R8+fMvx5GRRCn0qFXemPWg+bwmAXDuw4WvaN/NKSNmQ9KoOum+V0xo3+mw97b97/58t8ufu0oJTbVZ+2" +
+                "6eWUFIM8Z/YtxxZxyNxyZtogZZ3ddhJnTnbiqKQGbZZ/82GQVIN43+kUibbikUDnDjQmgLCUJvT96C1C" +
+                "IufUHflgWo/kFgeb0XEEPkQcJoWXqKk6Pkm+j6KW3C4XwPgkzagxQSXrGxzApAfwdklmhJlvXivBVPf7" +
+                "MFNvt9jrOfK5w3FBszKFr3i+QI0X03A1tGGOoEqb6Lo8W+E23RCKoAUZQtPRNTr/esgdoqu5LTtb42UA" +
+                "4QYOQPVKSVc3F8q+SHv24Sg/KZ5r/IusP+nqTLMOO3M6fRq3MBDAIYadbQFdH4pI4yyCSs6uI8eDUdZU" +
+                "0lQf1WOAwCobwTenFBpb3jJ7mzuTcpxebtPBN+YniNWhcPkEAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

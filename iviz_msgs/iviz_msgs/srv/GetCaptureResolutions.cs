@@ -60,17 +60,17 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetCaptureResolutionsRequest(ref Buffer b)
+        internal GetCaptureResolutionsRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        GetCaptureResolutionsRequest IDeserializable<GetCaptureResolutionsRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public GetCaptureResolutionsRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly GetCaptureResolutionsRequest Singleton = new GetCaptureResolutionsRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetCaptureResolutionsResponse(ref Buffer b)
+        internal GetCaptureResolutionsResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
@@ -120,11 +120,11 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetCaptureResolutionsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetCaptureResolutionsResponse(ref b);
         
-        GetCaptureResolutionsResponse IDeserializable<GetCaptureResolutionsResponse>.RosDeserialize(ref Buffer b) => new GetCaptureResolutionsResponse(ref b);
+        public GetCaptureResolutionsResponse RosDeserialize(ref ReadBuffer b) => new GetCaptureResolutionsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);

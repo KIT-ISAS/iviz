@@ -22,16 +22,16 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// Constructor with buffer.
-        internal FibonacciGoal(ref Buffer b)
+        internal FibonacciGoal(ref ReadBuffer b)
         {
             Order = b.Deserialize<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new FibonacciGoal(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FibonacciGoal(ref b);
         
-        FibonacciGoal IDeserializable<FibonacciGoal>.RosDeserialize(ref Buffer b) => new FibonacciGoal(ref b);
+        public FibonacciGoal RosDeserialize(ref ReadBuffer b) => new FibonacciGoal(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Order);
         }
@@ -55,7 +55,7 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuPKzCsxNlLIL0pJLeICAL/qDR8NAAAA";
+                "H4sIAAAAAAAAE+PKzCsxNlLIL0pJLeICAL/qDR8NAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
     }

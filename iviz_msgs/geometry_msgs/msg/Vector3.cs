@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IMessage, System.IEquatable<Vector3>, IDeserializable<Vector3>
+    public struct Vector3 : IMessage, IDeserializable<Vector3>
     {
         // This represents a vector in free space. 
         // It is only meant to represent a direction. Therefore, it does not
@@ -30,28 +30,24 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Vector3(ref Buffer b)
+        internal Vector3(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b) => new Vector3(ref b);
+        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Vector3(ref b);
         
-        readonly Vector3 IDeserializable<Vector3>.RosDeserialize(ref Buffer b) => new Vector3(ref b);
+        public readonly Vector3 RosDeserialize(ref ReadBuffer b) => new Vector3(ref b);
         
-        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Vector3 s && Equals(s);
-        
-        public readonly bool Equals(Vector3 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
+        public readonly bool Equals(in Vector3 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
         
         public static bool operator==(in Vector3 a, in Vector3 b) => a.Equals(b);
         
         public static bool operator!=(in Vector3 a, in Vector3 b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref this);
+            b.Serialize(in this);
         }
         
         public readonly void RosValidate()
@@ -73,11 +69,11 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACkWQQU7EMAxF9z3Fl2YDUlUkQNxhdiwQW+Rp3UxEE1eOh1JOj9OisvuK/J6/c8LbNRYo" +
-                "z8qFsxUQvrg3UcSMUZlRZuq5Q3PC2eCzkqcViSkbTP5JB4eojkbJnVtZeRTlFtEwCBdkMXck+nQl58KV" +
-                "pnl2GcGUcpmosvXZkTvuQtdiuXLep2IOPuiGwJk19tAY4rCTvigdMOF9O+CphY2PWOI07Z33ZXZll6jY" +
-                "Btx3OI9Y5YalHuRBMZB5I8HFK/71ostU+0qLWy2+KQJLYtP1I5VQHl4lOp+4FArsf1eMaeiaZpyE7OUZ" +
-                "30daj/TT/ALUysCIfwEAAA==";
+                "H4sIAAAAAAAAE0WQQWrEMAxF9znFh9m0EFJoS+8wuy7KbIsmUTymjhVkTdP09JUTSHcfo/f05RM+brFA" +
+                "eVYunK2A8M29iSJmjMqMMlPPHZoTzgaflZxWTEzZYPJPOjhEdTRK7tzKyqMot4iGQbggi7ljoi9Xci5c" +
+                "aZpnlxFMKZdEla3PjjxwF7oWy43zPhVz8EE3BM6ssYfGEIed9EXTARMu2wEvLWx8xhJT2jvvy+zGLlGx" +
+                "DXjscB6xyh1LPciDYiCjKrry0YuuqfaVFvdafFMElolN18+phPL0LtH5iUuhwP53xZiGrmnGJGRvr/g5" +
+                "0nqk3+YP1MrAiH8BAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

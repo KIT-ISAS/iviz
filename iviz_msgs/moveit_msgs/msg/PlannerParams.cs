@@ -31,18 +31,18 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PlannerParams(ref Buffer b)
+        internal PlannerParams(ref ReadBuffer b)
         {
             Keys = b.DeserializeStringArray();
             Values = b.DeserializeStringArray();
             Descriptions = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new PlannerParams(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PlannerParams(ref b);
         
-        PlannerParams IDeserializable<PlannerParams>.RosDeserialize(ref Buffer b) => new PlannerParams(ref b);
+        public PlannerParams RosDeserialize(ref ReadBuffer b) => new PlannerParams(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Keys);
             b.SerializeArray(Values);
@@ -89,7 +89,7 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACl3LMQ6AIBAF0Z5T/IQGz2QsVtwYoiBh0QRPL4YGraaZpxEpkefMCaFWYKQG4m4GCS7a" +
+                "H4sIAAAAAAAAE13LMQ6AIBAF0Z5T/IQGz2QsVtwYoiBh0QRPL4YGraaZpxEpkefMCaFWYKQG4m4GCS7a" +
                 "T5ZBSU4urOOEjYsopTvWlp97t0615+sWFptczO4IMJYCZgb7mEvnuqfqB1KvtWCtAAAA";
                 
         public override string ToString() => Extensions.ToString(this);

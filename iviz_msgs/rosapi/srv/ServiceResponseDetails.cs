@@ -68,16 +68,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal ServiceResponseDetailsRequest(ref Buffer b)
+        internal ServiceResponseDetailsRequest(ref ReadBuffer b)
         {
             Type = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ServiceResponseDetailsRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServiceResponseDetailsRequest(ref b);
         
-        ServiceResponseDetailsRequest IDeserializable<ServiceResponseDetailsRequest>.RosDeserialize(ref Buffer b) => new ServiceResponseDetailsRequest(ref b);
+        public ServiceResponseDetailsRequest RosDeserialize(ref ReadBuffer b) => new ServiceResponseDetailsRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Type);
         }
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal ServiceResponseDetailsResponse(ref Buffer b)
+        internal ServiceResponseDetailsResponse(ref ReadBuffer b)
         {
             Typedefs = b.DeserializeArray<TypeDef>();
             for (int i = 0; i < Typedefs.Length; i++)
@@ -119,11 +119,11 @@ namespace Iviz.Msgs.Rosapi
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ServiceResponseDetailsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServiceResponseDetailsResponse(ref b);
         
-        ServiceResponseDetailsResponse IDeserializable<ServiceResponseDetailsResponse>.RosDeserialize(ref Buffer b) => new ServiceResponseDetailsResponse(ref b);
+        public ServiceResponseDetailsResponse RosDeserialize(ref ReadBuffer b) => new ServiceResponseDetailsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Typedefs);
         }

@@ -69,17 +69,17 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal AddTwoIntsRequest(ref Buffer b)
+        internal AddTwoIntsRequest(ref ReadBuffer b)
         {
             A = b.Deserialize<long>();
             B = b.Deserialize<long>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new AddTwoIntsRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddTwoIntsRequest(ref b);
         
-        AddTwoIntsRequest IDeserializable<AddTwoIntsRequest>.RosDeserialize(ref Buffer b) => new AddTwoIntsRequest(ref b);
+        public AddTwoIntsRequest RosDeserialize(ref ReadBuffer b) => new AddTwoIntsRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(A);
             b.Serialize(B);
@@ -114,16 +114,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal AddTwoIntsResponse(ref Buffer b)
+        internal AddTwoIntsResponse(ref ReadBuffer b)
         {
             Sum = b.Deserialize<long>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new AddTwoIntsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddTwoIntsResponse(ref b);
         
-        AddTwoIntsResponse IDeserializable<AddTwoIntsResponse>.RosDeserialize(ref Buffer b) => new AddTwoIntsResponse(ref b);
+        public AddTwoIntsResponse RosDeserialize(ref ReadBuffer b) => new AddTwoIntsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Sum);
         }

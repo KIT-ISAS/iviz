@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Pose : IMessage, System.IEquatable<Pose>, IDeserializable<Pose>
+    public struct Pose : IMessage, IDeserializable<Pose>
     {
         // A representation of pose in free space, composed of position and orientation. 
         [DataMember (Name = "position")] public Point Position;
@@ -23,28 +23,24 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Pose(ref Buffer b)
+        internal Pose(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b) => new Pose(ref b);
+        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Pose(ref b);
         
-        readonly Pose IDeserializable<Pose>.RosDeserialize(ref Buffer b) => new Pose(ref b);
+        public readonly Pose RosDeserialize(ref ReadBuffer b) => new Pose(ref b);
         
-        public override readonly int GetHashCode() => (Position, Orientation).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Pose s && Equals(s);
-        
-        public readonly bool Equals(Pose o) => (Position, Orientation) == (o.Position, o.Orientation);
+        public readonly bool Equals(in Pose o) => (Position, Orientation) == (o.Position, o.Orientation);
         
         public static bool operator==(in Pose a, in Pose b) => a.Equals(b);
         
         public static bool operator!=(in Pose a, in Pose b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref this);
+            b.Serialize(in this);
         }
         
         public readonly void RosValidate()
@@ -66,7 +62,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1RsQrCMBTc31c8cJW6iIPg4OQkKLpLqC9twOTVvIjWrzctNrGTi5jpLrm83F0muEZP" +
+                "H4sIAAAAAAAAE71RsQrCMBTc31c8cJW6iIPg4OQkKLpLqC9twOTVvIjWrzctNrGTi5jpLrm83F0muEZP" +
                 "jSchF1Qw7JA1NiyExqH2RCiNKmmKJdtu+/w+N71Wuci9Ge4WCDs2LiQB7G8qkHf93KwDWP14wfawWWJF" +
                 "bCn49mSlkllvBSZ4rI1E+/Ft4wRDTdl/zKIi6yyP4oK+sAqLOT4SahN6/sd+rm7IkD5KYvGffY7Nd+ya" +
                 "e9fsbQFfEg3oDvACaqg09xMCAAA=";

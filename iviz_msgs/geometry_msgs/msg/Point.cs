@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point : IMessage, System.IEquatable<Point>, IDeserializable<Point>
+    public struct Point : IMessage, IDeserializable<Point>
     {
         // This contains the position of a point in free space
         [DataMember (Name = "x")] public double X;
@@ -25,28 +25,24 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Point(ref Buffer b)
+        internal Point(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b) => new Point(ref b);
+        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Point(ref b);
         
-        readonly Point IDeserializable<Point>.RosDeserialize(ref Buffer b) => new Point(ref b);
+        public readonly Point RosDeserialize(ref ReadBuffer b) => new Point(ref b);
         
-        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Point s && Equals(s);
-        
-        public readonly bool Equals(Point o) => (X, Y, Z) == (o.X, o.Y, o.Z);
+        public readonly bool Equals(in Point o) => (X, Y, Z) == (o.X, o.Y, o.Z);
         
         public static bool operator==(in Point a, in Point b) => a.Equals(b);
         
         public static bool operator!=(in Point a, in Point b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref this);
+            b.Serialize(in this);
         }
         
         public readonly void RosValidate()
@@ -68,7 +64,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACj3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
+                "H4sIAAAAAAAAEz3HwQmAMAwF0Hum+OAK4iQuEEpCA5KUJgd1ej319t6Gs1uihRebJ6oLRqSVhSMU/M+8" +
                 "YA6dIsjBTUiv4Dp23EvP0kv0AQQdt/JVAAAA";
                 
         public override string ToString() => Extensions.ToString(this);

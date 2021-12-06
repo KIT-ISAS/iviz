@@ -40,7 +40,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal TypeDef(ref Buffer b)
+        internal TypeDef(ref ReadBuffer b)
         {
             Type = b.DeserializeString();
             Fieldnames = b.DeserializeStringArray();
@@ -51,11 +51,11 @@ namespace Iviz.Msgs.Rosapi
             Constvalues = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TypeDef(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TypeDef(ref b);
         
-        TypeDef IDeserializable<TypeDef>.RosDeserialize(ref Buffer b) => new TypeDef(ref b);
+        public TypeDef RosDeserialize(ref ReadBuffer b) => new TypeDef(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Type);
             b.SerializeArray(Fieldnames);
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.Rosapi
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACisuKcrMS1coqSxI5SoGs6NjFdIyU3NS8hJzU4vRxEDKirky80qMjWBCiUVFiZU5qXkI" +
+                "H4sIAAAAAAAAEysuKcrMS1coqSxI5SoGs6NjFdIyU3NS8hJzU4vRxEDKirky80qMjWBCiUVFiZU5qXkI" +
                 "lakVibkFOch6k/PzikvQzAOLlSXmlAIFuQB/w6D2hgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);

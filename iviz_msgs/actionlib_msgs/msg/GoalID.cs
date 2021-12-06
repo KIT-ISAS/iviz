@@ -30,17 +30,17 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
         
         /// Constructor with buffer.
-        internal GoalID(ref Buffer b)
+        internal GoalID(ref ReadBuffer b)
         {
             Stamp = b.Deserialize<time>();
             Id = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GoalID(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GoalID(ref b);
         
-        GoalID IDeserializable<GoalID>.RosDeserialize(ref Buffer b) => new GoalID(ref b);
+        public GoalID RosDeserialize(ref ReadBuffer b) => new GoalID(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Stamp);
             b.Serialize(Id);
@@ -63,7 +63,7 @@ namespace Iviz.Msgs.ActionlibMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACj2PS5LDIAxE95yiq7L3PbKfC8ggG1VscJCIK7cf4XHNkqY/Tw/8ZIYa7Qc0174lf9TG" +
+                "H4sIAAAAAAAAEz2PS5LDIAxE95yiq7L3PbKfC8ggG1VscJCIK7cf4XHNkqY/Tw/8ZIYa7Qc0174lf9TG" +
                 "MJdNdgYZziwxuyKKtdKGkxSN353VOE3hgafB/7pywvwFFVA0qQXK7cPN81wgBmvCCqs4GvN+GGjbPD06" +
                 "Xc5jiX36vxozL4OFELkZSbmIwoV1IQdPD35JXlk/kryeHO87Rki1RiFjLMxppvhysuSJxto3w86qtDJO" +
                 "sQw9OMoi8e/Am0Cnu91Dt8Gh9q7mZOhF3DUF9bPKOlwh/AJcvpWYTwEAAA==";

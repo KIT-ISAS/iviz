@@ -71,17 +71,17 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// Constructor with buffer.
-        internal SetLoggerLevelRequest(ref Buffer b)
+        internal SetLoggerLevelRequest(ref ReadBuffer b)
         {
             Logger = b.DeserializeString();
             Level = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SetLoggerLevelRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetLoggerLevelRequest(ref b);
         
-        SetLoggerLevelRequest IDeserializable<SetLoggerLevelRequest>.RosDeserialize(ref Buffer b) => new SetLoggerLevelRequest(ref b);
+        public SetLoggerLevelRequest RosDeserialize(ref ReadBuffer b) => new SetLoggerLevelRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Logger);
             b.Serialize(Level);
@@ -108,17 +108,17 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// Constructor with buffer.
-        internal SetLoggerLevelResponse(ref Buffer b)
+        internal SetLoggerLevelResponse(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        SetLoggerLevelResponse IDeserializable<SetLoggerLevelResponse>.RosDeserialize(ref Buffer b) => Singleton;
+        public SetLoggerLevelResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly SetLoggerLevelResponse Singleton = new SetLoggerLevelResponse();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         

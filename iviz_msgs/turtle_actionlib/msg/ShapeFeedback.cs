@@ -15,17 +15,17 @@ namespace Iviz.Msgs.TurtleActionlib
         }
         
         /// Constructor with buffer.
-        internal ShapeFeedback(ref Buffer b)
+        internal ShapeFeedback(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        ShapeFeedback IDeserializable<ShapeFeedback>.RosDeserialize(ref Buffer b) => Singleton;
+        public ShapeFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly ShapeFeedback Singleton = new ShapeFeedback();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.TurtleActionlib
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuPiAgBrE+NbAgAAAA==";
+                "H4sIAAAAAAAAE+PiAgBrE+NbAgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

@@ -13,17 +13,17 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal LookupTransformFeedback(ref Buffer b)
+        internal LookupTransformFeedback(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        LookupTransformFeedback IDeserializable<LookupTransformFeedback>.RosDeserialize(ref Buffer b) => Singleton;
+        public LookupTransformFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly LookupTransformFeedback Singleton = new LookupTransformFeedback();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -45,9 +45,8 @@ namespace Iviz.Msgs.Tf2Msgs
         [Preserve] public const string RosMd5Sum = BuiltIns.EmptyMd5Sum;
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
-        [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACuMCAJMG1zIBAAAA";
-                
+        [Preserve] public const string RosDependenciesBase64 = BuiltIns.EmptyDependenciesBase64;
+    
         public override string ToString() => Extensions.ToString(this);
     }
 }

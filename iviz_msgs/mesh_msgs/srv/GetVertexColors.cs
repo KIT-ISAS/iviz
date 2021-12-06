@@ -68,16 +68,16 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetVertexColorsRequest(ref Buffer b)
+        internal GetVertexColorsRequest(ref ReadBuffer b)
         {
             Uuid = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetVertexColorsRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetVertexColorsRequest(ref b);
         
-        GetVertexColorsRequest IDeserializable<GetVertexColorsRequest>.RosDeserialize(ref Buffer b) => new GetVertexColorsRequest(ref b);
+        public GetVertexColorsRequest RosDeserialize(ref ReadBuffer b) => new GetVertexColorsRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Uuid);
         }
@@ -110,16 +110,16 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetVertexColorsResponse(ref Buffer b)
+        internal GetVertexColorsResponse(ref ReadBuffer b)
         {
             MeshVertexColorsStamped = new MeshMsgs.MeshVertexColorsStamped(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetVertexColorsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetVertexColorsResponse(ref b);
         
-        GetVertexColorsResponse IDeserializable<GetVertexColorsResponse>.RosDeserialize(ref Buffer b) => new GetVertexColorsResponse(ref b);
+        public GetVertexColorsResponse RosDeserialize(ref ReadBuffer b) => new GetVertexColorsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             MeshVertexColorsStamped.RosSerialize(ref b);
         }

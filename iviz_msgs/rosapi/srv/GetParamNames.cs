@@ -60,17 +60,17 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal GetParamNamesRequest(ref Buffer b)
+        internal GetParamNamesRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        GetParamNamesRequest IDeserializable<GetParamNamesRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public GetParamNamesRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly GetParamNamesRequest Singleton = new GetParamNamesRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -104,16 +104,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal GetParamNamesResponse(ref Buffer b)
+        internal GetParamNamesResponse(ref ReadBuffer b)
         {
             Names = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetParamNamesResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetParamNamesResponse(ref b);
         
-        GetParamNamesResponse IDeserializable<GetParamNamesResponse>.RosDeserialize(ref Buffer b) => new GetParamNamesResponse(ref b);
+        public GetParamNamesResponse RosDeserialize(ref ReadBuffer b) => new GetParamNamesResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Names);
         }

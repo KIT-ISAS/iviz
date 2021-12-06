@@ -72,17 +72,17 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal AddModuleRequest(ref Buffer b)
+        internal AddModuleRequest(ref ReadBuffer b)
         {
             ModuleType = b.DeserializeString();
             Id = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new AddModuleRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddModuleRequest(ref b);
         
-        AddModuleRequest IDeserializable<AddModuleRequest>.RosDeserialize(ref Buffer b) => new AddModuleRequest(ref b);
+        public AddModuleRequest RosDeserialize(ref ReadBuffer b) => new AddModuleRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(ModuleType);
             b.Serialize(Id);
@@ -122,18 +122,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal AddModuleResponse(ref Buffer b)
+        internal AddModuleResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
             Id = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new AddModuleResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddModuleResponse(ref b);
         
-        AddModuleResponse IDeserializable<AddModuleResponse>.RosDeserialize(ref Buffer b) => new AddModuleResponse(ref b);
+        public AddModuleResponse RosDeserialize(ref ReadBuffer b) => new AddModuleResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);

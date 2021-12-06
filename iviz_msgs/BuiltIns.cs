@@ -250,26 +250,32 @@ namespace Iviz.Msgs
         {
             o.RosValidate();
             byte[] bytes = new byte[o.RosMessageLength];
-            Buffer.Serialize(o, bytes);
+            WriteBuffer.Serialize(o, bytes);
             return bytes;
         }
 
-        public static uint SerializeToArray<T>(this T o, byte[] bytes, int offset = 0) where T : ISerializable
+        public static uint SerializeTo<T>(this T o, Span<byte> bytes) where T : ISerializable
         {
-            return Buffer.Serialize(o, bytes, offset);
+            return WriteBuffer.Serialize(o, bytes);
         }
 
-        public static T DeserializeFromArray<T>(this T generator, byte[] bytes, int size = -1, int offset = 0)
+        public static ISerializable DeserializeFrom(this ISerializable generator, ReadOnlySpan<byte> bytes)
+        {
+            return ReadBuffer.Deserialize(generator, bytes);
+        }
+
+        public static T DeserializeFrom<T>(this IDeserializable<T> generator, ReadOnlySpan<byte> bytes)
             where T : ISerializable
         {
-            return Buffer.Deserialize(generator, bytes, size, offset);
+            return ReadBuffer.Deserialize(generator, bytes);
         }
 
-        public static T DeserializeFromArray<T>(this IDeserializable<T> generator, byte[] bytes, int size = -1,
-            int offset = 0) where T : ISerializable
+        public static T DeserializeFrom<T>(this T generator, ReadOnlySpan<byte> bytes)
+            where T : ISerializable, IDeserializable<T>
         {
-            return Buffer.Deserialize(generator, bytes, size, offset);
+            return ReadBuffer.Deserialize(generator, bytes);
         }
+        
 
         internal static int GetArraySize<T>(T[]? array) where T : IMessage
         {

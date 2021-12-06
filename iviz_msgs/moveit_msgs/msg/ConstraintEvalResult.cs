@@ -28,17 +28,17 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ConstraintEvalResult(ref Buffer b)
+        internal ConstraintEvalResult(ref ReadBuffer b)
         {
             Result = b.Deserialize<bool>();
             Distance = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ConstraintEvalResult(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ConstraintEvalResult(ref b);
         
-        ConstraintEvalResult IDeserializable<ConstraintEvalResult>.RosDeserialize(ref Buffer b) => new ConstraintEvalResult(ref b);
+        public ConstraintEvalResult RosDeserialize(ref ReadBuffer b) => new ConstraintEvalResult(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Result);
             b.Serialize(Distance);
@@ -63,10 +63,10 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACm2QSw7CMAwF9zmFpW5A6hJxEi5gWodaCjGK3S44PU6/SLCq7MwbPbeB28AKT1LFB0En" +
-                "2ZCzQiEdk0Es8qxLteJrA5owjWgsOTQboy/qODIp2EDbUuL/GHjuZGUk4Nxzh+YxNf+A+rvOmiPYQsSk" +
-                "v+zEkubxQM8u5rjwLfTsYO7cupdDPxJ1LFS71aY7s86Ler64jod6MdfSX2L/aUoGJvCmIuEuktbbQ0yC" +
-                "dr3sbAgfrgPjJWYBAAA=";
+                "H4sIAAAAAAAAE22QQQ7CMAwE73mFpV5A6hHxEj5ggkMtpTGK3R54PU5bKBKcItuzq910cBlYYSRVvBNE" +
+                "KYZcFCrplA1SlbEt1aqvDWjGPKGxlNC9GX1Q5MSkYAO9l5L+y8B1B6sTAZcbRzSXqfkD6nddbHZhDwmz" +
+                "/rIzS17GHT26MaeV7+HGDpZIX+HQS6JOlVq2lvTDbPNqvTRu4269OrfQX8b+aUoGJvCkKuEqkrfuIWVB" +
+                "O58+bAgvrgPjJWYBAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

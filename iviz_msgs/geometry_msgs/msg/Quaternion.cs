@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Quaternion : IMessage, System.IEquatable<Quaternion>, IDeserializable<Quaternion>
+    public struct Quaternion : IMessage, IDeserializable<Quaternion>
     {
         // This represents an orientation in free space in quaternion form.
         [DataMember (Name = "x")] public double X;
@@ -27,28 +27,24 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Quaternion(ref Buffer b)
+        internal Quaternion(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b) => new Quaternion(ref b);
+        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Quaternion(ref b);
         
-        readonly Quaternion IDeserializable<Quaternion>.RosDeserialize(ref Buffer b) => new Quaternion(ref b);
+        public readonly Quaternion RosDeserialize(ref ReadBuffer b) => new Quaternion(ref b);
         
-        public override readonly int GetHashCode() => (X, Y, Z, W).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Quaternion s && Equals(s);
-        
-        public readonly bool Equals(Quaternion o) => (X, Y, Z, W) == (o.X, o.Y, o.Z, o.W);
+        public readonly bool Equals(in Quaternion o) => (X, Y, Z, W) == (o.X, o.Y, o.Z, o.W);
         
         public static bool operator==(in Quaternion a, in Quaternion b) => a.Equals(b);
         
         public static bool operator!=(in Quaternion a, in Quaternion b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref this);
+            b.Serialize(in this);
         }
         
         public readonly void RosValidate()
@@ -70,7 +66,7 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACj3JTQqAQAhA4b2nENq3ik7SBSQcEkonNfo5fbWZ3fd4HU6LBDpX52DNQFI0l4+UYoqi" +
+                "H4sIAAAAAAAAEz3JTQqAQAhA4b2nENq3ik7SBSQcEkonNfo5fbWZ3fd4HU6LBDpX52DNQFI0l4+UYoqi" +
                 "WJwZo9LMf+0HJbv+r5hvPUBZjXIc8Gq6m56mE+AFLI5yL20AAAA=";
                 
         public override string ToString() => Extensions.ToString(this);

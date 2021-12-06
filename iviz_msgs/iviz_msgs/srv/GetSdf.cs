@@ -69,16 +69,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetSdfRequest(ref Buffer b)
+        internal GetSdfRequest(ref ReadBuffer b)
         {
             Uri = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetSdfRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetSdfRequest(ref b);
         
-        GetSdfRequest IDeserializable<GetSdfRequest>.RosDeserialize(ref Buffer b) => new GetSdfRequest(ref b);
+        public GetSdfRequest RosDeserialize(ref ReadBuffer b) => new GetSdfRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Uri);
         }
@@ -116,18 +116,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetSdfResponse(ref Buffer b)
+        internal GetSdfResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Scene = new Scene(ref b);
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetSdfResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetSdfResponse(ref b);
         
-        GetSdfResponse IDeserializable<GetSdfResponse>.RosDeserialize(ref Buffer b) => new GetSdfResponse(ref b);
+        public GetSdfResponse RosDeserialize(ref ReadBuffer b) => new GetSdfResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             Scene.RosSerialize(ref b);

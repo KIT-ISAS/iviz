@@ -60,17 +60,17 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestEmptyRequest(ref Buffer b)
+        internal TestEmptyRequest(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        TestEmptyRequest IDeserializable<TestEmptyRequest>.RosDeserialize(ref Buffer b) => Singleton;
+        public TestEmptyRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly TestEmptyRequest Singleton = new TestEmptyRequest();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         
@@ -96,17 +96,17 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestEmptyResponse(ref Buffer b)
+        internal TestEmptyResponse(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        TestEmptyResponse IDeserializable<TestEmptyResponse>.RosDeserialize(ref Buffer b) => Singleton;
+        public TestEmptyResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly TestEmptyResponse Singleton = new TestEmptyResponse();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         

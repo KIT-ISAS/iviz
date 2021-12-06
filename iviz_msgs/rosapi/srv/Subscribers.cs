@@ -68,16 +68,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal SubscribersRequest(ref Buffer b)
+        internal SubscribersRequest(ref ReadBuffer b)
         {
             Topic = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SubscribersRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SubscribersRequest(ref b);
         
-        SubscribersRequest IDeserializable<SubscribersRequest>.RosDeserialize(ref Buffer b) => new SubscribersRequest(ref b);
+        public SubscribersRequest RosDeserialize(ref ReadBuffer b) => new SubscribersRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Topic);
         }
@@ -110,16 +110,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal SubscribersResponse(ref Buffer b)
+        internal SubscribersResponse(ref ReadBuffer b)
         {
             Subscribers_ = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new SubscribersResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SubscribersResponse(ref b);
         
-        SubscribersResponse IDeserializable<SubscribersResponse>.RosDeserialize(ref Buffer b) => new SubscribersResponse(ref b);
+        public SubscribersResponse RosDeserialize(ref ReadBuffer b) => new SubscribersResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Subscribers_);
         }

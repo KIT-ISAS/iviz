@@ -26,17 +26,17 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal LinkScale(ref Buffer b)
+        internal LinkScale(ref ReadBuffer b)
         {
             LinkName = b.DeserializeString();
             Scale = b.Deserialize<double>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new LinkScale(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LinkScale(ref b);
         
-        LinkScale IDeserializable<LinkScale>.RosDeserialize(ref Buffer b) => new LinkScale(ref b);
+        public LinkScale RosDeserialize(ref ReadBuffer b) => new LinkScale(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(LinkName);
             b.Serialize(Scale);
@@ -59,8 +59,8 @@ namespace Iviz.Msgs.MoveitMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClPOS8xNVUjLL1IoyUhVyMnMy+YqLinKzEsHs+NBslxcygrFyYlAfrpCSb5CYkFBTiWI" +
-                "AdeQlpOfWGJmAlYEVA0AloKoqFMAAAA=";
+                "H4sIAAAAAAAAE1POS8xNVUjLL1IoyUhVyMnMy+YqLinKzEsHs+NBslxcygrFyYk5IMGSfIXEgoKcShAD" +
+                "riEtJz+xxMwErAioGgCWgqioUwAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }

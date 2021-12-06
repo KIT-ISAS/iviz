@@ -78,18 +78,18 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPlanRequest(ref Buffer b)
+        internal GetPlanRequest(ref ReadBuffer b)
         {
             Start = new GeometryMsgs.PoseStamped(ref b);
             Goal = new GeometryMsgs.PoseStamped(ref b);
             Tolerance = b.Deserialize<float>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetPlanRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPlanRequest(ref b);
         
-        GetPlanRequest IDeserializable<GetPlanRequest>.RosDeserialize(ref Buffer b) => new GetPlanRequest(ref b);
+        public GetPlanRequest RosDeserialize(ref ReadBuffer b) => new GetPlanRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Start.RosSerialize(ref b);
             Goal.RosSerialize(ref b);
@@ -127,16 +127,16 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPlanResponse(ref Buffer b)
+        internal GetPlanResponse(ref ReadBuffer b)
         {
             Plan = new NavMsgs.Path(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetPlanResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPlanResponse(ref b);
         
-        GetPlanResponse IDeserializable<GetPlanResponse>.RosDeserialize(ref Buffer b) => new GetPlanResponse(ref b);
+        public GetPlanResponse RosDeserialize(ref ReadBuffer b) => new GetPlanResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Plan.RosSerialize(ref b);
         }

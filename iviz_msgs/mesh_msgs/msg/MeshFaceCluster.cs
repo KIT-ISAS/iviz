@@ -27,17 +27,17 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal MeshFaceCluster(ref Buffer b)
+        internal MeshFaceCluster(ref ReadBuffer b)
         {
             FaceIndices = b.DeserializeStructArray<uint>();
             Label = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new MeshFaceCluster(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshFaceCluster(ref b);
         
-        MeshFaceCluster IDeserializable<MeshFaceCluster>.RosDeserialize(ref Buffer b) => new MeshFaceCluster(ref b);
+        public MeshFaceCluster RosDeserialize(ref ReadBuffer b) => new MeshFaceCluster(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(FaceIndices);
             b.Serialize(Label);
@@ -61,7 +61,7 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAClN2ziktLkkt4irNzCsxNoqOVUhLTE6Nz8xLyUxOLeZSzi8oyczPS8zhKi4pysxLV8hJ" +
+                "H4sIAAAAAAAAE1N2ziktLkkt4irNzCsxNoqOVUhLTE6Nz8xLyUxOLeZSzi8oyczPS8zhKi4pysxLV8hJ" +
                 "TErN4eICAKZztFU3AAAA";
                 
         public override string ToString() => Extensions.ToString(this);

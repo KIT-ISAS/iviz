@@ -68,16 +68,16 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal NodeDetailsRequest(ref Buffer b)
+        internal NodeDetailsRequest(ref ReadBuffer b)
         {
             Node = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new NodeDetailsRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new NodeDetailsRequest(ref b);
         
-        NodeDetailsRequest IDeserializable<NodeDetailsRequest>.RosDeserialize(ref Buffer b) => new NodeDetailsRequest(ref b);
+        public NodeDetailsRequest RosDeserialize(ref ReadBuffer b) => new NodeDetailsRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Node);
         }
@@ -116,18 +116,18 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal NodeDetailsResponse(ref Buffer b)
+        internal NodeDetailsResponse(ref ReadBuffer b)
         {
             Subscribing = b.DeserializeStringArray();
             Publishing = b.DeserializeStringArray();
             Services = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new NodeDetailsResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new NodeDetailsResponse(ref b);
         
-        NodeDetailsResponse IDeserializable<NodeDetailsResponse>.RosDeserialize(ref Buffer b) => new NodeDetailsResponse(ref b);
+        public NodeDetailsResponse RosDeserialize(ref ReadBuffer b) => new NodeDetailsResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Subscribing);
             b.SerializeArray(Publishing);

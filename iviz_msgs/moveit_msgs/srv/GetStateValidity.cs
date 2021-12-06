@@ -74,18 +74,18 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetStateValidityRequest(ref Buffer b)
+        internal GetStateValidityRequest(ref ReadBuffer b)
         {
             RobotState = new RobotState(ref b);
             GroupName = b.DeserializeString();
             Constraints = new Constraints(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetStateValidityRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetStateValidityRequest(ref b);
         
-        GetStateValidityRequest IDeserializable<GetStateValidityRequest>.RosDeserialize(ref Buffer b) => new GetStateValidityRequest(ref b);
+        public GetStateValidityRequest RosDeserialize(ref ReadBuffer b) => new GetStateValidityRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             RobotState.RosSerialize(ref b);
             b.Serialize(GroupName);
@@ -141,7 +141,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetStateValidityResponse(ref Buffer b)
+        internal GetStateValidityResponse(ref ReadBuffer b)
         {
             Valid = b.Deserialize<bool>();
             Contacts = b.DeserializeArray<ContactInformation>();
@@ -161,11 +161,11 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetStateValidityResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetStateValidityResponse(ref b);
         
-        GetStateValidityResponse IDeserializable<GetStateValidityResponse>.RosDeserialize(ref Buffer b) => new GetStateValidityResponse(ref b);
+        public GetStateValidityResponse RosDeserialize(ref ReadBuffer b) => new GetStateValidityResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Valid);
             b.SerializeArray(Contacts);

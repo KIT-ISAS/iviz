@@ -70,17 +70,17 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetTextureRequest(ref Buffer b)
+        internal GetTextureRequest(ref ReadBuffer b)
         {
             Uuid = b.DeserializeString();
             TextureIndex = b.Deserialize<uint>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetTextureRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetTextureRequest(ref b);
         
-        GetTextureRequest IDeserializable<GetTextureRequest>.RosDeserialize(ref Buffer b) => new GetTextureRequest(ref b);
+        public GetTextureRequest RosDeserialize(ref ReadBuffer b) => new GetTextureRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Uuid);
             b.Serialize(TextureIndex);
@@ -114,16 +114,16 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetTextureResponse(ref Buffer b)
+        internal GetTextureResponse(ref ReadBuffer b)
         {
             Texture = new MeshMsgs.MeshTexture(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetTextureResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetTextureResponse(ref b);
         
-        GetTextureResponse IDeserializable<GetTextureResponse>.RosDeserialize(ref Buffer b) => new GetTextureResponse(ref b);
+        public GetTextureResponse RosDeserialize(ref ReadBuffer b) => new GetTextureResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Texture.RosSerialize(ref b);
         }

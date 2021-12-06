@@ -71,17 +71,17 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal DeleteRobotStateFromWarehouseRequest(ref Buffer b)
+        internal DeleteRobotStateFromWarehouseRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Robot = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new DeleteRobotStateFromWarehouseRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new DeleteRobotStateFromWarehouseRequest(ref b);
         
-        DeleteRobotStateFromWarehouseRequest IDeserializable<DeleteRobotStateFromWarehouseRequest>.RosDeserialize(ref Buffer b) => new DeleteRobotStateFromWarehouseRequest(ref b);
+        public DeleteRobotStateFromWarehouseRequest RosDeserialize(ref ReadBuffer b) => new DeleteRobotStateFromWarehouseRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
             b.Serialize(Robot);
@@ -108,17 +108,17 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal DeleteRobotStateFromWarehouseResponse(ref Buffer b)
+        internal DeleteRobotStateFromWarehouseResponse(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        DeleteRobotStateFromWarehouseResponse IDeserializable<DeleteRobotStateFromWarehouseResponse>.RosDeserialize(ref Buffer b) => Singleton;
+        public DeleteRobotStateFromWarehouseResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly DeleteRobotStateFromWarehouseResponse Singleton = new DeleteRobotStateFromWarehouseResponse();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         

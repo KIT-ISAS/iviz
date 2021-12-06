@@ -22,16 +22,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal ColorChannel(ref Buffer b)
+        internal ColorChannel(ref ReadBuffer b)
         {
             Colors = b.DeserializeStructArray<Color32>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new ColorChannel(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ColorChannel(ref b);
         
-        ColorChannel IDeserializable<ColorChannel>.RosDeserialize(ref Buffer b) => new ColorChannel(ref b);
+        public ColorChannel RosDeserialize(ref ReadBuffer b) => new ColorChannel(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(Colors);
         }
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACnPOz8kvMjaKjlVIBrGKubhsqQy4fIPdrRQyyzKr4nOL04v1nSE2cpVm5pVYKBRB6XQo" +
+                "H4sIAAAAAAAAE3POz8kvMjaKjlVIBrGKubhsqQy4fIPdrRQyyzKr4nOL04v1nSE2cpVm5pVYKBRB6XQo" +
                 "nQSlE7m4AEmfKA6bAAAA";
                 
         public override string ToString() => Extensions.ToString(this);

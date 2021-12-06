@@ -68,16 +68,16 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal LaunchDialogRequest(ref Buffer b)
+        internal LaunchDialogRequest(ref ReadBuffer b)
         {
             Dialog = new IvizMsgs.Dialog(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new LaunchDialogRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LaunchDialogRequest(ref b);
         
-        LaunchDialogRequest IDeserializable<LaunchDialogRequest>.RosDeserialize(ref Buffer b) => new LaunchDialogRequest(ref b);
+        public LaunchDialogRequest RosDeserialize(ref ReadBuffer b) => new LaunchDialogRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Dialog.RosSerialize(ref b);
         }
@@ -116,18 +116,18 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal LaunchDialogResponse(ref Buffer b)
+        internal LaunchDialogResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
             Feedback = new IvizMsgs.Feedback(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new LaunchDialogResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LaunchDialogResponse(ref b);
         
-        LaunchDialogResponse IDeserializable<LaunchDialogResponse>.RosDeserialize(ref Buffer b) => new LaunchDialogResponse(ref b);
+        public LaunchDialogResponse RosDeserialize(ref ReadBuffer b) => new LaunchDialogResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);

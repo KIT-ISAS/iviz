@@ -71,17 +71,17 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetRobotStateFromWarehouseRequest(ref Buffer b)
+        internal GetRobotStateFromWarehouseRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Robot = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetRobotStateFromWarehouseRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetRobotStateFromWarehouseRequest(ref b);
         
-        GetRobotStateFromWarehouseRequest IDeserializable<GetRobotStateFromWarehouseRequest>.RosDeserialize(ref Buffer b) => new GetRobotStateFromWarehouseRequest(ref b);
+        public GetRobotStateFromWarehouseRequest RosDeserialize(ref ReadBuffer b) => new GetRobotStateFromWarehouseRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Name);
             b.Serialize(Robot);
@@ -116,16 +116,16 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetRobotStateFromWarehouseResponse(ref Buffer b)
+        internal GetRobotStateFromWarehouseResponse(ref ReadBuffer b)
         {
             State = new MoveitMsgs.RobotState(ref b);
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new GetRobotStateFromWarehouseResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetRobotStateFromWarehouseResponse(ref b);
         
-        GetRobotStateFromWarehouseResponse IDeserializable<GetRobotStateFromWarehouseResponse>.RosDeserialize(ref Buffer b) => new GetRobotStateFromWarehouseResponse(ref b);
+        public GetRobotStateFromWarehouseResponse RosDeserialize(ref ReadBuffer b) => new GetRobotStateFromWarehouseResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             State.RosSerialize(ref b);
         }

@@ -68,16 +68,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestArrayRequestRequest(ref Buffer b)
+        internal TestArrayRequestRequest(ref ReadBuffer b)
         {
             @int = b.DeserializeStructArray<int>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new TestArrayRequestRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestArrayRequestRequest(ref b);
         
-        TestArrayRequestRequest IDeserializable<TestArrayRequestRequest>.RosDeserialize(ref Buffer b) => new TestArrayRequestRequest(ref b);
+        public TestArrayRequestRequest RosDeserialize(ref ReadBuffer b) => new TestArrayRequestRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(@int);
         }
@@ -102,17 +102,17 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestArrayRequestResponse(ref Buffer b)
+        internal TestArrayRequestResponse(ref ReadBuffer b)
         {
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => Singleton;
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => Singleton;
         
-        TestArrayRequestResponse IDeserializable<TestArrayRequestResponse>.RosDeserialize(ref Buffer b) => Singleton;
+        public TestArrayRequestResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
         public static readonly TestArrayRequestResponse Singleton = new TestArrayRequestResponse();
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
         }
         

@@ -25,17 +25,17 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Trajectory(ref Buffer b)
+        internal Trajectory(ref ReadBuffer b)
         {
             Poses = b.DeserializeStructArray<GeometryMsgs.Pose>();
             Timestamps = b.DeserializeStructArray<time>();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new Trajectory(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Trajectory(ref b);
         
-        Trajectory IDeserializable<Trajectory>.RosDeserialize(ref Buffer b) => new Trajectory(ref b);
+        public Trajectory RosDeserialize(ref ReadBuffer b) => new Trajectory(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(Poses);
             b.SerializeStructArray(Timestamps);
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.IvizMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr2RPwvCMBDF9/sUB65SF3EQHJycBEU3EQl6rQGT1NyJfz69l2Jbi4OLmCX3kkvyey8F" +
+                "H4sIAAAAAAAAE72RPwvCMBDF9/sUB65SF3EQHJycBEU3EQl6rQGT1NyJfz69l2Jbi4OLmCX3kkvyey8F" +
                 "BUcS7zvHBQ8WgWmzxVInBrEuiTSxGFcyAEx+PGC+mo2x+ICAHk4xUhmJyYsRGzyGvAJD6zGPRMil2VMf" +
                 "98Gl5cNr31a9xquOtj6bISyC9dI0wPJihKKv7m37/mVQUdTh+mhZ8fVt6xnlSC2/ejGqEnLHLuSnYGQ0" +
                 "xFtT3Zvq8R/8NrraQ/NRrMG/59mFT+rc5p6H6DL44qiurgBPjHOw/qsCAAA=";

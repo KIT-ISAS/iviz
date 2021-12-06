@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Transform : IMessage, System.IEquatable<Transform>, IDeserializable<Transform>
+    public struct Transform : IMessage, IDeserializable<Transform>
     {
         // This represents the transform between two coordinate frames in free space.
         [DataMember (Name = "translation")] public Vector3 Translation;
@@ -23,28 +23,24 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Transform(ref Buffer b)
+        internal Transform(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
         
-        public readonly ISerializable RosDeserialize(ref Buffer b) => new Transform(ref b);
+        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Transform(ref b);
         
-        readonly Transform IDeserializable<Transform>.RosDeserialize(ref Buffer b) => new Transform(ref b);
+        public readonly Transform RosDeserialize(ref ReadBuffer b) => new Transform(ref b);
         
-        public override readonly int GetHashCode() => (Translation, Rotation).GetHashCode();
-        
-        public override readonly bool Equals(object? o) => o is Transform s && Equals(s);
-        
-        public readonly bool Equals(Transform o) => (Translation, Rotation) == (o.Translation, o.Rotation);
+        public readonly bool Equals(in Transform o) => (Translation, Rotation) == (o.Translation, o.Rotation);
         
         public static bool operator==(in Transform a, in Transform b) => a.Equals(b);
         
         public static bool operator!=(in Transform a, in Transform b) => !a.Equals(b);
     
-        public void RosSerialize(ref Buffer b)
+        public readonly void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(ref this);
+            b.Serialize(in this);
         }
         
         public readonly void RosValidate()
@@ -66,12 +62,12 @@ namespace Iviz.Msgs.GeometryMsgs
     
         /// Base64 of the GZip'd compression of the concatenated dependencies file.
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAACr1SwUrDUBC85ysGelEIEVQ8CJ6lB0FRvMprskkfJm/jvq0xfr2bpk2sCl7EnCYvO5PZ" +
-                "mbfAw9pHCLVCkYJG6Jqg4kIsWRqsSDuiAO0YObMUPjgllOIaivDBEBFi63LKkuSRcmU5G/m1U88hudsY" +
-                "QYJBCOt4llz98ZPc3F9foiJuSKV/amIVT3ZmksW3FR1et9+++IeNLhU2y6Hu0ZALCuWZacTCi1Fth8xU" +
-                "SchCohReUbDlEVhNo3HPJkkhWpAM17Ym5j5nMhwb5YiyKkvRrS3f7ZQPlQ2aQkWBxOcQX/libmMiO+yW" +
-                "S6HlKTpf16Pn8WdWoYns0z7OsCzR8wbdsJABQeHUHLHVO/lyq3rwyyk2g/GtxGGgt+yNb71HV5FlF5Vc" +
-                "Ya2XNTu9OMfbhPoJvf9L1fMd+6ntABZvcIzvoPPh7WW+oEPIvy60R12SfAD/PmSRPgMAAA==";
+                "H4sIAAAAAAAAE71SwUrDQBC971cM9KIQIqh4EDxLD4KieJVpMkkXk504OzXGr3e2aROrghcxp5fNvJc3" +
+                "7+0CHtY+glAnFCloBF0TqGCIFUsLK9KeKID2DAWzlD6gElSCLUXwwRARxA4Lyp17pEJZzkZ+g+o5uLuN" +
+                "ESQYBGEdz9zVHz/u5v76EmrillSGpzbW8WRnxi2+rYjwuv32xT/Y6FLBZjk0A7SEQUF5Zhqx9GJU2yE3" +
+                "VRKykCgDr1Cy5RFYTaPFZ5OkECmxsetMDD9nko6NckR5nWfQry3f7ZQPtQ2aQk2BxBcgvvbl3MZERtgt" +
+                "l4FWp9D7phk9jz+zCk1kn/ZxDssKBt5AnxYyIFCiYhJa0eQLV03yyxlskvGtxGGgt+yNb71HrMmyi0pY" +
+                "WutVw6gX5/A2oWFC7/9S9XzHfmo7AIs3OMZ30Hl6e5kvaAr514X2qHfuA/8+ZJE+AwAA";
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code

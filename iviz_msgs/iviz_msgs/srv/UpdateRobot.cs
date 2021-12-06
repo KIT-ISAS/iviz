@@ -76,7 +76,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal UpdateRobotRequest(ref Buffer b)
+        internal UpdateRobotRequest(ref ReadBuffer b)
         {
             Operation = b.Deserialize<int>();
             Id = b.DeserializeString();
@@ -84,11 +84,11 @@ namespace Iviz.Msgs.IvizMsgs
             ValidFields = b.DeserializeStringArray();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new UpdateRobotRequest(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateRobotRequest(ref b);
         
-        UpdateRobotRequest IDeserializable<UpdateRobotRequest>.RosDeserialize(ref Buffer b) => new UpdateRobotRequest(ref b);
+        public UpdateRobotRequest RosDeserialize(ref ReadBuffer b) => new UpdateRobotRequest(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Operation);
             b.Serialize(Id);
@@ -142,17 +142,17 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal UpdateRobotResponse(ref Buffer b)
+        internal UpdateRobotResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();
         }
         
-        public ISerializable RosDeserialize(ref Buffer b) => new UpdateRobotResponse(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateRobotResponse(ref b);
         
-        UpdateRobotResponse IDeserializable<UpdateRobotResponse>.RosDeserialize(ref Buffer b) => new UpdateRobotResponse(ref b);
+        public UpdateRobotResponse RosDeserialize(ref ReadBuffer b) => new UpdateRobotResponse(ref b);
     
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.Serialize(Success);
             b.Serialize(Message);
