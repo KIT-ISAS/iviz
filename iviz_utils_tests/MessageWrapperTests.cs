@@ -49,7 +49,7 @@ namespace Iviz.UtilsTests
 
             Assert.True(messageBytes.SequenceEqual(otherMessageBytes));
 
-            var otherWrapped = wrapped.DeserializeFromArray(messageBytes);
+            var otherWrapped = wrapped.DeserializeFrom(messageBytes);
             Assert.True(wrapped.Header == real.Header);
             Assert.True(wrapped.ChildFrameId == real.ChildFrameId);
             Assert.True(wrapped.Transform == real.Transform);

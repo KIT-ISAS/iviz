@@ -173,10 +173,10 @@ namespace Iviz.UtilsTests
     {
         public sealed class DummyMessage : IMessage
         {
-            public void RosSerialize(ref Buffer b) => throw new NotImplementedException();
+            public void RosSerialize(ref WriteBuffer b) => throw new NotImplementedException();
             public int RosMessageLength => 0;
             public void RosValidate() => throw new NotImplementedException();
-            public ISerializable RosDeserialize(ref Buffer b) => throw new NotImplementedException();
+            public ISerializable RosDeserializeBase(ref ReadBuffer b) => throw new NotImplementedException();
             public string RosType => "";
         }
     }

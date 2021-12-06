@@ -8,6 +8,10 @@
         <AssemblyName>Iviz.UtilsTests</AssemblyName>
 
         <RootNamespace>Iviz.UtilsTests</RootNamespace>
+
+        <OutputType>Library</OutputType>
+
+        <LangVersion>9</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

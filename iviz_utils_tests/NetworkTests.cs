@@ -11,12 +11,15 @@ using String = Iviz.Msgs.StdMsgs.String;
 
 namespace Iviz.UtilsTests
 {
-    [Category("Network"), Ignore("")]
+    [Category("Network")]
     public class NetworkTests
     {
         static readonly Uri CallerUri = new Uri("http://localhost:7613");
+
         static readonly Uri OtherCallerUri = new Uri("http://localhost:7614");
-        static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
+
+        //static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
+        static readonly Uri MasterUri = new Uri("http://192.168.0.220:11311");
         const string CallerId = "/iviz_util_tests";
 
         [SetUp]
@@ -42,7 +45,7 @@ namespace Iviz.UtilsTests
         [Test]
         public void TestXmlRpcGetUri()
         {
-            var args = new XmlRpcArg[] {CallerId};
+            var args = new XmlRpcArg[] { CallerId };
 
             using var source = new CancellationTokenSource();
             source.CancelAfter(3000);
@@ -60,7 +63,7 @@ namespace Iviz.UtilsTests
         [Test]
         public async Task TestXmlRpcGetUriAsync()
         {
-            var args = new XmlRpcArg[] {CallerId};
+            var args = new XmlRpcArg[] { CallerId };
 
             using var source = new CancellationTokenSource();
             source.CancelAfter(3000);
@@ -78,7 +81,7 @@ namespace Iviz.UtilsTests
         [Test]
         public void TestXmlRpcGetUriTimeout()
         {
-            var args = new XmlRpcArg[] {CallerId};
+            var args = new XmlRpcArg[] { CallerId };
 
             using var source = new CancellationTokenSource();
             source.Cancel();
@@ -97,6 +100,14 @@ namespace Iviz.UtilsTests
             Uri testMasterUri = new RosNodeClient(CallerId, OtherCallerUri, CallerUri).GetMasterUri().Uri;
             Assert.True(testMasterUri == MasterUri);
             Assert.Catch<RosUriBindingException>(() => new RosClient(MasterUri, CallerId, CallerUri));
+        }
+
+        [Test]
+        public void TestRosClientGetTopics()
+        {
+            using var client = new RosClient(MasterUri, CallerId, CallerUri);
+            var topics = client.GetSystemTopicTypes();
+            Assert.IsNotEmpty(topics);
         }
 
         [Test]
@@ -166,7 +177,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await RosChannelWriterUtils.CreateWriterAsync<String>(client, topicName);
+            await using var publisher = await client.CreateWriterAsync<String>(topicName);
             publisher.LatchingEnabled = true;
 
             var systemState = await client.GetSystemStateAsync();
@@ -176,7 +187,7 @@ namespace Iviz.UtilsTests
             const string msgText = "test message";
             publisher.Write(new String(msgText));
 
-            await using var subscriber = await RosChannelReaderUtils.CreateReaderAsync<String>(client, topicName);
+            await using var subscriber = await client.CreateReaderAsync<String>(topicName);
 
             using var source = new CancellationTokenSource(5000);
 
@@ -211,7 +222,7 @@ namespace Iviz.UtilsTests
 
             await foreach (var msg in subscriber.ReadAllAsync(source.Token))
             {
-                if (msg is String {Data: msgText})
+                if (msg is String { Data: msgText })
                 {
                     break;
                 }
@@ -241,7 +252,7 @@ namespace Iviz.UtilsTests
                 break;
             }
         }
-        
+
         [Test]
         public async Task TestRosClientParametersAsync()
         {
@@ -259,7 +270,7 @@ namespace Iviz.UtilsTests
             Assert.True(success && value.TryGetInteger(out int valueInt) && valueInt == inValueInt);
             Assert.True(await client.Parameters.DeleteParameterAsync("/iviz_utils_tests/a"));
 
-            string[] inValueArray = {"a", "b"};
+            string[] inValueArray = { "a", "b" };
             Assert.True(await client.Parameters.SetParameterAsync("/iviz_utils_tests/a", inValueArray));
             (success, value) = await client.Parameters.GetParameterAsync("/iviz_utils_tests/a");
             Assert.True(success && value.TryGetArray(out var valueArray)

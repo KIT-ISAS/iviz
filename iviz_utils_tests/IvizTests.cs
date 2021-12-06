@@ -82,26 +82,26 @@ namespace Iviz.UtilsTests
 
         public record SimpleRobotConfiguration
         {
-            public string SourceParameter { get; init; }
-            public string SavedRobotName { get; init; }
-            public string FramePrefix { get; init; }
-            public string FrameSuffix { get; init; }
-            public bool AttachedToTf { get; init; }
-            public bool RenderAsOcclusionOnly { get; init; }
-            public SerializableColor Tint { get; init; }
-            public float Metallic { get; init; }
-            public float Smoothness { get; init; }
-            public string Id { get; init; }
-            public bool Visible { get; init; }
+            public string SourceParameter { get; set; }
+            public string SavedRobotName { get; set; }
+            public string FramePrefix { get; set; }
+            public string FrameSuffix { get; set; }
+            public bool AttachedToTf { get; set; }
+            public bool RenderAsOcclusionOnly { get; set; }
+            public SerializableColor Tint { get; set; }
+            public float Metallic { get; set; }
+            public float Smoothness { get; set; }
+            public string Id { get; set; }
+            public bool Visible { get; set; }
             public ModuleType ModuleType => ModuleType.Robot;
         }
 
         public record SerializableColor
         {
-            public float R { get; init; }
-            public float G { get; init; }
-            public float B { get; init; }
-            public float A { get; init; }
+            public float R { get; set; }
+            public float G { get; set; }
+            public float B { get; set; }
+            public float A { get; set; }
 
             public static implicit operator SerializableColor(in ColorRGBA color) => new()
                 {R = color.R, G = color.G, B = color.B, A = color.A};
