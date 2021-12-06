@@ -1,13 +1,11 @@
 using System;
 using System.Runtime.Serialization;
-using Iviz.Common;
-using Iviz.Roslib.Utils;
 using UnityEngine;
 
-namespace Iviz.Controllers
+namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class JoystickConfiguration : JsonToString, IConfiguration
+    public sealed class JoystickConfiguration : IConfiguration
     {
         [DataMember] public string JoyTopic { get; set; } = "";
         [DataMember] public bool PublishJoy { get; set; }

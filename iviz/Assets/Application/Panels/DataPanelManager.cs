@@ -65,7 +65,7 @@ namespace Iviz.App
             panelByResourceType[resource] = contents;
 
             var rootCanvas = contents.GetComponentInParent<Canvas>();
-            rootCanvas.ProcessCanvasForXR();
+            rootCanvas.transform.ProcessCanvasForXR();
 
             return contents;
         }

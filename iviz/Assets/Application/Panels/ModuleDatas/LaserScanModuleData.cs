@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -24,21 +25,10 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public LaserScanModuleData(ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<LaserScanConfiguration>()?.Topic ?? constructor.Topic,
-                constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<LaserScanPanelContents>(ModuleType.LaserScan);
-            listener = new LaserScanListener(this);
-            if (constructor.Configuration == null)
-            {
-                listener.Config.Topic = Topic;
-            }
-            else
-            {
-                listener.Config = (LaserScanConfiguration) constructor.Configuration;
-            }
-
-            listener.StartListening();
+            listener = new LaserScanListener(this, (LaserScanConfiguration?)constructor.Configuration, Topic);
             UpdateModuleButton();
         }
 
@@ -49,7 +39,7 @@ namespace Iviz.App
 
             panel.NumPoints.Text = BuildDescriptionString();
 
-            panel.Colormap.Index = (int) listener.Colormap;
+            panel.Colormap.Index = (int)listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
             panel.UseIntensity.Value = listener.UseIntensity;
             panel.HideButton.State = listener.Visible;
@@ -65,7 +55,7 @@ namespace Iviz.App
 
             panel.UseIntensity.ValueChanged += f => { listener.UseIntensity = f; };
             panel.PointSize.ValueChanged += f => { listener.PointSize = f; };
-            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId) i; };
+            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId)i; };
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
             panel.ForceMinMax.ValueChanged += f =>
@@ -79,8 +69,7 @@ namespace Iviz.App
             panel.MaxIntensity.ValueChanged += f => { listener.MaxIntensity = f; };
             panel.UseLines.ValueChanged += f => { listener.UseLines = f; };
         }
-        
-        
+
 
         public override void UpdatePanel()
         {

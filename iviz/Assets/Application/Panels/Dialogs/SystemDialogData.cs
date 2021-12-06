@@ -26,7 +26,6 @@ namespace Iviz.App
         readonly SystemDialogContents panel;
         public override IDialogPanelContents Panel => panel;
 
-        readonly StringBuilder description = new(65536);
         readonly SortedSet<string> hostsBuffer = new();
 
         uint? descriptionHash;
@@ -104,7 +103,6 @@ namespace Iviz.App
             var topicTypes = ConnectionManager.Connection.GetSystemTopicTypes()
                 .ToDictionary(info => info.Topic, info => info.Type);
 
-            description.Clear();
             var topicHasSubscribers = new SortedDictionary<string, bool>();
             foreach (var tuple in systemState.Publishers)
             {
@@ -118,6 +116,8 @@ namespace Iviz.App
                     topicHasSubscribers[topic] = false;
                 }
             }
+
+            using var description = BuilderPool.Rent();
 
             foreach (var (key, value) in topicHasSubscribers)
             {
@@ -133,10 +133,10 @@ namespace Iviz.App
                 }
 
                 description.Append(topicTypes.TryGetValue(key, out string type) ? type : "unknown")
-                    .AppendLine("]");
+                    .Append("]").AppendLine();
             }
 
-            UpdateTop();
+            UpdateTop(description);
         }
 
         void UpdateServices()
@@ -149,17 +149,18 @@ namespace Iviz.App
                 return;
             }
 
-            description.Clear();
             var services = new SortedSet<string>(systemState.Services.Select(service => service.Topic));
+
+            using var description = BuilderPool.Rent();
 
             foreach (string service in services)
             {
                 description.Append("<b><u><link=")
                     .Append(service).Append(">").Append(service)
-                    .AppendLine("</link></u></b>");
+                    .Append("</link></u></b>").AppendLine();
             }
 
-            UpdateTop();
+            UpdateTop(description);
         }
 
         void UpdateParameters()
@@ -171,16 +172,17 @@ namespace Iviz.App
                 return;
             }
 
-            description.Clear();
             var parameters = new SortedSet<string>(ConnectionManager.Connection.GetSystemParameterList());
+
+            using var description = BuilderPool.Rent();
 
             foreach (string parameter in parameters)
             {
                 description.Append("<b><u><link=").Append(parameter).Append(">").Append(parameter)
-                    .AppendLine("</link></u></b>");
+                    .Append("</link></u></b>").AppendLine();
             }
 
-            UpdateTop();
+            UpdateTop(description);
         }
 
         void UpdateNodes()
@@ -193,7 +195,6 @@ namespace Iviz.App
                 return;
             }
 
-            description.Clear();
             var nodesEnumerator =
                 systemState.Publishers.SelectMany(tuple => tuple.Members).Concat(
                     systemState.Subscribers.SelectMany(tuple => tuple.Members).Concat(
@@ -201,16 +202,19 @@ namespace Iviz.App
                     ));
             var nodes = new SortedSet<string>(nodesEnumerator);
 
+            using var description = BuilderPool.Rent();
+
             foreach (string node in nodes)
             {
-                description.Append("<b><u><link=").Append(node).Append(">").Append(node)
-                    .AppendLine("</link></u></b>");
+                description.Append("<b><u><link=").Append(node).Append(">")
+                    .Append(node).Append("</link></u></b>")
+                    .AppendLine();
             }
 
-            UpdateTop();
+            UpdateTop(description);
         }
 
-        void UpdateTop()
+        void UpdateTop(BuilderPool.BuilderRent description)
         {
             uint newHash = Crc32Calculator.Compute(description);
             if (descriptionHash == newHash)
@@ -246,7 +250,8 @@ namespace Iviz.App
 
         void UpdateTopicsLink(string link)
         {
-            description.Clear();
+            using var description = BuilderPool.Rent();
+
             var systemState = ConnectionManager.Connection.GetSystemState(RequestType.CachedOnly);
             if (systemState == null)
             {
@@ -254,7 +259,7 @@ namespace Iviz.App
                 return;
             }
 
-            description.Append("<b>").Append(link).AppendLine("</b>");
+            description.Append("<b>").Append(link).Append("</b>").AppendLine();
 
             description.Append("<color=#800000ff><b>Publishers:</b></color>").AppendLine();
             var publishers = systemState.Publishers.FirstOrDefault(tuple => tuple.Topic == link);
@@ -262,12 +267,12 @@ namespace Iviz.App
             {
                 foreach (string publisher in publishers.Members)
                 {
-                    description.Append("  ").AppendLine(publisher);
+                    description.Append("  ").Append(publisher).AppendLine();
                 }
             }
             else
             {
-                description.AppendLine("  (none)");
+                description.Append("  (none)").AppendLine();
             }
 
             description.Append("<color=#000080ff><b>Subscribers:</b></color>").AppendLine();
@@ -276,12 +281,12 @@ namespace Iviz.App
             {
                 foreach (string subscriber in subscribers.Members)
                 {
-                    description.Append("  ").AppendLine(subscriber);
+                    description.Append("  ").Append(subscriber).AppendLine();
                 }
             }
             else
             {
-                description.AppendLine("  (none)");
+                description.Append("  (none)").AppendLine();
             }
 
             panel.TextBottom.SetText(description);
@@ -289,7 +294,8 @@ namespace Iviz.App
 
         void UpdateServicesLink(string link)
         {
-            description.Clear();
+            using var description = BuilderPool.Rent();
+
             var systemState = ConnectionManager.Connection.GetSystemState(RequestType.CachedOnly);
             if (systemState == null)
             {
@@ -297,11 +303,11 @@ namespace Iviz.App
                 return;
             }
 
-            description.Append("<b>").Append(link).AppendLine("</b>");
+            description.Append("<b>").Append(link).Append("</b>").AppendLine();
 
             if (providerAddress != null)
             {
-                description.Append("  [").Append(providerAddress).AppendLine("]");
+                description.Append("  [").Append(providerAddress).Append("]").AppendLine();
             }
             else
             {
@@ -316,12 +322,12 @@ namespace Iviz.App
             {
                 foreach (string publisher in providers.Members)
                 {
-                    description.Append("  ").AppendLine(publisher);
+                    description.Append("  ").Append(publisher).AppendLine();
                 }
             }
             else
             {
-                description.AppendLine("  (none)");
+                description.Append("  (none)").AppendLine();
             }
 
             panel.TextBottom.SetText(description);
@@ -353,18 +359,19 @@ namespace Iviz.App
 
         void UpdateParametersLink(string link)
         {
-            description.Clear();
+            using var description = BuilderPool.Rent();
+
             if (!ConnectionManager.IsConnected)
             {
                 panel.TextBottom.text = EmptyBottomText;
                 return;
             }
 
-            description.Append("<b>").Append(link).AppendLine("</b>");
+            description.Append("<b>").Append(link).Append("</b>").AppendLine();
 
             if (!paramValue.IsEmpty)
             {
-                description.AppendLine("<b>Value:</b>");
+                description.Append("<b>Value:</b>").AppendLine();
 
                 string value = JsonConvert
                     .SerializeObject(paramValue, Formatting.Indented, JsonConverter);
@@ -389,7 +396,7 @@ namespace Iviz.App
             }
 
             panel.TextBottom.SetText(description);
-            panel.TextBottom.UpdateVertexData();
+            //panel.TextBottom.UpdateVertexData();
 
             async void GetParamValue(string param, CancellationToken token)
             {
@@ -412,7 +419,6 @@ namespace Iviz.App
 
         void UpdateNodesLink(string link)
         {
-            description.Clear();
             var systemState = ConnectionManager.Connection.GetSystemState(RequestType.CachedOnly);
             if (systemState == null)
             {
@@ -420,11 +426,13 @@ namespace Iviz.App
                 return;
             }
 
-            description.Append("<b>").Append(link).AppendLine("</b>");
+            using var description = BuilderPool.Rent();
+
+            description.Append("<b>").Append(link).Append("</b>").AppendLine();
 
             if (nodeAddress != null)
             {
-                description.Append("  [").Append(nodeAddress).AppendLine("]");
+                description.Append("  [").Append(nodeAddress).Append("]").AppendLine();
             }
             else
             {
@@ -439,12 +447,12 @@ namespace Iviz.App
             {
                 foreach ((string topic, _) in published)
                 {
-                    description.Append("  ").AppendLine(topic);
+                    description.Append("  ").Append(topic).AppendLine();
                 }
             }
             else
             {
-                description.AppendLine("  (none)");
+                description.Append("  (none)").AppendLine();
             }
 
             description.Append("<color=#000080ff><b>Subscribed to:</b></color>").AppendLine();
@@ -453,12 +461,12 @@ namespace Iviz.App
             {
                 foreach ((string topic, _) in subscribed)
                 {
-                    description.Append("  ").AppendLine(topic);
+                    description.Append("  ").Append(topic).AppendLine();
                 }
             }
             else
             {
-                description.AppendLine("  (none)");
+                description.Append("  (none)").AppendLine();
             }
 
             description.Append("<color=#008000ff><b>Provides Services:</b></color>").AppendLine();
@@ -467,12 +475,12 @@ namespace Iviz.App
             {
                 foreach ((string topic, _) in services)
                 {
-                    description.Append("  ").AppendLine(topic);
+                    description.Append("  ").Append(topic).AppendLine();
                 }
             }
             else
             {
-                description.AppendLine("  (none)");
+                description.Append("  (none)").AppendLine();
             }
 
             panel.TextBottom.SetText(description);
@@ -589,7 +597,7 @@ namespace Iviz.App
     }
 
     [DataContract]
-    public class HostAlias : IEquatable<HostAlias>
+    public sealed class HostAlias : IEquatable<HostAlias>
     {
         [DataMember] public string Hostname { get; set; } = "";
         [DataMember] public string Address { get; set; } = "";
@@ -602,7 +610,7 @@ namespace Iviz.App
 
         public void Deconstruct(out string hostname, out string address) => (hostname, address) = (Hostname, Address);
 
-        public bool Equals(HostAlias? a) => a is { } ha && a.Hostname == Hostname && a.Address == Address;
+        public bool Equals(HostAlias? a) => a is var (hostname, address) && hostname == Hostname && address == Address;
 
         public override bool Equals(object obj) => obj is HostAlias other && Equals(other);
 

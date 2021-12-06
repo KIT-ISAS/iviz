@@ -4,6 +4,7 @@ using System;
 using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;

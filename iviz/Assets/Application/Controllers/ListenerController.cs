@@ -14,7 +14,7 @@ namespace Iviz.Controllers
         /// <summary>
         /// The ROS subscriber of this controller.
         /// </summary>
-        public IListener? Listener { get; protected set; }
+        public abstract IListener Listener { get; }
 
         public abstract TfFrame? Frame { get; }
 
@@ -22,12 +22,12 @@ namespace Iviz.Controllers
 
         public virtual void Dispose()
         {
-            Listener?.Stop();
+            Listener.Stop();
         }
 
         public virtual void ResetController()
         {
-            Listener?.Reset();
+            Listener.Reset();
         }
 
         public abstract bool Visible { get; set; }

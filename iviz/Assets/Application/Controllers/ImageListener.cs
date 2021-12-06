@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
@@ -38,7 +39,7 @@ namespace Iviz.Controllers
             set
             {
                 isProcessing = value;
-                Listener?.SetPause(value);
+                Listener.SetPause(value);
             }
         }        
 
@@ -150,6 +151,8 @@ namespace Iviz.Controllers
                 billboard.Offset = value.Ros2Unity();
             }
         }
+
+        public override IListener Listener { get; }
 
         public ImageListener(IModuleData moduleData, ImageConfiguration? config, string topic, string type)
         {

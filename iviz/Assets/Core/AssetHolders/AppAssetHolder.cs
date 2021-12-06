@@ -69,6 +69,7 @@ namespace Iviz.Displays
         public GameObject Leash;
         public GameObject Reticle;
         public GameObject SelectionFrame;
+        public GameObject CanvasHolder;
 
         public AudioClip Click;
         public AudioClip Screenshot;

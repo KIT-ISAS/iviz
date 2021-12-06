@@ -61,6 +61,7 @@ namespace Iviz.Resources
         public Info<GameObject> Reticle { get; }
         public Info<GameObject> Ring { get; }
         public Info<GameObject> SelectionFrame { get; }
+        public Info<GameObject> CanvasHolder { get; }
 
         public DisplaysType()
         {
@@ -118,6 +119,7 @@ namespace Iviz.Resources
             Reticle = new Info<GameObject>(appAssetHolder.Reticle);
             Ring = new Info<GameObject>(appAssetHolder.Ring);
             SelectionFrame = new Info<GameObject>(appAssetHolder.SelectionFrame);
+            CanvasHolder = new Info<GameObject>(appAssetHolder.CanvasHolder);
 
             resourceByType = CreateTypeDictionary(this);
         }

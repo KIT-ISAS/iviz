@@ -21,16 +21,7 @@ namespace Iviz.App
             get => detached;
             set
             {
-                if (detached == value)
-                {
-                    return;
-                }
-
                 detached = value;
-                if (detached)
-                {
-                    DialogPanelManager.DetachSelectedPanel();
-                }
 
                 if (Panel is DetachablePanelContents detachablePanel)
                 {

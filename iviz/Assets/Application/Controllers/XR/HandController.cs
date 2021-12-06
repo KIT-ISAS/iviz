@@ -6,6 +6,7 @@ using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Tools;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.SpatialTracking;
@@ -113,7 +114,7 @@ namespace Iviz.Controllers.XR
                 return;
             }
 
-            for (int i = 0; i < 5; i++)
+            foreach (int i in ..5)
             {
                 var finger = (HandFinger)i;
                 if (!hand.TryGetFingerBones(finger, boneList))
@@ -127,7 +128,7 @@ namespace Iviz.Controllers.XR
                     fingers = new Pose[boneList.Count];
                 }
 
-                for (int j = 0; j < boneList.Count; j++)
+                foreach (int j in ..boneList.Count)
                 {
                     if (!boneList[j].TryGetPosition(out fingers[j].position)
                         || !boneList[j].TryGetRotation(out fingers[j].rotation))

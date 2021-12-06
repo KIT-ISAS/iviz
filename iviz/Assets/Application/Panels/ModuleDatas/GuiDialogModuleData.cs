@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Resources;
@@ -21,8 +22,8 @@ namespace Iviz.App
 
 
         public GuiDialogModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<GuiDialogConfiguration>()?.Topic ?? constructor.Topic,
-                constructor.GetConfiguration<GuiDialogConfiguration>()?.Type ?? constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
+                constructor.TryGetConfigurationType() ?? constructor.Type)
         {
             dialogPanel = DataPanelManager.GetPanelByResourceType<GuiDialogPanelContents>(ModuleType.GuiDialog);
             dialogListener = new GuiDialogListener(this);
@@ -33,14 +34,14 @@ namespace Iviz.App
             }
             else
             {
-                dialogListener.Config = (GuiDialogConfiguration) constructor.Configuration;
+                dialogListener.Config = (GuiDialogConfiguration)constructor.Configuration;
             }
 
             Interactable = ModuleListPanel.SceneInteractable;
             dialogListener.StartListening();
             UpdateModuleButton();
         }
-        
+
         public bool Interactable
         {
             get => dialogListener.Interactable;
@@ -58,19 +59,19 @@ namespace Iviz.App
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<TfConfiguration>(configAsJson);
-            
+
             foreach (string field in fields)
             {
-                switch (field) 
+                switch (field)
                 {
                     case nameof(GuiDialogConfiguration.Visible):
                         break;
                     default:
                         Core.RosLogger.Error($"{this}: Unknown field '{field}'");
-                        break;                    
+                        break;
                 }
             }
-            
+
             ResetPanel();
         }
 

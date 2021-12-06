@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -40,9 +41,9 @@ namespace Iviz.App
             UpdateModuleButton();
         }
 
-        public override void Stop()
+        public override void Dispose()
         {
-            base.Stop();
+            base.Dispose();
             controller.Dispose();
         }
 

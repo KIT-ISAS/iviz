@@ -1,17 +1,12 @@
 using System;
 using System.Runtime.Serialization;
-using Iviz.Common;
-using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
-using Iviz.MsgsWrapper;
 
-namespace Iviz.Msgs.IvizCommonMsgs
+namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class OctomapConfiguration : RosMessageWrapper<OctomapConfiguration>, IConfiguration
+    public sealed class OctomapConfiguration : IConfigurationWithTopic
     {
-        [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/OctomapConfiguration";
-
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.OccupancyGrid;
         [DataMember] public bool Visible { get; set; } = true;

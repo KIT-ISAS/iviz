@@ -2,18 +2,13 @@
 
 using System;
 using System.Runtime.Serialization;
-using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
-using Iviz.MsgsWrapper;
-using JetBrains.Annotations;
 
-namespace Iviz.Common
+namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class RobotConfiguration : RosMessageWrapper<RobotConfiguration>, IConfiguration
+    public sealed class RobotConfiguration : IConfiguration
     {
-        [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/RobotConfiguration";
-
         [DataMember] public string SourceParameter { get; set; } = "";
         [DataMember] public string SavedRobotName { get; set; } = "";
         [DataMember] public string FramePrefix { get; set; } = "";

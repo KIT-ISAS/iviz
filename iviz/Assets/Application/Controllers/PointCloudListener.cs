@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
@@ -28,14 +29,10 @@ namespace Iviz.Controllers
         readonly List<string> fieldNames = new() { "x", "y", "z" };
         readonly FrameNode node;
         readonly PointListResource pointCloud;
-
         readonly MeshListResource meshCloud;
-        //readonly NativeList<float4> pointBuffer = new();
 
         float4[] pointBuffer = Array.Empty<float4>();
-        int pointBufferLength = 0;
-
-
+        int pointBufferLength;
         bool isProcessing;
 
         bool IsProcessing
@@ -46,18 +43,6 @@ namespace Iviz.Controllers
                 isProcessing = value;
                 Listener?.SetPause(value);
             }
-        }
-
-
-        public PointCloudListener(IModuleData moduleData)
-        {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            FieldNames = fieldNames.AsReadOnly();
-            node = FrameNode.Instantiate("[PointCloudNode]");
-            pointCloud = ResourcePool.RentDisplay<PointListResource>(node.transform);
-            meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.transform);
-            meshCloud.CastShadows = false;
-            Config = new PointCloudConfiguration();
         }
 
         public override IModuleData ModuleData { get; }
@@ -71,7 +56,7 @@ namespace Iviz.Controllers
         public PointCloudConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 config.Topic = value.Topic;
                 Visible = value.Visible;
@@ -121,13 +106,6 @@ namespace Iviz.Controllers
                 config.SizeMultiplier = value;
                 UpdateSize();
             }
-        }
-
-        void UpdateSize()
-        {
-            float value = PointSize * Mathf.Pow(10, SizeMultiplierPow10);
-            pointCloud.ElementScale = value;
-            meshCloud.ElementScale = value;
         }
 
         public ColormapId Colormap
@@ -228,10 +206,24 @@ namespace Iviz.Controllers
 
         public ReadOnlyCollection<string> FieldNames { get; }
 
-        public void StartListening()
+        public override IListener Listener { get; }
+
+        public PointCloudListener(IModuleData moduleData, PointCloudConfiguration? config, string topic)
         {
-            Listener = new Listener<PointCloud2>(config.Topic, Handler);
-            node.name = $"[{config.Topic}]";
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+            FieldNames = fieldNames.AsReadOnly();
+            node = FrameNode.Instantiate("[PointCloudNode]");
+            pointCloud = ResourcePool.RentDisplay<PointListResource>(node.transform);
+            meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.transform);
+            meshCloud.CastShadows = false;
+
+            Config = config ?? new PointCloudConfiguration
+            {
+                Topic = topic,
+            };
+
+            Listener = new Listener<PointCloud2>(Config.Topic, Handler);
+            node.name = $"[{Config.Topic}]";
         }
 
         static int FieldSizeFromType(int datatype)
@@ -267,6 +259,13 @@ namespace Iviz.Controllers
             Task.Run(() => ProcessMessage(msg));
 
             return true;
+        }
+
+        void UpdateSize()
+        {
+            float value = PointSize * Mathf.Pow(10, SizeMultiplierPow10);
+            pointCloud.ElementScale = value;
+            meshCloud.ElementScale = value;
         }
 
         static bool TryGetField(PointField[] fields, string name, [NotNullWhen(true)] out PointField? result)
@@ -387,13 +386,13 @@ namespace Iviz.Controllers
                         else if (PointCloudType == PointCloudType.Points)
                         {
                             pointCloud.UseColormap = !rgbaHint;
-                            pointCloud.SetDirect(pointBuffer[..pointBufferLength]);
+                            pointCloud.SetDirect(pointBuffer.Slice(..pointBufferLength));
                             meshCloud.Reset();
                         }
                         else
                         {
                             meshCloud.UseColormap = !rgbaHint;
-                            meshCloud.SetDirect(pointBuffer[..pointBufferLength]);
+                            meshCloud.SetDirect(pointBuffer.Slice(..pointBufferLength));
                             pointCloud.Reset();
                         }
                     }
@@ -481,7 +480,7 @@ namespace Iviz.Controllers
             pointBufferLength = o;
         }
 
-        void GeneratePointBufferXYZ(PointCloud2 msg, byte[] dataSrc, int iOffset, int iType)
+        void GeneratePointBufferXYZ(PointCloud2 msg, ReadOnlySpan<byte> dataSrc, int iOffset, int iType)
         {
             const float maxPositionMagnitude = PointListResource.MaxPositionMagnitude;
 
@@ -496,7 +495,7 @@ namespace Iviz.Controllers
                 pointBuffer = new float4[msg.Width * msg.Height];
             }
 
-            float4[] dstBuffer = pointBuffer;
+            var dstBuffer = pointBuffer;
             int dstOff = 0;
 
             void Set(float x, float y, float z, float w)
@@ -513,7 +512,7 @@ namespace Iviz.Controllers
                 }
             }
 
-            ReadOnlySpan<byte> dataRowOff = dataSrc;
+            var dataRowOff = dataSrc;
 
             switch (iType)
             {
@@ -563,7 +562,7 @@ namespace Iviz.Controllers
                             TryAdd(dataOff.Read<float3>(), (sbyte)dataOff[iOffset]);
                         }
                     }
-                    
+
                     break;
                 case PointField.UINT8:
                     for (int v = height; v > 0; v--, dataRowOff = dataRowOff[rowStep..])

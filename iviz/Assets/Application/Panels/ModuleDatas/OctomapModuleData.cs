@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -27,8 +28,7 @@ namespace Iviz.App
 
 
         public OctomapModuleData([NotNull] ModuleDataConstructor constructor) :
-        base(constructor.GetConfiguration<OctomapConfiguration>()?.Topic ?? constructor.Topic, 
-            constructor.Type)
+        base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<OctomapPanelContents>(ModuleType.Octomap);
             listener = new OctomapListener(this);

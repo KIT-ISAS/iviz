@@ -83,13 +83,9 @@ namespace Iviz.Displays
             return texture;
         }
 
-        public void Set(sbyte[] values, float cellSize, int numCellsX, OccupancyGridResource.Rect bounds, Pose pose)
+        public void Set(ReadOnlySpan<sbyte> values, float cellSize, int numCellsX, OccupancyGridResource.Rect bounds,
+            Pose pose)
         {
-            if (values == null)
-            {
-                throw new ArgumentNullException(nameof(values));
-            }
-
             IsProcessing = true;
 
             int segmentWidth = bounds.Width;
@@ -138,8 +134,8 @@ namespace Iviz.Displays
 
                 var mTransform = Transform;
                 var rosCenter = new Vector3(
-                    bounds.XMax + bounds.XMin - 1,
-                    bounds.YMax + bounds.YMin - 1,
+                    bounds.xMax + bounds.xMin - 1,
+                    bounds.yMax + bounds.yMin - 1,
                     0) * (cellSize / 2);
                 rosCenter.z += 0.001f;
 
@@ -156,20 +152,20 @@ namespace Iviz.Displays
             });
         }
 
-        static (uint hash, int numValidValues)
-            Process(sbyte[] src, OccupancyGridResource.Rect bounds, int pitch, sbyte[] dest)
+        static (uint hash, int numValidValues) Process(ReadOnlySpan<sbyte> src, OccupancyGridResource.Rect bounds,
+            int pitch, Span<sbyte> dest)
         {
             uint hash = Crc32Calculator.DefaultSeed;
             long numValidValues = 0;
 
-            int rowSize = bounds.XMax - bounds.XMin;
-            foreach (int v in ..(bounds.YMax - bounds.YMin))
+            int rowSize = bounds.Width;
+            foreach (int v in ..bounds.Height)
             {
-                int srcOffset = (v + bounds.YMin) * pitch + bounds.XMin;
+                int srcOffset = (v + bounds.yMin) * pitch + bounds.xMin;
                 int dstOffset = v * rowSize;
 
-                var srcSpan = new ReadOnlySpan<sbyte>(src, srcOffset, rowSize);
-                var dstSpan = new Span<sbyte>(dest, dstOffset, rowSize);
+                var srcSpan = src.Slice(srcOffset, rowSize);
+                var dstSpan = dest.Slice(dstOffset, rowSize);
 
                 srcSpan.CopyTo(dstSpan);
                 hash = Crc32Calculator.Compute(srcSpan, hash);
@@ -232,13 +228,13 @@ namespace Iviz.Displays
             MeshRenderer.enabled = true;
         }
 
-        static void CreateMipmaps(sbyte[] array, int width, int height)
+        static void CreateMipmaps(Span<sbyte> array, int width, int height)
         {
-            var srcPtr = new Span<sbyte>(array);
+            var srcPtr = array;
             while (width > 1 && height > 1)
             {
                 int size = width * height;
-                var dstPtr = srcPtr.Slice(size, srcPtr.Length - size);
+                var dstPtr = srcPtr[size..];
                 Reduce(srcPtr, width, height, dstPtr);
                 srcPtr = dstPtr;
                 width /= 2;

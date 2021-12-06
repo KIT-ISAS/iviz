@@ -3,18 +3,14 @@
 using System;
 using System.Linq;
 using System.Runtime.Serialization;
-using Iviz.Common;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
-using Iviz.MsgsWrapper;
 
-namespace Iviz.Msgs.IvizCommonMsgs
+namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class MarkerConfiguration : RosMessageWrapper<MarkerConfiguration>, IConfiguration
+    public sealed class MarkerConfiguration : IConfigurationWithType
     {
-        [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/MarkerConfiguration";
-
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
         [DataMember] public bool RenderAsOcclusionOnly { get; set; }

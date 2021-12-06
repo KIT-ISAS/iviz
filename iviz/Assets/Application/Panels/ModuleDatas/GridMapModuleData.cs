@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using Iviz.Common;
-using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Resources;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -15,8 +15,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class GridMapModuleData : ListenerModuleData
     {
-        [NotNull] readonly GridMapListener listener;
-        [NotNull] readonly GridMapPanelContents panel;
+        readonly GridMapListener listener;
+        readonly GridMapPanelContents panel;
 
         protected override ListenerController Listener => listener;
 
@@ -24,22 +24,11 @@ namespace Iviz.App
         public override ModuleType ModuleType => ModuleType.GridMap;
         public override IConfiguration Configuration => listener.Config;
 
-
-        public GridMapModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<GridMapConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
+        public GridMapModuleData(ModuleDataConstructor constructor) :
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<GridMapPanelContents>(ModuleType.GridMap);
-            listener = new GridMapListener(this);
-            if (constructor.Configuration == null)
-            {
-                listener.Config.Topic = Topic;
-            }
-            else
-            {
-                listener.Config = (GridMapConfiguration) constructor.Configuration;
-            }
-
-            listener.StartListening();
+            listener = new GridMapListener(this, (GridMapConfiguration?) constructor.Configuration, Topic);
             UpdateModuleButton();
         }
 

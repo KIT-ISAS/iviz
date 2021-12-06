@@ -2,17 +2,12 @@
 
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using Iviz.Msgs;
-using Iviz.Msgs.IvizCommonMsgs;
-using Iviz.MsgsWrapper;
 
-namespace Iviz.Common
+namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class TfConfiguration : IConfiguration
+    public sealed class TfConfiguration : IConfigurationWithTopic
     {
-        [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/TfConfiguration";
-
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public float FrameSize { get; set; } = 0.125f;
         [DataMember] public bool FrameLabelsVisible { get; set; }

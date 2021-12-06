@@ -43,7 +43,7 @@ namespace Iviz.Resources
             using var description = BuilderPool.Rent();
             int usedWidth = 0;
             int numLines = 0;
-            for (int i = 0; i < str.Length; i++)
+            foreach (int i in ..str.Length)
             {
                 int charWidth = CharWidth(str[i]);
                 if (usedWidth + charWidth > usableWidth)

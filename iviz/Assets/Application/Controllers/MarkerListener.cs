@@ -6,6 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
@@ -55,7 +56,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                for (int i = 0; i < value.VisibleMask.Length; i++)
+                foreach (int i in ..value.VisibleMask.Length)
                 {
                     config.VisibleMask[i] = value.VisibleMask[i];
                 }
@@ -187,6 +188,8 @@ namespace Iviz.Controllers
         }
         
         public string Topic => config.Topic;        
+        
+        public override IListener Listener { get; }
         
         public MarkerListener(IModuleData moduleData, MarkerConfiguration? config, string topic, string type)
         {        
@@ -323,7 +326,7 @@ namespace Iviz.Controllers
         public IEnumerable<string> GetMaskEntries()
         {
             yield return "---";
-            for (int i = 0; i < config.VisibleMask.Length; i++)
+            foreach (int i in ..config.VisibleMask.Length)
             {
                 string name = ((MarkerType) i).ToString();
                 yield return config.VisibleMask[i] ? name : $"<color=#A0A0A0>({name})</color>";
@@ -335,7 +338,7 @@ namespace Iviz.Controllers
             bool newVisible = !config.VisibleMask[i];
             config.VisibleMask[i] = newVisible;
 
-            MarkerType markerType = (MarkerType) i;
+            var markerType = (MarkerType) i;
             foreach (var marker in markers.Values)
             {
                 if (marker.MarkerType == markerType)

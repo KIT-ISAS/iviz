@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Resources;
@@ -134,7 +135,7 @@ namespace Iviz.App
 
         public abstract void AddToState(StateConfiguration config);
 
-        public virtual void Stop()
+        public virtual void Dispose()
         {
             DataPanelManager.HidePanelFor(this);
         }

@@ -2,20 +2,21 @@ using System;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 namespace Iviz.App
 {
     public sealed class DialogMoverWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler
     {
-        [SerializeField] Transform targetTransform;
-        [SerializeField] bool hideModuleList = true;
+        [SerializeField] RectTransform targetTransform;
+        [FormerlySerializedAs("hideModuleList")] [SerializeField] bool dragCausesDetach = true;
         bool isDragging;
         
         void Awake()
         {
             if (targetTransform == null)
             {
-                targetTransform = transform.parent;
+                targetTransform = (RectTransform)transform.parent;
             }
         }
 
@@ -24,15 +25,16 @@ namespace Iviz.App
             if (!isDragging)
             {
                 isDragging = true;
-                if (hideModuleList)
+                if (dragCausesDetach)
                 {
                     ModuleListPanel.Instance.DialogPanelManager.DetachSelectedPanel();
+                    return;
                 }
             }
 
             if (targetTransform != null)
             {
-                targetTransform.position += (Vector3) eventData.delta;
+                targetTransform.anchoredPosition += eventData.delta / ModuleListPanel.CanvasScale;
             }
         }
 

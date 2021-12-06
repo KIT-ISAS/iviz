@@ -9,6 +9,7 @@ using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
@@ -326,7 +327,7 @@ namespace Iviz.App
 
                 UpperCanvas.EnableAR.gameObject.SetActive(false);
                 CreateModule(ModuleType.XR);
-                RootCanvas.ProcessCanvasForXR();
+                RootCanvas.transform.ProcessCanvasForXR();
             }
 
             initialized = true;
@@ -765,7 +766,7 @@ namespace Iviz.App
         void RemoveModule(int index)
         {
             topicsWithModule.Remove(moduleDatas[index].Topic);
-            moduleDatas[index].Stop();
+            moduleDatas[index].Dispose();
             moduleDatas.RemoveAt(index);
 
             Buttons.RemoveButton(index);

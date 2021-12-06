@@ -1,15 +1,11 @@
 using System.Runtime.Serialization;
-using Iviz.Common;
-using Iviz.MsgsWrapper;
 using JetBrains.Annotations;
 
-namespace Iviz.Msgs.IvizCommonMsgs
+namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class GuiDialogConfiguration : RosMessageWrapper<GuiDialogConfiguration>, IConfiguration
+    public sealed class GuiDialogConfiguration : IConfigurationWithType
     {
-        [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/GuiDialogConfiguration";
-
         [DataMember, NotNull] public string Id { get; set; } = System.Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.GuiDialog;
         [DataMember] public bool Visible { get; set; } = true;

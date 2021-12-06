@@ -2,13 +2,13 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using BitMiracle.LibJpeg;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
+using Iviz.Tools;
 using UnityEngine;
 using Buffer = System.Buffer;
 
@@ -73,6 +73,7 @@ namespace Iviz.Displays
         public bool IsMono { get; private set; }
         public int Width => Texture != null ? Texture.width : 0;
         public int Height => Texture != null ? Texture.height : 0;
+        public int BytesPerPixel { get; private set; }
 
         ColormapId colormap;
 
@@ -194,9 +195,11 @@ namespace Iviz.Displays
                         int srcOffset = png.RowOffset;
                         int dstOffset = 0;
                         int rowSize = png.RowSize;
-                        for (int i = png.Height; i != 0; i--, srcOffset += png.RowStep, dstOffset += rowSize)
+                        foreach (int _ in ..png.Height)
                         {
                             Buffer.BlockCopy(png.Data, srcOffset, bitmapBuffer, dstOffset, rowSize);
+                            srcOffset += png.RowStep;
+                            dstOffset += rowSize;
                         }
 
                         newData = bitmapBuffer;
@@ -309,12 +312,12 @@ namespace Iviz.Displays
                     }
 
                     byte[] newBitmapBuffer = bitmapBuffer;
-                    
+
                     GameThread.PostInListenerQueue(() =>
                     {
                         try
                         {
-                            Set(image.Width, image.Height, encoding, newBitmapBuffer[bmpHeaderLength..]);
+                            Set(image.Width, image.Height, encoding, newBitmapBuffer.Slice(bmpHeaderLength..));
                         }
                         finally
                         {
@@ -340,16 +343,17 @@ namespace Iviz.Displays
             int size = width * height;
             int? bpp = FieldSizeFromEncoding(encoding);
 
-            if (bpp == null)
+            if (bpp is not { } validatedBpp)
             {
                 RosLogger.Debug($"{this}: Unsupported encoding '{encoding}'");
                 return;
             }
 
-            if (data.Length < size * bpp)
+            BytesPerPixel = validatedBpp;
+            if (data.Length < size * validatedBpp)
             {
                 RosLogger.Debug(
-                    $"{this}: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
+                    $"{this}: Invalid image! Expected at least {(size * validatedBpp).ToString()} bytes, " +
                     $"received {data.Length.ToString()}");
                 return;
             }
@@ -397,7 +401,7 @@ namespace Iviz.Displays
                     return;
             }
 
-            ApplyTexture(width, height, data, encoding, size * bpp.Value, generateMipmaps);
+            ApplyTexture(width, height, data, encoding, size * validatedBpp, generateMipmaps);
         }
 
         void ApplyTexture(int width, int height, ReadOnlySpan<byte> data, string encoding, int length,
@@ -497,7 +501,7 @@ namespace Iviz.Displays
             }
         }
 
-        unsafe void CopyRgb24ToRgba32(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
+        void CopyRgb24ToRgba32(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
         {
             int numElements = lengthInBytes / 3;
             if (lengthInBytes > src.Length || numElements * 4 > dst.Length)
@@ -505,20 +509,27 @@ namespace Iviz.Displays
                 throw new InvalidOperationException($"{this}: Skipping copy. Possible buffer overflow.");
             }
 
-            fixed (byte* dstPtr0 = dst)
-            fixed (byte* srcPtr0 = src)
+            var srcPtr = MemoryMarshal.Cast<byte, Rgb>(src);
+            var dstPtr = MemoryMarshal.Cast<byte, Rgba>(dst);
+            var colorOut = new Rgba { a = 255 };
+            for (int i = 0; i < numElements; i++)
             {
-                byte* dstPtr = dstPtr0;
-                byte* srcPtr = srcPtr0;
-
-                for (int i = numElements; i >= 0; i--)
-                {
-                    *dstPtr++ = *srcPtr++;
-                    *dstPtr++ = *srcPtr++;
-                    *dstPtr++ = *srcPtr++;
-                    *dstPtr++ = 255;
-                }
+                var colorIn = srcPtr[i];
+                colorOut.r = colorIn.r;
+                colorOut.g = colorIn.g;
+                colorOut.b = colorIn.b;
+                dstPtr[i] = colorOut;
             }
+        }
+
+        struct Rgba
+        {
+            public byte r, g, b, a;
+        }
+
+        struct Rgb
+        {
+            public byte r, g, b;
         }
 
         Texture2D EnsureSize(int width, int height, TextureFormat format)

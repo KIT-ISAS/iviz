@@ -1,11 +1,10 @@
 using System;
 using System.Runtime.Serialization;
-using Iviz.Roslib.Utils;
 
-namespace Iviz.Common
+namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class ImageConfiguration : JsonToString, IConfiguration
+    public sealed class ImageConfiguration : IConfigurationWithType
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.Image;

@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System;
 using Iviz.Msgs.SensorMsgs;
-using System.Runtime.Serialization;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Roslib;
 using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib.Utils;
 using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
@@ -22,19 +21,6 @@ namespace Iviz.Controllers
         event Action Stopped;
         bool TryWriteJoint(string joint, float value);
         bool AttachedToTf { get; }
-    }
-
-    [DataContract]
-    public sealed class JointStateConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public ModuleType ModuleType => ModuleType.JointState;
-        [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public string RobotName { get; set; } = "";
-        [DataMember] public string MsgJointPrefix { get; set; } = "";
-        [DataMember] public string MsgJointSuffix { get; set; } = "";
-        [DataMember] public int MsgTrimFromEnd { get; set; } = 0;
     }
 
     public sealed class JointStateListener : ListenerController
@@ -111,6 +97,9 @@ namespace Iviz.Controllers
 
         readonly HashSet<string> warnNotFound = new HashSet<string>();
 
+        IListener listener;
+        public override IListener Listener => listener;
+        
         public JointStateListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
@@ -123,7 +112,7 @@ namespace Iviz.Controllers
 
         public void StartListening()
         {
-            Listener = new Listener<JointState>(config.Topic, Handler);
+            listener = new Listener<JointState>(config.Topic, Handler);
         }
 
         public override void Dispose()

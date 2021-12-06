@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -25,20 +26,10 @@ namespace Iviz.App
 
 
         public PointCloudModuleData(ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<PointCloudConfiguration>()?.Topic ?? constructor.Topic, constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<PointCloudPanelContents>(ModuleType.PointCloud);
-            listener = new PointCloudListener(this);
-            if (constructor.Configuration == null)
-            {
-                listener.Config.Topic = Topic;
-            }
-            else
-            {
-                listener.Config = (PointCloudConfiguration) constructor.Configuration;
-            }
-
-            listener.StartListening();
+            listener = new PointCloudListener(this, (PointCloudConfiguration?) constructor.Configuration, Topic);
             UpdateModuleButton();
         }
 

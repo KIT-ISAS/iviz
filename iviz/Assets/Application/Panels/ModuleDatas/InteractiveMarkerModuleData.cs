@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Core;
 using JetBrains.Annotations;
@@ -25,8 +26,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public InteractiveMarkerModuleData(ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<InteractiveMarkerConfiguration>()?.Topic ?? constructor.Topic,
-                constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<InteractiveMarkerPanelContents>(
                 ModuleType.InteractiveMarker);

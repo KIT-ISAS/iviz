@@ -20,10 +20,10 @@ namespace Iviz.App.ARDialogs
         [NotNull]
         static Mesh CreateMesh(float r0, float r1)
         {
-            Mesh mesh = new Mesh();
-            List<Vector3> vertices = new List<Vector3>();
-            List<int> indices = new List<int>();
-            List<Color> colors = new List<Color>();
+            var mesh = new Mesh();
+            var vertices = new List<Vector3>();
+            var indices = new List<int>();
+            var colors = new List<Color>();
 
             Color outerColor = Color.white;
             Color innerColor = Color.white.WithAlpha(0);

@@ -3,8 +3,10 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Resources;
+using UnityEngine.UI;
 
 namespace Iviz.App
 {
@@ -70,6 +72,8 @@ namespace Iviz.App
                 panelByType.Add(type, panel);
                 panel.Active = false;
             }
+
+            transform.ProcessCanvasForXR();
 
             Active = true;
             gameObject.SetActive(true);

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -26,8 +27,8 @@ namespace Iviz.App
 
 
         public PathModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<PathConfiguration>()?.Topic ?? constructor.Topic,
-                constructor.GetConfiguration<PathConfiguration>()?.Type ?? constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
+                constructor.TryGetConfigurationType() ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<PathPanelContents>(ModuleType.Path);
             listener = new PathListener(this);

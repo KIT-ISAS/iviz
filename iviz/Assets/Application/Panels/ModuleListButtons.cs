@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.Displays;
 using Iviz.Resources;
+using Iviz.Tools;
 using UnityEngine;
 
 namespace Iviz.App
@@ -20,7 +21,7 @@ namespace Iviz.App
         public ModuleListButtons(GameObject contentObject)
         {
             buttonHeight = Resource.Widgets.DraggableDisplayButton.Object.GetComponent<RectTransform>().rect.height;
-            contentObjectTransform = (RectTransform) contentObject.transform;
+            contentObjectTransform = (RectTransform)contentObject.transform;
         }
 
         public void CreateButtonForModule(ModuleData moduleData)
@@ -36,7 +37,7 @@ namespace Iviz.App
             button.ButtonText = moduleData.ButtonText;
             button.Name = $"Button:{moduleData.ModuleType}";
             button.Visible = true;
-            
+
             button.Clicked += moduleData.ToggleShowPanel;
             button.RevealedLeft += moduleData.ToggleVisible;
             button.RevealedRight += moduleData.Close;
@@ -54,14 +55,13 @@ namespace Iviz.App
 
             buttons.RemoveAt(index);
 
-            int i;
-            for (i = index; i < buttons.Count; i++)
+            foreach (int i in index..buttons.Count)
             {
                 float y = 2 * YOffset + i * (buttonHeight + YOffset);
                 buttons[i].Transform.anchoredPosition = new Vector3(0, -y);
             }
 
-            contentObjectTransform.sizeDelta = new Vector2(0, 2 * YOffset + i * (buttonHeight + YOffset));
+            contentObjectTransform.sizeDelta = new Vector2(0, 2 * YOffset + buttons.Count * (buttonHeight + YOffset));
         }
 
         public void UpdateButton(int index, string content)

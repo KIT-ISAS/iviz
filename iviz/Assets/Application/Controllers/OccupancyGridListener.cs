@@ -1,44 +1,23 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Msgs.NavMsgs;
-using Iviz.Msgs.StdMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using Iviz.Tools;
-using Iviz.XmlRpc;
-using JetBrains.Annotations;
 using Nito.AsyncEx;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public sealed class OccupancyGridConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public ModuleType ModuleType => ModuleType.OccupancyGrid;
-        [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public ColormapId Colormap { get; set; } = ColormapId.gray;
-        [DataMember] public bool FlipMinMax { get; set; } = true;
-        [DataMember] public bool CubesVisible { get; set; } = false;
-        [DataMember] public bool TextureVisible { get; set; } = true;
-        [DataMember] public float ScaleZ { get; set; } = 0.5f;
-        [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
-        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
-    }
-
     public sealed class OccupancyGridListener : ListenerController
     {
         const int MaxTileSize = 256;
@@ -46,8 +25,8 @@ namespace Iviz.Controllers
         readonly FrameNode cubeNode;
         readonly FrameNode textureNode;
 
-        [NotNull] OccupancyGridResource[] gridTiles = Array.Empty<OccupancyGridResource>();
-        readonly List<OccupancyGridTextureResource> textureTiles = new List<OccupancyGridTextureResource>();
+        OccupancyGridResource[] gridTiles = Array.Empty<OccupancyGridResource>();
+        readonly List<OccupancyGridTextureResource> textureTiles = new();
 
         int numCellsX;
         int numCellsY;
@@ -55,7 +34,7 @@ namespace Iviz.Controllers
 
         public override IModuleData ModuleData { get; }
 
-        public override TfFrame Frame => cubeNode.Parent;
+        public override TfFrame? Frame => cubeNode.Parent;
 
         bool isProcessing;
 
@@ -69,7 +48,6 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
         public string Description
         {
             get
@@ -94,12 +72,12 @@ namespace Iviz.Controllers
             }
         }
 
-        readonly OccupancyGridConfiguration config = new OccupancyGridConfiguration();
+        readonly OccupancyGridConfiguration config = new();
 
         public OccupancyGridConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 config.Topic = value.Topic;
                 Visible = value.Visible;
@@ -229,20 +207,22 @@ namespace Iviz.Controllers
                 textureNode.gameObject.SetActive(value);
             }
         }
+        
+        public override IListener Listener { get; }
 
-        public OccupancyGridListener([NotNull] IModuleData moduleData)
+        public OccupancyGridListener(IModuleData moduleData, OccupancyGridConfiguration? config, string topic)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
             cubeNode = FrameNode.Instantiate("OccupancyGrid Cube Node");
             textureNode = FrameNode.Instantiate("OccupancyGrid Texture Node");
 
-            Config = new OccupancyGridConfiguration();
-        }
+            Config = config ?? new OccupancyGridConfiguration
+            {
+                Topic = topic,
+            };   
 
-        public void StartListening()
-        {
-            Listener = new Listener<OccupancyGrid>(config.Topic, Handler);
+            Listener = new Listener<OccupancyGrid>(Config.Topic, Handler);
         }
 
         void Handler(OccupancyGrid msg)
@@ -286,7 +266,7 @@ namespace Iviz.Controllers
             numCellsY = (int) msg.Info.Height;
             cellSize = msg.Info.Resolution;
 
-            List<Task> tasks = new List<Task>();
+            var tasks = new List<Task>();
 
             try
             {
@@ -303,39 +283,39 @@ namespace Iviz.Controllers
             }
             finally
             {
-                // next frame
                 AwaitAndReset(tasks);
             }
         }
 
-        async void AwaitAndReset([NotNull] IEnumerable<Task> tasks)
+        async void AwaitAndReset(IEnumerable<Task> tasks)
         {
             await tasks.WhenAll().AwaitNoThrow(this);
-            IsProcessing = false;
+            IsProcessing = false; // next frame
         }
 
-        void SetCubes([NotNull] sbyte[] data, Pose pose, List<Task> tasks)
+        void SetCubes(Memory<sbyte> data, Pose pose, ICollection<Task> tasks)
         {
             if (gridTiles.Length != 16)
             {
                 gridTiles = new OccupancyGridResource[16];
-                foreach (ref var gridTile in gridTiles.Ref())
+                foreach (int j in ..16)
                 {
-                    gridTile = ResourcePool.Rent<OccupancyGridResource>(
+                    var gridTile = ResourcePool.Rent<OccupancyGridResource>(
                         Resource.Displays.OccupancyGridResource,
                         cubeNode.Transform);
                     gridTile.Transform.SetLocalPose(Pose.identity);
                     gridTile.Colormap = Colormap;
                     gridTile.FlipMinMax = FlipMinMax;
+                    gridTiles[j] = gridTile;
                 }
             }
 
             int i = 0;
-            for (int v = 0; v < 4; v++)
+            foreach (int v in ..4)
             {
-                for (int u = 0; u < 4; u++, i++)
+                foreach (int u in ..4)
                 {
-                    OccupancyGridResource grid = gridTiles[i];
+                    var grid = gridTiles[i++];
                     grid.NumCellsX = numCellsX;
                     grid.NumCellsY = numCellsY;
                     grid.CellSize = cellSize;
@@ -352,7 +332,7 @@ namespace Iviz.Controllers
                     {
                         try
                         {
-                            grid.SetOccupancy(data, rect, pose);
+                            grid.SetOccupancy(data.Span, rect, pose);
                         }
                         catch (Exception e)
                         {
@@ -366,7 +346,7 @@ namespace Iviz.Controllers
             ScaleZ = ScaleZ;
         }
 
-        void SetTextures([NotNull] sbyte[] data, Pose pose, ICollection<Task> tasks)
+        void SetTextures(Memory<sbyte> data, Pose pose, ICollection<Task> tasks)
         {
             int tileSizeX = (numCellsX + MaxTileSize - 1) / MaxTileSize;
             int tileSizeY = (numCellsY + MaxTileSize - 1) / MaxTileSize;
@@ -376,21 +356,20 @@ namespace Iviz.Controllers
             {
                 if (tileTotalSize > textureTiles.Count)
                 {
-                    for (int j = textureTiles.Count; j < tileTotalSize; j++)
+                    foreach (int _ in textureTiles.Count..tileTotalSize)
                     {
-                        textureTiles.Add(
-                            ResourcePool.RentDisplay<OccupancyGridTextureResource>(textureNode.Transform));
-                        textureTiles[j].Visible = Visible;
-                        textureTiles[j].Colormap = Colormap;
-                        textureTiles[j].FlipMinMax = FlipMinMax;
+                        var texture = ResourcePool.RentDisplay<OccupancyGridTextureResource>(textureNode.Transform); 
+                        texture.Visible = Visible;
+                        texture.Colormap = Colormap;
+                        texture.FlipMinMax = FlipMinMax;
+                        textureTiles.Add(texture);
                     }
                 }
                 else
                 {
-                    for (int j = tileTotalSize; j < textureTiles.Count; j++)
+                    foreach (var textureTile in textureTiles.Skip(tileTotalSize))
                     {
-                        textureTiles[j].ReturnToPool();
-                        textureTiles[j] = null;
+                        textureTile.ReturnToPool();
                     }
 
                     textureTiles.RemoveRange(tileTotalSize, textureTiles.Count - tileTotalSize);
@@ -398,9 +377,9 @@ namespace Iviz.Controllers
             }
 
             int i = 0;
-            for (int v = 0; v < tileSizeY; v++)
+            foreach (int v in ..tileSizeY)
             {
-                for (int u = 0; u < tileSizeX; u++, i++)
+                foreach (int u in ..tileSizeX)
                 {
                     int xMin = u * MaxTileSize;
                     int xMax = Math.Min(xMin + MaxTileSize, numCellsX);
@@ -409,12 +388,12 @@ namespace Iviz.Controllers
                     
                     var rect = new OccupancyGridResource.Rect(xMin, xMax, yMin, yMax);
 
-                    var texture = textureTiles[i];
+                    var texture = textureTiles[i++];
                     tasks.Add(Task.Run(() =>
                     {
                         try
                         {
-                            texture.Set(data, cellSize, numCellsX, rect, pose);
+                            texture.Set(data.Span, cellSize, numCellsX, rect, pose);
                         }
                         catch (Exception e)
                         {

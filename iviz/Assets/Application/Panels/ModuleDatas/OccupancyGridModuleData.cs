@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -26,21 +27,10 @@ namespace Iviz.App
 
 
         public OccupancyGridModuleData(ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<OccupancyGridConfiguration>()?.Topic ?? constructor.Topic,
-                constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<OccupancyGridPanelContents>(ModuleType.OccupancyGrid);
-            listener = new OccupancyGridListener(this);
-            if (constructor.Configuration == null)
-            {
-                listener.Config.Topic = Topic;
-            }
-            else
-            {
-                listener.Config = (OccupancyGridConfiguration) constructor.Configuration;
-            }
-
-            listener.StartListening();
+            listener = new OccupancyGridListener(this, (OccupancyGridConfiguration?)constructor.Configuration, Topic);
             UpdateModuleButton();
         }
 
@@ -49,7 +39,7 @@ namespace Iviz.App
             panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
 
-            panel.Colormap.Index = (int) listener.Colormap;
+            panel.Colormap.Index = (int)listener.Colormap;
             panel.HideButton.State = listener.Visible;
             panel.FlipColors.Value = listener.FlipMinMax;
             panel.ScaleZ.Value = listener.ScaleZ;
@@ -83,7 +73,7 @@ namespace Iviz.App
                 panel.ScaleZ.Interactable = f;
             };
 
-            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId) i; };
+            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId)i; };
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
         }

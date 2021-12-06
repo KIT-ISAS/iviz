@@ -1,8 +1,8 @@
 ﻿#nullable enable
 
 using System;
-using System.Runtime.Serialization;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
@@ -13,45 +13,24 @@ using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public sealed class MagnitudeConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public ModuleType ModuleType => ModuleType.Magnitude;
-        [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public string Type { get; set; } = "";
-        [DataMember] public bool TrailVisible { get; set; } = false;
-        [DataMember] public bool AngleVisible { get; set; } = true;
-        [DataMember] public bool FrameVisible { get; set; } = true;
-        [DataMember] public float Scale { get; set; } = 1.0f;
-        [DataMember] public bool PreferUdp { get; set; } = true;
-        [DataMember] public bool VectorVisible { get; set; } = true;
-        [DataMember] public float VectorScale { get; set; } = 1.0f;
-        [DataMember] public float ScaleMultiplierPow10 { get; set; } = 0;
-        [DataMember] public SerializableColor Color { get; set; } = UnityEngine.Color.red;
-        [DataMember] public float TrailTime { get; set; } = 2.0f;
-    }
-
     public sealed class MagnitudeListener : ListenerController
     {
         readonly FrameNode frameNode;
         readonly TrailResource trail;
-        FrameNode? childNode;
-        AxisFrameResource? axisFrame;
-        MeshMarkerResource? sphere;
-        ArrowResource? arrow;
-        AngleAxisResource? angleAxis;
-        
+        readonly FrameNode? childNode;
+        readonly AxisFrameResource? axisFrame;
+        readonly MeshMarkerResource? sphere;
+        readonly ArrowResource? arrow;
+        readonly AngleAxisResource? angleAxis;
+
         Vector3 dirForDataSource;
 
-        readonly MagnitudeConfiguration config = new MagnitudeConfiguration();
+        readonly MagnitudeConfiguration config = new();
 
         public override IModuleData ModuleData { get; }
         public override TfFrame? Frame => frameNode.Parent;
@@ -59,7 +38,7 @@ namespace Iviz.Controllers
         public MagnitudeConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 config.Topic = value.Topic;
                 config.Type = value.Type;
@@ -75,19 +54,16 @@ namespace Iviz.Controllers
                 PreferUdp = value.PreferUdp;
             }
         }
-        
+
         public bool PreferUdp
         {
             get => config.PreferUdp;
             set
             {
                 config.PreferUdp = value;
-                if (Listener != null)
-                {
-                    Listener.TransportHint = value ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
-                }
+                Listener.TransportHint = value ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
             }
-        }        
+        }
 
         public override bool Visible
         {
@@ -158,7 +134,7 @@ namespace Iviz.Controllers
                 }
             }
         }
-        
+
         public bool AngleVisible
         {
             get => config.AngleVisible;
@@ -199,7 +175,7 @@ namespace Iviz.Controllers
                 config.Scale = value;
                 frameNode.Transform.localScale = value * Vector3.one;
                 trail.ElementScale = 0.02f * value;
-                
+
                 if (axisFrame != null)
                 {
                     axisFrame.Transform.localScale = value * Vector3.one;
@@ -213,11 +189,12 @@ namespace Iviz.Controllers
                 if (angleAxis != null)
                 {
                     angleAxis.Transform.localScale = value * Vector3.one;
-                }                
+                }
             }
         }
 
         float scaleMultiplier = 1;
+
         public float VectorScaleMultiplierPow10
         {
             get => config.ScaleMultiplierPow10;
@@ -237,7 +214,7 @@ namespace Iviz.Controllers
             set
             {
                 config.TrailTime = value;
-                trail.TimeWindowInMs = (int) (value * 1000);
+                trail.TimeWindowInMs = (int)(value * 1000);
             }
         }
 
@@ -247,7 +224,9 @@ namespace Iviz.Controllers
             set => config.VectorScale = value;
         }
 
-        public MagnitudeListener(IModuleData moduleData)
+        public override IListener Listener { get; }
+
+        public MagnitudeListener(IModuleData moduleData, MagnitudeConfiguration? config, string topic, string type)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
@@ -256,100 +235,102 @@ namespace Iviz.Controllers
             trail = ResourcePool.RentDisplay<TrailResource>();
             trail.DataSource = () => frameNode.Transform.position;
 
-            Config = new MagnitudeConfiguration();
-        }
+            Config = config ?? new MagnitudeConfiguration
+            {
+                Topic = topic,
+                Type = type
+            };
 
-        public void StartListening()
-        {
-            frameNode.name = $"[{config.Topic}]";
+            frameNode.name = $"[{Config.Topic}]";
 
             var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
-            switch (config.Type)
+            switch (Config.Type)
             {
                 case PoseStamped.RosMessageType:
-                    Listener = new Listener<PoseStamped>(config.Topic, Handler, transportHint);
+                    Listener = new Listener<PoseStamped>(Config.Topic, Handler, transportHint);
                     goto case Msgs.GeometryMsgs.Pose.RosMessageType;
 
                 case Msgs.GeometryMsgs.Pose.RosMessageType:
-                    Listener ??= new Listener<Msgs.GeometryMsgs.Pose>(config.Topic, Handler, transportHint);
-                    RentFrame(frameNode);
+                    Listener ??= new Listener<Msgs.GeometryMsgs.Pose>(Config.Topic, Handler, transportHint);
+                    RentFrame(frameNode, out axisFrame);
                     break;
 
                 case PointStamped.RosMessageType:
-                    Listener = new Listener<PointStamped>(config.Topic, Handler, transportHint);
+                    Listener = new Listener<PointStamped>(Config.Topic, Handler, transportHint);
                     goto case Point.RosMessageType;
 
                 case Point.RosMessageType:
-                    Listener ??= new Listener<Point>(config.Topic, Handler, transportHint);
-
-                    RentSphere(frameNode);
+                    Listener ??= new Listener<Point>(Config.Topic, Handler, transportHint);
+                    RentSphere(frameNode, Color, out sphere);
                     break;
 
                 case WrenchStamped.RosMessageType:
-                    Listener = new Listener<WrenchStamped>(config.Topic, Handler, transportHint);
+                    Listener = new Listener<WrenchStamped>(Config.Topic, Handler, transportHint);
                     goto case Wrench.RosMessageType;
 
                 case Wrench.RosMessageType:
-                    Listener ??= new Listener<Wrench>(config.Topic, Handler, transportHint);
-                    RentFrame(frameNode);
-                    RentArrow(frameNode);
-                    RentAngleAxis(frameNode);
-                    RentSphere(frameNode);
+                    Listener ??= new Listener<Wrench>(Config.Topic, Handler, transportHint);
+                    RentFrame(frameNode, out axisFrame);
+                    RentArrow(frameNode, Color, out arrow);
+                    RentAngleAxis(frameNode, out angleAxis);
+                    RentSphere(frameNode, Color, out sphere);
                     trail.DataSource = TrailDataSource;
                     break;
 
                 case TwistStamped.RosMessageType:
-                    Listener = new Listener<TwistStamped>(config.Topic, Handler, transportHint);
+                    Listener = new Listener<TwistStamped>(Config.Topic, Handler, transportHint);
                     goto case Twist.RosMessageType;
 
                 case Twist.RosMessageType:
-                    Listener ??= new Listener<Twist>(config.Topic, Handler, transportHint);
-                    RentFrame(frameNode);
-                    RentArrow(frameNode);
-                    RentAngleAxis(frameNode);
-                    RentSphere(frameNode);
+                    Listener ??= new Listener<Twist>(Config.Topic, Handler, transportHint);
+                    RentFrame(frameNode, out axisFrame);
+                    RentArrow(frameNode, Color, out arrow);
+                    RentAngleAxis(frameNode, out angleAxis);
+                    RentSphere(frameNode, Color, out sphere);
                     trail.DataSource = TrailDataSource;
                     break;
 
                 case Odometry.RosMessageType:
-                    Listener = new Listener<Odometry>(config.Topic, Handler, transportHint);
-                    RentFrame(frameNode);
-                    RentSphere(frameNode);
-                    childNode = FrameNode.Instantiate($"[{config.Topic} | Child]");
-                    RentArrow(childNode);
-                    RentAngleAxis(childNode);
+                    Listener = new Listener<Odometry>(Config.Topic, Handler, transportHint);
+                    RentFrame(frameNode, out axisFrame);
+                    RentSphere(frameNode, Color, out sphere);
+                    childNode = FrameNode.Instantiate($"[{Config.Topic} | Child]");
+                    RentArrow(childNode, Color, out arrow);
+                    RentAngleAxis(childNode, out angleAxis);
                     trail.DataSource = TrailDataSource;
                     break;
+                default:
+                    throw new InvalidOperationException("Invalid message type");
             }
         }
-
-        void RentFrame(FrameNode node)
+        
+        static void RentFrame(FrameNode node, out AxisFrameResource axisFrame)
         {
             axisFrame = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
             axisFrame.ShadowsEnabled = false;
         }
-        
-        void RentArrow(FrameNode node)
+
+        static void RentArrow(FrameNode node, Color color, out ArrowResource arrow)
         {
             arrow = ResourcePool.RentDisplay<ArrowResource>(node.Transform);
-            arrow.Color = Color;
+            arrow.Color = color;
             arrow.Set(Vector3.one * 0.01f);
             arrow.ShadowsEnabled = false;
         }
 
-        void RentAngleAxis(FrameNode node)
+        static void RentAngleAxis(FrameNode node, out AngleAxisResource angleAxis)
         {
             angleAxis = ResourcePool.RentDisplay<AngleAxisResource>(node.Transform);
             angleAxis.Color = Color.yellow;
         }
-        
-        void RentSphere(FrameNode node)
+
+        static void RentSphere(FrameNode node, Color color, out MeshMarkerResource sphere)
         {
             sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.Transform);
             sphere.Transform.localScale = 0.05f * Vector3.one;
-            sphere.Color = Color;
+            sphere.Color = color;
             sphere.ShadowsEnabled = false;
-        }
+        }        
 
         void Handler(PoseStamped msg)
         {
@@ -389,7 +370,8 @@ namespace Iviz.Controllers
             Handler(msg.Wrench);
         }
 
-        Vector3 TrailDataSource() => frameNode.Transform.TransformPoint(dirForDataSource * (VectorScale * scaleMultiplier));
+        Vector3 TrailDataSource() =>
+            frameNode.Transform.TransformPoint(dirForDataSource * (VectorScale * scaleMultiplier));
 
         void Handler(Wrench msg)
         {

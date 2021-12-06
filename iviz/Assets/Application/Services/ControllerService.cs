@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.App.ARDialogs;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
@@ -16,6 +17,7 @@ using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.Roscpp;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Tools;
 using Newtonsoft.Json;
 using UnityEngine;
 using Feedback = Iviz.Msgs.IvizCommonMsgs.Feedback;
@@ -79,7 +81,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            for (int i = 0; i < LogLevelNames.Length; i++)
+            foreach (int i in ..LogLevelNames.Length)
             {
                 if (LogLevelNames[i] == srv.Request.Level)
                 {

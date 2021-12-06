@@ -1,8 +1,10 @@
 ﻿#nullable enable
 
 using System;
+using System.Linq;
 using System.Runtime.Serialization;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Roslib.Utils;
 
@@ -16,7 +18,11 @@ namespace Iviz.App
         [DataMember] public string Type { get; }
         [DataMember] public IConfiguration? Configuration { get; }
 
-        public T? GetConfiguration<T>() where T : class, IConfiguration => Configuration as T;
+        public string? TryGetConfigurationTopic() =>
+            Configuration is IConfigurationWithTopic hasTopic ? hasTopic.Topic : null;
+
+        public string? TryGetConfigurationType() =>
+            Configuration is IConfigurationWithType hasType ? hasType.Type : null;
 
         public ModuleDataConstructor(ModuleType moduleType, string topic, string type, IConfiguration? configuration)
         {

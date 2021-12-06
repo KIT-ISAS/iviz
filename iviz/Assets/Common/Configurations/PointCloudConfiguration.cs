@@ -1,11 +1,9 @@
 using System;
 using System.Runtime.Serialization;
-using Iviz.Common;
-using Iviz.MsgsWrapper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Iviz.Msgs.IvizCommonMsgs
+namespace Iviz.Common.Configurations
 {
     [JsonConverter(typeof(StringEnumConverter))]
     public enum PointCloudType
@@ -14,12 +12,10 @@ namespace Iviz.Msgs.IvizCommonMsgs
         Cubes,
         Spheres
     }
-    
+
     [DataContract]
-    public sealed class PointCloudConfiguration : RosMessageWrapper<PointCloudConfiguration>, IConfiguration
+    public sealed class PointCloudConfiguration : IConfigurationWithTopic
     {
-        [Preserve, MessageName] public const string RosMessageType = "iviz_msgs/PointCloudConfiguration";
-        
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string IntensityChannel { get; set; } = "z";
         [DataMember] public float PointSize { get; set; } = 0.3f;

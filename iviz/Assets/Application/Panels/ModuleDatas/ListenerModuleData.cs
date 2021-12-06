@@ -15,9 +15,9 @@ namespace Iviz.App
             ModuleListPanel.RegisterDisplayedTopic(Topic);
         }
 
-        public override void Stop()
+        public override void Dispose()
         {
-            base.Stop();
+            base.Dispose();
             Listener.Dispose();
         }
         

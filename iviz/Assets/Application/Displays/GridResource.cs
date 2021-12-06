@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -12,14 +13,6 @@ using JetBrains.Annotations;
 
 namespace Iviz.Displays
 {
-    [JsonConverter(typeof(StringEnumConverter))]
-    public enum GridOrientation
-    {
-        XY,
-        YZ,
-        XZ
-    }
-
     public sealed class GridResource : MarkerResource, IRecyclable
     {
         //Mesh mesh;

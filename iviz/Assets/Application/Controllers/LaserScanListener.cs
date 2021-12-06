@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
@@ -16,7 +17,7 @@ namespace Iviz.Controllers
         readonly RadialScanResource resource;
         readonly FrameNode node;
         readonly LaserScanConfiguration config = new();
-        
+
         public override IModuleData ModuleData { get; }
 
         public override TfFrame? Frame => node.Parent;
@@ -133,20 +134,22 @@ namespace Iviz.Controllers
                 resource.UseLines = value;
             }
         }
+        
+        public override IListener Listener { get; }
 
-        public LaserScanListener(IModuleData moduleData)
+        public LaserScanListener(IModuleData moduleData, LaserScanConfiguration? config, string topic)
         {
             ModuleData = moduleData;
 
             node = FrameNode.Instantiate("[LaserScanNode]");
             resource = ResourcePool.RentDisplay<RadialScanResource>(node.transform);
-            Config = new LaserScanConfiguration();
-        }
+            Config = config ?? new LaserScanConfiguration
+            {
+                Topic = topic,
+            };
 
-        public void StartListening()
-        {
-            Listener = new Listener<LaserScan>(config.Topic, Handler);
-            node.name = "[" + config.Topic + "]";
+            Listener = new Listener<LaserScan>(Config.Topic, Handler);
+            node.name = "[" + Config.Topic + "]";
         }
 
         void Handler(LaserScan msg)

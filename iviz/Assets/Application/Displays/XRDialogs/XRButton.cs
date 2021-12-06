@@ -13,7 +13,6 @@ using UnityEngine;
 
 namespace Iviz.Displays.XRDialogs
 {
-    [RequireComponent(typeof(BoxCollider))]
     public sealed class XRButton : MonoBehaviour, IDisplay, IHasBounds, IRecyclable
     {
         [SerializeField] Texture2D[] icons = Array.Empty<Texture2D>();
@@ -35,8 +34,8 @@ namespace Iviz.Displays.XRDialogs
         MeshRenderer IconMeshRenderer => iconMeshRenderer.AssertNotNull(nameof(iconMeshRenderer));
         Material Material => material != null ? material : material = Instantiate(IconMeshRenderer.material);
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
-
-        Transform IHasBounds.BoundsTransform => Transform;
+        Transform IHasBounds.BoundsTransform => BoxCollider.transform;
+        
         public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
         public event Action? BoundsChanged;
         public event Action? Clicked;

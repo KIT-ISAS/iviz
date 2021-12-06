@@ -55,7 +55,7 @@ namespace Iviz.Controllers
 
                     lastSeenStr = lastSeen.Code.Length < maxLastSeenLength
                         ? $"Last seen: {typeStr} \"{lastSeen.Code}\""
-                        : $"Last seen: {typeStr} \"{lastSeen.Code.Substring(0, maxLastSeenLength)}...\"";
+                        : $"Last seen: {typeStr} \"{lastSeen.Code[..maxLastSeenLength]}...\"";
                 }
 
                 return "<b>AR Markers</b>\n" +

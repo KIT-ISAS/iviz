@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs.SensorMsgs;
@@ -42,9 +43,9 @@ namespace Iviz.App
             UpdateModuleButton();
         }
 
-        public override void Stop()
+        public override void Dispose()
         {
-            base.Stop();
+            base.Dispose();
             controller.Dispose();
             colorDialogData?.Stop();
             depthDialogData?.Stop();

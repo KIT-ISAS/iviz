@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Controllers.XR;
 using Newtonsoft.Json;
@@ -29,9 +30,9 @@ namespace Iviz.App
             UpdateModuleButton();
         }
 
-        public override void Stop()
+        public override void Dispose()
         {
-            base.Stop();
+            base.Dispose();
             controller.Dispose();
         }
 

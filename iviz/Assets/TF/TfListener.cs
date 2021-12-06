@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.Tf2Msgs;

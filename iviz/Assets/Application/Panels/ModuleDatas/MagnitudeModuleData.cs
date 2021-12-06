@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -25,22 +26,11 @@ namespace Iviz.App
 
 
         public MagnitudeModuleData(ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<MagnitudeConfiguration>()?.Topic ?? constructor.Topic,
-                constructor.GetConfiguration<MagnitudeConfiguration>()?.Type ?? constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
+                constructor.TryGetConfigurationType() ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<MagnitudePanelContents>(ModuleType.Magnitude);
-            listener = new MagnitudeListener(this);
-            if (constructor.Configuration == null)
-            {
-                listener.Config.Topic = Topic;
-                listener.Config.Type = Type;
-            }
-            else
-            {
-                listener.Config = (MagnitudeConfiguration) constructor.Configuration;
-            }
-
-            listener.StartListening();
+            listener = new MagnitudeListener(this, (MagnitudeConfiguration?)constructor.Configuration, Topic, Type);
             UpdateModuleButton();
         }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.MsgsWrapper;

@@ -2,31 +2,18 @@
 
 using System;
 using System.Linq;
-using System.Runtime.Serialization;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public sealed class DepthCloudConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string ColorTopic { get; set; } = "";
-
-        [DataMember] public string DepthTopic { get; set; } = "";
-
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public ModuleType ModuleType => ModuleType.DepthCloud;
-        [DataMember] public bool Visible { get; set; } = true;
-    }
-
     public sealed class DepthCloudController : IController, IHasFrame
     {
         readonly DepthCloudConfiguration config = new();
@@ -61,7 +48,7 @@ namespace Iviz.Controllers
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             depthImageTexture = new ImageTexture();
             colorImageTexture = new ImageTexture();
-            
+
             node = FrameNode.Instantiate("DepthCloud");
             node.Transform.localRotation = new Quaternion(0, 0.7071f, 0.7071f, 0);
 
@@ -242,11 +229,9 @@ namespace Iviz.Controllers
                 {
                     return; // stopped!
                 }
-                
+
                 node.AttachTo(msg.Header);
-                int width = (int)msg.Width;
-                int height = (int)msg.Height;
-                depthImageTexture.Set(width, height, msg.Encoding, msg.Data);
+                depthImageTexture.Set((int)msg.Width, (int)msg.Height, msg.Encoding, msg.Data);
                 UpdateIntensityBounds();
                 DepthIsProcessing = false;
             });
@@ -320,9 +305,7 @@ namespace Iviz.Controllers
 
             GameThread.PostInListenerQueue(() =>
             {
-                int width = (int)msg.Width;
-                int height = (int)msg.Height;
-                colorImageTexture.Set(width, height, msg.Encoding, msg.Data);
+                colorImageTexture.Set((int)msg.Width, (int)msg.Height, msg.Encoding, msg.Data);
                 ColorIsProcessing = false;
             });
 

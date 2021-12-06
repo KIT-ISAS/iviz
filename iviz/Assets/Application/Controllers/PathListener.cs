@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
@@ -9,27 +9,11 @@ using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public sealed class PathConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public ModuleType ModuleType => ModuleType.Path;
-        [DataMember] public bool Visible { get; set; } = true;
-        [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public string Type { get; set; } = "";
-        [DataMember] public float LineWidth { get; set; } = 0.01f;
-        [DataMember] public bool FramesVisible { get; set; } = false;
-        [DataMember] public float FrameSize { get; set; } = 0.125f;
-        [DataMember] public bool LinesVisible { get; set; } = true;
-        [DataMember] public SerializableColor LineColor { get; set; } = Color.yellow;
-    }
-
     public sealed class PathListener : ListenerController
     {
         readonly FrameNode node;
@@ -39,7 +23,7 @@ namespace Iviz.Controllers
 
         public override TfFrame Frame => node.Parent;
 
-        readonly PathConfiguration config = new PathConfiguration();
+        readonly PathConfiguration config = new();
 
         public PathConfiguration Config
         {
@@ -128,8 +112,11 @@ namespace Iviz.Controllers
             }
         }
 
-        readonly List<Pose> savedPoses = new List<Pose>();
-        readonly NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
+        readonly List<Pose> savedPoses = new();
+        readonly NativeList<LineWithColor> lines = new();
+
+        IListener listener;
+        public override IListener Listener => listener;
 
         public PathListener([NotNull] IModuleData moduleData)
         {
@@ -147,19 +134,19 @@ namespace Iviz.Controllers
             switch (config.Type)
             {
                 case Msgs.NavMsgs.Path.RosMessageType:
-                    Listener = new Listener<Msgs.NavMsgs.Path>(config.Topic, Handler);
+                    listener = new Listener<Msgs.NavMsgs.Path>(config.Topic, Handler);
                     break;
                 case Msgs.GeometryMsgs.PoseArray.RosMessageType:
-                    Listener = new Listener<Msgs.GeometryMsgs.PoseArray>(config.Topic, Handler);
+                    listener = new Listener<Msgs.GeometryMsgs.PoseArray>(config.Topic, Handler);
                     LinesVisible = false;
                     break;
                 case Msgs.GeometryMsgs.PolygonStamped.RosMessageType:
-                    Listener = new Listener<Msgs.GeometryMsgs.PolygonStamped>(config.Topic, Handler);
+                    listener = new Listener<Msgs.GeometryMsgs.PolygonStamped>(config.Topic, Handler);
                     FramesVisible = false;
                     break;
                 case Msgs.GeometryMsgs.Polygon.RosMessageType:
                     node.Parent = TfListener.DefaultFrame;
-                    Listener = new Listener<Msgs.GeometryMsgs.Polygon>(config.Topic, Handler);
+                    listener = new Listener<Msgs.GeometryMsgs.Polygon>(config.Topic, Handler);
                     FramesVisible = false;
                     break;
             }

@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Controllers.XR;

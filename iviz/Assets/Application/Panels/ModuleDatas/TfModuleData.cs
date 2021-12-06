@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
@@ -25,7 +26,7 @@ namespace Iviz.App
         public override IController Controller => listener;
 
         public TfModuleData(ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<TfConfiguration>()?.Topic ?? constructor.Topic,
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
                 constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<TfPanelContents>(ModuleType.TF);
@@ -33,9 +34,9 @@ namespace Iviz.App
             UpdateModuleButton();
         }
 
-        public override void Stop()
+        public override void Dispose()
         {
-            base.Stop();
+            base.Dispose();
             listener.Dispose();
         }
         

@@ -4,6 +4,7 @@ using System.Text;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
@@ -86,7 +87,7 @@ namespace Iviz.Displays
             set => gameObject.SetActive(value);
         }
 
-        public void SetCaption(StringBuilder str)
+        public void SetCaption(BuilderPool.BuilderRent str)
         {
             uint hash = Crc32Calculator.Compute(str);
             if (hash == prevTextHash)

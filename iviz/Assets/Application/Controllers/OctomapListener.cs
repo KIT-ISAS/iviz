@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
@@ -92,6 +93,9 @@ namespace Iviz.Controllers
             }
         }
 
+        IListener listener;
+        public override IListener Listener => listener;
+
         public OctomapListener([NotNull] IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
@@ -110,7 +114,7 @@ namespace Iviz.Controllers
 
         public void StartListening()
         {
-            Listener = new Listener<Octomap>(config.Topic, Handler);
+            listener = new Listener<Octomap>(config.Topic, Handler);
         }
 
         void Handler([NotNull] Octomap msg)

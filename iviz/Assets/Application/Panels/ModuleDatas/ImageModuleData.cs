@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -27,8 +28,8 @@ namespace Iviz.App
         ImageDialogData? imageDialogData;
 
         public ImageModuleData(ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<ImageConfiguration>()?.Topic ?? constructor.Topic,
-                constructor.GetConfiguration<ImageConfiguration>()?.Type ?? constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
+                constructor.TryGetConfigurationType() ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<ImagePanelContents>(ModuleType.Image);
             listener = new ImageListener(this, (ImageConfiguration?)constructor.Configuration, Topic, Type);
@@ -158,9 +159,9 @@ namespace Iviz.App
             imageDialogData = null;
         }
 
-        public override void Stop()
+        public override void Dispose()
         {
-            base.Stop();
+            base.Dispose();
             imageDialogData?.Stop();
         }
 

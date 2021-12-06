@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Runtime.Serialization;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
@@ -11,30 +13,11 @@ using Iviz.Msgs.GridMapMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
-using Iviz.Roslib.Utils;
 using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    [DataContract]
-    public class GridMapConfiguration : JsonToString, IConfiguration
-    {
-        [DataMember] public string Id { get; set; } = System.Guid.NewGuid().ToString();
-        [DataMember] public ModuleType ModuleType => ModuleType.GridMap;
-        [DataMember] public bool Visible { get; set; } = true;
-
-        [DataMember] public string Topic { get; set; } = "";
-
-        [DataMember] public string IntensityChannel { get; set; } = "";
-        [DataMember] public ColormapId Colormap { get; set; } = ColormapId.hsv;
-        [DataMember] public bool ForceMinMax { get; set; }
-        [DataMember] public float MinIntensity { get; set; }
-        [DataMember] public float MaxIntensity { get; set; } = 1;
-        [DataMember] public bool FlipMinMax { get; set; }
-        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
-    }
-
     public sealed class GridMapListener : ListenerController
     {
         const int MaxGridSize = 4096;
@@ -42,7 +25,7 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         readonly FrameNode link;
         readonly GridMapResource resource;
-        
+
         int numCellsX;
         int numCellsY;
         float cellSize;
@@ -51,9 +34,9 @@ namespace Iviz.Controllers
 
         public Vector2 MeasuredIntensityBounds => resource.MeasuredIntensityBounds;
 
-        public override TfFrame Frame => node.Parent;
+        public override TfFrame? Frame => node.Parent;
 
-        readonly GridMapConfiguration config = new GridMapConfiguration();
+        readonly GridMapConfiguration config = new();
 
         public GridMapConfiguration Config
         {
@@ -86,7 +69,7 @@ namespace Iviz.Controllers
         {
             get => config.IntensityChannel;
             set => config.IntensityChannel = value;
-        } 
+        }
 
         public ColormapId Colormap
         {
@@ -156,41 +139,42 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
         public string Description
         {
             get
             {
                 string minIntensityStr = MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
                 string maxIntensityStr = MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
-                
+
                 return $"<b>{numCellsX.ToString("N0")}x{numCellsY.ToString("N0")} cells | " +
-                    $"{cellSize.ToString("#,0.###")} m/cell</b>\n" +
-                    $"[{minIntensityStr} .. {maxIntensityStr}]";
+                       $"{cellSize.ToString("#,0.###")} m/cell</b>\n" +
+                       $"[{minIntensityStr} .. {maxIntensityStr}]";
             }
         }
 
-        readonly List<string> fieldNames = new List<string>();
+        readonly List<string> fieldNames = new();
 
         public ReadOnlyCollection<string> FieldNames { get; }
 
-        public GridMapListener([NotNull] IModuleData moduleData)
+        public override IListener Listener { get; }
+
+        public GridMapListener(IModuleData moduleData, GridMapConfiguration? config, string topic)
         {
             ModuleData = moduleData ?? throw new System.ArgumentNullException(nameof(moduleData));
-         
+
             FieldNames = fieldNames.AsReadOnly();
-            
+
             node = FrameNode.Instantiate("[GridMapNode]");
             link = FrameNode.Instantiate("[GridMapLink]");
             link.Transform.parent = node.Transform;
             resource = ResourcePool.Rent<GridMapResource>(Resource.Displays.GridMap, link.Transform);
 
-            Config = new GridMapConfiguration();
-        }
+            Config = config ?? new GridMapConfiguration
+            {
+                Topic = topic,
+            };
 
-        public void StartListening()
-        {
-            Listener = new Listener<GridMap>(config.Topic, Handler);
+            Listener = new Listener<GridMap>(Config.Topic, Handler);
         }
 
         static bool IsInvalidSize(double x)
@@ -198,7 +182,7 @@ namespace Iviz.Controllers
             return double.IsNaN(x) || x <= 0;
         }
 
-        void Handler([NotNull] GridMap msg)
+        void Handler(GridMap msg)
         {
             if (IsInvalidSize(msg.Info.LengthX) ||
                 IsInvalidSize(msg.Info.LengthY) ||
@@ -209,8 +193,8 @@ namespace Iviz.Controllers
                 return;
             }
 
-            int width = (int) (msg.Info.LengthX / msg.Info.Resolution + 0.5);
-            int height = (int) (msg.Info.LengthY / msg.Info.Resolution + 0.5);
+            int width = (int)(msg.Info.LengthX / msg.Info.Resolution + 0.5);
+            int height = (int)(msg.Info.LengthY / msg.Info.Resolution + 0.5);
 
             if (width > MaxGridSize || height > MaxGridSize)
             {
@@ -237,7 +221,8 @@ namespace Iviz.Controllers
             int length = msg.Data[layer].Data.Length;
             if (length != width * height)
             {
-                RosLogger.Error($"{this}: Gridmap layer size does not match. Expected {width * height}, but got {length}");
+                RosLogger.Error(
+                    $"{this}: Gridmap layer size does not match. Expected {width * height}, but got {length}");
                 return;
             }
 
@@ -245,12 +230,12 @@ namespace Iviz.Controllers
             link.transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
 
             resource.Set(width, height,
-                (float) msg.Info.LengthX, (float) msg.Info.LengthY,
+                (float)msg.Info.LengthX, (float)msg.Info.LengthY,
                 msg.Data[layer].Data, length);
 
             numCellsX = width;
             numCellsY = height;
-            cellSize = (float) msg.Info.Resolution;
+            cellSize = (float)msg.Info.Resolution;
         }
 
         public override void Dispose()

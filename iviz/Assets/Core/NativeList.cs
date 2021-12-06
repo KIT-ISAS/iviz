@@ -1,6 +1,6 @@
+#nullable enable
+
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -121,7 +121,7 @@ namespace Iviz.Core
             length = newSize;
         }
 
-        public static implicit operator ReadOnlySpan<T>([NotNull] NativeList<T> list)
+        public static implicit operator ReadOnlySpan<T>(NativeList<T> list)
         {
             return list.AsReadOnlySpan();
         }

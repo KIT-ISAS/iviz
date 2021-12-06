@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -28,8 +29,8 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public MarkerModuleData(ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<MarkerConfiguration>()?.Topic ?? constructor.Topic,
-                constructor.GetConfiguration<MarkerConfiguration>()?.Type ?? constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
+                constructor.TryGetConfigurationType() ?? constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<MarkerPanelContents>(ModuleType.Marker);
             listener = new MarkerListener(this, (MarkerConfiguration?)constructor.Configuration, Topic, Type);

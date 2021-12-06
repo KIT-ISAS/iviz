@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.App.ARDialogs;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
@@ -64,18 +65,11 @@ namespace Iviz.Controllers
             }
         }
         
-        public void StartListening()
-        {
-            Listener = config.Type switch
-            {
-                Dialog.RosMessageType => new Listener<Dialog>(config.Topic, Handler) { MaxQueueSize = 50 },
-                GuiArray.RosMessageType => new Listener<GuiArray>(config.Topic, Handler) { MaxQueueSize = 50 },
-                _ => Listener
-            };
 
-            FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");
-        }
-
+        
+        IListener listener;
+        public override IListener Listener => listener;
+        
         public GuiDialogListener([NotNull] IModuleData moduleData)
         {
             this.moduleData = moduleData;
@@ -84,6 +78,18 @@ namespace Iviz.Controllers
             GameThread.EveryFrame += CheckDeadDialogs;
         }
 
+        public void StartListening()
+        {
+            listener = config.Type switch
+            {
+                Dialog.RosMessageType => new Listener<Dialog>(config.Topic, Handler) { MaxQueueSize = 50 },
+                GuiArray.RosMessageType => new Listener<GuiArray>(config.Topic, Handler) { MaxQueueSize = 50 },
+                _ => Listener
+            };
+
+            FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");
+        }
+        
         GuiDialogListener()
         {
             moduleData = null;

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using Iviz.App;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
@@ -163,6 +164,8 @@ namespace Iviz.Controllers
                 return $"{markerStr}\n{errorStr}, {warnStr}";
             }
         }
+        
+        public override IListener Listener { get; }
 
         public InteractiveMarkerListener(IModuleData moduleData, InteractiveMarkerConfiguration? config, string topic)
         {

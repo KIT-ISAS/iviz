@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Newtonsoft.Json;
@@ -39,9 +40,9 @@ namespace Iviz.App
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
         }
 
-        public override void Stop()
+        public override void Dispose()
         {
-            base.Stop();
+            base.Dispose();
             GridController.Dispose();
             
             ARController.ARCameraViewChanged -= OnARCameraViewChanged;

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -20,9 +21,9 @@ namespace Iviz.Displays
 
         readonly List<float4> pointBuffer = new();
         MeshListResource? resource;
-        
+
         MeshListResource Resource =>
-            resource != null ? resource : (resource = ResourcePool.RentDisplay<MeshListResource>(transform));        
+            resource != null ? resource : (resource = ResourcePool.RentDisplay<MeshListResource>(transform));
 
         protected override IDisplay Display => Resource;
 
@@ -131,27 +132,32 @@ namespace Iviz.Displays
             pointBuffer.Clear();
         }
 
-        public void SetOccupancy(sbyte[] values, Rect? inBounds, Pose pose)
+        public void SetOccupancy(ReadOnlySpan<sbyte> values, Rect? inBounds, Pose pose)
         {
             IsProcessing = true;
             Rect bounds = inBounds ?? new Rect(0, numCellsX, 0, numCellsY);
 
             pointBuffer.Clear();
 
-            var mul = new float4(cellSize, cellSize, 0, 0.01f);
+            //var mul = new float4(cellSize, cellSize, 0, 0.01f);
+            float size = cellSize;
+            var p = new float4();
 
-            for (int v = bounds.YMin; v < bounds.YMax; v++)
+            foreach (int v in bounds.yMin..bounds.yMax)
             {
-                int i = v * numCellsX + bounds.XMin;
-                for (int u = bounds.XMin; u < bounds.XMax; u++, i++)
+                var row = values[(v * numCellsX)..];
+                p.y = v * size;
+
+                foreach (int u in bounds.xMin..bounds.xMax)
                 {
-                    sbyte val = values[i];
+                    sbyte val = row[u];
                     if (val <= 0)
                     {
                         continue;
                     }
 
-                    var p = new float4(u, v, 0, val) * mul;
+                    p.x = u * size;
+                    p.w = val * 0.01f;
                     pointBuffer.Add(p.Ros2Unity());
                 }
             }
@@ -167,26 +173,25 @@ namespace Iviz.Displays
         public void SplitForRecycle()
         {
             resource.ReturnToPool();
-        }        
+        }
 
         public readonly struct Rect
         {
-            public int XMin { get; }
-            public int XMax { get; }
-            public int YMin { get; }
-            public int YMax { get; }
+            public readonly int xMin;
+            public readonly int xMax;
+            public readonly int yMin;
+            public readonly int yMax;
 
-            public int Width => XMax - XMin;
-            public int Height => YMax - YMin;
+            public int Width => xMax - xMin;
+            public int Height => yMax - yMin;
 
             public Rect(int xMin, int xMax, int yMin, int yMax)
             {
-                XMin = xMin;
-                XMax = xMax;
-                YMin = yMin;
-                YMax = yMax;
+                this.xMin = xMin;
+                this.xMax = xMax;
+                this.yMin = yMin;
+                this.yMax = yMax;
             }
-        }        
+        }
     }
 }
-

@@ -3,6 +3,7 @@ using Iviz.Resources;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
@@ -27,8 +28,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public JointStateModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.GetConfiguration<JointStateConfiguration>()?.Topic ?? constructor.Topic,
-                constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<JointStatePanelContents>(ModuleType.JointState);
             listener = new JointStateListener(this);
