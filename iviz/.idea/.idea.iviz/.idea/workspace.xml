@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="a4ab0e6f-020c-40c1-9c2e-5b61f055d597" name="Changes" comment="" />
+    <list default="true" id="85d7bd89-72ba-4b71-9722-67531f4cea85" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ProjectId" id="21uOZGWUnV0ViKwJoM1FE7jRSiK" />
+  <component name="ProjectId" id="21uP8ISrTNkZFwGpOMosIIexBAS" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -43,12 +43,12 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="a4ab0e6f-020c-40c1-9c2e-5b61f055d597" name="Changes" comment="" />
-      <created>1638787559619</created>
+      <changelist id="85d7bd89-72ba-4b71-9722-67531f4cea85" name="Changes" comment="" />
+      <created>1638787837751</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1638787559619</updated>
-      <workItem from="1638787564099" duration="11000" />
+      <updated>1638787837751</updated>
+      <workItem from="1638787901246" duration="5000" />
     </task>
     <servers />
   </component>
@@ -57,7 +57,4 @@
   </component>
   <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
   <component name="UnityUnitTestConfiguration" currentTestLauncher="NUnit" />
-  <component name="VcsManagerConfiguration">
-    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
-  </component>
 </project>
