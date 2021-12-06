@@ -221,8 +221,7 @@ namespace Iviz.Roslib
                     using (var readBuffer = await ReceivePacket(runningTs.Token))
                     {
                         serviceMsg = (TService)serviceInfo.Generator.Create();
-                        serviceMsg.Request =
-                            serviceMsg.Request.DeserializeFromArray(readBuffer.Array, readBuffer.Length);
+                        serviceMsg.Request = (IRequest)serviceMsg.Request.DeserializeFrom(readBuffer);
                     }
 
                     byte resultStatus;
@@ -260,7 +259,7 @@ namespace Iviz.Roslib
                         using var writeBuffer = new Rent<byte>(msgLength + 5);
 
                         WriteHeader(writeBuffer, resultStatus, msgLength);
-                        responseMsg.SerializeToArray(writeBuffer.Array, 5);
+                        responseMsg.SerializeTo(writeBuffer[5..]);
 
                         await tcpClient.WriteChunkAsync(writeBuffer, runningTs.Token);
                     }

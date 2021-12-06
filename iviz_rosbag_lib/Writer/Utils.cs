@@ -58,7 +58,7 @@ namespace Iviz.Rosbag.Writer
 
         public static ValueTask WriteValueAsync(this Stream stream, uint value) => stream.WriteValueAsync((int) value);
 
-        public static Stream WriteValue(this Stream stream, string value)
+        public static Stream WriteValueAscii(this Stream stream, string value)
         {
             using var bytes = new Rent<byte>(value.Length);
             byte[] array = bytes.Array;
@@ -71,7 +71,7 @@ namespace Iviz.Rosbag.Writer
             return stream;
         }
 
-        public static async ValueTask WriteValueAsync(this Stream stream, string value)
+        public static async ValueTask WriteValueAsciiAsync(this Stream stream, string value)
         {
             using var bytes = new Rent<byte>(value.Length);
             byte[] array = bytes.Array;

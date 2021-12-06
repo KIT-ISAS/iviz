@@ -27,12 +27,12 @@ namespace Iviz.MsgsGen.Dynamic
             Value.RosValidate();
         }
 
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             Value.RosSerialize(ref b);
         }
 
-        public void RosDeserializeInPlace(ref Buffer b)
+        public void RosDeserializeInPlace(ref ReadBuffer b)
         {
             Value = Generator.RosDeserialize(ref b);
         }

@@ -187,9 +187,13 @@ namespace Iviz.Tools
             await client.WriteChunkAsync(array, token);
         }
 
-        public static byte[] WriteHeaderToArray(string[] contents)
+        public static byte[] WriteHeaderToArray(ReadOnlySpan<string> contents)
         {
-            int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
+            int totalLength = 4 * contents.Length;
+            foreach (string entry in contents)
+            {
+                totalLength += Defaults.UTF8.GetByteCount(entry);
+            }
 
             byte[] array = new byte[totalLength];
             using var writer = new BinaryWriter(new MemoryStream(array));
@@ -197,7 +201,7 @@ namespace Iviz.Tools
             return array;
         }
 
-        static void WriteHeaderEntries(BinaryWriter writer, string[] contents)
+        static void WriteHeaderEntries(BinaryWriter writer, ReadOnlySpan<string> contents)
         {
             foreach (string entry in contents)
             {

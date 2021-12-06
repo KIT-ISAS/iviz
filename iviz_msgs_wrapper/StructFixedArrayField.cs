@@ -27,8 +27,8 @@ namespace Iviz.MsgsWrapper
                 property.GetSetMethod()!);
         }
 
-        public void RosSerialize(T msg, ref Buffer b) => b.SerializeStructArray(getter(msg), arraySize);
-        public void RosDeserialize(T msg, ref Buffer b) => setter(msg, b.DeserializeStructArray<TField>(arraySize));
+        public void RosSerialize(T msg, ref WriteBuffer b) => b.SerializeStructArray(getter(msg), (int) arraySize);
+        public void RosDeserialize(T msg, ref ReadBuffer b) => setter(msg, b.DeserializeStructArray<TField>((int) arraySize));
         public int RosLength(T msg) => FieldSize * (int) arraySize;
 
         public void RosValidate(T msg)

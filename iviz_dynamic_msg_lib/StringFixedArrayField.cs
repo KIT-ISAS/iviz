@@ -7,7 +7,7 @@ namespace Iviz.MsgsGen.Dynamic
     [Preserve]
     public sealed class StringFixedArrayField : IField
     {
-        public uint Count { get; }
+        public int Count { get; }
 
         public string[] Value { get; set; }
 
@@ -15,7 +15,7 @@ namespace Iviz.MsgsGen.Dynamic
         
         public FieldType Type => FieldType.StringFixedArray;
 
-        public StringFixedArrayField(uint count)
+        public StringFixedArrayField(int count)
         {
             Count = count;
             Value = new string[count];
@@ -29,7 +29,7 @@ namespace Iviz.MsgsGen.Dynamic
         {
             get
             {
-                int size = 4 * (int) Count;
+                int size = 4 * Count;
                 for (int i = 0; i < Count; i++)
                 {
                     size += BuiltIns.UTF8.GetByteCount(Value[i]);
@@ -60,12 +60,12 @@ namespace Iviz.MsgsGen.Dynamic
             }
         }
 
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Value, Count);
         }
 
-        public void RosDeserializeInPlace(ref Buffer b)
+        public void RosDeserializeInPlace(ref ReadBuffer b)
         {
             Value = b.DeserializeStringArray(Count);
         }

@@ -6,7 +6,7 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsWrapper
 {
     internal sealed class MessageFixedArrayField<T, TField> : IMessageField<T>
-        where T : IDeserializable<T>, ISerializable  
+        where T : IDeserializable<T>, ISerializable
         where TField : IDeserializable<TField>, IMessage, new()
     {
         static readonly IDeserializable<TField> Generator = new TField();
@@ -22,15 +22,15 @@ namespace Iviz.MsgsWrapper
         {
             this.propertyName = propertyName;
             this.arraySize = arraySize;
-            getter = (Func<T, TField[]>) Delegate.CreateDelegate(typeof(Func<T, TField[]>),
+            getter = (Func<T, TField[]>)Delegate.CreateDelegate(typeof(Func<T, TField[]>),
                 property.GetGetMethod()!);
-            setter = (Action<T, TField[]>) Delegate.CreateDelegate(typeof(Action<T, TField[]>),
+            setter = (Action<T, TField[]>)Delegate.CreateDelegate(typeof(Action<T, TField[]>),
                 property.GetSetMethod()!);
         }
 
-        public void RosSerialize(T msg, ref Buffer b) => b.SerializeArray(getter(msg), arraySize);
+        public void RosSerialize(T msg, ref WriteBuffer b) => b.SerializeArray(getter(msg), (int)arraySize);
 
-        public void RosDeserialize(T msg, ref Buffer b)
+        public void RosDeserialize(T msg, ref ReadBuffer b)
         {
             TField[] array = b.DeserializeArray<TField>();
             for (int i = 0; i < array.Length; i++)
@@ -45,7 +45,7 @@ namespace Iviz.MsgsWrapper
         {
             if (FieldSize != null)
             {
-                return FieldSize.Value * (int) arraySize;
+                return FieldSize.Value * (int)arraySize;
             }
 
             var array = getter(msg);
@@ -68,7 +68,7 @@ namespace Iviz.MsgsWrapper
 
             if (array.Length != arraySize)
             {
-                throw new RosInvalidSizeForFixedArrayException(propertyName, array.Length, (int) arraySize);
+                throw new RosInvalidSizeForFixedArrayException(propertyName, array.Length, (int)arraySize);
             }
 
             if (IsValueType)

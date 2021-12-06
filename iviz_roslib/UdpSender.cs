@@ -208,7 +208,7 @@ namespace Iviz.Roslib
             const int udpPlusSizeHeaders = UdpRosParams.HeaderLength + 4;
             byte[] array = writeBuffer.Array;
 
-            using var resizableBuffer = new ByteBufferRent();
+            using var resizableBuffer = new ResizableRent();
 
             try
             {
@@ -224,13 +224,13 @@ namespace Iviz.Roslib
                     if (msgLength + udpPlusSizeHeaders <= MaxPacketSize)
                     {
                         WriteUnfragmented(msgLength);
-                        msg.SerializeToArray(array, udpPlusSizeHeaders);
+                        msg.SerializeTo(writeBuffer[udpPlusSizeHeaders..]);
                         await WriteChunkAsync(msgLength + udpPlusSizeHeaders);
                     }
                     else
                     {
                         resizableBuffer.EnsureCapacity(msgLength);
-                        msg.SerializeToArray(resizableBuffer.Array);
+                        msg.SerializeTo(resizableBuffer);
 
                         int maxPayloadSize = MaxPacketSize - UdpRosParams.HeaderLength;
                         int totalBlocks = (4 + msgLength + maxPayloadSize - 1) / maxPayloadSize;

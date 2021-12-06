@@ -142,7 +142,7 @@ namespace Iviz.Roslib
 
             using var writeBuffer = new Rent<byte>(msgLength);
 
-            uint sendLength = requestMsg.SerializeToArray(writeBuffer.Array);
+            uint sendLength = requestMsg.SerializeTo(writeBuffer);
 
             await tcpClient.WriteChunkAsync(BitConverter.GetBytes(sendLength), 4, token);
             await tcpClient.WriteChunkAsync(writeBuffer.Array, (int)sendLength, token);
@@ -157,7 +157,7 @@ namespace Iviz.Roslib
                     BuiltIns.UTF8.GetString(readBuffer.Array, 0, readBuffer.Length));
             }
 
-            service.Response = service.Response.DeserializeFromArray(readBuffer.Array, readBuffer.Length);
+            service.Response = (IResponse) service.Response.DeserializeFrom(readBuffer);
         }
 
         async ValueTask<byte> ReadOneByteAsync(CancellationToken token)

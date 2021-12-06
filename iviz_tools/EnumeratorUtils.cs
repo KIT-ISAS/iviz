@@ -99,5 +99,11 @@ namespace Iviz.Tools
         {
             return range.GetEnumerable().Select(_ => a());
         }
+        
+        public static Span<T> Slice<T>(this T[] t, Range range)
+        {
+            return new Span<T>(t)[range];
+        }
+        
     }
 }

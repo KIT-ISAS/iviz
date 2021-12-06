@@ -18,11 +18,7 @@ namespace Iviz.Tools
 
         public readonly int Length;
         public readonly T?[] Array;
-
-#if !NETSTANDARD2_0
-        public Span<T?> Span => new(Array, 0, Length);
-#endif
-
+        
         public RentAndClear(int count)
         {
             switch (count)

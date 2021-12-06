@@ -200,7 +200,7 @@ namespace Iviz.Roslib
 
             Status = ReceiverStatus.Running;
             using var readBuffer = new Rent<byte>(MaxPacketSize);
-            using var resizableBuffer = new ByteBufferRent();
+            using var resizableBuffer = new ResizableRent();
 
             int expectedBlockNr = 0;
             int expectedMsgId = 0;
@@ -244,7 +244,8 @@ namespace Iviz.Roslib
                             MarkDropped();
                         }
 
-                        ProcessMessage(generator, readBuffer.Array, received, UdpRosParams.HeaderLength);
+                        ProcessMessage(generator, readBuffer[UdpRosParams.HeaderLength..],
+                            received - UdpRosParams.HeaderLength);
                         continue;
                     case UdpRosParams.OpCodeData0:
                         if (totalBlocks != 0)
@@ -283,7 +284,7 @@ namespace Iviz.Roslib
 
                         if (expectedBlockNr == totalBlocks)
                         {
-                            ProcessMessage(generator, resizableBuffer.Array, offset, 0);
+                            ProcessMessage(generator, resizableBuffer, offset);
                             totalBlocks = 0;
                             expectedBlockNr = 0;
                             offset = 0;
@@ -303,22 +304,22 @@ namespace Iviz.Roslib
             }
         }
 
-        void ProcessMessage(IDeserializable<T> generator, byte[] array, int rcvLength, int offset)
+        void ProcessMessage(IDeserializable<T> generator, Span<byte> array, int rcvLength)
         {
             if (IsPaused)
             {
                 return;
             }
 
-            int msgLength = BitConverter.ToInt32(array, offset);
-            if (offset + 4 + msgLength > rcvLength)
+            int msgLength = BitConverter.ToInt32(array);
+            if (4 + msgLength > rcvLength)
             {
                 // incomplete packet
                 numDropped++;
                 return;
             }
 
-            T message = generator.DeserializeFromArray(array, offset: offset + 4);
+            var message = generator.DeserializeFrom(array[4..]);
             manager.MessageCallback(message, this);
 
             CheckBufferSize(rcvLength);

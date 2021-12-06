@@ -8,7 +8,7 @@ using Buffer = Iviz.Msgs.Buffer;
 namespace Iviz.MsgsWrapper
 {
     internal sealed class StructFixedListField<T, TField> : IMessageField<T>
-        where T : IDeserializable<T>, ISerializable   
+        where T : IDeserializable<T>, ISerializable
         where TField : unmanaged
     {
         static readonly int FieldSize = Marshal.SizeOf<TField>();
@@ -21,13 +21,13 @@ namespace Iviz.MsgsWrapper
         {
             this.propertyName = propertyName;
             this.arraySize = arraySize;
-            getter = (Func<T, List<TField>>) Delegate.CreateDelegate(typeof(Func<T, List<TField>>),
+            getter = (Func<T, List<TField>>)Delegate.CreateDelegate(typeof(Func<T, List<TField>>),
                 property.GetGetMethod()!);
         }
 
-        public void RosSerialize(T msg, ref Buffer b) => b.SerializeStructList(getter(msg), arraySize);
-        public void RosDeserialize(T msg, ref Buffer b) => b.DeserializeStructList(getter(msg), arraySize);
-        public int RosLength(T msg) => FieldSize * (int) arraySize;
+        public void RosSerialize(T msg, ref WriteBuffer b) => b.SerializeStructList(getter(msg), (int)arraySize);
+        public void RosDeserialize(T msg, ref ReadBuffer b) => b.DeserializeStructList(getter(msg), (int)arraySize);
+        public int RosLength(T msg) => FieldSize * (int)arraySize;
 
         public void RosValidate(T msg)
         {
@@ -39,7 +39,7 @@ namespace Iviz.MsgsWrapper
 
             if (array.Count != arraySize)
             {
-                throw new RosInvalidSizeForFixedArrayException(propertyName, array.Count, (int) arraySize);
+                throw new RosInvalidSizeForFixedArrayException(propertyName, array.Count, (int)arraySize);
             }
         }
     }

@@ -179,7 +179,7 @@ namespace Iviz.Roslib
             return null;
         }
 
-        async ValueTask<int> ReceivePacket(TcpClient client, ByteBufferRent readBuffer)
+        async ValueTask<int> ReceivePacket(TcpClient client, ResizableRent readBuffer)
         {
             if (!await client.ReadChunkAsync(readBuffer.Array, 4, runningTs.Token))
             {
@@ -247,7 +247,7 @@ namespace Iviz.Roslib
         {
             await SendHeader(client);
 
-            using ByteBufferRent readBuffer = new(4);
+            using var readBuffer = new ResizableRent();
 
             int receivedLength = await ReceivePacket(client, readBuffer);
             if (receivedLength == -1)
@@ -279,7 +279,7 @@ namespace Iviz.Roslib
         async ValueTask ProcessMessages(TcpClient client)
         {
             var generator = topicInfo.Generator ?? throw new InvalidOperationException("Invalid generator!");
-            using ByteBufferRent readBuffer = new(4);
+            using var readBuffer = new ResizableRent();
             while (KeepRunning)
             {
                 bool isPaused = IsPaused;
@@ -302,7 +302,7 @@ namespace Iviz.Roslib
                     continue;
                 }
 
-                T message = generator.DeserializeFromArray(readBuffer.Array, rcvLength);
+                var message = generator.DeserializeFrom(readBuffer[..rcvLength]);
                 manager.MessageCallback(message, this);
 
                 CheckBufferSize(client, rcvLength);

@@ -25,8 +25,8 @@ namespace Iviz.MsgsWrapper
             this.propertyName = propertyName;
         }
 
-        public void RosSerialize(T msg, ref Buffer b) => getter(msg).RosSerialize(ref b);
-        public void RosDeserialize(T msg, ref Buffer b) => setter(msg, Generator.RosDeserialize(ref b));
+        public void RosSerialize(T msg, ref WriteBuffer b) => getter(msg).RosSerialize(ref b);
+        public void RosDeserialize(T msg, ref ReadBuffer b) => setter(msg, Generator.RosDeserialize(ref b));
         public int RosLength(T msg) => FieldSize ?? getter(msg).RosMessageLength;
 
         public void RosValidate(T msg)

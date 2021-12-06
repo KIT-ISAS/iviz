@@ -88,7 +88,7 @@ namespace Iviz.MsgsGen.Dynamic
                     {
                         VariableElement.NotAnArray => new StringField(),
                         VariableElement.DynamicSizeArray => new StringArrayField(),
-                        _ => new StringFixedArrayField((uint) element.ArraySize)
+                        _ => new StringFixedArrayField(element.ArraySize)
                     };
                 }
                 else if (BaseTypes.TryGetValue(rosType, out Type? csType))
@@ -101,7 +101,7 @@ namespace Iviz.MsgsGen.Dynamic
                             Activator.CreateInstance(typeof(StructArrayField<>).MakeGenericType(csType)),
                         _ =>
                             Activator.CreateInstance(typeof(StructFixedArrayField<>).MakeGenericType(csType),
-                                (uint) element.ArraySize)
+                                element.ArraySize)
                     };
                     field = (IField) (tmpField ?? throw new NullReferenceException());
                 }
@@ -116,7 +116,7 @@ namespace Iviz.MsgsGen.Dynamic
                             Activator.CreateInstance(typeof(MessageArrayField<>).MakeGenericType(csType)),
                         _ =>
                             Activator.CreateInstance(typeof(MessageFixedArrayField<>).MakeGenericType(csType),
-                                (uint) element.ArraySize)
+                                element.ArraySize)
                     };
                     field = (IField) (tmpField ?? throw new NullReferenceException());
                 }
@@ -138,7 +138,7 @@ namespace Iviz.MsgsGen.Dynamic
                     {
                         VariableElement.NotAnArray => new DynamicMessage(generator),
                         VariableElement.DynamicSizeArray => new DynamicMessageArrayField(generator),
-                        _ => new DynamicMessageFixedArrayField((uint) element.ArraySize, generator)
+                        _ => new DynamicMessageFixedArrayField(element.ArraySize, generator)
                     };
                 }
 
@@ -188,7 +188,7 @@ namespace Iviz.MsgsGen.Dynamic
             }
         }
 
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             foreach (var field in Fields)
             {
@@ -196,7 +196,7 @@ namespace Iviz.MsgsGen.Dynamic
             }
         }
 
-        internal void RosDeserializeInPlace(ref Buffer b)
+        internal void RosDeserializeInPlace(ref ReadBuffer b)
         {
             foreach (var field in Fields)
             {
@@ -204,28 +204,23 @@ namespace Iviz.MsgsGen.Dynamic
             }
         }
 
-        void IField.RosDeserializeInPlace(ref Buffer b) => RosDeserializeInPlace(ref b);
+        void IField.RosDeserializeInPlace(ref ReadBuffer b) => RosDeserializeInPlace(ref b);
 
         IField IField.Generate()
         {
-            return Generate();
+            return new DynamicMessage(this);
         }
 
         object IField.Value => Fields;
 
-        DynamicMessage Generate()
+        public DynamicMessage RosDeserialize(ref ReadBuffer b)
         {
-            return new(this);
-        }
-
-        public DynamicMessage RosDeserialize(ref Buffer b)
-        {
-            DynamicMessage t = new(this);
+            var t = new DynamicMessage(this);
             t.RosDeserializeInPlace(ref b);
             return t;
         }
 
-        ISerializable ISerializable.RosDeserialize(ref Buffer b)
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b)
         {
             return RosDeserialize(ref b);
         }

@@ -111,9 +111,9 @@ namespace Iviz.Rosbag.Writer
             return writer;
         }
 
-        void WriteMagic() => writer.WriteValue(RosbagMagic);
+        void WriteMagic() => writer.WriteValueAscii(RosbagMagic);
 
-        ValueTask WriteMagicAsync() => writer.WriteValueAsync(RosbagMagic);
+        ValueTask WriteMagicAsync() => writer.WriteValueAsciiAsync(RosbagMagic);
 
         void WriteHeaderRecord(int numConnections, int numChunks, long connectionIndexPosition)
         {
@@ -132,14 +132,7 @@ namespace Iviz.Rosbag.Writer
 
             const int dataLength = 4096 - headerLength;
             using var padding = new Rent<byte>(dataLength);
-#if NETSTANDARD2_0
-            for (int i = 0; i < dataLength; i++)
-            {
-                padding.Array[i] = 0x20;
-            }
-#else
-            new Span<byte>(padding.Array, 0, dataLength).Fill(0x20);
-#endif
+            padding.AsSpan().Fill(0x20);
 
             writer.WriteValue(dataLength)
                 .WriteValue(padding);
@@ -162,14 +155,7 @@ namespace Iviz.Rosbag.Writer
 
             const int dataLength = 4096 - headerLength;
             using var padding = new Rent<byte>(dataLength);
-#if NETSTANDARD2_0
-            for (int i = 0; i < dataLength; i++)
-            {
-                padding.Array[i] = 0x20;
-            }
-#else
-            new Span<byte>(padding.Array, 0, dataLength).Fill(0x20);
-#endif
+            padding.AsSpan().Fill(0x20);
 
             await writer.WriteValueAsync(dataLength);
             await writer.WriteValueAsync(padding);
@@ -238,7 +224,7 @@ namespace Iviz.Rosbag.Writer
             int dataLength = message.RosMessageLength;
 
             using Rent<byte> bytes = new Rent<byte>(dataLength);
-            message.SerializeToArray(bytes.Array);
+            message.SerializeTo(bytes);
 
             writer.WriteValue(dataLength)
                 .WriteValue(bytes);
@@ -260,7 +246,7 @@ namespace Iviz.Rosbag.Writer
             int dataLength = message.RosMessageLength;
 
             using Rent<byte> bytes = new Rent<byte>(dataLength);
-            message.SerializeToArray(bytes.Array);
+            message.SerializeTo(bytes);
 
             await writer.WriteValueAsync(dataLength);
             await writer.WriteValueAsync(bytes);
@@ -284,7 +270,6 @@ namespace Iviz.Rosbag.Writer
 
         async ValueTask WritePartialChunkRecordAsync(int sizeInBytes)
         {
-            //Console.WriteLine("** Chunk start " + writer.Position);
             var op = new OpCodeHeaderEntry(OpCode.Chunk);
             var compression = new StringHeaderEntry("compression", "none");
             var size = new IntHeaderEntry("size", sizeInBytes);
@@ -363,8 +348,6 @@ namespace Iviz.Rosbag.Writer
                 await writer.WriteValueAsync(time.Nsecs);
                 await writer.WriteValueAsync((int)offset);
             }
-
-            //Console.WriteLine("** End position: " + writer.Position);
         }
 
         void WriteChunkInfoRecord(ChunkInfoRecord record)
@@ -397,8 +380,6 @@ namespace Iviz.Rosbag.Writer
                 writer.WriteValue(connId)
                     .WriteValue(connCount);
             }
-
-            //Console.WriteLine("** End position: " + writer.Position);
         }
 
         async ValueTask WriteChunkInfoRecordAsync(ChunkInfoRecord record)
@@ -614,7 +595,6 @@ namespace Iviz.Rosbag.Writer
             }
             else
             {
-                //Console.WriteLine("**  Adding connection " + connections.Count);
                 connectionId = connections[connection] = connections.Count;
                 await WriteConnectionRecordAsync(connectionId, connection.Topic, connection.RosHeader);
             }
@@ -646,9 +626,9 @@ namespace Iviz.Rosbag.Writer
 
             long connectionStart = writer.Position;
 
-            foreach (var pair in connections)
+            foreach ((var connection, int id) in connections)
             {
-                WriteConnectionRecord(pair.Value, pair.Key.Topic, pair.Key.RosHeader);
+                WriteConnectionRecord(id, connection.Topic, connection.RosHeader);
             }
 
             foreach (var info in chunkInfos)
@@ -699,9 +679,9 @@ namespace Iviz.Rosbag.Writer
 
             long connectionStart = writer.Position;
 
-            foreach (var pair in connections)
+            foreach ((var connection, int id) in connections)
             {
-                await WriteConnectionRecordAsync(pair.Value, pair.Key.Topic, pair.Key.RosHeader);
+                await WriteConnectionRecordAsync(id, connection.Topic, connection.RosHeader);
             }
 
             foreach (var info in chunkInfos)
@@ -735,7 +715,6 @@ namespace Iviz.Rosbag.Writer
             }
 
             cachedLastLength = writer.Length;
-
             if (!leaveOpen)
             {
 #if NETSTANDARD2_0

@@ -1,3 +1,4 @@
+using Iviz.Msgs;
 using Newtonsoft.Json;
 using Buffer = Iviz.Msgs.Buffer;
 
@@ -26,8 +27,8 @@ namespace Iviz.MsgsGen.Dynamic
         object Value { get; }
         int RosLength { get; }
         void RosValidate();
-        void RosSerialize(ref Buffer b);
-        void RosDeserializeInPlace(ref Buffer b);
+        void RosSerialize(ref WriteBuffer b);
+        void RosDeserializeInPlace(ref ReadBuffer b);
         IField Generate();
     }
 

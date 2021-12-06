@@ -97,7 +97,7 @@ namespace Iviz.MsgsWrapper
             RosDependencies = CreateDependencies(RosDefinition);
         }
 
-        public void Serialize(T msg, ref Buffer b)
+        public void Serialize(T msg, ref WriteBuffer b)
         {
             foreach (var field in messageFields)
             {
@@ -105,7 +105,7 @@ namespace Iviz.MsgsWrapper
             }
         }
 
-        public void Deserialize(T msg, ref Buffer b)
+        public void Deserialize(T msg, ref ReadBuffer b)
         {
             foreach (var field in messageFields)
             {

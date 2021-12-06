@@ -22,6 +22,9 @@ namespace Iviz.Tools
         public readonly int Length;
         public readonly T[] Array;
 
+        public Span<T> AsSpan() => new(Array, 0, Length);
+        public ReadOnlySpan<T> AsReadOnlySpan() => new(Array, 0, Length);
+
         public Rent(int length)
         {
             switch (length)
@@ -57,8 +60,6 @@ namespace Iviz.Tools
 
         public RentEnumerator<T> GetEnumerator() => new(Array, Length);
 
-        public RentRefEnumerable<T> Ref() => new(Array, Length);
-
         public ref T this[int index]
         {
             get
@@ -72,12 +73,23 @@ namespace Iviz.Tools
             }
         }
 
+        public Span<T> this[Range range] => AsSpan()[range];
         public Rent<T> Resize(int newLength) => new(Array, newLength);
 
         int IReadOnlyCollection<T>.Count => Length;
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
         T IReadOnlyList<T>.this[int index] => Array[index];            
+        
+        public static implicit operator Span<T>(Rent<T> rent)
+        {
+            return rent.AsSpan();
+        }
+        
+        public static implicit operator ReadOnlySpan<T>(Rent<T> rent)
+        {
+            return rent.AsReadOnlySpan();
+        }
     }
 
     public static class Rent

@@ -9,14 +9,14 @@ namespace Iviz.MsgsGen.Dynamic
     {
         readonly DynamicMessage generator;
         
-        public uint Count { get; }
+        public int Count { get; }
         public DynamicMessage[] Value { get; set; }
 
         object IField.Value => Value;
 
         public FieldType Type => FieldType.DynamicMessageFixedArray;
 
-        public DynamicMessageFixedArrayField(uint count, DynamicMessage generator)
+        public DynamicMessageFixedArrayField(int count, DynamicMessage generator)
         {
             Count = count;
             this.generator = generator;
@@ -55,12 +55,12 @@ namespace Iviz.MsgsGen.Dynamic
             }
         }
 
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeArray(Value, Count);
         }
 
-        public void RosDeserializeInPlace(ref Buffer b)
+        public void RosDeserializeInPlace(ref ReadBuffer b)
         {
             foreach (DynamicMessage t in Value)
             {

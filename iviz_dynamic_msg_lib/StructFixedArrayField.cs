@@ -8,7 +8,7 @@ namespace Iviz.MsgsGen.Dynamic
     [Preserve]
     public sealed class StructFixedArrayField<T> : IField where T : unmanaged
     {
-        public uint Count { get; }
+        public int Count { get; }
 
         public T[] Value { get; set; }
 
@@ -16,9 +16,9 @@ namespace Iviz.MsgsGen.Dynamic
         
         public FieldType Type => FieldType.StructFixedArray;
 
-        public int RosLength => (int) Count * Marshal.SizeOf<T>();
+        public int RosLength => Count * Marshal.SizeOf<T>();
 
-        public StructFixedArrayField(uint count)
+        public StructFixedArrayField(int count)
         {
             Count = count;
             Value = new T[Count];
@@ -37,12 +37,12 @@ namespace Iviz.MsgsGen.Dynamic
             }
         }
 
-        public void RosSerialize(ref Buffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
             b.SerializeStructArray(Value, Count);
         }
 
-        public void RosDeserializeInPlace(ref Buffer b)
+        public void RosDeserializeInPlace(ref ReadBuffer b)
         {
             Value = b.DeserializeStructArray<T>(Count);
         }

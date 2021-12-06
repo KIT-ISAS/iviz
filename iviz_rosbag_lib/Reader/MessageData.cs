@@ -60,7 +60,7 @@ namespace Iviz.Rosbag.Reader
                     Type? msgType = BuiltIns.TryGetTypeFromMessageName(type);
                     if (msgType != null)
                     {
-                        generator = (IMessage?) Activator.CreateInstance(msgType) ??
+                        generator = (IMessage?)Activator.CreateInstance(msgType) ??
                                     throw new InvalidOperationException($"Failed to create message of type '{type}'");
                     }
                     else if (MessageDefinition != null)
@@ -77,25 +77,23 @@ namespace Iviz.Rosbag.Reader
 
                 if (reader is MemoryStream memoryStream)
                 {
-                    message = Buffer.Deserialize(generator, memoryStream.GetBuffer(),
-                        (int) (dataEnd - dataStart),
-                        (int) dataStart
-                    );
+                    var buffer = memoryStream.GetBuffer().AsSpan();
+                    message = (IMessage)ReadBuffer.Deserialize(generator, buffer[(int)dataStart..(int)dataEnd]);
                     return message;
                 }
 
-                using var bytes = new Rent<byte>((int) (dataEnd - dataStart));
+                using var bytes = new Rent<byte>((int)(dataEnd - dataStart));
 
                 reader.Seek(dataStart, SeekOrigin.Begin);
                 reader.Read(bytes.Array, 0, bytes.Length);
 
-                message = Buffer.Deserialize(generator, bytes.Array, bytes.Length);
+                message = (IMessage)ReadBuffer.Deserialize(generator, bytes);
                 return message;
             }
         }
 
-        public T GetMessage<T>() where T : IMessage => (T) Message;
-        
-        public override string ToString() => JsonConvert.SerializeObject(this);        
+        public T GetMessage<T>() where T : IMessage => (T)Message;
+
+        public override string ToString() => JsonConvert.SerializeObject(this);
     }
 }

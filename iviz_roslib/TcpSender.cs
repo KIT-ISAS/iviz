@@ -270,7 +270,7 @@ namespace Iviz.Roslib
 
         async ValueTask ProcessLoop(NullableMessage<T> latchedMsg)
         {
-            using ByteBufferRent writeBuffer = new(4);
+            using var writeBuffer = new ResizableRent();
 
             await ProcessHandshake(latchedMsg.HasValue);
 
@@ -296,7 +296,7 @@ namespace Iviz.Roslib
             }
         }
 
-        async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, ByteBufferRent writeBuffer)
+        async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, ResizableRent writeBuffer)
         {
             void WriteLengthToBuffer(int i)
             {
@@ -318,8 +318,8 @@ namespace Iviz.Roslib
 
                     writeBuffer.EnsureCapacity(msgLength + 4);
 
-                    msg.SerializeToArray(writeBuffer.Array, 4);
                     WriteLengthToBuffer(msgLength);
+                    msg.SerializeTo(writeBuffer[4..]);
                     await TcpClient.WriteChunkAsync(writeBuffer.Array, msgLength + 4, runningTs.Token);
 
                     numSent++;
