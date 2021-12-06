@@ -45,7 +45,7 @@ namespace Iviz.App
         {
             base.Stop();
 
-            controller.StopController();
+            controller.Dispose();
             Object.Destroy(controller.gameObject);
         }
 

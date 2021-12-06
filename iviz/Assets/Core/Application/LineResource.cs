@@ -28,11 +28,11 @@ namespace Iviz.Displays
             AlwaysBillboard,
         }
 
-        static int helperForMaxSegmentsForMesh = -1;
+        static int? maxSegmentsForMesh;
 
-        static int MaxSegmentsForMesh => helperForMaxSegmentsForMesh != -1
-            ? helperForMaxSegmentsForMesh
-            : (helperForMaxSegmentsForMesh = Settings.SupportsComputeBuffers ? 30 : int.MaxValue);
+        static int MaxSegmentsForMesh => maxSegmentsForMesh is {} validatedMaxSegmentsForMesh
+            ? validatedMaxSegmentsForMesh
+            : (maxSegmentsForMesh = Settings.SupportsComputeBuffers ? 30 : int.MaxValue).Value;
 
         const float MinLineLength = 1E-06f;
         const float MaxPositionMagnitude = 1e3f;
@@ -42,12 +42,11 @@ namespace Iviz.Displays
 
         readonly NativeList<float4x2> lineBuffer = new();
 
+        [SerializeField] MeshRenderer? meshRenderer;
+        [SerializeField] MeshFilter? meshFilter;
+
         ComputeBuffer? lineComputeBuffer;
         Mesh? mesh;
-
-        [SerializeField] MeshRenderer? meshRenderer = null;
-        [SerializeField] MeshFilter? meshFilter = null;
-
         bool linesNeedAlpha;
 
         Mesh Mesh => mesh != null ? mesh : (mesh = new Mesh {name = "Line Capsules"});
@@ -181,8 +180,10 @@ namespace Iviz.Displays
                 return false;
             }
 
-            foreach (ref readonly float4x2 t in lineBuffer.Ref())
+            ReadOnlySpan<float4x2> lines = lineBuffer;
+            for (int i = 0; i < lines.Length; i++)
             {
+                ref readonly var t = ref lines[i];
                 Color32 cA = PointWithColor.RecastToColor32(t.c0.w);
                 if (cA.a < 255)
                 {
@@ -214,7 +215,7 @@ namespace Iviz.Displays
 
         public override float ElementScale
         {
-            get => base.ElementScale;
+            protected get => base.ElementScale;
             set
             {
                 base.ElementScale = value;
@@ -249,21 +250,15 @@ namespace Iviz.Displays
 
             var worldBounds = Collider.bounds;
 
-            Material material;
-            if (MaterialOverride != null)
-            {
-                material = MaterialOverride;
-            }
-            else
-            {
-                material = UseColormap switch
+            var material = MaterialOverride != null
+                ? MaterialOverride
+                : UseColormap switch
                 {
                     true when !UsesAlpha => Resource.Materials.LineWithColormap.Object,
                     true => Resource.Materials.TransparentLineWithColormap.Object,
                     false when !UsesAlpha => Resource.Materials.Line.Object,
                     false => Resource.Materials.TransparentLine.Object
                 };
-            }
 
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 2 * 4, Size,
                 null, Properties, ShadowCastingMode.Off, false, gameObject.layer);
@@ -299,7 +294,7 @@ namespace Iviz.Displays
             if (lineComputeBuffer == null || lineComputeBuffer.count < lineBuffer.Capacity)
             {
                 lineComputeBuffer?.Release();
-                lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Marshal.SizeOf<LineWithColor>());
+                lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Unsafe.SizeOf<LineWithColor>());
                 Properties.SetBuffer(LinesID, lineComputeBuffer);
             }
 

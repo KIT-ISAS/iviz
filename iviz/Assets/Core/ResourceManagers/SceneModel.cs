@@ -104,6 +104,7 @@ namespace Iviz.Displays
                         ? mesh.TexCoords[bumpTexture.UvIndex].Coords
                         : Array.Empty<Vector3f>();
 
+                /*
                 using (var vertices = new Rent<Vector3>(mesh.Vertices.Length))
                 using (var normals = new Rent<Vector3>(mesh.Normals.Length))
                 using (var colors = new Rent<Color32>(meshColors.Length))
@@ -127,7 +128,32 @@ namespace Iviz.Displays
 
                     meshResource.Set(vertices, normals, tangents, diffuseTexCoords, bumpTexCoords, triangles, colors);
                 }
+                */
 
+                var meshTangents = mesh.Tangents;
+                using (var tangents = new Rent<Vector4>(meshTangents.Length))
+                {
+                    var v = new Vector4(0, 0, 0, -1);
+                    for (int i = 0; i < meshTangents.Length; i++)
+                    {
+                        (v.x, v.y, v.z) = meshTangents[i];
+                        tangents.Array[i] = v;
+                    }
+
+                    //meshResource.Set(vertices, normals, tangents, diffuseTexCoords, bumpTexCoords, triangles, colors);
+                    meshResource.Set(
+                        MemoryMarshal.Cast<Vector3f, Vector3>(mesh.Vertices),
+                        MemoryMarshal.Cast<Vector3f, Vector3>(mesh.Normals),
+                        tangents,
+                        MemoryMarshal.Cast<Vector3f, Vector3>(meshDiffuseTexCoords),
+                        MemoryMarshal.Cast<Vector3f, Vector3>(meshBumpTexCoords),
+                        MemoryMarshal.Cast<Triangle, int>(mesh.Faces),
+                        MemoryMarshal.Cast<Iviz.Msgs.IvizMsgs.Color32, Color32>(meshColors)
+                    );
+                }
+
+                
+                
                 meshResource.Color = material.Diffuse.ToColor32();
                 meshResource.EmissiveColor = material.Emissive.ToColor32();
 
@@ -229,6 +255,7 @@ namespace Iviz.Displays
 
         //static Vector3 Assimp2Unity(in Vector3f vector3) => new(vector3.X, vector3.Y, vector3.Z);
 
+        /*
         static void MemCopy<TA, TB>(TA[] src, TB[] dst, int sizeToCopy)
             where TA : unmanaged
             where TB : unmanaged
@@ -237,5 +264,6 @@ namespace Iviz.Displays
             var dstPtr = MemoryMarshal.AsBytes(dst.AsSpan());
             srcPtr.CopyTo(dstPtr);
         }
+        */
     }
 }

@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
-
 using UnityEditor;
 
 namespace External
 {
+#if UNITY_EDITOR
     [CustomEditor(typeof(VariableJoystick))]
     public class VariableJoystickEditor : JoystickEditor
     {
@@ -23,7 +23,7 @@ namespace External
 
             if (background != null)
             {
-                RectTransform backgroundRect = (RectTransform) background.objectReferenceValue;
+                RectTransform backgroundRect = (RectTransform)background.objectReferenceValue;
                 backgroundRect.pivot = center;
             }
         }
@@ -38,4 +38,5 @@ namespace External
                 new GUIContent("Joystick Type", "The type of joystick the variable joystick is current using."));
         }
     }
+#endif
 }

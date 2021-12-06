@@ -41,11 +41,6 @@ namespace Iviz.Displays
 
         public static void CreateCapsulesFromSegments(ReadOnlySpan<float4x2> lineBuffer, float scale, Mesh mesh)
         {
-            if (lineBuffer == null)
-            {
-                throw new ArgumentNullException(nameof(lineBuffer));
-            }
-
             if (mesh == null)
             {
                 throw new ArgumentNullException(nameof(mesh));
@@ -61,7 +56,7 @@ namespace Iviz.Displays
             using var points = new Rent<Vector3>(length);
             using var colors = new Rent<Color32>(length);
             using var uvs = new Rent<Vector2>(length);
-            using var indices = new Rent<int>(CapsuleIndices.Length * lineBuffer.Length);
+            using var indices = new Rent<int>(16 * 3 * lineBuffer.Length);
             int baseOff = 0;
             int pOff = 0;
             int cOff = 0;
@@ -72,7 +67,6 @@ namespace Iviz.Displays
 
             const float minMagnitude = 1e-8f;
                 
-            //foreach (ref readonly float4x2 line in lineBuffer.Ref())
             for (int l = 0; l < lineBuffer.Length; l++)
             {
                 ref readonly float4x2 line = ref lineBuffer[l];
@@ -82,8 +76,8 @@ namespace Iviz.Displays
                 Vector3 dirX = b - a;
                 Vector3 dirY, dirZ;
 
-                float dirXMagnitude = dirX.Magnitude();
-                if (dirXMagnitude < minMagnitude)
+                float dirXMagnitudeSq = dirX.MagnitudeSq();
+                if (dirXMagnitudeSq < minMagnitude * minMagnitude)
                 {
                     dirX = Vector3.zero;
                     dirY = Vector3.zero;
@@ -107,9 +101,9 @@ namespace Iviz.Displays
                 }
                     
 
-                Vector3 halfDirX = 0.5f * dirX;
-                Vector3 halfSumYz = 0.5f * (dirY + dirZ);
-                Vector3 halfDiffYz = 0.5f * (dirY - dirZ);
+                var halfDirX = 0.5f * dirX;
+                var halfSumYz = 0.5f * (dirY + dirZ);
+                var halfDiffYz = 0.5f * (dirY - dirZ);
 
                 pArray[pOff++] = a - halfDirX;
                 pArray[pOff++] = a + halfSumYz;
@@ -123,8 +117,8 @@ namespace Iviz.Displays
                 pArray[pOff++] = b - halfDiffYz;
                 pArray[pOff++] = b + halfDirX;
 
-                Color32 ca = PointWithColor.RecastToColor32(line.c0.w);
-                Color32 cb = PointWithColor.RecastToColor32(line.c1.w);
+                var ca = PointWithColor.RecastToColor32(line.c0.w);
+                var cb = PointWithColor.RecastToColor32(line.c1.w);
 
                 var uv0 = new Vector2(line.c0.w, 0);
                 for (int i = 0; i < 5; i++)
@@ -133,7 +127,7 @@ namespace Iviz.Displays
                     uvs.Array[uvOff++] = uv0;
                 }
 
-                Vector2 uv1 = new Vector2(line.c1.w, 0);
+                var uv1 = new Vector2(line.c1.w, 0);
                 for (int i = 5; i < 10; i++)
                 {
                     colors.Array[cOff++] = cb;

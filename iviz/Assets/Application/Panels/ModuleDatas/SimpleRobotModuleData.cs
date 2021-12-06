@@ -67,7 +67,7 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-            RobotController.StopController();
+            RobotController.Dispose();
             ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
         }
 

@@ -426,9 +426,9 @@ namespace Iviz.Controllers
         }
 
 
-        public override void StopController()
+        public override void Dispose()
         {
-            base.StopController();
+            base.Dispose();
             foreach (var grid in gridTiles)
             {
                 grid.ReturnToPool();

@@ -42,7 +42,7 @@ namespace Iviz.Displays
         int Size => pointBuffer.Length;
 
         public event Action? BoundsChanged;
-        
+
         public override bool UseColormap
         {
             get => base.UseColormap;
@@ -64,7 +64,7 @@ namespace Iviz.Displays
                 }
             }
         }
-        
+
         public override Bounds? Bounds => Size == 0 ? null : base.Bounds;
 
         protected override void Awake()
@@ -72,8 +72,8 @@ namespace Iviz.Displays
             if (!Settings.SupportsComputeBuffers)
             {
                 RosLogger.Info($"{this}: Device does not support compute buffers in vertices. " +
-                            "Point clouds may not appear correctly.");
-                mesh = new Mesh {name = "PointCloud Mesh"};
+                               "Point clouds may not appear correctly.");
+                mesh = new Mesh { name = "PointCloud Mesh" };
                 mesh.MarkDynamic();
                 MeshFilter.mesh = mesh;
                 MeshRenderer.enabled = true;
@@ -158,36 +158,39 @@ namespace Iviz.Displays
                 return;
             }
 
-            using (var points = new Rent<Vector3>(pointBuffer.Length))
-            using (var indices = new Rent<int>(pointBuffer.Length))
+            ReadOnlySpan<float4> points = pointBuffer;
+            using (var vertices = new Rent<Vector3>(points.Length))
+            using (var indices = new Rent<int>(points.Length))
             {
                 if (UseColormap)
                 {
-                    using var uvs = new Rent<Vector2>(pointBuffer.Length);
-                    for (int i = 0; i < pointBuffer.Length; i++)
+                    using var uvs = new Rent<Vector2>(points.Length);
+                    for (int i = 0; i < points.Length; i++)
                     {
-                        var p = pointBuffer[i];
-                        points.Array[i] = p.xyz;
+                        ref readonly var p = ref points[i];
+                        ref var v = ref vertices.Array[i];
+                        (v.x, v.y, v.z) = p;
                         indices.Array[i] = i;
                         uvs.Array[i].x = p.w;
                     }
 
-                    mesh.SetVertices(points);
+                    mesh.SetVertices(vertices);
                     mesh.SetUVs(uvs);
                     mesh.SetIndices(indices, MeshTopology.Points, 0);
                 }
                 else
                 {
-                    using var colors = new Rent<Color32>(pointBuffer.Length);
-                    for (int i = 0; i < pointBuffer.Length; i++)
+                    using var colors = new Rent<Color32>(points.Length);
+                    for (int i = 0; i < points.Length; i++)
                     {
-                        var p = pointBuffer[i];
-                        points.Array[i] = p.xyz;
+                        ref readonly var p = ref points[i];
+                        ref var v = ref vertices.Array[i];
+                        (v.x, v.y, v.z) = p;
                         indices.Array[i] = i;
                         colors.Array[i] = PointWithColor.RecastToColor32(p.w);
                     }
 
-                    mesh.SetVertices(points);
+                    mesh.SetVertices(vertices);
                     mesh.SetColors(colors);
                     mesh.SetIndices(indices, MeshTopology.Points, 0);
                 }
@@ -203,7 +206,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, (ComputeBuffer?) null);
+                Properties.SetBuffer(PointsId, (ComputeBuffer?)null);
             }
 
             pointBuffer.Dispose();
@@ -224,18 +227,15 @@ namespace Iviz.Displays
 
             pointBuffer.EnsureCapacity(points.Length);
             pointBuffer.Clear();
-            if (points.Length != 0)
+            for (int i = 0; i < points.Length; i++)
             {
-                for (int i = 0; i < points.Length; i++)
+                ref readonly var t = ref points[i];
+                if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
                 {
-                    ref readonly var t = ref points[i];
-                    if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
-                    {
-                        continue;
-                    }
-
-                    pointBuffer.Add(t.f);
+                    continue;
                 }
+
+                pointBuffer.Add(t.f);
             }
 
             isDirty = true;
@@ -309,7 +309,7 @@ namespace Iviz.Displays
             {
                 IntensityBounds = span;
             }
-            
+
             BoundsChanged?.Invoke();
         }
 
@@ -332,7 +332,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, (ComputeBuffer?) null);
+                Properties.SetBuffer(PointsId, (ComputeBuffer?)null);
             }
 
             if (pointBuffer.Capacity != 0)
@@ -354,7 +354,7 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
-            Properties.SetBuffer(PointsId, (ComputeBuffer?) null);
+            Properties.SetBuffer(PointsId, (ComputeBuffer?)null);
             BoundsChanged = null;
         }
 

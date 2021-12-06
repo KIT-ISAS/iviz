@@ -3,6 +3,7 @@ using UnityEditor;
 
 namespace External
 {
+#if UNITY_EDITOR
     [CustomEditor(typeof(FloatingJoystick))]
     public class FloatingJoystickEditor : JoystickEditor
     {
@@ -12,11 +13,12 @@ namespace External
 
             if (background != null)
             {
-                RectTransform backgroundRect = (RectTransform) background.objectReferenceValue;
+                RectTransform backgroundRect = (RectTransform)background.objectReferenceValue;
                 backgroundRect.anchorMax = Vector2.zero;
                 backgroundRect.anchorMin = Vector2.zero;
                 backgroundRect.pivot = center;
             }
         }
     }
+#endif
 }

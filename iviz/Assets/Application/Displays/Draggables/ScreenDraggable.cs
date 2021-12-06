@@ -13,7 +13,7 @@ namespace Iviz.Displays
         IPointerEnterHandler, IPointerExitHandler,
         IPointerDownHandler, IPointerUpHandler
     {
-        [SerializeField] Transform? targetTransform = null;
+        [SerializeField] Transform? targetTransform;
         [SerializeField] Collider? rayCollider;
 
         Transform? mTransform;
@@ -52,7 +52,7 @@ namespace Iviz.Displays
 
         public Transform TargetTransform
         {
-            get => targetTransform.CheckedNull() ?? Transform;
+            protected get => targetTransform.CheckedNull() ?? Transform;
             set => targetTransform = value.CheckedNull() ?? throw new NullReferenceException(nameof(targetTransform));
         }
 
@@ -73,8 +73,8 @@ namespace Iviz.Displays
             ReferencePointLocal = Transform.InverseTransformPoint(intersectionWorld);
             referenceNormalLocal = Transform.InverseTransformDirection(normalWorld);
             return intersectionWorld;
-        }        
-        
+        }
+
         void IScreenDraggable.OnStartDragging()
         {
             ReferencePointLocal = null;
@@ -98,7 +98,7 @@ namespace Iviz.Displays
 
         protected void StartSelected()
         {
-            GuiInputModule.Instance.TrySetDraggedObject(this);
+            GuiInputModule.TrySetDraggedObject(this);
             PointerDown?.Invoke();
         }
 
@@ -110,7 +110,7 @@ namespace Iviz.Displays
 
         protected void EndSelected()
         {
-            GuiInputModule.Instance.TryUnsetDraggedObject(this);
+            GuiInputModule.TryUnsetDraggedObject(this);
             PointerUp?.Invoke();
         }
 
@@ -124,14 +124,6 @@ namespace Iviz.Displays
         protected void RaiseMoved()
         {
             Moved?.Invoke();
-        }
-
-        protected virtual void Awake()
-        {
-            if (targetTransform == null)
-            {
-                targetTransform = Transform;
-            }
         }
 
         void IPointerEnterHandler.OnPointerEnter(PointerEventData _)
@@ -148,7 +140,7 @@ namespace Iviz.Displays
 
         void OnDisable()
         {
-            GuiInputModule.Instance.TryUnsetDraggedObject(this);
+            GuiInputModule.TryUnsetDraggedObject(this);
             if (IsHovering || IsDragging)
             {
                 IsHovering = false;

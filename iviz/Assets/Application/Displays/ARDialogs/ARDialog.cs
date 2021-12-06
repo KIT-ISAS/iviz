@@ -5,6 +5,7 @@ using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Displays.XRDialogs;
 using Iviz.Tools;
 using Iviz.Msgs.IvizCommonMsgs;
 using JetBrains.Annotations;
@@ -22,17 +23,17 @@ namespace Iviz.App.ARDialogs
 
         [SerializeField] TextMesh title = null;
         [SerializeField] TMP_Text caption = null;
-        [SerializeField] ARButton button1 = null;
-        [SerializeField] ARButton button2 = null;
-        [SerializeField] ARButton button3 = null;
+        [SerializeField] XRButton button1 = null;
+        [SerializeField] XRButton button2 = null;
+        [SerializeField] XRButton button3 = null;
         [SerializeField] ARLineConnector connector = null;
         [SerializeField] MeshRenderer iconMeshRenderer = null;
 
         [SerializeField] Texture2D[] icons = null;
 
-        [SerializeField] ARButton[] menuButtons = null;
-        [SerializeField] ARButton upButton = null;
-        [SerializeField] ARButton downButton = null;
+        [SerializeField] XRButton[] menuButtons = null;
+        [SerializeField] XRButton upButton = null;
+        [SerializeField] XRButton downButton = null;
 
         [SerializeField] Color backgroundColor = DefaultBackgroundColor;
         [SerializeField] MeshMarkerResource background = null;
@@ -105,7 +106,7 @@ namespace Iviz.App.ARDialogs
             }
         }
 
-        static void SetBackgroundColor(ARButton button, Color color)
+        static void SetBackgroundColor(XRButton button, Color color)
         {
             if (button != null)
             {
@@ -191,17 +192,17 @@ namespace Iviz.App.ARDialogs
             {
                 case ButtonType.Ok:
                     button1.Visible = true;
-                    button1.Icon = ARButton.ButtonIcon.Ok;
+                    button1.Icon = XRButton.ButtonIcon.Ok;
                     button1.Caption = "Ok";
                     break;
                 case ButtonType.Forward:
                     button1.Visible = true;
-                    button1.Icon = ARButton.ButtonIcon.Forward;
+                    button1.Icon = XRButton.ButtonIcon.Forward;
                     button1.Caption = "Ok";
                     break;
                 case ButtonType.Backward:
                     button1.Visible = true;
-                    button1.Icon = ARButton.ButtonIcon.Backward;
+                    button1.Icon = XRButton.ButtonIcon.Backward;
                     button1.Caption = "Back";
                     break;
                 case ButtonType.YesNo:
@@ -211,10 +212,10 @@ namespace Iviz.App.ARDialogs
                     }
 
                     button2.Visible = true;
-                    button2.Icon = ARButton.ButtonIcon.Ok;
+                    button2.Icon = XRButton.ButtonIcon.Ok;
                     button2.Caption = "Yes";
                     button3.Visible = true;
-                    button3.Icon = ARButton.ButtonIcon.Cross;
+                    button3.Icon = XRButton.ButtonIcon.Cross;
                     button3.Caption = "No";
                     break;
                 case ButtonType.ForwardBackward:
@@ -224,10 +225,10 @@ namespace Iviz.App.ARDialogs
                     }
 
                     button2.Visible = true;
-                    button2.Icon = ARButton.ButtonIcon.Backward;
+                    button2.Icon = XRButton.ButtonIcon.Backward;
                     button2.Caption = "Back";
                     button3.Visible = true;
-                    button3.Icon = ARButton.ButtonIcon.Forward;
+                    button3.Icon = XRButton.ButtonIcon.Forward;
                     button3.Caption = "Forward";
                     break;
                 case ButtonType.OkCancel:
@@ -237,10 +238,10 @@ namespace Iviz.App.ARDialogs
                     }
 
                     button2.Visible = true;
-                    button2.Icon = ARButton.ButtonIcon.Ok;
+                    button2.Icon = XRButton.ButtonIcon.Ok;
                     button2.Caption = "Ok";
                     button3.Visible = true;
-                    button3.Icon = ARButton.ButtonIcon.Cross;
+                    button3.Icon = XRButton.ButtonIcon.Cross;
                     button3.Caption = "Cancel";
                     break;
                 default:

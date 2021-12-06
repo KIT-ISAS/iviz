@@ -3,7 +3,7 @@ using UnityEditor;
 
 namespace External
 {
-
+#if UNITY_EDITOR
     [CustomEditor(typeof(Joystick), true)]
     public class JoystickEditor : Editor
     {
@@ -68,4 +68,5 @@ namespace External
             EditorGUILayout.ObjectField(handle, new GUIContent("Handle", "The handle's RectTransform component."));
         }
     }
+#endif
 }

@@ -20,7 +20,7 @@ namespace Iviz.Controllers
 
         public abstract IModuleData ModuleData { get; }
 
-        public virtual void StopController()
+        public virtual void Dispose()
         {
             Listener?.Stop();
         }

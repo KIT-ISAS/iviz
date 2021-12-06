@@ -18,7 +18,7 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-            Listener.StopController();
+            Listener.Dispose();
         }
         
         public override string ToString()

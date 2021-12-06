@@ -70,6 +70,7 @@ namespace Iviz.Core
         void Awake()
         {
             instance = this;
+            GameTime = 0;
             gameThread = Thread.CurrentThread;
         }
 
@@ -216,6 +217,7 @@ namespace Iviz.Core
             EverySecond = null;
             LateEverySecond = null;
             EveryFastTick = null;
+            GameTime = 0;
 
             while (actionsQueue.Count != 0)
             {

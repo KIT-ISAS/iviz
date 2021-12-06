@@ -15,7 +15,7 @@ namespace Iviz.Common
         /// <summary>
         /// Tells the controller to finalize and dispose its resources. 
         /// </summary>
-        void StopController();
+        void Dispose();
 
         /// <summary>
         /// Tells the controller to 'reset' itself.

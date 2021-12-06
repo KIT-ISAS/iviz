@@ -518,7 +518,7 @@ namespace Iviz.Controllers
             Robot.BaseLinkObject.transform.SetParentLocal(node.Transform);
         }
         
-        public void StopController()
+        public void Dispose()
         {
             if (AttachedToTf)
             {

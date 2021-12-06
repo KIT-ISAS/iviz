@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -409,6 +410,9 @@ namespace Iviz.Controllers
                 points.Array[i] = srcPoints[i].Ros2Unity();
             }
 
+            var colors = MemoryMarshal.Cast<ColorRGBA, Color>(msg.Colors);
+            meshTriangles.Set(points, colors);
+            /*
             if (msg.Colors.Length != 0)
             {
                 var srcColors = msg.Colors;
@@ -418,13 +422,12 @@ namespace Iviz.Controllers
                     ref var color = ref colors.Array[i];
                     (color.r, color.g, color.b, color.a) = srcColors[i];
                 }
-
-                meshTriangles.Set(points, colors);
             }
             else
             {
                 meshTriangles.Set(points);
             }
+            */
         }
 
         void CreatePoints(Marker msg)

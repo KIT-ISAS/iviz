@@ -30,7 +30,7 @@ namespace Iviz.Displays
         [SerializeField] Vector3 preTranslation;
         [SerializeField] Mesh mesh;
 
-        readonly uint[] argsBuffer = {0, 0, 0, 0, 0};
+        readonly uint[] argsBuffer = { 0, 0, 0, 0, 0 };
         [CanBeNull] ComputeBuffer argsComputeBuffer;
         [CanBeNull] Info<GameObject> meshResource;
 
@@ -128,7 +128,7 @@ namespace Iviz.Displays
 
         public override float ElementScale
         {
-            get => base.ElementScale;
+            protected get => base.ElementScale;
             set
             {
                 base.ElementScale = value;
@@ -148,7 +148,7 @@ namespace Iviz.Displays
                 UpdateScale();
             }
         }
-        
+
         public override Bounds? Bounds => Size == 0 ? null : base.Bounds;
 
         protected override void Awake()
@@ -240,29 +240,27 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
-            Properties.SetBuffer(PointsID, (ComputeBuffer) null);
+            Properties.SetBuffer(PointsID, (ComputeBuffer)null);
         }
 
         /// <summary>
         /// Sets the instance positions and colors with the given enumeration.
         /// </summary>
         /// <param name="points">The list of positions and colors.</param>
-        public void Set([NotNull] NativeList<PointWithColor> points)
+        public void Set(ReadOnlySpan<PointWithColor> points)
         {
             pointBuffer.EnsureCapacity(points.Length);
 
             pointBuffer.Clear();
-            if (points.Length != 0)
+            for (int i = 0; i < points.Length; i++)
             {
-                foreach (ref readonly PointWithColor t in points.Ref())
+                ref readonly var t = ref points[i];
+                if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
                 {
-                    if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
-                    {
-                        continue;
-                    }
-
-                    pointBuffer.Add(t.f);
+                    continue;
                 }
+
+                pointBuffer.Add(t.f);
             }
 
             UpdateBuffer();
@@ -344,7 +342,7 @@ namespace Iviz.Displays
             bool isSinglePassStereo = XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
             int instanceCount = isSinglePassStereo ? 2 * Size : Size;
 
-            argsBuffer[1] = (uint) instanceCount;
+            argsBuffer[1] = (uint)instanceCount;
             argsComputeBuffer?.SetData(argsBuffer);
 
             Vector3 meshScale = ElementScale * ElementScale3;
@@ -380,7 +378,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsID, (ComputeBuffer) null);
+                Properties.SetBuffer(PointsID, (ComputeBuffer)null);
             }
 
             if (pointBuffer.Capacity != 0)

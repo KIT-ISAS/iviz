@@ -20,7 +20,6 @@ using Iviz.Ros;
 using Iviz.Tools;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -56,6 +55,7 @@ namespace Iviz.App
 
         [SerializeField] AnchorCanvasPanel? anchorCanvasPanel;
         [SerializeField] UpperCanvasPanel? upperCanvasPanel;
+        [SerializeField] BottomCanvasPanel? bottomCanvasPanel;
         [SerializeField] ARSidePanel? arSidePanel;
         [SerializeField] DataPanelManager? dataPanelManager;
         [SerializeField] DialogPanelManager? dialogPanelManager;
@@ -64,19 +64,12 @@ namespace Iviz.App
         [SerializeField] GameObject? contentObject;
         [SerializeField] Canvas? rootCanvas;
         [SerializeField] XRMainController? xrController;
+        [SerializeField] GameObject? imageCanvasHolder;
 
-        [SerializeField] TMP_Text cameraText;
-        [SerializeField] Text bottomTime;
-        [SerializeField] Text bottomBattery;
-        [SerializeField] Text bottomFps;
-        [SerializeField] Text bottomBandwidth;
+        [SerializeField] GameObject? moduleListCanvas;
+        [SerializeField] GameObject? dataPanelCanvas;
+        [SerializeField] GameObject? menuObject;
 
-        [SerializeField] GameObject moduleListCanvas;
-        [SerializeField] GameObject dataPanelCanvas;
-        [SerializeField] GameObject imageCanvasHolder;
-
-        [SerializeField] GameObject menuObject;
-        
         readonly List<ModuleData> moduleDatas = new();
         readonly HashSet<string> topicsWithModule = new();
         readonly HashSet<ImageDialogData> imageDatas = new();
@@ -91,6 +84,7 @@ namespace Iviz.App
         IMenuDialogContents? menuDialog;
 
         UpperCanvasPanel UpperCanvas => upperCanvasPanel.AssertNotNull(nameof(upperCanvasPanel));
+        BottomCanvasPanel BottomCanvas => bottomCanvasPanel.AssertNotNull(nameof(bottomCanvasPanel));
         AnchorToggleButton BottomHideGuiButton => AnchorCanvasPanel.BottomHideGui;
         Button LeftHideGuiButton => AnchorCanvasPanel.LeftHideGui;
         Button MiddleHideGuiButton => middleHideGuiButton.AssertNotNull(nameof(middleHideGuiButton));
@@ -211,7 +205,7 @@ namespace Iviz.App
             ARController.ARStateChanged += OnARStateChanged;
 
             BottomHideGuiButton.Visible = !Settings.IsMobile;
-            MiddleHideGuiButton.gameObject.SetActive(Settings.IsMobile);
+            MiddleHideGuiButton.gameObject.SetActive(Settings.IsMobile && !Settings.IsXR);
             UpdateLeftHideVisible();
 
             SceneInteractable = true;
@@ -302,7 +296,6 @@ namespace Iviz.App
             };
 
             connectionData.MasterActiveChanged += _ => ConnectionManager.Connection.Disconnect();
-
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
             ConnectionManager.Connection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
@@ -312,8 +305,15 @@ namespace Iviz.App
 
             ServiceFunctions.Start();
 
-            menuDialog = menuObject.GetComponent<IMenuDialogContents>();
-            menuObject.SetActive(false);
+            if (menuObject != null)
+            {
+                menuDialog = menuObject.GetComponent<IMenuDialogContents>();
+                menuObject.SetActive(false);
+            }
+            else
+            {
+                throw new NullReferenceException("The menu dialog is not set!");
+            }
 
             AllGuiVisible = AllGuiVisible; // initialize value
 
@@ -324,6 +324,7 @@ namespace Iviz.App
                     throw new NullReferenceException("XR is enabled, but the XR controller is not set");
                 }
 
+                UpperCanvas.EnableAR.gameObject.SetActive(false);
                 CreateModule(ModuleType.XR);
                 RootCanvas.ProcessCanvasForXR();
             }
@@ -799,7 +800,8 @@ namespace Iviz.App
 
         public ImageDialogData CreateImageDialog(ImageDialogListener caller)
         {
-            var newImageData = new ImageDialogData(caller, imageCanvasHolder.transform);
+            var canvasHolder = imageCanvasHolder.AssertNotNull(nameof(imageCanvasHolder));
+            var newImageData = new ImageDialogData(caller, canvasHolder.transform);
             imageDatas.Add(newImageData);
             return newImageData;
         }
@@ -834,22 +836,22 @@ namespace Iviz.App
             var cameraPose = TfListener.RelativePoseToFixedFrame(currentCamera.AsPose());
             RosUtils.FormatPose(cameraPose, description,
                 TfListener.Instance.FlipZ ? RosUtils.PoseFormat.All : RosUtils.PoseFormat.AllWithoutRoll);
-            cameraText.SetText(description);
+            BottomCanvas.CameraText.SetText(description);
         }
 
         void UpdateFpsStats()
         {
 #if UNITY_EDITOR
             long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
-            bottomTime.text = $"M: {memBytesKb.ToString()}M";
+            BottomCanvas.Time.text = $"M: {memBytesKb.ToString()}M";
 #else
-            bottomTime.text = GameThread.Now.ToString("HH:mm:ss");
+            BottomCanvas.BottomTime.text = GameThread.Now.ToString("HH:mm:ss");
 #endif
-            bottomFps.text = $"{frameCounter.ToString()} FPS";
+            BottomCanvas.Fps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
 
             (long downB, long upB) = ConnectionManager.CollectBandwidthReport();
-            bottomBandwidth.text = $"↓{FormatBandwidth(downB)} ↑{FormatBandwidth(upB)}";
+            BottomCanvas.Bandwidth.text = $"↓{FormatBandwidth(downB)} ↑{FormatBandwidth(upB)}";
 
             var bagListener = ConnectionManager.Connection.BagListener;
             if (bagListener != null)
@@ -859,24 +861,17 @@ namespace Iviz.App
             }
 
             var state = SystemInfo.batteryStatus;
-            switch (SystemInfo.batteryLevel)
+
+            float batteryLevel = SystemInfo.batteryLevel;
+            BottomCanvas.Battery.text = batteryLevel switch
             {
-                case -1:
-                    bottomBattery.text = "---";
-                    break;
-                case 1 when state is BatteryStatus.Full or BatteryStatus.Charging:
-                    bottomBattery.text = "<color=#005500>Full</color>";
-                    break;
-                case 1:
-                    bottomBattery.text = "Full";
-                    break;
-                default:
-                    int level = (int)(SystemInfo.batteryLevel * 100);
-                    bottomBattery.text = state == BatteryStatus.Charging
-                        ? $"<color=#005500>{level.ToString()}%</color>"
-                        : $"{level.ToString()}%";
-                    break;
-            }
+                -1 => "---",
+                1 when state is BatteryStatus.Full or BatteryStatus.Charging => "<color=#005500>Full</color>",
+                1 => "Full",
+                _ when state == BatteryStatus.Charging =>
+                    $"<color=#005500>{((int)(batteryLevel * 100)).ToString()}%</color>",
+                _ => $"{((int)(batteryLevel * 100)).ToString()}%"
+            };
         }
 
         static string FormatBandwidth(long speedB)

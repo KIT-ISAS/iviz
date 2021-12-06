@@ -542,9 +542,9 @@ namespace Iviz.Controllers
             return new time(numSecs, numNSecs);
         }
 
-        public override void StopController()
+        public override void Dispose()
         {
-            base.StopController();
+            base.Dispose();
             GameThread.EveryFrame -= CheckDeadDialogs;
             DestroyAll(dialogs);
             DestroyAll(widgets);

@@ -40,5 +40,11 @@ namespace Iviz.Resources
         public Color DraggableHoverColor { get; } = Color.white;
         public Color DraggableSelectedColor { get; } = Color.cyan;
         public Color DraggableSelectedEmissive { get; } = Color.blue;
+        
+        public Color EnabledSideFont { get; } = Color.black; 
+        public Color DisabledSideFont { get; } = new Color(0.25f, 0.25f, 0.25f, 0.5f); 
+        public Color EnabledSideFrame { get; } = new Color(0.2f, 0.3f, 0.4f); 
+        public Color DisabledSideFrame { get; } = new Color(0.75f, 0.75f, 0.75f, 1);
+
     }
 }

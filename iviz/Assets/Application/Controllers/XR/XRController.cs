@@ -190,7 +190,7 @@ namespace Iviz.Controllers.XR
             return TfListener.RelativePoseToFixedFrame(cameraOffset.TransformPose(pose)).Unity2RosTransform();
         }
 
-        public void StopController()
+        public void Dispose()
         {
             GameThread.EveryFrame -= Update;
         }

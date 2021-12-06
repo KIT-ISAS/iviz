@@ -2,6 +2,7 @@ using System;
 using Iviz.App.ARDialogs;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Displays.XRDialogs;
 using UnityEngine;
 
 namespace Iviz.App.ARDialogs
@@ -17,8 +18,8 @@ namespace Iviz.App.ARDialogs
         [SerializeField] PolyGlowDisplay poly = null;
         [SerializeField] PlaneDraggable disc = null;
         [SerializeField] PlaneDraggable corner = null;
-        [SerializeField] ARButton okButton = null;
-        [SerializeField] ARButton cancelButton = null;
+        [SerializeField] XRButton okButton = null;
+        [SerializeField] XRButton cancelButton = null;
         [SerializeField] Transform buttonPivotTransform = null;
         [SerializeField] Transform pivotTransform = null;
         LineResource lines;
@@ -105,11 +106,11 @@ namespace Iviz.App.ARDialogs
             corner.StartDragging += () => scaling = true;
             corner.EndDragging += () => scaling = false;
 
-            okButton.Icon = ARButton.ButtonIcon.Ok;
+            okButton.Icon = XRButton.ButtonIcon.Ok;
             MainButtonCaption = MainButtonCaption;
 
             cancelButton.Caption = "Cancel";
-            cancelButton.Icon = ARButton.ButtonIcon.Cross;
+            cancelButton.Icon = XRButton.ButtonIcon.Cross;
 
             okButton.Clicked += () =>
             {

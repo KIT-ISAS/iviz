@@ -242,9 +242,9 @@ namespace Iviz.Controllers
             return true;
         }
 
-        public override void StopController()
+        public override void Dispose()
         {
-            base.StopController();
+            base.Dispose();
             billboard.Texture = null;
             billboard.ReturnToPool();
 

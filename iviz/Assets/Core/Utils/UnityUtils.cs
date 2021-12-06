@@ -1,12 +1,15 @@
 #nullable enable
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Iviz.Msgs;
+using Iviz.Tools;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -409,6 +412,10 @@ namespace Iviz.Core
             (x, y, z, w) = (v.x, v.y, v.z, v.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Deconstruct(this in float4 v, out float x, out float y, out float z) =>
+            (x, y, z) = (v.x, v.y, v.z);
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Bounds b, out Vector3 center, out Vector3 size) =>
             (center, size) = (b.center, b.size);
 
@@ -424,8 +431,7 @@ namespace Iviz.Core
         public static void Deconstruct(this in Msgs.GeometryMsgs.TransformStamped p,
             out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp) =>
             (parentId, childId, transform, stamp) = (p.Header.FrameId, p.ChildFrameId, p.Transform, p.Header.Stamp);
-
-
+        
         public static unsafe Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return new Span<T>(array.GetUnsafePtr(), array.Length);
@@ -438,12 +444,17 @@ namespace Iviz.Core
         
         public static Span<T> AsSpan<T>(this List<T> list) where T : unmanaged
         {
-            return list.ExtractArray()[..list.Count];
+            return new Span<T>(list.ExtractArray(), 0, list.Count);
         }
         
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list) where T : unmanaged
         {
-            return list.ExtractArray()[..list.Count];
+            return new ReadOnlySpan<T>(list.ExtractArray(), 0, list.Count);
+        }
+        
+        public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged
+        {
+            return MemoryMarshal.Read<T>(span);
         }
     }
 }

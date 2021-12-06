@@ -176,9 +176,9 @@ namespace Iviz.Controllers
             resource.Set(msg.AngleMin, msg.AngleIncrement, msg.RangeMin, msg.RangeMax, msg.Ranges, msg.Intensities);
         }
 
-        public override void StopController()
+        public override void Dispose()
         {
-            base.StopController();
+            base.Dispose();
             resource.ReturnToPool();
             node.DestroySelf();
         }

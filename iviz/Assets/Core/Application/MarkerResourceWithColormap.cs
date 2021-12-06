@@ -22,11 +22,11 @@ namespace Iviz.Displays
         static readonly int TintId = Shader.PropertyToID("_Tint");
         static readonly int AtlasRowId = Shader.PropertyToID("_AtlasRow");
 
-        [SerializeField] ColormapId colormap;
-        [SerializeField] Vector2 intensityBounds;
-        [SerializeField] bool flipMinMax;
-        [SerializeField] Color tint;
-        [SerializeField] float elementScale = 1.0f;
+        ColormapId colormap;
+        Vector2 intensityBounds;
+        bool flipMinMax;
+        Color tint;
+        float elementScale = 1.0f;
 
         MaterialPropertyBlock? properties;
 
@@ -109,7 +109,7 @@ namespace Iviz.Displays
         /// <exception cref="ArgumentException">If the size is negative.</exception>
         public virtual float ElementScale
         {
-            get => elementScale;
+            protected get => elementScale;
             set
             {
                 if (value < 0)

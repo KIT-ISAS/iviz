@@ -293,9 +293,9 @@ namespace Iviz.Controllers
             resource.Set(lines, LineColor.a < 1);
         }
 
-        public override void StopController()
+        public override void Dispose()
         {
-            base.StopController();
+            base.Dispose();
             resource.ReturnToPool();
             node.DestroySelf();
             lines.Dispose();

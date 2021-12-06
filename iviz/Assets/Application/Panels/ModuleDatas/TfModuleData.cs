@@ -36,7 +36,7 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-            listener.StopController();
+            listener.Dispose();
         }
         
         public void UpdateConfiguration(TfConfiguration configuration)

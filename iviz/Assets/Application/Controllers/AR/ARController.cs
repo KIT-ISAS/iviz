@@ -475,7 +475,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public virtual void StopController()
+        public virtual void Dispose()
         {
             ARStateChanged?.Invoke(false);
 

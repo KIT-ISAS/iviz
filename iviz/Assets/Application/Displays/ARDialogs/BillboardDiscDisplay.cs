@@ -21,7 +21,7 @@ namespace Iviz.App.ARDialogs
 
         public Transform TargetTransform
         {
-            get => disc.TargetTransform;
+            get => null; //disc.TargetTransform;
             set => disc.TargetTransform = value;
         }
 

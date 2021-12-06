@@ -1,33 +1,32 @@
 #nullable enable
 
 using System;
+using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Displays.Highlighters;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 
-namespace Iviz.App.ARDialogs
+namespace Iviz.Displays.XRDialogs
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class ARButton : MonoBehaviour, IDisplay, IHasBounds, IRecyclable
+    public sealed class XRButton : MonoBehaviour, IDisplay, IHasBounds, IRecyclable
     {
         [SerializeField] Texture2D[] icons = Array.Empty<Texture2D>();
         [SerializeField] TMP_Text? text;
         [SerializeField] MeshRenderer? iconMeshRenderer;
-        [SerializeField] MeshMarkerResource? cylinder;
-        [SerializeField] RoundedPlaneResource? background;
         [SerializeField] Transform? m_Transform;
         [SerializeField] BoxCollider? boxCollider;
 
         Color backgroundColor = Resource.Colors.HighlighterBackground;
-        ButtonIcon icon = ButtonIcon.Cross;
+        ButtonIcon? icon;
         Material? material;
         StaticBoundsControl? boundsControl;
+        RoundedPlaneResource? background;
 
         RoundedPlaneResource Background =>
             background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneResource>(Transform);
@@ -35,20 +34,22 @@ namespace Iviz.App.ARDialogs
         TMP_Text Text => text.AssertNotNull(nameof(text));
         MeshRenderer IconMeshRenderer => iconMeshRenderer.AssertNotNull(nameof(iconMeshRenderer));
         Material Material => material != null ? material : material = Instantiate(IconMeshRenderer.material);
-        MeshMarkerResource Cylinder => cylinder.AssertNotNull(nameof(cylinder));
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
 
+        Transform IHasBounds.BoundsTransform => Transform;
         public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
+        public event Action? BoundsChanged;
         public event Action? Clicked;
-
 
         public enum ButtonIcon
         {
-            None,
             Cross,
             Ok,
             Forward,
-            Backward
+            Backward,
+            Dialog,
+            Up,
+            Down,
         }
 
         public Color BackgroundColor
@@ -64,11 +65,6 @@ namespace Iviz.App.ARDialogs
             }
         }
 
-        Transform IHasBounds.BoundsTransform => Transform;
-        string? IHasBounds.Caption => null;
-        bool IHasBounds.AcceptsHighlighter => false;
-        public event Action? BoundsChanged;
-
         public string Caption
         {
             set => Text.text = value;
@@ -80,32 +76,21 @@ namespace Iviz.App.ARDialogs
             set => gameObject.SetActive(value);
         }
 
-        public ButtonIcon Icon
+        public ButtonIcon? Icon
         {
             get => icon;
             set
             {
                 icon = value;
-                Material.mainTexture = value == ButtonIcon.Backward
-                    ? icons[(int)ButtonIcon.Forward]
-                    : icons[(int)value];
-                (float x, _, float z) = IconMeshRenderer.transform.localRotation.eulerAngles;
-
-                Quaternion rotation;
-                switch (value)
+                if (icon is { } validatedIcon)
                 {
-                    case ButtonIcon.Cross:
-                        rotation = Quaternion.Euler(x, 45, z);
-                        break;
-                    case ButtonIcon.Backward:
-                        rotation = Quaternion.Euler(x, 0, z);
-                        break;
-                    default:
-                        rotation = Quaternion.Euler(x, 180, z);
-                        break;
+                    Material.mainTexture = icons[(int)validatedIcon];
+                    IconMeshRenderer.enabled = true;
                 }
-
-                IconMeshRenderer.transform.localRotation = rotation;
+                else
+                {
+                    IconMeshRenderer.enabled = false;
+                }
             }
         }
 
@@ -114,9 +99,15 @@ namespace Iviz.App.ARDialogs
             Icon = Icon;
             IconMeshRenderer.material = Material;
             boundsControl = new StaticBoundsControl(this);
+            boundsControl.PointerUp += OnClick;
             Background.Size = new Vector2(1, 1);
             Background.Radius = 0.3f;
             Background.Color = BackgroundColor;
+        }
+
+        void Start()
+        {
+            BoundsChanged?.Invoke();
         }
 
         void OnClick()
@@ -125,33 +116,28 @@ namespace Iviz.App.ARDialogs
             Clicked?.Invoke();
         }
 
-        public void Stop()
-        {
-            Clicked = null;
-            boundsControl?.Dispose();
-        }
-
         public void SplitForRecycle()
         {
+            boundsControl?.Dispose();
+            background.ReturnToPool();
         }
 
         Bounds? IHasBounds.Bounds => Bounds;
         Bounds? IDisplay.Bounds => Bounds;
 
-        Bounds Bounds
-        {
-            get => new(BoxCollider.center, BoxCollider.size);
-            set
-            {
-                BoxCollider.center = value.center;
-                BoxCollider.size = value.size;
-            }
-        }
+        Bounds Bounds => new(BoxCollider.center, BoxCollider.size);
 
         public int Layer { get; set; }
 
+        public void TriggerBoundsChanged()
+        {
+            BoundsChanged?.Invoke();
+        }
+
         void IDisplay.Suspend()
         {
+            BoundsChanged = null;
+            Clicked = null;
         }
     }
 }

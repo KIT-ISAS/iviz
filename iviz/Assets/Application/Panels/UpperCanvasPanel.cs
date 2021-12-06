@@ -8,33 +8,33 @@ namespace Iviz.App
 {
     public sealed class UpperCanvasPanel : MonoBehaviour
     {
-        [SerializeField] DataLabelWidget? masterUriStr = null;
-        [SerializeField] TrashButtonWidget? masterUriButton = null;
-        [SerializeField] TrashButtonWidget? connectButton = null;
-        [SerializeField] TrashButtonWidget? stopButton = null;
-        [SerializeField] Image? topPanel = null;
-        [SerializeField] Button? save = null;
-        [SerializeField] Button? load = null;
-        [SerializeField] Image? status = null;
+        [SerializeField] DataLabelWidget? masterUriStr;
+        [SerializeField] TrashButtonWidget? masterUriButton;
+        [SerializeField] TrashButtonWidget? connectButton;
+        [SerializeField] TrashButtonWidget? stopButton;
+        [SerializeField] Image? topPanel;
+        [SerializeField] Button? save;
+        [SerializeField] Button? load;
+        [SerializeField] Image? status;
 
-        [SerializeField] Button? addDisplayByTopic = null;
-        [SerializeField] Button? addModule = null;
-        [SerializeField] Button? showTfTree = null;
-        [SerializeField] Button? enableAR = null;
-        [SerializeField] Button? showNetwork = null;
-        [SerializeField] Button? showConsole = null;
-        [SerializeField] Button? showSettings = null;
-        [SerializeField] Button? showEcho = null;
-        [SerializeField] Button? showSystem = null;
+        [SerializeField] Button? addDisplayByTopic;
+        [SerializeField] Button? addModule;
+        [SerializeField] Button? showTfTree;
+        [SerializeField] Button? enableAR;
+        [SerializeField] Button? showNetwork;
+        [SerializeField] Button? showConsole;
+        [SerializeField] Button? showSettings;
+        [SerializeField] Button? showEcho;
+        [SerializeField] Button? showSystem;
 
-        [SerializeField] Button? recordBag = null;
-        [SerializeField] Text? recordBagText = null;
-        [SerializeField] Image? recordBagImage = null;
+        [SerializeField] Button? recordBag;
+        [SerializeField] Text? recordBagText;
+        [SerializeField] Image? recordBagImage;
 
-        [SerializeField] Sprite? connectedSprite = null;
-        [SerializeField] Sprite? connectingSprite = null;
-        [SerializeField] Sprite? disconnectedSprite = null;
-        [SerializeField] Sprite? questionSprite = null;
+        [SerializeField] Sprite? connectedSprite;
+        [SerializeField] Sprite? connectingSprite;
+        [SerializeField] Sprite? disconnectedSprite;
+        [SerializeField] Sprite? questionSprite;
 
         public DataLabelWidget MasterUriStr => masterUriStr.AssertNotNull(nameof(masterUriStr));
         public TrashButtonWidget MasterUriButton => masterUriButton.AssertNotNull(nameof(masterUriButton));

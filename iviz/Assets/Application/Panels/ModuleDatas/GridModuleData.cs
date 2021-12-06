@@ -42,7 +42,7 @@ namespace Iviz.App
         public override void Stop()
         {
             base.Stop();
-            GridController.StopController();
+            GridController.Dispose();
             
             ARController.ARCameraViewChanged -= OnARCameraViewChanged;
         }

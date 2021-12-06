@@ -170,9 +170,9 @@ namespace Iviz.Controllers
             RosLogger.Debug($"{this}: Construction of octomap finished with {buffer.Length.ToString()} values");
         }
 
-        public override void StopController()
+        public override void Dispose()
         {
-            base.StopController();
+            base.Dispose();
             resource.ReturnToPool();
             node.DestroySelf();
         }

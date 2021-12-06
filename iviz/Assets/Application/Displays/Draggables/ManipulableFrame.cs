@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class ManipulableFrame : MonoBehaviour, IHasBounds, IDisplay
+    public sealed class ManipulableFrame : MonoBehaviour, IHasBounds, IDisplay, IDraggable
     {
         static readonly Quaternion ZtoX = Quaternion.Euler(0, 90, 0);
         static readonly Quaternion ZtoY = Quaternion.Euler(90, 0, 0);
@@ -24,6 +24,11 @@ namespace Iviz.Displays
         IBoundsControl? control;
 
         public event Action? BoundsChanged;
+        public event Action? PointerDown;
+        public event Action? PointerUp;
+        public event Action? Moved;
+        public event Action? StartDragging;
+        public event Action? EndDragging;
 
         public TranslationConstraintType TranslationConstraint
         {
@@ -122,7 +127,10 @@ namespace Iviz.Displays
 
             control.StartDragging += () => OnStartDragging(control);
             control.EndDragging += OnEndDragging;
-            
+            control.PointerDown += () => PointerDown?.Invoke();
+            control.PointerUp += () => PointerUp?.Invoke();
+            control.Moved += () => Moved?.Invoke();
+
             foreach (var wrapper in wrappers)
             {
                 wrapper.StartDragging += () => OnStartDragging(wrapper);
@@ -145,6 +153,8 @@ namespace Iviz.Displays
                     wrapper.Interactable = false;
                 }
             }
+
+            StartDragging?.Invoke();
         }
 
         void OnEndDragging()
@@ -158,6 +168,8 @@ namespace Iviz.Displays
             {
                 wrapper.Interactable = true;
             }
+
+            EndDragging?.Invoke();
         }
 
         public Bounds Bounds
@@ -188,6 +200,13 @@ namespace Iviz.Displays
 
             translationConstraint = 0;
             rotationConstraint = 0;
+
+            BoundsChanged = null;
+            PointerDown = null;
+            PointerUp = null;
+            Moved = null;
+            StartDragging = null;
+            EndDragging = null;
         }
 
         void Awake()

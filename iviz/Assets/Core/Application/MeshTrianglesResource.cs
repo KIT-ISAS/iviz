@@ -54,7 +54,7 @@ namespace Iviz.Displays
             EnsureOwnMesh(0).Clear();
         }
 
-        public void Set(in Rent<Vector3> points, in Rent<Color> colors = default)
+        public void Set(in Rent<Vector3> points, ReadOnlySpan<Color> colors = default)
         {
             if (points.Length % 3 != 0)
             {
@@ -103,7 +103,9 @@ namespace Iviz.Displays
             Collider.center = ownMesh.bounds.center;
             Collider.size = ownMesh.bounds.size;
         }
-
+        
+        
+        /*
         public void Set(
             in Rent<Vector3> points,
             in Rent<Vector3> normals,
@@ -112,6 +114,15 @@ namespace Iviz.Displays
             in Rent<Vector3> bumpTexCoords,
             in Rent<int> triangles,
             in Rent<Color32> colors = default)
+            */
+        public void Set(
+            ReadOnlySpan<Vector3> points,
+            ReadOnlySpan<Vector3> normals,
+            ReadOnlySpan<Vector4> tangents,
+            ReadOnlySpan<Vector3> diffuseTexCoords,
+            ReadOnlySpan<Vector3> bumpTexCoords,
+            ReadOnlySpan<int> triangles,
+            ReadOnlySpan<Color32> colors = default)
         {
             if (triangles.Length % 3 != 0)
             {
@@ -144,7 +155,7 @@ namespace Iviz.Displays
 
             if (bumpTexCoords.Length != 0)
             {
-                ownMesh.SetUVs(1, bumpTexCoords);
+                ownMesh.SetUVs(bumpTexCoords, 1);
             }
 
             if (colors.Length != 0)

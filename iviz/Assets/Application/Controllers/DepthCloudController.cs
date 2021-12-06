@@ -362,7 +362,7 @@ namespace Iviz.Controllers
             projector.Intrinsic = new Intrinsic(info.K);
         }
 
-        public void StopController()
+        public void Dispose()
         {
             ColorListener?.Stop();
             DepthListener?.Stop();

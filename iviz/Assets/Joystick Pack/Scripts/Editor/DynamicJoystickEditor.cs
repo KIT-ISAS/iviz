@@ -3,6 +3,7 @@ using UnityEditor;
 
 namespace External
 {
+#if UNITY_EDITOR
     [CustomEditor(typeof(DynamicJoystick))]
     public class DynamicJoystickEditor : JoystickEditor
     {
@@ -20,7 +21,7 @@ namespace External
 
             if (background != null)
             {
-                RectTransform backgroundRect = (RectTransform) background.objectReferenceValue;
+                RectTransform backgroundRect = (RectTransform)background.objectReferenceValue;
                 backgroundRect.anchorMax = Vector2.zero;
                 backgroundRect.anchorMin = Vector2.zero;
                 backgroundRect.pivot = center;
@@ -35,4 +36,5 @@ namespace External
                     "The distance away from the center input has to be before the joystick begins to move."));
         }
     }
+#endif
 }

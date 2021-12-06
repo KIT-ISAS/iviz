@@ -209,9 +209,9 @@ namespace Iviz.Controllers
         public IEnumerable<IHasBounds> GetAllBounds() =>
             interactiveMarkers.Values.SelectMany(interactiveMarker => interactiveMarker.GetAllBounds());
 
-        public override void StopController()
+        public override void Dispose()
         {
-            base.StopController();
+            base.Dispose();
 
             foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
             {

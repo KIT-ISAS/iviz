@@ -541,7 +541,7 @@ namespace Iviz.Controllers.TF
             ProcessWorldOffset();
         }
 
-        public void StopController()
+        public void Dispose()
         {
             Listener.Stop();
             ListenerStatic.Stop();

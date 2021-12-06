@@ -253,9 +253,9 @@ namespace Iviz.Controllers
             cellSize = (float) msg.Info.Resolution;
         }
 
-        public override void StopController()
+        public override void Dispose()
         {
-            base.StopController();
+            base.Dispose();
 
             resource.ReturnToPool();
 

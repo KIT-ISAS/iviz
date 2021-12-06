@@ -200,7 +200,7 @@ namespace Iviz.Controllers
             reflectionProbe.RenderProbe();
         }
 
-        public void StopController()
+        public void Dispose()
         {
             grid.ReturnToPool();
             node.DestroySelf();

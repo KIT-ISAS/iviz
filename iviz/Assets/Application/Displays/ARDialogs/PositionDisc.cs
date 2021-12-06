@@ -3,13 +3,14 @@ using Iviz.App.ARDialogs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Displays.XRDialogs;
 using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
     public sealed class PositionDisc : ARWidget, IRecyclable
     {
-        [SerializeField] ARButton button = null;
+        [SerializeField] XRButton button = null;
         [SerializeField] PlaneDraggable disc = null;
         [SerializeField] Transform anchor = null;
         [SerializeField] float linkWidth = 0.02f;
@@ -44,7 +45,7 @@ namespace Iviz.App.ARDialogs
             lineBuffer.Add(new LineWithColor());
             lineBuffer.Add(new LineWithColor());
 
-            button.Icon = ARButton.ButtonIcon.Ok;
+            button.Icon = XRButton.ButtonIcon.Ok;
             button.Caption = "Send!";
             button.Visible = false;
             button.Transform.SetParentLocal(Transform);

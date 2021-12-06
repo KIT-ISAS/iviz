@@ -627,9 +627,9 @@ namespace Iviz.Controllers
             }
         }
 
-        public override void StopController()
+        public override void Dispose()
         {
-            base.StopController();
+            base.Dispose();
             tokenSource.Cancel();
             ARSet.Clicked -= ArSetOnClicked;
             WorldPoseChanged -= OnWorldPoseChanged;

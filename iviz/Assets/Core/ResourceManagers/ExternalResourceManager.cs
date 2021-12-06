@@ -556,8 +556,7 @@ namespace Iviz.Displays
                 return null;
             }
 
-            return Msgs.Buffer.Deserialize(modelGenerator, buffer.Array, buffer.Length - Md5SumLength,
-                Md5SumLength);
+            return Msgs.Buffer.Deserialize(modelGenerator, buffer[Md5SumLength..]);
         }
 
         async ValueTask<Info<GameObject>?> LoadLocalModelAsync(string uriString, string localPath,
@@ -628,8 +627,7 @@ namespace Iviz.Displays
                     return null;
                 }
 
-                var msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer.Array, buffer.Length - Md5SumLength,
-                    Md5SumLength);
+                var msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer[Md5SumLength..]);
                 obj = await CreateSceneNodeAsync(msg, provider, token);
             }
             catch (Exception e) when (e is not OperationCanceledException)
@@ -659,7 +657,7 @@ namespace Iviz.Displays
                 using (var buffer = new Rent<byte>(msg.Model.RosMessageLength + Md5SumLength))
                 {
                     BuiltIns.UTF8.GetBytes(Model.RosMd5Sum, 0, Md5SumLength, buffer.Array, 0);
-                    msg.Model.SerializeToArray(buffer.Array, Md5SumLength);
+                    msg.Model.SerializeTo(buffer[Md5SumLength..]);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                 }
 
@@ -723,7 +721,7 @@ namespace Iviz.Displays
                 using (var buffer = new Rent<byte>(msg.Scene.RosMessageLength + Md5SumLength))
                 {
                     BuiltIns.UTF8.GetBytes(Scene.RosMd5Sum, 0, Md5SumLength, buffer.Array, 0);
-                    msg.Scene.SerializeToArray(buffer.Array, Md5SumLength);
+                    msg.Scene.SerializeTo(buffer[Md5SumLength..]);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                     RosLogger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
                 }

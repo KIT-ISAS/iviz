@@ -4,6 +4,7 @@ using Iviz.App.ARDialogs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Displays.XRDialogs;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -11,7 +12,7 @@ namespace Iviz.App.ARDialogs
 {
     public sealed class TrajectoryDisc : ARWidget, IRecyclable
     {
-        [SerializeField] ARButton button = null;
+        [SerializeField] XRButton button = null;
         [SerializeField] float period = 0.1f;
 
         BillboardDiscDisplay disc;
@@ -48,7 +49,7 @@ namespace Iviz.App.ARDialogs
             Lines.ElementScale = 0.02f;
             Lines.RenderType = LineResource.LineRenderType.AlwaysCapsule;
 
-            button.Icon = ARButton.ButtonIcon.Ok;
+            button.Icon = XRButton.ButtonIcon.Ok;
             button.Visible = false;
             button.Transform.parent = Transform.parent;
             MainButtonCaption = mainButtonCaption;

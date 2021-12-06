@@ -126,9 +126,9 @@ namespace Iviz.Controllers
             Listener = new Listener<JointState>(config.Topic, Handler);
         }
 
-        public override void StopController()
+        public override void Dispose()
         {
-            base.StopController();
+            base.Dispose();
             Robot = null;
             warnNotFound.Clear();
         }

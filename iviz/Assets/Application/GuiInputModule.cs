@@ -384,15 +384,18 @@ namespace Iviz.App
             QualityInView = QualityInView;
         }
 
-        public void TryUnsetDraggedObject(IScreenDraggable draggable)
+        public static void TryUnsetDraggedObject(IScreenDraggable draggable)
         {
-            if (DraggedObject == draggable)
+            // do not fetch Instance here, we may be shutting down the scene
+            if (instance == null || instance.DraggedObject != draggable)
             {
-                DraggedObject = null;
+                return;
             }
+
+            instance.DraggedObject = null;
         }
 
-        public void TrySetDraggedObject(IScreenDraggable draggable)
+        public static void TrySetDraggedObject(IScreenDraggable draggable)
         {
             if (!IsDraggingAllowed)
             {
@@ -400,7 +403,7 @@ namespace Iviz.App
                 return;
             }
 
-            DraggedObject = draggable;
+            Instance.DraggedObject = draggable;
         }
 
         void UpdateEvenIfInactive()
@@ -408,8 +411,6 @@ namespace Iviz.App
             const float shortClickTime = 0.3f;
             const float longClickTime = 0.5f;
             const float maxDistanceForClickEvent = 20;
-
-            //QualitySettings.shadowDistance = Mathf.Max(MinShadowDistance, MainCamera.transform.position.y);
 
             if (Settings.IsXR) // XR doesn't need cursor management
             {
@@ -423,8 +424,6 @@ namespace Iviz.App
             if (Settings.IsPhone)
             {
                 var activeTouches = Touch.activeTouches;
-
-                //prevPointerDown |= altPointerIsDown;
 
                 pointerIsDown = activeTouches.Count == 1;
                 altPointerIsDown = activeTouches.Count == 2;
@@ -524,7 +523,7 @@ namespace Iviz.App
 
         static bool IsPointerOnGui(Vector2 pointerPosition)
         {
-            EventSystem eventSystem = EventSystem.current;
+            var eventSystem = EventSystem.current;
             var results = new List<RaycastResult>();
             eventSystem.RaycastAll(new PointerEventData(eventSystem) { position = pointerPosition }, results);
             return results.Any(result => result.gameObject.layer == LayerType.UI);
@@ -896,15 +895,11 @@ namespace Iviz.App
             }
         }
 
-        static async void HighlightAll(List<IHighlightable> hits)
+        static async void HighlightAll(IEnumerable<IHighlightable> hits)
         {
-            foreach (var toHighlight in hits)
+            var aliveHits = hits.Where(toHighlight => toHighlight.IsAlive);
+            foreach (var toHighlight in aliveHits)
             {
-                if (!toHighlight.IsAlive)
-                {
-                    continue;
-                }
-
                 toHighlight.Highlight();
                 await Task.Delay(1000);
             }

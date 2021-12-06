@@ -146,7 +146,7 @@ namespace Iviz.Controllers
 
         public IModuleData ModuleData { get; }
 
-        public void StopController()
+        public void Dispose()
         {
             SenderJoy?.Stop();
             SenderTwist?.Stop();

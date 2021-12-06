@@ -13,22 +13,19 @@ namespace Iviz.Displays
     {
         const int MeasurementsPerSecond = 32;
 
-        [SerializeField] int timeWindowInMs = 5000;
-        [SerializeField] Color color = UnityEngine.Color.red;
-
         readonly Queue<(Vector3 A, Vector3 B)> measurements = new(5 * MeasurementsPerSecond);
         readonly Func<NativeList<float4x2>, bool?> lineSetterDelegate;
 
-        Vector3? lastMeasurement;
+        int timeWindowInMs = 5000;
         float lastTick;
         int maxMeasurements = 160;
-
+        Color color = UnityEngine.Color.red;
+        Vector3? lastMeasurement;
         LineResource? resource;
+        
         LineResource Resource => resource != null ? resource : (resource = CreateLineResource(Transform));
-
         protected override IDisplay Display => Resource;
         public Func<Vector3>? DataSource { get; set; }
-
 
         static LineResource CreateLineResource(Transform transform)
         {
@@ -66,13 +63,12 @@ namespace Iviz.Displays
 
         public Color32 Color
         {
-            get => color;
+            private get => color;
             set => color = value;
         }
 
         public float ElementScale
         {
-            get => Resource.ElementScale;
             set => Resource.ElementScale = value;
         }
 
