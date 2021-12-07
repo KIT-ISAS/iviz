@@ -28,7 +28,7 @@ namespace Iviz.Controllers
         readonly ArrowResource? arrow;
         readonly AngleAxisResource? angleAxis;
 
-        Vector3 dirForDataSource;
+        Vector3 cachedDirection;
 
         readonly MagnitudeConfiguration config = new();
 
@@ -371,7 +371,7 @@ namespace Iviz.Controllers
         }
 
         Vector3 TrailDataSource() =>
-            frameNode.Transform.TransformPoint(dirForDataSource * (VectorScale * scaleMultiplier));
+            frameNode.Transform.TransformPoint(cachedDirection * (VectorScale * scaleMultiplier));
 
         void Handler(Wrench msg)
         {
@@ -380,7 +380,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            Vector3 dir = msg.Force.Ros2Unity();
+            var dir = msg.Force.Ros2Unity();
             if (arrow != null)
             {
                 arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
@@ -391,7 +391,7 @@ namespace Iviz.Controllers
                 angleAxis.Set(msg.Torque.Ros2Unity());
             }
 
-            dirForDataSource = dir;
+            cachedDirection = dir;
         }
 
         void Handler(TwistStamped msg)
@@ -408,7 +408,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            Vector3 dir = linear.Ros2Unity();
+            var dir = linear.Ros2Unity();
             if (arrow != null)
             {
                 arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
@@ -419,7 +419,7 @@ namespace Iviz.Controllers
                 angleAxis.Set(angular.RosRpy2Unity());
             }
 
-            dirForDataSource = dir;
+            cachedDirection = dir;
         }
 
         void Handler(Odometry msg)
@@ -443,7 +443,7 @@ namespace Iviz.Controllers
 
             frameNode.Transform.SetLocalPose(msg.Pose.Pose.Ros2Unity());
 
-            Vector3 dir = linear.Ros2Unity();
+            var dir = linear.Ros2Unity();
             if (arrow != null)
             {
                 arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
@@ -454,7 +454,7 @@ namespace Iviz.Controllers
                 angleAxis.Set(angular.RosRpy2Unity());
             }
 
-            dirForDataSource = dir;
+            cachedDirection = dir;
         }
 
         public override void ResetController()

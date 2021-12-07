@@ -200,7 +200,7 @@ namespace Iviz.Controllers
         public void Reset()
         {
             DestroyAllMarkers();
-            FullListener?.Unsuspend();
+            FullListener?.Subscribe();
         }
 
         public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
@@ -271,7 +271,7 @@ namespace Iviz.Controllers
                 CreateInteractiveMarker(marker);
             }
 
-            FullListener?.Suspend();
+            FullListener?.Unsubscribe();
         }
 
         void CreateInteractiveMarker(InteractiveMarker msg)

@@ -13,7 +13,7 @@ namespace Iviz.Core
         readonly CancellationToken token;
         readonly float startTime;
         readonly float duration;
-
+        
         FAnimator(Action<float> update, Action? dispose, CancellationToken token, float duration)
         {
             this.update = update;

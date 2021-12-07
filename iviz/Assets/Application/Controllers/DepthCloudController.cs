@@ -21,17 +21,16 @@ namespace Iviz.Controllers
         readonly DepthCloudResource projector;
         readonly ImageTexture depthImageTexture;
         readonly ImageTexture colorImageTexture;
+        
         bool depthIsProcessing;
         bool colorIsProcessing;
         TextureFormat? lastDepthFormat;
+        Listener<CameraInfo>? depthInfoListener;
 
         public IModuleData ModuleData { get; }
         public TfFrame? Frame => node.Parent;
-
-        Listener<CameraInfo>? depthInfoListener;
         public IListener? DepthListener { get; private set; }
         public IListener? ColorListener { get; private set; }
-
         public Material ColorMaterial => colorImageTexture.Material;
         public Material DepthMaterial => depthImageTexture.Material;
 
@@ -42,24 +41,6 @@ namespace Iviz.Controllers
         public Vector2Int DepthImageSize => depthImageTexture.Texture != null
             ? new Vector2Int(depthImageTexture.Texture.width, depthImageTexture.Texture.height)
             : Vector2Int.zero;
-
-        public DepthCloudController(IModuleData moduleData)
-        {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            depthImageTexture = new ImageTexture();
-            colorImageTexture = new ImageTexture();
-
-            node = FrameNode.Instantiate("DepthCloud");
-            node.Transform.localRotation = new Quaternion(0, 0.7071f, 0.7071f, 0);
-
-            projector = ResourcePool.RentDisplay<DepthCloudResource>(node.Transform);
-            projector.DepthImage = depthImageTexture;
-            projector.ColorImage = colorImageTexture;
-            Config = new DepthCloudConfiguration();
-
-            depthImageTexture.Colormap = ColormapId.gray;
-            colorImageTexture.Colormap = ColormapId.gray;
-        }
 
         bool DepthIsProcessing
         {
@@ -119,27 +100,30 @@ namespace Iviz.Controllers
                 }
 
                 string colorTopic = value.Trim();
-                config.ColorTopic = colorTopic;
                 if (string.IsNullOrWhiteSpace(colorTopic))
                 {
+                    config.ColorTopic = "";
                     colorImageTexture.Reset();
                     return;
                 }
 
                 var topicInfos = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
                 string? type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == colorTopic)?.Type;
-                switch (type)
+                ColorListener = type switch
                 {
-                    case Image.RosMessageType:
-                        ColorListener = new Listener<Image>(colorTopic, ColorHandler);
-                        break;
-                    case CompressedImage.RosMessageType:
-                        ColorListener = new Listener<CompressedImage>(colorTopic, ColorHandlerCompressed);
-                        break;
-                    default:
-                        config.ColorTopic = "";
-                        break;
+                    Image.RosMessageType => new Listener<Image>(colorTopic, ColorHandler),
+                    CompressedImage.RosMessageType => new Listener<CompressedImage>(colorTopic, ColorHandlerCompressed),
+                    _ => null
+                };
+
+                if (ColorListener == null)
+                {
+                    config.ColorTopic = "";
+                    colorImageTexture.Reset();
+                    return;
                 }
+                
+                config.ColorTopic = colorTopic;
             }
         }
 
@@ -160,27 +144,30 @@ namespace Iviz.Controllers
                 depthInfoListener = null;
 
                 string depthTopic = value.Trim();
-                config.DepthTopic = value;
                 if (string.IsNullOrWhiteSpace(depthTopic))
                 {
+                    config.DepthTopic = "";
                     depthImageTexture.Reset();
                     return;
                 }
 
                 var topicInfos = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
                 string? type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == depthTopic)?.Type;
-                switch (type)
+                DepthListener = type switch
                 {
-                    case Image.RosMessageType:
-                        DepthListener = new Listener<Image>(depthTopic, DepthHandler);
-                        break;
-                    case CompressedImage.RosMessageType:
-                        DepthListener = new Listener<CompressedImage>(depthTopic, DepthHandlerCompressed);
-                        break;
-                    default:
-                        config.DepthTopic = "";
-                        break;
+                    Image.RosMessageType => new Listener<Image>(depthTopic, DepthHandler),
+                    CompressedImage.RosMessageType => new Listener<CompressedImage>(depthTopic, DepthHandlerCompressed),
+                    _ => null
+                };
+
+                if (DepthListener == null)
+                {
+                    config.DepthTopic = "";
+                    depthImageTexture.Reset();
+                    return;
                 }
+
+                config.DepthTopic = depthTopic;
 
                 int lastSlash = depthTopic.LastIndexOf('/');
                 string root = lastSlash != -1 ? depthTopic[..lastSlash] : "";
@@ -213,6 +200,24 @@ namespace Iviz.Controllers
                 return depthDescription + colorDescription;
             }
         }
+        
+        public DepthCloudController(IModuleData moduleData)
+        {
+            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+            depthImageTexture = new ImageTexture();
+            colorImageTexture = new ImageTexture();
+
+            node = FrameNode.Instantiate("DepthCloud");
+            node.Transform.localRotation = new Quaternion(0, 0.7071f, 0.7071f, 0);
+
+            projector = ResourcePool.RentDisplay<DepthCloudResource>(node.Transform);
+            projector.DepthImage = depthImageTexture;
+            projector.ColorImage = colorImageTexture;
+            Config = new DepthCloudConfiguration();
+
+            depthImageTexture.Colormap = ColormapId.gray;
+            colorImageTexture.Colormap = ColormapId.gray;
+        }        
 
         bool DepthHandler(Image msg)
         {
@@ -342,7 +347,7 @@ namespace Iviz.Controllers
 
         void InfoHandler(CameraInfo info)
         {
-            projector.Intrinsic = new Intrinsic(info.K);
+            projector.SetIntrinsic(info.K);
         }
 
         public void Dispose()

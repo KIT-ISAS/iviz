@@ -22,11 +22,18 @@ namespace Iviz.Ros
         readonly List<T> tmpMessageBag = new(32);
         readonly bool callbackInGameThread;
 
-        int droppedMsgs;
+        int droppedMsgCounter;
         long lastMsgBytes;
         int totalMsgCounter;
-        int recentMsgs;
+        int recentMsgCounter;
         RosTransportHint transportHint;
+
+        public string Topic { get; }
+        public string Type { get; }
+        public RosListenerStats Stats { get; private set; }
+        public (int active, int total) NumPublishers => Connection.GetNumPublishers(Topic);
+        public int MaxQueueSize { get; set; } = 1;
+        public bool Subscribed { get; private set; }
 
         public RosTransportHint TransportHint
         {
@@ -42,14 +49,7 @@ namespace Iviz.Ros
                 Reset();
             }
         }
-
-        public string Topic { get; }
-        public string Type { get; }
-        public RosListenerStats Stats { get; private set; }
-        public (int active, int total) NumPublishers => Connection.GetNumPublishers(Topic);
-        public int MaxQueueSize { get; set; } = 1;
-        public bool Subscribed { get; private set; }
-
+        
         Listener(string topic, RosTransportHint transportHint)
         {
             if (string.IsNullOrWhiteSpace(topic))
@@ -91,7 +91,7 @@ namespace Iviz.Ros
         {
         }
 
-        // used by EchoDialogData
+        // used in reflection by EchoDialogData, do not delete
         [Preserve]
         public Listener(string topic, Func<IMessage, IRosReceiver, bool> handler, RosTransportHint transportHint)
             : this(topic, (T msg, IRosReceiver receiver) => handler(msg, receiver), transportHint)
@@ -107,14 +107,10 @@ namespace Iviz.Ros
             }
 
             RosLogger.Info($"Unsubscribing from {Topic}.");
-            if (Subscribed)
-            {
-                Subscribed = false;
-                Connection.Unsubscribe(this);
-            }
+            Unsubscribe();
         }
 
-        public void Suspend()
+        public void Unsubscribe()
         {
             if (!Subscribed)
             {
@@ -125,7 +121,7 @@ namespace Iviz.Ros
             Subscribed = false;
         }
 
-        public void Unsuspend()
+        public void Subscribe()
         {
             if (Subscribed)
             {
@@ -140,11 +136,11 @@ namespace Iviz.Ros
         {
             if (value)
             {
-                Suspend();
+                Unsubscribe();
             }
             else
             {
-                Unsuspend();
+                Subscribe();
             }
         }
 
@@ -155,8 +151,8 @@ namespace Iviz.Ros
 
         public void Reset()
         {
-            Suspend();
-            Unsuspend();
+            Unsubscribe();
+            Subscribe();
         }
 
         internal void EnqueueMessage(in T msg, IRosReceiver receiver)
@@ -191,7 +187,7 @@ namespace Iviz.Ros
             int start = Math.Max(0, tmpMessageBag.Count - MaxQueueSize);
             foreach (var msg in tmpMessageBag.Skip(start))
             {
-                Interlocked.Increment(ref recentMsgs);
+                Interlocked.Increment(ref recentMsgCounter);
                 try
                 {
                     lastMsgBytes += msg.RosMessageLength;
@@ -203,9 +199,10 @@ namespace Iviz.Ros
                 }
             }
 
-            droppedMsgs += start;
+            // single threaded, no interlocked needed here
+            droppedMsgCounter += start;
             totalMsgCounter += messageQueue.Count;
-            recentMsgs += messageQueue.Count;
+            recentMsgCounter += messageQueue.Count;
         }
 
         void CallHandlerDirect(in T msg, IRosReceiver receiver)
@@ -216,7 +213,7 @@ namespace Iviz.Ros
             }
 
             Interlocked.Increment(ref totalMsgCounter);
-            Interlocked.Increment(ref recentMsgs);
+            Interlocked.Increment(ref recentMsgCounter);
 
             bool processed;
             try
@@ -232,13 +229,13 @@ namespace Iviz.Ros
 
             if (!processed)
             {
-                Interlocked.Increment(ref droppedMsgs);
+                Interlocked.Increment(ref droppedMsgCounter);
             }
         }
 
         void UpdateStats()
         {
-            if (recentMsgs == 0)
+            if (recentMsgCounter == 0)
             {
                 Stats = RosListenerStats.Empty;
                 return;
@@ -246,17 +243,17 @@ namespace Iviz.Ros
 
             Stats = new RosListenerStats(
                 totalMsgCounter,
-                recentMsgs,
+                recentMsgCounter,
                 lastMsgBytes,
                 messageQueue.Count,
-                droppedMsgs
+                droppedMsgCounter
             );
 
             ConnectionManager.ReportBandwidthDown(lastMsgBytes);
 
             Interlocked.Exchange(ref lastMsgBytes, 0);
-            Interlocked.Exchange(ref droppedMsgs, 0);
-            Interlocked.Exchange(ref recentMsgs, 0);
+            Interlocked.Exchange(ref droppedMsgCounter, 0);
+            Interlocked.Exchange(ref recentMsgCounter, 0);
         }
 
         public void WriteDescriptionTo(StringBuilder description)

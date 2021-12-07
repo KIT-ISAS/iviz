@@ -37,7 +37,7 @@ namespace Iviz.Displays
         Material Material => material != null
             ? material
             : (material = Resource.Materials.DepthCloud.Instantiate());
-        
+
         public Intrinsic Intrinsic
         {
             set
@@ -47,7 +47,7 @@ namespace Iviz.Displays
                     return;
                 }
 
-                intrinsic = value ?? throw new ArgumentNullException(nameof(value));
+                intrinsic = value;
                 if (DepthImage != null)
                 {
                     UpdatePosValues(DepthImage.Texture);
@@ -122,6 +122,14 @@ namespace Iviz.Displays
 
             Graphics.DrawProcedural(Material, WorldBounds, MeshTopology.Quads, 4, uvs.Length,
                 castShadows: ShadowCastingMode.Off, receiveShadows: false, layer: gameObject.layer);
+        }
+
+        public void SetIntrinsic(double[] array)
+        {
+            if (intrinsic == null || !intrinsic.Equals(array))
+            {
+                Intrinsic = new Intrinsic(array);
+            }
         }
 
         void OnApplicationFocus(bool hasFocus)
@@ -225,16 +233,18 @@ namespace Iviz.Displays
                 return;
             }
 
-            // create default intrinsic so we can at least see something
-            intrinsic ??= new Intrinsic(60 * Mathf.Deg2Rad, texture.width, texture.height);
-            
-            float posMulX = texture.width / intrinsic.Fx;
-            float posMulY = texture.height / intrinsic.Fy;
+            var mIntrinsic = intrinsic is { } validatedIntrinsic
+                ? validatedIntrinsic
+                // create default intrinsic so we can at least see something
+                : new Intrinsic(60 * Mathf.Deg2Rad, texture.width, texture.height);
 
-            float posAddX = -intrinsic.Cx / intrinsic.Fx;
-            float posAddY = -intrinsic.Cy / intrinsic.Fy;
+            float posMulX = texture.width / mIntrinsic.Fx;
+            float posMulY = texture.height / mIntrinsic.Fy;
 
-            pointSize = 1f / intrinsic.Fx;
+            float posAddX = -mIntrinsic.Cx / mIntrinsic.Fx;
+            float posAddY = -mIntrinsic.Cy / mIntrinsic.Fy;
+
+            pointSize = 1f / mIntrinsic.Fx;
 
             Material.SetVector(PropPosSt, new Vector4(posMulX, posMulY, posAddX, posAddY));
 

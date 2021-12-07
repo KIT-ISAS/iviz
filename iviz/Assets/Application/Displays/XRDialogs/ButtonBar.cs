@@ -14,13 +14,13 @@ namespace Iviz.Displays.XRDialogs
         [SerializeField] XRButton[] buttons = Array.Empty<XRButton>();
         [SerializeField] GameObject? draggableObject;
         [SerializeField] float scale = 0.4f;
+        [SerializeField] float padding = 0.1f;
 
         IHasBounds? frame;
         CancellationTokenSource? tokenSource;
 
         Transform? mTransform;
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
-        
         public float? Damping { get; set; } = 0.1f;
 
         void Awake()
@@ -40,7 +40,7 @@ namespace Iviz.Displays.XRDialogs
             }
 
             const float angleOpening = Mathf.PI / 4;
-            float radius = (0.5f + 0.1f) * scale * buttons.Length / angleOpening;
+            float radius = (0.5f + padding) * scale * buttons.Length / angleOpening;
             float delta = (buttons.Length - 1) / 2f;
 
             foreach (var (button, i) in buttons.WithIndex())
@@ -82,13 +82,13 @@ namespace Iviz.Displays.XRDialogs
 
             if (Damping is { } damping)
             {
-                Transform.position = Vector3.Lerp(Transform.position, targetPosition, damping);
-                Transform.rotation = Quaternion.Lerp(Transform.rotation, targetRotation, damping);
+                Transform.SetPositionAndRotation(
+                    Vector3.Lerp(Transform.position, targetPosition, damping),
+                    Quaternion.Lerp(Transform.rotation, targetRotation, damping));
             }
             else
             {
-                Transform.position = targetPosition;
-                Transform.rotation = targetRotation;
+                Transform.SetPositionAndRotation(targetPosition, targetRotation);
             }
         }
     }

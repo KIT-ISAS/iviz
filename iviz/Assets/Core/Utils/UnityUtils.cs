@@ -329,7 +329,7 @@ namespace Iviz.Core
                     return extractArrayFromListTypeFn;
                 }
 
-                var assembly = Assembly.GetAssembly(typeof(Mesh) /* any unity type */); 
+                var assembly = Assembly.GetAssembly(typeof(Mesh) /* any unity type */);
                 var type = assembly?.GetType("UnityEngine.NoAllocHelpers");
                 var methodInfo = type?.GetMethod("ExtractArrayFromList", BindingFlags.Static | BindingFlags.Public);
                 if (methodInfo == null)
@@ -414,7 +414,7 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in float4 v, out float x, out float y, out float z) =>
             (x, y, z) = (v.x, v.y, v.z);
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Bounds b, out Vector3 center, out Vector3 size) =>
             (center, size) = (b.center, b.size);
@@ -431,30 +431,49 @@ namespace Iviz.Core
         public static void Deconstruct(this in Msgs.GeometryMsgs.TransformStamped p,
             out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp) =>
             (parentId, childId, transform, stamp) = (p.Header.FrameId, p.ChildFrameId, p.Transform, p.Header.Stamp);
-        
+
         public static unsafe Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return new Span<T>(array.GetUnsafePtr(), array.Length);
         }
-        
+
         public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return new ReadOnlySpan<T>(array.GetUnsafeReadOnlyPtr(), array.Length);
         }
-        
+
         public static Span<T> AsSpan<T>(this List<T> list) where T : unmanaged
         {
             return new Span<T>(list.ExtractArray(), 0, list.Count);
         }
-        
+
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list) where T : unmanaged
         {
             return new ReadOnlySpan<T>(list.ExtractArray(), 0, list.Count);
         }
-        
+
         public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged
         {
             return MemoryMarshal.Read<T>(span);
+        }
+
+        public static void TryReturn<T>(this T[] _) where T : unmanaged
+        {
+        }
+
+        public static void TryReturn<T>(this ReadOnlyMemory<T> memory) where T : unmanaged
+        {
+            if (memory.Length == 0)
+            {
+                return;
+            }
+
+            if (!MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
+            {
+                return;
+            }
+            
+            ArrayPool<T>.Shared.Return(segment.Array);
         }
     }
 }

@@ -9,7 +9,7 @@ using UnityEngine;
 namespace Iviz.Common
 {
     [DataContract]
-    public sealed class Intrinsic : IEquatable<Intrinsic>
+    public readonly struct Intrinsic : IEquatable<Intrinsic>
     {
         [DataMember] public float Fx { get; }
         [DataMember] public float Cx { get; }
@@ -44,8 +44,12 @@ namespace Iviz.Common
         public float GetVerticalFovInRad(float imageHeight) =>
             Fy != 0 && imageHeight != 0 ? 2 * Mathf.Atan(imageHeight / (2 * Fy)) : 0;
 
-        public bool Equals(Intrinsic? other) =>
-            other != null && (Fx, Cx, Fy, Cy) == (other.Fx, other.Cx, other.Fy, other.Cy);
+        public bool Equals(Intrinsic? other) => other is { } validatedOther && Equals(validatedOther);
+
+        public bool Equals(Intrinsic other) => (Fx, Cx, Fy, Cy) == (other.Fx, other.Cx, other.Fy, other.Cy);
+
+        public bool Equals(double[] array) =>
+            (Fx, Cx, Fy, Cy) == (array[0], array[2], array[4], array[5]);
 
         public override int GetHashCode() => (Fx, Cx, Fy, Cy).GetHashCode();
     }

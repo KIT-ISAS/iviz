@@ -23,7 +23,6 @@ namespace Iviz.Controllers
         readonly AROcclusionManager occlusionManager;
 
         Intrinsic? intrinsic;
-
         Screenshot? lastColor;
         Screenshot? lastDepth;
         Screenshot? lastConfidence;
@@ -34,13 +33,14 @@ namespace Iviz.Controllers
             {
                 if (intrinsic != null)
                 {
-                    return intrinsic;
+                    return intrinsic.Value;
                 }
 
                 if (cameraManager.TryGetIntrinsics(out var intrinsics))
                 {
-                    return intrinsic = new Intrinsic(intrinsics.focalLength.x, intrinsics.principalPoint.x,
+                    intrinsic = new Intrinsic(intrinsics.focalLength.x, intrinsics.principalPoint.x,
                         intrinsics.focalLength.y, intrinsics.principalPoint.y);
+                    return intrinsic.Value;
                 }
 
                 // shouldn't happen
@@ -49,8 +49,9 @@ namespace Iviz.Controllers
                     throw new InvalidOperationException("AR subsystem is not set!");
                 }
 
-                const float fovInRad = 60;
-                return intrinsic = new Intrinsic(fovInRad, configuration.width, configuration.height);
+                const float defaultFovInRad = 60;
+                intrinsic = new Intrinsic(defaultFovInRad, configuration.width, configuration.height);
+                return intrinsic.Value;
             }
         }
 
@@ -186,7 +187,7 @@ namespace Iviz.Controllers
                 {
                     if (token.IsCancellationRequested)
                     {
-                        task.TrySetCanceled();
+                        task.TrySetCanceled(token);
                         return;
                     }
 
@@ -309,31 +310,11 @@ namespace Iviz.Controllers
                 var row = ptr.Slice(v * width, width);
                 foreach (int u in ..(width / 2))
                 {
-                    ref T a = ref row[u];
-                    ref T b = ref row[^u];
-                    (a, b) = (b, a);
+                    ref T l = ref row[u];
+                    ref T r = ref row[^u];
+                    (l, r) = (r, l);
                 }
             }
-
-
-            /*
-            fixed (byte* bytesPtr = bytes)
-            {
-                T* ptr = (T*)bytesPtr;
-
-                for (int v = 0; v < height; v++)
-                {
-                    T* start = ptr + v * width;
-                    T* end = ptr + (v + 1) * width - 1;
-                    for (int u = 0; u < width / 2; u++, start++, end--)
-                    {
-                        T tmp = *end;
-                        *end = *start;
-                        *start = tmp;
-                    }
-                }
-            }
-            */
         }
     }
 }

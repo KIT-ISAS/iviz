@@ -102,6 +102,27 @@ namespace Iviz.Displays
             }
         }
 
+        public void InitializePose()
+        {
+            var canvasTransform = (RectTransform)Canvas.transform;
+            float sizeY = canvasTransform.rect.size.y * canvasTransform.localScale.y;
+
+            var position = Settings.MainCameraTransform.position + Settings.MainCameraTransform.forward * 1.5f;
+            position.y = Mathf.Max(position.y, sizeY / 2 + 0.5f);
+
+            transform.position = position;
+            transform.rotation = CalculateOrientationToCamera();
+            
+            tokenSource?.Cancel();
+            tokenSource = new CancellationTokenSource();
+
+            FAnimator.Spawn(tokenSource.Token, 0.15f, t =>
+            {
+                float scale = Mathf.Sqrt(t);
+                transform.localScale = scale * Vector3.one;
+            });
+        }
+
         void OnEndDragging()
         {
             tokenSource?.Cancel();
@@ -110,11 +131,31 @@ namespace Iviz.Displays
             var start = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
             FAnimator.Spawn(tokenSource.Token, 0.25f, t =>
             {
-                var (x, _, z) = transform.position - Settings.MainCameraTransform.position;
-                var end = quaternion.Euler(0, Mathf.PI / 2 - Mathf.Atan2(z, x), 0);
-                transform.rotation = Quaternion.Lerp(start, end, t);
+                transform.rotation = Quaternion.Lerp(start, CalculateOrientationToCamera(), t);
             });
         }
+
+        Quaternion CalculateOrientationToCamera()
+        {
+            var (x, _, z) = transform.position - Settings.MainCameraTransform.position;
+            return quaternion.Euler(0, Mathf.PI / 2 - Mathf.Atan2(z, x), 0);
+        }
+
+        public void ReturnToPool()
+        {
+            tokenSource?.Cancel();
+            tokenSource = new CancellationTokenSource();
+
+            FAnimator.Spawn(tokenSource.Token, 0.15f, t =>
+            {
+                float scale = Mathf.Sqrt(1 - t);
+                transform.localScale = scale * Vector3.one;
+            }, () =>
+            {
+                transform.localScale = Vector3.one;
+                ResourceUtils.ReturnToPool(this);
+            });
+        } 
 
         public Bounds? Bounds => new Bounds(BoxCollider.center, BoxCollider.size);
 
@@ -122,6 +163,7 @@ namespace Iviz.Displays
 
         public void Suspend()
         {
+            tokenSource?.Cancel();
             frame.ReturnToPool();
             frame = null;
         }

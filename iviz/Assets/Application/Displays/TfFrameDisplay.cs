@@ -279,7 +279,10 @@ namespace Iviz.Displays
 
         public override void Highlight()
         {
-            FAnimator.Start(new TfFrameHighlighter(this));
+            if (IsAlive)
+            {
+                FAnimator.Start(new TfFrameHighlighter(this));
+            }
         }
     }
 }

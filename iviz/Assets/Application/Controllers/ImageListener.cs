@@ -181,6 +181,7 @@ namespace Iviz.Controllers
         {
             if (IsProcessing)
             {
+                msg.Data.TryReturn();
                 return false;
             }
 
@@ -193,6 +194,7 @@ namespace Iviz.Controllers
                     node.AttachTo(msg.Header);
                 }
 
+                msg.Data.TryReturn();
                 IsProcessing = false;
             }
 
@@ -211,6 +213,7 @@ namespace Iviz.Controllers
                     descriptionOverride = msg.Format.Length == 0
                         ? "[Unknown Format]"
                         : $"[Unknown Format '{msg.Format}']";
+                    PostProcess();
                     break;
             }
 
@@ -221,6 +224,7 @@ namespace Iviz.Controllers
         {
             if (IsProcessing)
             {
+                msg.Data.TryReturn();
                 return false;
             }
 
@@ -231,6 +235,7 @@ namespace Iviz.Controllers
                 if (!node.IsAlive)
                 {
                     IsProcessing = false;
+                    msg.Data.TryReturn();
                     return; // stopped!
                 }
 
@@ -238,8 +243,9 @@ namespace Iviz.Controllers
 
                 int width = (int) msg.Width;
                 int height = (int) msg.Height;
-                imageTexture.Set(width, height, msg.Encoding, msg.Data);
+                imageTexture.Set(width, height, msg.Encoding, msg.Data.AsSpan());
                 IsProcessing = false;
+                msg.Data.TryReturn();
             });
 
             return true;

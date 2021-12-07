@@ -1,4 +1,5 @@
 using System;
+using Iviz.Core;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -24,12 +25,15 @@ namespace Iviz.App
         {
             if (!isDragging)
             {
-                isDragging = true;
                 if (dragCausesDetach)
                 {
                     ModuleListPanel.Instance.DialogPanelManager.DetachSelectedPanel();
-                    return;
+                    if (Settings.IsXR || true)
+                    {
+                        return;
+                    }
                 }
+                isDragging = true;
             }
 
             if (targetTransform != null)

@@ -12,7 +12,12 @@ namespace Iviz.App
     {
         [SerializeField] DialogScalerWidget? scalerWidget;
         Image? panelImage;
+        
         CanvasHolder? canvasHolder;
+        Transform? originalParent;
+        Vector3 originalScale;
+        Vector2 originalOffsetMin;
+        Vector2 originalOffsetMax;
 
         protected DialogScalerWidget ScalerWidget => scalerWidget.AssertNotNull(nameof(scalerWidget));
         Image PanelImage => panelImage != null ? panelImage : (panelImage = GetComponent<Image>());
@@ -24,19 +29,50 @@ namespace Iviz.App
                 ScalerWidget.gameObject.SetActive(value);
                 PanelImage.color = value ? Resource.Colors.DetachedPanelColor : Resource.Colors.AttachedPanelColor;
 
-                RectTransform mTransform = (RectTransform)transform;
-                if (value)
+                if (Settings.IsXR || true)
                 {
-                    canvasHolder = ResourcePool.RentDisplay<CanvasHolder>();
-                    mTransform.SetParent(canvasHolder.Canvas.transform, false);
-                    mTransform.localScale = Vector3.one;
-                    mTransform.offsetMin = Vector2.zero;
-                    mTransform.offsetMax = Vector2.zero;
-
-                    canvasHolder.CanvasSize = new Vector2(400, 800);
-                    GetComponentInChildren<DialogMoverWidget>().enabled = false;
+                    DetachXR(value);
                 }
             }
+        }
+
+        void DetachXR(bool value)
+        {
+            var mTransform = (RectTransform)transform;
+            var dialogMover = GetComponentInChildren<DialogMoverWidget>();
+            
+            if (value && canvasHolder == null)
+            {
+                canvasHolder = ResourcePool.RentDisplay<CanvasHolder>();
+                canvasHolder.Title = "Dialog";
+                
+                originalParent = mTransform.parent;
+                mTransform.SetParent(canvasHolder.Canvas.transform, false);
+
+                originalScale = mTransform.localScale;
+                originalOffsetMin = mTransform.offsetMin;
+                originalOffsetMax = mTransform.offsetMax;
+                    
+                mTransform.localScale = Vector3.one;
+                mTransform.offsetMin = Vector2.zero;
+                mTransform.offsetMax = Vector2.zero;
+
+                canvasHolder.CanvasSize = new Vector2(400, 600);
+                dialogMover.enabled = false;
+                
+                canvasHolder.InitializePose();
+            }
+            else if (!value && canvasHolder != null)
+            {
+                mTransform.SetParent(originalParent, false);
+                mTransform.localScale = originalScale;
+                mTransform.offsetMin = originalOffsetMin;
+                mTransform.offsetMax = originalOffsetMax;
+                dialogMover.enabled = true;
+                    
+                canvasHolder.ReturnToPool();
+                canvasHolder = null;
+            }            
         }
     }
 }
