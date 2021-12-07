@@ -597,9 +597,21 @@ namespace Iviz.MsgsGen
                                     : $"    {prefix}{variable.CsFieldName} = b.Deserialize<{variable.CsClassName}>();");
                                 break;
                             case VariableElement.DynamicSizeArray:
-                                lines.Add(variable.CsClassName == "string"
-                                    ? $"    {prefix}{variable.CsFieldName} = b.DeserializeStringArray();"
-                                    : $"    {prefix}{variable.CsFieldName} = b.DeserializeStructArray<{variable.CsClassName}>();");
+                                if (variable.CsClassName == "string")
+                                {
+                                    lines.Add($"    {prefix}{variable.CsFieldName} = b.DeserializeStringArray();");
+                                }
+                                else if (variable.RentHint)
+                                {
+                                    lines.Add(
+                                        $"    {prefix}{variable.CsFieldName} = b.DeserializeStructRent<{variable.CsClassName}>();");
+                                }
+                                else
+                                {
+                                    lines.Add(
+                                        $"    {prefix}{variable.CsFieldName} = b.DeserializeStructArray<{variable.CsClassName}>();");
+                                }
+
                                 break;
                             default:
                                 lines.Add(
@@ -697,59 +709,24 @@ namespace Iviz.MsgsGen
                 if (myVars.Length == 0)
                 {
                     lines.Add("");
-                    lines.Add($"public readonly bool Equals(in {name} o) => true;");
-                    lines.Add("");
-                    lines.Add($"public static bool operator==(in {name} _, in {name} __) => true;");
-                    lines.Add("");
-                    lines.Add($"public static bool operator!=(in {name} _, in {name} __) => false;");
-                }
-                else
-                {
-                    string oVars = string.Join(", ", variables.Select(x => $"o.{x.CsFieldName}"));
-
-                    lines.Add("");
-                    lines.Add($"public readonly bool Equals(in {name} o) => ({myVars}) == ({oVars});");
-                    lines.Add("");
-                    lines.Add($"public static bool operator==(in {name} a, in {name} b) => a.Equals(b);");
-                    lines.Add("");
-                    lines.Add($"public static bool operator!=(in {name} a, in {name} b) => !a.Equals(b);");
-                }
-                
-                
-                /*
-                string myVars = string.Join(", ", variables.Select(x => x.CsFieldName));
-
-                if (myVars.Length == 0)
-                {
-                    lines.Add("");
                     lines.Add("public override readonly int GetHashCode() => 0;");
-                    lines.Add("");
                     lines.Add($"public override readonly bool Equals(object? o) => o is {name};");
-                    lines.Add("");
-
                     lines.Add($"public readonly bool Equals({name} o) => true;");
-                    lines.Add("");
                     lines.Add($"public static bool operator==(in {name} _, in {name} __) => true;");
-                    lines.Add("");
                     lines.Add($"public static bool operator!=(in {name} _, in {name} __) => false;");
                 }
                 else
                 {
                     lines.Add("");
                     lines.Add($"public override readonly int GetHashCode() => ({myVars}).GetHashCode();");
-                    lines.Add("");
                     lines.Add($"public override readonly bool Equals(object? o) => o is {name} s && Equals(s);");
-                    lines.Add("");
 
                     string oVars = string.Join(", ", variables.Select(x => $"o.{x.CsFieldName}"));
 
                     lines.Add($"public readonly bool Equals({name} o) => ({myVars}) == ({oVars});");
-                    lines.Add("");
                     lines.Add($"public static bool operator==(in {name} a, in {name} b) => a.Equals(b);");
-                    lines.Add("");
                     lines.Add($"public static bool operator!=(in {name} a, in {name} b) => !a.Equals(b);");
                 }
-                */
             }
 
             if (!variables.Any())
@@ -806,7 +783,7 @@ namespace Iviz.MsgsGen
                                     lines.Add(variable.CsClassName == "string"
                                         ? $"    b.SerializeArray({variable.CsFieldName});"
                                         : $"    b.SerializeStructArray({variable.CsFieldName});");
-                                }                                
+                                }
                             }
                             else
                             {
@@ -821,7 +798,7 @@ namespace Iviz.MsgsGen
                                     lines.Add(variable.CsClassName == "string"
                                         ? $"    b.SerializeArray({variable.CsFieldName}, {variable.ArraySize});"
                                         : $"    b.SerializeStructArray({variable.CsFieldName}, {variable.ArraySize});");
-                                }                                
+                                }
                             }
                         }
                     }
@@ -885,7 +862,7 @@ namespace Iviz.MsgsGen
                 }
                 else
                 {
-                    if (!forceStruct && (!variable.ClassIsStruct || variable.IsArray))
+                    if (!forceStruct && !variable.RentHint && (!variable.ClassIsStruct || variable.IsArray))
                     {
                         lines.Add(
                             $"    if ({variable.CsFieldName} is null) throw new System.NullReferenceException(nameof({variable.CsFieldName}));");
@@ -1168,7 +1145,7 @@ namespace Iviz.MsgsGen
             AddDependencies(dependencies);
 
             var builder = new StringBuilder(100);
-            
+
             builder.AppendNLine(fullMessageText);
 
             foreach (ClassInfo classInfo in dependencies)
@@ -1237,7 +1214,7 @@ namespace Iviz.MsgsGen
             str.Append(s).Append('\n');
             return str;
         }
-        
+
         public static StringBuilder AppendNLine(this StringBuilder str)
         {
             str.Append('\n');

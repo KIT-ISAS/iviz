@@ -24,6 +24,7 @@ namespace Iviz.MsgsGen
         public string CsFieldName { get; }
         public string CsClassName { get; }
         public int ArraySize { get; }
+        public bool RentHint { get; }
         public bool IsArray => ArraySize != NotAnArray;
         public bool IsDynamicSizeArray => ArraySize == DynamicSizeArray;
         public bool IsFixedSizeArray => ArraySize > 0;
@@ -59,7 +60,7 @@ namespace Iviz.MsgsGen
             bool serializeAsProperty = false
         )
         {
-            Comment = comment;
+            Comment = comment.Trim();
             this.rosClassToken = rosClassToken;
             this.serializeAsProperty = serializeAsProperty;
 
@@ -125,6 +126,7 @@ namespace Iviz.MsgsGen
             }
 
             ClassInfo = classInfo;
+            RentHint = IsDynamicSizeArray && Comment == "[Rent]";
         }
 
         public override string ToString()
@@ -179,7 +181,9 @@ namespace Iviz.MsgsGen
                     }
                     else
                     {
-                        result = $"public {CsClassName}[] {CsFieldName};";
+                        result = RentHint
+                            ? $"public System.Memory<{CsClassName}> {CsFieldName};"
+                            : $"public {CsClassName}[] {CsFieldName};";
                     }
                 }
 
@@ -201,11 +205,24 @@ namespace Iviz.MsgsGen
                 }
             }
 
+            if (Comment.Length == 0)
+            {
+                return new[] { $"{attrStr} {result}" };
+            }
+            
+            return new[]
+            {
+                "/// " + Comment,
+                $"{attrStr} {result}"
+            };
+            
+            /*
             string csString = Comment.Length == 0
                 ? $"{attrStr} {result}"
-                : $"{attrStr} {result} //{Comment}";
-            
+                : $"{attrStr} {result} // {Comment}";
+
             return new[] { csString };
+            */
         }
 
         public string ToRosString()
@@ -213,7 +230,7 @@ namespace Iviz.MsgsGen
             return $"{rosClassToken} {RosFieldName}";
         }
 
-        public string? GetEntryForMd5Hash(string parentPackageName)
+        public string GetEntryForMd5Hash(string parentPackageName)
         {
             if (ClassInfo != null)
             {
