@@ -87,8 +87,8 @@ namespace Iviz.App
             string minIntensityStr = x.ToString("#,0.##", UnityUtils.Culture);
             string maxIntensityStr = y.ToString("#,0.##", UnityUtils.Culture);
             return
-                $"<b>{listener.Size.ToString("N0")} Points</b>\n" +
-                (listener.Size == 0 
+                $"<b>{listener.NumValidPoints.ToString("N0")} Points</b>\n" +
+                (listener.NumValidPoints == 0 
                     ? "Empty" 
                     : listener.IsIntensityUsed 
                         ? $"[{minIntensityStr} .. {maxIntensityStr}]" 

@@ -232,20 +232,24 @@ namespace Iviz.Controllers
 
             GameThread.PostInListenerQueue(() =>
             {
-                if (!node.IsAlive)
+                try
+                {
+                    if (!node.IsAlive)
+                    {
+                        return; // stopped!
+                    }
+
+                    node.AttachTo(msg.Header);
+
+                    int width = (int)msg.Width;
+                    int height = (int)msg.Height;
+                    imageTexture.Set(width, height, msg.Encoding, msg.Data.AsSpan());
+                }
+                finally
                 {
                     IsProcessing = false;
                     msg.Data.TryReturn();
-                    return; // stopped!
                 }
-
-                node.AttachTo(msg.Header);
-
-                int width = (int) msg.Width;
-                int height = (int) msg.Height;
-                imageTexture.Set(width, height, msg.Encoding, msg.Data.AsSpan());
-                IsProcessing = false;
-                msg.Data.TryReturn();
             });
 
             return true;

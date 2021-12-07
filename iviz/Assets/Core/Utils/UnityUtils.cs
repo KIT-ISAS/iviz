@@ -456,12 +456,12 @@ namespace Iviz.Core
         {
             return MemoryMarshal.Read<T>(span);
         }
-
+        
         public static void TryReturn<T>(this T[] _) where T : unmanaged
         {
         }
 
-        public static void TryReturn<T>(this ReadOnlyMemory<T> memory) where T : unmanaged
+        public static void TryReturn<T>(this Memory<T> memory) where T : unmanaged
         {
             if (memory.Length == 0)
             {
@@ -474,6 +474,11 @@ namespace Iviz.Core
             }
             
             ArrayPool<T>.Shared.Return(segment.Array);
+        }
+
+        public static Span<T> AsSpan<T>(this Memory<T> memory) where T : unmanaged
+        {
+            return memory.Span;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Iviz.Controllers
         readonly DepthCloudResource projector;
         readonly ImageTexture depthImageTexture;
         readonly ImageTexture colorImageTexture;
-        
+
         bool depthIsProcessing;
         bool colorIsProcessing;
         TextureFormat? lastDepthFormat;
@@ -122,7 +122,7 @@ namespace Iviz.Controllers
                     colorImageTexture.Reset();
                     return;
                 }
-                
+
                 config.ColorTopic = colorTopic;
             }
         }
@@ -200,7 +200,7 @@ namespace Iviz.Controllers
                 return depthDescription + colorDescription;
             }
         }
-        
+
         public DepthCloudController(IModuleData moduleData)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
@@ -217,12 +217,13 @@ namespace Iviz.Controllers
 
             depthImageTexture.Colormap = ColormapId.gray;
             colorImageTexture.Colormap = ColormapId.gray;
-        }        
+        }
 
         bool DepthHandler(Image msg)
         {
             if (DepthIsProcessing)
             {
+                msg.Data.TryReturn();
                 return false;
             }
 
@@ -230,15 +231,23 @@ namespace Iviz.Controllers
 
             GameThread.PostInListenerQueue(() =>
             {
-                if (!node.IsAlive)
+                try
                 {
-                    return; // stopped!
-                }
+                    if (!node.IsAlive)
+                    {
+                        return; // stopped!
+                    }
 
-                node.AttachTo(msg.Header);
-                depthImageTexture.Set((int)msg.Width, (int)msg.Height, msg.Encoding, msg.Data);
-                UpdateIntensityBounds();
-                DepthIsProcessing = false;
+                    node.AttachTo(msg.Header);
+
+                    depthImageTexture.Set((int)msg.Width, (int)msg.Height, msg.Encoding, msg.Data.AsSpan());
+                    UpdateIntensityBounds();
+                }
+                finally
+                {
+                    msg.Data.TryReturn();
+                    DepthIsProcessing = false;
+                }
             });
 
             return true;
@@ -248,6 +257,7 @@ namespace Iviz.Controllers
         {
             if (DepthIsProcessing)
             {
+                msg.Data.TryReturn();
                 return false;
             }
 
@@ -261,6 +271,7 @@ namespace Iviz.Controllers
                 }
 
                 node.AttachTo(msg.Header);
+                msg.Data.TryReturn();
                 DepthIsProcessing = false;
                 UpdateIntensityBounds();
             }
@@ -273,6 +284,9 @@ namespace Iviz.Controllers
                 case "JPEG":
                 case "JPG":
                     depthImageTexture.ProcessJpg(msg.Data, PostProcess);
+                    break;
+                default:
+                    PostProcess();
                     break;
             }
 
@@ -303,6 +317,7 @@ namespace Iviz.Controllers
         {
             if (ColorIsProcessing)
             {
+                msg.Data.TryReturn();
                 return false;
             }
 
@@ -310,8 +325,15 @@ namespace Iviz.Controllers
 
             GameThread.PostInListenerQueue(() =>
             {
-                colorImageTexture.Set((int)msg.Width, (int)msg.Height, msg.Encoding, msg.Data);
-                ColorIsProcessing = false;
+                try
+                {
+                    colorImageTexture.Set((int)msg.Width, (int)msg.Height, msg.Encoding, msg.Data.AsSpan());
+                }
+                finally
+                {
+                    msg.Data.TryReturn();
+                    ColorIsProcessing = false;
+                }
             });
 
             return true;
@@ -321,6 +343,7 @@ namespace Iviz.Controllers
         {
             if (ColorIsProcessing)
             {
+                msg.Data.TryReturn();
                 return false;
             }
 
@@ -328,6 +351,7 @@ namespace Iviz.Controllers
 
             void PostProcess()
             {
+                msg.Data.TryReturn();
                 ColorIsProcessing = false;
             }
 
@@ -339,6 +363,9 @@ namespace Iviz.Controllers
                 case "JPEG":
                 case "JPG":
                     colorImageTexture.ProcessJpg(msg.Data, PostProcess);
+                    break;
+                default:
+                    PostProcess();
                     break;
             }
 

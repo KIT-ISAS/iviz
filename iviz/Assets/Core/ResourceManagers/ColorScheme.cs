@@ -13,8 +13,8 @@ namespace Iviz.Resources
         public Color AttachedPanelColor { get; } = new Color(0.91f, 0.95f, 1, 0.75f);
         public Color DetachedPanelColor { get; } = new Color(0.95f, 1f, 1, 0.75f);
 
-        public Color GridGreenLine { get; } = new Color(0, 0.5f, 0);
-        public Color GridRedLine { get; } = new Color(0.5f, 0, 0);
+        public Color GridGreenLine { get; } = new Color(0, 0.5f, 0).WithSaturation(0.75f);
+        public Color GridRedLine { get; } = new Color(0.5f, 0, 0).WithSaturation(0.75f);
         public Color GridInterior { get; } = Color.white.WithValue(0.6f);
         public Color GridLine { get; } = Color.white.WithValue(0.25f * 0.6f);
 

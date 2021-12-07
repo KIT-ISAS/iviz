@@ -176,6 +176,17 @@ namespace Iviz.Msgs
             Advance(size);
             return val;
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T[] SkipStructArray<T>() where T : unmanaged
+        {
+            int count = ReadInt();
+            int sizeOfT = SizeOf<T>();
+            int size = count * sizeOfT;
+            ThrowIfOutOfRange(size);
+            Advance(size);
+            return Array.Empty<T>();            
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DeserializeStructList<T>(List<T> list) where T : unmanaged

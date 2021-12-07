@@ -556,7 +556,7 @@ namespace Iviz.Displays
                 return null;
             }
 
-            return Msgs.Buffer.Deserialize(modelGenerator, buffer[Md5SumLength..]);
+            return ReadBuffer.Deserialize(modelGenerator, buffer[Md5SumLength..]);
         }
 
         async ValueTask<Info<GameObject>?> LoadLocalModelAsync(string uriString, string localPath,
@@ -627,7 +627,7 @@ namespace Iviz.Displays
                     return null;
                 }
 
-                var msg = Msgs.Buffer.Deserialize(sceneGenerator, buffer[Md5SumLength..]);
+                var msg = ReadBuffer.Deserialize(sceneGenerator, buffer[Md5SumLength..]);
                 obj = await CreateSceneNodeAsync(msg, provider, token);
             }
             catch (Exception e) when (e is not OperationCanceledException)

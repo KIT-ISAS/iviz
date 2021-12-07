@@ -909,6 +909,7 @@ MonoBehaviour:
   - {fileID: 965834914}
   draggableObject: {fileID: 193273978}
   scale: 0.4
+  padding: 0.1
 --- !u!1 &110040305
 GameObject:
   m_ObjectHideFlags: 0
@@ -4534,6 +4535,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas Holder
       objectReference: {fileID: 0}
+    - target: {fileID: 4340412021783892170, guid: 8aaae644fa0e1459ca28dd17ce583d0b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4340412021783892171, guid: 8aaae644fa0e1459ca28dd17ce583d0b,
         type: 3}
       propertyPath: m_RootOrder
@@ -8110,7 +8116,7 @@ PrefabInstance:
     - target: {fileID: 49972902730325441, guid: 0b1eb06ef98d6b049b97212ac5d3dde9,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 49972902730325443, guid: 0b1eb06ef98d6b049b97212ac5d3dde9,
         type: 3}

@@ -47,9 +47,13 @@ namespace Iviz.Controllers
 
         public override IModuleData ModuleData { get; }
 
-        public Vector2 MeasuredIntensityBounds => pointCloud.MeasuredIntensityBounds;
+        public Vector2 MeasuredIntensityBounds =>
+            PointCloudType == PointCloudType.Points
+                ? pointCloud.MeasuredIntensityBounds
+                : meshCloud.MeasuredIntensityBounds;
 
-        public int Size { get; private set; }
+        public int NumPoints { get; private set; }
+        public int NumValidPoints => pointBufferLength;
 
         public override TfFrame? Frame => node.Parent;
 
@@ -251,6 +255,7 @@ namespace Iviz.Controllers
         {
             if (IsProcessing)
             {
+                msg.Data.TryReturn();
                 return false;
             }
 
@@ -362,7 +367,7 @@ namespace Iviz.Controllers
                 var header = msg.Header;
                 int numPoints = (int)(msg.Width * msg.Height);
 
-                GeneratePointBuffer(msg, msg.Data, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
+                GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
 
                 GameThread.PostInListenerQueue(() =>
                 {
@@ -376,7 +381,7 @@ namespace Iviz.Controllers
 
                         node.AttachTo(header);
 
-                        Size = numPoints;
+                        NumPoints = numPoints;
 
                         if (pointBufferLength == 0)
                         {
@@ -407,80 +412,90 @@ namespace Iviz.Controllers
                 RosLogger.Error($"{this}: Error handling point cloud", e);
                 IsProcessing = false;
             }
+            finally
+            {
+                msg.Data.TryReturn();
+            }
         }
 
-        void GeneratePointBuffer(PointCloud2 msg, byte[] dataSrc, int xOffset, int yOffset,
+        void GeneratePointBuffer(PointCloud2 msg, int xOffset, int yOffset,
             int zOffset, int iOffset,
             int iType, bool rgbaHint)
         {
             bool xyzAligned = xOffset == 0 && yOffset == 4 && zOffset == 8;
             if (xyzAligned)
             {
-                GeneratePointBufferXYZ(msg, dataSrc, iOffset, rgbaHint ? PointField.FLOAT32 : iType);
+                GeneratePointBufferXYZ(msg, iOffset, rgbaHint ? PointField.FLOAT32 : iType);
             }
             else
             {
-                GeneratePointBufferSlow(msg, dataSrc, xOffset, yOffset, zOffset, iOffset, iType, rgbaHint);
+                GeneratePointBufferSlow(msg, xOffset, yOffset, zOffset, iOffset, iType, rgbaHint);
             }
         }
 
-        void GeneratePointBufferSlow(PointCloud2 msg, byte[] dataSrc,
+        delegate float IntensityFnDelegate(ReadOnlySpan<byte> span);
+
+        void GeneratePointBufferSlow(PointCloud2 msg,
             int xOffset, int yOffset, int zOffset, int iOffset,
             int iType, bool rgbaHint)
         {
-            int heightOffset = 0;
+            int height = (int)msg.Height;
+            int width = (int)msg.Width;
             int rowStep = (int)msg.RowStep;
             int pointStep = (int)msg.PointStep;
 
-            Func<byte[], int, float> intensityFn;
+            IntensityFnDelegate intensityFn;
             if (rgbaHint)
             {
-                intensityFn = BitConverter.ToSingle;
+                intensityFn = m => m.Read<float>();
             }
             else
             {
                 intensityFn = iType switch
                 {
-                    PointField.FLOAT32 => BitConverter.ToSingle,
-                    PointField.FLOAT64 => (m, o) => (float)BitConverter.ToDouble(m, o),
-                    PointField.INT8 => (m, o) => (sbyte)m[o],
-                    PointField.UINT8 => (m, o) => m[o],
-                    PointField.INT16 => (m, o) => BitConverter.ToInt16(m, o),
-                    PointField.UINT16 => (m, o) => BitConverter.ToUInt16(m, o),
-                    PointField.INT32 => (m, o) => BitConverter.ToInt32(m, o),
-                    PointField.UINT32 => (m, o) => BitConverter.ToUInt32(m, o),
-                    _ => (_, _) => 0
+                    PointField.FLOAT32 => m => m.Read<float>(),
+                    PointField.FLOAT64 => m => (float)m.Read<double>(),
+                    PointField.INT8 => m => (sbyte)m[0],
+                    PointField.UINT8 => m => m[0],
+                    PointField.INT16 => m => m.Read<short>(),
+                    PointField.UINT16 => m => m.Read<ushort>(),
+                    PointField.INT32 => m => m.Read<int>(),
+                    PointField.UINT32 => m => m.Read<uint>(),
+                    _ => _ => 0
                 };
             }
 
-            pointBufferLength = 0;
+            //pointBufferLength = 0;
             if (pointBuffer.Length < msg.Width * msg.Height)
             {
                 pointBuffer = new float4[msg.Width * msg.Height];
             }
 
-            int o = 0;
-            for (int v = (int)msg.Height; v > 0; v--, heightOffset += rowStep)
+            ReadOnlySpan<byte> dataSrc = msg.Data.AsSpan();
+
+            int heightOff = 0;
+            int dstOff = 0;
+            foreach (int _ in ..height)
             {
-                int rowOffset = heightOffset;
-                for (int u = (int)msg.Width; u > 0; u--, rowOffset += pointStep)
+                var dataOff = dataSrc[heightOff..];
+                heightOff += rowStep;
+
+                foreach (int __ in ..width)
                 {
-                    Vector3 xyz = new(
-                        BitConverter.ToSingle(dataSrc, rowOffset + xOffset),
-                        BitConverter.ToSingle(dataSrc, rowOffset + yOffset),
-                        BitConverter.ToSingle(dataSrc, rowOffset + zOffset)
-                    );
-                    pointBuffer[o++] = new float4(
-                        -xyz.y, xyz.z, xyz.x,
-                        intensityFn(dataSrc, rowOffset + iOffset)
-                    );
+                    float x = dataOff[xOffset..].Read<float>();
+                    float y = dataOff[yOffset..].Read<float>();
+                    float z = dataOff[zOffset..].Read<float>();
+
+                    ref var f = ref pointBuffer[dstOff++];
+                    (f.x, f.y, f.z, f.w) = (-y, z, x, intensityFn(dataOff[iOffset..]));
+                    dataOff = dataOff[pointStep..];
                 }
             }
 
-            pointBufferLength = o;
+            pointBufferLength = dstOff;
         }
 
-        void GeneratePointBufferXYZ(PointCloud2 msg, ReadOnlySpan<byte> dataSrc, int iOffset, int iType)
+        void GeneratePointBufferXYZ(PointCloud2 msg, int iOffset, int iType)
         {
             const float maxPositionMagnitude = PointListResource.MaxPositionMagnitude;
 
@@ -489,7 +504,7 @@ namespace Iviz.Controllers
             int height = (int)msg.Height;
             int width = (int)msg.Width;
 
-            pointBufferLength = 0;
+            //pointBufferLength = 0;
             if (pointBuffer.Length < msg.Width * msg.Height)
             {
                 pointBuffer = new float4[msg.Width * msg.Height];
@@ -498,21 +513,17 @@ namespace Iviz.Controllers
             var dstBuffer = pointBuffer;
             int dstOff = 0;
 
-            void Set(float x, float y, float z, float w)
+            void TryAdd(ReadOnlySpan<byte> span, float w)
             {
-                ref float4 point = ref dstBuffer[dstOff++];
-                (point.x, point.y, point.z, point.w) = (x, y, z, w);
-            }
-
-            void TryAdd(in float3 data, float w)
-            {
+                var data = span.Read<float3>();
                 if (!data.HasNaN() && data.MaxAbsCoeff() <= maxPositionMagnitude)
                 {
-                    Set(-data.y, data.z, data.x, w);
+                    ref float4 f = ref dstBuffer[dstOff++];
+                    (f.x, f.y, f.z, f.w) = (-data.y, data.z, data.x, w);
                 }
             }
 
-            var dataRowOff = dataSrc;
+            ReadOnlySpan<byte> dataRowOff = msg.Data.AsSpan();
 
             switch (iType)
             {
@@ -522,10 +533,11 @@ namespace Iviz.Controllers
                         var dataOff = dataRowOff;
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
-                            float4 data = dataOff.Read<float4>();
+                            var data = dataOff.Read<float4>();
                             if (!data.HasNaN() && !(data.MaxAbsCoeff3() > maxPositionMagnitude))
                             {
-                                Set(-data.y, data.z, data.x, data.w);
+                                ref float4 f = ref dstBuffer[dstOff++];
+                                (f.x, f.y, f.z, f.w) = (-data.y, data.z, data.x, data.w);
                             }
                         }
                     }
@@ -537,7 +549,7 @@ namespace Iviz.Controllers
                         var dataOff = dataRowOff;
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
-                            TryAdd(dataOff.Read<float3>(), dataOff[iOffset..].Read<float>());
+                            TryAdd(dataOff, dataOff[iOffset..].Read<float>());
                         }
                     }
 
@@ -548,7 +560,7 @@ namespace Iviz.Controllers
                         var dataOff = dataRowOff;
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
-                            TryAdd(dataOff.Read<float3>(), (float)dataOff[iOffset..].Read<double>());
+                            TryAdd(dataOff, (float)dataOff[iOffset..].Read<double>());
                         }
                     }
 
@@ -559,7 +571,7 @@ namespace Iviz.Controllers
                         var dataOff = dataRowOff;
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
-                            TryAdd(dataOff.Read<float3>(), (sbyte)dataOff[iOffset]);
+                            TryAdd(dataOff, (sbyte)dataOff[iOffset]);
                         }
                     }
 
@@ -570,7 +582,7 @@ namespace Iviz.Controllers
                         var dataOff = dataRowOff;
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
-                            TryAdd(dataOff.Read<float3>(), dataOff[iOffset]);
+                            TryAdd(dataOff, dataOff[iOffset]);
                         }
                     }
 
@@ -581,7 +593,7 @@ namespace Iviz.Controllers
                         var dataOff = dataRowOff;
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
-                            TryAdd(dataOff.Read<float3>(), dataOff[iOffset..].Read<short>());
+                            TryAdd(dataOff, dataOff[iOffset..].Read<short>());
                         }
                     }
 
@@ -592,7 +604,7 @@ namespace Iviz.Controllers
                         var dataOff = dataRowOff;
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
-                            TryAdd(dataOff.Read<float3>(), dataOff[iOffset..].Read<ushort>());
+                            TryAdd(dataOff, dataOff[iOffset..].Read<ushort>());
                         }
                     }
 
@@ -603,7 +615,7 @@ namespace Iviz.Controllers
                         var dataOff = dataRowOff;
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
-                            TryAdd(dataOff.Read<float3>(), dataOff[iOffset..].Read<int>());
+                            TryAdd(dataOff, dataOff[iOffset..].Read<int>());
                         }
                     }
 
@@ -614,7 +626,7 @@ namespace Iviz.Controllers
                         var dataOff = dataRowOff;
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
-                            TryAdd(dataOff.Read<float3>(), dataOff[iOffset..].Read<uint>());
+                            TryAdd(dataOff, dataOff[iOffset..].Read<uint>());
                         }
                     }
 

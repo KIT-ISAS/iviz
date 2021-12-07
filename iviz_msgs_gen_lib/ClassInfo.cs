@@ -599,12 +599,19 @@ namespace Iviz.MsgsGen
                             case VariableElement.DynamicSizeArray:
                                 if (variable.CsClassName == "string")
                                 {
-                                    lines.Add($"    {prefix}{variable.CsFieldName} = b.DeserializeStringArray();");
+                                    lines.Add(variable.IgnoreHint
+                                        ? $"    {prefix}{variable.CsFieldName} = b.SkipStringArray();"
+                                        : $"    {prefix}{variable.CsFieldName} = b.DeserializeStringArray();");
                                 }
                                 else if (variable.RentHint)
                                 {
                                     lines.Add(
                                         $"    {prefix}{variable.CsFieldName} = b.DeserializeStructRent<{variable.CsClassName}>();");
+                                }
+                                else if (variable.IgnoreHint)
+                                {
+                                    lines.Add(
+                                        $"    {prefix}{variable.CsFieldName} = b.SkipStructArray<{variable.CsClassName}>();");
                                 }
                                 else
                                 {

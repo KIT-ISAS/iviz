@@ -25,6 +25,7 @@ namespace Iviz.MsgsGen
         public string CsClassName { get; }
         public int ArraySize { get; }
         public bool RentHint { get; }
+        public bool IgnoreHint { get; }
         public bool IsArray => ArraySize != NotAnArray;
         public bool IsDynamicSizeArray => ArraySize == DynamicSizeArray;
         public bool IsFixedSizeArray => ArraySize > 0;
@@ -127,6 +128,7 @@ namespace Iviz.MsgsGen
 
             ClassInfo = classInfo;
             RentHint = IsDynamicSizeArray && Comment == "[Rent]";
+            IgnoreHint = IsDynamicSizeArray && Comment == "[Ignore]";
         }
 
         public override string ToString()
@@ -216,13 +218,6 @@ namespace Iviz.MsgsGen
                 $"{attrStr} {result}"
             };
             
-            /*
-            string csString = Comment.Length == 0
-                ? $"{attrStr} {result}"
-                : $"{attrStr} {result} // {Comment}";
-
-            return new[] { csString };
-            */
         }
 
         public string ToRosString()

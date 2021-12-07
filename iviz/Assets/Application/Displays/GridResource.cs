@@ -15,7 +15,6 @@ namespace Iviz.Displays
 {
     public sealed class GridResource : MarkerResource, IRecyclable
     {
-        //Mesh mesh;
         MeshRenderer meshRenderer;
 
         [NotNull]
@@ -27,7 +26,7 @@ namespace Iviz.Displays
         readonly List<MeshMarkerResource> verticals = new();
 
         int lastX = 0, lastZ = 0;
-        
+
         public static readonly List<string> OrientationNames = new() { "XY", "YZ", "XZ" };
 
         static readonly Dictionary<GridOrientation, Quaternion> RotationByOrientation =
@@ -83,10 +82,7 @@ namespace Iviz.Displays
             set
             {
                 gridLineWidth = value;
-                //if (!(mesh is null))
-                {
-                    UpdateMesh();
-                }
+                UpdateMesh();
             }
         }
 
@@ -98,10 +94,7 @@ namespace Iviz.Displays
             set
             {
                 gridCellSize = value;
-                //if (!(mesh is null))
-                {
-                    UpdateMesh();
-                }
+                UpdateMesh();
             }
         }
 
@@ -146,17 +139,14 @@ namespace Iviz.Displays
                     ? Resource.Materials.GridInteriorSimple.Object
                     : Resource.Materials.GridInterior.Object;
 
+            var resource = interiorObject.GetComponent<MeshMarkerResource>();
+            resource.Metallic = 0.5f;
+            resource.Smoothness = 0.5f;
+
             Settings.QualityTypeChanged += OnQualityChanged;
 
             interiorRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             interiorRenderer.receiveShadows = true;
-
-
-            /*
-            // the grid "jumps" every meter to center itself under the camera
-            // this breaks motion blur, so we tell the camera to ignore the motion of the grid
-            interiorRenderer.motionVectorGenerationMode = MotionVectorGenerationMode.Camera; // camera only
-            */
 
             Orientation = GridOrientation.XY;
             GridColor = Color.white.WithAlpha(0.25f);

@@ -246,7 +246,7 @@ namespace Iviz.App
                 int numIndices = 0;
 
                 messageQueue.CopyTo(messages.Array, 0);
-                for (int i = 0; i < messages.Length; i++)
+                foreach (int i in ..messages.Length)
                 {
                     var message = messages[i];
                     var messageLevel = message.Level;
@@ -273,7 +273,7 @@ namespace Iviz.App
                     }
                 }
 
-                for (int i = 0; i < numIndices; i++)
+                foreach (int i in ..numIndices)
                 {
                     int index = indices[(indexStart + i) % MaxMessagesToPrint];
                     var message = messages[index];
