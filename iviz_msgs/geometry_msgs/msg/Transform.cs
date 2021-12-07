@@ -32,10 +32,10 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Transform RosDeserialize(ref ReadBuffer b) => new Transform(ref b);
         
-        public readonly bool Equals(in Transform o) => (Translation, Rotation) == (o.Translation, o.Rotation);
-        
+        public override readonly int GetHashCode() => (Translation, Rotation).GetHashCode();
+        public override readonly bool Equals(object? o) => o is Transform s && Equals(s);
+        public readonly bool Equals(Transform o) => (Translation, Rotation) == (o.Translation, o.Rotation);
         public static bool operator==(in Transform a, in Transform b) => a.Equals(b);
-        
         public static bool operator!=(in Transform a, in Transform b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

@@ -33,10 +33,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public readonly Triangle RosDeserialize(ref ReadBuffer b) => new Triangle(ref b);
         
-        public readonly bool Equals(in Triangle o) => (A, B, C) == (o.A, o.B, o.C);
-        
+        public override readonly int GetHashCode() => (A, B, C).GetHashCode();
+        public override readonly bool Equals(object? o) => o is Triangle s && Equals(s);
+        public readonly bool Equals(Triangle o) => (A, B, C) == (o.A, o.B, o.C);
         public static bool operator==(in Triangle a, in Triangle b) => a.Equals(b);
-        
         public static bool operator!=(in Triangle a, in Triangle b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

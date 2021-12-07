@@ -163,6 +163,18 @@ namespace Iviz.Msgs
             
             Advance(size);
         }
+        
+        public void SerializeStructArray<T>(Memory<T> val) where T : unmanaged
+        {
+            int sizeOfT = SizeOf<T>();
+            int size = val.Length * sizeOfT;
+            ThrowIfOutOfRange(4 + size);
+            
+            WriteInt(val.Length);
+            MemoryMarshal.AsBytes(val.Span).CopyTo(ptr);
+            
+            Advance(size);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SerializeStructArray<T>(T[] val, int count) where T : unmanaged

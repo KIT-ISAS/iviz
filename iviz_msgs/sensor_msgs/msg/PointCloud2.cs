@@ -23,11 +23,16 @@ namespace Iviz.Msgs.SensorMsgs
         [DataMember (Name = "width")] public uint Width;
         // Describes the channels and their layout in the binary data blob.
         [DataMember (Name = "fields")] public PointField[] Fields;
-        [DataMember (Name = "is_bigendian")] public bool IsBigendian; // Is this data bigendian?
-        [DataMember (Name = "point_step")] public uint PointStep; // Length of a point in bytes
-        [DataMember (Name = "row_step")] public uint RowStep; // Length of a row in bytes
-        [DataMember (Name = "data")] public byte[] Data; // Actual point data, size is (row_step*height)
-        [DataMember (Name = "is_dense")] public bool IsDense; // True if there are no invalid points
+        /// Is this data bigendian?
+        [DataMember (Name = "is_bigendian")] public bool IsBigendian;
+        /// Length of a point in bytes
+        [DataMember (Name = "point_step")] public uint PointStep;
+        /// Length of a row in bytes
+        [DataMember (Name = "row_step")] public uint RowStep;
+        /// Actual point data, size is (row_step*height)
+        [DataMember (Name = "data")] public byte[] Data;
+        /// True if there are no invalid points
+        [DataMember (Name = "is_dense")] public bool IsDense;
     
         /// Constructor for empty message.
         public PointCloud2()

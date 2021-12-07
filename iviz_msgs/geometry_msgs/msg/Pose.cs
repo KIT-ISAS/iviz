@@ -32,10 +32,10 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Pose RosDeserialize(ref ReadBuffer b) => new Pose(ref b);
         
-        public readonly bool Equals(in Pose o) => (Position, Orientation) == (o.Position, o.Orientation);
-        
+        public override readonly int GetHashCode() => (Position, Orientation).GetHashCode();
+        public override readonly bool Equals(object? o) => o is Pose s && Equals(s);
+        public readonly bool Equals(Pose o) => (Position, Orientation) == (o.Position, o.Orientation);
         public static bool operator==(in Pose a, in Pose b) => a.Equals(b);
-        
         public static bool operator!=(in Pose a, in Pose b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

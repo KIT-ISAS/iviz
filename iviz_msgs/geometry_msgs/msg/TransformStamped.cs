@@ -17,7 +17,8 @@ namespace Iviz.Msgs.GeometryMsgs
         // <a href="http://wiki.ros.org/tf">tf</a> package. 
         // See its documentation for more information.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
-        [DataMember (Name = "child_frame_id")] public string ChildFrameId; // the frame id of the child frame
+        /// the frame id of the child frame
+        [DataMember (Name = "child_frame_id")] public string ChildFrameId;
         [DataMember (Name = "transform")] public Transform Transform;
     
         /// Explicit constructor.
@@ -46,10 +47,10 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly TransformStamped RosDeserialize(ref ReadBuffer b) => new TransformStamped(ref b);
         
-        public readonly bool Equals(in TransformStamped o) => (Header, ChildFrameId, Transform) == (o.Header, o.ChildFrameId, o.Transform);
-        
+        public override readonly int GetHashCode() => (Header, ChildFrameId, Transform).GetHashCode();
+        public override readonly bool Equals(object? o) => o is TransformStamped s && Equals(s);
+        public readonly bool Equals(TransformStamped o) => (Header, ChildFrameId, Transform) == (o.Header, o.ChildFrameId, o.Transform);
         public static bool operator==(in TransformStamped a, in TransformStamped b) => a.Equals(b);
-        
         public static bool operator!=(in TransformStamped a, in TransformStamped b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

@@ -23,12 +23,18 @@ namespace Iviz.Msgs.RosgraphMsgs
         //#
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "level")] public byte Level;
-        [DataMember (Name = "name")] public string Name; // name of the node
-        [DataMember (Name = "msg")] public string Msg; // message 
-        [DataMember (Name = "file")] public string File; // file the message came from
-        [DataMember (Name = "function")] public string Function; // function the message came from
-        [DataMember (Name = "line")] public uint Line; // line the message came from
-        [DataMember (Name = "topics")] public string[] Topics; // topic names that the node publishes
+        /// name of the node
+        [DataMember (Name = "name")] public string Name;
+        /// message
+        [DataMember (Name = "msg")] public string Msg;
+        /// file the message came from
+        [DataMember (Name = "file")] public string File;
+        /// function the message came from
+        [DataMember (Name = "function")] public string Function;
+        /// line the message came from
+        [DataMember (Name = "line")] public uint Line;
+        /// topic names that the node publishes
+        [DataMember (Name = "topics")] public string[] Topics;
     
         /// Explicit constructor.
         public Log(in StdMsgs.Header Header, byte Level, string Name, string Msg, string File, string Function, uint Line, string[] Topics)
@@ -59,17 +65,17 @@ namespace Iviz.Msgs.RosgraphMsgs
             h.File = b.DeserializeString();
             h.Function = b.DeserializeString();
             h.Line = b.Deserialize<uint>();
-            h.Topics = b.SkipStringArray();
+            h.Topics = b.DeserializeStringArray();
         }
         
         readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Log(ref b);
         
         public readonly Log RosDeserialize(ref ReadBuffer b) => new Log(ref b);
         
-        public readonly bool Equals(in Log o) => (Header, Level, Name, Msg, File, Function, Line, Topics) == (o.Header, o.Level, o.Name, o.Msg, o.File, o.Function, o.Line, o.Topics);
-        
+        public override readonly int GetHashCode() => (Header, Level, Name, Msg, File, Function, Line, Topics).GetHashCode();
+        public override readonly bool Equals(object? o) => o is Log s && Equals(s);
+        public readonly bool Equals(Log o) => (Header, Level, Name, Msg, File, Function, Line, Topics) == (o.Header, o.Level, o.Name, o.Msg, o.File, o.Function, o.Line, o.Topics);
         public static bool operator==(in Log a, in Log b) => a.Equals(b);
-        
         public static bool operator!=(in Log a, in Log b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

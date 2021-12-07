@@ -40,10 +40,10 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Point32 RosDeserialize(ref ReadBuffer b) => new Point32(ref b);
         
-        public readonly bool Equals(in Point32 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
-        
+        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
+        public override readonly bool Equals(object? o) => o is Point32 s && Equals(s);
+        public readonly bool Equals(Point32 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
         public static bool operator==(in Point32 a, in Point32 b) => a.Equals(b);
-        
         public static bool operator!=(in Point32 a, in Point32 b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

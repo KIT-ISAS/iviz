@@ -12,8 +12,10 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "type")] public byte Type;
         [DataMember (Name = "code")] public string Code;
-        [DataMember (Name = "corners")] public GeometryMsgs.Vector3[/*4*/] Corners; // pixel position with z = 0
-        [DataMember (Name = "camera_intrinsic")] public double[/*9*/] CameraIntrinsic; // row major intrinsic
+        /// pixel position with z = 0
+        [DataMember (Name = "corners")] public GeometryMsgs.Vector3[/*4*/] Corners;
+        /// row major intrinsic
+        [DataMember (Name = "camera_intrinsic")] public double[/*9*/] CameraIntrinsic;
         [DataMember (Name = "camera_pose")] public GeometryMsgs.Pose CameraPose;
         [DataMember (Name = "has_extrinsic_pose")] public bool HasExtrinsicPose;
         [DataMember (Name = "marker_size_in_mm")] public double MarkerSizeInMm;

@@ -14,13 +14,18 @@ namespace Iviz.Msgs.Actionlib
         public const int TERMINATE_DROP = 4;
         public const int TERMINATE_EXCEPTION = 5;
         [DataMember (Name = "terminate_status")] public int TerminateStatus;
-        [DataMember (Name = "ignore_cancel")] public bool IgnoreCancel; // If true, ignores requests to cancel
+        /// If true, ignores requests to cancel
+        [DataMember (Name = "ignore_cancel")] public bool IgnoreCancel;
         [DataMember (Name = "result_text")] public string ResultText;
-        [DataMember (Name = "the_result")] public int TheResult; // Desired value for the_result in the Result
+        /// Desired value for the_result in the Result
+        [DataMember (Name = "the_result")] public int TheResult;
         [DataMember (Name = "is_simple_client")] public bool IsSimpleClient;
-        [DataMember (Name = "delay_accept")] public duration DelayAccept; // Delays accepting the goal by this amount of time
-        [DataMember (Name = "delay_terminate")] public duration DelayTerminate; // Delays terminating for this amount of time
-        [DataMember (Name = "pause_status")] public duration PauseStatus; // Pauses the status messages for this amount of time
+        /// Delays accepting the goal by this amount of time
+        [DataMember (Name = "delay_accept")] public duration DelayAccept;
+        /// Delays terminating for this amount of time
+        [DataMember (Name = "delay_terminate")] public duration DelayTerminate;
+        /// Pauses the status messages for this amount of time
+        [DataMember (Name = "pause_status")] public duration PauseStatus;
     
         /// Constructor for empty message.
         public TestRequestGoal()

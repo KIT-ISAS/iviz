@@ -35,10 +35,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public readonly Color32 RosDeserialize(ref ReadBuffer b) => new Color32(ref b);
         
-        public readonly bool Equals(in Color32 o) => (R, G, B, A) == (o.R, o.G, o.B, o.A);
-        
+        public override readonly int GetHashCode() => (R, G, B, A).GetHashCode();
+        public override readonly bool Equals(object? o) => o is Color32 s && Equals(s);
+        public readonly bool Equals(Color32 o) => (R, G, B, A) == (o.R, o.G, o.B, o.A);
         public static bool operator==(in Color32 a, in Color32 b) => a.Equals(b);
-        
         public static bool operator!=(in Color32 a, in Color32 b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

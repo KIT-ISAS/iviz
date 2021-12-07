@@ -19,10 +19,13 @@ namespace Iviz.Msgs.SensorMsgs
         // Luminous intensity (candela/light source output)
         // Luminance (nits/light output per area)
         // Irradiance (watt/area), etc.
-        [DataMember (Name = "header")] public StdMsgs.Header Header; // timestamp is the time the illuminance was measured
+        /// timestamp is the time the illuminance was measured
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // frame_id is the location and direction of the reading
-        [DataMember (Name = "illuminance")] public double Illuminance_; // Measurement of the Photometric Illuminance in Lux.
-        [DataMember (Name = "variance")] public double Variance; // 0 is interpreted as variance unknown
+        /// Measurement of the Photometric Illuminance in Lux.
+        [DataMember (Name = "illuminance")] public double Illuminance_;
+        /// 0 is interpreted as variance unknown
+        [DataMember (Name = "variance")] public double Variance;
     
         /// Constructor for empty message.
         public Illuminance()

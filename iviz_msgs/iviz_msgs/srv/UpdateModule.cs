@@ -54,9 +54,12 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class UpdateModuleRequest : IRequest<UpdateModule, UpdateModuleResponse>, IDeserializable<UpdateModuleRequest>
     {
         // Updates a module
-        [DataMember (Name = "id")] public string Id; // Id of the module
-        [DataMember (Name = "fields")] public string[] Fields; // The fields to be updated
-        [DataMember (Name = "config")] public string Config; // Configuration encoded in JSON
+        /// Id of the module
+        [DataMember (Name = "id")] public string Id;
+        /// The fields to be updated
+        [DataMember (Name = "fields")] public string[] Fields;
+        /// Configuration encoded in JSON
+        [DataMember (Name = "config")] public string Config;
     
         /// Constructor for empty message.
         public UpdateModuleRequest()
@@ -121,8 +124,10 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class UpdateModuleResponse : IResponse, IDeserializable<UpdateModuleResponse>
     {
-        [DataMember (Name = "success")] public bool Success; // Whether the retrieval succeeded
-        [DataMember (Name = "message")] public string Message; // An error message if success is false
+        /// Whether the retrieval succeeded
+        [DataMember (Name = "success")] public bool Success;
+        /// An error message if success is false
+        [DataMember (Name = "message")] public string Message;
     
         /// Constructor for empty message.
         public UpdateModuleResponse()

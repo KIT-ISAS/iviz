@@ -39,10 +39,10 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Vector3 RosDeserialize(ref ReadBuffer b) => new Vector3(ref b);
         
-        public readonly bool Equals(in Vector3 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
-        
+        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
+        public override readonly bool Equals(object? o) => o is Vector3 s && Equals(s);
+        public readonly bool Equals(Vector3 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
         public static bool operator==(in Vector3 a, in Vector3 b) => a.Equals(b);
-        
         public static bool operator!=(in Vector3 a, in Vector3 b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

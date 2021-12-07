@@ -10,8 +10,10 @@ namespace Iviz.Msgs.StdMsgs
         // The multiarray declares a generic multi-dimensional array of a
         // particular data type.  Dimensions are ordered from outer most
         // to inner most.
-        [DataMember (Name = "dim")] public MultiArrayDimension[] Dim; // Array of dimension properties
-        [DataMember (Name = "data_offset")] public uint DataOffset; // padding elements at front of data
+        /// Array of dimension properties
+        [DataMember (Name = "dim")] public MultiArrayDimension[] Dim;
+        /// padding elements at front of data
+        [DataMember (Name = "data_offset")] public uint DataOffset;
         // Accessors should ALWAYS be written in terms of dimension stride
         // and specified outer-most dimension first.
         // 

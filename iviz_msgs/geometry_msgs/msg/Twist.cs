@@ -32,10 +32,10 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Twist RosDeserialize(ref ReadBuffer b) => new Twist(ref b);
         
-        public readonly bool Equals(in Twist o) => (Linear, Angular) == (o.Linear, o.Angular);
-        
+        public override readonly int GetHashCode() => (Linear, Angular).GetHashCode();
+        public override readonly bool Equals(object? o) => o is Twist s && Equals(s);
+        public readonly bool Equals(Twist o) => (Linear, Angular) == (o.Linear, o.Angular);
         public static bool operator==(in Twist a, in Twist b) => a.Equals(b);
-        
         public static bool operator!=(in Twist a, in Twist b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

@@ -14,11 +14,16 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public const byte WARN = 1;
         public const byte ERROR = 2;
         public const byte STALE = 3;
-        [DataMember (Name = "level")] public byte Level; // level of operation enumerated above 
-        [DataMember (Name = "name")] public string Name; // a description of the test/component reporting
-        [DataMember (Name = "message")] public string Message; // a description of the status
-        [DataMember (Name = "hardware_id")] public string HardwareId; // a hardware unique string
-        [DataMember (Name = "values")] public KeyValue[] Values; // an array of values associated with the status
+        /// level of operation enumerated above
+        [DataMember (Name = "level")] public byte Level;
+        /// a description of the test/component reporting
+        [DataMember (Name = "name")] public string Name;
+        /// a description of the status
+        [DataMember (Name = "message")] public string Message;
+        /// a hardware unique string
+        [DataMember (Name = "hardware_id")] public string HardwareId;
+        /// an array of values associated with the status
+        [DataMember (Name = "values")] public KeyValue[] Values;
     
         /// Constructor for empty message.
         public DiagnosticStatus()

@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -151,6 +152,26 @@ namespace Iviz.Msgs
 
             T[] val = new T[count];
             ptr[..size].CopyTo(MemoryMarshal.AsBytes(val.AsSpan()));
+
+            Advance(size);
+            return val;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Memory<T> DeserializeStructRent<T>() where T : unmanaged
+        {
+            int count = ReadInt();
+            if (count == 0)
+            {
+                return Memory<T>.Empty;
+            }
+
+            int sizeOfT = SizeOf<T>();
+            int size = count * sizeOfT;
+            ThrowIfOutOfRange(size);
+
+            var val = new Memory<T>(ArrayPool<T>.Shared.Rent(count))[..count];
+            ptr[..size].CopyTo(MemoryMarshal.AsBytes(val.Span));
 
             Advance(size);
             return val;

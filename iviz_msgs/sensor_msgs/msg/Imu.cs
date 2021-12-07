@@ -22,11 +22,14 @@ namespace Iviz.Msgs.SensorMsgs
         // covariance matrix, and disregard the associated estimate.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation;
-        [DataMember (Name = "orientation_covariance")] public double[/*9*/] OrientationCovariance; // Row major about x, y, z axes
+        /// Row major about x, y, z axes
+        [DataMember (Name = "orientation_covariance")] public double[/*9*/] OrientationCovariance;
         [DataMember (Name = "angular_velocity")] public GeometryMsgs.Vector3 AngularVelocity;
-        [DataMember (Name = "angular_velocity_covariance")] public double[/*9*/] AngularVelocityCovariance; // Row major about x, y, z axes
+        /// Row major about x, y, z axes
+        [DataMember (Name = "angular_velocity_covariance")] public double[/*9*/] AngularVelocityCovariance;
         [DataMember (Name = "linear_acceleration")] public GeometryMsgs.Vector3 LinearAcceleration;
-        [DataMember (Name = "linear_acceleration_covariance")] public double[/*9*/] LinearAccelerationCovariance; // Row major x, y z 
+        /// Row major x, y z
+        [DataMember (Name = "linear_acceleration_covariance")] public double[/*9*/] LinearAccelerationCovariance;
     
         /// Constructor for empty message.
         public Imu()

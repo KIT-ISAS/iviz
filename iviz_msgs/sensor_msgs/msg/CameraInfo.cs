@@ -34,7 +34,8 @@ namespace Iviz.Msgs.SensorMsgs
         //                     Image acquisition info                          #
         //######################################################################
         // Time of image acquisition, camera coordinate frame ID
-        [DataMember (Name = "header")] public StdMsgs.Header Header; // Header timestamp should be acquisition time of image
+        /// Header timestamp should be acquisition time of image
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
@@ -71,12 +72,14 @@ namespace Iviz.Msgs.SensorMsgs
         // Projects 3D points in the camera coordinate frame to 2D pixel
         // coordinates using the focal lengths (fx, fy) and principal point
         // (cx, cy).
-        [DataMember] public double[/*9*/] K; // 3x3 row-major matrix
+        /// 3x3 row-major matrix
+        [DataMember] public double[/*9*/] K;
         // Rectification matrix (stereo cameras only)
         // A rotation matrix aligning the camera coordinate system to the ideal
         // stereo image plane so that epipolar lines in both stereo images are
         // parallel.
-        [DataMember] public double[/*9*/] R; // 3x3 row-major matrix
+        /// 3x3 row-major matrix
+        [DataMember] public double[/*9*/] R;
         // Projection/camera matrix
         //     [fx'  0  cx' Tx]
         // P = [ 0  fy' cy' Ty]
@@ -101,7 +104,8 @@ namespace Iviz.Msgs.SensorMsgs
         //         x = u / w
         //         y = v / w
         //  This holds for both images of a stereo pair.
-        [DataMember] public double[/*12*/] P; // 3x4 row-major matrix
+        /// 3x4 row-major matrix
+        [DataMember] public double[/*12*/] P;
         //######################################################################
         //                      Operational Parameters                         #
         //######################################################################

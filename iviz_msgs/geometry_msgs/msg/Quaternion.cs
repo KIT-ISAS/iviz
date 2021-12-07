@@ -36,10 +36,10 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Quaternion RosDeserialize(ref ReadBuffer b) => new Quaternion(ref b);
         
-        public readonly bool Equals(in Quaternion o) => (X, Y, Z, W) == (o.X, o.Y, o.Z, o.W);
-        
+        public override readonly int GetHashCode() => (X, Y, Z, W).GetHashCode();
+        public override readonly bool Equals(object? o) => o is Quaternion s && Equals(s);
+        public readonly bool Equals(Quaternion o) => (X, Y, Z, W) == (o.X, o.Y, o.Z, o.W);
         public static bool operator==(in Quaternion a, in Quaternion b) => a.Equals(b);
-        
         public static bool operator!=(in Quaternion a, in Quaternion b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

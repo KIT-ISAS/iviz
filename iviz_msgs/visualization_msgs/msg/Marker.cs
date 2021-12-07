@@ -24,16 +24,26 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte MODIFY = 0;
         public const byte DELETE = 2;
         public const byte DELETEALL = 3;
-        [DataMember (Name = "header")] public StdMsgs.Header Header; // header for time/frame information
-        [DataMember (Name = "ns")] public string Ns; // Namespace to place this object in... used in conjunction with id to create a unique name for the object
-        [DataMember (Name = "id")] public int Id; // object ID useful in conjunction with the namespace for manipulating and deleting the object later
-        [DataMember (Name = "type")] public int Type; // Type of object
-        [DataMember (Name = "action")] public int Action; // 0 add/modify an object, 1 (deprecated), 2 deletes an object, 3 deletes all objects
-        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose; // Pose of the object
-        [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale; // Scale of the object 1,1,1 means default (usually 1 meter square)
-        [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color; // Color [0.0-1.0]
-        [DataMember (Name = "lifetime")] public duration Lifetime; // How long the object should last before being automatically deleted.  0 means forever
-        [DataMember (Name = "frame_locked")] public bool FrameLocked; // If this marker should be frame-locked, i.e. retransformed into its frame every timestep
+        /// header for time/frame information
+        [DataMember (Name = "header")] public StdMsgs.Header Header;
+        /// Namespace to place this object in... used in conjunction with id to create a unique name for the object
+        [DataMember (Name = "ns")] public string Ns;
+        /// object ID useful in conjunction with the namespace for manipulating and deleting the object later
+        [DataMember (Name = "id")] public int Id;
+        /// Type of object
+        [DataMember (Name = "type")] public int Type;
+        /// 0 add/modify an object, 1 (deprecated), 2 deletes an object, 3 deletes all objects
+        [DataMember (Name = "action")] public int Action;
+        /// Pose of the object
+        [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
+        /// Scale of the object 1,1,1 means default (usually 1 meter square)
+        [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale;
+        /// Color [0.0-1.0]
+        [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color;
+        /// How long the object should last before being automatically deleted.  0 means forever
+        [DataMember (Name = "lifetime")] public duration Lifetime;
+        /// If this marker should be frame-locked, i.e. retransformed into its frame every timestep
+        [DataMember (Name = "frame_locked")] public bool FrameLocked;
         //Only used if the type specified has some use for them (eg. POINTS, LINE_STRIP, ...)
         [DataMember (Name = "points")] public GeometryMsgs.Point[] Points;
         //Only used if the type specified has some use for them (eg. POINTS, LINE_STRIP, ...)

@@ -54,7 +54,8 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetFramePoseRequest : IRequest<GetFramePose, GetFramePoseResponse>, IDeserializable<GetFramePoseRequest>
     {
         // Gets the absolute pose of a TF frame w.r.t. the map frame
-        [DataMember (Name = "frames")] public string[] Frames; // Frame ids
+        /// Frame ids
+        [DataMember (Name = "frames")] public string[] Frames;
     
         /// Constructor for empty message.
         public GetFramePoseRequest()
@@ -100,8 +101,10 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class GetFramePoseResponse : IResponse, IDeserializable<GetFramePoseResponse>
     {
-        [DataMember (Name = "is_valid")] public bool[] IsValid; // Whether the entry is valid
-        [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses; // The absolute poses
+        /// Whether the entry is valid
+        [DataMember (Name = "is_valid")] public bool[] IsValid;
+        /// The absolute poses
+        [DataMember (Name = "poses")] public GeometryMsgs.Pose[] Poses;
     
         /// Constructor for empty message.
         public GetFramePoseResponse()

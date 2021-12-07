@@ -8,10 +8,14 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class Scene : IDeserializable<Scene>, IMessage
     {
         // A complete scene 
-        [DataMember (Name = "name")] public string Name; // Name of the scene
-        [DataMember (Name = "filename")] public string Filename; // Original filename
-        [DataMember (Name = "includes")] public Include[] Includes; // List of models to be included
-        [DataMember (Name = "lights")] public Light[] Lights; // List of lights
+        /// Name of the scene
+        [DataMember (Name = "name")] public string Name;
+        /// Original filename
+        [DataMember (Name = "filename")] public string Filename;
+        /// List of models to be included
+        [DataMember (Name = "includes")] public Include[] Includes;
+        /// List of lights
+        [DataMember (Name = "lights")] public Light[] Lights;
     
         /// Constructor for empty message.
         public Scene()

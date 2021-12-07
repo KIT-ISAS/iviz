@@ -54,8 +54,10 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class AddModuleFromTopicRequest : IRequest<AddModuleFromTopic, AddModuleFromTopicResponse>, IDeserializable<AddModuleFromTopicRequest>
     {
         // Adds a module
-        [DataMember (Name = "topic")] public string Topic; // Name of the topic
-        [DataMember (Name = "id")] public string Id; // Requested id to identify this module, or empty to autogenerate
+        /// Name of the topic
+        [DataMember (Name = "topic")] public string Topic;
+        /// Requested id to identify this module, or empty to autogenerate
+        [DataMember (Name = "id")] public string Id;
     
         /// Constructor for empty message.
         public AddModuleFromTopicRequest()
@@ -102,9 +104,12 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class AddModuleFromTopicResponse : IResponse, IDeserializable<AddModuleFromTopicResponse>
     {
-        [DataMember (Name = "success")] public bool Success; // Whether the retrieval succeeded
-        [DataMember (Name = "message")] public string Message; // An error message if success is false
-        [DataMember (Name = "id")] public string Id; // An id identifying this module
+        /// Whether the retrieval succeeded
+        [DataMember (Name = "success")] public bool Success;
+        /// An error message if success is false
+        [DataMember (Name = "message")] public string Message;
+        /// An id identifying this module
+        [DataMember (Name = "id")] public string Id;
     
         /// Constructor for empty message.
         public AddModuleFromTopicResponse()

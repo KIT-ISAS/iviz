@@ -33,10 +33,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public readonly Vector3f RosDeserialize(ref ReadBuffer b) => new Vector3f(ref b);
         
-        public readonly bool Equals(in Vector3f o) => (X, Y, Z) == (o.X, o.Y, o.Z);
-        
+        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
+        public override readonly bool Equals(object? o) => o is Vector3f s && Equals(s);
+        public readonly bool Equals(Vector3f o) => (X, Y, Z) == (o.X, o.Y, o.Z);
         public static bool operator==(in Vector3f a, in Vector3f b) => a.Equals(b);
-        
         public static bool operator!=(in Vector3f a, in Vector3f b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

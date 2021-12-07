@@ -50,10 +50,10 @@ namespace Iviz.Msgs.StdMsgs
         
         public readonly Header RosDeserialize(ref ReadBuffer b) => new Header(ref b);
         
-        public readonly bool Equals(in Header o) => (Seq, Stamp, FrameId) == (o.Seq, o.Stamp, o.FrameId);
-        
+        public override readonly int GetHashCode() => (Seq, Stamp, FrameId).GetHashCode();
+        public override readonly bool Equals(object? o) => o is Header s && Equals(s);
+        public readonly bool Equals(Header o) => (Seq, Stamp, FrameId) == (o.Seq, o.Stamp, o.FrameId);
         public static bool operator==(in Header a, in Header b) => a.Equals(b);
-        
         public static bool operator!=(in Header a, in Header b) => !a.Equals(b);
     
         public readonly void RosSerialize(ref WriteBuffer b)

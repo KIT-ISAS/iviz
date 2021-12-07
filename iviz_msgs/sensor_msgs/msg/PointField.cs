@@ -17,10 +17,14 @@ namespace Iviz.Msgs.SensorMsgs
         public const byte UINT32 = 6;
         public const byte FLOAT32 = 7;
         public const byte FLOAT64 = 8;
-        [DataMember (Name = "name")] public string Name; // Name of field
-        [DataMember (Name = "offset")] public uint Offset; // Offset from start of point struct
-        [DataMember (Name = "datatype")] public byte Datatype; // Datatype enumeration, see above
-        [DataMember (Name = "count")] public uint Count; // How many elements in the field
+        /// Name of field
+        [DataMember (Name = "name")] public string Name;
+        /// Offset from start of point struct
+        [DataMember (Name = "offset")] public uint Offset;
+        /// Datatype enumeration, see above
+        [DataMember (Name = "datatype")] public byte Datatype;
+        /// How many elements in the field
+        [DataMember (Name = "count")] public uint Count;
     
         /// Constructor for empty message.
         public PointField()
