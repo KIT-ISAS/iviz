@@ -22,9 +22,11 @@ namespace Iviz.Displays
 
         RoundedPlaneResource? background;
         SelectionFrame? frame;
+        Transform? mTransform;
+        Vector2 canvasSize = new Vector2(800, 600);
 
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
-
+        
         RoundedPlaneResource Background =>
             background != null
                 ? background
@@ -32,8 +34,9 @@ namespace Iviz.Displays
 
         FixedDistanceDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         Transform Holder => Draggable.Transform;
-
         TMP_Text Label => label.AssertNotNull(nameof(label));
+        
+        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         public string Title
         {
@@ -42,8 +45,6 @@ namespace Iviz.Displays
         }
 
         public Canvas Canvas => canvas.AssertNotNull(nameof(canvas));
-
-        Vector2 canvasSize = new Vector2(800, 600);
 
         public Vector2 CanvasSize
         {
@@ -59,6 +60,14 @@ namespace Iviz.Displays
                 Draggable.Transform.localPosition = (sizeY + HeaderHeight + 0.01f) / 2 * Vector3.up;
             }
         }
+
+        public bool FollowsCamera
+        {
+            set
+            {
+                enabled = value;
+            }
+        } 
 
         void Awake()
         {
@@ -100,6 +109,8 @@ namespace Iviz.Displays
             {
                 Title = "Main";
             }
+
+            FollowsCamera = false;
         }
 
         public void InitializePose()
@@ -160,6 +171,37 @@ namespace Iviz.Displays
 
         public int Layer { get; set; }
 
+        void Update()
+        {
+            const float minDistance = 1.0f;
+            const float maxDistance = 1.5f;
+            const float damping = 0.05f;
+            
+            var mainCameraPose = new Pose(
+                Settings.MainCameraTransform.position,
+                Quaternion.Euler(0, Settings.MainCameraTransform.eulerAngles.y, 0)
+            );
+
+            var (currentPosition, currentRotation) = Transform.AsPose();
+            var currentPositionLocal = mainCameraPose.Inverse().Multiply(currentPosition);
+            var targetPositionLocal = Clamp(
+                currentPositionLocal, 
+                new Vector3(-0.5f, -0.3f, minDistance),
+                new Vector3(0.5f, 0.1f, maxDistance));
+
+            var targetPosition = mainCameraPose.Multiply(targetPositionLocal);
+            var targetRotation = mainCameraPose.rotation;
+            
+            Transform.SetPositionAndRotation(
+                Vector3.Lerp(currentPosition, targetPosition, damping), 
+                Quaternion.Lerp(currentRotation, targetRotation, damping));
+        }
+
+        static Vector3 Clamp(in Vector3 value, in Vector3 min, in Vector3 max)
+        {
+            return Vector3.Min(Vector3.Max(value, min), max);
+        }
+        
         public void Suspend()
         {
             tokenSource?.Cancel();

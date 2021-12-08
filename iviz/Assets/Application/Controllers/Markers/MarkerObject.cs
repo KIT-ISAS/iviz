@@ -36,34 +36,34 @@ namespace Iviz.Controllers
         static MarkerLineHelper LineHelper => lineHelper ??= new MarkerLineHelper();
         static MarkerPointHelper PointHelper => pointHelper ??= new MarkerPointHelper();
 
-        readonly StringBuilder description = new(250);
+        //readonly StringBuilder description = new(250);
         readonly FrameNode node;
         readonly (string Ns, int Id) id;
 
         IDisplay? resource;
         Info<GameObject>? resourceInfo;
         CancellationTokenSource? runningTs;
-
         BoundsHighlighter? highlighter;
+        Marker? lastMessage;
 
         Pose currentPose;
         Vector3 currentScale;
-        
-        int numErrors;
-        int numWarnings;
+
+        //int numErrors;
+        //int numWarnings;
 
         uint? previousHash;
-
-        bool occlusionOnly;
-        bool triangleListFlipWinding;
         float metallic = 0.5f;
         float smoothness = 0.5f;
         Color tint = Color.white;
+        
+        bool occlusionOnly;
+        bool triangleListFlipWinding;
 
         public DateTime ExpirationTime { get; private set; }
         public MarkerType MarkerType { get; private set; }
         public string UniqueNodeName { get; }
-        
+
         public Transform Transform => node.Transform;
         Bounds? IHasBounds.Bounds => resource?.Bounds;
         Transform? IHasBounds.BoundsTransform => resource?.GetTransform();
@@ -179,40 +179,37 @@ namespace Iviz.Controllers
 
         public async ValueTask SetAsync(Marker msg)
         {
-            if (msg == null)
-            {
-                throw new ArgumentNullException(nameof(msg));
-            }
+            //numWarnings = 0;
+            //numErrors = 0;
 
-            numWarnings = 0;
-            numErrors = 0;
-
-            description.Length = 0;
-
-            description.Append("<color=#800000ff>")
-                .Append("<link=").Append(UniqueNodeName).Append(">")
-                .Append("<b><u>").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/").Append(id.Id)
-                .Append("</u></b></link></color>")
-                .AppendLine();
-
-            description.Append("Type: <b>");
-            description.Append(DescriptionFromType(msg));
-            if (msg.Type() == MarkerType.MeshResource)
-            {
-                description.Append(": ").Append(msg.MeshResource);
-            }
-
-            description.Append("</b>").AppendLine();
+            lastMessage = msg ?? throw new ArgumentNullException(nameof(msg));
+            
+            // description.Length = 0;
+            //
+            // description.Append("<color=#800000ff>")
+            //     .Append("<link=").Append(UniqueNodeName).Append(">")
+            //     .Append("<b><u>").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/").Append(id.Id)
+            //     .Append("</u></b></link></color>")
+            //     .AppendLine();
+            //
+            // description.Append("Type: <b>");
+            // description.Append(DescriptionFromType(msg));
+            // if (msg.Type() == MarkerType.MeshResource)
+            // {
+            //     description.Append(": ").Append(msg.MeshResource);
+            // }
+            //
+            // description.Append("</b>").AppendLine();
 
             if (msg.Lifetime == default)
             {
                 ExpirationTime = DateTime.MaxValue;
-                description.Append("Expiration: None").AppendLine();
+                //description.Append("Expiration: None").AppendLine();
             }
             else
             {
                 ExpirationTime = GameThread.Now + msg.Lifetime.ToTimeSpan();
-                description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append(" secs").AppendLine();
+                //description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append(" secs").AppendLine();
             }
 
             if (msg.Type is < 0 or > (int)MarkerType.TriangleList)
@@ -239,8 +236,8 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                description.Append(ErrorStr).Append("Failed to load mesh resource. See Log.").AppendLine();
-                numErrors++;
+                //description.Append(ErrorStr).Append("Failed to load mesh resource. See Log.").AppendLine();
+                //numErrors++;
 
                 return;
             }
@@ -288,6 +285,7 @@ namespace Iviz.Controllers
                 ? result
                 : throw new InvalidOperationException("Resource is not set!");
 
+        /*
         void AppendColor(in ColorRGBA c)
         {
             description.Append("Color: ");
@@ -325,7 +323,9 @@ namespace Iviz.Controllers
 
             description.AppendLine();
         }
+        */
 
+        /*
         void AppendScale(in Msgs.GeometryMsgs.Vector3 c)
         {
             description.Append("Scale: [")
@@ -333,17 +333,21 @@ namespace Iviz.Controllers
                 .Append(c.Y.ToString(FloatFormat)).Append(" | ")
                 .Append(c.Z.ToString(FloatFormat)).Append("]").AppendLine();
         }
+        */
 
+        /*
         void AppendScale(double c)
         {
             description.Append("Scale: ").Append(c.ToString(FloatFormat)).AppendLine();
         }
+        */
 
         void CreateTriangleList(Marker msg)
         {
-            AppendScale(msg.Scale);
-            AppendColor(msg.Color);
+            //AppendScale(msg.Scale);
+            //AppendColor(msg.Color);
 
+            /*
             if (msg.Points.Length == 0)
             {
                 description.Append("Elements: Empty").AppendLine();
@@ -352,39 +356,40 @@ namespace Iviz.Controllers
             {
                 description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
             }
+            */
 
             var meshTriangles = ValidateResource<MeshTrianglesResource>();
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
-                description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
-                    .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
+                //description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
+                //    .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
                 meshTriangles.Clear();
-                numErrors++;
+                //numErrors++;
                 return;
             }
 
             if (Mathf.Approximately(msg.Color.A, 0))
             {
-                description.Append(WarnStr).Append("Color has alpha 0. Marker will not be visible").AppendLine();
+                //description.Append(WarnStr).Append("Color has alpha 0. Marker will not be visible").AppendLine();
                 meshTriangles.Clear();
-                numWarnings++;
+                //numWarnings++;
                 return;
             }
 
             if (msg.Color.HasNaN())
             {
-                description.Append(ErrorStr).Append("Color has NaN. Marker will not be visible").AppendLine();
+                //description.Append(ErrorStr).Append("Color has NaN. Marker will not be visible").AppendLine();
                 meshTriangles.Clear();
-                numWarnings++;
+                //numWarnings++;
                 return;
             }
 
             if (msg.Points.Length % 3 != 0)
             {
-                description.Append(ErrorStr).Append("Point array length ").Append(msg.Colors.Length)
-                    .Append(" needs to be a multiple of 3").AppendLine();
+                //description.Append(ErrorStr).Append("Point array length ").Append(msg.Colors.Length)
+                //    .Append(" needs to be a multiple of 3").AppendLine();
                 meshTriangles.Clear();
-                numErrors++;
+                //numErrors++;
                 return;
             }
 
@@ -419,33 +424,33 @@ namespace Iviz.Controllers
             var pointList = ValidateResource<PointListResource>();
             pointList.ElementScale = Mathf.Abs((float)msg.Scale.X);
 
-            AppendColor(msg.Color);
-            AppendScale(msg.Scale.X);
+            //AppendColor(msg.Color);
+            //AppendScale(msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
-                description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
-                    .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
+                //description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
+                //    .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
                 pointList.Reset();
-                numErrors++;
+                //numErrors++;
                 return;
             }
 
             if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.HasNaN())
             {
-                description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
+                //description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
                 pointList.Reset();
-                numWarnings++;
+                //numWarnings++;
                 return;
             }
 
             if (msg.Points.Length == 0)
             {
-                description.Append("Elements: Empty").AppendLine();
+                //description.Append("Elements: Empty").AppendLine();
             }
             else
             {
-                description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+                //description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
             }
 
             if (HasSameHash(msg))
@@ -463,42 +468,42 @@ namespace Iviz.Controllers
             var lineResource = ValidateResource<LineResource>();
             float elementScale = Mathf.Abs((float)msg.Scale.X);
 
-            AppendColor(msg.Color);
-            AppendScale(elementScale);
+            //AppendColor(msg.Color);
+            //AppendScale(elementScale);
 
             if (msg.Points.Length == 0)
             {
-                description.Append("Elements: Empty").AppendLine();
+                //description.Append("Elements: Empty").AppendLine();
             }
             else
             {
-                description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+                //description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
             }
 
             if (Mathf.Approximately(elementScale, 0) || elementScale.IsInvalid())
             {
-                description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
+                //description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
                 lineResource.Reset();
-                numWarnings++;
+                //numWarnings++;
                 return;
             }
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
-                description.Append(ErrorStr)
-                    .Append("Color array length ").Append(msg.Colors.Length)
-                    .Append(" does not match point array length ").Append(msg.Points.Length)
-                    .AppendLine();
+                //description.Append(ErrorStr)
+                //    .Append("Color array length ").Append(msg.Colors.Length)
+                //    .Append(" does not match point array length ").Append(msg.Points.Length)
+                //    .AppendLine();
                 lineResource.Reset();
-                numErrors++;
+                //numErrors++;
                 return;
             }
 
             if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.HasNaN())
             {
-                description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
+                //description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
                 lineResource.Reset();
-                numWarnings++;
+                //numWarnings++;
                 return;
             }
 
@@ -525,40 +530,40 @@ namespace Iviz.Controllers
                 ? Resource.Displays.Cube
                 : Resource.Displays.Sphere;
 
-            AppendColor(msg.Color);
-            AppendScale(msg.Scale);
+            //AppendColor(msg.Color);
+            //AppendScale(msg.Scale);
 
             if (msg.Points.Length == 0)
             {
-                description.Append("Elements: Empty").AppendLine();
+                //description.Append("Elements: Empty").AppendLine();
             }
             else
             {
-                description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+                //description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
             }
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
             {
-                description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
-                    .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
+                //description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
+                //    .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
                 meshList.Reset();
-                numErrors++;
+                //numErrors++;
                 return;
             }
 
             if (Mathf.Approximately(msg.Color.A, 0))
             {
-                description.Append(WarnStr).Append("Color field has alpha 0").AppendLine();
+                //description.Append(WarnStr).Append("Color field has alpha 0").AppendLine();
                 meshList.Reset();
-                numWarnings++;
+                //numWarnings++;
                 return;
             }
 
             if (msg.Color.HasNaN())
             {
-                description.Append(ErrorStr).Append("Color field has NaN. Marker will not be visible").AppendLine();
+                //description.Append(ErrorStr).Append("Color field has NaN. Marker will not be visible").AppendLine();
                 meshList.Reset();
-                numErrors++;
+                //numErrors++;
                 return;
             }
 
@@ -581,15 +586,15 @@ namespace Iviz.Controllers
             textResource.BillboardEnabled = true;
             textResource.ElementSize = (float)msg.Scale.Z;
 
-            description.Append("Text: ").Append(msg.Text.Length).Append(" chars").AppendLine();
-            AppendColor(msg.Color);
-            AppendScale(msg.Scale.Z);
+            //description.Append("Text: ").Append(msg.Text.Length).Append(" chars").AppendLine();
+            //AppendColor(msg.Color);
+            //AppendScale(msg.Scale.Z);
 
-            if (Mathf.Approximately((float)msg.Scale.Z, 0) || msg.Scale.Z.IsInvalid())
-            {
-                description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
-                numWarnings++;
-            }
+            //if (Mathf.Approximately((float)msg.Scale.Z, 0) || msg.Scale.Z.IsInvalid())
+            //{
+                //description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
+                //numWarnings++;
+                //}
         }
 
         void CreateMeshResource(Marker msg)
@@ -599,19 +604,19 @@ namespace Iviz.Controllers
                 meshMarker.Color = msg.Color.Sanitize().ToUnityColor();
             }
 
-            AppendColor(msg.Color);
-            AppendScale(msg.Scale);
+            //AppendColor(msg.Color);
+            //AppendScale(msg.Scale);
 
-            if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
-            {
-                description.Append(WarnStr).Append("Scale value of 0").AppendLine();
-                numWarnings++;
-            }
-            else if (msg.Scale.HasNaN())
-            {
-                description.Append(WarnStr).Append("Scale value has NaN").AppendLine();
-                numWarnings++;
-            }
+            //if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
+            //{
+                //description.Append(WarnStr).Append("Scale value of 0").AppendLine();
+                //numWarnings++;
+            //}
+            //else if (msg.Scale.HasNaN())
+            //{
+                //description.Append(WarnStr).Append("Scale value has NaN").AppendLine();
+                //numWarnings++;
+                //}
 
             var newScale = msg.Scale.Ros2Unity().Abs();
             Transform.localScale = currentScale = newScale;
@@ -627,44 +632,44 @@ namespace Iviz.Controllers
                 {
                     if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
                     {
-                        description.Append(WarnStr).Append("Scale value of 0").AppendLine();
+                        //description.Append(WarnStr).Append("Scale value of 0").AppendLine();
                         arrowMarker.Visible = false;
-                        numWarnings++;
+                        //numWarnings++;
                         return;
                     }
 
                     if (msg.Scale.HasNaN())
                     {
-                        description.Append(WarnStr).Append("Scale value of NaN").AppendLine();
+                        //description.Append(WarnStr).Append("Scale value of NaN").AppendLine();
                         arrowMarker.Visible = false;
-                        numWarnings++;
+                        //numWarnings++;
                         return;
                     }
 
                     arrowMarker.Visible = true;
                     arrowMarker.Set(msg.Scale.Ros2Unity().Abs());
 
-                    AppendColor(msg.Color);
-                    AppendScale(msg.Scale);
+                    //AppendColor(msg.Color);
+                    //AppendScale(msg.Scale);
                     return;
                 }
                 case 2:
                 {
                     float sx = Mathf.Abs((float)msg.Scale.X);
-                    AppendColor(msg.Color);
-                    AppendScale(msg.Scale.X);
+                    //AppendColor(msg.Color);
+                    //AppendScale(msg.Scale.X);
                     switch (sx)
                     {
                         case 0:
-                            description.Append(WarnStr).Append("Scale value of 0").AppendLine();
-                            numWarnings++;
+                            //description.Append(WarnStr).Append("Scale value of 0").AppendLine();
+                            //numWarnings++;
                             arrowMarker.Visible = false;
                             return;
                         case float.NaN:
                         case float.NegativeInfinity:
                         case float.PositiveInfinity:
-                            description.Append(WarnStr).Append("Scale value of NaN or infinite").AppendLine();
-                            numWarnings++;
+                            //description.Append(WarnStr).Append("Scale value of NaN or infinite").AppendLine();
+                            //numWarnings++;
                             arrowMarker.Visible = false;
                             return;
                         default:
@@ -673,10 +678,10 @@ namespace Iviz.Controllers
                             return;
                     }
                 }
-                default:
-                    description.Append(ErrorStr).Append("Point array must have a length of 0 or 2").AppendLine();
-                    numErrors++;
-                    break;
+                //default:
+                    //description.Append(ErrorStr).Append("Point array must have a length of 0 or 2").AppendLine();
+                    //numErrors++;
+                    //break;
             }
         }
 
@@ -695,15 +700,15 @@ namespace Iviz.Controllers
                 if (msg.Type() != MarkerType.MeshResource)
                 {
                     RosLogger.Warn($"MarkerObject: Marker type '{msg.Type.ToString()}' has no resource assigned!");
-                    description.Append(ErrorStr).AppendLine("Unknown marker type ").Append(msg.Type).AppendLine();
-                    numErrors++;
+                    //description.Append(ErrorStr).AppendLine("Unknown marker type ").Append(msg.Type).AppendLine();
+                    //numErrors++;
                 }
                 else
                 {
-                    description.Append(WarnStr)
-                        .Append("Unknown mesh resource '").Append(msg.MeshResource).Append("'")
-                        .AppendLine();
-                    numWarnings++;
+                    //description.Append(WarnStr)
+                    //    .Append("Unknown mesh resource '").Append(msg.MeshResource).Append("'")
+                    //    .AppendLine();
+                    //numWarnings++;
                 }
 
                 BoundsChanged?.Invoke();
@@ -725,7 +730,7 @@ namespace Iviz.Controllers
                 {
                     pointListResource.BoundsChanged += () => BoundsChanged?.Invoke();
                 }
-                
+
                 // BoundsChanged?.Invoke() gets called later
                 return; // all OK
             }
@@ -745,14 +750,14 @@ namespace Iviz.Controllers
         void UpdateTransform(Marker msg)
         {
             node.AttachTo(msg.Header);
-            description.Append("Frame Locked to: <i>")
-                .Append(string.IsNullOrEmpty(msg.Header.FrameId) ? "(none)" : msg.Header.FrameId)
-                .Append("</i>").AppendLine();
+                //description.Append("Frame Locked to: <i>")
+                //    .Append(string.IsNullOrEmpty(msg.Header.FrameId) ? "(none)" : msg.Header.FrameId)
+                //   .Append("</i>").AppendLine();
 
             if (msg.Pose.HasNaN())
             {
-                description.Append(WarnStr).Append("Pose contains NaN values").AppendLine();
-                numWarnings++;
+                //description.Append(WarnStr).Append("Pose contains NaN values").AppendLine();
+                //numWarnings++;
                 return;
             }
 
@@ -764,9 +769,9 @@ namespace Iviz.Controllers
 
             if (!newPose.IsUsable())
             {
-                numErrors++;
-                description.Append(ErrorStr).Append(
-                    $"Cannot use ({newPose.position.x}, {newPose.position.y}, {newPose.position.z}) as position. Values too large.");
+                //numErrors++;
+                //description.Append(ErrorStr).Append(
+                //    $"Cannot use ({newPose.position.x}, {newPose.position.y}, {newPose.position.z}) as position. Values too large.");
                 currentPose = Pose.identity;
             }
             else
@@ -809,14 +814,14 @@ namespace Iviz.Controllers
         {
             StopLoadResourceTask();
             runningTs = new CancellationTokenSource();
-            description.Append("** Mesh is being downloaded...").AppendLine();
+            //description.Append("** Mesh is being downloaded...").AppendLine();
 
             try
             {
                 var result = await Resource.GetGameObjectResourceAsync(meshResource,
                     ConnectionManager.ServiceProvider, runningTs.Token);
                 runningTs.Token.ThrowIfCancellationRequested();
-                description.Append(result != null ? "** Download finished." : "** Download failed.").AppendLine();
+                //description.Append(result != null ? "** Download finished." : "** Download failed.").AppendLine();
                 return result;
             }
             catch (Exception e) when (e is not OperationCanceledException)
@@ -833,6 +838,7 @@ namespace Iviz.Controllers
             runningTs = null;
         }
 
+        /*
         public void GenerateLog(StringBuilder baseDescription)
         {
             if (baseDescription == null)
@@ -842,11 +848,14 @@ namespace Iviz.Controllers
 
             baseDescription.Append(description);
         }
+        */
 
         public void GetErrorCount(out int totalErrors, out int totalWarnings)
         {
-            totalErrors = numErrors;
-            totalWarnings = numWarnings;
+            //totalErrors = numErrors;
+            //totalWarnings = numWarnings;
+            totalErrors = 0;
+            totalWarnings = 0;
         }
 
         bool HasSameHash(Marker msg, bool useScale = false)
@@ -867,8 +876,8 @@ namespace Iviz.Controllers
             hash = Crc32Calculator.Compute(msg.Color, hash);
             hash = Crc32Calculator.Compute(msg.Points, hash);
             hash = Crc32Calculator.Compute(msg.Colors, hash);
-            return useScale 
-                ? Crc32Calculator.Compute(msg.Scale, hash) 
+            return useScale
+                ? Crc32Calculator.Compute(msg.Scale, hash)
                 : hash;
         }
 
@@ -896,6 +905,397 @@ namespace Iviz.Controllers
         }
 
         public override string ToString() => $"[MarkerObject {node.name}]";
+
+        public void GenerateLog(StringBuilder description)
+        {
+            if (lastMessage is not {} msg)
+            {
+                return;
+            }
+
+            description.Append("<color=#800000ff>")
+                .Append("<link=").Append(UniqueNodeName).Append(">")
+                .Append("<b><u>").Append(id.Ns.Length != 0 ? id.Ns : "[]").Append("/").Append(id.Id)
+                .Append("</u></b></link></color>")
+                .AppendLine();
+
+            description.Append("Type: <b>");
+            description.Append(DescriptionFromType(msg));
+            if (msg.Type() == MarkerType.MeshResource)
+            {
+                description.Append(": ").Append(msg.MeshResource);
+            }
+
+            description.Append("</b>").AppendLine();
+
+            if (msg.Lifetime == default)
+            {
+                description.Append("Expiration: None").AppendLine();
+            }
+            else
+            {
+                description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append(" secs").AppendLine();
+            }
+
+            if (msg.Type is < 0 or > (int)MarkerType.TriangleList)
+            {
+                return;
+            }
+
+            UpdateResourceAsyncLog();
+
+            if (resource == null)
+            {
+                if (msg.Type() != MarkerType.MeshResource)
+                {
+                    return;
+                }
+
+                description.Append(ErrorStr).Append("Failed to load mesh resource. See Log.").AppendLine();
+                return;
+            }
+
+            UpdateTransformLog();
+
+            var markerType = msg.Type();
+            switch (markerType)
+            {
+                case MarkerType.Arrow:
+                    CreateArrowLog();
+                    break;
+                case MarkerType.Cube:
+                case MarkerType.Sphere:
+                case MarkerType.Cylinder:
+                case MarkerType.MeshResource:
+                    CreateMeshResourceLog();
+                    break;
+                case MarkerType.TextViewFacing:
+                    CreateTextResourceLog();
+                    break;
+                case MarkerType.CubeList:
+                case MarkerType.SphereList:
+                    CreateMeshListLog();
+                    break;
+                case MarkerType.LineList:
+                case MarkerType.LineStrip:
+                    CreateLineLog();
+                    break;
+                case MarkerType.Points:
+                    CreatePointsLog();
+                    break;
+                case MarkerType.TriangleList:
+                    CreateTriangleListLog();
+                    break;
+            }
+
+            void UpdateTransformLog()
+            {
+                description.Append("Frame Locked to: <i>")
+                    .Append(string.IsNullOrEmpty(msg.Header.FrameId) ? "(none)" : msg.Header.FrameId)
+                    .Append("</i>").AppendLine();
+
+                if (msg.Pose.HasNaN())
+                {
+                    description.Append(WarnStr).Append("Pose contains NaN values").AppendLine();
+                    return;
+                }
+
+                var newPose = msg.Pose.Ros2Unity();
+                if (!newPose.IsUsable())
+                {
+                    description.Append(ErrorStr).Append(
+                        $"Cannot use ({newPose.position.x}, {newPose.position.y}, {newPose.position.z}) as position. Values too large.");
+                }
+            }
+
+            void UpdateResourceAsyncLog()
+            {
+                if (resourceInfo != null)
+                {
+                    return;
+                }
+
+                if (msg.Type() != MarkerType.MeshResource)
+                {
+                    description.Append(ErrorStr).AppendLine("Unknown marker type ").Append(msg.Type).AppendLine();
+                }
+                else
+                {
+                    description.Append(WarnStr)
+                        .Append("Unknown mesh resource '").Append(msg.MeshResource).Append("'")
+                        .AppendLine();
+                }
+            }
+
+            void CreateArrowLog()
+            {
+                switch (msg.Points.Length)
+                {
+                    case 0:
+                        AppendColorLog(msg.Color);
+                        AppendScaleLog(msg.Scale);
+                        
+                        if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
+                        {
+                            description.Append(WarnStr).Append("Scale value of 0").AppendLine();
+                        }
+
+                        if (msg.Scale.HasNaN())
+                        {
+                            description.Append(WarnStr).Append("Scale value of NaN").AppendLine();
+                        }
+                        
+                        break;
+                    case 2:
+                        float sx = Mathf.Abs((float)msg.Scale.X);
+                        AppendColorLog(msg.Color);
+                        AppendScalarLog(msg.Scale.X);                        
+
+                        switch (sx)
+                        {
+                            case 0:
+                                description.Append(WarnStr).Append("Scale value of 0").AppendLine();
+                                break;
+                            case float.NaN:
+                            case float.NegativeInfinity:
+                            case float.PositiveInfinity:
+                                description.Append(WarnStr).Append("Scale value of NaN or infinite").AppendLine();
+                                break;
+                        }
+
+                        break;
+                    default:
+                        description.Append(ErrorStr).Append("Point array must have a length of 0 or 2").AppendLine();
+                        break;
+                }
+            }
+
+            void CreateMeshResourceLog()
+            {
+                AppendColorLog(msg.Color);
+                AppendScaleLog(msg.Scale);
+                
+                if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
+                {
+                    description.Append(WarnStr).Append("Scale value of 0").AppendLine();
+                }
+                else if (msg.Scale.HasNaN())
+                {
+                    description.Append(WarnStr).Append("Scale value has NaN").AppendLine();
+                }
+            }
+
+            void CreateTextResourceLog()
+            {
+                description.Append("Text: ").Append(msg.Text.Length).Append(" chars").AppendLine();
+                AppendColorLog(msg.Color);
+                AppendScalarLog(msg.Scale.Z);
+
+                if (Mathf.Approximately((float)msg.Scale.Z, 0) || msg.Scale.Z.IsInvalid())
+                {
+                    description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
+                }
+            }
+
+            void CreateMeshListLog()
+            {
+                AppendScaleLog(msg.Scale);
+                AppendColorLog(msg.Color);
+                
+                if (msg.Points.Length == 0)
+                {
+                    description.Append("Elements: Empty").AppendLine();
+                }
+                else
+                {
+                    description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+                }
+
+                if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
+                {
+                    description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
+                        .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
+                    return;
+                }
+
+                if (Mathf.Approximately(msg.Color.A, 0))
+                {
+                    description.Append(WarnStr).Append("Color field has alpha 0").AppendLine();
+                    return;
+                }
+
+                if (msg.Color.HasNaN())
+                {
+                    description.Append(ErrorStr).Append("Color field has NaN. Marker will not be visible").AppendLine();
+                }
+            }
+
+            void CreateLineLog()
+            {
+                float elementScale = Mathf.Abs((float)msg.Scale.X);
+
+                AppendColorLog(msg.Color);
+                AppendScalarLog(elementScale);
+                
+                if (msg.Points.Length == 0)
+                {
+                    description.Append("Elements: Empty").AppendLine();
+                }
+                else
+                {
+                    description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+                }
+
+                if (Mathf.Approximately(elementScale, 0) || elementScale.IsInvalid())
+                {
+                    description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
+                    return;
+                }
+
+                if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
+                {
+                    description.Append(ErrorStr)
+                        .Append("Color array length ").Append(msg.Colors.Length)
+                        .Append(" does not match point array length ").Append(msg.Points.Length)
+                        .AppendLine();
+                    return;
+                }
+
+                if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.HasNaN())
+                {
+                    description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
+                }
+            }
+
+            void CreatePointsLog()
+            {
+                AppendColorLog(msg.Color);
+                AppendScalarLog(msg.Scale.X);
+                
+                if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
+                {
+                    description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
+                        .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
+                    return;
+                }
+
+                if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.HasNaN())
+                {
+                    description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
+                    return;
+                }
+
+                if (msg.Points.Length == 0)
+                {
+                    description.Append("Elements: Empty").AppendLine();
+                }
+                else
+                {
+                    description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+                }
+            }
+
+            void CreateTriangleListLog()
+            {
+                AppendScaleLog(msg.Scale);
+                AppendColorLog(msg.Color);
+
+                if (msg.Points.Length == 0)
+                {
+                    description.Append("Elements: Empty").AppendLine();
+                }
+                else
+                {
+                    description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
+                }
+
+                //var meshTriangles = ValidateResource<MeshTrianglesResource>();
+                if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
+                {
+                    description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
+                        .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
+                    //meshTriangles.Clear();
+                    //numErrors++;
+                    return;
+                }
+
+                if (Mathf.Approximately(msg.Color.A, 0))
+                {
+                    description.Append(WarnStr).Append("Color has alpha 0. Marker will not be visible").AppendLine();
+                    //meshTriangles.Clear();
+                    //numWarnings++;
+                    return;
+                }
+
+                if (msg.Color.HasNaN())
+                {
+                    description.Append(ErrorStr).Append("Color has NaN. Marker will not be visible").AppendLine();
+                    //meshTriangles.Clear();
+                    //numWarnings++;
+                    return;
+                }
+
+                if (msg.Points.Length % 3 != 0)
+                {
+                    description.Append(ErrorStr).Append("Point array length ").Append(msg.Colors.Length)
+                        .Append(" needs to be a multiple of 3").AppendLine();
+                    //meshTriangles.Clear();
+                    //numErrors++;
+                    //return;
+                }
+            }
+
+            void AppendScaleLog(in Msgs.GeometryMsgs.Vector3 c)
+            {
+                description.Append("Scale: [")
+                    .Append(c.X.ToString(FloatFormat)).Append(" | ")
+                    .Append(c.Y.ToString(FloatFormat)).Append(" | ")
+                    .Append(c.Z.ToString(FloatFormat)).Append("]").AppendLine();
+            }
+            
+            void AppendColorLog(in ColorRGBA c)
+            {
+                description.Append("Color: ");
+
+                string alpha = c.A.ToString(FloatFormat);
+
+                switch (c.R, c.G, c.B)
+                {
+                    case (1, 1, 1):
+                        description.Append("White | ").Append(alpha);
+                        break;
+                    case (0, 0, 0):
+                        description.Append("Black | ").Append(alpha);
+                        break;
+                    case (1, 0, 0):
+                        description.Append("Red | ").Append(alpha);
+                        break;
+                    case (0, 1, 0):
+                        description.Append("Green | ").Append(alpha);
+                        break;
+                    case (0, 0, 1):
+                        description.Append("Blue | ").Append(alpha);
+                        break;
+                    case (0.5f, 0.5f, 0.5f):
+                        description.Append("Grey | ").Append(alpha);
+                        break;
+                    default:
+                        description
+                            .Append(c.R.ToString(FloatFormat)).Append(" | ")
+                            .Append(c.G.ToString(FloatFormat)).Append(" | ")
+                            .Append(c.B.ToString(FloatFormat)).Append(" | ")
+                            .Append(alpha);
+                        break;
+                }
+
+                description.AppendLine();
+            }            
+            
+            void AppendScalarLog(double c)
+            {
+                description.Append("Scale: ").Append(c.ToString(FloatFormat)).AppendLine();
+            }            
+        }
 
         static string DescriptionFromType(Marker msg)
         {

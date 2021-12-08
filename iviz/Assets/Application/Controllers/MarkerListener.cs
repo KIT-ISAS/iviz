@@ -262,7 +262,6 @@ namespace Iviz.Controllers
 
         public void GenerateLog(StringBuilder description)
         {
-
             if (description == null)
             {
                 throw new ArgumentNullException(nameof(description));
@@ -487,5 +486,6 @@ namespace Iviz.Controllers
             markers[id] = marker;
             return marker;
         }
+
     }
 }

@@ -13,22 +13,29 @@ namespace Iviz.Displays
 
         void Update()
         {
-            var currentPositionLocal = Settings.MainCameraTransform.InverseTransformPoint(Transform.position);
-            var targetPositionLocal = new Vector3
-            (
-                Clamp(currentPositionLocal.x, -0.2f, 0.2f),
-                Clamp(currentPositionLocal.y, -0.3f, 0.3f),
-                Clamp(currentPositionLocal.z, minDistance, maxDistance)
+            var mainCameraPose = new Pose(
+                Settings.MainCameraTransform.position,
+                Quaternion.Euler(0, Settings.MainCameraTransform.eulerAngles.y, 0)
             );
-            
-            
-            
 
+            var (currentPosition, currentRotation) = Transform.AsPose();
+            var currentPositionLocal = mainCameraPose.Inverse().Multiply(currentPosition);
+            var targetPositionLocal = Clamp(
+                currentPositionLocal, 
+                new Vector3(-0.5f, -0.3f, minDistance),
+                new Vector3(0.5f, 0.1f, maxDistance));
+
+            var targetPosition = mainCameraPose.Multiply(targetPositionLocal);
+            var targetRotation = mainCameraPose.rotation;
+            
+            Transform.SetPositionAndRotation(
+                Vector3.Lerp(currentPosition, targetPosition, 0.05f), 
+                Quaternion.Lerp(currentRotation, targetRotation, 0.05f));
         }
 
-        static float Clamp(float value, float min, float max)
+        static Vector3 Clamp(in Vector3 value, in Vector3 min, in Vector3 max)
         {
-            return value < min ? min : value > max ? max : value;
+            return Vector3.Min(Vector3.Max(value, min), max);
         }
     }
 }

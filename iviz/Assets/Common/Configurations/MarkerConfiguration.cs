@@ -24,7 +24,6 @@ namespace Iviz.Common.Configurations
         [DataMember] public float Metallic { get; set; } = 0.5f;
         [DataMember]
         public bool[] VisibleMask { get; set; } = Enumerable.Repeat(true, Marker.TRIANGLE_LIST + 1).ToArray();
-
         [DataMember] public bool Visible { get; set; } = true;
     }
 }
