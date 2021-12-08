@@ -30,8 +30,8 @@ namespace Iviz.Displays
 
         Mesh? mesh;
 
-        [SerializeField] MeshRenderer? meshRenderer = null;
-        [SerializeField] MeshFilter? meshFilter = null;
+        [SerializeField] MeshRenderer? meshRenderer;
+        [SerializeField] MeshFilter? meshFilter;
         ComputeBuffer? pointComputeBuffer;
 
         Material? currentMaterial;

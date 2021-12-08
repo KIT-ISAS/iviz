@@ -21,6 +21,7 @@ namespace Iviz.Msgs
             this.ptr = ptr;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void Advance(int value)
         {
             ptr = ptr[value..];
@@ -63,7 +64,6 @@ namespace Iviz.Msgs
             return val;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string[] DeserializeStringArray()
         {
             int count = ReadInt();
@@ -83,7 +83,6 @@ namespace Iviz.Msgs
             return val;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public string[] SkipStringArray()
         {
             int count = ReadInt();
@@ -99,14 +98,12 @@ namespace Iviz.Msgs
             return Array.Empty<string>();
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DeserializeStringList(List<string> list)
         {
             int count = ReadInt();
             DeserializeStringArray(list, count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DeserializeStringArray(List<string> list, int count)
         {
             list.Clear();
@@ -136,14 +133,12 @@ namespace Iviz.Msgs
             Advance(SizeOf<T>());
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] DeserializeStructArray<T>() where T : unmanaged
         {
             int count = ReadInt();
             return count == 0 ? Array.Empty<T>() : DeserializeStructArray<T>(count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] DeserializeStructArray<T>(int count) where T : unmanaged
         {
             int sizeOfT = SizeOf<T>();
@@ -157,7 +152,6 @@ namespace Iviz.Msgs
             return val;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Memory<T> DeserializeStructRent<T>() where T : unmanaged
         {
             int count = ReadInt();
@@ -177,7 +171,6 @@ namespace Iviz.Msgs
             return val;
         }
         
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] SkipStructArray<T>() where T : unmanaged
         {
             int count = ReadInt();
@@ -188,14 +181,12 @@ namespace Iviz.Msgs
             return Array.Empty<T>();            
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DeserializeStructList<T>(List<T> list) where T : unmanaged
         {
             int count = ReadInt();
             DeserializeStructList(list, count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void DeserializeStructList<T>(List<T> list, int count) where T : unmanaged
         {
             ThrowIfOutOfRange(count * SizeOf<T>());
@@ -211,8 +202,6 @@ namespace Iviz.Msgs
             }
         }
 
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T[] DeserializeArray<T>() where T : IMessage, new()
         {
             int count = ReadInt();

@@ -61,7 +61,6 @@ namespace Iviz.Core
 
             EnsureCapacity(length + otherArray.Length);
             otherArray.CopyTo(array.AsSpan().Slice(length, otherArray.Length));
-            //NativeArray<T>.Copy(otherArray.array, 0, array, length, otherArray.Length);
             length += otherArray.Length;
         }
 

@@ -21,6 +21,7 @@ namespace Iviz.Msgs
             this.ptr = ptr;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         void Advance(int value)
         {
             ptr = ptr[value..];
@@ -113,7 +114,6 @@ namespace Iviz.Msgs
             Advance(count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SerializeArray(string[] val)
         {
             WriteInt(val.Length);
@@ -123,7 +123,6 @@ namespace Iviz.Msgs
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SerializeArray(string[] val, int count)
         {
             ThrowIfWrongSize(val, count);
@@ -151,7 +150,6 @@ namespace Iviz.Msgs
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SerializeStructArray<T>(T[] val) where T : unmanaged
         {
             int sizeOfT = SizeOf<T>();
@@ -176,7 +174,6 @@ namespace Iviz.Msgs
             Advance(size);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SerializeStructArray<T>(T[] val, int count) where T : unmanaged
         {
             ThrowIfWrongSize(val, count);
@@ -189,7 +186,6 @@ namespace Iviz.Msgs
             Advance(size);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SerializeStructList<T>(List<T> val, int count = 0) where T : unmanaged
         {
             int sizeOfT = SizeOf<T>();
@@ -210,7 +206,6 @@ namespace Iviz.Msgs
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SerializeArray<T>(T[] val) where T : IMessage
         {
             WriteInt(val.Length);
@@ -220,7 +215,6 @@ namespace Iviz.Msgs
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SerializeArray<T>(T[] val, int count) where T : IMessage
         {
             ThrowIfWrongSize(val, count);

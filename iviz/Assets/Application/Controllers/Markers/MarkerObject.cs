@@ -29,8 +29,13 @@ namespace Iviz.Controllers
         const string ErrorStr = "<color=red>Error:</color> ";
         const string FloatFormat = "#,0.###";
 
+        static MarkerLineHelper? lineHelper;
+        static MarkerPointHelper? pointHelper;
         static uint globalIdCounter;
-        
+
+        static MarkerLineHelper LineHelper => lineHelper ??= new MarkerLineHelper();
+        static MarkerPointHelper PointHelper => pointHelper ??= new MarkerPointHelper();
+
         readonly StringBuilder description = new(250);
         readonly FrameNode node;
         readonly (string Ns, int Id) id;
@@ -39,8 +44,6 @@ namespace Iviz.Controllers
         Info<GameObject>? resourceInfo;
         CancellationTokenSource? runningTs;
 
-        MarkerLineHelper? lineHelper;
-        MarkerPointHelper? pointHelper;
         BoundsHighlighter? highlighter;
 
         Pose currentPose;
@@ -57,12 +60,11 @@ namespace Iviz.Controllers
         float smoothness = 0.5f;
         Color tint = Color.white;
 
-        MarkerLineHelper LineHelper => lineHelper ??= new MarkerLineHelper();
-        MarkerPointHelper PointHelper => pointHelper ??= new MarkerPointHelper();
         public DateTime ExpirationTime { get; private set; }
         public MarkerType MarkerType { get; private set; }
+        public string UniqueNodeName { get; }
+        
         public Transform Transform => node.Transform;
-
         Bounds? IHasBounds.Bounds => resource?.Bounds;
         Transform? IHasBounds.BoundsTransform => resource?.GetTransform();
         bool IHasBounds.AcceptsHighlighter => !ShowDescription;
@@ -144,8 +146,6 @@ namespace Iviz.Controllers
             get => node.gameObject.activeSelf;
             set => node.gameObject.SetActive(value);
         }
-
-        public string UniqueNodeName { get; }
 
         public bool TriangleListFlipWinding
         {
@@ -412,22 +412,6 @@ namespace Iviz.Controllers
 
             var colors = MemoryMarshal.Cast<ColorRGBA, Color>(msg.Colors);
             meshTriangles.Set(points, colors);
-            /*
-            if (msg.Colors.Length != 0)
-            {
-                var srcColors = msg.Colors;
-                using var colors = new Rent<Color>(srcColors.Length);
-                for (int i = 0; i < srcColors.Length; i++)
-                {
-                    ref var color = ref colors.Array[i];
-                    (color.r, color.g, color.b, color.a) = srcColors[i];
-                }
-            }
-            else
-            {
-                meshTriangles.Set(points);
-            }
-            */
         }
 
         void CreatePoints(Marker msg)
@@ -783,10 +767,14 @@ namespace Iviz.Controllers
                 numErrors++;
                 description.Append(ErrorStr).Append(
                     $"Cannot use ({newPose.position.x}, {newPose.position.y}, {newPose.position.z}) as position. Values too large.");
-                newPose = Pose.identity;
+                currentPose = Pose.identity;
+            }
+            else
+            {
+                currentPose = newPose;
             }
 
-            Transform.SetLocalPose(currentPose = newPose);
+            Transform.SetLocalPose(currentPose);
         }
 
         ValueTask<Info<GameObject>?> GetRequestedResource(Marker msg)
@@ -879,12 +867,9 @@ namespace Iviz.Controllers
             hash = Crc32Calculator.Compute(msg.Color, hash);
             hash = Crc32Calculator.Compute(msg.Points, hash);
             hash = Crc32Calculator.Compute(msg.Colors, hash);
-            if (useScale)
-            {
-                return Crc32Calculator.Compute(msg.Scale, hash);
-            }
-
-            return hash;
+            return useScale 
+                ? Crc32Calculator.Compute(msg.Scale, hash) 
+                : hash;
         }
 
         public void Stop()

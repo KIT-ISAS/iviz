@@ -82,9 +82,6 @@ namespace Iviz.Displays
 
         readonly GameObject? node;
 
-        readonly Model modelGenerator = new();
-        readonly Scene sceneGenerator = new();
-
         public ReadOnlyCollection<string> GetListOfModels() => resourceFiles.Models.Keys.ToList().AsReadOnly();
 
         public ExternalResourceManager(bool createNode = true)
@@ -315,7 +312,7 @@ namespace Iviz.Displays
             string fileType = Path.GetExtension(uriPath).ToUpperInvariant();
 
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
-            if (fileType == ".SDF" || fileType == ".WORLD")
+            if (fileType is ".SDF" or ".WORLD")
             {
                 return await TryGetSceneAsync(uriString, provider, tokenSource.Token);
             }
@@ -382,7 +379,7 @@ namespace Iviz.Displays
         async ValueTask<Info<GameObject>?> TryGetModelFromServerAsync(string uriString,
             IExternalServiceProvider provider, CancellationToken token)
         {
-            var msg = new GetModelResource {Request = {Uri = uriString}};
+            var msg = new GetModelResource { Request = { Uri = uriString } };
             try
             {
                 bool hasClient = await provider.CallServiceAsync(ModelServiceName, msg, TimeoutInMs, token);
@@ -452,7 +449,7 @@ namespace Iviz.Displays
         async ValueTask<Info<GameObject>?> TryGetSceneFromServerAsync(string uriString,
             IExternalServiceProvider provider, CancellationToken token)
         {
-            var msg = new GetSdf {Request = {Uri = uriString}};
+            var msg = new GetSdf { Request = { Uri = uriString } };
             if (await provider.CallServiceAsync(SceneServiceName, msg, TimeoutInMs, token) && msg.Response.Success)
             {
                 return await ProcessSceneResponseAsync(uriString, msg.Response, provider, token);
@@ -516,7 +513,7 @@ namespace Iviz.Displays
         async ValueTask<Info<Texture2D>?> TryGetTextureFromServerAsync(string uriString,
             IExternalServiceProvider provider, CancellationToken token, float currentTime)
         {
-            var msg = new GetModelTexture {Request = {Uri = uriString}};
+            var msg = new GetModelTexture { Request = { Uri = uriString } };
             if (await provider.CallServiceAsync(TextureServiceName, msg, TimeoutInMs, token) && msg.Response.Success)
             {
                 return await ProcessTextureResponseAsync(uriString, msg.Response, token);
@@ -543,7 +540,7 @@ namespace Iviz.Displays
                 return ReadModelFromFileAsync(uriString, localPath, token);
             }
 
-            return ValueTask2.FromResult((Model?) null);
+            return ValueTask2.FromResult((Model?)null);
         }
 
         async ValueTask<Model?> ReadModelFromFileAsync(string uriString, string localPath, CancellationToken token)
@@ -556,7 +553,7 @@ namespace Iviz.Displays
                 return null;
             }
 
-            return ReadBuffer.Deserialize(modelGenerator, buffer[Md5SumLength..]);
+            return BuiltIns.DeserializeMessage<Model>(buffer[Md5SumLength..]);
         }
 
         async ValueTask<Info<GameObject>?> LoadLocalModelAsync(string uriString, string localPath,
@@ -627,7 +624,7 @@ namespace Iviz.Displays
                     return null;
                 }
 
-                var msg = ReadBuffer.Deserialize(sceneGenerator, buffer[Md5SumLength..]);
+                var msg = BuiltIns.DeserializeMessage<Scene>(buffer[Md5SumLength..]);
                 obj = await CreateSceneNodeAsync(msg, provider, token);
             }
             catch (Exception e) when (e is not OperationCanceledException)
@@ -781,7 +778,7 @@ namespace Iviz.Displays
                 var childTransform = child.transform;
                 childTransform.SetParent(sceneNode.transform, false);
                 childTransform.localRotation = m.rotation.Ros2Unity();
-                childTransform.localPosition = ((Vector3) m.GetColumn(3)).Ros2Unity();
+                childTransform.localPosition = ((Vector3)m.GetColumn(3)).Ros2Unity();
                 childTransform.localScale = m.lossyScale;
 
                 var includeResource = await Resource.GetGameObjectResourceAsync(include.Uri, provider, token);
@@ -803,7 +800,7 @@ namespace Iviz.Displays
                 light.shadows = source.CastShadows ? LightShadows.Soft : LightShadows.None;
                 lightObject.transform.localPosition = source.Position.Ros2Unity();
                 light.range = source.Range != 0 ? source.Range : 20;
-                switch ((SdfLightType) source.Type)
+                switch ((SdfLightType)source.Type)
                 {
                     default:
                         light.type = LightType.Point;

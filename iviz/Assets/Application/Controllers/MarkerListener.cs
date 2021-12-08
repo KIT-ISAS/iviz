@@ -118,17 +118,42 @@ namespace Iviz.Controllers
                 }
             }
         }
+        
+        public float Smoothness
+        {
+            get => config.Smoothness;
+            set
+            {
+                config.Smoothness = value;
 
+                foreach (var marker in markers.Values)
+                {
+                    marker.Smoothness = value;
+                }
+            }
+        }        
+
+        public float Metallic
+        {
+            get => config.Metallic;
+            set
+            {
+                config.Metallic = value;
+
+                foreach (var marker in markers.Values)
+                {
+                    marker.Metallic = value;
+                }
+            }
+        }             
+        
         public bool PreferUdp
         {
             get => config.PreferUdp;
             set
             {
                 config.PreferUdp = value;
-                if (Listener != null)
-                {
-                    Listener.TransportHint = value ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
-                }
+                Listener.TransportHint = value ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
             }
         }
         
@@ -404,19 +429,19 @@ namespace Iviz.Controllers
                 case Marker.ADD:
                     if (msg.Pose.HasNaN())
                     {
-                        RosLogger.Debug($"{this}: NaN in pose!");
+                        RosLogger.Debug($"{this}: NaN in pose! Rejecting marker update {id.ToString()}.");
                         break;
                     }
 
                     if (msg.Scale.HasNaN())
                     {
-                        RosLogger.Debug($"{this}: NaN in scale!");
+                        RosLogger.Debug($"{this}: NaN in scale! Rejecting marker update {id.ToString()}.");
                         break;
                     }
 
                     if (msg.Type >= config.VisibleMask.Length)
                     {
-                        RosLogger.Debug($"{this}: Unknown type {msg.Type.ToString()}");
+                        RosLogger.Debug($"{this}: Unknown type {msg.Type.ToString()}.  Rejecting marker update {id.ToString()}.");
                         break;
                     }
 
@@ -455,7 +480,9 @@ namespace Iviz.Controllers
                 OcclusionOnly = RenderAsOcclusionOnly,
                 Tint = Tint,
                 Visible = Visible && config.VisibleMask[msgType],
-                TriangleListFlipWinding = TriangleListFlipWinding
+                TriangleListFlipWinding = TriangleListFlipWinding,
+                Metallic = Metallic,
+                Smoothness = Smoothness
             };
             markers[id] = marker;
             return marker;

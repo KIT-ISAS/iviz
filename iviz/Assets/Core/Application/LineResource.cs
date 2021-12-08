@@ -388,7 +388,7 @@ namespace Iviz.Displays
 
             if (lineBuffer.Capacity != 0)
             {
-                lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Marshal.SizeOf<LineWithColor>());
+                lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Unsafe.SizeOf<LineWithColor>());
                 lineComputeBuffer.SetData(lineBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(LinesID, lineComputeBuffer);
             }

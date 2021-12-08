@@ -16,9 +16,7 @@ namespace Iviz.Displays.Highlighters
         readonly FrameNode node;
         readonly MeshMarkerResource reticle;
         readonly Tooltip tooltip;
-        //readonly CancellationTokenSource tokenSource;
 
-        //public CancellationToken Token => tokenSource.Token;
         public CancellationToken Token => default;
         public float Duration => 1;
 
@@ -48,8 +46,6 @@ namespace Iviz.Displays.Highlighters
             tooltip.Transform.localPosition = 2f * (frameSize * 0.3f + labelSize) * Vector3.up;
             tooltip.PointToCamera();
 
-            //tokenSource = new CancellationTokenSource();
-
             using var description = BuilderPool.Rent();
             RosUtils.FormatPose(unityPose, description, RosUtils.PoseFormat.OnlyPosition, 2);
             tooltip.SetCaption(description);
@@ -65,8 +61,6 @@ namespace Iviz.Displays.Highlighters
 
         public void Dispose()
         {
-            //tokenSource.Cancel();
-            //tokenSource.Dispose();
             reticle.ReturnToPool(Resource.Displays.Reticle);
             tooltip.ReturnToPool();
             node.DestroySelf();

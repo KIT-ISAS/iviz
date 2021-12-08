@@ -276,6 +276,11 @@ namespace Iviz.Msgs
             return ReadBuffer.Deserialize(generator, bytes);
         }
         
+        public static T DeserializeMessage<T>(ReadOnlySpan<byte> bytes)
+            where T : ISerializable, IDeserializable<T>, new()
+        {
+            return ReadBuffer.Deserialize(new T(), bytes);
+        }
 
         internal static int GetArraySize<T>(T[]? array) where T : IMessage
         {

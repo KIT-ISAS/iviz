@@ -17,9 +17,7 @@ namespace Iviz.Displays.Highlighters
         readonly AxisFrameResource axisResource;
         readonly Tooltip tooltip;
         readonly FrameNode node;
-        //readonly CancellationTokenSource tokenSource;
 
-        //public CancellationToken Token => tokenSource.Token;
         public CancellationToken Token => default;
         public float Duration => 1;
 
@@ -37,8 +35,6 @@ namespace Iviz.Displays.Highlighters
             tooltip.BackgroundColor = Resource.Colors.HighlighterBackground;
             tooltip.CaptionColor = Color.white;
             tooltip.Caption = "";
-
-            //tokenSource = new CancellationTokenSource();
 
             if (!frame.IsAlive) // ?
             {
@@ -84,8 +80,6 @@ namespace Iviz.Displays.Highlighters
 
         public void Dispose()
         {
-            //tokenSource.Cancel();
-            //tokenSource.Dispose();
             axisResource.ReturnToPool();
             tooltip.ReturnToPool();
             node.DestroySelf();

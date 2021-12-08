@@ -137,8 +137,7 @@ namespace Iviz.Displays
 
         Quaternion CalculateOrientationToCamera()
         {
-            var (x, _, z) = transform.position - Settings.MainCameraTransform.position;
-            return quaternion.Euler(0, Mathf.PI / 2 - Mathf.Atan2(z, x), 0);
+            return Quaternion.LookRotation((transform.position - Settings.MainCameraTransform.position).WithY(0));
         }
 
         public void ReturnToPool()

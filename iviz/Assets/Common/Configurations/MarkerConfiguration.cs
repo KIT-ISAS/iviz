@@ -20,7 +20,8 @@ namespace Iviz.Common.Configurations
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public bool PreferUdp { get; set; } = true;
         [DataMember] public ModuleType ModuleType => ModuleType.Marker;
-
+        [DataMember] public float Smoothness { get; set; } = 0.5f;
+        [DataMember] public float Metallic { get; set; } = 0.5f;
         [DataMember]
         public bool[] VisibleMask { get; set; } = Enumerable.Repeat(true, Marker.TRIANGLE_LIST + 1).ToArray();
 
