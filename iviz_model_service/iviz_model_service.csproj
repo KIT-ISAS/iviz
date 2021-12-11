@@ -4,7 +4,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Iviz.ModelService</RootNamespace>
     <AssemblyName>Iviz.ModelService</AssemblyName>
-    <LangVersion>8</LangVersion>
+    <LangVersion>default</LangVersion>
     <Nullable>enable</Nullable>
     <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
   </PropertyGroup>
@@ -12,7 +12,6 @@
     <ProjectReference Include="..\iviz_model_service_lib\iviz_model_service_lib.csproj" />
     <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
     <ProjectReference Include="..\iviz_roslib\iviz_roslib.csproj" />
-    <ProjectReference Include="..\iviz_urdf\iviz_urdf.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AssimpNet" Version="4.1.0" />
