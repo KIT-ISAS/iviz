@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <LangVersion>9</LangVersion>
+        <LangVersion>latest</LangVersion>
         <AssemblyName>Iviz.XmlRpc</AssemblyName>
         <RootNamespace>Iviz.XmlRpc</RootNamespace>
-        <TargetFrameworks>net5.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 

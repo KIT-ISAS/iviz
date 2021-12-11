@@ -211,7 +211,7 @@ namespace Iviz.Msgs
             }
 
             return count == 0 ? Array.Empty<T>() : new T[count];
-            // per entry deserialization happens outside
+            // entry deserializations happen outside
         }
         
         /// <summary>

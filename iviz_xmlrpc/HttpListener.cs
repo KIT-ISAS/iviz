@@ -176,7 +176,7 @@ namespace Iviz.XmlRpc
                 return;
             }
 
-            DateTime now = DateTime.Now;
+            var now = DateTime.Now;
             int count = backgroundTasks.Count(tuple => (tuple.start - now).TotalMilliseconds > BackgroundTimeoutInMs);
             if (count > 0)
             {
