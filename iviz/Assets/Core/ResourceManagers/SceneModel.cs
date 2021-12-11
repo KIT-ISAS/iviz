@@ -152,10 +152,9 @@ namespace Iviz.Displays
                     );
                 }
 
-                
-                
                 meshResource.Color = material.Diffuse.ToColor32();
                 meshResource.EmissiveColor = material.Emissive.ToColor32();
+                meshResource.MeshName = $"{uriString}/{mesh.Name}";
 
                 if (diffuseTexture != null && diffuseTexture.Path.Length != 0)
                 {
@@ -184,8 +183,6 @@ namespace Iviz.Displays
                                        $"'{bumpTexture.Path}' required by '{uriString}'");
                     }
                 }
-
-                meshResource.Mesh.name = mesh.Name;
 
                 children.Add(meshResource);
                 templateMeshes.Add(meshResource);
@@ -233,7 +230,7 @@ namespace Iviz.Displays
                 }
             }
 
-            marker.Children = children;
+            marker.Children = children.ToArray();
             marker.UpdateBounds();
 
             return marker;

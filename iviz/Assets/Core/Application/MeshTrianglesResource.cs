@@ -21,6 +21,17 @@ namespace Iviz.Displays
         public override Bounds? Bounds =>
             mesh != null && mesh.vertexCount != 0 ? new Bounds(Collider.center, Collider.size) : null;
 
+        public string MeshName
+        {
+            set
+            {
+                if (mesh != null)
+                {
+                    mesh.name = value;
+                }
+            }
+        }
+
         Mesh EnsureOwnMesh(int numPointsNeeded)
         {
             var indexFormat = numPointsNeeded >= MaxVerticesShort

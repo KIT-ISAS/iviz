@@ -3,6 +3,7 @@
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Core;
+using Iviz.Displays;
 using UnityEngine;
 
 /*
@@ -21,7 +22,7 @@ namespace Iviz.Controllers.XR
         public bool Visible { get; set; }
     }
 
-    public sealed class XRMainController : MonoBehaviour
+    public sealed class XRContents : MonoBehaviour
     {
         [SerializeField] GazeController? gaze;
         [SerializeField] HandController? leftHand;
@@ -29,6 +30,7 @@ namespace Iviz.Controllers.XR
         [SerializeField] PaddleController? leftPaddle;
         [SerializeField] PaddleController? rightPaddle;
         [SerializeField] Transform? cameraOffset;
+        [SerializeField] CanvasHolder? canvasHolder;
 
         public GazeController Gaze => gaze.AssertNotNull(nameof(gaze));
         public HandController LeftHand => leftHand.AssertNotNull(nameof(leftHand));
@@ -36,5 +38,6 @@ namespace Iviz.Controllers.XR
         public PaddleController LeftPaddle => leftPaddle.AssertNotNull(nameof(leftPaddle));
         public PaddleController RightPaddle => rightPaddle.AssertNotNull(nameof(rightPaddle));
         public Transform CameraOffset => cameraOffset.AssertNotNull(nameof(cameraOffset));
+        public CanvasHolder CanvasHolder => canvasHolder.AssertNotNull(nameof(canvasHolder));
     }
 }

@@ -49,7 +49,7 @@ namespace Iviz.Displays
 
                 float det = math.determinant(m);
                 float angle = Mathf.Asin(det) * Mathf.Rad2Deg;
-                float dampenedAngle = Damping is { } damping
+                float dampenedAngle = DampingPerFrame is { } damping
                     ? damping * angle
                     : angle;
 

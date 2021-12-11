@@ -409,7 +409,7 @@ namespace Iviz.App.ARDialogs
             connector.Start = () => Transform.localPosition - BaseDisplacement;
             connector.End = () =>
             {
-                Vector3 framePosition = TfListener.RelativePositionToOrigin(Node.Transform.position) + PivotFrameOffset;
+                Vector3 framePosition = TfListener.RelativeToOrigin(Node.Transform.position) + PivotFrameOffset;
 
                 return PivotDisplacement.MaxAbsCoeff() == 0
                     ? framePosition
@@ -496,7 +496,7 @@ namespace Iviz.App.ARDialogs
                 return;
             }
 
-            Vector3 frameLocalPosition = TfListener.RelativePositionToOrigin(Node.Transform.position) + PivotFrameOffset;
+            Vector3 frameLocalPosition = TfListener.RelativeToOrigin(Node.Transform.position) + PivotFrameOffset;
             Quaternion cameraLocalRotation = GetFlatCameraRotation(frameLocalPosition);
 
             Vector3 targetLocalPosition = frameLocalPosition + cameraLocalRotation * DialogDisplacement + BaseDisplacement;

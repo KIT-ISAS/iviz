@@ -618,7 +618,7 @@ namespace Iviz.Controllers
                 }
 
                 var absoluteArCameraPose = ARPoseToUnity(anyPose.Value);
-                var relativePose = TfListener.RelativePoseToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
+                var relativePose = TfListener.RelativeToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
                 TfListener.Publish(frameId, relativePose.ToCameraFrame());
             }
             catch (Exception e)

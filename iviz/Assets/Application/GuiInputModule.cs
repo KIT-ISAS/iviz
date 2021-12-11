@@ -339,9 +339,10 @@ namespace Iviz.App
                 Color valueNoAlpha = colorToUse.WithAlpha(0);
                 MainCamera.backgroundColor = valueNoAlpha;
 
-                float maxRGB = Mathf.Max(Mathf.Max(colorToUse.r, colorToUse.g), colorToUse.b);
-                Color skyColor = maxRGB == 0 ? Color.black : valueNoAlpha / maxRGB;
-                RenderSettings.ambientSkyColor = skyColor.WithAlpha(0);
+                //float maxRGB = Mathf.Max(Mathf.Max(colorToUse.r, colorToUse.g), colorToUse.b);
+                //Color skyColor = maxRGB == 0 ? Color.black : valueNoAlpha / maxRGB;
+                //RenderSettings.ambientSkyColor = skyColor.WithAlpha(0);
+                RenderSettings.ambientSkyColor = colorToUse.WithAlpha(0);
             }
         }
 
@@ -890,7 +891,7 @@ namespace Iviz.App
             {
                 var poseStamped = new PoseStamped(
                     (tapSeq++, TfListener.FixedFrameId),
-                    TfListener.RelativePoseToFixedFrame(poseToHighlight).Unity2RosPose()
+                    TfListener.RelativeToFixedFrame(poseToHighlight).Unity2RosPose()
                 );
                 TfListener.Instance.TapPublisher.Publish(poseStamped);
             }

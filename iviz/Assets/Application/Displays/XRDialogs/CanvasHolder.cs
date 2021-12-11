@@ -1,5 +1,6 @@
 #nullable enable
 
+using System.Drawing;
 using System.Threading;
 using Iviz.Core;
 using Iviz.Resources;
@@ -7,6 +8,7 @@ using JetBrains.Annotations;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
+using Color = UnityEngine.Color;
 
 namespace Iviz.Displays
 {
@@ -18,6 +20,7 @@ namespace Iviz.Displays
         [SerializeField] BoxCollider? boxCollider;
         [SerializeField] FixedDistanceDraggable? draggable;
         [SerializeField] TMP_Text? label;
+        [SerializeField] bool followsCamera;
         CancellationTokenSource? tokenSource;
 
         RoundedPlaneResource? background;
@@ -26,7 +29,7 @@ namespace Iviz.Displays
         Vector2 canvasSize = new Vector2(800, 600);
 
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
-        
+
         RoundedPlaneResource Background =>
             background != null
                 ? background
@@ -35,8 +38,8 @@ namespace Iviz.Displays
         FixedDistanceDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         Transform Holder => Draggable.Transform;
         TMP_Text Label => label.AssertNotNull(nameof(label));
-        
-        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+
+        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         public string Title
         {
@@ -63,11 +66,14 @@ namespace Iviz.Displays
 
         public bool FollowsCamera
         {
-            set
-            {
-                enabled = value;
-            }
-        } 
+            set => enabled = value;
+        }
+
+        public bool Visible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
+        }
 
         void Awake()
         {
@@ -81,7 +87,6 @@ namespace Iviz.Displays
             Background.ShadowsEnabled = false;
             Background.Layer = LayerType.Clickable;
 
-            Draggable.Damping = 0.2f;
             Draggable.ForwardScale = 5f;
             Draggable.StateChanged += () =>
             {
@@ -110,20 +115,30 @@ namespace Iviz.Displays
                 Title = "Main";
             }
 
-            FollowsCamera = false;
+            FollowsCamera = followsCamera;
+        }
+
+        public Pose GetTargetPose()
+        {
+            var mainCameraPose = new Pose(
+                Settings.MainCameraTransform.position,
+                Quaternion.Euler(0, Settings.MainCameraTransform.eulerAngles.y, 0)
+            );
+
+            var canvasTransform = (RectTransform)Canvas.transform;
+            float sizeY = canvasTransform.rect.size.y * canvasTransform.localScale.y;
+            var targetPosition = mainCameraPose.position + mainCameraPose.forward * 1.5f;
+            targetPosition.y = Mathf.Max(targetPosition.y, sizeY / 2 + 0.5f);
+
+            var targetRotation = CalculateOrientationToCamera();
+
+            return ClampTargetPose(new Pose(targetPosition, targetRotation), mainCameraPose);
         }
 
         public void InitializePose()
         {
-            var canvasTransform = (RectTransform)Canvas.transform;
-            float sizeY = canvasTransform.rect.size.y * canvasTransform.localScale.y;
+            transform.SetPose(GetTargetPose());
 
-            var position = Settings.MainCameraTransform.position + Settings.MainCameraTransform.forward * 1.5f;
-            position.y = Mathf.Max(position.y, sizeY / 2 + 0.5f);
-
-            transform.position = position;
-            transform.rotation = CalculateOrientationToCamera();
-            
             tokenSource?.Cancel();
             tokenSource = new CancellationTokenSource();
 
@@ -140,10 +155,8 @@ namespace Iviz.Displays
             tokenSource = new CancellationTokenSource();
 
             var start = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
-            FAnimator.Spawn(tokenSource.Token, 0.25f, t =>
-            {
-                transform.rotation = Quaternion.Lerp(start, CalculateOrientationToCamera(), t);
-            });
+            FAnimator.Spawn(tokenSource.Token, 0.25f,
+                t => { transform.rotation = Quaternion.Lerp(start, CalculateOrientationToCamera(), t); });
         }
 
         Quaternion CalculateOrientationToCamera()
@@ -165,7 +178,7 @@ namespace Iviz.Displays
                 transform.localScale = Vector3.one;
                 ResourceUtils.ReturnToPool(this);
             });
-        } 
+        }
 
         public Bounds? Bounds => new Bounds(BoxCollider.center, BoxCollider.size);
 
@@ -173,35 +186,51 @@ namespace Iviz.Displays
 
         void Update()
         {
-            const float minDistance = 1.0f;
-            const float maxDistance = 1.5f;
             const float damping = 0.05f;
-            
+
             var mainCameraPose = new Pose(
                 Settings.MainCameraTransform.position,
                 Quaternion.Euler(0, Settings.MainCameraTransform.eulerAngles.y, 0)
             );
 
-            var (currentPosition, currentRotation) = Transform.AsPose();
-            var currentPositionLocal = mainCameraPose.Inverse().Multiply(currentPosition);
-            var targetPositionLocal = Clamp(
-                currentPositionLocal, 
-                new Vector3(-0.5f, -0.3f, minDistance),
-                new Vector3(0.5f, 0.1f, maxDistance));
 
-            var targetPosition = mainCameraPose.Multiply(targetPositionLocal);
-            var targetRotation = mainCameraPose.rotation;
-            
+            var currentPose = Transform.AsPose();
+            var (targetPosition, targetRotation) = ClampTargetPose(currentPose, mainCameraPose);
+
             Transform.SetPositionAndRotation(
-                Vector3.Lerp(currentPosition, targetPosition, damping), 
-                Quaternion.Lerp(currentRotation, targetRotation, damping));
+                Vector3.Lerp(currentPose.position, targetPosition, damping),
+                Quaternion.Lerp(currentPose.rotation, targetRotation, damping * 0.25f));
+        }
+
+        static Pose ClampTargetPose(in Pose currentPose, in Pose mainCameraPose)
+        {
+            const float minDistance = 1.0f;
+            const float maxDistance = 1.5f;
+
+            var (currentPositionLocal, currentRotationLocal) = mainCameraPose.Inverse().Multiply(currentPose);
+            var targetPositionLocal = Clamp(
+                currentPositionLocal,
+                new Vector3(-0.5f, -0.4f, minDistance),
+                new Vector3(0.5f, -0.2f, maxDistance));
+
+            float currentAngleLocal = currentRotationLocal.eulerAngles.y;
+            if (currentAngleLocal > 180)
+            {
+                currentAngleLocal -= 360;
+            }
+
+            var targetRotationLocal = Mathf.Abs(currentAngleLocal) < 30
+                ? currentRotationLocal
+                : Quaternion.identity;
+
+            return mainCameraPose.Multiply(new Pose(targetPositionLocal, targetRotationLocal));
         }
 
         static Vector3 Clamp(in Vector3 value, in Vector3 min, in Vector3 max)
         {
             return Vector3.Min(Vector3.Max(value, min), max);
         }
-        
+
         public void Suspend()
         {
             tokenSource?.Cancel();

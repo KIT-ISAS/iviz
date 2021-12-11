@@ -40,7 +40,7 @@ namespace Iviz.Displays
                 var referencePointWorld = mTransform.TransformPoint(referencePointLocal);
                 var deltaPositionWorld = intersectionWorld - referencePointWorld;
 
-                mTarget.position += Damping is { } damping
+                mTarget.position += DampingPerFrame is { } damping
                     ? damping * deltaPositionWorld
                     : deltaPositionWorld;
                 RaiseMoved();

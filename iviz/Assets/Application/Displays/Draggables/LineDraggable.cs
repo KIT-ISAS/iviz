@@ -38,7 +38,7 @@ namespace Iviz.Displays
 
                 var deltaPositionWorld = axisDistance * axisRay.direction;
 
-                mTarget.position += Damping is { } damping
+                mTarget.position += DampingPerFrame is { } damping
                     ? damping * deltaPositionWorld
                     : deltaPositionWorld;
                 RaiseMoved();

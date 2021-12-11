@@ -22,11 +22,12 @@ namespace Iviz.Controllers.XR
         Right
     }
 
-    public class HandState
+    public sealed class HandState
     {
-        public Pose palm;
+        public Pose Palm { get; set; }
+        public Ray? Cursor { get; set; }
 
-        public readonly Pose[][] fingers =
+        public Pose[][] Fingers { get; } =
         {
             Array.Empty<Pose>(),
             Array.Empty<Pose>(),
@@ -34,6 +35,12 @@ namespace Iviz.Controllers.XR
             Array.Empty<Pose>(),
             Array.Empty<Pose>(),
         };
+
+        public Pose ThumbFingertip => Fingers[0][^1];
+        public Pose IndexFingertip => Fingers[1][^1];
+        public SelectEnumerable<Pose[][], Pose[], Pose> Fingertips => Fingers.Select(GetTip);
+        
+        static readonly Func<Pose[], Pose> GetTip = finger => finger[^1]; 
     }
 
     public sealed class HandController : CustomController
@@ -41,7 +48,7 @@ namespace Iviz.Controllers.XR
         static readonly InputFeatureUsage<Hand> HandData = CommonUsages.handData;
         static readonly InputFeatureUsage HandDataBase = (InputFeatureUsage)HandData;
 
-        readonly List<Bone> boneList = new();
+        readonly List<Bone> cachedBoneList = new();
         readonly MeshMarkerResource?[] fingerTips = new MeshMarkerResource?[5];
         readonly MeshMarkerResource?[] fingerBases = new MeshMarkerResource?[5];
         readonly HandState cachedHandState = new();
@@ -52,7 +59,7 @@ namespace Iviz.Controllers.XR
 
         GameObject? modelRoot;
 
-        public HandState? HandState { get; private set; }
+        public HandState? State { get; private set; }
 
         Transform RootTransform
         {
@@ -89,7 +96,7 @@ namespace Iviz.Controllers.XR
         protected override void UpdateTrackingInput(XRControllerState? controllerState)
         {
             base.UpdateTrackingInput(controllerState);
-            HandState = null;
+            State = null;
             ModelVisible = false;
             IsActiveInFrame = false;
             HasCursor = false;
@@ -107,61 +114,28 @@ namespace Iviz.Controllers.XR
                 return;
             }
 
-            if (!hand.TryGetRootBone(out var palm)
-                || !palm.TryGetPosition(out cachedHandState.palm.position)
-                || !palm.TryGetRotation(out cachedHandState.palm.rotation))
+            var referenceTransform = transform.parent;
+
+            if (!TryGetHandData(hand, referenceTransform))
             {
                 return;
             }
 
-            foreach (int i in ..5)
-            {
-                var finger = (HandFinger)i;
-                if (!hand.TryGetFingerBones(finger, boneList))
-                {
-                    return;
-                }
-
-                ref var fingers = ref cachedHandState.fingers[i];
-                if (fingers.Length != boneList.Count)
-                {
-                    fingers = new Pose[boneList.Count];
-                }
-
-                foreach (int j in ..boneList.Count)
-                {
-                    if (!boneList[j].TryGetPosition(out fingers[j].position)
-                        || !boneList[j].TryGetRotation(out fingers[j].rotation))
-                    {
-                        return;
-                    }
-                }
-            }
-
             ModelVisible = true;
             IsActiveInFrame = true;
-            HandState = cachedHandState;
+            State = cachedHandState;
 
             if (cameraTransform == null)
             {
                 return;
             }
 
-            /*
-            for (int i = 0; i < 5; i++)
-            {
-                HandleBone(ref fingerTips[i], HandState.fingers[i][^1]);
-                HandleBone(ref fingerBases[i], HandState.fingers[i][^3]);
-            }
-            */
-
-            HandleBone(ref fingerTips[0], HandState.fingers[0][^1]);
-            HandleBone(ref fingerTips[1], HandState.fingers[1][^1]);
+            HandleBoneMesh(ref fingerTips[0], cachedHandState.ThumbFingertip);
+            HandleBoneMesh(ref fingerTips[1], cachedHandState.IndexFingertip);
+            HandleBoneMesh(ref fingerTips[2], cachedHandState.Palm);
 
 
-            var cameraOffset = transform.parent;
-
-            var (palmPosition, palmRotation) = cameraOffset.TransformPose(HandState.palm);
+            var (palmPosition, palmRotation) = cachedHandState.Palm;
 
             const float palmOffset = 0.03f;
             var controllerPosition = palmPosition + palmRotation *
@@ -171,11 +145,60 @@ namespace Iviz.Controllers.XR
             var controllerRotation = Quaternion.LookRotation(controllerForward);
 
             controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
-            controllerState.position = cameraOffset.InverseTransformPoint(controllerPosition);
+            controllerState.position = referenceTransform.InverseTransformPoint(controllerPosition);
             controllerState.rotation = controllerRotation;
 
             HasCursor = Vector3.Dot(palmRotation * Vector3.up, cameraTransform.forward) < 0;
+            cachedHandState.Cursor = HasCursor
+                ? new Ray(controllerPosition, controllerForward.normalized)
+                : null;
         }
+
+        bool TryGetHandData(Hand hand, Transform referenceTransform)
+        {
+            if (!hand.TryGetRootBone(out var palm)
+                || !palm.TryGetPosition(out var palmPosition)
+                || !palm.TryGetRotation(out var palmRotation))
+            {
+                return false;
+            }
+
+            cachedHandState.Palm = referenceTransform.TransformPose(new Pose(palmPosition, palmRotation));
+
+            foreach (int i in ..5)
+            {
+                var finger = (HandFinger)i;
+                if (!hand.TryGetFingerBones(finger, cachedBoneList))
+                {
+                    return false;
+                }
+
+                Pose[] fingers;
+                if (cachedHandState.Fingers[i].Length != cachedBoneList.Count)
+                {
+                    fingers = new Pose[cachedBoneList.Count];
+                    cachedHandState.Fingers[i] = fingers;
+                }
+                else
+                {
+                    fingers = cachedHandState.Fingers[i];
+                }
+
+                foreach (int j in ..cachedBoneList.Count)
+                {
+                    if (!cachedBoneList[j].TryGetPosition(out var fingerPosition)
+                        || !cachedBoneList[j].TryGetRotation(out var fingerRotation))
+                    {
+                        return false;
+                    }
+
+                    fingers[j] = referenceTransform.TransformPose(new Pose(fingerPosition, fingerRotation));
+                }
+            }
+
+            return true;
+        }
+
 
         /// <inheritdoc />
         protected override void UpdateInput(XRControllerState? controllerState)
@@ -207,10 +230,9 @@ namespace Iviz.Controllers.XR
             controllerState.selectInteractionState.SetFrameState(ButtonState);
             controllerState.uiPressInteractionState.SetFrameState(ButtonState);
 
-            
-            
+
             // --------
-            
+
             var color = ButtonState ? Color.white : Color.white.WithAlpha(0.3f);
             var scale = new Vector3(0.005f, 0.005f, 0.001f) * (ButtonState ? 2 : 1);
 
@@ -218,22 +240,21 @@ namespace Iviz.Controllers.XR
             thumb.Transform.localScale = scale;
             index.Color = color;
             index.Transform.localScale = scale;
-
         }
 
-        void HandleBone(ref MeshMarkerResource? resource, in Pose pose)
+        void HandleBoneMesh(ref MeshMarkerResource? resource, in Pose pose)
         {
             if (resource == null)
             {
                 resource = CreateBoneObject();
             }
 
-            resource.transform.SetLocalPose(pose);
+            resource.transform.SetPose(pose);
         }
 
         MeshMarkerResource CreateBoneObject()
         {
-            var boneObject = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, RootTransform);
+            var boneObject = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Reticle, RootTransform);
             boneObject.transform.localScale = new Vector3(0.005f, 0.005f, 0.001f);
             boneObject.Color = Color.white.WithAlpha(0.3f);
             boneObject.EmissiveColor = Color.blue;

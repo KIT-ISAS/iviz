@@ -154,7 +154,7 @@ namespace Iviz.App
         void UpdateOptions()
         {
             CreateTopicList();
-            dialog.Topics.Hints = entries.Select(entry => entry.Description);
+            dialog.Topics.SetHints(entries.Select(entry => entry.Description));
         }
 
         public override void UpdatePanel()

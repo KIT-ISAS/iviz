@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -207,11 +208,12 @@ namespace Iviz.Displays
             float invWidth = 1.0f / width;
             float invHeight = 1.0f / height;
             int off = 0;
-            for (int v = 0; v < height; v++)
+            foreach (int v in ..height)
             {
-                for (int u = 0; u < width; u++, off++)
+                foreach (int u in ..width)
                 {
                     uvs[off] = new Vector2((u + 0.5f) * invWidth, (v + 0.5f) * invHeight);
+                    off++;
                 }
             }
 

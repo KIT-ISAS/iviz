@@ -45,7 +45,7 @@ namespace Iviz.Displays.Highlighters
             {
                 tooltip = ResourcePool.RentDisplay<Tooltip>(node.Transform);
                 tooltip.CaptionColor = Color.white;
-                tooltip.BackgroundColor = Resource.Colors.HighlighterBackground;
+                tooltip.Color = Resource.Colors.HighlighterBackground;
                 tooltip.Layer = LayerType.IgnoreRaycast;
                 tooltip.Caption = caption;
                 tooltip.PointToCamera();

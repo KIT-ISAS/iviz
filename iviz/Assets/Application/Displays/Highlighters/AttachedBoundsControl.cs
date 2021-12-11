@@ -175,7 +175,11 @@ namespace Iviz.Displays.Highlighters
     {
         public FixedDistanceBoundsControl(IHasBounds source, Transform target)
         {
-            InitializeDraggable<FixedDistanceDraggable>(source, target);
+            var draggable = InitializeDraggable<FixedDistanceDraggable>(source, target);
+            if (Settings.IsXR)
+            {
+                draggable.ForwardScale = 5f;
+            }
         }
     }
 }

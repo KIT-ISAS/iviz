@@ -67,8 +67,7 @@ namespace Iviz.App.Tests
                 Type = (byte) ARMarkerType.QrCode,
                 Header = new Header(0, default, TfListener.FixedFrameId),
                 Code = qr.Code,
-                CameraPose = TfListener.RelativePoseToFixedFrame(Pose.identity).Unity2RosPose()
-                    .ToCameraFrame(),
+                CameraPose = TfListener.RelativeToFixedFrame(Pose.identity).Unity2RosPose().ToCameraFrame(),
                 Corners = qr.Corners.Select(v => new Msgs.GeometryMsgs.Vector3(v.X, v.Y, 0)).ToArray(),
                 CameraIntrinsic = new Intrinsic(3000, texture.width / 2f, 3000, texture.height / 2f).ToArray(),
             };

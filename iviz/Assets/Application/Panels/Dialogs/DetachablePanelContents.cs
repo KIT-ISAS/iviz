@@ -29,7 +29,7 @@ namespace Iviz.App
                 ScalerWidget.gameObject.SetActive(value);
                 PanelImage.color = value ? Resource.Colors.DetachedPanelColor : Resource.Colors.AttachedPanelColor;
 
-                if (Settings.IsXR || true)
+                if (Settings.IsXR)
                 {
                     DetachXR(value);
                 }

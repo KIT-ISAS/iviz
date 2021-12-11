@@ -576,7 +576,7 @@ namespace Iviz.Controllers
 
                         ss = await Settings.ScreenCaptureManager.CaptureColorAsync();
                         pose = ss != null
-                            ? TfListener.RelativePoseToFixedFrame(ss.CameraPose).Unity2RosPose().ToCameraFrame()
+                            ? TfListener.RelativeToFixedFrame(ss.CameraPose).Unity2RosPose().ToCameraFrame()
                             : null;
                     }
                     catch (Exception e)

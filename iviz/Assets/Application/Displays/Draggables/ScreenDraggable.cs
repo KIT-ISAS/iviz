@@ -23,7 +23,12 @@ namespace Iviz.Displays
 
         public bool IsHovering { get; private set; }
         public bool IsDragging { get; private set; }
+
         public float? Damping { get; set; } = 0.2f;
+
+        protected float? DampingPerFrame => Damping is { } validatedDamping
+            ? validatedDamping * (Time.deltaTime / 0.016f)
+            : null;
 
         public Collider RayCollider
         {

@@ -1,9 +1,12 @@
 ﻿#nullable enable
 
+using System;
+using System.Threading;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Displays;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -36,6 +39,18 @@ namespace Iviz.Controllers.XR
         readonly PaddleController leftPaddle;
         readonly PaddleController rightPaddle;
         readonly Transform cameraOffset;
+        readonly CanvasHolder mainCanvasHolder;
+
+        readonly HandGestures leftGestures = new(HandType.Left);
+        readonly HandGestures rightGestures = new(HandType.Right);
+
+        CustomController? LeftController =>
+            leftHand.isActiveAndEnabled ? leftHand :
+            leftPaddle.isActiveAndEnabled ? leftPaddle : null;
+
+        CustomController? RightController =>
+            rightHand.isActiveAndEnabled ? rightHand :
+            rightPaddle.isActiveAndEnabled ? rightPaddle : null;
 
         bool gazeActive;
         bool leftHandActive;
@@ -45,13 +60,17 @@ namespace Iviz.Controllers.XR
         uint leftHandSeqNr;
         uint rightHandSeqNr;
 
+        CancellationTokenSource? tokenSource;
+
+        public static XRController? Instance { get; private set; }
+
         public XRConfiguration Config { get; }
 
         public IModuleData ModuleData { get; }
 
         public TfFrame Frame => TfListener.GetOrCreateFrame(HeadFrameId);
 
-        public XRController(IModuleData moduleData, XRMainController controller, XRConfiguration? configuration)
+        public XRController(IModuleData moduleData, XRContents controller, XRConfiguration? configuration)
         {
             gaze = controller.Gaze;
             gazeInteractor = gaze.GetComponent<XRRayInteractor>().AssertNotNull(nameof(gazeInteractor));
@@ -60,6 +79,7 @@ namespace Iviz.Controllers.XR
             leftPaddle = controller.LeftPaddle;
             rightPaddle = controller.RightPaddle;
             cameraOffset = controller.CameraOffset;
+            mainCanvasHolder = controller.CanvasHolder;
             ModuleData = moduleData;
 
             Config = configuration ?? new XRConfiguration();
@@ -75,11 +95,16 @@ namespace Iviz.Controllers.XR
             TfListener.GetOrCreateFrame(GazeFrameId).ForceInvisible = true;
 
             GameThread.EveryFrame += Update;
+
+            leftGestures.PalmClicked += _ => ToggleMainCanvas(LeftController!);
+
+            Instance = this;
+
+            ModuleListPanel.CallAfterInitialized(() => mainCanvasHolder.Visible = false);
         }
 
         void Update()
         {
-
             UpdateGazeSender();
             UpdateHandSender(leftHand, LeftHandSender, ref leftHandSeqNr, ref leftHandActive);
             UpdateHandSender(rightHand, RightHandSender, ref rightHandSeqNr, ref rightHandActive);
@@ -106,21 +131,24 @@ namespace Iviz.Controllers.XR
                 }
             }
 
-            CustomController? leftController =
-                leftHand.isActiveAndEnabled ? leftHand :
-                leftPaddle.isActiveAndEnabled ? leftPaddle : null;
-            CustomController? rightController =
-                rightHand.isActiveAndEnabled ? rightHand :
-                rightPaddle.isActiveAndEnabled ? rightPaddle : null;
-
             TfListener.Publish(LeftControllerFrameId,
-                leftController is { IsActiveInFrame: true } ? leftController.transform.AsPose() : default);
+                LeftController is { IsActiveInFrame: true } leftController
+                    ? leftController.transform.AsPose()
+                    : default);
 
             TfListener.Publish(RightControllerFrameId,
-                rightController is { IsActiveInFrame: true } ? rightController.transform.AsPose() : default);
+                RightController is { IsActiveInFrame: true } rightController
+                    ? rightController.transform.AsPose()
+                    : default);
+
+
+            leftGestures.Process(leftHand.State);
+            leftGestures.Process(leftHand.State, rightHand.State);
+            rightGestures.Process(rightHand.State);
+            rightGestures.Process(rightHand.State, leftHand.State);
         }
 
-        void UpdateHandSender(
+        static void UpdateHandSender(
             HandController handController,
             Sender<XRHandState> sender,
             ref uint seqNr,
@@ -131,7 +159,7 @@ namespace Iviz.Controllers.XR
                 return;
             }
 
-            var handState = handController.HandState;
+            var handState = handController.State;
             if (handState != null)
             {
                 active = true;
@@ -139,13 +167,14 @@ namespace Iviz.Controllers.XR
                 {
                     IsValid = true,
                     Header = (seqNr++, TfListener.FixedFrameId),
-                    Palm = ToTransform(handState.palm),
-                    Thumb = handState.fingers[(int)HandFinger.Thumb].Select(ToTransform).ToArray(),
-                    Index = handState.fingers[(int)HandFinger.Index].Select(ToTransform).ToArray(),
-                    Middle = handState.fingers[(int)HandFinger.Middle].Select(ToTransform).ToArray(),
-                    Ring = handState.fingers[(int)HandFinger.Ring].Select(ToTransform).ToArray(),
-                    Little = handState.fingers[(int)HandFinger.Pinky].Select(ToTransform).ToArray()
+                    Palm = ToTransform(handState.Palm),
+                    Thumb = handState.Fingers[(int)HandFinger.Thumb].Select(ToTransform).ToArray(),
+                    Index = handState.Fingers[(int)HandFinger.Index].Select(ToTransform).ToArray(),
+                    Middle = handState.Fingers[(int)HandFinger.Middle].Select(ToTransform).ToArray(),
+                    Ring = handState.Fingers[(int)HandFinger.Ring].Select(ToTransform).ToArray(),
+                    Little = handState.Fingers[(int)HandFinger.Pinky].Select(ToTransform).ToArray()
                 };
+
 
                 sender.Publish(state);
                 return;
@@ -185,14 +214,14 @@ namespace Iviz.Controllers.XR
             }
         }
 
-        Msgs.GeometryMsgs.Transform ToTransform(Pose pose)
-        {
-            return TfListener.RelativePoseToFixedFrame(cameraOffset.TransformPose(pose)).Unity2RosTransform();
-        }
+        static readonly Func<Pose, Msgs.GeometryMsgs.Transform> ToTransform = pose =>
+            TfListener.RelativeToFixedFrame(pose).Unity2RosTransform();
+
 
         public void Dispose()
         {
             GameThread.EveryFrame -= Update;
+            Instance = null;
         }
 
         public void ResetController()
@@ -200,5 +229,69 @@ namespace Iviz.Controllers.XR
         }
 
         public bool Visible { get; set; }
+
+        public void ToggleMainCanvas(CustomController controller)
+        {
+            if (!mainCanvasHolder.Visible)
+            {
+                SpawnMainCanvas(controller.transform.position);
+            }
+            else
+            {
+                DespawnMainCanvas(controller.transform);
+            }
+        }
+
+        void SpawnMainCanvas(Vector3 originPosition)
+        {
+            if (tokenSource is { IsCancellationRequested: false })
+            {
+                return;
+            }
+
+            var (targetPosition, targetRotation) = mainCanvasHolder.GetTargetPose();
+
+            mainCanvasHolder.Visible = true;
+            mainCanvasHolder.Transform.localScale = Vector3.zero;
+            mainCanvasHolder.transform.rotation = targetRotation;
+
+            tokenSource = new CancellationTokenSource();
+            FAnimator.Spawn(tokenSource.Token, 0.25f, t =>
+                {
+                    float scale = 1 - Mathf.Sqrt(1 - t);
+                    mainCanvasHolder.Transform.localScale = scale * Vector3.one;
+                    mainCanvasHolder.Transform.position = Vector3.Lerp(originPosition, targetPosition, t);
+                },
+                () =>
+                {
+                    tokenSource.Cancel();
+                    mainCanvasHolder.FollowsCamera = true;
+                });
+        }
+
+        void DespawnMainCanvas(Transform target)
+        {
+            if (tokenSource is { IsCancellationRequested: false })
+            {
+                return;
+            }
+
+            var originPosition = mainCanvasHolder.Transform.position;
+
+            mainCanvasHolder.FollowsCamera = false;
+
+            tokenSource = new CancellationTokenSource();
+            FAnimator.Spawn(tokenSource.Token, 0.25f, t =>
+                {
+                    float scale = Mathf.Sqrt(t);
+                    mainCanvasHolder.Transform.localScale = (1 - scale) * Vector3.one;
+                    mainCanvasHolder.Transform.position = Vector3.Lerp(originPosition, target.position, t);
+                },
+                () =>
+                {
+                    mainCanvasHolder.Visible = false;
+                    tokenSource.Cancel();
+                });
+        }
     }
 }

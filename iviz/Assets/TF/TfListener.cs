@@ -269,10 +269,8 @@ namespace Iviz.Controllers.TF
             }
         }
 
-        static bool IsFrameUsableAsHint(TfFrame frame)
-        {
-            return frame != RootFrame && frame != UnityFrame && frame != OriginFrame;
-        }
+        static readonly Func<TfFrame, bool> IsFrameUsableAsHint =
+            frame => frame != RootFrame && frame != UnityFrame && frame != OriginFrame;
 
         static bool IsValid(in Msgs.GeometryMsgs.Vector3 v)
         {
@@ -554,10 +552,10 @@ namespace Iviz.Controllers.TF
             instance = null;
         }
 
-        public static Vector3 RelativePositionToOrigin(in Vector3 unityPosition) =>
+        public static Vector3 RelativeToOrigin(in Vector3 unityPosition) =>
             OriginFrame.Transform.InverseTransformPoint(unityPosition);
 
-        public static Pose RelativePoseToOrigin(in Pose unityPose)
+        public static Pose RelativeToOrigin(in Pose unityPose)
         {
             var originFrame = OriginFrame.Transform;
             var (position, rotation) = unityPose;
@@ -567,7 +565,7 @@ namespace Iviz.Controllers.TF
             );
         }
 
-        public static Pose RelativePoseToFixedFrame(in Pose unityPose)
+        public static Pose RelativeToFixedFrame(in Pose unityPose)
         {
             var fixedFrame = Instance.FixedFrame.Transform;
             var (position, rotation) = unityPose;
@@ -581,7 +579,7 @@ namespace Iviz.Controllers.TF
 
         public static void Publish(string childFrame, in Pose absoluteUnityPose)
         {
-            var relativePose = RelativePoseToFixedFrame(absoluteUnityPose);
+            var relativePose = RelativeToFixedFrame(absoluteUnityPose);
             Publish(FixedFrameId, childFrame, relativePose.Unity2RosTransform());
         }
 

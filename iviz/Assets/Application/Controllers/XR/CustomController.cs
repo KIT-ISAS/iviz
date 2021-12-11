@@ -10,7 +10,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 namespace Iviz.Controllers.XR
 {
     /// <summary>
-    /// A simplified version of <see cref="XRMainController"/> for devices that do not have a <see cref="XRNode"/>.
+    /// A simplified version of <see cref="XRContents"/> for devices that do not have a <see cref="XRNode"/>.
     /// Instead we just wait for a device that "looks like" what we need.  
     /// </summary>
     public abstract class CustomController : XRBaseController
@@ -26,8 +26,7 @@ namespace Iviz.Controllers.XR
 
         public bool IsActiveInFrame { get; protected set; }
         public bool HasCursor { get; protected set; }
-        public bool HasDevice => device != null;
-
+        //public bool HasDevice => device != null;
         public bool ButtonState { get; protected set; }
         public bool ButtonUp { get; protected set; }
         public bool ButtonDown { get; protected set; }

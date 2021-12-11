@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
 using UnityEngine.XR;
+using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.OpenXR;
 
@@ -66,7 +67,9 @@ namespace Iviz.Controllers.XR
             if (controllerState.poseDataFlags == (PoseDataFlags.Position | PoseDataFlags.Rotation))
             {
                 IsActiveInFrame = true;
-                Pose = new Pose(controllerState.position, controllerState.rotation);
+                
+                var referenceTransform = transform.parent;
+                Pose = referenceTransform.TransformPose(new Pose(controllerState.position, controllerState.rotation));
             }
 
         }

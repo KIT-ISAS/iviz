@@ -16,7 +16,7 @@ namespace Iviz.Displays
     {
         [SerializeField] BoxCollider? boxCollider;
         [SerializeField] TMP_Text? text;
-        
+
         RoundedPlaneResource? background;
         uint? prevTextHash;
         Transform? mTransform;
@@ -24,7 +24,7 @@ namespace Iviz.Displays
         BoxCollider BoxCollider => boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
         TMP_Text Text => text.AssertNotNull(nameof(text));
 
-        RoundedPlaneResource Background =>
+        public RoundedPlaneResource Background =>
             background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneResource>(Transform);
 
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
@@ -39,25 +39,25 @@ namespace Iviz.Displays
                 Background.Layer = value;
             }
         }
-        
+
         public float Scale
         {
             set => Transform.localScale = value * Vector3.one;
-        }        
+        }
 
         void Awake()
         {
             Layer = LayerType.IgnoreRaycast;
         }
 
-        public Color BackgroundColor
+        public Color Color
         {
             set => Background.Color = value;
         }
 
-        public Color MainColor
+        public Color EmissiveColor
         {
-            set => BackgroundColor = value;
+            set => Background.EmissiveColor = value;
         }
 
         public Color CaptionColor
@@ -77,6 +77,7 @@ namespace Iviz.Displays
 
                 prevTextHash = hash;
                 Text.text = value;
+                //Text.ForceMeshUpdate();
                 UpdateSize();
             }
         }
@@ -97,12 +98,18 @@ namespace Iviz.Displays
 
             prevTextHash = hash;
             Text.SetText(str);
+            //Text.ForceMeshUpdate();
             UpdateSize();
         }
 
+        public bool FixedWidth { get; set; } = false;
+        public float PaddingX { get; set; } = 5;
+        public float PaddingY { get; set; } = 2;
+
         void UpdateSize()
         {
-            Background.Size = new Vector2(Text.preferredWidth + 5f, Text.preferredHeight + 2f);
+            float width = FixedWidth ? Text.rectTransform.rect.width : Text.preferredWidth;
+            Background.Size = new Vector2(width + PaddingX, Text.preferredHeight + PaddingY);
             Background.Radius = 2f;
             BoxCollider.size = Background.Bounds.size;
         }
@@ -110,6 +117,7 @@ namespace Iviz.Displays
         void IDisplay.Suspend()
         {
             Caption = "";
+            EmissiveColor = Color.black;
         }
 
         void IRecyclable.SplitForRecycle()

@@ -198,6 +198,8 @@ namespace Iviz.Displays
                 linkObjects[BaseLink].transform.SetParent(BaseLinkObject.transform, false);
             }
 
+            HideChildlessLinks();
+            
             LinkParents = linkParents.AsReadOnly();
             LinkObjects = linkObjects.AsReadOnly();
             Joints = joints.AsReadOnly();
@@ -212,6 +214,68 @@ namespace Iviz.Displays
             string errorStr = numErrors == 0 ? "" : $"There were {numErrors.ToString()} errors.";
             RosLogger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
                            $"links and {Joints.Count.ToString()} joints. {errorStr}");
+        }
+
+        void HideChildlessLinks()
+        {
+            var links = new Dictionary<string, Link>();
+            var linkChildren = new Dictionary<string, HashSet<string>>();
+
+            foreach (var link in robot.Links)
+            {
+                links[link.Name ?? ""] = link;
+            }
+            
+            foreach (string child in linkObjects.Keys)
+            {
+                linkChildren[child] = new HashSet<string>();
+            }
+            
+            foreach (var (child, parent) in linkParents)
+            {
+                linkChildren[parent].Add(child);
+            }
+
+            HashSet<string> toHide = new HashSet<string>();
+
+            int numHidden = 0;
+            bool hasChanges;
+            do
+            {
+                hasChanges = false;
+                
+                foreach (var (linkName, children) in linkChildren)
+                {
+                    if (children.Count != 0)
+                    {
+                        continue;
+                    }
+
+                    var link = links[linkName];
+                    if (link.Collisions.Count == 0 && link.Visuals.Count == 0)
+                    {
+                        toHide.Add(linkName);
+                        hasChanges = true;
+                    }
+                }
+
+                foreach (var child in toHide)
+                {
+                    linkChildren.Remove(child);
+                    if (linkChildren.TryGetValue(linkParents[child], out var siblings))
+                    {
+                        siblings.Remove(child);
+                    }
+
+                    var gameObject = linkObjects[child];
+                    //var grandParent = gameObject.transform.parent.parent.gameObject;
+                    var parent = gameObject.transform.parent.gameObject;
+                    parent.SetActive(false);
+                    numHidden++;
+                }
+            } while (hasChanges);
+            
+            Debug.Log($"Hiding {numHidden} unused links out of {links.Count.ToString()}.");
         }
 
         public void CancelTasks()
@@ -230,6 +294,11 @@ namespace Iviz.Displays
             linkObject.transform.parent = BaseLinkObject.transform;
 
             linkObjects[link.Name ?? ""] = linkObject;
+
+            if (link.Visuals.Count == 0 && link.Collisions.Count == 0)
+            {
+                return Task.CompletedTask;
+            }
 
             /*
             foreach (var collision in link.Collisions)
@@ -282,6 +351,7 @@ namespace Iviz.Displays
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
                     RosLogger.Error($"{this}: Failed to retrieve '{uri}'", e);
+                    Object.Destroy(collisionObject);
                     numErrors++;
                     return;
                 }
@@ -289,6 +359,7 @@ namespace Iviz.Displays
                 if (info == null)
                 {
                     RosLogger.Error($"{this}: Failed to retrieve '{uri}'");
+                    Object.Destroy(collisionObject);
                     numErrors++;
                     return;
                 }
@@ -332,6 +403,10 @@ namespace Iviz.Displays
                 var collider = collisionObject.EnsureComponent<SphereCollider>();
                 collider.radius = geometry.Sphere.Radius;
             }
+            else
+            {
+                Object.Destroy(collisionObject);
+            }
         }
 
         async ValueTask ProcessVisualAsync(bool keepMeshMaterials,
@@ -344,11 +419,18 @@ namespace Iviz.Displays
             var (name, origin, geometry, material) = visual;
             var (box, cylinder, sphere, mesh) = geometry;
 
-            var visualObject = new GameObject(name != null ? $"[Visual:{name}]" : "[Visual]");
-            visualObject.transform.SetParent(linkObject.transform, false);
-            visualObject.transform.SetLocalPose(origin.ToPose());
-
-
+            GameObject visualObject;
+            if (origin == Origin.Identity)
+            {
+                visualObject = linkObject;
+            }
+            else
+            {
+                visualObject = new GameObject(name != null ? $"[Visual:{name}]" : "[Visual]");
+                visualObject.transform.SetParent(linkObject.transform, false);
+                visualObject.transform.SetLocalPose(origin.ToPose());
+            }
+            
             GameObject resourceObject;
             if (mesh != null)
             {
@@ -372,27 +454,27 @@ namespace Iviz.Displays
                     return;
                 }
 
-                InternalRent(info, mesh.Scale.ToVector3().Abs());
+                Rent(info, mesh.Scale.ToVector3().Abs());
             }
             else if (cylinder != null)
             {
                 (float radius, float length) = cylinder;
-                InternalRent(Resource.Displays.Cylinder, new Vector3(radius * 2, length, radius * 2).Abs());
+                Rent(Resource.Displays.Cylinder, new Vector3(radius * 2, length, radius * 2).Abs());
             }
             else if (box != null)
             {
-                InternalRent(Resource.Displays.Cube, box.Size.ToVector3().Abs());
+                Rent(Resource.Displays.Cube, box.Size.ToVector3().Abs());
             }
             else if (sphere != null)
             {
-                InternalRent(Resource.Displays.Sphere, Mathf.Abs(sphere.Radius) * Vector3.one);
+                Rent(Resource.Displays.Sphere, Mathf.Abs(sphere.Radius) * Vector3.one);
             }
             else
             {
                 return; //?
             }
 
-            void InternalRent(Info<GameObject> info, in Vector3 scale)
+            void Rent(Info<GameObject> info, in Vector3 scale)
             {
                 resourceObject = ResourcePool.Rent(info);
                 resourceObject.layer = LayerType.IgnoreRaycast;
@@ -452,7 +534,7 @@ namespace Iviz.Displays
             var jointObject = new GameObject("{Joint:" + joint.Name + "}");
             jointObjects[joint.Name] = jointObject;
 
-            var originObject = new GameObject($"[JointOrigin:{joint.Name}]");
+            //var originObject = new GameObject($"[JointOrigin:{joint.Name}]");
 
             if (!linkObjects.TryGetValue(joint.Parent.Link, out var parent))
             {
@@ -474,13 +556,15 @@ namespace Iviz.Displays
             linkParents[joint.Child.Link] = joint.Parent.Link;
             joints[joint.Name] = joint;
 
-            originObject.transform.SetParent(parent.transform, false);
-            jointObject.transform.SetParent(originObject.transform, false);
+            //originObject.transform.SetParent(parent.transform, false);
+            //jointObject.transform.SetParent(originObject.transform, false);
+            jointObject.transform.SetParent(parent.transform, false);
             child.transform.SetParent(jointObject.transform, false);
 
             linkParentObjects[child] = jointObject;
 
-            originObject.transform.SetLocalPose(joint.Origin.ToPose());
+            //originObject.transform.SetLocalPose(joint.Origin.ToPose());
+            jointObject.transform.SetLocalPose(joint.Origin.ToPose());
         }
 
         static Material? GetMaterialForVisual(Material? material, IReadOnlyDictionary<string, Material>? rootMaterials)

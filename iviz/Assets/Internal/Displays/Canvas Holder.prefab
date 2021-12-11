@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4340412021067335221}
   - component: {fileID: 4340412021693849407}
   - component: {fileID: 866070338}
-  m_Layer: 2
+  m_Layer: 8
   m_Name: Holder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -63,7 +63,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_InteractionManager: {fileID: 0}
   m_Colliders:
-  - {fileID: 0}
+  - {fileID: 866070338}
   m_InteractionLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -182,6 +182,7 @@ MonoBehaviour:
   boxCollider: {fileID: 866070338}
   draggable: {fileID: 4340412021067335221}
   label: {fileID: 4340412022777234071}
+  followsCamera: 0
 --- !u!1 &4340412022777234069
 GameObject:
   m_ObjectHideFlags: 0

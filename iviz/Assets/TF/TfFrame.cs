@@ -47,7 +47,7 @@ namespace Iviz.Controllers.TF
         /// <summary>
         /// Pose in relation to the ROS origin in Unity coordinates
         /// </summary>
-        public Pose OriginWorldPose => TfListener.RelativePoseToOrigin(AbsoluteUnityPose);
+        public Pose OriginWorldPose => TfListener.RelativeToOrigin(AbsoluteUnityPose);
 
         /// <summary>
         /// Pose in relation to the Unity origin in Unity coordinates

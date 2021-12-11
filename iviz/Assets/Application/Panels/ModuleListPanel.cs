@@ -64,7 +64,7 @@ namespace Iviz.App
         [SerializeField] TwistJoystick? twistJoystick;
         [SerializeField] GameObject? contentObject;
         [SerializeField] Canvas? rootCanvas;
-        [SerializeField] XRMainController? xrController;
+        [SerializeField] XRContents? xrController;
         [SerializeField] GameObject? imageCanvasHolder;
 
         [SerializeField] GameObject? moduleListCanvas;
@@ -104,7 +104,7 @@ namespace Iviz.App
         public TwistJoystick TwistJoystick => twistJoystick.AssertNotNull(nameof(twistJoystick));
         public ARJoystick ARJoystick => arJoystick.AssertNotNull(nameof(arJoystick));
         public ARSidePanel ARSidePanel => arSidePanel.AssertNotNull(nameof(arSidePanel));
-        public XRMainController XRController => xrController.AssertNotNull(nameof(xrController));
+        public XRContents XRController => xrController.AssertNotNull(nameof(xrController));
         public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
@@ -834,7 +834,7 @@ namespace Iviz.App
             );
 
             var currentCamera = Settings.MainCameraTransform;
-            var cameraPose = TfListener.RelativePoseToFixedFrame(currentCamera.AsPose());
+            var cameraPose = TfListener.RelativeToFixedFrame(currentCamera.AsPose());
             RosUtils.FormatPose(cameraPose, description,
                 TfListener.Instance.FlipZ ? RosUtils.PoseFormat.All : RosUtils.PoseFormat.AllWithoutRoll);
             BottomCanvas.CameraText.SetText(description);

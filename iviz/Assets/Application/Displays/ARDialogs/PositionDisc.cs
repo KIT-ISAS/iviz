@@ -53,8 +53,8 @@ namespace Iviz.App.ARDialogs
 
             tooltipX = ResourcePool.RentDisplay<Tooltip>(Transform);
             tooltipY = ResourcePool.RentDisplay<Tooltip>(Transform);
-            tooltipX.MainColor = Color.red.WithAlpha(0.5f);
-            tooltipY.MainColor = Color.green.WithAlpha(0.5f);
+            tooltipX.Color = Color.red.WithAlpha(0.5f);
+            tooltipY.Color = Color.green.WithAlpha(0.5f);
             tooltipX.Visible = false;
             tooltipY.Visible = false;
 

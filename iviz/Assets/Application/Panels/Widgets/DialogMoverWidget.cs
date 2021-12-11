@@ -28,7 +28,7 @@ namespace Iviz.App
                 if (dragCausesDetach)
                 {
                     ModuleListPanel.Instance.DialogPanelManager.DetachSelectedPanel();
-                    if (Settings.IsXR || true)
+                    if (Settings.IsXR)
                     {
                         return;
                     }
