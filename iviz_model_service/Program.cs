@@ -36,19 +36,23 @@ namespace Iviz.ModelService
             Uri myUri = RosClient.TryGetCallerUriFor(masterUri) ?? RosClient.TryGetCallerUri();
             await using RosClient client = await RosClient.CreateAsync(masterUri, "iviz_model_service", myUri);
                         
-            bool enableFileSchema;
-            if (args.Length != 0 && args[0] == "--enable-file-schema")
+            bool enableFileSchema = false;
+            bool verbose = false;
+            
+            foreach (string arg in args)
             {
-                enableFileSchema = true;
-                Console.Error.WriteLine("WW Uris starting with 'file://' are now accepted. " +
-                                        "This makes all your files available to the outside.");
+                if (arg == "--enable-file-schema" && !enableFileSchema)
+                {
+                    enableFileSchema = true;
+                    Console.Error.WriteLine("WW Uris starting with 'file://' are now accepted. " +
+                                            "This makes all your files available to the outside.");
+                } else if (arg == "--verbose" || arg == "-v")
+                {
+                    verbose = true;
+                }
             }
-            else
-            {
-                enableFileSchema = false;
-            }
-
-            string? rosPackagePathExtras = null;
+            
+            string? rosPackagePathExtras;
             string? extrasPath = await GetPathExtras();
             if (extrasPath != null && File.Exists(extrasPath))
             {
@@ -59,10 +63,15 @@ namespace Iviz.ModelService
                 catch (IOException e)
                 {
                     Console.WriteLine($"EE Extras file '{extrasPath}' could not be read: {e.Message}");
+                    rosPackagePathExtras = null;
                 }
             }
+            else
+            {
+                rosPackagePathExtras = null;                
+            }
 
-            using var modelServer = new ModelServer(rosPackagePathExtras, enableFileSchema);
+            using var modelServer = new ModelServer(rosPackagePathExtras, enableFileSchema, verbose);
 
             if (modelServer.NumPackages == 0)
             {
@@ -129,7 +138,6 @@ namespace Iviz.ModelService
             string extrasPath = homeFolder + "/.iviz/ros_package_path";
             if (!File.Exists(extrasPath))
             {
-                // Console.WriteLine($"** Optional file '{extrasPath}' with extra ROS package paths is not present.");
                 return null;
             }
 

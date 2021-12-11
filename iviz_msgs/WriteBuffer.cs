@@ -83,6 +83,7 @@ namespace Iviz.Msgs
             Advance(SizeOf<T>());
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Serialize<T>(in T val) where T : unmanaged
         {
             ref T valRef = ref Unsafe.AsRef(in val);
@@ -105,11 +106,6 @@ namespace Iviz.Msgs
             int count = BuiltIns.UTF8.GetByteCount(val);
             ThrowIfOutOfRange(4 + count);
             WriteInt(count);
-            if (count == 0)
-            {
-                return;
-            }
-
             BuiltIns.UTF8.GetBytes(val.AsSpan(), ptr);
             Advance(count);
         }

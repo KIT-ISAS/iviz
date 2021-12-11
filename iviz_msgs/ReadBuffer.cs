@@ -164,7 +164,8 @@ namespace Iviz.Msgs
             int size = count * sizeOfT;
             ThrowIfOutOfRange(size);
 
-            var val = new Memory<T>(ArrayPool<T>.Shared.Rent(count))[..count];
+            T[] rent = ArrayPool<T>.Shared.Rent(count);
+            var val = new Memory<T>(rent)[..count];
             ptr[..size].CopyTo(MemoryMarshal.AsBytes(val.Span));
 
             Advance(size);

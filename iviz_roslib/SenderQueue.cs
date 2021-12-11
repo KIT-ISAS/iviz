@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Tools;
 
+using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<object?>;
+
 namespace Iviz.Roslib;
 
 internal sealed class SenderQueue<T> where T : IMessage
@@ -55,7 +57,7 @@ internal sealed class SenderQueue<T> where T : IMessage
             return default;
         }
             
-        var msgSignal = new TaskCompletionSource<object?>();
+        var msgSignal = new TaskCompletionSource();
         messageQueue.Enqueue(new Entry(message, msgSignal));
         signal.Release();
             
@@ -64,13 +66,9 @@ internal sealed class SenderQueue<T> where T : IMessage
             : new ValueTask(msgSignal.Task);
     }
 
-    static async ValueTask WaitForSignal(TaskCompletionSource<object?> msgSignal, CancellationToken token)
+    static async ValueTask WaitForSignal(TaskCompletionSource msgSignal, CancellationToken token)
     {
-#if !NETSTANDARD2_0
         await using (token.Register(StreamUtils.OnCanceled, msgSignal))
-#else
-            using (token.Register(StreamUtils.OnCanceled, msgSignal))
-#endif
         {
             await msgSignal.Task;
         }
@@ -228,9 +226,9 @@ internal sealed class SenderQueue<T> where T : IMessage
     {
         readonly T message;
         public readonly int messageLength;
-        public readonly TaskCompletionSource<object?>? signal;
+        public readonly TaskCompletionSource? signal;
 
-        public Entry(in T message, TaskCompletionSource<object?>? signal = null)
+        public Entry(in T message, TaskCompletionSource? signal = null)
         {
             (this.message, messageLength, this.signal) = (message, message.RosMessageLength, signal);
             if (messageLength < 0)
@@ -239,8 +237,7 @@ internal sealed class SenderQueue<T> where T : IMessage
             }
         }
 
-        public void Deconstruct(out T outMessage, out int outMessageLength,
-            out TaskCompletionSource<object?>? outSignal) =>
+        public void Deconstruct(out T outMessage, out int outMessageLength, out TaskCompletionSource? outSignal) =>
             (outMessage, outMessageLength, outSignal) = (message, messageLength, signal);
     }
 }

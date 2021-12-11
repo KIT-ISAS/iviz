@@ -17,6 +17,7 @@ namespace Iviz.ModelService
         public const string FileServiceName = "/iviz/get_file";
         public const string SdfServiceName = "/iviz/get_sdf";
 
+        readonly bool verbose;
         readonly AssimpContext importer = new();
         readonly Dictionary<string, List<string>> packagePaths = new();
 
@@ -40,8 +41,9 @@ namespace Iviz.ModelService
             Console.WriteLine(">> " + uri);
         }
 
-        public ModelServer(string additionalPaths = null, bool enableFileSchema = false)
+        public ModelServer(string additionalPaths = null, bool enableFileSchema = false, bool verbose = false)
         {
+            this.verbose = verbose;
             string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
             if (packagePath is null && additionalPaths is null)
             {
@@ -51,14 +53,47 @@ namespace Iviz.ModelService
             {
                 var paths = new List<string>();
 
+                if (verbose)
+                {
+                    Log("** Adding the following package paths:");
+                }
+
                 if (packagePath != null)
                 {
-                    paths.AddRange(packagePath.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries));
+                    string[] newPaths = packagePath.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (verbose)
+                    {
+                        foreach (string path in newPaths)
+                        {
+                            Log("    " + path);
+                        }
+                    }
+
+                    paths.AddRange(newPaths);
                 }
 
                 if (additionalPaths != null)
                 {
-                    paths.AddRange(additionalPaths.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries));
+                    if (verbose)
+                    {
+                        Log("** Adding additional package paths:");
+                    }
+
+                    string[] newPaths = additionalPaths.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    if (verbose)
+                    {
+                        foreach (string path in newPaths)
+                        {
+                            Log("    " + path);
+                        }
+                    }
+
+                    paths.AddRange(newPaths);
+                }
+
+                if (verbose)
+                {
+                    Log("** Resolving subfolders:");
                 }
 
                 foreach (string path in paths)
@@ -106,6 +141,11 @@ namespace Iviz.ModelService
                 packagePaths[package] = paths;
             }
 
+            if (verbose)
+            {
+                Log("    " + path);
+            }
+            
             paths.Add(path);
         }
 
@@ -598,7 +638,7 @@ namespace Iviz.ModelService
                 Includes = includes.ToArray(),
                 Lights = file.Lights.Select(ToLight).ToArray()
             };
-            
+
             LogUp(uri);
         }
 
