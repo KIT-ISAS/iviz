@@ -6,7 +6,7 @@
     <AssemblyName>Iviz.ModelService</AssemblyName>
     <LangVersion>default</LangVersion>
     <Nullable>enable</Nullable>
-    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\iviz_model_service_lib\iviz_model_service_lib.csproj" />

@@ -55,7 +55,7 @@ namespace Iviz.ModelService
 
                 if (verbose)
                 {
-                    Log("** Adding the following package paths:");
+                    Log("Adding the following package paths:");
                 }
 
                 if (packagePath != null)
@@ -76,7 +76,7 @@ namespace Iviz.ModelService
                 {
                     if (verbose)
                     {
-                        Log("** Adding additional package paths:");
+                        Log("Adding additional package paths:");
                     }
 
                     string[] newPaths = additionalPaths.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
@@ -156,12 +156,12 @@ namespace Iviz.ModelService
 
         string ResolvePath(Uri uri, out string outPackagePath)
         {
-            outPackagePath = null;
-
             string package = uri.Host;
             if (!packagePaths.TryGetValue(package, out List<string> paths))
             {
                 LogError($"Failed to resolve uri '{uri}'. Reason: Package '{package}' not found.");
+
+                outPackagePath = null;
                 return null;
             }
 
@@ -184,10 +184,13 @@ namespace Iviz.ModelService
                 }
 
                 LogError($"Failed to resolve uri '{uri}'. Reason: Resolution requires path traversal.");
+
+                outPackagePath = null;
                 return null;
             }
 
             LogError($"Failed to resolve uri '{uri}'.");
+            outPackagePath = null;
             return null;
         }
 
@@ -418,7 +421,7 @@ namespace Iviz.ModelService
                 }
 
                 Func<Vector3D, Vector3f> toVector3 = ToVector3;
-                Msgs.IvizMsgs.Mesh dstMesh = new()
+                var dstMesh = new Msgs.IvizMsgs.Mesh()
                 {
                     Name = srcMesh.Name ?? "[mesh]",
                     Vertices = srcMesh.Vertices.Select(toVector3).ToArray(),

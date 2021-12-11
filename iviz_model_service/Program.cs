@@ -33,9 +33,6 @@ namespace Iviz.ModelService
                 return;
             }
 
-            Uri myUri = RosClient.TryGetCallerUriFor(masterUri) ?? RosClient.TryGetCallerUri();
-            await using RosClient client = await RosClient.CreateAsync(masterUri, "iviz_model_service", myUri);
-                        
             bool enableFileSchema = false;
             bool verbose = false;
             
@@ -46,7 +43,7 @@ namespace Iviz.ModelService
                     enableFileSchema = true;
                     Console.Error.WriteLine("WW Uris starting with 'file://' are now accepted. " +
                                             "This makes all your files available to the outside.");
-                } else if (arg == "--verbose" || arg == "-v")
+                } else if (arg is "--verbose" or "-v")
                 {
                     verbose = true;
                 }
@@ -77,6 +74,14 @@ namespace Iviz.ModelService
             {
                 return;
             }
+            
+            Uri myUri = RosClient.TryGetCallerUriFor(masterUri) ?? RosClient.TryGetCallerUri();
+            await using RosClient client = await RosClient.CreateAsync(masterUri, "iviz_model_service", myUri);
+
+            Console.WriteLine($"** Starting node at URI {client.CallerUri}..."); 
+
+            Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.ModelServiceName,
+                GetModelResource.RosServiceType);
 
             Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.ModelServiceName,
                 GetModelResource.RosServiceType);
