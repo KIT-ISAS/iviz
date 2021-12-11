@@ -2,13 +2,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Iviz.Roslib
+namespace Iviz.Roslib;
+
+internal interface IServiceRequestManager
 {
-    internal interface IServiceRequestManager
-    {
-        string Service { get; }
-        string ServiceType { get; }
-        Uri Uri { get; }
-        ValueTask DisposeAsync(CancellationToken token);
-    }
+    string Service { get; }
+    string ServiceType { get; }
+    Uri Uri { get; }
+    ValueTask DisposeAsync(CancellationToken token);
 }

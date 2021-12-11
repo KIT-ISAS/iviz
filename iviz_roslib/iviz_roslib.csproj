@@ -3,9 +3,9 @@
   <PropertyGroup>
     <AssemblyName>Iviz.Roslib</AssemblyName>
     <RootNamespace>Iviz.Roslib</RootNamespace>
-    <TargetFrameworks>net5.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
     <Nullable>enable</Nullable>
-    <LangVersion>9</LangVersion>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

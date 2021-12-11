@@ -1,109 +1,111 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
-namespace Iviz.Tools
+namespace Iviz.Tools;
+
+public static class EnumeratorUtils
 {
-    public static class EnumeratorUtils
+    public static ZipEnumerable<TA, TB> Zip<TA, TB>(this IReadOnlyList<TA> a, IReadOnlyList<TB> b)
     {
-        public static ZipEnumerable<TA, TB> Zip<TA, TB>(this IReadOnlyList<TA> a, IReadOnlyList<TB> b)
+        if (a == null)
         {
-            if (a == null)
-            {
-                throw new ArgumentNullException(nameof(a));
-            }
-
-            if (b == null)
-            {
-                throw new ArgumentNullException(nameof(b));
-            }
-
-            return new ZipEnumerable<TA, TB>(a, b);
+            throw new ArgumentNullException(nameof(a));
         }
 
-        public static SelectEnumerable<IReadOnlyList<TA>, TA, TB> Select<TA, TB>(this IReadOnlyList<TA> a,
-            Func<TA, TB> f)
+        if (b == null)
         {
-            if (a == null)
-            {
-                throw new ArgumentNullException(nameof(a));
-            }
-
-            if (f == null)
-            {
-                throw new ArgumentNullException(nameof(f));
-            }
-
-            return new SelectEnumerable<IReadOnlyList<TA>, TA, TB>(a, f);
+            throw new ArgumentNullException(nameof(b));
         }
 
-        public static void AddRange<TC, TA, TB>(this List<TB> list, in SelectEnumerable<TC, TA, TB> tb)
-            where TC : IReadOnlyList<TA>
+        return new ZipEnumerable<TA, TB>(a, b);
+    }
+
+    public static SelectEnumerable<IReadOnlyList<TA>, TA, TB> Select<TA, TB>(this IReadOnlyList<TA> a,
+        Func<TA, TB> f)
+    {
+        if (a == null)
         {
-            list.Capacity = list.Count + tb.Count;
-            foreach (TB b in tb)
-            {
-                list.Add(b);
-            }
+            throw new ArgumentNullException(nameof(a));
         }
 
-        public static RefEnumerable<T> Ref<T>(this T[] a) =>
-            new(a ?? throw new ArgumentNullException(nameof(a)));
-
-        public static RefEnumerable<T>.Enumerator RefEnumerator<T>(this T[] a) =>
-            new(a ?? throw new ArgumentNullException(nameof(a)));
-
-        public delegate void RefAction<T>(ref T t);
-
-        public static T[] ForEach<T>(this T[] a, RefAction<T> action)
+        if (f == null)
         {
-            for (int i = 0; i < a.Length; i++)
-            {
-                action(ref a[i]);
-            }
-
-            return a;
+            throw new ArgumentNullException(nameof(f));
         }
 
-        public static RangeEnumerable<TA> Take<TA>(this IReadOnlyList<TA> a, int count) => new(a, 0, count);
+        return new SelectEnumerable<IReadOnlyList<TA>, TA, TB>(a, f);
+    }
 
-        public static RangeEnumerable<TA> Skip<TA>(this IReadOnlyList<TA> a, int start) => new(a, start, a.Count);
-
-        public static Rent<T> ToRent<T>(this IReadOnlyCollection<T> ts) where T : unmanaged
+    public static SelectEnumerable<TA[], TA, TB> Select<TA, TB>(this TA[] a, Func<TA, TB> f)
+    {
+        if (a == null)
         {
-            var rent = new Rent<T>(ts.Count);
-            int i = 0;
-            foreach (var t in ts)
-            {
-                rent[i++] = t;
-            }
-
-            return rent;
-        }
-        
-        public static IndexRangeEnumerable GetEnumerable(this Range range)
-        {
-            return new IndexRangeEnumerable(range);
+            throw new ArgumentNullException(nameof(a));
         }
 
-        public static IndexRangeEnumerable.Enumerator GetEnumerator(this Range range)
+        if (f == null)
         {
-            return range.GetEnumerable().GetEnumerator();
+            throw new ArgumentNullException(nameof(f));
         }
 
-        public static SelectEnumerable<IndexRangeEnumerable, int, T> Select<T>(this Range range, Func<int, T> f)
+        return new SelectEnumerable<TA[], TA, TB>(a, f);
+    }
+
+    public static void AddRange<TC, TA, TB>(this List<TB> list, in SelectEnumerable<TC, TA, TB> tb)
+        where TC : IReadOnlyList<TA>
+    {
+        list.Capacity = list.Count + tb.Count;
+        foreach (TB b in tb)
         {
-            return range.GetEnumerable().Select(f);
+            list.Add(b);
         }
-        
-        public static SelectEnumerable<IndexRangeEnumerable, int, T> Select<T>(this Range range, Func<T> a)
+    }
+
+    public static void CopyFrom<TT, TU>(this Span<TT> span, TU list) where TU : IReadOnlyList<TT>
+    {
+        foreach (int i in ..span.Length)
         {
-            return range.GetEnumerable().Select(_ => a());
+            span[i] = list[i];
         }
-        
-        public static Span<T> Slice<T>(this T[] t, Range range)
+    }
+    public static RangeEnumerable<TA> Take<TA>(this IReadOnlyList<TA> a, int count) => new(a, 0, count);
+
+    public static RangeEnumerable<TA> Skip<TA>(this IReadOnlyList<TA> a, int start) => new(a, start, a.Count);
+
+    public static Rent<T> ToRent<T>(this IReadOnlyCollection<T> ts) where T : unmanaged
+    {
+        var rent = new Rent<T>(ts.Count);
+        int i = 0;
+        foreach (var t in ts)
         {
-            return new Span<T>(t)[range];
+            rent[i++] = t;
         }
-        
+
+        return rent;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static IndexRangeEnumerable GetEnumerable(this Range range) => new(range);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static IndexRangeEnumerable.Enumerator GetEnumerator(this Range range)
+    {
+        return range.GetEnumerable().GetEnumerator();
+    }
+
+    public static SelectEnumerable<IndexRangeEnumerable, int, T> Select<T>(this Range range, Func<int, T> f)
+    {
+        return range.GetEnumerable().Select(f);
+    }
+
+    public static SelectEnumerable<IndexRangeEnumerable, int, T> Select<T>(this Range range, Func<T> a)
+    {
+        return range.GetEnumerable().Select(_ => a());
+    }
+
+    public static Span<T> Slice<T>(this T[] t, Range range)
+    {
+        return new Span<T>(t)[range];
     }
 }

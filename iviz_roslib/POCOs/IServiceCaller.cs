@@ -1,9 +1,8 @@
 using System;
 
-namespace Iviz.Roslib
+namespace Iviz.Roslib;
+
+internal interface IServiceCaller : IDisposable
 {
-    internal interface IServiceCaller : IDisposable
-    {
-        string ServiceType { get; }
-    }
+    string ServiceType { get; }
 }

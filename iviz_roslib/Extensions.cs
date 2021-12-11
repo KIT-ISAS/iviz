@@ -5,211 +5,210 @@ using System.Threading.Tasks;
 using Iviz.Tools;
 using Iviz.XmlRpc;
 
-namespace Iviz.Roslib
+namespace Iviz.Roslib;
+
+public static class Extensions
 {
-    public static class Extensions
+    public static void WaitForService(this RosClient client, string service, int timeoutInMs)
     {
-        public static void WaitForService(this RosClient client, string service, int timeoutInMs)
+        using CancellationTokenSource tokenSource = new(timeoutInMs);
+        try
         {
-            using CancellationTokenSource tokenSource = new(timeoutInMs);
+            client.WaitForService(service, tokenSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException($"Wait for service '{service}' timed out");
+        }
+    }
+
+    public static void WaitForService(this RosClient client, string service, CancellationToken token = default)
+    {
+        if (client == null)
+        {
+            throw new ArgumentNullException(nameof(client));
+        }
+
+        if (service == null)
+        {
+            throw new ArgumentNullException(nameof(service));
+        }
+
+        Task.Run(() => client.WaitForServiceAsync(service, token), token).WaitAndRethrow();
+    }
+
+    public static async ValueTask WaitForServiceAsync(this RosClient client, string service,
+        CancellationToken token = default)
+    {
+        if (client == null)
+        {
+            throw new ArgumentNullException(nameof(client));
+        }
+
+        if (service == null)
+        {
+            throw new ArgumentNullException(nameof(service));
+        }
+
+        while (true)
+        {
             try
             {
-                client.WaitForService(service, tokenSource.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                throw new TimeoutException($"Wait for service '{service}' timed out");
-            }
-        }
-
-        public static void WaitForService(this RosClient client, string service, CancellationToken token = default)
-        {
-            if (client == null)
-            {
-                throw new ArgumentNullException(nameof(client));
-            }
-
-            if (service == null)
-            {
-                throw new ArgumentNullException(nameof(service));
-            }
-
-            Task.Run(() => client.WaitForServiceAsync(service, token), token).WaitAndRethrow();
-        }
-
-        public static async ValueTask WaitForServiceAsync(this RosClient client, string service,
-            CancellationToken token = default)
-        {
-            if (client == null)
-            {
-                throw new ArgumentNullException(nameof(client));
-            }
-
-            if (service == null)
-            {
-                throw new ArgumentNullException(nameof(service));
-            }
-
-            while (true)
-            {
-                try
+                var result = await client.RosMasterClient.LookupServiceAsync(service, token);
+                if (result.IsValid)
                 {
-                    var result = await client.RosMasterClient.LookupServiceAsync(service, token);
-                    if (result.IsValid)
-                    {
-                        return;
-                    }
-
-                    await Task.Delay(200, token);
+                    return;
                 }
-                catch (XmlRpcException)
-                {
-                }
+
+                await Task.Delay(200, token);
+            }
+            catch (XmlRpcException)
+            {
             }
         }
+    }
 
-        public static void WaitForAnySubscriber(this IRosPublisher publisher, int timeoutInMs)
+    public static void WaitForAnySubscriber(this IRosPublisher publisher, int timeoutInMs)
+    {
+        using CancellationTokenSource tokenSource = new(timeoutInMs);
+        try
         {
-            using CancellationTokenSource tokenSource = new(timeoutInMs);
-            try
-            {
-                publisher.WaitForAnySubscriber(tokenSource.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                throw new TimeoutException("Wait for subscriber timed out");
-            }
+            publisher.WaitForAnySubscriber(tokenSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException("Wait for subscriber timed out");
+        }
+    }
+
+    public static void WaitForAnySubscriber(this IRosPublisher publisher, CancellationToken token = default)
+    {
+        if (publisher == null)
+        {
+            throw new ArgumentNullException(nameof(publisher));
         }
 
-        public static void WaitForAnySubscriber(this IRosPublisher publisher, CancellationToken token = default)
-        {
-            if (publisher == null)
-            {
-                throw new ArgumentNullException(nameof(publisher));
-            }
+        Task.Run(() => publisher.WaitForAnySubscriberAsync(token), token).WaitAndRethrow();
+    }
 
-            Task.Run(() => publisher.WaitForAnySubscriberAsync(token), token).WaitAndRethrow();
+    public static async ValueTask WaitForAnySubscriberAsync(this IRosPublisher publisher,
+        CancellationToken token = default)
+    {
+        if (publisher == null)
+        {
+            throw new ArgumentNullException(nameof(publisher));
         }
 
-        public static async ValueTask WaitForAnySubscriberAsync(this IRosPublisher publisher,
-            CancellationToken token = default)
+        if (publisher.NumSubscribers != 0)
         {
-            if (publisher == null)
-            {
-                throw new ArgumentNullException(nameof(publisher));
-            }
-
-            if (publisher.NumSubscribers != 0)
-            {
-                return;
-            }
-
-            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, publisher.CancellationToken);
-            while (publisher.NumSubscribers == 0)
-            {
-                await Task.Delay(200, linkedSource.Token);
-            }
+            return;
         }
 
-        public static void WaitForAnyPublisher(this IRosSubscriber subscriber, int timeoutInMs)
+        using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, publisher.CancellationToken);
+        while (publisher.NumSubscribers == 0)
         {
-            using CancellationTokenSource tokenSource = new(timeoutInMs);
-            try
-            {
-                subscriber.WaitForAnyPublisher(tokenSource.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                throw new TimeoutException("Wait for publisher timed out");
-            }
+            await Task.Delay(200, linkedSource.Token);
+        }
+    }
+
+    public static void WaitForAnyPublisher(this IRosSubscriber subscriber, int timeoutInMs)
+    {
+        using CancellationTokenSource tokenSource = new(timeoutInMs);
+        try
+        {
+            subscriber.WaitForAnyPublisher(tokenSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException("Wait for publisher timed out");
+        }
+    }
+
+    public static void WaitForAnyPublisher(this IRosSubscriber subscriber, CancellationToken token = default)
+    {
+        if (subscriber == null)
+        {
+            throw new ArgumentNullException(nameof(subscriber));
         }
 
-        public static void WaitForAnyPublisher(this IRosSubscriber subscriber, CancellationToken token = default)
-        {
-            if (subscriber == null)
-            {
-                throw new ArgumentNullException(nameof(subscriber));
-            }
+        Task.Run(() => subscriber.WaitForAnyPublisherAsync(token), token).WaitAndRethrow();
+    }
 
-            Task.Run(() => subscriber.WaitForAnyPublisherAsync(token), token).WaitAndRethrow();
+    public static async ValueTask WaitForAnyPublisherAsync(this IRosSubscriber subscriber,
+        CancellationToken token = default)
+    {
+        if (subscriber == null)
+        {
+            throw new ArgumentNullException(nameof(subscriber));
         }
 
-        public static async ValueTask WaitForAnyPublisherAsync(this IRosSubscriber subscriber,
-            CancellationToken token = default)
+        if (subscriber.NumActivePublishers != 0)
         {
-            if (subscriber == null)
-            {
-                throw new ArgumentNullException(nameof(subscriber));
-            }
-
-            if (subscriber.NumActivePublishers != 0)
-            {
-                return;
-            }
+            return;
+        }
             
-            using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, subscriber.CancellationToken);
-            while (subscriber.NumActivePublishers == 0)
-            {
-                await Task.Delay(200, linkedSource.Token);
-            }
+        using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, subscriber.CancellationToken);
+        while (subscriber.NumActivePublishers == 0)
+        {
+            await Task.Delay(200, linkedSource.Token);
+        }
+    }
+
+    public static void WaitForTopic(this RosClient client, string topic, int timeoutInMs)
+    {
+        using CancellationTokenSource tokenSource = new(timeoutInMs);
+        try
+        {
+            client.WaitForTopic(topic, tokenSource.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException($"Wait for topic '{topic}' timed out");
+        }
+    }
+
+    public static void WaitForTopic(this RosClient client, string topic, CancellationToken token = default)
+    {
+        if (client == null)
+        {
+            throw new ArgumentNullException(nameof(client));
         }
 
-        public static void WaitForTopic(this RosClient client, string topic, int timeoutInMs)
+        if (topic == null)
         {
-            using CancellationTokenSource tokenSource = new(timeoutInMs);
+            throw new ArgumentNullException(nameof(topic));
+        }
+
+        Task.Run(() => client.WaitForTopicAsync(topic, token), token).WaitAndRethrow();
+    }
+
+    public static async ValueTask WaitForTopicAsync(this RosClient client, string topic,
+        CancellationToken token = default)
+    {
+        if (client == null)
+        {
+            throw new ArgumentNullException(nameof(client));
+        }
+
+        if (topic == null)
+        {
+            throw new ArgumentNullException(nameof(topic));
+        }
+
+        while (true)
+        {
             try
             {
-                client.WaitForTopic(topic, tokenSource.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                throw new TimeoutException($"Wait for topic '{topic}' timed out");
-            }
-        }
-
-        public static void WaitForTopic(this RosClient client, string topic, CancellationToken token = default)
-        {
-            if (client == null)
-            {
-                throw new ArgumentNullException(nameof(client));
-            }
-
-            if (topic == null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
-
-            Task.Run(() => client.WaitForTopicAsync(topic, token), token).WaitAndRethrow();
-        }
-
-        public static async ValueTask WaitForTopicAsync(this RosClient client, string topic,
-            CancellationToken token = default)
-        {
-            if (client == null)
-            {
-                throw new ArgumentNullException(nameof(client));
-            }
-
-            if (topic == null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
-
-            while (true)
-            {
-                try
+                var result = await client.RosMasterClient.GetPublishedTopicsAsync(token: token);
+                if (result.IsValid && result.Topics.Any(tuple => tuple.name == topic))
                 {
-                    var result = await client.RosMasterClient.GetPublishedTopicsAsync(token: token);
-                    if (result.IsValid && result.Topics.Any(tuple => tuple.name == topic))
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    await Task.Delay(200, token);
-                }
-                catch (XmlRpcException)
-                {
-                }
+                await Task.Delay(200, token);
+            }
+            catch (XmlRpcException)
+            {
             }
         }
     }

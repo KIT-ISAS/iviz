@@ -7,161 +7,161 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Iviz.Tools
+namespace Iviz.Tools;
+
+public static class BaseUtils
 {
-    public static class BaseUtils
+    public static readonly Random Random = new();
+
+    public const string GenericExceptionFormat = "{0}: {1}";
+
+    public static bool HasPrefix(this string check, string prefix)
     {
-        public static readonly Random Random = new();
-
-        public const string GenericExceptionFormat = "{0}: {1}";
-
-        public static bool HasPrefix(this string check, string prefix)
+        if (check is null)
         {
-            if (check is null)
-            {
-                throw new ArgumentNullException(nameof(check));
-            }
-
-            if (prefix is null)
-            {
-                throw new ArgumentNullException(nameof(prefix));
-            }
-
-            if (check.Length < prefix.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < prefix.Length; i++)
-            {
-                if (check[i] != prefix[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            throw new ArgumentNullException(nameof(check));
         }
 
-        public static bool HasSuffix(this string check, string suffix)
+        if (prefix is null)
         {
-            if (check is null)
-            {
-                throw new ArgumentNullException(nameof(check));
-            }
-
-            if (suffix is null)
-            {
-                throw new ArgumentNullException(nameof(suffix));
-            }
-
-            if (check.Length < suffix.Length)
-            {
-                return false;
-            }
-
-            int offset = check.Length - suffix.Length;
-            for (int i = 0; i < suffix.Length; i++)
-            {
-                if (check[offset + i] != suffix[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            throw new ArgumentNullException(nameof(prefix));
         }
 
-        public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t) => new(t);
-
-        public static int Sum<T>(this ReadOnlySpan<T> ts, Func<T, int> selector)
+        if (check.Length < prefix.Length)
         {
-            int sum = 0;
-            foreach (T t in ts)
-            {
-                sum += selector(t);
-            }
-
-            return sum;
-        }
-
-        public static int Sum<T>(this T[] ts, Func<T, int> selector)
-        {
-            int sum = 0;
-            foreach (T t in ts)
-            {
-                sum += selector(t);
-            }
-
-            return sum;
-        }
-
-        public static bool Any<T>(this T[] ts, Predicate<T> predicate)
-        {
-            foreach (var t in ts)
-            {
-                if (predicate(t))
-                {
-                    return true;
-                }
-            }
-
             return false;
         }
 
-        public static Rent<byte> AsRent(this string s)
+        for (int i = 0; i < prefix.Length; i++)
         {
-            var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(s.Length));
-            int size = Defaults.UTF8.GetBytes(s, 0, s.Length, bytes.Array, 0);
-            return bytes.Resize(size);
+            if (check[i] != prefix[i])
+            {
+                return false;
+            }
         }
+
+        return true;
+    }
+
+    public static bool HasSuffix(this string check, string suffix)
+    {
+        if (check is null)
+        {
+            throw new ArgumentNullException(nameof(check));
+        }
+
+        if (suffix is null)
+        {
+            throw new ArgumentNullException(nameof(suffix));
+        }
+
+        if (check.Length < suffix.Length)
+        {
+            return false;
+        }
+
+        int offset = check.Length - suffix.Length;
+        for (int i = 0; i < suffix.Length; i++)
+        {
+            if (check[offset + i] != suffix[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> t) => new(t);
+
+    public static int Sum<T>(this ReadOnlySpan<T> ts, Func<T, int> selector)
+    {
+        int sum = 0;
+        foreach (T t in ts)
+        {
+            sum += selector(t);
+        }
+
+        return sum;
+    }
+
+    public static int Sum<T>(this T[] ts, Func<T, int> selector)
+    {
+        int sum = 0;
+        foreach (T t in ts)
+        {
+            sum += selector(t);
+        }
+
+        return sum;
+    }
+
+    public static bool Any<T>(this T[] ts, Predicate<T> predicate)
+    {
+        foreach (var t in ts)
+        {
+            if (predicate(t))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static Rent<byte> AsRent(this string s)
+    {
+        var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(s.Length));
+        int size = Defaults.UTF8.GetBytes(s, 0, s.Length, bytes.Array, 0);
+        return bytes.Resize(size);
+    }
 
 #if NETSTANDARD2_0
         internal static Rent<byte> AsRent(this StringBuilder str, char[] mainChunk)
 #else
-        internal static Rent<byte> AsRent(this StringBuilder str, in ReadOnlyMemory<char> mainChunk)
+    internal static Rent<byte> AsRent(this StringBuilder str, in ReadOnlyMemory<char> mainChunk)
 #endif
-        {
-            var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(str.Length));
-            int size;
+    {
+        var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(str.Length));
+        int size;
 
-            if (mainChunk.Length >= str.Length)
-            {
+        if (mainChunk.Length >= str.Length)
+        {
 #if NETSTANDARD2_0
                 size = Defaults.UTF8.GetBytes(mainChunk, 0, str.Length, bytes.Array, 0);
 #else
-                size = Defaults.UTF8.GetBytes(mainChunk[..str.Length].Span, bytes.Array);
+            size = Defaults.UTF8.GetBytes(mainChunk[..str.Length].Span, bytes.Array);
 #endif
-            }
-            else
-            {
-                // slow path
-                using var chars = new Rent<char>(str.Length);
-                for (int i = 0; i < str.Length; i++)
-                {
-                    chars.Array[i] = str[i];
-                }
-
-                size = Defaults.UTF8.GetBytes(chars.Array, 0, chars.Length, bytes.Array, 0);
-            }
-
-            return bytes.Resize(size);
         }
+        else
+        {
+            // slow path
+            using var chars = new Rent<char>(str.Length);
+            for (int i = 0; i < str.Length; i++)
+            {
+                chars.Array[i] = str[i];
+            }
+
+            size = Defaults.UTF8.GetBytes(chars.Array, 0, chars.Length, bytes.Array, 0);
+        }
+
+        return bytes.Resize(size);
+    }
 
 #if NETSTANDARD2_1
-        static FieldInfo? chunkField;
+    static FieldInfo? chunkField;
 
-        internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
+    internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
+    {
+        if (chunkField == null)
         {
-            if (chunkField == null)
-            {
-                chunkField =
-                    typeof(StringBuilder).GetField("m_ChunkChars", BindingFlags.NonPublic | BindingFlags.Instance)
-                    ?? throw new InvalidOperationException("Failed to find StringBuilder chunk field!");
-            }
-
-            return (char[])chunkField.GetValue(str)!;
+            chunkField =
+                typeof(StringBuilder).GetField("m_ChunkChars", BindingFlags.NonPublic | BindingFlags.Instance)
+                ?? throw new InvalidOperationException("Failed to find StringBuilder chunk field!");
         }
+
+        return (char[])chunkField.GetValue(str)!;
+    }
 #else
         internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
         {
@@ -170,43 +170,42 @@ namespace Iviz.Tools
         }
 #endif
 
-        /// <summary>
-        ///     A string hash that does not change every run unlike <see cref="string.GetHashCode()"/>
-        /// </summary>
-        /// <param name="str">String to calculate the hash from</param>
-        /// <returns>A hash integer</returns>
-        public static int GetDeterministicHashCode(this string str)
+    /// <summary>
+    ///     A string hash that does not change every run unlike <see cref="string.GetHashCode()"/>
+    /// </summary>
+    /// <param name="str">String to calculate the hash from</param>
+    /// <returns>A hash integer</returns>
+    public static int GetDeterministicHashCode(this string str)
+    {
+        unchecked
         {
-            unchecked
+            int hash1 = (5381 << 16) + 5381;
+            int hash2 = hash1;
+
+            for (int i = 0; i < str.Length; i += 2)
             {
-                int hash1 = (5381 << 16) + 5381;
-                int hash2 = hash1;
-
-                for (int i = 0; i < str.Length; i += 2)
+                hash1 = ((hash1 << 5) + hash1) ^ str[i];
+                if (i == str.Length - 1)
                 {
-                    hash1 = ((hash1 << 5) + hash1) ^ str[i];
-                    if (i == str.Length - 1)
-                    {
-                        break;
-                    }
-
-                    hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
+                    break;
                 }
 
-                return hash1 + hash2 * 1566083941;
+                hash2 = ((hash2 << 5) + hash2) ^ str[i + 1];
             }
+
+            return hash1 + hash2 * 1566083941;
         }
     }
+}
 
-    public sealed class ConcurrentSet<T> : IReadOnlyCollection<T> where T : notnull
-    {
-        readonly ConcurrentDictionary<T, object?> backend = new();
-        public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-        public void Add(T s) => backend[s] = null;
-        public bool Remove(T s) => backend.TryRemove(s, out _);
-        public int Count => backend.Count;
-        public void Clear() => backend.Clear();
-        public T[] ToArray() => backend.Keys.ToArray();
-    }
+public sealed class ConcurrentSet<T> : IReadOnlyCollection<T> where T : notnull
+{
+    readonly ConcurrentDictionary<T, object?> backend = new();
+    public IEnumerator<T> GetEnumerator() => backend.Keys.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    public void Add(T s) => backend[s] = null;
+    public bool Remove(T s) => backend.TryRemove(s, out _);
+    public int Count => backend.Count;
+    public void Clear() => backend.Clear();
+    public T[] ToArray() => backend.Keys.ToArray();
 }

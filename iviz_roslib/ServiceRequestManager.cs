@@ -9,127 +9,126 @@ using Iviz.Msgs;
 using Iviz.Tools;
 using Nito.AsyncEx;
 
-namespace Iviz.Roslib
+namespace Iviz.Roslib;
+
+internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T : IService
 {
-    internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T : IService
+    readonly Func<T, ValueTask> callback;
+    readonly HashSet<ServiceRequest<T>> requests = new();
+    readonly TcpListener listener;
+    readonly ServiceInfo<T> serviceInfo;
+    readonly Task task;
+
+    readonly CancellationTokenSource tokenSource = new();
+    bool KeepRunning => !tokenSource.IsCancellationRequested;
+
+    bool disposed;
+
+    public ServiceRequestManager(ServiceInfo<T> serviceInfo, string host, Func<T, ValueTask> callback)
     {
-        readonly Func<T, ValueTask> callback;
-        readonly HashSet<ServiceRequest<T>> requests = new();
-        readonly TcpListener listener;
-        readonly ServiceInfo<T> serviceInfo;
-        readonly Task task;
+        this.serviceInfo = serviceInfo;
+        this.callback = callback;
 
-        readonly CancellationTokenSource tokenSource = new();
-        bool KeepRunning => !tokenSource.IsCancellationRequested;
+        listener = new TcpListener(IPAddress.IPv6Any, 0) { Server = { DualMode = true } };
+        listener.Start();
 
-        bool disposed;
+        IPEndPoint localEndpoint = (IPEndPoint)listener.LocalEndpoint;
+        Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port.ToString()}/");
 
-        public ServiceRequestManager(ServiceInfo<T> serviceInfo, string host, Func<T, ValueTask> callback)
+        Logger.LogDebugFormat("{0}: Starting!", this);
+
+        task = TaskUtils.StartLongTask(async () => await RunLoop().AwaitNoThrow(this));
+    }
+
+    public Uri Uri { get; }
+    public string Service => serviceInfo.Service;
+    public string ServiceType => serviceInfo.Type;
+
+
+    async ValueTask RunLoop()
+    {
+        try
         {
-            this.serviceInfo = serviceInfo;
-            this.callback = callback;
-
-            listener = new TcpListener(IPAddress.IPv6Any, 0) { Server = { DualMode = true } };
-            listener.Start();
-
-            IPEndPoint localEndpoint = (IPEndPoint)listener.LocalEndpoint;
-            Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port.ToString()}/");
-
-            Logger.LogDebugFormat("{0}: Starting!", this);
-
-            task = TaskUtils.StartLongTask(async () => await RunLoop().AwaitNoThrow(this));
-        }
-
-        public Uri Uri { get; }
-        public string Service => serviceInfo.Service;
-        public string ServiceType => serviceInfo.Type;
-
-
-        async ValueTask RunLoop()
-        {
-            try
+            while (KeepRunning)
             {
-                while (KeepRunning)
+                TcpClient client = await listener.AcceptTcpClientAsync();
+                if (!KeepRunning)
                 {
-                    TcpClient client = await listener.AcceptTcpClientAsync();
-                    if (!KeepRunning)
-                    {
-                        break;
-                    }
-
-                    IPEndPoint? endPoint;
-                    if ((endPoint = (IPEndPoint?)client.Client.RemoteEndPoint) == null)
-                    {
-                        Logger.LogFormat("{0}: Received a request, but failed to initialize connection.", this);
-                        continue;
-                    }
-
-                    var sender = new ServiceRequest<T>(serviceInfo, client, new Endpoint(endPoint), callback);
-                    requests.Add(sender);
-
-                    await CleanupAsync(tokenSource.Token);
-                }
-            }
-            catch (Exception e)
-            {
-                if (e is not (ObjectDisposedException or OperationCanceledException))
-                {
-                    Logger.LogFormat("{0}: Stopped thread {1}", this, e);
+                    break;
                 }
 
-                return;
+                IPEndPoint? endPoint;
+                if ((endPoint = (IPEndPoint?)client.Client.RemoteEndPoint) == null)
+                {
+                    Logger.LogFormat("{0}: Received a request, but failed to initialize connection.", this);
+                    continue;
+                }
+
+                var sender = new ServiceRequest<T>(serviceInfo, client, new Endpoint(endPoint), callback);
+                requests.Add(sender);
+
+                await CleanupAsync(tokenSource.Token);
             }
-
-            Logger.LogDebugFormat("{0}: Leaving task", this); // also expected
         }
-
-        async ValueTask CleanupAsync(CancellationToken token)
+        catch (Exception e)
         {
-            var toRemove = requests.Where(request => !request.IsAlive).ToArray();
-            var tasks = toRemove.Select(async request =>
+            if (e is not (ObjectDisposedException or OperationCanceledException))
             {
-                Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x",
-                    this, request.Hostname);
-                await request.StopAsync(token);
-                requests.Remove(request);
-            });
-            await tasks.WhenAll().AwaitNoThrow(this);
+                Logger.LogFormat("{0}: Stopped thread {1}", this, e);
+            }
+
+            return;
         }
 
-        public async ValueTask DisposeAsync(CancellationToken token)
+        Logger.LogDebugFormat("{0}: Leaving task", this); // also expected
+    }
+
+    async ValueTask CleanupAsync(CancellationToken token)
+    {
+        var toRemove = requests.Where(request => !request.IsAlive).ToArray();
+        var tasks = toRemove.Select(async request =>
         {
-            if (disposed)
-            {
-                return;
-            }
+            Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x",
+                this, request.Hostname);
+            await request.StopAsync(token);
+            requests.Remove(request);
+        });
+        await tasks.WhenAll().AwaitNoThrow(this);
+    }
 
-            disposed = true;
-
-            tokenSource.Cancel();
-
-            // this is a bad hack, but it's the only reliable way I've found to make AcceptTcpClient come out 
-            using (var client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } })
-            {
-                await client.ConnectAsync(IPAddress.Loopback, Uri.Port);
-            }
-
-            listener.Stop();
-            if (!await task.AwaitFor(2000, token))
-            {
-                Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
-            }
-
-
-            Task[] tasks = requests.Select(request => request.StopAsync(token).AsTask()).ToArray();
-            await tasks.WhenAll().AwaitNoThrow(this);
-            requests.Clear();
-
-            tokenSource.Dispose();
-        }
-
-        public override string ToString()
+    public async ValueTask DisposeAsync(CancellationToken token)
+    {
+        if (disposed)
         {
-            return $"[ServiceRequestManager {Service} [{ServiceType}] at {Uri}]";
+            return;
         }
+
+        disposed = true;
+
+        tokenSource.Cancel();
+
+        // this is a bad hack, but it's the only reliable way I've found to make AcceptTcpClient come out 
+        using (var client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } })
+        {
+            await client.ConnectAsync(IPAddress.Loopback, Uri.Port);
+        }
+
+        listener.Stop();
+        if (!await task.AwaitFor(2000, token))
+        {
+            Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
+        }
+
+
+        Task[] tasks = requests.Select(request => request.StopAsync(token).AsTask()).ToArray();
+        await tasks.WhenAll().AwaitNoThrow(this);
+        requests.Clear();
+
+        tokenSource.Dispose();
+    }
+
+    public override string ToString()
+    {
+        return $"[ServiceRequestManager {Service} [{ServiceType}] at {Uri}]";
     }
 }

@@ -1,73 +1,72 @@
 using System;
 using System.Threading;
 
-namespace Iviz.Tools
+namespace Iviz.Tools;
+
+/// <summary>
+/// A shared reference to a rented array. Similar to <see cref="UniqueRef{T}"/>,
+/// but multiple <see cref="SharedRef{T}"/> instances can be created that point to the same array.
+/// Ownership of the rented array is collective, and the rented array will only be
+/// returned once all the shared references are disposed. 
+/// </summary>
+/// <typeparam name="T">The type of the rented array.</typeparam>
+[Obsolete]
+public sealed class SharedRef<T> : IDisposable
 {
+    public T[] Array => reference.Array;
+    public int Length => reference.Length;
+    readonly UniqueRef<T> reference;
+    readonly CountdownEvent cd;
+    bool disposed;
+
     /// <summary>
-    /// A shared reference to a rented array. Similar to <see cref="UniqueRef{T}"/>,
-    /// but multiple <see cref="SharedRef{T}"/> instances can be created that point to the same array.
-    /// Ownership of the rented array is collective, and the rented array will only be
-    /// returned once all the shared references are disposed. 
+    /// Creates a new shared reference by releasing the array from the given <see cref="UniqueRef{T}"/>.
     /// </summary>
-    /// <typeparam name="T">The type of the rented array.</typeparam>
-    [Obsolete]
-    public sealed class SharedRef<T> : IDisposable
+    /// <param name="t">The unique ref that owns the array. Ownership will be removed from this value.</param>
+    public SharedRef(UniqueRef<T> t)
     {
-        public T[] Array => reference.Array;
-        public int Length => reference.Length;
-        readonly UniqueRef<T> reference;
-        readonly CountdownEvent cd;
-        bool disposed;
+        reference = t.Release();
+        cd = new CountdownEvent(1);
+    }
 
-        /// <summary>
-        /// Creates a new shared reference by releasing the array from the given <see cref="UniqueRef{T}"/>.
-        /// </summary>
-        /// <param name="t">The unique ref that owns the array. Ownership will be removed from this value.</param>
-        public SharedRef(UniqueRef<T> t)
+    SharedRef(SharedRef<T> other)
+    {
+        reference = other.reference;
+        cd = other.cd;
+        cd.AddCount();
+    }
+
+    /// <summary>
+    /// Creates a new <see cref="SharedRef{T}"/> that points to the same rented array as this ref.
+    /// The array will not be returned unless all instances created by this function are disposed.
+    /// </summary>
+    /// <returns>A new shared ref.</returns>
+    public SharedRef<T> Share()
+    {
+        return new(this);
+    }
+
+    public void Dispose()
+    {
+        if (disposed)
         {
-            reference = t.Release();
-            cd = new CountdownEvent(1);
+            return;
         }
 
-        SharedRef(SharedRef<T> other)
+        disposed = true;
+        if (!cd.Signal())
         {
-            reference = other.reference;
-            cd = other.cd;
-            cd.AddCount();
+            return;
         }
 
-        /// <summary>
-        /// Creates a new <see cref="SharedRef{T}"/> that points to the same rented array as this ref.
-        /// The array will not be returned unless all instances created by this function are disposed.
-        /// </summary>
-        /// <returns>A new shared ref.</returns>
-        public SharedRef<T> Share()
-        {
-            return new(this);
-        }
-
-        public void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            disposed = true;
-            if (!cd.Signal())
-            {
-                return;
-            }
-
-            reference.Dispose();
-            cd.Dispose();
-        }
+        reference.Dispose();
+        cd.Dispose();
+    }
         
-        public RentEnumerator<T> GetEnumerator() => reference.GetEnumerator();
+    public RentEnumerator<T> GetEnumerator() => reference.GetEnumerator();
 
-        public override string ToString()
-        {
-            return $"[SharedRef Ref={reference} Count={cd.CurrentCount.ToString()}]";
-        }
+    public override string ToString()
+    {
+        return $"[SharedRef Ref={reference} Count={cd.CurrentCount.ToString()}]";
     }
 }
