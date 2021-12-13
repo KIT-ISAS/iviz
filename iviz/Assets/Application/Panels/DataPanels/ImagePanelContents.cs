@@ -18,11 +18,11 @@ namespace Iviz.App
         public ImagePreviewWidget PreviewWidget { get; private set; }
         public DataLabelWidget Description { get; private set; }
         public DropdownWidget Colormap { get; private set; }
-        public SliderWidget Min { get; private set; }
-        public SliderWidget Max { get; private set; }
+        public ToggleWidget ForceMinMax { get; private set; }
+        public SliderWidgetWithScale Min { get; private set; }
+        public SliderWidgetWithScale Max { get; private set; }
         public ToggleWidget FlipMinMax { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
-        CollapsibleWidget billboard;
 
         void Awake()
         {
@@ -34,8 +34,9 @@ namespace Iviz.App
             Colormap = p.AddDropdown("Colormap")
                 .SetOptions(Resource.Colormaps.Names)
                 .SetIndex((int)ColormapId.gray);
-            Min = p.AddSlider("Colormap Min").SetMinValue(0).SetMaxValue(1);
-            Max = p.AddSlider("Colormap Max").SetMinValue(0).SetMaxValue(1);
+            ForceMinMax = p.AddToggle("Colormap Override Min/Max");
+            Min = p.AddSliderWidgetWithScale("Colormap Min");
+            Max = p.AddSliderWidgetWithScale("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");
 
             PreviewWidget = p.AddImagePreviewWidget("Preview");
@@ -45,7 +46,7 @@ namespace Iviz.App
             BillboardFollowsCamera = p.AddToggle("Billboard Points To You");
             BillboardOffset = p.AddVector3Slider("Billboard Offset");
 
-            billboard = p.AddCollapsibleWidget("Billboard")
+            p.AddCollapsibleWidget("Billboard")
                 .Attach(ShowBillboard)
                 .Attach(BillboardSize)
                 .Attach(BillboardFollowsCamera)

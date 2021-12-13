@@ -32,7 +32,7 @@ namespace Iviz.Displays.Highlighters
             frame.ShadowsEnabled = false;
             frame.EmissiveColor = Color.blue;
             frame.Color = Color.white;
-            
+
             tokenSource = new CancellationTokenSource();
 
             this.isPermanent = isPermanent;
@@ -40,7 +40,7 @@ namespace Iviz.Displays.Highlighters
             {
                 GameThread.EveryFrame += Update;
             }
-            
+
             if (holder.Caption is { } caption)
             {
                 tooltip = ResourcePool.RentDisplay<Tooltip>(node.Transform);
@@ -48,12 +48,13 @@ namespace Iviz.Displays.Highlighters
                 tooltip.Color = Resource.Colors.HighlighterBackground;
                 tooltip.Layer = LayerType.IgnoreRaycast;
                 tooltip.Caption = caption;
-                tooltip.PointToCamera();
             }
 
-            if (isPermanent)
+            Update();
+
+            if (tooltip != null)
             {
-                Update();
+                tooltip.PointToCamera();
             }
         }
 
@@ -73,10 +74,10 @@ namespace Iviz.Displays.Highlighters
             {
                 return;
             }
-            
+
             float labelSize = Tooltip.GetRecommendedSize(transform.position);
-            var worldBounds = bounds.TransformBound(transform);
-            tooltip.Scale = labelSize;
+            var worldBounds = bounds.TransformBound(transform.AsPose(), transform.lossyScale);
+            tooltip.AbsoluteScale = labelSize;
             tooltip.Transform.position = worldBounds.center +
                                          2f * (worldBounds.size.y * 0.3f + labelSize) * Vector3.up;
         }
@@ -86,6 +87,12 @@ namespace Iviz.Displays.Highlighters
             Update();
 
             float alpha = Mathf.Sqrt(1 - t);
+            if (tooltip != null)
+            {
+                tooltip.CaptionColor = Color.white.WithAlpha(alpha);
+                tooltip.Color = Resource.Colors.HighlighterBackground.WithAlpha(alpha);
+            }
+
             frame.Color = Color.white.WithAlpha(alpha);
         }
 
@@ -96,7 +103,7 @@ namespace Iviz.Displays.Highlighters
             frame.ReturnToPool();
             tooltip.ReturnToPool();
             node.DestroySelf();
-            
+
             if (isPermanent)
             {
                 GameThread.EveryFrame -= Update;

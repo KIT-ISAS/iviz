@@ -10,15 +10,13 @@ namespace Iviz.App
         public FrameWidget Frame { get; private set; }
         //public ToggleWidget PreferUdp { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
-        public SliderWidget Scale { get; private set; }
+        public SliderWidgetWithScale Scale { get; private set; }
         public ToggleWidget ShowAxis { get; private set; }
         public ToggleWidget ShowTrail { get; private set; }
         public ToggleWidget ShowVector { get; private set; }
         public ToggleWidget ShowAngle { get; private set; }
-        public SliderWidget VectorScale { get; private set; }
-        //public SliderWidget TrailTime { get; private set; }
+        public SliderWidgetWithScale VectorScale { get; private set; }
         public ColorPickerWidget VectorColor { get; private set; }
-        public SliderWidget ScaleMultiplier { get; private set; }
 
         void Awake()
         {
@@ -26,7 +24,6 @@ namespace Iviz.App
             p.AddHeadTitleWidget("Magnitude");
             Listener = p.AddListener();
             Frame = p.AddFrame();
-            //PreferUdp = p.AddToggle("Prefer UDP");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             ShowAxis = p.AddToggle("Show Frame");
@@ -34,15 +31,13 @@ namespace Iviz.App
             ShowVector = p.AddToggle("Show Vector");
             ShowTrail = p.AddToggle("Show Trail");
 
-            Scale = p.AddSlider("Scale (All)").SetMinValue(0.1f).SetMaxValue(10.0f).SetNumberOfSteps(99);
+            Scale = p.AddSliderWidgetWithScale("Scale (All)");
             
             VectorColor = p.AddColorPicker("Vector Color");
-            VectorScale = p.AddSlider("Additional Scale (Vector)").SetMinValue(0.1f).SetMaxValue(10.0f).SetNumberOfSteps(99);
-            ScaleMultiplier = p.AddSlider("Multiply Scale (Vector) by Power of 10").SetMinValue(-4).SetMaxValue(4).SetIntegerOnly(true);
+            VectorScale = p.AddSliderWidgetWithScale("Additional Scale (Vector)");
             p.AddCollapsibleWidget("Vector...")
                 .Attach(VectorColor)
                 .Attach(VectorScale)
-                .Attach(ScaleMultiplier)
                 .UpdateSize();
             
             p.UpdateSize();

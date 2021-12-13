@@ -117,7 +117,8 @@ namespace Iviz.App
             }
 
             var content = (RectTransform)Dropdown.transform.GetChild(2).GetChild(0).GetChild(0);
-            float max = content.GetComponentsInChildren<TMP_Text>().Max(text => text.preferredWidth);
+            var textFields = content.GetComponentsInChildren<TMP_Text>();
+            float max = textFields.Length == 0 ? 0 : textFields.Max(text => text.preferredWidth);
             content.sizeDelta = content.sizeDelta.WithX(max + 20);
         }
 

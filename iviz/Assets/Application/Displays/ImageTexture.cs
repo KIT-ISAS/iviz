@@ -73,6 +73,8 @@ namespace Iviz.Displays
         public bool IsMono { get; private set; }
         public int Width => Texture != null ? Texture.width : 0;
         public int Height => Texture != null ? Texture.height : 0;
+        public Vector2? MeasuredBounds { get; private set; }
+        public Vector2? NormalizedMeasuredBounds { get; private set; }
         public int BytesPerPixel { get; private set; }
 
         ColormapId colormap;
@@ -428,6 +430,8 @@ namespace Iviz.Displays
                         texture = EnsureSize(width, height, TextureFormat.RGB24);
                     }
 
+                    MeasuredBounds = null;
+                    NormalizedMeasuredBounds = null;
                     break;
                 case "RGBA8":
                 case "BGRA8":
@@ -453,6 +457,8 @@ namespace Iviz.Displays
                         texture = EnsureSize(width, height, TextureFormat.R16);
                     }
 
+                    MeasuredBounds = CalculateBoundsR16(data);
+                    NormalizedMeasuredBounds = MeasuredBounds.Value / ushort.MaxValue;
                     break;
                 case "MONO8":
                 case "8UC1":
@@ -460,10 +466,14 @@ namespace Iviz.Displays
                 case "8SC1":
                 case "8SC":
                     texture = EnsureSize(width, height, TextureFormat.R8);
+                    MeasuredBounds = CalculateBoundsR8(data);
+                    NormalizedMeasuredBounds = MeasuredBounds.Value / byte.MaxValue;
                     break;
                 case "32FC1":
                 case "32FC":
                     texture = EnsureSize(width, height, TextureFormat.RFloat);
+                    MeasuredBounds = CalculateBoundsRFloat(data);
+                    NormalizedMeasuredBounds = MeasuredBounds.Value;
                     break;
                 default:
                     return;
@@ -472,7 +482,6 @@ namespace Iviz.Displays
             if (!alreadyCopied)
             {
                 data[..length].CopyTo(texture.GetRawTextureData<byte>().AsSpan());
-                //NativeArray<byte>.Copy(data.Array, data.Offset, texture.GetRawTextureData<byte>(), 0, length);
             }
 
             texture.Apply(generateMipmaps);
@@ -501,14 +510,9 @@ namespace Iviz.Displays
             }
         }
 
-        void CopyRgb24ToRgba32(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
+        static void CopyRgb24ToRgba32(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
         {
             int numElements = lengthInBytes / 3;
-            if (lengthInBytes > src.Length || numElements * 4 > dst.Length)
-            {
-                throw new InvalidOperationException($"{this}: Skipping copy. Possible buffer overflow.");
-            }
-
             var srcPtr = MemoryMarshal.Cast<byte, Rgb>(src);
             var dstPtr = MemoryMarshal.Cast<byte, Rgba>(dst);
             var colorOut = new Rgba { a = 255 };
@@ -521,7 +525,7 @@ namespace Iviz.Displays
                 dstPtr[i] = colorOut;
             }
         }
-
+        
         struct Rgba
         {
             public byte r, g, b, a;
@@ -531,6 +535,68 @@ namespace Iviz.Displays
         {
             public byte r, g, b;
         }
+
+        static Vector2 CalculateBoundsR8(ReadOnlySpan<byte> src)
+        {
+            byte min = byte.MaxValue;
+            byte max = byte.MinValue;
+            foreach (byte b in src)
+            {
+                if (b > max)
+                {
+                    max = b;
+                }
+
+                if (b < min)
+                {
+                    min = b;
+                }
+            }
+
+            return new Vector2(min, max);
+        }
+        
+        static Vector2 CalculateBoundsR16(ReadOnlySpan<byte> src)
+        {
+            ushort min = ushort.MaxValue;
+            ushort max = ushort.MinValue;
+            var span = MemoryMarshal.Cast<byte, ushort>(src);
+            foreach (ushort b in span)
+            {
+                if (b > max)
+                {
+                    max = b;
+                }
+
+                if (b < min)
+                {
+                    min = b;
+                }
+            }
+
+            return new Vector2(min, max);
+        }        
+        
+        static Vector2 CalculateBoundsRFloat(ReadOnlySpan<byte> src)
+        {
+            float min = float.MaxValue;
+            float max = float.MinValue;
+            var span = MemoryMarshal.Cast<byte, float>(src);
+            foreach (float b in span)
+            {
+                if (b > max)
+                {
+                    max = b;
+                }
+
+                if (b < min)
+                {
+                    min = b;
+                }
+            }
+
+            return new Vector2(min, max);
+        }           
 
         Texture2D EnsureSize(int width, int height, TextureFormat format)
         {

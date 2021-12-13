@@ -35,11 +35,6 @@ namespace Iviz.Displays
         const string StrCallServiceFailed =
             "ExternalResourceManager: Call Service failed! Are you sure iviz is connected and the Iviz.Model.Service program is running?";
 
-        const string StrResourceFailedWithError = "ExternalResourceManager: Loading resource {0} failed with error {1}";
-
-        const string StrLocalResourceFailedWithError =
-            "ExternalResourceManager: Loading local resource '{0}' failed with error {1}";
-
         const int TimeoutInMs = 10000;
 
         const int Md5SumLength = 32;
@@ -104,11 +99,11 @@ namespace Iviz.Displays
 
             if (!File.Exists(Settings.ResourcesFilePath))
             {
-                RosLogger.Debug("ExternalResourceManager: Failed to find file " + Settings.ResourcesFilePath);
+                RosLogger.Debug($"{this}: Failed to find file " + Settings.ResourcesFilePath);
                 return;
             }
 
-            RosLogger.Debug("ExternalResourceManager: Using resource file " + Settings.ResourcesFilePath);
+            RosLogger.Debug($"{this}: Using resource file " + Settings.ResourcesFilePath);
 
             try
             {
@@ -142,7 +137,7 @@ namespace Iviz.Displays
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"ExternalResourceManager: Failed to delete file '{path}' :", e);
+                    RosLogger.Error($"{this}: Failed to delete file '{path}' :", e);
                 }
             }
 
@@ -217,7 +212,7 @@ namespace Iviz.Displays
             }
             catch (IOException e)
             {
-                RosLogger.Error($"ExternalResourceManager: Failed to read robot '{robotName}' :", e);
+                RosLogger.Error($"{this}: Failed to read robot '{robotName}' :", e);
                 return default;
             }
         }
@@ -240,7 +235,7 @@ namespace Iviz.Displays
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
             await FileUtils.WriteAllTextAsync($"{Settings.SavedRobotsPath}/{localPath}", robotDescription,
                 tokenSource.Token);
-            RosLogger.Debug($"Saving to {Settings.SavedRobotsPath}/{localPath}");
+            RosLogger.Debug($"{this}: Saving to {Settings.SavedRobotsPath}/{localPath}");
 
             resourceFiles.RobotDescriptions[robotName] = localPath;
             await WriteResourceFileAsync(tokenSource.Token);
@@ -266,7 +261,7 @@ namespace Iviz.Displays
             }
             catch (IOException)
             {
-                RosLogger.Warn("ExternalResourceManager: Failed to delete robot file '" + localPath + "'");
+                RosLogger.Warn($"{this}: Failed to delete robot file '" + localPath + "'");
             }
 
             resourceFiles.RobotDescriptions.Remove(robotName);
@@ -303,7 +298,7 @@ namespace Iviz.Displays
 
             if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri uri))
             {
-                RosLogger.Warn($"[ExternalResourceManager]: Uri '{uriString}' is not a valid uri!");
+                RosLogger.Warn($"{this}:  Uri '{uriString}' is not a valid uri!");
                 temporaryBlacklist.Add(uriString, float.MaxValue);
                 return null;
             }
@@ -385,7 +380,7 @@ namespace Iviz.Displays
                 bool hasClient = await provider.CallServiceAsync(ModelServiceName, msg, TimeoutInMs, token);
                 if (!hasClient)
                 {
-                    RosLogger.Debug("ExternalResourceManager: Call to model service failed. Reason: Not connected.");
+                    RosLogger.Debug($"{this}: Call to model service failed. Reason: Not connected.");
                     return null;
                 }
 
@@ -562,6 +557,7 @@ namespace Iviz.Displays
             GameObject obj;
             try
             {
+                float time = Time.time;
                 var msg = await ReadModelFromFileAsync(uriString, localPath, token);
                 if (msg == null)
                 {
@@ -658,7 +654,7 @@ namespace Iviz.Displays
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                 }
 
-                RosLogger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
+                RosLogger.Debug($"{this}: Saving to {Settings.ResourcesPath}/{localPath}");
 
                 resourceFiles.Models[uriString] = localPath;
                 await WriteResourceFileAsync(token);
@@ -688,7 +684,7 @@ namespace Iviz.Displays
                 string localPath = SanitizeForFilename(uriString);
 
                 await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", msg.Image.Data, token);
-                RosLogger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
+                RosLogger.Debug($"{this}: Saving to {Settings.ResourcesPath}/{localPath}");
 
                 resourceFiles.Textures[uriString] = localPath;
                 await WriteResourceFileAsync(token);
@@ -707,7 +703,7 @@ namespace Iviz.Displays
         {
             try
             {
-                Debug.Log("ExternalResourceManager: Processing " + uriString);
+                Debug.Log($"{this}: Processing {uriString}");
                 var sceneNode = await CreateSceneNodeAsync(msg.Scene, provider, token);
                 var info = new Info<GameObject>(sceneNode);
 
@@ -720,7 +716,7 @@ namespace Iviz.Displays
                     BuiltIns.UTF8.GetBytes(Scene.RosMd5Sum, 0, Md5SumLength, buffer.Array, 0);
                     msg.Scene.SerializeTo(buffer[Md5SumLength..]);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
-                    RosLogger.Debug($"Saving to {Settings.ResourcesPath}/{localPath}");
+                    RosLogger.Debug($"{this}: Saving to {Settings.ResourcesPath}/{localPath}");
                 }
 
                 resourceFiles.Scenes[uriString] = localPath;
@@ -821,5 +817,7 @@ namespace Iviz.Displays
 
             return sceneNode;
         }
+
+        public override string ToString() => "ExternalResourceManager";
     }
 }

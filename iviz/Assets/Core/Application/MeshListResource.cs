@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Common;
 using Iviz.Core;
@@ -332,7 +333,8 @@ namespace Iviz.Displays
             if (pointComputeBuffer == null || pointComputeBuffer.count < pointBuffer.Capacity)
             {
                 pointComputeBuffer?.Release();
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Unsafe.SizeOf<PointWithColor>(),
+                    ComputeBufferType.Default, ComputeBufferMode.Dynamic);
                 Properties.SetBuffer(PointsID, pointComputeBuffer);
             }
 
@@ -351,8 +353,8 @@ namespace Iviz.Displays
                 meshScale.y *= Mathf.Max(Mathf.Abs(span.x), Mathf.Abs(span.y));
             }
 
-            Bounds baseMeshBounds = mesh.bounds;
-            Bounds meshBounds = new Bounds
+            var baseMeshBounds = mesh.bounds;
+            var meshBounds = new Bounds
             {
                 center = meshScale.Mult(baseMeshBounds.center + preTranslation),
                 size = meshScale.Mult(baseMeshBounds.size)

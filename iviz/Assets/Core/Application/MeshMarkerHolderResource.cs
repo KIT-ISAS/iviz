@@ -43,10 +43,7 @@ namespace Iviz.Displays
 
                 foreach (var child in children)
                 {
-                    if (child != null)
-                    {
-                        child.Layer = value;
-                    }
+                    child.Layer = value;
                 }
             }
         }
@@ -63,10 +60,7 @@ namespace Iviz.Displays
             {
                 foreach (var child in children)
                 {
-                    if (child != null)
-                    {
-                        child.OcclusionOnly = value;
-                    }
+                    child.OcclusionOnly = value;
                 }
             }
         }
@@ -77,10 +71,7 @@ namespace Iviz.Displays
             {
                 foreach (var child in children)
                 {
-                    if (child != null)
-                    {
-                        child.Tint = value;
-                    }
+                    child.Tint = value;
                 }
             }
         }
@@ -92,10 +83,7 @@ namespace Iviz.Displays
             {
                 foreach (var child in children)
                 {
-                    if (child != null)
-                    {
-                        child.Smoothness = value;
-                    }
+                    child.Smoothness = value;
                 }
             }
         }
@@ -106,10 +94,7 @@ namespace Iviz.Displays
             {
                 foreach (var child in children)
                 {
-                    if (child != null)
-                    {
-                        child.Metallic = value;
-                    }
+                    child.Metallic = value;
                 }
             }
         }
@@ -120,10 +105,7 @@ namespace Iviz.Displays
             {
                 foreach (var child in children)
                 {
-                    if (child != null)
-                    {
-                        child.Color = value;
-                    }
+                    child.Color = value;
                 }
             }
         }
@@ -134,10 +116,7 @@ namespace Iviz.Displays
             {
                 foreach (var child in children)
                 {
-                    if (child != null)
-                    {
-                        child.EmissiveColor = value;
-                    }
+                    child.EmissiveColor = value;
                 }
             }
         }

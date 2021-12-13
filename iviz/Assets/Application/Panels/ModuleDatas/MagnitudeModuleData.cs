@@ -46,7 +46,6 @@ namespace Iviz.App
             panel.Scale.Value = listener.Scale;
             panel.VectorScale.Value = listener.VectorScale;
             panel.HideButton.State = listener.Visible;
-            panel.ScaleMultiplier.Value = listener.VectorScaleMultiplierPow10;
             //panel.PreferUdp.Value = listener.PreferUdp;
 
 
@@ -58,7 +57,6 @@ namespace Iviz.App
             panel.ShowAxis.ValueChanged += f => { listener.FrameVisible = f; };
             panel.ShowVector.ValueChanged += f => { listener.VectorVisible = f; };
             panel.VectorScale.ValueChanged += f => { listener.VectorScale = f; };
-            panel.ScaleMultiplier.ValueChanged += f => { listener.VectorScaleMultiplierPow10 = f; };
             //panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
 
             switch (listener.Config.Type)

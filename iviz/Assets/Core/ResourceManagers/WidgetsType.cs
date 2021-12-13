@@ -23,6 +23,7 @@ namespace Iviz.Resources
         public Info<GameObject> HeadTitle { get; }
         public Info<GameObject> Toggle { get; }
         public Info<GameObject> Slider { get; }
+        public Info<GameObject> SliderWithScale { get; }
         public Info<GameObject> Input { get; }
         public Info<GameObject> NumberInput { get; }
         public Info<GameObject> Dropdown { get; }
@@ -70,6 +71,7 @@ namespace Iviz.Resources
             HeadTitle = new Info<GameObject>(assetHolder.HeadTitle);
             Toggle = new Info<GameObject>(assetHolder.Toggle);
             Slider = new Info<GameObject>(assetHolder.Slider);
+            SliderWithScale = new Info<GameObject>(assetHolder.SliderWithScale);
             Input = new Info<GameObject>(assetHolder.InputField);
             NumberInput = new Info<GameObject>(assetHolder.NumberInputField);
             ColorPicker = new Info<GameObject>(assetHolder.ColorPicker);

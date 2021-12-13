@@ -20,6 +20,8 @@ namespace Iviz.App
     public sealed class SimpleRobotModuleData : ModuleData
     {
         const string ParamSubstring = "_description";
+        
+        static readonly string[] NoneStr = {"<color=#b0b0b0ff><i><none></i></color>"};
 
         readonly SimpleRobotPanelContents panel;
 
@@ -31,8 +33,6 @@ namespace Iviz.App
         public SimpleRobotController RobotController { get; }
 
         CancellationTokenSource? tokenSource;
-
-        static readonly string[] NoneStr = {"<color=#b0b0b0ff><i><none></i></color>"};
 
         public SimpleRobotModuleData(ModuleDataConstructor constructor) :
             base(constructor.Topic, constructor.Type)
@@ -97,6 +97,7 @@ namespace Iviz.App
             panel.HideButton.State = RobotController.Visible;
 
             panel.OcclusionOnlyMode.Value = RobotController.RenderAsOcclusionOnly;
+            panel.EnableColliders.Value = RobotController.EnableColliders;
             panel.Tint.Value = RobotController.Tint;
             panel.Alpha.Value = RobotController.Tint.a;
             panel.Metallic.Value = RobotController.Metallic;
@@ -112,6 +113,7 @@ namespace Iviz.App
             panel.Metallic.ValueChanged += f => RobotController.Metallic = f;
             panel.Smoothness.ValueChanged += f => RobotController.Smoothness = f;
             panel.OcclusionOnlyMode.ValueChanged += f => RobotController.RenderAsOcclusionOnly = f;
+            panel.EnableColliders.ValueChanged += f => RobotController.EnableColliders = f;
             panel.SavedRobotName.ValueChanged += (i, name) =>
             {
                 RobotController.TryLoadSavedRobot(i == 0 ? null : name);
@@ -184,7 +186,6 @@ namespace Iviz.App
             list.Sort();
             return list;
         }
-
 
         static IEnumerable<string> GetSavedRobots() => NoneStr.Concat(Resource.GetRobotNames());
 

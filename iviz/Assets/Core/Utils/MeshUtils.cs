@@ -10,12 +10,18 @@ namespace Iviz.Core
 {
     public static class MeshUtils
     {
-        public static unsafe void SetVertices(this Mesh mesh, ReadOnlySpan<Vector3> span)
+        static unsafe NativeArray<T> CreateNativeArrayWrapper<T>(T* ptr, int length) where T : unmanaged
         {
-            fixed (Vector3* ptr = span)
+            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(ptr, length, Allocator.Temp);
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
+            return array;
+        }
+
+        public static unsafe void SetVertices(this Mesh mesh, ReadOnlySpan<Vector3> ps)
+        {
+            fixed (Vector3* ptr = ps)
             {
-                using var array =
-                    NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector3>(ptr, span.Length, Allocator.None);
+                var array = CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetVertices(array);
             }
         }
@@ -29,8 +35,7 @@ namespace Iviz.Core
         {
             fixed (Vector3* ptr = ps)
             {
-                using var array =
-                    NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector3>(ptr, ps.Length, Allocator.None);
+                var array = CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetNormals(array);
             }
         }
@@ -44,41 +49,38 @@ namespace Iviz.Core
         {
             fixed (Vector4* ptr = ps)
             {
-                using var array =
-                    NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector4>(ptr, ps.Length, Allocator.None);
+                var array = CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetTangents(array);
             }
         }
-        
+
         public static void SetTangents(this Mesh mesh, in Rent<Vector4> ps)
         {
             mesh.SetTangents(ps.Array, 0, ps.Length);
         }
-        
+
         public static unsafe void SetIndices(this Mesh mesh, ReadOnlySpan<int> ps, MeshTopology topology, int subMesh)
         {
             fixed (int* ptr = ps)
             {
-                using var array =
-                    NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(ptr, ps.Length, Allocator.None);
+                var array = CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetIndices(array, topology, subMesh);
             }
-        }        
+        }
 
         public static void SetIndices(this Mesh mesh, in Rent<int> ps, MeshTopology topology, int subMesh)
         {
             mesh.SetIndices(ps.Array, 0, ps.Length, topology, subMesh);
         }
-        
+
         public static unsafe void SetColors(this Mesh mesh, ReadOnlySpan<Color> ps)
         {
             fixed (Color* ptr = ps)
             {
-                using var array =
-                    NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Color>(ptr, ps.Length, Allocator.None);
+                var array = CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetColors(array);
             }
-        }        
+        }
 
         public static void SetColors(this Mesh mesh, in Rent<Color> ps)
         {
@@ -89,26 +91,24 @@ namespace Iviz.Core
         {
             fixed (Color32* ptr = ps)
             {
-                using var array =
-                    NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Color32>(ptr, ps.Length, Allocator.None);
+                var array = CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetColors(array);
             }
-        }  
-        
+        }
+
         public static void SetColors(this Mesh mesh, in Rent<Color32> ps)
         {
             mesh.SetColors(ps.Array, 0, ps.Length);
         }
-        
+
         public static unsafe void SetUVs(this Mesh mesh, ReadOnlySpan<Vector2> ps)
         {
             fixed (Vector2* ptr = ps)
             {
-                using var array =
-                    NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector2>(ptr, ps.Length, Allocator.None);
+                var array = CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetUVs(0, array);
             }
-        }          
+        }
 
         public static void SetUVs(this Mesh mesh, in Rent<Vector2> ps)
         {
@@ -119,8 +119,7 @@ namespace Iviz.Core
         {
             fixed (Vector3* ptr = ps)
             {
-                using var array =
-                    NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector3>(ptr, ps.Length, Allocator.None);
+                var array = CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetUVs(channel, array);
             }
         }
@@ -133,7 +132,7 @@ namespace Iviz.Core
         public static void SetTriangles(this Mesh mesh, ReadOnlySpan<int> ps, int subMesh = 0)
         {
             mesh.SetIndices(ps, MeshTopology.Triangles, subMesh);
-        }         
+        }
 
         public static void SetTriangles(this Mesh mesh, in Rent<int> ps, int subMesh = 0)
         {

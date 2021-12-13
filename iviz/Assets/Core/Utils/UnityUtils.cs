@@ -44,11 +44,18 @@ namespace Iviz.Core
             return Mathf.Max(Mathf.Max(Mathf.Abs(x), Mathf.Abs(y)), Mathf.Abs(z));
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in Vector4 p)
         {
             return Mathf.Max(Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z)), Mathf.Abs(p.w));
+        }
+
+        public static Vector3 InvCoeff(this Vector3 p)
+        {
+            p.x = 1f / p.x;
+            p.y = 1f / p.y;
+            p.z = 1f / p.z;
+            return p;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

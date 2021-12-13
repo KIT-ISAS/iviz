@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
+using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Resources;
 using Iviz.Urdf;
@@ -26,6 +27,8 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class RobotModel : ISupportsTint, ISupportsPbr, ISupportsAROcclusion
     {
+        public const string ColliderTag = "RobotCollider";
+        
         readonly List<MeshMarkerResource> displays = new();
         readonly Dictionary<string, GameObject> jointObjects = new();
         readonly Dictionary<string, Joint> joints = new();
@@ -153,19 +156,37 @@ namespace Iviz.Displays
         /// For external 3D models, whether to keep the materials instead
         /// of replacing them with the provided colors.
         /// </param>
-        public async ValueTask StartAsync(IExternalServiceProvider? provider = null, bool keepMeshMaterials = true)
+        public async ValueTask StartAsync(IExternalServiceProvider? provider, bool keepMeshMaterials = false)
         {
+            if (robot.Links.Count == 0 || robot.Joints.Count == 0)
+            {
+                RosLogger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
+                return;
+            }
+
             var rootMaterials = new Dictionary<string, Material>();
             foreach (var material in robot.Materials)
             {
                 rootMaterials[material.Name] = material;
             }
 
+            foreach (var link in robot.Links)
+            {
+                var linkObject = new GameObject("Link:" + link.Name);
+                linkObject.transform.parent = BaseLinkObject.transform;
+                linkObjects[link.Name ?? ""] = linkObject;
+            }
+            
+            foreach (var joint in robot.Joints)
+            {
+                ProcessJoint(joint);
+            }
+            
             try
             {
-                await robot.Links.Select(
-                    link => ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, runningTs.Token)
-                ).WhenAll();
+                var modelLoadingTasks = robot.Links.SelectMany(
+                    link => ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, runningTs.Token));
+                await modelLoadingTasks.WhenAll();
             }
             catch (OperationCanceledException)
             {
@@ -176,17 +197,6 @@ namespace Iviz.Displays
             {
                 RosLogger.Error($"{this}: Failed to construct '{Name}'", e);
                 throw;
-            }
-
-            foreach (var joint in robot.Joints)
-            {
-                ProcessJoint(joint);
-            }
-
-            if (linkObjects.Count == 0)
-            {
-                RosLogger.Info($"Finished constructing empty robot '{Name}' with no links and no joints.");
-                return;
             }
 
             var keysWithoutParent = new HashSet<string>(linkObjects.Keys);
@@ -238,7 +248,6 @@ namespace Iviz.Displays
 
             HashSet<string> toHide = new HashSet<string>();
 
-            int numHidden = 0;
             bool hasChanges;
             do
             {
@@ -259,7 +268,7 @@ namespace Iviz.Displays
                     }
                 }
 
-                foreach (var child in toHide)
+                foreach (string child in toHide)
                 {
                     linkChildren.Remove(child);
                     if (linkChildren.TryGetValue(linkParents[child], out var siblings))
@@ -268,14 +277,10 @@ namespace Iviz.Displays
                     }
 
                     var gameObject = linkObjects[child];
-                    //var grandParent = gameObject.transform.parent.parent.gameObject;
                     var parent = gameObject.transform.parent.gameObject;
                     parent.SetActive(false);
-                    numHidden++;
                 }
             } while (hasChanges);
-            
-            Debug.Log($"Hiding {numHidden} unused links out of {links.Count.ToString()}.");
         }
 
         public void CancelTasks()
@@ -284,39 +289,20 @@ namespace Iviz.Displays
         }
 
 
-        Task ProcessLinkAsync(bool keepMeshMaterials,
+        IEnumerable<Task> ProcessLinkAsync(bool keepMeshMaterials,
             Link link,
             IReadOnlyDictionary<string, Material> rootMaterials,
             IExternalServiceProvider? provider,
             CancellationToken token)
         {
-            var linkObject = new GameObject("Link:" + link.Name);
-            linkObject.transform.parent = BaseLinkObject.transform;
-
-            linkObjects[link.Name ?? ""] = linkObject;
-
             if (link.Visuals.Count == 0 && link.Collisions.Count == 0)
             {
-                return Task.CompletedTask;
+                return Array.Empty<Task>();
             }
-
-            /*
-            foreach (var collision in link.Collisions)
-            {
-                await ProcessCollisionAsync(collision, linkObject, provider, token);
-            }
-
-            foreach (var visual in link.Visuals)
-            {
-                await ProcessVisualAsync(keepMeshMaterials, visual, linkObject, rootMaterials, provider, token);
-            }
-            */
+            
+            var linkObject = linkObjects[link.Name ?? ""];
+            
             var tasks = new List<Task>(link.Collisions.Count + link.Visuals.Count);
-            foreach (var collision in link.Collisions)
-            {
-                tasks.Add(ProcessCollisionAsync(collision, linkObject, provider, token).AsTask());
-            }
-
             foreach (var visual in link.Visuals)
             {
                 var task =
@@ -324,7 +310,12 @@ namespace Iviz.Displays
                 tasks.Add(task);
             }
 
-            return tasks.WhenAll();
+            foreach (var collision in link.Collisions)
+            {
+                tasks.Add(ProcessCollisionAsync(collision, linkObject, provider, token).AsTask());
+            }
+
+            return tasks;
         }
 
         async ValueTask ProcessCollisionAsync(
@@ -339,6 +330,7 @@ namespace Iviz.Displays
             collisionObject.transform.SetParent(linkObject.transform, false);
             collisionObject.transform.SetLocalPose(origin.ToPose());
             collisionObject.layer = LayerType.Collider;
+            collisionObject.tag = ColliderTag;
 
             if (geometry.Mesh != null)
             {
@@ -364,11 +356,10 @@ namespace Iviz.Displays
                     return;
                 }
 
-
                 var resourceObject = info.Object;
                 foreach (var meshFilter in resourceObject.GetComponentsInChildren<MeshFilter>())
                 {
-                    var child = new GameObject();
+                    var child = new GameObject("[Collider]");
                     child.transform.parent = collisionObject.transform;
                     child.transform.SetLocalPose(meshFilter.transform.AsPose());
                     child.transform.localScale = meshFilter.transform.lossyScale;

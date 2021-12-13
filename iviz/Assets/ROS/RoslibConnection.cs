@@ -162,11 +162,12 @@ namespace Iviz.Ros
             {
                 const int rpcTimeoutInMs = 3000;
 
-#if LOG_ENABLED
+                
                 //Tools.Logger.LogDebug = Core.Logger.Debug;
                 Tools.Logger.LogError = RosLogger.Error;
                 Tools.Logger.Log = RosLogger.Info;
-#endif
+
+                
                 RosLogger.Internal("Connecting...");
 
                 connectionTs.Cancel();
@@ -897,7 +898,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(service));
             }
 
-            CancellationToken token = connectionTs.Token;
+            var token = connectionTs.Token;
             AddTask(async () =>
             {
                 try

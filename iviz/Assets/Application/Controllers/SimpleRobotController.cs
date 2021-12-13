@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Iviz.App;
 using Iviz.Common;
@@ -59,6 +60,8 @@ namespace Iviz.Controllers
                 Tint = value.Tint.ToUnityColor();
                 Smoothness = value.Smoothness;
                 Metallic = value.Metallic;
+                KeepMeshMaterials = value.KeepMeshMaterials;
+                EnableColliders = value.EnableColliders;
 
                 ProcessRobotSource(value.SavedRobotName, value.SourceParameter);
             }
@@ -191,6 +194,32 @@ namespace Iviz.Controllers
 
                 Robot.Smoothness = value;
             }
+        }
+
+        public bool EnableColliders
+        {
+            get => config.EnableColliders;
+            set
+            {
+                config.EnableColliders = value;
+                if (Robot is null)
+                {
+                    return;
+                }
+
+                var colliders = Robot.BaseLinkObject.GetComponentsInChildren<Collider>(true)
+                    .Where(collider => collider.gameObject.layer == LayerType.Collider);
+                foreach (var collider in colliders)
+                {
+                    collider.enabled = value;
+                }
+            }
+        }
+
+        public bool KeepMeshMaterials
+        {
+            get => config.KeepMeshMaterials;
+            set => config.KeepMeshMaterials = value;
         }
 
         public IModuleData ModuleData { get; }
@@ -383,17 +412,17 @@ namespace Iviz.Controllers
             }
 
             Robot = newRobot;
+            HelpText = "[Loading Robot...]";
             
             async void LoadRobotAsync()
             {
-                var task = newRobot.StartAsync(ConnectionManager.ServiceProvider).AsTask();
-                robotLoadingTask = task;
-                await task;
+                robotLoadingTask = newRobot.StartAsync(ConnectionManager.ServiceProvider, KeepMeshMaterials).AsTask();
+                await robotLoadingTask;
+                RobotLinkHighlightable.ProcessRobot(newRobot.BaseLinkObject);
                 UpdateStartTaskStatus();
             }
 
             LoadRobotAsync();
-            HelpText = "[Loading Robot...]";
             UpdateStartTaskStatus();
             return true;
         }

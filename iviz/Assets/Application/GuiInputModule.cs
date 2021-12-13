@@ -38,7 +38,7 @@ namespace Iviz.App
         const float LookAtAnimationTime = 0.3f;
 
         static readonly string[] QualityInViewOptions =
-            { "Very Low", "Low", "Medium", "High", "Very High", "Ultra", "Mega" };
+            { "Very Low", "Low", "Medium", "High", "Very High", "Ultra" };
 
         static readonly string[] QualityInArOptions = { "Very Low", "Low", "Medium", "High", "Very High", "Ultra" };
         static readonly Vector3 DirectionWeight = new(1.5f, 1.5f, 1);
@@ -279,10 +279,11 @@ namespace Iviz.App
             get => config.QualityInAr;
             set
             {
-                config.QualityInAr = value != QualityType.Mega ? value : QualityType.Ultra;
+                //config.QualityInAr = value != QualityType.Mega ? value : QualityType.Ultra;
+                config.QualityInAr = ValidateQuality(value);
                 if (ARController.IsActive)
                 {
-                    QualitySettings.SetQualityLevel((int)value, true);
+                    QualitySettings.SetQualityLevel((int)config.QualityInAr, true);
                     Settings.RaiseQualityTypeChanged(value);
                 }
             }
@@ -293,15 +294,16 @@ namespace Iviz.App
             get => config.QualityInView;
             set
             {
-                config.QualityInView = value;
+                config.QualityInView = ValidateQuality(value);
 
-                QualityType qualityToUse = Settings.IsHololens ? QualityType.Low : value;
+                QualityType qualityToUse = Settings.IsHololens ? QualityType.Low : config.QualityInView;
 
                 if (ARController.IsActive)
                 {
                     return;
                 }
 
+                /*
                 if (qualityToUse == QualityType.Mega)
                 {
                     QualitySettings.SetQualityLevel((int)QualityType.Ultra, true);
@@ -310,12 +312,23 @@ namespace Iviz.App
                     GetComponent<PostProcessLayer>().enabled = true;
                     return;
                 }
+                */
 
                 GetComponent<PostProcessLayer>().enabled = false;
                 MainCamera.renderingPath = RenderingPath.Forward;
                 QualitySettings.SetQualityLevel((int)qualityToUse, true);
                 Settings.RaiseQualityTypeChanged(qualityToUse);
             }
+        }
+
+        static QualityType ValidateQuality(QualityType qualityType)
+        {
+            return qualityType switch
+            {
+                < QualityType.VeryLow => QualityType.VeryLow,
+                > QualityType.Ultra => QualityType.Ultra,
+                _ => qualityType
+            };
         }
 
         public int TargetFps
@@ -336,13 +349,10 @@ namespace Iviz.App
                 config.BackgroundColor = value.WithAlpha(1);
 
                 Color colorToUse = Settings.IsHololens ? Color.black : value;
-                Color valueNoAlpha = colorToUse.WithAlpha(0);
-                MainCamera.backgroundColor = valueNoAlpha;
+                MainCamera.backgroundColor = colorToUse.WithAlpha(0);
 
-                //float maxRGB = Mathf.Max(Mathf.Max(colorToUse.r, colorToUse.g), colorToUse.b);
-                //Color skyColor = maxRGB == 0 ? Color.black : valueNoAlpha / maxRGB;
-                //RenderSettings.ambientSkyColor = skyColor.WithAlpha(0);
-                RenderSettings.ambientSkyColor = colorToUse.WithAlpha(0);
+                RenderSettings.ambientSkyColor = value.WithAlpha(0);
+                RenderSettings.ambientEquatorColor = value.WithValue(0.5f).WithSaturation(0.3f).WithAlpha(0);
             }
         }
 
@@ -843,10 +853,20 @@ namespace Iviz.App
         {
             if (clickInfo.TryGetRaycastResults(out var hitResults))
             {
+                Vector3? maybeReferencePosition = null;
                 List<IHighlightable>? hits = null;
-                foreach (var (hitObject, _, _) in hitResults)
+                foreach (var (hitObject, hitPosition, _) in hitResults)
                 {
                     if (!TryGetHighlightable(hitObject, out var toHighlight))
+                    {
+                        continue;
+                    }
+
+                    if (maybeReferencePosition is not { } referencePosition)
+                    {
+                        maybeReferencePosition = hitPosition;
+                    }
+                    else if (Vector3.Distance(hitPosition, referencePosition) > 0.25f)
                     {
                         continue;
                     }
@@ -903,7 +923,7 @@ namespace Iviz.App
             foreach (var toHighlight in aliveHits)
             {
                 toHighlight.Highlight();
-                await Task.Delay(1000);
+                await Task.Delay(250);
             }
         }
 

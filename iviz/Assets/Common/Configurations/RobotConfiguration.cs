@@ -18,6 +18,8 @@ namespace Iviz.Common.Configurations
         [DataMember] public ColorRGBA Tint { get; set; } = ColorRGBA.White;
         [DataMember] public float Metallic { get; set; } = 0.5f;
         [DataMember] public float Smoothness { get; set; } = 0.5f;
+        [DataMember] public bool EnableColliders { get; set; } = true;
+        [DataMember] public bool KeepMeshMaterials { get; set; } = false;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.Robot;
         [DataMember] public bool Visible { get; set; } = true;

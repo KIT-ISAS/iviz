@@ -18,8 +18,7 @@ namespace Iviz.Common.Configurations
     {
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string IntensityChannel { get; set; } = "z";
-        [DataMember] public float PointSize { get; set; } = 0.3f;
-        [DataMember] public int SizeMultiplier { get; set; } = -1;
+        [DataMember] public float PointSize { get; set; } = 0.03f;
         [DataMember] public ColormapId Colormap { get; set; } = ColormapId.hsv;
         [DataMember] public bool OverrideMinMax { get; set; }
         [DataMember] public float MinIntensity { get; set; }

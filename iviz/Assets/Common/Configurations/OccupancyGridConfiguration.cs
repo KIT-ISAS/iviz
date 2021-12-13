@@ -12,7 +12,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public ModuleType ModuleType => ModuleType.OccupancyGrid;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
-        [DataMember] public ColormapId Colormap { get; set; } = ColormapId.gray;
+        [DataMember] public ColormapId Colormap { get; set; } = ColormapId.bone;
         [DataMember] public bool FlipMinMax { get; set; } = true;
         [DataMember] public bool CubesVisible { get; set; } = false;
         [DataMember] public bool TextureVisible { get; set; } = true;

@@ -19,7 +19,6 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool PreferUdp { get; set; } = true;
         [DataMember] public bool VectorVisible { get; set; } = true;
         [DataMember] public float VectorScale { get; set; } = 1.0f;
-        [DataMember] public float ScaleMultiplierPow10 { get; set; } = 0;
         [DataMember] public SerializableColor Color { get; set; } = UnityEngine.Color.red;
         [DataMember] public float TrailTime { get; set; } = 2.0f;
     }

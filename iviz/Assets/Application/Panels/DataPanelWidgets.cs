@@ -61,6 +61,11 @@ namespace Iviz.App
             return Resource.Widgets.Slider.Instantiate<SliderWidget>(NonStatics.transform).SetLabel(label);
         }
 
+        public SliderWidgetWithScale AddSliderWidgetWithScale(string label)
+        {
+            return Resource.Widgets.SliderWithScale.Instantiate<SliderWidgetWithScale>(NonStatics.transform).SetLabel(label);
+        }
+
         public InputFieldWidget AddInputField(string label)
         {
             return Resource.Widgets.Input.Instantiate<InputFieldWidget>(NonStatics.transform).SetLabel(label);

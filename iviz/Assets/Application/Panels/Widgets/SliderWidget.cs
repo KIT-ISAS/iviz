@@ -12,9 +12,9 @@ namespace Iviz.App
 {
     public sealed class SliderWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Slider? slider = null;
-        [SerializeField] TMP_Text? text = null;
-        [SerializeField] TMP_Text? valueText = null;
+        [SerializeField] Slider? slider;
+        [SerializeField] TMP_Text? text;
+        [SerializeField] TMP_Text? valueText;
 
         Slider Slider => slider.AssertNotNull(nameof(slider));
         TMP_Text Text => text.AssertNotNull(nameof(text));
@@ -60,7 +60,7 @@ namespace Iviz.App
             {
                 Slider.interactable = value;
                 Text.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
-                this.ValueText.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
+                ValueText.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
             }
         }
 
@@ -77,7 +77,7 @@ namespace Iviz.App
             }
         }
 
-        float min = 0;
+        float min;
 
         public float Min
         {

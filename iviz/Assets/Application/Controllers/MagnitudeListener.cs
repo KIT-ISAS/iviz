@@ -193,21 +193,6 @@ namespace Iviz.Controllers
             }
         }
 
-        float scaleMultiplier = 1;
-
-        public float VectorScaleMultiplierPow10
-        {
-            get => config.ScaleMultiplierPow10;
-            set
-            {
-                config.ScaleMultiplierPow10 = value;
-                scaleMultiplier = Mathf.Pow(10, value);
-                Scale = Scale;
-                VectorScale = VectorScale;
-            }
-        }
-
-
         public float TrailTime
         {
             get => config.TrailTime;
@@ -303,7 +288,7 @@ namespace Iviz.Controllers
                     throw new InvalidOperationException("Invalid message type");
             }
         }
-        
+
         static void RentFrame(FrameNode node, out AxisFrameResource axisFrame)
         {
             axisFrame = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
@@ -330,7 +315,7 @@ namespace Iviz.Controllers
             sphere.Transform.localScale = 0.05f * Vector3.one;
             sphere.Color = color;
             sphere.ShadowsEnabled = false;
-        }        
+        }
 
         void Handler(PoseStamped msg)
         {
@@ -371,7 +356,7 @@ namespace Iviz.Controllers
         }
 
         Vector3 TrailDataSource() =>
-            frameNode.Transform.TransformPoint(cachedDirection * (VectorScale * scaleMultiplier));
+            frameNode.Transform.TransformPoint(cachedDirection * VectorScale);
 
         void Handler(Wrench msg)
         {
@@ -383,7 +368,7 @@ namespace Iviz.Controllers
             var dir = msg.Force.Ros2Unity();
             if (arrow != null)
             {
-                arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
+                arrow.Set(Vector3.zero, dir * VectorScale);
             }
 
             if (angleAxis != null)
@@ -411,7 +396,7 @@ namespace Iviz.Controllers
             var dir = linear.Ros2Unity();
             if (arrow != null)
             {
-                arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
+                arrow.Set(Vector3.zero, dir * VectorScale);
             }
 
             if (angleAxis != null)
@@ -446,7 +431,7 @@ namespace Iviz.Controllers
             var dir = linear.Ros2Unity();
             if (arrow != null)
             {
-                arrow.Set(Vector3.zero, dir * (VectorScale * scaleMultiplier));
+                arrow.Set(Vector3.zero, dir * VectorScale);
             }
 
             if (angleAxis != null)

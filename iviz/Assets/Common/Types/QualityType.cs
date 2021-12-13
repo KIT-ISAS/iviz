@@ -1,3 +1,4 @@
+using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -12,6 +13,6 @@ namespace Iviz.Common
         High,
         VeryHigh,
         Ultra,
-        Mega
+        [Obsolete] Mega
     }
 }

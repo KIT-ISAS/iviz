@@ -154,11 +154,11 @@ namespace Iviz.Core
             {
                 if (level == LogLevel.Debug)
                 {
-                    UnityEngine.Debug.Log((string?)msg + e);
+                    UnityEngine.Debug.Log((string?)msg + "\n" + e);
                 }
                 else
                 {
-                    UnityEngine.Debug.LogWarning((string?)msg + e);
+                    UnityEngine.Debug.LogWarning((string?)msg + "\n" + e);
                 }
             }
             else

@@ -14,15 +14,14 @@ namespace Iviz.App
         static readonly List<string> DefaultChannels = new List<string> {"x", "y", "z"};
         public FrameWidget Frame { get; private set; }
         public DataLabelWidget NumPoints { get; private set; }
-        public SliderWidget PointSize { get; private set; }
-        public SliderWidget SizeMultiplier { get; private set; }
+        public SliderWidgetWithScale PointSize { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public InputFieldWithHintsWidget IntensityChannel { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
 
         public ToggleWidget ForceMinMax { get; private set; }
-        public NumberInputFieldWidget MinIntensity { get; private set; }
-        public NumberInputFieldWidget MaxIntensity { get; private set; }
+        public SliderWidgetWithScale MinIntensity { get; private set; }
+        public SliderWidgetWithScale MaxIntensity { get; private set; }
         public ToggleWidget FlipMinMax { get; private set; }
         public DropdownWidget PointCloudType { get; private set; }
 
@@ -34,9 +33,7 @@ namespace Iviz.App
             Listener = p.AddListener();
             Frame = p.AddFrame();
             NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetCentered();
-            PointSize = p.AddSlider("Point Size").SetMinValue(0.05f).SetMaxValue(1f);
-            SizeMultiplier = p.AddSlider("Multiply Point Size by Power of 10").SetMinValue(-4).SetMaxValue(4)
-                .SetIntegerOnly(true);
+            PointSize = p.AddSliderWidgetWithScale("Point Size");
             IntensityChannel = p.AddInputFieldWithHints("Intensity Channel")
                 .SetOptions(DefaultChannels);
             Colormap = p.AddDropdown("Colormap")
@@ -44,8 +41,8 @@ namespace Iviz.App
                 .SetIndex((int) ColormapId.hsv);
 
             ForceMinMax = p.AddToggle("Colormap Override Min/Max");
-            MinIntensity = p.AddNumberInputField("Colormap Min");
-            MaxIntensity = p.AddNumberInputField("Colormap Max");
+            MinIntensity = p.AddSliderWidgetWithScale("Colormap Min");
+            MaxIntensity = p.AddSliderWidgetWithScale("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");
             PointCloudType = p.AddDropdown("Show as").SetOptions(new[] {"Points", "Cubes", "Spheres"});
 

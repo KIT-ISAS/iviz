@@ -30,11 +30,12 @@ namespace Iviz.App.ARDialogs
             lines = ResourcePool.RentDisplay<LineResource>(node.transform);
             lines.ElementScale = 0.005f;
 
-            foreach (ref var sphere in spheres.Ref())
+            foreach (int i in ..spheres.Length)
             {
-                sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.transform);
+                var sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.transform);
                 sphere.Transform.localScale = 0.05f * Vector3.one;
                 sphere.ShadowsEnabled = false;
+                spheres[i] = sphere;
             }
 
             Color = Color.cyan;

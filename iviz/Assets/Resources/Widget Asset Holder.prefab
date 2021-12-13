@@ -100,6 +100,8 @@ MonoBehaviour:
   SettingsPanel: {fileID: 8946395367666485985, guid: 073a5f0da4fa34dbabc4b394ebda7d53,
     type: 3}
   Slider: {fileID: 2236944325299982083, guid: f4814752b52a24c4eb60c6322f4e24ab, type: 3}
+  SliderWithScale: {fileID: 1974338578587004767, guid: f6d2bdb112c514f1db8138329f0a22c0,
+    type: 3}
   TfTreePanel: {fileID: 7291371499597271211, guid: f74455175387045dcb254fe3abbc19b1,
     type: 3}
   ToggleButton: {fileID: 8956375948674936311, guid: a528c13d8c7ab419591e517d2f44deae,

@@ -104,32 +104,6 @@ namespace Iviz.Displays
                         ? mesh.TexCoords[bumpTexture.UvIndex].Coords
                         : Array.Empty<Vector3f>();
 
-                /*
-                using (var vertices = new Rent<Vector3>(mesh.Vertices.Length))
-                using (var normals = new Rent<Vector3>(mesh.Normals.Length))
-                using (var colors = new Rent<Color32>(meshColors.Length))
-                using (var diffuseTexCoords = new Rent<Vector3>(meshDiffuseTexCoords.Length))
-                using (var bumpTexCoords = new Rent<Vector3>(meshBumpTexCoords.Length))
-                using (var tangents = new Rent<Vector4>(mesh.Tangents.Length))
-                using (var triangles = new Rent<int>(mesh.Faces.Length * 3))
-                {
-                    MemCopy(mesh.Vertices, vertices.Array, vertices.Length * 3 * sizeof(float));
-                    MemCopy(mesh.Normals, normals.Array, normals.Length * 3 * sizeof(float));
-                    MemCopy(meshColors, colors.Array, colors.Length * sizeof(int));
-                    MemCopy(meshDiffuseTexCoords, diffuseTexCoords.Array, diffuseTexCoords.Length * 3 * sizeof(float));
-                    MemCopy(meshBumpTexCoords, bumpTexCoords.Array, bumpTexCoords.Length * 3 * sizeof(float));
-                    MemCopy(mesh.Faces, triangles.Array, triangles.Length * sizeof(int));
-
-                    for (int i = 0; i < mesh.Tangents.Length; i++)
-                    {
-                        var (x, y, z) = mesh.Tangents[i];
-                        tangents.Array[i] = new Vector4(x, y, z, -1);
-                    }
-
-                    meshResource.Set(vertices, normals, tangents, diffuseTexCoords, bumpTexCoords, triangles, colors);
-                }
-                */
-
                 var meshTangents = mesh.Tangents;
                 using (var tangents = new Rent<Vector4>(meshTangents.Length))
                 {
@@ -140,7 +114,6 @@ namespace Iviz.Displays
                         tangents.Array[i] = v;
                     }
 
-                    //meshResource.Set(vertices, normals, tangents, diffuseTexCoords, bumpTexCoords, triangles, colors);
                     meshResource.Set(
                         MemoryMarshal.Cast<Vector3f, Vector3>(mesh.Vertices),
                         MemoryMarshal.Cast<Vector3f, Vector3>(mesh.Normals),
@@ -249,18 +222,5 @@ namespace Iviz.Displays
             string textureUri = $"{uri.Scheme}://{uri.Host}{validatedName}/{localPath}";
             return Resource.GetTextureResourceAsync(textureUri, provider, token);
         }
-
-        //static Vector3 Assimp2Unity(in Vector3f vector3) => new(vector3.X, vector3.Y, vector3.Z);
-
-        /*
-        static void MemCopy<TA, TB>(TA[] src, TB[] dst, int sizeToCopy)
-            where TA : unmanaged
-            where TB : unmanaged
-        {
-            var srcPtr = MemoryMarshal.AsBytes(src.AsSpan())[..sizeToCopy];
-            var dstPtr = MemoryMarshal.AsBytes(dst.AsSpan());
-            srcPtr.CopyTo(dstPtr);
-        }
-        */
     }
 }

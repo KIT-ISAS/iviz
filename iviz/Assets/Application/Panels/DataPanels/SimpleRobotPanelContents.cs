@@ -14,6 +14,7 @@ namespace Iviz.App
         public InputFieldWithHintsWidget SourceParameter { get; private set; }
         public DropdownWidget SavedRobotName { get; private set; }
         public ToggleWidget AttachToTf { get; private set; }
+        public ToggleWidget EnableColliders { get; private set; }
         CollapsibleWidget Material { get; set; }
         public ColorPickerWidget Tint { get; private set; }
         public SliderWidget Alpha { get; private set; }
@@ -32,6 +33,7 @@ namespace Iviz.App
             SourceParameter = p.AddInputFieldWithHints("Load From Source Parameter").SetPlaceholder("<none>");
             SavedRobotName = p.AddDropdown("Load From Saved");
             AttachToTf = p.AddToggle("Attach to TF Frames");
+            EnableColliders = p.AddToggle("Enable Colliders");
             Tint = p.AddColorPicker("Tint");
             Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
             Metallic = p.AddSlider("Metallic").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);

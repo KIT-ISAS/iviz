@@ -30,7 +30,7 @@ namespace Iviz.Displays
 
         static int? maxSegmentsForMesh;
 
-        static int MaxSegmentsForMesh => maxSegmentsForMesh is {} validatedMaxSegmentsForMesh
+        static int MaxSegmentsForMesh => maxSegmentsForMesh is { } validatedMaxSegmentsForMesh
             ? validatedMaxSegmentsForMesh
             : (maxSegmentsForMesh = Settings.SupportsComputeBuffers ? 30 : int.MaxValue).Value;
 
@@ -49,7 +49,7 @@ namespace Iviz.Displays
         Mesh? mesh;
         bool linesNeedAlpha;
 
-        Mesh Mesh => mesh != null ? mesh : (mesh = new Mesh {name = "Line Capsules"});
+        Mesh Mesh => mesh != null ? mesh : (mesh = new Mesh { name = "Line Capsules" });
         MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
         MeshFilter MeshFilter => meshFilter.AssertNotNull(nameof(meshFilter));
         bool UsesAlpha => linesNeedAlpha || Tint.a <= 254f / 255f;
@@ -98,7 +98,7 @@ namespace Iviz.Displays
                                                             (f.c0 - f.c1).MaxAbsCoeff3() > MinLineLength &&
                                                             f.c0.MaxAbsCoeff3() < MaxPositionMagnitude &&
                                                             f.c1.MaxAbsCoeff3() < MaxPositionMagnitude;
-        
+
         public override Bounds? Bounds => Size == 0 ? null : base.Bounds;
 
         /// <summary>
@@ -272,7 +272,7 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
-                Properties.SetBuffer(LinesID, (ComputeBuffer?) null);
+                Properties.SetBuffer(LinesID, (ComputeBuffer?)null);
             }
 
             Destroy(Mesh);
@@ -332,7 +332,7 @@ namespace Iviz.Displays
             {
                 return MaterialOverride;
             }
-            
+
             return UseColormap switch
             {
                 true when !UsesAlpha => Resource.Materials.LineSimpleWithColormap.Object,
@@ -383,7 +383,7 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
-                Properties.SetBuffer(LinesID, (ComputeBuffer?) null);
+                Properties.SetBuffer(LinesID, (ComputeBuffer?)null);
             }
 
             if (lineBuffer.Capacity != 0)
@@ -408,7 +408,7 @@ namespace Iviz.Displays
 
             lineComputeBuffer?.Release();
             lineComputeBuffer = null;
-            Properties.SetBuffer(LinesID, (ComputeBuffer?) null);
+            Properties.SetBuffer(LinesID, (ComputeBuffer?)null);
         }
     }
 }

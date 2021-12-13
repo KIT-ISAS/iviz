@@ -102,16 +102,6 @@ namespace Iviz.Controllers
             }
         }
 
-        public int SizeMultiplierPow10
-        {
-            get => config.SizeMultiplier;
-            set
-            {
-                config.SizeMultiplier = value;
-                UpdateSize();
-            }
-        }
-
         public ColormapId Colormap
         {
             get => config.Colormap;
@@ -268,7 +258,7 @@ namespace Iviz.Controllers
 
         void UpdateSize()
         {
-            float value = PointSize * Mathf.Pow(10, SizeMultiplierPow10);
+            float value = PointSize;
             pointCloud.ElementScale = value;
             meshCloud.ElementScale = value;
         }

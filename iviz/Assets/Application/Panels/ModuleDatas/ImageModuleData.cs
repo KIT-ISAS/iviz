@@ -45,15 +45,17 @@ namespace Iviz.App
 
             panel.PreviewWidget.Material = listener.Material;
 
+            panel.ForceMinMax.Value = listener.OverrideMinMax;
             panel.Min.Value = listener.MinIntensity;
             panel.Max.Value = listener.MaxIntensity;
             panel.FlipMinMax.Value = listener.FlipMinMax;
 
             panel.Colormap.Index = (int)listener.Colormap;
 
+            panel.ForceMinMax.Interactable = listener.IsMono;
             panel.Colormap.Interactable = listener.IsMono;
-            panel.Min.Interactable = listener.IsMono;
-            panel.Max.Interactable = listener.IsMono;
+            panel.Min.Interactable = listener.IsMono && listener.OverrideMinMax;
+            panel.Max.Interactable = listener.IsMono && listener.OverrideMinMax;
             panel.FlipMinMax.Interactable = listener.IsMono;
 
             panel.ShowBillboard.Value = listener.EnableBillboard;
@@ -70,6 +72,12 @@ namespace Iviz.App
             panel.Max.ValueChanged += f => { listener.MaxIntensity = f; };
             panel.FlipMinMax.ValueChanged += f => { listener.FlipMinMax = f; };
             panel.CloseButton.Clicked += Close;
+            panel.ForceMinMax.ValueChanged += f =>
+            {
+                listener.OverrideMinMax = f;
+                panel.Min.Interactable = listener.IsMono && f;
+                panel.Max.Interactable = listener.IsMono && f;
+            };
             panel.ShowBillboard.ValueChanged += f =>
             {
                 panel.BillboardSize.Interactable = f;
@@ -97,8 +105,9 @@ namespace Iviz.App
         {
             base.UpdatePanel();
             panel.Colormap.Interactable = listener.IsMono;
-            panel.Min.Interactable = listener.IsMono;
-            panel.Max.Interactable = listener.IsMono;
+            panel.ForceMinMax.Interactable = listener.IsMono;
+            panel.Min.Interactable = listener.IsMono && listener.OverrideMinMax;
+            panel.Max.Interactable = listener.IsMono && listener.OverrideMinMax;
             panel.FlipMinMax.Interactable = listener.IsMono;
             panel.Description.Text = $"<b>{listener.Description}</b>";
             panel.PreviewWidget.ToggleImageEnabled();

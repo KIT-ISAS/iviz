@@ -8,6 +8,7 @@ using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Ros;
 
 namespace Iviz.Controllers
@@ -18,21 +19,43 @@ namespace Iviz.Controllers
         readonly ImageResource billboard;
         readonly ImageTexture imageTexture;
         readonly ImageConfiguration config = new();
-        
+
         string? descriptionOverride;
         bool isProcessing;
 
         Texture2D? Texture => imageTexture.Texture;
 
         public Material Material => imageTexture.Material;
-        public string Description => descriptionOverride ?? imageTexture.Description;
+
+        public string Description
+        {
+            get
+            {
+                if (descriptionOverride != null)
+                {
+                    return descriptionOverride;
+                }
+
+                if (imageTexture.MeasuredBounds is not { } bounds)
+                {
+                    return imageTexture.Description;
+                }
+
+                (float x, float y) = bounds;
+                string minIntensityStr = x.ToString("#,0.##", UnityUtils.Culture);
+                string maxIntensityStr = y.ToString("#,0.##", UnityUtils.Culture);
+                return $"{imageTexture.Description}\n[{minIntensityStr} .. {maxIntensityStr}]";
+            }
+        }
+
         public bool IsMono => imageTexture.IsMono;
-        public string Topic => config.Topic;  
+        public string Topic => config.Topic;
         public override TfFrame? Frame => node.Parent;
         public override IModuleData ModuleData { get; }
+
         public Vector2Int ImageSize =>
             Texture != null ? new Vector2Int(Texture.width, Texture.height) : Vector2Int.zero;
-        
+
         bool IsProcessing
         {
             get => isProcessing;
@@ -41,7 +64,7 @@ namespace Iviz.Controllers
                 isProcessing = value;
                 Listener.SetPause(value);
             }
-        }        
+        }
 
         public ImageConfiguration Config
         {
@@ -71,7 +94,7 @@ namespace Iviz.Controllers
                 billboard.Visible = value && config.EnableBillboard;
             }
         }
-        
+
         public ColormapId Colormap
         {
             get => config.Colormap;
@@ -88,7 +111,10 @@ namespace Iviz.Controllers
             set
             {
                 config.MinIntensity = value;
-                imageTexture.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                if (OverrideMinMax)
+                {
+                    imageTexture.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                }
             }
         }
 
@@ -98,8 +124,32 @@ namespace Iviz.Controllers
             set
             {
                 config.MaxIntensity = value;
-                imageTexture.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                if (OverrideMinMax)
+                {
+                    imageTexture.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                }
             }
+        }
+
+        public bool OverrideMinMax
+        {
+            get => config.OverrideMinMax;
+            set
+            {
+                config.OverrideMinMax = value;
+                UpdateIntensityBounds();
+            }
+        }
+
+        void UpdateIntensityBounds()
+        {
+            if (OverrideMinMax || imageTexture.NormalizedMeasuredBounds is not { } bounds)
+            {
+                imageTexture.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                return;
+            }
+
+            imageTexture.IntensityBounds = bounds;
         }
 
         public bool FlipMinMax
@@ -162,7 +212,7 @@ namespace Iviz.Controllers
             billboard = ResourcePool.RentDisplay<ImageResource>();
             billboard.Texture = imageTexture;
             billboard.Transform.SetParentLocal(node.transform);
-            
+
             Config = config ?? new ImageConfiguration
             {
                 Topic = topic,
@@ -195,6 +245,7 @@ namespace Iviz.Controllers
                 }
 
                 msg.Data.TryReturn();
+                UpdateIntensityBounds();
                 IsProcessing = false;
             }
 
@@ -244,6 +295,7 @@ namespace Iviz.Controllers
                     int width = (int)msg.Width;
                     int height = (int)msg.Height;
                     imageTexture.Set(width, height, msg.Encoding, msg.Data.AsSpan());
+                    UpdateIntensityBounds();
                 }
                 finally
                 {

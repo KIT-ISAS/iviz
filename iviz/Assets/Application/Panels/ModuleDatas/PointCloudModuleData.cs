@@ -3,7 +3,6 @@
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Newtonsoft.Json;
@@ -42,7 +41,6 @@ namespace Iviz.App
 
             panel.Colormap.Index = (int) listener.Colormap;
             panel.PointSize.Value = listener.PointSize;
-            panel.SizeMultiplier.Value = listener.SizeMultiplierPow10;
             panel.IntensityChannel.Hints = listener.FieldNames;
             panel.IntensityChannel.Value = listener.IntensityChannel;
 
@@ -71,7 +69,6 @@ namespace Iviz.App
             panel.MinIntensity.ValueChanged += f => listener.MinIntensity = f;
             panel.MaxIntensity.ValueChanged += f => listener.MaxIntensity = f;
             panel.PointCloudType.ValueChanged += (f, _) => listener.PointCloudType = (PointCloudType) f;
-            panel.SizeMultiplier.ValueChanged += f => listener.SizeMultiplierPow10 = (int) f;
         }
 
         public override void UpdatePanel()

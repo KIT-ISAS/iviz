@@ -37,6 +37,7 @@ namespace Iviz.Displays
         public GameObject SettingsPanel = null;
         
         public GameObject Slider = null;
+        public GameObject SliderWithScale = null;
         public GameObject TfTreePanel = null;
         public GameObject ToggleButton = null;
         public GameObject ResetButton = null;
