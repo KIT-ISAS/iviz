@@ -223,7 +223,7 @@ public static class TaskUtils
         }
         catch (Exception e)
         {
-            if (e is not OperationCanceledException)
+            if (e is not (OperationCanceledException or TimeoutException))
             {
                 Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
             }
@@ -238,7 +238,7 @@ public static class TaskUtils
         }
         catch (Exception e)
         {
-            if (e is not OperationCanceledException)
+            if (e is not (OperationCanceledException or TimeoutException))
             {
                 Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
             }
@@ -255,7 +255,7 @@ public static class TaskUtils
         }
         catch (Exception e)
         {
-            if (e is not OperationCanceledException)
+            if (e is not (OperationCanceledException or TimeoutException))
             {
                 Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
             }
