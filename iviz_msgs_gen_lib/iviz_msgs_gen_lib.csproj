@@ -5,7 +5,11 @@
         <AssemblyName>Iviz.MsgsGen.Lib</AssemblyName>
         <RootNamespace>Iviz.MsgsGen</RootNamespace>
         <Nullable>enable</Nullable>
-        <TargetFrameworks>net5.0;netstandard2.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net5.0;net6.0;netstandard2.1</TargetFrameworks>
     </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\iviz_tools\iviz_tools.csproj" />
+    </ItemGroup>
 
 </Project>

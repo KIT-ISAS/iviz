@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Iviz.Tools;
@@ -116,22 +117,14 @@ public static class BaseUtils
         return bytes.Resize(size);
     }
 
-#if NETSTANDARD2_0
-        internal static Rent<byte> AsRent(this StringBuilder str, char[] mainChunk)
-#else
     internal static Rent<byte> AsRent(this StringBuilder str, in ReadOnlyMemory<char> mainChunk)
-#endif
     {
         var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(str.Length));
         int size;
 
         if (mainChunk.Length >= str.Length)
         {
-#if NETSTANDARD2_0
-                size = Defaults.UTF8.GetBytes(mainChunk, 0, str.Length, bytes.Array, 0);
-#else
             size = Defaults.UTF8.GetBytes(mainChunk[..str.Length].Span, bytes.Array);
-#endif
         }
         else
         {
@@ -163,11 +156,11 @@ public static class BaseUtils
         return (char[])chunkField.GetValue(str)!;
     }
 #else
-        internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
-        {
-            var e = str.GetChunks();
-            return !e.MoveNext() ? ReadOnlyMemory<char>.Empty : e.Current;
-        }
+    internal static ReadOnlyMemory<char> GetMainChunk(this StringBuilder str)
+    {
+        var e = str.GetChunks();
+        return !e.MoveNext() ? ReadOnlyMemory<char>.Empty : e.Current;
+    }
 #endif
 
     /// <summary>
@@ -195,6 +188,21 @@ public static class BaseUtils
 
             return hash1 + hash2 * 1566083941;
         }
+    }
+
+    public static string GetMd5Hash(byte[] input, MD5? md5Hash = null)
+    {
+        MD5? ownMd5Hash = null;
+        MD5 validatedMd5Hash = md5Hash ?? (ownMd5Hash = MD5.Create());
+        byte[] data = validatedMd5Hash.ComputeHash(input);
+        var sBuilder = new StringBuilder(data.Length * 2);
+        foreach (byte b in data)
+        {
+            sBuilder.Append(b.ToString("x2"));
+        }
+
+        ownMd5Hash?.Dispose();
+        return sBuilder.ToString();
     }
 }
 

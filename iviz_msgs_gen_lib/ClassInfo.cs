@@ -1184,7 +1184,7 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            var md5Variables = variables.Select(x => x.GetEntryForMd5Hash(RosPackage)).ToArray();
+            string[] md5Variables = variables.Select(x => x.GetEntryForMd5Hash(RosPackage)).ToArray();
             if (md5Variables.Any(md5String => md5String == null))
             {
                 return ""; // shouldn't happen, exception thrown earlier
@@ -1194,23 +1194,12 @@ namespace Iviz.MsgsGen
 
             md5File = str.ToString();
 
-#pragma warning disable CA5351
-            using MD5 md5Hash = MD5.Create();
-#pragma warning restore CA5351
-
-            return GetMd5Hash(md5Hash, md5File);
+            return GetMd5Hash(md5File);
         }
 
-        internal static string GetMd5Hash(MD5 md5Hash, string input)
+        internal static string GetMd5Hash(string input)
         {
-            var data = md5Hash.ComputeHash(Utf8.GetBytes(input));
-            StringBuilder sBuilder = new StringBuilder(data.Length * 2);
-            foreach (byte b in data)
-            {
-                sBuilder.Append(b.ToString("x2", Culture));
-            }
-
-            return sBuilder.ToString();
+            return Tools.BaseUtils.GetMd5Hash(Utf8.GetBytes(input));
         }
     }
 
