@@ -40,7 +40,7 @@ namespace Iviz.Displays.Highlighters
 
             tooltip = ResourcePool.RentDisplay<Tooltip>(node.Transform);
             tooltip.CaptionColor = Color.white;
-            tooltip.Color = Resource.Colors.HighlighterBackground;
+            tooltip.Color = Resource.Colors.TooltipBackground;
             tooltip.Layer = LayerType.IgnoreRaycast;
             tooltip.Scale = labelSize;
             tooltip.Transform.localPosition = 2f * (frameSize * 0.3f + labelSize) * Vector3.up;
@@ -55,7 +55,7 @@ namespace Iviz.Displays.Highlighters
         {
             float alpha = Mathf.Sqrt(1 - t);
             tooltip.CaptionColor = Color.white.WithAlpha(alpha);
-            tooltip.Color = Resource.Colors.HighlighterBackground.WithAlpha(alpha);
+            tooltip.Color = Resource.Colors.TooltipBackground.WithAlpha(alpha);
             reticle.Color = Color.white.WithAlpha(0.3f * alpha);
         }
 

@@ -27,22 +27,6 @@ namespace Iviz.App
             }
         }
 
-        string Description
-        {
-            get
-            {
-                if (string.IsNullOrEmpty(Topic))
-                {
-                    return $"<b>{ModuleType}</b>";
-                }
-
-                string type = string.IsNullOrEmpty(Type) ? ModuleType.ToString() : Type;
-                int lastSlash = type.LastIndexOf('/');
-                string shortType = (lastSlash == -1) ? type : type.Substring(lastSlash + 1);
-                return $"{Topic}\n<b>{shortType}</b>";
-            }
-        }
-
         public string Topic { get; }
         protected string Type { get; }
         public abstract ModuleType ModuleType { get; }
@@ -105,12 +89,6 @@ namespace Iviz.App
             Panel.ClearSubscribers();
             SetupPanel();
         }
-
-        /*
-        public virtual void CleanupPanel()
-        {
-        }
-        */
 
         public virtual void UpdatePanel()
         {

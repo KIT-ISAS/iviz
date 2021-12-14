@@ -47,7 +47,7 @@ namespace Iviz.Displays.Highlighters
             {
                 tooltip = ResourcePool.RentDisplay<Tooltip>(nodeTransform);
                 tooltip.CaptionColor = Color.white;
-                tooltip.Color = Resource.Colors.HighlighterBackground;
+                tooltip.Color = Resource.Colors.TooltipBackground;
                 tooltip.Layer = LayerType.IgnoreRaycast;
                 tooltip.Caption = caption;
             }
@@ -91,7 +91,7 @@ namespace Iviz.Displays.Highlighters
             if (tooltip != null)
             {
                 tooltip.CaptionColor = Color.white.WithAlpha(alpha);
-                tooltip.Color = Resource.Colors.HighlighterBackground.WithAlpha(alpha);
+                tooltip.Color = Resource.Colors.TooltipBackground.WithAlpha(alpha);
             }
 
             frame.Color = Color.white.WithAlpha(alpha);

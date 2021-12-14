@@ -21,7 +21,7 @@ namespace Iviz.Displays.XRDialogs
         [SerializeField] Transform? m_Transform;
         [SerializeField] BoxCollider? boxCollider;
 
-        Color backgroundColor = Resource.Colors.HighlighterBackground;
+        Color backgroundColor = Resource.Colors.TooltipBackground;
         ButtonIcon? icon;
         Material? material;
         StaticBoundsControl? boundsControl;

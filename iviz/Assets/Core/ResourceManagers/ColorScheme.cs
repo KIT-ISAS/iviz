@@ -34,7 +34,7 @@ namespace Iviz.Resources
         public Color EnabledListener { get; } = new Color(0.71f, 0.98f, 1, 0.733f);
         public Color EnabledSender { get; } = new Color(0.59f, 0.79f, 0.90f, 0.90f);
 
-        public Color HighlighterBackground { get; } = Color.blue.WithValue(0.5f).WithSaturation(0.25f);
+        public Color TooltipBackground { get; } = Color.blue.WithValue(0.5f).WithSaturation(0.25f);
 
         public Color DraggableDefaultColor { get; } = Color.grey;
         public Color DraggableHoverColor { get; } = Color.white;

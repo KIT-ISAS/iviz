@@ -32,7 +32,7 @@ namespace Iviz.Displays.Highlighters
             axisResource.Tint = Color.white;
 
             tooltip = ResourcePool.RentDisplay<Tooltip>(node.Transform);
-            tooltip.Color = Resource.Colors.HighlighterBackground;
+            tooltip.Color = Resource.Colors.TooltipBackground;
             tooltip.CaptionColor = Color.white;
             tooltip.Caption = "";
 
@@ -66,7 +66,7 @@ namespace Iviz.Displays.Highlighters
             tooltip.Scale = labelSize;
             tooltip.Transform.position = nodePosition + (1.2f * axisResource.AxisLength + 5 * labelSize) * Vector3.up;
             tooltip.CaptionColor = color;
-            tooltip.Color = Resource.Colors.HighlighterBackground.WithAlpha(alpha);
+            tooltip.Color = Resource.Colors.TooltipBackground.WithAlpha(alpha);
             if (t == 0)
             {
                 tooltip.PointToCamera();

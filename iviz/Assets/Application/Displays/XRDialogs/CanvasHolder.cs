@@ -83,7 +83,7 @@ namespace Iviz.Displays
             }
 
             Background.Radius = 0.01f;
-            Background.Color = Resource.Colors.HighlighterBackground;
+            Background.Color = Resource.Colors.TooltipBackground;
             Background.ShadowsEnabled = false;
             Background.Layer = LayerType.Clickable;
 
@@ -193,7 +193,6 @@ namespace Iviz.Displays
                 Quaternion.Euler(0, Settings.MainCameraTransform.eulerAngles.y, 0)
             );
 
-
             var currentPose = Transform.AsPose();
             var (targetPosition, targetRotation) = ClampTargetPose(currentPose, mainCameraPose);
 
@@ -213,11 +212,8 @@ namespace Iviz.Displays
                 new Vector3(-0.5f, -0.4f, minDistance),
                 new Vector3(0.5f, -0.2f, maxDistance));
 
-            float currentAngleLocal = currentRotationLocal.eulerAngles.y;
-            if (currentAngleLocal > 180)
-            {
-                currentAngleLocal -= 360;
-            }
+            float rawAngleLocal = currentRotationLocal.eulerAngles.y;
+            float currentAngleLocal = rawAngleLocal > 180 ? rawAngleLocal - 360 : rawAngleLocal;
 
             var targetRotationLocal = Mathf.Abs(currentAngleLocal) < 30
                 ? currentRotationLocal
