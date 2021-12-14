@@ -36,7 +36,7 @@ namespace Iviz.Controllers
                     return descriptionOverride;
                 }
 
-                if (imageTexture.MeasuredBounds is not { } bounds)
+                if (imageTexture.MeasuredIntensityBounds is not { } bounds)
                 {
                     return imageTexture.Description;
                 }
@@ -137,19 +137,12 @@ namespace Iviz.Controllers
             set
             {
                 config.OverrideMinMax = value;
-                UpdateIntensityBounds();
+                imageTexture.OverrideIntensityBounds = value;
+                if (value)
+                {
+                    imageTexture.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                }
             }
-        }
-
-        void UpdateIntensityBounds()
-        {
-            if (OverrideMinMax || imageTexture.NormalizedMeasuredBounds is not { } bounds)
-            {
-                imageTexture.IntensityBounds = new Vector2(MinIntensity, MaxIntensity);
-                return;
-            }
-
-            imageTexture.IntensityBounds = bounds;
         }
 
         public bool FlipMinMax
@@ -245,7 +238,6 @@ namespace Iviz.Controllers
                 }
 
                 msg.Data.TryReturn();
-                UpdateIntensityBounds();
                 IsProcessing = false;
             }
 
@@ -295,7 +287,6 @@ namespace Iviz.Controllers
                     int width = (int)msg.Width;
                     int height = (int)msg.Height;
                     imageTexture.Set(width, height, msg.Encoding, msg.Data.AsSpan());
-                    UpdateIntensityBounds();
                 }
                 finally
                 {

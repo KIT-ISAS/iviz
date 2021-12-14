@@ -53,6 +53,7 @@ namespace Iviz.Displays
         public Material MeshListOcclusionOnlyWithScaleY;
         public Material MeshListOcclusionOnlyWithScaleAll;
         
+        public Texture2D Atlas;
         public Texture2D Lines;
         public Texture2D Pink;
         public Texture2D Copper;

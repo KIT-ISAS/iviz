@@ -8,6 +8,7 @@ namespace Iviz.Resources
     {
         static readonly int Tint = Shader.PropertyToID("_Tint");
 
+        public Texture2D Atlas { get; }
         public Texture2D AtlasLarge { get; }
         public Texture2D AtlasLargeFlip { get; }
         
@@ -60,6 +61,7 @@ namespace Iviz.Resources
             var assetHolder = Resource.Extras.AssetHolder;
             var appAssetHolder = Resource.Extras.AppAssetHolder;
 
+            Atlas = assetHolder.Atlas.AssertNotNull(nameof(assetHolder.Atlas));
             AtlasLarge = appAssetHolder.AtlasLarge.AssertNotNull(nameof(appAssetHolder.AtlasLarge));
             AtlasLargeFlip = appAssetHolder.AtlasLargeFlip.AssertNotNull(nameof(appAssetHolder.AtlasLargeFlip));
             

@@ -38,6 +38,14 @@ namespace Iviz.App
             Min = p.AddSliderWidgetWithScale("Colormap Min");
             Max = p.AddSliderWidgetWithScale("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");
+            
+            p.AddCollapsibleWidget("Colormap")
+                .Attach(Colormap)
+                .Attach(ForceMinMax)
+                .Attach(Min)
+                .Attach(Max)
+                .Attach(FlipMinMax)
+                .UpdateSize();
 
             PreviewWidget = p.AddImagePreviewWidget("Preview");
 

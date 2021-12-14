@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Iviz.Common;
+using Iviz.Resources;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -13,6 +15,12 @@ namespace Iviz.App
         public ListenerWidget ColorTopic { get; private set; }
         public ImagePreviewWidget DepthPreview { get; private set; }
         public ImagePreviewWidget ColorPreview { get; private set; }
+        public DropdownWidget Colormap { get; private set; }
+        public ToggleWidget ForceMinMax { get; private set; }
+        public SliderWidgetWithScale Min { get; private set; }
+        public SliderWidgetWithScale Max { get; private set; }
+        public ToggleWidget FlipMinMax { get; private set; }
+
         public TrashButtonWidget CloseButton { get; private set; }
 
         void Awake()
@@ -28,6 +36,23 @@ namespace Iviz.App
             Color = p.AddInputFieldWithHints("Color Topic");
             DepthPreview = p.AddImagePreviewWidget("Depth Preview");
             ColorPreview = p.AddImagePreviewWidget("Color Preview");
+            
+            Colormap = p.AddDropdown("Colormap")
+                .SetOptions(Resource.Colormaps.Names)
+                .SetIndex((int)ColormapId.gray);
+            ForceMinMax = p.AddToggle("Colormap Override Min/Max");
+            Min = p.AddSliderWidgetWithScale("Colormap Min");
+            Max = p.AddSliderWidgetWithScale("Colormap Max");
+            FlipMinMax = p.AddToggle("Flip Min/Max");
+            
+            p.AddCollapsibleWidget("Colormap")
+                .Attach(Colormap)
+                .Attach(ForceMinMax)
+                .Attach(Min)
+                .Attach(Max)
+                .Attach(FlipMinMax)
+                .UpdateSize();
+            
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             p.UpdateSize();

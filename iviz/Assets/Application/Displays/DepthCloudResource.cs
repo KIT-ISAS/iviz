@@ -15,19 +15,28 @@ namespace Iviz.Displays
     {
         static readonly int PColor = Shader.PropertyToID("_ColorTexture");
         static readonly int PDepth = Shader.PropertyToID("_DepthTexture");
+
         static readonly int PPoints = Shader.PropertyToID("_Points");
-        static readonly int PIntensity = Shader.PropertyToID("_IntensityTexture");
+
+        //static readonly int PIntensity = Shader.PropertyToID("_IntensityTexture");
         static readonly int PropPointSize = Shader.PropertyToID("_PointSize");
         static readonly int PropPosSt = Shader.PropertyToID("_Pos_ST");
         static readonly int PLocalToWorld = Shader.PropertyToID("_LocalToWorld");
         static readonly int PWorldToLocal = Shader.PropertyToID("_WorldToLocal");
         static readonly int PDepthScale = Shader.PropertyToID("_DepthScale");
 
+        static readonly int IntensityCoeffID = Shader.PropertyToID("_IntensityCoeff");
+        static readonly int IntensityAddID = Shader.PropertyToID("_IntensityAdd");
+        static readonly int AtlasRowId = Shader.PropertyToID("_AtlasRow");
+
         [SerializeField] Material? material = null;
         [SerializeField] int width;
         [SerializeField] int height;
+        ColormapId colormap;
+        Vector2 intensityBounds;
         Intrinsic? intrinsic;
         float pointSize;
+        bool flipMinMax;
 
         ImageTexture? colorImage;
         ImageTexture? depthImage;
@@ -87,21 +96,71 @@ namespace Iviz.Displays
                 if (depthImage != null)
                 {
                     depthImage.TextureChanged -= UpdatePointComputeBuffers;
-                    depthImage.ColormapChanged -= UpdateColormap;
                 }
 
                 depthImage = value;
                 if (value != null)
                 {
                     UpdateDepthTexture(value.Texture);
-                    UpdateColormap(value.ColormapTexture);
                     value.TextureChanged += UpdateDepthTexture;
-                    value.ColormapChanged += UpdateColormap;
                 }
                 else
                 {
                     UpdateDepthTexture(null);
                 }
+            }
+        }
+
+        public Vector2 IntensityBounds
+        {
+            get => intensityBounds;
+            set
+            {
+                intensityBounds = value;
+
+                float intensitySpan = intensityBounds.y - intensityBounds.x;
+
+                if (intensitySpan == 0)
+                {
+                    Material.SetFloat(IntensityCoeffID, 1);
+                    Material.SetFloat(IntensityAddID, 0);
+                }
+                else
+                {
+                    if (!FlipMinMax)
+                    {
+                        Material.SetFloat(IntensityCoeffID, 1 / intensitySpan);
+                        Material.SetFloat(IntensityAddID, -intensityBounds.x / intensitySpan);
+                    }
+                    else
+                    {
+                        Material.SetFloat(IntensityCoeffID, -1 / intensitySpan);
+                        Material.SetFloat(IntensityAddID, intensityBounds.y / intensitySpan);
+                    }
+                }
+            }
+        }
+
+        public bool FlipMinMax
+        {
+            get => flipMinMax;
+            set
+            {
+                flipMinMax = value;
+                IntensityBounds = IntensityBounds;
+            }
+        }
+
+        public ColormapId Colormap
+        {
+            get => colormap;
+            set
+            {
+                colormap = value;
+                Material.SetTexture(PColor, Resource.Materials.Atlas);
+                Material.SetFloat(AtlasRowId,
+                    (ColormapsType.AtlasSize - 0.5f - (float)value) / ColormapsType.AtlasSize);
+                Material.EnableKeyword("USE_INTENSITY");
             }
         }
 
@@ -123,14 +182,6 @@ namespace Iviz.Displays
 
             Graphics.DrawProcedural(Material, WorldBounds, MeshTopology.Quads, 4, uvs.Length,
                 castShadows: ShadowCastingMode.Off, receiveShadows: false, layer: gameObject.layer);
-        }
-
-        public void SetIntrinsic(double[] array)
-        {
-            if (intrinsic == null || !intrinsic.Equals(array))
-            {
-                Intrinsic = new Intrinsic(array);
-            }
         }
 
         void OnApplicationFocus(bool hasFocus)
@@ -184,11 +235,11 @@ namespace Iviz.Displays
             switch (depthImage.Texture.format)
             {
                 case TextureFormat.RFloat:
-                    depthImage.IntensityBounds = new Vector2(0, 5);
+                    depthImage.NormalizedIntensityBounds = new Vector2(0, 5);
                     Material.SetFloat(PDepthScale, 1);
                     break;
                 case TextureFormat.R16:
-                    depthImage.IntensityBounds = new Vector2(0, 5000 / 65535f);
+                    depthImage.NormalizedIntensityBounds = new Vector2(0, 5000 / 65535f);
                     Material.SetFloat(PDepthScale, 65.535f);
                     break;
             }
@@ -221,11 +272,6 @@ namespace Iviz.Displays
             pointComputeBuffer = new ComputeBuffer(uvs.Length, Marshal.SizeOf<Vector2>());
             pointComputeBuffer.SetData(uvs, 0, 0, uvs.Length);
             Material.SetBuffer(PPoints, pointComputeBuffer);
-        }
-
-        void UpdateColormap(Texture2D? texture)
-        {
-            Material.SetTexture(PIntensity, texture);
         }
 
         void UpdatePosValues(Texture? texture)

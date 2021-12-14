@@ -7,12 +7,13 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Resources;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace Iviz.Displays.Highlighters
 {
     public class BoundsHighlighter : IAnimatable
     {
-        readonly FrameNode node;
+        readonly Transform nodeTransform;
         readonly SelectionFrame frame;
         readonly CancellationTokenSource tokenSource;
         readonly Tooltip? tooltip;
@@ -25,10 +26,11 @@ namespace Iviz.Displays.Highlighters
         public BoundsHighlighter(IHasBounds holder, bool isPermanent = false)
         {
             this.holder = holder ?? throw new ArgumentNullException(nameof(holder));
-            node = FrameNode.Instantiate("[Bounds Highlighter]");
-            node.Transform.SetParentLocal(holder.BoundsTransform);
+            var node = new GameObject("[Bounds Highlighter]");
+            nodeTransform = node.transform;
+            nodeTransform.SetParentLocal(holder.BoundsTransform);
 
-            frame = ResourcePool.RentDisplay<SelectionFrame>(node.Transform);
+            frame = ResourcePool.RentDisplay<SelectionFrame>(nodeTransform);
             frame.ShadowsEnabled = false;
             frame.EmissiveColor = Color.blue;
             frame.Color = Color.white;
@@ -43,7 +45,7 @@ namespace Iviz.Displays.Highlighters
 
             if (holder.Caption is { } caption)
             {
-                tooltip = ResourcePool.RentDisplay<Tooltip>(node.Transform);
+                tooltip = ResourcePool.RentDisplay<Tooltip>(nodeTransform);
                 tooltip.CaptionColor = Color.white;
                 tooltip.Color = Resource.Colors.HighlighterBackground;
                 tooltip.Layer = LayerType.IgnoreRaycast;
@@ -62,12 +64,11 @@ namespace Iviz.Displays.Highlighters
         {
             if (holder.BoundsTransform is not { } transform || holder.Bounds is not { } bounds)
             {
-                node.gameObject.SetActive(false);
+                nodeTransform.gameObject.SetActive(false);
                 return;
             }
 
-            node.gameObject.SetActive(true);
-            node.Transform.SetParentLocal(transform);
+            nodeTransform.gameObject.SetActive(true);
             frame.SetBounds(bounds);
 
             if (tooltip == null)
@@ -102,7 +103,7 @@ namespace Iviz.Displays.Highlighters
             tokenSource.Dispose();
             frame.ReturnToPool();
             tooltip.ReturnToPool();
-            node.DestroySelf();
+            Object.Destroy(nodeTransform.gameObject);
 
             if (isPermanent)
             {

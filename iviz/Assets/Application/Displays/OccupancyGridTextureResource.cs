@@ -13,12 +13,15 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshRenderer))]
     public sealed class OccupancyGridTextureResource : MarkerResourceWithColormap
     {
+        static float baseOffset = 0.001f;
         static readonly int AtlasTex = Shader.PropertyToID("_AtlasTex");
         static Texture2D AtlasLarge => Resource.Materials.AtlasLarge;
         static Texture2D AtlasLargeFlipped => Resource.Materials.AtlasLargeFlip;
 
         [SerializeField] Texture2D? texture;
         [SerializeField] MeshRenderer? meshRenderer;
+
+        readonly float zOffset;
 
         Material? material;
         sbyte[] buffer = Array.Empty<sbyte>();
@@ -51,6 +54,11 @@ namespace Iviz.Displays
             }
         }
 
+        public OccupancyGridTextureResource()
+        {
+            zOffset = (baseOffset += 1e-5f);
+        }
+        
         protected override void Awake()
         {
             MeshRenderer.sharedMaterial = Material;
@@ -94,7 +102,6 @@ namespace Iviz.Displays
             float totalWidth = segmentWidth * cellSize;
             float totalHeight = segmentHeight * cellSize;
 
-
             int totalTextureSize = CalculateAllMipmapsSize(segmentWidth, segmentHeight);
             if (buffer.Length != totalTextureSize)
             {
@@ -137,7 +144,7 @@ namespace Iviz.Displays
                     bounds.xMax + bounds.xMin - 1,
                     bounds.yMax + bounds.yMin - 1,
                     0) * (cellSize / 2);
-                rosCenter.z += 0.001f;
+                rosCenter.z += zOffset;
 
                 var offset = new Pose(rosCenter.Ros2Unity(), Quaternion.Euler(0, 90, 0));
                 var newPose = pose.Multiply(offset);

@@ -5,10 +5,6 @@ Shader "iviz/DepthCloud"
 		_PointSize("Point Size", Float) = 0.05
 		_ColorTexture("Color Texture", 2D) = "white"
 		_DepthTexture("Depth Texture", 2D) = "white"
-		//_IntensityTexture("Intensity Texture", 2D) = "white"
-
-		//_IntensityCoeff("Intensity Coeff", Float) = 1
-		//_IntensityAdd("Intensity Add", Float) = 0
 	}
 
 	SubShader
@@ -22,7 +18,8 @@ Shader "iviz/DepthCloud"
 
 			#pragma vertex vert
 			#pragma fragment frag
-
+			#pragma multi_compile _ USE_INTENSITY
+			
 			float4 _Pos_ST;
 
 			float4x4 _LocalToWorld;
@@ -31,6 +28,10 @@ Shader "iviz/DepthCloud"
 			sampler2D _ColorTexture;
 			sampler2D _DepthTexture;
 
+			float _IntensityCoeff;
+			float _IntensityAdd;
+			float _AtlasRow;
+			
 			float _PointSize;
 			float _DepthScale;
 
@@ -59,14 +60,13 @@ Shader "iviz/DepthCloud"
 			};
 
 
-			//v2f vert(uint id : SV_VertexID, uint inst : SV_InstanceID)
 			v2f vert(appdata In)
 			{
 				unity_ObjectToWorld = _LocalToWorld;
 				unity_WorldToObject = _WorldToLocal;
 
 				const uint id = In.id;
-				const uint inst = In.inst;
+				uint inst = In.inst;
 
 				v2f o;
 #ifdef USING_STEREO_MATRICES
@@ -81,7 +81,8 @@ Shader "iviz/DepthCloud"
 				const float2 quadVertex = Quad[id];
 				float2 center = _Points[inst];
 
-				const float z = tex2Dlod(_DepthTexture, float4(center, 0, 0)).r * _DepthScale;
+				const float depth =  tex2Dlod(_DepthTexture, float4(center, 0, 0)).r;
+				const float z = depth * _DepthScale;
 				const float2 size = z * extent * _PointSize;
 
 				float4 pos;
@@ -90,9 +91,14 @@ Shader "iviz/DepthCloud"
 				pos.z = z;
 				pos.w = 1;
 
+#ifdef USE_INTENSITY
+				o.uv = float2(depth * _IntensityCoeff + _IntensityAdd, _AtlasRow);
+#else
+                o.uv = center;
+#endif
+				
 				// Set vertex output.
 				o.position = UnityObjectToClipPos(pos) + float4(quadVertex * size, 0, 0);				 
-                o.uv = center;
 				return o;
 			}
 

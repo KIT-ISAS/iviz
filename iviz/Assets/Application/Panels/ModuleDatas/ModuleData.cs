@@ -51,7 +51,7 @@ namespace Iviz.App
         public abstract IConfiguration Configuration { get; }
 
         protected bool IsSelected => DataPanelManager.SelectedModuleData == this;
-        
+
         protected ModuleData(string topic, string type)
         {
             Topic = topic ?? throw new ArgumentNullException(nameof(topic));
@@ -60,25 +60,22 @@ namespace Iviz.App
 
         protected virtual void UpdateModuleButton()
         {
-            string text;
-            if (!string.IsNullOrEmpty(Topic))
-            {
-                string topicShort = Resource.Font.Split(Topic, ModuleListPanel.ModuleDataCaptionWidth);
-
-                string type = string.IsNullOrEmpty(Type) ? ModuleType.ToString() : Type;
-                int lastSlash = type.LastIndexOf('/');
-                string shortType = (lastSlash == -1) ? type : type.Substring(lastSlash + 1);
-                string clampedType = Resource.Font.Split(shortType, ModuleListPanel.ModuleDataCaptionWidth);
-                text = $"{topicShort}\n<b>{clampedType}</b>";
-            }
-            else
-            {
-                text = $"<b>{ModuleType}</b>";
-            }
+            string text = Topic.Length != 0 && Type.Length != 0
+                ? GetDescriptionForTopic(Topic, Type)
+                : $"<b>{ModuleType}</b>";
 
             ButtonText = Controller.Visible ? text : $"<color=grey>{text}</color>";
         }
-        
+
+        protected static string GetDescriptionForTopic(string topic, string type)
+        {
+            string topicShort = Resource.Font.Split(topic, ModuleListPanel.ModuleDataCaptionWidth);
+            int lastSlash = type.LastIndexOf('/');
+            string shortType = (lastSlash == -1) ? type : type[(lastSlash + 1)..];
+            string clampedType = Resource.Font.Split(shortType, ModuleListPanel.ModuleDataCaptionWidth);
+            return $"{topicShort}\n<b>{clampedType}</b>";
+        }
+
         public void ToggleVisible()
         {
             Controller.Visible = !Controller.Visible;
@@ -93,7 +90,7 @@ namespace Iviz.App
         public virtual void Close()
         {
             DataPanelManager.HideSelectedPanel();
-            ModuleListPanel.RemoveModule(this);            
+            ModuleListPanel.RemoveModule(this);
         }
 
         public abstract void SetupPanel();

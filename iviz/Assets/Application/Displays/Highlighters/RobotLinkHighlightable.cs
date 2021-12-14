@@ -1,7 +1,6 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Core;
@@ -12,8 +11,6 @@ namespace Iviz.Displays
 {
     public sealed class RobotLinkHighlightable : MonoBehaviour, IHighlightable, IHasBounds
     {
-        IReadOnlyList<RobotLinkHighlightable>? peers;
-
         Collider Collider
         {
             set
@@ -29,22 +26,9 @@ namespace Iviz.Displays
             }
         }
 
-        public void Highlight()
+        public void Highlight(in Vector3 _)
         {
             FAnimator.Start(new BoundsHighlighter(this));
-            /*
-            if (peers == null)
-            {
-                FAnimator.Start(new BoundsHighlighter(this));
-            }
-            else
-            {
-                foreach (var peer in peers)
-                {
-                    FAnimator.Start(new BoundsHighlighter(peer));
-                }
-            }
-            */
         }
 
         public bool IsAlive => true;
@@ -69,19 +53,11 @@ namespace Iviz.Displays
                 else
                 {
                     var colliders = node.GetComponentsInChildren<Collider>();
-                    var peers = new List<RobotLinkHighlightable>();
-
                     foreach (var subCollider in colliders)
                     {
                         var highlightable = subCollider.gameObject.AddComponent<RobotLinkHighlightable>();
                         highlightable.Collider = subCollider;
                         highlightable.Caption = linkName;
-                        peers.Add(highlightable);
-                    }
-
-                    foreach (var peer in peers)
-                    {
-                        peer.peers = peers;
                     }
                 }
             }

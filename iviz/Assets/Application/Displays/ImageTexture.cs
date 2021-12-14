@@ -22,19 +22,29 @@ namespace Iviz.Displays
         static readonly int MainTexID = Shader.PropertyToID("_MainTex");
 
         byte[]? bitmapBuffer;
-        Vector2 intensityBounds;
+        Vector2 normalizedIntensityBounds;
+        ColormapId colormap;
+        float normalizationFactor = 1;
         bool flipMinMax;
+        bool overrideIntensityBounds;
 
         public event Action<Texture2D?>? TextureChanged;
         public event Action<Texture2D?>? ColormapChanged;
 
         public Vector2 IntensityBounds
         {
-            get => intensityBounds;
+            get => NormalizedIntensityBounds / normalizationFactor;
+            set => NormalizedIntensityBounds = value * normalizationFactor;
+        }
+
+        public Vector2 NormalizedIntensityBounds
+        {
+            get => normalizedIntensityBounds;
             set
             {
-                intensityBounds = value;
-                float intensitySpan = intensityBounds.y - intensityBounds.x;
+                normalizedIntensityBounds = value;
+
+                float intensitySpan = normalizedIntensityBounds.y - normalizedIntensityBounds.x;
 
                 if (intensitySpan == 0)
                 {
@@ -46,12 +56,12 @@ namespace Iviz.Displays
                     if (!FlipMinMax)
                     {
                         Material.SetFloat(IntensityCoeffID, 1 / intensitySpan);
-                        Material.SetFloat(IntensityAddID, -intensityBounds.x / intensitySpan);
+                        Material.SetFloat(IntensityAddID, -normalizedIntensityBounds.x / intensitySpan);
                     }
                     else
                     {
                         Material.SetFloat(IntensityCoeffID, -1 / intensitySpan);
-                        Material.SetFloat(IntensityAddID, intensityBounds.y / intensitySpan);
+                        Material.SetFloat(IntensityAddID, normalizedIntensityBounds.y / intensitySpan);
                     }
                 }
             }
@@ -63,7 +73,7 @@ namespace Iviz.Displays
             set
             {
                 flipMinMax = value;
-                IntensityBounds = IntensityBounds;
+                NormalizedIntensityBounds = NormalizedIntensityBounds;
             }
         }
 
@@ -73,11 +83,20 @@ namespace Iviz.Displays
         public bool IsMono { get; private set; }
         public int Width => Texture != null ? Texture.width : 0;
         public int Height => Texture != null ? Texture.height : 0;
-        public Vector2? MeasuredBounds { get; private set; }
-        public Vector2? NormalizedMeasuredBounds { get; private set; }
-        public int BytesPerPixel { get; private set; }
+        public Vector2? MeasuredIntensityBounds { get; private set; }
 
-        ColormapId colormap;
+        public bool OverrideIntensityBounds
+        {
+            get => overrideIntensityBounds;
+            set
+            {
+                overrideIntensityBounds = value;
+                if (!value && MeasuredIntensityBounds is { } bounds)
+                {
+                    IntensityBounds = bounds;
+                }
+            }
+        }
 
         public ColormapId Colormap
         {
@@ -351,7 +370,6 @@ namespace Iviz.Displays
                 return;
             }
 
-            BytesPerPixel = validatedBpp;
             if (data.Length < size * validatedBpp)
             {
                 RosLogger.Debug(
@@ -411,6 +429,7 @@ namespace Iviz.Displays
         {
             bool alreadyCopied = false;
             Texture2D texture;
+            Vector2 intensityBounds;
             switch (encoding.ToUpperInvariant())
             {
                 case "RGB8":
@@ -430,8 +449,8 @@ namespace Iviz.Displays
                         texture = EnsureSize(width, height, TextureFormat.RGB24);
                     }
 
-                    MeasuredBounds = null;
-                    NormalizedMeasuredBounds = null;
+                    MeasuredIntensityBounds = null;
+                    normalizationFactor = 1;
                     break;
                 case "RGBA8":
                 case "BGRA8":
@@ -440,6 +459,8 @@ namespace Iviz.Displays
                 case "8SC4":
                 case "8UC4":
                     texture = EnsureSize(width, height, TextureFormat.RGBA32);
+                    MeasuredIntensityBounds = null;
+                    normalizationFactor = 1;
                     break;
                 case "MONO16":
                 case "16UC1":
@@ -457,8 +478,14 @@ namespace Iviz.Displays
                         texture = EnsureSize(width, height, TextureFormat.R16);
                     }
 
-                    MeasuredBounds = CalculateBoundsR16(data);
-                    NormalizedMeasuredBounds = MeasuredBounds.Value / ushort.MaxValue;
+                    intensityBounds = CalculateBoundsR16(data);
+                    MeasuredIntensityBounds = intensityBounds;
+                    normalizationFactor = 1f / ushort.MaxValue;
+                    if (!OverrideIntensityBounds)
+                    {
+                        IntensityBounds = intensityBounds;
+                    }
+
                     break;
                 case "MONO8":
                 case "8UC1":
@@ -466,14 +493,26 @@ namespace Iviz.Displays
                 case "8SC1":
                 case "8SC":
                     texture = EnsureSize(width, height, TextureFormat.R8);
-                    MeasuredBounds = CalculateBoundsR8(data);
-                    NormalizedMeasuredBounds = MeasuredBounds.Value / byte.MaxValue;
+                    intensityBounds = CalculateBoundsR8(data);
+                    MeasuredIntensityBounds = intensityBounds;
+                    normalizationFactor = 1f / byte.MaxValue;
+                    if (!OverrideIntensityBounds)
+                    {
+                        IntensityBounds = intensityBounds;
+                    }
+
                     break;
                 case "32FC1":
                 case "32FC":
                     texture = EnsureSize(width, height, TextureFormat.RFloat);
-                    MeasuredBounds = CalculateBoundsRFloat(data);
-                    NormalizedMeasuredBounds = MeasuredBounds.Value;
+                    intensityBounds = CalculateBoundsRFloat(data);
+                    MeasuredIntensityBounds = intensityBounds;
+                    normalizationFactor = 1;
+                    if (!OverrideIntensityBounds)
+                    {
+                        IntensityBounds = intensityBounds;
+                    }
+
                     break;
                 default:
                     return;
@@ -481,7 +520,7 @@ namespace Iviz.Displays
 
             if (!alreadyCopied)
             {
-                data[..length].CopyTo(texture.GetRawTextureData<byte>().AsSpan());
+                texture.GetRawTextureData<byte>().CopyFrom(data[..length]);
             }
 
             texture.Apply(generateMipmaps);
@@ -525,7 +564,7 @@ namespace Iviz.Displays
                 dstPtr[i] = colorOut;
             }
         }
-        
+
         struct Rgba
         {
             public byte r, g, b, a;
@@ -555,7 +594,7 @@ namespace Iviz.Displays
 
             return new Vector2(min, max);
         }
-        
+
         static Vector2 CalculateBoundsR16(ReadOnlySpan<byte> src)
         {
             ushort min = ushort.MaxValue;
@@ -575,8 +614,8 @@ namespace Iviz.Displays
             }
 
             return new Vector2(min, max);
-        }        
-        
+        }
+
         static Vector2 CalculateBoundsRFloat(ReadOnlySpan<byte> src)
         {
             float min = float.MaxValue;
@@ -596,7 +635,7 @@ namespace Iviz.Displays
             }
 
             return new Vector2(min, max);
-        }           
+        }
 
         Texture2D EnsureSize(int width, int height, TextureFormat format)
         {

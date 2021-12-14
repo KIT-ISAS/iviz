@@ -277,6 +277,8 @@ namespace Iviz.Displays
             axis = null;
         }
 
+        public void Highlight(in Vector3 hitPoint) => Highlight();
+
         public override void Highlight()
         {
             if (IsAlive)

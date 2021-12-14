@@ -34,18 +34,25 @@ namespace Iviz.App
             Frame = p.AddFrame();
             NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetCentered();
             PointSize = p.AddSlider("Point Size").SetMinValue(0.01f).SetMaxValue(0.1f);
+            UseIntensity = p.AddToggle("Use Intensity instead of Range");
+            UseLines = p.AddToggle("Use Lines");
+
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)ColormapId.hsv);
-            UseIntensity = p.AddToggle("Use Intensity instead of Range");
-
             ForceMinMax = p.AddToggle("Colormap Override Min/Max");
             MinIntensity = p.AddNumberInputField("Colormap Min");
             MaxIntensity = p.AddNumberInputField("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");
 
-            UseLines = p.AddToggle("Use Lines");
-
+            p.AddCollapsibleWidget("Colormap")
+                .Attach(Colormap)
+                .Attach(ForceMinMax)
+                .Attach(MinIntensity)
+                .Attach(MaxIntensity)
+                .Attach(FlipMinMax)
+                .UpdateSize();
+            
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             p.UpdateSize();

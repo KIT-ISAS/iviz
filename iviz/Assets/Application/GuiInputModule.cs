@@ -854,8 +854,8 @@ namespace Iviz.App
             if (clickInfo.TryGetRaycastResults(out var hitResults))
             {
                 Vector3? maybeReferencePosition = null;
-                List<IHighlightable>? hits = null;
-                foreach (var (hitObject, hitPosition, _) in hitResults)
+                List<(IHighlightable highlightable, Vector3 hitPoint)>? hits = null;
+                foreach (var (hitObject, hitPoint, _) in hitResults)
                 {
                     if (!TryGetHighlightable(hitObject, out var toHighlight))
                     {
@@ -864,21 +864,21 @@ namespace Iviz.App
 
                     if (maybeReferencePosition is not { } referencePosition)
                     {
-                        maybeReferencePosition = hitPosition;
+                        maybeReferencePosition = hitPoint;
                     }
-                    else if (Vector3.Distance(hitPosition, referencePosition) > 0.25f)
+                    else if (Vector3.Distance(hitPoint, referencePosition) > 0.25f)
                     {
                         continue;
                     }
 
-                    hits ??= new List<IHighlightable>();
-                    hits.Add(toHighlight);
+                    hits ??= new List<(IHighlightable, Vector3)>();
+                    hits.Add((toHighlight, hitPoint));
                 }
 
                 switch (hits?.Count)
                 {
                     case 1:
-                        hits[0].Highlight();
+                        hits[0].highlightable.Highlight(hits[0].hitPoint);
                         return;
                     case > 1:
                         HighlightAll(hits);
@@ -917,12 +917,12 @@ namespace Iviz.App
             }
         }
 
-        static async void HighlightAll(IEnumerable<IHighlightable> hits)
+        static async void HighlightAll(IEnumerable<(IHighlightable highlightable, Vector3 hitPoint)> hits)
         {
-            var aliveHits = hits.Where(toHighlight => toHighlight.IsAlive);
-            foreach (var toHighlight in aliveHits)
+            var aliveHits = hits.Where(toHighlight => toHighlight.highlightable.IsAlive);
+            foreach (var (highlightable, hitPoint) in aliveHits)
             {
-                toHighlight.Highlight();
+                highlightable.Highlight(hitPoint);
                 await Task.Delay(250);
             }
         }

@@ -16,6 +16,7 @@ namespace Iviz.App
 {
     public sealed class DepthCloudModuleData : ModuleData
     {
+        const string ModuleTypeStr = "DepthCloud";
         const string NoneStr = "<none>";
 
         readonly DepthCloudController controller;
@@ -33,13 +34,7 @@ namespace Iviz.App
             base(constructor.Topic, constructor.Type)
         {
             panel = DataPanelManager.GetPanelByResourceType<DepthCloudPanelContents>(ModuleType.DepthCloud);
-
-            controller = new DepthCloudController(this);
-            if (constructor.Configuration != null)
-            {
-                controller.Config = (DepthCloudConfiguration)constructor.Configuration;
-            }
-
+            controller = new DepthCloudController(this, (DepthCloudConfiguration?)constructor.Configuration);
             UpdateModuleButton();
         }
 
@@ -59,13 +54,20 @@ namespace Iviz.App
             panel.ColorTopic.Listener = controller.ColorListener;
             panel.DepthTopic.Listener = controller.DepthListener;
 
-            panel.Color.Value = controller.ColorTopic;
-            panel.Depth.Value = controller.DepthTopic;
-
             panel.ColorPreview.Material = controller.ColorMaterial;
             panel.DepthPreview.Material = controller.DepthMaterial;
 
             panel.Description.Text = controller.Description;
+
+            panel.ForceMinMax.Value = controller.OverrideMinMax;
+            panel.Min.Value = controller.MinIntensity;
+            panel.Max.Value = controller.MaxIntensity;
+            panel.FlipMinMax.Value = controller.FlipMinMax;
+
+            panel.Colormap.Index = (int)controller.Colormap;
+
+            panel.Color.Value = controller.ColorTopic;
+            panel.Depth.Value = controller.DepthTopic;
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
@@ -87,11 +89,18 @@ namespace Iviz.App
             panel.Depth.EndEdit += f =>
             {
                 controller.DepthTopic = f.Length == 0 || f[0] == NoneStr[0] ? "" : f;
+                UpdateModuleButton();
+
                 panel.DepthTopic.Listener = controller.DepthListener;
 
                 if (depthDialogData != null)
                 {
                     depthDialogData.Title = SanitizeTitle(controller.DepthTopic);
+                }
+
+                if (controller.DepthTopic.Length == 0)
+                {
+                    controller.Colormap = controller.Colormap;
                 }
             };
             panel.ColorPreview.Clicked += () =>
@@ -114,6 +123,12 @@ namespace Iviz.App
 
                 depthDialogData.Title = SanitizeTitle(controller.DepthTopic);
             };
+            panel.Colormap.ValueChanged += (i, _) => controller.Colormap = (ColormapId)i;
+            panel.Min.ValueChanged += f => controller.MinIntensity = f;
+            panel.Max.ValueChanged += f => controller.MaxIntensity = f;
+            panel.FlipMinMax.ValueChanged += f => controller.FlipMinMax = f;
+            panel.CloseButton.Clicked += Close;
+            panel.ForceMinMax.ValueChanged += f => controller.OverrideMinMax = f;
         }
 
         static string SanitizeTitle(string? topic) => topic is null or "" ? "[Empty]" : topic;
@@ -183,6 +198,14 @@ namespace Iviz.App
             {
                 depthDialogData = null;
             }
+        }
+
+        protected override void UpdateModuleButton()
+        {
+            string text = controller.DepthTopic.Length != 0
+                ? GetDescriptionForTopic(controller.DepthTopic, ModuleTypeStr)
+                : $"<b>{ModuleTypeStr}</b>";
+            ButtonText = Controller.Visible ? text : $"<color=grey>{text}</color>";
         }
 
         sealed class ColorImageDialogListener : ImageDialogListener

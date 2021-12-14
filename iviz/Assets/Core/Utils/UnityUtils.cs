@@ -9,7 +9,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Msgs;
-using Iviz.Tools;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -486,6 +485,18 @@ namespace Iviz.Core
         public static Span<T> AsSpan<T>(this Memory<T> memory) where T : unmanaged
         {
             return memory.Span;
+        }
+        
+        public static unsafe NativeArray<T> CreateNativeArrayWrapper<T>(T* ptr, int length) where T : unmanaged
+        {
+            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(ptr, length, Allocator.None);
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
+            return array;
+        }
+
+        public static void CopyFrom<T>(this NativeArray<T> dst, ReadOnlySpan<T> span) where T : unmanaged
+        {
+            span.CopyTo(dst.AsSpan());
         }
     }
 }

@@ -65,14 +65,87 @@ namespace Iviz.Controllers
         public DepthCloudConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 Visible = value.Visible;
                 ColorTopic = value.ColorTopic;
                 DepthTopic = value.DepthTopic;
+                Colormap = value.Colormap;
+                Visible = value.Visible;
+                MinIntensity = value.MinIntensity;
+                MaxIntensity = value.MaxIntensity;
+                FlipMinMax = value.FlipMinMax;                
+            }
+        }
+        
+        public ColormapId Colormap
+        {
+            get => config.Colormap;
+            set
+            {
+                config.Colormap = value;
+                depthImageTexture.Colormap = value;
+                projector.Colormap = value;
             }
         }
 
+        public float MinIntensity
+        {
+            get => config.MinIntensity;
+            set
+            {
+                config.MinIntensity = value;
+                if (OverrideMinMax)
+                {
+                    var intensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                    depthImageTexture.IntensityBounds = intensityBounds;
+                    projector.IntensityBounds = intensityBounds;
+                }
+            }
+        }      
+        
+        public float MaxIntensity
+        {
+            get => config.MaxIntensity;
+            set
+            {
+                config.MaxIntensity = value;
+                if (OverrideMinMax)
+                {
+                    var intensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                    depthImageTexture.IntensityBounds = intensityBounds;
+                    projector.IntensityBounds = intensityBounds;
+                }
+            }
+        }
+
+        public bool OverrideMinMax
+        {
+            get => config.OverrideMinMax;
+            set
+            {
+                config.OverrideMinMax = value;
+                depthImageTexture.OverrideIntensityBounds = value;
+                if (value)
+                {
+                    var intensityBounds = new Vector2(MinIntensity, MaxIntensity);
+                    depthImageTexture.IntensityBounds = intensityBounds;
+                    projector.IntensityBounds = intensityBounds;
+                }
+            }
+        }
+        
+        public bool FlipMinMax
+        {
+            get => config.FlipMinMax;
+            set
+            {
+                config.FlipMinMax = value;
+                depthImageTexture.FlipMinMax = value;
+                projector.FlipMinMax = value;
+            }
+        }
+        
         public bool Visible
         {
             get => config.Visible;
@@ -201,7 +274,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public DepthCloudController(IModuleData moduleData)
+        public DepthCloudController(IModuleData moduleData, DepthCloudConfiguration? config)
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             depthImageTexture = new ImageTexture();
@@ -213,10 +286,8 @@ namespace Iviz.Controllers
             projector = ResourcePool.RentDisplay<DepthCloudResource>(node.Transform);
             projector.DepthImage = depthImageTexture;
             projector.ColorImage = colorImageTexture;
-            Config = new DepthCloudConfiguration();
-
-            depthImageTexture.Colormap = ColormapId.gray;
-            colorImageTexture.Colormap = ColormapId.gray;
+            Config = config ?? new DepthCloudConfiguration();
+            colorImageTexture.Colormap = ColormapId.bone;
         }
 
         bool DepthHandler(Image msg)
@@ -295,22 +366,10 @@ namespace Iviz.Controllers
 
         void UpdateIntensityBounds()
         {
-            TextureFormat? format = depthImageTexture.Texture != null
-                ? depthImageTexture.Texture.format
-                : null;
-
-            if (format == lastDepthFormat)
+            if (!OverrideMinMax)
             {
-                return;
+                projector.IntensityBounds = depthImageTexture.NormalizedIntensityBounds;
             }
-
-            lastDepthFormat = format;
-            depthImageTexture.IntensityBounds = format switch
-            {
-                TextureFormat.RFloat => new Vector2(0, 5),
-                TextureFormat.R16 => new Vector2(0, 5000 / 65535f),
-                _ => depthImageTexture.IntensityBounds
-            };
         }
 
         bool ColorHandler(Image msg)
@@ -374,7 +433,7 @@ namespace Iviz.Controllers
 
         void InfoHandler(CameraInfo info)
         {
-            projector.SetIntrinsic(info.K);
+            projector.Intrinsic = new Intrinsic(info.K);
         }
 
         public void Dispose()

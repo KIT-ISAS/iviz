@@ -10,18 +10,11 @@ namespace Iviz.Core
 {
     public static class MeshUtils
     {
-        static unsafe NativeArray<T> CreateNativeArrayWrapper<T>(T* ptr, int length) where T : unmanaged
-        {
-            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(ptr, length, Allocator.Temp);
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
-            return array;
-        }
-
         public static unsafe void SetVertices(this Mesh mesh, ReadOnlySpan<Vector3> ps)
         {
             fixed (Vector3* ptr = ps)
             {
-                var array = CreateNativeArrayWrapper(ptr, ps.Length);
+                var array = UnityUtils.CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetVertices(array);
             }
         }
@@ -35,7 +28,7 @@ namespace Iviz.Core
         {
             fixed (Vector3* ptr = ps)
             {
-                var array = CreateNativeArrayWrapper(ptr, ps.Length);
+                var array = UnityUtils.CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetNormals(array);
             }
         }
@@ -49,7 +42,7 @@ namespace Iviz.Core
         {
             fixed (Vector4* ptr = ps)
             {
-                var array = CreateNativeArrayWrapper(ptr, ps.Length);
+                var array = UnityUtils.CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetTangents(array);
             }
         }
@@ -63,7 +56,7 @@ namespace Iviz.Core
         {
             fixed (int* ptr = ps)
             {
-                var array = CreateNativeArrayWrapper(ptr, ps.Length);
+                var array = UnityUtils.CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetIndices(array, topology, subMesh);
             }
         }
@@ -77,7 +70,7 @@ namespace Iviz.Core
         {
             fixed (Color* ptr = ps)
             {
-                var array = CreateNativeArrayWrapper(ptr, ps.Length);
+                var array = UnityUtils.CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetColors(array);
             }
         }
@@ -91,7 +84,7 @@ namespace Iviz.Core
         {
             fixed (Color32* ptr = ps)
             {
-                var array = CreateNativeArrayWrapper(ptr, ps.Length);
+                var array = UnityUtils.CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetColors(array);
             }
         }
@@ -105,7 +98,7 @@ namespace Iviz.Core
         {
             fixed (Vector2* ptr = ps)
             {
-                var array = CreateNativeArrayWrapper(ptr, ps.Length);
+                var array = UnityUtils.CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetUVs(0, array);
             }
         }
@@ -119,7 +112,7 @@ namespace Iviz.Core
         {
             fixed (Vector3* ptr = ps)
             {
-                var array = CreateNativeArrayWrapper(ptr, ps.Length);
+                var array = UnityUtils.CreateNativeArrayWrapper(ptr, ps.Length);
                 mesh.SetUVs(channel, array);
             }
         }

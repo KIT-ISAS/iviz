@@ -104,6 +104,7 @@ MonoBehaviour:
     type: 2}
   MeshListOcclusionOnlyWithScaleAll: {fileID: 2100000, guid: a217398eda827488ebec373b00138c66,
     type: 2}
+  Atlas: {fileID: 2800000, guid: 31bf6fb355ce04e369667cb6f0764d14, type: 3}
   Lines: {fileID: 2800000, guid: 9c3c6a738a5afdf4b97007615ed15ae1, type: 3}
   Pink: {fileID: 2800000, guid: e91257000652d3c43b75ac3490f6d051, type: 3}
   Copper: {fileID: 2800000, guid: dc24028e6d757554aabbfece4bcab26a, type: 3}

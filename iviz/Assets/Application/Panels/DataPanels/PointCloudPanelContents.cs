@@ -36,16 +36,26 @@ namespace Iviz.App
             PointSize = p.AddSliderWidgetWithScale("Point Size");
             IntensityChannel = p.AddInputFieldWithHints("Intensity Channel")
                 .SetOptions(DefaultChannels);
+
+            PointCloudType = p.AddDropdown("Show as").SetOptions(new[] {"Points", "Cubes", "Spheres"});
+
             Colormap = p.AddDropdown("Colormap")
                 .SetOptions(Resource.Colormaps.Names)
                 .SetIndex((int) ColormapId.hsv);
-
             ForceMinMax = p.AddToggle("Colormap Override Min/Max");
             MinIntensity = p.AddSliderWidgetWithScale("Colormap Min");
             MaxIntensity = p.AddSliderWidgetWithScale("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");
-            PointCloudType = p.AddDropdown("Show as").SetOptions(new[] {"Points", "Cubes", "Spheres"});
 
+            
+            p.AddCollapsibleWidget("Colormap")
+                .Attach(Colormap)
+                .Attach(ForceMinMax)
+                .Attach(MinIntensity)
+                .Attach(MaxIntensity)
+                .Attach(FlipMinMax)
+                .UpdateSize();
+            
 
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
