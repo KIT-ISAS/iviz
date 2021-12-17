@@ -21,12 +21,12 @@ namespace Iviz.Displays
         [SerializeField] FixedDistanceDraggable? draggable;
         [SerializeField] TMP_Text? label;
         [SerializeField] bool followsCamera;
-        CancellationTokenSource? tokenSource;
+        [SerializeField] Vector2 canvasSize = new Vector2(800, 600);
 
+        CancellationTokenSource? tokenSource;
         RoundedPlaneResource? background;
         SelectionFrame? frame;
         Transform? mTransform;
-        Vector2 canvasSize = new Vector2(800, 600);
 
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
 
@@ -198,13 +198,13 @@ namespace Iviz.Displays
 
             Transform.SetPositionAndRotation(
                 Vector3.Lerp(currentPose.position, targetPosition, damping),
-                Quaternion.Lerp(currentPose.rotation, targetRotation, damping * 0.25f));
+                Quaternion.Lerp(currentPose.rotation, targetRotation, damping * 0.5f));
         }
 
         static Pose ClampTargetPose(in Pose currentPose, in Pose mainCameraPose)
         {
-            const float minDistance = 1.0f;
-            const float maxDistance = 1.5f;
+            const float minDistance = 1.5f;
+            const float maxDistance = 2.0f;
 
             var (currentPositionLocal, currentRotationLocal) = mainCameraPose.Inverse().Multiply(currentPose);
             var targetPositionLocal = Clamp(
@@ -215,7 +215,7 @@ namespace Iviz.Displays
             float rawAngleLocal = currentRotationLocal.eulerAngles.y;
             float currentAngleLocal = rawAngleLocal > 180 ? rawAngleLocal - 360 : rawAngleLocal;
 
-            var targetRotationLocal = Mathf.Abs(currentAngleLocal) < 30
+            var targetRotationLocal = Mathf.Abs(currentAngleLocal) < 15
                 ? currentRotationLocal
                 : Quaternion.identity;
 

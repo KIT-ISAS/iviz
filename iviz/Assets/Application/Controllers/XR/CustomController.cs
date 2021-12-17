@@ -26,7 +26,6 @@ namespace Iviz.Controllers.XR
 
         public bool IsActiveInFrame { get; protected set; }
         public bool HasCursor { get; protected set; }
-        //public bool HasDevice => device != null;
         public bool ButtonState { get; protected set; }
         public bool ButtonUp { get; protected set; }
         public bool ButtonDown { get; protected set; }

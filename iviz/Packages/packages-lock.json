@@ -10,7 +10,7 @@
       }
     },
     "com.microsoft.mixedreality.worldlockingtools": {
-      "version": "file:MixedReality/com.microsoft.mixedreality.worldlockingtools-1.5.6.tgz",
+      "version": "file:MixedReality/com.microsoft.mixedreality.worldlockingtools-1.5.7.tgz",
       "depth": 0,
       "source": "local-tarball",
       "dependencies": {}

@@ -4,8 +4,10 @@ using System;
 using Iviz.Core;
 using Iviz.Tools;
 using JetBrains.Annotations;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
@@ -52,32 +54,37 @@ namespace Iviz.Displays
                 return;
             }
 
+            float halfScale = scale * 0.5f;
             int length = 10 * lineBuffer.Length;
+
             using var points = new Rent<Vector3>(length);
             using var colors = new Rent<Color32>(length);
             using var uvs = new Rent<Vector2>(length);
             using var indices = new Rent<int>(16 * 3 * lineBuffer.Length);
-            int baseOff = 0;
             int pOff = 0;
             int cOff = 0;
             int uvOff = 0;
             int iOff = 0;
 
             var pArray = points.Array;
+            var cArray = colors.Array;
+            var uArray = uvs.Array;
+            int[] iArray = indices.Array;
 
-            const float minMagnitude = 1e-8f;
-                
-            foreach (int l in ..lineBuffer.Length)
+            const float minMagnitude = 1e-5f;
+
+            Vector3 a = default;
+            Vector3 b = default;
+
+            foreach (var line in lineBuffer)
             {
-                ref readonly float4x2 line = ref lineBuffer[l];
-                Vector3 a = line.c0.xyz;
-                Vector3 b = line.c1.xyz;
-                    
-                Vector3 dirX = b - a;
-                Vector3 dirY, dirZ;
+                (a.x, a.y, a.z) = (line.c0.x, line.c0.y, line.c0.z);
+                (b.x, b.y, b.z) = (line.c1.x, line.c1.y, line.c1.z);
 
-                float dirXMagnitudeSq = dirX.MagnitudeSq();
-                if (dirXMagnitudeSq < minMagnitude * minMagnitude)
+                Vector3 ab = b - a;
+                Vector3 dirX, dirY, dirZ;
+
+                if (ab.MagnitudeSq() < minMagnitude * minMagnitude)
                 {
                     dirX = Vector3.zero;
                     dirY = Vector3.zero;
@@ -85,25 +92,18 @@ namespace Iviz.Displays
                 }
                 else
                 {
-                    dirX /= dirX.Magnitude();
-
-                    dirY = new Vector3(-dirX.y, dirX.x, 0);
-                    if (Mathf.Abs(dirY.MaxAbsCoeff()) < minMagnitude)
-                    {
-                        dirY = Vector3.up.Cross(dirX);
-                    }
-
-                    dirX *= scale;
-                    dirY *= scale / dirY.Magnitude();
-
-                    dirZ = dirX.Cross(dirY);
-                    dirZ *= scale / dirZ.Magnitude();
+                    dirX = ab.Normalized();
+                    dirY = !Mathf.Approximately(Mathf.Abs(dirX.z), 1)
+                        ? new Vector3(-dirX.y, dirX.x, 0).Normalized()
+                        : new Vector3(-dirX.z, 0, dirX.x).Normalized();
+                    dirZ = dirX.Cross(dirY).Normalized();
                 }
-                    
 
-                var halfDirX = 0.5f * dirX;
-                var halfSumYz = 0.5f * (dirY + dirZ);
-                var halfDiffYz = 0.5f * (dirY - dirZ);
+                var halfDirX = halfScale * dirX;
+                var halfSumYz = halfScale * (dirY + dirZ);
+                var halfDiffYz = halfScale * (dirY - dirZ);
+
+                int baseOff = pOff;
 
                 pArray[pOff++] = a - halfDirX;
                 pArray[pOff++] = a + halfSumYz;
@@ -121,28 +121,59 @@ namespace Iviz.Displays
                 var cb = PointWithColor.RecastToColor32(line.c1.w);
 
                 var uv0 = new Vector2(line.c0.w, 0);
+                var uv1 = new Vector2(line.c1.w, 0);
+
+                /*
                 for (int i = 0; i < 5; i++)
                 {
-                    colors.Array[cOff++] = ca;
-                    uvs.Array[uvOff++] = uv0;
+                    colors[cOff++] = ca;
+                    uvs[uvOff++] = uv0;
+                }
+                */
+                {
+                    cArray[cOff++] = ca;
+                    cArray[cOff++] = ca;
+                    cArray[cOff++] = ca;
+                    cArray[cOff++] = ca;
+                    cArray[cOff++] = ca;
+                    uArray[uvOff++] = uv0;
+                    uArray[uvOff++] = uv0;
+                    uArray[uvOff++] = uv0;
+                    uArray[uvOff++] = uv0;
+                    uArray[uvOff++] = uv0;
                 }
 
-                var uv1 = new Vector2(line.c1.w, 0);
+                /*
                 for (int i = 5; i < 10; i++)
                 {
-                    colors.Array[cOff++] = cb;
-                    uvs.Array[uvOff++] = uv1;
+                    colors[cOff++] = cb;
+                    uvs[uvOff++] = uv1;
+                }
+                */
+                {
+                    cArray[cOff++] = cb;
+                    cArray[cOff++] = cb;
+                    cArray[cOff++] = cb;
+                    cArray[cOff++] = cb;
+                    cArray[cOff++] = cb;
+                    uArray[uvOff++] = uv1;
+                    uArray[uvOff++] = uv1;
+                    uArray[uvOff++] = uv1;
+                    uArray[uvOff++] = uv1;
+                    uArray[uvOff++] = uv1;
                 }
 
                 foreach (int index in CapsuleIndices)
                 {
-                    indices.Array[iOff++] = baseOff + index;
+                    iArray[iOff++] = baseOff + index;
                 }
-                
-                baseOff += 10;
             }
 
             mesh.Clear();
+            mesh.indexFormat = indices.Length <= UnityUtils.MeshUInt16Threshold
+                ? IndexFormat.UInt16
+                : IndexFormat.UInt32;
+
             mesh.SetVertices(points);
             mesh.SetTriangles(indices);
             mesh.SetColors(colors);

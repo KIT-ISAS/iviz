@@ -9,7 +9,17 @@ namespace Iviz.Controllers.XR
 {
     public static class XRUtils
     {
-        public static void ProcessCanvasForXR(this Transform root)
+        public static void ProcessCanvasForXR(this GameObject root)
+        {
+            ProcessCanvasForXR(root.transform);
+        }
+
+        public static void ProcessCanvasForXR(this Component root)
+        {
+            ProcessCanvasForXR(root.transform);
+        }
+
+        static void ProcessCanvasForXR(this Transform root)
         {
             foreach (var subCanvas in root.GetComponentsInChildren<Canvas>(true))
             {

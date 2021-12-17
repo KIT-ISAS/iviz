@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.microsoft.mixedreality.openxr": "file:MixedReality/com.microsoft.mixedreality.openxr-1.1.2.tgz",
-    "com.microsoft.mixedreality.worldlockingtools": "file:MixedReality/com.microsoft.mixedreality.worldlockingtools-1.5.6.tgz",
+    "com.microsoft.mixedreality.worldlockingtools": "file:MixedReality/com.microsoft.mixedreality.worldlockingtools-1.5.7.tgz",
     "com.unity.burst": "1.6.1",
     "com.unity.collab-proxy": "1.15.1",
     "com.unity.ext.nunit": "1.0.6",

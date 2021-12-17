@@ -94,9 +94,9 @@ namespace Iviz.App
 
         bool IsLookAtAnimationRunning => lookAtTokenSource is { IsCancellationRequested: false };
 
-        public event Action<ClickInfo>? PointerDown;
-        public event Action<ClickInfo>? ShortClick;
-        public event Action<ClickInfo>? LongClick;
+        public event Action<ClickHitInfo>? PointerDown;
+        public event Action<ClickHitInfo>? ShortClick;
+        public event Action<ClickHitInfo>? LongClick;
 
         public TfFrame? OrbitCenterOverride
         {
@@ -398,7 +398,7 @@ namespace Iviz.App
 
         public static void TryUnsetDraggedObject(IScreenDraggable draggable)
         {
-            // do not fetch Instance here, we may be shutting down the scene
+            // do not fetch Instance here, we may be in the middle of shutting down the scene
             if (instance == null || instance.DraggedObject != draggable)
             {
                 return;
@@ -510,7 +510,7 @@ namespace Iviz.App
             bool anyPointerDown = pointerIsDown || altPointerIsDown;
             if (!prevPointerDown && anyPointerDown)
             {
-                var clickInfo = new ClickInfo(pointerPosition);
+                var clickInfo = new ClickHitInfo(pointerPosition);
                 PointerDown?.Invoke(clickInfo);
             }
 
@@ -518,7 +518,7 @@ namespace Iviz.App
                 && !anyPointerDown
                 && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
             {
-                var clickInfo = new ClickInfo(pointerPosition);
+                var clickInfo = new ClickHitInfo(pointerPosition);
                 float timeDown = Time.time - pointerDownTime;
                 if (timeDown < shortClickTime)
                 {
@@ -844,14 +844,14 @@ namespace Iviz.App
             return pVelocity;
         }
 
-        void OnClick(ClickInfo clickInfo, bool isShortClick)
+        void OnClick(ClickHitInfo clickHitInfo, bool isShortClick)
         {
-            TriggerEnvironmentClick(clickInfo, isShortClick);
+            TriggerEnvironmentClick(clickHitInfo, isShortClick);
         }
 
-        public static void TriggerEnvironmentClick(ClickInfo clickInfo, bool isShortClick = true)
+        public static void TriggerEnvironmentClick(ClickHitInfo clickHitInfo, bool isShortClick = true)
         {
-            if (clickInfo.TryGetRaycastResults(out var hitResults))
+            if (clickHitInfo.TryGetRaycastResults(out var hitResults))
             {
                 Vector3? maybeReferencePosition = null;
                 List<(IHighlightable highlightable, Vector3 hitPoint)>? hits = null;
@@ -887,7 +887,7 @@ namespace Iviz.App
             }
 
             Pose poseToHighlight;
-            if (clickInfo.TryGetARRaycastResults(out var arHitResults))
+            if (clickHitInfo.TryGetARRaycastResults(out var arHitResults))
             {
                 poseToHighlight = arHitResults[0].AsPose();
             }

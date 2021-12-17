@@ -535,7 +535,7 @@ namespace Iviz.Displays
                 return ReadModelFromFileAsync(uriString, localPath, token);
             }
 
-            return ValueTask2.FromResult((Model?)null);
+            return default; // completed, null
         }
 
         async ValueTask<Model?> ReadModelFromFileAsync(string uriString, string localPath, CancellationToken token)

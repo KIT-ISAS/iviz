@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using Iviz.Controllers;
+using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Resources;
 using Unity.Mathematics;
@@ -17,18 +18,7 @@ namespace Iviz.Displays
     {
         static GameObject? container;
 
-        static bool TryGetMeshManager([NotNullWhen(true)] out ARMeshManager? meshManager)
-        {
-            if (ARController.Instance != null)
-            {
-                meshManager = ARController.Instance.MeshManager;
-                return meshManager != null;
-            }
-
-            meshManager = null;
-            return false;
-        }
-        
+        bool writing;
         bool pulseMaterialSet;
         readonly List<int> indices = new();
         readonly List<Vector3> vertices = new();
@@ -56,7 +46,7 @@ namespace Iviz.Displays
 
                 resource = ResourcePool.RentDisplay<LineResource>(container.transform);
                 resource.ElementScale = 0.001f;
-                resource.Visible = ARController.IsVisible;
+                resource.Visible = ARController.IsXRVisible;
                 resource.MaterialOverride = ARController.IsPulseActive
                     ? Resources.Resource.Materials.LinePulse.Object
                     : Resources.Resource.Materials.LineMesh.Object;
@@ -64,7 +54,7 @@ namespace Iviz.Displays
                 return resource;
             }
         }
-        
+
         public Bounds? Bounds => Resource != null ? Resource.Bounds : null;
 
         public int Layer { get; set; }
@@ -83,13 +73,19 @@ namespace Iviz.Displays
 
         void Awake()
         {
+            if (Settings.IsHololens)
+            {
+                enabled = false;
+                return;
+            }
+            
             pulseMaterialSet = ARController.IsPulseActive;
             MeshFilter.sharedMesh = new Mesh { name = "AR Mesh" };
             Resource.Visible = Visible;
 
-            if (TryGetMeshManager(out var meshManager))
+            if (ARController.TryGetMeshManager(out var meshManager))
             {
-                meshManager.meshesChanged += OnManagerChanged;
+                meshManager.meshesChanged += OnMeshChanged;
             }
             else
             {
@@ -97,7 +93,7 @@ namespace Iviz.Displays
             }
 
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
-            OnARCameraViewChanged(ARController.IsVisible);
+            OnARCameraViewChanged(ARController.IsXRVisible);
         }
 
         void Start()
@@ -110,7 +106,7 @@ namespace Iviz.Displays
             Resource.Visible = ARController.IsPulseActive || !value;
         }
 
-        void OnManagerChanged(ARMeshesChangedEventArgs args)
+        void OnMeshChanged(ARMeshesChangedEventArgs args)
         {
             if (args.added.Contains(MeshFilter) || args.updated.Contains(MeshFilter))
             {
@@ -142,12 +138,18 @@ namespace Iviz.Displays
             {
                 Resource.MaterialOverride = Resources.Resource.Materials.LineMesh.Object;
                 pulseMaterialSet = false;
-                Resource.Visible = !ARController.IsVisible;
+                Resource.Visible = !ARController.IsXRVisible;
             }
         }
 
         void WriteMeshLines()
         {
+            if (writing)
+            {
+                Debug.LogError("Whee!");
+            }
+
+            writing = true;
             var mesh = MeshFilter.sharedMesh;
 
             indices.Clear();
@@ -157,6 +159,7 @@ namespace Iviz.Displays
             mesh.GetVertices(vertices);
 
             Resource.SetDirect(DirectLineSetter, indices.Count);
+            writing = false;
         }
 
         bool? DirectLineSetter(NativeList<float4x2> lineBuffer)
@@ -215,10 +218,18 @@ namespace Iviz.Displays
             }
 
             return false;
+
+            static void Write(ref float4x2 f, in Vector3 a, in Vector3 b)
+            {
+                (f.c0.x, f.c0.y, f.c0.z) = a;
+                (f.c1.x, f.c1.y, f.c1.z) = b;
+            }
         }
 
         public void Suspend()
         {
+            indices.Clear();
+            vertices.Clear();
         }
 
         void OnDestroy()
@@ -232,21 +243,10 @@ namespace Iviz.Displays
 
             Destroy(MeshFilter.sharedMesh);
 
-            if (TryGetMeshManager(out var meshManager))
+            if (ARController.TryGetMeshManager(out var meshManager))
             {
-                meshManager.meshesChanged -= OnManagerChanged;
+                meshManager.meshesChanged -= OnMeshChanged;
             }
-        }
-
-        static void Write(ref float4x2 f, in Vector3 a, in Vector3 b)
-        {
-            f.c0.x = a.x;
-            f.c0.y = a.y;
-            f.c0.z = a.z;
-
-            f.c1.x = b.x;
-            f.c1.y = b.y;
-            f.c1.z = b.z;
         }
     }
 }

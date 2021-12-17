@@ -41,7 +41,7 @@ namespace Iviz.Displays.Highlighters
                 node.Visible = false;
                 return;
             }
-            
+
             node.AttachTo(frame);
         }
 
@@ -74,7 +74,8 @@ namespace Iviz.Displays.Highlighters
 
             using var description = BuilderPool.Rent();
             description.Append("<b>").Append(node.ParentId).Append("</b>\n");
-            RosUtils.FormatPose(node.Transform.AsPose(), description, RosUtils.PoseFormat.OnlyPosition);
+            RosUtils.FormatPose(TfListener.RelativeToFixedFrame(node.Transform.AsPose()), description,
+                RosUtils.PoseFormat.OnlyPosition);
             tooltip.SetCaption(description);
         }
 

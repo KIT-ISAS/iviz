@@ -65,11 +65,12 @@ namespace Iviz.Resources
         /// Constructs a unique identifier from an existing instance
         /// </summary>
         /// <param name="baseObject">Loaded instance of this type, if already available.</param>
-        public Info(T baseObject) : this(null, baseObject)
+        /// <param name="objectName">>Optional descriptive name for this object, in case of an error.</param>
+        public Info(T baseObject, string? objectName = null) : this(null, baseObject)
         {
             if (baseObject == null)
             {
-                throw new ArgumentNullException(nameof(baseObject));
+                throw new ArgumentNullException(objectName ?? nameof(baseObject));
             }
         }
 

@@ -32,7 +32,7 @@ namespace Iviz.Displays
             Resource.RenderType = LineResource.LineRenderType.AlwaysCapsule;
         }
 
-        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal)
+        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal, float offset = 0)
         {
             Reticle.Visible = true;
             Reticle.Transform.SetPositionAndRotation(target, Quaternion.LookRotation(normal));
@@ -40,7 +40,7 @@ namespace Iviz.Displays
             float scale = 0.03f * Vector3.Distance(target, Settings.MainCameraTransform.position);
             Reticle.Transform.localScale = scale * Vector3.one;
 
-            BuildLeash(pointerRay, target);
+            BuildLeash(pointerRay, target + normal * offset);
         }
 
         public void Set(in Ray pointerRay, in Vector3 target)
@@ -76,7 +76,6 @@ namespace Iviz.Displays
 
             Resource.SetDirect(array =>
             {
-                float3 p = default, q = default;
                 var line = new float4x2();
 
                 ref var c0 = ref f.c0;
@@ -85,7 +84,7 @@ namespace Iviz.Displays
                 ref var l0 = ref line.c0;
                 ref var l1 = ref line.c1;
 
-                (p.x, p.y, p.z) = c0;
+                float3 p = c0;
 
                 float colorA = colorBase.a;
 
@@ -97,7 +96,7 @@ namespace Iviz.Displays
                 foreach (int i in ..numSegments)
                 {
                     float t = (i + 1f) / numSegments;
-                    (q.x, q.y, q.z) = Bezier(t, f);
+                    float3 q = Bezier(t, f);
 
                     var delta = q - p;
                     (l0.x, l0.y, l0.z) = p + 0.25f * delta;

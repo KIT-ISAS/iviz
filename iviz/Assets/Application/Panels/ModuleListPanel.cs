@@ -327,7 +327,7 @@ namespace Iviz.App
 
                 UpperCanvas.EnableAR.gameObject.SetActive(false);
                 CreateModule(ModuleType.XR);
-                RootCanvas.transform.ProcessCanvasForXR();
+                RootCanvas.ProcessCanvasForXR();
             }
 
             initialized = true;
@@ -640,6 +640,64 @@ namespace Iviz.App
             }
         }
 
+        public bool TryLoadXRConfiguration(out Pose unityPose)
+        {
+            string path = Settings.XRStartConfigurationPath;
+
+            try
+            {
+                if (!File.Exists(path))
+                {
+                    unityPose = Pose.identity;
+                    return false;
+                }
+
+                Debug.Log("Using XR settings from " + path);
+
+                string text = File.ReadAllText(path);
+                var config = JsonConvert.DeserializeObject<XRStartConfiguration?>(text);
+                if (config == null)
+                {
+                    unityPose = Pose.identity;
+                    return false; // empty text
+                }
+
+                unityPose.position = config.AnchorPosition;
+                unityPose.rotation = config.AnchorOrientation;
+                return true;
+            }
+            catch (Exception e) when
+                (e is IOException or SecurityException or JsonException)
+            {
+                RosLogger.Debug($"{this}: Error loading XR configuration", e);
+                File.Delete(path);
+                unityPose = Pose.identity;
+                return false; // empty text
+            }
+        }
+        
+        public async void SaveXRConfiguration(Pose unityPose)
+        {
+            var (position, rotation) = unityPose;
+            var config = new XRStartConfiguration
+            {
+                AnchorOrientation = rotation,
+                AnchorPosition = position
+            };
+
+            try
+            {
+                string text = JsonConvert.SerializeObject(config, Formatting.Indented);
+                await FileUtils.WriteAllTextAsync(Settings.XRStartConfigurationPath, text, default);
+            }
+            catch (Exception e) when
+                (e is IOException or SecurityException or JsonException)
+            {
+                RosLogger.Debug($"{this}: Error saving XR configuration", e);
+            }
+        }
+
+        
         public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
 
         public async ValueTask ClearMastersCacheAsync(CancellationToken token = default)

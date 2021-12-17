@@ -21,7 +21,7 @@ namespace Iviz.Displays
         static readonly int IntensityID = Shader.PropertyToID("_IntensityTexture");
         static readonly int MainTexID = Shader.PropertyToID("_MainTex");
 
-        byte[]? bitmapBuffer;
+        byte[] bitmapBuffer = Array.Empty<byte>();
         Vector2 normalizedIntensityBounds;
         ColormapId colormap;
         float normalizationFactor = 1;
@@ -208,7 +208,7 @@ namespace Iviz.Displays
                     if (png.RowOffset != 0)
                     {
                         int reqSize = png.Height * png.RowSize;
-                        if (bitmapBuffer == null || bitmapBuffer.Length < reqSize)
+                        if (bitmapBuffer.Length < reqSize)
                         {
                             bitmapBuffer = new byte[reqSize];
                         }
@@ -315,14 +315,14 @@ namespace Iviz.Displays
                     if (encoding == null)
                     {
                         RosLogger.Debug(
-                            $"{this}: Unsupported encoding '{image.Colorspace}' with size {image.BitsPerComponent}");
+                            $"{this}: Unsupported encoding '{image.Colorspace}' with size {image.BitsPerComponent.ToString()}");
                         return;
                     }
 
                     const int bmpHeaderLength = 54;
                     reqSize += bmpHeaderLength;
 
-                    if (bitmapBuffer == null || bitmapBuffer.Length < reqSize)
+                    if (bitmapBuffer.Length < reqSize)
                     {
                         bitmapBuffer = new byte[reqSize];
                     }
@@ -679,7 +679,7 @@ namespace Iviz.Displays
             ColormapChanged = null;
         }
 
-        public void Destroy()
+        public void Dispose()
         {
             if (Texture != null)
             {
@@ -687,6 +687,7 @@ namespace Iviz.Displays
             }
 
             UnityEngine.Object.Destroy(Material);
+            bitmapBuffer = Array.Empty<byte>();
         }
     }
 }

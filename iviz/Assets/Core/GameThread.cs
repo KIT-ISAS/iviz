@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Msgs;
 using Iviz.Tools;
 using UnityEngine;
 
@@ -33,7 +34,15 @@ namespace Iviz.Core
 
         public static float GameTime { get; private set; }
 
+        /// <summary>
+        /// DateTime timestamp of the start of the frame.
+        /// </summary>
         public static DateTime Now { get; private set; } = DateTime.Now;
+
+        /// <summary>
+        /// ROS timestamp of the start of the frame.
+        /// </summary>
+        public static time TimeNow { get; private set; } = time.Now();
 
         static string? nowFormatted;
         public static string NowFormatted => nowFormatted ??= Now.ToString("HH:mm:ss.fff");
@@ -86,6 +95,7 @@ namespace Iviz.Core
             }
 
             Now = DateTime.Now;
+            TimeNow = time.Now();
             nowFormatted = null;
             GameTime = Time.time;
             if (GameTime - lastSecondRunTime > 1)

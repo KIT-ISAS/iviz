@@ -39,8 +39,8 @@ namespace Iviz.Controllers.XR
         public Pose ThumbFingertip => Fingers[0][^1];
         public Pose IndexFingertip => Fingers[1][^1];
         public SelectEnumerable<Pose[][], Pose[], Pose> Fingertips => Fingers.Select(GetTip);
-        
-        static readonly Func<Pose[], Pose> GetTip = finger => finger[^1]; 
+
+        static readonly Func<Pose[], Pose> GetTip = finger => finger[^1];
     }
 
     public sealed class HandController : CustomController
@@ -50,7 +50,6 @@ namespace Iviz.Controllers.XR
 
         readonly List<Bone> cachedBoneList = new();
         readonly MeshMarkerResource?[] fingerTips = new MeshMarkerResource?[5];
-        readonly MeshMarkerResource?[] fingerBases = new MeshMarkerResource?[5];
         readonly HandState cachedHandState = new();
 
         [SerializeField] HandType handType;
@@ -60,6 +59,9 @@ namespace Iviz.Controllers.XR
         GameObject? modelRoot;
 
         public HandState? State { get; private set; }
+        public Transform? ThumbFingertipTransform => fingerTips[0].CheckedNull()?.Transform;
+        public Transform? IndexFingertipTransform => fingerTips[1].CheckedNull()?.Transform;
+        public Transform? PalmTransform => fingerTips[2].CheckedNull()?.Transform;
 
         Transform RootTransform
         {
@@ -130,12 +132,14 @@ namespace Iviz.Controllers.XR
                 return;
             }
 
-            HandleBoneMesh(ref fingerTips[0], cachedHandState.ThumbFingertip);
-            HandleBoneMesh(ref fingerTips[1], cachedHandState.IndexFingertip);
-            HandleBoneMesh(ref fingerTips[2], cachedHandState.Palm);
+            fingerTips[0] = HandleBoneMesh(fingerTips[0], cachedHandState.ThumbFingertip);
+            fingerTips[1] = HandleBoneMesh(fingerTips[1], cachedHandState.IndexFingertip);
+            
+            var palmResource = HandleBoneMesh(fingerTips[2], cachedHandState.Palm);
+            fingerTips[2] = palmResource;
 
-
-            var (palmPosition, palmRotation) = cachedHandState.Palm;
+            //var (palmPosition, palmRotation) = cachedHandState.Palm;
+            var (palmPosition, palmRotation) = palmResource.Transform.AsPose();
 
             const float palmOffset = 0.03f;
             var controllerPosition = palmPosition + palmRotation *
@@ -143,10 +147,11 @@ namespace Iviz.Controllers.XR
             var pivot = cameraTransform.TransformPoint(shoulderToCamera);
             var controllerForward = controllerPosition - pivot;
             var controllerRotation = Quaternion.LookRotation(controllerForward);
-
+            var controllerPose = new Pose(controllerPosition, controllerRotation);
+            
             controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
-            controllerState.position = referenceTransform.InverseTransformPoint(controllerPosition);
-            controllerState.rotation = controllerRotation;
+            (controllerState.position, controllerState.rotation) = 
+                referenceTransform.InverseTransformPose(controllerPose);
 
             HasCursor = Vector3.Dot(palmRotation * Vector3.up, cameraTransform.forward) < 0;
             cachedHandState.Cursor = HasCursor
@@ -214,12 +219,23 @@ namespace Iviz.Controllers.XR
 
             controllerState.ResetFrameDependentStates();
 
+            if (!IsActiveInFrame)
+            {
+                ButtonDown = false;
+                ButtonUp = ButtonState;
+                ButtonState = false;
+                
+                controllerState.selectInteractionState.SetFrameState(false);
+                controllerState.uiPressInteractionState.SetFrameState(false);
+                return;
+            }
+
             if (fingerTips[0] is not { } thumb
                 || fingerTips[1] is not { } index)
             {
                 return;
             }
-
+            
             float distance = Vector3.Distance(thumb.Transform.position, index.Transform.position);
             bool newButtonState = distance < (ButtonState ? distanceTransitionToOpen : distanceTransitionToClose);
 
@@ -230,11 +246,10 @@ namespace Iviz.Controllers.XR
             controllerState.selectInteractionState.SetFrameState(ButtonState);
             controllerState.uiPressInteractionState.SetFrameState(ButtonState);
 
-
             // --------
 
             var color = ButtonState ? Color.white : Color.white.WithAlpha(0.3f);
-            var scale = new Vector3(0.005f, 0.005f, 0.001f) * (ButtonState ? 2 : 1);
+            var scale = 0.005f * (ButtonState ? 2 : 1) * Vector3.one;
 
             thumb.Color = color;
             thumb.Transform.localScale = scale;
@@ -242,20 +257,28 @@ namespace Iviz.Controllers.XR
             index.Transform.localScale = scale;
         }
 
-        void HandleBoneMesh(ref MeshMarkerResource? resource, in Pose pose)
+        MeshMarkerResource HandleBoneMesh(MeshMarkerResource? resource, in Pose pose)
         {
+            MeshMarkerResource result;
             if (resource == null)
             {
-                resource = CreateBoneObject();
+                result = CreateBoneObject();
+                result.transform.SetPose(pose);
+            }
+            else
+            {
+                result = resource;
+                var currentPose = result.transform.AsPose();
+                result.transform.SetPose(currentPose.Lerp(pose, 0.25f)); // TODO: better filtering
             }
 
-            resource.transform.SetPose(pose);
+            return result;
         }
 
         MeshMarkerResource CreateBoneObject()
         {
             var boneObject = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Reticle, RootTransform);
-            boneObject.transform.localScale = new Vector3(0.005f, 0.005f, 0.001f);
+            boneObject.transform.localScale = 0.005f * Vector3.one;
             boneObject.Color = Color.white.WithAlpha(0.3f);
             boneObject.EmissiveColor = Color.blue;
             return boneObject;

@@ -15,6 +15,9 @@ namespace Iviz.Displays.XRDialogs
 {
     public sealed class XRButton : MonoBehaviour, IDisplay, IHasBounds, IRecyclable
     {
+        [SerializeField] string? caption;
+        [SerializeField] ButtonIcon icon;
+        
         [SerializeField] Texture2D[] icons = Array.Empty<Texture2D>();
         [SerializeField] TMP_Text? text;
         [SerializeField] MeshRenderer? iconMeshRenderer;
@@ -22,7 +25,6 @@ namespace Iviz.Displays.XRDialogs
         [SerializeField] BoxCollider? boxCollider;
 
         Color backgroundColor = Resource.Colors.TooltipBackground;
-        ButtonIcon? icon;
         Material? material;
         StaticBoundsControl? boundsControl;
         RoundedPlaneResource? background;
@@ -49,6 +51,7 @@ namespace Iviz.Displays.XRDialogs
             Dialog,
             Up,
             Down,
+            None
         }
 
         public Color BackgroundColor
@@ -66,7 +69,12 @@ namespace Iviz.Displays.XRDialogs
 
         public string Caption
         {
-            set => Text.text = value;
+            get => caption ?? "";
+            set
+            {
+                caption = value;
+                Text.text = value;
+            } 
         }
 
         public bool Visible
@@ -75,15 +83,15 @@ namespace Iviz.Displays.XRDialogs
             set => gameObject.SetActive(value);
         }
 
-        public ButtonIcon? Icon
+        public ButtonIcon Icon
         {
             get => icon;
             set
             {
                 icon = value;
-                if (icon is { } validatedIcon)
+                if (icon != ButtonIcon.None)
                 {
-                    Material.mainTexture = icons[(int)validatedIcon];
+                    Material.mainTexture = icons[(int)icon];
                     IconMeshRenderer.enabled = true;
                 }
                 else
@@ -96,6 +104,7 @@ namespace Iviz.Displays.XRDialogs
         void Awake()
         {
             Icon = Icon;
+            Caption = Caption;
             IconMeshRenderer.material = Material;
             boundsControl = new StaticBoundsControl(this);
             boundsControl.PointerUp += OnClick;

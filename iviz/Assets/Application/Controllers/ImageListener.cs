@@ -305,7 +305,7 @@ namespace Iviz.Controllers
             billboard.ReturnToPool();
 
             imageTexture.Stop();
-            imageTexture.Destroy();
+            imageTexture.Dispose();
 
             node.DestroySelf();
         }

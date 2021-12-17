@@ -20,6 +20,11 @@ namespace Iviz.Core
 {
     public static class UnityUtils
     {
+        /// <summary>
+        ///  Max amount of indices that a mesh can hold with short indices
+        /// </summary>
+        public const int MeshUInt16Threshold = ushort.MaxValue;
+        
         public static readonly CultureInfo Culture = BuiltIns.Culture;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -498,5 +503,13 @@ namespace Iviz.Core
         {
             span.CopyTo(dst.AsSpan());
         }
+        
+        /*
+        public static Pose InverseTransformPose(this Transform transform, in Pose pose)
+        {
+            return transform.AsPose().Inverse().Multiply(pose);
+        }
+        */
+
     }
 }

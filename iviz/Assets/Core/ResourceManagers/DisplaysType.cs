@@ -62,6 +62,7 @@ namespace Iviz.Resources
         public Info<GameObject> Ring { get; }
         public Info<GameObject> SelectionFrame { get; }
         public Info<GameObject> CanvasHolder { get; }
+        public Info<GameObject> PalmCompass { get; }
 
         public DisplaysType()
         {
@@ -94,32 +95,34 @@ namespace Iviz.Resources
             GridMap = new Info<GameObject>(appAssetHolder.GridMap);
             OccupancyGridTextureResource = new Info<GameObject>(appAssetHolder.OccupancyGridTexture);
 
-            Pyramid = new Info<GameObject>(appAssetHolder.Pyramid);
+            Pyramid = new Info<GameObject>(appAssetHolder.Pyramid, nameof(appAssetHolder.Pyramid));
 
-            ARDialog = new Info<GameObject>(appAssetHolder.ARDialog);
-            ARDialogIcon = new Info<GameObject>(appAssetHolder.ARDialogIcon);
-            ARDialogMenu = new Info<GameObject>(appAssetHolder.ARDialogMenu);
-            ARDialogShort = new Info<GameObject>(appAssetHolder.ARDialogShort);
-            ARTfFrame = new Info<GameObject>(appAssetHolder.ARTfFrame);
-            ARDialogNotice = new Info<GameObject>(appAssetHolder.ARDialogNotice);
-            ARButtonDialog = new Info<GameObject>(appAssetHolder.ARButtonDialog);
-            ARMarkerHighlighter = new Info<GameObject>(appAssetHolder.ARMarkerHighlighter);
+            ARDialog = new Info<GameObject>(appAssetHolder.ARDialog, nameof(appAssetHolder.ARDialog));
+            ARDialogIcon = new Info<GameObject>(appAssetHolder.ARDialogIcon, nameof(appAssetHolder.ARDialogIcon));
+            ARDialogMenu = new Info<GameObject>(appAssetHolder.ARDialogMenu, nameof(appAssetHolder.ARDialogMenu));
+            ARDialogShort = new Info<GameObject>(appAssetHolder.ARDialogShort, nameof(appAssetHolder.ARDialogShort));
+            ARTfFrame = new Info<GameObject>(appAssetHolder.ARTfFrame, nameof(appAssetHolder.ARTfFrame));
+            ARDialogNotice = new Info<GameObject>(appAssetHolder.ARDialogNotice, nameof(appAssetHolder.ARDialogNotice));
+            ARButtonDialog = new Info<GameObject>(appAssetHolder.ARButtonDialog, nameof(appAssetHolder.ARButtonDialog));
+            ARMarkerHighlighter = new Info<GameObject>(appAssetHolder.ARMarkerHighlighter,
+                nameof(appAssetHolder.ARMarkerHighlighter));
 
-            RotationDisc = new Info<GameObject>(appAssetHolder.RotationDisc);
-            SpringDisc = new Info<GameObject>(appAssetHolder.SpringDisc);
-            SpringDisc3D = new Info<GameObject>(appAssetHolder.SpringDisc3D);
-            TrajectoryDisc = new Info<GameObject>(appAssetHolder.TrajectoryDisc);
-            Tooltip = new Info<GameObject>(appAssetHolder.Tooltip);
-            TargetArea = new Info<GameObject>(appAssetHolder.TargetArea);
-            PositionDisc3D = new Info<GameObject>(appAssetHolder.PositionDisc3D);
-            PositionDisc = new Info<GameObject>(appAssetHolder.PositionDisc);
+            RotationDisc = new Info<GameObject>(appAssetHolder.RotationDisc, nameof(appAssetHolder.RotationDisc));
+            SpringDisc = new Info<GameObject>(appAssetHolder.SpringDisc, nameof(appAssetHolder.SpringDisc));
+            SpringDisc3D = new Info<GameObject>(appAssetHolder.SpringDisc3D, nameof(appAssetHolder.SpringDisc3D));
+            TrajectoryDisc = new Info<GameObject>(appAssetHolder.TrajectoryDisc, nameof(appAssetHolder.TrajectoryDisc));
+            Tooltip = new Info<GameObject>(appAssetHolder.Tooltip, nameof(appAssetHolder.Tooltip));
+            TargetArea = new Info<GameObject>(appAssetHolder.TargetArea, nameof(appAssetHolder.TargetArea));
+            PositionDisc3D = new Info<GameObject>(appAssetHolder.PositionDisc3D, nameof(appAssetHolder.PositionDisc3D));
+            PositionDisc = new Info<GameObject>(appAssetHolder.PositionDisc, nameof(appAssetHolder.PositionDisc));
 
-            RoundedPlane = new Info<GameObject>(appAssetHolder.RoundedPlane);
-            Leash = new Info<GameObject>(appAssetHolder.Leash);
-            Reticle = new Info<GameObject>(appAssetHolder.Reticle);
-            Ring = new Info<GameObject>(appAssetHolder.Ring);
-            SelectionFrame = new Info<GameObject>(appAssetHolder.SelectionFrame);
-            CanvasHolder = new Info<GameObject>(appAssetHolder.CanvasHolder);
+            RoundedPlane = new Info<GameObject>(appAssetHolder.RoundedPlane, nameof(appAssetHolder.RoundedPlane));
+            Leash = new Info<GameObject>(appAssetHolder.Leash, nameof(appAssetHolder.Leash));
+            Reticle = new Info<GameObject>(appAssetHolder.Reticle, nameof(appAssetHolder.Reticle));
+            Ring = new Info<GameObject>(appAssetHolder.Ring, nameof(appAssetHolder.Ring));
+            SelectionFrame = new Info<GameObject>(appAssetHolder.SelectionFrame, nameof(appAssetHolder.SelectionFrame));
+            CanvasHolder = new Info<GameObject>(appAssetHolder.CanvasHolder, nameof(appAssetHolder.CanvasHolder));
+            PalmCompass = new Info<GameObject>(appAssetHolder.PalmCompass, nameof(appAssetHolder.PalmCompass));
 
             resourceByType = CreateTypeDictionary(this);
         }
@@ -135,7 +138,7 @@ namespace Iviz.Resources
                     continue;
                 }
 
-                var info = (Info<GameObject>?) property.GetValue(o);
+                var info = (Info<GameObject>?)property.GetValue(o);
                 if (info == null)
                 {
                     Debug.LogError("DisplaysType: Property " + property.Name + " has not been set!");
@@ -145,7 +148,7 @@ namespace Iviz.Resources
                 var display = info.Object.GetComponent<IDisplay>();
                 var type = display?.GetType();
                 string? name = type?.FullName;
-                if (name is null || type == null)
+                if (name is null || type is null)
                 {
                     continue;
                 }

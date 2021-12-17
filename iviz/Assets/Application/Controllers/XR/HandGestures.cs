@@ -14,8 +14,8 @@ namespace Iviz.Controllers.XR
         public bool IsHandOpen { get; private set; }
         public bool IsIndexPointing { get; private set; }
 
-        public event Action<HandType>? GestureChanged;
-        public event Action<HandType>? PalmClicked;
+        public event Action? GestureChanged;
+        public event Action? PalmClicked;
 
         public HandGestures(HandType handType) => this.handType = handType;
 
@@ -29,7 +29,7 @@ namespace Iviz.Controllers.XR
                 IsIndexPointing = false;
                 if (hasGesture)
                 {
-                    GestureChanged?.Invoke(handType);
+                    GestureChanged?.Invoke();
                 }
 
                 return;
@@ -79,7 +79,7 @@ namespace Iviz.Controllers.XR
 
             if (triggerStateChanged)
             {
-                GestureChanged?.Invoke(handType);
+                GestureChanged?.Invoke();
             }
 
             bool CheckPalmUp(float threshold) => -state.Palm.up.y > Mathf.Sin(threshold);
@@ -116,12 +116,12 @@ namespace Iviz.Controllers.XR
             else if (!isPalmClicking)
             {
                 isPalmClicking = true;
-                PalmClicked?.Invoke(handType);
+                PalmClicked?.Invoke();
             }
 
             bool CheckPalmClicking() => IsHandOpen &&
                                         Vector3.Distance(
-                                            otherState.IndexFingertip.position, state.Palm.position) < 0.05f;
+                                            otherState.IndexFingertip.position, state.Palm.position) < 0.035f;
         }
     }
 }

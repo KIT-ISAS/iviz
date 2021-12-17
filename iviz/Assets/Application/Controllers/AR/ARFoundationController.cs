@@ -379,7 +379,7 @@ namespace Iviz.Controllers
                 var ray = new Ray(origin, Vector3.down);
                 if (TryGetRaycastHit(ray, out Pose hit))
                 {
-                    Pose pose = WorldPose.WithPosition(hit.position);
+                    var pose = WorldPose.WithPosition(hit.position);
                     InitializeWorldAnchor();
                     SetWorldPose(pose, RootMover.Anchor);
                 }
@@ -529,9 +529,9 @@ namespace Iviz.Controllers
             }
         }
 
-        void TriggerPulse(ClickInfo clickInfo)
+        void TriggerPulse(ClickHitInfo clickHitInfo)
         {
-            if (Visible && clickInfo.TryGetARRaycastResults(out var results))
+            if (Visible && clickHitInfo.TryGetARRaycastResults(out var results))
             {
                 ARController.TriggerPulse(results[0].Position);
             }

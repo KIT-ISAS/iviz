@@ -2,6 +2,7 @@
 
 using System;
 using Iviz.Common;
+using Iviz.Controllers.XR;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Utilities;
 using UnityEngine;
@@ -61,9 +62,34 @@ namespace Iviz.Core
         public const bool IsHololens = true;
         public const bool IsXR = true;
 #else
-        public static bool IsHololens { get; set; }
+        static bool? isHololens;
 
-        public static bool IsXR { get; set; }
+        static bool? isXR;
+
+        static bool TryReadXRInfo()
+        {
+            if (isHololens != null && isXR != null)
+            {
+                return true;
+            }
+
+            if (!GameObject.Find("iviz").TryGetComponent<XRStatusInfo>(out var info))
+            {
+                return false;
+            }
+
+            isHololens = info.IsHololens;
+            isXR = info.IsXREnabled;
+            return true;
+        }
+
+        public static bool IsHololens =>
+            TryReadXRInfo() && (isHololens ??
+                                throw new InvalidOperationException("Could not check if we are running in a Hololens"));
+
+        public static bool IsXR =>
+            TryReadXRInfo() && (isXR ?? throw new InvalidOperationException("Could not check if we are running in XR"));
+
 #endif
 
         public static bool SupportsAR => IsPhone;
@@ -72,6 +98,7 @@ namespace Iviz.Core
         static string? savedFolder;
         static string? bagsFolder;
         static string? simpleConfigurationPath;
+        static string? xrStartConfigurationPath;
         static string? resourcesPath;
         static string? savedRobotsPath;
         static string? resourcesFilePath;
@@ -90,6 +117,8 @@ namespace Iviz.Core
 
         public static string SimpleConfigurationPath =>
             simpleConfigurationPath ??= $"{PersistentDataPath}/connection.json";
+
+        public static string XRStartConfigurationPath => xrStartConfigurationPath ??= $"{PersistentDataPath}/xr_start.json";
 
         public static string ResourcesPath => resourcesPath ??= $"{PersistentDataPath}/resources";
         public static string SavedRobotsPath => savedRobotsPath ??= $"{PersistentDataPath}/robots";

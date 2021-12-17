@@ -63,36 +63,64 @@ namespace Iviz.Controllers.XR
             {
                 Leash.Color = Color.cyan;
                 Leash.Width = interactingWidth;
-                Leash.Set(transformRay, referencePoint);
+                if (draggable.ReferenceNormal is { } referenceNormal)
+                {
+                    Leash.Set(transformRay, referencePoint, referenceNormal);
+                }
+                else
+                {
+                    Leash.Set(transformRay, referencePoint);
+                }
                 return;
             }
 
-            if (Controller.ButtonUp)
+            bool hitExists = TryGetHitInfo(out var hitPosition, out var hitNormal, out bool isUIHitClosest);
+            
+            if (Controller.ButtonUp && !isUIHitClosest)
             {
-                GuiInputModule.TriggerEnvironmentClick(new ClickInfo(transformRay));
+                GuiInputModule.TriggerEnvironmentClick(new ClickHitInfo(transformRay));
             }
 
-            if (Interactor.TryGetHitInfo(out var hitPosition, out var hitNormal, out _, out _))
+            if (hitExists)
             {
                 Leash.Color = Color.white;
                 Leash.Width = hoveringWidth;
-                Leash.Set(transformRay, hitPosition, hitNormal);
+                Leash.Set(transformRay, hitPosition, hitNormal, isUIHitClosest ? 0.01f : 0.001f);
                 return;
             }
-
-            /*
-            if (Physics.Raycast(transformRay, out var hitInfo, 100, LayerType.RaycastLayerMask))
-            {
-                Leash.Color = Color.white;
-                Leash.Width = hoveringWidth;
-                Leash.Set(transformRay, hitInfo.point, hitInfo.normal);
-                return;
-            }
-            */
 
             Leash.Color = Color.white;
             Leash.Width = noHitWidth;
             Leash.Set(transformRay, Transform.TransformPoint(Vector3.forward * noHitLength));
         }
+        
+        public bool TryGetHitInfo(out Vector3 position, out Vector3 normal, out bool isUIHitClosest)
+        {
+            position = default;
+            normal = default;
+
+            if (!Interactor.TryGetCurrentRaycast(
+                    out var raycastHit,
+                    out int raycastHitIndex,
+                    out var raycastResult,
+                    out int raycastResultIndex,
+                    out isUIHitClosest))
+            {
+                return false;
+            }
+
+            if (raycastResult.HasValue && isUIHitClosest)
+            {
+                position = raycastResult.Value.worldPosition;
+                normal = raycastResult.Value.worldNormal;
+            }
+            else if (raycastHit.HasValue)
+            {
+                position = raycastHit.Value.point;
+                normal = raycastHit.Value.normal;
+            }
+
+            return true;
+        }        
     }
 }

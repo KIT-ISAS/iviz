@@ -1,24 +1,32 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
+using Iviz.Controllers.XR;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
 {
     public sealed class ImageDialogData : DialogData
     {
-        [NotNull] readonly ImageDialogContents panel;
-        [NotNull] readonly GameObject canvas;
-        [NotNull] readonly ImageDialogListener listener;
-        
-        public override IDialogPanelContents Panel => panel;
-        public event Action Closed; 
+        readonly ImageDialogContents panel;
+        readonly GameObject canvas;
+        readonly ImageDialogListener listener;
 
-        public ImageDialogData([NotNull] ImageDialogListener listener, Transform holder)
+        public override IDialogPanelContents Panel => panel;
+        public event Action? Closed;
+
+        public ImageDialogData(ImageDialogListener listener, Transform holder)
         {
             this.listener = listener;
             canvas = ResourcePool.Rent(Resource.Widgets.ImageCanvas, holder);
+            if (Settings.IsXR)
+            {
+                canvas.ProcessCanvasForXR();
+            }
+
             panel = canvas.GetComponentInChildren<ImageDialogContents>();
             panel.Closed += () => Closed?.Invoke();
         }

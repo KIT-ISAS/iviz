@@ -295,17 +295,17 @@ namespace Iviz.Controllers
         void UpdateInteractiveMarkerPose(InteractiveMarkerPose msg)
         {
             string id = msg.Name;
-            if (!interactiveMarkers.TryGetValue(id, out InteractiveMarkerObject im))
+            if (!interactiveMarkers.TryGetValue(id, out var interactiveMarker))
             {
                 return;
             }
 
-            im.Set(msg.Header.FrameId, msg.Pose);
+            interactiveMarker.Set(msg.Header.FrameId, msg.Pose);
         }
 
         void DestroyInteractiveMarker(string id)
         {
-            if (!interactiveMarkers.TryGetValue(id, out InteractiveMarkerObject interactiveMarker))
+            if (!interactiveMarkers.TryGetValue(id, out var interactiveMarker))
             {
                 return;
             }
@@ -320,7 +320,7 @@ namespace Iviz.Controllers
             MouseEventType eventType)
         {
             var msg = new InteractiveMarkerFeedback(
-                (feedSeq++, frameId ?? ""),
+                TfListener.CreateHeader(feedSeq++, frameId ?? ""),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
@@ -340,7 +340,7 @@ namespace Iviz.Controllers
         {
             var msg = new InteractiveMarkerFeedback
             (
-                (feedSeq++, frameId ?? ""),
+                TfListener.CreateHeader(feedSeq++, frameId ?? ""),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
@@ -359,7 +359,7 @@ namespace Iviz.Controllers
         {
             var msg = new InteractiveMarkerFeedback
             (
-                (feedSeq++, frameId ?? ""),
+                TfListener.CreateHeader(feedSeq++, frameId ?? ""),
                 ConnectionManager.MyId ?? "",
                 interactiveMarkerId,
                 "",

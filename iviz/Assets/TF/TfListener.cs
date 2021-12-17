@@ -8,11 +8,14 @@ using System.Linq;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
+using Iviz.Tools;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using Transform = UnityEngine.Transform;
@@ -52,7 +55,10 @@ namespace Iviz.Controllers.TF
         readonly TfFrame unityFrame;
 
         public static bool HasInstance => instance != null;
-        public static TfListener Instance => instance ?? throw new NullReferenceException("No TFListener was set!");
+
+        public static TfListener Instance =>
+            instance ?? throw new NullReferenceException("No TFListener has been set!");
+
         public static TfFrame RootFrame => Instance.rootFrame;
         public static TfFrame OriginFrame => Instance.originFrame;
         public static TfFrame UnityFrame => Instance.unityFrame;
@@ -81,50 +87,58 @@ namespace Iviz.Controllers.TF
         {
             instance = this;
 
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
-            unityFrame = Add(CreateFrameObject("TF", null, null));
-            unityFrame.ForceInvisible = true;
-            unityFrame.Visible = false;
-
-            var defaultListener = FrameNode.Instantiate("[.]");
-            unityFrame.AddListener(defaultListener);
-
-            keepAllListenerNode = FrameNode.Instantiate("[TFNode]");
-            staticListenerNode = FrameNode.Instantiate("[TFStatic]");
-            fixedFrameListenerNode = FrameNode.Instantiate("[TFFixedFrame]");
-            defaultListener.transform.parent = unityFrame.Transform;
-
-            rootFrame = Add(CreateFrameObject("/", unityFrame.Transform, unityFrame));
-            rootFrame.ForceInvisible = true;
-            rootFrame.Visible = false;
-            rootFrame.AddListener(defaultListener);
-
-            originFrame = Add(CreateFrameObject(OriginFrameId, rootFrame.Transform, rootFrame));
-            originFrame.Parent = rootFrame;
-            originFrame.ForceInvisible = true;
-            originFrame.Visible = false;
-            originFrame.AddListener(defaultListener);
-            originFrame.ParentCanChange = false;
-
-            mapFrame = Add(CreateFrameObject(MapFrameId, originFrame.Transform, originFrame));
-            mapFrame.Parent = originFrame;
-            mapFrame.AddListener(defaultListener);
-            FixedFrame = mapFrame;
-
-            Publisher = new Sender<TFMessage>(DefaultTopic);
-            TapPublisher = new Sender<PoseStamped>(DefaultTapTopic);
-
-            Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic,
-                PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
-            ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
-
-            Config = config ?? new TfConfiguration
+            try
             {
-                Topic = topic
-            };
+                ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
-            GameThread.LateEveryFrame += LateUpdate;
+                unityFrame = Add(CreateFrameObject("TF", null, null));
+                unityFrame.ForceInvisible = true;
+                unityFrame.Visible = false;
+
+                var defaultListener = FrameNode.Instantiate("[.]");
+                unityFrame.AddListener(defaultListener);
+
+                keepAllListenerNode = FrameNode.Instantiate("[TFNode]");
+                staticListenerNode = FrameNode.Instantiate("[TFStatic]");
+                fixedFrameListenerNode = FrameNode.Instantiate("[TFFixedFrame]");
+                defaultListener.transform.parent = unityFrame.Transform;
+
+                rootFrame = Add(CreateFrameObject("/", unityFrame.Transform, unityFrame));
+                rootFrame.ForceInvisible = true;
+                rootFrame.Visible = false;
+                rootFrame.AddListener(defaultListener);
+
+                originFrame = Add(CreateFrameObject(OriginFrameId, rootFrame.Transform, rootFrame));
+                originFrame.Parent = rootFrame;
+                originFrame.ForceInvisible = true;
+                originFrame.Visible = false;
+                originFrame.AddListener(defaultListener);
+                originFrame.ParentCanChange = false;
+
+                mapFrame = Add(CreateFrameObject(MapFrameId, originFrame.Transform, originFrame));
+                mapFrame.Parent = originFrame;
+                mapFrame.AddListener(defaultListener);
+                FixedFrame = mapFrame;
+
+                Publisher = new Sender<TFMessage>(DefaultTopic);
+                TapPublisher = new Sender<PoseStamped>(DefaultTapTopic);
+
+                Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic,
+                    PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
+                ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
+
+                Config = config ?? new TfConfiguration
+                {
+                    Topic = topic
+                };
+
+                GameThread.LateEveryFrame += LateUpdate;
+            }
+            catch (Exception)
+            {
+                instance = null;
+                throw;
+            }
         }
 
         public static string FixedFrameId
@@ -396,7 +410,7 @@ namespace Iviz.Controllers.TF
             return Instance.TryGetFrameImpl(id, out frame);
         }
 
-        public static string ResolveFrameId(string frameId)
+        static string ResolveFrameId(string frameId)
         {
             if (string.IsNullOrEmpty(frameId))
             {
@@ -423,11 +437,6 @@ namespace Iviz.Controllers.TF
                 ? $"{ConnectionManager.MyId[1..]}/{frameIdSuffix}"
                 : $"{ConnectionManager.MyId}/{frameIdSuffix}";
         }
-
-        /*
-        public static TfFrame ResolveFrame(string frameId, FrameNode? listener = null) =>
-            GetOrCreateFrame(ResolveFrameId(frameId), listener);
-            */
 
         public static TfFrame GetOrCreateFrame(string frameId, FrameNode? listener = null)
         {
@@ -538,6 +547,7 @@ namespace Iviz.Controllers.TF
         {
             ProcessMessages();
             ProcessWorldOffset();
+            DoPublish();
         }
 
         public void Dispose()
@@ -586,32 +596,43 @@ namespace Iviz.Controllers.TF
         public static void Publish(string childFrame, in Msgs.GeometryMsgs.Transform rosTransform) =>
             Publish(FixedFrameId, childFrame, rosTransform);
 
+        static readonly ConcurrentBag<TransformStamped> MessagesToPublish = new();
+
         public static void Publish(string? parentFrame, string childFrame, in Msgs.GeometryMsgs.Transform rosTransform)
         {
-            if (instance == null)
+            MessagesToPublish.Add(new TransformStamped(CreateHeader(tfSeq++, parentFrame ?? FixedFrameId),
+                ResolveFrameId(childFrame), rosTransform));
+        }
+
+        static void DoPublish()
+        {
+            int count = MessagesToPublish.Count;
+            if (count == 0)
             {
                 return;
             }
 
-            var msg = new TFMessage
-            (
-                new[]
-                {
-                    new TransformStamped(
-                        (tfSeq++, parentFrame ?? FixedFrameId),
-                        ResolveFrameId(childFrame),
-                        rosTransform)
-                }
-            );
+            var messages = new TransformStamped[count];
+            foreach (int i in ..count)
+            {
+                MessagesToPublish.TryTake(out messages[i]);
+            }
 
+            var tfMessage = new TFMessage(messages);
             if (ConnectionManager.IsConnected)
             {
-                Instance.Publisher.Publish(msg);
+                Instance.Publisher.Publish(tfMessage);
             }
             else
             {
-                Instance.HandlerNonStatic(msg, null);
+                Instance.HandlerNonStatic(tfMessage, null);
             }
         }
+
+        /// <summary>
+        /// Creates a header using the frame start as the timestamp.
+        /// </summary>
+        public static Header CreateHeader(uint seqId, string? frameId = null) =>
+            new(seqId, GameThread.TimeNow, frameId ?? FixedFrameId);
     }
 }

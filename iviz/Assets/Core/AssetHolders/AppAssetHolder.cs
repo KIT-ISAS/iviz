@@ -70,6 +70,7 @@ namespace Iviz.Displays
         public GameObject Reticle;
         public GameObject SelectionFrame;
         public GameObject CanvasHolder;
+        public GameObject PalmCompass;
 
         public AudioClip Click;
         public AudioClip Screenshot;

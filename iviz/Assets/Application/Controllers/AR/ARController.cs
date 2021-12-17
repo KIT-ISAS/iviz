@@ -1,12 +1,14 @@
 ﻿#nullable enable
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
 using System.Threading;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
+using Iviz.Controllers.XR;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
@@ -89,6 +91,25 @@ namespace Iviz.Controllers
         public static bool IsActive => Instance != null;
         public static ARFoundationController? Instance { get; protected set; }
         public static bool IsVisible => Instance != null && Instance.Visible;
+        public static bool IsXRVisible => Settings.IsHololens || IsVisible;
+
+        public static bool TryGetMeshManager([NotNullWhen(true)] out ARMeshManager? meshManager)
+        {
+            if (Instance != null)
+            {
+                meshManager = Instance.MeshManager;
+                return meshManager != null;
+            }
+
+            if (XRController.Instance != null)
+            {
+                meshManager = XRController.Instance.MeshManager;
+                return meshManager != null;
+            }
+
+            meshManager = null;
+            return false;
+        }
 
         readonly ARConfiguration config = new();
         readonly MarkerDetector detector = new();

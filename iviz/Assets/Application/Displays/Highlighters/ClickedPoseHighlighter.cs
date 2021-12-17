@@ -47,7 +47,8 @@ namespace Iviz.Displays.Highlighters
             tooltip.PointToCamera();
 
             using var description = BuilderPool.Rent();
-            RosUtils.FormatPose(unityPose, description, RosUtils.PoseFormat.OnlyPosition, 2);
+            RosUtils.FormatPose(TfListener.RelativeToFixedFrame(unityPose), description,
+                RosUtils.PoseFormat.OnlyPosition, 2);
             tooltip.SetCaption(description);
         }
 

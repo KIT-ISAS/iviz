@@ -124,6 +124,8 @@ namespace Iviz.Displays
         {
             Caption = "";
             EmissiveColor = Color.black;
+            Color = Resource.Colors.TooltipBackground;
+            CaptionColor = Color.white;
         }
 
         void IRecyclable.SplitForRecycle()

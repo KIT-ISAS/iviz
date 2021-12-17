@@ -71,7 +71,7 @@ namespace Iviz.Resources
                 {GuiArray.RosMessageType, ModuleType.GuiDialog},
             }.AsReadOnly();
 
-        public static readonly ColorScheme Colors = new();
+        public static readonly ColorSchema Colors = new();
 
         public static MaterialsType Materials => materials ??= new MaterialsType();
         public static ColormapsType Colormaps => colormaps ??= new ColormapsType();

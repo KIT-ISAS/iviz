@@ -92,14 +92,14 @@ namespace Iviz.Controllers
                 && lastColor != null
                 && (GameThread.Now - lastColor.Timestamp.ToDateTime()).TotalMilliseconds < reuseCaptureAgeInMs)
             {
-                return ValueTask2.FromResult((Screenshot?)lastColor);
+                return new ValueTask<Screenshot?>(lastColor);
             }
 
             token.ThrowIfCancellationRequested();
 
             if (!cameraManager.TryAcquireLatestCpuImage(out XRCpuImage image))
             {
-                return ValueTask2.FromResult((Screenshot?)null);
+                return default; // completed, null
             }
 
             var conversionParams = new XRCpuImage.ConversionParams
@@ -133,8 +133,8 @@ namespace Iviz.Controllers
                     byte[] bytes = new byte[array.Length];
                     NativeArray<byte>.Copy(array, bytes, array.Length);
 
-                    var screenshot = new Screenshot(ScreenshotFormat.Rgb, width, height, Intrinsic.Scale(0.5f), pose,
-                        bytes);
+                    var screenshot = new Screenshot(ScreenshotFormat.Rgb, GameThread.TimeNow, width, height,
+                        Intrinsic.Scale(0.5f), pose, bytes);
                     lastColor = screenshot;
                     task.TrySetResult(screenshot);
                 });
@@ -151,20 +151,20 @@ namespace Iviz.Controllers
                 && lastDepth != null
                 && (GameThread.Now - lastDepth.Timestamp.ToDateTime()).TotalMilliseconds < reuseCaptureAgeInMs)
             {
-                return ValueTask2.FromResult((Screenshot?)lastDepth);
+                return new ValueTask<Screenshot?>(lastDepth);
             }
 
             token.ThrowIfCancellationRequested();
 
             if (occlusionManager.requestedEnvironmentDepthMode == EnvironmentDepthMode.Disabled)
             {
-                return ValueTask2.FromResult((Screenshot?)null);
+                return default; // completed, null
             }
 
             if (!occlusionManager.TryAcquireEnvironmentDepthCpuImage(out XRCpuImage image))
             {
                 RosLogger.Info($"{this}: Depth capture failed.");
-                return ValueTask2.FromResult((Screenshot?)null);
+                return default; // completed, null
             }
 
             var conversionParams = new XRCpuImage.ConversionParams
@@ -202,8 +202,8 @@ namespace Iviz.Controllers
                     NativeArray<byte>.Copy(array, bytes, array.Length);
 
                     float scale = colorWidth == null ? 1 : width / (float)colorWidth.Value;
-                    var screenshot = new Screenshot(ScreenshotFormat.Float, width, height, Intrinsic.Scale(scale), pose,
-                        bytes);
+                    var screenshot = new Screenshot(ScreenshotFormat.Float, GameThread.TimeNow, width, height,
+                        Intrinsic.Scale(scale), pose, bytes);
                     Task.Run(() =>
                     {
                         MirrorX<float>(screenshot.Bytes, screenshot.Width, screenshot.Height);
@@ -224,20 +224,20 @@ namespace Iviz.Controllers
                 && lastConfidence != null
                 && (GameThread.Now - lastConfidence.Timestamp.ToDateTime()).TotalMilliseconds < reuseCaptureAgeInMs)
             {
-                return ValueTask2.FromResult((Screenshot?)lastConfidence);
+                return new ValueTask<Screenshot?>(lastConfidence);
             }
 
             token.ThrowIfCancellationRequested();
 
             if (occlusionManager.requestedEnvironmentDepthMode == EnvironmentDepthMode.Disabled)
             {
-                return ValueTask2.FromResult((Screenshot?)null);
+                return default; // completed, null
             }
 
             if (!occlusionManager.TryAcquireEnvironmentDepthConfidenceCpuImage(out XRCpuImage image))
             {
                 RosLogger.Info($"{this}: Depth capture failed.");
-                return ValueTask2.FromResult((Screenshot?)null);
+                return default; // completed, null
             }
 
             var conversionParams = new XRCpuImage.ConversionParams
@@ -277,8 +277,8 @@ namespace Iviz.Controllers
                     NativeArray<byte>.Copy(array, bytes, array.Length);
 
                     float scale = colorWidth == null ? 1 : width / (float)colorWidth.Value;
-                    var screenshot = new Screenshot(ScreenshotFormat.Mono8, width, height, Intrinsic.Scale(scale), pose,
-                        bytes);
+                    var screenshot = new Screenshot(ScreenshotFormat.Mono8, GameThread.TimeNow, width, height,
+                        Intrinsic.Scale(scale), pose, bytes);
                     Task.Run(() =>
                     {
                         MirrorX<byte>(screenshot.Bytes, screenshot.Width, screenshot.Height);
@@ -291,7 +291,7 @@ namespace Iviz.Controllers
             return task.Task.AsValueTask();
         }
 
-        static void MirrorX<T>(byte[] bytes, int width, int height) where T : unmanaged
+        static void MirrorX<T>(Span<byte> bytes, int width, int height) where T : unmanaged
         {
             if (bytes == null)
             {

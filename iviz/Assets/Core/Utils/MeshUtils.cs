@@ -122,7 +122,17 @@ namespace Iviz.Core
             mesh.SetUVs(channel, ps.Array, 0, ps.Length);
         }
 
+        public static void SetUVs(this Mesh mesh, in NativeArray<Vector2> ps, int channel = 0)
+        {
+            mesh.SetUVs(channel, ps);
+        }
+
         public static void SetTriangles(this Mesh mesh, ReadOnlySpan<int> ps, int subMesh = 0)
+        {
+            mesh.SetIndices(ps, MeshTopology.Triangles, subMesh);
+        }
+
+        public static void SetTriangles(this Mesh mesh, NativeArray<int> ps, int subMesh = 0)
         {
             mesh.SetIndices(ps, MeshTopology.Triangles, subMesh);
         }

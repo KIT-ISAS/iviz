@@ -210,7 +210,7 @@ namespace Iviz.Controllers
                 {
                     string frameId = string.IsNullOrEmpty(AttachToFrame) ? TfListener.FixedFrameId : AttachToFrame;
                     var twistStamped = new TwistStamped(
-                        (twistSeq++, frameId),
+                        TfListener.CreateHeader(twistSeq++, frameId),
                         twist
                     );
                     SenderTwist.Publish(twistStamped);
@@ -228,7 +228,7 @@ namespace Iviz.Controllers
 
                 string frameId = string.IsNullOrEmpty(AttachToFrame) ? TfListener.FixedFrameId : AttachToFrame;
                 var joy = new Joy(
-                    (joySeq++, frameId),
+                    TfListener.CreateHeader(joySeq++, frameId),
                     new[] { leftDir.x, leftDir.y, rightDir.x, rightDir.y },
                     Array.Empty<int>()
                 );

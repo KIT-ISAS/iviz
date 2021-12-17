@@ -228,6 +228,7 @@ namespace Iviz.Displays
 
         protected override void Awake()
         {
+            Mesh.MarkDynamic();
             MeshFilter.sharedMesh = Mesh;
             MeshRenderer.SetPropertyBlock(Properties);
 
@@ -312,6 +313,7 @@ namespace Iviz.Displays
             {
                 enabled = false;
                 MeshRenderer.enabled = false;
+                Mesh.Clear();
                 CalculateBoundsEmpty();
                 return;
             }
@@ -333,12 +335,12 @@ namespace Iviz.Displays
                 return MaterialOverride;
             }
 
-            return UseColormap switch
+            return (UseColormap, UsesAlpha) switch
             {
-                true when !UsesAlpha => Resource.Materials.LineSimpleWithColormap.Object,
-                true => Resource.Materials.TransparentLineSimpleWithColormap.Object,
-                false when !UsesAlpha => Resource.Materials.LineSimple.Object,
-                false => Resource.Materials.TransparentLineSimple.Object
+                (true, false) => Resource.Materials.LineSimpleWithColormap.Object,
+                (true, true) => Resource.Materials.TransparentLineSimpleWithColormap.Object,
+                (false, false) => Resource.Materials.LineSimple.Object,
+                (false, true) => Resource.Materials.TransparentLineSimple.Object
             };
         }
 

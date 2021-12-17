@@ -129,8 +129,8 @@ namespace Iviz.Displays
             EmissiveColor = emissiveColor;
             Tint = tint;
             
-            Metallic = 0.2f;
-            Smoothness = 0.2f;
+            Metallic = 0.5f;
+            Smoothness = 0.5f;
 
             MainRenderer.ResetPropertyTextureScale();
         }

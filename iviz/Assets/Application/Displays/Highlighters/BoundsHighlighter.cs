@@ -45,7 +45,7 @@ namespace Iviz.Displays.Highlighters
 
             if (holder.Caption is { } caption)
             {
-                tooltip = ResourcePool.RentDisplay<Tooltip>(nodeTransform);
+                tooltip = ResourcePool.RentDisplay<Tooltip>();
                 tooltip.CaptionColor = Color.white;
                 tooltip.Color = Resource.Colors.TooltipBackground;
                 tooltip.Layer = LayerType.IgnoreRaycast;
@@ -76,9 +76,9 @@ namespace Iviz.Displays.Highlighters
                 return;
             }
 
-            float labelSize = Tooltip.GetRecommendedSize(transform.position);
             var worldBounds = bounds.TransformBound(transform.AsPose(), transform.lossyScale);
-            tooltip.AbsoluteScale = labelSize;
+            float labelSize = Tooltip.GetRecommendedSize(transform.position);
+            tooltip.Scale = labelSize;
             tooltip.Transform.position = worldBounds.center +
                                          2f * (worldBounds.size.y * 0.3f + labelSize) * Vector3.up;
         }

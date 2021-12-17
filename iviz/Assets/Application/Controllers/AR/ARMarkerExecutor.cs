@@ -17,11 +17,9 @@ namespace Iviz.Controllers
 {
     public sealed class ARMarkerExecutor
     {
-        readonly Dictionary<(ARMarkerType, string), ARExecutableMarker> markers =
-            new Dictionary<(ARMarkerType, string), ARExecutableMarker>();
+        readonly Dictionary<(ARMarkerType, string), ARExecutableMarker> markers = new();
 
-        readonly Dictionary<(ARMarkerType, string), ARTfFrame> frames =
-            new Dictionary<(ARMarkerType, string), ARTfFrame>();
+        readonly Dictionary<(ARMarkerType, string), ARTfFrame> frames = new();
 
         [CanBeNull] ARExecutableMarker lastSeen;
         float maxMarkerDistanceInM = 0.5f;
@@ -67,7 +65,7 @@ namespace Iviz.Controllers
         [NotNull]
         public ARMarkersConfiguration Configuration
         {
-            get => new ARMarkersConfiguration
+            get => new()
             {
                 MaxMarkerDistanceInM = maxMarkerDistanceInM, Markers = markers.Values.ToArray()
             };

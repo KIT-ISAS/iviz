@@ -4,6 +4,7 @@ using System;
 using Iviz.Core;
 using Iviz.Tools;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Iviz.Displays
 {
@@ -12,8 +13,6 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class MeshTrianglesResource : MeshMarkerResource
     {
-        const int MaxVerticesShort = 65000;
-
         public bool FlipWinding { get; set; }
 
         Mesh? mesh;
@@ -34,9 +33,9 @@ namespace Iviz.Displays
 
         Mesh EnsureOwnMesh(int numPointsNeeded)
         {
-            var indexFormat = numPointsNeeded >= MaxVerticesShort
-                ? UnityEngine.Rendering.IndexFormat.UInt32
-                : UnityEngine.Rendering.IndexFormat.UInt16;
+            var indexFormat = numPointsNeeded <= UnityUtils.MeshUInt16Threshold
+                ? IndexFormat.UInt16
+                : IndexFormat.UInt32;
 
             if (mesh != null)
             {

@@ -22,14 +22,16 @@ namespace Iviz.Displays.XRDialogs
         Transform? mTransform;
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         public float? Damping { get; set; } = 0.1f;
-
+        public event Action<int>? Clicked;
+        
+        public virtual bool Visible
+        {
+            get => gameObject.activeSelf;
+            set => gameObject.SetActive(value);
+        }
+        
         void Awake()
         {
-            foreach (var button in buttons)
-            {
-                button.Transform.SetParentLocal(Transform);
-            }
-
             if (draggableObject != null)
             {
                 var draggable = draggableObject.GetComponent<IDraggable>();
@@ -43,9 +45,13 @@ namespace Iviz.Displays.XRDialogs
             float radius = (0.5f + padding) * scale * buttons.Length / angleOpening;
             float delta = (buttons.Length - 1) / 2f;
 
-            foreach (var (button, i) in buttons.WithIndex())
+            foreach (var (button, index) in buttons.WithIndex())
             {
-                float a = (i - delta) / delta * angleOpening / 2 + Mathf.PI / 2;
+                button.Transform.SetParentLocal(Transform);
+                button.Clicked += () => Clicked?.Invoke(index);
+
+                int reverseIndex = buttons.Length - 1 - index; // 0-180 is right to left, we need left to right
+                float a = (reverseIndex - delta) / delta * angleOpening / 2 + Mathf.PI / 2;
                 button.Transform.localScale = scale * Vector3.one;
                 button.Transform.localPosition = radius * new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0);
             }

@@ -73,7 +73,7 @@ namespace Iviz.App
                 panel.Active = false;
             }
 
-            transform.ProcessCanvasForXR();
+            this.ProcessCanvasForXR();
 
             Active = true;
             gameObject.SetActive(true);

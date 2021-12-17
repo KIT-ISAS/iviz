@@ -18,11 +18,11 @@ namespace Iviz.Common
         public Pose CameraPose { get; }
         public byte[] Bytes { get; }
 
-        public Screenshot(ScreenshotFormat format, int width, int height, Intrinsic intrinsic, in Pose cameraPose,
+        public Screenshot(ScreenshotFormat format, time timestamp, int width, int height, Intrinsic intrinsic, in Pose cameraPose,
             byte[] bytes)
         {
             Format = format;
-            Timestamp = time.Now();
+            Timestamp = timestamp;
             Width = width;
             Height = height;
             Bpp = BppFromFormat(format);
