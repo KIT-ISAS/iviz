@@ -103,7 +103,7 @@ namespace Iviz.Controllers
                 }
                 else if (!value && SenderJoy != null)
                 {
-                    SenderJoy.Stop();
+                    SenderJoy.Dispose();
                     SenderJoy = null;
                 }
             }
@@ -121,7 +121,7 @@ namespace Iviz.Controllers
                 }
                 else if (!value && SenderTwist != null)
                 {
-                    SenderTwist.Stop();
+                    SenderTwist.Dispose();
                     SenderTwist = null;
                 }
             }
@@ -149,8 +149,8 @@ namespace Iviz.Controllers
 
         public void Dispose()
         {
-            SenderJoy?.Stop();
-            SenderTwist?.Stop();
+            SenderJoy?.Dispose();
+            SenderTwist?.Dispose();
             Visible = false;
         }
 
@@ -162,7 +162,7 @@ namespace Iviz.Controllers
         {
             if (SenderJoy != null && SenderJoy.Topic != config.JoyTopic)
             {
-                SenderJoy.Stop();
+                SenderJoy.Dispose();
                 SenderJoy = null;
             }
 
@@ -178,7 +178,7 @@ namespace Iviz.Controllers
             if (SenderTwist != null &&
                 (SenderTwist.Topic != config.TwistTopic || SenderTwist.Type != twistType))
             {
-                SenderTwist.Stop();
+                SenderTwist.Dispose();
                 SenderTwist = null;
             }
 

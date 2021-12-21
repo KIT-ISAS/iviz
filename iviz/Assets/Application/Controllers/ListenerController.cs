@@ -22,7 +22,7 @@ namespace Iviz.Controllers
 
         public virtual void Dispose()
         {
-            Listener.Stop();
+            Listener.Dispose();
         }
 
         public virtual void ResetController()

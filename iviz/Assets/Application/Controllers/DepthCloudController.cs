@@ -168,7 +168,7 @@ namespace Iviz.Controllers
 
                 if (ColorListener != null)
                 {
-                    ColorListener.Stop();
+                    ColorListener.Dispose();
                     ColorListener = null;
                 }
 
@@ -210,10 +210,10 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                DepthListener?.Stop();
+                DepthListener?.Dispose();
                 DepthListener = null;
 
-                depthInfoListener?.Stop();
+                depthInfoListener?.Dispose();
                 depthInfoListener = null;
 
                 string depthTopic = value.Trim();
@@ -438,8 +438,8 @@ namespace Iviz.Controllers
 
         public void Dispose()
         {
-            ColorListener?.Stop();
-            DepthListener?.Stop();
+            ColorListener?.Dispose();
+            DepthListener?.Dispose();
 
             projector.ReturnToPool();
             node.DestroySelf();

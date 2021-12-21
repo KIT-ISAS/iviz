@@ -222,7 +222,7 @@ namespace Iviz.Controllers
             }
 
             interactiveMarkers.Clear();
-            Publisher?.Stop();
+            Publisher?.Dispose();
 
             node.DestroySelf();
         }

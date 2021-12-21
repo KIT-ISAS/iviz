@@ -75,7 +75,7 @@ namespace Iviz.App
                     return;
                 }
 
-                listener.Stop();
+                listener.Dispose();
             }
 
             listener = csType == typeof(DynamicMessage)
@@ -121,7 +121,7 @@ namespace Iviz.App
             {
                 if (i == 0)
                 {
-                    listener?.Stop();
+                    listener?.Dispose();
                     listener = null;
                     return;
                 }

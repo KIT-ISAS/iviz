@@ -513,14 +513,14 @@ namespace Iviz.Controllers
 
             GuiInputModule.Instance.UpdateQualityLevel();
 
-            MarkerSender?.Stop();
+            MarkerSender?.Dispose();
             detector.Dispose();
             MarkerExecutor.Stop();
 
-            ColorInfoSender?.Stop();
-            ColorSender?.Stop();
-            DepthSender?.Stop();
-            DepthConfidenceSender?.Stop();
+            ColorInfoSender?.Dispose();
+            ColorSender?.Dispose();
+            DepthSender?.Dispose();
+            DepthConfidenceSender?.Dispose();
         }
 
         void IController.ResetController()
