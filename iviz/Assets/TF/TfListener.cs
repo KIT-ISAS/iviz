@@ -552,9 +552,9 @@ namespace Iviz.Controllers.TF
 
         public void Dispose()
         {
-            Listener.Stop();
-            ListenerStatic.Stop();
-            Publisher.Stop();
+            Listener.Dispose();
+            ListenerStatic.Dispose();
+            Publisher.Dispose();
 
             GameThread.LateEveryFrame -= LateUpdate;
             staticListenerNode.DestroySelf();
