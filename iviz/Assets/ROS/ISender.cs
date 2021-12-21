@@ -12,7 +12,7 @@ namespace Iviz.Ros
         internal int Id { get; }
         RosSenderStats Stats { get; }
         int NumSubscribers { get; }
-        void Stop();
+        void Dispose();
         void Publish(IMessage msg);
         void WriteDescriptionTo(StringBuilder description);
     }

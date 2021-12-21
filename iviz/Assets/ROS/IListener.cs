@@ -6,7 +6,8 @@ using Iviz.Roslib;
 namespace Iviz.Ros
 {
     /// <summary>
-    /// Wrapper around a ROS subscriber.
+    /// A wrapper around a <see cref="RosSubscriber{T}"/> that persists even if the connection is interrupted.
+    /// After a connection is reestablished, the data in this listener is used to resubscribe transparently.
     /// </summary>
     public interface IListener
     {
@@ -14,12 +15,25 @@ namespace Iviz.Ros
         string Type { get; }
         RosTransportHint TransportHint { get; set; }
         RosListenerStats Stats { get; }
-        (int active, int total) NumPublishers { get; }
-        int MaxQueueSize { set; }
         bool Subscribed { get; }
-        void Stop();
+        
+        void Dispose();
+        
+        /// <summary>
+        /// Sets the suspended state of the listener.
+        /// If suspended, the topic will be unsubscribed. If unsuspended, the topic will be resubscribed.  
+        /// </summary>        
         void SetSuspend(bool value);
+        
+        /// <summary>
+        /// Unsubscribes and resubscribes from the topic.
+        /// </summary>
         void Reset();
+        
+        /// <summary>
+        /// Sets the paused state of the subscriber.
+        /// When paused, the subscriber will still receive data, but will not parse it or generate a message. 
+        /// </summary>      
         void SetPause(bool value);
         void WriteDescriptionTo(StringBuilder b);
     }

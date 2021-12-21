@@ -45,19 +45,18 @@ namespace Iviz.Ros
         public async ValueTask AdvertiseAsync(RosClient? client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            string fullService = service[0] == '/' ? service : $"{client?.CallerId}/{service}";
             if (client != null)
             {
                 foreach (int t in ..NumRetries)
                 {
                     try
                     {
-                        await client.AdvertiseServiceAsync(fullService, callCallback, token);
+                        await client.AdvertiseServiceAsync(service, callCallback, token);
                         break;
                     }
                     catch (RoslibException e)
                     {
-                        RosLogger.Error($"Failed to advertise service (try {t.ToString()}): ", e);
+                        RosLogger.Error($"{this}: Failed to advertise service (try {t.ToString()}): ", e);
                         await Task.Delay(WaitBetweenRetriesInMs, token);
                     }
                 }

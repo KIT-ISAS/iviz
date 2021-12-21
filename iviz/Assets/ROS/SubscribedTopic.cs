@@ -19,6 +19,7 @@ namespace Iviz.Ros
         readonly string topic;
         readonly RosTransportHint transportHint;
 
+        Listener<T>[] listenerCache = Array.Empty<Listener<T>>();
         BagListener? bagListener;
         string? subscriberId;
         string? bagId;
@@ -34,11 +35,13 @@ namespace Iviz.Ros
         public void Add(IListener subscriber)
         {
             listeners.Add((Listener<T>)subscriber);
+            listenerCache = listeners.ToArray();
         }
 
         public void Remove(IListener subscriber)
         {
             listeners.Remove((Listener<T>)subscriber);
+            listenerCache = listeners.ToArray();
         }
 
         public async ValueTask SubscribeAsync(RosClient? client, IListener? listener, CancellationToken token)
@@ -68,7 +71,7 @@ namespace Iviz.Ros
                     }
                     catch (RoslibException e)
                     {
-                        RosLogger.Error($"Failed to subscribe to service (try {t.ToString()}): ", e);
+                        RosLogger.Error($"{this}: Failed to subscribe to topic (try {t.ToString()}): ", e);
                         await Task.Delay(WaitBetweenRetriesInMs, token);
                     }
                 }
@@ -135,7 +138,8 @@ namespace Iviz.Ros
 
         void Callback(in T msg, IRosReceiver receiver)
         {
-            foreach (var listener in listeners)
+            var cache = listenerCache;
+            foreach (var listener in cache)
             {
                 try
                 {
@@ -148,9 +152,6 @@ namespace Iviz.Ros
             }
         }
 
-        public override string ToString()
-        {
-            return $"[SubscribedTopic '{topic}']";
-        }
+        public override string ToString() => $"[SubscribedTopic '{topic}']";
     }
 }

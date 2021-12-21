@@ -42,7 +42,7 @@ namespace Iviz.Ros
             Publish((T)msg);
         }
 
-        public void Stop()
+        public void Dispose()
         {
             GameThread.EverySecond -= UpdateStats;
             Connection.Unadvertise(this);

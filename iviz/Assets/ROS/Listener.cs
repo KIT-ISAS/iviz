@@ -12,6 +12,11 @@ using Iviz.Tools;
 
 namespace Iviz.Ros
 {
+    /// <summary>
+    /// A wrapper around a <see cref="RosSubscriber{T}"/> that persists even if the connection is interrupted.
+    /// After a connection is reestablished, this listener is used to resubscribe transparently.
+    /// </summary>
+    /// <typeparam name="T">The ROS message type</typeparam>
     public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
     {
         static RoslibConnection Connection => ConnectionManager.Connection;
@@ -49,7 +54,7 @@ namespace Iviz.Ros
                 Reset();
             }
         }
-        
+
         Listener(string topic, RosTransportHint transportHint)
         {
             if (string.IsNullOrWhiteSpace(topic))
@@ -66,6 +71,13 @@ namespace Iviz.Ros
             GameThread.EverySecond += UpdateStats;
         }
 
+        /// <summary>
+        /// Creates a listener with an asynchronous handler.
+        /// Messages will be put in a queue and the callback will only be executed on the game thread. 
+        /// </summary>
+        /// <param name="topic">The topic to subscribe to</param>
+        /// <param name="handler">The callback to execute in the game thread if a message is available</param>
+        /// <param name="transportHint">Tells the subscriber which protocol is preferred</param>
         public Listener(string topic, Action<T> handler,
             RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
         {
@@ -76,6 +88,19 @@ namespace Iviz.Ros
             Subscribed = true;
         }
 
+        /// <summary>
+        /// Creates a listener with a synchronous handler.
+        /// The callback will be executed as soon as a message arrives.
+        /// </summary>
+        /// <param name="topic">The topic to subscribe to</param>
+        /// <param name="handler">
+        /// The callback to execute as soon as a message is available.
+        /// It accepts a message of type <see cref="T"/> and an <see cref="IRosReceiver"/> which contains information
+        /// about the connection where the message was received.  
+        /// It returns a boolean which indicates whether the message was processed.
+        /// This is only used for logging purposes.
+        /// </param>
+        /// <param name="transportHint">Tells the subscriber which protocol is preferred</param>
         public Listener(string topic, Func<T, IRosReceiver, bool> handler,
             RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
         {
@@ -85,6 +110,17 @@ namespace Iviz.Ros
             Subscribed = true;
         }
 
+        /// <summary>
+        /// Creates a listener with a synchronous handler.
+        /// The callback will be executed as soon as a message arrives.
+        /// </summary>
+        /// <param name="topic">The topic to subscribe to</param>
+        /// <param name="handler">
+        /// The callback to execute as soon as a message is available.
+        /// It returns a boolean which indicates whether the message was processed.
+        /// This is only used for logging purposes.
+        /// </param>
+        /// <param name="transportHint">Tells the subscriber which protocol is preferred</param>
         public Listener(string topic, Func<T, bool> handler,
             RosTransportHint transportHint = RosTransportHint.PreferTcp) :
             this(topic, (t, _) => handler(t), transportHint)
@@ -98,7 +134,7 @@ namespace Iviz.Ros
         {
         }
 
-        public void Stop()
+        public void Dispose()
         {
             GameThread.EverySecond -= UpdateStats;
             if (callbackInGameThread)
@@ -110,6 +146,9 @@ namespace Iviz.Ros
             Unsubscribe();
         }
 
+        /// <summary>
+        /// Unsubscribes from the topic.
+        /// </summary>
         public void Unsubscribe()
         {
             if (!Subscribed)
@@ -121,6 +160,9 @@ namespace Iviz.Ros
             Subscribed = false;
         }
 
+        /// <summary>
+        /// Subscribes to the topic.
+        /// </summary>
         public void Subscribe()
         {
             if (Subscribed)
@@ -164,6 +206,12 @@ namespace Iviz.Ros
 
             if (callbackInGameThread)
             {
+                if (messageQueue.Count >= MaxQueueSize)
+                {
+                    messageQueue.TryDequeue(out _);
+                    Interlocked.Increment(ref droppedMsgCounter);
+                }
+
                 messageQueue.Enqueue(msg);
                 return;
             }
@@ -179,12 +227,15 @@ namespace Iviz.Ros
             }
 
             tmpMessageBag.Clear();
-            while (messageQueue.TryDequeue(out T t))
+
+            int messageCount = messageQueue.Count;
+            foreach (int _ in ..messageCount) // copy a fixed amount, in case messages are still being added
             {
+                messageQueue.TryDequeue(out T t);
                 tmpMessageBag.Add(t);
             }
 
-            int start = Math.Max(0, tmpMessageBag.Count - MaxQueueSize);
+            int start = Math.Max(0, tmpMessageBag.Count - MaxQueueSize); // should be 0 unless MaxQueueSize changed
             foreach (var msg in tmpMessageBag.Skip(start))
             {
                 Interlocked.Increment(ref recentMsgCounter);
@@ -199,10 +250,9 @@ namespace Iviz.Ros
                 }
             }
 
-            // single threaded, no interlocked needed here
-            droppedMsgCounter += start;
-            totalMsgCounter += messageQueue.Count;
-            recentMsgCounter += messageQueue.Count;
+            Interlocked.Add(ref droppedMsgCounter, start);
+            Interlocked.Add(ref totalMsgCounter, messageCount);
+            Interlocked.Add(ref recentMsgCounter, messageCount);
         }
 
         void CallHandlerDirect(in T msg, IRosReceiver receiver)
@@ -237,7 +287,7 @@ namespace Iviz.Ros
         {
             if (recentMsgCounter == 0)
             {
-                Stats = RosListenerStats.Empty;
+                Stats = default;
                 return;
             }
 
@@ -271,15 +321,12 @@ namespace Iviz.Ros
             {
                 description.Append(numActivePublishers.ToString())
                     .Append("/")
-                    .Append(numPublishers.ToString())
+                    .Append(numPublishers)
                     .Append(" pub");
             }
         }
 
-        public override string ToString()
-        {
-            return $"[Listener {Topic} [{Type}]]";
-        }
+        public override string ToString() => $"[Listener {Topic} [{Type}]]";
     }
 
     public static class Listener
