@@ -209,7 +209,7 @@ namespace Iviz.Controllers
             node = FrameNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.RentDisplay<PointListResource>(node.transform);
             meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.transform);
-            meshCloud.CastShadows = false;
+            meshCloud.ShadowsEnabled = false;
 
             Config = config ?? new PointCloudConfiguration
             {

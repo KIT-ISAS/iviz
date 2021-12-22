@@ -1,18 +1,17 @@
+#nullable enable
+
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
-using Iviz.Resources;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace Iviz.App
 {
     public sealed class GuiDialogModuleData : ListenerModuleData, IInteractableModuleData
     {
-        readonly GuiDialogListener dialogListener;
+        readonly GuiWidgetListener dialogListener;
         readonly GuiDialogPanelContents dialogPanel;
 
         protected override ListenerController Listener => dialogListener;
@@ -20,31 +19,17 @@ namespace Iviz.App
         public override DataPanelContents Panel => dialogPanel;
         public override IConfiguration Configuration => dialogListener.Config;
 
-
-        public GuiDialogModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
-                constructor.TryGetConfigurationType() ?? constructor.Type)
+        public GuiDialogModuleData(ModuleDataConstructor constructor) :
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
             dialogPanel = DataPanelManager.GetPanelByResourceType<GuiDialogPanelContents>(ModuleType.GuiDialog);
-            dialogListener = new GuiDialogListener(this);
-            if (constructor.Configuration == null)
-            {
-                dialogListener.Config.Topic = Topic;
-                dialogListener.Config.Type = Type;
-            }
-            else
-            {
-                dialogListener.Config = (GuiDialogConfiguration)constructor.Configuration;
-            }
-
+            dialogListener = new GuiWidgetListener(this, (GuiDialogConfiguration?)constructor.Configuration, Topic);
             Interactable = ModuleListPanel.SceneInteractable;
-            dialogListener.StartListening();
             UpdateModuleButton();
         }
 
         public bool Interactable
         {
-            get => dialogListener.Interactable;
             set => dialogListener.Interactable = value;
         }
 

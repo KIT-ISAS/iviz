@@ -62,7 +62,8 @@ namespace Iviz.Displays.Highlighters
 
         void Update()
         {
-            if (holder.BoundsTransform is not { } transform || holder.Bounds is not { } bounds)
+            if (holder.BoundsTransform is not { } transform 
+                || holder.Bounds is not { } bounds)
             {
                 nodeTransform.gameObject.SetActive(false);
                 return;

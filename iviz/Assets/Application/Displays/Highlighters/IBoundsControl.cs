@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using UnityEngine;
 
 namespace Iviz.Displays.Highlighters
 {
@@ -11,6 +12,7 @@ namespace Iviz.Displays.Highlighters
         event Action StartDragging;
         event Action EndDragging;
         bool Interactable { set; }
+        Quaternion BaseOrientation { set; }
         void Dispose();
     }
 }

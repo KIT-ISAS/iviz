@@ -7,7 +7,8 @@ namespace Iviz.Ros
 {
     /// <summary>
     /// A wrapper around a <see cref="RosSubscriber{T}"/> that persists even if the connection is interrupted.
-    /// After a connection is reestablished, the data in this listener is used to resubscribe transparently.
+    /// There can be multiple IListeners that refer to the same shared subscriber
+    /// The original is stored in a <see cref="SubscribedTopic{T}"/>.  
     /// </summary>
     public interface IListener
     {

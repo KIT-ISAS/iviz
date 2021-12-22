@@ -803,7 +803,7 @@ namespace Iviz.Controllers
                 {
                     RosLogger.Info($"ControllerService: Creating dialog");
 
-                    var dialog = GuiDialogListener.DefaultHandler.AddDialog(srv.Request.Dialog);
+                    var dialog = GuiWidgetListener.DefaultHandler.AddDialog(srv.Request.Dialog);
                     if (dialog == null)
                     {
                         TryRelease(signal);

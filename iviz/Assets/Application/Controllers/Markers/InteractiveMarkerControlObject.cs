@@ -1,19 +1,14 @@
 ﻿#nullable enable
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Displays.Highlighters;
-using Iviz.Msgs;
 using Iviz.Msgs.VisualizationMsgs;
-using Iviz.Resources;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -25,7 +20,7 @@ namespace Iviz.Controllers
         const string ErrorStr = "<color=red>Error:</color> ";
 
         readonly Dictionary<(string Ns, int Id), MarkerObject> markers = new();
-        readonly List<IBoundsControl> boundsControls = new();
+        readonly Dictionary<IBoundsControl, Quaternion> boundsControls = new();
         readonly GameObject node;
         readonly InteractiveMarkerObject parent;
         readonly string rosId;
@@ -34,6 +29,7 @@ namespace Iviz.Controllers
 
         bool visible;
         bool interactable;
+        bool independentMarkerOrientation;
 
         public Transform Transform => node.transform;
 
@@ -63,7 +59,7 @@ namespace Iviz.Controllers
             set
             {
                 interactable = value;
-                foreach (var control in boundsControls)
+                foreach (var control in boundsControls.Keys)
                 {
                     control.Interactable = value;
                 }
@@ -83,12 +79,7 @@ namespace Iviz.Controllers
         {
             lastMessage = msg;
 
-            foreach (var control in boundsControls)
-            {
-                control.Dispose();
-            }
-
-            boundsControls.Clear();
+            ResetState();
 
             UpdateMarkers(msg.Markers);
 
@@ -103,8 +94,21 @@ namespace Iviz.Controllers
 
             var orientation = msg.Orientation.Ros2Unity();
             UpdateInteractionMode(orientation, orientationMode);
+            independentMarkerOrientation = msg.IndependentMarkerOrientation;
         }
 
+        void ResetState()
+        {
+            foreach (var control in boundsControls.Keys)
+            {
+                control.Dispose();
+            }
+
+            GameThread.EveryFrame -= KeepPointingForward;
+            node.transform.rotation = Quaternion.identity;
+
+            boundsControls.Clear();
+        }
 
         void UpdateMarkers(Marker[] msg)
         {
@@ -123,10 +127,8 @@ namespace Iviz.Controllers
                             : CreateMarker(markerId);
 
                         _ = markerObject.SetAsync(marker); // TODO: deal with mesh loading
-                        if (string.IsNullOrEmpty(marker.Header.FrameId))
-                        {
-                            markerObject.Transform.SetParentLocal(Transform);
-                        }
+                        markerObject.Transform.SetParent(Transform,
+                            marker.Header.FrameId.Length != 0); // world position stays
 
                         break;
                     case Marker.DELETE:
@@ -168,18 +170,23 @@ namespace Iviz.Controllers
                     {
                         InteractionMode.Button => new StaticBoundsControl(marker),
                         InteractionMode.Menu => new StaticBoundsControl(marker),
-                        InteractionMode.MoveAxis => new LineBoundsControl(marker, target, orientation),
-                        InteractionMode.MovePlane => new PlaneBoundsControl(marker, target, orientation),
-                        InteractionMode.MoveRotate => new PlaneBoundsControl(marker, target, orientation),
-                        InteractionMode.RotateAxis => new RotationBoundsControl(marker, target, orientation),
+                        InteractionMode.MoveAxis => new LineBoundsControl(marker, target),
+                        InteractionMode.MovePlane => new PlaneBoundsControl(marker, target),
+                        InteractionMode.MoveRotate => new PlaneBoundsControl(marker, target),
+                        InteractionMode.RotateAxis => new RotationBoundsControl(marker, target),
                         InteractionMode.Move3D => new FixedDistanceBoundsControl(marker, target),
                         InteractionMode.MoveRotate3D => new FixedDistanceBoundsControl(marker, target),
                         _ => (IBoundsControl?)null
                     };
-                    if (control != null)
+
+                    if (control == null)
                     {
-                        boundsControls.Add(control);
+                        continue;
                     }
+
+                    var baseOrientation = orientation * Quaternion.Inverse(marker.Pose.rotation);
+                    control.BaseOrientation = baseOrientation;
+                    boundsControls.Add(control, baseOrientation);
                 }
             }
             else
@@ -187,19 +194,23 @@ namespace Iviz.Controllers
                 switch (interactionMode)
                 {
                     case InteractionMode.MoveAxis:
-                        boundsControls.Add(new LineWrapperBoundsControl(nodeTransform, target, orientation));
+                        boundsControls.Add(new LineWrapperBoundsControl(nodeTransform, target)
+                            { BaseOrientation = orientation }, orientation);
                         break;
                     case InteractionMode.RotateAxis:
-                        boundsControls.Add(new RotationWrapperBoundsControl(nodeTransform, target, orientation));
+                        boundsControls.Add(new RotationWrapperBoundsControl(nodeTransform, target)
+                            { BaseOrientation = orientation }, orientation);
                         break;
                     case InteractionMode.MoveRotate:
-                        boundsControls.Add(new LineWrapperBoundsControl(nodeTransform, target, orientation));
-                        boundsControls.Add(new RotationWrapperBoundsControl(nodeTransform, target, orientation));
+                        boundsControls.Add(new LineWrapperBoundsControl(nodeTransform, target)
+                            { BaseOrientation = orientation }, orientation);
+                        boundsControls.Add(new RotationWrapperBoundsControl(nodeTransform, target)
+                            { BaseOrientation = orientation }, orientation);
                         break;
                 }
             }
 
-            foreach (var control in boundsControls)
+            foreach (var control in boundsControls.Keys)
             {
                 control.Interactable = Interactable;
 
@@ -217,12 +228,48 @@ namespace Iviz.Controllers
                     parent.PoseUpdateEnabled = true;
                     parent.OnMouseEvent(rosId, null, MouseEventType.Up);
 
-                    if (InteractionMode == InteractionMode.Button)
+                    if (InteractionMode is not (InteractionMode.Button or InteractionMode.Menu))
                     {
-                        GuiInputModule.PlayClickAudio(parent.ControlNode.position);
-                        parent.OnMouseEvent(rosId, null, MouseEventType.Click);
+                        return;
+                    }
+
+                    GuiInputModule.PlayClickAudio(parent.ControlNode.position);
+                    parent.OnMouseEvent(rosId, null, MouseEventType.Click);
+
+                    if (InteractionMode is InteractionMode.Menu)
+                    {
+                        parent.ShowMenu();
                     }
                 };
+            }
+
+            if (orientationMode == OrientationMode.ViewFacing)
+            {
+                GameThread.EveryFrame += KeepPointingForward;
+            }
+        }
+
+        void KeepPointingForward()
+        {
+            if (!parent.PoseUpdateEnabled)
+            {
+                return;
+            }
+
+            if (independentMarkerOrientation)
+            {
+                var forwardWorld = Settings.MainCameraTransform.position - node.transform.position;
+                var deltaRotationWorld = Quaternion.LookRotation(forwardWorld);
+                var deltaRotationLocal = Quaternion.Inverse(node.transform.rotation) * deltaRotationWorld;
+
+                foreach (var (boundsControl, baseOrientation) in boundsControls)
+                {
+                    boundsControl.BaseOrientation = deltaRotationLocal * baseOrientation;
+                }
+            }
+            else
+            {
+                node.transform.LookAt(Settings.MainCameraTransform.position);
             }
         }
 
@@ -238,6 +285,7 @@ namespace Iviz.Controllers
 
         public void Stop()
         {
+            GameThread.EveryFrame -= KeepPointingForward;
             DestroyAllMarkers();
             Object.Destroy(node);
         }
@@ -285,7 +333,7 @@ namespace Iviz.Controllers
             }
 
             description.Append("OrientationMode: ")
-                .Append(OrientationModeToString(lastMessage.OrientationMode))
+                .Append(OrientationModeToString(lastMessage.OrientationMode, lastMessage.IndependentMarkerOrientation))
                 .AppendLine();
 
             if (ValidateOrientationMode(lastMessage.OrientationMode) is not { } orientationMode)
@@ -299,13 +347,6 @@ namespace Iviz.Controllers
             {
                 description.Append(WarnStr)
                     .Append("OrientationMode FIXED not implemented")
-                    .AppendLine();
-            }
-
-            if (lastMessage.IndependentMarkerOrientation)
-            {
-                description.Append(WarnStr)
-                    .Append("IndependentMarkerOrientation not implemented")
                     .AppendLine();
             }
 
@@ -349,12 +390,14 @@ namespace Iviz.Controllers
         static OrientationMode? ValidateOrientationMode(int mode) =>
             mode is < 0 or > (int)OrientationMode.ViewFacing ? null : (OrientationMode?)mode;
 
-        static string OrientationModeToString(int mode)
+        static string OrientationModeToString(int mode, bool independentMarkerOrientation)
         {
             return (OrientationMode)mode switch
             {
                 OrientationMode.Inherit => "Inherit",
                 OrientationMode.Fixed => "Fixed",
+                OrientationMode.ViewFacing when independentMarkerOrientation =>
+                    "ViewFacing + IndependentMarkerOrientation",
                 OrientationMode.ViewFacing => "ViewFacing",
                 _ => $"Unknown ({mode.ToString()})"
             };

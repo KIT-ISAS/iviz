@@ -15,6 +15,11 @@ namespace Iviz.Displays
             set => normal = value;
         }
 
+        public override Quaternion BaseOrientation
+        {
+            set => normal = value * Vector3.forward;
+        }
+        
         protected override void OnPointerMove(in Ray pointerRay)
         {
             Transform mTransform = Transform;

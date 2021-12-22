@@ -158,7 +158,7 @@ namespace Iviz.App
         void Awake()
         {
             Resource.ClearResources();
-            GuiDialogListener.ClearResources();
+            GuiWidgetListener.ClearResources();
             ARController.ClearResources();
         }
 
@@ -173,6 +173,8 @@ namespace Iviz.App
             {
                 dialogData.FinalizePanel();
             }
+            
+            GuiWidgetListener.DisposeDefaultHandler();
         }
 
         static string MasterUriToString(Uri? uri) =>
@@ -950,7 +952,7 @@ namespace Iviz.App
             frameCounter++;
         }
 
-        public void ShowMenu(MenuEntryList menuEntries, Action<uint> callback, Vector3 unityPositionHint)
+        public void ShowMenu(MenuEntryDescription[] menuEntries, Action<uint> callback)
         {
             if (menuEntries == null)
             {
@@ -962,7 +964,7 @@ namespace Iviz.App
                 throw new NullReferenceException("Menu dialog has not been set!");
             }
 
-            menuDialog.Set(menuEntries, unityPositionHint, callback);
+            menuDialog.Set(menuEntries, callback);
         }
     }
 }

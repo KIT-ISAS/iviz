@@ -14,6 +14,11 @@ namespace Iviz.Displays
         {
             set => line = value;
         }
+
+        public override Quaternion BaseOrientation
+        {
+            set => line = value * Vector3.forward;
+        }
         
         protected override void OnPointerMove(in Ray pointerRay)
         {

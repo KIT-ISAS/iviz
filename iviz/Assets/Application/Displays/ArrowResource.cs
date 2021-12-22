@@ -1,69 +1,103 @@
 ﻿#nullable enable
 
+using System;
+using Iviz.Common;
 using Iviz.Core;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class ArrowResource : MeshMarkerResource
+    public sealed class ArrowResource : MarkerResource, ISupportsColor, ISupportsPbr, ISupportsTint,
+        ISupportsAROcclusion, ISupportsShadows
     {
         const float MaxArrowWidth = 5.0f;
 
-        static readonly Quaternion PointToX = Quaternion.AngleAxis(90, Vector3.up);
+        [SerializeField] MeshMarkerResource? arrow;
 
-        protected override void Awake()
+        MeshMarkerResource Arrow => arrow.AssertNotNull(nameof(arrow));
+
+        public Color Color
         {
-            base.Awake();
+            set => Arrow.Color = value;
+        }
+
+        public Color EmissiveColor
+        {
+            set => Arrow.EmissiveColor = value;
+        }
+
+        void Awake()
+        {
             Reset();
         }
 
-        public void Set(in Vector3 a, in Vector3 b, float? overrideScaleYZ = null)
+        public void Set(in Vector3 a, in Vector3 b, float? overrideScaleXY = null)
         {
-            var diff = a - b; // arrow model is flipped
-            float scaleX = diff.Magnitude();
-            float scaleYZ = overrideScaleYZ ?? Mathf.Min(scaleX * 0.15f, MaxArrowWidth);
+            var direction = b - a;
+            float scaleZ = direction.Magnitude();
 
-            Transform.localScale = new Vector3(scaleX, scaleYZ, scaleYZ);
-            Transform.localPosition = a;
-
-            if (Mathf.Approximately(scaleX, 0))
+            if (Mathf.Approximately(scaleZ, 0))
             {
+                Reset();
                 return;
             }
 
-            var x = diff / scaleX;
+            float scaleXY = overrideScaleXY ?? Mathf.Min(scaleZ * 0.15f, MaxArrowWidth);
 
-            var notX = x.WithZ(0).MagnitudeSq() < 1e-6
-                ? Vector3.up
-                : Vector3.forward;
-
-            var y = x.Cross(notX).Normalized();
-            var z = x.Cross(y).Normalized();
-
-            var m = Matrix4x4.identity;
-            m.SetColumn(0, x);
-            m.SetColumn(1, y);
-            m.SetColumn(2, z);
-
-            Transform.localRotation = m.rotation;
+            Arrow.Transform.localScale = new Vector3(scaleXY, scaleXY, scaleZ);
+            Arrow.Transform.localPosition = a;
+            Arrow.Transform.localRotation = Quaternion.LookRotation(direction);
+            UpdateBounds();
         }
 
         public void Set(in Vector3 scale)
         {
-            Transform.localScale = new Vector3(scale.z, scale.y, scale.x);
-            Transform.SetLocalPose(Pose.identity.WithRotation(PointToX));
+            Arrow.Transform.localScale = new Vector3(scale.z, scale.y, scale.x);
+            UpdateBounds();
         }
 
         public void Reset()
         {
-            Transform.localScale = Vector3.zero;
-            Transform.SetLocalPose(Pose.identity);
+            Arrow.Transform.localScale = Vector3.zero;
+            UpdateBounds();
+        }
+
+        void UpdateBounds()
+        {
+            Collider.SetBounds(Arrow.Bounds is { } bounds 
+                ? bounds.TransformBound(Arrow.Transform) 
+                : default);
         }
 
         public override void Suspend()
         {
-            base.Suspend();
+            Arrow.Suspend();
             Reset();
+        }
+
+        public float Metallic
+        {
+            set => Arrow.Metallic = value;
+        }
+
+        public float Smoothness
+        {
+            set => Arrow.Smoothness = value;
+        }
+
+        public Color Tint
+        {
+            set => Arrow.Tint = value;
+        }
+
+        public bool OcclusionOnly
+        {
+            set => Arrow.OcclusionOnly = value;
+        }
+
+        public bool ShadowsEnabled
+        {
+            set => Arrow.ShadowsEnabled = value;
         }
     }
 }

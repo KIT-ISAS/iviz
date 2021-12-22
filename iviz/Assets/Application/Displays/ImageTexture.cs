@@ -526,7 +526,7 @@ namespace Iviz.Displays
             texture.Apply(generateMipmaps);
         }
 
-        unsafe void CopyR16ToR8(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
+        void CopyR16ToR8(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
         {
             int numElements = lengthInBytes / 2;
             if (lengthInBytes > src.Length || numElements > dst.Length)
@@ -534,28 +534,26 @@ namespace Iviz.Displays
                 throw new InvalidOperationException($"{this}: Skipping copy. Possible buffer overflow.");
             }
 
-            fixed (byte* dstPtr0 = src)
-            fixed (byte* srcPtr0 = dst)
+            var srcPtr = MemoryMarshal.Cast<byte, R16>(src);
+            for (int i = 0; i < srcPtr.Length; i++)
             {
-                byte* dstPtr = dstPtr0;
-                byte* srcPtr = srcPtr0 + 1;
-
-                for (int i = numElements; i >= 0; i--)
-                {
-                    *dstPtr = *srcPtr;
-                    dstPtr++;
-                    srcPtr += 2;
-                }
+                dst[i] = srcPtr[i].low;
             }
+        }
+        
+        [StructLayout(LayoutKind.Sequential)]
+        readonly struct R16
+        {
+            readonly byte high;
+            public readonly byte low;
         }
 
         static void CopyRgb24ToRgba32(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
         {
-            int numElements = lengthInBytes / 3;
             var srcPtr = MemoryMarshal.Cast<byte, Rgb>(src);
             var dstPtr = MemoryMarshal.Cast<byte, Rgba>(dst);
             var colorOut = new Rgba { a = 255 };
-            for (int i = 0; i < numElements; i++)
+            for (int i = 0; i < srcPtr.Length; i++)
             {
                 var colorIn = srcPtr[i];
                 colorOut.r = colorIn.r;
@@ -565,14 +563,16 @@ namespace Iviz.Displays
             }
         }
 
+        [StructLayout(LayoutKind.Sequential)]
         struct Rgba
         {
             public byte r, g, b, a;
         }
 
-        struct Rgb
+        [StructLayout(LayoutKind.Sequential)]
+        readonly struct Rgb
         {
-            public byte r, g, b;
+            public readonly byte r, g, b;
         }
 
         static Vector2 CalculateBoundsR8(ReadOnlySpan<byte> src)

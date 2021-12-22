@@ -5,12 +5,20 @@ using UnityEngine;
 
 namespace Iviz.Common
 {
-    public interface IHasBounds
+    public interface IHasBounds : ISupportsDynamicBounds
     {
         Bounds? Bounds { get; }
         Transform? BoundsTransform { get; }
         string? Caption => null;
         bool AcceptsHighlighter => false;
-        event Action? BoundsChanged;
     }
+    
+    
+    /// <summary>
+    /// Interface for displays whose bounds can change after initial setup (for example, async mesh loading)
+    /// </summary>
+    public interface ISupportsDynamicBounds
+    {
+        event Action? BoundsChanged;
+    }     
 }

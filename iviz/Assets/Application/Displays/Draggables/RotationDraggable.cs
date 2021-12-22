@@ -16,8 +16,11 @@ namespace Iviz.Displays
             set => normal = value;
         }
         
-        public bool DoesRotationReset { get; set; }
-
+        public override Quaternion BaseOrientation
+        {
+            set => normal = value * Vector3.forward;
+        }
+        
         protected override void OnPointerMove(in Ray pointerRay)
         {
             Transform mTransform = Transform;
@@ -58,13 +61,6 @@ namespace Iviz.Displays
 
                 mTarget.rotation *= deltaRotation;
                 RaiseMoved();
-
-                /*
-                if (DoesRotationReset)
-                {
-                    startIntersection = localIntersection;
-                }
-                */
             }
         }
     }

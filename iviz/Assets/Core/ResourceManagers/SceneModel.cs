@@ -104,9 +104,10 @@ namespace Iviz.Displays
                         ? mesh.TexCoords[bumpTexture.UvIndex].Coords
                         : Array.Empty<Vector3f>();
 
-                var meshTangents = mesh.Tangents;
-                using (var tangents = new Rent<Vector4>(meshTangents.Length))
+                if (mesh.Tangents.Length != 0)
                 {
+                    var meshTangents = mesh.Tangents;
+                    using var tangents = new Rent<Vector4>(meshTangents.Length);
                     var v = new Vector4(0, 0, 0, -1);
                     for (int i = 0; i < meshTangents.Length; i++)
                     {
@@ -114,15 +115,31 @@ namespace Iviz.Displays
                         tangents.Array[i] = v;
                     }
 
-                    meshResource.Set(
-                        MemoryMarshal.Cast<Vector3f, Vector3>(mesh.Vertices),
-                        MemoryMarshal.Cast<Vector3f, Vector3>(mesh.Normals),
-                        tangents,
-                        MemoryMarshal.Cast<Vector3f, Vector3>(meshDiffuseTexCoords),
-                        MemoryMarshal.Cast<Vector3f, Vector3>(meshBumpTexCoords),
-                        MemoryMarshal.Cast<Triangle, int>(mesh.Faces),
-                        MemoryMarshal.Cast<Iviz.Msgs.IvizMsgs.Color32, Color32>(meshColors)
-                    );
+                    SetMesh(tangents);
+                }
+                else
+                {
+                    SetMesh(Rent.Empty<Vector4>());
+                }
+
+                void SetMesh(Rent<Vector4> tangents)
+                {
+                    try
+                    {
+                        meshResource.Set(
+                            MemoryMarshal.Cast<Vector3f, Vector3>(mesh.Vertices),
+                            MemoryMarshal.Cast<Vector3f, Vector3>(mesh.Normals),
+                            tangents,
+                            MemoryMarshal.Cast<Vector3f, Vector3>(meshDiffuseTexCoords),
+                            MemoryMarshal.Cast<Vector3f, Vector3>(meshBumpTexCoords),
+                            MemoryMarshal.Cast<Triangle, int>(mesh.Faces),
+                            MemoryMarshal.Cast<Iviz.Msgs.IvizMsgs.Color32, Color32>(meshColors)
+                        );
+                    }
+                    catch (Exception e)
+                    {
+                        throw new InvalidResourceException($"Failed to load resource '{uriString}'", e);
+                    }
                 }
 
                 meshResource.Color = material.Diffuse.ToColor32();
@@ -138,7 +155,7 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        RosLogger.Warn($"SceneModel: Failed to retrieve diffuse texture " +
+                        RosLogger.Warn("SceneModel: Failed to retrieve diffuse texture " +
                                        $"'{diffuseTexture.Path}' required by '{uriString}'");
                     }
                 }
@@ -152,7 +169,7 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        RosLogger.Warn($"SceneModel: Failed to retrieve normal texture " +
+                        RosLogger.Warn("SceneModel: Failed to retrieve normal texture " +
                                        $"'{bumpTexture.Path}' required by '{uriString}'");
                     }
                 }

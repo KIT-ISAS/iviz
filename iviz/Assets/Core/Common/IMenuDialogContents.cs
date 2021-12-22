@@ -7,6 +7,6 @@ namespace Iviz.App
 {
     public interface IMenuDialogContents
     {
-        void Set([NotNull] MenuEntryList menu, Vector3 positionHint, [NotNull] Action<uint> callback);
+        void Set([NotNull] MenuEntryDescription[] menuEntries, [NotNull] Action<uint> callback);
     }
 }

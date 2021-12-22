@@ -8,4 +8,11 @@ namespace Iviz.Resources
         {
         }
     }
+    
+    public class InvalidResourceException : Exception
+    {
+        public InvalidResourceException(string message, Exception e) : base(message, e)
+        {
+        }
+    }
 }

@@ -1,85 +1,117 @@
+#nullable enable
+
 using System;
+using System.Threading;
 using Iviz.Core;
-using Iviz.Displays;
 using UnityEngine;
 
-namespace Iviz.App.ARDialogs
+namespace Iviz.Displays.ARDialogs
 {
-    [RequireComponent(typeof(BoxCollider))]
-    public sealed class SpringDisc : ARWidget
+    public interface IWidgetWithColor : IDisplay
     {
-        [SerializeField] LinkDisplay link = null;
-        [SerializeField] PlaneDraggable disc = null;
-        [SerializeField] MeshMarkerResource outerDisc = null;
-        [SerializeField] float linkWidth = 0.2f;
-        bool dragBack;
+        Color Color { set; }
+        Color SecondaryColor { set; }
+    }
 
-        public event Action<SpringDisc, Vector3> Moved;
+    public interface IWidgetWithCaption : IDisplay
+    {
+        string Caption { set; }
+    }
+    
+    [RequireComponent(typeof(BoxCollider))]
+    public sealed class SpringDisc : MonoBehaviour, IWidgetWithColor
+    {
+        [SerializeField] MeshMarkerResource? anchor;
+        [SerializeField] MeshMarkerResource? link;
+        [SerializeField] XRScreenDraggable? draggable;
+        [SerializeField] MeshMarkerResource? disc;
+        [SerializeField] Color color = Color.white;
+        [SerializeField] Color secondaryColor = Color.cyan;
+        CancellationTokenSource? tokenSource;
 
-        public override Color MainColor
+        MeshMarkerResource Anchor => anchor.AssertNotNull(nameof(anchor));
+        MeshMarkerResource Link => link.AssertNotNull(nameof(link));
+        MeshMarkerResource Disc => disc.AssertNotNull(nameof(disc));
+        XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
+        
+        public event Action<Vector3>? Moved;
+
+        public Color Color
         {
-            get => base.MainColor;
             set
             {
-                base.MainColor = value;
-                outerDisc.Color = value;
+                color = value;
+                Disc.Color = value;
+                Anchor.Color = value;
             }
         }
 
-        protected override void Awake()
+        public Color SecondaryColor
         {
-            base.Awake();
-            disc.EndDragging += () =>
+            set
             {
-                dragBack = true;
-                Moved?.Invoke(this, Vector3.zero);
-            };
-            
-            disc.StartDragging += () =>
-            {
-                dragBack = false;
-            };
-
-            link.Color = Color.cyan.WithAlpha(0.8f);
+                secondaryColor = value;
+                Link.Color = value.WithAlpha(0.8f);
+            }
         }
 
-        protected override void Update()
+        void Awake()
         {
-            base.Update();;
+            Color = color;
+            SecondaryColor = secondaryColor;
 
-            var discPosition = disc.Transform.localPosition;
-            float discDistance = discPosition.Magnitude();
-            if (discDistance < 0.005f)
+            Draggable.Moved += () => OnDiscMoved(true);
+            Draggable.EndDragging += () =>
             {
-                if (dragBack)
+                Moved?.Invoke(Vector3.zero);
+
+                tokenSource?.Cancel();
+                tokenSource = new CancellationTokenSource();
+
+                var startPosition = Draggable.Transform.localPosition;
+                FAnimator.Spawn(tokenSource.Token, 0.1f, t =>
                 {
-                    disc.Transform.localPosition = Vector3.zero;
-                    dragBack = false;
-                }
+                    Draggable.Transform.localPosition = (1 - Mathf.Sqrt(t)) * startPosition;
+                    OnDiscMoved(false);
+                });
+            };
 
-                return;
-            }
+            Draggable.StartDragging += () => tokenSource?.Cancel();
+            Draggable.Damping = null;
+            //.cyan.WithAlpha(0.8f);
+        }
 
+        void OnDiscMoved(bool raiseOnMoved)
+        {
+            var discPosition = Draggable.Transform.localPosition;
+            float discDistance = discPosition.Magnitude();
             float angle = -Mathf.Atan2(discPosition.z, discPosition.x) * Mathf.Rad2Deg;
-            link.Transform.localScale = new Vector3(discDistance, 0.002f, linkWidth);
-            link.Transform.SetLocalPose(new Pose(discPosition / 2, Quaternion.AngleAxis(angle, Vector3.up)));
+            Link.Transform.localScale = new Vector3(discDistance, 0.002f, 0.2f);
+            Link.Transform.SetLocalPose(new Pose(discPosition / 2, Quaternion.AngleAxis(angle, Vector3.up)));
 
-            if (dragBack)
+            if (raiseOnMoved)
             {
-                disc.Transform.localPosition = 0.9f * discPosition;
-            }
-            else
-            {
-                Moved?.Invoke(this, discPosition);
+                Moved?.Invoke(discPosition);
             }
         }
-        
-        public override void Suspend()
+
+        public Bounds? Bounds => Disc.Bounds;
+
+        public int Layer
         {
-            base.Suspend();
+            set
+            {
+                Disc.Layer = value;
+                Link.Layer = value;
+                Anchor.Layer = value;
+            }
+        }
+
+        public void Suspend()
+        {
             Moved = null;
-            disc.Transform.localPosition = Vector3.zero;
-            dragBack = false;
-        }        
+            Disc.Transform.localPosition = Vector3.zero;
+            tokenSource?.Cancel();
+        }
     }
 }

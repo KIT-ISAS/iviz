@@ -212,8 +212,7 @@ namespace Iviz.Displays
                 new Vector3(-0.5f, -0.4f, minDistance),
                 new Vector3(0.5f, -0.2f, maxDistance));
 
-            float rawAngleLocal = currentRotationLocal.eulerAngles.y;
-            float currentAngleLocal = rawAngleLocal > 180 ? rawAngleLocal - 360 : rawAngleLocal;
+            float currentAngleLocal = UnityUtils.RegularizeAngle(currentRotationLocal.eulerAngles.y);
 
             var targetRotationLocal = Mathf.Abs(currentAngleLocal) < 15
                 ? currentRotationLocal

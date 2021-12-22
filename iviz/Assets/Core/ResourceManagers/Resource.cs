@@ -68,7 +68,7 @@ namespace Iviz.Resources
                 //{ Octomap.RosMessageType, ModuleType.Octomap },
                 //{ OctomapWithPose.RosMessageType, ModuleType.Octomap },
                 //{ Dialog.RosMessageType, ModuleType.GuiDialog },
-                {GuiArray.RosMessageType, ModuleType.GuiDialog},
+                {DialogArray.RosMessageType, ModuleType.GuiDialog},
             }.AsReadOnly();
 
         public static readonly ColorSchema Colors = new();

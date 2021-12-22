@@ -13,7 +13,6 @@ namespace Iviz.Displays
         public GameObject ARCameraFovDisplay;
         public GameObject ARMarkerResource;
         public GameObject Arrow;
-        public GameObject ArrowShort;
         public GameObject AxisFrame;
         public GameObject BoundaryFrame;
         public GameObject DepthImage;

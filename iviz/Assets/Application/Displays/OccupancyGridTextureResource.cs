@@ -11,7 +11,7 @@ using UnityEngine;
 namespace Iviz.Displays
 {
     [RequireComponent(typeof(MeshRenderer))]
-    public sealed class OccupancyGridTextureResource : MarkerResourceWithColormap
+    public sealed class OccupancyGridTextureResource : MarkerResourceWithColormap, IHighlightable
     {
         static float baseOffset = 0.001f;
         static readonly int AtlasTex = Shader.PropertyToID("_AtlasTex");
@@ -58,7 +58,7 @@ namespace Iviz.Displays
         {
             zOffset = (baseOffset += 1e-5f);
         }
-        
+
         protected override void Awake()
         {
             MeshRenderer.sharedMaterial = Material;
@@ -163,7 +163,7 @@ namespace Iviz.Displays
             int pitch, Span<sbyte> dest)
         {
             uint hash = Crc32Calculator.DefaultSeed;
-            long numValidValues = 0;
+            int numValidValues = 0;
 
             int rowSize = bounds.Width;
             foreach (int v in ..bounds.Height)
@@ -184,25 +184,7 @@ namespace Iviz.Displays
                 }
             }
 
-            /*
-            fixed (sbyte* dstPtr0 = dest, srcPtr0 = src)
-            {
-                sbyte* dstPtr = dstPtr0;
-                for (int v = bounds.YMin; v < bounds.YMax; v++)
-                {
-                    sbyte* srcPtr = srcPtr0 + v * pitch + bounds.XMin;
-                    for (int u = bounds.XMin; u < bounds.XMax; u++, srcPtr++, dstPtr++)
-                    {
-                        *dstPtr = *srcPtr;
-                        hash = Crc32Calculator.Update(hash, (byte)*srcPtr);
-                        numValidValues += (*srcPtr >> 8) + 1;
-                    }
-                }
-            }
-                        */
-
-
-            return (hash, (int)numValidValues);
+            return (hash, numValidValues);
         }
 
         void OnDestroy()
@@ -338,6 +320,7 @@ namespace Iviz.Displays
 
         static int Fuse(int a, int b, int c, int d)
         {
+            /*
             int4 abcd = new int4(a, b, c, d);
             int4 sign = ~abcd >> 8;
             int numValid = -(sign.x + sign.y + sign.z + sign.w);
@@ -348,18 +331,21 @@ namespace Iviz.Displays
 
             int4 value = abcd & sign;
             int sum = value.x + value.y + value.z + value.w;
+            */
 
-            /*
+            
             int signA = ~a >> 8; // a >= 0 ? -1 : 0
             int signB = ~b >> 8; // b >= 0 ? -1 : 0
             int signC = ~c >> 8; // c >= 0 ? -1 : 0
             int signD = ~d >> 8; // d >= 0 ? -1 : 0
 
             int numValid = -(signA + signB + signC + signD);
+            /*
             if (numValid <= 1)
             {
                 return -1;
             }
+            */
 
             int valueA = a & signA; // a >= 0 ? a : 0
             int valueB = b & signB; // b >= 0 ? b : 0
@@ -367,13 +353,22 @@ namespace Iviz.Displays
             int valueD = d & signD; // d >= 0 ? d : 0
 
             int sum = valueA + valueB + valueC + valueD;
-            */
+            
             return numValid switch
             {
+                0 => -1,
+                1 => -1,
                 2 => sum >> 1, // sum / 2
                 3 => (sum * 21845) >> 16, // sum * (65536/3) / 65536
                 _ => sum >> 2
             };
         }
+
+        public void Highlight(in Vector3 hitPoint)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool IsAlive => true;
     }
 }

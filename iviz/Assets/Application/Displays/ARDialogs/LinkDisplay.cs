@@ -1,46 +1,41 @@
+#nullable enable
+
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
-using JetBrains.Annotations;
+using Iviz.Tools;
 using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
     public sealed class LinkDisplay : MeshMarkerResource
     {
-        static Mesh baseLinkMesh;
-        [NotNull] static Mesh BaseLinkMesh => baseLinkMesh != null ? baseLinkMesh : (baseLinkMesh = CreateMesh());
-        
-        protected override void Awake()
-        {
-            base.Awake();
-            Mesh = BaseLinkMesh;            
-        }
+        static Mesh? baseLinkMesh;
+        static Mesh BaseLinkMesh => baseLinkMesh != null ? baseLinkMesh : (baseLinkMesh = CreateMesh());
 
-        [NotNull]
         static Mesh CreateMesh()
         {
-            Color[] colors = new Color[24];
-
-            Mesh cubeMesh = Resource.Displays.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
+            var cubeMesh = Resource.Displays.Cube.Object.GetComponent<MeshFilter>().sharedMesh;
             var vertices = cubeMesh.vertices;
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                colors[i] = vertices[i].x < 0
-                    ? Color.white.WithAlpha(0)
-                    : Color.white;
-            }
 
-            Mesh mesh = new Mesh
+            return new Mesh
             {
                 name = "Link Mesh",
                 vertices = vertices,
                 normals = cubeMesh.normals,
-                colors = colors,
+                colors = vertices.Select(
+                    vertex => vertex.x < 0
+                        ? Color.white.WithAlpha(0)
+                        : Color.white
+                ).ToArray(),
                 triangles = cubeMesh.triangles
             };
-
-            return mesh;                   
+        }
+        
+        protected override void Awake()
+        {
+            base.Awake();
+            Mesh = BaseLinkMesh;
         }
     }
 }

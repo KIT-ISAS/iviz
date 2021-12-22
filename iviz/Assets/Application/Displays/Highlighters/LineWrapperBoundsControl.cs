@@ -59,11 +59,10 @@ namespace Iviz.Displays.Highlighters
             }
         }
 
-        public LineWrapperBoundsControl(Transform parent, Transform target, in Quaternion orientation)
+        public LineWrapperBoundsControl(Transform parent, Transform target)
         {
             node = new GameObject("[Line Wrapper]");
             node.transform.SetParentLocal(parent);
-            node.transform.localRotation = orientation;
 
             left = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Pyramid, node.transform);
             left.Transform.localRotation = BaseRotationLeft;
@@ -98,8 +97,8 @@ namespace Iviz.Displays.Highlighters
                 bool anyHovering = leftDraggable.IsHovering || rightDraggable.IsHovering;
                 if (anyDragging || anyHovering)
                 {
-                    left.EmissiveColor = right.EmissiveColor = anyDragging 
-                        ? Resource.Colors.DraggableSelectedEmissive 
+                    left.EmissiveColor = right.EmissiveColor = anyDragging
+                        ? Resource.Colors.DraggableSelectedEmissive
                         : Color.black;
                     left.Color = right.Color = anyDragging
                         ? Resource.Colors.DraggableSelectedColor
@@ -116,19 +115,24 @@ namespace Iviz.Displays.Highlighters
             rightDraggable.StateChanged += OnStateChanged;
         }
 
+        public override Quaternion BaseOrientation
+        {
+            set => node.transform.localRotation = value;
+        }
+
         public override void Dispose()
         {
             base.Dispose();
 
             leftDraggable.ClearSubscribers();
             rightDraggable.ClearSubscribers();
-            UnityEngine.Object.Destroy(leftDraggable);
-            UnityEngine.Object.Destroy(rightDraggable);
+            Object.Destroy(leftDraggable);
+            Object.Destroy(rightDraggable);
 
             left.ReturnToPool(Resource.Displays.Pyramid);
             right.ReturnToPool(Resource.Displays.Pyramid);
 
-            UnityEngine.Object.Destroy(node.gameObject);
+            Object.Destroy(node.gameObject);
         }
     }
 }

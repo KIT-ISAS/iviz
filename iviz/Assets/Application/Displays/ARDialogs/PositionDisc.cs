@@ -10,9 +10,9 @@ namespace Iviz.App.ARDialogs
 {
     public sealed class PositionDisc : ARWidget, IRecyclable
     {
-        [SerializeField] XRButton button = null;
-        [SerializeField] PlaneDraggable disc = null;
-        [SerializeField] Transform anchor = null;
+        [SerializeField] XRButton button;
+        [SerializeField] PlaneDraggable disc;
+        [SerializeField] Transform anchor;
         [SerializeField] float linkWidth = 0.02f;
         LineResource line;
         Tooltip tooltipX;
@@ -20,9 +20,9 @@ namespace Iviz.App.ARDialogs
         
         bool dragBack;
 
-        readonly NativeList<LineWithColor> lineBuffer = new NativeList<LineWithColor>();
+        readonly NativeList<LineWithColor> lineBuffer = new();
 
-        public event Action<PositionDisc, Vector3> Moved;
+        public event Action<Vector3> Moved;
         
         string mainButtonCaption = "Send!";
         public string MainButtonCaption
@@ -78,7 +78,7 @@ namespace Iviz.App.ARDialogs
                 button.Visible = false;
                 tooltipX.Visible = false;
                 tooltipY.Visible = false;
-                Moved?.Invoke(this, disc.Transform.localPosition);
+                Moved?.Invoke(disc.Transform.localPosition);
             };
         }
 

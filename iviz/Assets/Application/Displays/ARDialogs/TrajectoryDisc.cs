@@ -18,13 +18,13 @@ namespace Iviz.App.ARDialogs
         BillboardDiscDisplay disc;
 
         float? startTime;
-        readonly List<Vector3> positions = new List<Vector3>();
-        readonly NativeList<LineWithColor> lineBuffer = new NativeList<LineWithColor>();
+        readonly List<Vector3> positions = new();
+        readonly NativeList<LineWithColor> lineBuffer = new();
 
         [CanBeNull] LineResource lines;
         [NotNull] LineResource Lines => (lines != null) ? lines : lines = ResourcePool.RentDisplay<LineResource>();
 
-        public event Action<TrajectoryDisc, Vector3[], float> Moved;
+        public event Action<Vector3[], float> Moved;
 
         string mainButtonCaption = "Send!";
         public string MainButtonCaption
@@ -76,7 +76,7 @@ namespace Iviz.App.ARDialogs
         void SendTrajectory()
         {
             Debug.Log($"{this}: Sending trajectory");
-            Moved?.Invoke(this, positions.ToArray(), period);
+            Moved?.Invoke(positions.ToArray(), period);
         }
 
         public override void Initialize()
@@ -86,7 +86,7 @@ namespace Iviz.App.ARDialogs
             button.Transform.parent = Transform.parent;
         }
 
-        static readonly Pose BaseButtonPose = new Pose(
+        static readonly Pose BaseButtonPose = new(
             new Vector3(-0.5f, 0, -0.5f),
             Quaternion.AngleAxis(-90, Vector3.right) * Quaternion.AngleAxis(180, Vector3.up)
         );

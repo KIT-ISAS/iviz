@@ -29,6 +29,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7301127554347909424}
   - {fileID: 3834849191497203498}
@@ -48,8 +49,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dbae57c135b4905be26b8076fc2fd31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  targetTransform: {fileID: 3834849191676742097}
+  rayCollider: {fileID: 3834849191676742103}
   normal: {x: 0, y: 1, z: 0}
-  sourceTransform: {fileID: 3834849191676742097}
 --- !u!65 &3834849191676742103
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -104,6 +106,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3834849191676742097}
   - {fileID: 7002819733210540197}
@@ -135,7 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 729f4947d79942e9a35130b1acb3c6ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxCollider: {fileID: 0}
+  boxCollider: {fileID: 7002819732865035590}
   disc: {fileID: 3834849191676742098}
   anchor: {fileID: 7002819733210540197}
   linkWidth: 0.2
@@ -166,6 +169,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3550468902098136351}
   m_Father: {fileID: 7002819732865035588}

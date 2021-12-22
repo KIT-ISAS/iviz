@@ -159,14 +159,9 @@ namespace Iviz.Displays
                 JsonConvert.SerializeObject(resourceFiles, Formatting.Indented), token).AwaitNoThrow(this);
         }
 
-        public static string SanitizeForFilename(string input)
+        public static string SanitizeFilename(string input)
         {
-            if (input == null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
-
-            return Uri.EscapeDataString(input);
+            return Uri.EscapeDataString(input ?? throw new ArgumentNullException(nameof(input)));
         }
 
         #region RobotStuff
@@ -175,12 +170,8 @@ namespace Iviz.Displays
 
         public bool ContainsRobot(string robotName)
         {
-            if (robotName == null)
-            {
-                throw new ArgumentNullException(nameof(robotName));
-            }
-
-            return resourceFiles.RobotDescriptions.ContainsKey(robotName);
+            return resourceFiles.RobotDescriptions.ContainsKey(robotName ??
+                                                               throw new ArgumentNullException(nameof(robotName)));
         }
 
         public async ValueTask<(bool result, string? robotDescription)> TryGetRobotAsync(string robotName,
@@ -230,7 +221,7 @@ namespace Iviz.Displays
                 throw new ArgumentException("Value cannot be null or empty.", nameof(robotDescription));
             }
 
-            string localPath = SanitizeForFilename(robotName);
+            string localPath = SanitizeFilename(robotName);
 
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
             await FileUtils.WriteAllTextAsync($"{Settings.SavedRobotsPath}/{localPath}", robotDescription,
@@ -326,13 +317,15 @@ namespace Iviz.Displays
 
         bool TryGetModel(string uriString, [NotNullWhen(true)] out Info<GameObject>? resource)
         {
-            if (!loadedModels.TryGetValue(uriString, out resource))
+            if (!loadedModels.TryGetValue(uriString, out var resourceCandidate))
             {
+                resource = null;
                 return false;
             }
 
-            if (resource != null)
+            if (resourceCandidate != null)
             {
+                resource = resourceCandidate;
                 return true;
             }
 
@@ -557,7 +550,6 @@ namespace Iviz.Displays
             GameObject obj;
             try
             {
-                float time = Time.time;
                 var msg = await ReadModelFromFileAsync(uriString, localPath, token);
                 if (msg == null)
                 {
@@ -645,7 +637,7 @@ namespace Iviz.Displays
                 var info = new Info<GameObject>(obj);
                 loadedModels[uriString] = info;
 
-                string localPath = SanitizeForFilename(uriString);
+                string localPath = SanitizeFilename(uriString);
 
                 using (var buffer = new Rent<byte>(msg.Model.RosMessageLength + Md5SumLength))
                 {
@@ -681,7 +673,7 @@ namespace Iviz.Displays
                 var info = new Info<Texture2D>(texture);
                 loadedTextures[uriString] = info;
 
-                string localPath = SanitizeForFilename(uriString);
+                string localPath = SanitizeFilename(uriString);
 
                 await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", msg.Image.Data, token);
                 RosLogger.Debug($"{this}: Saving to {Settings.ResourcesPath}/{localPath}");
@@ -709,7 +701,7 @@ namespace Iviz.Displays
 
                 loadedScenes[uriString] = info;
 
-                string localPath = SanitizeForFilename(uriString);
+                string localPath = SanitizeFilename(uriString);
 
                 using (var buffer = new Rent<byte>(msg.Scene.RosMessageLength + Md5SumLength))
                 {

@@ -18,13 +18,13 @@ namespace Iviz.App.ARDialogs
         [SerializeField] LineResource lines;
         //[SerializeField] ARLineConnector connector = null;
 
-        readonly NativeList<LineWithColor> lineBuffer = new NativeList<LineWithColor>();
+        readonly NativeList<LineWithColor> lineBuffer = new();
         float? currentAngle;
         bool dragBack;
         
-        Vector3 DiscRestPosition => new Vector3(0, 0, dragBackDistance);
+        Vector3 DiscRestPosition => new(0, 0, dragBackDistance);
         
-        public event Action<RotationDisc, float> Moved;
+        public event Action<float> Moved;
 
         protected override void Awake()
         {
@@ -32,7 +32,7 @@ namespace Iviz.App.ARDialogs
             disc.EndDragging += () =>
             {
                 dragBack = true;
-                Moved?.Invoke(this, 0);
+                Moved?.Invoke(0);
                 lines.Reset();
                 currentAngle = null;
             };
@@ -120,7 +120,7 @@ namespace Iviz.App.ARDialogs
             lineBuffer.Add(new LineWithColor(Vector3.zero, a0));
             lines.Set(lineBuffer);
 
-            Moved?.Invoke(this, openingAngle);
+            Moved?.Invoke(openingAngle);
         }
 
         void IRecyclable.SplitForRecycle()

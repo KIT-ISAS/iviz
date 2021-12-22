@@ -116,7 +116,7 @@ namespace Iviz.Displays
             Resource.MeshResource = Resources.Resource.Displays.Cube;
             Resource.UseColormap = true;
             Resource.UseIntensityForScaleY = true;
-            Resource.CastShadows = false; // fix weird shadow bug
+            Resource.ShadowsEnabled = false; // fix weird shadow bug
 
             Layer = LayerType.IgnoreRaycast;
         }

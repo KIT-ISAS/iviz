@@ -28,8 +28,8 @@ namespace Iviz.App.ARDialogs
         ModeType mode;
         bool scaling;
 
-        public event Action<TargetWidget, Vector2, Vector3> Moved;
-        public event Action<TargetWidget> Cancelled;
+        public event Action<Vector2, Vector3> Moved;
+        public event Action Cancelled;
 
         Vector2 TargetScale
         {
@@ -117,9 +117,9 @@ namespace Iviz.App.ARDialogs
                 Debug.Log($"{this}: Sending scale");
                 //float totalScale = transform.parent.lossyScale.x;
                 //Debug.Log(TargetScale / Scale / totalScale);
-                Moved?.Invoke(this, TargetScale * Scale, Transform.localPosition);
+                Moved?.Invoke(TargetScale * Scale, Transform.localPosition);
             };
-            cancelButton.Clicked += () => Cancelled?.Invoke(this);
+            cancelButton.Clicked += () => Cancelled?.Invoke();
         }
 
         protected override void Update()

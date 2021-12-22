@@ -24,7 +24,7 @@ namespace Iviz.Core
         ///  Max amount of indices that a mesh can hold with short indices
         /// </summary>
         public const int MeshUInt16Threshold = ushort.MaxValue;
-        
+
         public static readonly CultureInfo Culture = BuiltIns.Culture;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -226,7 +226,7 @@ namespace Iviz.Core
         /// <typeparam name="T">The type of the Unity object</typeparam>
         /// <returns>The Unity object if not-null and valid, otherwise a normal C# null</returns>           
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        [return: NotNullIfNotNull("o")]
+        //[return: NotNullIfNotNull("o")]
         public static T? CheckedNull<T>(this T? o) where T : UnityEngine.Object => o != null ? o : null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -467,7 +467,7 @@ namespace Iviz.Core
         {
             return MemoryMarshal.Read<T>(span);
         }
-        
+
         public static void TryReturn<T>(this T[] _) where T : unmanaged
         {
         }
@@ -483,7 +483,7 @@ namespace Iviz.Core
             {
                 return;
             }
-            
+
             ArrayPool<T>.Shared.Return(segment.Array);
         }
 
@@ -491,7 +491,7 @@ namespace Iviz.Core
         {
             return memory.Span;
         }
-        
+
         public static unsafe NativeArray<T> CreateNativeArrayWrapper<T>(T* ptr, int length) where T : unmanaged
         {
             var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(ptr, length, Allocator.None);
@@ -503,13 +503,19 @@ namespace Iviz.Core
         {
             span.CopyTo(dst.AsSpan());
         }
-        
-        /*
-        public static Pose InverseTransformPose(this Transform transform, in Pose pose)
-        {
-            return transform.AsPose().Inverse().Multiply(pose);
-        }
-        */
 
+        public static float RegularizeAngle(float angle) =>
+            angle switch
+            {
+                <= -180 => angle + 360,
+                > 180 => angle - 360,
+                _ => angle
+            };
+
+        public static void SetBounds(this BoxCollider collider, in Bounds bounds)
+        {
+            collider.center = bounds.center;
+            collider.size = bounds.size;
+        }
     }
 }

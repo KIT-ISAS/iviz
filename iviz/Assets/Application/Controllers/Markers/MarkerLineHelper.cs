@@ -65,14 +65,13 @@ namespace Iviz.Controllers.Markers
 
             float colorAsFloat = PointWithColor.RecastToFloat(color32);
 
-            (c1.x, c1.y, c1.z) = lPoints[0].Ros2Unity();
+            lPoints[0].Ros2Unity(ref c1);
             c1.w = colorAsFloat;
 
             for (int i = 1; i < lPoints.Length; i++)
             {
                 c0 = c1;
-                (c1.x, c1.y, c1.z) = lPoints[i].Ros2Unity();
-
+                lPoints[i].Ros2Unity(ref c1);
                 if (LineResource.IsElementValid(f))
                 {
                     lineBuffer.Add(f);
@@ -96,13 +95,13 @@ namespace Iviz.Controllers.Markers
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
 
-            (c1.x, c1.y, c1.z) = lPoints[0].Ros2Unity();
+            lPoints[0].Ros2Unity(ref c1);
             c1.w = PointWithColor.RecastToFloat(lColors[0].ToUnityColor32());
             
             for (int i = 1; i < lPoints.Length; i++)
             {
                 c0 = c1;
-                (c1.x, c1.y, c1.z) = lPoints[i].Ros2Unity();
+                lPoints[i].Ros2Unity(ref c1);
                 c1.w = PointWithColor.RecastToFloat(lColors[i].ToUnityColor32());
 
                 if (LineResource.IsElementValid(f))
@@ -129,13 +128,13 @@ namespace Iviz.Controllers.Markers
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
 
-            (c1.x, c1.y, c1.z) = lPoints[0].Ros2Unity();
+            lPoints[0].Ros2Unity(ref c1);
             c1.w = PointWithColor.RecastToFloat(color * lColors[0].ToUnityColor());
             
             for (int i = 1; i < lPoints.Length; i++)
             {
                 c0 = c1;
-                (c1.x, c1.y, c1.z) = lPoints[i].Ros2Unity();
+                lPoints[i].Ros2Unity(ref c1);
                 c1.w = PointWithColor.RecastToFloat(color * lColors[i].ToUnityColor());
 
                 if (LineResource.IsElementValid(f))
@@ -177,8 +176,8 @@ namespace Iviz.Controllers.Markers
 
             for (int i = 0; i < lPoints.Length; i += 2)
             {
-                (c0.x, c0.y, c0.z) = lPoints[i + 0].Ros2Unity();
-                (c1.x, c1.y, c1.z) = lPoints[i + 1].Ros2Unity();
+                lPoints[i + 0].Ros2Unity(ref c0);
+                lPoints[i + 1].Ros2Unity(ref c1);
                 if (LineResource.IsElementValid(f))
                 {
                     lineBuffer.Add(f);
@@ -199,8 +198,8 @@ namespace Iviz.Controllers.Markers
             
             for (int i = 0; i < lPoints.Length; i += 2)
             {
-                (c0.x, c0.y, c0.z) = lPoints[i + 0].Ros2Unity();
-                (c1.x, c1.y, c1.z) = lPoints[i + 1].Ros2Unity();
+                lPoints[i + 0].Ros2Unity(ref c0);
+                lPoints[i + 1].Ros2Unity(ref c1);
 
                 if (LineResource.IsElementValid(f))
                 {
@@ -225,8 +224,8 @@ namespace Iviz.Controllers.Markers
 
             for (int i = 0; i < lPoints.Length; i += 2)
             {
-                (c0.x, c0.y, c0.z) = lPoints[i + 0].Ros2Unity();
-                (c1.x, c1.y, c1.z) = lPoints[i + 1].Ros2Unity();
+                lPoints[i + 0].Ros2Unity(ref c0);
+                lPoints[i + 1].Ros2Unity(ref c1);
 
                 if (LineResource.IsElementValid(f))
                 {

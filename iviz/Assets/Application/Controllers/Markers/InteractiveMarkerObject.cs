@@ -27,6 +27,7 @@ namespace Iviz.Controllers
         TextMarkerResource? text;
 
         bool visible;
+        bool descriptionVisible;
         Pose? bufferedPose;
         bool poseUpdateEnabled = true;
         bool interactable;
@@ -52,16 +53,22 @@ namespace Iviz.Controllers
 
         public bool DescriptionVisible
         {
+            get => descriptionVisible;
             set
             {
-                if (value)
+                descriptionVisible = value;
+                if (value && !string.IsNullOrEmpty(caption))
                 {
-                    text = ResourcePool.RentDisplay<TextMarkerResource>(ControlNode);
-                    text.BillboardEnabled = true;
-                    text.BillboardOffset = Vector3.up * 0.1f;
-                    text.ElementSize = 0.1f;
-                    text.Visible = true;
-                    text.AlwaysVisible = true;
+                    if (text == null)
+                    {
+                        text = ResourcePool.RentDisplay<TextMarkerResource>(ControlNode);
+                        text.BillboardEnabled = true;
+                        text.BillboardOffset = Vector3.up * 0.1f;
+                        text.ElementSize = 0.1f;
+                        text.Visible = true;
+                        text.AlwaysVisible = true;
+                    }
+
                     text.Text = caption;
                 }
                 else if (text != null)
@@ -92,7 +99,6 @@ namespace Iviz.Controllers
             set
             {
                 visible = value;
-
                 foreach (var control in controls.Values)
                 {
                     control.Visible = value;
@@ -131,20 +137,14 @@ namespace Iviz.Controllers
         {
             lastMessage = msg;
 
-            caption = msg.Description.Length != 0 ? msg.Description : msg.Name;
-            if (text != null)
-            {
-                text.Text = caption;
-            }
-
-            float defaultScale = Mathf.Approximately(msg.Scale, 0) ? 1 : msg.Scale;
-
+            caption = msg.Description;
+            DescriptionVisible = DescriptionVisible;
             LocalPose = msg.Pose.Ros2Unity();
 
             node.AttachTo(msg.Header);
 
             var controlsToDelete = new HashSet<string>(controls.Keys);
-
+            float defaultScale = Mathf.Approximately(msg.Scale, 0) ? 1 : msg.Scale;
             int numUnnamed = 0;
             foreach (var controlMsg in msg.Controls)
             {
@@ -184,33 +184,16 @@ namespace Iviz.Controllers
             {
                 menuEntries = new MenuEntryList(msg.MenuEntries);
             }
-
-            /*
-            {
-                var controlMarker = controls.Values
-                    .FirstOrDefault(control => control.ControlMarker != null)
-                    ?.ControlMarker;
-                if (controlMarker != null)
-                {
-                    controlMarker.EnableMenu = true;
-                }
-                else
-                {
-                    numWarnings++;
-                    description.Append(WarnStr).Append("Menu requested without a control").AppendLine();
-                }
-            }
-            */
         }
 
-        internal void ShowMenu(Vector3 unityPositionHint)
+        internal void ShowMenu()
         {
             if (menuEntries == null)
             {
                 return;
             }
 
-            ModuleListPanel.Instance.ShowMenu(menuEntries, OnMenuClick, unityPositionHint);
+            ModuleListPanel.Instance.ShowMenu(menuEntries.RootEntries, OnMenuClick);
         }
 
         public void Set(string frameId, in Iviz.Msgs.GeometryMsgs.Pose rosPose)

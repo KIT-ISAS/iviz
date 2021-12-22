@@ -18,9 +18,9 @@ namespace Iviz.App.ARDialogs
         LineResource line;
         bool dragBack;
 
-        readonly NativeList<LineWithColor> lineBuffer = new NativeList<LineWithColor>();
+        readonly NativeList<LineWithColor> lineBuffer = new();
 
-        public event Action<PositionDisc3D, Vector3> Moved;
+        public event Action<Vector3> Moved;
 
         string mainButtonCaption = "Send!";
         public string MainButtonCaption
@@ -65,11 +65,11 @@ namespace Iviz.App.ARDialogs
                 dragBack = true;
                 button.Visible = false;
                 Debug.Log("click");
-                Moved?.Invoke(this, disc.Transform.localPosition);
+                Moved?.Invoke(disc.Transform.localPosition);
             };
         }
 
-        static readonly Pose BaseButtonPose = new Pose(
+        static readonly Pose BaseButtonPose = new(
             new Vector3(-0.8f, 0, 0),
             Quaternion.AngleAxis(-90, Vector3.right) * Quaternion.AngleAxis(180, Vector3.up)
         );

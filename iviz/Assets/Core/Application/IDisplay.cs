@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -57,5 +58,10 @@ namespace Iviz.Displays
     {
         float Metallic { set; }
         float Smoothness { set; }
-    }    
+    }
+    
+    public interface ISupportsShadows
+    {
+        bool ShadowsEnabled { set; }
+    }
 }

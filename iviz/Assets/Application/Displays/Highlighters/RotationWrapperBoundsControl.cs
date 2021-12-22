@@ -82,14 +82,13 @@ namespace Iviz.Displays.Highlighters
             }
         }
 
-        public RotationWrapperBoundsControl(Transform parent, Transform target, in Quaternion orientation)
+        public RotationWrapperBoundsControl(Transform parent, Transform target)
         {
             node = new GameObject("[Rotation Wrapper]");
             node.layer = LayerType.Clickable;
 
             var nodeTransform = node.transform;
             nodeTransform.SetParentLocal(parent);
-            nodeTransform.localRotation = orientation;
 
             collider = node.AddComponent<BoxCollider>();
 
@@ -155,6 +154,11 @@ namespace Iviz.Displays.Highlighters
             SizeX = 1;
             SizeY = 1;
             MarkerScale = 1;
+        }
+
+        public override Quaternion BaseOrientation
+        {
+            set => node.transform.localRotation = value;
         }
 
         void RentRing(Transform nodeTransform)

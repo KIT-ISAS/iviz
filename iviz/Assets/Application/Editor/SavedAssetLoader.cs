@@ -80,8 +80,8 @@ namespace Iviz.Editor
 
             foreach (string robotName in manager.GetRobotNames())
             {
-                var(_, robotDescription) = await manager.TryGetRobotAsync(robotName);
-                string filename = ExternalResourceManager.SanitizeForFilename(robotName).Replace(".", "_");
+                var (_, robotDescription) = await manager.TryGetRobotAsync(robotName);
+                string filename = ExternalResourceManager.SanitizeFilename(robotName).Replace(".", "_");
                 File.WriteAllText(absolutePath + "/" + filename + ".txt", robotDescription);
             }
         }
@@ -199,7 +199,7 @@ namespace Iviz.Editor
 
                 if (writtenColors.TryGetValue((color, emissive, texture), out Material material))
                 {
-                    resource.SetMaterialValuesDirect((Texture2D) material.mainTexture, emissive, color, Color.white);
+                    resource.SetMaterialValuesDirect((Texture2D)material.mainTexture, emissive, color, Color.white);
                     renderer.sharedMaterial = material;
                     continue;
                 }
@@ -236,8 +236,7 @@ namespace Iviz.Editor
             foreach (var resource in resources)
             {
                 BoxCollider collider = resource.GetComponent<BoxCollider>();
-                collider.center = resource.Bounds.Value.center;
-                collider.size = resource.Bounds.Value.size;
+                collider.SetBounds(resource.Bounds is { } bounds ? bounds : default);
                 collider.enabled = false;
 
                 //DestroyImmediate(resource);
@@ -285,8 +284,8 @@ namespace Iviz.Editor
                     case LightType.Spot:
                         light.type = UnityEngine.LightType.Spot;
                         light.transform.LookAt(light.transform.position + source.Direction.Ros2Unity());
-                        light.spotAngle = (float) source.Spot.OuterAngle * Mathf.Rad2Deg;
-                        light.innerSpotAngle = (float) source.Spot.InnerAngle * Mathf.Rad2Deg;
+                        light.spotAngle = (float)source.Spot.OuterAngle * Mathf.Rad2Deg;
+                        light.innerSpotAngle = (float)source.Spot.InnerAngle * Mathf.Rad2Deg;
                         break;
                     case LightType.Directional:
                         light.type = UnityEngine.LightType.Directional;
@@ -303,7 +302,7 @@ namespace Iviz.Editor
             Pose pose = model.Pose?.ToPose() ?? UnityEngine.Pose.identity;
             Pose includePose = model.IncludePose?.ToPose() ?? UnityEngine.Pose.identity;
             modelObject.transform.SetLocalPose(includePose.Multiply(pose));
-            
+
             foreach (Sdf.Model innerModel in model.Models)
             {
                 CreateModel(innerModel).transform.SetParent(modelObject.transform, false);
@@ -358,9 +357,9 @@ namespace Iviz.Editor
                 {
                     resourceObject = Instantiate(Resource.Displays.Cylinder.Object, visualObject.transform, false);
                     visualObject.transform.localScale = new Vector3(
-                        (float) geometry.Cylinder.Radius * 2,
-                        (float) geometry.Cylinder.Length,
-                        (float) geometry.Cylinder.Radius * 2);
+                        (float)geometry.Cylinder.Radius * 2,
+                        (float)geometry.Cylinder.Length,
+                        (float)geometry.Cylinder.Radius * 2);
                 }
                 else if (geometry.Box != null)
                 {
@@ -370,7 +369,7 @@ namespace Iviz.Editor
                 else if (geometry.Sphere != null)
                 {
                     resourceObject = Instantiate(Resource.Displays.Sphere.Object, visualObject.transform, false);
-                    visualObject.transform.localScale = (float) geometry.Sphere.Radius * Vector3.one;
+                    visualObject.transform.localScale = (float)geometry.Sphere.Radius * Vector3.one;
                 }
 
                 if (resourceObject == null)

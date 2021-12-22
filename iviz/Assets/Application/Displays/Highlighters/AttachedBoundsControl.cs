@@ -14,6 +14,8 @@ namespace Iviz.Displays.Highlighters
         readonly BoxCollider collider;
 
         SelectionFrame? frame;
+        IHasBounds? source;
+        ScreenDraggable? draggable;
 
         public event Action? PointerDown;
         public event Action? PointerUp;
@@ -37,9 +39,20 @@ namespace Iviz.Displays.Highlighters
             nodeTransform = node.transform;
         }
 
-        protected T InitializeDraggable<T>(IHasBounds source, Transform? target)
-            where T : ScreenDraggable
+        public Quaternion BaseOrientation
         {
+            set
+            {
+                if (draggable != null)
+                {
+                    draggable.BaseOrientation = value;
+                }
+            }
+        }
+
+        protected T InitializeDraggable<T>(IHasBounds newSource, Transform? target) where T : ScreenDraggable
+        {
+            source = newSource;
             if (source.BoundsTransform is { } boundsTransform)
             {
                 nodeTransform.SetParentLocal(boundsTransform.parent);
@@ -47,7 +60,7 @@ namespace Iviz.Displays.Highlighters
                 nodeTransform.localScale = boundsTransform.localScale;
             }
 
-            var draggable = nodeTransform.gameObject.AddComponent<T>();
+            draggable = nodeTransform.gameObject.AddComponent<T>();
             draggable.RayCollider = collider;
             draggable.TargetTransform = target.CheckedNull() ??
                                         source.BoundsTransform.CheckedNull() ??
@@ -85,38 +98,43 @@ namespace Iviz.Displays.Highlighters
                 }
             };
 
-            void OnBoundsChanged()
-            {
-                if (source.BoundsTransform is { } validTransform)
-                {
-                    nodeTransform.SetParentLocal(validTransform.parent);
-                    nodeTransform.SetLocalPose(validTransform.AsLocalPose());
-                    nodeTransform.localScale = validTransform.localScale;
-                }
-
-                if (source.Bounds is { } validBounds)
-                {
-                    if (frame != null)
-                    {
-                        frame.Size = validBounds.size;
-                        frame.Transform.localPosition = validBounds.center;
-                        frame.Visible = draggable.IsDragging || draggable.IsHovering;
-                    }
-
-                    collider.center = validBounds.center;
-                    collider.size = validBounds.size;
-                }
-                else
-                {
-                    frame.ReturnToPool();
-                    frame = null;
-                }
-            }
-
             source.BoundsChanged += OnBoundsChanged;
             OnBoundsChanged();
 
-            return draggable;
+            return (T)draggable;
+        }
+
+        void OnBoundsChanged()
+        {
+            if (source == null || draggable == null)
+            {
+                Debug.LogError($"{this}: OnBoundsChanged() called on uninitialized attached bounds");
+                return;
+            }
+
+            if (source.BoundsTransform is { } validTransform)
+            {
+                nodeTransform.SetParentLocal(validTransform.parent);
+                nodeTransform.SetLocalPose(validTransform.AsLocalPose());
+                nodeTransform.localScale = validTransform.localScale;
+            }
+
+            if (source.Bounds is { } validBounds)
+            {
+                if (frame != null)
+                {
+                    frame.Size = validBounds.size;
+                    frame.Transform.localPosition = validBounds.center;
+                    frame.Visible = draggable.IsDragging || draggable.IsHovering;
+                }
+
+                collider.SetBounds(validBounds);
+            }
+            else
+            {
+                frame.ReturnToPool();
+                frame = null;
+            }
         }
 
         public void Dispose()
@@ -130,6 +148,11 @@ namespace Iviz.Displays.Highlighters
             if (frame != null)
             {
                 frame.ReturnToPool();
+            }
+
+            if (source != null)
+            {
+                source.BoundsChanged -= OnBoundsChanged;
             }
 
             UnityEngine.Object.Destroy(nodeTransform.gameObject);
@@ -146,28 +169,25 @@ namespace Iviz.Displays.Highlighters
 
     public sealed class LineBoundsControl : AttachedBoundsControl
     {
-        public LineBoundsControl(IHasBounds source, Transform target, in Quaternion orientation)
+        public LineBoundsControl(IHasBounds source, Transform target)
         {
-            var draggable = InitializeDraggable<LineDraggable>(source, target);
-            draggable.Line = orientation * Vector3.forward;
+            InitializeDraggable<LineDraggable>(source, target);
         }
     }
 
     public sealed class PlaneBoundsControl : AttachedBoundsControl
     {
-        public PlaneBoundsControl(IHasBounds source, Transform target, in Quaternion orientation)
+        public PlaneBoundsControl(IHasBounds source, Transform target)
         {
-            var draggable = InitializeDraggable<PlaneDraggable>(source, target);
-            draggable.Normal = orientation * Vector3.forward;
+            InitializeDraggable<PlaneDraggable>(source, target);
         }
     }
 
     public sealed class RotationBoundsControl : AttachedBoundsControl
     {
-        public RotationBoundsControl(IHasBounds source, Transform target, in Quaternion orientation)
+        public RotationBoundsControl(IHasBounds source, Transform target)
         {
-            var draggable = InitializeDraggable<RotationDraggable>(source, target);
-            draggable.Normal = orientation * Vector3.forward;
+            InitializeDraggable<RotationDraggable>(source, target);
         }
     }
 

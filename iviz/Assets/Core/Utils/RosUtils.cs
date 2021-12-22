@@ -83,6 +83,10 @@ namespace Iviz.Core
         public static Vector3 Ros2Unity(this in Point p) =>
             new((float)-p.Y, (float)p.Z, (float)p.X);
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Ros2Unity(this in Point p, ref float4 f) =>
+            (f.x, f.y, f.z) = ((float)-p.Y, (float)p.Z, (float)p.X);
+
         public static Color ToUnityColor(this in ColorRGBA p) =>
             new(p.R, p.G, p.B, p.A);
 
@@ -226,11 +230,11 @@ namespace Iviz.Core
                     _ => "#,0.",
                 };
 
-                string px = pX == 0 ? "0" : pX.ToString(positionFormat, UnityUtils.Culture);
-                string py = pY == 0 ? "0" : pY.ToString(positionFormat, UnityUtils.Culture);
-                string pz = pZ == 0 ? "0" : pZ.ToString(positionFormat, UnityUtils.Culture);
+                string pXStr = (pX == 0) ? "0" : pX.ToString(positionFormat, UnityUtils.Culture);
+                string pYStr = (pY == 0) ? "0" : pY.ToString(positionFormat, UnityUtils.Culture);
+                string pZStr = (pZ == 0) ? "0" : pZ.ToString(positionFormat, UnityUtils.Culture);
 
-                description.Append(px).Append(", ").Append(py).Append(", ").Append(pz);
+                description.Append(pXStr).Append(", ").Append(pYStr).Append(", ").Append(pZStr);
             }
 
             if (format == PoseFormat.OnlyPosition)
@@ -243,33 +247,24 @@ namespace Iviz.Core
                 description.AppendLine();
             }
 
-            var (rXr, rYr, rZr) = (-unityPose.rotation.eulerAngles).Unity2RosVector3();
+            var (unityX, unityY, unityZ) = unityPose.rotation.eulerAngles;
+            var (rXRaw, rYRaw, rZRaw) = (-unityZ, unityX, -unityY);
 
             if (format is PoseFormat.All or PoseFormat.OnlyRotation)
             {
-                double rX = RegularizeAngle(rXr);
-                string rx = rX == 0 ? "0" : rX.ToString("#,0.#", UnityUtils.Culture);
+                float rX = UnityUtils.RegularizeAngle(rXRaw);
+                string rXStr = (rX == 0) ? "0" : rX.ToString("#,0.#", UnityUtils.Culture);
 
-                description.Append("r: ").Append(rx).Append(", ");
+                description.Append("r: ").Append(rXStr).Append(", ");
             }
 
-            double rY = RegularizeAngle(rYr);
-            double rZ = RegularizeAngle(rZr);
+            float rY = UnityUtils.RegularizeAngle(rYRaw);
+            float rZ = UnityUtils.RegularizeAngle(rZRaw);
 
-            string ry = rY == 0 ? "0" : rY.ToString("#,0.#", UnityUtils.Culture);
-            string rz = rZ == 0 ? "0" : rZ.ToString("#,0.#", UnityUtils.Culture);
+            string rYStr = (rY == 0) ? "0" : rY.ToString("#,0.#", UnityUtils.Culture);
+            string rZStr = (rZ == 0) ? "0" : rZ.ToString("#,0.#", UnityUtils.Culture);
 
-            description.Append("p: ").Append(ry).Append(", y: ").Append(rz);
-        }
-
-        static double RegularizeAngle(double angle)
-        {
-            return angle switch
-            {
-                <= -180 => angle + 360,
-                > 180 => angle - 360,
-                _ => angle
-            };
+            description.Append("p: ").Append(rYStr).Append(", y: ").Append(rZStr);
         }
     }
 }

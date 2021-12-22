@@ -34,11 +34,10 @@ namespace Iviz.App
             CloseClicked += Close;
         }
 
-        public void Set(MenuEntryList menu, Vector3 _, Action<uint> newCallback)
+        public void Set(MenuEntryDescription[] menuEntries, Action<uint> newCallback)
         {
             callback = newCallback ?? throw new ArgumentNullException(nameof(newCallback));
-            var menuEntryList = menu ?? throw new ArgumentNullException(nameof(menu));
-            Entries = menuEntryList.GetDescriptionsForRoot();
+            Entries = menuEntries;
             gameObject.SetActive(true);
         }
 
@@ -60,11 +59,11 @@ namespace Iviz.App
         {
             return description.Type switch
             {
-                MenuEntryList.EntryType.Forward => $"<b>{description.Title}  →</b>",
-                MenuEntryList.EntryType.Off => $"<b>{description.Title}</b>\nOff",
-                MenuEntryList.EntryType.On => $"<b>{description.Title}</b>\nOn",
-                MenuEntryList.EntryType.Default => $"<b>{description.Title}</b>",
-                MenuEntryList.EntryType.Back => $"<b>← {description.Title}</b>",
+                MenuEntryType.Forward => $"<b>{description.Title}  →</b>",
+                MenuEntryType.Off => $"<b>{description.Title}</b>\nOff",
+                MenuEntryType.On => $"<b>{description.Title}</b>\nOn",
+                MenuEntryType.Default => $"<b>{description.Title}</b>",
+                MenuEntryType.Back => $"<b>← {description.Title}</b>",
                 _ => throw new ArgumentOutOfRangeException()
             };
         }

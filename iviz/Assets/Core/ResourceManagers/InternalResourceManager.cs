@@ -28,7 +28,7 @@ namespace Iviz.Resources
         readonly ReadOnlyDictionary<string, string> robotDescriptions;
 
         public IEnumerable<string> GetRobotNames() =>
-            robotDescriptions.Keys ?? (IEnumerable<string>) Array.Empty<string>();
+            robotDescriptions.Keys ?? (IEnumerable<string>)Array.Empty<string>();
 
         public InternalResourceManager()
         {
@@ -99,10 +99,11 @@ namespace Iviz.Resources
                 throw new ArgumentNullException(nameof(uriString));
             }
 
-            if (repository.TryGetValue(uriString, out info))
+            if (repository.TryGetValue(uriString, out var infoCandidate))
             {
-                if (info != null)
+                if (infoCandidate != null)
                 {
+                    info = infoCandidate;
                     return true;
                 }
 
@@ -113,6 +114,7 @@ namespace Iviz.Resources
 
             if (negRepository.Contains(uriString))
             {
+                info = null;
                 return false;
             }
 
@@ -120,21 +122,19 @@ namespace Iviz.Resources
             {
                 RosLogger.Warn($"{this}: Uri '{uriString}' is not a valid uri!");
                 negRepository.Add(uriString);
+                info = null;
                 return false;
             }
 
             string path = $"Package/{uri.Host}{Uri.UnescapeDataString(uri.AbsolutePath)}".Replace("//", "/");
-            T resource = UnityEngine.Resources.Load<T>(path);
-
-            if (resource == null)
-            {
-                string alternativePath = Path.GetDirectoryName(path) + "/" + Path.GetFileNameWithoutExtension(path);
-                resource = UnityEngine.Resources.Load<T>(alternativePath);
-            }
+            T? resource = UnityEngine.Resources.Load<T>(path).CheckedNull()
+                          ?? UnityEngine.Resources.Load<T>(
+                              $"{Path.GetDirectoryName(path)}/{Path.GetFileNameWithoutExtension(path)}");
 
             if (resource == null)
             {
                 negRepository.Add(uriString);
+                info = null;
                 return false;
             }
 

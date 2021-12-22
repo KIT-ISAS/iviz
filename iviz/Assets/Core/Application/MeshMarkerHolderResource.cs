@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Common;
 using Iviz.Core;
 using UnityEngine;
 
@@ -10,12 +11,12 @@ namespace Iviz.Displays
 {
     [RequireComponent(typeof(BoxCollider))]
     public class MeshMarkerHolderResource : MonoBehaviour, IDisplay, ISupportsColor, ISupportsAROcclusion,
-        ISupportsTint, ISupportsPbr
+        ISupportsTint, ISupportsPbr, ISupportsDynamicBounds, ISupportsShadows
     {
         [SerializeField] protected MeshMarkerResource[] children = Array.Empty<MeshMarkerResource>();
         [SerializeField] BoxCollider? boxCollider;
         [SerializeField] Transform? m_Transform;
-
+        
         protected BoxCollider Collider => boxCollider != null
             ? boxCollider
             : boxCollider = GetComponent<BoxCollider>().AssertNotNull(nameof(boxCollider));
@@ -131,6 +132,8 @@ namespace Iviz.Displays
                 }
             }
         }
+        
+        public event Action? BoundsChanged;
 
         public bool ColliderEnabled
         {
@@ -141,22 +144,14 @@ namespace Iviz.Displays
         {
             var markerChildren = children.Select(resource =>
                 BoundsUtils.TransformBoundsUntil(resource.Bounds, resource.Transform, Transform));
-            var nullableRootBounds = markerChildren.CombineBounds();
-
-            if (nullableRootBounds is not { } rootBounds)
-            {
-                Collider.center = Vector3.zero;
-                Collider.size = Vector3.zero;
-                return;
-            }
-
-            Collider.center = rootBounds.center;
-            Collider.size = rootBounds.size;
+            Collider.SetBounds(markerChildren.CombineBounds() is { } rootBounds ? rootBounds : default);
+            BoundsChanged?.Invoke();
         }
 
         public virtual void Suspend()
         {
             Visible = true;
+            BoundsChanged = null;
         }
     }
 }

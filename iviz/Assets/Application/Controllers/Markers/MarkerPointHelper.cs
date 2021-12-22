@@ -47,9 +47,9 @@ namespace Iviz.Controllers.Markers
             var f = new float4();
             f.w = PointWithColor.RecastToFloat(color32);
 
-            foreach (var rosPoint in points)
+            for (int i = 0; i < points.Length; i++)
             {
-                (f.x, f.y, f.z) = rosPoint.Ros2Unity();
+                points[i].Ros2Unity(ref f);
                 if (PointListResource.IsElementValid(f))
                 {
                     pointBuffer.Add(f);
@@ -63,7 +63,7 @@ namespace Iviz.Controllers.Markers
 
             for (int i = 0; i < points.Length; i++)
             {
-                (f.x, f.y, f.z) = points[i].Ros2Unity();
+                points[i].Ros2Unity(ref f);
                 if (PointListResource.IsElementValid(f))
                 {
                     f.w = PointWithColor.RecastToFloat(colors[i].ToUnityColor32());
@@ -79,7 +79,7 @@ namespace Iviz.Controllers.Markers
             
             for (int i = 0; i < points.Length; i++)
             {
-                (f.x, f.y, f.z) = points[i].Ros2Unity();
+                points[i].Ros2Unity(ref f);
                 if (PointListResource.IsElementValid(f))
                 {
                     f.w = PointWithColor.RecastToFloat(color * colors[i].ToUnityColor());

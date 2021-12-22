@@ -19,12 +19,6 @@ namespace Iviz.App.ARDialogs
         public event Action EndDragging;
         public event Action StartDragging;
 
-        public Transform TargetTransform
-        {
-            get => null; //disc.TargetTransform;
-            set => disc.TargetTransform = value;
-        }
-
         void Awake()
         {
             disc.PointerUp += () => PointerUp?.Invoke();

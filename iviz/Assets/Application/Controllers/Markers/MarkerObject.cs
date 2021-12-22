@@ -23,7 +23,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public sealed class MarkerObject : IHasBounds
+    public sealed class MarkerObject : IHasBounds, ISupportsDynamicBounds
     {
         const string WarnStr = "<color=yellow>Warning:</color> ";
         const string ErrorStr = "<color=red>Error:</color> ";
@@ -46,7 +46,6 @@ namespace Iviz.Controllers
         BoundsHighlighter? highlighter;
         Marker? lastMessage;
 
-        Pose currentPose;
         Vector3 currentScale;
 
         //int numErrors;
@@ -56,13 +55,14 @@ namespace Iviz.Controllers
         float metallic = 0.5f;
         float smoothness = 0.5f;
         Color tint = Color.white;
-        
+        bool shadowsEnabled = true;
         bool occlusionOnly;
         bool triangleListFlipWinding;
 
         public DateTime ExpirationTime { get; private set; }
         public MarkerType MarkerType { get; private set; }
         public string UniqueNodeName { get; }
+        public Pose Pose { get; private set; }
 
         public Transform Transform => node.Transform;
         Bounds? IHasBounds.Bounds => resource?.Bounds;
@@ -137,6 +137,19 @@ namespace Iviz.Controllers
                 if (resource is ISupportsPbr pbrResource)
                 {
                     pbrResource.Smoothness = value;
+                }
+            }
+        }
+        
+        public bool ShadowsEnabled
+        {
+            get => shadowsEnabled;
+            set
+            {
+                shadowsEnabled = value;
+                if (resource is ISupportsShadows shadowResource)
+                {
+                    shadowResource.ShadowsEnabled = value;
                 }
             }
         }
@@ -410,9 +423,10 @@ namespace Iviz.Controllers
 
             var srcPoints = msg.Points;
             using var points = new Rent<Vector3>(srcPoints.Length);
+            var pArray = points.Array;
             for (int i = 0; i < srcPoints.Length; i++)
             {
-                points.Array[i] = srcPoints[i].Ros2Unity();
+                pArray[i] = srcPoints[i].Ros2Unity();
             }
 
             var colors = MemoryMarshal.Cast<ColorRGBA, Color>(msg.Colors);
@@ -725,13 +739,13 @@ namespace Iviz.Controllers
                 Smoothness = Smoothness;
                 Metallic = Metallic;
                 OcclusionOnly = OcclusionOnly;
+                ShadowsEnabled = ShadowsEnabled;
 
-                if (resource is PointListResource pointListResource)
+                if (resource is ISupportsDynamicBounds hasDynamicBounds)
                 {
-                    pointListResource.BoundsChanged += () => BoundsChanged?.Invoke();
+                    hasDynamicBounds.BoundsChanged += RaiseBoundsChanged;
                 }
 
-                // BoundsChanged?.Invoke() gets called later
                 return; // all OK
             }
 
@@ -745,6 +759,11 @@ namespace Iviz.Controllers
             resource = resourceGameObject.AddComponent<AssetWrapperResource>();
             resource.Layer = LayerType.IgnoreRaycast;
             BoundsChanged?.Invoke();
+        }
+
+        void RaiseBoundsChanged()
+        {
+            BoundsChanged?.Invoke();            
         }
 
         void UpdateTransform(Marker msg)
@@ -762,7 +781,7 @@ namespace Iviz.Controllers
             }
 
             var newPose = msg.Pose.Ros2Unity();
-            if (newPose == currentPose)
+            if (newPose == Pose)
             {
                 return;
             }
@@ -772,14 +791,14 @@ namespace Iviz.Controllers
                 //numErrors++;
                 //description.Append(ErrorStr).Append(
                 //    $"Cannot use ({newPose.position.x}, {newPose.position.y}, {newPose.position.z}) as position. Values too large.");
-                currentPose = Pose.identity;
+                Pose = Pose.identity;
             }
             else
             {
-                currentPose = newPose;
+                Pose = newPose;
             }
 
-            Transform.SetLocalPose(currentPose);
+            Transform.SetLocalPose(Pose);
         }
 
         ValueTask<Info<GameObject>?> GetRequestedResource(Marker msg)
@@ -893,6 +912,11 @@ namespace Iviz.Controllers
 
         void DiscardResource()
         {
+            if (resource is ISupportsDynamicBounds hasDynamicBounds)
+            {
+                hasDynamicBounds.BoundsChanged -= RaiseBoundsChanged;
+            }
+
             if (resource == null || resourceInfo == null)
             {
                 return;

@@ -44,7 +44,7 @@ namespace Iviz.Core
             return Compute(MemoryMarshal.AsBytes(span), startHash);
         }
 
-        public static uint Compute(StringBuilder value, uint startHash = DefaultSeed)
+        static uint Compute(StringBuilder value, uint startHash = DefaultSeed)
         {
             uint hash = startHash;
             for (int i = 0; i < value.Length; i++)

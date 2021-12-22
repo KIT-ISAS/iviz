@@ -121,6 +121,7 @@ namespace Iviz.Displays
                     transform.localRotation = Quaternion.identity;
                 }
 
+                /*
                 foreach (var resource in allResources)
                 {
                     var draggable = resource.GetComponent<RotationDraggable>();
@@ -129,6 +130,7 @@ namespace Iviz.Displays
                         draggable.DoesRotationReset = value;
                     }
                 }
+                */
             }
         }
 
@@ -153,6 +155,7 @@ namespace Iviz.Displays
                     transform.localRotation = Quaternion.identity;
                 }
 
+                /*
                 foreach (var resource in allResources)
                 {
                     var draggable = resource.GetComponent<RotationDraggable>();
@@ -161,6 +164,7 @@ namespace Iviz.Displays
                         draggable.DoesRotationReset = value;
                     }
                 }
+                */
             }
         }
 

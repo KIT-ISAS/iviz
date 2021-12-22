@@ -3,6 +3,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
@@ -17,7 +18,7 @@ namespace Iviz.Displays
     /// </summary>
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    public sealed class PointListResource : MarkerResourceWithColormap
+    public sealed class PointListResource : MarkerResourceWithColormap, ISupportsDynamicBounds
     {
         public const float MaxPositionMagnitude = 1e3f;
 
@@ -315,8 +316,7 @@ namespace Iviz.Displays
 
         void CalculateBoundsEmpty()
         {
-            Collider.center = Vector3.zero;
-            Collider.size = Vector3.zero;
+            Collider.SetBounds(default);
             MeasuredIntensityBounds = Vector2.zero;
             if (!OverrideIntensityBounds)
             {

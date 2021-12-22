@@ -1,41 +1,51 @@
+#nullable enable
+
 using System;
+using System.Threading;
 using Iviz.Core;
-using Iviz.Displays;
 using UnityEngine;
 
-namespace Iviz.App.ARDialogs
+namespace Iviz.Displays.ARDialogs
 {
+    /*
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class SpringDisc3D : ARWidget, IRecyclable
+    public sealed class SpringDisc3D : MonoBehaviour, IWidgetWithColor
     {
-        [SerializeField] PlaneDraggable disc = null;
-        [SerializeField] Transform anchor = null;
-        [SerializeField] float linkWidth = 0.2f;
-        [SerializeField] MeshMarkerResource outerDisc = null;
+        [SerializeField] MeshMarkerResource? anchor;
+        [SerializeField] MeshMarkerResource? link;
+        [SerializeField] XRScreenDraggable? draggable;
+        [SerializeField] MeshMarkerResource? disc;
+        [SerializeField] Color color = Color.white;
+        [SerializeField] Color secondaryColor = Color.cyan;
+        CancellationTokenSource? tokenSource;
         LineResource line;
         bool dragBack;
         
-        readonly NativeList<LineWithColor> lineBuffer = new NativeList<LineWithColor>();
-
-        public event Action<SpringDisc3D, Vector3> Moved;
+        MeshMarkerResource Anchor => anchor.AssertNotNull(nameof(anchor));
+        MeshMarkerResource Link => link.AssertNotNull(nameof(link));
+        MeshMarkerResource Disc => disc.AssertNotNull(nameof(disc));
+        XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         
-        public override Color MainColor
+        readonly NativeList<LineWithColor> lineBuffer = new();
+
+        public event Action<Vector3>? Moved;
+        
+        public Color Color
         {
-            get => base.MainColor;
             set
             {
-                base.MainColor = value;
-                outerDisc.Color = value;
+                color = value;
+                Disc.Color = value;
+                Anchor.Color = value;
             }
         }
 
-        protected override void Awake()
+        void Awake()
         {
-            base.Awake();
-            disc.EndDragging += () =>
+            Draggable.EndDragging += () =>
             {
                 dragBack = true;
-                Moved?.Invoke(this, Vector3.zero);
+                Moved?.Invoke(Vector3.zero);
             };
 
             disc.StartDragging += () =>
@@ -52,6 +62,7 @@ namespace Iviz.App.ARDialogs
             lineBuffer.Add(new LineWithColor());
         }
 
+        
         protected override void Update()
         {
             base.Update();
@@ -83,7 +94,7 @@ namespace Iviz.App.ARDialogs
             }
             else
             {
-                Moved?.Invoke(this, discPosition);
+                Moved?.Invoke(discPosition);
             }
         }
 
@@ -106,4 +117,5 @@ namespace Iviz.App.ARDialogs
             line.ReturnToPool();
         }
     }
+    */
 }

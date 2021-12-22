@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using Iviz.Common;
 using Iviz.Core;
 using Iviz.Tools;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace Iviz.Displays
     /// <summary>
     /// Resource that constructs a mesh from vertices, triangles, normals, etc.
     /// </summary>
-    public sealed class MeshTrianglesResource : MeshMarkerResource
+    public sealed class MeshTrianglesResource : MeshMarkerResource, ISupportsDynamicBounds
     {
         public bool FlipWinding { get; set; }
 
@@ -20,6 +21,8 @@ namespace Iviz.Displays
         public override Bounds? Bounds =>
             mesh != null && mesh.vertexCount != 0 ? new Bounds(Collider.center, Collider.size) : null;
 
+        public event Action? BoundsChanged;
+        
         public string MeshName
         {
             set
@@ -47,16 +50,16 @@ namespace Iviz.Displays
                 return mesh;
             }
 
-            var tmpMesh = new Mesh
+            var newMesh = new Mesh
             {
                 indexFormat = indexFormat,
                 name = "MeshTrianglesResource Mesh"
             };
 
 
-            mesh = tmpMesh;
-            GetComponent<MeshFilter>().sharedMesh = tmpMesh;
-            return tmpMesh;
+            mesh = newMesh;
+            GetComponent<MeshFilter>().sharedMesh = newMesh;
+            return newMesh;
         }
 
         public void Clear()
@@ -87,21 +90,21 @@ namespace Iviz.Displays
 
             using (var triangles = new Rent<int>(points.Length))
             {
-                int[] array = triangles.Array;
+                int[] tArray = triangles.Array;
                 if (FlipWinding)
                 {
                     for (int i = 0; i < triangles.Length; i += 3)
                     {
-                        array[i] = i;
-                        array[i + 1] = i + 2;
-                        array[i + 2] = i + 1;
+                        tArray[i + 2] = i + 1;
+                        tArray[i + 1] = i + 2;
+                        tArray[i] = i;
                     }
                 }
                 else
                 {
                     for (int i = 0; i < triangles.Length; i++)
                     {
-                        array[i] = i;
+                        tArray[i] = i;
                     }
                 }
 
@@ -112,19 +115,9 @@ namespace Iviz.Displays
 
             Collider.center = ownMesh.bounds.center;
             Collider.size = ownMesh.bounds.size;
+            BoundsChanged?.Invoke();
         }
         
-        
-        /*
-        public void Set(
-            in Rent<Vector3> points,
-            in Rent<Vector3> normals,
-            in Rent<Vector4> tangents,
-            in Rent<Vector3> diffuseTexCoords,
-            in Rent<Vector3> bumpTexCoords,
-            in Rent<int> triangles,
-            in Rent<Color32> colors = default)
-            */
         public void Set(
             ReadOnlySpan<Vector3> points,
             ReadOnlySpan<Vector3> normals,
@@ -193,11 +186,14 @@ namespace Iviz.Displays
 
             Collider.center = ownMesh.bounds.center;
             Collider.size = ownMesh.bounds.size;
+            
+            BoundsChanged?.Invoke();
         }
 
         public override void Suspend()
         {
             base.Suspend();
+            BoundsChanged = null;
             if (mesh != null)
             {
                 mesh.Clear();

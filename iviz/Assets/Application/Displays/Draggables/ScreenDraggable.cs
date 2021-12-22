@@ -24,6 +24,8 @@ namespace Iviz.Displays
         public bool IsHovering { get; private set; }
         public bool IsDragging { get; private set; }
 
+        public abstract Quaternion BaseOrientation { set; }
+
         public float? Damping { get; set; } = 0.2f;
 
         protected float? DampingPerFrame => Damping is { } validatedDamping

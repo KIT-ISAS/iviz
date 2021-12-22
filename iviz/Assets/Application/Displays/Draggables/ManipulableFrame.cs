@@ -74,17 +74,17 @@ namespace Iviz.Displays
             {
                 0 => new StaticBoundsControl(this),
                 TranslationConstraintType.X =>
-                    new LineBoundsControl(this, targetTransform, ZtoX),
+                    new LineBoundsControl(this, targetTransform) { BaseOrientation = ZtoX },
                 TranslationConstraintType.Y =>
-                    new LineBoundsControl(this, targetTransform, ZtoY),
+                    new LineBoundsControl(this, targetTransform) { BaseOrientation = ZtoX },
                 TranslationConstraintType.Z =>
-                    new LineBoundsControl(this, targetTransform, Quaternion.identity),
+                    new LineBoundsControl(this, targetTransform),
                 TranslationConstraintType.X | TranslationConstraintType.Y =>
-                    new PlaneBoundsControl(this, targetTransform, Quaternion.identity),
+                    new PlaneBoundsControl(this, targetTransform),
                 TranslationConstraintType.X | TranslationConstraintType.Z =>
-                    new PlaneBoundsControl(this, targetTransform, ZtoY),
+                    new PlaneBoundsControl(this, targetTransform) { BaseOrientation = ZtoY },
                 TranslationConstraintType.Y | TranslationConstraintType.Z =>
-                    new PlaneBoundsControl(this, targetTransform, ZtoX),
+                    new PlaneBoundsControl(this, targetTransform) { BaseOrientation = ZtoX },
                 (TranslationConstraintType.X | TranslationConstraintType.Y | TranslationConstraintType.Z) or
                     TranslationConstraintType.Everything =>
                     new FixedDistanceBoundsControl(this, targetTransform),
@@ -96,33 +96,37 @@ namespace Iviz.Displays
             {
                 if ((translationConstraint & TranslationConstraintType.X) != 0)
                 {
-                    wrappers.Add(new LineWrapperBoundsControl(targetTransform, targetTransform, ZtoX));
+                    wrappers.Add(new LineWrapperBoundsControl(targetTransform, targetTransform)
+                        { BaseOrientation = ZtoX });
                 }
 
                 if ((translationConstraint & TranslationConstraintType.Y) != 0)
                 {
-                    wrappers.Add(new LineWrapperBoundsControl(targetTransform, targetTransform, ZtoY));
+                    wrappers.Add(new LineWrapperBoundsControl(targetTransform, targetTransform)
+                        { BaseOrientation = ZtoY });
                 }
 
                 if ((translationConstraint & TranslationConstraintType.Z) != 0)
                 {
-                    wrappers.Add(new LineWrapperBoundsControl(targetTransform, targetTransform, Quaternion.identity));
+                    wrappers.Add(new LineWrapperBoundsControl(targetTransform, targetTransform));
                 }
             }
 
             if ((rotationConstraint & RotationConstraintType.XY) != 0)
             {
-                wrappers.Add(new RotationWrapperBoundsControl(targetTransform, targetTransform, Quaternion.identity));
+                wrappers.Add(new RotationWrapperBoundsControl(targetTransform, targetTransform));
             }
 
             if ((rotationConstraint & RotationConstraintType.YZ) != 0)
             {
-                wrappers.Add(new RotationWrapperBoundsControl(targetTransform, targetTransform, ZtoX));
+                wrappers.Add(new RotationWrapperBoundsControl(targetTransform, targetTransform)
+                    { BaseOrientation = ZtoX });
             }
 
             if ((rotationConstraint & RotationConstraintType.XZ) != 0)
             {
-                wrappers.Add(new RotationWrapperBoundsControl(targetTransform, targetTransform, ZtoY));
+                wrappers.Add(new RotationWrapperBoundsControl(targetTransform, targetTransform)
+                    { BaseOrientation = ZtoY });
             }
 
             control.StartDragging += () => OnStartDragging(control);

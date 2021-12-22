@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#nullable enable
+
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Common;
 using Iviz.Core;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
-using JetBrains.Annotations;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -18,7 +16,7 @@ namespace Iviz.Displays
     /// <summary>
     /// Displays multiple copies of a given mesh. 
     /// </summary>
-    public sealed class MeshListResource : MarkerResourceWithColormap, ISupportsAROcclusion
+    public sealed class MeshListResource : MarkerResourceWithColormap, ISupportsAROcclusion, ISupportsShadows
     {
         const float MaxPositionMagnitude = 1e3f;
 
@@ -29,19 +27,18 @@ namespace Iviz.Displays
 
         [SerializeField] Vector3 elementScale3;
         [SerializeField] Vector3 preTranslation;
-        [SerializeField] Mesh mesh;
+        [SerializeField] Mesh? mesh;
 
         readonly uint[] argsBuffer = { 0, 0, 0, 0, 0 };
-        [CanBeNull] ComputeBuffer argsComputeBuffer;
-        [CanBeNull] Info<GameObject> meshResource;
+        ComputeBuffer? argsComputeBuffer;
+        Info<GameObject>? meshResource;
 
-        readonly NativeList<float4> pointBuffer = new NativeList<float4>();
+        readonly NativeList<float4> pointBuffer = new();
 
-        [CanBeNull] ComputeBuffer pointComputeBuffer;
+        ComputeBuffer? pointComputeBuffer;
         bool useIntensityForScaleY;
         bool useIntensityForAllScales;
 
-        [NotNull]
         Mesh Mesh
         {
             get => mesh != null ? mesh : throw new NullReferenceException("Mesh has not been set!");
@@ -63,8 +60,7 @@ namespace Iviz.Displays
         /// <summary>
         /// The resource to be multiplied.
         /// </summary>
-        [CanBeNull]
-        public Info<GameObject> MeshResource
+        public Info<GameObject>? MeshResource
         {
             get => meshResource;
             set
@@ -125,7 +121,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Whether to enable shadows. Displayed shadows can get bugged if the number of instances is too high.
         /// </summary>
-        public bool CastShadows { get; set; } = true;
+        public bool ShadowsEnabled { get; set; } = true;
 
         public override float ElementScale
         {
@@ -177,16 +173,15 @@ namespace Iviz.Displays
 
             UpdateTransform();
 
-            Bounds worldBounds = Collider.bounds;
+            var worldBounds = Collider.bounds;
             Properties.SetVector(BoundaryCenterID, worldBounds.center);
 
-            Material material = FindMaterial();
+            var material = FindMaterial();
 
             Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer,
-                0, Properties, CastShadows && !OcclusionOnly ? ShadowCastingMode.On : ShadowCastingMode.Off);
+                0, Properties, ShadowsEnabled && !OcclusionOnly ? ShadowCastingMode.On : ShadowCastingMode.Off);
         }
 
-        [NotNull]
         Material FindMaterial()
         {
             if (OcclusionOnly && UseIntensityForScaleY)
@@ -241,7 +236,7 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
-            Properties.SetBuffer(PointsID, (ComputeBuffer)null);
+            Properties.SetBuffer(PointsID, (ComputeBuffer?)null);
         }
 
         /// <summary>
@@ -284,7 +279,7 @@ namespace Iviz.Displays
             UpdateBuffer();
         }
 
-        public void SetDirect([NotNull] Action<NativeList<float4>> callback, int reserve = 0)
+        public void SetDirect(Action<NativeList<float4>> callback, int reserve = 0)
         {
             if (callback == null)
             {
@@ -318,9 +313,7 @@ namespace Iviz.Displays
         {
             if (Size == 0)
             {
-                Collider.size = Vector3.zero;
-                Collider.center = Vector3.zero;
-
+                Collider.SetBounds(default);
                 MeasuredIntensityBounds = Vector2.zero;
                 if (!OverrideIntensityBounds)
                 {
@@ -353,7 +346,7 @@ namespace Iviz.Displays
                 meshScale.y *= Mathf.Max(Mathf.Abs(span.x), Mathf.Abs(span.y));
             }
 
-            var baseMeshBounds = mesh.bounds;
+            var baseMeshBounds = Mesh.bounds;
             var meshBounds = new Bounds
             {
                 center = meshScale.Mult(baseMeshBounds.center + preTranslation),
@@ -380,7 +373,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsID, (ComputeBuffer)null);
+                Properties.SetBuffer(PointsID, (ComputeBuffer?)null);
             }
 
             if (pointBuffer.Capacity != 0)
