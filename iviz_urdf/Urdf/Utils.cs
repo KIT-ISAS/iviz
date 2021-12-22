@@ -53,6 +53,6 @@ namespace Iviz.Urdf
         public static string ParseString(XmlAttribute? attr, string @default)
         {
             return attr?.Value ?? @default;
-        }          
+        }
     }
 }

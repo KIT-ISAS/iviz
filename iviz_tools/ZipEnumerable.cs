@@ -55,4 +55,7 @@ public readonly struct ZipEnumerable<TA, TB> : IReadOnlyList<(TA First, TB Secon
     }
 
     public SelectEnumerable<ZipEnumerable<TA, TB>, (TA, TB), TC> Select<TC>(Func<(TA, TB), TC> f) => new(this, f);
+
+    public SelectEnumerable<ZipEnumerable<TA, TB>, (TA, TB), TC> Select<TC>(Func<TA, TB, TC> f) =>
+        new(this, ((TA first, TB second) pair) => f(pair.first, pair.second));
 }

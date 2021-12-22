@@ -57,6 +57,30 @@ namespace Iviz.Msgs
                 : AngleAxis(angle, rod / angle);
         }
 
+        public static Quaternion ToRpyRotation(this in Vector3 rpy)
+        {
+            var q = rpy.Z != 0
+                ? AngleAxis(rpy.Z, new VectorUnitZ())
+                : Quaternion.Identity;
+            
+            if (rpy.Y != 0)
+            {
+                q *= AngleAxis(rpy.Y, new VectorUnitY());
+            }
+
+            if (rpy.X != 0)
+            {
+                q *= AngleAxis(rpy.X, new VectorUnitX());
+            }
+
+            return q;
+            /*
+            return AngleAxis(rpy.Z, new VectorUnitZ())
+                   * AngleAxis(rpy.Y, new VectorUnitY())
+                   * AngleAxis(rpy.X, new VectorUnitX());
+             */
+        }
+
         public static Quaternion Normalize(Quaternion q)
         {
             double norm = System.Math.Sqrt(q.X * q.X + q.Y * q.Y + q.Z * q.Z + q.W * q.W);
@@ -72,7 +96,11 @@ namespace Iviz.Msgs
             return q;
         }
 
-        public static Pose WithPosition(this in Pose pose, in Point position) => new(position, pose.Orientation);
+        public static Pose WithPosition(this Pose pose, in Point position)
+        {
+            pose.Position = position;
+            return pose;
+        }
 
         public static Pose WithPosition(this in Pose pose, double x, double y, double z) =>
             new(new Point(x, y, z), pose.Orientation);
@@ -80,11 +108,17 @@ namespace Iviz.Msgs
         public static Pose WithOrientation(this in Pose pose, in Quaternion orientation) =>
             new(pose.Position, orientation);
 
-        public static Transform WithTranslation(this in Transform t, in Vector3 translation) =>
-            new(translation, t.Rotation);
+        public static Transform WithTranslation(this Transform t, in Vector3 translation)
+        {
+            t.Translation = translation;
+            return t;
+        }
 
-        public static Transform WithRotation(this in Transform t, in Quaternion rotation) =>
-            new(t.Translation, rotation);
+        public static Transform WithRotation(this Transform t, in Quaternion rotation)
+        {
+            t.Rotation = rotation;
+            return t;
+        }
 
         public static Transform Translate(this in Transform t, in Vector3 translation) =>
             new(t.Translation + translation, t.Rotation);

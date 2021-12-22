@@ -71,6 +71,7 @@ namespace Iviz.Urdf
         public override string ToString() => JsonConvert.SerializeObject(this);
 
         public static implicit operator Vector3(Vector3f v) => (v.X, v.Y, v.Z);
+        public static implicit operator Point(Vector3f v) => (v.X, v.Y, v.Z);
         public static implicit operator Msgs.IvizMsgs.Vector3f(Vector3f v) => (v.X, v.Y, v.Z);
 
         public bool Equals(Vector3f? other) =>

@@ -1,5 +1,7 @@
 using System.Runtime.Serialization;
 using System.Xml;
+using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
 using Newtonsoft.Json;
 
 namespace Iviz.Urdf
@@ -32,5 +34,7 @@ namespace Iviz.Urdf
         public void Deconstruct(out Vector3f rpy, out Vector3f xyz) => (rpy, xyz) = (Rpy, Xyz);
 
         public override string ToString() => JsonConvert.SerializeObject(this);
+
+        public Transform AsTransform() => new(Xyz, ((Vector3)Rpy).ToRpyRotation());
     }
 }

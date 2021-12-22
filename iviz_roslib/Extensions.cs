@@ -91,6 +91,11 @@ public static class Extensions
         Task.Run(() => publisher.WaitForAnySubscriberAsync(token), token).WaitAndRethrow();
     }
 
+    public static void WaitForAnySubscriber(this IRosChannelWriter writer, CancellationToken token = default)
+    {
+        writer.Publisher.WaitForAnySubscriber(token);
+    }
+
     public static async ValueTask WaitForAnySubscriberAsync(this IRosPublisher publisher,
         CancellationToken token = default)
     {
@@ -109,6 +114,11 @@ public static class Extensions
         {
             await Task.Delay(200, linkedSource.Token);
         }
+    }
+    
+    public static ValueTask WaitForAnySubscriberAsync(this IRosChannelWriter writer, CancellationToken token = default)
+    {
+        return writer.Publisher.WaitForAnySubscriberAsync(token);
     }
 
     public static void WaitForAnyPublisher(this IRosSubscriber subscriber, int timeoutInMs)

@@ -290,11 +290,9 @@ public static class RosChannelWriterUtils
         return writer;
     }
 
-    public static IRosChannelWriter CreateWriterForMessage(IMessage msg)
-    {
-        return CreateWriterForMessage(msg.GetType());
-    }
-
+    /// <summary>
+    /// Creates a writer suitable for the given dynamically generated message type.
+    /// </summary>
     public static async ValueTask<IRosChannelWriter> CreateWriterForMessageAsync(this IRosClient client, IMessage msg,
         string topic, CancellationToken token = default)
     {
@@ -303,6 +301,9 @@ public static class RosChannelWriterUtils
         return writer;
     }
 
+    /// <summary>
+    /// Creates a writer suitable for the given dynamically generated message type.
+    /// </summary>
     public static IRosChannelWriter CreateWriterForMessage(this IRosClient client, IMessage msg, string topic)
     {
         var writer = CreateWriterForMessage(msg.GetType());
@@ -310,7 +311,12 @@ public static class RosChannelWriterUtils
         return writer;
     }
 
-    public static IRosChannelWriter CreateWriterForMessage(Type msgType)
+    static IRosChannelWriter CreateWriterForMessage(IMessage msg)
+    {
+        return CreateWriterForMessage(msg.GetType());
+    }
+    
+    static IRosChannelWriter CreateWriterForMessage(Type msgType)
     {
         if (typeof(IMessage) == msgType)
         {

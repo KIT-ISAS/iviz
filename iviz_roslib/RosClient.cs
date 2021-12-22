@@ -369,7 +369,6 @@ public sealed class RosClient : IRosClient
         Uri? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
         new RosClient(masterUri, callerId, callerUri, ensureCleanSlate, namespaceOverride);
 
-
     /// <summary>
     /// Constructs and connects a ROS client.
     /// </summary>
@@ -386,13 +385,20 @@ public sealed class RosClient : IRosClient
     /// Other clients will use this address to connect to this node.
     /// Leave empty to generate one automatically. </param>
     /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
+    /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
     public RosClient(string? masterUri,
         string? callerId = null,
         string? callerUri = null,
-        bool ensureCleanSlate = true) :
-        this(TryToCreateUri(masterUri, true), callerId, TryToCreateUri(callerUri, false), ensureCleanSlate)
+        bool ensureCleanSlate = true,
+        string? namespaceOverride = null) :
+        this(TryToCreateUri(masterUri, true), callerId, TryToCreateUri(callerUri, false), ensureCleanSlate,
+            namespaceOverride)
     {
     }
+
+    public static RosClient Create(string? masterUri, string? callerId = null,
+        string? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
+        new RosClient(masterUri, callerId, callerUri, ensureCleanSlate, namespaceOverride);
 
     static Uri? TryToCreateUri(string? uri, bool isMaster)
     {
@@ -1621,7 +1627,7 @@ public sealed class RosClient : IRosClient
         }
 
         await finalTask.AwaitNoThrow(this);
-            
+
         RosMasterClient.Dispose();
     }
 

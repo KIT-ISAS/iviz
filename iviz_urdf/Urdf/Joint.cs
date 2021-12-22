@@ -1,5 +1,7 @@
 using System.Runtime.Serialization;
 using System.Xml;
+using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -31,23 +33,23 @@ namespace Iviz.Urdf
             Planar
         }
 
-        /// Specifies a unique name of the joint
+        /// Specifies a unique name of the joint.
         [DataMember]
         public string Name { get; }
 
-        /// Specifies the type of joint
+        /// Specifies the type of joint.
         [DataMember]
         public JointType Type { get; }
 
-        /// This is the transform from the parent link to the child link. The joint is located at the origin of the child link, as shown in the figure above
+        /// This is the transform from the parent link to the child link. The joint is located at the origin of the child link.
         [DataMember]
         public Origin Origin { get; }
 
-        /// Parent link name
+        /// Parent link name.
         [DataMember]
         public Parent Parent { get; }
 
-        /// Child link name
+        /// Child link name.
         [DataMember]
         public Child Child { get; }
 
@@ -98,6 +100,56 @@ namespace Iviz.Urdf
             Child = child ?? throw new MalformedUrdfException(node);
             Axis = axis ?? Axis.Right;
             Limit = limit ?? Limit.Empty;
+        }
+
+        /// <summary>
+        /// Gets the transform of this joint's origin when the joint has the given value. 
+        /// </summary>
+        public Transform GetOriginTransform(double jointValue)
+        {
+            var originTransform = Origin.AsTransform();
+            if (jointValue == 0 || Type == JointType.Fixed)
+            {
+                return originTransform;
+            }
+
+            bool isIdentityRotation = Origin.Rpy is (0, 0, 0);
+            switch (Type)
+            {
+                case JointType.Continuous or JointType.Revolute:
+                    var jointRotation = Quaternion.AngleAxis(jointValue, Axis.Xyz);
+                    if (isIdentityRotation)
+                    {
+                        originTransform.Rotation = jointRotation;
+                    }
+                    else
+                    {
+                        originTransform.Rotation *= jointRotation;
+                    }
+
+                    return originTransform;
+                case JointType.Prismatic:
+                    var jointTranslation = (Vector3)Axis.Xyz * jointValue;
+                    if (isIdentityRotation)
+                    {
+                        originTransform.Translation = jointTranslation;
+                    }
+                    else
+                    {
+                        originTransform.Translation += originTransform.Rotation * jointTranslation;
+                    }
+
+                    return originTransform;
+                default:
+                    return originTransform;
+            }
+        }
+
+        public Transform GetDefaultOriginTransform()
+        {
+            return Type is JointType.Continuous or JointType.Fixed || Limit.Lower <= 0 && 0 <= Limit.Upper
+                ? Origin.AsTransform()
+                : GetOriginTransform(Limit.Lower);
         }
 
         static JointType GetJointType(string type, XmlNode node)

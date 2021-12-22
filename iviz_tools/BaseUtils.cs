@@ -85,6 +85,20 @@ public static class BaseUtils
 
         return sum;
     }
+    
+    public static int Count<T>(this ReadOnlySpan<T> ts, Func<T, bool> selector)
+    {
+        int sum = 0;
+        foreach (T t in ts)
+        {
+            if (selector(t))
+            {
+                sum++;
+            }
+        }
+
+        return sum;
+    }    
 
     public static int Sum<T>(this T[] ts, Func<T, int> selector)
     {
