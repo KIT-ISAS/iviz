@@ -87,6 +87,9 @@ namespace Iviz.Core
         public static void Ros2Unity(this in Point p, ref float4 f) =>
             (f.x, f.y, f.z) = ((float)-p.Y, (float)p.Z, (float)p.X);
 
+        public static void Ros2Unity(this in Point p, out Vector3 v) =>
+            (v.x, v.y, v.z) = ((float)-p.Y, (float)p.Z, (float)p.X);
+
         public static Color ToUnityColor(this in ColorRGBA p) =>
             new(p.R, p.G, p.B, p.A);
 

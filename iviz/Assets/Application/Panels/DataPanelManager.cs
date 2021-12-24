@@ -35,11 +35,13 @@ namespace Iviz.App
             gameObject.SetActive(true);
             started = true;
             GameThread.EverySecond += UpdateSelected;
+            GameThread.EveryFastTick += UpdateSelectedFast;
         }
 
         void OnDestroy()
         {
             GameThread.EverySecond -= UpdateSelected;
+            GameThread.EveryFastTick -= UpdateSelectedFast;
         }
 
         public T GetPanelByResourceType<T>(ModuleType resource) where T : DataPanelContents
@@ -82,7 +84,7 @@ namespace Iviz.App
                 throw new NullReferenceException("Invalid selected panel: null");
             }
 
-            if (newSelected == SelectedModuleData)
+            if (SelectedModuleData == newSelected)
             {
                 return;
             }
@@ -134,24 +136,25 @@ namespace Iviz.App
 
         GameObject CreatePanelObject(string panelName)
         {
-            GameObject o = Resource.Widgets.DataPanel.Instantiate(transform);
+            var o = Resource.Widgets.DataPanel.Instantiate(transform);
             o.name = panelName;
             return o;
         }
 
         void UpdateSelected()
         {
-            if (SelectedModuleData?.Panel is null)
+            if (SelectedModuleData?.Panel is { isActiveAndEnabled: true })
             {
-                return;
+                SelectedModuleData.UpdatePanel();
             }
-
-            if (!SelectedModuleData.Panel.isActiveAndEnabled)
+        }
+        
+        void UpdateSelectedFast()
+        {
+            if (SelectedModuleData?.Panel is { isActiveAndEnabled: true })
             {
-                return;
+                SelectedModuleData.UpdatePanelFast();
             }
-
-            SelectedModuleData.UpdatePanel();
         }
     }
 }

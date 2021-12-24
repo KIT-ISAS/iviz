@@ -13,19 +13,22 @@ namespace Iviz.App
     {
         [SerializeField] TMP_Text? label = null;
         bool interactable = true;
+        uint? textHash;
 
         TMP_Text Label => label.AssertNotNull(nameof(label));
-        
+
         public string Text
         {
             get => Label.text;
             set
             {
-                if (value == null)
+                uint newHash = Crc32Calculator.Compute(value ?? throw new ArgumentNullException(nameof(value)));
+                if (newHash == textHash)
                 {
-                    throw new ArgumentNullException(nameof(value));
+                    return;
                 }
 
+                textHash = newHash;
                 name = "DataLabel:" + value;
                 Label.text = value;
             }

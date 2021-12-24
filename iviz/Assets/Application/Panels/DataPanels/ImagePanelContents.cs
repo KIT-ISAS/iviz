@@ -31,6 +31,8 @@ namespace Iviz.App
             Listener = p.AddListener();
             Frame = p.AddFrame();
             Description = p.AddDataLabel("").SetHasRichText(true).SetCentered();
+            PreviewWidget = p.AddImagePreviewWidget("Preview");
+
             Colormap = p.AddDropdown("Colormap")
                 .SetOptions(Resource.Colormaps.Names)
                 .SetIndex((int)ColormapId.gray);
@@ -46,8 +48,6 @@ namespace Iviz.App
                 .Attach(Max)
                 .Attach(FlipMinMax)
                 .UpdateSize();
-
-            PreviewWidget = p.AddImagePreviewWidget("Preview");
 
             ShowBillboard = p.AddToggle("Show As Billboard");
             BillboardSize = p.AddSlider("Billboard Size").SetMinValue(0.1f).SetMaxValue(10);

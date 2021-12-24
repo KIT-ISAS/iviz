@@ -667,7 +667,8 @@ namespace Iviz.Displays
 
             UnityEngine.Object.Destroy(Texture);
             Texture = null;
-            Material.SetTexture(MainTexID, Texture);
+            Material.SetTexture(MainTexID, Texture2D.whiteTexture);
+            Material.DisableKeyword("USE_INTENSITY");
             TextureChanged?.Invoke(Texture);
         }
 

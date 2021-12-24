@@ -327,7 +327,7 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    IConfiguration[] configurations = ModuleDatas.Select(data => data.Configuration).ToArray();
+                    var configurations = ModuleDatas.Select(data => data.Configuration).ToArray();
                     result = configurations.Select(JsonConvert.SerializeObject).ToArray();
                 }
                 catch (JsonException e)

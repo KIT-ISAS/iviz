@@ -177,6 +177,7 @@ namespace Iviz.Controllers
                 {
                     config.ColorTopic = "";
                     colorImageTexture.Reset();
+                    Colormap = Colormap;
                     return;
                 }
 
@@ -440,6 +441,7 @@ namespace Iviz.Controllers
         {
             ColorListener?.Dispose();
             DepthListener?.Dispose();
+            depthInfoListener?.Dispose();
 
             projector.ReturnToPool();
             node.DestroySelf();

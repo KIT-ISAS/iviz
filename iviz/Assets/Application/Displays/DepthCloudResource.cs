@@ -204,6 +204,19 @@ namespace Iviz.Displays
 
             ColorImage = ColorImage;
             DepthImage = DepthImage;
+
+            if (intrinsic is { } validatedIntrinsic)
+            {
+                Intrinsic = validatedIntrinsic;
+            }
+
+            if (ColorImage?.Texture != null)
+            {
+                return;
+            }
+
+            Colormap = Colormap;
+            IntensityBounds = IntensityBounds;
         }
 
         void UpdateColorTexture(Texture2D? texture)
@@ -227,22 +240,22 @@ namespace Iviz.Displays
             UpdatePointComputeBuffers(texture);
             UpdatePosValues(texture);
 
+
             if (depthImage == null || depthImage.Texture == null)
             {
                 return;
             }
 
-            switch (depthImage.Texture.format)
-            {
-                case TextureFormat.RFloat:
-                    depthImage.NormalizedIntensityBounds = new Vector2(0, 5);
-                    Material.SetFloat(PDepthScale, 1);
-                    break;
-                case TextureFormat.R16:
-                    depthImage.NormalizedIntensityBounds = new Vector2(0, 5000 / 65535f);
-                    Material.SetFloat(PDepthScale, 65.535f);
-                    break;
-            }
+            float depthScale =
+                depthImage.Texture.format switch
+                {
+                    TextureFormat.RFloat => 1,
+                    TextureFormat.R16 => 65.535f, // 0..65535 values in mm
+                    TextureFormat.R8 => 2.55f, // 0..255 values in cm
+                    _ => 1
+                };
+
+            Material.SetFloat(PDepthScale, depthScale);
         }
 
         void UpdatePointComputeBuffers(Texture2D? sourceTexture)
@@ -263,8 +276,7 @@ namespace Iviz.Displays
             {
                 foreach (int u in ..width)
                 {
-                    uvs[off] = new Vector2((u + 0.5f) * invWidth, (v + 0.5f) * invHeight);
-                    off++;
+                    uvs[off++] = new Vector2((u + 0.5f) * invWidth, (v + 0.5f) * invHeight);
                 }
             }
 

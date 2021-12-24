@@ -815,7 +815,13 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(entry));
             }
 
-            RemoveModule(moduleDatas.IndexOf(entry));
+            int index = moduleDatas.IndexOf(entry);
+            if (index == -1)
+            {
+                throw new InvalidOperationException($"Tried to remove non-existing module '{entry}'");
+            }
+            
+            RemoveModule(index);
 
             if (entry.ModuleType == ModuleType.InteractiveMarker)
             {

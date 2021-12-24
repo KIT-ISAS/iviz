@@ -64,6 +64,9 @@ namespace Iviz.App
             panel.Max.Value = controller.MaxIntensity;
             panel.FlipMinMax.Value = controller.FlipMinMax;
 
+            panel.Min.Interactable = controller.OverrideMinMax;
+            panel.Max.Interactable = controller.OverrideMinMax;
+
             panel.Colormap.Index = (int)controller.Colormap;
 
             panel.Color.Value = controller.ColorTopic;
@@ -79,6 +82,7 @@ namespace Iviz.App
             panel.Color.EndEdit += f =>
             {
                 controller.ColorTopic = f.Length == 0 || f[0] == NoneStr[0] ? "" : f;
+                panel.ColorPreview.SetMaterialDirty();
                 panel.ColorTopic.Listener = controller.ColorListener;
 
                 if (colorDialogData != null)
@@ -127,24 +131,32 @@ namespace Iviz.App
             panel.Min.ValueChanged += f => controller.MinIntensity = f;
             panel.Max.ValueChanged += f => controller.MaxIntensity = f;
             panel.FlipMinMax.ValueChanged += f => controller.FlipMinMax = f;
-            panel.CloseButton.Clicked += Close;
-            panel.ForceMinMax.ValueChanged += f => controller.OverrideMinMax = f;
+            panel.ForceMinMax.ValueChanged += f =>
+            {
+                controller.OverrideMinMax = f;
+                panel.Min.Interactable = f;
+                panel.Max.Interactable = f;
+            };
         }
 
         static string SanitizeTitle(string? topic) => topic is null or "" ? "[Empty]" : topic;
 
         public override void UpdatePanel()
         {
-            base.UpdatePanel();
-
             var topics = GetImageTopics();
             panel.Color.Hints = topics;
             panel.Depth.Hints = topics;
-            panel.ColorPreview.ToggleImageEnabled();
-            panel.DepthPreview.ToggleImageEnabled();
+
+            panel.Description.Text = controller.Description;
+        }
+
+        public override void UpdatePanelFast()
+        {
             colorDialogData?.ToggleImageEnabled();
             depthDialogData?.ToggleImageEnabled();
-            panel.Description.Text = controller.Description;
+
+            panel.ColorPreview.UpdateMaterial();
+            panel.DepthPreview.UpdateMaterial();
         }
 
         static List<string> GetImageTopics()

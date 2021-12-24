@@ -18,6 +18,7 @@ namespace Iviz.App
 
         TfFrame? frame;
         IHasFrame? owner;
+        uint? textHash;
 
         public IHasFrame? Owner
         {
@@ -26,11 +27,11 @@ namespace Iviz.App
             {
                 if (owner == null && value != null)
                 {
-                    GameThread.EverySecond += UpdateStats;
+                    GameThread.EveryFastTick += UpdateStats;
                 }
                 else if (owner != null && value == null)
                 {
-                    GameThread.EverySecond -= UpdateStats;
+                    GameThread.EveryFastTick -= UpdateStats;
                 }
 
                 owner = value;
@@ -43,34 +44,33 @@ namespace Iviz.App
             get => frame;
             set
             {
-                if (frame == value)
+                frame = value;
+
+                using var description = BuilderPool.Rent();
+                if (frame == null)
+                {
+                    description.Append("<i>(none)</i>");
+                }
+                else if (TfListener.FixedFrameId == frame.Id)
+                {
+                    description.Append("<b>").Append(frame.Id).Append("</b> <i>[Fixed]</i>");
+                }
+                else
+                {
+                    description.Append("<b>").Append(frame.Id).Append("</b>\n");
+                    RosUtils.FormatPose(frame.OriginWorldPose, description, RosUtils.PoseFormat.OnlyPosition);
+                }
+
+                uint newHash = Crc32Calculator.Compute(description);
+                if (newHash == textHash)
                 {
                     return;
                 }
 
-                frame = value;
+                textHash = newHash;
+                Text.SetText(description);
 
-
-                using (var description = BuilderPool.Rent())
-                {
-                    if (frame == null)
-                    {
-                        description.Append("<i>(none)</i>");
-                    }
-                    else if (TfListener.FixedFrameId == frame.Id)
-                    {
-                        description.Append("<b>").Append(frame.Id).Append("</b> <i>[Fixed]</i>");
-                    }
-                    else
-                    {
-                        description.Append("<b>").Append(frame.Id).Append("</b>\n");
-                        RosUtils.FormatPose(frame.OriginWorldPose, description, RosUtils.PoseFormat.OnlyPosition);
-                    }
-
-                    Text.SetText(description);
-                }
-
-                UpdateStats();
+                //UpdateStats();
             }
         }
 

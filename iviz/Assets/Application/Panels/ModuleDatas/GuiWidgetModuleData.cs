@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 
 namespace Iviz.App
 {
-    public sealed class GuiDialogModuleData : ListenerModuleData, IInteractableModuleData
+    public sealed class GuiWidgetModuleData : ListenerModuleData, IInteractableModuleData
     {
         readonly GuiWidgetListener dialogListener;
         readonly GuiDialogPanelContents dialogPanel;
@@ -19,11 +19,11 @@ namespace Iviz.App
         public override DataPanelContents Panel => dialogPanel;
         public override IConfiguration Configuration => dialogListener.Config;
 
-        public GuiDialogModuleData(ModuleDataConstructor constructor) :
+        public GuiWidgetModuleData(ModuleDataConstructor constructor) :
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
             dialogPanel = DataPanelManager.GetPanelByResourceType<GuiDialogPanelContents>(ModuleType.GuiDialog);
-            dialogListener = new GuiWidgetListener(this, (GuiDialogConfiguration?)constructor.Configuration, Topic);
+            dialogListener = new GuiWidgetListener(this, (GuiWidgetConfiguration?)constructor.Configuration, Topic);
             Interactable = ModuleListPanel.SceneInteractable;
             UpdateModuleButton();
         }
@@ -49,7 +49,7 @@ namespace Iviz.App
             {
                 switch (field)
                 {
-                    case nameof(GuiDialogConfiguration.Visible):
+                    case nameof(GuiWidgetConfiguration.Visible):
                         break;
                     default:
                         Core.RosLogger.Error($"{this}: Unknown field '{field}'");

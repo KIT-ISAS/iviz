@@ -103,14 +103,17 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            base.UpdatePanel();
             panel.Colormap.Interactable = listener.IsMono;
             panel.ForceMinMax.Interactable = listener.IsMono;
             panel.Min.Interactable = listener.IsMono && listener.OverrideMinMax;
             panel.Max.Interactable = listener.IsMono && listener.OverrideMinMax;
             panel.FlipMinMax.Interactable = listener.IsMono;
             panel.Description.Text = $"<b>{listener.Description}</b>";
-            panel.PreviewWidget.ToggleImageEnabled();
+        }
+        
+        public override void UpdatePanelFast()
+        {
+            panel.PreviewWidget.UpdateMaterial();
             imageDialogData?.ToggleImageEnabled();
         }
 

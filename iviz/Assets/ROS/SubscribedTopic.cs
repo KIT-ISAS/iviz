@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
@@ -15,17 +16,16 @@ namespace Iviz.Ros
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;
 
-        readonly ConcurrentSet<Listener<T>> listeners = new();
         readonly string topic;
         readonly RosTransportHint transportHint;
 
-        Listener<T>[] listenerCache = Array.Empty<Listener<T>>();
+        Listener<T>[] listeners = Array.Empty<Listener<T>>();
         BagListener? bagListener;
         string? subscriberId;
         string? bagId;
 
         public IRosSubscriber? Subscriber { get; private set; }
-        
+
         public SubscribedTopic(string topic, RosTransportHint transportHint)
         {
             this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
@@ -34,21 +34,29 @@ namespace Iviz.Ros
 
         public void Add(IListener subscriber)
         {
-            listeners.Add((Listener<T>)subscriber);
-            listenerCache = listeners.ToArray();
+            if (listeners.Contains(subscriber))
+            {
+                return;
+            }
+
+            listeners = listeners.Append((Listener<T>)subscriber).ToArray();
         }
 
         public void Remove(IListener subscriber)
         {
-            listeners.Remove((Listener<T>)subscriber);
-            listenerCache = listeners.ToArray();
+            if (!listeners.Contains(subscriber))
+            {
+                return;
+            }
+
+            listeners = listeners.Where(s => s != subscriber).ToArray();
         }
 
         public async ValueTask SubscribeAsync(RosClient? client, IListener? listener, CancellationToken token)
         {
             if (listener != null)
             {
-                listeners.Add((Listener<T>)listener);
+                Add(listener);
             }
 
             token.ThrowIfCancellationRequested();
@@ -129,7 +137,7 @@ namespace Iviz.Ros
             }
         }
 
-        public int Count => listeners.Count;
+        public int Count => listeners.Length;
 
         public void Invalidate()
         {
@@ -138,7 +146,7 @@ namespace Iviz.Ros
 
         void Callback(in T msg, IRosReceiver receiver)
         {
-            var cache = listenerCache;
+            var cache = listeners;
             foreach (var listener in cache)
             {
                 try

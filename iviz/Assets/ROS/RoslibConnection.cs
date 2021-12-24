@@ -162,12 +162,12 @@ namespace Iviz.Ros
             {
                 const int rpcTimeoutInMs = 3000;
 
-                
+
                 //Tools.Logger.LogDebug = Core.Logger.Debug;
                 Tools.Logger.LogError = RosLogger.Error;
                 Tools.Logger.Log = RosLogger.Info;
 
-                
+
                 RosLogger.Internal("Connecting...");
 
                 connectionTs.Cancel();
@@ -233,7 +233,7 @@ namespace Iviz.Ros
 
                 RosLogger.Debug("Connected!");
                 RosLogger.Internal("<b>Connected!</b>");
-                
+
                 LogConnectionCheck(token);
 
                 return true;
@@ -258,7 +258,7 @@ namespace Iviz.Ros
                         if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
                         {
                             RosLogger.Internal("Note: This appears to be a local ROS master. " +
-                                                 "Make sure that <b>My URI</b> is a reachable address, and restart the master.");
+                                               "Make sure that <b>My URI</b> is a reachable address, and restart the master.");
                         }
 
                         break;
@@ -341,8 +341,8 @@ namespace Iviz.Ros
             if (sender.NumSubscribers == 0)
             {
                 RosLogger.Internal("<b>Warning:</b> Our logger has no subscriptions yet. " +
-                                     "Maybe /rosout hasn't seen us yet. " +
-                                     "But it also may be that outside nodes cannot connect to us, for example due to a firewall.");
+                                   "Maybe /rosout hasn't seen us yet. " +
+                                   "But it also may be that outside nodes cannot connect to us, for example due to a firewall.");
             }
         }
 
@@ -374,7 +374,7 @@ namespace Iviz.Ros
                         if (!warningSet)
                         {
                             RosLogger.Internal("<b>Warning:</b> The master is not responding. It was last seen at" +
-                                                 $" [{lastMasterAccess:HH:mm:ss}].");
+                                               $" [{lastMasterAccess:HH:mm:ss}].");
                             connection.SetConnectionWarningState(true);
                             warningSet = true;
                         }
@@ -458,10 +458,10 @@ namespace Iviz.Ros
             {
                 time.GlobalTimeOffset = offset;
                 string offsetStr = Math.Abs(offset.TotalSeconds) >= 1
-                    ? offset.TotalSeconds.ToString("#,0.###", BuiltIns.Culture) + " sec"
-                    : offset.TotalMilliseconds.ToString("#,0.###", BuiltIns.Culture) + " ms";
+                    ? $"{offset.TotalSeconds:#,0.###} sec"
+                    : $"{offset.TotalMilliseconds:#,0.###} ms";
                 RosLogger.Info($"[NtpChecker] Master clock appears to have a time offset of {offsetStr}. " +
-                                 "Local published messages will use this offset.");
+                               "Local published messages will use this offset.");
             }
         }
 
@@ -595,8 +595,7 @@ namespace Iviz.Ros
             advertiser.Id = newAdvertisedTopic.Id;
         }
 
-        public void AdvertiseService<T>(string service, Action<T> callback)
-            where T : IService, new()
+        public void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new()
         {
             if (service == null)
             {
@@ -615,8 +614,7 @@ namespace Iviz.Ros
             });
         }
 
-        public void AdvertiseService<T>(string service, Func<T, ValueTask> callback)
-            where T : IService, new()
+        public void AdvertiseService<T>(string service, Func<T, ValueTask> callback) where T : IService, new()
         {
             if (service == null)
             {
@@ -734,7 +732,7 @@ namespace Iviz.Ros
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                Debug.LogWarning($"Exception during RoslibConnection.Publish(): {e.Message}");
+                RosLogger.Error($"Exception during RoslibConnection.Publish(): ", e);
             }
         }
 
@@ -846,8 +844,8 @@ namespace Iviz.Ros
                 publishers[advertiser.Id] = null;
             }
 
-            return Connected 
-                ? advertisedTopic.UnadvertiseAsync(token) 
+            return Connected
+                ? advertisedTopic.UnadvertiseAsync(token)
                 : default;
         }
 
@@ -858,7 +856,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(subscriber));
             }
 
-            CancellationToken token = connectionTs.Token;
+            var token = connectionTs.Token;
             AddTask(async () =>
             {
                 try
@@ -884,10 +882,10 @@ namespace Iviz.Ros
             {
                 return default;
             }
-            
+
             subscribersByTopic.Remove(subscriber.Topic);
-            return Connected 
-                ? subscribedTopic.UnsubscribeAsync(token) 
+            return Connected
+                ? subscribedTopic.UnsubscribeAsync(token)
                 : default;
         }
 
@@ -905,10 +903,7 @@ namespace Iviz.Ros
                 {
                     await UnadvertiseServiceImpl(service, token);
                 }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception e)
+                catch (Exception e) when (e is not OperationCanceledException)
                 {
                     RosLogger.Error("Exception during RoslibConnection.AdvertiseService(): ", e);
                 }
@@ -997,10 +992,7 @@ namespace Iviz.Ros
                 tokenSource.CancelAfter(timeoutInMs);
                 cachedTopics = await Client.GetSystemTopicTypesAsync(tokenSource.Token);
             }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception e)
+            catch (Exception e) when (e is not OperationCanceledException)
             {
                 RosLogger.Error("Exception during RoslibConnection.GetSystemTopicTypesAsync(): ", e);
             }
@@ -1024,10 +1016,7 @@ namespace Iviz.Ros
                     using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, internalToken);
                     cachedParameters = await Client.Parameters.GetParameterNamesAsync(tokenSource.Token);
                 }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception e)
+                catch (Exception e) when (e is not OperationCanceledException)
                 {
                     RosLogger.Error("Exception during RoslibConnection.GetSystemParameterList(): ", e);
                 }
@@ -1107,10 +1096,7 @@ namespace Iviz.Ros
                 tokenSource.CancelAfter(timeoutInMs);
                 cachedSystemState = await Client.GetSystemStateAsync(tokenSource.Token);
             }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception e)
+            catch (Exception e) when (e is not OperationCanceledException)
             {
                 RosLogger.Error("Exception during RoslibConnection.GetSystemState(): ", e);
             }
@@ -1136,45 +1122,6 @@ namespace Iviz.Ros
                 ? basePublisher.NumSubscribers
                 : 0;
         }
-
-        /*
-        public bool TryResolveIdFromUri(Uri uri, out string topicName)
-        {
-            if (resolver == null)
-            {
-                topicName = "";
-                return false;
-            }
-
-            if (resolver.TryGetId(uri.ToString(), out topicName))
-            {
-                return true;
-            }
-            
-            Task.Run(async () =>
-            {
-                if (!Connected || connectionTs.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                try
-                {
-                    var client = new RosNodeClient(Client.CallerId, Client.CallerUri, uri);
-                    client.
-                    cachedParameters = await Client.RosMasterClient.LookupNode() .GetParameterNamesAsync(tokenSource.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception e)
-                {
-                    RosLogger.Error("Exception during RoslibConnection.GetSystemParameterList(): ", e);
-                }
-            }, connectionTs.Token);
-        }
-        */
-
 
         internal override void Stop()
         {

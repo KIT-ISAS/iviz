@@ -188,7 +188,7 @@ namespace Iviz.Core
 
             return entry.Parent is null
                 ? childDescriptions.ToArray()
-                : new[] { BackDescription(entry.Parent) }.Concat(childDescriptions).ToArray();
+                : childDescriptions.Prepend(BackDescription(entry.Parent)).ToArray();
         }
 
         static MenuEntryDescription BackDescription(MenuEntryList.Entry parent) => new(parent, "Back");

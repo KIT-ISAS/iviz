@@ -29,7 +29,7 @@ namespace Iviz.App
         [DataMember] public List<PathConfiguration> Paths { get; set; } = new();
         [DataMember] public List<GridMapConfiguration> GridMaps { get; set; } = new();
         [DataMember] public List<OctomapConfiguration> Octomaps { get; set; } = new();
-        [DataMember] public List<GuiDialogConfiguration> Dialogs { get; set; } = new();
+        [DataMember] public List<GuiWidgetConfiguration> Dialogs { get; set; } = new();
         [DataMember] public ARConfiguration AR { get; set; } = new();
         [DataMember] public JoystickConfiguration Joystick { get; set; } = new();
         [DataMember] public XRConfiguration XR { get; set; } = new();

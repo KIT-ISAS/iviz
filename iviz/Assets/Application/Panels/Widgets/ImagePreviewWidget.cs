@@ -15,7 +15,7 @@ namespace Iviz.App
 
         void Awake()
         {
-            button.onClick.AddListener(() => { Clicked?.Invoke(); });
+            button.onClick.AddListener(() => Clicked?.Invoke());
         }
 
         bool interactable = true;
@@ -68,10 +68,15 @@ namespace Iviz.App
             return this;
         }
 
-        public void ToggleImageEnabled()
+        public void UpdateMaterial()
         {
             image.enabled = false;
             image.enabled = true;
+        }
+        
+        public void SetMaterialDirty()
+        {
+            image.SetMaterialDirty();
         }
 
         public void ClearSubscribers()

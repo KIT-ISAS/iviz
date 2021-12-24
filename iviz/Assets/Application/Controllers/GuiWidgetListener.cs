@@ -30,7 +30,7 @@ namespace Iviz.Controllers
 
 
         readonly IModuleData? moduleData;
-        readonly GuiDialogConfiguration config = new();
+        readonly GuiWidgetConfiguration config = new();
         readonly Dictionary<string, GuiObject> widgets = new();
         readonly Dictionary<string, GuiObject> dialogs = new();
         uint feedbackSeq;
@@ -43,16 +43,16 @@ namespace Iviz.Controllers
         public override IModuleData ModuleData =>
             moduleData ?? throw new InvalidOperationException("Listener has no module data");
 
-        public GuiDialogConfiguration Config
+        public GuiWidgetConfiguration Config
         {
             get => config;
             set { config.Topic = value.Topic; }
         }
 
-        public GuiWidgetListener(IModuleData? moduleData, GuiDialogConfiguration? configuration, string topic)
+        public GuiWidgetListener(IModuleData? moduleData, GuiWidgetConfiguration? configuration, string topic)
         {
             this.moduleData = moduleData;
-            Config = configuration ?? new GuiDialogConfiguration
+            Config = configuration ?? new GuiWidgetConfiguration
             {
                 Topic = topic
             };

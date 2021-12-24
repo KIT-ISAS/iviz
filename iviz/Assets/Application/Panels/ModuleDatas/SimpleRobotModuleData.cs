@@ -20,8 +20,7 @@ namespace Iviz.App
     public sealed class SimpleRobotModuleData : ModuleData
     {
         const string ParamSubstring = "_description";
-        
-        static readonly string[] NoneStr = {"<color=#b0b0b0ff><i><none></i></color>"};
+        const string NoneStr = "<color=#b0b0b0ff><i><none></i></color>";
 
         readonly SimpleRobotPanelContents panel;
 
@@ -187,7 +186,7 @@ namespace Iviz.App
             return list;
         }
 
-        static IEnumerable<string> GetSavedRobots() => NoneStr.Concat(Resource.GetRobotNames());
+        static IEnumerable<string> GetSavedRobots() => Resource.GetRobotNames().Prepend(NoneStr);
 
         static IEnumerable<string> GetParameterHints(CancellationToken token) => GetParameterCandidates(token);
 
@@ -196,7 +195,8 @@ namespace Iviz.App
         protected override void UpdateModuleButton()
         {
             string text =
-                $"{Resource.Font.Split(RobotController.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n<b>{ModuleType}</b>";
+                $"{Resource.Font.Split(RobotController.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n" +
+                $"<b>{ModuleType}</b>";
             ButtonText = RobotController.Visible ? text : $"<color=grey>{text}</color>";
         }
 
