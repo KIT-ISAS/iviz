@@ -42,6 +42,12 @@ public readonly struct Rent<T> : IReadOnlyList<T>, IDisposable  where T : unmana
         }
     }
 
+    public Rent(ReadOnlySpan<T> span) : this(span.Length)
+    {
+        span.CopyTo(AsSpan());
+    }
+
+
     Rent(T[] array, int length) => (Array, Length) = (array, length);
 
     public void Dispose()
