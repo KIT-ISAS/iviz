@@ -2,7 +2,9 @@
 
 using System;
 using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Displays.Highlighters;
 using Iviz.Resources;
 using Iviz.Tools;
 using Unity.Mathematics;
@@ -28,6 +30,9 @@ namespace Iviz.Displays
         uint? previousHash;
         bool newFlipMinMax;
 
+        float cellSize;
+        OccupancyGridResource.Rect bounds;
+
         Material Material => material != null
             ? material
             : material = Resource.Materials.OccupancyGridTexture.Instantiate();
@@ -35,8 +40,8 @@ namespace Iviz.Displays
         MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
 
         bool IsProcessing { get; set; }
-
         public int NumValidValues { get; private set; }
+        public string Title { get; set; } = "";
 
         public override Vector2 IntensityBounds
         {
@@ -66,6 +71,7 @@ namespace Iviz.Displays
             base.Awake();
             Colormap = ColormapId.hsv;
             FlipMinMax = false;
+            Layer = LayerType.Collider;
         }
 
         Texture2D EnsureSize(int sizeX, int sizeY)
@@ -91,10 +97,13 @@ namespace Iviz.Displays
             return texture;
         }
 
-        public void Set(ReadOnlySpan<sbyte> values, float cellSize, int numCellsX, OccupancyGridResource.Rect bounds,
-            Pose pose)
+        public void Set(ReadOnlySpan<sbyte> values, float newCellSize, int numCellsX,
+            in OccupancyGridResource.Rect newBounds, Pose pose)
         {
             IsProcessing = true;
+
+            cellSize = newCellSize;
+            bounds = newBounds;
 
             int segmentWidth = bounds.Width;
             int segmentHeight = bounds.Height;
@@ -213,8 +222,10 @@ namespace Iviz.Displays
         public override void Suspend()
         {
             base.Suspend();
+            cellSize = 0;
             previousHash = null;
             MeshRenderer.enabled = true;
+            Title = "";
         }
 
         static void CreateMipmaps(Span<sbyte> array, int width, int height)
@@ -333,7 +344,7 @@ namespace Iviz.Displays
             int sum = value.x + value.y + value.z + value.w;
             */
 
-            
+
             int signA = ~a >> 8; // a >= 0 ? -1 : 0
             int signB = ~b >> 8; // b >= 0 ? -1 : 0
             int signC = ~c >> 8; // c >= 0 ? -1 : 0
@@ -353,7 +364,7 @@ namespace Iviz.Displays
             int valueD = d & signD; // d >= 0 ? d : 0
 
             int sum = valueA + valueB + valueC + valueD;
-            
+
             return numValid switch
             {
                 0 => -1,
@@ -366,9 +377,37 @@ namespace Iviz.Displays
 
         public void Highlight(in Vector3 hitPoint)
         {
-            throw new NotImplementedException();
+            int segmentWidth = bounds.Width;
+            int segmentHeight = bounds.Height;
+
+            var (localX, localY, localZ) = Transform.InverseTransformPoint(hitPoint);
+            int coordU = Mathf.Clamp((int)((0.5f - localX) * segmentWidth), 0, segmentWidth - 1);
+            int coordV = Mathf.Clamp((int)((localZ + 0.5f) * segmentHeight), 0, segmentHeight - 1);
+            sbyte value = buffer[(segmentHeight - 1 - coordV) * segmentWidth + coordU];
+
+            float clampedX = 0.5f - (coordU + 0.5f) / segmentWidth;
+            float clampedZ = (coordV + 0.5f) / segmentHeight - 0.5f;
+            var localClamped = new Vector3(clampedX, localY, clampedZ);
+            var worldClamped = Transform.TransformPoint(localClamped);
+            var unityPose = Pose.identity.WithPosition(worldClamped);
+
+            string caption;
+            using (var description = BuilderPool.Rent())
+            {
+                description.Append("<b>").Append(Title).Append("</b>").AppendLine();
+                RosUtils.FormatPose(TfListener.RelativeToFixedFrame(unityPose), description,
+                    RosUtils.PoseFormat.OnlyPosition, 2);
+                description.AppendLine();
+                description
+                    .Append("<b>u: </b>").Append(coordU + bounds.xMin)
+                    .Append(" <b>v: </b>").Append(coordV + bounds.yMin).AppendLine()
+                    .Append(value);
+                caption = description.ToString();
+            }
+
+            FAnimator.Start(new ClickedPoseHighlighter(unityPose, caption, 2));
         }
 
-        public bool IsAlive => true;
+        public bool IsAlive => Visible && cellSize != 0;
     }
 }

@@ -55,14 +55,10 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool PreferUdp
+        bool PreferUdp
         {
             get => config.PreferUdp;
-            set
-            {
-                config.PreferUdp = value;
-                Listener.TransportHint = value ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
-            }
+            set => config.PreferUdp = value;
         }
 
         public override bool Visible

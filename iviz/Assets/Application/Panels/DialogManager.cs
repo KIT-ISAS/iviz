@@ -21,6 +21,7 @@ namespace Iviz.App
         public EchoDialogData EchoData { get; }
         public SystemDialogData SystemData { get; }
         public ARMarkerDialogData ARMarkerData { get; }
+        public TfPublisherDialogData TfPublisherData { get; }
 
         public DialogManager()
         {
@@ -39,6 +40,7 @@ namespace Iviz.App
                 EchoData = new EchoDialogData(),
                 SystemData = new SystemDialogData(),
                 ARMarkerData = new ARMarkerDialogData(),
+                TfPublisherData = new TfPublisherDialogData(),
             }.AsReadOnly();                
         }
     }

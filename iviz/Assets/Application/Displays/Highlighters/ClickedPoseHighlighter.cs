@@ -18,13 +18,15 @@ namespace Iviz.Displays.Highlighters
         readonly Tooltip tooltip;
 
         public CancellationToken Token => default;
-        public float Duration => 1;
+        public float Duration { get; }
 
-        public ClickedPoseHighlighter(in Pose unityPose)
+        public ClickedPoseHighlighter(in Pose unityPose, string? customText = null, float duration = 1)
         {
             float labelSize = Tooltip.GetRecommendedSize(unityPose.position);
             float frameSize = labelSize * 10;
 
+            Duration = duration;
+            
             node = FrameNode.Instantiate("[Clicked Pose Highlighter]");
             node.Transform.SetPose(unityPose);
 
@@ -46,15 +48,22 @@ namespace Iviz.Displays.Highlighters
             tooltip.Transform.localPosition = 2f * (frameSize * 0.3f + labelSize) * Vector3.up;
             tooltip.PointToCamera();
 
-            using var description = BuilderPool.Rent();
-            RosUtils.FormatPose(TfListener.RelativeToFixedFrame(unityPose), description,
-                RosUtils.PoseFormat.OnlyPosition, 2);
-            tooltip.SetCaption(description);
+            if (customText == null)
+            {
+                using var description = BuilderPool.Rent();
+                RosUtils.FormatPose(TfListener.RelativeToFixedFrame(unityPose), description,
+                    RosUtils.PoseFormat.OnlyPosition, 2);
+                tooltip.SetCaption(description);
+            }
+            else
+            {
+                tooltip.Caption = customText;
+            }
         }
 
         public void Update(float t)
         {
-            float alpha = Mathf.Sqrt(1 - t);
+            float alpha = 1 - t * t;
             tooltip.CaptionColor = Color.white.WithAlpha(alpha);
             tooltip.Color = Resource.Colors.TooltipBackground.WithAlpha(alpha);
             reticle.Color = Color.white.WithAlpha(0.3f * alpha);

@@ -303,8 +303,7 @@ namespace Iviz.Controllers
                 throw new ArgumentException("Sizes are not correct and might cause a buffer overflow!");
             }
 
-            var ptr = MemoryMarshal.Cast<byte, T>(bytes);
-
+            var ptr = bytes.Cast<T>();
             foreach (int v in ..height)
             {
                 var row = ptr.Slice(v * width, width);

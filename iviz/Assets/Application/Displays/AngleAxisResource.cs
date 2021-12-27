@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -16,7 +17,7 @@ namespace Iviz.Displays
 
         LineResource Resource =>
             resource != null ? resource : (resource = ResourcePool.RentDisplay<LineResource>(transform));
-        
+
         protected override IDisplay Display => Resource;
 
         public Color Color
@@ -25,15 +26,15 @@ namespace Iviz.Displays
             set
             {
                 color = value;
-                
+
                 float colorAsFloat = PointWithColor.RecastToFloat(color);
-                
+
                 var linesAsSpan = lines.AsSpan();
                 for (int i = 0; i < linesAsSpan.Length; i++)
                 {
                     ref var line = ref linesAsSpan[i];
-                    line.f.c0.w = colorAsFloat; 
-                    line.f.c1.w = colorAsFloat; 
+                    line.f.c0.w = colorAsFloat;
+                    line.f.c1.w = colorAsFloat;
                 }
 
                 Resource.Set(linesAsSpan, color.a < 1);
@@ -80,7 +81,7 @@ namespace Iviz.Displays
 
         void Set(float angle, Vector3 axis, float scale = 0.3f)
         {
-            if (Mathf.Approximately(angle, 0) 
+            if (Mathf.Approximately(angle, 0)
                 || Mathf.Approximately(axis.MagnitudeSq(), 0))
             {
                 Resource.Visible = false;
@@ -110,7 +111,7 @@ namespace Iviz.Displays
             dirX *= scale;
             dirY *= scale;
 
-            int n = (int) (Mathf.Abs(angle) / (2 * Mathf.PI) * 32 + 1);
+            int n = (int)(Mathf.Abs(angle) / (2 * Mathf.PI) * 32 + 1);
 
             Vector3 v0 = dirX;
             Vector3 v1 = Vector3.zero;
@@ -119,9 +120,9 @@ namespace Iviz.Displays
 
             const float scaleFromAngle = 0.02f;
 
-            for (int i = 1; i <= n; i++)
+            foreach (int i in 1..(n + 1))
             {
-                float a = i / (float) n * angle;
+                float a = i / (float)n * angle;
                 float ax = Mathf.Cos(a);
                 float ay = Mathf.Sin(a);
                 v1 = ax * dirX + ay * dirY;
@@ -133,10 +134,10 @@ namespace Iviz.Displays
             lines.Add(new LineWithColor(Vector3.zero, 1.2f * v1, Color));
             Resource.Set(lines.AsReadOnlySpan(), Color.a < 1);
         }
-        
+
         public void SplitForRecycle()
         {
             resource.ReturnToPool();
-        }        
+        }
     }
 }

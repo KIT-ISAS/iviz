@@ -310,12 +310,7 @@ namespace Iviz.MarkerDetection
                 o += 3;
             }
 
-            cameraFloats[0] = intrinsic.Fx;
-            cameraFloats[1] = 0;
-            cameraFloats[2] = intrinsic.Cx;
-            cameraFloats[3] = 0;
-            cameraFloats[4] = intrinsic.Fy;
-            cameraFloats[5] = intrinsic.Cy;
+            intrinsic.CopyTo(cameraFloats);
 
             if (!Native.EstimatePnp(inputFloats.Array, inputFloats.Length, outputFloats.Array, outputFloats.Length,
                 cameraFloats.Array, cameraFloats.Length, resultFloats.Array, resultFloats.Length))

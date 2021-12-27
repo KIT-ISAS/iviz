@@ -448,6 +448,11 @@ namespace Iviz.Core
             return new Span<T>(array.GetUnsafePtr(), array.Length);
         }
 
+        public static Span<T> AsSpan<T>(this in NativeArray<T> array, int start, int length) where T : unmanaged
+        {
+            return array.AsSpan().Slice(start, length);
+        }
+
         public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return new ReadOnlySpan<T>(array.GetUnsafeReadOnlyPtr(), array.Length);
@@ -502,6 +507,16 @@ namespace Iviz.Core
         public static void CopyFrom<T>(this NativeArray<T> dst, ReadOnlySpan<T> span) where T : unmanaged
         {
             span.CopyTo(dst.AsSpan());
+        }
+
+        public static ReadOnlySpan<T> Cast<T>(this ReadOnlySpan<byte> src) where T : unmanaged
+        {
+            return MemoryMarshal.Cast<byte, T>(src);
+        }
+
+        public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged
+        {
+            return MemoryMarshal.Cast<byte, T>(src);
         }
 
         public static float RegularizeAngle(float angle) =>

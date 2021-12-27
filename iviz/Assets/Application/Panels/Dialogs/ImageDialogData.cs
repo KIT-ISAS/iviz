@@ -4,6 +4,7 @@ using System;
 using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Resources;
 using UnityEngine;
 
@@ -14,9 +15,20 @@ namespace Iviz.App
         readonly ImageDialogContents panel;
         readonly GameObject canvas;
         readonly ImageDialogListener listener;
+        string title = "";
+        string lastSample = "";
 
         public override IDialogPanelContents Panel => panel;
         public event Action? Closed;
+
+        public string Title
+        {
+            set
+            {
+                title = value;
+                UpdateTitle();
+            }
+        }
 
         public ImageDialogData(ImageDialogListener listener, Transform holder)
         {
@@ -29,12 +41,36 @@ namespace Iviz.App
 
             panel = canvas.GetComponentInChildren<ImageDialogContents>();
             panel.Closed += () => Closed?.Invoke();
+
+
+            panel.Clicked += rawUV =>
+            {
+                lastSample = GetSampleText(rawUV);
+                UpdateTitle();
+            };
         }
 
-        public string Title
+        string GetSampleText(in Vector2 rawUV)
         {
-            set => panel.Title = value;
+            if (!listener.TrySampleColor(rawUV, out var uv, out var format, out var color))
+            {
+                return "";
+            }
+
+            return $"<b>u: </b>{FormatInt(uv.x)} <b>v: </b>{FormatInt(uv.y)} <b>val: </b>" + format switch
+            {
+                TextureFormat.R8 or TextureFormat.R16 => FormatInt((int) color.x),
+                TextureFormat.RFloat => FormatFloat(color.x),
+                TextureFormat.RGB24 => $"[{FormatFloat(color.x)}, {FormatFloat(color.y)}, {FormatFloat(color.z)}]",
+                TextureFormat.RGBA32 =>
+                    $"[{FormatFloat(color.x)}, {FormatFloat(color.y)}, {FormatFloat(color.z)}, {FormatFloat(color.w)}]",
+                _ => ""
+            };
+
+            static string FormatInt(int f) => f.ToString("#,0", BuiltIns.Culture);
+            static string FormatFloat(float f) => f.ToString("#,0.###", BuiltIns.Culture);
         }
+
 
         public override void SetupPanel()
         {
@@ -46,6 +82,13 @@ namespace Iviz.App
         {
             panel.ToggleImageEnabled();
             panel.ImageSize = listener.ImageSize;
+        }
+
+        void UpdateTitle()
+        {
+            panel.Title = lastSample.Length != 0 ? 
+                $"<b>{title}</b>\n{lastSample}" : 
+                $"<b>{title}</b>";
         }
 
         public void Stop()

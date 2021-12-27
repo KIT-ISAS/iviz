@@ -96,7 +96,7 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 10, y: 0.001, z: 10}
+  m_Size: {x: 1, y: 0.001, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3588449040480477125
 MonoBehaviour:
@@ -112,10 +112,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Transform: {fileID: 2407072229022344813}
   boxCollider: {fileID: 9001608685486769029}
-  colormap: 0
-  intensityBounds: {x: 0, y: 0}
-  flipMinMax: 0
-  tint: {r: 0, g: 0, b: 0, a: 0}
-  elementScale: 1
   texture: {fileID: 0}
   meshRenderer: {fileID: 3543364979145727234}

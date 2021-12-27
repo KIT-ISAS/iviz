@@ -13,14 +13,17 @@ namespace Iviz.App
         [SerializeField] TMP_Text? text;
         [SerializeField] RawImage? previewImage;
         [SerializeField] TrashButtonWidget? closeButton;
-
+        [SerializeField] ImageCursorHandler? cursorHandler;
+        
         Vector2Int imageSize;
 
         TMP_Text Text => text.AssertNotNull(nameof(text));
         RawImage PreviewImage => previewImage.AssertNotNull(nameof(previewImage));
         TrashButtonWidget CloseButton => closeButton.AssertNotNull(nameof(closeButton));
+        ImageCursorHandler CursorHandler => cursorHandler.AssertNotNull(nameof(cursorHandler));
 
         public event Action? Closed;
+        public event Action<Vector2>? Clicked;
         
         public string Title
         {
@@ -84,6 +87,7 @@ namespace Iviz.App
             AdjustSize();
 
             CloseButton.Clicked += () => Closed?.Invoke();
+            CursorHandler.Clicked += c => Clicked?.Invoke(c);
             ScalerWidget.ScaleChanged += AdjustSize;
         }
         
@@ -96,6 +100,7 @@ namespace Iviz.App
         public override void ClearSubscribers()
         {
             Closed = null;
+            Clicked = null;
             Material = null;
         }
     }

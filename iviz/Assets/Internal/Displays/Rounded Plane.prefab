@@ -47,7 +47,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   children: []
   boxCollider: {fileID: 8064000476403792576}
-  mTransform: {fileID: 1062175728900501383}
+  m_Transform: {fileID: 1062175728900501383}
+  cornerMesh: {fileID: -2432090755550338912, guid: 0c24f6379f26644b08c9365b76fe265e,
+    type: 3}
+  quadMesh: {fileID: -462981019419857548, guid: e5e884af6e9d7467dbf80b183417de36,
+    type: 3}
 --- !u!65 &8064000476403792576
 BoxCollider:
   m_ObjectHideFlags: 0

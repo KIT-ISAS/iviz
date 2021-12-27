@@ -49,7 +49,10 @@ namespace Iviz.Displays
         public GameObject SystemInfo = null;
         public GameObject ARMarkerPanel = null;
         public GameObject ARMarkers = null;
-        
+
+        public GameObject TfPublisherPanel = null;
+        public GameObject TfPublisherWidget = null;
+
         public GameObject Collapsible = null;
         
         public GameObject ImageCanvas;

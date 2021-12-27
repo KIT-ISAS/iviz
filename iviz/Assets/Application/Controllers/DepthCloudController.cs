@@ -74,10 +74,10 @@ namespace Iviz.Controllers
                 Visible = value.Visible;
                 MinIntensity = value.MinIntensity;
                 MaxIntensity = value.MaxIntensity;
-                FlipMinMax = value.FlipMinMax;                
+                FlipMinMax = value.FlipMinMax;
             }
         }
-        
+
         public ColormapId Colormap
         {
             get => config.Colormap;
@@ -102,8 +102,8 @@ namespace Iviz.Controllers
                     projector.IntensityBounds = intensityBounds;
                 }
             }
-        }      
-        
+        }
+
         public float MaxIntensity
         {
             get => config.MaxIntensity;
@@ -134,7 +134,7 @@ namespace Iviz.Controllers
                 }
             }
         }
-        
+
         public bool FlipMinMax
         {
             get => config.FlipMinMax;
@@ -145,7 +145,7 @@ namespace Iviz.Controllers
                 projector.FlipMinMax = value;
             }
         }
-        
+
         public bool Visible
         {
             get => config.Visible;
@@ -243,10 +243,7 @@ namespace Iviz.Controllers
 
                 config.DepthTopic = depthTopic;
 
-                int lastSlash = depthTopic.LastIndexOf('/');
-                string root = lastSlash != -1 ? depthTopic[..lastSlash] : "";
-                string infoTopic = $"{root}/camera_info";
-
+                string infoTopic = RosUtils.GetCameraInfoTopic(depthTopic);
                 depthInfoListener = new Listener<CameraInfo>(infoTopic, InfoHandler, RosTransportHint.PreferUdp);
             }
         }
@@ -436,6 +433,12 @@ namespace Iviz.Controllers
         {
             projector.Intrinsic = new Intrinsic(info.K);
         }
+
+        public bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format, out Vector4 color) =>
+            colorImageTexture.TrySampleColor(rawUV, out uv, out format, out color);
+
+        public bool TrySampleDepth(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format, out Vector4 color) =>
+            depthImageTexture.TrySampleColor(rawUV, out uv, out format, out color);
 
         public void Dispose()
         {

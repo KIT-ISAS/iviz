@@ -1,8 +1,10 @@
 ﻿#nullable enable
 
 using System;
+using System.Text;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -29,9 +31,20 @@ namespace Iviz.App
                 }
 
                 textHash = newHash;
-                name = "DataLabel:" + value;
                 Label.text = value;
             }
+        }
+
+        public void SetText(BuilderPool.BuilderRent builder)
+        {
+            uint newHash = Crc32Calculator.Compute(builder);
+            if (newHash == textHash)
+            {
+                return;
+            }
+
+            textHash = newHash;
+            Label.SetText(builder);
         }
 
         public bool Interactable

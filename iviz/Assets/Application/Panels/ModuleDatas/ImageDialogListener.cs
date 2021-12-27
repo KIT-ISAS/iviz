@@ -1,12 +1,16 @@
+#nullable enable
+
 using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.App
 {
-    public abstract class ImageDialogListener 
+    public abstract class ImageDialogListener
     {
-        [NotNull] public ImageDialogData DialogData { get; }
-
+        public ImageDialogData DialogData { get; }
+        public abstract Material Material { get; }
+        public abstract Vector2Int ImageSize { get; }
+        
         protected ImageDialogListener()
         {
             DialogData = ModuleListPanel.Instance.CreateImageDialog(this);
@@ -17,8 +21,9 @@ namespace Iviz.App
             };
         }
 
-        [NotNull] public abstract Material Material { get; }
-        public abstract Vector2Int ImageSize { get; }
+        public abstract bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format,
+            out Vector4 color);
+
         protected abstract void Stop();
     }
 }

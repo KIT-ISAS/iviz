@@ -40,6 +40,7 @@ namespace Iviz.App
             set
             {
                 this.value = value;
+                Mean = value;
                 UpdateInputLabels();
             }
         }
@@ -161,7 +162,6 @@ namespace Iviz.App
 
         void Awake()
         {
-            Interactable = true;
             inputX.SetNumberOfSteps(100);
             inputY.SetNumberOfSteps(100);
             inputZ.SetNumberOfSteps(100);
@@ -171,7 +171,7 @@ namespace Iviz.App
             inputY.SubscribeValueChanged(_ => OnValueChanged());
             inputZ.SubscribeValueChanged(_ => OnValueChanged());
 
-            HandleLink[] links = GetComponentsInChildren<HandleLink>();
+            var links = GetComponentsInChildren<HandleLink>();
             foreach (var link in links)
             {
                 link.Clicked += LinkOnClicked;

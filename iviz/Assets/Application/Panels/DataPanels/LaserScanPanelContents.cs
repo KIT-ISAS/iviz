@@ -15,15 +15,13 @@ namespace Iviz.App
 
         public ToggleWidget UseIntensity { get; private set; }
         public DataLabelWidget NumPoints { get; private set; }
-        public SliderWidget PointSize { get; private set; }
+        public SliderWidgetWithScale PointSize { get; private set; }
         public DropdownWidget Colormap { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
-
         public ToggleWidget ForceMinMax { get; private set; }
         public NumberInputFieldWidget MinIntensity { get; private set; }
         public NumberInputFieldWidget MaxIntensity { get; private set; }
         public ToggleWidget FlipMinMax { get; private set; }
-
         public ToggleWidget UseLines { get; private set; }
 
         void Awake()
@@ -33,7 +31,7 @@ namespace Iviz.App
             Listener = p.AddListener();
             Frame = p.AddFrame();
             NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetCentered();
-            PointSize = p.AddSlider("Point Size").SetMinValue(0.01f).SetMaxValue(0.1f);
+            PointSize = p.AddSliderWidgetWithScale("Point Size");
             UseIntensity = p.AddToggle("Use Intensity instead of Range");
             UseLines = p.AddToggle("Use Lines");
 

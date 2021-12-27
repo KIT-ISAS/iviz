@@ -26,19 +26,20 @@ namespace Iviz.Displays
             }
         }
 
-        public void Highlight(in Vector3 _)
-        {
-            FAnimator.Start(new BoundsHighlighter(this));
-        }
-
         public bool IsAlive => true;
         public Bounds? Bounds { get; private set; }
         public Transform BoundsTransform => transform;
         public event Action? BoundsChanged;
-        public string? Caption { get; private set; }
+        public string Caption { get; private set; } = "";
 
-        public static void ProcessRobot(GameObject baseLink)
+        public void Highlight(in Vector3 _)
         {
+            FAnimator.Start(new BoundsHighlighter(this, duration: 1));
+        }
+
+        public static void ProcessRobot(string robotName, GameObject baseLink)
+        {
+            string robotNameCaption = $"<b>{robotName}</b>\n";
             var nodes = baseLink.GetComponentsInChildren<Transform>()
                 .Where(transform => transform.CompareTag(RobotModel.ColliderTag));
             foreach (var node in nodes)
@@ -48,7 +49,7 @@ namespace Iviz.Displays
                 {
                     var highlightable = node.gameObject.AddComponent<RobotLinkHighlightable>();
                     highlightable.Collider = collider;
-                    highlightable.Caption = linkName;
+                    highlightable.Caption = robotNameCaption + linkName;
                 }
                 else
                 {
@@ -57,7 +58,7 @@ namespace Iviz.Displays
                     {
                         var highlightable = subCollider.gameObject.AddComponent<RobotLinkHighlightable>();
                         highlightable.Collider = subCollider;
-                        highlightable.Caption = linkName;
+                        highlightable.Caption = robotNameCaption + linkName;
                     }
                 }
             }

@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using Iviz.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -17,7 +18,8 @@ namespace Iviz.App
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {
-            int linkIndex = TMP_TextUtilities.FindIntersectingLink(text, Input.mousePosition, null);
+            int linkIndex = TMP_TextUtilities.FindIntersectingLink(text, Input.mousePosition,
+                Settings.IsXR ? Settings.MainCamera : null);
             if (linkIndex == -1)
             {
                 return;

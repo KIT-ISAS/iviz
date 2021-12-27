@@ -171,14 +171,12 @@ namespace Iviz.Controllers
         {
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             node = FrameNode.Instantiate("[InteractiveMarkerListener]");
-
+            Listener = new Listener<InteractiveMarkerUpdate>(Config.Topic, HandlerUpdate) { MaxQueueSize = 50 };
             Config = config ?? new InteractiveMarkerConfiguration
             {
                 Topic = topic,
             };
-
-            Listener = new Listener<InteractiveMarkerUpdate>(Config.Topic, HandlerUpdate) { MaxQueueSize = 50 };
-
+            
             string root;
             if (Config.Topic.HasSuffix("/update"))
             {

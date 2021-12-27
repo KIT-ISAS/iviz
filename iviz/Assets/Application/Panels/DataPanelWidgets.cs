@@ -138,6 +138,11 @@ namespace Iviz.App
         {
             return Resource.Widgets.ARMarkerWidget.Instantiate<ARMarkerWidget>(NonStatics.transform);
         }
+        
+        public TfPublisherWidget AddTfPublisher()
+        {
+            return Resource.Widgets.TfPublisherWidget.Instantiate<TfPublisherWidget>(NonStatics.transform);
+        }
 
         public CollapsibleWidget AddCollapsibleWidget(string label)
         {

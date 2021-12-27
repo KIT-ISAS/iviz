@@ -140,7 +140,7 @@ GameObject:
   - component: {fileID: 6469948729944380945}
   - component: {fileID: 9119482650867960444}
   m_Layer: 5
-  m_Name: Markers
+  m_Name: Markers Widget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -502,22 +502,24 @@ namespace Iviz.App
             }
 
             // check if we are clicking something interesting
-            if (pointerIsOnGui)
-            {
-                return;
-            }
 
             bool anyPointerDown = pointerIsDown || altPointerIsDown;
             if (!prevPointerDown && anyPointerDown)
             {
-                var clickInfo = new ClickHitInfo(pointerPosition);
-                PointerDown?.Invoke(clickInfo);
+                if (!pointerIsOnGui)
+                {
+                    PointerDown?.Invoke(new ClickHitInfo(pointerPosition));
+                }
             }
-
-            if (prevPointerDown
-                && !anyPointerDown
-                && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
+            else if (prevPointerDown
+                     && !anyPointerDown
+                     && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
             {
+                if (IsPointerOnGui(pointerPosition)) // pointerIsOnGui is only set on button down
+                {
+                    return;
+                }
+                
                 var clickInfo = new ClickHitInfo(pointerPosition);
                 float timeDown = Time.time - pointerDownTime;
                 if (timeDown < shortClickTime)
@@ -893,7 +895,7 @@ namespace Iviz.App
             }
             else if (hitResults.Length != 0)
             {
-                if (hitResults.Any(result => result.GameObject.layer == LayerType.Clickable))
+                if (hitResults.Any(result => result.GameObject.layer is LayerType.Clickable))
                 {
                     return;
                 }
@@ -917,7 +919,7 @@ namespace Iviz.App
             }
         }
 
-        static async void HighlightAll(IEnumerable<(IHighlightable highlightable, Vector3 hitPoint)> hits)
+        static async void HighlightAll(List<(IHighlightable highlightable, Vector3)> hits)
         {
             var aliveHits = hits.Where(toHighlight => toHighlight.highlightable.IsAlive);
             foreach (var (highlightable, hitPoint) in aliveHits)

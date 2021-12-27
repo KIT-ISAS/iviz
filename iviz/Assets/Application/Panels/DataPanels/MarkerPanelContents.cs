@@ -7,7 +7,7 @@
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public ColorPickerWidget Tint { get; private set; }
-        public ToggleWidget PreferUdp { get; private set; }
+        //public ToggleWidget PreferUdp { get; private set; }
         public SliderWidget Alpha { get; private set; }
         public ToggleWidget TriangleListFlipWinding { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
@@ -20,7 +20,7 @@
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("Markers");
             Listener = p.AddListener();
-            PreferUdp = p.AddToggle("Prefer UDP");
+            //PreferUdp = p.AddToggle("Prefer UDP");
 
             Tint = p.AddColorPicker("Tint");
             Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);

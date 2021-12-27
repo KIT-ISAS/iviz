@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1066434273854107125}
   - component: {fileID: 7954079755484087815}
   - component: {fileID: 2560784202415664666}
-  m_Layer: 0
+  m_Layer: 15
   m_Name: Billboard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -107,7 +107,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d3241af991a48044bb7d8ade0ba6df8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boxCollider: {fileID: 2560784202415664666}
   front: {fileID: 5766033239396999442}
   billboard: {fileID: 7954079755484087815}
   scale: 1

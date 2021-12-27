@@ -7,9 +7,10 @@ namespace Iviz.App
 {
     public sealed class ImagePreviewWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text label = null;
-        [SerializeField] RawImage image = null;
-        [SerializeField] Button button = null;
+        [SerializeField] Text label;
+        [SerializeField] RawImage image;
+        [SerializeField] Button button;
+        bool interactable = true;
 
         public Action Clicked { get; set; }
 
@@ -18,7 +19,6 @@ namespace Iviz.App
             button.onClick.AddListener(() => Clicked?.Invoke());
         }
 
-        bool interactable = true;
         public bool Interactable
         {
             get => interactable;
@@ -58,13 +58,6 @@ namespace Iviz.App
         public ImagePreviewWidget SetLabel([NotNull] string f)
         {
             Label = f;
-            return this;
-        }
-
-        [NotNull]
-        public ImagePreviewWidget SetMaterial(Material f)
-        {
-            Material = f;
             return this;
         }
 

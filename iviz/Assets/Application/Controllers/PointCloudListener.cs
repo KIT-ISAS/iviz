@@ -381,13 +381,13 @@ namespace Iviz.Controllers
                         else if (PointCloudType == PointCloudType.Points)
                         {
                             pointCloud.UseColormap = !rgbaHint;
-                            pointCloud.SetDirect(pointBuffer.Slice(..pointBufferLength));
+                            pointCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
                             meshCloud.Reset();
                         }
                         else
                         {
                             meshCloud.UseColormap = !rgbaHint;
-                            meshCloud.SetDirect(pointBuffer.Slice(..pointBufferLength));
+                            meshCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
                             pointCloud.Reset();
                         }
                     }

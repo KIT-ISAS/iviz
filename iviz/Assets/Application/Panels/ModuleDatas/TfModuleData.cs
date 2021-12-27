@@ -58,6 +58,7 @@ namespace Iviz.App
             panel.FlipZ.Value = listener.FlipZ;
             panel.Sender.Set(listener.Publisher);
             panel.TapSender.Set(listener.TapPublisher);
+            panel.Publisher.UpdateText();
 
             panel.HideButton.Clicked += ToggleVisible;
             panel.ShowFrameLabels.ValueChanged += f => listener.FrameLabelsVisible = f;
@@ -73,6 +74,10 @@ namespace Iviz.App
             // do nothing!
         }
 
+        public override void UpdatePanel()
+        {
+            panel.Publisher.UpdateText();
+        }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {

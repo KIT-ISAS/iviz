@@ -52,7 +52,6 @@ namespace Iviz.App
 
             panel.OcclusionOnlyMode.Interactable = listener.CubesVisible;
             panel.ScaleZ.Interactable = listener.CubesVisible;
-            //panel.Alpha.Value = listener.Tint.a;
 
             panel.Tint.ValueChanged += f =>
             {

@@ -82,90 +82,7 @@ namespace Iviz.Controllers.TF
         {
             set => RootFrame.transform.localScale = value * Vector3.one;
         }
-
-        public TfListener(IModuleData moduleData, TfConfiguration? config, string topic)
-        {
-            instance = this;
-
-            try
-            {
-                ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
-                unityFrame = Add(CreateFrameObject("TF", null, null));
-                unityFrame.ForceInvisible = true;
-                unityFrame.Visible = false;
-
-                var defaultListener = FrameNode.Instantiate("[.]");
-                unityFrame.AddListener(defaultListener);
-
-                keepAllListenerNode = FrameNode.Instantiate("[TFNode]");
-                staticListenerNode = FrameNode.Instantiate("[TFStatic]");
-                fixedFrameListenerNode = FrameNode.Instantiate("[TFFixedFrame]");
-                defaultListener.transform.parent = unityFrame.Transform;
-
-                rootFrame = Add(CreateFrameObject("/", unityFrame.Transform, unityFrame));
-                rootFrame.ForceInvisible = true;
-                rootFrame.Visible = false;
-                rootFrame.AddListener(defaultListener);
-
-                originFrame = Add(CreateFrameObject(OriginFrameId, rootFrame.Transform, rootFrame));
-                originFrame.Parent = rootFrame;
-                originFrame.ForceInvisible = true;
-                originFrame.Visible = false;
-                originFrame.AddListener(defaultListener);
-                originFrame.ParentCanChange = false;
-
-                mapFrame = Add(CreateFrameObject(MapFrameId, originFrame.Transform, originFrame));
-                mapFrame.Parent = originFrame;
-                mapFrame.AddListener(defaultListener);
-                FixedFrame = mapFrame;
-
-                Publisher = new Sender<TFMessage>(DefaultTopic);
-                TapPublisher = new Sender<PoseStamped>(DefaultTapTopic);
-
-                Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic,
-                    PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
-                ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
-
-                Config = config ?? new TfConfiguration
-                {
-                    Topic = topic
-                };
-
-                GameThread.LateEveryFrame += LateUpdate;
-            }
-            catch (Exception)
-            {
-                instance = null;
-                throw;
-            }
-        }
-
-        public static string FixedFrameId
-        {
-            get => Instance.FixedFrame.Id;
-            set
-            {
-                if (Instance.FixedFrame != null)
-                {
-                    Instance.FixedFrame.RemoveListener(Instance.fixedFrameListenerNode);
-                }
-
-                if (string.IsNullOrEmpty(value))
-                {
-                    Instance.FixedFrame = Instance.mapFrame;
-                    OriginFrame.Transform.SetLocalPose(Pose.identity);
-                    Instance.Config.FixedFrameId = "";
-                    return;
-                }
-
-                Instance.Config.FixedFrameId = value;
-                var frame = GetOrCreateFrame(value, Instance.fixedFrameListenerNode);
-                Instance.FixedFrame = frame;
-                OriginFrame.Transform.SetLocalPose(frame.OriginWorldPose.Inverse());
-            }
-        }
-
+        
         public TfConfiguration Config
         {
             get => config;
@@ -276,12 +193,92 @@ namespace Iviz.Controllers.TF
         bool PreferUdp
         {
             get => config.PreferUdp;
+            set => config.PreferUdp = value;
+        }
+
+        public static string FixedFrameId
+        {
+            get => Instance.FixedFrame.Id;
             set
             {
-                config.PreferUdp = value;
-                Listener.TransportHint = value ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+                if (Instance.FixedFrame != null)
+                {
+                    Instance.FixedFrame.RemoveListener(Instance.fixedFrameListenerNode);
+                }
+
+                if (string.IsNullOrEmpty(value))
+                {
+                    Instance.FixedFrame = Instance.mapFrame;
+                    OriginFrame.Transform.SetLocalPose(Pose.identity);
+                    Instance.Config.FixedFrameId = "";
+                    return;
+                }
+
+                Instance.Config.FixedFrameId = value;
+                var frame = GetOrCreateFrame(value, Instance.fixedFrameListenerNode);
+                Instance.FixedFrame = frame;
+                OriginFrame.Transform.SetLocalPose(frame.OriginWorldPose.Inverse());
             }
         }
+        
+        public TfListener(IModuleData moduleData, TfConfiguration? config, string topic)
+        {
+            instance = this;
+
+            try
+            {
+                ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+
+                unityFrame = Add(CreateFrameObject("TF", null, null));
+                unityFrame.ForceInvisible = true;
+                unityFrame.Visible = false;
+
+                var defaultListener = FrameNode.Instantiate("[.]");
+                unityFrame.AddListener(defaultListener);
+
+                keepAllListenerNode = FrameNode.Instantiate("[TFNode]");
+                staticListenerNode = FrameNode.Instantiate("[TFStatic]");
+                fixedFrameListenerNode = FrameNode.Instantiate("[TFFixedFrame]");
+                defaultListener.transform.parent = unityFrame.Transform;
+
+                rootFrame = Add(CreateFrameObject("/", unityFrame.Transform, unityFrame));
+                rootFrame.ForceInvisible = true;
+                rootFrame.Visible = false;
+                rootFrame.AddListener(defaultListener);
+
+                originFrame = Add(CreateFrameObject(OriginFrameId, rootFrame.Transform, rootFrame));
+                originFrame.Parent = rootFrame;
+                originFrame.ForceInvisible = true;
+                originFrame.Visible = false;
+                originFrame.AddListener(defaultListener);
+                originFrame.ParentCanChange = false;
+
+                mapFrame = Add(CreateFrameObject(MapFrameId, originFrame.Transform, originFrame));
+                mapFrame.Parent = originFrame;
+                mapFrame.AddListener(defaultListener);
+                FixedFrame = mapFrame;
+
+                Publisher = new Sender<TFMessage>(DefaultTopic);
+                TapPublisher = new Sender<PoseStamped>(DefaultTapTopic);
+
+                Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic,
+                    PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
+                ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
+
+                Config = config ?? new TfConfiguration
+                {
+                    Topic = topic
+                };
+
+                GameThread.LateEveryFrame += LateUpdate;
+            }
+            catch (Exception)
+            {
+                instance = null;
+                throw;
+            }
+        }
+
 
         static readonly Func<TfFrame, bool> IsFrameUsableAsHint =
             frame => frame != RootFrame && frame != UnityFrame && frame != OriginFrame;

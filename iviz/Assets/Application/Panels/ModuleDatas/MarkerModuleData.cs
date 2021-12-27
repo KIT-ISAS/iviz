@@ -48,7 +48,7 @@ namespace Iviz.App
             panel.HideButton.State = listener.Visible;
             panel.TriangleListFlipWinding.Value = listener.TriangleListFlipWinding;
             panel.ShowDescriptions.Value = listener.ShowDescriptions;
-            panel.PreferUdp.Value = listener.PreferUdp;
+            //panel.PreferUdp.Value = listener.PreferUdp;
 
             panel.Mask.Options = listener.GetMaskEntries();
 
@@ -67,7 +67,7 @@ namespace Iviz.App
                 panel.Mask.Options = listener.GetMaskEntries();
                 panel.Mask.OverrideCaption("---");
             };
-            panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
+            //panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
 
             HighlightAll();
         }

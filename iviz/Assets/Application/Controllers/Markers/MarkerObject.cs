@@ -724,7 +724,8 @@ namespace Iviz.Controllers
                 if (!newPose.IsUsable())
                 {
                     description.Append(ErrorStr).Append(
-                        $"Cannot use ({newPose.position.x}, {newPose.position.y}, {newPose.position.z}) as position. Values too large.");
+                        $"Cannot use ({newPose.position.x}, {newPose.position.y}, {newPose.position.z}) as position. " +
+                        $"Values too large.");
                 }
             }
 

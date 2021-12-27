@@ -254,7 +254,7 @@ namespace Iviz.Controllers
             Config = new RobotConfiguration();
         }
 
-        
+
         public bool TryWriteJoint(string joint, float value)
         {
             if (Robot == null)
@@ -326,7 +326,8 @@ namespace Iviz.Controllers
             try
             {
                 HelpText = "- Requesting parameter -";
-                (parameterValue, errorMsg) = await ConnectionManager.Connection.GetParameterAsync(value, ParameterTimeoutInMs);
+                (parameterValue, errorMsg) =
+                    await ConnectionManager.Connection.GetParameterAsync(value, ParameterTimeoutInMs);
             }
             catch (OperationCanceledException)
             {
@@ -413,12 +414,12 @@ namespace Iviz.Controllers
 
             Robot = newRobot;
             HelpText = "[Loading Robot...]";
-            
+
             async void LoadRobotAsync()
             {
                 robotLoadingTask = newRobot.StartAsync(ConnectionManager.ServiceProvider, KeepMeshMaterials).AsTask();
                 await robotLoadingTask;
-                RobotLinkHighlightable.ProcessRobot(newRobot.BaseLinkObject);
+                RobotLinkHighlightable.ProcessRobot(newRobot.Name, newRobot.BaseLinkObject);
                 UpdateStartTaskStatus();
             }
 
@@ -443,12 +444,12 @@ namespace Iviz.Controllers
                         HelpText = "[Error Loading Robot. See Log.]";
                         Robot = null;
                         robotLoadingTask = null;
-                        ((SimpleRobotModuleData) ModuleData).OnRobotFinishedLoading();
+                        ((SimpleRobotModuleData)ModuleData).OnRobotFinishedLoading();
                         return;
                     case TaskStatus.Canceled:
                         HelpText = "[Robot Task canceled.]";
                         robotLoadingTask = null;
-                        ((SimpleRobotModuleData) ModuleData).OnRobotFinishedLoading();
+                        ((SimpleRobotModuleData)ModuleData).OnRobotFinishedLoading();
                         return;
                     case TaskStatus.RanToCompletion:
                         node.name = "SimpleRobotNode:" + Name;
@@ -476,7 +477,7 @@ namespace Iviz.Controllers
                         Smoothness = Smoothness;
                         Metallic = Metallic;
                         robotLoadingTask = null;
-                        ((SimpleRobotModuleData) ModuleData).OnRobotFinishedLoading();
+                        ((SimpleRobotModuleData)ModuleData).OnRobotFinishedLoading();
                         break;
                 }
             }
@@ -547,7 +548,7 @@ namespace Iviz.Controllers
             node.AttachTo(Robot.BaseLink != null ? Decorate(Robot.BaseLink) : null);
             Robot.BaseLinkObject.transform.SetParentLocal(node.Transform);
         }
-        
+
         public void Dispose()
         {
             if (AttachedToTf)

@@ -226,6 +226,11 @@ namespace Iviz.App
             public ColorImageDialogListener(DepthCloudModuleData moduleData) => this.moduleData = moduleData;
             public override Material Material => moduleData.controller.ColorMaterial;
             public override Vector2Int ImageSize => moduleData.controller.ColorImageSize;
+
+            public override bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format,
+                out Vector4 color) =>
+                moduleData.controller.TrySampleColor(rawUV, out uv, out format, out color);
+
             protected override void Stop() => moduleData.OnDialogClosed(DialogData);
         }
 
@@ -235,6 +240,11 @@ namespace Iviz.App
             public DepthImageDialogListener(DepthCloudModuleData moduleData) => this.moduleData = moduleData;
             public override Material Material => moduleData.controller.DepthMaterial;
             public override Vector2Int ImageSize => moduleData.controller.DepthImageSize;
+
+            public override bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format,
+                out Vector4 color) =>
+                moduleData.controller.TrySampleDepth(rawUV, out uv, out format, out color);
+
             protected override void Stop() => moduleData.OnDialogClosed(DialogData);
         }
     }

@@ -57,7 +57,7 @@ namespace Iviz.Displays.Highlighters
             float frameSize = baseFrameSize * clampedSize;
             float labelSize = baseFrameSize * Mathf.Max(size * 0.375f / 2, 0.15f);
 
-            float alpha = Mathf.Sqrt(1 - t);
+            float alpha = 1 - t * t;
             var color = Color.white.WithAlpha(alpha);
 
             axisResource.AxisLength = frameSize;

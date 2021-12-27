@@ -47,6 +47,9 @@ namespace Iviz.Resources
         public Info<GameObject> ARMarkerPanel { get; }
         public Info<GameObject> ARMarkerWidget { get; }
         
+        public Info<GameObject> TfPublisherPanel { get; }
+        public Info<GameObject> TfPublisherWidget { get; }
+        
         public Info<GameObject> ImageCanvas { get; }
 
         public WidgetsType()
@@ -89,12 +92,15 @@ namespace Iviz.Resources
             InputWithHints = new Info<GameObject>(assetHolder.InputFieldWithHints);
             MarkerWidget = new Info<GameObject>(assetHolder.Markers);            
             
-            DataPanel = new Info<GameObject>(assetHolder.DataPanel);
-            ARMarkerPanel = new Info<GameObject>(assetHolder.ARMarkerPanel);
-            ARMarkerWidget = new Info<GameObject>(assetHolder.ARMarkers);
-            
-            CollapsibleWidget = new Info<GameObject>(assetHolder.Collapsible);
-            ImageCanvas =  new Info<GameObject>(assetHolder.ImageCanvas);
+            DataPanel = new Info<GameObject>(assetHolder.DataPanel, nameof(assetHolder.DataPanel));
+            ARMarkerPanel = new Info<GameObject>(assetHolder.ARMarkerPanel, nameof(assetHolder.ARMarkerPanel));
+            ARMarkerWidget = new Info<GameObject>(assetHolder.ARMarkers, nameof(assetHolder.ARMarkers));
+
+            TfPublisherPanel = new Info<GameObject>(assetHolder.TfPublisherPanel, nameof(assetHolder.TfPublisherPanel));
+            TfPublisherWidget = new Info<GameObject>(assetHolder.TfPublisherWidget, nameof(assetHolder.TfPublisherWidget));
+
+            CollapsibleWidget = new Info<GameObject>(assetHolder.Collapsible, nameof(assetHolder.Collapsible));
+            ImageCanvas =  new Info<GameObject>(assetHolder.ImageCanvas, nameof(assetHolder.ImageCanvas));
         }
     }
 }

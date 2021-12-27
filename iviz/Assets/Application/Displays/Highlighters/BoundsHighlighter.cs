@@ -21,11 +21,13 @@ namespace Iviz.Displays.Highlighters
         readonly bool isPermanent;
 
         public CancellationToken Token => tokenSource.Token;
-        public float Duration => 0.5f;
+        public float Duration { get; }
 
-        public BoundsHighlighter(IHasBounds holder, bool isPermanent = false)
+        public BoundsHighlighter(IHasBounds holder, bool isPermanent = false, float duration = 0.5f)
         {
             this.holder = holder ?? throw new ArgumentNullException(nameof(holder));
+            Duration = duration;
+            
             var node = new GameObject("[Bounds Highlighter]");
             nodeTransform = node.transform;
             nodeTransform.SetParentLocal(holder.BoundsTransform);

@@ -60,7 +60,7 @@ namespace Iviz.Core
             }
 
             EnsureCapacity(length + otherArray.Length);
-            otherArray.CopyTo(array.AsSpan().Slice(length, otherArray.Length));
+            otherArray.CopyTo(array.AsSpan(length, otherArray.Length));
             length += otherArray.Length;
         }
 

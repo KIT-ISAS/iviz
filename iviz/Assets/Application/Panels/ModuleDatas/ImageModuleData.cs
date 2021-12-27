@@ -49,6 +49,7 @@ namespace Iviz.App
             panel.Min.Value = listener.MinIntensity;
             panel.Max.Value = listener.MaxIntensity;
             panel.FlipMinMax.Value = listener.FlipMinMax;
+            panel.UseIntrinsicScale.Value = listener.UseIntrinsicScale;
 
             panel.Colormap.Index = (int)listener.Colormap;
 
@@ -66,11 +67,13 @@ namespace Iviz.App
             panel.BillboardSize.Interactable = listener.EnableBillboard;
             panel.BillboardFollowsCamera.Interactable = listener.EnableBillboard;
             panel.BillboardOffset.Interactable = listener.EnableBillboard;
+            panel.UseIntrinsicScale.Interactable = listener.EnableBillboard;
 
-            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId)i; };
-            panel.Min.ValueChanged += f => { listener.MinIntensity = f; };
-            panel.Max.ValueChanged += f => { listener.MaxIntensity = f; };
-            panel.FlipMinMax.ValueChanged += f => { listener.FlipMinMax = f; };
+            panel.UseIntrinsicScale.ValueChanged += f => listener.UseIntrinsicScale = f;
+            panel.Colormap.ValueChanged += (i, _) => listener.Colormap = (ColormapId)i;
+            panel.Min.ValueChanged += f => listener.MinIntensity = f;
+            panel.Max.ValueChanged += f => listener.MaxIntensity = f;
+            panel.FlipMinMax.ValueChanged += f => listener.FlipMinMax = f;
             panel.CloseButton.Clicked += Close;
             panel.ForceMinMax.ValueChanged += f =>
             {
@@ -84,10 +87,11 @@ namespace Iviz.App
                 panel.BillboardFollowsCamera.Interactable = f;
                 panel.BillboardOffset.Interactable = f;
                 listener.EnableBillboard = f;
+                panel.UseIntrinsicScale.Interactable = f;
             };
-            panel.BillboardSize.ValueChanged += f => { listener.BillboardSize = f; };
-            panel.BillboardFollowsCamera.ValueChanged += f => { listener.BillboardFollowsCamera = f; };
-            panel.BillboardOffset.ValueChanged += f => { listener.BillboardOffset = f; };
+            panel.BillboardSize.ValueChanged += f => listener.BillboardSize = f;
+            panel.BillboardFollowsCamera.ValueChanged += f => listener.BillboardFollowsCamera = f;
+            panel.BillboardOffset.ValueChanged += f => listener.BillboardOffset = f;
             panel.PreviewWidget.Clicked += () =>
             {
                 if (imageDialogData == null)
@@ -183,6 +187,11 @@ namespace Iviz.App
             public ColorImageListener(ImageModuleData moduleData) => this.moduleData = moduleData;
             public override Material Material => moduleData.listener.Material;
             public override Vector2Int ImageSize => moduleData.listener.ImageSize;
+
+            public override bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format,
+                out Vector4 color) =>
+                moduleData.listener.TrySampleColor(rawUV, out uv, out format, out color);
+
             protected override void Stop() => moduleData.OnDialogClosed();
         }
     }

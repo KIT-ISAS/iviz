@@ -38,6 +38,24 @@ namespace Iviz.Common
 
         public double[] ToArray() => new double[] { Fx, 0, Cx, 0, Fy, Cy, 0, 0, 1 };
 
+        public void CopyTo(Span<float> span)
+        {
+            span[0] = Fx;
+            span[1] = 0;
+            span[2] = Cx;
+            span[3] = 0;
+            span[4] = Fy;
+            span[5] = Cy;
+            if (span.Length < 9)
+            {
+                return;
+            }
+
+            span[6] = 0;
+            span[7] = 0;
+            span[8] = 1;
+        }
+
         public float GetHorizontalFovInRad(float imageWidth) =>
             Fx != 0 && imageWidth != 0 ? 2 * Mathf.Atan(imageWidth / (2 * Fx)) : 0;
 

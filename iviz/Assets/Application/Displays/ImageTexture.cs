@@ -534,13 +534,13 @@ namespace Iviz.Displays
                 throw new InvalidOperationException($"{this}: Skipping copy. Possible buffer overflow.");
             }
 
-            var srcPtr = MemoryMarshal.Cast<byte, R16>(src);
+            var srcPtr = src.Cast<R16>();
             for (int i = 0; i < srcPtr.Length; i++)
             {
                 dst[i] = srcPtr[i].low;
             }
         }
-        
+
         [StructLayout(LayoutKind.Sequential)]
         readonly struct R16
         {
@@ -550,8 +550,8 @@ namespace Iviz.Displays
 
         static void CopyRgb24ToRgba32(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
         {
-            var srcPtr = MemoryMarshal.Cast<byte, Rgb>(src);
-            var dstPtr = MemoryMarshal.Cast<byte, Rgba>(dst);
+            var srcPtr = src.Cast<Rgb>();
+            var dstPtr = dst.Cast<Rgba>();
             var colorOut = new Rgba { a = 255 };
             for (int i = 0; i < srcPtr.Length; i++)
             {
@@ -599,7 +599,7 @@ namespace Iviz.Displays
         {
             ushort min = ushort.MaxValue;
             ushort max = ushort.MinValue;
-            var span = MemoryMarshal.Cast<byte, ushort>(src);
+            var span = src.Cast<ushort>();
             foreach (ushort b in span)
             {
                 if (b > max)
@@ -620,7 +620,7 @@ namespace Iviz.Displays
         {
             float min = float.MaxValue;
             float max = float.MinValue;
-            var span = MemoryMarshal.Cast<byte, float>(src);
+            var span = src.Cast<float>();
             foreach (float b in span)
             {
                 if (b > max)
@@ -656,6 +656,53 @@ namespace Iviz.Displays
             Material.SetTexture(MainTexID, Texture);
             TextureChanged?.Invoke(Texture);
             return Texture;
+        }
+
+        public bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format, out Vector4 color)
+        {
+            if (Texture == null)
+            {
+                format = default;
+                color = default;
+                uv = default;
+                return false;
+            }
+
+            format = Texture.format;
+            int u = Mathf.Clamp((int)(rawUV.x * Texture.width), 0, Texture.width - 1);
+            int v = Mathf.Clamp((int)(rawUV.y * Texture.height), 0, Texture.height - 1);
+            bool rbFlipped = Material.IsKeywordEnabled("FLIP_RB");
+            uv = new Vector2Int(u, v);
+
+            int offset = v * Texture.width + u;
+            var span = Texture.GetRawTextureData<byte>().AsReadOnlySpan();
+            var maybeColor = format switch
+            {
+                TextureFormat.R8 => FromScalar(span[offset]),
+                TextureFormat.R16 => FromScalar(span.Cast<ushort>()[offset]),
+                TextureFormat.RFloat => FromScalar(span.Cast<float>()[offset]),
+                TextureFormat.RGB24 when rbFlipped => FromBgr(span.Cast<Rgb>()[offset]),
+                TextureFormat.RGBA32 when rbFlipped => FromBgra(span.Cast<Rgba>()[offset]),
+                TextureFormat.RGB24 => FromRgb(span.Cast<Rgb>()[offset]),
+                TextureFormat.RGBA32 => FromRgba(span.Cast<Rgba>()[offset]),
+                _ => (Vector4?)null
+            };
+
+            if (maybeColor is not { } validatedColor)
+            {
+                color = default;
+                Debug.Log($"{this}: Unhandled format {format}");
+                return false;
+            }
+
+            color = validatedColor;
+            return true;
+
+            static Vector4 FromScalar(float f) => new(f, 0, 0, 1);
+            static Vector4 FromRgb(in Rgb rgb) => new(rgb.r, rgb.g, rgb.b, 1);
+            static Vector4 FromRgba(in Rgba rgb) => new(rgb.r, rgb.g, rgb.b, rgb.a);
+            static Vector4 FromBgr(in Rgb rgb) => new(rgb.b, rgb.g, rgb.r, 1);
+            static Vector4 FromBgra(in Rgba rgb) => new(rgb.b, rgb.g, rgb.r, rgb.a);
         }
 
         public void Reset()

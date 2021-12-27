@@ -26,6 +26,7 @@ namespace Iviz.App
         Echo,
         System,
         ARMarkers,
+        TfPublisher,
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -65,6 +66,7 @@ namespace Iviz.App
                 (DialogPanelType.Echo, CreatePanel<EchoDialogContents>(Resource.Widgets.EchoPanel)),
                 (DialogPanelType.System, CreatePanel<SystemDialogContents>(Resource.Widgets.SystemPanel)),
                 (DialogPanelType.ARMarkers, CreatePanel<ARMarkerDialogContents>(Resource.Widgets.ARMarkerPanel)),
+                (DialogPanelType.TfPublisher, CreatePanel<TfPublisherDialogContents>(Resource.Widgets.TfPublisherPanel)),
             };
 
             foreach (var (type, panel) in panels)

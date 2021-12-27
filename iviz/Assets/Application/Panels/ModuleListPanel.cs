@@ -149,7 +149,10 @@ namespace Iviz.App
                 UpperCanvas.Status.enabled = value;
             }
         }
-
+        
+        public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
+        public int NumTfFramesPublished => Dialogs.TfPublisherData.NumFrames;
+        
         public ModuleListPanel()
         {
             ModuleDatas = moduleDatas.AsReadOnly();
@@ -698,10 +701,7 @@ namespace Iviz.App
                 RosLogger.Debug($"{this}: Error saving XR configuration", e);
             }
         }
-
         
-        public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
-
         public async ValueTask ClearMastersCacheAsync(CancellationToken token = default)
         {
             string path = Settings.SimpleConfigurationPath;
@@ -888,6 +888,10 @@ namespace Iviz.App
             Dialogs.ARMarkerData.Show();
         }
 
+        public void ShowTfPublisherDialog()
+        {
+            Dialogs.TfPublisherData.Show();
+        }
         void UpdateCameraStats()
         {
             using var description = BuilderPool.Rent();

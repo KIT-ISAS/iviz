@@ -10,6 +10,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Ros;
+using Iviz.Roslib;
 
 namespace Iviz.Controllers
 {
@@ -19,6 +20,7 @@ namespace Iviz.Controllers
         readonly ImageResource billboard;
         readonly ImageTexture imageTexture;
         readonly ImageConfiguration config = new();
+        readonly Listener<CameraInfo> infoListener;
 
         string? descriptionOverride;
         bool isProcessing;
@@ -82,6 +84,7 @@ namespace Iviz.Controllers
                 BillboardSize = value.BillboardSize;
                 BillboardFollowsCamera = value.BillboardFollowCamera;
                 BillboardOffset = value.BillboardOffset;
+                UseIntrinsicScale = value.UseIntrinsicScale;
             }
         }
 
@@ -195,6 +198,19 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool UseIntrinsicScale
+        {
+            get => config.UseIntrinsicScale;
+            set
+            {
+                config.UseIntrinsicScale = value;
+                if (!value)
+                {
+                    billboard.Intrinsic = null;
+                }
+            }
+        }
+
         public override IListener Listener { get; }
 
         public ImageListener(IModuleData moduleData, ImageConfiguration? config, string topic, string type)
@@ -218,6 +234,11 @@ namespace Iviz.Controllers
                 CompressedImage.RosMessageType => new Listener<CompressedImage>(Config.Topic, HandlerCompressed),
                 _ => throw new InvalidOperationException("Invalid message type")
             };
+
+            billboard.Title = Listener.Topic;
+
+            string infoTopic = RosUtils.GetCameraInfoTopic(Config.Topic);
+            infoListener = new Listener<CameraInfo>(infoTopic, InfoHandler, RosTransportHint.PreferUdp);
         }
 
         bool HandlerCompressed(CompressedImage msg)
@@ -241,14 +262,14 @@ namespace Iviz.Controllers
                 IsProcessing = false;
             }
 
-            switch (msg.Format)
+            switch (msg.Format.ToUpperInvariant())
             {
-                case "png":
+                case "PNG":
                     descriptionOverride = null;
                     imageTexture.ProcessPng(msg.Data, PostProcess);
                     break;
-                case "jpeg":
-                case "jpg":
+                case "JPEG":
+                case "JPG":
                     descriptionOverride = null;
                     imageTexture.ProcessJpg(msg.Data, PostProcess);
                     break;
@@ -283,10 +304,7 @@ namespace Iviz.Controllers
                     }
 
                     node.AttachTo(msg.Header);
-
-                    int width = (int)msg.Width;
-                    int height = (int)msg.Height;
-                    imageTexture.Set(width, height, msg.Encoding, msg.Data.AsSpan());
+                    imageTexture.Set((int)msg.Width, (int)msg.Height, msg.Encoding, msg.Data.AsSpan());
                 }
                 finally
                 {
@@ -298,6 +316,17 @@ namespace Iviz.Controllers
             return true;
         }
 
+        public bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format, out Vector4 color) =>
+            imageTexture.TrySampleColor(rawUV, out uv, out format, out color);
+
+        void InfoHandler(CameraInfo info)
+        {
+            if (UseIntrinsicScale)
+            {
+                billboard.Intrinsic = new Intrinsic(info.K);
+            }
+        }
+
         public override void Dispose()
         {
             base.Dispose();
@@ -306,6 +335,7 @@ namespace Iviz.Controllers
 
             imageTexture.Stop();
             imageTexture.Dispose();
+            infoListener.Dispose();
 
             node.DestroySelf();
         }

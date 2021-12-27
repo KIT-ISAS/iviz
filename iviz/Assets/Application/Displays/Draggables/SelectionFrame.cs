@@ -72,7 +72,7 @@ namespace Iviz.Displays
             children[2].Transform.localPosition = new Vector3(-halfSizeX, -halfSizeY, 0);
             children[3].Transform.localPosition = new Vector3(-halfSizeX, halfSizeY, 0);
 
-            foreach (var child in children.Slice(..4))
+            foreach (var child in children.AsSpan(..4))
             {
                 child.Transform.localScale = new Vector3(ColumnWidth, ColumnWidth, size.z);
             }
@@ -82,7 +82,7 @@ namespace Iviz.Displays
             children[6].Transform.localPosition = new Vector3(0, -halfSizeY, -halfSizeZ);
             children[7].Transform.localPosition = new Vector3(0, halfSizeY, -halfSizeZ);
 
-            foreach (var child in children.Slice(4..8))
+            foreach (var child in children.AsSpan(4..8))
             {
                 child.Transform.localScale = new Vector3(size.x, ColumnWidth, ColumnWidth);
             }
@@ -92,7 +92,7 @@ namespace Iviz.Displays
             children[10].Transform.localPosition = new Vector3(-halfSizeX, 0, -halfSizeZ);
             children[11].Transform.localPosition = new Vector3(halfSizeX, 0, -halfSizeZ);
 
-            foreach (var child in children.Slice(8..12))
+            foreach (var child in children.AsSpan(8..12))
             {
                 child.Transform.localScale = new Vector3(ColumnWidth, size.y, ColumnWidth);
             }
@@ -105,17 +105,17 @@ namespace Iviz.Displays
                 children = CreateObjects(Transform);
             }
 
-            foreach (var child in children.Slice(..4))
+            foreach (var child in children.AsSpan(..4))
             {
                 child.Transform.localScale = new Vector3(ColumnWidth, ColumnWidth, size.z);
             }
 
-            foreach (var child in children.Slice(4..8))
+            foreach (var child in children.AsSpan(4..8))
             {
                 child.Transform.localScale = new Vector3(size.x, ColumnWidth, ColumnWidth);
             }
 
-            foreach (var child in children.Slice(8..12))
+            foreach (var child in children.AsSpan(8..12))
             {
                 child.Transform.localScale = new Vector3(ColumnWidth, size.y, ColumnWidth);
             }            

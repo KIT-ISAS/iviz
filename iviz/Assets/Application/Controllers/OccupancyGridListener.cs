@@ -44,7 +44,7 @@ namespace Iviz.Controllers
             set
             {
                 isProcessing = value;
-                Listener?.SetPause(value);
+                Listener.SetPause(value);
             }
         }
 
@@ -207,7 +207,7 @@ namespace Iviz.Controllers
                 textureNode.gameObject.SetActive(value);
             }
         }
-        
+
         public override IListener Listener { get; }
 
         public OccupancyGridListener(IModuleData moduleData, OccupancyGridConfiguration? config, string topic)
@@ -220,7 +220,7 @@ namespace Iviz.Controllers
             Config = config ?? new OccupancyGridConfiguration
             {
                 Topic = topic,
-            };   
+            };
 
             Listener = new Listener<OccupancyGrid>(Config.Topic, Handler);
         }
@@ -254,16 +254,21 @@ namespace Iviz.Controllers
                 return;
             }
 
-            Pose origin = msg.Info.Origin.Ros2Unity();
+            var origin = msg.Info.Origin.Ros2Unity();
+            Pose validatedOrigin;
             if (!origin.IsUsable())
             {
                 RosLogger.Error($"{this}: Cannot use ({origin.position.x}, {origin.position.y}, " +
-                             $"{origin.position.z}) as position. Values too large");
-                origin = Pose.identity;
+                                $"{origin.position.z}) as position. Values too large!");
+                validatedOrigin = Pose.identity;
+            }
+            else
+            {
+                validatedOrigin = origin;
             }
 
-            numCellsX = (int) msg.Info.Width;
-            numCellsY = (int) msg.Info.Height;
+            numCellsX = (int)msg.Info.Width;
+            numCellsY = (int)msg.Info.Height;
             cellSize = msg.Info.Resolution;
 
             var tasks = new List<Task>();
@@ -273,26 +278,26 @@ namespace Iviz.Controllers
                 IsProcessing = true;
                 if (CubesVisible)
                 {
-                    SetCubes(msg.Data, origin, tasks);
+                    SetCubes(msg.Data, validatedOrigin, tasks);
                 }
 
                 if (TextureVisible)
                 {
-                    SetTextures(msg.Data, origin, tasks);
+                    SetTextures(msg.Data, validatedOrigin, tasks);
                 }
             }
             finally
             {
-                AwaitAndReset(tasks);
+                AwaitAndReset();
+            }
+            
+            async void AwaitAndReset()
+            {
+                await tasks.WhenAll().AwaitNoThrow(this);
+                IsProcessing = false; 
             }
         }
-
-        async void AwaitAndReset(IEnumerable<Task> tasks)
-        {
-            await tasks.WhenAll().AwaitNoThrow(this);
-            IsProcessing = false; // next frame
-        }
-
+        
         void SetCubes(Memory<sbyte> data, Pose pose, ICollection<Task> tasks)
         {
             if (gridTiles.Length != 16)
@@ -300,13 +305,14 @@ namespace Iviz.Controllers
                 gridTiles = new OccupancyGridResource[16];
                 foreach (int j in ..16)
                 {
-                    var gridTile = ResourcePool.Rent<OccupancyGridResource>(
+                    var resource = ResourcePool.Rent<OccupancyGridResource>(
                         Resource.Displays.OccupancyGridResource,
                         cubeNode.Transform);
-                    gridTile.Transform.SetLocalPose(Pose.identity);
-                    gridTile.Colormap = Colormap;
-                    gridTile.FlipMinMax = FlipMinMax;
-                    gridTiles[j] = gridTile;
+                    resource.gameObject.name = $"OccupancyGridResource-{j.ToString()}";
+                    resource.Transform.SetLocalPose(Pose.identity);
+                    resource.Colormap = Colormap;
+                    resource.FlipMinMax = FlipMinMax;
+                    gridTiles[j] = resource;
                 }
             }
 
@@ -356,13 +362,15 @@ namespace Iviz.Controllers
             {
                 if (tileTotalSize > textureTiles.Count)
                 {
-                    foreach (int _ in textureTiles.Count..tileTotalSize)
+                    foreach (int j in textureTiles.Count..tileTotalSize)
                     {
-                        var texture = ResourcePool.RentDisplay<OccupancyGridTextureResource>(textureNode.Transform); 
-                        texture.Visible = Visible;
-                        texture.Colormap = Colormap;
-                        texture.FlipMinMax = FlipMinMax;
-                        textureTiles.Add(texture);
+                        var resource = ResourcePool.RentDisplay<OccupancyGridTextureResource>(textureNode.Transform);
+                        resource.gameObject.name = $"OccupancyGridTextureResource-{j.ToString()}";
+                        resource.Visible = Visible;
+                        resource.Colormap = Colormap;
+                        resource.FlipMinMax = FlipMinMax;
+                        resource.Title = Listener.Topic;
+                        textureTiles.Add(resource);
                     }
                 }
                 else
@@ -385,7 +393,7 @@ namespace Iviz.Controllers
                     int xMax = Math.Min(xMin + MaxTileSize, numCellsX);
                     int yMin = v * MaxTileSize;
                     int yMax = Math.Min(yMin + MaxTileSize, numCellsY);
-                    
+
                     var rect = new OccupancyGridResource.Rect(xMin, xMax, yMin, yMax);
 
                     var texture = textureTiles[i++];

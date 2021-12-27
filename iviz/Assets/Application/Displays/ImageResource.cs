@@ -1,11 +1,14 @@
 ﻿#nullable enable
 
+using System;
+using Iviz.Common;
 using Iviz.Core;
+using Iviz.Displays.Highlighters;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class ImageResource : MonoBehaviour, IDisplay
+    public sealed class ImageResource : MonoBehaviour, IDisplay, IHasBounds, IHighlightable
     {
         [SerializeField] MeshRenderer? front = null;
         [SerializeField] Billboard? billboard = null;
@@ -15,7 +18,9 @@ namespace Iviz.Displays
         ImageTexture? texture;
         BoxCollider? boxCollider;
         Pose billboardStartPose;
+        bool billboardEnabled;
         Vector3 offset;
+        Intrinsic? intrinsic;
 
         Billboard Billboard => billboard.AssertNotNull(nameof(billboard));
         MeshRenderer Front => front.AssertNotNull(nameof(front));
@@ -24,8 +29,22 @@ namespace Iviz.Displays
             boxCollider != null ? boxCollider : (boxCollider = Billboard.GetComponent<BoxCollider>());
 
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
-        
-        
+        public string Title { get; set; } = "";
+
+        public Intrinsic? Intrinsic
+        {
+            set
+            {
+                if (Nullable.Equals(intrinsic, value))
+                {
+                    return;
+                }
+
+                intrinsic = value;
+                UpdateSize();
+            }
+        }
+
         public ImageTexture? Texture
         {
             get => texture;
@@ -46,6 +65,8 @@ namespace Iviz.Displays
         }
 
         public Bounds? Bounds => new Bounds(Collider.center, Collider.size);
+        public Transform BoundsTransform => Billboard.transform;
+        public event Action? BoundsChanged;
 
         public int Layer
         {
@@ -54,14 +75,11 @@ namespace Iviz.Displays
 
         public bool BillboardEnabled
         {
-            get => Billboard.enabled;
             set
             {
+                billboardEnabled = value;
                 Billboard.enabled = value;
-                if (!value)
-                {
-                    Billboard.transform.SetLocalPose(new Pose(Offset, billboardStartPose.rotation));
-                }
+                UpdateSize();
             }
         }
 
@@ -71,7 +89,7 @@ namespace Iviz.Displays
             set
             {
                 offset = value;
-                Billboard.transform.localPosition = value;
+                UpdateSize();
             }
         }
 
@@ -81,13 +99,16 @@ namespace Iviz.Displays
             set
             {
                 scale = value;
-                UpdateSides();
+                UpdateSize();
             }
         }
 
         float Width => Scale;
         float Height => Width * AspectRatio;
         float AspectRatio => Texture != null && Texture.Width != 0 ? (float)Texture.Height / Texture.Width : 1;
+
+        public bool IsAlive => gameObject.activeSelf;
+        public string Caption => $"<b>{Title}</b>\n{(Texture != null ? Texture.Description : "(unset)")}";
 
         void Awake()
         {
@@ -124,6 +145,8 @@ namespace Iviz.Displays
             Offset = Vector3.zero;
             BillboardEnabled = false;
             Scale = 1;
+            Intrinsic = null;
+            Title = "";
         }
 
         public bool Visible
@@ -132,14 +155,37 @@ namespace Iviz.Displays
             set => gameObject.SetActive(value);
         }
 
-        void UpdateSides()
+        void UpdateSize()
         {
-            Billboard.transform.localScale = new Vector3(Width, Height, 1);
+            var billboardTransform = Billboard.transform;
+            var baseScale = new Vector3(Width, Height, 1);
+
+            if (intrinsic is { } validatedIntrinsic && !billboardEnabled && Texture is { Width: not 0 })
+            {
+                float perspectiveScale = Mathf.Abs(offset.y) / Texture.Width;
+                billboardTransform.localScale = baseScale * (validatedIntrinsic.Fx * perspectiveScale);
+                var intrinsicOffset = new Vector3(
+                    validatedIntrinsic.Cx - Texture.Width / 2f,
+                    Texture.Height / 2f - validatedIntrinsic.Cy,
+                    0);
+                billboardTransform.localPosition = offset + intrinsicOffset.Ros2Unity() * perspectiveScale;
+                billboardTransform.localRotation = billboardStartPose.rotation;
+            }
+            else
+            {
+                billboardTransform.localScale = baseScale;
+                billboardTransform.localPosition = offset;
+                billboardTransform.localRotation = billboardEnabled
+                    ? Quaternion.identity
+                    : billboardStartPose.rotation;
+            }
+
+            BoundsChanged?.Invoke();
         }
 
         void OnTextureChanged(Texture2D? newTexture)
         {
-            UpdateSides();
+            UpdateSize();
 
             if (newTexture != null)
             {
@@ -150,6 +196,11 @@ namespace Iviz.Displays
             {
                 Front.sharedMaterial = Texture.Material;
             }
+        }
+
+        public void Highlight(in Vector3 hitPoint)
+        {
+            FAnimator.Start(new BoundsHighlighter(this, duration: 2));
         }
     }
 }

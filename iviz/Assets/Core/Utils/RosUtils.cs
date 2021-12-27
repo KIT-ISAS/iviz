@@ -44,8 +44,7 @@ namespace Iviz.Core
             new(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float4 Ros2Unity(this in float4 v) =>
-            new(-v.y, v.z, v.x, v.w);
+        public static float4 Ros2Unity(this in float4 v) => new(-v.y, v.z, v.x, v.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityEngine.Quaternion RosRpy2Unity(this in Vector3 v) =>
@@ -56,32 +55,28 @@ namespace Iviz.Core
             v.ToUnity().RosRpy2Unity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Ros2Unity(this in Vector3f p) =>
-            new(-p.Y, p.Z, p.X);
+        public static Vector3 Ros2Unity(this in Vector3f p) => new(-p.Y, p.Z, p.X);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 ToUnity(this in Msgs.GeometryMsgs.Vector3 p) =>
-            new((float)p.X, (float)p.Y, (float)p.Z);
+        public static Vector3 ToUnity(this in Msgs.GeometryMsgs.Vector3 p) => new((float)p.X, (float)p.Y, (float)p.Z);
+
+        public static Msgs.GeometryMsgs.Vector3 ToRosVector3(this in Vector3 p) => new(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Ros2Unity(this in Msgs.GeometryMsgs.Vector3 p) =>
             new((float)-p.Y, (float)p.Z, (float)p.X);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Ros2Unity(this in Point32 p) =>
-            new(-p.Y, p.Z, p.X);
+        public static Vector3 Ros2Unity(this in Point32 p) => new(-p.Y, p.Z, p.X);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Msgs.GeometryMsgs.Vector3 Unity2RosVector3(this in Vector3 p) =>
-            new(p.z, -p.x, p.y);
+        public static Msgs.GeometryMsgs.Vector3 Unity2RosVector3(this in Vector3 p) => new(p.z, -p.x, p.y);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Point Unity2RosPoint(this in Vector3 p) =>
-            new(p.z, -p.x, p.y);
+        public static Point Unity2RosPoint(this in Vector3 p) => new(p.z, -p.x, p.y);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Ros2Unity(this in Point p) =>
-            new((float)-p.Y, (float)p.Z, (float)p.X);
+        public static Vector3 Ros2Unity(this in Point p) => new((float)-p.Y, (float)p.Z, (float)p.X);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Ros2Unity(this in Point p, ref float4 f) =>
@@ -90,8 +85,7 @@ namespace Iviz.Core
         public static void Ros2Unity(this in Point p, out Vector3 v) =>
             (v.x, v.y, v.z) = ((float)-p.Y, (float)p.Z, (float)p.X);
 
-        public static Color ToUnityColor(this in ColorRGBA p) =>
-            new(p.R, p.G, p.B, p.A);
+        public static Color ToUnityColor(this in ColorRGBA p) => new(p.R, p.G, p.B, p.A);
 
         public static ColorRGBA Sanitize(this in ColorRGBA p)
         {
@@ -268,6 +262,12 @@ namespace Iviz.Core
             string rZStr = (rZ == 0) ? "0" : rZ.ToString("#,0.#", UnityUtils.Culture);
 
             description.Append("p: ").Append(rYStr).Append(", y: ").Append(rZStr);
+        }
+
+        public static string GetCameraInfoTopic(string imageTopic)
+        {
+            int lastSlash = imageTopic.LastIndexOf('/');
+            return lastSlash != -1 ? $"{imageTopic[..lastSlash]}/camera_info" : "/camera_info";
         }
     }
 }
