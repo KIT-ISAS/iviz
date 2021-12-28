@@ -96,7 +96,7 @@ namespace Iviz.App
             panel.HideButton.State = RobotController.Visible;
 
             panel.OcclusionOnlyMode.Value = RobotController.RenderAsOcclusionOnly;
-            panel.EnableColliders.Value = RobotController.EnableColliders;
+            panel.EnableColliders.Value = RobotController.Interactable;
             panel.Tint.Value = RobotController.Tint;
             panel.Alpha.Value = RobotController.Tint.a;
             panel.Metallic.Value = RobotController.Metallic;
@@ -112,7 +112,7 @@ namespace Iviz.App
             panel.Metallic.ValueChanged += f => RobotController.Metallic = f;
             panel.Smoothness.ValueChanged += f => RobotController.Smoothness = f;
             panel.OcclusionOnlyMode.ValueChanged += f => RobotController.RenderAsOcclusionOnly = f;
-            panel.EnableColliders.ValueChanged += f => RobotController.EnableColliders = f;
+            panel.EnableColliders.ValueChanged += f => RobotController.Interactable = f;
             panel.SavedRobotName.ValueChanged += (i, name) =>
             {
                 RobotController.TryLoadSavedRobot(i == 0 ? null : name);

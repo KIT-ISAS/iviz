@@ -99,7 +99,7 @@ namespace Iviz.Controllers
                 {
                     var intensityBounds = new Vector2(MinIntensity, MaxIntensity);
                     depthImageTexture.IntensityBounds = intensityBounds;
-                    projector.IntensityBounds = intensityBounds;
+                    projector.IntensityBounds = depthImageTexture.NormalizedIntensityBounds;
                 }
             }
         }
@@ -114,7 +114,7 @@ namespace Iviz.Controllers
                 {
                     var intensityBounds = new Vector2(MinIntensity, MaxIntensity);
                     depthImageTexture.IntensityBounds = intensityBounds;
-                    projector.IntensityBounds = intensityBounds;
+                    projector.IntensityBounds = depthImageTexture.NormalizedIntensityBounds;
                 }
             }
         }
@@ -130,7 +130,7 @@ namespace Iviz.Controllers
                 {
                     var intensityBounds = new Vector2(MinIntensity, MaxIntensity);
                     depthImageTexture.IntensityBounds = intensityBounds;
-                    projector.IntensityBounds = intensityBounds;
+                    projector.IntensityBounds = depthImageTexture.NormalizedIntensityBounds;
                 }
             }
         }
@@ -447,11 +447,16 @@ namespace Iviz.Controllers
             depthInfoListener?.Dispose();
 
             projector.ReturnToPool();
+            depthImageTexture.Dispose();
+            colorImageTexture.Dispose();
             node.DestroySelf();
         }
 
         public void ResetController()
         {
+            ColorListener?.Reset();
+            DepthListener?.Reset();
+            depthInfoListener?.Reset();
         }
     }
 }

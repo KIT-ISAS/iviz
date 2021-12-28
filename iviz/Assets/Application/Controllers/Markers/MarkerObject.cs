@@ -596,7 +596,7 @@ namespace Iviz.Controllers
                 : hash;
         }
 
-        public void Stop()
+        public void Dispose()
         {
             StopLoadResourceTask();
             DiscardResource();

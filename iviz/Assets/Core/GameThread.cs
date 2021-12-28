@@ -40,7 +40,7 @@ namespace Iviz.Core
         public static DateTime Now { get; private set; } = DateTime.Now;
 
         /// <summary>
-        /// ROS timestamp of the start of the frame.
+        /// ROS timestamp of the start of the frame. Takes into account NTP adjustment.
         /// </summary>
         public static time TimeNow { get; private set; } = time.Now();
 

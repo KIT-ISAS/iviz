@@ -7,6 +7,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
+using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -148,7 +149,7 @@ namespace Iviz.Controllers
                 Topic = topic,
             };
 
-            Listener = new Listener<LaserScan>(Config.Topic, Handler);
+            Listener = new Listener<LaserScan>(Config.Topic, Handler, RosTransportHint.PreferUdp);
             node.name = "[" + Config.Topic + "]";
         }
 

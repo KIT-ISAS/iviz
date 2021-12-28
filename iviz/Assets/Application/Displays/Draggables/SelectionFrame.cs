@@ -52,7 +52,7 @@ namespace Iviz.Displays
             {
                 var resource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, transform);
                 resource.ShadowsEnabled = false;
-                resource.ColliderEnabled = false;
+                resource.EnableCollider = false;
                 return resource;
             }
 

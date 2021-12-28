@@ -178,7 +178,7 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
-            imageDialogData?.Stop();
+            imageDialogData?.Dispose();
         }
 
         sealed class ColorImageListener : ImageDialogListener
@@ -192,7 +192,7 @@ namespace Iviz.App
                 out Vector4 color) =>
                 moduleData.listener.TrySampleColor(rawUV, out uv, out format, out color);
 
-            protected override void Stop() => moduleData.OnDialogClosed();
+            protected override void Dispose() => moduleData.OnDialogClosed();
         }
     }
 }

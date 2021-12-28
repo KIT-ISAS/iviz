@@ -21,7 +21,7 @@ namespace Iviz.Displays
         Vector2 size;
         float radius;
 
-        public new Bounds Bounds => new(Collider.center, Collider.size);
+        public new Bounds Bounds => Collider.GetBounds();
 
         public Vector2 Size
         {
@@ -91,7 +91,7 @@ namespace Iviz.Displays
                 var resource = o.AddComponent<MeshMarkerResource>();
                 resource.Mesh = QuadMesh;
                 resource.Transform.SetParentLocal(transform);
-                resource.ColliderEnabled = false;
+                resource.EnableCollider = false;
                 resource.ShadowsEnabled = false;
                 resource.Layer = LayerType.IgnoreRaycast;
                 objects[i] = resource;
@@ -103,7 +103,7 @@ namespace Iviz.Displays
                 var resource = o.AddComponent<MeshMarkerResource>();
                 resource.Mesh = CornerMesh;
                 resource.Transform.SetParentLocal(transform);
-                resource.ColliderEnabled = false;
+                resource.EnableCollider = false;
                 resource.ShadowsEnabled = false;
                 resource.Layer = LayerType.IgnoreRaycast;
                 objects[i] = resource;

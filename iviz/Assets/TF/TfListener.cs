@@ -42,7 +42,8 @@ namespace Iviz.Controllers.TF
 
         readonly TfConfiguration config = new();
 
-        readonly ConcurrentQueue<(TransformStamped[] frame, string? callerId, bool isStatic)> messageList = new();
+        readonly ConcurrentQueue<(TransformStamped[] frame, string? callerId, bool isStatic)> incomingMessages = new();
+        readonly ConcurrentBag<TransformStamped> outgoingMessages = new();
 
         readonly Dictionary<string, TfFrame> frames = new();
         readonly FrameNode keepAllListenerNode;
@@ -82,7 +83,7 @@ namespace Iviz.Controllers.TF
         {
             set => RootFrame.transform.localScale = value * Vector3.one;
         }
-        
+
         public TfConfiguration Config
         {
             get => config;
@@ -198,29 +199,35 @@ namespace Iviz.Controllers.TF
 
         public static string FixedFrameId
         {
-            get => Instance.FixedFrame.Id;
+            get => Instance.FixedFrameIdImpl;
+            set => Instance.FixedFrameIdImpl = value;
+        }
+
+        string FixedFrameIdImpl
+        {
+            get => FixedFrame.Id;
             set
             {
-                if (Instance.FixedFrame != null)
+                if (FixedFrame != null)
                 {
-                    Instance.FixedFrame.RemoveListener(Instance.fixedFrameListenerNode);
+                    FixedFrame.RemoveListener(fixedFrameListenerNode);
                 }
 
                 if (string.IsNullOrEmpty(value))
                 {
-                    Instance.FixedFrame = Instance.mapFrame;
-                    OriginFrame.Transform.SetLocalPose(Pose.identity);
-                    Instance.Config.FixedFrameId = "";
+                    FixedFrame = mapFrame;
+                    originFrame.Transform.SetLocalPose(Pose.identity);
+                    Config.FixedFrameId = "";
                     return;
                 }
 
-                Instance.Config.FixedFrameId = value;
-                var frame = GetOrCreateFrame(value, Instance.fixedFrameListenerNode);
-                Instance.FixedFrame = frame;
-                OriginFrame.Transform.SetLocalPose(frame.OriginWorldPose.Inverse());
+                Config.FixedFrameId = value;
+                var frame = GetOrCreateFrame(value, fixedFrameListenerNode);
+                FixedFrame = frame;
+                originFrame.Transform.SetLocalPose(frame.OriginWorldPose.Inverse());
             }
         }
-        
+
         public TfListener(IModuleData moduleData, TfConfiguration? config, string topic)
         {
             instance = this;
@@ -296,7 +303,7 @@ namespace Iviz.Controllers.TF
             TfFrame? lastChild = null;
             bool keepAllFrames = KeepAllFrames;
 
-            while (messageList.TryDequeue(out var value))
+            while (incomingMessages.TryDequeue(out var value))
             {
                 var (transforms, callerId, isStatic) = value;
                 foreach (var (parentIdUnchecked, childIdUnchecked, rosTransform, _) in transforms)
@@ -468,7 +475,7 @@ namespace Iviz.Controllers.TF
 
         TfFrame CreateFrameObject(string id, Transform? parent, TfFrame? parentFrame)
         {
-            TfFrame frame = Resource.Displays.TfFrame.Instantiate<TfFrame>(parent);
+            var frame = Resource.Displays.TfFrame.Instantiate<TfFrame>(parent);
             frame.Setup(id);
             frame.Visible = config.Visible;
             frame.FrameSize = config.FrameSize;
@@ -489,23 +496,23 @@ namespace Iviz.Controllers.TF
 
         bool HandlerNonStatic(TFMessage msg, IRosReceiver? receiver)
         {
-            if (messageList.Count > MaxQueueSize)
+            if (incomingMessages.Count > MaxQueueSize)
             {
                 return false;
             }
 
-            messageList.Enqueue((msg.Transforms, receiver?.RemoteId, false));
+            incomingMessages.Enqueue((msg.Transforms, receiver?.RemoteId, false));
             return true;
         }
 
         bool HandlerStatic(TFMessage msg, IRosReceiver? receiver)
         {
-            if (messageList.Count > MaxQueueSize)
+            if (incomingMessages.Count > MaxQueueSize)
             {
                 return false;
             }
 
-            messageList.Enqueue((msg.Transforms, receiver?.RemoteId, true));
+            incomingMessages.Enqueue((msg.Transforms, receiver?.RemoteId, true));
             return true;
         }
 
@@ -593,17 +600,17 @@ namespace Iviz.Controllers.TF
         public static void Publish(string childFrame, in Msgs.GeometryMsgs.Transform rosTransform) =>
             Publish(FixedFrameId, childFrame, rosTransform);
 
-        static readonly ConcurrentBag<TransformStamped> MessagesToPublish = new();
-
         public static void Publish(string? parentFrame, string childFrame, in Msgs.GeometryMsgs.Transform rosTransform)
         {
-            MessagesToPublish.Add(new TransformStamped(CreateHeader(tfSeq++, parentFrame ?? FixedFrameId),
-                ResolveFrameId(childFrame), rosTransform));
+            instance?.outgoingMessages.Add(new TransformStamped(
+                CreateHeader(tfSeq++, parentFrame ?? FixedFrameId),
+                ResolveFrameId(childFrame),
+                rosTransform));
         }
 
-        static void DoPublish()
+        void DoPublish()
         {
-            int count = MessagesToPublish.Count;
+            int count = outgoingMessages.Count;
             if (count == 0)
             {
                 return;
@@ -612,17 +619,16 @@ namespace Iviz.Controllers.TF
             var messages = new TransformStamped[count];
             foreach (int i in ..count)
             {
-                MessagesToPublish.TryTake(out messages[i]);
+                outgoingMessages.TryTake(out messages[i]);
             }
 
-            var tfMessage = new TFMessage(messages);
             if (ConnectionManager.IsConnected)
             {
-                Instance.Publisher.Publish(tfMessage);
+                Publisher.Publish(new TFMessage(messages));
             }
             else
             {
-                Instance.HandlerNonStatic(tfMessage, null);
+                incomingMessages.Enqueue((messages, null, false));
             }
         }
 

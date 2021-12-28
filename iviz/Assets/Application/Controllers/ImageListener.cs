@@ -333,7 +333,6 @@ namespace Iviz.Controllers
             billboard.Texture = null;
             billboard.ReturnToPool();
 
-            imageTexture.Stop();
             imageTexture.Dispose();
             infoListener.Dispose();
 

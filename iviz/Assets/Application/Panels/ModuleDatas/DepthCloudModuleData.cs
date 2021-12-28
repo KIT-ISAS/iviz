@@ -8,7 +8,6 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -42,8 +41,8 @@ namespace Iviz.App
         {
             base.Dispose();
             controller.Dispose();
-            colorDialogData?.Stop();
-            depthDialogData?.Stop();
+            colorDialogData?.Dispose();
+            depthDialogData?.Dispose();
         }
 
         public override void SetupPanel()
@@ -76,8 +75,8 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
 
             var topics = GetImageTopics();
-            panel.Color.Hints = topics;
-            panel.Depth.Hints = topics;
+            panel.Color.SetHints(topics);
+            panel.Depth.SetHints(topics);
 
             panel.Color.EndEdit += f =>
             {
@@ -231,7 +230,7 @@ namespace Iviz.App
                 out Vector4 color) =>
                 moduleData.controller.TrySampleColor(rawUV, out uv, out format, out color);
 
-            protected override void Stop() => moduleData.OnDialogClosed(DialogData);
+            protected override void Dispose() => moduleData.OnDialogClosed(DialogData);
         }
 
         sealed class DepthImageDialogListener : ImageDialogListener
@@ -245,7 +244,7 @@ namespace Iviz.App
                 out Vector4 color) =>
                 moduleData.controller.TrySampleDepth(rawUV, out uv, out format, out color);
 
-            protected override void Stop() => moduleData.OnDialogClosed(DialogData);
+            protected override void Dispose() => moduleData.OnDialogClosed(DialogData);
         }
     }
 }

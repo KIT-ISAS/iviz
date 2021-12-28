@@ -216,7 +216,7 @@ namespace Iviz.Controllers
 
             foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
             {
-                markerObject.Stop();
+                markerObject.Dispose();
             }
 
             interactiveMarkers.Clear();
@@ -308,7 +308,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            interactiveMarker.Stop();
+            interactiveMarker.Dispose();
             interactiveMarkers.Remove(id);
         }
 
@@ -375,7 +375,7 @@ namespace Iviz.Controllers
         {
             foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
             {
-                markerObject.Stop();
+                markerObject.Dispose();
             }
 
             interactiveMarkers.Clear();

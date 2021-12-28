@@ -176,7 +176,7 @@ namespace Iviz.Controllers
 
             foreach (string controlId in controlsToDelete)
             {
-                controls[controlId].Stop();
+                controls[controlId].Dispose();
                 controls.Remove(controlId);
             }
 
@@ -235,11 +235,11 @@ namespace Iviz.Controllers
                 node.Parent != null ? node.Parent.Id : null, entryId, ControlNode.AsLocalPose());
         }
 
-        public void Stop()
+        public void Dispose()
         {
             foreach (var controlObject in controls.Values)
             {
-                controlObject.Stop();
+                controlObject.Dispose();
             }
 
             controls.Clear();

@@ -1123,10 +1123,10 @@ namespace Iviz.Ros
                 : 0;
         }
 
-        internal override void Stop()
+        internal override void Dispose()
         {
             Disconnect();
-            base.Stop();
+            base.Dispose();
         }
     }
 }

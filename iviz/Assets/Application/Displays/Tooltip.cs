@@ -28,7 +28,7 @@ namespace Iviz.Displays
             background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneResource>(Transform);
 
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
-        public Bounds? Bounds => new Bounds(BoxCollider.center, BoxCollider.size);
+        public Bounds? Bounds => BoxCollider.GetBounds();
 
         public int Layer
         {

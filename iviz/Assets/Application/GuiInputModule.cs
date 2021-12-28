@@ -723,12 +723,10 @@ namespace Iviz.App
                 return;
             }
 
-            Vector3Int baseInput = GetBaseInput();
+            var baseInput = GetBaseInput();
             float deltaTime = Time.deltaTime;
 
-            Vector3 speed = deltaTime * baseInput.Mult(MainSpeed * DirectionWeight);
-
-            accel.AddInPlace(baseInput.Mult(MainAccel * DirectionWeight) * deltaTime);
+            accel += baseInput.Mult(MainAccel * DirectionWeight) * deltaTime;
             if (baseInput.x == 0)
             {
                 accel.x *= BrakeCoeff;
@@ -756,8 +754,7 @@ namespace Iviz.App
                 }
             }
 
-            speed.AddInPlace(deltaTime * accel);
-
+            var speed = deltaTime * (baseInput.Mult(MainSpeed * DirectionWeight) + accel);
             Transform.position += Transform.rotation * speed;
         }
 
@@ -842,7 +839,7 @@ namespace Iviz.App
             {
                 pVelocity.y++;
             }
-
+            
             return pVelocity;
         }
 

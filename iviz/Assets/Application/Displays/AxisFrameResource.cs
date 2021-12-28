@@ -63,7 +63,7 @@ namespace Iviz.Displays
             foreach (var (frame, frameName) in Frames.Zip(Names))
             {
                 frame.gameObject.name = frameName;
-                frame.ColliderEnabled = false;
+                frame.EnableCollider = false;
                 frame.Layer = Layer;
             }
 

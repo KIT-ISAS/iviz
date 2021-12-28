@@ -14,15 +14,12 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class MeshTrianglesResource : MeshMarkerResource, ISupportsDynamicBounds
     {
-        public bool FlipWinding { get; set; }
-
         Mesh? mesh;
 
-        public override Bounds? Bounds =>
-            mesh != null && mesh.vertexCount != 0 ? new Bounds(Collider.center, Collider.size) : null;
-
+        public bool FlipWinding { get; set; }
+        public override Bounds? Bounds => mesh != null && mesh.vertexCount != 0 ? Collider.GetBounds() : null;
         public event Action? BoundsChanged;
-        
+
         public string MeshName
         {
             set
@@ -112,12 +109,10 @@ namespace Iviz.Displays
             }
 
             ownMesh.RecalculateNormals();
-
-            Collider.center = ownMesh.bounds.center;
-            Collider.size = ownMesh.bounds.size;
+            Collider.SetBounds(ownMesh.bounds);
             BoundsChanged?.Invoke();
         }
-        
+
         public void Set(
             ReadOnlySpan<Vector3> points,
             ReadOnlySpan<Vector3> normals,
@@ -168,12 +163,10 @@ namespace Iviz.Displays
 
             ownMesh.SetTriangles(triangles);
 
-
             if (normals.Length == 0)
             {
                 ownMesh.RecalculateNormals();
             }
-
 
             if (tangents.Length != 0)
             {
@@ -184,9 +177,7 @@ namespace Iviz.Displays
                 ownMesh.RecalculateTangents();
             }
 
-            Collider.center = ownMesh.bounds.center;
-            Collider.size = ownMesh.bounds.size;
-            
+            Collider.SetBounds(ownMesh.bounds);
             BoundsChanged?.Invoke();
         }
 
@@ -206,6 +197,6 @@ namespace Iviz.Displays
             {
                 Destroy(mesh);
             }
-        }        
+        }
     }
 }
