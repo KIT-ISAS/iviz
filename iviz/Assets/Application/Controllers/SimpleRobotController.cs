@@ -50,7 +50,7 @@ namespace Iviz.Controllers
         public RobotConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 AttachedToTf = value.AttachedToTf;
                 FramePrefix = value.FramePrefix;
@@ -62,7 +62,6 @@ namespace Iviz.Controllers
                 Metallic = value.Metallic;
                 KeepMeshMaterials = value.KeepMeshMaterials;
                 EnableColliders = value.EnableColliders;
-
                 ProcessRobotSource(value.SavedRobotName, value.SourceParameter);
             }
         }
@@ -246,12 +245,11 @@ namespace Iviz.Controllers
 
         public event Action? Stopped;
 
-        public SimpleRobotController(IModuleData moduleData)
+        public SimpleRobotController(IModuleData moduleData, RobotConfiguration? config)
         {
             node = FrameNode.Instantiate("SimpleRobotNode");
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
-            Config = new RobotConfiguration();
+            Config = config ?? new RobotConfiguration();
         }
 
 
