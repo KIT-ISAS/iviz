@@ -94,9 +94,9 @@ namespace Iviz.Displays
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsElementValid(in float4x2 f) => !f.c0.HasNaN() &&
-                                                            !f.c1.HasNaN() &&
-                                                            (f.c0 - f.c1).MaxAbsCoeff3() > MinLineLength &&
                                                             f.c0.MaxAbsCoeff3() < MaxPositionMagnitude &&
+                                                            (f.c0 - f.c1).MaxAbsCoeff3() > MinLineLength &&
+                                                            !f.c1.HasNaN() &&
                                                             f.c1.MaxAbsCoeff3() < MaxPositionMagnitude;
 
         public override Bounds? Bounds => Size == 0 ? null : base.Bounds;
@@ -120,7 +120,7 @@ namespace Iviz.Displays
                 ref readonly var t = ref lines[i];
                 if (IsElementValid(t))
                 {
-                    lineBuffer.Add(t.f);
+                    lineBuffer.AddUnsafe(t.f);
                 }
             }
 
@@ -142,19 +142,16 @@ namespace Iviz.Displays
         /// false if not, or null to request a manual check.
         /// </param>
         /// <param name="reserve">The expected number of lines, or 0 if unknown.</param>
-        public void SetDirect(Func<NativeList<float4x2>, bool?> callback, int reserve = 0)
+        public void SetDirect(Func<NativeList<float4x2>, bool?> callback, int reserve)
         {
             if (callback == null)
             {
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            if (reserve != 0)
-            {
-                lineBuffer.EnsureCapacity(reserve);
-            }
-
+            lineBuffer.EnsureCapacity(reserve);
             lineBuffer.Clear();
+            
             bool? overrideNeedsAlpha = callback(lineBuffer);
             UpdateLines(overrideNeedsAlpha);
         }

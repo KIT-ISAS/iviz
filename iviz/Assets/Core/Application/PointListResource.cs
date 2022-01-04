@@ -163,16 +163,23 @@ namespace Iviz.Displays
             using (var vertices = new Rent<Vector3>(points.Length))
             using (var indices = new Rent<int>(points.Length))
             {
+                var vArray = vertices.Array;
+                int[] iArray = indices.Array;
+
                 if (UseColormap)
                 {
                     using var uvs = new Rent<Vector2>(points.Length);
+                    var uvsArray = uvs.Array;
                     for (int i = 0; i < points.Length; i++)
                     {
+                        iArray[i] = i;
+
                         ref readonly var p = ref points[i];
-                        ref var v = ref vertices.Array[i];
-                        (v.x, v.y, v.z) = p;
-                        indices.Array[i] = i;
-                        uvs.Array[i].x = p.w;
+                        ref var v = ref vArray[i];
+                        v.x = p.x;
+                        v.y = p.y;
+                        v.z = p.z;
+                        uvsArray[i].x = p.w;
                     }
 
                     mesh.SetVertices(vertices);
@@ -182,13 +189,17 @@ namespace Iviz.Displays
                 else
                 {
                     using var colors = new Rent<Color32>(points.Length);
+                    var cArray = colors.Array;
                     for (int i = 0; i < points.Length; i++)
                     {
+                        iArray[i] = i;
+
                         ref readonly var p = ref points[i];
-                        ref var v = ref vertices.Array[i];
-                        (v.x, v.y, v.z) = p;
-                        indices.Array[i] = i;
-                        colors.Array[i] = PointWithColor.RecastToColor32(p.w);
+                        ref var v = ref vArray[i];
+                        v.x = p.x;
+                        v.y = p.y;
+                        v.z = p.z;
+                        cArray[i] = PointWithColor.RecastToColor32(p.w);
                     }
 
                     mesh.SetVertices(vertices);
@@ -223,16 +234,12 @@ namespace Iviz.Displays
         {
             Set(MemoryMarshal.Cast<PointWithColor, float4>(points));
         }
-        
+
         public void Set(ReadOnlySpan<float4> points)
         {
-            if (points == null)
-            {
-                throw new ArgumentNullException(nameof(points));
-            }
-
             pointBuffer.EnsureCapacity(points.Length);
             pointBuffer.Clear();
+
             for (int i = 0; i < points.Length; i++)
             {
                 ref readonly var t = ref points[i];
@@ -241,7 +248,7 @@ namespace Iviz.Displays
                     continue;
                 }
 
-                pointBuffer.Add(t);
+                pointBuffer.AddUnsafe(t);
             }
 
             isDirty = true;
@@ -265,19 +272,16 @@ namespace Iviz.Displays
             return !(t.HasNaN() || t.MaxAbsCoeff3() > MaxPositionMagnitude);
         }
 
-        public void SetDirect(Action<NativeList<float4>> callback, int reserve = 0)
+        public void SetDirect(Action<NativeList<float4>> callback, int reserve)
         {
             if (callback == null)
             {
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            if (reserve != 0)
-            {
-                pointBuffer.EnsureCapacity(reserve);
-            }
-
+            pointBuffer.EnsureCapacity(reserve);
             pointBuffer.Clear();
+
             callback(pointBuffer);
             isDirty = true;
         }

@@ -43,10 +43,8 @@ namespace Iviz.Core
         public static float MaxAbsCoeff(this in Vector3 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static float MaxAbsCoeff(float x, float y, float z)
-        {
-            return Mathf.Max(Mathf.Max(Mathf.Abs(x), Mathf.Abs(y)), Mathf.Abs(z));
-        }
+        static float MaxAbsCoeff(float x, float y, float z) =>
+            Mathf.Max(Mathf.Max(Mathf.Abs(x), Mathf.Abs(y)), Mathf.Abs(z));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in Vector4 p)
@@ -56,10 +54,11 @@ namespace Iviz.Core
 
         public static Vector3 InvCoeff(this Vector3 p)
         {
-            p.x = 1f / p.x;
-            p.y = 1f / p.y;
-            p.z = 1f / p.z;
-            return p;
+            Vector3 q;
+            q.x = 1f / p.x;
+            q.y = 1f / p.y;
+            q.z = 1f / p.z;
+            return q;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,36 +76,40 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Cross(this in Vector3 lhs, in Vector3 rhs)
         {
-            return new Vector3(
-                lhs.y * rhs.z - lhs.z * rhs.y,
-                lhs.z * rhs.x - lhs.x * rhs.z,
-                lhs.x * rhs.y - lhs.y * rhs.x);
+            Vector3 r;
+            r.x = lhs.y * rhs.z - lhs.z * rhs.y;
+            r.y = lhs.z * rhs.x - lhs.x * rhs.z;
+            r.z = lhs.x * rhs.y - lhs.y * rhs.x;
+            return r;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Normalized(this Vector3 v)
+        public static Vector3 Normalized(this Vector3 p)
         {
-            float m = v.Magnitude();
-            v.x /= m;
-            v.y /= m;
-            v.z /= m;
-            return v;
+            Vector3 q;
+            float m = p.Magnitude();
+            q.x = p.x / m;
+            q.y = p.y / m;
+            q.z = p.z / m;
+            return q;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Abs(this Vector3 p)
         {
-            p.x = Mathf.Abs(p.x);
-            p.y = Mathf.Abs(p.y);
-            p.z = Mathf.Abs(p.z);
-            return p;
+            Vector3 q;
+            q.x = Mathf.Abs(p.x);
+            q.y = Mathf.Abs(p.y);
+            q.z = Mathf.Abs(p.z);
+            return q;
         }
 
         public static Vector2 Abs(this Vector2 p)
         {
-            p.x = Mathf.Abs(p.x);
-            p.y = Mathf.Abs(p.y);
-            return p;
+            Vector2 q;
+            q.x = Mathf.Abs(p.x);
+            q.y = Mathf.Abs(p.y);
+            return q;
         }
 
         public static bool TryParse(string s, out float f)
@@ -123,13 +126,19 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pose AsPose(this Transform t)
         {
-            return new Pose(t.position, t.rotation);
+            Pose p;
+            p.position = t.position;
+            p.rotation = t.rotation;
+            return p;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pose AsLocalPose(this Transform t)
         {
-            return new Pose(t.localPosition, t.localRotation);
+            Pose p;
+            p.position = t.localPosition;
+            p.rotation = t.localRotation;
+            return p;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -468,6 +477,7 @@ namespace Iviz.Core
             return new ReadOnlySpan<T>(list.ExtractArray(), 0, list.Count);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged
         {
             return MemoryMarshal.Read<T>(span);

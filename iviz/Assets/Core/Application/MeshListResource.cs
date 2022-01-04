@@ -246,8 +246,8 @@ namespace Iviz.Displays
         public void Set(ReadOnlySpan<PointWithColor> points)
         {
             pointBuffer.EnsureCapacity(points.Length);
-
             pointBuffer.Clear();
+            
             for (int i = 0; i < points.Length; i++)
             {
                 ref readonly var t = ref points[i];
@@ -256,7 +256,7 @@ namespace Iviz.Displays
                     continue;
                 }
 
-                pointBuffer.Add(t.f);
+                pointBuffer.AddUnsafe(t.f);
             }
 
             UpdateBuffer();

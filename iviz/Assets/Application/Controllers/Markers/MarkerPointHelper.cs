@@ -47,12 +47,15 @@ namespace Iviz.Controllers.Markers
             var f = new float4();
             f.w = PointWithColor.RecastToFloat(color32);
 
+            pointBuffer.EnsureCapacity(points.Length);
+            pointBuffer.Clear();
+
             for (int i = 0; i < points.Length; i++)
             {
                 points[i].Ros2Unity(ref f);
                 if (PointListResource.IsElementValid(f))
                 {
-                    pointBuffer.Add(f);
+                    pointBuffer.AddUnsafe(f);
                 }
             }
         }
@@ -61,14 +64,19 @@ namespace Iviz.Controllers.Markers
         {
             var f = new float4();
 
+            pointBuffer.EnsureCapacity(points.Length);
+            pointBuffer.Clear();
+            
             for (int i = 0; i < points.Length; i++)
             {
                 points[i].Ros2Unity(ref f);
-                if (PointListResource.IsElementValid(f))
+                if (!PointListResource.IsElementValid(f))
                 {
-                    f.w = PointWithColor.RecastToFloat(colors[i].ToUnityColor32());
-                    pointBuffer.Add(f);
+                    continue;
                 }
+                
+                f.w = PointWithColor.RecastToFloat(colors[i].ToUnityColor32());
+                pointBuffer.AddUnsafe(f);
             }
         }
 
@@ -77,14 +85,19 @@ namespace Iviz.Controllers.Markers
             Color color = color32;
             var f = new float4();
             
+            pointBuffer.EnsureCapacity(points.Length);
+            pointBuffer.Clear();
+            
             for (int i = 0; i < points.Length; i++)
             {
                 points[i].Ros2Unity(ref f);
-                if (PointListResource.IsElementValid(f))
+                if (!PointListResource.IsElementValid(f))
                 {
-                    f.w = PointWithColor.RecastToFloat(color * colors[i].ToUnityColor());
-                    pointBuffer.Add(f);
+                    continue;
                 }
+                
+                f.w = PointWithColor.RecastToFloat(color * colors[i].ToUnityColor());
+                pointBuffer.AddUnsafe(f);
             }
         }
     }

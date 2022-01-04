@@ -68,13 +68,16 @@ namespace Iviz.Controllers.Markers
             lPoints[0].Ros2Unity(ref c1);
             c1.w = colorAsFloat;
 
+            lineBuffer.EnsureCapacity(lPoints.Length - 1);
+            lineBuffer.Clear();
+            
             for (int i = 1; i < lPoints.Length; i++)
             {
                 c0 = c1;
                 lPoints[i].Ros2Unity(ref c1);
                 if (LineResource.IsElementValid(f))
                 {
-                    lineBuffer.Add(f);
+                    lineBuffer.AddUnsafe(f);
                 }
             }
 
@@ -98,6 +101,9 @@ namespace Iviz.Controllers.Markers
             lPoints[0].Ros2Unity(ref c1);
             c1.w = PointWithColor.RecastToFloat(lColors[0].ToUnityColor32());
             
+            lineBuffer.EnsureCapacity(lPoints.Length - 1);
+            lineBuffer.Clear();
+            
             for (int i = 1; i < lPoints.Length; i++)
             {
                 c0 = c1;
@@ -106,7 +112,7 @@ namespace Iviz.Controllers.Markers
 
                 if (LineResource.IsElementValid(f))
                 {
-                    lineBuffer.Add(f);
+                    lineBuffer.AddUnsafe(f);
                 }
             }
 
@@ -131,6 +137,9 @@ namespace Iviz.Controllers.Markers
             lPoints[0].Ros2Unity(ref c1);
             c1.w = PointWithColor.RecastToFloat(color * lColors[0].ToUnityColor());
             
+            lineBuffer.EnsureCapacity(lPoints.Length - 1);
+            lineBuffer.Clear();
+            
             for (int i = 1; i < lPoints.Length; i++)
             {
                 c0 = c1;
@@ -139,7 +148,7 @@ namespace Iviz.Controllers.Markers
 
                 if (LineResource.IsElementValid(f))
                 {
-                    lineBuffer.Add(f);
+                    lineBuffer.AddUnsafe(f);
                 }
             }
 
@@ -174,13 +183,16 @@ namespace Iviz.Controllers.Markers
             c0.w = colorAsFloat; 
             c1.w = colorAsFloat; 
 
+            lineBuffer.EnsureCapacity(lPoints.Length / 2);
+            lineBuffer.Clear();
+            
             for (int i = 0; i < lPoints.Length; i += 2)
             {
                 lPoints[i + 0].Ros2Unity(ref c0);
                 lPoints[i + 1].Ros2Unity(ref c1);
                 if (LineResource.IsElementValid(f))
                 {
-                    lineBuffer.Add(f);
+                    lineBuffer.AddUnsafe(f);
                 }
             }
 
@@ -196,17 +208,22 @@ namespace Iviz.Controllers.Markers
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
             
+            lineBuffer.EnsureCapacity(lPoints.Length / 2);
+            lineBuffer.Clear();
+
             for (int i = 0; i < lPoints.Length; i += 2)
             {
                 lPoints[i + 0].Ros2Unity(ref c0);
                 lPoints[i + 1].Ros2Unity(ref c1);
 
-                if (LineResource.IsElementValid(f))
+                if (!LineResource.IsElementValid(f))
                 {
-                    c0.w = PointWithColor.RecastToFloat(lColors[i + 0].ToUnityColor32());
-                    c1.w = PointWithColor.RecastToFloat(lColors[i + 1].ToUnityColor32());
-                    lineBuffer.Add(f);
+                    continue;
                 }
+                
+                c0.w = PointWithColor.RecastToFloat(lColors[i + 0].ToUnityColor32());
+                c1.w = PointWithColor.RecastToFloat(lColors[i + 1].ToUnityColor32());
+                lineBuffer.AddUnsafe(f);
             }
 
             return null;
@@ -222,17 +239,22 @@ namespace Iviz.Controllers.Markers
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
 
+            lineBuffer.EnsureCapacity(lPoints.Length / 2);
+            lineBuffer.Clear();
+
             for (int i = 0; i < lPoints.Length; i += 2)
             {
                 lPoints[i + 0].Ros2Unity(ref c0);
                 lPoints[i + 1].Ros2Unity(ref c1);
 
-                if (LineResource.IsElementValid(f))
+                if (!LineResource.IsElementValid(f))
                 {
-                    c0.w = PointWithColor.RecastToFloat(color * lColors[i + 0].ToUnityColor());
-                    c1.w = PointWithColor.RecastToFloat(color * lColors[i + 1].ToUnityColor());
-                    lineBuffer.Add(f);
+                    continue;
                 }
+                
+                c0.w = PointWithColor.RecastToFloat(color * lColors[i + 0].ToUnityColor());
+                c1.w = PointWithColor.RecastToFloat(color * lColors[i + 1].ToUnityColor());
+                lineBuffer.AddUnsafe(f);
             }
 
             return color.a < 1 ? true : null;

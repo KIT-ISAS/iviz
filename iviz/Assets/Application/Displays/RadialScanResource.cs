@@ -267,9 +267,7 @@ namespace Iviz.Displays
             }
 
             pointBuffer.Clear();
-
             bool useIntensity = UseIntensityNotRange && intensities.Length != 0;
-            float4 f = default;
             foreach (int i in ..ranges.Length)
             {
                 float range = ranges[i];
@@ -280,7 +278,9 @@ namespace Iviz.Displays
 
                 var (x, z) = cache[i];
 
+                float4 f;
                 f.x = x * range;
+                f.y = 0;
                 f.z = z * range;
                 f.w = useIntensity ? intensities[i] : range;
                 pointBuffer.Add(f);

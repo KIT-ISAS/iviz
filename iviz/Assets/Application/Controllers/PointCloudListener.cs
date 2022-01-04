@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Iviz.Common;
@@ -503,14 +504,20 @@ namespace Iviz.Controllers
             var dstBuffer = pointBuffer;
             int dstOff = 0;
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void TryAdd(ReadOnlySpan<byte> span, float w)
             {
                 var data = span.Read<float3>();
-                if (!data.HasNaN() && data.MaxAbsCoeff() <= maxPositionMagnitude)
+                if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
                 {
-                    ref float4 f = ref dstBuffer[dstOff++];
-                    (f.x, f.y, f.z, f.w) = (-data.y, data.z, data.x, w);
+                    return;
                 }
+                
+                ref float4 f = ref dstBuffer[dstOff++];
+                f.x = -data.y;
+                f.y = data.z;
+                f.z = data.x;
+                f.w = w;
             }
 
             ReadOnlySpan<byte> dataRowOff = msg.Data.AsSpan();
@@ -524,11 +531,17 @@ namespace Iviz.Controllers
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
                             var data = dataOff.Read<float4>();
-                            if (!data.HasNaN() && !(data.MaxAbsCoeff3() > maxPositionMagnitude))
+                            if (data.HasNaN() || data.MaxAbsCoeff3() > maxPositionMagnitude)
                             {
-                                ref float4 f = ref dstBuffer[dstOff++];
-                                (f.x, f.y, f.z, f.w) = (-data.y, data.z, data.x, data.w);
+                                continue;
                             }
+                            
+                            ref float4 f = ref dstBuffer[dstOff++];
+                            f.x = -data.y;
+                            f.y = data.z;
+                            f.z = data.x;
+                            f.w = data.w;
+                            //(f.x, f.y, f.z, f.w) = (-data.y, data.z, data.x, data.w);
                         }
                     }
 

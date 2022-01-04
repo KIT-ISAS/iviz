@@ -60,26 +60,30 @@ namespace Iviz.Displays
             using var points = new Rent<Vector3>(length);
             using var colors = new Rent<Color32>(length);
             using var uvs = new Rent<Vector2>(length);
-            using var indices = new Rent<int>(16 * 3 * lineBuffer.Length);
             int pOff = 0;
             int cOff = 0;
             int uvOff = 0;
-            int iOff = 0;
 
             var pArray = points.Array;
             var cArray = colors.Array;
             var uArray = uvs.Array;
-            int[] iArray = indices.Array;
 
             const float minMagnitude = 1e-5f;
 
-            Vector3 a = default;
-            Vector3 b = default;
-
             foreach (var line in lineBuffer)
             {
-                (a.x, a.y, a.z) = (line.c0.x, line.c0.y, line.c0.z);
-                (b.x, b.y, b.z) = (line.c1.x, line.c1.y, line.c1.z);
+                //(a.x, a.y, a.z) = (line.c0.x, line.c0.y, line.c0.z);
+                //(b.x, b.y, b.z) = (line.c1.x, line.c1.y, line.c1.z);
+
+                Vector3 a;
+                a.x = line.c0.x;
+                a.y = line.c0.y;
+                a.z = line.c0.z;
+
+                Vector3 b;
+                b.x = line.c1.x;
+                b.y = line.c1.y;
+                b.z = line.c1.z;
 
                 Vector3 ab = b - a;
                 Vector3 dirX, dirY, dirZ;
@@ -103,8 +107,6 @@ namespace Iviz.Displays
                 var halfSumYz = halfScale * (dirY + dirZ);
                 var halfDiffYz = halfScale * (dirY - dirZ);
 
-                int baseOff = pOff;
-
                 pArray[pOff++] = a - halfDirX;
                 pArray[pOff++] = a + halfSumYz;
                 pArray[pOff++] = a + halfDiffYz;
@@ -117,11 +119,6 @@ namespace Iviz.Displays
                 pArray[pOff++] = b - halfDiffYz;
                 pArray[pOff++] = b + halfDirX;
 
-                var ca = PointWithColor.RecastToColor32(line.c0.w);
-                var cb = PointWithColor.RecastToColor32(line.c1.w);
-
-                var uv0 = new Vector2(line.c0.w, 0);
-                var uv1 = new Vector2(line.c1.w, 0);
 
                 /*
                 for (int i = 0; i < 5; i++)
@@ -131,16 +128,19 @@ namespace Iviz.Displays
                 }
                 */
                 {
+                    var ca = PointWithColor.RecastToColor32(line.c0.w);
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
-                    uArray[uvOff++] = uv0;
-                    uArray[uvOff++] = uv0;
-                    uArray[uvOff++] = uv0;
-                    uArray[uvOff++] = uv0;
-                    uArray[uvOff++] = uv0;
+
+                    var cb = PointWithColor.RecastToColor32(line.c1.w);
+                    cArray[cOff++] = cb;
+                    cArray[cOff++] = cb;
+                    cArray[cOff++] = cb;
+                    cArray[cOff++] = cb;
+                    cArray[cOff++] = cb;
                 }
 
                 /*
@@ -150,25 +150,38 @@ namespace Iviz.Displays
                     uvs[uvOff++] = uv1;
                 }
                 */
+                
                 {
-                    cArray[cOff++] = cb;
-                    cArray[cOff++] = cb;
-                    cArray[cOff++] = cb;
-                    cArray[cOff++] = cb;
-                    cArray[cOff++] = cb;
+                    var uv0 = new Vector2(line.c0.w, 0);
+                    uArray[uvOff++] = uv0;
+                    uArray[uvOff++] = uv0;
+                    uArray[uvOff++] = uv0;
+                    uArray[uvOff++] = uv0;
+                    uArray[uvOff++] = uv0;
+
+                    var uv1 = new Vector2(line.c1.w, 0);
                     uArray[uvOff++] = uv1;
                     uArray[uvOff++] = uv1;
                     uArray[uvOff++] = uv1;
                     uArray[uvOff++] = uv1;
                     uArray[uvOff++] = uv1;
                 }
+            }
 
+            using var indices = new Rent<int>(16 * 3 * lineBuffer.Length);
+            int[] iArray = indices.Array;
+            int iOff = 0;
+
+            for (int i = 0; i < lineBuffer.Length; i++)
+            {
+                int baseOff = i * 10;
                 foreach (int index in CapsuleIndices)
                 {
                     iArray[iOff++] = baseOff + index;
                 }
             }
 
+            
             mesh.Clear();
             mesh.indexFormat = indices.Length <= UnityUtils.MeshUInt16Threshold
                 ? IndexFormat.UInt16

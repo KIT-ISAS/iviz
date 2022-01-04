@@ -476,7 +476,7 @@ namespace Iviz.Displays
                         texture = EnsureSize(width, height, TextureFormat.R16);
                     }
 
-                    intensityBounds = CalculateBoundsR16(data);
+                    intensityBounds = CalculateBounds(data.Cast<ushort>());
                     MeasuredIntensityBounds = intensityBounds;
                     normalizationFactor = 1f / ushort.MaxValue;
                     if (!OverrideIntensityBounds)
@@ -491,7 +491,7 @@ namespace Iviz.Displays
                 case "8SC1":
                 case "8SC":
                     texture = EnsureSize(width, height, TextureFormat.R8);
-                    intensityBounds = CalculateBoundsR8(data);
+                    intensityBounds = CalculateBounds(data);
                     MeasuredIntensityBounds = intensityBounds;
                     normalizationFactor = 1f / byte.MaxValue;
                     if (!OverrideIntensityBounds)
@@ -503,7 +503,7 @@ namespace Iviz.Displays
                 case "32FC1":
                 case "32FC":
                     texture = EnsureSize(width, height, TextureFormat.RFloat);
-                    intensityBounds = CalculateBoundsRFloat(data);
+                    intensityBounds = CalculateBounds(data.Cast<float>());
                     MeasuredIntensityBounds = intensityBounds;
                     normalizationFactor = 1;
                     if (!OverrideIntensityBounds)
@@ -544,13 +544,16 @@ namespace Iviz.Displays
         {
             var srcPtr = src.Cast<Rgb>();
             var dstPtr = dst.Cast<Rgba>();
-            var colorOut = new Rgba { a = 255 };
             for (int i = 0; i < srcPtr.Length; i++)
             {
                 var colorIn = srcPtr[i];
+
+                Rgba colorOut;
                 colorOut.r = colorIn.r;
                 colorOut.g = colorIn.g;
                 colorOut.b = colorIn.b;
+                colorOut.a = 255;
+                
                 dstPtr[i] = colorOut;
             }
         }
@@ -567,7 +570,7 @@ namespace Iviz.Displays
             public readonly byte r, g, b;
         }
 
-        static Vector2 CalculateBoundsR8(ReadOnlySpan<byte> src)
+        static Vector2 CalculateBounds(ReadOnlySpan<byte> src)
         {
             byte min = byte.MaxValue;
             byte max = byte.MinValue;
@@ -587,12 +590,11 @@ namespace Iviz.Displays
             return new Vector2(min, max);
         }
 
-        static Vector2 CalculateBoundsR16(ReadOnlySpan<byte> src)
+        static Vector2 CalculateBounds(ReadOnlySpan<ushort> src)
         {
             ushort min = ushort.MaxValue;
             ushort max = ushort.MinValue;
-            var span = src.Cast<ushort>();
-            foreach (ushort b in span)
+            foreach (ushort b in src)
             {
                 if (b > max)
                 {
@@ -608,12 +610,11 @@ namespace Iviz.Displays
             return new Vector2(min, max);
         }
 
-        static Vector2 CalculateBoundsRFloat(ReadOnlySpan<byte> src)
+        static Vector2 CalculateBounds(ReadOnlySpan<float> src)
         {
             float min = float.MaxValue;
             float max = float.MinValue;
-            var span = src.Cast<float>();
-            foreach (float b in span)
+            foreach (float b in src)
             {
                 if (b > max)
                 {
