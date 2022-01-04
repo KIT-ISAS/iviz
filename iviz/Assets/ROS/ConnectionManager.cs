@@ -77,7 +77,7 @@ namespace Iviz.Ros
         {
             logListener?.Dispose();
             logSender?.Dispose();
-            Connection.Stop();
+            Connection.Dispose();
             RosServerManager.Dispose();
             instance = null;
             connection = null;

@@ -527,10 +527,9 @@ namespace Iviz.Core
                 _ => angle
             };
 
-        public static void SetBounds(this BoxCollider collider, in Bounds bounds)
-        {
-            collider.center = bounds.center;
-            collider.size = bounds.size;
-        }
+        public static void SetBounds(this BoxCollider collider, in Bounds bounds) =>
+            (collider.center, collider.size) = bounds;
+
+        public static Bounds GetBounds(this BoxCollider collider) => new(collider.center, collider.size);
     }
 }

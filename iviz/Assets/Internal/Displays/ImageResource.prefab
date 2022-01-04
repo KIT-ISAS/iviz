@@ -109,6 +109,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   front: {fileID: 5766033239396999442}
   billboard: {fileID: 7954079755484087815}
+  boxCollider: {fileID: 2560784202415664666}
   scale: 1
 --- !u!1001 &7979687757113801136
 PrefabInstance:

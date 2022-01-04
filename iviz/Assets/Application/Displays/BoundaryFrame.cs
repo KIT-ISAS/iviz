@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
+    [Obsolete]
     [RequireComponent(typeof(BoxCollider))]
     public sealed class BoundaryFrame : MonoBehaviour, IDisplay, IRecyclable
     {

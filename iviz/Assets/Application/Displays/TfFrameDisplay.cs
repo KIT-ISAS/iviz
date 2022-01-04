@@ -32,7 +32,7 @@ namespace Iviz.Displays
                 }
 
                 axis = ResourcePool.RentDisplay<AxisFrameResource>(Transform);
-                axis.ColliderEnabled = true;
+                axis.EnableCollider = true;
                 axis.Layer = LayerType.IgnoreRaycast;
                 axis.gameObject.layer = LayerType.TfAxis;
                 axis.name = "[Axis]";

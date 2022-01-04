@@ -21,21 +21,21 @@ namespace Iviz.App
             ToFixed
         }
 
-        [SerializeField] TMP_Text? tfText = null;
-        [SerializeField] TMP_Text? tfName = null;
-        [SerializeField] RectTransform? contentTransform = null;
-        [SerializeField] Button? gotoButton = null;
-        [SerializeField] Button? trail = null;
+        [SerializeField] TMP_Text? tfText;
+        [SerializeField] TMP_Text? tfName;
+        [SerializeField] RectTransform? contentTransform;
+        [SerializeField] Button? gotoButton;
+        [SerializeField] Button? trail;
 
-        [SerializeField] Button? lockPivot = null;
-        [SerializeField] Button? fixedFrame = null;
+        [SerializeField] Button? lockPivot;
+        [SerializeField] Button? fixedFrame;
 
-        [SerializeField] Text? trailText = null;
-        [SerializeField] Text? lockPivotText = null;
+        [SerializeField] Text? trailText;
+        [SerializeField] Text? lockPivotText;
 
-        [SerializeField] LinkResolver? tfLink = null;
-        [SerializeField] DropdownWidget? showAs = null;
-        [SerializeField] DropdownWidget? poseAs = null;
+        [SerializeField] LinkResolver? tfLink;
+        [SerializeField] DropdownWidget? showAs;
+        [SerializeField] DropdownWidget? poseAs;
 
         TMP_Text TfText => tfText.AssertNotNull(nameof(tfText));
         TMP_Text TfName => tfName.AssertNotNull(nameof(tfName));
@@ -162,6 +162,7 @@ namespace Iviz.App
             isInitialized = true;
 
             TfLink.LinkClicked += OnLinkClicked;
+            TfLink.LinkDoubleClicked += OnLinkDoubleClicked;
             SelectedFrame = null;
 
             GotoButton.interactable = false;
@@ -177,6 +178,11 @@ namespace Iviz.App
             SelectedFrame = frameId == null || !TfListener.TryGetFrame(frameId, out TfFrame? frame)
                 ? null
                 : frame;
+        }
+        
+        void OnLinkDoubleClicked(string? _)
+        {
+            OnGotoClicked();
         }
 
         public void Flush()

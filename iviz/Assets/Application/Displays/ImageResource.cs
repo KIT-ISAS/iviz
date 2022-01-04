@@ -10,13 +10,13 @@ namespace Iviz.Displays
 {
     public sealed class ImageResource : MonoBehaviour, IDisplay, IHasBounds, IHighlightable
     {
-        [SerializeField] MeshRenderer? front = null;
-        [SerializeField] Billboard? billboard = null;
+        [SerializeField] MeshRenderer? front;
+        [SerializeField] Billboard? billboard;
+        [SerializeField] BoxCollider? boxCollider;
         [SerializeField] float scale = 1;
 
         Transform? mTransform;
         ImageTexture? texture;
-        BoxCollider? boxCollider;
         Pose billboardStartPose;
         bool billboardEnabled;
         Vector3 offset;
@@ -24,9 +24,7 @@ namespace Iviz.Displays
 
         Billboard Billboard => billboard.AssertNotNull(nameof(billboard));
         MeshRenderer Front => front.AssertNotNull(nameof(front));
-
-        BoxCollider Collider =>
-            boxCollider != null ? boxCollider : (boxCollider = Billboard.GetComponent<BoxCollider>());
+        BoxCollider Collider => boxCollider.AssertNotNull(nameof(boxCollider));
 
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         public string Title { get; set; } = "";
@@ -35,7 +33,7 @@ namespace Iviz.Displays
         {
             set
             {
-                if (Nullable.Equals(intrinsic, value))
+                if (value is { IsValid: false } || Nullable.Equals(intrinsic, value))
                 {
                     return;
                 }
@@ -64,7 +62,7 @@ namespace Iviz.Displays
             }
         }
 
-        public Bounds? Bounds => new Bounds(Collider.center, Collider.size);
+        public Bounds? Bounds => Collider.GetBounds();
         public Transform BoundsTransform => Billboard.transform;
         public event Action? BoundsChanged;
 
@@ -85,7 +83,6 @@ namespace Iviz.Displays
 
         public Vector3 Offset
         {
-            get => offset;
             set
             {
                 offset = value;
@@ -107,8 +104,8 @@ namespace Iviz.Displays
         float Height => Width * AspectRatio;
         float AspectRatio => Texture != null && Texture.Width != 0 ? (float)Texture.Height / Texture.Width : 1;
 
-        public bool IsAlive => gameObject.activeSelf;
-        public string Caption => $"<b>{Title}</b>\n{(Texture != null ? Texture.Description : "(unset)")}";
+        bool IHighlightable.IsAlive => gameObject.activeSelf;
+        string IHasBounds.Caption => $"<b>{Title}</b>\n{(Texture != null ? Texture.Description : "(unset)")}";
 
         void Awake()
         {

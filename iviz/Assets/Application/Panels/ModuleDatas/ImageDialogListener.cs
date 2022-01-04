@@ -16,14 +16,14 @@ namespace Iviz.App
             DialogData = ModuleListPanel.Instance.CreateImageDialog(this);
             DialogData.Closed += () =>
             {
-                DialogData.Stop();
-                Stop();
+                DialogData.Dispose();
+                Dispose();
             };
         }
 
         public abstract bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format,
             out Vector4 color);
 
-        protected abstract void Stop();
+        protected abstract void Dispose();
     }
 }

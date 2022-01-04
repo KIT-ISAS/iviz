@@ -180,7 +180,7 @@ namespace Iviz.Displays
             });
         }
 
-        public Bounds? Bounds => new Bounds(BoxCollider.center, BoxCollider.size);
+        public Bounds? Bounds => BoxCollider.GetBounds();
 
         public int Layer { get; set; }
 

@@ -137,7 +137,7 @@ namespace Iviz.Controllers
         }
 #endif
 
-        public void Stop()
+        public void Dispose()
         {
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
             ConnectionManager.Connection.UnadvertiseService(ModelServer.ModelServiceName);

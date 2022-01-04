@@ -221,6 +221,11 @@ namespace Iviz.Displays
         /// <param name="points">The list of points.</param>
         public void Set(ReadOnlySpan<PointWithColor> points)
         {
+            Set(MemoryMarshal.Cast<PointWithColor, float4>(points));
+        }
+        
+        public void Set(ReadOnlySpan<float4> points)
+        {
             if (points == null)
             {
                 throw new ArgumentNullException(nameof(points));
@@ -231,12 +236,12 @@ namespace Iviz.Displays
             for (int i = 0; i < points.Length; i++)
             {
                 ref readonly var t = ref points[i];
-                if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
+                if (t.HasNaN() || t.MaxAbsCoeff3() > MaxPositionMagnitude)
                 {
                     continue;
                 }
 
-                pointBuffer.Add(t.f);
+                pointBuffer.Add(t);
             }
 
             isDirty = true;

@@ -58,7 +58,7 @@ namespace Iviz.MarkerDetection
         async Task RunAsync()
         {
             var detectedMarkers = new List<IMarkerCorners>();
-            var typeFoundInLastRound = (ARMarkerType?) null;
+            ARMarkerType? typeFoundInLastRound = null;
 
             try
             {
@@ -175,9 +175,9 @@ namespace Iviz.MarkerDetection
             }
         }
 
-        public static Pose SolvePnp(IReadOnlyList<Vector2f> imageCorners, in Intrinsic intrinsic, float sizeInM)
+        public static Pose SolvePnp(ReadOnlySpan<Vector2f> imageCorners, in Intrinsic intrinsic, float sizeInM)
         {
-            var objectCorners = new Vector3f[]
+            ReadOnlySpan<Vector3f> objectCorners = stackalloc Vector3f[]
             {
                 (-sizeInM / 2, sizeInM / 2, 0),
                 (sizeInM / 2, sizeInM / 2, 0),

@@ -132,9 +132,7 @@ namespace Iviz.Displays.XRDialogs
 
         Bounds? IHasBounds.Bounds => Bounds;
         Bounds? IDisplay.Bounds => Bounds;
-
-        Bounds Bounds => new(BoxCollider.center, BoxCollider.size);
-
+        Bounds Bounds => BoxCollider.GetBounds();
         public int Layer { get; set; }
 
         public void TriggerBoundsChanged()

@@ -90,6 +90,9 @@ namespace Iviz.App
         Button LeftHideGuiButton => AnchorCanvasPanel.LeftHideGui;
         Button MiddleHideGuiButton => middleHideGuiButton.AssertNotNull(nameof(middleHideGuiButton));
         AnchorToggleButton InteractableButton => AnchorCanvasPanel.Interact;
+        GameObject ModuleListCanvas => moduleListCanvas.AssertNotNull(nameof(moduleListCanvas));
+        GameObject DataPanelCanvas => dataPanelCanvas.AssertNotNull(nameof(dataPanelCanvas));
+
 
         ModuleListButtons Buttons =>
             buttons ??= new ModuleListButtons(contentObject.AssertNotNull(nameof(contentObject)));
@@ -104,7 +107,11 @@ namespace Iviz.App
         public TwistJoystick TwistJoystick => twistJoystick.AssertNotNull(nameof(twistJoystick));
         public ARJoystick ARJoystick => arJoystick.AssertNotNull(nameof(arJoystick));
         public ARSidePanel ARSidePanel => arSidePanel.AssertNotNull(nameof(arSidePanel));
-        public XRContents XRController => xrController.AssertNotNull(nameof(xrController));
+
+        public XRContents XRController => xrController != null
+            ? xrController
+            : throw new InvalidOperationException("Tried to access XRController, but the scene has not set any!");
+
         public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
@@ -115,8 +122,8 @@ namespace Iviz.App
             {
                 allGuiVisible = value;
                 BottomHideGuiButton.State = value;
-                moduleListCanvas.SetActive(value);
-                dataPanelCanvas.SetActive(value);
+                ModuleListCanvas.SetActive(value);
+                DataPanelCanvas.SetActive(value);
                 DialogPanelManager.Active = value;
                 ARSidePanel.Visible = !value;
             }
@@ -149,10 +156,10 @@ namespace Iviz.App
                 UpperCanvas.Status.enabled = value;
             }
         }
-        
+
         public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
         public int NumTfFramesPublished => Dialogs.TfPublisherData.NumFrames;
-        
+
         public ModuleListPanel()
         {
             ModuleDatas = moduleDatas.AsReadOnly();
@@ -176,7 +183,7 @@ namespace Iviz.App
             {
                 dialogData.FinalizePanel();
             }
-            
+
             GuiWidgetListener.DisposeDefaultHandler();
         }
 
@@ -680,7 +687,7 @@ namespace Iviz.App
                 return false; // empty text
             }
         }
-        
+
         public async void SaveXRConfiguration(Pose unityPose)
         {
             var (position, rotation) = unityPose;
@@ -701,7 +708,7 @@ namespace Iviz.App
                 RosLogger.Debug($"{this}: Error saving XR configuration", e);
             }
         }
-        
+
         public async ValueTask ClearMastersCacheAsync(CancellationToken token = default)
         {
             string path = Settings.SimpleConfigurationPath;
@@ -820,7 +827,7 @@ namespace Iviz.App
             {
                 throw new InvalidOperationException($"Tried to remove non-existing module '{entry}'");
             }
-            
+
             RemoveModule(index);
 
             if (entry.ModuleType == ModuleType.InteractiveMarker)
@@ -892,6 +899,7 @@ namespace Iviz.App
         {
             Dialogs.TfPublisherData.Show();
         }
+
         void UpdateCameraStats()
         {
             using var description = BuilderPool.Rent();

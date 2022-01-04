@@ -28,7 +28,7 @@ namespace Iviz.App.ARDialogs
 
         float? popupStartTime;
 
-        public Bounds? Bounds => new Bounds(BoxCollider.center, BoxCollider.size);
+        public Bounds? Bounds => BoxCollider.GetBounds();
         public virtual Color MainColor { get; set; }
         public virtual Color SecondaryColor { get; set; }
 

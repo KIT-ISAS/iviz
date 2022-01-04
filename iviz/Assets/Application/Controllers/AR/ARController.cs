@@ -515,7 +515,7 @@ namespace Iviz.Controllers
 
             MarkerSender?.Dispose();
             detector.Dispose();
-            MarkerExecutor.Stop();
+            MarkerExecutor.Dispose();
 
             ColorInfoSender?.Dispose();
             ColorSender?.Dispose();
@@ -541,7 +541,7 @@ namespace Iviz.Controllers
         static CancellationTokenSource? pulseTokenSource;
         public static bool IsPulseActive => pulseTokenSource is { IsCancellationRequested: true };
 
-        public static void TriggerPulse(in Vector3 start)
+        protected static void TriggerPulse(in Vector3 start)
         {
             pulseTokenSource?.Cancel();
             pulseTokenSource = new CancellationTokenSource();

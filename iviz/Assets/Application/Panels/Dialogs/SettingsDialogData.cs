@@ -161,7 +161,7 @@ namespace Iviz.App
                 switch ((ModelServerModes) i)
                 {
                     case ModelServerModes.Off:
-                        modelService.Stop();
+                        modelService.Dispose();
                         break;
                     case ModelServerModes.On:
                         _ = modelService.RestartAsync(false);

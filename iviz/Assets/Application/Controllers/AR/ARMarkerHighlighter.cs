@@ -1,12 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.MarkerDetection;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.XmlRpc;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
@@ -15,12 +13,12 @@ namespace Iviz.Controllers
 {
     public class ARMarkerHighlighter : MonoBehaviour, IDisplay
     {
-        [SerializeField] Transform topLeft = null;
-        [SerializeField] Transform topRight = null;
-        [SerializeField] Transform bottomRight = null;
-        [SerializeField] Transform bottomLeft = null;
-        [SerializeField] BoxCollider boxCollider = null;
-        [SerializeField] TextMeshPro text = null;
+        [SerializeField] Transform topLeft;
+        [SerializeField] Transform topRight;
+        [SerializeField] Transform bottomRight;
+        [SerializeField] Transform bottomLeft;
+        [SerializeField] BoxCollider boxCollider;
+        [SerializeField] TextMeshPro text;
         MeshMarkerResource[] resources;
         const float Scale = 0.005f;
         const float Z = 0.05f;
@@ -30,7 +28,7 @@ namespace Iviz.Controllers
         float highlightTime = 0.5f;
         float? highlightStart;
 
-        public void Highlight([NotNull] IEnumerable<Vector2f> corners2, [NotNull] string code, Intrinsic intrinsic,
+        public void Highlight([NotNull] Vector2f[] corners2, [NotNull] string code, Intrinsic intrinsic,
             float highlightTimeInMs)
         {
             resources ??= GetComponentsInChildren<MeshMarkerResource>();

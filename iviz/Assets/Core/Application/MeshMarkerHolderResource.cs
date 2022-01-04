@@ -33,7 +33,7 @@ namespace Iviz.Displays
 
         public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
 
-        public Bounds? Bounds => children.Length == 0 ? null : new Bounds(Collider.center, Collider.size);
+        public Bounds? Bounds => children.Length == 0 ? null : Collider.GetBounds();
 
         public int Layer
         {
@@ -135,7 +135,7 @@ namespace Iviz.Displays
         
         public event Action? BoundsChanged;
 
-        public bool ColliderEnabled
+        public bool EnableCollider
         {
             set => Collider.enabled = value;
         }

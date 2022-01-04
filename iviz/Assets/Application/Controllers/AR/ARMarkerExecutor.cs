@@ -1,3 +1,6 @@
+#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.App;
@@ -9,7 +12,6 @@ using Iviz.Displays;
 using Iviz.MarkerDetection;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.XmlRpc;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -21,10 +23,9 @@ namespace Iviz.Controllers
 
         readonly Dictionary<(ARMarkerType, string), ARTfFrame> frames = new();
 
-        [CanBeNull] ARExecutableMarker lastSeen;
+        ARExecutableMarker? lastSeen;
         float maxMarkerDistanceInM = 0.5f;
 
-        [NotNull]
         public string Description
         {
             get
@@ -62,7 +63,6 @@ namespace Iviz.Controllers
             }
         }
 
-        [NotNull]
         public ARMarkersConfiguration Configuration
         {
             get => new()
@@ -80,7 +80,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Process([NotNull] ARMarker detectedMarker)
+        public void Process(ARMarker detectedMarker)
         {
             var key = ((ARMarkerType) detectedMarker.Type, detectedMarker.Code);
             if (!markers.TryGetValue(key, out var executableMarker))
@@ -151,7 +151,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public void Stop()
+        public void Dispose()
         {
             foreach (var frame in frames.Values)
             {
@@ -161,15 +161,23 @@ namespace Iviz.Controllers
             frames.Clear();
         }
 
-        static Msgs.GeometryMsgs.Pose SolvePnp([NotNull] ARMarker marker)
+        static Msgs.GeometryMsgs.Pose SolvePnp(ARMarker marker)
         {
             float sizeInMm = (float) marker.MarkerSizeInMm;
             float sizeInM = sizeInMm / 1000f;
             var intrinsic = new Intrinsic(marker.CameraIntrinsic);
-            var imageCorners = marker.Corners
-                .Select(corner => new Vector2f((float) corner.X, (float) corner.Y))
-                .ToArray();
+            var corners = marker.Corners;
+            ReadOnlySpan<Vector2f> imageCorners = stackalloc Vector2f[]
+            {
+                ToVector2f(corners[0]), 
+                ToVector2f(corners[1]), 
+                ToVector2f(corners[2]), 
+                ToVector2f(corners[3])
+            };
+            
             return MarkerDetector.SolvePnp(imageCorners, intrinsic, sizeInM);
+
+            static Vector2f ToVector2f(in Msgs.GeometryMsgs.Vector3 v) => new((float)v.X, (float)v.Y);
         }
 
         public override string ToString() => "[ARMarkerExecutor]";

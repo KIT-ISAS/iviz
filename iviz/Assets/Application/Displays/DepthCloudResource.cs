@@ -48,11 +48,11 @@ namespace Iviz.Displays
             ? material
             : (material = Resource.Materials.DepthCloud.Instantiate());
 
-        public Intrinsic Intrinsic
+        public Intrinsic? Intrinsic
         {
             set
             {
-                if (value.Equals(intrinsic))
+                if (value is { IsValid: false } || Nullable.Equals(intrinsic, value))
                 {
                     return;
                 }

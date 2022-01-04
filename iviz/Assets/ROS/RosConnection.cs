@@ -41,7 +41,7 @@ namespace Iviz.Ros
             CancellationToken token)
             where T : IService;
 
-        internal virtual void Stop()
+        internal virtual void Dispose()
         {
             connectionTs.Cancel();
             Signal();

@@ -61,7 +61,8 @@ namespace Iviz.Controllers
                 Smoothness = value.Smoothness;
                 Metallic = value.Metallic;
                 KeepMeshMaterials = value.KeepMeshMaterials;
-                EnableColliders = value.EnableColliders;
+                Interactable = value.Interactable;
+
                 ProcessRobotSource(value.SavedRobotName, value.SourceParameter);
             }
         }
@@ -195,18 +196,19 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool EnableColliders
+        public bool Interactable
         {
-            get => config.EnableColliders;
+            get => config.Interactable;
             set
             {
-                config.EnableColliders = value;
+                config.Interactable = value;
                 if (Robot is null)
                 {
                     return;
                 }
 
-                var colliders = Robot.BaseLinkObject.GetComponentsInChildren<Collider>(true)
+                var colliders = Robot.BaseLinkObject
+                    .GetComponentsInChildren<Collider>(true)
                     .Where(collider => collider.gameObject.layer == LayerType.Collider);
                 foreach (var collider in colliders)
                 {

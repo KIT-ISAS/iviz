@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Iviz.Core;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -15,9 +16,9 @@ namespace Iviz.Displays
         protected Bounds WorldBounds => Collider.bounds;
         public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
         public BoxCollider Collider => boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
-        public virtual Bounds? Bounds => new(Collider.center, Collider.size);
+        public virtual Bounds? Bounds => Collider.GetBounds();
 
-        public bool ColliderEnabled
+        public bool EnableCollider
         {
             set => Collider.enabled = value;
         }

@@ -134,13 +134,13 @@ namespace Iviz.Controllers
                     case Marker.DELETE:
                         if (markers.TryGetValue(markerId, out var markerToDelete))
                         {
-                            markerToDelete.Stop();
+                            markerToDelete.Dispose();
                             markers.Remove(markerId);
                         }
 
                         break;
                     case Marker.DELETEALL:
-                        DestroyAllMarkers();
+                        DisposeAllMarkers();
                         break;
                 }
             }
@@ -273,20 +273,20 @@ namespace Iviz.Controllers
             }
         }
 
-        void DestroyAllMarkers()
+        void DisposeAllMarkers()
         {
             foreach (var markerObject in markers.Values)
             {
-                markerObject.Stop();
+                markerObject.Dispose();
             }
 
             markers.Clear();
         }
 
-        public void Stop()
+        public void Dispose()
         {
             GameThread.EveryFrame -= KeepPointingForward;
-            DestroyAllMarkers();
+            DisposeAllMarkers();
             Object.Destroy(node);
         }
 

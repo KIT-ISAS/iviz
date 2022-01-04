@@ -178,7 +178,7 @@ namespace Iviz.Displays
             Color = Color.white;
             Tint = Color.white;
             EmissiveColor = Color.black;
-            ColliderEnabled = true;
+            EnableCollider = true;
             OcclusionOnly = false;
             ShadowsEnabled = true;
         }
