@@ -34,6 +34,7 @@ public readonly struct IndexRangeEnumerable : IReadOnlyList<int>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IndexRangeEnumerable(Range range)
     {
+        /*
         if (range.Start.IsFromEnd || range.End.IsFromEnd)
         {
             throw new ArgumentException("Range start and end must not be from end");
@@ -43,6 +44,7 @@ public readonly struct IndexRangeEnumerable : IReadOnlyList<int>
         {
             throw new ArgumentException("start is greater than end");                
         }
+        */
 
         (start, end) = (range.Start.Value, range.End.Value);
     } 

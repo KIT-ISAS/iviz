@@ -69,6 +69,7 @@ public static class EnumeratorUtils
             span[i] = list[i];
         }
     }
+
     public static RangeEnumerable<TA> Take<TA>(this IReadOnlyList<TA> a, int count) => new(a, 0, count);
 
     public static RangeEnumerable<TA> Skip<TA>(this IReadOnlyList<TA> a, int start) => new(a, start, a.Count);
@@ -89,10 +90,8 @@ public static class EnumeratorUtils
     static IndexRangeEnumerable GetEnumerable(this Range range) => new(range);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IndexRangeEnumerable.Enumerator GetEnumerator(this Range range)
-    {
-        return range.GetEnumerable().GetEnumerator();
-    }
+    public static IndexRangeEnumerable.Enumerator GetEnumerator(this Range range) =>
+        new(range.Start.Value, range.End.Value);
 
     public static SelectEnumerable<IndexRangeEnumerable, int, T> Select<T>(this Range range, Func<int, T> f)
     {
