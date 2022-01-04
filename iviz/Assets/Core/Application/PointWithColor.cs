@@ -13,33 +13,15 @@ namespace Iviz.Displays
     /// </summary>
     public struct PointWithColor
     {
-        /// <summary>
-        /// Color representation from the bits of a float.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        internal static Color32 RecastToColor32(float f)
-        {
-            return Unsafe.As<float, Color32>(ref f);
-        }
-
-        /// <summary>
-        /// Float representation from the bits of a Color32.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public static float RecastToFloat(Color32 f)
-        {
-            return Unsafe.As<Color32, float>(ref f);
-        }
-
         public float4 f;
         
         public readonly float3 Position => f.xyz;
-        readonly Color32 Color => RecastToColor32(f.w);
+        readonly Color32 Color => UnityUtils.AsColor32(f.w);
         readonly float Intensity => f.w;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)] 
         public PointWithColor(in Vector3 position, Color32 color) :
-            this(position.x, position.y, position.z, RecastToFloat(color))
+            this(position.x, position.y, position.z, UnityUtils.AsFloat(color))
         {
         }
 

@@ -5,133 +5,91 @@ using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
+using Iviz.Core;
 using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="GridPanelContents"/> 
+    /// <see cref="CameraPanelContents"/> 
     /// </summary>
-    public sealed class GridModuleData : ModuleData
+    public sealed class CameraModuleData : ModuleData
     {
-        const float InteriorColorFactor = 0.25f;
+        readonly CameraConfiguration config = new();
+        readonly CameraPanelContents panel;
 
-        readonly GridPanelContents panel;
-
-        public GridController GridController { get; }
-        public override ModuleType ModuleType => ModuleType.Grid;
+        public override ModuleType ModuleType => ModuleType.Camera;
         public override DataPanelContents Panel => panel;
-        public override IConfiguration Configuration => GridController.Config;
-        public override IController Controller => GridController;
+        public override IConfiguration Configuration => config;
+        public override IController? Controller => null;
 
-        public GridModuleData(ModuleDataConstructor constructor) : base(constructor.Topic, constructor.Type)
+        public CameraModuleData()
         {
-            panel = DataPanelManager.GetPanelByResourceType<GridPanelContents>(ModuleType.Grid);
-
-            GridController = new GridController(this);
-            if (constructor.Configuration != null)
-            {
-                GridController.Config = (GridConfiguration) constructor.Configuration;
-            }
-
-            UpdateModuleButton();
-
-            ARController.ARCameraViewChanged += OnARCameraViewChanged;
+            panel = DataPanelManager.GetPanelByResourceType<CameraPanelContents>(ModuleType.Camera);
         }
-
-        public override void Dispose()
-        {
-            base.Dispose();
-            GridController.Dispose();
-            
-            ARController.ARCameraViewChanged -= OnARCameraViewChanged;
-        }
-
 
         public override void SetupPanel()
         {
-            panel.ColorPicker.Value = GridController.InteriorColor;
-            panel.ShowInterior.Value = GridController.InteriorVisible;
-            panel.HideButton.State = GridController.Visible;
-            panel.Offset.Value = GridController.Offset;
-            panel.FollowCamera.Value = GridController.FollowCamera;
-            panel.HideInARMode.Value = GridController.HideInARMode;
-
-            panel.ColorPicker.ValueChanged += f => UpdateColor();
-            panel.ShowInterior.ValueChanged += f =>
+            if (Settings.VirtualCamera == null)
             {
-                GridController.InteriorVisible = f;
-                UpdateColor();
-            };
-            panel.CloseButton.Clicked += Close;
-            panel.Offset.ValueChanged += f => GridController.Offset = f;
-            panel.HideButton.Clicked += ToggleVisible;
-            panel.FollowCamera.ValueChanged += f => GridController.FollowCamera = f;
-            panel.HideInARMode.ValueChanged += f => GridController.HideInARMode = f;
+                panel.Fov.Interactable = false;
+                panel.Roll.Interactable = false;
+                panel.Pitch.Interactable = false;
+                panel.Yaw.Interactable = false;
+                panel.Position.Interactable = false;
+                return;
+            }
+
+            var guiInputModule = GuiInputModule.Instance;
+            var virtualCamera = Settings.VirtualCamera;
+            
+            panel.Fov.Value = guiInputModule.CameraFieldOfView;
+            panel.Roll.Value = guiInputModule.CameraRoll;
+            panel.Pitch.Value = guiInputModule.CameraPitch;
+            panel.Yaw.Value = guiInputModule.CameraYaw;
+            panel.Position.Value = virtualCamera.transform.position;
+
+            panel.Roll.ValueChanged += f => guiInputModule.CameraRoll = f;
+            panel.Pitch.ValueChanged += f => guiInputModule.CameraPitch = f;
+            panel.Yaw.ValueChanged += f => guiInputModule.CameraYaw = f;
+            panel.Fov.ValueChanged += f => guiInputModule.CameraFieldOfView = f;
+            panel.Position.ValueChanged += f => virtualCamera.transform.position = f;
         }
 
-        void UpdateColor()
+        public override void UpdatePanelFast()
         {
-            Color f = panel.ColorPicker.Value;
-            if (GridController.InteriorVisible)
+            if (Settings.VirtualCamera is not { } virtualCamera)
             {
-                GridController.GridColor = f * InteriorColorFactor;
-                GridController.InteriorColor = f;
+                return;
             }
-            else
+
+            var guiInputModule = GuiInputModule.Instance;
+            panel.Roll.Value = guiInputModule.CameraRoll;
+            panel.Pitch.Value = guiInputModule.CameraPitch;
+            panel.Yaw.Value = guiInputModule.CameraYaw;
+
+            var position = virtualCamera.transform.position;
+            if (panel.Position.Value != position)
             {
-                GridController.GridColor = f;
+                panel.Position.Value = virtualCamera.transform.position;
             }
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string _, IEnumerable<string> __)
         {
-            GridConfiguration config = JsonConvert.DeserializeObject<GridConfiguration>(configAsJson);
-
-            foreach (string field in fields)
-            {
-                switch (field)
-                {
-                    case nameof(GridConfiguration.Visible):
-                        GridController.Visible = config.Visible;
-                        break;
-                    case nameof(GridConfiguration.GridColor):
-                        GridController.GridColor = config.GridColor;
-                        break;
-                    case nameof(GridConfiguration.InteriorColor):
-                        GridController.InteriorColor = config.InteriorColor;
-                        break;
-                    case nameof(GridConfiguration.InteriorVisible):
-                        GridController.InteriorVisible = config.InteriorVisible;
-                        break;
-                    case nameof(GridConfiguration.FollowCamera):
-                        GridController.FollowCamera = config.FollowCamera;
-                        break;
-                    case nameof(GridConfiguration.HideInARMode):
-                        GridController.HideInARMode = config.HideInARMode;
-                        break;
-                    case nameof(GridConfiguration.Offset):
-                        GridController.Offset = config.Offset;
-                        break;
-                    default:
-                        Core.RosLogger.Error($"{this}: Unknown field '{field}'");
-                        break;
-                }
-            }
-
             ResetPanel();
         }
 
-        public override void AddToState(StateConfiguration config)
+        public override void AddToState(StateConfiguration _)
         {
-            config.Grids.Add(GridController.Config);
         }
+    }
 
-        void OnARCameraViewChanged(bool _)
-        {
-            GridController.Visible = GridController.Visible; // reread value
-            UpdateModuleButton();
-        }
+    internal class CameraConfiguration : IConfiguration
+    {
+        public string Id { get; set; } = "";
+        public ModuleType ModuleType => ModuleType.Camera;
+        public bool Visible => true;
     }
 }

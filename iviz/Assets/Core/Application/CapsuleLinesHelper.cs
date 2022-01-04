@@ -117,8 +117,8 @@ namespace Iviz.Displays
                 pArray[pOff++] = b - halfDiffYz;
                 pArray[pOff++] = b + halfDirX;
 
-                var ca = PointWithColor.RecastToColor32(line.c0.w);
-                var cb = PointWithColor.RecastToColor32(line.c1.w);
+                var ca = UnityUtils.AsColor32(line.c0.w);
+                var cb = UnityUtils.AsColor32(line.c1.w);
 
                 var uv0 = new Vector2(line.c0.w, 0);
                 var uv1 = new Vector2(line.c1.w, 0);

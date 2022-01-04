@@ -121,19 +121,6 @@ namespace Iviz.Displays
             }            
         }
 
-        public override void Suspend()
-        {
-            //OcclusionOnly = false;
-            //ShadowsEnabled = false;
-            //EmissiveColor = Color.black;
-        }
-
-        public string Name
-        {
-            get => name;
-            set => name = value;
-        }
-
         void Awake()
         {
             Layer = LayerType.IgnoreRaycast;

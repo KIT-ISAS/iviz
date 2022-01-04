@@ -184,13 +184,13 @@ namespace Iviz.Displays
             for (int i = 0; i < lines.Length; i++)
             {
                 ref readonly var t = ref lines[i];
-                Color32 cA = PointWithColor.RecastToColor32(t.c0.w);
+                Color32 cA = UnityUtils.AsColor32(t.c0.w);
                 if (cA.a < 255)
                 {
                     return true;
                 }
 
-                Color32 cB = PointWithColor.RecastToColor32(t.c1.w);
+                Color32 cB = UnityUtils.AsColor32(t.c1.w);
                 if (cB.a < 255)
                 {
                     return true;
@@ -253,12 +253,12 @@ namespace Iviz.Displays
 
             var material = MaterialOverride != null
                 ? MaterialOverride
-                : UseColormap switch
+                : (UseColormap, UsesAlpha) switch
                 {
-                    true when !UsesAlpha => Resource.Materials.LineWithColormap.Object,
-                    true => Resource.Materials.TransparentLineWithColormap.Object,
-                    false when !UsesAlpha => Resource.Materials.Line.Object,
-                    false => Resource.Materials.TransparentLine.Object
+                    (true, false) => Resource.Materials.LineWithColormap.Object,
+                    (true, true) => Resource.Materials.TransparentLineWithColormap.Object,
+                    (false, false) => Resource.Materials.Line.Object,
+                    _ => Resource.Materials.TransparentLine.Object
                 };
 
             Graphics.DrawProcedural(material, worldBounds, MeshTopology.Quads, 2 * 4, Size,
@@ -295,7 +295,7 @@ namespace Iviz.Displays
             if (lineComputeBuffer == null || lineComputeBuffer.count < lineBuffer.Capacity)
             {
                 lineComputeBuffer?.Release();
-                lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Unsafe.SizeOf<LineWithColor>());
+                lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Unsafe.SizeOf<float4x2>());
                 Properties.SetBuffer(LinesID, lineComputeBuffer);
             }
 
@@ -340,7 +340,7 @@ namespace Iviz.Displays
                 (true, false) => Resource.Materials.LineSimpleWithColormap.Object,
                 (true, true) => Resource.Materials.TransparentLineSimpleWithColormap.Object,
                 (false, false) => Resource.Materials.LineSimple.Object,
-                (false, true) => Resource.Materials.TransparentLineSimple.Object
+                _ => Resource.Materials.TransparentLineSimple.Object
             };
         }
 
@@ -389,7 +389,7 @@ namespace Iviz.Displays
 
             if (lineBuffer.Capacity != 0)
             {
-                lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Unsafe.SizeOf<LineWithColor>());
+                lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Unsafe.SizeOf<float4x2>());
                 lineComputeBuffer.SetData(lineBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(LinesID, lineComputeBuffer);
             }

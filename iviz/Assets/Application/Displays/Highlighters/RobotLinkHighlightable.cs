@@ -26,6 +26,11 @@ namespace Iviz.Displays
             }
         }
 
+        void OnDestroy()
+        {
+            BoundsChanged = null;
+        }
+
         public bool IsAlive => true;
         public Bounds? Bounds { get; private set; }
         public Transform BoundsTransform => transform;

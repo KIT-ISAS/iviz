@@ -270,6 +270,7 @@ namespace Iviz.Displays
 
             bool useIntensity = UseIntensityNotRange && intensities.Length != 0;
             float4 f = default;
+            var mCache = cache;
             foreach (int i in ..ranges.Length)
             {
                 float range = ranges[i];
@@ -278,7 +279,7 @@ namespace Iviz.Displays
                     continue;
                 }
 
-                var (x, z) = cache[i];
+                var (x, z) = mCache[i];
 
                 f.x = x * range;
                 f.z = z * range;

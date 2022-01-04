@@ -188,7 +188,7 @@ namespace Iviz.Displays
                         ref var v = ref vertices.Array[i];
                         (v.x, v.y, v.z) = p;
                         indices.Array[i] = i;
-                        colors.Array[i] = PointWithColor.RecastToColor32(p.w);
+                        colors.Array[i] = UnityUtils.AsColor32(p.w);
                     }
 
                     mesh.SetVertices(vertices);
@@ -292,7 +292,7 @@ namespace Iviz.Displays
             if (pointComputeBuffer == null || pointComputeBuffer.count < pointBuffer.Capacity)
             {
                 pointComputeBuffer?.Release();
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<float4>());
                 Properties.SetBuffer(PointsId, pointComputeBuffer);
             }
 
@@ -342,7 +342,7 @@ namespace Iviz.Displays
 
             if (pointBuffer.Capacity != 0)
             {
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<float4>());
                 pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(PointsId, pointComputeBuffer);
             }

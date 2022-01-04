@@ -15,7 +15,7 @@
         public ToggleWidget FlipZ { get; private set; }
         public TfPublisherWidget Publisher { get; private set; }
         public SenderWidget Sender { get; private set; }
-        public SenderWidget TapSender { get; private set; }
+        //public SenderWidget TapSender { get; private set; }
 
         void Awake()
         {
@@ -33,11 +33,11 @@
             FrameSize = p.AddSlider("Frame Size").SetMinValue(0.01f).SetMaxValue(0.5f).SetNumberOfSteps(49);
             Publisher = p.AddTfPublisher();
             Sender = p.AddSender();
-            TapSender = p.AddSender();
+            //TapSender = p.AddSender();
             
             p.AddCollapsibleWidget("Publishers")
                 .Attach(Sender)
-                .Attach(TapSender)
+                //.Attach(TapSender)
                 .UpdateSize();            
             
             p.UpdateSize();

@@ -30,7 +30,7 @@ namespace Iviz.Controllers
         public LaserScanConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 config.Topic = value.Topic;
                 Visible = value.Visible;
@@ -135,7 +135,7 @@ namespace Iviz.Controllers
                 resource.UseLines = value;
             }
         }
-        
+
         public override IListener Listener { get; }
 
         public LaserScanListener(IModuleData moduleData, LaserScanConfiguration? config, string topic)
@@ -161,23 +161,31 @@ namespace Iviz.Controllers
                 float.IsNaN(msg.RangeMin) || float.IsNaN(msg.RangeMax) ||
                 float.IsNaN(msg.AngleIncrement))
             {
-                RosLogger.Info("LaserScanListener: NaN in header!");
+                RosLogger.Info($"{this}: NaN in header!");
                 return;
             }
 
             if (msg.AngleMin >= msg.AngleMax || msg.RangeMin >= msg.RangeMax)
             {
-                RosLogger.Info("LaserScanListener: Invalid angle or range dimensions!");
+                RosLogger.Info($"{this}: Invalid angle or range dimensions!");
                 return;
             }
 
             if (msg.Intensities.Length != 0 && msg.Intensities.Length != msg.Ranges.Length)
             {
-                RosLogger.Info("LaserScanListener: Invalid intensities length!");
+                RosLogger.Info($"{this}: Invalid intensities length!");
                 return;
             }
 
-            resource.Set(msg.AngleMin, msg.AngleIncrement, msg.RangeMin, msg.RangeMax, msg.Ranges, msg.Intensities);
+            try
+            {
+                resource.Set(msg.AngleMin, msg.AngleIncrement, msg.RangeMin, msg.RangeMax, msg.Ranges, msg.Intensities);
+            }
+            finally
+            {
+                msg.Ranges.TryReturn();
+                msg.Intensities.TryReturn();
+            }
         }
 
         public override void Dispose()

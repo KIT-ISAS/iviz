@@ -55,28 +55,28 @@ namespace Iviz.Controllers.TF
         readonly TfFrame originFrame;
         readonly TfFrame unityFrame;
 
-        public static bool HasInstance => instance != null;
-
         public static TfListener Instance =>
             instance ?? throw new NullReferenceException("No TFListener has been set!");
 
+        public static bool HasInstance => instance != null;
         public static TfFrame RootFrame => Instance.rootFrame;
         public static TfFrame OriginFrame => Instance.originFrame;
         public static TfFrame UnityFrame => Instance.unityFrame;
         public static TfFrame ListenersFrame => OriginFrame;
-        public TfFrame Frame => FixedFrame;
         public static TfFrame DefaultFrame => OriginFrame;
 
         public static IEnumerable<string> FramesUsableAsHints =>
             Instance.frames.Values.Where(IsFrameUsableAsHint).Select(frame => frame.Id);
 
+        public static event Action? AfterProcessMessages;
+
         public IModuleData ModuleData { get; }
         public Listener<TFMessage> Listener { get; }
         public Listener<TFMessage> ListenerStatic { get; }
         public Sender<TFMessage> Publisher { get; }
-        public Sender<PoseStamped> TapPublisher { get; }
+        //public Sender<PoseStamped> TapPublisher { get; }
         public TfFrame FixedFrame { get; private set; }
-
+        public TfFrame Frame => FixedFrame;
         public event Action? ResetFrames;
 
         public static float RootScale
@@ -266,7 +266,7 @@ namespace Iviz.Controllers.TF
                 FixedFrame = mapFrame;
 
                 Publisher = new Sender<TFMessage>(DefaultTopic);
-                TapPublisher = new Sender<PoseStamped>(DefaultTapTopic);
+                //TapPublisher = new Sender<PoseStamped>(DefaultTapTopic);
 
                 Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic,
                     PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
@@ -368,6 +368,8 @@ namespace Iviz.Controllers.TF
                     }
                 }
             }
+
+            AfterProcessMessages?.Invoke();
         }
 
         public void ResetController()
@@ -563,6 +565,7 @@ namespace Iviz.Controllers.TF
             GameThread.LateEveryFrame -= LateUpdate;
             staticListenerNode.DestroySelf();
             ResetFrames = null;
+            AfterProcessMessages = null;
             instance = null;
         }
 

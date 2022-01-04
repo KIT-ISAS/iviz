@@ -3,6 +3,7 @@
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using System.Runtime.InteropServices;
+using Iviz.Core;
 using Unity.Mathematics;
 
 namespace Iviz.Displays
@@ -14,22 +15,22 @@ namespace Iviz.Displays
     [StructLayout(LayoutKind.Sequential)]
     public struct LineWithColor
     {
-        static readonly float WhiteBits = PointWithColor.RecastToFloat(Color.white);
+        static readonly float WhiteBits = UnityUtils.AsFloat(Color.white);
 
         public float4x2 f;
 
-        readonly Color32 ColorA => PointWithColor.RecastToColor32(f.c0.w);
-        readonly Color32 ColorB => PointWithColor.RecastToColor32(f.c1.w);
+        readonly Color32 ColorA => UnityUtils.AsColor32(f.c0.w);
+        readonly Color32 ColorB => UnityUtils.AsColor32(f.c1.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public LineWithColor(in Vector3 start, Color32 colorA, in Vector3 end, Color32 colorB) :
-            this(start, PointWithColor.RecastToFloat(colorA), end, PointWithColor.RecastToFloat(colorB))
+            this(start, UnityUtils.AsFloat(colorA), end, UnityUtils.AsFloat(colorB))
         {
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public LineWithColor(in Vector3 start, in Vector3 end, Color32 color) :
-            this(start, PointWithColor.RecastToFloat(color), end, PointWithColor.RecastToFloat(color))
+            this(start, UnityUtils.AsFloat(color), end, UnityUtils.AsFloat(color))
         {
         }
 
@@ -53,7 +54,7 @@ namespace Iviz.Displays
             f.c1.w = intensityB;
         }
 
-        public override readonly string ToString()
+        public readonly override string ToString()
         {
             return $"[x={f.c0.x} y={f.c0.y} z={f.c0.z} i={f.c0.w} c={ColorA} ---- " +
                    $"x={f.c1.x} y={f.c1.y} z={f.c1.z} i={f.c1.w} c={ColorB}]";

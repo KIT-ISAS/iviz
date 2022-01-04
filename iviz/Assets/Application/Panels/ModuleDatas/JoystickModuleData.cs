@@ -27,8 +27,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public JoystickModuleData(ModuleDataConstructor constructor) :
-            base(constructor.Topic, constructor.Type)
+        public JoystickModuleData(ModuleDataConstructor constructor)
         {
             panel = DataPanelManager.GetPanelByResourceType<JoystickPanelContents>(ModuleType.Joystick);
 

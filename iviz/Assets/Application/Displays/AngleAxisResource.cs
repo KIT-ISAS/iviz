@@ -27,7 +27,7 @@ namespace Iviz.Displays
             {
                 color = value;
 
-                float colorAsFloat = PointWithColor.RecastToFloat(color);
+                float colorAsFloat = UnityUtils.AsFloat(color);
 
                 var linesAsSpan = lines.AsSpan();
                 for (int i = 0; i < linesAsSpan.Length; i++)

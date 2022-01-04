@@ -91,7 +91,7 @@ namespace Iviz.Displays
                 Color32 color = colorBase;
                 color.a = 0;
 
-                l0.w = PointWithColor.RecastToFloat(color);
+                l0.w = UnityUtils.AsFloat(color);
 
                 foreach (int i in ..numSegments)
                 {
@@ -104,7 +104,7 @@ namespace Iviz.Displays
 
                     color.a = (byte)(AlphaFromDistance(q, c0, c3) * colorA * 255);
 
-                    l1.w = PointWithColor.RecastToFloat(color);
+                    l1.w = UnityUtils.AsFloat(color);
 
                     array.Add(line);
 

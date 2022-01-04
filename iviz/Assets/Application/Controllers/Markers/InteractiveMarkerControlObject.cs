@@ -184,7 +184,7 @@ namespace Iviz.Controllers
                         continue;
                     }
 
-                    var baseOrientation = orientation * Quaternion.Inverse(marker.Pose.rotation);
+                    var baseOrientation = orientation * Quaternion.Inverse(marker.LocalRotation);
                     control.BaseOrientation = baseOrientation;
                     boundsControls.Add(control, baseOrientation);
                 }

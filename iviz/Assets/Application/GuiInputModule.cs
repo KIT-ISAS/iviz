@@ -29,12 +29,9 @@ namespace Iviz.App
 {
     public sealed class GuiInputModule : MonoBehaviour, ISettingsManager
     {
-        const float MinShadowDistance = 10;
-
         const float MainSpeed = 2f;
         const float MainAccel = 5f;
         const float BrakeCoeff = 0.9f;
-
         const float LookAtAnimationTime = 0.3f;
 
         static readonly string[] QualityInViewOptions =
@@ -46,6 +43,14 @@ namespace Iviz.App
         static GuiInputModule? instance;
         static uint tapSeq;
 
+        static bool IsDraggingAllowed =>
+            Settings.IsXR || (Settings.IsPhone
+                //? Input.touchCount == 1
+                ? Touch.activeTouches.Count == 1
+                : Mouse.current.rightButton.isPressed);
+        
+        static Camera MainCamera => Settings.MainCamera;
+
         public static GuiInputModule Instance =>
             instance != null
                 ? instance
@@ -54,6 +59,7 @@ namespace Iviz.App
         readonly SettingsConfiguration config = new();
 
         Vector3 accel;
+        Vector3 speed;
         bool pointerIsAlreadyMoving;
         bool alreadyScaling;
         TfFrame? cameraViewOverride;
@@ -68,7 +74,7 @@ namespace Iviz.App
         Vector3 orbitCenter;
         TfFrame? orbitCenterOverride;
 
-        float orbitX, orbitY = 45, orbitRadius = 5.0f;
+        float orbitRadius = 5.0f;
         Vector2 pointerDownStart;
         float pointerDownTime;
         bool pointerIsOnGui;
@@ -83,51 +89,14 @@ namespace Iviz.App
 
         float distancePointerAndAlt;
         float lastAltDistancePointerAndAlt;
-
-        static Camera MainCamera => Settings.MainCamera;
-
+        
         Leash? leash;
-        Leash Leash => leash != null ? leash : (leash = ResourcePool.RentDisplay<Leash>());
-
         Transform? mTransform;
+
+        Leash Leash => leash != null ? leash : (leash = ResourcePool.RentDisplay<Leash>());
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
-
         bool IsLookAtAnimationRunning => lookAtTokenSource is { IsCancellationRequested: false };
-
-        public event Action<ClickHitInfo>? PointerDown;
-        public event Action<ClickHitInfo>? ShortClick;
-        public event Action<ClickHitInfo>? LongClick;
-
-        public TfFrame? OrbitCenterOverride
-        {
-            get => IsLookAtAnimationRunning ? null : orbitCenterOverride;
-            set
-            {
-                orbitCenterOverride = value;
-                if (value != null)
-                {
-                    CameraViewOverride = null;
-                    LookAt(value.Transform);
-                }
-
-                ModuleListPanel.Instance.UnlockButtonVisible = value;
-            }
-        }
-
-        public TfFrame? CameraViewOverride
-        {
-            get => cameraViewOverride;
-            set
-            {
-                cameraViewOverride = value;
-                if (value != null)
-                {
-                    OrbitCenterOverride = null;
-                }
-
-                ModuleListPanel.Instance.UnlockButtonVisible = value;
-            }
-        }
+        Quaternion OrbitRotation => Quaternion.Euler(CameraPitch, CameraYaw, CameraRoll);
 
         IScreenDraggable? DraggedObject
         {
@@ -146,12 +115,57 @@ namespace Iviz.App
                 Leash.Visible = draggedObject != null;
             }
         }
+        
+        //public event Action<ClickHitInfo>? PointerDown;
+        //public event Action<ClickHitInfo>? ShortClick;
+        public event Action<ClickHitInfo>? LongClick;
 
-        static bool IsDraggingAllowed =>
-            Settings.IsXR || (Settings.IsPhone
-                //? Input.touchCount == 1
-                ? Touch.activeTouches.Count == 1
-                : Mouse.current.rightButton.isPressed);
+        public TfFrame? OrbitCenterOverride
+        {
+            get => IsLookAtAnimationRunning ? null : orbitCenterOverride;
+            set
+            {
+                orbitCenterOverride = value;
+                if (value != null)
+                {
+                    CameraViewOverride = null;
+                    LookAt(value.Transform);
+                }
+
+                ModuleListPanel.Instance.UnlockButtonVisible = value != null;
+            }
+        }
+
+        public TfFrame? CameraViewOverride
+        {
+            get => cameraViewOverride;
+            set
+            {
+                cameraViewOverride = value;
+                if (value != null)
+                {
+                    OrbitCenterOverride = null;
+                }
+
+                ModuleListPanel.Instance.UnlockButtonVisible = value != null;
+            }
+        }
+
+        public float CameraYaw { get; set; }
+        public float CameraPitch { get; set; } = 45;
+        public float CameraRoll { get; set; }
+
+        public float CameraFieldOfView
+        {
+            get => Settings.VirtualCamera == null ? 0 : Settings.VirtualCamera.GetHorizontalFov();
+            set
+            {
+                if (Settings.VirtualCamera != null)
+                {
+                    Settings.VirtualCamera.SetHorizontalFov(value);
+                }
+            }
+        }
 
         void Awake()
         {
@@ -172,6 +186,11 @@ namespace Iviz.App
                 MainCamera.allowHDR = true;
             }
 
+            if (!Settings.IsXR)
+            {
+                Settings.VirtualCamera = MainCamera;
+            }
+
             if (!Settings.SupportsComputeBuffers)
             {
                 RosLogger.Info("Platform does not support compute shaders. Point cloud rendering may look weird.");
@@ -185,14 +204,18 @@ namespace Iviz.App
 
             StartOrbiting();
 
+            TfListener.AfterProcessMessages += ProcessPoseChanges;
+
             ModuleListPanel.CallAfterInitialized(() => TfListener.Instance.ResetFrames += OnResetFrames);
         }
 
         void LateUpdate()
         {
-            UpdateEvenIfInactive();
+            ProcessPointer();
+        }
 
-
+        void ProcessPoseChanges()
+        {
             if (CameraViewOverride != null)
             {
                 Transform.SetPose(CameraViewOverride.AbsoluteUnityPose);
@@ -205,6 +228,7 @@ namespace Iviz.App
                 if (!Settings.IsPhone && mOrbitCenterOverride == null)
                 {
                     ProcessFlying();
+                    Transform.position += Transform.rotation * speed;
                 }
 
                 return;
@@ -215,44 +239,65 @@ namespace Iviz.App
                 if (mOrbitCenterOverride != null)
                 {
                     ProcessOrbiting();
+                    //Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
+                    //Transform.SetPositionAndRotation(-orbitRadius * (q * Vector3.forward) + orbitCenter, q);
+                    //Transform.rotation = q;
+
                     ProcessScaling(false);
-                    Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
-                    Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
+                    //Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
+
+                    // !
                     orbitCenter = mOrbitCenterOverride.AbsoluteUnityPose.position;
+                    //Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
                 }
                 else
                 {
                     ProcessOrbiting();
+                    //Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
+                    //Transform.SetPositionAndRotation(-orbitRadius * (q * Vector3.forward) + orbitCenter, q);
+                    //Transform.rotation = q;
+
                     ProcessScaling(true);
+                    //Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
                 }
 
                 ProcessTurning();
                 ProcessFlying();
+
+                var rotation = OrbitRotation;
+                Transform.rotation = rotation;
+                Transform.position = -orbitRadius * (rotation * Vector3.forward) + orbitCenter + rotation * speed;
                 return;
             }
 
             if (mOrbitCenterOverride != null)
             {
                 ProcessOrbiting();
-                Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
-                Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
+
+                var rotation = OrbitRotation;
                 orbitCenter = mOrbitCenterOverride.AbsoluteUnityPose.position;
+                Transform.rotation = rotation;
+                Transform.position = -orbitRadius * (rotation * Vector3.forward) + orbitCenter;
             }
             else
             {
                 ProcessTurning();
                 ProcessFlying();
+
+                var rotation = OrbitRotation;
+                Transform.rotation = rotation;
+                Transform.position += rotation * speed;
             }
         }
 
         void OnEnable()
         {
-            GameThread.EveryFrame -= UpdateEvenIfInactive;
+            GameThread.EveryFrame -= ProcessPointer;
         }
 
         void OnDisable()
         {
-            GameThread.EveryFrame += UpdateEvenIfInactive;
+            GameThread.EveryFrame += ProcessPointer;
         }
 
         void OnResetFrames()
@@ -418,7 +463,7 @@ namespace Iviz.App
             Instance.DraggedObject = draggable;
         }
 
-        void UpdateEvenIfInactive()
+        void ProcessPointer()
         {
             const float shortClickTime = 0.3f;
             const float longClickTime = 0.5f;
@@ -502,8 +547,8 @@ namespace Iviz.App
             }
 
             // check if we are clicking something interesting
-
             bool anyPointerDown = pointerIsDown || altPointerIsDown;
+            /*
             if (!prevPointerDown && anyPointerDown)
             {
                 if (!pointerIsOnGui)
@@ -511,7 +556,8 @@ namespace Iviz.App
                     PointerDown?.Invoke(new ClickHitInfo(pointerPosition));
                 }
             }
-            else if (prevPointerDown
+            */
+            if (prevPointerDown
                      && !anyPointerDown
                      && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
             {
@@ -519,12 +565,12 @@ namespace Iviz.App
                 {
                     return;
                 }
-                
+
                 var clickInfo = new ClickHitInfo(pointerPosition);
                 float timeDown = Time.time - pointerDownTime;
                 if (timeDown < shortClickTime)
                 {
-                    ShortClick?.Invoke(clickInfo);
+                    //ShortClick?.Invoke(clickInfo);
                     OnClick(clickInfo, true);
                 }
                 else if (timeDown > longClickTime)
@@ -547,13 +593,11 @@ namespace Iviz.App
         {
             var diff = orbitCenter - Transform.position;
             orbitRadius = Mathf.Min(5, diff.magnitude);
-            orbitX = Mathf.Atan2(diff.x, diff.z) * Mathf.Rad2Deg;
-            orbitY = -Mathf.Atan2(diff.y, new Vector2(diff.x, diff.z).magnitude) * Mathf.Rad2Deg;
+            CameraYaw = Mathf.Atan2(diff.x, diff.z) * Mathf.Rad2Deg;
+            CameraPitch = -Mathf.Atan2(diff.y, new Vector2(diff.x, diff.z).magnitude) * Mathf.Rad2Deg;
 
-            var q = Quaternion.Euler(orbitY, orbitX, 0);
-            Transform.SetPositionAndRotation(
-                -orbitRadius * (q * Vector3.forward) + orbitCenter,
-                q);
+            var rotation = OrbitRotation;
+            Transform.SetPositionAndRotation(-orbitRadius * (rotation * Vector3.forward) + orbitCenter, rotation);
         }
 
         void ProcessOrbiting()
@@ -586,14 +630,14 @@ namespace Iviz.App
             const float orbitCoeff = 0.1f;
             const float orbitRadiusAdvance = 0.1f;
 
-            orbitX += pointerDiff.x * orbitCoeff;
-            orbitY -= pointerDiff.y * orbitCoeff;
+            CameraYaw += pointerDiff.x * orbitCoeff;
+            CameraPitch -= pointerDiff.y * orbitCoeff;
 
-            orbitY = orbitY switch
+            CameraPitch = CameraPitch switch
             {
                 > 90 => 90,
                 < -90 => -90,
-                _ => orbitY
+                _ => CameraPitch
             };
 
             if (Keyboard.current[Key.W].isPressed)
@@ -604,9 +648,6 @@ namespace Iviz.App
             {
                 orbitRadius += orbitRadiusAdvance;
             }
-
-            Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
-            Transform.SetPositionAndRotation(-orbitRadius * (q * Vector3.forward) + orbitCenter, q);
         }
 
         void ProcessScaling(bool allowPivotMotion)
@@ -642,8 +683,7 @@ namespace Iviz.App
 
             orbitRadius += altDistanceDiff * radiusCoeff;
 
-            Transform t = Transform;
-            Quaternion q = t.rotation;
+            Quaternion q = Transform.rotation;
 
             if (!allowPivotMotion)
             {
@@ -658,18 +698,14 @@ namespace Iviz.App
                 {
                     // move forward
                     float diff = minDistanceToAdvance - orbitRadius;
-                    orbitCenter.AddInPlace(diff * (q * Vector3.forward));
+                    orbitCenter += diff * (q * Vector3.forward);
                     orbitRadius = minDistanceToAdvance;
                 }
 
                 float orbitScale = 0.75f * orbitRadius;
-                orbitCenter -= tangentCoeff * pointerAltDiff.x * orbitScale *
-                               t.TransformDirection(Vector3.right);
-                orbitCenter += tangentCoeff * pointerAltDiff.y * orbitScale *
-                               t.TransformDirection(Vector3.down);
+                orbitCenter -= tangentCoeff * pointerAltDiff.x * orbitScale * (q * Vector3.right);
+                orbitCenter += tangentCoeff * pointerAltDiff.y * orbitScale * (q * Vector3.down);
             }
-
-            t.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
         }
 
         void ProcessTurning()
@@ -706,13 +742,8 @@ namespace Iviz.App
             pointerIsAlreadyMoving = true;
 
             const float turnCoeff = 0.1f;
-            orbitX += pointerDiff.x * turnCoeff;
-            orbitY -= pointerDiff.y * turnCoeff;
-
-            orbitY = Mathf.Min(Mathf.Max(orbitY, -89), 89);
-
-            //Debug.Log(multiplier);
-            Transform.rotation = Quaternion.Euler(orbitY, orbitX, 0);
+            CameraYaw += pointerDiff.x * turnCoeff;
+            CameraPitch = Mathf.Clamp(CameraPitch - pointerDiff.y * turnCoeff, -89, 89);
         }
 
         void ProcessFlying()
@@ -720,17 +751,20 @@ namespace Iviz.App
             if (!pointerIsDown)
             {
                 accel = Vector3.zero;
+                speed = Vector3.zero;
                 return;
             }
 
             var baseInput = GetBaseInput();
             float deltaTime = Time.deltaTime;
+            const float minAccelToStop = 0.001f;
 
             accel += baseInput.Mult(MainAccel * DirectionWeight) * deltaTime;
+            
             if (baseInput.x == 0)
             {
                 accel.x *= BrakeCoeff;
-                if (Mathf.Abs(accel.x) < 0.001f)
+                if (Mathf.Abs(accel.x) < minAccelToStop)
                 {
                     accel.x = 0;
                 }
@@ -739,7 +773,7 @@ namespace Iviz.App
             if (baseInput.y == 0)
             {
                 accel.y *= BrakeCoeff;
-                if (Mathf.Abs(accel.y) < 0.001f)
+                if (Mathf.Abs(accel.y) < minAccelToStop)
                 {
                     accel.y = 0;
                 }
@@ -748,14 +782,13 @@ namespace Iviz.App
             if (baseInput.z == 0)
             {
                 accel.z *= BrakeCoeff;
-                if (Mathf.Abs(accel.z) < 0.001f)
+                if (Mathf.Abs(accel.z) < minAccelToStop)
                 {
                     accel.z = 0;
                 }
             }
 
-            var speed = deltaTime * (baseInput.Mult(MainSpeed * DirectionWeight) + accel);
-            Transform.position += Transform.rotation * speed;
+            speed = deltaTime * (baseInput.Mult(MainSpeed * DirectionWeight) + accel);
         }
 
         public void LookAt(Transform targetTransform, Vector3? localOffset = null)
@@ -803,7 +836,7 @@ namespace Iviz.App
             }
 
             orbitCenter = targetPosition;
-            orbitRadius = Mathf.Min(Mathf.Max(orbitRadius, minDistanceLookAt), maxDistanceLookAt);
+            orbitRadius = Mathf.Clamp(orbitRadius, minDistanceLookAt, maxDistanceLookAt);
             return -orbitRadius * (Transform.rotation * Vector3.forward) + orbitCenter;
         }
 
@@ -839,7 +872,7 @@ namespace Iviz.App
             {
                 pVelocity.y++;
             }
-            
+
             return pVelocity;
         }
 
@@ -906,6 +939,7 @@ namespace Iviz.App
 
             FAnimator.Start(new ClickedPoseHighlighter(poseToHighlight));
 
+            /*
             if (!isShortClick)
             {
                 var poseStamped = new PoseStamped(
@@ -914,6 +948,7 @@ namespace Iviz.App
                 );
                 TfListener.Instance.TapPublisher.Publish(poseStamped);
             }
+            */
         }
 
         static async void HighlightAll(List<(IHighlightable highlightable, Vector3)> hits)

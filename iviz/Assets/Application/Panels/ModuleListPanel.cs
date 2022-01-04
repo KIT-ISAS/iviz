@@ -83,6 +83,7 @@ namespace Iviz.App
         ModuleListButtons? buttons;
         DialogManager? dialogs;
         IMenuDialogContents? menuDialog;
+        CameraModuleData? cameraModuleData;
 
         UpperCanvasPanel UpperCanvas => upperCanvasPanel.AssertNotNull(nameof(upperCanvasPanel));
         BottomCanvasPanel BottomCanvas => bottomCanvasPanel.AssertNotNull(nameof(bottomCanvasPanel));
@@ -177,7 +178,7 @@ namespace Iviz.App
             instance = null;
             GameThread.LateEverySecond -= UpdateFpsStats;
             GameThread.EveryFrame -= UpdateFpsCounter;
-            GameThread.EveryFastTick -= UpdateCameraStats;
+            GameThread.EveryTenthSecond -= UpdateCameraStats;
 
             foreach (var dialogData in Dialogs.DialogDatas)
             {
@@ -308,12 +309,18 @@ namespace Iviz.App
                 KeepReconnecting = true;
             };
 
+            BottomCanvas.CameraButtonClicked += () =>
+            {
+                cameraModuleData ??= new CameraModuleData();
+                cameraModuleData.ToggleShowPanel();
+            };
+
             connectionData.MasterActiveChanged += _ => ConnectionManager.Connection.Disconnect();
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
             ConnectionManager.Connection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
-            GameThread.EveryFastTick += UpdateCameraStats;
+            GameThread.EveryTenthSecond += UpdateCameraStats;
             UpdateFpsStats();
 
             ServiceFunctions.Start();
@@ -415,7 +422,7 @@ namespace Iviz.App
             switch (state)
             {
                 case ConnectionState.Connected:
-                    GameThread.EverySecond -= RotateSprite;
+                    GameThread.EveryTenthSecond -= RotateSprite;
                     UpperCanvas.Status.sprite = UpperCanvas.ConnectedSprite;
                     UpperCanvas.TopPanel.color = RosServerManager.IsActive
                         ? Resource.Colors.ConnectionPanelOwnMaster
@@ -423,14 +430,14 @@ namespace Iviz.App
                     SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
-                    GameThread.EverySecond -= RotateSprite;
+                    GameThread.EveryTenthSecond -= RotateSprite;
                     UpperCanvas.Status.sprite = UpperCanvas.DisconnectedSprite;
                     UpperCanvas.TopPanel.color = Resource.Colors.ConnectionPanelDisconnected;
                     break;
                 case ConnectionState.Connecting:
                     UpperCanvas.Status.sprite = UpperCanvas.ConnectingSprite;
 
-                    GameThread.EverySecond += RotateSprite;
+                    GameThread.EveryTenthSecond += RotateSprite;
                     break;
             }
         }

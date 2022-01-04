@@ -25,7 +25,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => GridController.Config;
         public override IController Controller => GridController;
 
-        public GridModuleData(ModuleDataConstructor constructor) : base(constructor.Topic, constructor.Type)
+        public GridModuleData(ModuleDataConstructor constructor)
         {
             panel = DataPanelManager.GetPanelByResourceType<GridPanelContents>(ModuleType.Grid);
 

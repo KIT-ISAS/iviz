@@ -67,7 +67,9 @@ namespace Iviz.App
                 ModuleType.Octomap => o.AddComponent<OctomapPanelContents>(),
                 ModuleType.GuiDialog => o.AddComponent<GuiDialogPanelContents>(),
                 ModuleType.XR => o.AddComponent<XRPanelContents>(),
-                _ => throw new ArgumentException(nameof(resource))
+                ModuleType.Camera => o.AddComponent<CameraPanelContents>(),
+                _ => throw new ArgumentException($"Failed to find panel contents for resource '{resource}'",
+                    nameof(resource))
             };
         }
     }

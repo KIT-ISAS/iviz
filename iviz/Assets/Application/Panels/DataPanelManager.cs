@@ -16,10 +16,10 @@ namespace Iviz.App
     {
         readonly Dictionary<ModuleType, DataPanelContents> panelByResourceType = new();
 
-        Canvas? parentCanvas;
-        Canvas ParentCanvas => (parentCanvas != null) ? parentCanvas : GetComponentInParent<Canvas>();
-
         bool started;
+        Canvas? parentCanvas;
+
+        Canvas ParentCanvas => (parentCanvas != null) ? parentCanvas : GetComponentInParent<Canvas>();
 
         bool Active
         {
@@ -35,13 +35,13 @@ namespace Iviz.App
             gameObject.SetActive(true);
             started = true;
             GameThread.EverySecond += UpdateSelected;
-            GameThread.EveryFastTick += UpdateSelectedFast;
+            GameThread.EveryTenthSecond += UpdateSelectedFast;
         }
 
         void OnDestroy()
         {
             GameThread.EverySecond -= UpdateSelected;
-            GameThread.EveryFastTick -= UpdateSelectedFast;
+            GameThread.EveryTenthSecond -= UpdateSelectedFast;
         }
 
         public T GetPanelByResourceType<T>(ModuleType resource) where T : DataPanelContents
@@ -50,18 +50,18 @@ namespace Iviz.App
             {
                 return existingContents is T validatedContents
                     ? validatedContents
-                    : throw new InvalidOperationException("Panel type for " + resource + "does not match!");
+                    : throw new InvalidOperationException($"Panel type for {resource}does not match!");
             }
 
-            var newContents = DataPanelContents.AddTo(CreatePanelObject(resource + " Panel"), resource);
+            var newContents = DataPanelContents.AddTo(CreatePanelObject($"{resource} Panel"), resource);
             if (newContents == null)
             {
-                throw new InvalidOperationException("There is no panel for type " + resource);
+                throw new InvalidOperationException($"There is no panel for type {resource}");
             }
 
             if (newContents is not T contents)
             {
-                throw new InvalidOperationException("Panel type for " + resource + " does not match!");
+                throw new InvalidOperationException($"Panel type for {resource} does not match!");
             }
 
             panelByResourceType[resource] = contents;
