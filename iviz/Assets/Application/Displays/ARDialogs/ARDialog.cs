@@ -527,7 +527,7 @@ namespace Iviz.App.ARDialogs
             float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
             Quaternion absoluteRotation = Quaternion.AngleAxis(targetAngle, Vector3.up);
 
-            return Quaternion.Inverse(TfListener.OriginFrame.Transform.rotation) * absoluteRotation;
+            return TfListener.OriginFrame.Transform.rotation.Inverse() * absoluteRotation;
         }
 
         public void Initialize()

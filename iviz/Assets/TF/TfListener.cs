@@ -578,7 +578,7 @@ namespace Iviz.Controllers.TF
             var (position, rotation) = unityPose;
             return new Pose(
                 originFrame.InverseTransformPoint(position),
-                Quaternion.Inverse(originFrame.rotation) * rotation
+                originFrame.rotation.Inverse() * rotation
             );
         }
 
@@ -588,7 +588,7 @@ namespace Iviz.Controllers.TF
             var (position, rotation) = unityPose;
             return new Pose(
                 fixedFrame.InverseTransformPoint(position),
-                Quaternion.Inverse(fixedFrame.rotation) * rotation
+                fixedFrame.rotation.Inverse() * rotation
             );
         }
 

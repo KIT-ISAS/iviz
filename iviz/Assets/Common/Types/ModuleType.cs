@@ -29,6 +29,7 @@ namespace Iviz.Common
         Octomap,
         GuiDialog,
         XR,
-        Camera
+        Camera,
+        TFPublisher
     }
 }

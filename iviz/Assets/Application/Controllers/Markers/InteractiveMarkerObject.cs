@@ -144,7 +144,7 @@ namespace Iviz.Controllers
             node.AttachTo(msg.Header);
 
             var controlsToDelete = new HashSet<string>(controls.Keys);
-            float defaultScale = Mathf.Approximately(msg.Scale, 0) ? 1 : msg.Scale;
+            float defaultScale = msg.Scale.ApproximatelyZero() ? 1 : msg.Scale;
             int numUnnamed = 0;
             foreach (var controlMsg in msg.Controls)
             {
@@ -275,7 +275,7 @@ namespace Iviz.Controllers
                 : "[]";
             description.Append("Description: ").Append(msgDescription).AppendLine();
 
-            if (Mathf.Approximately(lastMessage.Scale, 0))
+            if (lastMessage.Scale.ApproximatelyZero())
             {
                 description.Append("Scale: 0 <i>(1)</i>").AppendLine();
             }

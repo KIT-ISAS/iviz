@@ -154,7 +154,7 @@ namespace Iviz.Controllers
             {
                 config.ScaleZ = value;
 
-                float yScale = Mathf.Approximately(cellSize, 0) ? 1 : value / cellSize;
+                float yScale = cellSize.ApproximatelyZero() ? 1 : value / cellSize;
                 cubeNode.Transform.localScale = new Vector3(1, yScale, 1);
             }
         }

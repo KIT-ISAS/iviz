@@ -1,14 +1,11 @@
 #nullable enable
 
-using System.Drawing;
+using System;
 using System.Threading;
 using Iviz.Core;
 using Iviz.Resources;
-using JetBrains.Annotations;
 using TMPro;
-using Unity.Mathematics;
 using UnityEngine;
-using Color = UnityEngine.Color;
 
 namespace Iviz.Displays
 {
@@ -128,7 +125,7 @@ namespace Iviz.Displays
             var canvasTransform = (RectTransform)Canvas.transform;
             float sizeY = canvasTransform.rect.size.y * canvasTransform.localScale.y;
             var targetPosition = mainCameraPose.position + mainCameraPose.forward * 1.5f;
-            targetPosition.y = Mathf.Max(targetPosition.y, sizeY / 2 + 0.5f);
+            targetPosition.y = Math.Max(targetPosition.y, sizeY / 2 + 0.5f);
 
             var targetRotation = CalculateOrientationToCamera();
 
@@ -156,7 +153,7 @@ namespace Iviz.Displays
 
             var start = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
             FAnimator.Spawn(tokenSource.Token, 0.25f,
-                t => { transform.rotation = Quaternion.Lerp(start, CalculateOrientationToCamera(), t); });
+                t => transform.rotation = Quaternion.Lerp(start, CalculateOrientationToCamera(), t));
         }
 
         Quaternion CalculateOrientationToCamera()
@@ -182,7 +179,10 @@ namespace Iviz.Displays
 
         public Bounds? Bounds => BoxCollider.GetBounds();
 
-        public int Layer { get; set; }
+        public int Layer
+        {
+            set { }
+        }
 
         void Update()
         {
@@ -203,28 +203,32 @@ namespace Iviz.Displays
 
         static Pose ClampTargetPose(in Pose currentPose, in Pose mainCameraPose)
         {
-            const float minDistance = 1.5f;
-            const float maxDistance = 2.0f;
+            const float minX = -0.5f;
+            const float maxX = 0.5f;
+            const float minY = -0.4f;
+            const float maxY = -0.2f;
+            const float minZ = 1.5f;
+            const float maxZ = 2.0f;
+            const float angleThreshold = 15; 
 
             var (currentPositionLocal, currentRotationLocal) = mainCameraPose.Inverse().Multiply(currentPose);
-            var targetPositionLocal = Clamp(
-                currentPositionLocal,
-                new Vector3(-0.5f, -0.4f, minDistance),
-                new Vector3(0.5f, -0.2f, maxDistance));
+            var targetPositionLocal = Clamp(currentPositionLocal);
 
             float currentAngleLocal = UnityUtils.RegularizeAngle(currentRotationLocal.eulerAngles.y);
 
-            var targetRotationLocal = Mathf.Abs(currentAngleLocal) < 15
+            var targetRotationLocal = Math.Abs(currentAngleLocal) < angleThreshold
                 ? currentRotationLocal
                 : Quaternion.identity;
 
             return mainCameraPose.Multiply(new Pose(targetPositionLocal, targetRotationLocal));
+
+            static Vector3 Clamp(in Vector3 value) => new(
+                Math.Clamp(value.x, minX, maxX),
+                Math.Clamp(value.y, minY, maxY),
+                Math.Clamp(value.z, minZ, maxZ)
+            );
         }
 
-        static Vector3 Clamp(in Vector3 value, in Vector3 min, in Vector3 max)
-        {
-            return Vector3.Min(Vector3.Max(value, min), max);
-        }
 
         public void Suspend()
         {

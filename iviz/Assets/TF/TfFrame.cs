@@ -191,9 +191,9 @@ namespace Iviz.Controllers.TF
             }
         }
 
-        public void SetPose(in Pose newPose, string? newModifierId = null)
+        public void SetPose(in Pose newPose, string? callerId = null)
         {
-            LastCallerId = newModifierId;
+            LastCallerId = callerId;
             
             if (localPose.EqualsApprox(newPose))
             {

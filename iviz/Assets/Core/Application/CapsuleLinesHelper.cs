@@ -85,7 +85,8 @@ namespace Iviz.Displays
                 Vector3 ab = b - a;
                 Vector3 dirX, dirY, dirZ;
 
-                if (ab.MagnitudeSq() < minMagnitude * minMagnitude)
+                float abMagnitudeSq = ab.MagnitudeSq();
+                if (abMagnitudeSq < minMagnitude * minMagnitude)
                 {
                     dirX = Vector3.zero;
                     dirY = Vector3.zero;
@@ -93,11 +94,13 @@ namespace Iviz.Displays
                 }
                 else
                 {
-                    dirX = ab.Normalized();
-                    dirY = !Mathf.Approximately(Mathf.Abs(dirX.z), 1)
-                        ? new Vector3(-dirX.y, dirX.x, 0).Normalized()
-                        : new Vector3(-dirX.z, 0, dirX.x).Normalized();
-                    dirZ = dirX.Cross(dirY).Normalized();
+                    dirX = ab / Mathf.Sqrt(abMagnitudeSq);
+                    var (x, y, z) = dirX;
+                    dirY = (Math.Abs(z) - 1).ApproximatelyZero()
+                        ? new Vector3(-y, x, 0) / Mathf.Sqrt(x * x + y * y)
+                        : new Vector3(-z, 0, x) / Mathf.Sqrt(x * x + z * z);
+                    //dirZ = dirX.Cross(dirY).Normalized();
+                    dirZ = dirX.Cross(dirY);
                 }
 
                 var halfDirX = halfScale * dirX;
@@ -115,7 +118,7 @@ namespace Iviz.Displays
                 pArray[pOff++] = b - halfSumYz;
                 pArray[pOff++] = b - halfDiffYz;
                 pArray[pOff++] = b + halfDirX;
-                
+
 
                 /*
                 for (int i = 0; i < 5; i++)
@@ -147,16 +150,22 @@ namespace Iviz.Displays
                     uvs[uvOff++] = uv1;
                 }
                 */
-                
+
                 {
-                    var uv0 = new Vector2(line.c0.w, 0);
+                    Vector2 uv0;
+                    uv0.x = line.c0.w;
+                    uv0.y = 0;
+
                     uArray[uvOff++] = uv0;
                     uArray[uvOff++] = uv0;
                     uArray[uvOff++] = uv0;
                     uArray[uvOff++] = uv0;
                     uArray[uvOff++] = uv0;
 
-                    var uv1 = new Vector2(line.c1.w, 0);
+                    Vector2 uv1;
+                    uv1.x = line.c1.w;
+                    uv1.y = 0;
+
                     uArray[uvOff++] = uv1;
                     uArray[uvOff++] = uv1;
                     uArray[uvOff++] = uv1;
@@ -169,7 +178,7 @@ namespace Iviz.Displays
             int[] iArray = indices.Array;
             int iOff = 0;
 
-            for (int i = 0; i < lineBuffer.Length; i++)
+            foreach (int i in ..lineBuffer.Length)
             {
                 int baseOff = i * 10;
                 foreach (int index in CapsuleIndices)
@@ -178,7 +187,7 @@ namespace Iviz.Displays
                 }
             }
 
-            
+
             mesh.Clear();
             mesh.indexFormat = indices.Length <= UnityUtils.MeshUInt16Threshold
                 ? IndexFormat.UInt16

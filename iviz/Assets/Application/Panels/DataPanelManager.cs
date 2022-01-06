@@ -101,9 +101,9 @@ namespace Iviz.App
             Active = true;
         }
 
-        public void HidePanelFor(ModuleData newSelected)
+        public void HidePanelFor(ModuleData moduleData)
         {
-            if (SelectedModuleData == newSelected)
+            if (SelectedModuleData == moduleData)
             {
                 HideSelectedPanel();
             }
@@ -122,15 +122,15 @@ namespace Iviz.App
             Active = false;
         }
 
-        public void TogglePanel(ModuleData selected)
+        public void TogglePanel(ModuleData moduleData)
         {
-            if (SelectedModuleData == selected)
+            if (SelectedModuleData == moduleData)
             {
                 HideSelectedPanel();
             }
             else
             {
-                SelectPanelFor(selected);
+                SelectPanelFor(moduleData);
             }
         }
 

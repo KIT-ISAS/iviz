@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace External
@@ -8,7 +9,7 @@ namespace External
         public float MoveThreshold
         {
             get { return moveThreshold; }
-            set { moveThreshold = Mathf.Abs(value); }
+            set { moveThreshold = Math.Abs(value); }
         }
 
         [SerializeField] private float moveThreshold = 1;

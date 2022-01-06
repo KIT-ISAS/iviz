@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Iviz.App;
@@ -184,7 +185,7 @@ namespace Iviz.Controllers
                         continue;
                     }
 
-                    var baseOrientation = orientation * Quaternion.Inverse(marker.LocalRotation);
+                    var baseOrientation = orientation * marker.LocalRotation.Inverse();
                     control.BaseOrientation = baseOrientation;
                     boundsControls.Add(control, baseOrientation);
                 }
@@ -260,7 +261,7 @@ namespace Iviz.Controllers
             {
                 var forwardWorld = Settings.MainCameraTransform.position - node.transform.position;
                 var deltaRotationWorld = Quaternion.LookRotation(forwardWorld);
-                var deltaRotationLocal = Quaternion.Inverse(node.transform.rotation) * deltaRotationWorld;
+                var deltaRotationLocal = node.transform.rotation.Inverse() * deltaRotationWorld;
 
                 foreach (var (boundsControl, baseOrientation) in boundsControls)
                 {
@@ -424,7 +425,7 @@ namespace Iviz.Controllers
         static Color ColorFromOrientation(in Quaternion orientation, in Vector3 direction)
         {
             var (x, y, z) = orientation * direction;
-            return new Color(Mathf.Abs(x), Mathf.Abs(y), Mathf.Abs(z));
+            return new Color(Math.Abs(x), Math.Abs(y), Math.Abs(z));
         }
     }
 }

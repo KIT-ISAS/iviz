@@ -46,7 +46,7 @@ namespace Iviz.Displays
             int numStipples = 10)
         {
             Vector3 notAxis = Vector3.forward;
-            if (Mathf.Approximately(notAxis.Cross(axis).MagnitudeSq(), 0))
+            if (notAxis.Cross(axis).ApproximatelyZero())
             {
                 notAxis = Vector3.right;
             }

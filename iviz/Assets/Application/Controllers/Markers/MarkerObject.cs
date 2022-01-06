@@ -267,7 +267,7 @@ namespace Iviz.Controllers
         {
             var meshTriangles = ValidateResource<MeshTrianglesResource>();
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
-                || Mathf.Approximately(msg.Color.A, 0)
+                || msg.Color.A.ApproximatelyZero()
                 || msg.Color.IsInvalid()
                 || msg.Points.Length % 3 != 0)
             {
@@ -305,10 +305,10 @@ namespace Iviz.Controllers
         void CreatePoints(Marker msg)
         {
             var pointList = ValidateResource<PointListResource>();
-            pointList.ElementScale = Mathf.Abs((float)msg.Scale.X);
+            pointList.ElementScale = Math.Abs((float)msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
-                || Mathf.Approximately(msg.Color.A, 0)
+                || msg.Color.A.ApproximatelyZero()
                 || msg.Color.IsInvalid())
             {
                 pointList.Reset();
@@ -328,12 +328,12 @@ namespace Iviz.Controllers
         void CreateLine(Marker msg, bool isStrip)
         {
             var lineResource = ValidateResource<LineResource>();
-            float elementScale = Mathf.Abs((float)msg.Scale.X);
+            float elementScale = Math.Abs((float)msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
-                || Mathf.Approximately(elementScale, 0)
+                || elementScale.ApproximatelyZero()
                 || elementScale.IsInvalid()
-                || Mathf.Approximately(msg.Color.A, 0)
+                || msg.Color.A.ApproximatelyZero()
                 || msg.Color.IsInvalid())
             {
                 lineResource.Reset();
@@ -364,10 +364,10 @@ namespace Iviz.Controllers
                 : Resource.Displays.Sphere;
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
-                || Mathf.Approximately(msg.Color.A, 0)
                 || msg.Color.IsInvalid()
+                || msg.Color.A.ApproximatelyZero()
                 || msg.Scale.IsInvalid()
-                || Mathf.Approximately((float) msg.Scale.MaxAbsCoeff3(), 0))
+                || msg.Scale.ApproximatelyZero())
             {
                 meshList.Reset();
                 return;
@@ -412,7 +412,7 @@ namespace Iviz.Controllers
             {
                 case 0:
                 {
-                    if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0) || msg.Scale.IsInvalid())
+                    if (msg.Scale.IsInvalid() || msg.Scale.ApproximatelyZero())
                     {
                         arrowMarker.Visible = false;
                         return;
@@ -424,8 +424,8 @@ namespace Iviz.Controllers
                 }
                 case 2:
                 {
-                    float sx = Mathf.Abs((float)msg.Scale.X);
-                    if (Mathf.Approximately(sx, 0) || !float.IsFinite(sx))
+                    float sx = Math.Abs((float)msg.Scale.X);
+                    if (sx.IsInvalid() || sx.ApproximatelyZero())
                     {
                         arrowMarker.Visible = false;
                         return;
@@ -591,11 +591,11 @@ namespace Iviz.Controllers
         static uint CalculateMarkerHash(Marker msg, bool useScale)
         {
             uint hash = Crc32Calculator.Compute(msg.Type);
-            hash = Crc32Calculator.Compute(msg.Color, hash);
+            hash = Crc32Calculator.Compute(in msg.Color, hash);
             hash = Crc32Calculator.Compute(msg.Points, hash);
             hash = Crc32Calculator.Compute(msg.Colors, hash);
             return useScale
-                ? Crc32Calculator.Compute(msg.Scale, hash)
+                ? Crc32Calculator.Compute(in msg.Scale, hash)
                 : hash;
         }
 
@@ -759,7 +759,7 @@ namespace Iviz.Controllers
                         AppendColorLog(msg.Color);
                         AppendScaleLog(msg.Scale);
 
-                        if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
+                        if (msg.Scale.MaxAbsCoeff().ApproximatelyZero())
                         {
                             description.Append(WarnStr).Append("Scale value of 0").AppendLine();
                         }
@@ -771,7 +771,7 @@ namespace Iviz.Controllers
 
                         break;
                     case 2:
-                        float sx = Mathf.Abs((float)msg.Scale.X);
+                        float sx = Math.Abs((float)msg.Scale.X);
                         AppendColorLog(msg.Color);
                         AppendScalarLog(msg.Scale.X);
 
@@ -799,7 +799,7 @@ namespace Iviz.Controllers
                 AppendColorLog(msg.Color);
                 AppendScaleLog(msg.Scale);
 
-                if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0))
+                if (msg.Scale.MaxAbsCoeff().ApproximatelyZero())
                 {
                     description.Append(WarnStr).Append("Scale value of 0").AppendLine();
                 }
@@ -815,7 +815,7 @@ namespace Iviz.Controllers
                 AppendColorLog(msg.Color);
                 AppendScalarLog(msg.Scale.Z);
 
-                if (Mathf.Approximately((float)msg.Scale.Z, 0) || msg.Scale.Z.IsInvalid())
+                if (msg.Scale.Z.ApproximatelyZero() || msg.Scale.Z.IsInvalid())
                 {
                     description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
                 }
@@ -842,7 +842,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                if (Mathf.Approximately(msg.Color.A, 0))
+                if (msg.Color.A.ApproximatelyZero())
                 {
                     description.Append(WarnStr).Append("Color field has alpha 0").AppendLine();
                     return;
@@ -856,7 +856,7 @@ namespace Iviz.Controllers
 
             void CreateLineLog()
             {
-                float elementScale = Mathf.Abs((float)msg.Scale.X);
+                float elementScale = Math.Abs((float)msg.Scale.X);
 
                 AppendColorLog(msg.Color);
                 AppendScalarLog(elementScale);
@@ -870,7 +870,7 @@ namespace Iviz.Controllers
                     description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
                 }
 
-                if (Mathf.Approximately(elementScale, 0) || elementScale.IsInvalid())
+                if (elementScale.IsInvalid() || elementScale.ApproximatelyZero())
                 {
                     description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
                     return;
@@ -885,7 +885,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.IsInvalid())
+                if (msg.Color.IsInvalid() || msg.Color.A.ApproximatelyZero())
                 {
                     description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
                 }
@@ -903,7 +903,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.IsInvalid())
+                if (msg.Color.IsInvalid() || msg.Color.A.ApproximatelyZero())
                 {
                     description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
                     return;
@@ -940,7 +940,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                if (Mathf.Approximately(msg.Color.A, 0))
+                if (msg.Color.A.ApproximatelyZero())
                 {
                     description.Append(WarnStr).Append("Color has alpha 0. Marker will not be visible").AppendLine();
                     return;

@@ -24,7 +24,7 @@ namespace Iviz.Core
 
         public void EnsureCapacity(int value)
         {
-            if (value <= 0)
+            if (value < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(value));
             }

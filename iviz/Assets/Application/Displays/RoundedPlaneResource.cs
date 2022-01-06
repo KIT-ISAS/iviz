@@ -1,5 +1,6 @@
 #nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Iviz.Core;
@@ -60,7 +61,7 @@ namespace Iviz.Displays
             }
 
 
-            float vRadius = Mathf.Min(radius, Mathf.Min(size.x / 2, size.y / 2));
+            float vRadius = Math.Min(radius, Math.Min(size.x / 2, size.y / 2));
 
             const float zScale = 0.001f;
 

@@ -212,15 +212,15 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            var topics = Connection.GetSystemPublishedTopicTypes(RequestType.CachedOnly);
-            string? type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
+            string? GetCachedPublishedType() =>
+                Connection.GetSystemPublishedTopicTypes(RequestType.CachedOnly)
+                    .FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
 
-            if (type == null)
-            {
-                topics = await Connection.GetSystemPublishedTopicTypesAsync(DefaultTimeoutInMs);
-                type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
-            }
+            async ValueTask<string?> GetPublishedTypeFromServer() =>
+                (await Connection.GetSystemPublishedTopicTypesAsync(DefaultTimeoutInMs))
+                    .FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
 
+            string? type = GetCachedPublishedType() ?? await GetPublishedTypeFromServer();
             if (type == null)
             {
                 return ("", false, $"EE Failed to find topic '{topic}'");
@@ -243,7 +243,7 @@ namespace Iviz.Controllers
                 catch (Exception e)
                 {
                     result.message = $"EE An exception was raised: {e.Message}";
-                    RosLogger.Error("Exception raised in TryAddModuleFromTopicAsync", e);
+                    RosLogger.Error($"ControllerService: Failed to create module for topic '{topic}'", e);
                 }
                 finally
                 {
@@ -355,7 +355,7 @@ namespace Iviz.Controllers
         {
             (bool success, string message) = await TrySetFixedFrame(srv.Request.Id);
             srv.Response.Success = success;
-            srv.Response.Message = message ?? "";
+            srv.Response.Message = message;
         }
 
         static async ValueTask<(bool success, string message)> TrySetFixedFrame(string id)
@@ -749,6 +749,7 @@ namespace Iviz.Controllers
                 {
                     srv.Response.Success = false;
                     srv.Response.Message = $"EE An exception was raised: {e.Message}";
+                    RosLogger.Error("ControllerService: Failed to create robot", e);
                 }
                 finally
                 {

@@ -457,9 +457,9 @@ namespace Iviz.Displays
         {
             var (x, y, z) = transform.parent.AsLocalPose().Unity2RosTransform() * direction;
             return new Color(
-                Mathf.Abs((float) x),
-                Mathf.Abs((float) y),
-                Mathf.Abs((float) z));
+                Math.Abs((float) x),
+                Math.Abs((float) y),
+                Math.Abs((float) z));
         }
 
         public Bounds? Bounds
@@ -483,20 +483,20 @@ namespace Iviz.Displays
                     case InteractionModeType.MovePlaneYz:
                     case InteractionModeType.RotateAxisX:
                     case InteractionModeType.MovePlaneYzRotateAxisX:
-                        holderScale = Mathf.Max(newBounds.size.x, newBounds.size.y);
+                        holderScale = Math.Max(newBounds.size.x, newBounds.size.y);
                         break;
                     default:
-                        holderScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
+                        holderScale = Math.Max(newBounds.size.x, Math.Max(newBounds.size.y, newBounds.size.z));
                         break;
                 }
 
-                GameObject holder = holderCollider.gameObject;
+                var holder = holderCollider.gameObject;
                 holder.transform.localPosition = newBounds.center;
                 holder.transform.localScale = 2 * holderScale * Vector3.one;
                 holderCollider.size = newBounds.size / (2 * holderScale);
 
 
-                float maxScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
+                float maxScale = Math.Max(newBounds.size.x, Math.Max(newBounds.size.y, newBounds.size.z));
                 float absoluteScaleY = transform.lossyScale.y;
                 menuObject.transform.localScale = 0.5f * Vector3.one;
                 menuObject.GetComponent<Billboard>().Offset =

@@ -51,7 +51,7 @@ namespace Iviz.Core
                 return;
             }
 
-            float t = Mathf.Min((GameThread.GameTime - startTime) / duration, 1);
+            float t = Math.Min((GameThread.GameTime - startTime) / duration, 1);
 
             TryCallUpdate(t);
 

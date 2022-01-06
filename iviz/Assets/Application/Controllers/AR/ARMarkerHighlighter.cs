@@ -44,11 +44,10 @@ namespace Iviz.Controllers
             float minY = cornersWorld.Min(corner => -corner.Y);
             float maxY = cornersWorld.Max(corner => -corner.Y);
 
-            Vector3 center = new Vector3((maxX + minX) / 2, (maxY + minY) / 2, Z);
+            var center = new Vector3((maxX + minX) / 2, (maxY + minY) / 2, Z);
             float sizeX = maxX - center.x;
             float sizeY = maxY - center.y;
-
-
+            
             Transform mTransform = transform;
             mTransform.parent = Settings.ARCamera.CheckedNull()?.transform;
             mTransform.localRotation = Quaternion.identity;
@@ -63,7 +62,7 @@ namespace Iviz.Controllers
             text.text = code;
 
             highlightStart = GameThread.GameTime;
-            highlightTime = Mathf.Max(highlightTimeInMs / 1000f, 0);
+            highlightTime = Math.Max(highlightTimeInMs / 1000f, 0);
         }
 
         public Bounds? Bounds => boxCollider.bounds;

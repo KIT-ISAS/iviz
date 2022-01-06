@@ -26,13 +26,14 @@ namespace Iviz.App
 
         public CameraModuleData()
         {
-            panel = DataPanelManager.GetPanelByResourceType<CameraPanelContents>(ModuleType.Camera);
+            panel = DataPanelManager.GetPanelByResourceType<CameraPanelContents>(ModuleType);
         }
 
         public override void SetupPanel()
         {
             if (Settings.VirtualCamera == null)
             {
+                panel.Frame.Owner = GuiInputModule.Instance;
                 panel.Fov.Interactable = false;
                 panel.Roll.Interactable = false;
                 panel.Pitch.Interactable = false;
@@ -44,6 +45,7 @@ namespace Iviz.App
             var guiInputModule = GuiInputModule.Instance;
             var virtualCamera = Settings.VirtualCamera;
             
+            panel.Frame.Owner = guiInputModule;
             panel.Fov.Value = guiInputModule.CameraFieldOfView;
             panel.Roll.Value = guiInputModule.CameraRoll;
             panel.Pitch.Value = guiInputModule.CameraPitch;
@@ -55,6 +57,7 @@ namespace Iviz.App
             panel.Yaw.ValueChanged += f => guiInputModule.CameraYaw = f;
             panel.Fov.ValueChanged += f => guiInputModule.CameraFieldOfView = f;
             panel.Position.ValueChanged += f => virtualCamera.transform.position = f;
+            panel.CloseButton.Clicked += () => DataPanelManager.HidePanelFor(this);
         }
 
         public override void UpdatePanelFast()

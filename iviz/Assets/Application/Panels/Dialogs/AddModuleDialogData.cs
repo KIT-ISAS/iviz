@@ -1,7 +1,9 @@
 ﻿#nullable enable
 
+using System;
 using System.Linq;
 using Iviz.Common;
+using Iviz.Core;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Tools;
 
@@ -52,7 +54,19 @@ namespace Iviz.App
 
         void OnItemClicked(int index, int _)
         {
-            var moduleData = ModuleListPanel.CreateModule(Modules[index].Module);
+            var moduleType = Modules[index].Module;
+
+            ModuleData moduleData;
+            try
+            {
+                moduleData = ModuleListPanel.CreateModule(moduleType);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to create module for type '{moduleType}'", e);
+                return;
+            }
+
             Close();
 
             if (moduleData is not ARModuleData)

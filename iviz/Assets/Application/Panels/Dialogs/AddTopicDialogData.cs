@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BigGustave;
@@ -157,7 +158,17 @@ namespace Iviz.App
                 return;
             }
 
-            var moduleData = ModuleListPanel.CreateModuleForTopic(clickedTopic.topic, clickedTopic.type);
+            ModuleData moduleData;
+            try
+            {
+                moduleData = ModuleListPanel.CreateModuleForTopic(clickedTopic.topic, clickedTopic.type);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to create module for topic '{clickedTopic.topic}'", e);
+                return;
+            }
+
             Close();
             moduleData.ShowPanel();
         }

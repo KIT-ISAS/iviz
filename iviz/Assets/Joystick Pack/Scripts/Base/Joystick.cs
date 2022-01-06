@@ -20,13 +20,13 @@ namespace External
         public float HandleRange
         {
             get => handleRange;
-            set => handleRange = Mathf.Abs(value);
+            set => handleRange = Math.Abs(value);
         }
 
         public float DeadZone
         {
             get => deadZone;
-            set => deadZone = Mathf.Abs(value);
+            set => deadZone = Math.Abs(value);
         }
 
         public AxisOptions AxisOptions

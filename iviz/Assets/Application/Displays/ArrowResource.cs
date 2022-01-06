@@ -36,13 +36,13 @@ namespace Iviz.Displays
             var direction = b - a;
             float scaleZ = direction.Magnitude();
 
-            if (Mathf.Approximately(scaleZ, 0))
+            if (scaleZ.ApproximatelyZero())
             {
                 Reset();
                 return;
             }
 
-            float scaleXY = overrideScaleXY ?? Mathf.Min(scaleZ * 0.15f, MaxArrowWidth);
+            float scaleXY = overrideScaleXY ?? Math.Min(scaleZ * 0.15f, MaxArrowWidth);
 
             Arrow.Transform.localScale = new Vector3(scaleXY, scaleXY, scaleZ);
             Arrow.Transform.localPosition = a;

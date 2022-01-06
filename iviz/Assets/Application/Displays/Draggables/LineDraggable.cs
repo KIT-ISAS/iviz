@@ -17,7 +17,7 @@ namespace Iviz.Displays
 
         public override Quaternion BaseOrientation
         {
-            set => line = value * Vector3.forward;
+            set => line = value.Forward();
         }
         
         protected override void OnPointerMove(in Ray pointerRay)

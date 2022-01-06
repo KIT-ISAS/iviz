@@ -780,7 +780,18 @@ namespace Iviz.App
             }
 
             var constructor = new ModuleDataConstructor(resource, topic, type, configuration);
-            var moduleData = ModuleData.CreateFromResource(constructor);
+
+            ModuleData moduleData;
+            try
+            {
+                moduleData = ModuleData.CreateFromResource(constructor);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("Failed to create module of type " + resource + ". " +
+                                                    "Topic='" + topic + "' Type='" + type + "' Configuration: '" +
+                                                    configuration + "'", e);
+            }
 
             if (requestedId != null)
             {

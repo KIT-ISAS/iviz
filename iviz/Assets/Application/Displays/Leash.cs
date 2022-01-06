@@ -54,7 +54,7 @@ namespace Iviz.Displays
             var (start, tangent) = pointerRay;
             float distance = Vector3.Distance(target, start);
 
-            if (Mathf.Approximately(distance, 0))
+            if (distance.ApproximatelyZero())
             {
                 Resource.Reset();
                 return;

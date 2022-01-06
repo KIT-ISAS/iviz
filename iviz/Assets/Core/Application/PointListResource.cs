@@ -277,7 +277,7 @@ namespace Iviz.Displays
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsElementValid(in Point t)
         {
-            return !(t.IsInvalid() || t.MaxAbsCoeff3() > MaxPositionMagnitude);
+            return !(t.IsInvalid() || t.MaxAbsCoeff() > MaxPositionMagnitude);
         }
 
         public void SetDirect(Action<NativeList<float4>> callback, int reserve)

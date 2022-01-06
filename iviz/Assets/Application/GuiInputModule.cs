@@ -27,7 +27,7 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.App
 {
-    public sealed class GuiInputModule : MonoBehaviour, ISettingsManager
+    public sealed class GuiInputModule : MonoBehaviour, ISettingsManager, IHasFrame
     {
         const float MainSpeed = 2f;
         const float MainAccel = 5f;
@@ -48,7 +48,7 @@ namespace Iviz.App
                 //? Input.touchCount == 1
                 ? Touch.activeTouches.Count == 1
                 : Mouse.current.rightButton.isPressed);
-        
+
         static Camera MainCamera => Settings.MainCamera;
 
         public static GuiInputModule Instance =>
@@ -89,7 +89,7 @@ namespace Iviz.App
 
         float distancePointerAndAlt;
         float lastAltDistancePointerAndAlt;
-        
+
         Leash? leash;
         Transform? mTransform;
 
@@ -115,7 +115,7 @@ namespace Iviz.App
                 Leash.Visible = draggedObject != null;
             }
         }
-        
+
         //public event Action<ClickHitInfo>? PointerDown;
         //public event Action<ClickHitInfo>? ShortClick;
         public event Action<ClickHitInfo>? LongClick;
@@ -166,7 +166,9 @@ namespace Iviz.App
                 }
             }
         }
-
+        
+        public TfFrame Frame => TfListener.Instance.FixedFrame;
+        
         void Awake()
         {
             EnhancedTouchSupport.Enable();
@@ -266,7 +268,7 @@ namespace Iviz.App
 
                 var rotation = OrbitRotation;
                 Transform.rotation = rotation;
-                Transform.position = -orbitRadius * (rotation * Vector3.forward) + orbitCenter + rotation * speed;
+                Transform.position = -orbitRadius * rotation.Forward() + orbitCenter + rotation * speed;
                 return;
             }
 
@@ -277,7 +279,7 @@ namespace Iviz.App
                 var rotation = OrbitRotation;
                 orbitCenter = mOrbitCenterOverride.AbsoluteUnityPose.position;
                 Transform.rotation = rotation;
-                Transform.position = -orbitRadius * (rotation * Vector3.forward) + orbitCenter;
+                Transform.position = -orbitRadius * rotation.Forward() + orbitCenter;
             }
             else
             {
@@ -558,8 +560,8 @@ namespace Iviz.App
             }
             */
             if (prevPointerDown
-                     && !anyPointerDown
-                     && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
+                && !anyPointerDown
+                && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
             {
                 if (IsPointerOnGui(pointerPosition)) // pointerIsOnGui is only set on button down
                 {
@@ -592,12 +594,14 @@ namespace Iviz.App
         void StartOrbiting()
         {
             var diff = orbitCenter - Transform.position;
-            orbitRadius = Mathf.Min(5, diff.magnitude);
-            CameraYaw = Mathf.Atan2(diff.x, diff.z) * Mathf.Rad2Deg;
-            CameraPitch = -Mathf.Atan2(diff.y, new Vector2(diff.x, diff.z).magnitude) * Mathf.Rad2Deg;
+            orbitRadius = Math.Min(5, diff.magnitude);
+
+            var (diffX, diffY, diffZ) = diff;
+            CameraYaw = Mathf.Atan2(diffX, diffZ) * Mathf.Rad2Deg;
+            CameraPitch = -Mathf.Atan2(diffY, Mathf.Sqrt(diffX * diffX + diffZ * diffZ)) * Mathf.Rad2Deg;
 
             var rotation = OrbitRotation;
-            Transform.SetPositionAndRotation(-orbitRadius * (rotation * Vector3.forward) + orbitCenter, rotation);
+            Transform.SetPositionAndRotation(-orbitRadius * rotation.Forward() + orbitCenter, rotation);
         }
 
         void ProcessOrbiting()
@@ -620,7 +624,7 @@ namespace Iviz.App
                 return;
             }
 
-            var pointerDiff = pointerIsAlreadyMoving
+            var (pointerDiffX, pointerDiffY) = pointerIsAlreadyMoving
                 ? pointerPosition - lastPointerPosition
                 : Vector2.zero;
 
@@ -629,20 +633,16 @@ namespace Iviz.App
 
             const float orbitCoeff = 0.1f;
             const float orbitRadiusAdvance = 0.1f;
+            const float minPitchInDeg = -90;
+            const float maxPitchInDeg = 90;
 
-            CameraYaw += pointerDiff.x * orbitCoeff;
-            CameraPitch -= pointerDiff.y * orbitCoeff;
-
-            CameraPitch = CameraPitch switch
-            {
-                > 90 => 90,
-                < -90 => -90,
-                _ => CameraPitch
-            };
+            CameraYaw += pointerDiffX * orbitCoeff;
+            CameraPitch -= pointerDiffY * orbitCoeff;
+            CameraPitch = Mathf.Clamp(CameraPitch, minPitchInDeg, maxPitchInDeg);
 
             if (Keyboard.current[Key.W].isPressed)
             {
-                orbitRadius = Mathf.Max(0, orbitRadius - orbitRadiusAdvance);
+                orbitRadius = Math.Max(0, orbitRadius - orbitRadiusAdvance);
             }
             else if (Keyboard.current[Key.S].isPressed)
             {
@@ -698,7 +698,7 @@ namespace Iviz.App
                 {
                     // move forward
                     float diff = minDistanceToAdvance - orbitRadius;
-                    orbitCenter += diff * (q * Vector3.forward);
+                    orbitCenter += diff * q.Forward();
                     orbitRadius = minDistanceToAdvance;
                 }
 
@@ -728,22 +728,20 @@ namespace Iviz.App
                 return;
             }
 
-            Vector2 pointerDiff;
-            if (pointerIsAlreadyMoving)
-            {
-                pointerDiff = pointerPosition - lastPointerPosition;
-            }
-            else
-            {
-                pointerDiff = Vector2.zero;
-            }
+            var (pointerDiffX, pointerDiffY) = pointerIsAlreadyMoving
+                ? pointerPosition - lastPointerPosition
+                : Vector2.zero;
 
             lastPointerPosition = pointerPosition;
             pointerIsAlreadyMoving = true;
 
             const float turnCoeff = 0.1f;
-            CameraYaw += pointerDiff.x * turnCoeff;
-            CameraPitch = Mathf.Clamp(CameraPitch - pointerDiff.y * turnCoeff, -89, 89);
+            const float minPitchInDeg = -89;
+            const float maxPitchInDeg = 89;
+
+            CameraYaw += pointerDiffX * turnCoeff;
+            CameraPitch -= pointerDiffY * turnCoeff;
+            CameraPitch = Mathf.Clamp(CameraPitch, minPitchInDeg, maxPitchInDeg);
         }
 
         void ProcessFlying()
@@ -760,11 +758,11 @@ namespace Iviz.App
             const float minAccelToStop = 0.001f;
 
             accel += baseInput.Mult(MainAccel * DirectionWeight) * deltaTime;
-            
+
             if (baseInput.x == 0)
             {
                 accel.x *= BrakeCoeff;
-                if (Mathf.Abs(accel.x) < minAccelToStop)
+                if (Math.Abs(accel.x) < minAccelToStop)
                 {
                     accel.x = 0;
                 }
@@ -773,7 +771,7 @@ namespace Iviz.App
             if (baseInput.y == 0)
             {
                 accel.y *= BrakeCoeff;
-                if (Mathf.Abs(accel.y) < minAccelToStop)
+                if (Math.Abs(accel.y) < minAccelToStop)
                 {
                     accel.y = 0;
                 }
@@ -782,7 +780,7 @@ namespace Iviz.App
             if (baseInput.z == 0)
             {
                 accel.z *= BrakeCoeff;
-                if (Mathf.Abs(accel.z) < minAccelToStop)
+                if (Math.Abs(accel.z) < minAccelToStop)
                 {
                     accel.z = 0;
                 }
@@ -831,13 +829,13 @@ namespace Iviz.App
             if (!Settings.IsPhone)
             {
                 float distanceToFrame = (Transform.position - targetPosition).magnitude;
-                float zoomRadius = Mathf.Min(Mathf.Max(distanceToFrame, minDistanceLookAt), maxDistanceLookAt);
+                float zoomRadius = Mathf.Clamp(distanceToFrame, minDistanceLookAt, maxDistanceLookAt);
                 return targetPosition - Transform.forward * zoomRadius;
             }
 
             orbitCenter = targetPosition;
             orbitRadius = Mathf.Clamp(orbitRadius, minDistanceLookAt, maxDistanceLookAt);
-            return -orbitRadius * (Transform.rotation * Vector3.forward) + orbitCenter;
+            return -orbitRadius * Transform.rotation.Forward() + orbitCenter;
         }
 
         static Vector3Int GetBaseInput()

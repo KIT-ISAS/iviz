@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Codice.Client.BaseCommands;
@@ -65,6 +66,9 @@ namespace Iviz.Core
             v.ToUnity().RosRpy2Unity();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector3 Unity2RosRpy(this in Vector3 v) => (v * -Mathf.Deg2Rad).Unity2Ros();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Ros2Unity(this in Vector3f p) => new(-p.Y, p.Z, p.X);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -116,6 +120,16 @@ namespace Iviz.Core
             q.Z = p.y;
             return q;
         }
+        
+        static Vector3 Unity2Ros(this in Vector3 p)
+        {
+            //new(p.z, -p.x, p.y);
+            Vector3 q;
+            q.x = p.z;
+            q.y = -p.x;
+            q.z = p.y;
+            return q;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Ros2Unity(this in Point p)
@@ -164,35 +178,29 @@ namespace Iviz.Core
 
         public static ColorRGBA Sanitize(this in ColorRGBA p)
         {
-            return new ColorRGBA
-            (
-                R: SanitizeColor(p.R),
-                G: SanitizeColor(p.G),
-                B: SanitizeColor(p.B),
-                A: SanitizeColor(p.A)
-            );
+            ColorRGBA c;
+            c.R = SanitizeChannel(p.R);
+            c.G = SanitizeChannel(p.G);
+            c.B = SanitizeChannel(p.B);
+            c.A = SanitizeChannel(p.A);
+            return c;
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static float SanitizeChannel(float f) => float.IsFinite(f) ? Math.Clamp(f, 0, 1) : 0;
         }
 
-        static float SanitizeColor(float f) => float.IsNaN(f) ? 0 : Mathf.Clamp01(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        /*
-        public static Color32 ToUnityColor32(this in ColorRGBA c) =>
-            new(
-                (byte)Mathf.Round(Mathf.Clamp01(c.R) * byte.MaxValue),
-                (byte)Mathf.Round(Mathf.Clamp01(c.G) * byte.MaxValue),
-                (byte)Mathf.Round(Mathf.Clamp01(c.B) * byte.MaxValue),
-                (byte)Mathf.Round(Mathf.Clamp01(c.A) * byte.MaxValue)
+        public static Color32 ToUnityColor32(this in ColorRGBA c)
+        {
+            var cs = Sanitize(c);
+            return new Color32(
+                (byte)(cs.R * 255),
+                (byte)(cs.G * 255),
+                (byte)(cs.B * 255),
+                (byte)(cs.A * 255)
             );
-        // note: taken from unity Color
-        */
-        public static Color32 ToUnityColor32(this in ColorRGBA c) =>
-            new(
-                (byte)(c.R * 255),
-                (byte)(c.G * 255),
-                (byte)(c.B * 255),
-                (byte)(c.A * 255)
-            );
+        }
 
         public static ColorRGBA ToRos(this in Color p) => new(p.r, p.g, p.b, p.a);
 
@@ -216,9 +224,9 @@ namespace Iviz.Core
             }
             else
             {
-                q.x = (float)p.X;
-                q.y = (float)p.Y;
-                q.z = (float)p.Z;
+                q.x = (float)p.Y;
+                q.y = (float)-p.Z;
+                q.z = (float)-p.X;
                 q.w = (float)p.W;
             }
         }

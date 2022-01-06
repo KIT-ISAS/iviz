@@ -106,8 +106,8 @@ namespace Iviz.App
 
             if (movedX > 0 && !allowRevealLeft
                 || movedX < 0 && !allowRevealRight
-                || Mathf.Abs(movedX) < ScaledMinMotionThreshold && !isDragging
-                || Mathf.Abs(movedY) > ScaledMaxMotionYThreshold && !isDragging)
+                || Math.Abs(movedX) < ScaledMinMotionThreshold && !isDragging
+                || Math.Abs(movedY) > ScaledMaxMotionYThreshold && !isDragging)
             {
                 ParentScrollRect.OnDrag(eventData);
                 return;

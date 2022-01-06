@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using Iviz.Common;
 using Iviz.Controllers;
@@ -117,8 +118,8 @@ namespace Iviz.App.Tests
         static void DrawLine(Texture2D t, int x0, int y0, int x1, int y1, Color? color = null)
         {
             Color ccolor = color ?? Color.red;
-            int dx = Mathf.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-            int dy = -Mathf.Abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+            int dx = Math.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+            int dy = -Math.Abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
             int err = dx + dy, e2; /* error value e_xy */
 
             while (true)
