@@ -489,17 +489,11 @@ namespace Iviz.Core
 
         public static void TryReturn<T>(this Memory<T> memory) where T : unmanaged
         {
-            if (memory.Length == 0)
+            if (memory.Length != 0
+                && MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
             {
-                return;
+                ArrayPool<T>.Shared.Return(segment.Array);
             }
-
-            if (!MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
-            {
-                return;
-            }
-
-            ArrayPool<T>.Shared.Return(segment.Array);
         }
 
         public static Span<T> AsSpan<T>(this Memory<T> memory) where T : unmanaged
@@ -541,5 +535,37 @@ namespace Iviz.Core
             (collider.center, collider.size) = bounds;
 
         public static Bounds GetBounds(this BoxCollider collider) => new(collider.center, collider.size);
+
+        public static float GetHorizontalFov(this Camera camera)
+        {
+            float verticalFovInRad = camera.fieldOfView * Mathf.Deg2Rad;
+            float horizontalFovInRad = 2 * Mathf.Atan(Mathf.Tan(verticalFovInRad / 2) * camera.aspect);
+            return horizontalFovInRad * Mathf.Rad2Deg;
+        }
+
+        public static void SetHorizontalFov(this Camera camera, float horizontalFovInDeg)
+        {
+            float horizontalFovInRad = horizontalFovInDeg * Mathf.Deg2Rad;
+            float verticalFovInRad = 2 * Mathf.Atan(Mathf.Tan(horizontalFovInRad / 2) / camera.aspect);
+            camera.fieldOfView = verticalFovInRad * Mathf.Rad2Deg;
+        }
+        
+        /// <summary>
+        /// Color representation from the bits of a float.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        internal static Color32 AsColor32(float f)
+        {
+            return Unsafe.As<float, Color32>(ref f);
+        }
+
+        /// <summary>
+        /// Float representation from the bits of a Color32.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        public static float AsFloat(Color32 f)
+        {
+            return Unsafe.As<Color32, float>(ref f);
+        }        
     }
 }

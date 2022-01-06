@@ -31,10 +31,14 @@ namespace Iviz.App
         protected string Type { get; }
         public abstract ModuleType ModuleType { get; }
         public abstract DataPanelContents Panel { get; }
-        public abstract IController Controller { get; }
+        public abstract IController? Controller { get; }
         public abstract IConfiguration Configuration { get; }
 
         protected bool IsSelected => DataPanelManager.SelectedModuleData == this;
+
+        protected ModuleData() : this("", "")
+        {
+        }
 
         protected ModuleData(string topic, string type)
         {
@@ -48,7 +52,7 @@ namespace Iviz.App
                 ? GetDescriptionForTopic(Topic, Type)
                 : $"<b>{ModuleType}</b>";
 
-            ButtonText = Controller.Visible ? text : $"<color=grey>{text}</color>";
+            ButtonText = Controller is null || Controller.Visible ? text : $"<color=grey>{text}</color>";
         }
 
         protected static string GetDescriptionForTopic(string topic, string type)
@@ -62,6 +66,11 @@ namespace Iviz.App
 
         public void ToggleVisible()
         {
+            if (Controller == null)
+            {
+                return;
+            }
+            
             Controller.Visible = !Controller.Visible;
             if (Panel.Active && Panel.HideButton != null)
             {
@@ -121,7 +130,7 @@ namespace Iviz.App
 
         public void ResetController()
         {
-            Controller.ResetController();
+            Controller?.ResetController();
         }
 
         public override string ToString()

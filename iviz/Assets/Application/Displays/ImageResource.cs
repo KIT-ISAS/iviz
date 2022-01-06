@@ -144,6 +144,7 @@ namespace Iviz.Displays
             Scale = 1;
             Intrinsic = null;
             Title = "";
+            BoundsChanged = null;
         }
 
         public bool Visible

@@ -57,7 +57,7 @@ namespace Iviz.App
             panel.KeepAllFrames.Value = listener.KeepAllFrames;
             panel.FlipZ.Value = listener.FlipZ;
             panel.Sender.Set(listener.Publisher);
-            panel.TapSender.Set(listener.TapPublisher);
+            //panel.TapSender.Set(listener.TapPublisher);
             panel.Publisher.UpdateText();
 
             panel.HideButton.Clicked += ToggleVisible;

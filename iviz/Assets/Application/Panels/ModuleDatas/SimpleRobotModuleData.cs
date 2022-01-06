@@ -36,12 +36,7 @@ namespace Iviz.App
         public SimpleRobotModuleData(ModuleDataConstructor constructor) :
             base(constructor.Topic, constructor.Type)
         {
-            RobotController = new SimpleRobotController(this);
-            if (constructor.Configuration != null)
-            {
-                RobotController.Config = (RobotConfiguration) constructor.Configuration;
-            }
-
+            RobotController = new SimpleRobotController(this, (RobotConfiguration?) constructor.Configuration);
             panel = DataPanelManager.GetPanelByResourceType<SimpleRobotPanelContents>(ModuleType.Robot);
             UpdateModuleButton();
 

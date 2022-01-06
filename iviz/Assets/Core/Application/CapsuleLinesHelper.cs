@@ -118,7 +118,7 @@ namespace Iviz.Displays
                 pArray[pOff++] = b - halfSumYz;
                 pArray[pOff++] = b - halfDiffYz;
                 pArray[pOff++] = b + halfDirX;
-
+                
 
                 /*
                 for (int i = 0; i < 5; i++)
@@ -128,14 +128,14 @@ namespace Iviz.Displays
                 }
                 */
                 {
-                    var ca = PointWithColor.RecastToColor32(line.c0.w);
+                    var ca = UnityUtils.RecastToColor32(line.c0.w);
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
 
-                    var cb = PointWithColor.RecastToColor32(line.c1.w);
+                    var cb = UnityUtils.RecastToColor32(line.c1.w);
                     cArray[cOff++] = cb;
                     cArray[cOff++] = cb;
                     cArray[cOff++] = cb;

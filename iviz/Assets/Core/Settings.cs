@@ -146,6 +146,7 @@ namespace Iviz.Core
                 ? mainCameraTransform
                 : (mainCameraTransform = MainCamera.transform);
 
+        public static Camera? VirtualCamera { get; set; }
         public static Camera? ARCamera { get; set; }
         public static event Action<QualityType>? QualityTypeChanged;
 

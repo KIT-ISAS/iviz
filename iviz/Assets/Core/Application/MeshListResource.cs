@@ -326,7 +326,7 @@ namespace Iviz.Displays
             if (pointComputeBuffer == null || pointComputeBuffer.count < pointBuffer.Capacity)
             {
                 pointComputeBuffer?.Release();
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Unsafe.SizeOf<PointWithColor>(),
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Unsafe.SizeOf<float4>(),
                     ComputeBufferType.Default, ComputeBufferMode.Dynamic);
                 Properties.SetBuffer(PointsID, pointComputeBuffer);
             }
@@ -378,7 +378,7 @@ namespace Iviz.Displays
 
             if (pointBuffer.Capacity != 0)
             {
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<float4>());
                 pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(PointsID, pointComputeBuffer);
             }

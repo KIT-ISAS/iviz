@@ -186,6 +186,7 @@ namespace Iviz.Displays
 
         public override void Suspend()
         {
+            base.Suspend();
             OcclusionOnly = false;
             ShadowsEnabled = false;
             EmissiveColor = Color.black;

@@ -18,8 +18,8 @@ namespace Iviz.Common
         public Pose CameraPose { get; }
         public byte[] Bytes { get; }
 
-        public Screenshot(ScreenshotFormat format, time timestamp, int width, int height, Intrinsic intrinsic, in Pose cameraPose,
-            byte[] bytes)
+        public Screenshot(ScreenshotFormat format, time timestamp, int width, int height, in Intrinsic intrinsic,
+            in Pose cameraPose, byte[] bytes)
         {
             Format = format;
             Timestamp = timestamp;
@@ -79,7 +79,7 @@ namespace Iviz.Common
 
         public override string ToString()
         {
-            return $"[Screenshot width={Width} height={Height} At={CameraPose}]";
+            return $"[Screenshot width={Width.ToString()} height={Height.ToString()} At={CameraPose.ToString()}]";
         }
     }
 }

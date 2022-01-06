@@ -45,7 +45,7 @@ namespace Iviz.Controllers.Markers
         void ProcessSingleColor(NativeList<float4> pointBuffer)
         {
             var f = new float4();
-            f.w = PointWithColor.RecastToFloat(color32);
+            f.w = UnityUtils.AsFloat(color32);
 
             pointBuffer.EnsureCapacity(points.Length);
             pointBuffer.Clear();
@@ -75,7 +75,7 @@ namespace Iviz.Controllers.Markers
                     continue;
                 }
                 
-                f.w = PointWithColor.RecastToFloat(colors[i].ToUnityColor32());
+                f.w = UnityUtils.AsFloat(colors[i].ToUnityColor32());
                 pointBuffer.AddUnsafe(f);
             }
         }
@@ -96,7 +96,7 @@ namespace Iviz.Controllers.Markers
                     continue;
                 }
                 
-                f.w = PointWithColor.RecastToFloat(color * colors[i].ToUnityColor());
+                f.w = UnityUtils.AsFloat(color * colors[i].ToUnityColor());
                 pointBuffer.AddUnsafe(f);
             }
         }

@@ -50,7 +50,7 @@ namespace Iviz.Controllers
         public RobotConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 AttachedToTf = value.AttachedToTf;
                 FramePrefix = value.FramePrefix;
@@ -247,12 +247,11 @@ namespace Iviz.Controllers
 
         public event Action? Stopped;
 
-        public SimpleRobotController(IModuleData moduleData)
+        public SimpleRobotController(IModuleData moduleData, RobotConfiguration? config)
         {
             node = FrameNode.Instantiate("SimpleRobotNode");
             ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
-            Config = new RobotConfiguration();
+            Config = config ?? new RobotConfiguration();
         }
 
 

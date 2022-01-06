@@ -36,7 +36,6 @@ namespace Iviz.Controllers
         static MarkerLineHelper LineHelper => lineHelper ??= new MarkerLineHelper();
         static MarkerPointHelper PointHelper => pointHelper ??= new MarkerPointHelper();
 
-        //readonly StringBuilder description = new(250);
         readonly FrameNode node;
         readonly (string Ns, int Id) id;
 
@@ -46,11 +45,8 @@ namespace Iviz.Controllers
         BoundsHighlighter? highlighter;
         Marker? lastMessage;
 
-        Vector3 currentScale;
-
-        //int numErrors;
-        //int numWarnings;
-
+        Pose localPose;
+        Vector3 localScale;
         uint? previousHash;
         float metallic = 0.5f;
         float smoothness = 0.5f;
@@ -59,10 +55,10 @@ namespace Iviz.Controllers
         bool occlusionOnly;
         bool triangleListFlipWinding;
 
+        internal Quaternion LocalRotation => localPose.rotation;
         public DateTime ExpirationTime { get; private set; }
         public MarkerType MarkerType { get; private set; }
         public string UniqueNodeName { get; }
-        public Pose Pose { get; private set; }
 
         public Transform Transform => node.Transform;
         Bounds? IHasBounds.Bounds => resource?.Bounds;
@@ -275,9 +271,9 @@ namespace Iviz.Controllers
             }
 
             var newScale = msg.Scale.Ros2Unity().Abs();
-            if (newScale != currentScale)
+            if (newScale != localScale)
             {
-                currentScale = newScale;
+                localScale = newScale;
                 Transform.localScale = newScale;
             }
 
@@ -398,7 +394,7 @@ namespace Iviz.Controllers
             }
 
             var newScale = msg.Scale.Ros2Unity().Abs();
-            Transform.localScale = currentScale = newScale;
+            Transform.localScale = localScale = newScale;
         }
 
         void CreateArrow(Marker msg)
@@ -501,16 +497,16 @@ namespace Iviz.Controllers
             }
 
             var newPose = msg.Pose.Ros2Unity();
-            if (newPose == Pose)
+            if (newPose == localPose)
             {
                 return;
             }
 
             node.AttachTo(msg.Header);
-            Pose = !newPose.IsUsable()
+            localPose = !newPose.IsUsable()
                 ? Pose.identity
                 : newPose;
-            Transform.SetLocalPose(Pose);
+            Transform.SetLocalPose(localPose);
         }
 
         ValueTask<Info<GameObject>?> GetRequestedResource(Marker msg)
@@ -930,29 +926,22 @@ namespace Iviz.Controllers
                     description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
                 }
 
-                //var meshTriangles = ValidateResource<MeshTrianglesResource>();
                 if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length)
                 {
                     description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
                         .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
-                    //meshTriangles.Clear();
-                    //numErrors++;
                     return;
                 }
 
                 if (Mathf.Approximately(msg.Color.A, 0))
                 {
                     description.Append(WarnStr).Append("Color has alpha 0. Marker will not be visible").AppendLine();
-                    //meshTriangles.Clear();
-                    //numWarnings++;
                     return;
                 }
 
                 if (msg.Color.HasNaN())
                 {
                     description.Append(ErrorStr).Append("Color has NaN. Marker will not be visible").AppendLine();
-                    //meshTriangles.Clear();
-                    //numWarnings++;
                     return;
                 }
 
@@ -960,9 +949,6 @@ namespace Iviz.Controllers
                 {
                     description.Append(ErrorStr).Append("Point array length ").Append(msg.Colors.Length)
                         .Append(" needs to be a multiple of 3").AppendLine();
-                    //meshTriangles.Clear();
-                    //numErrors++;
-                    //return;
                 }
             }
 

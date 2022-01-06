@@ -42,7 +42,7 @@ namespace Iviz.Controllers
             set
             {
                 isProcessing = value;
-                Listener?.SetPause(value);
+                Listener.SetPause(value);
             }
         }
 
@@ -252,7 +252,11 @@ namespace Iviz.Controllers
 
             IsProcessing = true;
 
-            Task.Run(() => ProcessMessage(msg));
+            Task.Run(() =>
+            {
+                ProcessMessage(msg);
+                msg.Data.TryReturn();
+            });
 
             return true;
         }
@@ -346,66 +350,72 @@ namespace Iviz.Controllers
                     : EmptyPointField;
 
                 int iOffset = (int)iField.Offset;
-                int iSize = FieldSizeFromType(iField.Datatype);
-                if (iSize == -1 || msg.PointStep < iOffset + iSize)
+                int iFieldSize = FieldSizeFromType(iField.Datatype);
+                if (iFieldSize == -1)
                 {
-                    RosLogger.Info($"{this}: Invalid or unsupported intensity field type!");
+                    RosLogger.Info($"{this}: Invalid or unsupported intensity field type {iField.Datatype.ToString()}");
                     IsProcessing = false;
                     return;
                 }
 
-                bool rgbaHint = iSize == 4 && iField.Name is "rgb" or "rgba";
-                var header = msg.Header;
-                int numPoints = (int)(msg.Width * msg.Height);
-
-                GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
-
-                GameThread.PostInListenerQueue(() =>
+                if (msg.PointStep < iOffset + iFieldSize)
                 {
-                    try
+                    RosLogger.Info($"{this}: Invalid field properties iOffset={iOffset.ToString()} " +
+                                   $"iFieldSize={iFieldSize.ToString()} dataType={iField.Datatype.ToString()}");
+                    IsProcessing = false;
+                    return;
+                }
+
+
+                bool rgbaHint = iFieldSize == 4 && iField.Name is "rgb" or "rgba";
+                GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
+                {
+                    bool useColormap = !rgbaHint;
+                    var header = msg.Header;
+                    int numPoints = (int)(msg.Width * msg.Height);
+                    GameThread.PostInListenerQueue(() =>
                     {
-                        if (!node.IsAlive)
+                        try
                         {
-                            // we're dead
-                            return;
-                        }
+                            if (!node.IsAlive)
+                            {
+                                // we're dead
+                                return;
+                            }
 
-                        node.AttachTo(header);
+                            node.AttachTo(header);
 
-                        NumPoints = numPoints;
+                            NumPoints = numPoints;
 
-                        if (pointBufferLength == 0)
-                        {
-                            pointCloud.Reset();
-                            meshCloud.Reset();
+                            if (pointBufferLength == 0)
+                            {
+                                pointCloud.Reset();
+                                meshCloud.Reset();
+                            }
+                            else if (PointCloudType == PointCloudType.Points)
+                            {
+                                pointCloud.UseColormap = useColormap;
+                                pointCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
+                                meshCloud.Reset();
+                            }
+                            else
+                            {
+                                meshCloud.UseColormap = useColormap;
+                                meshCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
+                                pointCloud.Reset();
+                            }
                         }
-                        else if (PointCloudType == PointCloudType.Points)
+                        finally
                         {
-                            pointCloud.UseColormap = !rgbaHint;
-                            pointCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
-                            meshCloud.Reset();
+                            IsProcessing = false;
                         }
-                        else
-                        {
-                            meshCloud.UseColormap = !rgbaHint;
-                            meshCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
-                            pointCloud.Reset();
-                        }
-                    }
-                    finally
-                    {
-                        IsProcessing = false;
-                    }
-                });
+                    });
+                }
             }
             catch (Exception e)
             {
                 RosLogger.Error($"{this}: Error handling point cloud", e);
                 IsProcessing = false;
-            }
-            finally
-            {
-                msg.Data.TryReturn();
             }
         }
 

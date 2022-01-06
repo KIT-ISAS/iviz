@@ -63,7 +63,7 @@ namespace Iviz.Controllers.Markers
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
 
-            float colorAsFloat = PointWithColor.RecastToFloat(color32);
+            float colorAsFloat = UnityUtils.AsFloat(color32);
 
             lPoints[0].Ros2Unity(ref c1);
             c1.w = colorAsFloat;
@@ -99,7 +99,7 @@ namespace Iviz.Controllers.Markers
             ref float4 c1 = ref f.c1;
 
             lPoints[0].Ros2Unity(ref c1);
-            c1.w = PointWithColor.RecastToFloat(lColors[0].ToUnityColor32());
+            c1.w = UnityUtils.AsFloat(lColors[0].ToUnityColor32());
             
             lineBuffer.EnsureCapacity(lPoints.Length - 1);
             lineBuffer.Clear();
@@ -108,7 +108,7 @@ namespace Iviz.Controllers.Markers
             {
                 c0 = c1;
                 lPoints[i].Ros2Unity(ref c1);
-                c1.w = PointWithColor.RecastToFloat(lColors[i].ToUnityColor32());
+                c1.w = UnityUtils.AsFloat(lColors[i].ToUnityColor32());
 
                 if (LineResource.IsElementValid(f))
                 {
@@ -135,7 +135,7 @@ namespace Iviz.Controllers.Markers
             ref float4 c1 = ref f.c1;
 
             lPoints[0].Ros2Unity(ref c1);
-            c1.w = PointWithColor.RecastToFloat(color * lColors[0].ToUnityColor());
+            c1.w = UnityUtils.AsFloat(color * lColors[0].ToUnityColor());
             
             lineBuffer.EnsureCapacity(lPoints.Length - 1);
             lineBuffer.Clear();
@@ -144,7 +144,7 @@ namespace Iviz.Controllers.Markers
             {
                 c0 = c1;
                 lPoints[i].Ros2Unity(ref c1);
-                c1.w = PointWithColor.RecastToFloat(color * lColors[i].ToUnityColor());
+                c1.w = UnityUtils.AsFloat(color * lColors[i].ToUnityColor());
 
                 if (LineResource.IsElementValid(f))
                 {
@@ -179,7 +179,7 @@ namespace Iviz.Controllers.Markers
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
             
-            float colorAsFloat = PointWithColor.RecastToFloat(color32);
+            float colorAsFloat = UnityUtils.AsFloat(color32);
             c0.w = colorAsFloat; 
             c1.w = colorAsFloat; 
 
@@ -221,8 +221,8 @@ namespace Iviz.Controllers.Markers
                     continue;
                 }
                 
-                c0.w = PointWithColor.RecastToFloat(lColors[i + 0].ToUnityColor32());
-                c1.w = PointWithColor.RecastToFloat(lColors[i + 1].ToUnityColor32());
+                c0.w = UnityUtils.RecastToFloat(lColors[i + 0].ToUnityColor32());
+                c1.w = UnityUtils.RecastToFloat(lColors[i + 1].ToUnityColor32());
                 lineBuffer.AddUnsafe(f);
             }
 
@@ -252,8 +252,8 @@ namespace Iviz.Controllers.Markers
                     continue;
                 }
                 
-                c0.w = PointWithColor.RecastToFloat(color * lColors[i + 0].ToUnityColor());
-                c1.w = PointWithColor.RecastToFloat(color * lColors[i + 1].ToUnityColor());
+                c0.w = UnityUtils.RecastToFloat(color * lColors[i + 0].ToUnityColor());
+                c1.w = UnityUtils.RecastToFloat(color * lColors[i + 1].ToUnityColor());
                 lineBuffer.AddUnsafe(f);
             }
 

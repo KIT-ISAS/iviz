@@ -28,7 +28,7 @@ namespace Iviz.Displays
     public sealed class RobotModel : ISupportsTint, ISupportsPbr, ISupportsAROcclusion
     {
         public const string ColliderTag = "RobotCollider";
-        
+
         readonly List<MeshMarkerResource> displays = new();
         readonly Dictionary<string, GameObject> jointObjects = new();
         readonly Dictionary<string, Joint> joints = new();
@@ -51,21 +51,12 @@ namespace Iviz.Displays
         public string Name { get; }
         public string? BaseLink { get; private set; }
         public GameObject BaseLinkObject { get; }
-
         public string Description { get; }
-        public ReadOnlyDictionary<string, string> LinkParents { get; private set; }
-        public ReadOnlyDictionary<string, GameObject> LinkObjects { get; private set; }
-        public ReadOnlyDictionary<string, Joint> Joints { get; private set; }
-
-        public string UnityName
-        {
-            get => BaseLinkObject.name;
-            set => BaseLinkObject.name = value;
-        }
+        public ReadOnlyDictionary<string, string> LinkParents { get; }
+        public ReadOnlyDictionary<string, GameObject> LinkObjects { get; }
 
         public bool OcclusionOnly
         {
-            get => occlusionOnly;
             set
             {
                 occlusionOnly = value;
@@ -78,7 +69,6 @@ namespace Iviz.Displays
 
         public Color Tint
         {
-            get => tint;
             set
             {
                 tint = value;
@@ -91,7 +81,6 @@ namespace Iviz.Displays
 
         public bool Visible
         {
-            get => visible;
             set
             {
                 visible = value;
@@ -104,7 +93,6 @@ namespace Iviz.Displays
 
         public float Smoothness
         {
-            get => smoothness;
             set
             {
                 smoothness = value;
@@ -117,7 +105,6 @@ namespace Iviz.Displays
 
         public float Metallic
         {
-            get => metallic;
             set
             {
                 metallic = value;
@@ -143,10 +130,8 @@ namespace Iviz.Displays
 
             Name = robot.Name;
             Description = robotDescription;
-
-            LinkParents = new Dictionary<string, string>().AsReadOnly();
-            LinkObjects = new Dictionary<string, GameObject>().AsReadOnly();
-            Joints = new Dictionary<string, Joint>().AsReadOnly();
+            LinkParents = linkParents.AsReadOnly();
+            LinkObjects = linkObjects.AsReadOnly();
             BaseLinkObject = new GameObject(Name);
         }
 
@@ -176,12 +161,12 @@ namespace Iviz.Displays
                 linkObject.transform.parent = BaseLinkObject.transform;
                 linkObjects[link.Name ?? ""] = linkObject;
             }
-            
+
             foreach (var joint in robot.Joints)
             {
                 ProcessJoint(joint);
             }
-            
+
             try
             {
                 var modelLoadingTasks = robot.Links.SelectMany(
@@ -209,10 +194,6 @@ namespace Iviz.Displays
             }
 
             HideChildlessLinks();
-            
-            LinkParents = linkParents.AsReadOnly();
-            LinkObjects = linkObjects.AsReadOnly();
-            Joints = joints.AsReadOnly();
 
             Tint = tint;
             OcclusionOnly = occlusionOnly;
@@ -222,8 +203,8 @@ namespace Iviz.Displays
             ApplyAnyValidConfiguration();
 
             string errorStr = numErrors == 0 ? "" : $"There were {numErrors.ToString()} errors.";
-            RosLogger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
-                           $"links and {Joints.Count.ToString()} joints. {errorStr}");
+            RosLogger.Info($"Finished constructing robot '{Name}' with {linkObjects.Count.ToString()} " +
+                           $"links and {joints.Count.ToString()} joints. {errorStr}");
         }
 
         void HideChildlessLinks()
@@ -235,12 +216,12 @@ namespace Iviz.Displays
             {
                 links[link.Name ?? ""] = link;
             }
-            
+
             foreach (string child in linkObjects.Keys)
             {
                 linkChildren[child] = new HashSet<string>();
             }
-            
+
             foreach (var (child, parent) in linkParents)
             {
                 linkChildren[parent].Add(child);
@@ -252,7 +233,7 @@ namespace Iviz.Displays
             do
             {
                 hasChanges = false;
-                
+
                 foreach (var (linkName, children) in linkChildren)
                 {
                     if (children.Count != 0)
@@ -297,11 +278,11 @@ namespace Iviz.Displays
         {
             if (link.Visuals.Count == 0 && link.Collisions.Count == 0)
             {
-                return Array.Empty<Task>();
+                return Enumerable.Empty<Task>();
             }
-            
+
             var linkObject = linkObjects[link.Name ?? ""];
-            
+
             var tasks = new List<Task>(link.Collisions.Count + link.Visuals.Count);
             foreach (var visual in link.Visuals)
             {
@@ -421,7 +402,7 @@ namespace Iviz.Displays
                 visualObject.transform.SetParent(linkObject.transform, false);
                 visualObject.transform.SetLocalPose(origin.ToPose());
             }
-            
+
             GameObject resourceObject;
             if (mesh != null)
             {
@@ -641,24 +622,23 @@ namespace Iviz.Displays
                 return false;
             }
 
-            Pose unityPose;
-            switch (joint.Type)
+            var axis = joint.Axis.Xyz.ToVector3();
+            Pose? unityPose = joint.Type switch
             {
-                case Joint.JointType.Revolute:
-                case Joint.JointType.Continuous:
-                    float angle = value * Mathf.Rad2Deg;
-                    unityPose = Pose.identity.WithRotation(Quaternion.AngleAxis(-angle, joint.Axis.Xyz.ToVector3()));
-                    break;
-                case Joint.JointType.Prismatic:
-                    unityPose = Pose.identity.WithPosition(joint.Axis.Xyz.ToVector3() * value);
-                    break;
-                default:
-                    return false;
+                Joint.JointType.Revolute or Joint.JointType.Continuous => 
+                    Pose.identity.WithRotation(Quaternion.AngleAxis(-value * Mathf.Rad2Deg, axis)),
+                Joint.JointType.Prismatic => 
+                    Pose.identity.WithPosition(axis * value),
+                _ => null
+            };
+
+            if (unityPose is not { } validatedPose)
+            {
+                return false;
             }
-
+            
             var jointObject = jointObjects[jointName];
-            jointObject.transform.SetLocalPose(unityPose);
-
+            jointObject.transform.SetLocalPose(validatedPose);
             return true;
         }
 

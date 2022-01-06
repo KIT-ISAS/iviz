@@ -27,11 +27,11 @@ namespace Iviz.App
             {
                 if (owner == null && value != null)
                 {
-                    GameThread.EveryFastTick += UpdateStats;
+                    GameThread.EveryTenthSecond += UpdateStats;
                 }
                 else if (owner != null && value == null)
                 {
-                    GameThread.EveryFastTick -= UpdateStats;
+                    GameThread.EveryTenthSecond -= UpdateStats;
                 }
 
                 owner = value;

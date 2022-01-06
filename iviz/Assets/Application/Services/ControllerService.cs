@@ -362,7 +362,7 @@ namespace Iviz.Controllers
         {
             (bool success, string message) result = default;
 
-            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            using (var signal = new SemaphoreSlim(0))
             {
                 GameThread.Post(() =>
                 {
@@ -627,22 +627,12 @@ namespace Iviz.Controllers
         {
             return Task.Run(() =>
             {
-                int bpp;
-                bool flipRb;
-
-                switch (ss.Format)
+                (int bpp, bool flipRb) = ss.Format switch
                 {
-                    case ScreenshotFormat.Bgra:
-                        bpp = 4;
-                        flipRb = true;
-                        break;
-                    case ScreenshotFormat.Rgb:
-                        bpp = 3;
-                        flipRb = false;
-                        break;
-                    default:
-                        throw new InvalidOperationException("Unknown screenshot format");
-                }
+                    ScreenshotFormat.Bgra => (bpp: 4, flipRb: true),
+                    ScreenshotFormat.Rgb => (bpp: 3, flipRb: false),
+                    _ => throw new InvalidOperationException("Unknown screenshot format")
+                };
 
                 var builder = new BigGustave.PngBuilder(ss.Bytes, bpp == 4, ss.Width, ss.Height, bpp, flipRb);
                 return builder.Save();

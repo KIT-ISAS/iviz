@@ -9,6 +9,7 @@ using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -66,9 +67,10 @@ namespace Iviz.Controllers
                     numValid = 0;
                 }
 
-                return $"<b>{numCellsX.ToString("N0")}x{numCellsY.ToString("N0")} cells | " +
-                       $"{cellSize.ToString("#,0.###")} m/cell</b>\n" +
-                       $"{numValid.ToString("N0")} valid";
+                return $"<b>{numCellsX.ToString("N0", BuiltIns.Culture)}x" +
+                       $"{numCellsY.ToString("N0", BuiltIns.Culture)} cells | " +
+                       $"{cellSize.ToString("#,0.###", BuiltIns.Culture)} m/cell</b>\n" +
+                       $"{numValid.ToString("N0", BuiltIns.Culture)} valid";
             }
         }
 
@@ -229,19 +231,22 @@ namespace Iviz.Controllers
         {
             if (IsProcessing)
             {
+                msg.Data.TryReturn();
                 return;
             }
 
             if (msg.Data.Length != msg.Info.Width * msg.Info.Height)
             {
-                RosLogger.Debug(
-                    $"{this}: Size {msg.Info.Width}x{msg.Info.Height} but data length {msg.Data.Length}");
+                RosLogger.Debug($"{this}: Size {msg.Info.Width.ToString()}x{msg.Info.Height.ToString()} " +
+                                $"does not match data length {msg.Data.Length.ToString()}");
+                msg.Data.TryReturn();
                 return;
             }
 
             if (float.IsNaN(msg.Info.Resolution))
             {
                 RosLogger.Debug($"{this}: NaN in header!");
+                msg.Data.TryReturn();
                 return;
             }
 
@@ -251,6 +256,7 @@ namespace Iviz.Controllers
             if (msg.Info.Origin.HasNaN())
             {
                 RosLogger.Debug($"{this}: NaN in origin!");
+                msg.Data.TryReturn();
                 return;
             }
 
@@ -258,8 +264,10 @@ namespace Iviz.Controllers
             Pose validatedOrigin;
             if (!origin.IsUsable())
             {
-                RosLogger.Error($"{this}: Cannot use ({origin.position.x}, {origin.position.y}, " +
-                                $"{origin.position.z}) as position. Values too large!");
+                RosLogger.Error($"{this}: Cannot use ({origin.position.x.ToString(BuiltIns.Culture)}, " +
+                                $"{origin.position.y.ToString(BuiltIns.Culture)}, " +
+                                $"{origin.position.z.ToString(BuiltIns.Culture)}) " +
+                                "as position. Values too large!");
                 validatedOrigin = Pose.identity;
             }
             else
@@ -278,28 +286,31 @@ namespace Iviz.Controllers
                 IsProcessing = true;
                 if (CubesVisible)
                 {
-                    SetCubes(msg.Data, validatedOrigin, tasks);
+                    tasks.AddRange(SetCubes(msg.Data, validatedOrigin));
                 }
 
                 if (TextureVisible)
                 {
-                    SetTextures(msg.Data, validatedOrigin, tasks);
+                    tasks.AddRange(SetTextures(msg.Data, validatedOrigin));
                 }
             }
             finally
             {
                 AwaitAndReset();
             }
-            
+
             async void AwaitAndReset()
             {
                 await tasks.WhenAll().AwaitNoThrow(this);
-                IsProcessing = false; 
+                msg.Data.TryReturn();
+                IsProcessing = false;
             }
         }
-        
-        void SetCubes(Memory<sbyte> data, Pose pose, ICollection<Task> tasks)
+
+        IEnumerable<Task> SetCubes(Memory<sbyte> data, Pose pose)
         {
+            var tasks = new List<Task>();
+
             if (gridTiles.Length != 16)
             {
                 gridTiles = new OccupancyGridResource[16];
@@ -350,10 +361,13 @@ namespace Iviz.Controllers
 
 
             ScaleZ = ScaleZ;
+            return tasks; 
         }
 
-        void SetTextures(Memory<sbyte> data, Pose pose, ICollection<Task> tasks)
+        IEnumerable<Task> SetTextures(Memory<sbyte> data, Pose pose)
         {
+            var tasks = new List<Task>();
+
             int tileSizeX = (numCellsX + MaxTileSize - 1) / MaxTileSize;
             int tileSizeY = (numCellsY + MaxTileSize - 1) / MaxTileSize;
             int tileTotalSize = tileSizeY * tileSizeX;
@@ -410,6 +424,8 @@ namespace Iviz.Controllers
                     }));
                 }
             }
+
+            return tasks;
         }
 
 

@@ -105,6 +105,6 @@ public static class EnumeratorUtils
 
     public static Span<T> Slice<T>(this T[] t, Range range)
     {
-        return new Span<T>(t)[range];
+        return t.AsSpan(range);
     }
 }
