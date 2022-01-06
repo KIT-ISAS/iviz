@@ -44,7 +44,7 @@ namespace Iviz.Displays
         /// Do the positions have a Nan? (ignores intensity) 
         /// </summary>        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]        
-        public readonly bool HasNaN() => f.HasNaN();
+        public readonly bool HasNaN() => f.IsInvalid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [NotNull]

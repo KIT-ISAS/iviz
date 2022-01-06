@@ -17,7 +17,7 @@ namespace Iviz.App
         [SerializeField] TMP_Text? bottomBandwidth;
         [SerializeField] Button? cameraButton;
 
-        public event Action CameraButtonClicked;
+        public event Action? CameraButtonClicked;
         
         public TMP_Text CameraText => cameraText.AssertNotNull(nameof(cameraText));
         public TMP_Text Time => bottomTime.AssertNotNull(nameof(bottomTime));

@@ -187,7 +187,7 @@ namespace Iviz.Controllers
             if (IsInvalidSize(msg.Info.LengthX) ||
                 IsInvalidSize(msg.Info.LengthY) ||
                 IsInvalidSize(msg.Info.Resolution) ||
-                msg.Info.Pose.HasNaN())
+                msg.Info.Pose.IsInvalid())
             {
                 RosLogger.Debug("GridMapListener: Message info has NaN!");
                 return;

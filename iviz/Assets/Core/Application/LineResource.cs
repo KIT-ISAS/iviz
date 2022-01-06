@@ -93,10 +93,10 @@ namespace Iviz.Displays
         public static bool IsElementValid(in LineWithColor t) => IsElementValid(t.f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsElementValid(in float4x2 f) => !f.c0.HasNaN() &&
+        public static bool IsElementValid(in float4x2 f) => !f.c0.IsInvalid() &&
                                                             f.c0.MaxAbsCoeff3() < MaxPositionMagnitude &&
                                                             (f.c0 - f.c1).MaxAbsCoeff3() > MinLineLength &&
-                                                            !f.c1.HasNaN() &&
+                                                            !f.c1.IsInvalid() &&
                                                             f.c1.MaxAbsCoeff3() < MaxPositionMagnitude;
 
         public override Bounds? Bounds => Size == 0 ? null : base.Bounds;

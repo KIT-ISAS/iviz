@@ -253,7 +253,7 @@ namespace Iviz.Controllers
             cubeNode.AttachTo(msg.Header);
             textureNode.AttachTo(msg.Header);
 
-            if (msg.Info.Origin.HasNaN())
+            if (msg.Info.Origin.IsInvalid())
             {
                 RosLogger.Debug($"{this}: NaN in origin!");
                 msg.Data.TryReturn();

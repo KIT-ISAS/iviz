@@ -142,7 +142,7 @@ namespace Iviz.Controllers
         public Vector3 MaxSpeed
         {
             get => config.MaxSpeed;
-            set => config.MaxSpeed = value.HasNaN() ? Vector3.zero : value;
+            set => config.MaxSpeed = value.IsInvalid() ? Vector3.zero : value;
         }
 
         public IModuleData ModuleData { get; }

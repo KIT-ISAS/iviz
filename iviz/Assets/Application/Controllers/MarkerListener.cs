@@ -420,13 +420,13 @@ namespace Iviz.Controllers
             switch (msg.Action)
             {
                 case Marker.ADD:
-                    if (msg.Pose.HasNaN())
+                    if (msg.Pose.IsInvalid())
                     {
                         RosLogger.Debug($"{this}: NaN in pose! Rejecting marker update {id.ToString()}.");
                         break;
                     }
 
-                    if (msg.Scale.HasNaN())
+                    if (msg.Scale.IsInvalid())
                     {
                         RosLogger.Debug($"{this}: NaN in scale! Rejecting marker update {id.ToString()}.");
                         break;
@@ -442,7 +442,7 @@ namespace Iviz.Controllers
                         ? existingMarker
                         : CreateMarkerObject(id, msg.Type);
 
-                    _ = markerToUpdate.SetAsync(msg).AwaitNoThrow(this);
+                    markerToUpdate.SetAsync(msg);
                     break;
                 case Marker.DELETE:
                     if (markers.TryGetValue(id, out var markerToDelete))

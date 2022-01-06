@@ -518,7 +518,7 @@ namespace Iviz.Controllers
             void TryAdd(ReadOnlySpan<byte> span, float w)
             {
                 var data = span.Read<float3>();
-                if (data.HasNaN() || data.MaxAbsCoeff() > maxPositionMagnitude)
+                if (data.IsInvalid() || data.MaxAbsCoeff() > maxPositionMagnitude)
                 {
                     return;
                 }
@@ -541,7 +541,7 @@ namespace Iviz.Controllers
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
                             var data = dataOff.Read<float4>();
-                            if (data.HasNaN() || data.MaxAbsCoeff3() > maxPositionMagnitude)
+                            if (data.IsInvalid() || data.MaxAbsCoeff3() > maxPositionMagnitude)
                             {
                                 continue;
                             }

@@ -9,12 +9,17 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using Color32 = UnityEngine.Color32;
 using Mesh = UnityEngine.Mesh;
+using Pose = UnityEngine.Pose;
+using Quaternion = UnityEngine.Quaternion;
+using Transform = UnityEngine.Transform;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Core
 {
@@ -40,11 +45,21 @@ namespace Iviz.Core
         public static float MaxAbsCoeff3(this in float4 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double MaxAbsCoeff3(this in Point p) => MaxAbsCoeff(p.X, p.Y, p.Z);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double MaxAbsCoeff3(this in Msgs.GeometryMsgs.Vector3 p) => MaxAbsCoeff(p.X, p.Y, p.Z);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in Vector3 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float MaxAbsCoeff(float x, float y, float z) =>
             Mathf.Max(Mathf.Max(Mathf.Abs(x), Mathf.Abs(y)), Mathf.Abs(z));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static double MaxAbsCoeff(double x, double y, double z) =>
+            Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in Vector4 p)
@@ -183,15 +198,6 @@ namespace Iviz.Core
             return p;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsApproxIdentity(this in Pose p)
-        {
-            return Mathf.Approximately(p.position.x, 0)
-                   && Mathf.Approximately(p.position.y, 0)
-                   && Mathf.Approximately(p.position.z, 0)
-                   && Mathf.Approximately(p.rotation.w, 1);
-        }
-
         public static bool EqualsApprox(this in Pose p, in Pose q)
         {
             return EqualsApprox(p.position, q.position) && EqualsApprox(p.rotation, q.rotation);
@@ -235,7 +241,6 @@ namespace Iviz.Core
         /// <typeparam name="T">The type of the Unity object</typeparam>
         /// <returns>The Unity object if not-null and valid, otherwise a normal C# null</returns>           
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        //[return: NotNullIfNotNull("o")]
         public static T? CheckedNull<T>(this T? o) where T : UnityEngine.Object => o != null ? o : null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -386,14 +391,6 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void AddInPlace(this ref Vector3 v, in Vector3 o)
-        {
-            v.x += o.x;
-            v.y += o.y;
-            v.z += o.z;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Mult(this in Vector3 v, Vector3 o)
         {
             o.x *= v.x;
@@ -412,12 +409,12 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this in Vector3 v, out float x, out float y, out float z) =>
-            (x, y, z) = (v.x, v.y, v.z);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this in Vector3Int v, out int x, out int y, out int z) =>
-            (x, y, z) = (v.x, v.y, v.z);
+        public static void Deconstruct(this in Vector3 v, out float x, out float y, out float z)
+        {
+            x = v.x;
+            y = v.y;
+            z = v.z;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this Vector2 v, out float x, out float y) =>
@@ -549,11 +546,11 @@ namespace Iviz.Core
             float verticalFovInRad = 2 * Mathf.Atan(Mathf.Tan(horizontalFovInRad / 2) / camera.aspect);
             camera.fieldOfView = verticalFovInRad * Mathf.Rad2Deg;
         }
-        
+
         /// <summary>
         /// Color representation from the bits of a float.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Color32 AsColor32(float f)
         {
             return Unsafe.As<float, Color32>(ref f);
@@ -562,10 +559,10 @@ namespace Iviz.Core
         /// <summary>
         /// Float representation from the bits of a Color32.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float AsFloat(Color32 f)
         {
             return Unsafe.As<Color32, float>(ref f);
-        }        
+        }
     }
 }

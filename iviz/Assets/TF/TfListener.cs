@@ -308,7 +308,7 @@ namespace Iviz.Controllers.TF
                 var (transforms, callerId, isStatic) = value;
                 foreach (var (parentIdUnchecked, childIdUnchecked, rosTransform, _) in transforms)
                 {
-                    if (rosTransform.HasNaN()
+                    if (rosTransform.IsInvalid()
                         || childIdUnchecked.Length == 0
                         || !IsValid(rosTransform.Translation))
                     {

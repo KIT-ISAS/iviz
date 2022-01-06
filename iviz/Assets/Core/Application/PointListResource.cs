@@ -5,11 +5,13 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Common;
 using Iviz.Core;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Displays
 {
@@ -243,7 +245,7 @@ namespace Iviz.Displays
             for (int i = 0; i < points.Length; i++)
             {
                 ref readonly var t = ref points[i];
-                if (t.HasNaN() || t.MaxAbsCoeff3() > MaxPositionMagnitude)
+                if (t.IsInvalid() || t.MaxAbsCoeff3() > MaxPositionMagnitude)
                 {
                     continue;
                 }
@@ -269,7 +271,13 @@ namespace Iviz.Displays
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsElementValid(in float4 t)
         {
-            return !(t.HasNaN() || t.MaxAbsCoeff3() > MaxPositionMagnitude);
+            return !(t.IsInvalid() || t.MaxAbsCoeff3() > MaxPositionMagnitude);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsElementValid(in Point t)
+        {
+            return !(t.IsInvalid() || t.MaxAbsCoeff3() > MaxPositionMagnitude);
         }
 
         public void SetDirect(Action<NativeList<float4>> callback, int reserve)

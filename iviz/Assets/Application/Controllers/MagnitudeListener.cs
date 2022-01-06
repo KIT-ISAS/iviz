@@ -225,54 +225,50 @@ namespace Iviz.Controllers
             frameNode.name = $"[{Config.Topic}]";
 
             var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+            Listener = Config.Type switch
+            {
+                PoseStamped.RosMessageType => CreateListener<PoseStamped>(Handler),
+                Msgs.GeometryMsgs.Pose.RosMessageType => CreateListener<Msgs.GeometryMsgs.Pose>(Handler),
+                PointStamped.RosMessageType => CreateListener<PointStamped>(Handler),
+                Point.RosMessageType => CreateListener<Point>(Handler),
+                WrenchStamped.RosMessageType => CreateListener<WrenchStamped>(Handler),
+                Wrench.RosMessageType => CreateListener<Wrench>(Handler),
+                TwistStamped.RosMessageType => CreateListener<TwistStamped>(Handler),
+                Twist.RosMessageType => CreateListener<Twist>(Handler),
+                Odometry.RosMessageType => CreateListener<Odometry>(Handler),
+                _ => throw new InvalidOperationException("Invalid message type")
+            };
+
+            Listener<T> CreateListener<T>(Action<T> a) where T : IMessage, IDeserializable<T>, new() =>
+                new(Config.Topic, a, transportHint);
+
             switch (Config.Type)
             {
                 case PoseStamped.RosMessageType:
-                    Listener = new Listener<PoseStamped>(Config.Topic, Handler, transportHint);
-                    goto case Msgs.GeometryMsgs.Pose.RosMessageType;
-
                 case Msgs.GeometryMsgs.Pose.RosMessageType:
-                    Listener ??= new Listener<Msgs.GeometryMsgs.Pose>(Config.Topic, Handler, transportHint);
                     RentFrame(frameNode, out axisFrame);
                     break;
-
                 case PointStamped.RosMessageType:
-                    Listener = new Listener<PointStamped>(Config.Topic, Handler, transportHint);
-                    goto case Point.RosMessageType;
-
                 case Point.RosMessageType:
-                    Listener ??= new Listener<Point>(Config.Topic, Handler, transportHint);
                     RentSphere(frameNode, Color, out sphere);
                     break;
-
                 case WrenchStamped.RosMessageType:
-                    Listener = new Listener<WrenchStamped>(Config.Topic, Handler, transportHint);
-                    goto case Wrench.RosMessageType;
-
                 case Wrench.RosMessageType:
-                    Listener ??= new Listener<Wrench>(Config.Topic, Handler, transportHint);
                     RentFrame(frameNode, out axisFrame);
                     RentArrow(frameNode, Color, out arrow);
                     RentAngleAxis(frameNode, out angleAxis);
                     RentSphere(frameNode, Color, out sphere);
                     trail.DataSource = TrailDataSource;
                     break;
-
                 case TwistStamped.RosMessageType:
-                    Listener = new Listener<TwistStamped>(Config.Topic, Handler, transportHint);
-                    goto case Twist.RosMessageType;
-
                 case Twist.RosMessageType:
-                    Listener ??= new Listener<Twist>(Config.Topic, Handler, transportHint);
                     RentFrame(frameNode, out axisFrame);
                     RentArrow(frameNode, Color, out arrow);
                     RentAngleAxis(frameNode, out angleAxis);
                     RentSphere(frameNode, Color, out sphere);
                     trail.DataSource = TrailDataSource;
                     break;
-
                 case Odometry.RosMessageType:
-                    Listener = new Listener<Odometry>(Config.Topic, Handler, transportHint);
                     RentFrame(frameNode, out axisFrame);
                     RentSphere(frameNode, Color, out sphere);
                     childNode = FrameNode.Instantiate($"[{Config.Topic} | Child]");
@@ -280,8 +276,6 @@ namespace Iviz.Controllers
                     RentAngleAxis(childNode, out angleAxis);
                     trail.DataSource = TrailDataSource;
                     break;
-                default:
-                    throw new InvalidOperationException("Invalid message type");
             }
         }
 
@@ -321,7 +315,7 @@ namespace Iviz.Controllers
 
         void Handler(Msgs.GeometryMsgs.Pose msg)
         {
-            if (msg.HasNaN())
+            if (msg.IsInvalid())
             {
                 return;
             }
@@ -337,7 +331,7 @@ namespace Iviz.Controllers
 
         void Handler(Point msg)
         {
-            if (msg.HasNaN())
+            if (msg.IsInvalid())
             {
                 return;
             }
@@ -356,7 +350,7 @@ namespace Iviz.Controllers
 
         void Handler(Wrench msg)
         {
-            if (msg.Force.HasNaN() || msg.Torque.HasNaN())
+            if (msg.Force.IsInvalid() || msg.Torque.IsInvalid())
             {
                 return;
             }
@@ -384,7 +378,7 @@ namespace Iviz.Controllers
         void Handler(Twist msg)
         {
             var (linear, angular) = msg;
-            if (angular.HasNaN() || linear.HasNaN())
+            if (angular.IsInvalid() || linear.IsInvalid())
             {
                 return;
             }
@@ -411,13 +405,13 @@ namespace Iviz.Controllers
                 childNode.AttachTo(msg.ChildFrameId);
             }
 
-            if (msg.Pose.Pose.HasNaN())
+            if (msg.Pose.Pose.IsInvalid())
             {
                 return;
             }
 
             var (linear, angular) = msg.Twist.Twist;
-            if (angular.HasNaN() || linear.HasNaN())
+            if (angular.IsInvalid() || linear.IsInvalid())
             {
                 return;
             }

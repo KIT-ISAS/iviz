@@ -3,8 +3,6 @@
 using System;
 using Iviz.Core;
 using Iviz.Tools;
-using JetBrains.Annotations;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -33,7 +31,6 @@ namespace Iviz.Displays
 
             4, 8, 5,
             4, 5, 1,
-
 
             9, 6, 5,
             9, 7, 6,
@@ -128,14 +125,14 @@ namespace Iviz.Displays
                 }
                 */
                 {
-                    var ca = UnityUtils.RecastToColor32(line.c0.w);
+                    var ca = UnityUtils.AsColor32(line.c0.w);
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
                     cArray[cOff++] = ca;
 
-                    var cb = UnityUtils.RecastToColor32(line.c1.w);
+                    var cb = UnityUtils.AsColor32(line.c1.w);
                     cArray[cOff++] = cb;
                     cArray[cOff++] = cb;
                     cArray[cOff++] = cb;

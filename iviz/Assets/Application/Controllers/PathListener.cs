@@ -211,7 +211,7 @@ namespace Iviz.Controllers
             savedPoses.Clear();
             foreach (Msgs.GeometryMsgs.Pose ps in msg.Poses)
             {
-                if (ps.HasNaN())
+                if (ps.IsInvalid())
                 {
                     continue;
                 }
@@ -233,7 +233,7 @@ namespace Iviz.Controllers
             savedPoses.Clear();
             foreach (var p in msg.Points)
             {
-                if (p.HasNaN())
+                if (p.IsInvalid())
                 {
                     continue;
                 }

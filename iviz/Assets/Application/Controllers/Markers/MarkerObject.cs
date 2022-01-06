@@ -23,7 +23,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public sealed class MarkerObject : IHasBounds, ISupportsDynamicBounds
+    public sealed class MarkerObject : IHasBounds
     {
         const string WarnStr = "<color=yellow>Warning:</color> ";
         const string ErrorStr = "<color=red>Error:</color> ";
@@ -186,7 +186,7 @@ namespace Iviz.Controllers
             UniqueNodeName = (++globalIdCounter).ToString();
         }
 
-        public async ValueTask SetAsync(Marker msg)
+        public async void SetAsync(Marker msg)
         {
             lastMessage = msg ?? throw new ArgumentNullException(nameof(msg));
             ExpirationTime = msg.Lifetime == default
@@ -207,6 +207,11 @@ namespace Iviz.Controllers
             }
             catch (OperationCanceledException)
             {
+                return;
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to update resource", e);
                 return;
             }
 
@@ -263,7 +268,7 @@ namespace Iviz.Controllers
             var meshTriangles = ValidateResource<MeshTrianglesResource>();
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || Mathf.Approximately(msg.Color.A, 0)
-                || msg.Color.HasNaN()
+                || msg.Color.IsInvalid()
                 || msg.Points.Length % 3 != 0)
             {
                 meshTriangles.Clear();
@@ -304,7 +309,7 @@ namespace Iviz.Controllers
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || Mathf.Approximately(msg.Color.A, 0)
-                || msg.Color.HasNaN())
+                || msg.Color.IsInvalid())
             {
                 pointList.Reset();
                 return;
@@ -329,7 +334,7 @@ namespace Iviz.Controllers
                 || Mathf.Approximately(elementScale, 0)
                 || elementScale.IsInvalid()
                 || Mathf.Approximately(msg.Color.A, 0)
-                || msg.Color.HasNaN())
+                || msg.Color.IsInvalid())
             {
                 lineResource.Reset();
                 return;
@@ -360,7 +365,9 @@ namespace Iviz.Controllers
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || Mathf.Approximately(msg.Color.A, 0)
-                || msg.Color.HasNaN())
+                || msg.Color.IsInvalid()
+                || msg.Scale.IsInvalid()
+                || Mathf.Approximately((float) msg.Scale.MaxAbsCoeff3(), 0))
             {
                 meshList.Reset();
                 return;
@@ -405,7 +412,7 @@ namespace Iviz.Controllers
             {
                 case 0:
                 {
-                    if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0) || msg.Scale.HasNaN())
+                    if (Mathf.Approximately((float)msg.Scale.SquaredNorm, 0) || msg.Scale.IsInvalid())
                     {
                         arrowMarker.Visible = false;
                         return;
@@ -491,7 +498,7 @@ namespace Iviz.Controllers
 
         void UpdateTransform(Marker msg)
         {
-            if (msg.Pose.HasNaN())
+            if (msg.Pose.IsInvalid())
             {
                 return;
             }
@@ -710,7 +717,7 @@ namespace Iviz.Controllers
                     .Append(string.IsNullOrEmpty(msg.Header.FrameId) ? "(none)" : msg.Header.FrameId)
                     .Append("</i>").AppendLine();
 
-                if (msg.Pose.HasNaN())
+                if (msg.Pose.IsInvalid())
                 {
                     description.Append(WarnStr).Append("Pose contains NaN values").AppendLine();
                     return;
@@ -757,7 +764,7 @@ namespace Iviz.Controllers
                             description.Append(WarnStr).Append("Scale value of 0").AppendLine();
                         }
 
-                        if (msg.Scale.HasNaN())
+                        if (msg.Scale.IsInvalid())
                         {
                             description.Append(WarnStr).Append("Scale value of NaN").AppendLine();
                         }
@@ -796,7 +803,7 @@ namespace Iviz.Controllers
                 {
                     description.Append(WarnStr).Append("Scale value of 0").AppendLine();
                 }
-                else if (msg.Scale.HasNaN())
+                else if (msg.Scale.IsInvalid())
                 {
                     description.Append(WarnStr).Append("Scale value has NaN").AppendLine();
                 }
@@ -841,7 +848,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                if (msg.Color.HasNaN())
+                if (msg.Color.IsInvalid())
                 {
                     description.Append(ErrorStr).Append("Color field has NaN. Marker will not be visible").AppendLine();
                 }
@@ -878,7 +885,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.HasNaN())
+                if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.IsInvalid())
                 {
                     description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
                 }
@@ -896,7 +903,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.HasNaN())
+                if (Mathf.Approximately(msg.Color.A, 0) || msg.Color.IsInvalid())
                 {
                     description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
                     return;
@@ -939,7 +946,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                if (msg.Color.HasNaN())
+                if (msg.Color.IsInvalid())
                 {
                     description.Append(ErrorStr).Append("Color has NaN. Marker will not be visible").AppendLine();
                     return;
