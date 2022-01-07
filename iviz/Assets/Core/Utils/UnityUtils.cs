@@ -562,12 +562,12 @@ namespace Iviz.Core
             return MemoryMarshal.Cast<byte, T>(src);
         }
 
-        public static float RegularizeAngle(float angle) =>
-            angle switch
+        public static float RegularizeAngle(float angleInDeg) =>
+            angleInDeg switch
             {
-                <= -180 => angle + 360,
-                > 180 => angle - 360,
-                _ => angle
+                <= -180 => angleInDeg + 360,
+                > 180 => angleInDeg - 360,
+                _ => angleInDeg
             };
 
         public static void SetBounds(this BoxCollider collider, in Bounds bounds) =>

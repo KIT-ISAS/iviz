@@ -20,42 +20,30 @@ namespace Iviz.Core
 {
     public static class RosUtils
     {
-        static readonly Quaternion XFrontToZFront = (0.5, -0.5, 0.5, -0.5);
+        static readonly Quaternion XFrontToZFront = new(0.5, -0.5, 0.5, -0.5);
 
         /// Make camera point to +Z instead of +X
         public static Pose ToCameraFrame(this in Pose pose) =>
-            (pose.Position, pose.Orientation * XFrontToZFront);
+            new(pose.Position, pose.Orientation * XFrontToZFront);
 
         public static Transform ToCameraFrame(this in Transform pose) =>
-            (pose.Translation, pose.Rotation * XFrontToZFront);
+            new(pose.Translation, pose.Rotation * XFrontToZFront);
 
         //----
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Ros2Unity(this Vector3 v)
+        public static Vector3 Ros2Unity(this in Vector3 p)
         {
             Vector3 q;
-            q.x = -v.y;
-            q.y = v.z;
-            q.z = v.x;
+            q.x = -p.y;
+            q.y = p.z;
+            q.z = p.x;
             return q;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityEngine.Quaternion Ros2Unity(this in UnityEngine.Quaternion quaternion) =>
             new(quaternion.y, -quaternion.z, -quaternion.x, quaternion.w);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float4 Ros2Unity(this in float4 v)
-        {
-            //new(-v.y, v.z, v.x, v.w);  
-            float4 w;
-            w.x = -v.y;
-            w.y = v.z;
-            w.z = v.x;
-            w.w = v.w;
-            return w;
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityEngine.Quaternion RosRpy2Unity(this in Vector3 v) =>
@@ -121,7 +109,7 @@ namespace Iviz.Core
             return q;
         }
         
-        static Vector3 Unity2Ros(this in Vector3 p)
+        public static Vector3 Unity2Ros(this in Vector3 p)
         {
             //new(p.z, -p.x, p.y);
             Vector3 q;
@@ -135,55 +123,55 @@ namespace Iviz.Core
         public static Vector3 Ros2Unity(this in Point p)
         {
             //return new((float)-p.Y, (float)p.Z, (float)p.X);
-            Vector3 f;
-            f.x = (float)-p.Y;
-            f.y = (float)p.Z;
-            f.z = (float)p.X;
-            return f;
+            Vector3 q;
+            q.x = (float)-p.Y;
+            q.y = (float)p.Z;
+            q.z = (float)p.X;
+            return q;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Ros2Unity(this in Point p, float w, out float4 f)
+        public static void Ros2Unity(this in Point p, float w, out float4 q)
         {
             //(f.x, f.y, f.z) = ((float)-p.Y, (float)p.Z, (float)p.X);
-            f.x = (float)-p.Y;
-            f.y = (float)p.Z;
-            f.z = (float)p.X;
-            f.w = w;
+            q.x = (float)-p.Y;
+            q.y = (float)p.Z;
+            q.z = (float)p.X;
+            q.w = w;
         }
 
-        public static void Ros2Unity(this in Point p, out Vector3 v)
+        public static void Ros2Unity(this in Point p, out Vector3 q)
         {
-            v.x = (float)-p.Y;
-            v.y = (float)p.Z;
-            v.z = (float)p.X;
+            q.x = (float)-p.Y;
+            q.y = (float)p.Z;
+            q.z = (float)p.X;
         }
 
-        static void Ros2Unity(this in Msgs.GeometryMsgs.Vector3 p, out Vector3 v)
+        static void Ros2Unity(this in Msgs.GeometryMsgs.Vector3 p, out Vector3 q)
         {
-            v.x = (float)-p.Y;
-            v.y = (float)p.Z;
-            v.z = (float)p.X;
+            q.x = (float)-p.Y;
+            q.y = (float)p.Z;
+            q.z = (float)p.X;
         }
 
-        public static Color ToUnityColor(this in ColorRGBA p)
+        public static Color ToUnityColor(this in ColorRGBA c)
         {
-            Color c;
-            c.r = p.R;
-            c.g = p.G;
-            c.b = p.B;
-            c.a = p.A;
-            return c;
+            Color d;
+            d.r = c.R;
+            d.g = c.G;
+            d.b = c.B;
+            d.a = c.A;
+            return d;
         }
 
-        public static ColorRGBA Sanitize(this in ColorRGBA p)
+        public static ColorRGBA Sanitize(this in ColorRGBA c)
         {
-            ColorRGBA c;
-            c.R = SanitizeChannel(p.R);
-            c.G = SanitizeChannel(p.G);
-            c.B = SanitizeChannel(p.B);
-            c.A = SanitizeChannel(p.A);
-            return c;
+            ColorRGBA d;
+            d.R = SanitizeChannel(c.R);
+            d.G = SanitizeChannel(c.G);
+            d.B = SanitizeChannel(c.B);
+            d.A = SanitizeChannel(c.A);
+            return d;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static float SanitizeChannel(float f) => float.IsFinite(f) ? Math.Clamp(f, 0, 1) : 0;
@@ -193,12 +181,12 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color32 ToUnityColor32(this in ColorRGBA c)
         {
-            var cs = Sanitize(c);
+            var d = Sanitize(c);
             return new Color32(
-                (byte)(cs.R * 255),
-                (byte)(cs.G * 255),
-                (byte)(cs.B * 255),
-                (byte)(cs.A * 255)
+                (byte)(d.R * 255),
+                (byte)(d.G * 255),
+                (byte)(d.B * 255),
+                (byte)(d.A * 255)
             );
         }
 
@@ -232,34 +220,32 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static Quaternion Unity2RosQuaternion(this in UnityEngine.Quaternion p)
+        static void Unity2RosQuaternion(this in UnityEngine.Quaternion p, out Quaternion q)
         {
             //new(-p.z, p.x, -p.y, p.w);
-            Quaternion q;
             q.X = -p.z;
             q.Y = p.x;
             q.Z = -p.y;
             q.W = p.w;
-            return q;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UnityEngine.Pose Ros2Unity(this in Transform pose)
+        public static UnityEngine.Pose Ros2Unity(this in Transform p)
         {
             //new(pose.Translation.Ros2Unity(), pose.Rotation.Ros2Unity());
             UnityEngine.Pose q;
-            pose.Translation.Ros2Unity(out q.position);
-            pose.Rotation.Ros2Unity(out q.rotation);
+            p.Translation.Ros2Unity(out q.position);
+            p.Rotation.Ros2Unity(out q.rotation);
             return q;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static UnityEngine.Pose Ros2Unity(this in Pose pose)
+        public static UnityEngine.Pose Ros2Unity(this in Pose p)
         {
             //new(pose.Position.Ros2Unity(), pose.Orientation.Ros2Unity());
             UnityEngine.Pose q;
-            pose.Position.Ros2Unity(out q.position);
-            pose.Orientation.Ros2Unity(out q.rotation);
+            p.Position.Ros2Unity(out q.position);
+            p.Orientation.Ros2Unity(out q.rotation);
             return q;
         }
 
@@ -269,7 +255,7 @@ namespace Iviz.Core
             //new(p.position.Unity2RosVector3(), p.rotation.Unity2RosQuaternion());
             Transform q;
             q.Translation = p.position.Unity2RosVector3();
-            q.Rotation = p.rotation.Unity2RosQuaternion();
+            p.rotation.Unity2RosQuaternion(out q.Rotation);
             return q;
         }
 
@@ -278,7 +264,7 @@ namespace Iviz.Core
         {
             Pose q;
             q.Position = p.position.Unity2RosPoint();
-            q.Orientation = p.rotation.Unity2RosQuaternion();
+            p.rotation.Unity2RosQuaternion(out q.Orientation);
             return q;
         }
 

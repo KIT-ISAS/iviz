@@ -19,9 +19,9 @@ namespace Iviz.App
         Slider Slider => slider.AssertNotNull(nameof(slider));
         TMP_Text Text => text.AssertNotNull(nameof(text));
         TMP_Text ValueText => valueText.AssertNotNull(nameof(valueText));
-        
+
         public event Action<float>? ValueChanged;
-        
+
         public string Label
         {
             get => Text.text;
@@ -31,7 +31,7 @@ namespace Iviz.App
                 {
                     throw new ArgumentNullException(nameof(value));
                 }
-                
+
                 name = "Slider:" + value;
                 Text.text = value;
             }
@@ -42,15 +42,21 @@ namespace Iviz.App
             get => Min + (Max - Min) * ValueInternal / NumberOfSteps;
             set
             {
+                float oldValueInternal = ValueInternal;
                 ValueInternal = (value - Min) / (Max - Min) * NumberOfSteps;
-                UpdateLabel(value);                
+                if (Mathf.Approximately(ValueInternal, oldValueInternal))
+                {
+                    return;
+                }
+
+                UpdateLabel(value);
             }
         }
 
         float ValueInternal
         {
             get => Slider.value;
-            set => Slider.SetValueWithoutNotify(Math.Max((int) value, 0));
+            set => Slider.SetValueWithoutNotify(Math.Max((int)value, 0));
         }
 
         public bool Interactable
@@ -115,9 +121,9 @@ namespace Iviz.App
             set
             {
                 integerOnly = value;
-                Max = (int) Max;
-                Min = (int) Min;
-                NumberOfSteps = (int) (Max - Min);
+                Max = (int)Max;
+                Min = (int)Min;
+                NumberOfSteps = (int)(Max - Min);
             }
         }
 

@@ -116,6 +116,8 @@ namespace Iviz.App
         public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
+        public TfPublisher TfPublisher { get; } = new();
+
         public bool AllGuiVisible
         {
             get => allGuiVisible;
@@ -159,7 +161,6 @@ namespace Iviz.App
         }
 
         public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
-        public int NumTfFramesPublished => Dialogs.TfPublisherData.NumFrames;
 
         public ModuleListPanel()
         {
@@ -185,6 +186,7 @@ namespace Iviz.App
                 dialogData.FinalizePanel();
             }
 
+            TfPublisher.Dispose();
             GuiWidgetListener.DisposeDefaultHandler();
         }
 
@@ -913,9 +915,17 @@ namespace Iviz.App
             Dialogs.ARMarkerData.Show();
         }
 
-        public void ShowTfPublisherDialog()
+        public void ShowTfDialog()
         {
-            Dialogs.TfPublisherData.Show();
+            Dialogs.TfTreeData.Show();
+        }
+
+        public void FlushTfDialog()
+        {
+            if (DialogPanelManager.IsActive(Dialogs.TfTreeData))
+            {
+                Dialogs.TfTreeData.UpdatePanel();
+            }
         }
 
         void UpdateCameraStats()

@@ -18,7 +18,7 @@ namespace Iviz.App
             p.AddHeadTitleWidget("Camera");
             Frame = p.AddFrame();
             HideButton = p.AddHideButton();
-            CloseButton = p.AddTrashButton();
+            CloseButton = p.AddCloseButton();
             Fov = p.AddSlider("Field of View").SetMinValue(30).SetMaxValue(170).SetIntegerOnly(true);
             Roll = p.AddSlider("Roll").SetMinValue(-180).SetMaxValue(180).SetIntegerOnly(true);
             Pitch = p.AddSlider("Pitch").SetMinValue(-89).SetMaxValue(89).SetIntegerOnly(true);

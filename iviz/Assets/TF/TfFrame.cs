@@ -37,7 +37,7 @@ namespace Iviz.Controllers.TF
             get => base.Parent;
             set
             {
-                if (!SetParent(value))
+                if (!TrySetParent(value))
                 {
                     RosLogger.Error($"{this}: Failed to set '{(value != null ? value.Id : "null")}' as a parent to {Id}");
                 }
@@ -123,7 +123,7 @@ namespace Iviz.Controllers.TF
             }
         }
 
-        public virtual bool SetParent(TfFrame? newParent)
+        public virtual bool TrySetParent(TfFrame? newParent)
         {
             if (!ParentCanChange)
             {

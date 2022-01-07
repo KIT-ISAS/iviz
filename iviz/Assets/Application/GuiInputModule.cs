@@ -841,19 +841,19 @@ namespace Iviz.App
         static Vector3Int GetBaseInput()
         {
             var pVelocity = new Vector3Int();
+            if (Keyboard.current[Key.S].isPressed)
+            {
+                pVelocity.z = -1;
+            }
+
             if (Keyboard.current[Key.W].isPressed)
             {
                 pVelocity.z++;
             }
 
-            if (Keyboard.current[Key.S].isPressed)
-            {
-                pVelocity.z--;
-            }
-
             if (Keyboard.current[Key.A].isPressed)
             {
-                pVelocity.x--;
+                pVelocity.x = -1;
             }
 
             if (Keyboard.current[Key.D].isPressed)
@@ -863,7 +863,7 @@ namespace Iviz.App
 
             if (Keyboard.current[Key.Q].isPressed)
             {
-                pVelocity.y--;
+                pVelocity.y = -1;
             }
 
             if (Keyboard.current[Key.E].isPressed)
@@ -883,7 +883,7 @@ namespace Iviz.App
         {
             if (clickHitInfo.TryGetRaycastResults(out var hitResults))
             {
-                Vector3? maybeReferencePosition = null;
+                Vector3? firstHitPoint = null;
                 List<(IHighlightable highlightable, Vector3 hitPoint)>? hits = null;
                 foreach (var (hitObject, hitPoint, _) in hitResults)
                 {
@@ -892,11 +892,11 @@ namespace Iviz.App
                         continue;
                     }
 
-                    if (maybeReferencePosition is not { } referencePosition)
+                    if (firstHitPoint is not { } referencePoint)
                     {
-                        maybeReferencePosition = hitPoint;
+                        firstHitPoint = hitPoint;
                     }
-                    else if (Vector3.Distance(hitPoint, referencePosition) > 0.25f)
+                    else if (Vector3.Distance(hitPoint, referencePoint) > 0.25f)
                     {
                         continue;
                     }
@@ -936,20 +936,9 @@ namespace Iviz.App
             }
 
             FAnimator.Start(new ClickedPoseHighlighter(poseToHighlight));
-
-            /*
-            if (!isShortClick)
-            {
-                var poseStamped = new PoseStamped(
-                    (tapSeq++, TfListener.FixedFrameId),
-                    TfListener.RelativeToFixedFrame(poseToHighlight).Unity2RosPose()
-                );
-                TfListener.Instance.TapPublisher.Publish(poseStamped);
-            }
-            */
         }
 
-        static async void HighlightAll(List<(IHighlightable highlightable, Vector3)> hits)
+        static async void HighlightAll(IEnumerable<(IHighlightable highlightable, Vector3)> hits)
         {
             var aliveHits = hits.Where(toHighlight => toHighlight.highlightable.IsAlive);
             foreach (var (highlightable, hitPoint) in aliveHits)

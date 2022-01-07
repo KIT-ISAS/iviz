@@ -26,7 +26,6 @@ namespace Iviz.App
         Echo,
         System,
         ARMarkers,
-        TfPublisher,
     }
 
     public class DialogPanelManager : MonoBehaviour
@@ -66,7 +65,6 @@ namespace Iviz.App
                 (DialogPanelType.Echo, CreatePanel<EchoDialogContents>(Resource.Widgets.EchoPanel)),
                 (DialogPanelType.System, CreatePanel<SystemDialogContents>(Resource.Widgets.SystemPanel)),
                 (DialogPanelType.ARMarkers, CreatePanel<ARMarkerDialogContents>(Resource.Widgets.ARMarkerPanel)),
-                (DialogPanelType.TfPublisher, CreatePanel<TfPublisherDialogContents>(Resource.Widgets.TfPublisherPanel)),
             };
 
             foreach (var (type, panel) in panels)
@@ -216,7 +214,6 @@ namespace Iviz.App
             dialogData.Panel.ClearSubscribers();
         }
 
-
         public void HidePanelFor(DialogData? deselected)
         {
             if (deselected == null)
@@ -259,7 +256,9 @@ namespace Iviz.App
             detachedDialogDatas.Add(selectedDialogData);
             selectedDialogData.Detached = true;
             selectedDialogData = null;
-        } 
+        }
+
+        public bool IsActive(DialogData dialogData) => selectedDialogData == dialogData || dialogData.Detached;
 
         public override string ToString() => "[DialogPanelManager]";
     }

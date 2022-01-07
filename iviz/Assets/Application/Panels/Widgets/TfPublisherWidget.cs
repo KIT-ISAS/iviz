@@ -1,4 +1,5 @@
 ﻿using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,17 +19,17 @@ namespace Iviz.App
 
         void OnClick()
         {
-            ModuleListPanel.Instance.ShowTfPublisherDialog();
+            ModuleListPanel.Instance.ShowTfDialog();
         }
 
         public void UpdateText()
         {
-            int numTfFrames = ModuleListPanel.Instance.NumTfFramesPublished;
+            int numTfFrames = TfListener.Instance.NumFrames;
             string frameStr = numTfFrames switch
             {
-                0 => "Publisher Manager\n<b>No published frames</b>",
-                1 => "Publisher Manager\n<b>1 published frame</b>",
-                _ => $"Publisher Manager\n<b>{numTfFrames.ToString()} published frames</b>"
+                0 => "TF Frames\n<b>No frames</b>",
+                1 => "TF Frames\n<b>1 frame</b>",
+                _ => $"TF Frames\n<b>{numTfFrames.ToString()} frames</b>"
             };
             text.text = frameStr;
         }

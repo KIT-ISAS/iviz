@@ -68,7 +68,8 @@ namespace Iviz.App
                 ModuleType.GuiDialog => o.AddComponent<GuiDialogPanelContents>(),
                 ModuleType.XR => o.AddComponent<XRPanelContents>(),
                 ModuleType.Camera => o.AddComponent<CameraPanelContents>(),
-                _ => throw new ArgumentException($"Failed to find panel contents for resource '{resource}'",
+                ModuleType.TFPublisher => o.AddComponent<TfPublisherPanelContents>(),
+                _ => throw new ArgumentException($"Failed to find panel contents for module type '{resource}'",
                     nameof(resource))
             };
         }

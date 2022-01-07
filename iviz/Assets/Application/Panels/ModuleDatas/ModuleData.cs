@@ -119,13 +119,18 @@ namespace Iviz.App
             ModuleListPanel.AllGuiVisible = true;
         }
 
+        public void HidePanel()
+        {
+            DataPanelManager.HidePanelFor(this);
+        }
+
         public abstract void UpdateConfiguration(string configAsJson, IEnumerable<string> fields);
 
         public abstract void AddToState(StateConfiguration config);
 
         public virtual void Dispose()
         {
-            DataPanelManager.HidePanelFor(this);
+            HidePanel();
         }
 
         public void ResetController()

@@ -39,12 +39,17 @@ namespace Iviz.App
             get => value;
             set
             {
+                if (this.value == value)
+                {
+                    return;
+                }
+                
                 this.value = value;
                 Mean = value;
                 UpdateInputLabels();
             }
         }
-
+        
         float range;
 
         public float Range

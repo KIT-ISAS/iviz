@@ -28,18 +28,17 @@ namespace Iviz.Core
                 TryCallDispose();
                 return;
             }
-
-            try
-            {
-                update(0);
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{this}: Error during Animator update", e);
-            }
-
-            GameThread.EveryFrame += OnFrameUpdate;
             
+            TryCallUpdate(0);
+
+            if (duration <= 0)
+            {
+                TryCallUpdate(1);
+                TryCallDispose();
+                return;
+            }
+            
+            GameThread.EveryFrame += OnFrameUpdate;
         }
 
         void OnFrameUpdate()
@@ -78,9 +77,14 @@ namespace Iviz.Core
 
         void TryCallDispose()
         {
+            if (dispose == null)
+            {
+                return;
+            }
+            
             try
             {
-                dispose?.Invoke();
+                dispose();
             }
             catch (Exception e)
             {

@@ -222,7 +222,7 @@ namespace Iviz.Displays
             get => base.Parent;
             set
             {
-                if (!SetParent(value))
+                if (!TrySetParent(value))
                 {
                     RosLogger.Error($"{this}: Failed to set '{(value != null ? value.Id : "null")}' as a parent to {Id}");
                 }
@@ -234,7 +234,7 @@ namespace Iviz.Displays
             FrameSize = 0.125f;
         }
 
-        public override bool SetParent(TfFrame? newParent)
+        public override bool TrySetParent(TfFrame? newParent)
         {
             if (!ParentCanChange)
             {
@@ -246,7 +246,10 @@ namespace Iviz.Displays
                 return false; // destroying!
             }
 
-            base.SetParent(newParent);
+            if (!base.TrySetParent(newParent))
+            {
+                return false;
+            }
 
             if (newParent is null)
             {

@@ -36,6 +36,15 @@ namespace Iviz.App
             o.SetActive(true);
             return o.GetComponent<ToggleButtonWidget>();
         }
+        
+        public TrashButtonWidget AddCloseButton()
+        {
+            var o = Resource.Widgets.CloseButton.Instantiate(Statics.transform);
+            var oTransform = (RectTransform) o.transform;
+            oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, YCloseButton);
+            o.SetActive(true);
+            return o.GetComponent<TrashButtonWidget>();
+        }
 
         public TrashButtonWidget AddResetButton()
         {

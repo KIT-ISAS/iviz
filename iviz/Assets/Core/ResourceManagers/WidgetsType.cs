@@ -30,6 +30,7 @@ namespace Iviz.Resources
         public Info<GameObject> ColorPicker { get; }
         public Info<GameObject> ImagePreview { get; }
         public Info<GameObject> TrashButton { get; }
+        public Info<GameObject> CloseButton { get; }
         public Info<GameObject> DataLabel { get; }
         public Info<GameObject> ToggleButton { get; }
         public Info<GameObject> ResetButton { get; }
@@ -81,6 +82,7 @@ namespace Iviz.Resources
             ImagePreview = new Info<GameObject>(assetHolder.ImagePreview);
             Dropdown = new Info<GameObject>(assetHolder.Dropdown);
             TrashButton = new Info<GameObject>(assetHolder.TrashButton);
+            CloseButton = new Info<GameObject>(assetHolder.CloseButton);
             DataLabel = new Info<GameObject>(assetHolder.DataLabel);
             ToggleButton = new Info<GameObject>(assetHolder.ToggleButton);
             ResetButton = new Info<GameObject>(assetHolder.ResetButton);

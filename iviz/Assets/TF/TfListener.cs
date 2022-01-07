@@ -25,8 +25,7 @@ namespace Iviz.Controllers.TF
 {
     public sealed class TfListener : IController, IHasFrame
     {
-        const string DefaultTapTopic = "~clicked_pose";
-        const string OriginFrameId = "[origin]";
+        public const string OriginFrameId = "[origin]";
         const string DefaultTopicStatic = "/tf_static";
 
         const int MaxQueueSize = 10000;
@@ -73,7 +72,9 @@ namespace Iviz.Controllers.TF
         public IModuleData ModuleData { get; }
         public Listener<TFMessage> Listener { get; }
         public Listener<TFMessage> ListenerStatic { get; }
+
         public Sender<TFMessage> Publisher { get; }
+
         //public Sender<PoseStamped> TapPublisher { get; }
         public TfFrame FixedFrame { get; private set; }
         public TfFrame Frame => FixedFrame;
@@ -286,6 +287,7 @@ namespace Iviz.Controllers.TF
             }
         }
 
+        public int NumFrames => frames.Count;
 
         static readonly Func<TfFrame, bool> IsFrameUsableAsHint =
             frame => frame != RootFrame && frame != UnityFrame && frame != OriginFrame;
@@ -345,7 +347,7 @@ namespace Iviz.Controllers.TF
                     lastChild = child;
                     if (parentIdUnchecked.Length == 0)
                     {
-                        child.SetParent(DefaultFrame);
+                        child.TrySetParent(DefaultFrame);
                         child.SetPose(rosTransform.Ros2Unity(), callerId);
                         continue;
                     }
@@ -361,7 +363,7 @@ namespace Iviz.Controllers.TF
                     else
                     {
                         var parent = GetOrCreateFrame(parentId);
-                        if (child.SetParent(parent))
+                        if (child.TrySetParent(parent))
                         {
                             child.SetPose(rosTransform.Ros2Unity(), callerId);
                         }
@@ -385,7 +387,7 @@ namespace Iviz.Controllers.TF
             var framesCopy = frames.Values.ToList();
             foreach (var frame in framesCopy)
             {
-                if (frame.SetParent(OriginFrame))
+                if (frame.TrySetParent(OriginFrame))
                 {
                     frame.SetPose(Pose.identity);
                 }
@@ -416,7 +418,7 @@ namespace Iviz.Controllers.TF
             return Instance.TryGetFrameImpl(id, out frame);
         }
 
-        static string ResolveFrameId(string frameId)
+        public static string ResolveFrameId(string frameId)
         {
             if (string.IsNullOrEmpty(frameId))
             {
@@ -428,27 +430,33 @@ namespace Iviz.Controllers.TF
                 return frameId;
             }
 
+            string? myId = ConnectionManager.MyId;
             if (frameId.Length == 1)
             {
-                return ConnectionManager.MyId ?? FixedFrameId;
+                return myId ?? FixedFrameId;
             }
 
             string frameIdSuffix = frameId[1] == '/' ? frameId[2..] : frameId[1..];
-            if (ConnectionManager.MyId == null)
+            if (myId == null)
             {
                 return frameIdSuffix;
             }
 
-            return ConnectionManager.MyId[0] == '/'
-                ? $"{ConnectionManager.MyId[1..]}/{frameIdSuffix}"
-                : $"{ConnectionManager.MyId}/{frameIdSuffix}";
+            return myId[0] == '/'
+                ? $"{myId[1..]}/{frameIdSuffix}"
+                : $"{myId}/{frameIdSuffix}";
         }
 
         public static TfFrame GetOrCreateFrame(string frameId, FrameNode? listener = null)
         {
-            if (frameId is null or "")
+            if (frameId is null)
             {
                 throw new ArgumentNullException(nameof(frameId));
+            }
+
+            if (frameId is "")
+            {
+                throw new ArgumentException("Cannot create frame with empty name", nameof(frameId));
             }
 
             string validatedFrameId = frameId[0] switch
@@ -603,12 +611,19 @@ namespace Iviz.Controllers.TF
         public static void Publish(string childFrame, in Msgs.GeometryMsgs.Transform rosTransform) =>
             Publish(FixedFrameId, childFrame, rosTransform);
 
-        public static void Publish(string? parentFrame, string childFrame, in Msgs.GeometryMsgs.Transform rosTransform)
+        public static void Publish(string parentFrame, string childFrame, in Msgs.GeometryMsgs.Transform rosTransform)
         {
-            instance?.outgoingMessages.Add(new TransformStamped(
-                CreateHeader(tfSeq++, parentFrame ?? FixedFrameId),
+            var transformStamped = new TransformStamped(
+                CreateHeader(tfSeq++, parentFrame),
                 ResolveFrameId(childFrame),
-                rosTransform));
+                rosTransform);
+            instance?.outgoingMessages.Add(transformStamped);
+        }
+
+        public static void Publish(TfFrame frame)
+        {
+            string parentFrameId = frame.Parent == OriginFrame ? "" : frame.Id;
+            Publish(parentFrameId, frame.Id, frame.Transform.AsLocalPose().Unity2RosTransform());
         }
 
         void DoPublish()

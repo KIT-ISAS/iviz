@@ -57,7 +57,7 @@ namespace Iviz.App
             panel.Yaw.ValueChanged += f => guiInputModule.CameraYaw = f;
             panel.Fov.ValueChanged += f => guiInputModule.CameraFieldOfView = f;
             panel.Position.ValueChanged += f => virtualCamera.transform.position = f;
-            panel.CloseButton.Clicked += () => DataPanelManager.HidePanelFor(this);
+            panel.CloseButton.Clicked += HidePanel;
         }
 
         public override void UpdatePanelFast()
