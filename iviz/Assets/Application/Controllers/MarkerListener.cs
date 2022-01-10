@@ -33,7 +33,6 @@ namespace Iviz.Controllers
         /// Temporary buffer to hold incoming marker messages from the network thread
         readonly Dictionary<(string Ns, int Id), Marker> newMarkerBuffer = new();
 
-        public override IModuleData ModuleData { get; }
         public override TfFrame Frame => TfListener.DefaultFrame;
 
         public MarkerConfiguration Config
@@ -212,10 +211,8 @@ namespace Iviz.Controllers
         
         public override IListener Listener { get; }
         
-        public MarkerListener(IModuleData moduleData, MarkerConfiguration? config, string topic, string type)
+        public MarkerListener(MarkerConfiguration? config, string topic, string type)
         {        
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            
             Config = config ?? new MarkerConfiguration
             {
                 Topic = topic,

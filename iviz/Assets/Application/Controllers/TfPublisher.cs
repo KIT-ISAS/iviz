@@ -3,17 +3,23 @@
 using System;
 using System.Collections.Generic;
 using Iviz.App;
+using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public class TfPublisher
+    public class TfPublisher : IController
     {
-        int counter;
+        const int PublishTimeInSec = 5;
+        
         readonly Dictionary<string, TfPublishedFrame> frames = new();
-        TfPublisherModuleData? currentModuleData;
+        PublishedFramePanelData? panelData;
+        int secondCounter;
+
+        public int NumPublishedFrames => frames.Count;
 
         public TfPublisher()
         {
@@ -22,12 +28,12 @@ namespace Iviz.Controllers
 
         void OnEverySecond()
         {
-            if (counter++ != 5)
+            if (secondCounter++ != PublishTimeInSec)
             {
                 return;
             }
             
-            counter = 0;
+            secondCounter = 0;
             Publish();
         }
 
@@ -39,11 +45,11 @@ namespace Iviz.Controllers
             }
         }
 
-        public TfFrame Add(string frameId, bool show = false)
+        public TfPublishedFrame Add(string frameId, bool show = false)
         {
             if (frames.TryGetValue(frameId, out var oldFrame))
             {
-                return oldFrame.TfFrame;
+                return oldFrame;
             }
 
             var newFrame = new TfPublishedFrame(frameId);
@@ -52,12 +58,12 @@ namespace Iviz.Controllers
             var newTfFrame = newFrame.TfFrame;
             if (show)
             {
-                currentModuleData = new TfPublisherModuleData(newTfFrame);
-                currentModuleData.ShowPanel();
+                panelData = new PublishedFramePanelData(newTfFrame);
+                panelData.ShowPanel();
             }
             
             TfListener.Publish(newTfFrame);
-            return newTfFrame;
+            return newFrame;
         }
 
         public bool Remove(string frameId)
@@ -70,9 +76,9 @@ namespace Iviz.Controllers
             frame.Dispose();
             frames.Remove(frameId);
             
-            if (currentModuleData != null && currentModuleData.Frame.Id == frameId)
+            if (panelData != null && panelData.Frame.Id == frameId)
             {
-                currentModuleData.HidePanel();
+                panelData.HidePanel();
             }
             
             return true;
@@ -82,23 +88,18 @@ namespace Iviz.Controllers
         {
             if (!frames.TryGetValue(frameId, out var frame))
             {
-                currentModuleData?.HidePanel();
+                panelData?.HidePanel();
                 return;
             }
 
-            if (currentModuleData != null && currentModuleData.Frame.Id == frameId)
+            if (panelData != null && panelData.Frame.Id == frameId)
             {
-                currentModuleData.ToggleShowPanel();
+                panelData.ToggleShowPanel();
                 return;
             }
             
-            currentModuleData = new TfPublisherModuleData(frame.TfFrame);
-            currentModuleData.ShowPanel();
-        }
-
-        public void HidePanel()
-        {
-            currentModuleData?.HidePanel();
+            panelData = new PublishedFramePanelData(frame.TfFrame);
+            panelData.ShowPanel();
         }
 
         public bool IsPublishing(string frameId) => frames.ContainsKey(frameId);
@@ -107,6 +108,13 @@ namespace Iviz.Controllers
         {
             GameThread.EverySecond -= OnEverySecond;
         }
+
+        public void ResetController()
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Visible { get; set; }
     }
 
     public sealed class TfPublishedFrame
@@ -126,5 +134,12 @@ namespace Iviz.Controllers
         {
             frameNode.DestroySelf();
         }
+    }
+
+    public class TfPublisherConfiguration : IConfiguration
+    {
+        public string Id { get; set; } = "";
+        public ModuleType ModuleType => ModuleType.TFPublisher;
+        public bool Visible => true;
     }
 }

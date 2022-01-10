@@ -14,13 +14,13 @@ namespace Iviz.App
     {
         internal const string Suffix = ".config.json";
 
-        readonly ItemListDialogContents itemList;
+        readonly ItemListDialogPanel itemList;
         readonly List<SavedFileInfo> files = new();
-        public override IDialogPanelContents Panel => itemList;
+        public override IDialogPanel Panel => itemList;
 
         public LoadConfigDialogData()
         {
-            itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.Load);
+            itemList = DialogPanelManager.GetPanelByType<ItemListDialogPanel>(DialogPanelType.Load);
             itemList.ButtonType = Resource.Widgets.ItemButtonWithDelete;
         }
 

@@ -11,24 +11,24 @@ using UnityEngine;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="GridMapPanelContents"/> 
+    /// <see cref="GridMapModulePanel"/> 
     /// </summary>
     public sealed class GridMapModuleData : ListenerModuleData
     {
         readonly GridMapListener listener;
-        readonly GridMapPanelContents panel;
+        readonly GridMapModulePanel panel;
 
         protected override ListenerController Listener => listener;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.GridMap;
         public override IConfiguration Configuration => listener.Config;
 
         public GridMapModuleData(ModuleDataConstructor constructor) :
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<GridMapPanelContents>(ModuleType.GridMap);
-            listener = new GridMapListener(this, (GridMapConfiguration?) constructor.Configuration, Topic);
+            panel = ModulePanelManager.GetPanelByResourceType<GridMapModulePanel>(ModuleType.GridMap);
+            listener = new GridMapListener((GridMapConfiguration?) constructor.Configuration, Topic);
             UpdateModuleButton();
         }
 

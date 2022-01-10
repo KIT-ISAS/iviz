@@ -31,6 +31,8 @@ namespace Iviz.Controllers
 
         GameObject? RobotObject => Robot?.BaseLinkObject;
 
+        public event Action? RobotFinishedLoading;
+
         public RobotModel? Robot
         {
             get => robot;
@@ -223,8 +225,6 @@ namespace Iviz.Controllers
             set => config.KeepMeshMaterials = value;
         }
 
-        public IModuleData ModuleData { get; }
-
         public TfFrame? Frame => node.Parent;
 
         public string Name
@@ -247,10 +247,9 @@ namespace Iviz.Controllers
 
         public event Action? Stopped;
 
-        public SimpleRobotController(IModuleData moduleData, RobotConfiguration? config)
+        public SimpleRobotController(RobotConfiguration? config)
         {
             node = FrameNode.Instantiate("SimpleRobotNode");
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             Config = config ?? new RobotConfiguration();
         }
 
@@ -444,12 +443,12 @@ namespace Iviz.Controllers
                         HelpText = "[Error Loading Robot. See Log.]";
                         Robot = null;
                         robotLoadingTask = null;
-                        ((SimpleRobotModuleData)ModuleData).OnRobotFinishedLoading();
+                        RobotFinishedLoading?.Invoke();
                         return;
                     case TaskStatus.Canceled:
                         HelpText = "[Robot Task canceled.]";
                         robotLoadingTask = null;
-                        ((SimpleRobotModuleData)ModuleData).OnRobotFinishedLoading();
+                        RobotFinishedLoading?.Invoke();
                         return;
                     case TaskStatus.RanToCompletion:
                         node.name = "SimpleRobotNode:" + Name;
@@ -477,7 +476,7 @@ namespace Iviz.Controllers
                         Smoothness = Smoothness;
                         Metallic = Metallic;
                         robotLoadingTask = null;
-                        ((SimpleRobotModuleData)ModuleData).OnRobotFinishedLoading();
+                        RobotFinishedLoading?.Invoke();
                         break;
                 }
             }
@@ -557,8 +556,8 @@ namespace Iviz.Controllers
             }
 
             Robot = null;
+            RobotFinishedLoading = null;
             Stopped?.Invoke();
-
             node.DestroySelf();
         }
 

@@ -17,12 +17,12 @@ namespace Iviz.App
         const string NoneStr = "<none>";
 
         [NotNull] readonly JointStateListener listener;
-        [NotNull] readonly JointStatePanelContents panel;
+        [NotNull] readonly JointStateModulePanel panel;
         readonly List<string> robotNames = new List<string>();
 
         protected override ListenerController Listener => listener;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.JointState;
 
         public override IConfiguration Configuration => listener.Config;
@@ -30,8 +30,8 @@ namespace Iviz.App
         public JointStateModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<JointStatePanelContents>(ModuleType.JointState);
-            listener = new JointStateListener(this);
+            panel = ModulePanelManager.GetPanelByResourceType<JointStateModulePanel>(ModuleType.JointState);
+            listener = new JointStateListener();
             if (constructor.Configuration != null)
             {
                 listener.Config = (JointStateConfiguration)constructor.Configuration;

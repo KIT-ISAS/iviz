@@ -27,12 +27,9 @@ namespace Iviz.Controllers
         readonly MeshMarkerResource? sphere;
         readonly ArrowResource? arrow;
         readonly AngleAxisResource? angleAxis;
-
+        readonly MagnitudeConfiguration config = new();
         Vector3 cachedDirection;
 
-        readonly MagnitudeConfiguration config = new();
-
-        public override IModuleData ModuleData { get; }
         public override TfFrame? Frame => frameNode.Parent;
 
         public MagnitudeConfiguration Config
@@ -207,10 +204,8 @@ namespace Iviz.Controllers
 
         public override IListener Listener { get; }
 
-        public MagnitudeListener(IModuleData moduleData, MagnitudeConfiguration? config, string topic, string type)
+        public MagnitudeListener(MagnitudeConfiguration? config, string topic, string type)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
             frameNode = FrameNode.Instantiate("DisplayNode");
 
             trail = ResourcePool.RentDisplay<TrailResource>();

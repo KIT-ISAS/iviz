@@ -12,20 +12,19 @@ namespace Iviz.App
 {
     public sealed class XRModuleData : ModuleData
     {
-        readonly XRPanelContents panel;
+        readonly XRModulePanel panel;
         readonly XRController controller;
 
         public override ModuleType ModuleType => ModuleType.XR;
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
         public XRModuleData(ModuleDataConstructor constructor) : base(constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<XRPanelContents>(ModuleType.XR);
+            panel = ModulePanelManager.GetPanelByResourceType<XRModulePanel>(ModuleType.XR);
 
-            controller = new XRController(this, ModuleListPanel.Instance.XRController,
-                (XRConfiguration?)constructor.Configuration);
+            controller = new XRController(ModuleListPanel.Instance.XRController, (XRConfiguration?)constructor.Configuration);
 
             UpdateModuleButton();
         }

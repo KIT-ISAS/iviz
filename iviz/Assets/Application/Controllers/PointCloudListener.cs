@@ -46,8 +46,6 @@ namespace Iviz.Controllers
             }
         }
 
-        public override IModuleData ModuleData { get; }
-
         public Vector2 MeasuredIntensityBounds =>
             PointCloudType == PointCloudType.Points
                 ? pointCloud.MeasuredIntensityBounds
@@ -203,9 +201,8 @@ namespace Iviz.Controllers
 
         public override IListener Listener { get; }
 
-        public PointCloudListener(IModuleData moduleData, PointCloudConfiguration? config, string topic)
+        public PointCloudListener(PointCloudConfiguration? config, string topic)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             FieldNames = fieldNames.AsReadOnly();
             node = FrameNode.Instantiate("[PointCloudNode]");
             pointCloud = ResourcePool.RentDisplay<PointListResource>(node.transform);

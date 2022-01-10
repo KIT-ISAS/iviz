@@ -12,16 +12,16 @@ using UnityEngine;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="ImagePanelContents"/> 
+    /// <see cref="ImageModulePanel"/> 
     /// </summary>
     public sealed class ImageModuleData : ListenerModuleData
     {
         readonly ImageListener listener;
-        readonly ImagePanelContents panel;
+        readonly ImageModulePanel panel;
 
         protected override ListenerController Listener => listener;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.Image;
         public override IConfiguration Configuration => listener.Config;
 
@@ -31,8 +31,8 @@ namespace Iviz.App
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
                 constructor.TryGetConfigurationType() ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<ImagePanelContents>(ModuleType.Image);
-            listener = new ImageListener(this, (ImageConfiguration?)constructor.Configuration, Topic, Type);
+            panel = ModulePanelManager.GetPanelByResourceType<ImageModulePanel>(ModuleType.Image);
+            listener = new ImageListener((ImageConfiguration?)constructor.Configuration, Topic, Type);
             UpdateModuleButton();
         }
 

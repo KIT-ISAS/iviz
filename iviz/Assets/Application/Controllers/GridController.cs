@@ -19,15 +19,12 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;
         readonly GridResource grid;
-
-        public IModuleData ModuleData { get; }
-
         readonly GridConfiguration config = new();
 
         public GridConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 Orientation = value.Orientation;
                 Visible = value.Visible;
@@ -57,7 +54,7 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
 
-                bool arEnabled = ARController.IsVisible;
+                bool arEnabled = ARController.Instance is { Visible: true };
                 bool gridVisible = value && (arEnabled && !HideInARMode || !arEnabled);
                 if (!gridVisible)
                 {
@@ -139,7 +136,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public GridController(IModuleData moduleData)
+        public GridController(GridConfiguration? config)
         {
             grid = ResourcePool.RentDisplay<GridResource>();
             grid.name = "Grid";
@@ -147,8 +144,6 @@ namespace Iviz.Controllers
 
             node = FrameNode.Instantiate("GridNode");
             grid.transform.SetParentLocal(node.transform);
-
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
 
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";
@@ -172,7 +167,7 @@ namespace Iviz.Controllers
 
             UpdateMesh();
 
-            Config = new GridConfiguration();
+            Config = config ?? new GridConfiguration();
         }
 
         void UpdateMesh()

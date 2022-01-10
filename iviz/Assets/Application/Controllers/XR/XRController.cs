@@ -77,12 +77,10 @@ namespace Iviz.Controllers.XR
 
         public XRConfiguration Config { get; }
 
-        public IModuleData ModuleData { get; }
-
         public TfFrame Frame => TfListener.GetOrCreateFrame(HeadFrameId);
 
 
-        public XRController(IModuleData moduleData, XRContents contents, XRConfiguration? configuration)
+        public XRController(XRContents contents, XRConfiguration? configuration)
         {
             gaze = contents.Gaze;
             gazeInteractor = gaze.GetComponent<XRRayInteractor>().AssertNotNull(nameof(gazeInteractor));
@@ -92,7 +90,6 @@ namespace Iviz.Controllers.XR
             rightPaddle = contents.RightPaddle;
             cameraOffset = contents.CameraOffset;
             mainCanvasHolder = contents.CanvasHolder;
-            ModuleData = moduleData;
 
             Config = configuration ?? new XRConfiguration();
 

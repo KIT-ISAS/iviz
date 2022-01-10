@@ -15,23 +15,23 @@ using Newtonsoft.Json;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="JoystickPanelContents"/> 
+    /// <see cref="JoystickModulePanel"/> 
     /// </summary>
     public sealed class JoystickModuleData : ModuleData
     {
         readonly JoystickController controller;
-        readonly JoystickPanelContents panel;
+        readonly JoystickModulePanel panel;
 
         public override ModuleType ModuleType => ModuleType.Joystick;
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
         public JoystickModuleData(ModuleDataConstructor constructor)
         {
-            panel = DataPanelManager.GetPanelByResourceType<JoystickPanelContents>(ModuleType.Joystick);
+            panel = ModulePanelManager.GetPanelByResourceType<JoystickModulePanel>(ModuleType.Joystick);
 
-            controller = new JoystickController(this, ModuleListPanel.TwistJoystick);
+            controller = new JoystickController(ModuleListPanel.TwistJoystick);
             if (constructor.Configuration != null)
             {
                 controller.Config = (JoystickConfiguration)constructor.Configuration;

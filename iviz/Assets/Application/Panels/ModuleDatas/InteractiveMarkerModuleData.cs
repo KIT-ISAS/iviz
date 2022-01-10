@@ -11,16 +11,16 @@ using Newtonsoft.Json;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="InteractiveMarkerPanelContents"/> 
+    /// <see cref="InteractiveMarkerModulePanel"/> 
     /// </summary>
     public sealed class InteractiveMarkerModuleData : ListenerModuleData, IInteractableModuleData
     {
         readonly InteractiveMarkerListener listener;
-        readonly InteractiveMarkerPanelContents panel;
+        readonly InteractiveMarkerModulePanel panel;
 
         protected override ListenerController Listener => listener;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.InteractiveMarker;
 
         public override IConfiguration Configuration => listener.Config;
@@ -28,10 +28,9 @@ namespace Iviz.App
         public InteractiveMarkerModuleData(ModuleDataConstructor constructor) :
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<InteractiveMarkerPanelContents>(
+            panel = ModulePanelManager.GetPanelByResourceType<InteractiveMarkerModulePanel>(
                 ModuleType.InteractiveMarker);
-            listener = new InteractiveMarkerListener(this,
-                (InteractiveMarkerConfiguration?)constructor.Configuration, Topic);
+            listener = new InteractiveMarkerListener((InteractiveMarkerConfiguration?)constructor.Configuration, Topic);
             Interactable = ModuleListPanel.SceneInteractable;
             UpdateModuleButton();
         }

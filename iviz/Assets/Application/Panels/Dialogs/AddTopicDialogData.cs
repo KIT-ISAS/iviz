@@ -28,16 +28,16 @@ namespace Iviz.App
             Color.Lerp(Color.blue, Color.white, 0.95f),
         };
 
-        readonly AddTopicDialogContents panel;
+        readonly AddTopicDialogPanel panel;
         readonly List<TopicWithResource> topics = new();
         readonly List<TopicWithResource> newTopics = new();
         uint? previousHash;
 
-        public override IDialogPanelContents Panel => panel;
+        public override IDialogPanel Panel => panel;
 
         public AddTopicDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<AddTopicDialogContents>(DialogPanelType.AddTopic);
+            panel = DialogPanelManager.GetPanelByType<AddTopicDialogPanel>(DialogPanelType.AddTopic);
             panel.ShowAll.Value = false;
         }
 

@@ -15,10 +15,11 @@ namespace Iviz.Controllers
         /// The ROS subscriber of this controller.
         /// </summary>
         public abstract IListener Listener { get; }
-
+        
+        /// <summary>
+        /// The frame on which the visualizations are attached.
+        /// </summary>
         public abstract TfFrame? Frame { get; }
-
-        public abstract IModuleData ModuleData { get; }
 
         public virtual void Dispose()
         {

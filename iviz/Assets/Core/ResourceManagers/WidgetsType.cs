@@ -98,7 +98,6 @@ namespace Iviz.Resources
             ARMarkerPanel = new Info<GameObject>(assetHolder.ARMarkerPanel, nameof(assetHolder.ARMarkerPanel));
             ARMarkerWidget = new Info<GameObject>(assetHolder.ARMarkers, nameof(assetHolder.ARMarkers));
 
-            TfPublisherPanel = new Info<GameObject>(assetHolder.TfPublisherPanel, nameof(assetHolder.TfPublisherPanel));
             TfPublisherWidget = new Info<GameObject>(assetHolder.TfPublisherWidget, nameof(assetHolder.TfPublisherWidget));
 
             CollapsibleWidget = new Info<GameObject>(assetHolder.Collapsible, nameof(assetHolder.Collapsible));

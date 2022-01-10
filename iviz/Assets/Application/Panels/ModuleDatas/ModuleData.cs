@@ -10,11 +10,13 @@ using Iviz.Resources;
 
 namespace Iviz.App
 {
-    public abstract class ModuleData : IModuleData
+    /// <summary>
+    /// Manager for all stuff related to a module: the <see cref="IController"/>,
+    /// the <see cref="IConfiguration"/>, the <see cref="ModulePanel"/>,
+    /// and the button in <see cref="ModuleListPanel"/>.
+    /// </summary>
+    public abstract class ModuleData : ModulePanelData
     {
-        protected static ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
-        protected static DataPanelManager DataPanelManager => ModuleListPanel.DataPanelManager;
-
         string buttonText = "";
 
         public string ButtonText
@@ -27,16 +29,15 @@ namespace Iviz.App
             }
         }
 
-        public string Topic { get; }
-        protected string Type { get; }
+        public string Topic { get; } = "";
+        protected string Type { get; } = "";
         public abstract ModuleType ModuleType { get; }
-        public abstract DataPanelContents Panel { get; }
-        public abstract IController? Controller { get; }
+        public abstract IController Controller { get; }
         public abstract IConfiguration Configuration { get; }
 
-        protected bool IsSelected => DataPanelManager.SelectedModuleData == this;
+        protected bool IsSelected => ModulePanelManager.SelectedModuleData == this;
 
-        protected ModuleData() : this("", "")
+        protected ModuleData()
         {
         }
 
@@ -52,7 +53,7 @@ namespace Iviz.App
                 ? GetDescriptionForTopic(Topic, Type)
                 : $"<b>{ModuleType}</b>";
 
-            ButtonText = Controller is null || Controller.Visible ? text : $"<color=grey>{text}</color>";
+            ButtonText = Controller.Visible ? text : $"<color=grey>{text}</color>";
         }
 
         protected static string GetDescriptionForTopic(string topic, string type)
@@ -66,11 +67,6 @@ namespace Iviz.App
 
         public void ToggleVisible()
         {
-            if (Controller == null)
-            {
-                return;
-            }
-            
             Controller.Visible = !Controller.Visible;
             if (Panel.Active && Panel.HideButton != null)
             {
@@ -82,11 +78,9 @@ namespace Iviz.App
 
         public virtual void Close()
         {
-            DataPanelManager.HideSelectedPanel();
+            HidePanel();
             ModuleListPanel.RemoveModule(this);
         }
-
-        public abstract void SetupPanel();
 
         public void ResetPanel()
         {
@@ -97,31 +91,6 @@ namespace Iviz.App
 
             Panel.ClearSubscribers();
             SetupPanel();
-        }
-
-        public virtual void UpdatePanel()
-        {
-        }
-
-        public virtual void UpdatePanelFast()
-        {
-        }
-        
-        public void ToggleShowPanel()
-        {
-            DataPanelManager.TogglePanel(this);
-            ModuleListPanel.AllGuiVisible = true;
-        }
-
-        public void ShowPanel()
-        {
-            DataPanelManager.SelectPanelFor(this);
-            ModuleListPanel.AllGuiVisible = true;
-        }
-
-        public void HidePanel()
-        {
-            DataPanelManager.HidePanelFor(this);
         }
 
         public abstract void UpdateConfiguration(string configAsJson, IEnumerable<string> fields);
@@ -135,7 +104,7 @@ namespace Iviz.App
 
         public void ResetController()
         {
-            Controller?.ResetController();
+            Controller.ResetController();
         }
 
         public override string ToString()

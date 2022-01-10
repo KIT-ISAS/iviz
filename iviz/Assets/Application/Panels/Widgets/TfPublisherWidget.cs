@@ -25,12 +25,16 @@ namespace Iviz.App
         public void UpdateText()
         {
             int numTfFrames = TfListener.Instance.NumFrames;
-            string frameStr = numTfFrames switch
+            int publishedFrames = ModuleListPanel.Instance.TfPublisher.NumPublishedFrames;
+            string frameStr = (numTfFrames, publishedFrames) switch
             {
-                0 => "TF Frames\n<b>No frames</b>",
-                1 => "TF Frames\n<b>1 frame</b>",
-                _ => $"TF Frames\n<b>{numTfFrames.ToString()} frames</b>"
+                (0, 0) => "Transform Frames\n<b>No frames</b>",
+                (1, 0) => "Transform Frames\n<b>1 frame, none published</b>",
+                (1, _) => $"Transform Frames\n<b>1 frame, {numTfFrames.ToString()} published</b>",
+                (_, 0) => $"Transform Frames\n<b>{numTfFrames.ToString()} frames, none published</b>",
+                _ => $"Transform Frames\n<b>{numTfFrames.ToString()} frames, {numTfFrames.ToString()} published</b>"
             };
+            
             text.text = frameStr;
         }
 

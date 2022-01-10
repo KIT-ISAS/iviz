@@ -30,8 +30,6 @@ namespace Iviz.Controllers
         int numCellsY;
         float cellSize;
 
-        public override IModuleData ModuleData { get; }
-
         public Vector2 MeasuredIntensityBounds => resource.MeasuredIntensityBounds;
 
         public override TfFrame? Frame => node.Parent;
@@ -158,10 +156,8 @@ namespace Iviz.Controllers
 
         public override IListener Listener { get; }
 
-        public GridMapListener(IModuleData moduleData, GridMapConfiguration? config, string topic)
+        public GridMapListener(GridMapConfiguration? config, string topic)
         {
-            ModuleData = moduleData ?? throw new System.ArgumentNullException(nameof(moduleData));
-
             FieldNames = fieldNames.AsReadOnly();
 
             node = FrameNode.Instantiate("[GridMapNode]");

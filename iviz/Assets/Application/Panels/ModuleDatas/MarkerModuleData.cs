@@ -15,14 +15,14 @@ using UnityEngine;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="MarkerPanelContents"/> 
+    /// <see cref="MarkerModulePanel"/> 
     /// </summary>
     public sealed class MarkerModuleData : ListenerModuleData
     {
         readonly MarkerListener listener;
-        readonly MarkerPanelContents panel;
+        readonly MarkerModulePanel panel;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         protected override ListenerController Listener => listener;
         public override ModuleType ModuleType => ModuleType.Marker;
 
@@ -32,8 +32,8 @@ namespace Iviz.App
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
                 constructor.TryGetConfigurationType() ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<MarkerPanelContents>(ModuleType.Marker);
-            listener = new MarkerListener(this, (MarkerConfiguration?)constructor.Configuration, Topic, Type);
+            panel = ModulePanelManager.GetPanelByResourceType<MarkerModulePanel>(ModuleType.Marker);
+            listener = new MarkerListener((MarkerConfiguration?)constructor.Configuration, Topic, Type);
             UpdateModuleButton();
         }
 

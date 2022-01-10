@@ -12,16 +12,16 @@ using UnityEngine;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="OccupancyGridPanelContents"/> 
+    /// <see cref="OccupancyGridModulePanel"/> 
     /// </summary>
     public sealed class OccupancyGridModuleData : ListenerModuleData
     {
         readonly OccupancyGridListener listener;
-        readonly OccupancyGridPanelContents panel;
+        readonly OccupancyGridModulePanel panel;
 
         protected override ListenerController Listener => listener;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.OccupancyGrid;
         public override IConfiguration Configuration => listener.Config;
 
@@ -29,8 +29,8 @@ namespace Iviz.App
         public OccupancyGridModuleData(ModuleDataConstructor constructor) :
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<OccupancyGridPanelContents>(ModuleType.OccupancyGrid);
-            listener = new OccupancyGridListener(this, (OccupancyGridConfiguration?)constructor.Configuration, Topic);
+            panel = ModulePanelManager.GetPanelByResourceType<OccupancyGridModulePanel>(ModuleType.OccupancyGrid);
+            listener = new OccupancyGridListener((OccupancyGridConfiguration?)constructor.Configuration, Topic);
             UpdateModuleButton();
         }
 

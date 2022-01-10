@@ -19,12 +19,12 @@ namespace Iviz.App
         const string NoneStr = "<none>";
 
         readonly DepthCloudController controller;
-        readonly DepthCloudPanelContents panel;
+        readonly DepthCloudModulePanel panel;
 
         ImageDialogData? colorDialogData;
         ImageDialogData? depthDialogData;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.DepthCloud;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
@@ -32,8 +32,8 @@ namespace Iviz.App
         public DepthCloudModuleData(ModuleDataConstructor constructor) :
             base(constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<DepthCloudPanelContents>(ModuleType.DepthCloud);
-            controller = new DepthCloudController(this, (DepthCloudConfiguration?)constructor.Configuration);
+            panel = ModulePanelManager.GetPanelByResourceType<DepthCloudModulePanel>(ModuleType.DepthCloud);
+            controller = new DepthCloudController((DepthCloudConfiguration?)constructor.Configuration);
             UpdateModuleButton();
         }
 

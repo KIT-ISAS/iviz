@@ -33,6 +33,7 @@ namespace Iviz.App
         [DataMember] public ARConfiguration AR { get; set; } = new();
         [DataMember] public JoystickConfiguration Joystick { get; set; } = new();
         [DataMember] public XRConfiguration XR { get; set; } = new();
+        [DataMember] public TfPublisherConfiguration TfPublisher { get; set; } = new();
 
         public IEnumerable<IEnumerable<IConfiguration>> CreateListOfEntries() => new IEnumerable<IConfiguration>[]
         {

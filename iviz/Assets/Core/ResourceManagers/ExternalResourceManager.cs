@@ -32,50 +32,35 @@ namespace Iviz.Displays
         const string StrMissingFileRemoving = "ExternalResourceManager: Missing file '{0}'. Removing.";
         const string StrServiceFailedWithMessage = "Model Loader Service failed to load '{0}'. Reason: {1}";
 
-        const string StrCallServiceFailed =
-            "ExternalResourceManager: Call Service failed! Are you sure iviz is connected and the Iviz.Model.Service program is running?";
+        const string StrCallServiceFailed = "ExternalResourceManager: Call Service failed! " +
+                                            "Are you sure iviz is connected and the Iviz.Model.Service program is running?";
 
         const int TimeoutInMs = 10000;
-
         const int Md5SumLength = 32;
 
 
         [DataContract]
-        public class ResourceFiles
+        sealed class ResourceFiles
         {
             [DataMember] int Version { get; set; }
-            [DataMember] public Dictionary<string, string> Models { get; set; }
-            [DataMember] public Dictionary<string, string> Textures { get; set; }
-            [DataMember] public Dictionary<string, string> Scenes { get; set; }
-            [DataMember] public Dictionary<string, string> RobotDescriptions { get; set; }
-
-            public ResourceFiles()
-            {
-                Models = new Dictionary<string, string>();
-                Textures = new Dictionary<string, string>();
-                Scenes = new Dictionary<string, string>();
-                RobotDescriptions = new Dictionary<string, string>();
-            }
+            [DataMember] public Dictionary<string, string> Models { get; set; } = new();
+            [DataMember] public Dictionary<string, string> Textures { get; set; } = new();
+            [DataMember] public Dictionary<string, string> Scenes { get; set; } = new();
+            [DataMember] public Dictionary<string, string> RobotDescriptions { get; set; } = new();
         }
 
         readonly ResourceFiles resourceFiles = new();
-
         readonly Dictionary<string, Info<GameObject>> loadedModels = new();
-
         readonly Dictionary<string, Info<Texture2D>> loadedTextures = new();
-
         readonly Dictionary<string, Info<GameObject>> loadedScenes = new();
-
         readonly Dictionary<string, float> temporaryBlacklist = new();
-
         readonly AsyncLock mutex = new();
+        readonly GameObject? node;
 
         CancellationTokenSource runningTs = new();
 
         public int ResourceCount => resourceFiles.Models.Count + resourceFiles.Textures.Count +
                                     resourceFiles.Scenes.Count + resourceFiles.RobotDescriptions.Count;
-
-        readonly GameObject? node;
 
         public ReadOnlyCollection<string> GetListOfModels() => resourceFiles.Models.Keys.ToList().AsReadOnly();
 
@@ -99,11 +84,11 @@ namespace Iviz.Displays
 
             if (!File.Exists(Settings.ResourcesFilePath))
             {
-                RosLogger.Debug($"{this}: Failed to find file " + Settings.ResourcesFilePath);
+                RosLogger.Debug($"{this}: Failed to find file {Settings.ResourcesFilePath}");
                 return;
             }
 
-            RosLogger.Debug($"{this}: Using resource file " + Settings.ResourcesFilePath);
+            RosLogger.Debug($"{this}: Using resource file {Settings.ResourcesFilePath}");
 
             try
             {

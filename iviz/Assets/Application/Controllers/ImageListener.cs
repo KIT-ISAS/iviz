@@ -53,7 +53,6 @@ namespace Iviz.Controllers
         public bool IsMono => imageTexture.IsMono;
         public string Topic => config.Topic;
         public override TfFrame? Frame => node.Parent;
-        public override IModuleData ModuleData { get; }
 
         public Vector2Int ImageSize =>
             Texture != null ? new Vector2Int(Texture.width, Texture.height) : Vector2Int.zero;
@@ -213,9 +212,8 @@ namespace Iviz.Controllers
 
         public override IListener Listener { get; }
 
-        public ImageListener(IModuleData moduleData, ImageConfiguration? config, string topic, string type)
+        public ImageListener(ImageConfiguration? config, string topic, string type)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             imageTexture = new ImageTexture();
             node = FrameNode.Instantiate("[ImageNode]");
             billboard = ResourcePool.RentDisplay<ImageResource>();

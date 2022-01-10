@@ -9,12 +9,12 @@ namespace Iviz.App
 {
     public sealed class TfDialogData : DialogData
     {
-        readonly TfDialogContents panel;
-        public override IDialogPanelContents Panel => panel;
+        readonly TfDialogPanel panel;
+        public override IDialogPanel Panel => panel;
 
         public TfDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<TfDialogContents>(DialogPanelType.Tf);
+            panel = DialogPanelManager.GetPanelByType<TfDialogPanel>(DialogPanelType.Tf);
         }
 
         public override void SetupPanel()
@@ -44,7 +44,7 @@ namespace Iviz.App
                 }
                 
                 var tfFrame = tfPublisher.Add(frameName);
-                panel.TfLog.SelectedFrame = tfFrame;
+                panel.TfLog.SelectedFrame = tfFrame.TfFrame;
                 panel.TfLog.Flush();
             };
 
@@ -52,7 +52,7 @@ namespace Iviz.App
             panel.ShowOnlyUsed.ValueChanged += f =>
             {
                 TfListener.Instance.KeepAllFrames = !f;
-                TfListener.Instance.ModuleData.ResetPanel();
+                ModuleListPanel.Instance.ResetTfPanel();
             };
         }
 

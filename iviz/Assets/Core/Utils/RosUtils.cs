@@ -57,10 +57,24 @@ namespace Iviz.Core
         public static Vector3 Unity2RosRpy(this in Vector3 v) => (v * -Mathf.Deg2Rad).Unity2Ros();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Ros2Unity(this in Vector3f p) => new(-p.Y, p.Z, p.X);
-
+        public static Vector3 Ros2Unity(this in Vector3f p)
+        {
+            Vector3 q;
+            q.x = -p.Y;
+            q.y = p.Z;
+            q.z = p.X;
+            return q;
+        }
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 ToUnity(this in Msgs.GeometryMsgs.Vector3 p) => new((float)p.X, (float)p.Y, (float)p.Z);
+        public static Vector3 ToUnity(this in Msgs.GeometryMsgs.Vector3 p)
+        {
+            Vector3 q;
+            q.x = (float)p.X;
+            q.y = (float)p.Y;
+            q.z = (float)p.Z;
+            return q;
+        }
 
         public static Msgs.GeometryMsgs.Vector3 ToRosVector3(this in Vector3 p) => new(p.x, p.y, p.z);
 
@@ -96,6 +110,23 @@ namespace Iviz.Core
             q.Y = -p.x;
             q.Z = p.y;
             return q;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void Unity2Ros(this in Vector3 p, out Msgs.GeometryMsgs.Vector3 q)
+        {
+            //new(p.z, -p.x, p.y);
+            q.X = p.z;
+            q.Y = -p.x;
+            q.Z = p.y;
+        }
+
+        static void Unity2Ros(this in Vector3 p, out Point q)
+        {
+            //new(p.z, -p.x, p.y);
+            q.X = p.z;
+            q.Y = -p.x;
+            q.Z = p.y;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -220,7 +251,7 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void Unity2RosQuaternion(this in UnityEngine.Quaternion p, out Quaternion q)
+        static void Unity2Ros(this in UnityEngine.Quaternion p, out Quaternion q)
         {
             //new(-p.z, p.x, -p.y, p.w);
             q.X = -p.z;
@@ -254,19 +285,25 @@ namespace Iviz.Core
         {
             //new(p.position.Unity2RosVector3(), p.rotation.Unity2RosQuaternion());
             Transform q;
-            q.Translation = p.position.Unity2RosVector3();
-            p.rotation.Unity2RosQuaternion(out q.Rotation);
+            p.position.Unity2Ros(out q.Translation);
+            p.rotation.Unity2Ros(out q.Rotation);
             return q;
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pose Unity2RosPose(this in UnityEngine.Pose p)
         {
             Pose q;
-            q.Position = p.position.Unity2RosPoint();
-            p.rotation.Unity2RosQuaternion(out q.Orientation);
+            p.position.Unity2Ros(out q.Position);
+            p.rotation.Unity2Ros(out q.Orientation);
             return q;
         }
+        
+        public static void Unity2Ros(this in UnityEngine.Pose p, out Transform q)
+        {
+            p.position.Unity2Ros(out q.Translation);
+            p.rotation.Unity2Ros(out q.Rotation);
+        }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this float f) => !float.IsFinite(f);

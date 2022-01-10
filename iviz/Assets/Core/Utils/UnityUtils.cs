@@ -181,12 +181,13 @@ namespace Iviz.Core
             t.SetParent(parent, false);
         }
 
-        public static void SetLocalPose(this Transform t, in Pose p)
-        {
-            t.localPosition = p.position;
-            t.localRotation = p.rotation;
-        }
+        public static void SetLocalPose(this Transform t, in Pose p) => SetLocalPose(t, p.position, p.rotation);
 
+        public static void SetLocalPose(this Transform t, in Vector3 p, in Quaternion q)
+        {
+            t.localPosition = p;
+            t.localRotation = q;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pose Inverse(this in Pose p)
@@ -410,7 +411,7 @@ namespace Iviz.Core
         public static void PlaneIntersection(in Ray plane, in Ray ray, out Vector3 intersection, out float scaleRay)
         {
             scaleRay = Vector3.Dot(ray.origin - plane.origin, plane.direction) /
-                       Vector3.Dot(-ray.direction, plane.direction);
+                       -Vector3.Dot(ray.direction, plane.direction);
             intersection = ray.origin + scaleRay * ray.direction;
         }
 
@@ -477,8 +478,11 @@ namespace Iviz.Core
             (center, size) = (b.center, b.size);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this in Pose p, out Vector3 position, out Quaternion rotation) =>
-            (position, rotation) = (p.position, p.rotation);
+        public static void Deconstruct(this in Pose p, out Vector3 position, out Quaternion rotation)
+        {
+            position = p.position;
+            rotation = p.rotation;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Ray r, out Vector3 origin, out Vector3 direction) =>
@@ -540,6 +544,7 @@ namespace Iviz.Core
 
         public static Span<T> AsSpan<T>(this Memory<T> memory) where T : unmanaged => memory.Span;
 
+        /// Creates a temporary native array that lasts one frame. Should not be disposed manually.
         public static unsafe NativeArray<T> CreateNativeArrayWrapper<T>(T* ptr, int length) where T : unmanaged
         {
             var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(ptr, length, Allocator.None);
@@ -569,6 +574,15 @@ namespace Iviz.Core
                 > 180 => angleInDeg - 360,
                 _ => angleInDeg
             };
+
+        public static Vector3 RegularizeRpy(in Vector3 p)
+        {
+            Vector3 q;
+            q.x = RegularizeAngle(p.x);
+            q.y = RegularizeAngle(p.y);
+            q.z = RegularizeAngle(p.z);
+            return q;
+        }
 
         public static void SetBounds(this BoxCollider collider, in Bounds bounds) =>
             (collider.center, collider.size) = bounds;
@@ -613,7 +627,7 @@ namespace Iviz.Core
             float y = rotation.y;
             float z = rotation.z;
             float w = rotation.w;
-            
+
             // copied from unity code
             float num1 = x * 2f;
             float num2 = y * 2f;

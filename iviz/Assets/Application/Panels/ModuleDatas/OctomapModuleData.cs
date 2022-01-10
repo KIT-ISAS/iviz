@@ -12,17 +12,17 @@ using UnityEngine;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="OctomapPanelContents"/> 
+    /// <see cref="OctomapModulePanel"/> 
     /// </summary>
 
     public sealed class OctomapModuleData : ListenerModuleData
     {
         [NotNull] readonly OctomapListener listener;
-        [NotNull] readonly OctomapPanelContents panel;
+        [NotNull] readonly OctomapModulePanel panel;
 
         protected override ListenerController Listener => listener;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.Octomap;
         public override IConfiguration Configuration => listener.Config;
 
@@ -30,8 +30,8 @@ namespace Iviz.App
         public OctomapModuleData([NotNull] ModuleDataConstructor constructor) :
         base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<OctomapPanelContents>(ModuleType.Octomap);
-            listener = new OctomapListener(this);
+            panel = ModulePanelManager.GetPanelByResourceType<OctomapModulePanel>(ModuleType.Octomap);
+            listener = new OctomapListener();
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;

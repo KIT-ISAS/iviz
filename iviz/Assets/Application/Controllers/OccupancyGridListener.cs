@@ -25,20 +25,17 @@ namespace Iviz.Controllers
 
         readonly FrameNode cubeNode;
         readonly FrameNode textureNode;
-
-        OccupancyGridResource[] gridTiles = Array.Empty<OccupancyGridResource>();
         readonly List<OccupancyGridTextureResource> textureTiles = new();
 
+        OccupancyGridResource[] gridTiles = Array.Empty<OccupancyGridResource>();
+        
         int numCellsX;
         int numCellsY;
         float cellSize;
-
-        public override IModuleData ModuleData { get; }
-
-        public override TfFrame? Frame => cubeNode.Parent;
-
         bool isProcessing;
 
+        public override TfFrame? Frame => cubeNode.Parent;
+        
         bool IsProcessing
         {
             get => isProcessing;
@@ -212,10 +209,8 @@ namespace Iviz.Controllers
 
         public override IListener Listener { get; }
 
-        public OccupancyGridListener(IModuleData moduleData, OccupancyGridConfiguration? config, string topic)
+        public OccupancyGridListener(OccupancyGridConfiguration? config, string topic)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
             cubeNode = FrameNode.Instantiate("OccupancyGrid Cube Node");
             textureNode = FrameNode.Instantiate("OccupancyGrid Texture Node");
 

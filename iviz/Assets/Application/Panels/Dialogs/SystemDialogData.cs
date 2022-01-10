@@ -23,8 +23,8 @@ namespace Iviz.App
 
         static readonly XmlRpcValue.JsonConverter JsonConverter = new();
 
-        readonly SystemDialogContents panel;
-        public override IDialogPanelContents Panel => panel;
+        readonly SystemDialogPanel panel;
+        public override IDialogPanel Panel => panel;
 
         readonly SortedSet<string> hostsBuffer = new();
 
@@ -40,7 +40,7 @@ namespace Iviz.App
 
         public SystemDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<SystemDialogContents>(DialogPanelType.System);
+            panel = DialogPanelManager.GetPanelByType<SystemDialogPanel>(DialogPanelType.System);
         }
 
         public override void SetupPanel()
@@ -56,7 +56,7 @@ namespace Iviz.App
                 descriptionHash = null;
 
                 panel.TextBottom.text = EmptyBottomText;
-                if (panel.Mode == SystemDialogContents.ModeType.Aliases)
+                if (panel.Mode == SystemDialogPanel.ModeType.Aliases)
                 {
                     SetupAliases();
                 }
@@ -72,19 +72,19 @@ namespace Iviz.App
         {
             switch (panel.Mode)
             {
-                case SystemDialogContents.ModeType.Topics:
+                case SystemDialogPanel.ModeType.Topics:
                     UpdateTopics();
                     break;
-                case SystemDialogContents.ModeType.Services:
+                case SystemDialogPanel.ModeType.Services:
                     UpdateServices();
                     break;
-                case SystemDialogContents.ModeType.Params:
+                case SystemDialogPanel.ModeType.Params:
                     UpdateParameters();
                     break;
-                case SystemDialogContents.ModeType.Nodes:
+                case SystemDialogPanel.ModeType.Nodes:
                     UpdateNodes();
                     break;
-                case SystemDialogContents.ModeType.Aliases:
+                case SystemDialogPanel.ModeType.Aliases:
                     UpdateAliases();
                     break;
             }
@@ -230,18 +230,18 @@ namespace Iviz.App
         {
             switch (panel.Mode)
             {
-                case SystemDialogContents.ModeType.Topics:
+                case SystemDialogPanel.ModeType.Topics:
                     UpdateTopicsLink(link);
                     break;
-                case SystemDialogContents.ModeType.Services:
+                case SystemDialogPanel.ModeType.Services:
                     providerAddress = null;
                     UpdateServicesLink(link);
                     break;
-                case SystemDialogContents.ModeType.Params:
+                case SystemDialogPanel.ModeType.Params:
                     paramValue = default;
                     UpdateParametersLink(link);
                     break;
-                case SystemDialogContents.ModeType.Nodes:
+                case SystemDialogPanel.ModeType.Nodes:
                     nodeAddress = null;
                     UpdateNodesLink(link);
                     break;

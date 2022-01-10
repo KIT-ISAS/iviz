@@ -10,16 +10,16 @@ using Newtonsoft.Json;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="PointCloudPanelContents"/> 
+    /// <see cref="PointCloudModulePanel"/> 
     /// </summary>
     public sealed class PointCloudModuleData : ListenerModuleData
     {
         readonly PointCloudListener listener;
-        readonly PointCloudPanelContents panel;
+        readonly PointCloudModulePanel panel;
 
         protected override ListenerController Listener => listener;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.PointCloud;
         public override IConfiguration Configuration => listener.Config;
 
@@ -27,8 +27,8 @@ namespace Iviz.App
         public PointCloudModuleData(ModuleDataConstructor constructor) :
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<PointCloudPanelContents>(ModuleType.PointCloud);
-            listener = new PointCloudListener(this, (PointCloudConfiguration?) constructor.Configuration, Topic);
+            panel = ModulePanelManager.GetPanelByResourceType<PointCloudModulePanel>(ModuleType.PointCloud);
+            listener = new PointCloudListener((PointCloudConfiguration?) constructor.Configuration, Topic);
             UpdateModuleButton();
         }
 

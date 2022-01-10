@@ -1,6 +1,5 @@
 ﻿#nullable enable
 
-using System;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -27,7 +26,6 @@ namespace Iviz.Controllers
         TextureFormat? lastDepthFormat;
         Listener<CameraInfo>? depthInfoListener;
 
-        public IModuleData ModuleData { get; }
         public TfFrame? Frame => node.Parent;
         public IListener? DepthListener { get; private set; }
         public IListener? ColorListener { get; private set; }
@@ -272,9 +270,8 @@ namespace Iviz.Controllers
             }
         }
 
-        public DepthCloudController(IModuleData moduleData, DepthCloudConfiguration? config)
+        public DepthCloudController(DepthCloudConfiguration? config)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             depthImageTexture = new ImageTexture();
             colorImageTexture = new ImageTexture();
 

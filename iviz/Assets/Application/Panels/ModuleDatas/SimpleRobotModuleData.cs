@@ -15,16 +15,16 @@ using Newtonsoft.Json;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="SimpleRobotPanelContents"/> 
+    /// <see cref="SimpleRobotModulePanel"/> 
     /// </summary>
     public sealed class SimpleRobotModuleData : ModuleData
     {
         const string ParamSubstring = "_description";
         const string NoneStr = "<color=#b0b0b0ff><i><none></i></color>";
 
-        readonly SimpleRobotPanelContents panel;
+        readonly SimpleRobotModulePanel panel;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.Robot;
         public override IConfiguration Configuration => RobotController.Config;
         public override IController Controller => RobotController;
@@ -36,10 +36,11 @@ namespace Iviz.App
         public SimpleRobotModuleData(ModuleDataConstructor constructor) :
             base(constructor.Topic, constructor.Type)
         {
-            RobotController = new SimpleRobotController(this, (RobotConfiguration?) constructor.Configuration);
-            panel = DataPanelManager.GetPanelByResourceType<SimpleRobotPanelContents>(ModuleType.Robot);
+            RobotController = new SimpleRobotController((RobotConfiguration?) constructor.Configuration);
+            panel = ModulePanelManager.GetPanelByResourceType<SimpleRobotModulePanel>(ModuleType.Robot);
             UpdateModuleButton();
 
+            RobotController.RobotFinishedLoading += OnRobotFinishedLoading;
             ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
         }
 
@@ -62,6 +63,7 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
+            RobotController.RobotFinishedLoading -= OnRobotFinishedLoading;
             RobotController.Dispose();
             ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
         }

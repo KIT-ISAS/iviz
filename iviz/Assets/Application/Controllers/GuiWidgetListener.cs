@@ -26,10 +26,9 @@ namespace Iviz.Controllers
         public static void DisposeDefaultHandler() => defaultHandler?.Dispose();
 
         public static GuiWidgetListener DefaultHandler =>
-            defaultHandler ??= new GuiWidgetListener(null, null, "~dialogs");
+            defaultHandler ??= new GuiWidgetListener(null, "~dialogs");
 
 
-        readonly IModuleData? moduleData;
         readonly GuiWidgetConfiguration config = new();
         readonly Dictionary<string, GuiObject> widgets = new();
         readonly Dictionary<string, GuiObject> dialogs = new();
@@ -40,18 +39,14 @@ namespace Iviz.Controllers
         public bool Interactable { get; set; }
         public override IListener Listener { get; }
 
-        public override IModuleData ModuleData =>
-            moduleData ?? throw new InvalidOperationException("Listener has no module data");
-
         public GuiWidgetConfiguration Config
         {
             get => config;
             set { config.Topic = value.Topic; }
         }
 
-        public GuiWidgetListener(IModuleData? moduleData, GuiWidgetConfiguration? configuration, string topic)
+        public GuiWidgetListener(GuiWidgetConfiguration? configuration, string topic)
         {
-            this.moduleData = moduleData;
             Config = configuration ?? new GuiWidgetConfiguration
             {
                 Topic = topic

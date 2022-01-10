@@ -11,32 +11,25 @@ using UnityEngine;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="GridPanelContents"/> 
+    /// <see cref="GridModulePanel"/> 
     /// </summary>
     public sealed class GridModuleData : ModuleData
     {
         const float InteriorColorFactor = 0.25f;
 
-        readonly GridPanelContents panel;
+        readonly GridModulePanel panel;
 
         public GridController GridController { get; }
         public override ModuleType ModuleType => ModuleType.Grid;
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => GridController.Config;
         public override IController Controller => GridController;
 
         public GridModuleData(ModuleDataConstructor constructor)
         {
-            panel = DataPanelManager.GetPanelByResourceType<GridPanelContents>(ModuleType.Grid);
-
-            GridController = new GridController(this);
-            if (constructor.Configuration != null)
-            {
-                GridController.Config = (GridConfiguration) constructor.Configuration;
-            }
-
+            panel = ModulePanelManager.GetPanelByResourceType<GridModulePanel>(ModuleType.Grid);
+            GridController = new GridController((GridConfiguration?) constructor.Configuration);
             UpdateModuleButton();
-
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
         }
 

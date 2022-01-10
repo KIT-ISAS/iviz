@@ -155,6 +155,12 @@ namespace Iviz.App
         public float CameraPitch { get; set; } = 45;
         public float CameraRoll { get; set; }
 
+        public Vector3 CameraRpy
+        {
+            get => new(CameraRoll, CameraPitch, CameraYaw);
+            set => (CameraRoll, CameraPitch, CameraYaw) = UnityUtils.RegularizeRpy(value);
+        }
+
         public float CameraFieldOfView
         {
             get => Settings.VirtualCamera == null ? 0 : Settings.VirtualCamera.GetHorizontalFov();
@@ -166,9 +172,9 @@ namespace Iviz.App
                 }
             }
         }
-        
+
         public TfFrame Frame => TfListener.Instance.FixedFrame;
-        
+
         void Awake()
         {
             EnhancedTouchSupport.Enable();
@@ -230,7 +236,7 @@ namespace Iviz.App
                 if (!Settings.IsPhone && mOrbitCenterOverride == null)
                 {
                     ProcessFlying();
-                    Transform.position += Transform.rotation * speed;
+                    Transform.localPosition += Transform.localRotation * speed;
                 }
 
                 return;
@@ -267,8 +273,7 @@ namespace Iviz.App
                 ProcessFlying();
 
                 var rotation = OrbitRotation;
-                Transform.rotation = rotation;
-                Transform.position = -orbitRadius * rotation.Forward() + orbitCenter + rotation * speed;
+                Transform.SetLocalPose(-orbitRadius * rotation.Forward() + orbitCenter + rotation * speed, rotation);
                 return;
             }
 
@@ -278,8 +283,7 @@ namespace Iviz.App
 
                 var rotation = OrbitRotation;
                 orbitCenter = mOrbitCenterOverride.AbsoluteUnityPose.position;
-                Transform.rotation = rotation;
-                Transform.position = -orbitRadius * rotation.Forward() + orbitCenter;
+                Transform.SetLocalPose(-orbitRadius * rotation.Forward() + orbitCenter, rotation);
             }
             else
             {
@@ -287,8 +291,8 @@ namespace Iviz.App
                 ProcessFlying();
 
                 var rotation = OrbitRotation;
-                Transform.rotation = rotation;
-                Transform.position += rotation * speed;
+                Transform.localRotation = rotation;
+                Transform.localPosition += rotation * speed;
             }
         }
 
@@ -446,7 +450,12 @@ namespace Iviz.App
         public static void TryUnsetDraggedObject(IScreenDraggable draggable)
         {
             // do not fetch Instance here, we may be in the middle of shutting down the scene
-            if (instance == null || instance.DraggedObject != draggable)
+            if (instance == null)
+            {
+                return;
+            }
+
+            if (instance.DraggedObject != draggable)
             {
                 return;
             }
@@ -593,7 +602,7 @@ namespace Iviz.App
 
         void StartOrbiting()
         {
-            var diff = orbitCenter - Transform.position;
+            var diff = orbitCenter - Transform.localPosition;
             orbitRadius = Math.Min(5, diff.magnitude);
 
             var (diffX, diffY, diffZ) = diff;
@@ -601,7 +610,7 @@ namespace Iviz.App
             CameraPitch = -Mathf.Atan2(diffY, Mathf.Sqrt(diffX * diffX + diffZ * diffZ)) * Mathf.Rad2Deg;
 
             var rotation = OrbitRotation;
-            Transform.SetPositionAndRotation(-orbitRadius * rotation.Forward() + orbitCenter, rotation);
+            Transform.SetLocalPose(-orbitRadius * rotation.Forward() + orbitCenter, rotation);
         }
 
         void ProcessOrbiting()
@@ -683,7 +692,7 @@ namespace Iviz.App
 
             orbitRadius += altDistanceDiff * radiusCoeff;
 
-            Quaternion q = Transform.rotation;
+            Quaternion q = Transform.localRotation;
 
             if (!allowPivotMotion)
             {
@@ -828,14 +837,14 @@ namespace Iviz.App
 
             if (!Settings.IsPhone)
             {
-                float distanceToFrame = (Transform.position - targetPosition).magnitude;
+                float distanceToFrame = (Transform.localPosition - targetPosition).magnitude;
                 float zoomRadius = Mathf.Clamp(distanceToFrame, minDistanceLookAt, maxDistanceLookAt);
-                return targetPosition - Transform.forward * zoomRadius;
+                return targetPosition - Transform.localRotation.Forward() * zoomRadius;
             }
 
             orbitCenter = targetPosition;
             orbitRadius = Mathf.Clamp(orbitRadius, minDistanceLookAt, maxDistanceLookAt);
-            return -orbitRadius * Transform.rotation.Forward() + orbitCenter;
+            return -orbitRadius * Transform.localRotation.Forward() + orbitCenter;
         }
 
         static Vector3Int GetBaseInput()
@@ -876,10 +885,10 @@ namespace Iviz.App
 
         void OnClick(ClickHitInfo clickHitInfo, bool isShortClick)
         {
-            TriggerEnvironmentClick(clickHitInfo, isShortClick);
+            TriggerEnvironmentClick(clickHitInfo);
         }
 
-        public static void TriggerEnvironmentClick(ClickHitInfo clickHitInfo, bool isShortClick = true)
+        public static void TriggerEnvironmentClick(ClickHitInfo clickHitInfo)
         {
             if (clickHitInfo.TryGetRaycastResults(out var hitResults))
             {

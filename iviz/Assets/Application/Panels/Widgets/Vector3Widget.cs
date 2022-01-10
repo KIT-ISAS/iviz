@@ -2,6 +2,7 @@
 using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,18 +27,24 @@ namespace Iviz.App
                 {
                     throw new ArgumentNullException(nameof(value));
                 }
-                
+
                 name = "ColorPicker:" + value;
                 label.text = value;
             }
         }
 
         Vector3 value;
+
         public Vector3 Value
         {
             get => value;
             set
             {
+                if ((this.value - value).ApproximatelyZero())
+                {
+                    return;
+                }
+
                 this.value = value;
                 UpdateInputLabels();
             }
@@ -57,6 +64,28 @@ namespace Iviz.App
         }
 
         public event Action<Vector3> ValueChanged;
+        public event Action<Vector3> EndEdit;
+
+        void ParseValue()
+        {
+            Vector3 v;
+            if (!float.TryParse(inputX.Value, out v.x))
+            {
+                v.x = 0;
+            }
+
+            if (!float.TryParse(inputY.Value, out v.y))
+            {
+                v.y = 0;
+            }
+
+            if (!float.TryParse(inputZ.Value, out v.z))
+            {
+                v.z = 0;
+            }
+
+            value = v;
+        }
 
         void OnValueChanged()
         {
@@ -64,21 +93,20 @@ namespace Iviz.App
             {
                 return;
             }
-            Vector3 v;
-            if (!float.TryParse(inputX.Value, out v.x))
-            {
-                v.x = 0;
-            }
-            if (!float.TryParse(inputY.Value, out v.y))
-            {
-                v.y = 0;
-            }
-            if (!float.TryParse(inputZ.Value, out v.z))
-            {
-                v.z = 0;
-            }
-            value = v;
+
+            ParseValue();
             ValueChanged?.Invoke(value);
+        }
+
+        void OnEndEdit()
+        {
+            if (disableUpdates)
+            {
+                return;
+            }
+
+            ParseValue();
+            EndEdit?.Invoke(value);
         }
 
 
@@ -94,6 +122,7 @@ namespace Iviz.App
         public void ClearSubscribers()
         {
             ValueChanged = null;
+            EndEdit = null;
         }
 
         [NotNull]
@@ -128,9 +157,18 @@ namespace Iviz.App
         {
             Interactable = true;
             UpdateInputLabels();
+
+            inputX.SetContentType(TMP_InputField.ContentType.DecimalNumber);
+            inputY.SetContentType(TMP_InputField.ContentType.DecimalNumber);
+            inputZ.SetContentType(TMP_InputField.ContentType.DecimalNumber);
+
             inputX.SubscribeValueChanged(_ => OnValueChanged());
             inputY.SubscribeValueChanged(_ => OnValueChanged());
             inputZ.SubscribeValueChanged(_ => OnValueChanged());
+            
+            inputX.SubscribeEndEdit(_ => OnEndEdit());
+            inputY.SubscribeEndEdit(_ => OnEndEdit());
+            inputZ.SubscribeEndEdit(_ => OnEndEdit());
         }
 
         void Start()

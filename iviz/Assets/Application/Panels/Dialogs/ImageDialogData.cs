@@ -12,13 +12,13 @@ namespace Iviz.App
 {
     public sealed class ImageDialogData : DialogData
     {
-        readonly ImageDialogContents panel;
+        readonly ImageDialogPanel panel;
         readonly GameObject canvas;
         readonly ImageDialogListener listener;
         string title = "";
         string lastSample = "";
 
-        public override IDialogPanelContents Panel => panel;
+        public override IDialogPanel Panel => panel;
         public event Action? Closed;
 
         public string Title
@@ -39,7 +39,7 @@ namespace Iviz.App
                 canvas.ProcessCanvasForXR();
             }
 
-            panel = canvas.GetComponentInChildren<ImageDialogContents>();
+            panel = canvas.GetComponentInChildren<ImageDialogPanel>();
             panel.Closed += () => Closed?.Invoke();
 
 

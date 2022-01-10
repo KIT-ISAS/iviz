@@ -28,7 +28,7 @@ namespace Iviz.Displays
             arCameraTransform = arCamera.transform;
             Transform.SetParentLocal(TfListener.OriginFrame.Transform);
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
-            gameObject.SetActive(!ARController.IsVisible);
+            gameObject.SetActive(ARController.Instance is not { Visible: true });
         }
 
         void OnARCameraViewChanged(bool newState)
@@ -55,11 +55,6 @@ namespace Iviz.Displays
             }
 
             var pose = ARController.ARPoseToUnity(arCameraTransform.AsPose());
-            //var relativePose = TfListener.RelativePoseToFixedFrame(pose);
-            //Transform.SetParentLocal(TfListener.Instance.FixedFrame.Transform);
-
-            //var relativePose = TfListener.RelativePoseToOrigin(pose);
-            //Transform.SetParentLocal(TfListener.OriginFrame.Transform);
             Transform.SetLocalPose(pose);
         }
 

@@ -58,7 +58,7 @@ namespace Iviz.App
         [SerializeField] UpperCanvasPanel? upperCanvasPanel;
         [SerializeField] BottomCanvasPanel? bottomCanvasPanel;
         [SerializeField] ARSidePanel? arSidePanel;
-        [SerializeField] DataPanelManager? dataPanelManager;
+        [SerializeField] ModulePanelManager? dataPanelManager;
         [SerializeField] DialogPanelManager? dialogPanelManager;
         [SerializeField] ARJoystick? arJoystick;
         [SerializeField] TwistJoystick? twistJoystick;
@@ -83,7 +83,7 @@ namespace Iviz.App
         ModuleListButtons? buttons;
         DialogManager? dialogs;
         IMenuDialogContents? menuDialog;
-        CameraModuleData? cameraModuleData;
+        CameraPanelData? cameraPanelData;
 
         UpperCanvasPanel UpperCanvas => upperCanvasPanel.AssertNotNull(nameof(upperCanvasPanel));
         BottomCanvasPanel BottomCanvas => bottomCanvasPanel.AssertNotNull(nameof(bottomCanvasPanel));
@@ -103,7 +103,7 @@ namespace Iviz.App
         Canvas RootCanvas => rootCanvas.AssertNotNull(nameof(rootCanvas));
         public AnchorCanvasPanel AnchorCanvasPanel => anchorCanvasPanel.AssertNotNull(nameof(anchorCanvasPanel));
         public Button UnlockButton => AnchorCanvasPanel.Unlock;
-        public DataPanelManager DataPanelManager => dataPanelManager.AssertNotNull(nameof(dataPanelManager));
+        public ModulePanelManager ModulePanelManager => dataPanelManager.AssertNotNull(nameof(dataPanelManager));
         public DialogPanelManager DialogPanelManager => dialogPanelManager.AssertNotNull(nameof(dialogPanelManager));
         public TwistJoystick TwistJoystick => twistJoystick.AssertNotNull(nameof(twistJoystick));
         public ARJoystick ARJoystick => arJoystick.AssertNotNull(nameof(arJoystick));
@@ -313,8 +313,8 @@ namespace Iviz.App
 
             BottomCanvas.CameraButtonClicked += () =>
             {
-                cameraModuleData ??= new CameraModuleData();
-                cameraModuleData.ToggleShowPanel();
+                cameraPanelData ??= new CameraPanelData();
+                cameraPanelData.ToggleShowPanel();
             };
 
             connectionData.MasterActiveChanged += _ => ConnectionManager.Connection.Disconnect();
@@ -927,14 +927,40 @@ namespace Iviz.App
                 Dialogs.TfTreeData.UpdatePanel();
             }
         }
+        
+        public void ShowARPanel()
+        {
+            var arModuleData = ModuleDatas.FirstOrDefault(moduleData => moduleData is ARModuleData);
+            arModuleData?.ShowPanel();
+        }
 
+        public void ResetTfPanel()
+        {
+            ModuleDatas[0].ResetPanel();            
+        }
+
+        public void ShowMenu(MenuEntryDescription[] menuEntries, Action<uint> callback)
+        {
+            if (menuEntries == null)
+            {
+                throw new ArgumentNullException(nameof(menuEntries));
+            }
+
+            if (menuDialog == null)
+            {
+                throw new NullReferenceException("Menu dialog has not been set!");
+            }
+
+            menuDialog.Set(menuEntries, callback);
+        }
+        
         void UpdateCameraStats()
         {
             using var description = BuilderPool.Rent();
             description.Append(
                 Settings.IsXR
                     ? "<b>XR View</b>\n"
-                    : ARController.IsVisible
+                    : ARController.Instance is { Visible: true }
                         ? "<b>AR View</b>\n"
                         : "<b>Virtual View</b>\n"
             );
@@ -996,21 +1022,6 @@ namespace Iviz.App
         void UpdateFpsCounter()
         {
             frameCounter++;
-        }
-
-        public void ShowMenu(MenuEntryDescription[] menuEntries, Action<uint> callback)
-        {
-            if (menuEntries == null)
-            {
-                throw new ArgumentNullException(nameof(menuEntries));
-            }
-
-            if (menuDialog == null)
-            {
-                throw new NullReferenceException("Menu dialog has not been set!");
-            }
-
-            menuDialog.Set(menuEntries, callback);
         }
     }
 }

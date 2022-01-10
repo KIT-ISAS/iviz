@@ -19,8 +19,6 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         readonly LaserScanConfiguration config = new();
 
-        public override IModuleData ModuleData { get; }
-
         public override TfFrame? Frame => node.Parent;
 
         public Vector2 MeasuredIntensityBounds => resource.MeasuredIntensityBounds;
@@ -138,10 +136,8 @@ namespace Iviz.Controllers
 
         public override IListener Listener { get; }
 
-        public LaserScanListener(IModuleData moduleData, LaserScanConfiguration? config, string topic)
+        public LaserScanListener(LaserScanConfiguration? config, string topic)
         {
-            ModuleData = moduleData;
-
             node = FrameNode.Instantiate("[LaserScanNode]");
             resource = ResourcePool.RentDisplay<RadialScanResource>(node.transform);
             Config = config ?? new LaserScanConfiguration

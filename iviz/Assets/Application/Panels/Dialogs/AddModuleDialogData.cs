@@ -26,12 +26,12 @@ namespace Iviz.App
             ModuleType.Joystick
         };
 
-        readonly ItemListDialogContents itemList;
-        public override IDialogPanelContents Panel => itemList;
+        readonly ItemListDialogPanel itemList;
+        public override IDialogPanel Panel => itemList;
 
         public AddModuleDialogData()
         {
-            itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.AddModule);
+            itemList = DialogPanelManager.GetPanelByType<ItemListDialogPanel>(DialogPanelType.AddModule);
         }
 
         public override void SetupPanel()

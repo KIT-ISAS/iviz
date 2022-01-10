@@ -14,11 +14,6 @@
         /// Module type of the controller. 
         /// </summary>
         ModuleType ModuleType { get; }
-
-        /// <summary>
-        /// Whether the controller is visible. 
-        /// </summary>
-        bool Visible { get; }
     }
 
     public interface IConfigurationWithTopic : IConfiguration

@@ -13,14 +13,14 @@ using Newtonsoft.Json;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="TfPanelContents"/> 
+    /// <see cref="TfModulePanel"/> 
     /// </summary>
     public sealed class TfModuleData : ModuleData
     {
         readonly TfListener listener;
-        readonly TfPanelContents panel;
+        readonly TfModulePanel panel;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.TF;
         public override IConfiguration Configuration => listener.Config;
         public override IController Controller => listener;
@@ -29,8 +29,8 @@ namespace Iviz.App
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
                 constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<TfPanelContents>(ModuleType.TF);
-            listener = new TfListener(this, (TfConfiguration?)constructor.Configuration, Topic);
+            panel = ModulePanelManager.GetPanelByResourceType<TfModulePanel>(ModuleType.TF);
+            listener = new TfListener((TfConfiguration?)constructor.Configuration, Topic);
             UpdateModuleButton();
         }
 

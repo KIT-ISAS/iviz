@@ -298,7 +298,7 @@ namespace Iviz.App
                 Pose pose = poseDisplay switch
                 {
                     PoseDisplayType.ToRoot => frame.OriginWorldPose,
-                    PoseDisplayType.ToFixed => TfListener.RelativeToFixedFrame(frame.AbsoluteUnityPose),
+                    PoseDisplayType.ToFixed => frame.FixedWorldPose,
                     PoseDisplayType.ToParent => frame.Transform.AsLocalPose(),
                     _ => Pose.identity
                 };

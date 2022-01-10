@@ -416,7 +416,7 @@ namespace Iviz.Controllers
                             else
                             {
                                 successList.Add(true);
-                                posesList.Add(frame.OriginWorldPose.Unity2RosPose());
+                                posesList.Add(frame.FixedWorldPose.Unity2RosPose());
                             }
                         }
 

@@ -123,7 +123,7 @@ namespace Iviz.Controllers
             switch (executableMarker.Action)
             {
                 case ARMarkerAction.Origin:
-                    if (ARController.Instance == null || !ARController.IsVisible)
+                    if (ARController.Instance is not { Visible: true })
                     {
                         break;
                     }

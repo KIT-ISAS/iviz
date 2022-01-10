@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Linq;
 using Iviz.Common;
@@ -24,14 +26,13 @@ namespace Iviz.Controllers
 
         readonly MeshListResource resource;
         readonly FrameNode node;
-        OctreeHelper helper;
-        Octomap lastMsg;
+        OctreeHelper? helper;
+        Octomap? lastMsg;
         readonly Action<NativeList<float4>> setterFunction;
 
-        public override IModuleData ModuleData { get; }
-        public override TfFrame Frame => node.Parent;
+        public override TfFrame? Frame => node.Parent;
 
-        readonly OctomapConfiguration config = new OctomapConfiguration();
+        readonly OctomapConfiguration config = new();
 
         public OctomapConfiguration Config
         {
@@ -96,9 +97,8 @@ namespace Iviz.Controllers
         IListener listener;
         public override IListener Listener => listener;
 
-        public OctomapListener([NotNull] IModuleData moduleData)
+        public OctomapListener()
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             node = FrameNode.Instantiate("Octomap Node");
 
             resource = ResourcePool.RentDisplay<MeshListResource>(node.Transform);

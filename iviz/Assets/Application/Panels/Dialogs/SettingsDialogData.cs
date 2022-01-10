@@ -22,9 +22,9 @@ namespace Iviz.App
 
         static readonly string[] ModelServerModesNames = {"Off", "On", "On + File"};
 
-        readonly SettingsDialogContents panel;
+        readonly SettingsDialogPanel panel;
         readonly Controllers.ModelService modelService = new();
-        public override IDialogPanelContents Panel => panel;
+        public override IDialogPanel Panel => panel;
 
         static ISettingsManager SettingsManager => Settings.SettingsManager ??
                                                    throw new InvalidOperationException(
@@ -32,7 +32,7 @@ namespace Iviz.App
 
         public SettingsDialogData(SettingsConfiguration? config = null)
         {
-            panel = DialogPanelManager.GetPanelByType<SettingsDialogContents>(DialogPanelType.Settings);
+            panel = DialogPanelManager.GetPanelByType<SettingsDialogPanel>(DialogPanelType.Settings);
             if (config != null)
             {
                 SettingsManager.Config = config;

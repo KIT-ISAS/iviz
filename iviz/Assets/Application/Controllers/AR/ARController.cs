@@ -1,14 +1,10 @@
 ﻿#nullable enable
 
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.Serialization;
 using System.Threading;
 using Iviz.App;
 using Iviz.Common;
-using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
-using Iviz.Controllers.XR;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
@@ -17,12 +13,10 @@ using Iviz.Msgs.StdMsgs;
 using Iviz.MarkerDetection;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
-using Iviz.Roslib.Utils;
 using Iviz.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
-using UnityEngine.XR.ARFoundation;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using Vector3 = UnityEngine.Vector3;
@@ -49,29 +43,7 @@ namespace Iviz.Controllers
         Fps30,
     }
 
-    [DataContract]
-    public sealed class ARConfiguration : JsonToString, IConfiguration
-    {
-        [IgnoreDataMember] public float WorldScale { get; set; } = 1.0f;
-        [IgnoreDataMember] public SerializableVector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset;
-
-        [DataMember] public bool EnableQrDetection { get; set; } = true;
-        [DataMember] public bool EnableArucoDetection { get; set; } = true;
-        [DataMember] public bool EnableMeshing { get; set; } = true;
-        [DataMember] public bool EnablePlaneDetection { get; set; } = true;
-        [DataMember] public OcclusionQualityType OcclusionQuality { get; set; } = OcclusionQualityType.Fast;
-        [DataMember] public PublicationFrequency PublicationFrequency { get; set; } = PublicationFrequency.Fps15;
-
-        [IgnoreDataMember] public float WorldAngle { get; set; }
-        [IgnoreDataMember] public bool ShowARJoystick { get; set; }
-        [IgnoreDataMember] public bool PinRootMarker { get; set; }
-
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public ModuleType ModuleType => ModuleType.AugmentedReality;
-        [DataMember] public bool Visible { get; set; } = true;
-    }
-
-    public abstract class ARController : MonoBehaviour, IController, IHasFrame
+    public abstract class ARController : IController, IHasFrame
     {
         public enum RootMover
         {
@@ -90,52 +62,27 @@ namespace Iviz.Controllers
         public static readonly Vector3 DefaultWorldOffset = new(0.5f, 0, -0.2f);
         public static bool IsActive => Instance != null;
         public static ARFoundationController? Instance { get; protected set; }
-        public static bool IsVisible => Instance != null && Instance.Visible;
-        public static bool IsXRVisible => Settings.IsHololens || IsVisible;
-
-        public static bool TryGetMeshManager([NotNullWhen(true)] out ARMeshManager? meshManager)
-        {
-            if (Instance != null)
-            {
-                meshManager = Instance.MeshManager;
-                return meshManager != null;
-            }
-
-            if (XRController.Instance != null)
-            {
-                meshManager = XRController.Instance.MeshManager;
-                return meshManager != null;
-            }
-
-            meshManager = null;
-            return false;
-        }
-
+        public static bool IsXRVisible => Settings.IsHololens || Instance is { Visible: true };
+        
         readonly ARConfiguration config = new();
         readonly MarkerDetector detector = new();
 
-        IModuleData? moduleData;
         float? joyVelocityAngle;
         Vector3? joyVelocityPos;
         uint markerSeq;
-        Canvas? canvas;
-
-        protected Canvas Canvas => canvas != null
-            ? canvas
-            : (canvas = GameObject.Find("Canvas").GetComponent<Canvas>().AssertNotNull(nameof(canvas)));
 
         public ARMarkerExecutor MarkerExecutor { get; } = new();
-        public Sender<ARMarkerArray>? MarkerSender { get; private set; }
-        public Sender<Image>? ColorSender { get; private set; }
-        public Sender<Image>? DepthSender { get; private set; }
-        public Sender<Image>? DepthConfidenceSender { get; private set; }
-        protected Sender<CameraInfo>? ColorInfoSender { get; private set; }
-        protected Sender<CameraInfo>? DepthInfoSender { get; private set; }
+        public Sender<ARMarkerArray>? MarkerSender { get; }
+        public Sender<Image>? ColorSender { get; }
+        public Sender<Image>? DepthSender { get; }
+        public Sender<Image>? DepthConfidenceSender { get; }
+        protected Sender<CameraInfo>? ColorInfoSender { get; }
+        protected Sender<CameraInfo>? DepthInfoSender { get; }
 
         public ARConfiguration Config
         {
             get => config;
-            set
+            protected set
             {
                 Visible = value.Visible;
                 WorldScale = value.WorldScale;
@@ -259,14 +206,7 @@ namespace Iviz.Controllers
                 }
             }
         }
-
-        public IModuleData ModuleData
-        {
-            get => moduleData ?? throw new InvalidOperationException("Controller has not been started!");
-            set => moduleData = value ?? throw new InvalidOperationException("Cannot set null value as module data");
-        }
-
-
+        
         public TfFrame Frame => TfListener.GetOrCreateFrame(HeadFrameId);
 
         /// <summary>
@@ -281,17 +221,14 @@ namespace Iviz.Controllers
 
         public event Action<RootMover>? WorldPoseChanged;
 
-        public ARMeshManager? MeshManager { get; protected set; }
-
-        protected virtual void Awake()
+        protected ARController()
         {
-            gameObject.name = "AR";
-
             ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
             ARJoystick.PointerUp += OnARJoystickPointerUp;
             ARJoystick.Close += ModuleListPanel.Instance.ARSidePanel.ToggleARJoystick;
-
+            GameThread.EveryFrame += Update;
+            
             GuiInputModule.Instance.UpdateQualityLevel();
 
             MarkerSender = new Sender<ARMarkerArray>("~xr/markers");
@@ -440,7 +377,7 @@ namespace Iviz.Controllers
         /// <param name="unityPose">The pose to compensate</param>
         public static Pose ARPoseToUnity(in Pose unityPose)
         {
-            if (Instance == null || Instance.Visible)
+            if (Instance is null || Instance.Visible)
             {
                 return unityPose;
             }
@@ -450,7 +387,7 @@ namespace Iviz.Controllers
 
         public static Pose OriginToRelativePose(in Pose unityPose)
         {
-            if (Instance == null || Instance.Visible)
+            if (Instance is null || Instance.Visible)
             {
                 return unityPose;
             }
@@ -508,6 +445,8 @@ namespace Iviz.Controllers
             ARJoystick.ChangedPosition -= OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle -= OnARJoystickChangedAngle;
             ARJoystick.PointerUp -= OnARJoystickPointerUp;
+            GameThread.EveryFrame -= Update;
+
             ShowARJoystick = false;
             Instance = null;
 

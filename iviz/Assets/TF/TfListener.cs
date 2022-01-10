@@ -69,7 +69,6 @@ namespace Iviz.Controllers.TF
 
         public static event Action? AfterProcessMessages;
 
-        public IModuleData ModuleData { get; }
         public Listener<TFMessage> Listener { get; }
         public Listener<TFMessage> ListenerStatic { get; }
 
@@ -229,14 +228,12 @@ namespace Iviz.Controllers.TF
             }
         }
 
-        public TfListener(IModuleData moduleData, TfConfiguration? config, string topic)
+        public TfListener(TfConfiguration? config, string topic)
         {
             instance = this;
 
             try
             {
-                ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
                 unityFrame = Add(CreateFrameObject("TF", null, null));
                 unityFrame.ForceInvisible = true;
                 unityFrame.Visible = false;
@@ -584,20 +581,23 @@ namespace Iviz.Controllers.TF
         {
             var originFrame = OriginFrame.Transform;
             var (position, rotation) = unityPose;
-            return new Pose(
-                originFrame.InverseTransformPoint(position),
-                originFrame.rotation.Inverse() * rotation
-            );
+
+            Pose p;
+            p.position = originFrame.InverseTransformPoint(position);
+            p.rotation = originFrame.rotation.Inverse() * rotation;
+            return p;
         }
 
         public static Pose RelativeToFixedFrame(in Pose unityPose)
         {
+            // equals unityPose unless in AR mode or flipped z 
             var fixedFrame = Instance.FixedFrame.Transform;
             var (position, rotation) = unityPose;
-            return new Pose(
-                fixedFrame.InverseTransformPoint(position),
-                fixedFrame.rotation.Inverse() * rotation
-            );
+            
+            Pose p;
+            p.position = fixedFrame.InverseTransformPoint(position);
+            p.rotation = fixedFrame.rotation.Inverse() * rotation;
+            return p;
         }
 
         public static Pose FixedFramePose => Instance.FixedFrame.Transform.AsPose();
@@ -613,10 +613,10 @@ namespace Iviz.Controllers.TF
 
         public static void Publish(string parentFrame, string childFrame, in Msgs.GeometryMsgs.Transform rosTransform)
         {
-            var transformStamped = new TransformStamped(
-                CreateHeader(tfSeq++, parentFrame),
-                ResolveFrameId(childFrame),
-                rosTransform);
+            TransformStamped transformStamped;
+            transformStamped.Header = CreateHeader(tfSeq++, parentFrame);
+            transformStamped.ChildFrameId = ResolveFrameId(childFrame);
+            transformStamped.Transform = rosTransform;
             instance?.outgoingMessages.Add(transformStamped);
         }
 
@@ -651,9 +651,27 @@ namespace Iviz.Controllers.TF
         }
 
         /// <summary>
-        /// Creates a header using the frame start as the timestamp.
+        /// Creates a header using the fixed frame as the frame id and the frame start as the timestamp.
         /// </summary>
-        public static Header CreateHeader(uint seqId, string? frameId = null) =>
-            new(seqId, GameThread.TimeNow, frameId ?? FixedFrameId);
+        public static Header CreateHeader(uint seqId)
+        {
+            Header h;
+            h.Seq = seqId;
+            h.Stamp = GameThread.TimeNow;
+            h.FrameId = FixedFrameId;
+            return h;
+        }
+        
+        /// <summary>
+        /// Creates a header with the given frame id using the frame start as the timestamp.
+        /// </summary>
+        public static Header CreateHeader(uint seqId, string frameId)
+        {
+            Header h;
+            h.Seq = seqId;
+            h.Stamp = GameThread.TimeNow;
+            h.FrameId = frameId;
+            return h;
+        }
     }
 }

@@ -25,10 +25,8 @@ namespace Iviz.Controllers
         public Sender<Joy>? SenderJoy { get; private set; }
         public ISender? SenderTwist { get; private set; }
 
-        public JoystickController(IModuleData moduleData, TwistJoystick joystick)
+        public JoystickController(TwistJoystick joystick)
         {
-            ModuleData = moduleData;
-
             this.joystick = joystick;
             this.joystick.Changed += PublishData;
 
@@ -144,8 +142,6 @@ namespace Iviz.Controllers
             get => config.MaxSpeed;
             set => config.MaxSpeed = value.IsInvalid() ? Vector3.zero : value;
         }
-
-        public IModuleData ModuleData { get; }
 
         public void Dispose()
         {

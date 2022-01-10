@@ -13,14 +13,14 @@ namespace Iviz.App
     {
         const string Suffix = LoadConfigDialogData.Suffix;
 
-        readonly SaveConfigDialogContents panel;
+        readonly SaveConfigDialogPanel panel;
         readonly List<SavedFileInfo> files = new();
         
-        public override IDialogPanelContents Panel => panel;
+        public override IDialogPanel Panel => panel;
 
         public SaveConfigDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<SaveConfigDialogContents>(DialogPanelType.SaveAs);
+            panel = DialogPanelManager.GetPanelByType<SaveConfigDialogPanel>(DialogPanelType.SaveAs);
             panel.ButtonType = Resource.Widgets.ItemButtonWithDelete;
         }
 

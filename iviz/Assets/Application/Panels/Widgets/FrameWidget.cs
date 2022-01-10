@@ -58,7 +58,7 @@ namespace Iviz.App
                 else
                 {
                     description.Append("<b>").Append(frame.Id).Append("</b>\n");
-                    RosUtils.FormatPose(frame.OriginWorldPose, description, RosUtils.PoseFormat.OnlyPosition);
+                    RosUtils.FormatPose(frame.FixedWorldPose, description, RosUtils.PoseFormat.OnlyPosition);
                 }
 
                 uint newHash = Crc32Calculator.Compute(description);

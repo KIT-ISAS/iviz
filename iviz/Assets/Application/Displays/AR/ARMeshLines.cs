@@ -10,6 +10,7 @@ using Iviz.Resources;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
+using XRUtils = Iviz.Controllers.XRUtils;
 
 namespace Iviz.Displays
 {
@@ -83,7 +84,7 @@ namespace Iviz.Displays
             MeshFilter.sharedMesh = new Mesh { name = "AR Mesh" };
             Resource.Visible = Visible;
 
-            if (ARController.TryGetMeshManager(out var meshManager))
+            if (XRUtils.TryGetMeshManager(out var meshManager))
             {
                 meshManager.meshesChanged += OnMeshChanged;
             }
@@ -243,7 +244,7 @@ namespace Iviz.Displays
 
             Destroy(MeshFilter.sharedMesh);
 
-            if (ARController.TryGetMeshManager(out var meshManager))
+            if (XRUtils.TryGetMeshManager(out var meshManager))
             {
                 meshManager.meshesChanged -= OnMeshChanged;
             }

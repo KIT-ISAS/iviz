@@ -40,7 +40,7 @@ namespace Iviz.Ros
         {
             if (disposed)
             {
-                RosLogger.Error("Tried to close rosbag file twice");
+                RosLogger.Error($"{this}: Tried to close rosbag file twice");
                 return;
             }
 
@@ -70,7 +70,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Debug($"{this}: Exception during EnqueueMessage: ", e);
+                RosLogger.Debug($"{this}: Exception during EnqueueMessage", e);
             }
         }
 
@@ -96,7 +96,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Debug($"{this}: Exception during WriteMessagesAsync: ", e);
+                RosLogger.Debug($"{this}: Exception during WriteMessagesAsync", e);
             }
 
             if (writer != null)

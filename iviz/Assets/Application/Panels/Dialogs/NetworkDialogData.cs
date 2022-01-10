@@ -10,12 +10,12 @@ namespace Iviz.App
 {
     public sealed class NetworkDialogData : DialogData
     {
-        readonly NetworkDialogContents panel;
-        public override IDialogPanelContents Panel => panel;
+        readonly NetworkDialogPanel panel;
+        public override IDialogPanel Panel => panel;
 
         public NetworkDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<NetworkDialogContents>(DialogPanelType.Network);
+            panel = DialogPanelManager.GetPanelByType<NetworkDialogPanel>(DialogPanelType.Network);
         }
 
         public override void SetupPanel()

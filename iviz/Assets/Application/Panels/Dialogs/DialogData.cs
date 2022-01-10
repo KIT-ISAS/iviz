@@ -12,7 +12,7 @@ namespace Iviz.App
 
         protected static ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
         protected static DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
-        public abstract IDialogPanelContents Panel { get; }
+        public abstract IDialogPanel Panel { get; }
 
         bool detached;
 
@@ -23,7 +23,7 @@ namespace Iviz.App
             {
                 detached = value;
 
-                if (Panel is DetachablePanelContents detachablePanel)
+                if (Panel is DetachableDialogPanel detachablePanel)
                 {
                     detachablePanel.Detached = value;
                 }
