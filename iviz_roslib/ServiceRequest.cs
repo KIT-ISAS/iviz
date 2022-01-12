@@ -40,7 +40,7 @@ internal sealed class ServiceRequest<TService> where TService : IService
         this.remoteEndPoint = remoteEndPoint;
         this.serviceInfo = serviceInfo;
 
-        task = TaskUtils.StartLongTask(async () => await StartSession().AwaitNoThrow(this), runningTs.Token);
+        task = TaskUtils.Run(async () => await StartSession().AwaitNoThrow(this), runningTs.Token);
     }
 
     public bool IsAlive => !task.IsCompleted;

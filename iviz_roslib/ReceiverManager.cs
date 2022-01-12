@@ -16,12 +16,13 @@ internal sealed class ReceiverManager<T> where T : IMessage
     const int DefaultTimeoutInMs = 5000;
 
     readonly AsyncLock mutex = new();
-    readonly ConcurrentDictionary<Uri, SessionManager> connectorsByUri = new();
+    readonly ConcurrentDictionary<Uri, ReceiverConnector> connectorsByUri = new();
     readonly ConcurrentDictionary<Uri, IProtocolReceiver> receiversByUri = new();
     readonly RosClient client;
     readonly RosSubscriber<T> subscriber;
     readonly TopicInfo<T> topicInfo;
     readonly RosTransportHint transportHint;
+    HashSet<Uri> cachedPublisherUris = new();
 
     bool isPaused;
 
@@ -50,13 +51,8 @@ internal sealed class ReceiverManager<T> where T : IMessage
 
     public string Topic => topicInfo.Topic;
     public string TopicType => topicInfo.Type;
-
-    HashSet<Uri> allPublisherUris = new();
-
     public int NumConnections => receiversByUri.Count;
-
     public int NumActiveConnections => receiversByUri.Count(pair => pair.Value.IsConnected);
-
     public bool RequestNoDelay { get; }
     public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
@@ -72,7 +68,7 @@ internal sealed class ReceiverManager<T> where T : IMessage
         using (await mutex.LockAsync(token))
         {
             var newPublishers = new HashSet<Uri>(publisherUris);
-            allPublisherUris = newPublishers;
+            cachedPublisherUris = newPublishers;
 
             if (receiversByUri.Keys.Any(key => !newPublishers.Contains(key)))
             {
@@ -108,7 +104,7 @@ internal sealed class ReceiverManager<T> where T : IMessage
 
                     var rosNodeClient = client.CreateNodeClient(remoteUri);
                     Logger.LogDebugFormat("{0}: Adding connector for '{1}'", this, remoteUri);
-                    var receiverConnector = new SessionManager(rosNodeClient, topicInfo.Topic, transportHint,
+                    var receiverConnector = new ReceiverConnector(rosNodeClient, topicInfo.Topic, transportHint,
                         udpTopicRequest, OnConnectionSucceeded);
                     connectorsByUri[remoteUri] = receiverConnector;
                 }
@@ -123,7 +119,7 @@ internal sealed class ReceiverManager<T> where T : IMessage
         }
     }
 
-    void OnConnectionSucceeded(SessionManager connector, SessionManager.Response response)
+    void OnConnectionSucceeded(ReceiverConnector connector, ReceiverConnector.Response response)
     {
         IProtocolReceiver receiver;
         var (tcpEndpoint, udpResponse, udpClient) = response;
@@ -166,7 +162,7 @@ internal sealed class ReceiverManager<T> where T : IMessage
 
                 var rosNodeClient = client.CreateNodeClient(remoteUri);
                 token.ThrowIfCancellationRequested();
-                var receiverConnector = new SessionManager(rosNodeClient, topicInfo.Topic, transportHint,
+                var receiverConnector = new ReceiverConnector(rosNodeClient, topicInfo.Topic, transportHint,
                     udpTopicRequest, OnConnectionSucceeded);
 
                 connectorsByUri[remoteUri] = receiverConnector;
@@ -214,12 +210,13 @@ internal sealed class ReceiverManager<T> where T : IMessage
         });
 
         await connectorTasks.WhenAll().AwaitNoThrow(this);
-        return true;
+
+        return receiversToDelete.Length != 0 || connectorsToDelete.Length != 0;
     }
 
     public void Stop()
     {
-        Task.Run(() => StopAsync(default)).WaitNoThrow(this);
+        TaskUtils.Run(() => StopAsync(default).AsTask()).WaitNoThrow(this);
     }
 
     public async ValueTask StopAsync(CancellationToken token)
@@ -235,9 +232,9 @@ internal sealed class ReceiverManager<T> where T : IMessage
 
     public ReadOnlyCollection<SubscriberReceiverState> GetStates()
     {
-        var publisherUris = allPublisherUris;
+        var publisherUris = cachedPublisherUris;
         var receivers = new Dictionary<Uri, IProtocolReceiver>(receiversByUri);
-        var connectors = new Dictionary<Uri, SessionManager>(connectorsByUri);
+        var connectors = new Dictionary<Uri, ReceiverConnector>(connectorsByUri);
 
         var states = new List<SubscriberReceiverState>();
         foreach (Uri uri in publisherUris)
@@ -250,23 +247,22 @@ internal sealed class ReceiverManager<T> where T : IMessage
                     continue;
                 }
 
-                if (connectors.TryGetValue(uri, out var receiverConnector))
+                if (connectors.TryGetValue(uri, out var connector) && connector.IsAlive)
                 {
-                    if (receiverConnector.IsAlive)
-                    {
-                        states.Add(receiverConnector.State);
-                        continue;
-                    }
+                    states.Add(connector.State);
+                    continue;
                 }
 
                 states.Add(receiver.State);
                 continue;
             }
-
-            if (connectors.TryGetValue(uri, out var connector))
+            else
             {
-                states.Add(connector.State);
-                continue;
+                if (connectors.TryGetValue(uri, out var connector))
+                {
+                    states.Add(connector.State);
+                    continue;
+                }
             }
 
             states.Add(new UninitializedReceiverState(uri));

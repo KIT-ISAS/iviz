@@ -76,7 +76,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         TcpClient = client;
         Endpoint = new Endpoint((IPEndPoint)TcpClient.Client.LocalEndPoint!);
         RemoteEndpoint = new Endpoint((IPEndPoint)TcpClient.Client.RemoteEndPoint!);
-        task = TaskUtils.StartLongTask(async () => await StartSession(latchedMsg).AwaitNoThrow(this),
+        task = TaskUtils.Run(async () => await StartSession(latchedMsg).AwaitNoThrow(this),
             runningTs.Token);
     }
 
@@ -272,11 +272,11 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
     {
         using var writeBuffer = new ResizableRent();
 
-        await ProcessHandshake(latchedMsg.HasValue);
+        await ProcessHandshake(latchedMsg.hasValue);
 
-        if (latchedMsg.HasValue)
+        if (latchedMsg.hasValue)
         {
-            Publish(latchedMsg.Value);
+            Publish(latchedMsg.value!);
         }
 
         while (KeepRunning)

@@ -55,7 +55,7 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         this.requestNoDelay = requestNoDelay;
         connectionTimeoutInMs = timeoutInMs;
         Status = ReceiverStatus.ConnectingTcp;
-        task = TaskUtils.StartLongTask(async () => await StartSession().AwaitNoThrow(this), runningTs.Token);
+        task = TaskUtils.Run(async () => await StartSession().AwaitNoThrow(this), runningTs.Token);
     }
 
     public SubscriberReceiverState State => new TcpReceiverState(RemoteUri)

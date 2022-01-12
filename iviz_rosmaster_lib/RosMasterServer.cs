@@ -160,8 +160,8 @@ namespace Iviz.RosMaster
 
             Logger.Log($"** {this}: Starting!");
             AddKey("/run_id", Guid.NewGuid().ToString());
-            Task startTask = Task.Run(() => listener.StartAsync(StartContext, true).AwaitNoThrow(this), Token);
-            Task rosoutTask = Task.Run(() => ManageRosoutAggAsync().AwaitNoThrow(this), Token);
+            Task startTask = TaskUtils.Run(() => listener.StartAsync(StartContext, true).AwaitNoThrow(this), Token);
+            Task rosoutTask = TaskUtils.Run(() => ManageRosoutAggAsync().AwaitNoThrow(this), Token);
             await (startTask, rosoutTask).WhenAll();
             Logger.Log($"** {this}: Leaving thread.");
         }

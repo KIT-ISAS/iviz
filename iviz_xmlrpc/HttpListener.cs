@@ -134,7 +134,7 @@ namespace Iviz.XmlRpc
 
                     if (runInBackground)
                     {
-                        AddToBackgroundTasks(Task.Run(CreateContextTask, runningTs.Token));
+                        AddToBackgroundTasks(TaskUtils.Run(CreateContextTask, runningTs.Token));
                     }
                     else
                     {

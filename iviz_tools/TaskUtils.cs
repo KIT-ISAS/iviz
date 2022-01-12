@@ -13,9 +13,15 @@ public static class TaskUtils
 {
     const string GenericExceptionFormat = "{0}: Exception thrown.{1}";
 
-    public static Task StartLongTask(Func<Task> task, CancellationToken token = default)
+    /// Same as Task.Run, but ensures that the async overload (with <see cref="Func{Task}"/>) is called
+    public static Task Run(Func<Task> task, CancellationToken token = default)
     {
-        // need some logging here
+        return Task.Run(task, token);
+    }
+
+    /// Same as Task.Run, but ensures that the async overload (with <see cref="Func{Task}"/>) is called 
+    public static Task<T> Run<T>(Func<Task<T>> task, CancellationToken token = default)
+    {
         return Task.Run(task, token);
     }
 
@@ -230,7 +236,7 @@ public static class TaskUtils
         }
     }
 
-    public static async ValueTask<T?> AwaitNoThrow<T>(this ValueTask<T> t, object caller)
+    public static async Task<T?> AwaitNoThrow<T>(this ValueTask<T> t, object caller)
     {
         try
         {
@@ -247,7 +253,7 @@ public static class TaskUtils
         return default;
     }
 
-    public static async ValueTask AwaitNoThrow(this ValueTask t, object caller)
+    public static async Task AwaitNoThrow(this ValueTask t, object caller)
     {
         try
         {

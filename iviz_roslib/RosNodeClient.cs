@@ -26,7 +26,7 @@ public sealed class RosNodeClient
     public RequestTopicResponse RequestTopic(string topic, RosTransportHint transportHint,
         RpcUdpTopicRequest? udpTopicRequest)
     {
-        var args = CreateRequestTopicArgs(topic, transportHint, udpTopicRequest);
+        var args = CreateRequestTopicArgs(CallerId, topic, transportHint, udpTopicRequest);
         var response = MethodCall("requestTopic", args);
         return new RequestTopicResponse(response);
     }
@@ -35,12 +35,12 @@ public sealed class RosNodeClient
         RosTransportHint transportHint, RpcUdpTopicRequest? udpTopicRequest,
         CancellationToken token)
     {
-        var args = CreateRequestTopicArgs(topic, transportHint, udpTopicRequest);
+        var args = CreateRequestTopicArgs(CallerId, topic, transportHint, udpTopicRequest);
         var response = await MethodCallAsync("requestTopic", args, token);
         return new RequestTopicResponse(response);
     }
 
-    XmlRpcArg[] CreateRequestTopicArgs(string topic, RosTransportHint transportHint,
+    static XmlRpcArg[] CreateRequestTopicArgs(string callerId, string topic, RosTransportHint transportHint,
         RpcUdpTopicRequest? udpTopicRequest)
     {
         if (transportHint != RosTransportHint.OnlyTcp && udpTopicRequest == null)
@@ -69,7 +69,7 @@ public sealed class RosNodeClient
             _ => throw new ArgumentOutOfRangeException(nameof(transportHint), transportHint, null)
         };
 
-        return new XmlRpcArg[] { CallerId, topic, supportedProtocols };
+        return new XmlRpcArg[] { callerId, topic, supportedProtocols };
     }
 
     public GetMasterUriResponse GetMasterUri()
@@ -102,25 +102,25 @@ public sealed class RosNodeClient
 
     XmlRpcValue[] MethodCall(string function, XmlRpcArg[] args)
     {
-        XmlRpcValue tmp = XmlRpcService.MethodCall(Uri, CallerUri, function, args);
-        if (tmp.TryGetArray(out XmlRpcValue[] result))
+        var wrapper = XmlRpcService.MethodCall(Uri, CallerUri, function, args);
+        if (wrapper.TryGetArray(out XmlRpcValue[] response))
         {
-            return result;
+            return response;
         }
 
         throw new RosRpcException($"Error while calling '{function}' on '{Uri}': " +
-                                  $"Expected type object[], got {tmp}");
+                                  $"Expected type object[], got {wrapper}");
     }
 
     async ValueTask<XmlRpcValue[]> MethodCallAsync(string function, XmlRpcArg[] args, CancellationToken token)
     {
-        using var ts = CancellationTokenSource.CreateLinkedTokenSource(token);
-        ts.CancelAfter(TimeoutInMs);
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
+        tokenSource.CancelAfter(TimeoutInMs);
 
-        XmlRpcValue tmp;
+        XmlRpcValue wrapper;
         try
         {
-            tmp = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, ts.Token);
+            wrapper = await XmlRpcService.MethodCallAsync(Uri, CallerUri, function, args, tokenSource.Token);
         }
         catch (OperationCanceledException)
         {
@@ -132,19 +132,16 @@ public sealed class RosNodeClient
             throw;
         }
 
-        if (!tmp.TryGetArray(out XmlRpcValue[] result))
+        if (wrapper.TryGetArray(out XmlRpcValue[] response))
         {
-            throw new RosRpcException($"Error while calling '{function}' on '{Uri}': " +
-                                      $"Expected type object[], got {tmp}");
+            return response;
         }
 
-        return result;
+        throw new RosRpcException($"Error while calling '{function}' on '{Uri}': " +
+                                  $"Expected type object[], got {wrapper}");
     }
 
-    public override string ToString()
-    {
-        return $"[RosNodeClient {Uri}]";
-    }
+    public override string ToString() => $"[RosNodeClient {Uri}]";
 }
 
 public sealed class RequestTopicResponse : BaseResponse
@@ -158,7 +155,7 @@ public sealed class RequestTopicResponse : BaseResponse
         {
             return;
         }
-            
+
         if (!value.TryGetArray(out XmlRpcValue[] protocolInfo))
         {
             MarkError();
@@ -219,8 +216,8 @@ public sealed class GetMasterUriResponse : BaseResponse
         {
             return;
         }
-            
-        if (!value.TryGetString(out string uriStr) 
+
+        if (!value.TryGetString(out string uriStr)
             || !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? uri))
         {
             MarkError();
@@ -241,7 +238,7 @@ public sealed class GetPidResponse : BaseResponse
         {
             return;
         }
-            
+
         if (!value.TryGetInteger(out int pid))
         {
             MarkError();
