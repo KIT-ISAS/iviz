@@ -564,7 +564,7 @@ namespace Iviz.MsgsGen
                 lines.Add("[MethodImpl(MethodImplOptions.AggressiveInlining)]");
             }
 
-            lines.Add($"internal {name}(ref ReadBuffer b)");
+            lines.Add($"public {name}(ref ReadBuffer b)");
             lines.Add("{");
             if (structIsBlittable)
             {
@@ -580,7 +580,7 @@ namespace Iviz.MsgsGen
                     lines.Add("    Deserialize(ref b, out this);");
                     lines.Add("}");
                     lines.Add("");
-                    lines.Add($"internal static void Deserialize(ref ReadBuffer b, out {name} h)");
+                    lines.Add($"public static void Deserialize(ref ReadBuffer b, out {name} h)");
                     lines.Add("{");
                 }
 
@@ -716,8 +716,8 @@ namespace Iviz.MsgsGen
                 if (myVars.Length == 0)
                 {
                     lines.Add("");
-                    lines.Add("public override readonly int GetHashCode() => 0;");
-                    lines.Add($"public override readonly bool Equals(object? o) => o is {name};");
+                    lines.Add("public readonly override int GetHashCode() => 0;");
+                    lines.Add($"public readonly override bool Equals(object? o) => o is {name};");
                     lines.Add($"public readonly bool Equals({name} o) => true;");
                     lines.Add($"public static bool operator==(in {name} _, in {name} __) => true;");
                     lines.Add($"public static bool operator!=(in {name} _, in {name} __) => false;");
@@ -725,8 +725,8 @@ namespace Iviz.MsgsGen
                 else
                 {
                     lines.Add("");
-                    lines.Add($"public override readonly int GetHashCode() => ({myVars}).GetHashCode();");
-                    lines.Add($"public override readonly bool Equals(object? o) => o is {name} s && Equals(s);");
+                    lines.Add($"public readonly override int GetHashCode() => ({myVars}).GetHashCode();");
+                    lines.Add($"public readonly override bool Equals(object? o) => o is {name} s && Equals(s);");
 
                     string oVars = string.Join(", ", variables.Select(x => $"o.{x.CsFieldName}"));
 
@@ -1013,7 +1013,7 @@ namespace Iviz.MsgsGen
                 lines.Add("[StructLayout(LayoutKind.Sequential)]");
                 lines.Add(variables.Any(element => element.IsFixedSizeArray)
                     ? $"public unsafe struct {Name} : IMessage, IDeserializable<{Name}>"
-                    : $"public struct {Name} : IMessage, IDeserializable<{Name}>");
+                    : $"public struct {Name} : IMessage, IDeserializable<{Name}>, System.IEquatable<{Name}>");
             }
             else
             {
