@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal SetFixedFrameRequest(ref ReadBuffer b)
+        public SetFixedFrameRequest(ref ReadBuffer b)
         {
             Id = b.DeserializeString();
         }
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal SetFixedFrameResponse(ref ReadBuffer b)
+        public SetFixedFrameResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

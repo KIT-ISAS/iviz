@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PlannerInterfaceDescription(ref ReadBuffer b)
+        public PlannerInterfaceDescription(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             PlannerIds = b.DeserializeStringArray();

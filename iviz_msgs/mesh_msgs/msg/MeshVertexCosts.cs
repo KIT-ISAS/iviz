@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal MeshVertexCosts(ref ReadBuffer b)
+        public MeshVertexCosts(ref ReadBuffer b)
         {
             Costs = b.DeserializeStructArray<float>();
         }

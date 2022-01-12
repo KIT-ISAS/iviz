@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Quaternion : IMessage, IDeserializable<Quaternion>
+    public struct Quaternion : IMessage, IDeserializable<Quaternion>, System.IEquatable<Quaternion>
     {
         // This represents an orientation in free space in quaternion form.
         [DataMember (Name = "x")] public double X;
@@ -27,7 +27,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Quaternion(ref ReadBuffer b)
+        public Quaternion(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
@@ -36,8 +36,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Quaternion RosDeserialize(ref ReadBuffer b) => new Quaternion(ref b);
         
-        public override readonly int GetHashCode() => (X, Y, Z, W).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Quaternion s && Equals(s);
+        public readonly override int GetHashCode() => (X, Y, Z, W).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Quaternion s && Equals(s);
         public readonly bool Equals(Quaternion o) => (X, Y, Z, W) == (o.X, o.Y, o.Z, o.W);
         public static bool operator==(in Quaternion a, in Quaternion b) => a.Equals(b);
         public static bool operator!=(in Quaternion a, in Quaternion b) => !a.Equals(b);

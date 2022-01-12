@@ -74,7 +74,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetStateValidityRequest(ref ReadBuffer b)
+        public GetStateValidityRequest(ref ReadBuffer b)
         {
             RobotState = new RobotState(ref b);
             GroupName = b.DeserializeString();
@@ -141,7 +141,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetStateValidityResponse(ref ReadBuffer b)
+        public GetStateValidityResponse(ref ReadBuffer b)
         {
             Valid = b.Deserialize<bool>();
             Contacts = b.DeserializeArray<ContactInformation>();

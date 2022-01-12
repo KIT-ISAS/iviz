@@ -74,7 +74,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestMultipleRequestFieldsRequest(ref ReadBuffer b)
+        public TestMultipleRequestFieldsRequest(ref ReadBuffer b)
         {
             @int = b.Deserialize<int>();
             @float = b.Deserialize<float>();
@@ -114,7 +114,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestMultipleRequestFieldsResponse(ref ReadBuffer b)
+        public TestMultipleRequestFieldsResponse(ref ReadBuffer b)
         {
         }
         

@@ -61,7 +61,7 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// Constructor with buffer.
-        internal VisionInfo(ref ReadBuffer b)
+        public VisionInfo(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Method = b.DeserializeString();

@@ -67,7 +67,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal MultiEchoLaserScan(ref ReadBuffer b)
+        public MultiEchoLaserScan(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             AngleMin = b.Deserialize<float>();

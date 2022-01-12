@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal MoveItErrorCodes(ref ReadBuffer b)
+        public MoveItErrorCodes(ref ReadBuffer b)
         {
             Val = b.Deserialize<int>();
         }

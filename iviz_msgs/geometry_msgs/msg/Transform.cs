@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Transform : IMessage, IDeserializable<Transform>
+    public struct Transform : IMessage, IDeserializable<Transform>, System.IEquatable<Transform>
     {
         // This represents the transform between two coordinate frames in free space.
         [DataMember (Name = "translation")] public Vector3 Translation;
@@ -23,7 +23,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Transform(ref ReadBuffer b)
+        public Transform(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
@@ -32,8 +32,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Transform RosDeserialize(ref ReadBuffer b) => new Transform(ref b);
         
-        public override readonly int GetHashCode() => (Translation, Rotation).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Transform s && Equals(s);
+        public readonly override int GetHashCode() => (Translation, Rotation).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Transform s && Equals(s);
         public readonly bool Equals(Transform o) => (Translation, Rotation) == (o.Translation, o.Rotation);
         public static bool operator==(in Transform a, in Transform b) => a.Equals(b);
         public static bool operator!=(in Transform a, in Transform b) => !a.Equals(b);

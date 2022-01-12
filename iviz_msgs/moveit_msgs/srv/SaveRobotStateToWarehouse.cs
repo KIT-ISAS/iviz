@@ -74,7 +74,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal SaveRobotStateToWarehouseRequest(ref ReadBuffer b)
+        public SaveRobotStateToWarehouseRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Robot = b.DeserializeString();
@@ -131,7 +131,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal SaveRobotStateToWarehouseResponse(ref ReadBuffer b)
+        public SaveRobotStateToWarehouseResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }

@@ -33,7 +33,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         }
         
         /// Constructor with buffer.
-        internal MultiDOFJointTrajectoryPoint(ref ReadBuffer b)
+        public MultiDOFJointTrajectoryPoint(ref ReadBuffer b)
         {
             Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
             Velocities = b.DeserializeStructArray<GeometryMsgs.Twist>();

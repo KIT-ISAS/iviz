@@ -22,7 +22,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal ARMarkerArray(ref ReadBuffer b)
+        public ARMarkerArray(ref ReadBuffer b)
         {
             Markers = b.DeserializeArray<ARMarker>();
             for (int i = 0; i < Markers.Length; i++)

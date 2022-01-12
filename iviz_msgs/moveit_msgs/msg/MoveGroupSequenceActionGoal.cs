@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal MoveGroupSequenceActionGoal(ref ReadBuffer b)
+        public MoveGroupSequenceActionGoal(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
             GoalId = new ActionlibMsgs.GoalID(ref b);

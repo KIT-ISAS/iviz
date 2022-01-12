@@ -27,7 +27,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal ObjectRecognitionActionResult(ref ReadBuffer b)
+        public ObjectRecognitionActionResult(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);

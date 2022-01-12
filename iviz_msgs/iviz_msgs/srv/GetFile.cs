@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetFileRequest(ref ReadBuffer b)
+        public GetFileRequest(ref ReadBuffer b)
         {
             Uri = b.DeserializeString();
         }
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetFileResponse(ref ReadBuffer b)
+        public GetFileResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Bytes = b.DeserializeStructArray<byte>();

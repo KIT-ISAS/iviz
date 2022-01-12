@@ -79,7 +79,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PickupGoal(ref ReadBuffer b)
+        public PickupGoal(ref ReadBuffer b)
         {
             TargetName = b.DeserializeString();
             GroupName = b.DeserializeString();

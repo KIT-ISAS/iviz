@@ -22,7 +22,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         }
         
         /// Constructor with buffer.
-        internal ConnectedClients(ref ReadBuffer b)
+        public ConnectedClients(ref ReadBuffer b)
         {
             Clients = b.DeserializeArray<ConnectedClient>();
             for (int i = 0; i < Clients.Length; i++)

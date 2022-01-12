@@ -24,7 +24,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal Feature(ref ReadBuffer b)
+        public Feature(ref ReadBuffer b)
         {
             b.Deserialize(out Location);
             Descriptor = b.DeserializeArray<StdMsgs.Float32>();

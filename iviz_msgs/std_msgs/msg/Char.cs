@@ -21,7 +21,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// Constructor with buffer.
-        internal Char(ref ReadBuffer b)
+        public Char(ref ReadBuffer b)
         {
             Data = b.Deserialize<sbyte>();
         }

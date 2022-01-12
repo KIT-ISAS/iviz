@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Point : IMessage, IDeserializable<Point>
+    public struct Point : IMessage, IDeserializable<Point>, System.IEquatable<Point>
     {
         // This contains the position of a point in free space
         [DataMember (Name = "x")] public double X;
@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Point(ref ReadBuffer b)
+        public Point(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
@@ -34,8 +34,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Point RosDeserialize(ref ReadBuffer b) => new Point(ref b);
         
-        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Point s && Equals(s);
+        public readonly override int GetHashCode() => (X, Y, Z).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Point s && Equals(s);
         public readonly bool Equals(Point o) => (X, Y, Z) == (o.X, o.Y, o.Z);
         public static bool operator==(in Point a, in Point b) => a.Equals(b);
         public static bool operator!=(in Point a, in Point b) => !a.Equals(b);

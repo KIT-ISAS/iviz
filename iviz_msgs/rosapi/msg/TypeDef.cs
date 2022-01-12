@@ -40,7 +40,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal TypeDef(ref ReadBuffer b)
+        public TypeDef(ref ReadBuffer b)
         {
             Type = b.DeserializeString();
             Fieldnames = b.DeserializeStringArray();

@@ -69,7 +69,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMotionSequenceRequest(ref ReadBuffer b)
+        public GetMotionSequenceRequest(ref ReadBuffer b)
         {
             Request = new MotionSequenceRequest(ref b);
         }
@@ -113,7 +113,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMotionSequenceResponse(ref ReadBuffer b)
+        public GetMotionSequenceResponse(ref ReadBuffer b)
         {
             Response = new MotionSequenceResponse(ref b);
         }

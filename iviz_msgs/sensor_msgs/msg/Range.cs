@@ -64,7 +64,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal Range(ref ReadBuffer b)
+        public Range(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             RadiationType = b.Deserialize<byte>();

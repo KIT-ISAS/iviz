@@ -27,7 +27,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// Constructor with buffer.
-        internal TestActionFeedback(ref ReadBuffer b)
+        public TestActionFeedback(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);

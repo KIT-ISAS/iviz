@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ApplyPlanningSceneRequest(ref ReadBuffer b)
+        public ApplyPlanningSceneRequest(ref ReadBuffer b)
         {
             Scene = new PlanningScene(ref b);
         }
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ApplyPlanningSceneResponse(ref ReadBuffer b)
+        public ApplyPlanningSceneResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }

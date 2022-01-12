@@ -26,7 +26,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal LinkPadding(ref ReadBuffer b)
+        public LinkPadding(ref ReadBuffer b)
         {
             LinkName = b.DeserializeString();
             Padding = b.Deserialize<double>();

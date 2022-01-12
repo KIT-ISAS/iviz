@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct TransformStamped : IMessage, IDeserializable<TransformStamped>
+    public struct TransformStamped : IMessage, IDeserializable<TransformStamped>, System.IEquatable<TransformStamped>
     {
         // This expresses a transform from coordinate frame header.frame_id
         // to the coordinate frame child_frame_id
@@ -31,12 +31,12 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal TransformStamped(ref ReadBuffer b)
+        public TransformStamped(ref ReadBuffer b)
         {
             Deserialize(ref b, out this);
         }
         
-        internal static void Deserialize(ref ReadBuffer b, out TransformStamped h)
+        public static void Deserialize(ref ReadBuffer b, out TransformStamped h)
         {
             StdMsgs.Header.Deserialize(ref b, out h.Header);
             h.ChildFrameId = b.DeserializeString();
@@ -47,8 +47,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly TransformStamped RosDeserialize(ref ReadBuffer b) => new TransformStamped(ref b);
         
-        public override readonly int GetHashCode() => (Header, ChildFrameId, Transform).GetHashCode();
-        public override readonly bool Equals(object? o) => o is TransformStamped s && Equals(s);
+        public readonly override int GetHashCode() => (Header, ChildFrameId, Transform).GetHashCode();
+        public readonly override bool Equals(object? o) => o is TransformStamped s && Equals(s);
         public readonly bool Equals(TransformStamped o) => (Header, ChildFrameId, Transform) == (o.Header, o.ChildFrameId, o.Transform);
         public static bool operator==(in TransformStamped a, in TransformStamped b) => a.Equals(b);
         public static bool operator!=(in TransformStamped a, in TransformStamped b) => !a.Equals(b);

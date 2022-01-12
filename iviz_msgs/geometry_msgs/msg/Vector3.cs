@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IMessage, IDeserializable<Vector3>
+    public struct Vector3 : IMessage, IDeserializable<Vector3>, System.IEquatable<Vector3>
     {
         // This represents a vector in free space. 
         // It is only meant to represent a direction. Therefore, it does not
@@ -30,7 +30,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Vector3(ref ReadBuffer b)
+        public Vector3(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
@@ -39,8 +39,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Vector3 RosDeserialize(ref ReadBuffer b) => new Vector3(ref b);
         
-        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Vector3 s && Equals(s);
+        public readonly override int GetHashCode() => (X, Y, Z).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Vector3 s && Equals(s);
         public readonly bool Equals(Vector3 o) => (X, Y, Z) == (o.X, o.Y, o.Z);
         public static bool operator==(in Vector3 a, in Vector3 b) => a.Equals(b);
         public static bool operator!=(in Vector3 a, in Vector3 b) => !a.Equals(b);

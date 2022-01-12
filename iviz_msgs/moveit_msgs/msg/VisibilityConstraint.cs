@@ -76,7 +76,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal VisibilityConstraint(ref ReadBuffer b)
+        public VisibilityConstraint(ref ReadBuffer b)
         {
             TargetRadius = b.Deserialize<double>();
             TargetPose = new GeometryMsgs.PoseStamped(ref b);

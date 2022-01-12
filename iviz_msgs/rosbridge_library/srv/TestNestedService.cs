@@ -68,7 +68,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestNestedServiceRequest(ref ReadBuffer b)
+        public TestNestedServiceRequest(ref ReadBuffer b)
         {
             b.Deserialize(out Pose);
         }
@@ -113,7 +113,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestNestedServiceResponse(ref ReadBuffer b)
+        public TestNestedServiceResponse(ref ReadBuffer b)
         {
             Data = new StdMsgs.Float64(ref b);
         }

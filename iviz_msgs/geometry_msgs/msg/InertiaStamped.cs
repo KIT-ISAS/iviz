@@ -24,7 +24,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal InertiaStamped(ref ReadBuffer b)
+        public InertiaStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Inertia = new Inertia(ref b);

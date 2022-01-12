@@ -61,7 +61,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetModulesRequest(ref ReadBuffer b)
+        public GetModulesRequest(ref ReadBuffer b)
         {
         }
         
@@ -106,7 +106,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetModulesResponse(ref ReadBuffer b)
+        public GetModulesResponse(ref ReadBuffer b)
         {
             Configs = b.DeserializeStringArray();
         }

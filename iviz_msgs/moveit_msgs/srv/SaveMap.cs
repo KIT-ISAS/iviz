@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal SaveMapRequest(ref ReadBuffer b)
+        public SaveMapRequest(ref ReadBuffer b)
         {
             Filename = b.DeserializeString();
         }
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal SaveMapResponse(ref ReadBuffer b)
+        public SaveMapResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }

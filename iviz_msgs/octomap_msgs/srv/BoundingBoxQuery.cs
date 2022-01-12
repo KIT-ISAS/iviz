@@ -72,7 +72,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// Constructor with buffer.
-        internal BoundingBoxQueryRequest(ref ReadBuffer b)
+        public BoundingBoxQueryRequest(ref ReadBuffer b)
         {
             b.Deserialize(out Min);
             b.Deserialize(out Max);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// Constructor with buffer.
-        internal BoundingBoxQueryResponse(ref ReadBuffer b)
+        public BoundingBoxQueryResponse(ref ReadBuffer b)
         {
         }
         

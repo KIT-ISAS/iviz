@@ -25,7 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Trajectory(ref ReadBuffer b)
+        public Trajectory(ref ReadBuffer b)
         {
             Poses = b.DeserializeStructArray<GeometryMsgs.Pose>();
             Timestamps = b.DeserializeStructArray<time>();

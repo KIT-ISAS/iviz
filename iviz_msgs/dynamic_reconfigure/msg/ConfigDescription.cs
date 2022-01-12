@@ -31,7 +31,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal ConfigDescription(ref ReadBuffer b)
+        public ConfigDescription(ref ReadBuffer b)
         {
             Groups = b.DeserializeArray<Group>();
             for (int i = 0; i < Groups.Length; i++)

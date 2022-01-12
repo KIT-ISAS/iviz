@@ -40,7 +40,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Feedback(ref ReadBuffer b)
+        public Feedback(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             VizId = b.DeserializeString();

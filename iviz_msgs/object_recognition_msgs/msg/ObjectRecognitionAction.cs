@@ -29,7 +29,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal ObjectRecognitionAction(ref ReadBuffer b)
+        public ObjectRecognitionAction(ref ReadBuffer b)
         {
             ActionGoal = new ObjectRecognitionActionGoal(ref b);
             ActionResult = new ObjectRecognitionActionResult(ref b);

@@ -29,7 +29,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// Constructor with buffer.
-        internal TestAction(ref ReadBuffer b)
+        public TestAction(ref ReadBuffer b)
         {
             ActionGoal = new TestActionGoal(ref b);
             ActionResult = new TestActionResult(ref b);

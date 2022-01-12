@@ -22,7 +22,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// Constructor with buffer.
-        internal MarkerArray(ref ReadBuffer b)
+        public MarkerArray(ref ReadBuffer b)
         {
             Markers = b.DeserializeArray<Marker>();
             for (int i = 0; i < Markers.Length; i++)

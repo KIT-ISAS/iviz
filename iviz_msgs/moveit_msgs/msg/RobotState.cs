@@ -36,7 +36,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal RobotState(ref ReadBuffer b)
+        public RobotState(ref ReadBuffer b)
         {
             JointState = new SensorMsgs.JointState(ref b);
             MultiDofJointState = new SensorMsgs.MultiDOFJointState(ref b);

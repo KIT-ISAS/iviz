@@ -57,7 +57,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PlanningOptions(ref ReadBuffer b)
+        public PlanningOptions(ref ReadBuffer b)
         {
             PlanningSceneDiff = new PlanningScene(ref b);
             PlanOnly = b.Deserialize<bool>();

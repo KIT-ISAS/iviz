@@ -73,7 +73,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// Constructor with buffer.
-        internal MenuEntry(ref ReadBuffer b)
+        public MenuEntry(ref ReadBuffer b)
         {
             Id = b.Deserialize<uint>();
             ParentId = b.Deserialize<uint>();

@@ -60,7 +60,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetUUIDRequest(ref ReadBuffer b)
+        public GetUUIDRequest(ref ReadBuffer b)
         {
         }
         
@@ -104,7 +104,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetUUIDResponse(ref ReadBuffer b)
+        public GetUUIDResponse(ref ReadBuffer b)
         {
             Uuid = b.DeserializeString();
         }

@@ -27,7 +27,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMapActionResult(ref ReadBuffer b)
+        public GetMapActionResult(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);

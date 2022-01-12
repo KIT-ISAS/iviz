@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal RobotTrajectory(ref ReadBuffer b)
+        public RobotTrajectory(ref ReadBuffer b)
         {
             JointTrajectory = new TrajectoryMsgs.JointTrajectory(ref b);
             MultiDofJointTrajectory = new TrajectoryMsgs.MultiDOFJointTrajectory(ref b);

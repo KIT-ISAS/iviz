@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PlanningScene(ref ReadBuffer b)
+        public PlanningScene(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             RobotState = new RobotState(ref b);

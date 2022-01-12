@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetModelResourceRequest(ref ReadBuffer b)
+        public GetModelResourceRequest(ref ReadBuffer b)
         {
             Uri = b.DeserializeString();
         }
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetModelResourceResponse(ref ReadBuffer b)
+        public GetModelResourceResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Model = new Model(ref b);

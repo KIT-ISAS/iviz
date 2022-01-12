@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal VectorField(ref ReadBuffer b)
+        public VectorField(ref ReadBuffer b)
         {
             Positions = b.DeserializeStructArray<GeometryMsgs.Point>();
             Vectors = b.DeserializeStructArray<GeometryMsgs.Vector3>();

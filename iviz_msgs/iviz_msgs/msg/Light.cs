@@ -41,7 +41,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Light(ref ReadBuffer b)
+        public Light(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Type = b.Deserialize<byte>();

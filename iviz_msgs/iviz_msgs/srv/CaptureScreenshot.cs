@@ -67,7 +67,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal CaptureScreenshotRequest(ref ReadBuffer b)
+        public CaptureScreenshotRequest(ref ReadBuffer b)
         {
             Compress = b.Deserialize<bool>();
         }
@@ -129,7 +129,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal CaptureScreenshotResponse(ref ReadBuffer b)
+        public CaptureScreenshotResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

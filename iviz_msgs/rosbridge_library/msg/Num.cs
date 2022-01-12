@@ -21,7 +21,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal Num(ref ReadBuffer b)
+        public Num(ref ReadBuffer b)
         {
             Num_ = b.Deserialize<long>();
         }

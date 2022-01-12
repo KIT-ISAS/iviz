@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal PoseArray(ref ReadBuffer b)
+        public PoseArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Poses = b.DeserializeStructArray<Pose>();

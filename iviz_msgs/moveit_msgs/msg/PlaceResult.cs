@@ -41,7 +41,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PlaceResult(ref ReadBuffer b)
+        public PlaceResult(ref ReadBuffer b)
         {
             ErrorCode = new MoveItErrorCodes(ref b);
             TrajectoryStart = new RobotState(ref b);

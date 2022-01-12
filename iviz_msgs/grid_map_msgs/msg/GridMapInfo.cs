@@ -34,7 +34,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// Constructor with buffer.
-        internal GridMapInfo(ref ReadBuffer b)
+        public GridMapInfo(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Resolution = b.Deserialize<double>();

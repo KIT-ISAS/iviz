@@ -29,7 +29,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
         
         /// Constructor with buffer.
-        internal OctomapWithPose(ref ReadBuffer b)
+        public OctomapWithPose(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Origin);

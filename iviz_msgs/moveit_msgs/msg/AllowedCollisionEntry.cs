@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal AllowedCollisionEntry(ref ReadBuffer b)
+        public AllowedCollisionEntry(ref ReadBuffer b)
         {
             Enabled = b.DeserializeStructArray<bool>();
         }

@@ -36,7 +36,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal MapMetaData(ref ReadBuffer b)
+        public MapMetaData(ref ReadBuffer b)
         {
             MapLoadTime = b.Deserialize<time>();
             Resolution = b.Deserialize<float>();

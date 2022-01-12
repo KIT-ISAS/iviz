@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetLabeledClustersRequest(ref ReadBuffer b)
+        public GetLabeledClustersRequest(ref ReadBuffer b)
         {
             Uuid = b.DeserializeString();
         }
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetLabeledClustersResponse(ref ReadBuffer b)
+        public GetLabeledClustersResponse(ref ReadBuffer b)
         {
             Clusters = b.DeserializeArray<MeshFaceCluster>();
             for (int i = 0; i < Clusters.Length; i++)

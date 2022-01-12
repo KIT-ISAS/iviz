@@ -40,7 +40,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal XRHandState(ref ReadBuffer b)
+        public XRHandState(ref ReadBuffer b)
         {
             IsValid = b.Deserialize<bool>();
             StdMsgs.Header.Deserialize(ref b, out Header);

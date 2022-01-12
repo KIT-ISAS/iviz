@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal AccelWithCovarianceStamped(ref ReadBuffer b)
+        public AccelWithCovarianceStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Accel = new AccelWithCovariance(ref b);

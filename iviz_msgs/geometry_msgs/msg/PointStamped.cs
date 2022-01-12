@@ -24,7 +24,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal PointStamped(ref ReadBuffer b)
+        public PointStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Point);

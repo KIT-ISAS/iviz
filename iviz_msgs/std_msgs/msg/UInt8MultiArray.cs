@@ -29,7 +29,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// Constructor with buffer.
-        internal UInt8MultiArray(ref ReadBuffer b)
+        public UInt8MultiArray(ref ReadBuffer b)
         {
             Layout = new MultiArrayLayout(ref b);
             Data = b.DeserializeStructArray<byte>();

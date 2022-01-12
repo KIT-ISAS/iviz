@@ -44,7 +44,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal ChannelFloat32(ref ReadBuffer b)
+        public ChannelFloat32(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Values = b.DeserializeStructArray<float>();

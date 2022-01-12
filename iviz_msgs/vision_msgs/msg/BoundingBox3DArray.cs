@@ -24,7 +24,7 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// Constructor with buffer.
-        internal BoundingBox3DArray(ref ReadBuffer b)
+        public BoundingBox3DArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Boxes = b.DeserializeArray<VisionMsgs.BoundingBox3D>();

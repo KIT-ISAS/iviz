@@ -41,7 +41,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal Inertia(ref ReadBuffer b)
+        public Inertia(ref ReadBuffer b)
         {
             M = b.Deserialize<double>();
             b.Deserialize(out Com);

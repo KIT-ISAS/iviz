@@ -30,7 +30,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// Constructor with buffer.
-        internal InteractiveMarkerPose(ref ReadBuffer b)
+        public InteractiveMarkerPose(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Pose);

@@ -74,7 +74,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ExecuteKnownTrajectoryRequest(ref ReadBuffer b)
+        public ExecuteKnownTrajectoryRequest(ref ReadBuffer b)
         {
             Trajectory = new RobotTrajectory(ref b);
             WaitForExecution = b.Deserialize<bool>();
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ExecuteKnownTrajectoryResponse(ref ReadBuffer b)
+        public ExecuteKnownTrajectoryResponse(ref ReadBuffer b)
         {
             ErrorCode = new MoveItErrorCodes(ref b);
         }

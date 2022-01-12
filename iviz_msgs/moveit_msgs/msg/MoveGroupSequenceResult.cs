@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal MoveGroupSequenceResult(ref ReadBuffer b)
+        public MoveGroupSequenceResult(ref ReadBuffer b)
         {
             Response = new MotionSequenceResponse(ref b);
         }

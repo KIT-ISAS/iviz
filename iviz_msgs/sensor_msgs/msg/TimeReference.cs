@@ -31,7 +31,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal TimeReference(ref ReadBuffer b)
+        public TimeReference(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             TimeRef = b.Deserialize<time>();

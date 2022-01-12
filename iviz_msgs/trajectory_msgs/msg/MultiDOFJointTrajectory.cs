@@ -32,7 +32,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         }
         
         /// Constructor with buffer.
-        internal MultiDOFJointTrajectory(ref ReadBuffer b)
+        public MultiDOFJointTrajectory(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             JointNames = b.DeserializeStringArray();

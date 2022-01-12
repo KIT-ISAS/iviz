@@ -43,7 +43,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal MagneticField(ref ReadBuffer b)
+        public MagneticField(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out MagneticField_);

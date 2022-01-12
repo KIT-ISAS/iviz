@@ -22,7 +22,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal TFMessage(ref ReadBuffer b)
+        public TFMessage(ref ReadBuffer b)
         {
             Transforms = b.DeserializeArray<GeometryMsgs.TransformStamped>();
             for (int i = 0; i < Transforms.Length; i++)

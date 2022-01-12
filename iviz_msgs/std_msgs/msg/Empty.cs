@@ -13,7 +13,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// Constructor with buffer.
-        internal Empty(ref ReadBuffer b)
+        public Empty(ref ReadBuffer b)
         {
         }
         

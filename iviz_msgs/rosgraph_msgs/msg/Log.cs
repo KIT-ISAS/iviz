@@ -8,7 +8,7 @@ namespace Iviz.Msgs.RosgraphMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Log : IMessage, IDeserializable<Log>
+    public struct Log : IMessage, IDeserializable<Log>, System.IEquatable<Log>
     {
         //#
         //# Severity level constants
@@ -52,12 +52,12 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Log(ref ReadBuffer b)
+        public Log(ref ReadBuffer b)
         {
             Deserialize(ref b, out this);
         }
         
-        internal static void Deserialize(ref ReadBuffer b, out Log h)
+        public static void Deserialize(ref ReadBuffer b, out Log h)
         {
             StdMsgs.Header.Deserialize(ref b, out h.Header);
             h.Level = b.Deserialize<byte>();
@@ -73,8 +73,8 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public readonly Log RosDeserialize(ref ReadBuffer b) => new Log(ref b);
         
-        public override readonly int GetHashCode() => (Header, Level, Name, Msg, File, Function, Line, Topics).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Log s && Equals(s);
+        public readonly override int GetHashCode() => (Header, Level, Name, Msg, File, Function, Line, Topics).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Log s && Equals(s);
         public readonly bool Equals(Log o) => (Header, Level, Name, Msg, File, Function, Line, Topics) == (o.Header, o.Level, o.Name, o.Msg, o.File, o.Function, o.Line, o.Topics);
         public static bool operator==(in Log a, in Log b) => a.Equals(b);
         public static bool operator!=(in Log a, in Log b) => !a.Equals(b);

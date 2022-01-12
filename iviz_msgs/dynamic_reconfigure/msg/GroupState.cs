@@ -28,7 +28,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal GroupState(ref ReadBuffer b)
+        public GroupState(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             State = b.Deserialize<bool>();

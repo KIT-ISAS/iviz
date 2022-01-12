@@ -33,7 +33,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal MeshFaceClusterStamped(ref ReadBuffer b)
+        public MeshFaceClusterStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Uuid = b.DeserializeString();

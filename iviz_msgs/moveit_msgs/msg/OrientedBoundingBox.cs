@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal OrientedBoundingBox(ref ReadBuffer b)
+        public OrientedBoundingBox(ref ReadBuffer b)
         {
             b.Deserialize(out Pose);
             b.Deserialize(out Extents);

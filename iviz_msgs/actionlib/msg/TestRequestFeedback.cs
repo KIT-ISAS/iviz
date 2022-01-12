@@ -14,7 +14,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// Constructor with buffer.
-        internal TestRequestFeedback(ref ReadBuffer b)
+        public TestRequestFeedback(ref ReadBuffer b)
         {
         }
         

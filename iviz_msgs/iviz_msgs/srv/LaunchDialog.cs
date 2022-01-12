@@ -68,7 +68,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal LaunchDialogRequest(ref ReadBuffer b)
+        public LaunchDialogRequest(ref ReadBuffer b)
         {
             Dialog = new IvizMsgs.Dialog(ref b);
         }
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal LaunchDialogResponse(ref ReadBuffer b)
+        public LaunchDialogResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

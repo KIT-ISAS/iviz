@@ -72,7 +72,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal SetMapRequest(ref ReadBuffer b)
+        public SetMapRequest(ref ReadBuffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
             InitialPose = new GeometryMsgs.PoseWithCovarianceStamped(ref b);
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal SetMapResponse(ref ReadBuffer b)
+        public SetMapResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }

@@ -105,7 +105,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetCartesianPathRequest(ref ReadBuffer b)
+        public GetCartesianPathRequest(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             StartState = new RobotState(ref b);
@@ -194,7 +194,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetCartesianPathResponse(ref ReadBuffer b)
+        public GetCartesianPathResponse(ref ReadBuffer b)
         {
             StartState = new RobotState(ref b);
             Solution = new RobotTrajectory(ref b);

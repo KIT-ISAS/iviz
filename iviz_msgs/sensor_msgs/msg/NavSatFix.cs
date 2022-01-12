@@ -64,7 +64,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal NavSatFix(ref ReadBuffer b)
+        public NavSatFix(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Status = new NavSatStatus(ref b);

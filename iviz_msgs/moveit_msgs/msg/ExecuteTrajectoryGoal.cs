@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ExecuteTrajectoryGoal(ref ReadBuffer b)
+        public ExecuteTrajectoryGoal(ref ReadBuffer b)
         {
             Trajectory = new RobotTrajectory(ref b);
         }

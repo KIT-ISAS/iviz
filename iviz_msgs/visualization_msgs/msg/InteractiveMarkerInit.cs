@@ -36,7 +36,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// Constructor with buffer.
-        internal InteractiveMarkerInit(ref ReadBuffer b)
+        public InteractiveMarkerInit(ref ReadBuffer b)
         {
             ServerId = b.DeserializeString();
             SeqNum = b.Deserialize<ulong>();

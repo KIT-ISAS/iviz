@@ -22,7 +22,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal TexCoords(ref ReadBuffer b)
+        public TexCoords(ref ReadBuffer b)
         {
             Coords = b.DeserializeStructArray<Vector3f>();
         }

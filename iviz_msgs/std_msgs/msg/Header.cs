@@ -8,7 +8,7 @@ namespace Iviz.Msgs.StdMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Header : IMessage, IDeserializable<Header>
+    public struct Header : IMessage, IDeserializable<Header>, System.IEquatable<Header>
     {
         // Standard metadata for higher-level stamped data types.
         // This is generally used to communicate timestamped data 
@@ -34,12 +34,12 @@ namespace Iviz.Msgs.StdMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Header(ref ReadBuffer b)
+        public Header(ref ReadBuffer b)
         {
             Deserialize(ref b, out this);
         }
         
-        internal static void Deserialize(ref ReadBuffer b, out Header h)
+        public static void Deserialize(ref ReadBuffer b, out Header h)
         {
             h.Seq = b.Deserialize<uint>();
             h.Stamp = b.Deserialize<time>();
@@ -50,8 +50,8 @@ namespace Iviz.Msgs.StdMsgs
         
         public readonly Header RosDeserialize(ref ReadBuffer b) => new Header(ref b);
         
-        public override readonly int GetHashCode() => (Seq, Stamp, FrameId).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Header s && Equals(s);
+        public readonly override int GetHashCode() => (Seq, Stamp, FrameId).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Header s && Equals(s);
         public readonly bool Equals(Header o) => (Seq, Stamp, FrameId) == (o.Seq, o.Stamp, o.FrameId);
         public static bool operator==(in Header a, in Header b) => a.Equals(b);
         public static bool operator!=(in Header a, in Header b) => !a.Equals(b);

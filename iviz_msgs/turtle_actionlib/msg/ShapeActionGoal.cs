@@ -27,7 +27,7 @@ namespace Iviz.Msgs.TurtleActionlib
         }
         
         /// Constructor with buffer.
-        internal ShapeActionGoal(ref ReadBuffer b)
+        public ShapeActionGoal(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
             GoalId = new ActionlibMsgs.GoalID(ref b);

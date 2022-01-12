@@ -15,7 +15,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMapFeedback(ref ReadBuffer b)
+        public GetMapFeedback(ref ReadBuffer b)
         {
         }
         

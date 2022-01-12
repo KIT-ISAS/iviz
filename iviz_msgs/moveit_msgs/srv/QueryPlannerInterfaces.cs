@@ -60,7 +60,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal QueryPlannerInterfacesRequest(ref ReadBuffer b)
+        public QueryPlannerInterfacesRequest(ref ReadBuffer b)
         {
         }
         
@@ -105,7 +105,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal QueryPlannerInterfacesResponse(ref ReadBuffer b)
+        public QueryPlannerInterfacesResponse(ref ReadBuffer b)
         {
             PlannerInterfaces = b.DeserializeArray<PlannerInterfaceDescription>();
             for (int i = 0; i < PlannerInterfaces.Length; i++)

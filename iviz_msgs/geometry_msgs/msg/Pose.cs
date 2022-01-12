@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Pose : IMessage, IDeserializable<Pose>
+    public struct Pose : IMessage, IDeserializable<Pose>, System.IEquatable<Pose>
     {
         // A representation of pose in free space, composed of position and orientation. 
         [DataMember (Name = "position")] public Point Position;
@@ -23,7 +23,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Pose(ref ReadBuffer b)
+        public Pose(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
@@ -32,8 +32,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Pose RosDeserialize(ref ReadBuffer b) => new Pose(ref b);
         
-        public override readonly int GetHashCode() => (Position, Orientation).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Pose s && Equals(s);
+        public readonly override int GetHashCode() => (Position, Orientation).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Pose s && Equals(s);
         public readonly bool Equals(Pose o) => (Position, Orientation) == (o.Position, o.Orientation);
         public static bool operator==(in Pose a, in Pose b) => a.Equals(b);
         public static bool operator!=(in Pose a, in Pose b) => !a.Equals(b);

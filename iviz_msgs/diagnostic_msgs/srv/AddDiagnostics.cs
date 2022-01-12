@@ -83,7 +83,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// Constructor with buffer.
-        internal AddDiagnosticsRequest(ref ReadBuffer b)
+        public AddDiagnosticsRequest(ref ReadBuffer b)
         {
             LoadNamespace = b.DeserializeString();
         }
@@ -132,7 +132,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// Constructor with buffer.
-        internal AddDiagnosticsResponse(ref ReadBuffer b)
+        public AddDiagnosticsResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

@@ -60,7 +60,7 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// Constructor with buffer.
-        internal EmptyRequest(ref ReadBuffer b)
+        public EmptyRequest(ref ReadBuffer b)
         {
         }
         
@@ -96,7 +96,7 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// Constructor with buffer.
-        internal EmptyResponse(ref ReadBuffer b)
+        public EmptyResponse(ref ReadBuffer b)
         {
         }
         

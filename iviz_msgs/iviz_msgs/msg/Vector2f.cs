@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector2f : IMessage, IDeserializable<Vector2f>
+    public struct Vector2f : IMessage, IDeserializable<Vector2f>, System.IEquatable<Vector2f>
     {
         [DataMember (Name = "x")] public float X;
         [DataMember (Name = "y")] public float Y;
@@ -22,7 +22,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Vector2f(ref ReadBuffer b)
+        public Vector2f(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
@@ -31,8 +31,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public readonly Vector2f RosDeserialize(ref ReadBuffer b) => new Vector2f(ref b);
         
-        public override readonly int GetHashCode() => (X, Y).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Vector2f s && Equals(s);
+        public readonly override int GetHashCode() => (X, Y).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Vector2f s && Equals(s);
         public readonly bool Equals(Vector2f o) => (X, Y) == (o.X, o.Y);
         public static bool operator==(in Vector2f a, in Vector2f b) => a.Equals(b);
         public static bool operator!=(in Vector2f a, in Vector2f b) => !a.Equals(b);

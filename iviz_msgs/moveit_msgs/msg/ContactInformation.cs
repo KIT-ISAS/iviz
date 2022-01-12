@@ -50,7 +50,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ContactInformation(ref ReadBuffer b)
+        public ContactInformation(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Position);

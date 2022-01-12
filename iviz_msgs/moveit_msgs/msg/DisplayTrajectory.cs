@@ -33,7 +33,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal DisplayTrajectory(ref ReadBuffer b)
+        public DisplayTrajectory(ref ReadBuffer b)
         {
             ModelId = b.DeserializeString();
             Trajectory = b.DeserializeArray<RobotTrajectory>();

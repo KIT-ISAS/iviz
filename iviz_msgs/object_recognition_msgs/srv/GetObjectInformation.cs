@@ -70,7 +70,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal GetObjectInformationRequest(ref ReadBuffer b)
+        public GetObjectInformationRequest(ref ReadBuffer b)
         {
             Type = new ObjectRecognitionMsgs.ObjectType(ref b);
         }
@@ -114,7 +114,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal GetObjectInformationResponse(ref ReadBuffer b)
+        public GetObjectInformationResponse(ref ReadBuffer b)
         {
             Information = new ObjectRecognitionMsgs.ObjectInformation(ref b);
         }

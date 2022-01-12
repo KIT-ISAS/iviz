@@ -45,7 +45,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PlanningSceneComponents(ref ReadBuffer b)
+        public PlanningSceneComponents(ref ReadBuffer b)
         {
             Components = b.Deserialize<uint>();
         }

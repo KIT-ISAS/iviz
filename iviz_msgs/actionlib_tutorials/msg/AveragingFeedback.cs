@@ -15,7 +15,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// Constructor with buffer.
-        internal AveragingFeedback(ref ReadBuffer b)
+        public AveragingFeedback(ref ReadBuffer b)
         {
         }
         

@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Color32 : IMessage, IDeserializable<Color32>
+    public struct Color32 : IMessage, IDeserializable<Color32>, System.IEquatable<Color32>
     {
         [DataMember (Name = "r")] public byte R;
         [DataMember (Name = "g")] public byte G;
@@ -26,7 +26,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Color32(ref ReadBuffer b)
+        public Color32(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
@@ -35,8 +35,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public readonly Color32 RosDeserialize(ref ReadBuffer b) => new Color32(ref b);
         
-        public override readonly int GetHashCode() => (R, G, B, A).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Color32 s && Equals(s);
+        public readonly override int GetHashCode() => (R, G, B, A).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Color32 s && Equals(s);
         public readonly bool Equals(Color32 o) => (R, G, B, A) == (o.R, o.G, o.B, o.A);
         public static bool operator==(in Color32 a, in Color32 b) => a.Equals(b);
         public static bool operator!=(in Color32 a, in Color32 b) => !a.Equals(b);

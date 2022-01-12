@@ -21,7 +21,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// Constructor with buffer.
-        internal TwoIntsResult(ref ReadBuffer b)
+        public TwoIntsResult(ref ReadBuffer b)
         {
             Sum = b.Deserialize<long>();
         }

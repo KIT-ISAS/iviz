@@ -34,7 +34,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal RelativeHumidity(ref ReadBuffer b)
+        public RelativeHumidity(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             RelativeHumidity_ = b.Deserialize<double>();

@@ -21,7 +21,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestHeader(ref ReadBuffer b)
+        public TestHeader(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
         }

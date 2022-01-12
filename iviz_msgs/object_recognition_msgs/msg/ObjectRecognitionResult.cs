@@ -23,7 +23,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal ObjectRecognitionResult(ref ReadBuffer b)
+        public ObjectRecognitionResult(ref ReadBuffer b)
         {
             RecognizedObjects = new ObjectRecognitionMsgs.RecognizedObjectArray(ref b);
         }

@@ -23,7 +23,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal Polygon(ref ReadBuffer b)
+        public Polygon(ref ReadBuffer b)
         {
             Points = b.DeserializeStructArray<Point32>();
         }

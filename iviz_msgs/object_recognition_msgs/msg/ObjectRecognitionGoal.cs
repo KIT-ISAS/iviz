@@ -25,7 +25,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal ObjectRecognitionGoal(ref ReadBuffer b)
+        public ObjectRecognitionGoal(ref ReadBuffer b)
         {
             UseRoi = b.Deserialize<bool>();
             FilterLimits = b.DeserializeStructArray<float>();
