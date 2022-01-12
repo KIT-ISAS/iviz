@@ -31,7 +31,7 @@ namespace Iviz.Displays
 
         readonly uint[] argsBuffer = { 0, 0, 0, 0, 0 };
         ComputeBuffer? argsComputeBuffer;
-        Info<GameObject>? meshResource;
+        ResourceKey<GameObject>? meshResource;
 
         readonly NativeList<float4> pointBuffer = new();
 
@@ -60,7 +60,7 @@ namespace Iviz.Displays
         /// <summary>
         /// The resource to be multiplied.
         /// </summary>
-        public Info<GameObject>? MeshResource
+        public ResourceKey<GameObject>? MeshResource
         {
             get => meshResource;
             set

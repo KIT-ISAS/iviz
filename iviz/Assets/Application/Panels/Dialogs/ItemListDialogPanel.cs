@@ -26,10 +26,10 @@ namespace Iviz.App
         protected float yOffset = 5;
         protected float buttonHeight;
 
-        [CanBeNull] Info<GameObject> buttonType;
+        [CanBeNull] ResourceKey<GameObject> buttonType;
 
         [NotNull]
-        public Info<GameObject> ButtonType
+        public ResourceKey<GameObject> ButtonType
         {
             get => buttonType ??= Resource.Widgets.ItemButton;
             set => buttonType = value;
@@ -61,12 +61,12 @@ namespace Iviz.App
             readonly ItemButton button;
             readonly float buttonHeight;
             readonly float yOffset;
-            readonly Info<GameObject> buttonType;
+            readonly ResourceKey<GameObject> buttonType;
             int index;
 
             public ItemEntry(int index,
                 [NotNull] GameObject parent, float buttonHeight, float yOffset,
-                [NotNull] Info<GameObject> buttonType,
+                [NotNull] ResourceKey<GameObject> buttonType,
                 [NotNull] Action<int, int> callback)
             {
                 if (parent == null)

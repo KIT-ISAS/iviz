@@ -16,7 +16,6 @@ using Iviz.Msgs.NavMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using UnityEngine;
-using GameObjectInfo = Iviz.Resources.Info<UnityEngine.GameObject>;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.Resources
@@ -42,33 +41,33 @@ namespace Iviz.Resources
         public static ReadOnlyDictionary<string, ModuleType> ResourceByRosMessageType { get; }
             = new Dictionary<string, ModuleType>
             {
-                {PointCloud2.RosMessageType, ModuleType.PointCloud},
-                {Image.RosMessageType, ModuleType.Image},
-                {CompressedImage.RosMessageType, ModuleType.Image},
-                {Marker.RosMessageType, ModuleType.Marker},
-                {MarkerArray.RosMessageType, ModuleType.Marker},
-                {InteractiveMarkerUpdate.RosMessageType, ModuleType.InteractiveMarker},
+                { PointCloud2.RosMessageType, ModuleType.PointCloud },
+                { Image.RosMessageType, ModuleType.Image },
+                { CompressedImage.RosMessageType, ModuleType.Image },
+                { Marker.RosMessageType, ModuleType.Marker },
+                { MarkerArray.RosMessageType, ModuleType.Marker },
+                { InteractiveMarkerUpdate.RosMessageType, ModuleType.InteractiveMarker },
                 //{ JointState.RosMessageType, ModuleType.JointState },
-                {LaserScan.RosMessageType, ModuleType.LaserScan},
-                {PoseStamped.RosMessageType, ModuleType.Magnitude},
-                {Pose.RosMessageType, ModuleType.Magnitude},
-                {PointStamped.RosMessageType, ModuleType.Magnitude},
-                {Point.RosMessageType, ModuleType.Magnitude},
-                {WrenchStamped.RosMessageType, ModuleType.Magnitude},
-                {Wrench.RosMessageType, ModuleType.Magnitude},
-                {Odometry.RosMessageType, ModuleType.Magnitude},
-                {TwistStamped.RosMessageType, ModuleType.Magnitude},
-                {Twist.RosMessageType, ModuleType.Magnitude},
-                {OccupancyGrid.RosMessageType, ModuleType.OccupancyGrid},
+                { LaserScan.RosMessageType, ModuleType.LaserScan },
+                { PoseStamped.RosMessageType, ModuleType.Magnitude },
+                { Pose.RosMessageType, ModuleType.Magnitude },
+                { PointStamped.RosMessageType, ModuleType.Magnitude },
+                { Point.RosMessageType, ModuleType.Magnitude },
+                { WrenchStamped.RosMessageType, ModuleType.Magnitude },
+                { Wrench.RosMessageType, ModuleType.Magnitude },
+                { Odometry.RosMessageType, ModuleType.Magnitude },
+                { TwistStamped.RosMessageType, ModuleType.Magnitude },
+                { Twist.RosMessageType, ModuleType.Magnitude },
+                { OccupancyGrid.RosMessageType, ModuleType.OccupancyGrid },
                 //{ Path.RosMessageType, ModuleType.Path },
                 //{ PoseArray.RosMessageType, ModuleType.Path },
                 //{ PolygonStamped.RosMessageType, ModuleType.Path },
                 //{ Polygon.RosMessageType, ModuleType.Path },
-                {GridMap.RosMessageType, ModuleType.GridMap},
+                { GridMap.RosMessageType, ModuleType.GridMap },
                 //{ Octomap.RosMessageType, ModuleType.Octomap },
                 //{ OctomapWithPose.RosMessageType, ModuleType.Octomap },
                 //{ Dialog.RosMessageType, ModuleType.GuiDialog },
-                {DialogArray.RosMessageType, ModuleType.GuiDialog},
+                { DialogArray.RosMessageType, ModuleType.GuiDialog },
             }.AsReadOnly();
 
         public static readonly ColorSchema Colors = new();
@@ -96,23 +95,23 @@ namespace Iviz.Resources
                 ? new ValueTask<(bool, string?)>((true, robotDescription))
                 : External.TryGetRobotAsync(robotName, token);
 
-        public static bool TryGetResource(string uriString, [NotNullWhen(true)] out GameObjectInfo? info) =>
+        public static bool TryGetResource(string uriString, [NotNullWhen(true)] out ResourceKey<GameObject>? info) =>
             Internal.TryGet(uriString, out info) || External.TryGetGameObject(uriString, out info);
 
-        public static ValueTask<GameObjectInfo?> GetGameObjectResourceAsync(
+        public static ValueTask<ResourceKey<GameObject>?> GetGameObjectResourceAsync(
             string uriString,
             IExternalServiceProvider? provider,
             CancellationToken token) =>
-            Internal.TryGet(uriString, out GameObjectInfo? info)
-                ? new ValueTask<GameObjectInfo?>(info)
+            Internal.TryGet(uriString, out ResourceKey<GameObject>? info)
+                ? new ValueTask<ResourceKey<GameObject>?>(info)
                 : External.TryGetGameObjectAsync(uriString, provider, token);
 
-        internal static ValueTask<Info<Texture2D>?> GetTextureResourceAsync(
+        internal static ValueTask<ResourceKey<Texture2D>?> GetTextureResourceAsync(
             string uriString,
             IExternalServiceProvider? provider,
             CancellationToken token) =>
-            Internal.TryGet(uriString, out Info<Texture2D>? info)
-                ? new ValueTask<Info<Texture2D>?>(info)
+            Internal.TryGet(uriString, out ResourceKey<Texture2D>? info)
+                ? new ValueTask<ResourceKey<Texture2D>?>(info)
                 : External.TryGetTextureAsync(uriString, provider, token);
 
         public static void ClearResources()

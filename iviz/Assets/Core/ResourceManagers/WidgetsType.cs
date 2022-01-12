@@ -1,107 +1,109 @@
-using Iviz.Displays;
+#nullable enable
+
 using UnityEngine;
 
 namespace Iviz.Resources
 {
     public sealed class WidgetsType
     {
-        public Info<GameObject> DraggableDisplayButton { get; }
-        public Info<GameObject> ItemButton { get; }
-        public Info<GameObject> ItemButtonWithDelete { get; }
-        public Info<GameObject> ItemListPanel { get; }
-        public Info<GameObject> ConnectionPanel { get; }
-        public Info<GameObject> TfPanel { get; }
-        public Info<GameObject> SaveAsPanel { get; }
-        public Info<GameObject> AddTopicPanel { get; }
-        public Info<GameObject> MarkerPanel { get; }
-        public Info<GameObject> NetworkPanel { get; }
-        public Info<GameObject> ConsolePanel { get; }
-        public Info<GameObject> SettingsPanel { get; }
-        public Info<GameObject> EchoPanel { get; }
-        public Info<GameObject> SystemPanel { get; }
+        public ResourceKey<GameObject> DraggableDisplayButton { get; }
+        public ResourceKey<GameObject> ItemButton { get; }
+        public ResourceKey<GameObject> ItemButtonWithDelete { get; }
+        public ResourceKey<GameObject> ItemListPanel { get; }
+        public ResourceKey<GameObject> ConnectionPanel { get; }
+        public ResourceKey<GameObject> TfPanel { get; }
+        public ResourceKey<GameObject> SaveAsPanel { get; }
+        public ResourceKey<GameObject> AddTopicPanel { get; }
+        public ResourceKey<GameObject> MarkerPanel { get; }
+        public ResourceKey<GameObject> NetworkPanel { get; }
+        public ResourceKey<GameObject> ConsolePanel { get; }
+        public ResourceKey<GameObject> SettingsPanel { get; }
+        public ResourceKey<GameObject> EchoPanel { get; }
+        public ResourceKey<GameObject> SystemPanel { get; }
 
-        public Info<GameObject> HeadTitle { get; }
-        public Info<GameObject> Toggle { get; }
-        public Info<GameObject> Slider { get; }
-        public Info<GameObject> SliderWithScale { get; }
-        public Info<GameObject> Input { get; }
-        public Info<GameObject> NumberInput { get; }
-        public Info<GameObject> Dropdown { get; }
-        public Info<GameObject> ColorPicker { get; }
-        public Info<GameObject> ImagePreview { get; }
-        public Info<GameObject> TrashButton { get; }
-        public Info<GameObject> CloseButton { get; }
-        public Info<GameObject> DataLabel { get; }
-        public Info<GameObject> ToggleButton { get; }
-        public Info<GameObject> ResetButton { get; }
-        public Info<GameObject> Vector3 { get; }
-        public Info<GameObject> Sender { get; }
-        public Info<GameObject> Listener { get; }
-        public Info<GameObject> Frame { get; }
-        public Info<GameObject> Vector3Slider { get; }
-        public Info<GameObject> InputWithHints { get; }
-        public Info<GameObject> MarkerWidget { get; }
-        public Info<GameObject> CollapsibleWidget { get; }
+        public ResourceKey<GameObject> HeadTitle { get; }
+        public ResourceKey<GameObject> Toggle { get; }
+        public ResourceKey<GameObject> Slider { get; }
+        public ResourceKey<GameObject> SliderWithScale { get; }
+        public ResourceKey<GameObject> Input { get; }
+        public ResourceKey<GameObject> NumberInput { get; }
+        public ResourceKey<GameObject> Dropdown { get; }
+        public ResourceKey<GameObject> ColorPicker { get; }
+        public ResourceKey<GameObject> ImagePreview { get; }
+        public ResourceKey<GameObject> TrashButton { get; }
+        public ResourceKey<GameObject> CloseButton { get; }
+        public ResourceKey<GameObject> DataLabel { get; }
+        public ResourceKey<GameObject> ToggleButton { get; }
+        public ResourceKey<GameObject> ResetButton { get; }
+        public ResourceKey<GameObject> Vector3 { get; }
+        public ResourceKey<GameObject> Sender { get; }
+        public ResourceKey<GameObject> Listener { get; }
+        public ResourceKey<GameObject> Frame { get; }
+        public ResourceKey<GameObject> Vector3Slider { get; }
+        public ResourceKey<GameObject> InputWithHints { get; }
+        public ResourceKey<GameObject> MarkerWidget { get; }
+        public ResourceKey<GameObject> CollapsibleWidget { get; }
 
-        public Info<GameObject> DataPanel { get; }
+        public ResourceKey<GameObject> DataPanel { get; }
         
-        public Info<GameObject> ARMarkerPanel { get; }
-        public Info<GameObject> ARMarkerWidget { get; }
+        public ResourceKey<GameObject> ARMarkerPanel { get; }
+        public ResourceKey<GameObject> ARMarkerWidget { get; }
         
-        public Info<GameObject> TfPublisherPanel { get; }
-        public Info<GameObject> TfPublisherWidget { get; }
+        public ResourceKey<GameObject> TfPublisherWidget { get; }
         
-        public Info<GameObject> ImageCanvas { get; }
+        public ResourceKey<GameObject> ImageCanvas { get; }
 
         public WidgetsType()
         {
             var assetHolder = Resource.Extras.WidgetAssetHolder;
 
-            DraggableDisplayButton = new Info<GameObject>(assetHolder.DraggableDisplayButton);
-            ItemButton = new Info<GameObject>(assetHolder.ItemButton);
-            ItemButtonWithDelete = new Info<GameObject>(assetHolder.ItemButtonWithDelete);
-            ItemListPanel = new Info<GameObject>(assetHolder.ItemListPanel);
-            ConnectionPanel = new Info<GameObject>(assetHolder.ConnectionPanel);
-            TfPanel = new Info<GameObject>(assetHolder.TfTreePanel);
-            SaveAsPanel = new Info<GameObject>(assetHolder.SaveAsPanel);
-            AddTopicPanel = new Info<GameObject>(assetHolder.AddTopicPanel);
-            MarkerPanel = new Info<GameObject>(assetHolder.MarkersPanel);
-            NetworkPanel = new Info<GameObject>(assetHolder.NetworkPanel);
-            ConsolePanel = new Info<GameObject>(assetHolder.ConsoleLog);
-            SettingsPanel = new Info<GameObject>(assetHolder.SettingsPanel);
-            EchoPanel = new Info<GameObject>(assetHolder.EchoPanel);
-            SystemPanel = new Info<GameObject>(assetHolder.SystemInfo);
+            DraggableDisplayButton = Create(assetHolder.DraggableDisplayButton);
+            ItemButton = Create(assetHolder.ItemButton);
+            ItemButtonWithDelete = Create(assetHolder.ItemButtonWithDelete);
+            ItemListPanel = Create(assetHolder.ItemListPanel);
+            ConnectionPanel = Create(assetHolder.ConnectionPanel);
+            TfPanel = Create(assetHolder.TfTreePanel);
+            SaveAsPanel = Create(assetHolder.SaveAsPanel);
+            AddTopicPanel = Create(assetHolder.AddTopicPanel);
+            MarkerPanel = Create(assetHolder.MarkersPanel);
+            NetworkPanel = Create(assetHolder.NetworkPanel);
+            ConsolePanel = Create(assetHolder.ConsoleLog);
+            SettingsPanel = Create(assetHolder.SettingsPanel);
+            EchoPanel = Create(assetHolder.EchoPanel);
+            SystemPanel = Create(assetHolder.SystemInfo);
             
-            HeadTitle = new Info<GameObject>(assetHolder.HeadTitle);
-            Toggle = new Info<GameObject>(assetHolder.Toggle);
-            Slider = new Info<GameObject>(assetHolder.Slider);
-            SliderWithScale = new Info<GameObject>(assetHolder.SliderWithScale);
-            Input = new Info<GameObject>(assetHolder.InputField);
-            NumberInput = new Info<GameObject>(assetHolder.NumberInputField);
-            ColorPicker = new Info<GameObject>(assetHolder.ColorPicker);
-            ImagePreview = new Info<GameObject>(assetHolder.ImagePreview);
-            Dropdown = new Info<GameObject>(assetHolder.Dropdown);
-            TrashButton = new Info<GameObject>(assetHolder.TrashButton);
-            CloseButton = new Info<GameObject>(assetHolder.CloseButton);
-            DataLabel = new Info<GameObject>(assetHolder.DataLabel);
-            ToggleButton = new Info<GameObject>(assetHolder.ToggleButton);
-            ResetButton = new Info<GameObject>(assetHolder.ResetButton);
-            Vector3 = new Info<GameObject>(assetHolder.Vector3);
-            Sender = new Info<GameObject>(assetHolder.Sender);
-            Listener = new Info<GameObject>(assetHolder.Listener);
-            Frame = new Info<GameObject>(assetHolder.Frame);
-            Vector3Slider = new Info<GameObject>(assetHolder.Vector3Slider);
-            InputWithHints = new Info<GameObject>(assetHolder.InputFieldWithHints);
-            MarkerWidget = new Info<GameObject>(assetHolder.Markers);            
+            HeadTitle = Create(assetHolder.HeadTitle);
+            Toggle = Create(assetHolder.Toggle);
+            Slider = Create(assetHolder.Slider);
+            SliderWithScale = Create(assetHolder.SliderWithScale);
+            Input = Create(assetHolder.InputField);
+            NumberInput = Create(assetHolder.NumberInputField);
+            ColorPicker = Create(assetHolder.ColorPicker);
+            ImagePreview = Create(assetHolder.ImagePreview);
+            Dropdown = Create(assetHolder.Dropdown);
+            TrashButton = Create(assetHolder.TrashButton);
+            CloseButton = Create(assetHolder.CloseButton);
+            DataLabel = Create(assetHolder.DataLabel);
+            ToggleButton = Create(assetHolder.ToggleButton);
+            ResetButton = Create(assetHolder.ResetButton);
+            Vector3 = Create(assetHolder.Vector3);
+            Sender = Create(assetHolder.Sender);
+            Listener = Create(assetHolder.Listener);
+            Frame = Create(assetHolder.Frame);
+            Vector3Slider = Create(assetHolder.Vector3Slider);
+            InputWithHints = Create(assetHolder.InputFieldWithHints);
+            MarkerWidget = Create(assetHolder.Markers);            
             
-            DataPanel = new Info<GameObject>(assetHolder.DataPanel, nameof(assetHolder.DataPanel));
-            ARMarkerPanel = new Info<GameObject>(assetHolder.ARMarkerPanel, nameof(assetHolder.ARMarkerPanel));
-            ARMarkerWidget = new Info<GameObject>(assetHolder.ARMarkers, nameof(assetHolder.ARMarkers));
+            DataPanel = Create(assetHolder.DataPanel, nameof(assetHolder.DataPanel));
+            ARMarkerPanel = Create(assetHolder.ARMarkerPanel, nameof(assetHolder.ARMarkerPanel));
+            ARMarkerWidget = Create(assetHolder.ARMarkers, nameof(assetHolder.ARMarkers));
 
-            TfPublisherWidget = new Info<GameObject>(assetHolder.TfPublisherWidget, nameof(assetHolder.TfPublisherWidget));
+            TfPublisherWidget = Create(assetHolder.TfPublisherWidget, nameof(assetHolder.TfPublisherWidget));
 
-            CollapsibleWidget = new Info<GameObject>(assetHolder.Collapsible, nameof(assetHolder.Collapsible));
-            ImageCanvas =  new Info<GameObject>(assetHolder.ImageCanvas, nameof(assetHolder.ImageCanvas));
+            CollapsibleWidget = Create(assetHolder.Collapsible, nameof(assetHolder.Collapsible));
+            ImageCanvas =  Create(assetHolder.ImageCanvas, nameof(assetHolder.ImageCanvas));
+            
+            static ResourceKey<GameObject> Create(GameObject obj, string? msg = null) => new(obj, msg);
         }
     }
 }

@@ -226,7 +226,7 @@ namespace Iviz.Displays
             return marker;
         }
 
-        static ValueTask<Info<Texture2D>?> GetTextureResourceAsync(string uriString, string localPath,
+        static ValueTask<ResourceKey<Texture2D>?> GetTextureResourceAsync(string uriString, string localPath,
             IExternalServiceProvider? provider, CancellationToken token)
         {
             var uri = new Uri(uriString);

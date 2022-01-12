@@ -1,19 +1,16 @@
 ﻿#nullable enable
 
 using System;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using Iviz.Common;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.Highlighters;
-using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
@@ -40,7 +37,7 @@ namespace Iviz.Controllers
         readonly (string Ns, int Id) id;
 
         IDisplay? resource;
-        Info<GameObject>? resourceInfo;
+        ResourceKey<GameObject>? resourceKey;
         CancellationTokenSource? runningTs;
         BoundsHighlighter? highlighter;
         Marker? lastMessage;
@@ -175,7 +172,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public MarkerObject(TfFrame parent, (string Ns, int Id) id)
+        public MarkerObject(TfFrame parent, in (string Ns, int Id) id)
         {
             node = FrameNode.Instantiate("[MarkerObject]");
             node.Parent = parent;
@@ -395,9 +392,9 @@ namespace Iviz.Controllers
 
         void CreateMeshResource(Marker msg)
         {
-            if (resource is MeshMarkerResource meshMarker)
+            if (resource is ISupportsColor hasColor)
             {
-                meshMarker.Color = msg.Color.Sanitize().ToUnityColor();
+                hasColor.Color = msg.Color.Sanitize().ToUnityColor();
             }
 
             var newScale = msg.Scale.Ros2Unity().Abs();
@@ -440,15 +437,15 @@ namespace Iviz.Controllers
 
         async ValueTask UpdateResourceAsync(Marker msg)
         {
-            var newResourceInfo = await GetRequestedResource(msg);
-            if (newResourceInfo == resourceInfo)
+            var newResourceKey = await GetRequestedResource(msg);
+            if (newResourceKey == resourceKey)
             {
                 return;
             }
 
             DiscardResource();
-            resourceInfo = newResourceInfo;
-            if (resourceInfo == null)
+            resourceKey = newResourceKey;
+            if (resourceKey == null)
             {
                 if (msg.Type() != MarkerType.MeshResource)
                 {
@@ -459,7 +456,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var resourceGameObject = ResourcePool.Rent(resourceInfo, Transform);
+            var resourceGameObject = ResourcePool.Rent(resourceKey, Transform);
 
             resource = resourceGameObject.GetComponent<IDisplay>();
             if (resource != null)
@@ -482,7 +479,7 @@ namespace Iviz.Controllers
             if (msg.Type() != MarkerType.MeshResource)
             {
                 // shouldn't happen!
-                Debug.LogWarning($"Mesh resource '{resourceInfo}' has no IDisplay!");
+                Debug.LogWarning($"Mesh resource '{resourceKey}' has no IDisplay!");
             }
 
             // add generic wrapper
@@ -516,7 +513,7 @@ namespace Iviz.Controllers
             Transform.SetLocalPose(localPose);
         }
 
-        ValueTask<Info<GameObject>?> GetRequestedResource(Marker msg)
+        ValueTask<ResourceKey<GameObject>?> GetRequestedResource(Marker msg)
         {
             if (msg.Type() != MarkerType.MeshResource)
             {
@@ -541,10 +538,10 @@ namespace Iviz.Controllers
                 _ => AsTask(null)
             };
 
-            static ValueTask<Info<GameObject>?> AsTask(Info<GameObject>? val) => new(val);
+            static ValueTask<ResourceKey<GameObject>?> AsTask(ResourceKey<GameObject>? val) => new(val);
         }
 
-        async ValueTask<Info<GameObject>?> RequestMeshResource(string meshResource)
+        async ValueTask<ResourceKey<GameObject>?> RequestMeshResource(string meshResource)
         {
             StopLoadResourceTask();
             runningTs = new CancellationTokenSource();
@@ -616,14 +613,14 @@ namespace Iviz.Controllers
                 hasDynamicBounds.BoundsChanged -= RaiseBoundsChanged;
             }
 
-            if (resource == null || resourceInfo == null)
+            if (resource == null || resourceKey == null)
             {
                 return;
             }
 
-            resource.ReturnToPool(resourceInfo);
+            resource.ReturnToPool(resourceKey);
             resource = null;
-            resourceInfo = null;
+            resourceKey = null;
             BoundsChanged?.Invoke();
         }
 
@@ -734,7 +731,7 @@ namespace Iviz.Controllers
 
             void UpdateResourceAsyncLog()
             {
-                if (resourceInfo != null)
+                if (resourceKey != null)
                 {
                     return;
                 }

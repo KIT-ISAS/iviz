@@ -12,12 +12,12 @@ namespace Iviz.Controllers.TF
     {
         [SerializeField] string id = "";
 
-        readonly Dictionary<string, TfFrame> children = new();
+        readonly SortedDictionary<string, TfFrame> children = new();
         readonly List<FrameNode> listeners = new();
 
         Pose localPose;
 
-        public Dictionary<string, TfFrame>.ValueCollection Children => children.Values;
+        public SortedDictionary<string, TfFrame>.ValueCollection Children => children.Values;
 
         public virtual string Id
         {

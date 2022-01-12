@@ -25,6 +25,7 @@ namespace Iviz.Ros
         readonly CancellationTokenSource connectionTs = new();
 
         DateTime lastConnectionTry = DateTime.MinValue;
+        bool tryConnectOnce;
 
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
         public bool KeepReconnecting { get; set; }
@@ -82,12 +83,13 @@ namespace Iviz.Ros
                 while (!connectionTs.IsCancellationRequested)
                 {
                     DateTime now = GameThread.Now;
-                    if (KeepReconnecting
+                    if (KeepReconnecting || tryConnectOnce
                         && ConnectionState != ConnectionState.Connected
                         && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)
                     {
                         SetConnectionState(ConnectionState.Connecting);
 
+                        tryConnectOnce = false;
                         bool connectionResult;
 
                         try
@@ -127,6 +129,12 @@ namespace Iviz.Ros
             {
                 await action().AwaitNoThrow(this);
             }
+        }
+
+        public void ConnectOneShot()
+        {
+            tryConnectOnce = true;
+            Signal();
         }
 
         protected abstract ValueTask<bool> ConnectAsync();

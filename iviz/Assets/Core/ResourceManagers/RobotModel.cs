@@ -35,7 +35,7 @@ namespace Iviz.Displays
         readonly Dictionary<string, GameObject> linkObjects = new();
         readonly Dictionary<GameObject, GameObject> linkParentObjects = new();
         readonly Dictionary<string, string> linkParents = new();
-        readonly List<(GameObject, Info<GameObject>)> objectResources = new();
+        readonly List<(GameObject, ResourceKey<GameObject>)> objectResources = new();
         readonly Dictionary<MeshMarkerResource, Color> originalColors = new();
 
         readonly Robot robot;
@@ -316,7 +316,7 @@ namespace Iviz.Displays
             if (geometry.Mesh != null)
             {
                 string uri = geometry.Mesh.Filename;
-                Info<GameObject>? info;
+                ResourceKey<GameObject>? info;
                 try
                 {
                     info = await Resource.GetGameObjectResourceAsync(geometry.Mesh.Filename, provider, token);
@@ -407,7 +407,7 @@ namespace Iviz.Displays
             if (mesh != null)
             {
                 string uri = mesh.Filename;
-                Info<GameObject>? info;
+                ResourceKey<GameObject>? info;
                 try
                 {
                     info = await Resource.GetGameObjectResourceAsync(uri, provider, token);
@@ -446,7 +446,7 @@ namespace Iviz.Displays
                 return; //?
             }
 
-            void Rent(Info<GameObject> info, in Vector3 scale)
+            void Rent(ResourceKey<GameObject> info, in Vector3 scale)
             {
                 resourceObject = ResourcePool.Rent(info);
                 resourceObject.layer = LayerType.IgnoreRaycast;

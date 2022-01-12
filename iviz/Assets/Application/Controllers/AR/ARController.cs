@@ -137,9 +137,7 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
                 GuiInputModule.Instance.DisableCameraLock();
-
                 TfListener.RootFrame.Transform.SetPose(value ? WorldPose : Pose.identity);
-                ARCameraViewChanged?.Invoke(value);
             }
         }
 
@@ -245,14 +243,17 @@ namespace Iviz.Controllers
             pulseTokenSource?.Cancel();
         }
 
-        protected static void RaiseARActiveChanged()
+        protected static void RaiseARStateChanged()
         {
             ARStateChanged?.Invoke(true);
+            ARCameraViewChanged?.Invoke(true);
         }
 
-        static int Sign(float f) => f > 0 ? 1 : f < 0 ? -1 : 0;
-        static int Sign(Vector3 v) => Sign(v.x) + Sign(v.y) + Sign(v.z); // only one of the components is nonzero
-
+        protected static void RaiseARCameraViewChanged(bool value)
+        {
+            ARCameraViewChanged?.Invoke(value);
+        }
+        
         void OnARJoystickChangedAngle(float dA)
         {
             float newVelocityAngle;
@@ -260,7 +261,7 @@ namespace Iviz.Controllers
             {
                 newVelocityAngle = 0;
             }
-            else if (Sign(velocityAngle) != 0 && Sign(velocityAngle) != Sign(dA))
+            else if (Math.Sign(velocityAngle) != 0 && Math.Sign(velocityAngle) != Math.Sign(dA))
             {
                 newVelocityAngle = 0;
             }
@@ -320,6 +321,8 @@ namespace Iviz.Controllers
             }
 
             SetWorldPosition(WorldPosition + deltaWorldPosition, RootMover.ControlMarker);
+            
+            static int Sign(in Vector3 v) => Math.Sign(v.x) + Math.Sign(v.y) + Math.Sign(v.z); // only one of the components is nonzero
         }
 
         void OnARJoystickPointerUp()
@@ -341,13 +344,7 @@ namespace Iviz.Controllers
 
         protected static float AngleFromPose(in Pose unityPose)
         {
-            float angle = unityPose.rotation.eulerAngles.y;
-            if (angle > 180)
-            {
-                angle -= 360;
-            }
-
-            return angle;
+            return UnityUtils.RegularizeAngle(unityPose.rotation.eulerAngles.y);
         }
 
         public void SetWorldPose(in Pose unityPose, RootMover mover)
@@ -383,16 +380,6 @@ namespace Iviz.Controllers
             }
 
             return Instance.WorldPose.Inverse().Multiply(unityPose);
-        }
-
-        public static Pose OriginToRelativePose(in Pose unityPose)
-        {
-            if (Instance is null || Instance.Visible)
-            {
-                return unityPose;
-            }
-
-            return Instance.WorldPose.Multiply(unityPose);
         }
 
         protected virtual void Update()
@@ -437,6 +424,7 @@ namespace Iviz.Controllers
         public virtual void Dispose()
         {
             ARStateChanged?.Invoke(false);
+            ARCameraViewChanged?.Invoke(false);
 
             Visible = false;
             WorldScale = 1;

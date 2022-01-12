@@ -3,6 +3,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Reflection;
@@ -529,7 +530,7 @@ namespace Iviz.Core
             return MemoryMarshal.Read<T>(span);
         }
 
-        public static void TryReturn<T>(this T[] _) where T : unmanaged
+        public static void TryReturn(this Array _)
         {
         }
 
@@ -658,5 +659,43 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyZero(this in Msgs.GeometryMsgs.Vector3 f) =>
             f.MaxAbsCoeff() < 8 * double.Epsilon;
+        
+        public static ReadOnlyDictionary<T, TU> AsReadOnly<T, TU>(this Dictionary<T, TU> t)
+        {
+            return new ReadOnlyDictionary<T, TU>(t);
+        }
+        
+        public static WithIndexEnumerable<T> WithIndex<T>(this IEnumerable<T> source)
+        { 
+            return new WithIndexEnumerable<T>(source);
+        }
+
+        public static T EnsureComponent<T>(this GameObject gameObject) where T : Component =>
+            gameObject.TryGetComponent(out T comp) ? comp : gameObject.AddComponent<T>();
     }
+    
+    public readonly struct WithIndexEnumerable<T>
+    {
+        readonly IEnumerable<T> a;
+
+        public struct Enumerator
+        {
+            readonly IEnumerator<T> a;
+            int index;
+
+            internal Enumerator(IEnumerator<T> a) => (this.a, index) = (a, -1);
+
+            public bool MoveNext()
+            {
+                ++index;
+                return a.MoveNext();
+            }
+
+            public (T, int) Current => (a.Current, index);
+        }
+
+        public WithIndexEnumerable(IEnumerable<T> a) => this.a = a;
+        public Enumerator GetEnumerator() => new(a.GetEnumerator());
+    }    
+    
 }

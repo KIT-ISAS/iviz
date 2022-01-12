@@ -32,7 +32,7 @@ namespace Iviz.Controllers
         readonly CancellationTokenSource tokenSource = new();
         readonly int defaultCullingMask;
         readonly AxisFrameResource setupModeFrame;
-        readonly Camera mainCamera;
+        readonly Camera virtualCamera;
         readonly Canvas canvas;
 
         bool setupModeEnabled = true;
@@ -116,11 +116,12 @@ namespace Iviz.Controllers
             set
             {
                 base.Visible = value;
-                mainCamera.gameObject.SetActive(!value);
+                
+                Settings.MainCamera = value ? ar.Camera : virtualCamera;
+                virtualCamera.gameObject.SetActive(!value);
                 ar.Camera.enabled = value;
                 ar.ARLight.gameObject.SetActive(value);
                 ARSet.Visible = SetupModeEnabled;
-                Settings.MainCamera = value ? ar.Camera : mainCamera;
                 canvas.worldCamera = Settings.MainCamera;
 
                 if (value)
@@ -132,6 +133,8 @@ namespace Iviz.Controllers
                     RenderSettings.ambientMode = AmbientMode.Trilight;
                     Settings.SettingsManager.BackgroundColor = Settings.SettingsManager.BackgroundColor;
                 }
+
+                RaiseARCameraViewChanged(value);
             }
         }
 
@@ -218,7 +221,7 @@ namespace Iviz.Controllers
             Settings.ARCamera = ar.Camera;
 
             canvas = GameObject.Find("Canvas").GetComponent<Canvas>().AssertNotNull(nameof(canvas));
-            mainCamera = Settings.FindMainCamera().GetComponent<Camera>();
+            virtualCamera = Settings.FindMainCamera().GetComponent<Camera>();
 
             MeshManager = ar.Camera.gameObject.GetComponent<ARMeshManager>();
 
@@ -252,7 +255,7 @@ namespace Iviz.Controllers
             Settings.ScreenCaptureManager =
                 new ARFoundationScreenCaptureManager(ar.CameraManager, ar.Camera.transform, ar.OcclusionManager);
 
-            RaiseARActiveChanged();
+            RaiseARStateChanged();
         }
 
         void ArSetOnClicked()

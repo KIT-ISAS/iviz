@@ -83,7 +83,7 @@ namespace Iviz.App
             GameThread.EveryTenthSecond += UpdateAllFast;
         }
 
-        T CreatePanel<T>(Info<GameObject> source) where T : IDialogPanel
+        T CreatePanel<T>(ResourceKey<GameObject> source) where T : IDialogPanel
         {
             if (source == null)
             {

@@ -37,7 +37,7 @@ namespace Iviz.Controllers.TF
         static uint tfSeq;
 
         uint tapSeq;
-        Pose cachedOriginPose = Pose.identity;
+        Pose cachedFixedPose = Pose.identity;
 
         readonly TfConfiguration config = new();
 
@@ -234,6 +234,17 @@ namespace Iviz.Controllers.TF
 
             try
             {
+                // hierarchy:  unityFrame ("TF") -> rootFrame -> originFrame -> fixedFrame
+                // unityFrame: container for all TF stuff. has no parents. invisible.
+                // rootFrame:  managed by the AR system. any movements in the AR origin are instead reversed and applied to rootFrame.
+                //             the root frame may have a uniform scale that is not 1. invisible. 
+                // originFrame: managed by the fixed frame. originFrame is set to the inverse of the fixedFrame pose,
+                //              to ensure that fixedFrame is always on the unity origin (excluding AR changes in root).
+                //              the transformation also applies FlipZ if active. invisible.
+                // fixedFrame: whatever TF frame the user has selected as fixed.
+                // mapFrame:   the default fixed frame. cannot be deleted, to ensure that there is always at least
+                //             one visible frame.
+                
                 unityFrame = Add(CreateFrameObject("TF", null, null));
                 unityFrame.ForceInvisible = true;
                 unityFrame.Visible = false;
@@ -264,8 +275,6 @@ namespace Iviz.Controllers.TF
                 FixedFrame = mapFrame;
 
                 Publisher = new Sender<TFMessage>(DefaultTopic);
-                //TapPublisher = new Sender<PoseStamped>(DefaultTapTopic);
-
                 Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic,
                     PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
                 ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
@@ -307,8 +316,8 @@ namespace Iviz.Controllers.TF
                 var (transforms, callerId, isStatic) = value;
                 foreach (var (parentIdUnchecked, childIdUnchecked, rosTransform, _) in transforms)
                 {
-                    if (rosTransform.IsInvalid()
-                        || childIdUnchecked.Length == 0
+                    if (childIdUnchecked.Length == 0
+                        || rosTransform.IsInvalid()
                         || !IsValid(rosTransform.Translation))
                     {
                         continue;
@@ -342,10 +351,13 @@ namespace Iviz.Controllers.TF
                     }
 
                     lastChild = child;
+                    
+                    var unityPose = rosTransform.Ros2Unity();
+                    
                     if (parentIdUnchecked.Length == 0)
                     {
                         child.TrySetParent(DefaultFrame);
-                        child.SetPose(rosTransform.Ros2Unity(), callerId);
+                        child.SetPose(unityPose, callerId);
                         continue;
                     }
 
@@ -355,14 +367,14 @@ namespace Iviz.Controllers.TF
 
                     if (child.Parent is not null && parentId == child.Parent.Id)
                     {
-                        child.SetPose(rosTransform.Ros2Unity(), callerId);
+                        child.SetPose(unityPose, callerId);
                     }
                     else
                     {
                         var parent = GetOrCreateFrame(parentId);
                         if (child.TrySetParent(parent))
                         {
-                            child.SetPose(rosTransform.Ros2Unity(), callerId);
+                            child.SetPose(unityPose, callerId);
                         }
                     }
                 }
@@ -536,22 +548,29 @@ namespace Iviz.Controllers.TF
 
         void ProcessWorldOffset()
         {
-            var originPose = FixedFrame.OriginWorldPose;
-
+            // task: move fixed frame so that it has identity transform to root frame
+            // hierarchy: root -> origin -> fixed
+            
+            Pose fixedFramePose; // fixed relative to origin
             if (FlipZ)
             {
+                var (position, rotation) = FixedFrame.OriginWorldPose;
                 var rotateAroundForward = new Quaternion(0, 0, 1, 0); // 180 deg around forward axis
-                originPose.rotation = rotateAroundForward * originPose.rotation;
-                originPose.position = rotateAroundForward * originPose.position;
+                fixedFramePose.rotation = rotateAroundForward * rotation;
+                fixedFramePose.position = rotateAroundForward * position;
+            }
+            else
+            {
+                fixedFramePose = FixedFrame.OriginWorldPose;
             }
 
-            if (originPose.EqualsApprox(cachedOriginPose))
+            if (fixedFramePose.EqualsApprox(cachedFixedPose))
             {
                 return;
             }
 
-            cachedOriginPose = originPose;
-            OriginFrame.Transform.SetLocalPose(originPose.Inverse());
+            cachedFixedPose = fixedFramePose;
+            OriginFrame.Transform.SetLocalPose(fixedFramePose.Inverse()); 
         }
 
         void LateUpdate()
@@ -572,6 +591,7 @@ namespace Iviz.Controllers.TF
             ResetFrames = null;
             AfterProcessMessages = null;
             instance = null;
+            tfSeq = 0;
         }
 
         public static Vector3 RelativeToOrigin(in Vector3 unityPosition) =>
@@ -583,7 +603,7 @@ namespace Iviz.Controllers.TF
             var (position, rotation) = unityPose;
 
             Pose p;
-            p.position = originFrame.InverseTransformPoint(position);
+            p.position = originFrame.InverseTransformPoint(position); // may contain scaling
             p.rotation = originFrame.rotation.Inverse() * rotation;
             return p;
         }
@@ -595,7 +615,7 @@ namespace Iviz.Controllers.TF
             var (position, rotation) = unityPose;
             
             Pose p;
-            p.position = fixedFrame.InverseTransformPoint(position);
+            p.position = fixedFrame.InverseTransformPoint(position); // may contain scaling
             p.rotation = fixedFrame.rotation.Inverse() * rotation;
             return p;
         }

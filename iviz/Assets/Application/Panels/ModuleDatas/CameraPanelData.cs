@@ -23,27 +23,20 @@ namespace Iviz.App
         public CameraPanelData()
         {
             panel = ModulePanelManager.GetPanelByResourceType<CameraPanel>(ModuleType.Camera);
+            ARController.ARCameraViewChanged += OnARViewChanged;
         }
 
         public override void SetupPanel()
         {
-            if (Settings.VirtualCamera == null)
-            {
-                panel.Frame.Owner = GuiInputModule.Instance;
-                panel.Fov.Interactable = false;
-                panel.Roll.Interactable = false;
-                panel.Pitch.Interactable = false;
-                panel.Yaw.Interactable = false;
-                panel.Position.Interactable = false;
-                panel.InputPosition.Interactable = false;
-                return;
-            }
+            panel.CloseButton.Clicked += HidePanel;
+
+            CheckInteractable();
 
             var guiInputModule = GuiInputModule.Instance;
             var virtualCamera = Settings.VirtualCamera;
 
             panel.Frame.Owner = guiInputModule;
-            panel.Fov.Value = guiInputModule.CameraFieldOfView;
+            panel.Fov.Value = Settings.MainCamera.GetHorizontalFov();
 
             UpdatePose();
 
@@ -51,14 +44,30 @@ namespace Iviz.App
             panel.Pitch.ValueChanged += f => guiInputModule.CameraPitch = f;
             panel.Yaw.ValueChanged += f => guiInputModule.CameraYaw = f;
 
-            panel.Position.ValueChanged += f =>
-                virtualCamera.transform.localPosition = TfListener.FixedFramePose.Multiply(f);
-            panel.InputPosition.ValueChanged += f =>
-                virtualCamera.transform.localPosition = TfListener.FixedFramePose.Multiply(f);
-            ;
-
+            if (virtualCamera != null)
+            {
+                panel.Position.ValueChanged += f =>
+                    virtualCamera.transform.localPosition = TfListener.FixedFramePose.Multiply(f).Ros2Unity();
+                panel.InputPosition.ValueChanged += f =>
+                    virtualCamera.transform.localPosition = TfListener.FixedFramePose.Multiply(f).Ros2Unity();
+            }
+            
             panel.Fov.ValueChanged += f => guiInputModule.CameraFieldOfView = f;
-            panel.CloseButton.Clicked += HidePanel;
+        }
+
+        void OnARViewChanged(bool _) => CheckInteractable();
+        
+        void CheckInteractable()
+        {
+            bool interactable = Settings.VirtualCamera != null && Settings.MainCamera == Settings.VirtualCamera;
+            panel.Fov.Interactable = interactable;
+            panel.Roll.Interactable = interactable;
+            panel.Pitch.Interactable = interactable;
+            panel.Yaw.Interactable = interactable;
+            panel.Position.Interactable = interactable;
+            panel.InputPosition.Interactable = interactable;
+            
+            panel.Fov.Value = Settings.MainCamera.GetHorizontalFov();
         }
 
         public override void UpdatePanelFast()
@@ -68,17 +77,43 @@ namespace Iviz.App
 
         void UpdatePose()
         {
-            if (Settings.VirtualCamera is not { } virtualCamera)
+            Vector3 rosCameraRpy;
+            if (Settings.MainCamera == Settings.VirtualCamera)
             {
-                return;
+                rosCameraRpy = GuiInputModule.Instance.CameraRpy;
+            }
+            else if (Settings.MainCamera != null)
+            {
+                var (unityX, unityY, unityZ) = Settings.MainCamera.transform.rotation.eulerAngles;
+                var rosRpy = new Vector3(-unityZ, unityX, -unityY);
+                rosCameraRpy = UnityUtils.RegularizeRpy(rosRpy);
+            }
+            else
+            {
+                rosCameraRpy = Vector3.zero;
             }
 
-            var guiInputModule = GuiInputModule.Instance;
-            (panel.Roll.Value, panel.Pitch.Value, panel.Yaw.Value) = guiInputModule.CameraRpy;
+            (panel.Roll.Value, panel.Pitch.Value, panel.Yaw.Value) = rosCameraRpy;
 
-            var cameraPosition = TfListener.RelativeToFixedFrame(virtualCamera.transform.AsPose()).position;
-            panel.Position.Value = cameraPosition;
-            panel.InputPosition.Value = cameraPosition;
+            Vector3 rosCameraPosition;
+            if (Settings.MainCamera is not { } mainCamera)
+            {
+                rosCameraPosition = Vector3.zero;
+            }
+            else
+            {
+                var fixedTransform = TfListener.Instance.FixedFrame.Transform;
+                var unityCameraPosition = mainCamera.transform.position;
+                rosCameraPosition = fixedTransform.InverseTransformPoint(unityCameraPosition).Unity2Ros();
+            }
+
+            panel.Position.Value = rosCameraPosition;
+            panel.InputPosition.Value = rosCameraPosition;
+        }
+
+        public void Dispose()
+        {
+            ARController.ARCameraViewChanged -= OnARViewChanged;
         }
     }
 }

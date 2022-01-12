@@ -13,8 +13,8 @@ namespace Iviz.Displays
     /// </summary>
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    public class MeshMarkerResource : MarkerResource, ISupportsColor, ISupportsTint, ISupportsAROcclusion, ISupportsPbr,
-        ISupportsShadows
+    public class MeshMarkerResource : MarkerResource,
+        ISupportsColor, ISupportsTint, ISupportsAROcclusion, ISupportsPbr, ISupportsShadows
     {
         static readonly int MainTex = Shader.PropertyToID("_MainTex");
 

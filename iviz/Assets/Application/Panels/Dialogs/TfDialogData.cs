@@ -4,6 +4,7 @@ using System;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Roslib;
 
 namespace Iviz.App
 {
@@ -29,11 +30,22 @@ namespace Iviz.App
 
             panel.CreateFrameClicked += () =>
             {
-                string frameName = panel.FrameName.Value;
+                string frameName = ValidateFrameName(panel.FrameName.Value.Trim());
                 if (frameName is "")
                 {
                     RosLogger.Error($"{this}: Cannot create frame with empty name.");
                     return;
+                }
+
+                if (frameName[0] == '/')
+                {
+                    RosLogger.Info($"{this}: Created frame's name has a trailing slash '/'. " +
+                                   "This may cause problems.");
+                }
+                else if (!RosClient.IsValidResourceName(frameName))
+                {
+                    RosLogger.Info($"{this}: Created frame's name '{frameName}' is not a valid ROS resource name. " +
+                                   "This may cause problems.");
                 }
 
                 var tfPublisher = ModuleListPanel.TfPublisher;
@@ -42,7 +54,7 @@ namespace Iviz.App
                     RosLogger.Info($"{this}: A frame with name '{frameName}' already exists.");
                     return;
                 }
-                
+
                 var tfFrame = tfPublisher.Add(frameName);
                 panel.TfLog.SelectedFrame = tfFrame.TfFrame;
                 panel.TfLog.Flush();
@@ -75,6 +87,16 @@ namespace Iviz.App
 
             Show();
             panel.TfLog.SelectedFrame = frame;
-        }        
+        }
+
+        static string ValidateFrameName(string frameName)
+        {
+            if (frameName == "")
+            {
+                return frameName;
+            }
+
+            return frameName[0] == '/' ? frameName[1..] : frameName;
+        }
     }
 }

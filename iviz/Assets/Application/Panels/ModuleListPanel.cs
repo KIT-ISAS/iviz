@@ -187,6 +187,7 @@ namespace Iviz.App
             }
 
             TfPublisher.Dispose();
+            cameraPanelData?.Dispose();
             GuiWidgetListener.DisposeDefaultHandler();
         }
 
@@ -243,14 +244,15 @@ namespace Iviz.App
             UpperCanvas.MasterUriStr.Text = MasterUriToString(connectionData.MasterUri);
             UpperCanvas.MasterUriButton.Clicked += connectionData.Show;
 
-            ConnectionManager.Connection.MasterUri = connectionData.MasterUri;
-            ConnectionManager.Connection.MyUri = connectionData.MyUri;
-            ConnectionManager.Connection.MyId = connectionData.MyId;
+            var rosConnection = ConnectionManager.Connection;
+            rosConnection.MasterUri = connectionData.MasterUri;
+            rosConnection.MyUri = connectionData.MyUri;
+            rosConnection.MyId = connectionData.MyId;
             KeepReconnecting = false;
 
             connectionData.MasterUriChanged += uri =>
             {
-                ConnectionManager.Connection.MasterUri = uri;
+                rosConnection.MasterUri = uri;
                 KeepReconnecting = false;
                 if (uri == null)
                 {
@@ -279,13 +281,13 @@ namespace Iviz.App
                     return;
                 }
 
-                ConnectionManager.Connection.MyId = id;
+                rosConnection.MyId = id;
                 KeepReconnecting = false;
                 RosLogger.Internal($"Changing my ROS id to '{id}'");
             };
             connectionData.MyUriChanged += uri =>
             {
-                ConnectionManager.Connection.MyUri = uri;
+                rosConnection.MyUri = uri;
                 KeepReconnecting = false;
                 RosLogger.Internal(uri == null
                     ? "<b>Error:</b> Failed to set caller uri. Reason: Uri is not valid."
@@ -300,14 +302,14 @@ namespace Iviz.App
                         : "Already disconnected."
                 );
                 KeepReconnecting = false;
-                ConnectionManager.Connection.Disconnect();
+                rosConnection.Disconnect();
             };
             UpperCanvas.ConnectButton.Clicked += () =>
             {
                 RosLogger.Internal(
                     ConnectionManager.IsConnected ? "Reconnection requested." : "Connection requested."
                 );
-                ConnectionManager.Connection.Disconnect();
+                rosConnection.Disconnect();
                 KeepReconnecting = true;
             };
 
@@ -317,9 +319,9 @@ namespace Iviz.App
                 cameraPanelData.ToggleShowPanel();
             };
 
-            connectionData.MasterActiveChanged += _ => ConnectionManager.Connection.Disconnect();
-            ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
-            ConnectionManager.Connection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
+            connectionData.MasterActiveChanged += _ => rosConnection.Disconnect();
+            rosConnection.ConnectionStateChanged += OnConnectionStateChanged;
+            rosConnection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
             GameThread.EveryTenthSecond += UpdateCameraStats;
@@ -355,6 +357,12 @@ namespace Iviz.App
 
             InitFinished?.Invoke();
             InitFinished = null;
+
+            if (rosConnection.MasterUri != null && rosConnection.MyUri != null && rosConnection.MyId != null)
+            {
+                RosLogger.Internal("Trying to connect to previous ROS server.");
+                rosConnection.ConnectOneShot();
+            }
         }
 
         public static void CallAfterInitialized(Action action)

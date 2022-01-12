@@ -476,7 +476,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
         sealed class GuiObject
         {
             readonly FrameNode node;
-            readonly Info<GameObject> info;
+            readonly ResourceKey<GameObject> resourceKey;
             readonly IDisplay display;
 
             public Transform Transform => node.Transform;
@@ -484,14 +484,14 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             public string Id { get; }
             public DateTime ExpirationTime { get; }
 
-            public GuiObject(Widget msg, Info<GameObject> info)
+            public GuiObject(Widget msg, ResourceKey<GameObject> resourceKey)
             {
-                this.info = info;
+                this.resourceKey = resourceKey;
                 node = FrameNode.Instantiate("Widget Node");
                 node.AttachTo(msg.Header.FrameId);
                 Id = msg.Id;
 
-                display = ResourcePool.Rent(info, node.Transform).GetComponent<IDisplay>();
+                display = ResourcePool.Rent(resourceKey, node.Transform).GetComponent<IDisplay>();
                 if (display is IWidgetWithCaption withCaption && msg.Caption.Length != 0)
                 {
                     withCaption.Caption = msg.Caption;
@@ -516,7 +516,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             GuiObject(GuiObject source)
             {
                 node = source.node;
-                info = source.info;
+                resourceKey = source.resourceKey;
                 display = source.display;
                 Id = source.Id;
                 ExpirationTime = DateTime.MinValue;
@@ -529,7 +529,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
 
             public void Dispose()
             {
-                display.ReturnToPool(info);
+                display.ReturnToPool(resourceKey);
                 node.DestroySelf();
             }
 
