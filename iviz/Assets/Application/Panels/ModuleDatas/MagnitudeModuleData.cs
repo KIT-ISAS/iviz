@@ -30,7 +30,7 @@ namespace Iviz.App
                 constructor.TryGetConfigurationType() ?? constructor.Type)
         {
             panel = ModulePanelManager.GetPanelByResourceType<MagnitudeModulePanel>(ModuleType.Magnitude);
-            listener = new MagnitudeListener((MagnitudeConfiguration?)constructor.Configuration, Topic, Type);
+            listener = new MagnitudeListener((MagnitudeConfiguration?)constructor.Configuration, Topic, TopicType);
             UpdateModuleButton();
         }
 

@@ -33,7 +33,7 @@ namespace Iviz.App
                 constructor.TryGetConfigurationType() ?? constructor.Type)
         {
             panel = ModulePanelManager.GetPanelByResourceType<MarkerModulePanel>(ModuleType.Marker);
-            listener = new MarkerListener((MarkerConfiguration?)constructor.Configuration, Topic, Type);
+            listener = new MarkerListener((MarkerConfiguration?)constructor.Configuration, Topic, TopicType);
             UpdateModuleButton();
         }
 

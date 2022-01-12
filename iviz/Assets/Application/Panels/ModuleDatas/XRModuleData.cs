@@ -20,7 +20,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public XRModuleData(ModuleDataConstructor constructor) : base(constructor.Topic, constructor.Type)
+        public XRModuleData(ModuleDataConstructor constructor)
         {
             panel = ModulePanelManager.GetPanelByResourceType<XRModulePanel>(ModuleType.XR);
 

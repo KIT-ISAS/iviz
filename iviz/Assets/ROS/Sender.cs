@@ -26,7 +26,7 @@ namespace Iviz.Ros
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
-                throw new ArgumentException("Invalid topic!", nameof(topic));
+                throw new ArgumentException("Sender topic is empty!", nameof(topic));
             }
 
             Topic = topic;

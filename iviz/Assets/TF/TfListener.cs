@@ -217,18 +217,18 @@ namespace Iviz.Controllers.TF
                 {
                     FixedFrame = mapFrame;
                     originFrame.Transform.SetLocalPose(Pose.identity);
-                    Config.FixedFrameId = "";
+                    config.FixedFrameId = "";
                     return;
                 }
 
-                Config.FixedFrameId = value;
+                config.FixedFrameId = value;
                 var frame = GetOrCreateFrame(value, fixedFrameListenerNode);
                 FixedFrame = frame;
                 originFrame.Transform.SetLocalPose(frame.OriginWorldPose.Inverse());
             }
         }
 
-        public TfListener(TfConfiguration? config, string topic)
+        public TfListener(TfConfiguration? config)
         {
             instance = this;
 
@@ -264,15 +264,13 @@ namespace Iviz.Controllers.TF
                 FixedFrame = mapFrame;
 
                 Publisher = new Sender<TFMessage>(DefaultTopic);
-                //TapPublisher = new Sender<PoseStamped>(DefaultTapTopic);
-
                 Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic,
                     PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
                 ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
 
                 Config = config ?? new TfConfiguration
                 {
-                    Topic = topic
+                    Topic = DefaultTopic
                 };
 
                 GameThread.LateEveryFrame += LateUpdate;

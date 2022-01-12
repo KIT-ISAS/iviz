@@ -157,12 +157,12 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    RosLogger.Info($"Creating module of type {moduleType}");
+                    RosLogger.Debug($"ControllerService: Creating module of type {moduleType}");
                     var newModuleData = ModuleListPanel.Instance.CreateModule(moduleType,
                         requestedId: requestedId.Length != 0 ? requestedId : null);
                     result.id = newModuleData.Configuration.Id;
                     result.success = true;
-                    RosLogger.Info("Done!");
+                    RosLogger.Debug("ControllerService: Done!");
                 }
                 catch (Exception e)
                 {
@@ -195,7 +195,7 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            var data = ModuleDatas.FirstOrDefault(module => module.Topic == topic);
+            var data = ModuleDatas.OfType<ListenerModuleData>().FirstOrDefault(module => module.Topic == topic);
             if (data != null)
             {
                 result.message = requestedId == data.Configuration.Id

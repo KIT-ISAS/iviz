@@ -25,12 +25,10 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
         public override IController Controller => listener;
 
-        public TfModuleData(ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
-                constructor.Type)
+        public TfModuleData(ModuleDataConstructor constructor)
         {
             panel = ModulePanelManager.GetPanelByResourceType<TfModulePanel>(ModuleType.TF);
-            listener = new TfListener((TfConfiguration?)constructor.Configuration, Topic);
+            listener = new TfListener((TfConfiguration?)constructor.Configuration);
             UpdateModuleButton();
         }
 
@@ -118,7 +116,7 @@ namespace Iviz.App
         
         public override string ToString()
         {
-            return $"[{ModuleType} Topic='{Topic}' [{Type}] guid={Configuration.Id}]";
+            return $"[{ModuleType} Topic='{TfListener.DefaultTopic}' guid={Configuration.Id}]";
         }        
     }
 }

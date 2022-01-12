@@ -30,9 +30,9 @@ namespace Iviz.App
             }
         }
 
-        public ImageDialogData(ImageDialogListener listener, Transform holder)
+        public ImageDialogData(ImageDialogListener listener, Transform? holder)
         {
-            this.listener = listener;
+            this.listener = listener ?? throw new ArgumentNullException(nameof(listener));
             canvas = ResourcePool.Rent(Resource.Widgets.ImageCanvas, holder);
             if (Settings.IsXR)
             {

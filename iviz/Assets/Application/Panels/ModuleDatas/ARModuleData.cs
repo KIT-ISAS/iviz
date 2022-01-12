@@ -25,8 +25,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public ARModuleData(ModuleDataConstructor constructor) :
-            base(constructor.Topic, constructor.Type)
+        public ARModuleData(ModuleDataConstructor constructor)
         {
             panel = ModulePanelManager.GetPanelByResourceType<ARModulePanel>(ModuleType.AugmentedReality);
             controller = new ARFoundationController((ARConfiguration?)constructor.Configuration);
