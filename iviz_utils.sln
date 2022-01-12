@@ -36,13 +36,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_msgs_wrapper", "iviz_m
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_tf_manager", "iviz_tf_manager\iviz_tf_manager.csproj", "{CD30D932-413D-47FA-8C2C-8957DC39415C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_test", "iviz_test\iviz_test.csproj", "{86F81717-CEE8-4833-9088-969DE86B8480}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_ntp_lib", "iviz_ntp_lib\iviz_ntp_lib.csproj", "{C3689E94-527D-4D73-B9C7-1EAB8F59C375}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_octree_helper", "iviz_octree_helper\iviz_octree_helper.csproj", "{D7C8CFBC-BC55-48A0-8491-31DA92820B04}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_kdl_wrapper", "iviz_kdl_wrapper\iviz_kdl_wrapper.csproj", "{62D65515-5F7B-46DE-8267-8998DC2F7A02}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_tools", "iviz_tools\iviz_tools.csproj", "{73125E88-C810-4E18-9F66-B1C005C3CE9C}"
 EndProject
@@ -120,10 +116,6 @@ Global
 		{CD30D932-413D-47FA-8C2C-8957DC39415C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD30D932-413D-47FA-8C2C-8957DC39415C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD30D932-413D-47FA-8C2C-8957DC39415C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{86F81717-CEE8-4833-9088-969DE86B8480}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{86F81717-CEE8-4833-9088-969DE86B8480}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{86F81717-CEE8-4833-9088-969DE86B8480}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{86F81717-CEE8-4833-9088-969DE86B8480}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C3689E94-527D-4D73-B9C7-1EAB8F59C375}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C3689E94-527D-4D73-B9C7-1EAB8F59C375}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C3689E94-527D-4D73-B9C7-1EAB8F59C375}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -132,10 +124,6 @@ Global
 		{D7C8CFBC-BC55-48A0-8491-31DA92820B04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7C8CFBC-BC55-48A0-8491-31DA92820B04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7C8CFBC-BC55-48A0-8491-31DA92820B04}.Release|Any CPU.Build.0 = Release|Any CPU
-		{62D65515-5F7B-46DE-8267-8998DC2F7A02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{62D65515-5F7B-46DE-8267-8998DC2F7A02}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{62D65515-5F7B-46DE-8267-8998DC2F7A02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{62D65515-5F7B-46DE-8267-8998DC2F7A02}.Release|Any CPU.Build.0 = Release|Any CPU
 		{73125E88-C810-4E18-9F66-B1C005C3CE9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{73125E88-C810-4E18-9F66-B1C005C3CE9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73125E88-C810-4E18-9F66-B1C005C3CE9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
