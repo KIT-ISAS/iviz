@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal MeshFeatures(ref ReadBuffer b)
+        public MeshFeatures(ref ReadBuffer b)
         {
             MapUuid = b.DeserializeString();
             Features = b.DeserializeArray<MeshMsgs.Feature>();

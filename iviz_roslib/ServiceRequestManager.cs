@@ -37,7 +37,7 @@ internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T 
 
         Logger.LogDebugFormat("{0}: Starting!", this);
 
-        task = TaskUtils.StartLongTask(async () => await RunLoop().AwaitNoThrow(this));
+        task = TaskUtils.Run(() => RunLoop().AsTask().AwaitNoThrow(this));
     }
 
     public Uri Uri { get; }

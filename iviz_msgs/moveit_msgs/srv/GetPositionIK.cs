@@ -70,7 +70,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPositionIKRequest(ref ReadBuffer b)
+        public GetPositionIKRequest(ref ReadBuffer b)
         {
             IkRequest = new PositionIKRequest(ref b);
         }
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPositionIKResponse(ref ReadBuffer b)
+        public GetPositionIKResponse(ref ReadBuffer b)
         {
             Solution = new RobotState(ref b);
             ErrorCode = new MoveItErrorCodes(ref b);

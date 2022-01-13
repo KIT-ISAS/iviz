@@ -33,7 +33,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal JoyFeedback(ref ReadBuffer b)
+        public JoyFeedback(ref ReadBuffer b)
         {
             Type = b.Deserialize<byte>();
             Id = b.Deserialize<byte>();

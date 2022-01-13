@@ -60,7 +60,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// Constructor with buffer.
-        internal SelfTestRequest(ref ReadBuffer b)
+        public SelfTestRequest(ref ReadBuffer b)
         {
         }
         
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// Constructor with buffer.
-        internal SelfTestResponse(ref ReadBuffer b)
+        public SelfTestResponse(ref ReadBuffer b)
         {
             Id = b.DeserializeString();
             Passed = b.Deserialize<byte>();

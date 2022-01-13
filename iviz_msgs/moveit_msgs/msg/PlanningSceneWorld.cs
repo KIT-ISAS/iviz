@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PlanningSceneWorld(ref ReadBuffer b)
+        public PlanningSceneWorld(ref ReadBuffer b)
         {
             CollisionObjects = b.DeserializeArray<CollisionObject>();
             for (int i = 0; i < CollisionObjects.Length; i++)

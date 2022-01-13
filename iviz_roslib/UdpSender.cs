@@ -123,13 +123,13 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             $"md5sum={topicInfo.Md5Sum}",
             $"type={topicInfo.Type}",
             $"callerid={topicInfo.CallerId}",
-            latchedMsg.HasValue ? "latching=1" : "latching=0",
+            latchedMsg.hasValue ? "latching=1" : "latching=0",
             $"message_definition={topicInfo.MessageDependencies}",
         };
 
         responseHeader = StreamUtils.WriteHeaderToArray(responseHeaderContents);
 
-        task = TaskUtils.StartLongTask(async () => await StartSession(latchedMsg).AwaitNoThrow(this));
+        task = TaskUtils.Run(async () => await StartSession(latchedMsg).AwaitNoThrow(this));
     }
 
     async ValueTask StartSession(NullableMessage<T> latchedMsg)
@@ -172,9 +172,9 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 
     async ValueTask ProcessLoop(NullableMessage<T> latchedMsg)
     {
-        if (latchedMsg.HasValue)
+        if (latchedMsg.hasValue)
         {
-            Publish(latchedMsg.Value);
+            Publish(latchedMsg.value!);
         }
 
         using var writeBuffer = new Rent<byte>(MaxPacketSize);
@@ -183,7 +183,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             writeBuffer[i] = 0;
         }
 
-        _ = Task.Run(KeepAliveMessages);
+        _ = TaskUtils.Run(KeepAliveMessages);
 
         while (KeepRunning)
         {
@@ -339,7 +339,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         }
     }
         
-    async ValueTask KeepAliveMessages()
+    async Task KeepAliveMessages()
     {
         while (KeepRunning)
         {

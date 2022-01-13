@@ -10,6 +10,7 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Urdf;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -33,8 +34,7 @@ namespace Iviz.App
 
         CancellationTokenSource? tokenSource;
 
-        public SimpleRobotModuleData(ModuleDataConstructor constructor) :
-            base(constructor.Topic, constructor.Type)
+        public SimpleRobotModuleData(ModuleDataConstructor constructor)
         {
             RobotController = new SimpleRobotController((RobotConfiguration?) constructor.Configuration);
             panel = ModulePanelManager.GetPanelByResourceType<SimpleRobotModulePanel>(ModuleType.Robot);
@@ -191,13 +191,10 @@ namespace Iviz.App
 
         protected override void UpdateModuleButton()
         {
-            string text =
-                $"{Resource.Font.Split(RobotController.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n" +
-                $"<b>{ModuleType}</b>";
-            ButtonText = RobotController.Visible ? text : $"<color=grey>{text}</color>";
+            ModuleListButtonText = ModuleListPanel.CreateButtonTextForModule(this, RobotController.Name);
         }
 
-        public void OnRobotFinishedLoading()
+        void OnRobotFinishedLoading()
         {
             UpdateModuleButton();
         }
@@ -273,7 +270,7 @@ namespace Iviz.App
 
                 RobotController.ProcessRobotSource(config.SavedRobotName, config.SourceParameter);
 
-                if (IsSelected)
+                if (IsPanelSelected)
                 {
                     panel.HelpText.Text = RobotController.HelpText;
                 }

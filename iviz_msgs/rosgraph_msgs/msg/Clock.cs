@@ -24,7 +24,7 @@ namespace Iviz.Msgs.RosgraphMsgs
         }
         
         /// Constructor with buffer.
-        internal Clock(ref ReadBuffer b)
+        public Clock(ref ReadBuffer b)
         {
             Clock_ = b.Deserialize<time>();
         }

@@ -23,7 +23,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Matrix4(ref ReadBuffer b)
+        public Matrix4(ref ReadBuffer b)
         {
             M = b.DeserializeStructArray<float>(16);
         }

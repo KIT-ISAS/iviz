@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal Wrench(ref ReadBuffer b)
+        public Wrench(ref ReadBuffer b)
         {
             b.Deserialize(out Force);
             b.Deserialize(out Torque);

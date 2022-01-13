@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal TrajectoryConstraints(ref ReadBuffer b)
+        public TrajectoryConstraints(ref ReadBuffer b)
         {
             Constraints = b.DeserializeArray<Constraints>();
             for (int i = 0; i < Constraints.Length; i++)

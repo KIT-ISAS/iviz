@@ -29,7 +29,7 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// Constructor with buffer.
-        internal BoundingBox3D(ref ReadBuffer b)
+        public BoundingBox3D(ref ReadBuffer b)
         {
             b.Deserialize(out Center);
             b.Deserialize(out Size);

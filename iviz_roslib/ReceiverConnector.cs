@@ -12,7 +12,7 @@ namespace Iviz.Roslib;
 /// <summary>
 /// Class in charge of trying to connect and reconnect over and over to a ROS publisher 
 /// </summary>
-internal class SessionManager
+internal class ReceiverConnector
 {
     const int MaxConnectionRetries = 120;
     const int DisposeTimeoutInMs = 2000;
@@ -21,21 +21,19 @@ internal class SessionManager
     readonly string topic;
     readonly CancellationTokenSource tokenSource = new();
     readonly Task task;
-
-    readonly Action<SessionManager, Response> onConnectionSucceeded;
-
+    readonly Action<ReceiverConnector, Response> onConnectionSucceeded;
     readonly RpcUdpTopicRequest? udpRequest;
     readonly UdpClient? udpClient;
     readonly RosTransportHint transportHint;
 
     ReceiverStatus status;
-    public ErrorMessage? ErrorDescription { get; private set; }
+    bool disposed;
 
     CancellationToken Token => tokenSource.Token;
     public Uri RemoteUri => client.Uri;
+    public ErrorMessage? ErrorDescription { get; private set; }
     public bool IsAlive => !task.IsCompleted;
 
-    bool disposed;
 
     public sealed class Response
     {
@@ -51,8 +49,8 @@ internal class SessionManager
             (tcpResponse, udpResponse, udpClient) = (TcpResponse, UdpResponse, UdpClient);
     }
 
-    public SessionManager(RosNodeClient client, string topic, RosTransportHint transportHint,
-        RpcUdpTopicRequest? udpRequest, Action<SessionManager, Response> onConnectionSucceeded)
+    public ReceiverConnector(RosNodeClient client, string topic, RosTransportHint transportHint,
+        RpcUdpTopicRequest? udpRequest, Action<ReceiverConnector, Response> onConnectionSucceeded)
     {
         this.topic = topic;
         this.client = client;
@@ -69,7 +67,7 @@ internal class SessionManager
         }
 
         status = ReceiverStatus.ConnectingRpc;
-        task = TaskUtils.StartLongTask(async () => await KeepReconnecting().AwaitNoThrow(this));
+        task = TaskUtils.Run(async () => await KeepReconnecting().AwaitNoThrow(this));
     }
 
     async ValueTask KeepReconnecting()

@@ -23,7 +23,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Vector2i(ref ReadBuffer b)
+        public Vector2i(ref ReadBuffer b)
         {
             X = b.Deserialize<int>();
             Y = b.Deserialize<int>();

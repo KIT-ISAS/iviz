@@ -39,7 +39,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal LookupTransformGoal(ref ReadBuffer b)
+        public LookupTransformGoal(ref ReadBuffer b)
         {
             TargetFrame = b.DeserializeString();
             SourceFrame = b.DeserializeString();

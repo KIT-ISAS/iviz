@@ -27,7 +27,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// Constructor with buffer.
-        internal DiagnosticArray(ref ReadBuffer b)
+        public DiagnosticArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Status = b.DeserializeArray<DiagnosticStatus>();

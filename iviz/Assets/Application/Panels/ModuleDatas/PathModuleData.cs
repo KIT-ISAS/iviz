@@ -35,7 +35,7 @@ namespace Iviz.App
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;
-                listener.Config.Type = Type;
+                listener.Config.Type = TopicType;
             }
             else
             {
@@ -58,7 +58,7 @@ namespace Iviz.App
             panel.ShowLines.Value = listener.LinesVisible;
             panel.LineColor.Value = listener.LineColor;
 
-            switch (Type)
+            switch (TopicType)
             {
                 case PoseArray.RosMessageType:
                     panel.ShowAxes.Interactable = false;

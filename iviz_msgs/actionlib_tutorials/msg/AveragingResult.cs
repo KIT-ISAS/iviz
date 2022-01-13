@@ -24,7 +24,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// Constructor with buffer.
-        internal AveragingResult(ref ReadBuffer b)
+        public AveragingResult(ref ReadBuffer b)
         {
             InteriorAngle = b.Deserialize<float>();
             Apothem = b.Deserialize<float>();

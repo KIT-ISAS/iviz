@@ -569,7 +569,7 @@ namespace Iviz.App
             string address = panel.Addresses[index].Value;
             if (!string.IsNullOrWhiteSpace(hostname) && !string.IsNullOrWhiteSpace(address))
             {
-                var newHostAlias = new HostAlias(hostname, address);
+                var newHostAlias = new HostAlias { Hostname = hostname, Address = address };
                 if (!newHostAlias.Equals(HostAliases[index]))
                 {
                     return;
@@ -597,23 +597,12 @@ namespace Iviz.App
     }
 
     [DataContract]
-    public sealed class HostAlias : IEquatable<HostAlias>
+    public sealed class HostAlias
     {
         [DataMember] public string Hostname { get; set; } = "";
         [DataMember] public string Address { get; set; } = "";
 
-        public HostAlias()
-        {
-        }
-
-        public HostAlias(string hostname, string address) => (Hostname, Address) = (hostname, address);
-
         public void Deconstruct(out string hostname, out string address) => (hostname, address) = (Hostname, Address);
-
         public bool Equals(HostAlias? a) => a is var (hostname, address) && hostname == Hostname && address == Address;
-
-        public override bool Equals(object obj) => obj is HostAlias other && Equals(other);
-
-        public override int GetHashCode() => (Hostname, Address).GetHashCode();
     }
 }

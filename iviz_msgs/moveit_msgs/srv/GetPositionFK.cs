@@ -78,7 +78,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPositionFKRequest(ref ReadBuffer b)
+        public GetPositionFKRequest(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             FkLinkNames = b.DeserializeStringArray();
@@ -147,7 +147,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPositionFKResponse(ref ReadBuffer b)
+        public GetPositionFKResponse(ref ReadBuffer b)
         {
             PoseStamped = b.DeserializeArray<GeometryMsgs.PoseStamped>();
             for (int i = 0; i < PoseStamped.Length; i++)

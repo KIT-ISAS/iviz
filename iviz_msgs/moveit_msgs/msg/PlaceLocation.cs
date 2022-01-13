@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PlaceLocation(ref ReadBuffer b)
+        public PlaceLocation(ref ReadBuffer b)
         {
             Id = b.DeserializeString();
             PostPlacePosture = new TrajectoryMsgs.JointTrajectory(ref b);

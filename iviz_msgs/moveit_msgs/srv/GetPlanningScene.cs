@@ -70,7 +70,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPlanningSceneRequest(ref ReadBuffer b)
+        public GetPlanningSceneRequest(ref ReadBuffer b)
         {
             Components = new PlanningSceneComponents(ref b);
         }
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPlanningSceneResponse(ref ReadBuffer b)
+        public GetPlanningSceneResponse(ref ReadBuffer b)
         {
             Scene = new PlanningScene(ref b);
         }

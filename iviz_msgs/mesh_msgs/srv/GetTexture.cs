@@ -70,7 +70,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetTextureRequest(ref ReadBuffer b)
+        public GetTextureRequest(ref ReadBuffer b)
         {
             Uuid = b.DeserializeString();
             TextureIndex = b.Deserialize<uint>();
@@ -114,7 +114,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetTextureResponse(ref ReadBuffer b)
+        public GetTextureResponse(ref ReadBuffer b)
         {
             Texture = new MeshMsgs.MeshTexture(ref b);
         }

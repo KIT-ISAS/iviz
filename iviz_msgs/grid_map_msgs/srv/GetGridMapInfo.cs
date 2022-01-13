@@ -60,7 +60,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// Constructor with buffer.
-        internal GetGridMapInfoRequest(ref ReadBuffer b)
+        public GetGridMapInfoRequest(ref ReadBuffer b)
         {
         }
         
@@ -105,7 +105,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
         
         /// Constructor with buffer.
-        internal GetGridMapInfoResponse(ref ReadBuffer b)
+        public GetGridMapInfoResponse(ref ReadBuffer b)
         {
             Info = new GridMapMsgs.GridMapInfo(ref b);
         }

@@ -27,7 +27,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// Constructor with buffer.
-        internal AveragingActionGoal(ref ReadBuffer b)
+        public AveragingActionGoal(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
             GoalId = new ActionlibMsgs.GoalID(ref b);

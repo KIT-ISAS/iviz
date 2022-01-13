@@ -36,7 +36,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal BoundingVolume(ref ReadBuffer b)
+        public BoundingVolume(ref ReadBuffer b)
         {
             Primitives = b.DeserializeArray<ShapeMsgs.SolidPrimitive>();
             for (int i = 0; i < Primitives.Length; i++)

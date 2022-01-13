@@ -71,7 +71,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal MotionPlanRequest(ref ReadBuffer b)
+        public MotionPlanRequest(ref ReadBuffer b)
         {
             WorkspaceParameters = new WorkspaceParameters(ref b);
             StartState = new RobotState(ref b);

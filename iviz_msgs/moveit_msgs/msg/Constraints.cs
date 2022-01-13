@@ -36,7 +36,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal Constraints(ref ReadBuffer b)
+        public Constraints(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             JointConstraints = b.DeserializeArray<JointConstraint>();

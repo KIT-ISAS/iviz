@@ -26,7 +26,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
         
         /// Constructor with buffer.
-        internal GoalStatusArray(ref ReadBuffer b)
+        public GoalStatusArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             StatusList = b.DeserializeArray<GoalStatus>();

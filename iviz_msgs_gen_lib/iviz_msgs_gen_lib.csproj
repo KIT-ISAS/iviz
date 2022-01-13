@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <LangVersion>9</LangVersion>
+        <LangVersion>default</LangVersion>
         <AssemblyName>Iviz.MsgsGen.Lib</AssemblyName>
         <RootNamespace>Iviz.MsgsGen</RootNamespace>
         <Nullable>enable</Nullable>

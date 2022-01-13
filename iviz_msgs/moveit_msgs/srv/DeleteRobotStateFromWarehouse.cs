@@ -71,7 +71,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal DeleteRobotStateFromWarehouseRequest(ref ReadBuffer b)
+        public DeleteRobotStateFromWarehouseRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Robot = b.DeserializeString();
@@ -108,7 +108,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal DeleteRobotStateFromWarehouseResponse(ref ReadBuffer b)
+        public DeleteRobotStateFromWarehouseResponse(ref ReadBuffer b)
         {
         }
         

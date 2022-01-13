@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal MotionSequenceItem(ref ReadBuffer b)
+        public MotionSequenceItem(ref ReadBuffer b)
         {
             Req = new MotionPlanRequest(ref b);
             BlendRadius = b.Deserialize<double>();

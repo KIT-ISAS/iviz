@@ -27,7 +27,7 @@ namespace Iviz.Msgs.TurtleActionlib
         }
         
         /// Constructor with buffer.
-        internal ShapeActionResult(ref ReadBuffer b)
+        public ShapeActionResult(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);

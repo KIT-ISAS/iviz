@@ -24,7 +24,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal Vector3Stamped(ref ReadBuffer b)
+        public Vector3Stamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Vector);

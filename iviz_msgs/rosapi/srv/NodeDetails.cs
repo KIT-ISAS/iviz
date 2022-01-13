@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal NodeDetailsRequest(ref ReadBuffer b)
+        public NodeDetailsRequest(ref ReadBuffer b)
         {
             Node = b.DeserializeString();
         }
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal NodeDetailsResponse(ref ReadBuffer b)
+        public NodeDetailsResponse(ref ReadBuffer b)
         {
             Subscribing = b.DeserializeStringArray();
             Publishing = b.DeserializeStringArray();

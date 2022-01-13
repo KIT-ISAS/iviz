@@ -24,7 +24,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal DoubleParameter(ref ReadBuffer b)
+        public DoubleParameter(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Value = b.Deserialize<double>();

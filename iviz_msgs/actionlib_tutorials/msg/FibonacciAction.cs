@@ -29,7 +29,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// Constructor with buffer.
-        internal FibonacciAction(ref ReadBuffer b)
+        public FibonacciAction(ref ReadBuffer b)
         {
             ActionGoal = new FibonacciActionGoal(ref b);
             ActionResult = new FibonacciActionResult(ref b);

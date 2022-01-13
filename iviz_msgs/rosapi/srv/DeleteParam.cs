@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal DeleteParamRequest(ref ReadBuffer b)
+        public DeleteParamRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
         }
@@ -102,7 +102,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal DeleteParamResponse(ref ReadBuffer b)
+        public DeleteParamResponse(ref ReadBuffer b)
         {
         }
         

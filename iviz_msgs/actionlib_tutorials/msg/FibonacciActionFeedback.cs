@@ -27,7 +27,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         }
         
         /// Constructor with buffer.
-        internal FibonacciActionFeedback(ref ReadBuffer b)
+        public FibonacciActionFeedback(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);

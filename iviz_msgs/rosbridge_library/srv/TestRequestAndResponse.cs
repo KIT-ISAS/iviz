@@ -67,7 +67,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestRequestAndResponseRequest(ref ReadBuffer b)
+        public TestRequestAndResponseRequest(ref ReadBuffer b)
         {
             Data = b.Deserialize<int>();
         }
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestRequestAndResponseResponse(ref ReadBuffer b)
+        public TestRequestAndResponseResponse(ref ReadBuffer b)
         {
             Data = b.Deserialize<int>();
         }

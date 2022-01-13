@@ -27,7 +27,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
         }
         
         /// Constructor with buffer.
-        internal JointTrajectory(ref ReadBuffer b)
+        public JointTrajectory(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             JointNames = b.DeserializeStringArray();

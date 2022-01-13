@@ -57,7 +57,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Dialog(ref ReadBuffer b)
+        public Dialog(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Action = b.Deserialize<byte>();

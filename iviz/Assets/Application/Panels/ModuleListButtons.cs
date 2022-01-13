@@ -34,7 +34,7 @@ namespace Iviz.App
                 .GetComponentInChildren<DraggableButtonWidget>();
 
             button.Transform.anchoredPosition = new Vector2(0, -y);
-            button.ButtonText = moduleData.ButtonText;
+            button.ButtonText = moduleData.ModuleListButtonText;
             button.Name = $"Button:{moduleData.ModuleType}";
             button.Visible = true;
 
@@ -58,7 +58,7 @@ namespace Iviz.App
             foreach (int i in index..buttons.Count)
             {
                 float y = 2 * YOffset + i * (buttonHeight + YOffset);
-                buttons[i].Transform.anchoredPosition = new Vector3(0, -y);
+                buttons[i].Transform.anchoredPosition = new Vector2(0, -y);
             }
 
             contentObjectTransform.sizeDelta = new Vector2(0, 2 * YOffset + buttons.Count * (buttonHeight + YOffset));

@@ -27,7 +27,7 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// Constructor with buffer.
-        internal Detection2DArray(ref ReadBuffer b)
+        public Detection2DArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Detections = b.DeserializeArray<Detection2D>();

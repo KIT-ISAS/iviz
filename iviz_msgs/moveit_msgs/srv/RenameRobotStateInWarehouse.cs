@@ -74,7 +74,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal RenameRobotStateInWarehouseRequest(ref ReadBuffer b)
+        public RenameRobotStateInWarehouseRequest(ref ReadBuffer b)
         {
             OldName = b.DeserializeString();
             NewName = b.DeserializeString();
@@ -123,7 +123,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal RenameRobotStateInWarehouseResponse(ref ReadBuffer b)
+        public RenameRobotStateInWarehouseResponse(ref ReadBuffer b)
         {
         }
         

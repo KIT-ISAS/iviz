@@ -18,24 +18,27 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
 
     readonly AsyncLock mutex = new();
     readonly HashSet<IProtocolSender<TMessage>> senders = new();
-    IProtocolSender<TMessage>[] cachedSenders = Array.Empty<IProtocolSender<TMessage>>();
-
     readonly RosPublisher<TMessage> publisher;
     readonly TopicInfo<TMessage> topicInfo;
     readonly CancellationTokenSource tokenSource = new();
     readonly TcpListener listener;
     readonly Task task;
 
+    IProtocolSender<TMessage>[] cachedSenders = Array.Empty<IProtocolSender<TMessage>>();
     NullableMessage<TMessage> latchedMessage;
-
-    bool KeepRunning => !tokenSource.IsCancellationRequested;
 
     int maxQueueSizeInBytes;
     bool latching;
     bool forceTcpNoDelay;
     bool disposed;
 
+    bool KeepRunning => !tokenSource.IsCancellationRequested;
     public Endpoint Endpoint => new((IPEndPoint)listener.LocalEndpoint);
+    
+    public string Topic => topicInfo.Topic;
+    public string TopicType => topicInfo.Type;
+    public int NumConnections => senders.Count(sender => sender.IsAlive);
+    public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
     public bool ForceTcpNoDelay
     {
@@ -55,13 +58,6 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
             }
         }
     }
-
-    public string Topic => topicInfo.Topic;
-    public string TopicType => topicInfo.Type;
-
-    public int NumConnections => senders.Count(sender => sender.IsAlive);
-
-    public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
     public bool Latching
     {
@@ -91,6 +87,11 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
         }
     }
 
+    public TMessage LatchedMessage
+    {
+        set => latchedMessage = value ?? throw new NullReferenceException("Latched message cannot be null");
+    }
+
     public SenderManager(RosPublisher<TMessage> publisher, TopicInfo<TMessage> topicInfo)
     {
         this.publisher = publisher;
@@ -99,7 +100,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
         listener = new TcpListener(IPAddress.IPv6Any, 0) { Server = { DualMode = true } };
         listener.Start();
 
-        task = TaskUtils.StartLongTask(async () => await RunTcpReceiverLoop().AwaitNoThrow(this));
+        task = TaskUtils.Run(async () => await RunTcpReceiverLoop().AwaitNoThrow(this));
 
         Logger.LogDebugFormat("{0}: Starting at :{1}", this, Endpoint.Port.ToString());
     }
@@ -111,7 +112,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
         {
             while (KeepRunning)
             {
-                TcpClient client = await listener.AcceptTcpClientAsync();
+                var client = await listener.AcceptTcpClientAsync();
                 if (!KeepRunning)
                 {
                     break;
@@ -209,7 +210,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
     {
         if (Latching)
         {
-            latchedMessage = new NullableMessage<TMessage>(msg);
+            latchedMessage = msg;
         }
 
         foreach (var sender in cachedSenders)
@@ -222,7 +223,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
     {
         if (Latching)
         {
-            latchedMessage = new NullableMessage<TMessage>(msg);
+            latchedMessage = msg;
         }
 
         var localSenders = cachedSenders;
@@ -245,7 +246,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
 
     public void Dispose()
     {
-        Task.Run(() => DisposeAsync(default)).WaitNoThrow(this);
+        TaskUtils.Run(() => DisposeAsync(default).AsTask()).WaitNoThrow(this);
     }
 
     public async ValueTask DisposeAsync(CancellationToken token)
@@ -278,16 +279,30 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
 
     public PublisherSenderState[] GetStates() => cachedSenders.Select(sender => sender.State).ToArray();
 
+    public void UnsetLatch()
+    {
+        latchedMessage = default;
+    }
+    
     public override string ToString()
     {
         return $"[SenderManager '{Topic}']";
     }
 }
 
-internal readonly struct NullableMessage<T> where T : IMessage
+internal readonly struct NullableMessage<T>
 {
-    readonly T? element;
-    public bool HasValue { get; }
-    public T Value => HasValue ? element! : throw new NullReferenceException();
-    public NullableMessage(T? element) => (this.element, HasValue) = (element, true);
+    public readonly T? value;
+    public readonly bool hasValue;
+
+    NullableMessage(in T element)
+    {
+        value = element;
+        hasValue = true;
+    }
+
+    public static implicit operator NullableMessage<T>(in T message)
+    {
+        return new NullableMessage<T>(message);
+    }
 }

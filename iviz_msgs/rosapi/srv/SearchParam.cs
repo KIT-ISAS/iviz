@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal SearchParamRequest(ref ReadBuffer b)
+        public SearchParamRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
         }
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal SearchParamResponse(ref ReadBuffer b)
+        public SearchParamResponse(ref ReadBuffer b)
         {
             GlobalName = b.DeserializeString();
         }

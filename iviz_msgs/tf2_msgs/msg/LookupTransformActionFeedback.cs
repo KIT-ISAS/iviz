@@ -27,7 +27,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal LookupTransformActionFeedback(ref ReadBuffer b)
+        public LookupTransformActionFeedback(ref ReadBuffer b)
         {
             Header = new StdMsgs.Header(ref b);
             Status = new ActionlibMsgs.GoalStatus(ref b);

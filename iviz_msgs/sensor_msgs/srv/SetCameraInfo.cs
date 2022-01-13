@@ -76,7 +76,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal SetCameraInfoRequest(ref ReadBuffer b)
+        public SetCameraInfoRequest(ref ReadBuffer b)
         {
             CameraInfo = new SensorMsgs.CameraInfo(ref b);
         }
@@ -123,7 +123,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal SetCameraInfoResponse(ref ReadBuffer b)
+        public SetCameraInfoResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             StatusMessage = b.DeserializeString();

@@ -91,7 +91,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// Constructor with buffer.
-        internal InteractiveMarkerControl(ref ReadBuffer b)
+        public InteractiveMarkerControl(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             b.Deserialize(out Orientation);

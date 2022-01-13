@@ -60,7 +60,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetCaptureResolutionsRequest(ref ReadBuffer b)
+        public GetCaptureResolutionsRequest(ref ReadBuffer b)
         {
         }
         
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetCaptureResolutionsResponse(ref ReadBuffer b)
+        public GetCaptureResolutionsResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

@@ -24,7 +24,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal LookupTransformResult(ref ReadBuffer b)
+        public LookupTransformResult(ref ReadBuffer b)
         {
             Transform = new GeometryMsgs.TransformStamped(ref b);
             Error = new Tf2Msgs.TF2Error(ref b);

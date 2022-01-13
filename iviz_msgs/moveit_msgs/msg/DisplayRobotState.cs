@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal DisplayRobotState(ref ReadBuffer b)
+        public DisplayRobotState(ref ReadBuffer b)
         {
             State = new RobotState(ref b);
             HighlightLinks = b.DeserializeArray<ObjectColor>();

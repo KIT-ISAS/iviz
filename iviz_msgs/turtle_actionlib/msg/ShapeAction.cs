@@ -29,7 +29,7 @@ namespace Iviz.Msgs.TurtleActionlib
         }
         
         /// Constructor with buffer.
-        internal ShapeAction(ref ReadBuffer b)
+        public ShapeAction(ref ReadBuffer b)
         {
             ActionGoal = new ShapeActionGoal(ref b);
             ActionResult = new ShapeActionResult(ref b);

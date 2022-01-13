@@ -21,7 +21,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// Constructor with buffer.
-        internal UInt64(ref ReadBuffer b)
+        public UInt64(ref ReadBuffer b)
         {
             Data = b.Deserialize<ulong>();
         }

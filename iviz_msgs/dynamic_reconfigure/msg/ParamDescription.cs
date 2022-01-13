@@ -33,7 +33,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal ParamDescription(ref ReadBuffer b)
+        public ParamDescription(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Type = b.DeserializeString();

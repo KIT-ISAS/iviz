@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetFramePoseRequest(ref ReadBuffer b)
+        public GetFramePoseRequest(ref ReadBuffer b)
         {
             Frames = b.DeserializeStringArray();
         }
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetFramePoseResponse(ref ReadBuffer b)
+        public GetFramePoseResponse(ref ReadBuffer b)
         {
             IsValid = b.DeserializeStructArray<bool>();
             Poses = b.DeserializeStructArray<GeometryMsgs.Pose>();

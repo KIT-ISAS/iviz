@@ -22,7 +22,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestTimeArray(ref ReadBuffer b)
+        public TestTimeArray(ref ReadBuffer b)
         {
             Times = b.DeserializeStructArray<time>();
         }

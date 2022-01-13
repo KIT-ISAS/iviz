@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ExecuteTrajectoryFeedback(ref ReadBuffer b)
+        public ExecuteTrajectoryFeedback(ref ReadBuffer b)
         {
             State = b.DeserializeString();
         }

@@ -32,7 +32,7 @@ namespace Iviz.App
                 constructor.TryGetConfigurationType() ?? constructor.Type)
         {
             panel = ModulePanelManager.GetPanelByResourceType<ImageModulePanel>(ModuleType.Image);
-            listener = new ImageListener((ImageConfiguration?)constructor.Configuration, Topic, Type);
+            listener = new ImageListener((ImageConfiguration?)constructor.Configuration, Topic, TopicType);
             UpdateModuleButton();
         }
 

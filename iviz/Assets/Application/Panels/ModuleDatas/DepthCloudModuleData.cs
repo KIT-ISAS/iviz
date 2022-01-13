@@ -29,8 +29,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public DepthCloudModuleData(ModuleDataConstructor constructor) :
-            base(constructor.Topic, constructor.Type)
+        public DepthCloudModuleData(ModuleDataConstructor constructor) 
         {
             panel = ModulePanelManager.GetPanelByResourceType<DepthCloudModulePanel>(ModuleType.DepthCloud);
             controller = new DepthCloudController((DepthCloudConfiguration?)constructor.Configuration);
@@ -213,10 +212,8 @@ namespace Iviz.App
 
         protected override void UpdateModuleButton()
         {
-            string text = controller.DepthTopic.Length != 0
-                ? GetDescriptionForTopic(controller.DepthTopic, ModuleTypeStr)
-                : $"<b>{ModuleTypeStr}</b>";
-            ButtonText = Controller.Visible ? text : $"<color=grey>{text}</color>";
+            ModuleListButtonText =
+                ModuleListPanel.CreateButtonTextForListenerModule(this, controller.DepthTopic, ModuleTypeStr);
         }
 
         sealed class ColorImageDialogListener : ImageDialogListener

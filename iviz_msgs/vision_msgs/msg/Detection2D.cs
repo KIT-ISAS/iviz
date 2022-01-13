@@ -48,7 +48,7 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// Constructor with buffer.
-        internal Detection2D(ref ReadBuffer b)
+        public Detection2D(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Results = b.DeserializeArray<ObjectHypothesisWithPose>();

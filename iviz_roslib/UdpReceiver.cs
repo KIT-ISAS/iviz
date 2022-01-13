@@ -118,7 +118,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
             }
         }
 
-        task = TaskUtils.StartLongTask(async () => await StartSession().AwaitNoThrow(this));
+        task = TaskUtils.Run(async () => await StartSession().AwaitNoThrow(this));
     }
 
     public SubscriberReceiverState State => new UdpReceiverState(RemoteUri)

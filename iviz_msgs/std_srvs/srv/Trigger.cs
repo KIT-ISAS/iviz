@@ -60,7 +60,7 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// Constructor with buffer.
-        internal TriggerRequest(ref ReadBuffer b)
+        public TriggerRequest(ref ReadBuffer b)
         {
         }
         
@@ -108,7 +108,7 @@ namespace Iviz.Msgs.StdSrvs
         }
         
         /// Constructor with buffer.
-        internal TriggerResponse(ref ReadBuffer b)
+        public TriggerResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

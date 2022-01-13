@@ -24,7 +24,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal TriangleMeshStamped(ref ReadBuffer b)
+        public TriangleMeshStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Mesh = new MeshMsgs.TriangleMesh(ref b);

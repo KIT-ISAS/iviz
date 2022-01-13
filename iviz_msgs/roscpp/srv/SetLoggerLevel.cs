@@ -71,7 +71,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// Constructor with buffer.
-        internal SetLoggerLevelRequest(ref ReadBuffer b)
+        public SetLoggerLevelRequest(ref ReadBuffer b)
         {
             Logger = b.DeserializeString();
             Level = b.DeserializeString();
@@ -108,7 +108,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// Constructor with buffer.
-        internal SetLoggerLevelResponse(ref ReadBuffer b)
+        public SetLoggerLevelResponse(ref ReadBuffer b)
         {
         }
         

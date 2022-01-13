@@ -45,7 +45,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         }
         
         /// Constructor with buffer.
-        internal GoalStatus(ref ReadBuffer b)
+        public GoalStatus(ref ReadBuffer b)
         {
             GoalId = new GoalID(ref b);
             Status = b.Deserialize<byte>();

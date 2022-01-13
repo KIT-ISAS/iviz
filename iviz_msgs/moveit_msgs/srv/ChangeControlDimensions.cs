@@ -81,7 +81,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ChangeControlDimensionsRequest(ref ReadBuffer b)
+        public ChangeControlDimensionsRequest(ref ReadBuffer b)
         {
             ControlXTranslation = b.Deserialize<bool>();
             ControlYTranslation = b.Deserialize<bool>();
@@ -134,7 +134,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ChangeControlDimensionsResponse(ref ReadBuffer b)
+        public ChangeControlDimensionsResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }

@@ -32,7 +32,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GripperTranslation(ref ReadBuffer b)
+        public GripperTranslation(ref ReadBuffer b)
         {
             Direction = new GeometryMsgs.Vector3Stamped(ref b);
             DesiredDistance = b.Deserialize<float>();

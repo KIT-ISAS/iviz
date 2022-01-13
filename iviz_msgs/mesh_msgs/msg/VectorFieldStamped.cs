@@ -24,7 +24,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal VectorFieldStamped(ref ReadBuffer b)
+        public VectorFieldStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             VectorField = new MeshMsgs.VectorField(ref b);

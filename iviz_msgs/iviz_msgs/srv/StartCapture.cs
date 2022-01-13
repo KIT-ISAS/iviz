@@ -71,7 +71,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal StartCaptureRequest(ref ReadBuffer b)
+        public StartCaptureRequest(ref ReadBuffer b)
         {
             ResolutionX = b.Deserialize<int>();
             ResolutionY = b.Deserialize<int>();
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal StartCaptureResponse(ref ReadBuffer b)
+        public StartCaptureResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

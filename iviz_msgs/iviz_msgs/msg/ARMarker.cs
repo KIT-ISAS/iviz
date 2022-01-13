@@ -44,7 +44,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal ARMarker(ref ReadBuffer b)
+        public ARMarker(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Type = b.Deserialize<byte>();

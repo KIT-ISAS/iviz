@@ -34,7 +34,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal MotionSequenceResponse(ref ReadBuffer b)
+        public MotionSequenceResponse(ref ReadBuffer b)
         {
             ErrorCode = new MoveItErrorCodes(ref b);
             SequenceStart = new RobotState(ref b);

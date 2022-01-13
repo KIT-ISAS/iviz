@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal PoseWithCovarianceStamped(ref ReadBuffer b)
+        public PoseWithCovarianceStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Pose = new PoseWithCovariance(ref b);

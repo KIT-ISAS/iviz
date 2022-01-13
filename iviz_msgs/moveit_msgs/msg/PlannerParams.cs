@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PlannerParams(ref ReadBuffer b)
+        public PlannerParams(ref ReadBuffer b)
         {
             Keys = b.DeserializeStringArray();
             Values = b.DeserializeStringArray();

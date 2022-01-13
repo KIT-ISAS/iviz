@@ -24,7 +24,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal QuaternionStamped(ref ReadBuffer b)
+        public QuaternionStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Quaternion);

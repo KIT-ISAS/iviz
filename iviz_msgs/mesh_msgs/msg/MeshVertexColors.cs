@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal MeshVertexColors(ref ReadBuffer b)
+        public MeshVertexColors(ref ReadBuffer b)
         {
             VertexColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
         }

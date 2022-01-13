@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal MotionPlanResponse(ref ReadBuffer b)
+        public MotionPlanResponse(ref ReadBuffer b)
         {
             TrajectoryStart = new RobotState(ref b);
             GroupName = b.DeserializeString();

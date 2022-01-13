@@ -29,7 +29,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal LookupTransformAction(ref ReadBuffer b)
+        public LookupTransformAction(ref ReadBuffer b)
         {
             ActionGoal = new LookupTransformActionGoal(ref b);
             ActionResult = new LookupTransformActionResult(ref b);

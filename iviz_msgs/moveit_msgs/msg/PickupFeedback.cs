@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PickupFeedback(ref ReadBuffer b)
+        public PickupFeedback(ref ReadBuffer b)
         {
             State = b.DeserializeString();
         }

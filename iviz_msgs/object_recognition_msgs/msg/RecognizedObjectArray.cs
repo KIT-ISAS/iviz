@@ -31,7 +31,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal RecognizedObjectArray(ref ReadBuffer b)
+        public RecognizedObjectArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Objects = b.DeserializeArray<ObjectRecognitionMsgs.RecognizedObject>();

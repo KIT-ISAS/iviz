@@ -52,7 +52,7 @@ namespace Iviz.Msgs.ShapeMsgs
         }
         
         /// Constructor with buffer.
-        internal SolidPrimitive(ref ReadBuffer b)
+        public SolidPrimitive(ref ReadBuffer b)
         {
             Type = b.Deserialize<byte>();
             Dimensions = b.DeserializeStructArray<double>();

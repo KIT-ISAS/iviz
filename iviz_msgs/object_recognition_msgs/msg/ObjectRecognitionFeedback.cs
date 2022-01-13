@@ -15,7 +15,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal ObjectRecognitionFeedback(ref ReadBuffer b)
+        public ObjectRecognitionFeedback(ref ReadBuffer b)
         {
         }
         

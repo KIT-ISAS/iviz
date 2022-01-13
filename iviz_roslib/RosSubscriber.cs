@@ -260,8 +260,8 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
         else
         {
             cachedCallbacks = EmptyCallback;
-            Task disposeTask = DisposeAsync(token).AwaitNoThrow(this).AsTask();
-            Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this).AsTask();
+            Task disposeTask = DisposeAsync(token).AwaitNoThrow(this);
+            Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
             await (disposeTask, unsubscribeTask).WhenAll();
         }
 
@@ -282,7 +282,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
 
     internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris, CancellationToken token)
     {
-        Task.Run(() => PublisherUpdateRcpAsync(publisherUris, token), token).AwaitNoThrow(this);
+        TaskUtils.Run(() => PublisherUpdateRcpAsync(publisherUris, token).AsTask(), token).AwaitNoThrow(this);
     }
 
     bool IRosSubscriber<T>.TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<T>? receiver) =>

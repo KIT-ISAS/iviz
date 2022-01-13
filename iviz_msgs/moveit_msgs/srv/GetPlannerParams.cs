@@ -73,7 +73,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPlannerParamsRequest(ref ReadBuffer b)
+        public GetPlannerParamsRequest(ref ReadBuffer b)
         {
             PlannerConfig = b.DeserializeString();
             Group = b.DeserializeString();
@@ -119,7 +119,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetPlannerParamsResponse(ref ReadBuffer b)
+        public GetPlannerParamsResponse(ref ReadBuffer b)
         {
             Params = new PlannerParams(ref b);
         }

@@ -32,7 +32,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal OccupancyGrid(ref ReadBuffer b)
+        public OccupancyGrid(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Info = new MapMetaData(ref b);

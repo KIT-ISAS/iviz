@@ -71,7 +71,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal CheckIfRobotStateExistsInWarehouseRequest(ref ReadBuffer b)
+        public CheckIfRobotStateExistsInWarehouseRequest(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Robot = b.DeserializeString();
@@ -115,7 +115,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal CheckIfRobotStateExistsInWarehouseResponse(ref ReadBuffer b)
+        public CheckIfRobotStateExistsInWarehouseResponse(ref ReadBuffer b)
         {
             Exists = b.Deserialize<bool>();
         }

@@ -35,7 +35,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Include(ref ReadBuffer b)
+        public Include(ref ReadBuffer b)
         {
             Uri = b.DeserializeString();
             Pose = new Matrix4(ref b);

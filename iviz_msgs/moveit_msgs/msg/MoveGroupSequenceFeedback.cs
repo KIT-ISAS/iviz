@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal MoveGroupSequenceFeedback(ref ReadBuffer b)
+        public MoveGroupSequenceFeedback(ref ReadBuffer b)
         {
             State = b.DeserializeString();
         }

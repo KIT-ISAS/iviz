@@ -34,7 +34,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal Config(ref ReadBuffer b)
+        public Config(ref ReadBuffer b)
         {
             Bools = b.DeserializeArray<BoolParameter>();
             for (int i = 0; i < Bools.Length; i++)

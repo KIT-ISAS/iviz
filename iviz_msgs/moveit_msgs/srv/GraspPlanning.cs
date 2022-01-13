@@ -89,7 +89,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GraspPlanningRequest(ref ReadBuffer b)
+        public GraspPlanningRequest(ref ReadBuffer b)
         {
             GroupName = b.DeserializeString();
             Target = new CollisionObject(ref b);
@@ -182,7 +182,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GraspPlanningResponse(ref ReadBuffer b)
+        public GraspPlanningResponse(ref ReadBuffer b)
         {
             Grasps = b.DeserializeArray<Grasp>();
             for (int i = 0; i < Grasps.Length; i++)
