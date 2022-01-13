@@ -1,4 +1,5 @@
 ﻿using System;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using TMPro;
@@ -39,7 +40,7 @@ namespace Iviz.App
             get => value;
             set
             {
-                if (this.value == value)
+                if ((this.value - value).ApproximatelyZero())
                 {
                     return;
                 }

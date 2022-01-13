@@ -41,7 +41,7 @@ namespace Iviz.App
             UpdateModuleButton();
 
             RobotController.RobotFinishedLoading += OnRobotFinishedLoading;
-            ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
+            RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -65,7 +65,7 @@ namespace Iviz.App
             base.Dispose();
             RobotController.RobotFinishedLoading -= OnRobotFinishedLoading;
             RobotController.Dispose();
-            ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
+            RosConnection.ConnectionStateChanged -= OnConnectionStateChanged;
         }
 
         public override void SetupPanel()

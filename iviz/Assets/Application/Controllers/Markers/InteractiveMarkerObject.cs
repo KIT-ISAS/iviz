@@ -247,7 +247,7 @@ namespace Iviz.Controllers
             text.ReturnToPool();
 
             Object.Destroy(ControlNode.gameObject);
-            node.DestroySelf();
+            node.Dispose();
         }
 
         public void GenerateLog(StringBuilder description)

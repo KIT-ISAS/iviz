@@ -147,7 +147,7 @@ namespace Iviz.Controllers
                     break;
             }
 
-            node.name = $"[{config.Topic}]";
+            node.Name = $"[{config.Topic}]";
         }
 
 
@@ -280,7 +280,7 @@ namespace Iviz.Controllers
         {
             base.Dispose();
             resource.ReturnToPool();
-            node.DestroySelf();
+            node.Dispose();
             lines.Dispose();
         }
     }

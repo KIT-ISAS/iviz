@@ -46,17 +46,15 @@ namespace Iviz.App
 
             if (virtualCamera != null)
             {
-                panel.Position.ValueChanged += f =>
-                    virtualCamera.transform.localPosition = TfListener.FixedFramePose.Multiply(f).Ros2Unity();
-                panel.InputPosition.ValueChanged += f =>
-                    virtualCamera.transform.localPosition = TfListener.FixedFramePose.Multiply(f).Ros2Unity();
+                panel.Position.ValueChanged += f => guiInputModule.CameraPosition = TransformFixed(f);
+                panel.InputPosition.ValueChanged += f => guiInputModule.CameraPosition = TransformFixed(f);
             }
-            
+
             panel.Fov.ValueChanged += f => guiInputModule.CameraFieldOfView = f;
         }
 
         void OnARViewChanged(bool _) => CheckInteractable();
-        
+
         void CheckInteractable()
         {
             bool interactable = Settings.VirtualCamera != null && Settings.MainCamera == Settings.VirtualCamera;
@@ -66,7 +64,7 @@ namespace Iviz.App
             panel.Yaw.Interactable = interactable;
             panel.Position.Interactable = interactable;
             panel.InputPosition.Interactable = interactable;
-            
+
             panel.Fov.Value = Settings.MainCamera.GetHorizontalFov();
         }
 
@@ -96,20 +94,27 @@ namespace Iviz.App
             (panel.Roll.Value, panel.Pitch.Value, panel.Yaw.Value) = rosCameraRpy;
 
             Vector3 rosCameraPosition;
-            if (Settings.MainCamera is not { } mainCamera)
+            if (Settings.MainCamera == Settings.VirtualCamera)
             {
-                rosCameraPosition = Vector3.zero;
+                rosCameraPosition = InverseTransformFixed(GuiInputModule.Instance.CameraPosition);
+            } else if (Settings.MainCamera != null)
+            {
+                rosCameraPosition = InverseTransformFixed(Settings.MainCamera.transform.localPosition);
             }
             else
             {
-                var fixedTransform = TfListener.Instance.FixedFrame.Transform;
-                var unityCameraPosition = mainCamera.transform.position;
-                rosCameraPosition = fixedTransform.InverseTransformPoint(unityCameraPosition).Unity2Ros();
+                rosCameraPosition = Vector3.zero;
             }
 
             panel.Position.Value = rosCameraPosition;
             panel.InputPosition.Value = rosCameraPosition;
         }
+
+        static Vector3 TransformFixed(in Vector3 f) =>
+            TfListener.FixedFrame.Transform.TransformPoint(f).Ros2Unity();
+
+        static Vector3 InverseTransformFixed(in Vector3 f) =>
+            TfListener.FixedFrame.Transform.InverseTransformPoint(f).Unity2Ros();
 
         public void Dispose()
         {

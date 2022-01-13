@@ -4,34 +4,23 @@ using System;
 using System.Collections.Generic;
 using Iviz.Core;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers.TF
 {
     public abstract class TfFrame : FrameNode
     {
-        [SerializeField] string id = "";
-
         readonly SortedDictionary<string, TfFrame> children = new();
         readonly List<FrameNode> listeners = new();
-
         Pose localPose;
 
         public SortedDictionary<string, TfFrame>.ValueCollection Children => children.Values;
 
-        public virtual string Id
-        {
-            get => id;
-            protected set => id = value ?? throw new ArgumentNullException(nameof(value));
-        }
-
-        public virtual bool ForceInvisible { get; set; }
+        public string Id { get; }
         public virtual bool LabelVisible { get; set; }
         public abstract bool ConnectorVisible { get; set; }
         public abstract float FrameSize { get; set; }
         public virtual bool TrailVisible { get; set; }
-        public bool ParentCanChange { get; set; } = true;
-
+        
         public override TfFrame? Parent
         {
             get => base.Parent;
@@ -39,16 +28,21 @@ namespace Iviz.Controllers.TF
             {
                 if (!TrySetParent(value))
                 {
-                    RosLogger.Error($"{this}: Failed to set '{(value != null ? value.Id : "null")}' as a parent to {Id}");
+                    RosLogger.Error(
+                        $"{this}: Failed to set '{(value != null ? value.Id : "null")}' as a parent to {Id}");
                 }
             }
         }
 
+
         /// <summary>
-        /// Pose in relation to the ROS origin in Unity coordinates
+        /// Pose in relation to the origin frame in Unity coordinates
         /// </summary>
         public Pose OriginWorldPose => TfListener.RelativeToOrigin(AbsoluteUnityPose);
 
+        /// <summary>
+        /// Pose in relation to the fixed frame in Unity coordinates
+        /// </summary>
         public Pose FixedWorldPose => TfListener.RelativeToFixedFrame(AbsoluteUnityPose);
 
         /// <summary>
@@ -59,12 +53,12 @@ namespace Iviz.Controllers.TF
         bool HasNoListeners => listeners.Count == 0;
 
         bool IsChildless => children.Count == 0;
-        
-        public string? LastCallerId { get; private set; }
 
-        public void Setup(string newId)
+        //public string? LastCallerId { get; private set; }
+
+        protected TfFrame(string id)
         {
-            Id = newId;
+            Id = id;
             Name = "{" + Id + "}";
         }
 
@@ -116,7 +110,7 @@ namespace Iviz.Controllers.TF
         {
             if (listeners.RemoveAll(listener => listener == null) != 0)
             {
-                Debug.LogWarning($"Frame '{id}' had a listener that was previously destroyed.");
+                Debug.LogWarning($"Frame '{Id}' had a listener that was previously destroyed.");
             }
 
             if (HasNoListeners && IsChildless)
@@ -125,58 +119,40 @@ namespace Iviz.Controllers.TF
             }
         }
 
-        public virtual bool TrySetParent(TfFrame? newParent)
+        public virtual bool TrySetParent(TfFrame? parent)
         {
-            if (!ParentCanChange)
+            if (!IsAlive)
             {
                 return false;
             }
             
-            if (!IsAlive)
+            if (parent == Parent)
             {
-                return false; // destroying!
+                return true;
             }
 
-            TfFrame? oldParent = Parent;
-
-            if (newParent is null)
+            if (parent == null)
             {
-                if (oldParent is not null)
-                {
-                    oldParent.RemoveChild(this);
-                }
-
+                Parent?.RemoveChild(this);
                 base.Parent = null;
+                return true;
             }
-            else
+
+            if (IsChildOf(parent, this))
             {
-                if (IsChildOf(newParent, this))
-                {
-                    newParent.CheckIfDead();
-                    return false;
-                }
-
-                if (newParent == oldParent)
-                {
-                    return true;
-                }
-
-                if (oldParent is not null)
-                {
-                    oldParent.RemoveChild(this);
-                }
-
-                base.Parent = newParent;
-                newParent.AddChild(this);
+                parent.CheckIfDead();
+                return false;
             }
+
+            Parent?.RemoveChild(this);
+            base.Parent = parent;
+            parent.AddChild(this);
 
             return true;
         }
 
-        static bool IsChildOf(TfFrame? maybeChild, Object frame)
+        static bool IsChildOf(TfFrame? maybeChild, TfFrame frame)
         {
-            int frameId = frame.GetInstanceID();
-
             while (true)
             {
                 if (maybeChild is null)
@@ -184,7 +160,7 @@ namespace Iviz.Controllers.TF
                     return false;
                 }
 
-                if (maybeChild.GetInstanceID() == frameId)
+                if (maybeChild == frame)
                 {
                     return true;
                 }
@@ -193,18 +169,19 @@ namespace Iviz.Controllers.TF
             }
         }
 
-        public void SetPose(in Pose newPose, string? callerId = null)
+        public bool SetLocalPose(in Pose newPose, string? callerId = null)
         {
-            LastCallerId = callerId;
-            
             if (localPose.EqualsApprox(newPose))
             {
-                return;
+                return false;
             }
 
             localPose = newPose;
             Transform.SetLocalPose(newPose);
+            return true;
         }
+        
+        public abstract void ForceInvisible();
 
         public abstract void Highlight();
     }

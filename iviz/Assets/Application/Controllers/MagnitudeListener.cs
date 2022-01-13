@@ -217,7 +217,7 @@ namespace Iviz.Controllers
                 Type = type
             };
 
-            frameNode.name = $"[{Config.Topic}]";
+            frameNode.Name = $"[{Config.Topic}]";
 
             var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
             Listener = Config.Type switch
@@ -449,13 +449,13 @@ namespace Iviz.Controllers
 
             trail.DataSource = null;
 
-            frameNode.DestroySelf();
+            frameNode.Dispose();
 
             trail.ReturnToPool();
 
             if (childNode != null)
             {
-                childNode.DestroySelf();
+                childNode.Dispose();
             }
 
             axisFrame.ReturnToPool();

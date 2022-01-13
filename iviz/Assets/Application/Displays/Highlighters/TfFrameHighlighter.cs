@@ -83,7 +83,7 @@ namespace Iviz.Displays.Highlighters
         {
             axisResource.ReturnToPool();
             tooltip.ReturnToPool();
-            node.DestroySelf();
+            node.Dispose();
         }
     }
 }

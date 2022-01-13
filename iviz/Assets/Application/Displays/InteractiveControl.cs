@@ -14,6 +14,12 @@ using UnityEngine.PlayerLoop;
 namespace Iviz.Displays
 {
     [Obsolete]
+    public sealed class InteractiveControl : MonoBehaviour
+    {
+    }
+
+#if false
+    [Obsolete]
     public sealed class InteractiveControl : MonoBehaviour, IControlMarker, IPointerDownHandler, IPointerUpHandler,
         IPointerEnterHandler, IPointerExitHandler
     {
@@ -680,4 +686,5 @@ namespace Iviz.Displays
             frame.Color = FrameInactiveColor;
         }
     }
+#endif
 }

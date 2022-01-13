@@ -545,11 +545,15 @@ namespace Iviz.Core
 
         public static Span<T> AsSpan<T>(this Memory<T> memory) where T : unmanaged => memory.Span;
 
-        /// Creates a temporary native array that lasts one frame. Should not be disposed manually.
+        /// Creates a temporary native array that lasts one frame.
+        /// It should not be disposed manually. It should not be used in Burst.
+        /// This is simply a wrapper for reading and writing to Unity objects such as meshes. 
         public static unsafe NativeArray<T> CreateNativeArrayWrapper<T>(T* ptr, int length) where T : unmanaged
         {
             var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(ptr, length, Allocator.None);
+#if UNITY_EDITOR
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
+#endif
             return array;
         }
 
@@ -659,21 +663,21 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyZero(this in Msgs.GeometryMsgs.Vector3 f) =>
             f.MaxAbsCoeff() < 8 * double.Epsilon;
-        
+
         public static ReadOnlyDictionary<T, TU> AsReadOnly<T, TU>(this Dictionary<T, TU> t)
         {
             return new ReadOnlyDictionary<T, TU>(t);
         }
-        
+
         public static WithIndexEnumerable<T> WithIndex<T>(this IEnumerable<T> source)
-        { 
+        {
             return new WithIndexEnumerable<T>(source);
         }
 
         public static T EnsureComponent<T>(this GameObject gameObject) where T : Component =>
             gameObject.TryGetComponent(out T comp) ? comp : gameObject.AddComponent<T>();
     }
-    
+
     public readonly struct WithIndexEnumerable<T>
     {
         readonly IEnumerable<T> a;
@@ -696,6 +700,5 @@ namespace Iviz.Core
 
         public WithIndexEnumerable(IEnumerable<T> a) => this.a = a;
         public Enumerator GetEnumerator() => new(a.GetEnumerator());
-    }    
-    
+    }
 }

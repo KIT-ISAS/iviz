@@ -451,7 +451,7 @@ namespace Iviz.Controllers
                         RobotFinishedLoading?.Invoke();
                         return;
                     case TaskStatus.RanToCompletion:
-                        node.name = "SimpleRobotNode:" + Name;
+                        node.Name = "SimpleRobotNode:" + Name;
                         if (Robot == null)
                         {
                             HelpText = "[Invalid Robot]";
@@ -558,7 +558,7 @@ namespace Iviz.Controllers
             Robot = null;
             RobotFinishedLoading = null;
             Stopped?.Invoke();
-            node.DestroySelf();
+            node.Dispose();
         }
 
         public void ResetController()

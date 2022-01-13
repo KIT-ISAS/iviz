@@ -1,9 +1,7 @@
-﻿using Iviz.Common;
+﻿using Iviz.Controllers;
 using Iviz.Controllers.TF;
-using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
-using JetBrains.Annotations;
 
 namespace Iviz.App
 {
@@ -25,7 +23,7 @@ namespace Iviz.App
         public void UpdateText()
         {
             int numTfFrames = TfListener.Instance.NumFrames;
-            int publishedFrames = ModuleListPanel.Instance.TfPublisher.NumPublishedFrames;
+            int publishedFrames = TfPublisher.Instance.NumPublishedFrames;
             string frameStr = (numTfFrames, publishedFrames) switch
             {
                 (0, 0) => "Transform Frames\n<b>No frames</b>",

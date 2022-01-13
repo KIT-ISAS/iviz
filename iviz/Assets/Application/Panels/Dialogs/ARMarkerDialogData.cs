@@ -4,6 +4,7 @@ using Iviz.Common;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -67,7 +68,7 @@ namespace Iviz.App
         void WritePanelToConfiguration()
         {
             var markers = new List<ARExecutableMarker>();
-            for (int index = 0; index < panel.Types.Count; index++)
+            foreach (int index in ..panel.Types.Count)
             {
                 var type = (ARMarkerType) panel.Types[index].Index;
                 if (type == ARMarkerType.Unset)
@@ -75,10 +76,10 @@ namespace Iviz.App
                     continue;
                 }
 
-                if (!float.TryParse(panel.Sizes[index].Value, out float sizeInMm) || sizeInMm <= 0)
+                if (!float.TryParse(panel.Sizes[index].Value, out float sizeInMm) || sizeInMm < 0)
                 {
                     RosLogger.Info($"{this}: Ignoring size for entry {index}, cannot parse '{panel.Sizes[index].Value}' " +
-                                "into a positive number.");
+                                "into a nonnegative number.");
                     continue;
                 }
 
@@ -89,7 +90,7 @@ namespace Iviz.App
                     continue;
                 }
 
-                ARExecutableMarker marker = new ARExecutableMarker
+                var marker = new ARExecutableMarker
                 {
                     Type = type,
                     Action = (ARMarkerAction) panel.Actions[index].Index,

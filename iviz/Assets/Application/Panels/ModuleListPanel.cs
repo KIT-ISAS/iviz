@@ -10,16 +10,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Controllers.XR;
 using Iviz.Core;
-using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -30,7 +27,7 @@ namespace Iviz.App
 {
     public sealed class ModuleListPanel : MonoBehaviour
     {
-        public const int ModuleDataCaptionWidth = 200;
+        const int ModuleDataCaptionWidth = 200;
 
         static ModuleListPanel? instance;
 
@@ -74,6 +71,7 @@ namespace Iviz.App
         readonly List<ModuleData> moduleDatas = new();
         readonly HashSet<string> topicsWithModule = new();
         readonly HashSet<ImageDialogData> imageDatas = new();
+        readonly TfPublisher tfPublisher = new();
 
         int frameCounter;
         bool allGuiVisible = true;
@@ -117,7 +115,6 @@ namespace Iviz.App
 
         public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         public IEnumerable<string> DisplayedTopics => topicsWithModule;
-        public TfPublisher TfPublisher { get; } = new();
 
         public bool AllGuiVisible
         {
@@ -187,7 +184,7 @@ namespace Iviz.App
                 dialogData.FinalizePanel();
             }
 
-            TfPublisher.Dispose();
+            tfPublisher.Dispose();
             cameraPanelData?.Dispose();
             GuiWidgetListener.DisposeDefaultHandler();
         }
@@ -222,7 +219,7 @@ namespace Iviz.App
 
             ARController.ARStateChanged += OnARStateChanged;
 
-            BottomHideGuiButton.Visible = !Settings.IsMobile;
+            BottomHideGuiButton.Visible = !Settings.IsXR;
             MiddleHideGuiButton.gameObject.SetActive(Settings.IsMobile && !Settings.IsXR);
             UpdateLeftHideVisible();
 
@@ -320,8 +317,8 @@ namespace Iviz.App
             };
 
             connectionData.MasterActiveChanged += _ => Connection.Disconnect();
-            Connection.ConnectionStateChanged += OnConnectionStateChanged;
-            Connection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
+            RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
+            RosConnection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
             GameThread.EveryTenthSecond += UpdateCameraStats;
@@ -998,7 +995,7 @@ namespace Iviz.App
             long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
             BottomCanvas.Time.text = $"M: {memBytesKb.ToString()}M";
 #else
-            BottomCanvas.BottomTime.text = GameThread.Now.ToString("HH:mm:ss");
+            BottomCanvas.Time.text = GameThread.Now.ToString("HH:mm:ss");
 #endif
             BottomCanvas.Fps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;

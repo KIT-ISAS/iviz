@@ -24,7 +24,7 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> MeshList { get; }
         public ResourceKey<GameObject> PointList { get; }
         public ResourceKey<GameObject> MeshTriangles { get; }
-        public ResourceKey<GameObject> TfFrame { get; }
+        //public ResourceKey<GameObject> TfFrame { get; }
         public ResourceKey<GameObject> Image { get; }
         public ResourceKey<GameObject> Square { get; }
         public ResourceKey<GameObject> Line { get; }
@@ -32,7 +32,6 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> DepthImageResource { get; }
         public ResourceKey<GameObject> OccupancyGridResource { get; }
         public ResourceKey<GameObject> RadialScanResource { get; }
-        public ResourceKey<GameObject> ARMarkerResource { get; }
         public ResourceKey<GameObject> AxisFrame { get; }
         public ResourceKey<GameObject> AngleAxis { get; }
         public ResourceKey<GameObject> Trail { get; }
@@ -79,7 +78,7 @@ namespace Iviz.Resources
             MeshList = Create(assetHolder.MeshList);
             PointList = Create(assetHolder.PointList);
             MeshTriangles = Create(assetHolder.MeshTriangles);
-            TfFrame = Create(appAssetHolder.TFFrame);
+            //TfFrame = Create(appAssetHolder.TFFrame);
             Image = Create(appAssetHolder.Image);
             Square = Create(assetHolder.Plane);
             Line = Create(assetHolder.Line);
@@ -87,7 +86,6 @@ namespace Iviz.Resources
             DepthImageResource = Create(appAssetHolder.DepthImage);
             OccupancyGridResource = Create(appAssetHolder.OccupancyGrid);
             RadialScanResource = Create(appAssetHolder.RadialScan);
-            ARMarkerResource = Create(appAssetHolder.ARMarkerResource);
             AxisFrame = Create(appAssetHolder.AxisFrame);
             AngleAxis = Create(appAssetHolder.AngleAxis);
             Trail = Create(appAssetHolder.Trail);

@@ -49,6 +49,11 @@ namespace Iviz.Controllers.XR
         readonly HandGestures leftGestures = new(HandType.Left);
         readonly HandGestures rightGestures = new(HandType.Right);
 
+        readonly IPublishedFrame headFrame;
+        readonly IPublishedFrame leftControllerFrame;
+        readonly IPublishedFrame rightControllerFrame;
+        readonly IPublishedFrame? gazeFrame;
+
         ARAnchor? originAnchor;
 
         public ARMeshManager MeshManager { get; }
@@ -77,7 +82,7 @@ namespace Iviz.Controllers.XR
 
         public XRConfiguration Config { get; }
 
-        public TfFrame Frame => TfListener.GetOrCreateFrame(HeadFrameId);
+        public TfFrame Frame => headFrame.TfFrame;
 
 
         public XRController(XRContents contents, XRConfiguration? configuration)
@@ -98,10 +103,14 @@ namespace Iviz.Controllers.XR
             leftHand.gameObject.SetActive(Settings.IsHololens);
             rightHand.gameObject.SetActive(Settings.IsHololens);
 
-            Frame.ForceInvisible = true;
-            TfListener.GetOrCreateFrame(LeftControllerFrameId).ForceInvisible = true;
-            TfListener.GetOrCreateFrame(RightControllerFrameId).ForceInvisible = true;
-            TfListener.GetOrCreateFrame(GazeFrameId).ForceInvisible = true;
+            headFrame = TfPublisher.Instance.GetOrCreate(HeadFrameId, isInternal: true);
+            leftControllerFrame = TfPublisher.Instance.GetOrCreate(LeftControllerFrameId, isInternal: true);
+            rightControllerFrame = TfPublisher.Instance.GetOrCreate(RightControllerFrameId, isInternal: true);
+
+            if (Settings.IsHololens)
+            {
+                gazeFrame = TfPublisher.Instance.GetOrCreate(HeadFrameId, isInternal: true);
+            }
 
             GameThread.EveryFrame += Update;
 
@@ -136,12 +145,12 @@ namespace Iviz.Controllers.XR
         {
             const int startButton = 0;
             const int downButton = 1;
-            
+
             switch (index)
             {
                 case startButton:
                     var newOriginAbsolute = hololensInitManipulableFrame.transform.AsPose();
-                    TfListener.RootFrame.transform.SetPose(newOriginAbsolute);
+                    TfListener.RootFrame.Transform.SetPose(newOriginAbsolute);
                     hololensInitManipulableFrame.SetActive(false);
                     hololensInitButtonBar.Visible = false;
 
@@ -149,8 +158,8 @@ namespace Iviz.Controllers.XR
                         newOriginAbsolute.position, null,
                         adjustment =>
                         {
-                            var newPose = adjustment.Multiply(TfListener.RootFrame.transform.AsPose());
-                            TfListener.RootFrame.transform.SetPose(newPose);
+                            var newPose = adjustment.Multiply(TfListener.RootFrame.Transform.AsPose());
+                            TfListener.RootFrame.Transform.SetPose(newPose);
                             hololensInitManipulableFrame.transform.SetPose(newPose);
                             ModuleListPanel.Instance.SaveXRConfiguration(newPose);
                         },
@@ -210,9 +219,9 @@ namespace Iviz.Controllers.XR
             UpdateHandSender(leftHand, LeftHandSender, ref leftHandSeqNr, ref leftHandActive);
             UpdateHandSender(rightHand, RightHandSender, ref rightHandSeqNr, ref rightHandActive);
 
-            TfListener.Publish(HeadFrameId, Settings.MainCameraTransform.AsPose());
+            headFrame.LocalPose = TfListener.RelativeToFixedFrame(Settings.MainCameraTransform.AsPose());
 
-            if (gaze.isActiveAndEnabled)
+            if (gaze.isActiveAndEnabled && gazeFrame != null)
             {
                 if (gaze.IsActiveInFrame)
                 {
@@ -221,27 +230,25 @@ namespace Iviz.Controllers.XR
                     var gazePosition = gazeTransform.position;
                     var gazeRotation = gazeTransform.rotation;
 
-                    var pose = gazeInteractor.TryGetHitInfo(out var hitPosition, out _, out _, out _)
-                        ? new Pose(hitPosition, gazeRotation)
-                        : new Pose(gazePosition + 5 * gazeForward, gazeRotation);
-                    TfListener.Publish(GazeFrameId, pose);
+                    var positionToPublish = gazeInteractor.TryGetHitInfo(out var hitPosition, out _, out _, out _)
+                        ? hitPosition
+                        : gazePosition + 5 * gazeForward;
+                    var poseToPublish = new Pose(positionToPublish, gazeRotation);
+                    gazeFrame.LocalPose = TfListener.RelativeToFixedFrame(poseToPublish);
                 }
                 else
                 {
-                    TfListener.Publish(GazeFrameId, default(Pose));
+                    gazeFrame.LocalPose = Pose.identity;
                 }
             }
 
-            TfListener.Publish(LeftControllerFrameId,
-                LeftController is { IsActiveInFrame: true } leftController
-                    ? leftController.transform.AsPose()
-                    : default);
+            leftControllerFrame.LocalPose = LeftController is { IsActiveInFrame: true } leftController
+                ? leftController.transform.AsPose()
+                : Pose.identity;
 
-            TfListener.Publish(RightControllerFrameId,
-                RightController is { IsActiveInFrame: true } rightController
-                    ? rightController.transform.AsPose()
-                    : default);
-
+            rightControllerFrame.LocalPose = RightController is { IsActiveInFrame: true } rightController
+                ? rightController.transform.AsPose()
+                : Pose.identity;
 
             leftGestures.Process(leftHand.State);
             leftGestures.Process(leftHand.State, rightHand.State);

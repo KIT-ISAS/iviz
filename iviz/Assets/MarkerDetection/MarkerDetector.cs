@@ -52,7 +52,7 @@ namespace Iviz.MarkerDetection
 
         public MarkerDetector()
         {
-            task = Task.Run(async () => await RunAsync().AwaitNoThrow(this));
+            task = TaskUtils.Run(() => RunAsync().AwaitNoThrow(this));
         }
 
         async Task RunAsync()

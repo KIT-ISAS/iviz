@@ -34,7 +34,7 @@ namespace Iviz.Controllers
         readonly Dictionary<string, GuiObject> dialogs = new();
         uint feedbackSeq;
 
-        public override TfFrame Frame => TfListener.Instance.FixedFrame;
+        public override TfFrame Frame => TfListener.FixedFrame;
         public Sender<Feedback>? FeedbackSender { get; }
         public bool Interactable { get; set; }
         public override IListener Listener { get; }
@@ -530,7 +530,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             public void Dispose()
             {
                 display.ReturnToPool(resourceKey);
-                node.DestroySelf();
+                node.Dispose();
             }
 
             public GuiObject AsExpired() => new(this);

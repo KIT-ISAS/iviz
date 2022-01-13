@@ -41,6 +41,7 @@ namespace Iviz.App
         [SerializeField] DropdownWidget? showAs;
         [SerializeField] DropdownWidget? poseAs;
 
+        static TfPublisher TfPublisher => TfPublisher.Instance;
         TMP_Text TfText => tfText.AssertNotNull(nameof(tfText));
         TMP_Text TfName => tfName.AssertNotNull(nameof(tfName));
         Button Publishing => publishing.AssertNotNull(nameof(publishing));
@@ -54,7 +55,6 @@ namespace Iviz.App
         Text LockPivotText => lockPivotText.AssertNotNull(nameof(lockPivotText));
         Text PublishingText => publishingText.AssertNotNull(nameof(publishingText));
         RectTransform ContentTransform => contentTransform.AssertNotNull(nameof(contentTransform));
-        static TfPublisher TfPublisher => ModuleListPanel.Instance.TfPublisher;
 
         FrameNode PlaceHolder =>
             placeHolder != null ? placeHolder : (placeHolder = FrameNode.Instantiate("TFLog Placeholder"));
@@ -280,7 +280,7 @@ namespace Iviz.App
                 description.Append(id == TfListener.FixedFrameId
                         ? "]</b>  <i>[Fixed]</i>"
                         : TfPublisher.IsPublishing(id)
-                            ? "]</b>  <i>[Publ.]</i>"
+                            ? "]</b>  <i>[Publ]</i>"
                             : "]</b>")
                     .AppendLine();
 
@@ -363,7 +363,8 @@ namespace Iviz.App
             string selectedFrameId = SelectedFrame.Id;
             if (!TfPublisher.Remove(selectedFrameId))
             {
-                TfPublisher.Add(selectedFrameId, true);
+                var publishedFrame  = TfPublisher.GetOrCreate(selectedFrameId, true);
+                TfListener.Publish(publishedFrame.TfFrame);
             }
 
             UpdateFrameButtons();

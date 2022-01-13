@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Rosbag.Writer;
+using Iviz.Tools;
 using Nito.AsyncEx;
 
 namespace Iviz.Ros
@@ -33,7 +34,7 @@ namespace Iviz.Ros
                 RosLogger.Info($"{this}: Writing rosbag to path {path}");
             }
 
-            task = Task.Run(WriteMessagesAsync);
+            task = TaskUtils.Run(() => WriteMessagesAsync().AsTask());
         }
 
         public async ValueTask DisposeAsync()

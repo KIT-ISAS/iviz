@@ -25,7 +25,7 @@ namespace Iviz.App
             Roll = p.AddSlider("Roll").SetMinValue(-179).SetMaxValue(180).SetIntegerOnly(true);
             Pitch = p.AddSlider("Pitch").SetMinValue(-89).SetMaxValue(89).SetIntegerOnly(true);
             Yaw = p.AddSlider("Yaw").SetMinValue(-179).SetMaxValue(180).SetIntegerOnly(true);
-            Position = p.AddVector3Slider("Translation From Fixed");
+            Position = p.AddVector3Slider("Position From Fixed");
             
             InputPosition = p.AddVector3("Position");
             p.AddCollapsibleWidget("Explicit Position")

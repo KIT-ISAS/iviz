@@ -1,4 +1,3 @@
-#nullable enable
 
 using System;
 using System.Linq;
@@ -26,11 +25,11 @@ namespace Iviz.Controllers
 
         readonly MeshListResource resource;
         readonly FrameNode node;
-        OctreeHelper? helper;
-        Octomap? lastMsg;
+        [CanBeNull] OctreeHelper helper;
+        [CanBeNull] Octomap lastMsg;
         readonly Action<NativeList<float4>> setterFunction;
 
-        public override TfFrame? Frame => node.Parent;
+        [CanBeNull] public override TfFrame Frame => node.Parent;
 
         readonly OctomapConfiguration config = new();
 
@@ -178,7 +177,7 @@ namespace Iviz.Controllers
         {
             base.Dispose();
             resource.ReturnToPool();
-            node.DestroySelf();
+            node.Dispose();
         }
     }
 }

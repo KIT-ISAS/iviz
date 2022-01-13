@@ -61,7 +61,7 @@ namespace Iviz.Controllers
         Bounds? IHasBounds.Bounds => resource?.Bounds;
         Transform? IHasBounds.BoundsTransform => resource?.GetTransform();
         bool IHasBounds.AcceptsHighlighter => !ShowDescription;
-        string IHasBounds.Caption => node.gameObject.name;
+        string IHasBounds.Caption => node.Name;
 
         public event Action? BoundsChanged;
 
@@ -149,8 +149,7 @@ namespace Iviz.Controllers
 
         public bool Visible
         {
-            get => node.gameObject.activeSelf;
-            set => node.gameObject.SetActive(value);
+            set => node.Visible = value;
         }
 
         public bool TriangleListFlipWinding
@@ -178,7 +177,7 @@ namespace Iviz.Controllers
             node.Parent = parent;
 
             this.id = id;
-            node.gameObject.name = $"{id.Ns}/{id.Id.ToString()}";
+            node.Name = $"{id.Ns}/{id.Id.ToString()}";
 
             UniqueNodeName = (++globalIdCounter).ToString();
         }
@@ -603,7 +602,7 @@ namespace Iviz.Controllers
             ShowDescription = false;
             previousHash = null;
             BoundsChanged = null;
-            node.DestroySelf();
+            node.Dispose();
         }
 
         void DiscardResource()
@@ -624,7 +623,7 @@ namespace Iviz.Controllers
             BoundsChanged?.Invoke();
         }
 
-        public override string ToString() => $"[MarkerObject {node.name}]";
+        public override string ToString() => $"[MarkerObject {node.Name}]";
 
         public void GenerateLog(StringBuilder description)
         {

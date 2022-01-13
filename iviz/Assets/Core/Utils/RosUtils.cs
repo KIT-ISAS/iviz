@@ -3,7 +3,6 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Text;
-using Codice.Client.BaseCommands;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
@@ -25,6 +24,9 @@ namespace Iviz.Core
         /// Make camera point to +Z instead of +X
         public static Pose ToCameraFrame(this in Pose pose) =>
             new(pose.Position, pose.Orientation * XFrontToZFront);
+
+        public static Pose FromCameraFrame(this in Pose pose) =>
+            new(pose.Position, pose.Orientation * XFrontToZFront.Inverse);
 
         public static Transform ToCameraFrame(this in Transform pose) =>
             new(pose.Translation, pose.Rotation * XFrontToZFront);
@@ -249,6 +251,7 @@ namespace Iviz.Core
                 q.w = (float)p.W;
             }
         }
+        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void Unity2Ros(this in UnityEngine.Quaternion p, out Quaternion q)
@@ -341,6 +344,9 @@ namespace Iviz.Core
 
         static bool IsInvalid(this in Quaternion v) =>
             v.X.IsInvalid() || v.Y.IsInvalid() || v.Z.IsInvalid() || v.W.IsInvalid();
+
+        public static bool IsInvalid(this in UnityEngine.Quaternion v) =>
+            v.x.IsInvalid() || v.y.IsInvalid() || v.z.IsInvalid() || v.w.IsInvalid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this in Transform transform) =>

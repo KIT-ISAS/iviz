@@ -218,7 +218,7 @@ namespace Iviz.Controllers
             node = FrameNode.Instantiate("[ImageNode]");
             billboard = ResourcePool.RentDisplay<ImageResource>();
             billboard.Texture = imageTexture;
-            billboard.Transform.SetParentLocal(node.transform);
+            billboard.Transform.SetParentLocal(node.Transform);
 
             Config = config ?? new ImageConfiguration
             {
@@ -334,7 +334,7 @@ namespace Iviz.Controllers
             imageTexture.Dispose();
             infoListener.Dispose();
 
-            node.DestroySelf();
+            node.Dispose();
         }
     }
 }

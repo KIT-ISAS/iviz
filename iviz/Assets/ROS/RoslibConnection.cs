@@ -199,21 +199,21 @@ namespace Iviz.Ros
                     RosLogger.Debug("--- Advertising services...");
                     token.ThrowIfCancellationRequested();
                     await servicesByTopic.Values
-                        .Select(topic => ReAdvertiseService(topic, token).AwaitNoThrow(this).AsTask())
+                        .Select(topic => ReAdvertiseService(topic, token).AwaitNoThrow(this))
                         .WhenAll();
                     RosLogger.Debug("+++ Done advertising services");
 
                     RosLogger.Debug("--- Readvertising...");
                     token.ThrowIfCancellationRequested();
                     await publishersByTopic.Values
-                        .Select(topic => ReAdvertise(topic, token).AwaitNoThrow(this).AsTask())
+                        .Select(topic => ReAdvertise(topic, token).AwaitNoThrow(this))
                         .WhenAll();
                     RosLogger.Debug("+++ Done readvertising");
 
                     RosLogger.Debug("--- Resubscribing...");
                     token.ThrowIfCancellationRequested();
                     await subscribersByTopic.Values
-                        .Select(topic => ReSubscribe(topic, token).AwaitNoThrow(this).AsTask())
+                        .Select(topic => ReSubscribe(topic, token).AwaitNoThrow(this))
                         .WhenAll();
                     RosLogger.Debug("+++ Done resubscribing");
 
@@ -358,7 +358,7 @@ namespace Iviz.Ros
             var connection = ConnectionManager.Connection;
 
 
-            connection.SetConnectionWarningState(false);
+            SetConnectionWarningState(false);
             try
             {
                 for (; !token.IsCancellationRequested; await Task.Delay(delayBetweenPingsInMs, token))
@@ -375,7 +375,7 @@ namespace Iviz.Ros
                         {
                             RosLogger.Internal("<b>Warning:</b> The master is not responding. It was last seen at" +
                                                $" [{lastMasterAccess:HH:mm:ss}].");
-                            connection.SetConnectionWarningState(true);
+                            SetConnectionWarningState(true);
                             warningSet = true;
                         }
 
@@ -422,7 +422,7 @@ namespace Iviz.Ros
             {
             }
 
-            connection.SetConnectionWarningState(false);
+            SetConnectionWarningState(false);
         }
 
         static async Task NtpCheckerTask(string hostname, CancellationToken token)
@@ -932,7 +932,7 @@ namespace Iviz.Ros
         {
             if (type == RequestType.CachedButRequestInBackground)
             {
-                Task.Run(async () => await GetSystemPublishedTopicTypesAsync(), connectionTs.Token);
+                TaskUtils.Run(() => GetSystemPublishedTopicTypesAsync().AsTask(), connectionTs.Token);
             }
 
             return cachedPublishedTopics;
@@ -970,7 +970,7 @@ namespace Iviz.Ros
         {
             if (type == RequestType.CachedButRequestInBackground)
             {
-                Task.Run(async () => await GetSystemTopicTypesAsync(), connectionTs.Token);
+                TaskUtils.Run(() => GetSystemTopicTypesAsync().AsTask(), connectionTs.Token);
             }
 
             return cachedTopics;
@@ -1002,8 +1002,8 @@ namespace Iviz.Ros
 
         public IEnumerable<string> GetSystemParameterList(CancellationToken token = default)
         {
-            CancellationToken internalToken = connectionTs.Token;
-            Task.Run(async () =>
+            var internalToken = connectionTs.Token;
+            TaskUtils.Run(async () =>
             {
                 if (!Connected || token.IsCancellationRequested || internalToken.IsCancellationRequested)
                 {
@@ -1075,7 +1075,7 @@ namespace Iviz.Ros
         {
             if (type == RequestType.CachedButRequestInBackground)
             {
-                Task.Run(GetSystemStateAsync, connectionTs.Token);
+                TaskUtils.Run(() => GetSystemStateAsync().AsTask(), connectionTs.Token);
             }
 
             return cachedSystemState;

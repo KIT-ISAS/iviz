@@ -446,7 +446,7 @@ namespace Iviz.Controllers
             projector.ReturnToPool();
             depthImageTexture.Dispose();
             colorImageTexture.Dispose();
-            node.DestroySelf();
+            node.Dispose();
         }
 
         public void ResetController()

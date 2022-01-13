@@ -193,7 +193,7 @@ namespace Iviz.Controllers
             set
             {
                 config.CubesVisible = value;
-                cubeNode.gameObject.SetActive(value);
+                cubeNode.Visible = value;
             }
         }
 
@@ -203,7 +203,7 @@ namespace Iviz.Controllers
             set
             {
                 config.TextureVisible = value;
-                textureNode.gameObject.SetActive(value);
+                textureNode.Visible = value;
             }
         }
 
@@ -437,8 +437,8 @@ namespace Iviz.Controllers
                 texture.ReturnToPool();
             }
 
-            cubeNode.DestroySelf();
-            textureNode.DestroySelf();
+            cubeNode.Dispose();
+            textureNode.Dispose();
         }
     }
 }

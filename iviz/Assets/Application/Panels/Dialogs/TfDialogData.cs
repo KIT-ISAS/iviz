@@ -48,14 +48,14 @@ namespace Iviz.App
                                    "This may cause problems.");
                 }
 
-                var tfPublisher = ModuleListPanel.TfPublisher;
+                var tfPublisher = TfPublisher.Instance;
                 if (tfPublisher.IsPublishing(frameName))
                 {
                     RosLogger.Info($"{this}: A frame with name '{frameName}' already exists.");
                     return;
                 }
 
-                var tfFrame = tfPublisher.Add(frameName);
+                var tfFrame = tfPublisher.GetOrCreate(frameName);
                 panel.TfLog.SelectedFrame = tfFrame.TfFrame;
                 panel.TfLog.Flush();
             };

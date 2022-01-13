@@ -26,7 +26,7 @@ namespace Iviz.App.ARDialogs
         void Awake()
         {
             node = new GameObject("AR LineConnector Node");
-            node.transform.SetParentLocal(TfListener.OriginFrame.transform);
+            node.transform.SetParentLocal(TfListener.OriginFrame.Transform);
             lines = ResourcePool.RentDisplay<LineResource>(node.transform);
             lines.ElementScale = 0.005f;
 

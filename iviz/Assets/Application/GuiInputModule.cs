@@ -59,7 +59,7 @@ namespace Iviz.App
         readonly SettingsConfiguration config = new();
 
         Vector3 accel;
-        Vector3 speed;
+        Vector3 velocity;
         bool pointerIsAlreadyMoving;
         bool alreadyScaling;
         TfFrame? cameraViewOverride;
@@ -161,6 +161,24 @@ namespace Iviz.App
             set => (CameraRoll, CameraPitch, CameraYaw) = UnityUtils.RegularizeRpy(value);
         }
 
+        public Vector3 CameraPosition
+        {
+            get => Transform.localPosition;
+            set
+            {
+                if (OrbitCenterOverride != null || CameraViewOverride != null)
+                {
+                    return;
+                }
+
+                Transform.localPosition = value;
+                if (Settings.IsPhone)
+                {
+                    orbitCenter = value + orbitRadius * OrbitRotation.Forward();
+                }
+            }
+        }
+
         public float CameraFieldOfView
         {
             get => Settings.VirtualCamera == null ? 0 : Settings.VirtualCamera.GetHorizontalFov();
@@ -173,7 +191,7 @@ namespace Iviz.App
             }
         }
 
-        public TfFrame Frame => TfListener.Instance.FixedFrame;
+        public TfFrame Frame => TfListener.FixedFrame;
 
         void Awake()
         {
@@ -236,7 +254,7 @@ namespace Iviz.App
                 if (!Settings.IsPhone && mOrbitCenterOverride == null)
                 {
                     ProcessFlying();
-                    Transform.localPosition += Transform.localRotation * speed;
+                    Transform.localPosition += Transform.localRotation * velocity;
                 }
 
                 return;
@@ -247,33 +265,20 @@ namespace Iviz.App
                 if (mOrbitCenterOverride != null)
                 {
                     ProcessOrbiting();
-                    //Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
-                    //Transform.SetPositionAndRotation(-orbitRadius * (q * Vector3.forward) + orbitCenter, q);
-                    //Transform.rotation = q;
-
                     ProcessScaling(false);
-                    //Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
-
-                    // !
-                    orbitCenter = mOrbitCenterOverride.AbsoluteUnityPose.position;
-                    //Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
+                    orbitCenter = mOrbitCenterOverride.AbsoluteUnityPose.position; // !
                 }
                 else
                 {
                     ProcessOrbiting();
-                    //Quaternion q = Quaternion.Euler(orbitY, orbitX, 0);
-                    //Transform.SetPositionAndRotation(-orbitRadius * (q * Vector3.forward) + orbitCenter, q);
-                    //Transform.rotation = q;
-
                     ProcessScaling(true);
-                    //Transform.position = -orbitRadius * (q * Vector3.forward) + orbitCenter;
                 }
 
                 ProcessTurning();
                 ProcessFlying();
 
                 var rotation = OrbitRotation;
-                Transform.SetLocalPose(-orbitRadius * rotation.Forward() + orbitCenter + rotation * speed, rotation);
+                Transform.SetLocalPose(-orbitRadius * rotation.Forward() + orbitCenter + rotation * velocity, rotation);
                 return;
             }
 
@@ -292,7 +297,7 @@ namespace Iviz.App
 
                 var rotation = OrbitRotation;
                 Transform.localRotation = rotation;
-                Transform.localPosition += rotation * speed;
+                Transform.localPosition += rotation * velocity;
             }
         }
 
@@ -559,15 +564,6 @@ namespace Iviz.App
 
             // check if we are clicking something interesting
             bool anyPointerDown = pointerIsDown || altPointerIsDown;
-            /*
-            if (!prevPointerDown && anyPointerDown)
-            {
-                if (!pointerIsOnGui)
-                {
-                    PointerDown?.Invoke(new ClickHitInfo(pointerPosition));
-                }
-            }
-            */
             if (prevPointerDown
                 && !anyPointerDown
                 && Vector2.Distance(pointerPosition, pointerDownStart) < maxDistanceForClickEvent)
@@ -758,7 +754,7 @@ namespace Iviz.App
             if (!pointerIsDown)
             {
                 accel = Vector3.zero;
-                speed = Vector3.zero;
+                velocity = Vector3.zero;
                 return;
             }
 
@@ -795,7 +791,7 @@ namespace Iviz.App
                 }
             }
 
-            speed = deltaTime * (baseInput.Mult(MainSpeed * DirectionWeight) + accel);
+            velocity = deltaTime * (baseInput.Mult(MainSpeed * DirectionWeight) + accel);
         }
 
         public void LookAt(Transform targetTransform, Vector3? localOffset = null)
@@ -804,17 +800,18 @@ namespace Iviz.App
             CancellationTokenSource newToken = new();
             lookAtTokenSource = newToken;
 
+            var lookAtCameraStartPosition = CameraPosition;
+
             void Update(float t)
             {
-                var lookAtCameraStartPose = Transform.AsPose();
                 var targetPosition = localOffset is { } validatedOffset
                     ? targetTransform.TransformPoint(validatedOffset)
                     : targetTransform.position;
 
                 var lookAtCameraTargetPosition = CalculateTargetCameraPosition(targetPosition);
-                var lookAtCameraTargetPose = lookAtCameraStartPose.WithPosition(lookAtCameraTargetPosition);
-                var currentPose = lookAtCameraStartPose.Lerp(lookAtCameraTargetPose, Mathf.Sqrt(t));
-                Transform.SetPose(currentPose);
+                var currentPosition =
+                    Vector3.Lerp(lookAtCameraStartPosition, lookAtCameraTargetPosition, Mathf.Sqrt(t));
+                CameraPosition = currentPosition;
             }
 
             void Dispose()

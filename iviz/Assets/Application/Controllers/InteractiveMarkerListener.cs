@@ -221,7 +221,7 @@ namespace Iviz.Controllers
             interactiveMarkers.Clear();
             Publisher?.Dispose();
 
-            node.DestroySelf();
+            node.Dispose();
         }
 
         public override void ResetController()

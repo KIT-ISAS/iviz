@@ -131,7 +131,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Offset = value;
-                node.transform.localPosition = value.Ros2Unity();
+                node.Transform.localPosition = value.Ros2Unity();
                 UpdateMesh();
             }
         }
@@ -143,7 +143,7 @@ namespace Iviz.Controllers
             grid.Layer = LayerType.Collider;
 
             node = FrameNode.Instantiate("GridNode");
-            grid.transform.SetParentLocal(node.transform);
+            grid.transform.SetParentLocal(node.Transform);
 
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";
@@ -183,7 +183,7 @@ namespace Iviz.Controllers
         public void Dispose()
         {
             grid.ReturnToPool();
-            node.DestroySelf();
+            node.Dispose();
             UnityEngine.Object.Destroy(reflectionProbe.gameObject);
         }
 

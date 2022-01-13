@@ -4,10 +4,9 @@ using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
-using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Displays;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -28,7 +27,7 @@ namespace Iviz.App
         public TfModuleData(ModuleDataConstructor constructor)
         {
             panel = ModulePanelManager.GetPanelByResourceType<TfModulePanel>(ModuleType.TF);
-            listener = new TfListener((TfConfiguration?)constructor.Configuration);
+            listener = new TfListener((TfConfiguration?)constructor.Configuration, id => new TfFrameDisplay(id));
             UpdateModuleButton();
         }
 
@@ -37,7 +36,7 @@ namespace Iviz.App
             base.Dispose();
             listener.Dispose();
         }
-        
+
         public void UpdateConfiguration(TfConfiguration configuration)
         {
             listener.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -113,10 +112,10 @@ namespace Iviz.App
         {
             config.Tf = listener.Config;
         }
-        
+
         public override string ToString()
         {
             return $"[{ModuleType} Topic='{TfListener.DefaultTopic}' guid={Configuration.Id}]";
-        }        
+        }
     }
 }

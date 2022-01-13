@@ -73,7 +73,7 @@ namespace Iviz.Displays.Highlighters
         {
             reticle.ReturnToPool(Resource.Displays.Reticle);
             tooltip.ReturnToPool();
-            node.DestroySelf();
+            node.Dispose();
         }
     }
 }

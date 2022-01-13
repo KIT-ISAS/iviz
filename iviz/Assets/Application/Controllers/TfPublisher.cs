@@ -29,8 +29,9 @@ namespace Iviz.Controllers
 
         public TfPublisher()
         {
+            instance = this;
             GameThread.EverySecond += OnEverySecond;
-            ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
+            RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -65,7 +66,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public TfPublishedFrame GetOrCreate(string frameId, bool showPublisherPanel = false, bool isInternal = false)
+        public IPublishedFrame GetOrCreate(string frameId, bool showPublisherPanel = false, bool isInternal = false)
         {
             if (frames.TryGetValue(frameId, out var oldFrame))
             {
@@ -75,14 +76,17 @@ namespace Iviz.Controllers
             var newFrame = new TfPublishedFrame(frameId, isInternal);
             frames[frameId] = newFrame;
 
-            var newTfFrame = newFrame.TfFrame;
             if (showPublisherPanel)
             {
-                panelData = new PublishedFramePanelData(newTfFrame);
+                panelData = new PublishedFramePanelData(newFrame.TfFrame);
                 panelData.ShowPanel();
             }
 
-            TfListener.Publish(newTfFrame);
+            if (isInternal)
+            {
+                newFrame.AttachToFixed();
+            }
+
             return newFrame;
         }
 
@@ -93,7 +97,7 @@ namespace Iviz.Controllers
                 return false;
             }
 
-            if (frame.IsInternal)
+            if (frame.isInternal)
             {
                 RosLogger.Info($"{this}: Cannot remove '{frameId}'. Reason: It is being managed by iviz.");
                 return false;
@@ -133,7 +137,7 @@ namespace Iviz.Controllers
         public void Dispose()
         {
             GameThread.EverySecond -= OnEverySecond;
-            ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
+            RosConnection.ConnectionStateChanged -= OnConnectionStateChanged;
             instance = null;
         }
 
@@ -141,56 +145,66 @@ namespace Iviz.Controllers
         {
             return "[TfPublisher]";
         }
+
+        sealed class TfPublishedFrame : IPublishedFrame
+        {
+            readonly string id;
+            readonly FrameNode frameNode;
+            public readonly bool isInternal;
+            public TfFrame TfFrame { get; private set; }
+
+            internal TfPublishedFrame(string id, bool isInternal)
+            {
+                this.id = id;
+                frameNode = FrameNode.Instantiate("[Publisher]");
+                frameNode.AttachTo(id);
+                TfFrame = frameNode.Parent ??
+                          throw new NullReferenceException("Failed to set origin parent"); // shouldn't happen
+                this.isInternal = isInternal;
+
+                if (isInternal)
+                {
+                    TfFrame.ForceInvisible();
+                }
+            }
+
+            public void Dispose()
+            {
+                frameNode.Dispose();
+            }
+
+            public Pose LocalPose
+            {
+                set
+                {
+                    if (TfFrame.SetLocalPose(value))
+                    {
+                        TfListener.Publish(TfFrame);
+                    }
+                }
+            }
+
+            public void AttachToFixed()
+            {
+                TfFrame.Parent = TfListener.FixedFrame;
+            }
+
+            public void UpdateFrame()
+            {
+                frameNode.AttachTo(id);
+                TfFrame = frameNode.Parent ??
+                          throw new NullReferenceException("Failed to set origin parent"); // shouldn't happen
+            }
+        }
     }
 
-    public sealed class TfPublishedFrame
+    public interface IPublishedFrame
     {
-        readonly string id;
-        readonly FrameNode frameNode;
-        public TfFrame TfFrame { get; private set; }
-        public bool IsInternal { get; }
-
-        internal TfPublishedFrame(string id, bool isInternal)
-        {
-            this.id = id;
-            frameNode = FrameNode.Instantiate("[Publisher]");
-            frameNode.AttachTo(id);
-            TfFrame = frameNode.Parent.CheckedNull()
-                      ?? throw new NullReferenceException("Failed to set origin parent"); // shouldn't happen
-            IsInternal = isInternal;
-            
-            if (isInternal)
-            {
-                TfFrame.ForceInvisible = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            frameNode.DestroySelf();
-        }
-
-        public Pose LocalPose
-        {
-            set
-            {
-                TfFrame.SetLocalPose(value);
-                TfListener.Publish(TfFrame);
-            }
-        }
-
-        public void AttachToFixed()
-        {
-            TfFrame.Parent = TfListener.Instance.FixedFrame;
-        }
-
-        internal void UpdateFrame()
-        {
-            frameNode.AttachTo(id);
-            TfFrame = frameNode.Parent.CheckedNull()
-                      ?? throw new NullReferenceException("Failed to set origin parent"); // shouldn't happen
-        }
+        public Pose LocalPose { set; }
+        public TfFrame TfFrame { get; }
+        public void AttachToFixed();
     }
+
 
     /*
     public class TfPublisherConfiguration : IConfiguration

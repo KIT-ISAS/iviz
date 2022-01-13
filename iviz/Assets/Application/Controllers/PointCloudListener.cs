@@ -205,8 +205,8 @@ namespace Iviz.Controllers
         {
             FieldNames = fieldNames.AsReadOnly();
             node = FrameNode.Instantiate("[PointCloudNode]");
-            pointCloud = ResourcePool.RentDisplay<PointListResource>(node.transform);
-            meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.transform);
+            pointCloud = ResourcePool.RentDisplay<PointListResource>(node.Transform);
+            meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.Transform);
             meshCloud.ShadowsEnabled = false;
 
             Config = config ?? new PointCloudConfiguration
@@ -215,7 +215,7 @@ namespace Iviz.Controllers
             };
 
             Listener = new Listener<PointCloud2>(Config.Topic, Handler);
-            node.name = $"[{Config.Topic}]";
+            node.Name = $"[{Config.Topic}]";
         }
 
         static int FieldSizeFromType(int datatype)
@@ -653,7 +653,7 @@ namespace Iviz.Controllers
             pointCloud.ReturnToPool();
             meshCloud.ReturnToPool();
 
-            node.DestroySelf();
+            node.Dispose();
             pointBuffer = Array.Empty<float4>();
         }
     }

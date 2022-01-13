@@ -33,5 +33,7 @@ namespace Iviz.App
         }
         public void Deconstruct(out GameObject gameObject, out Vector3 position, out Vector3 normal) =>
             (gameObject, position, normal) = (GameObject, Position, Normal);
+        
+        public void Deconstruct(out Vector3 position, out Vector3 normal) => (position, normal) = (Position, Normal);
     }
 }

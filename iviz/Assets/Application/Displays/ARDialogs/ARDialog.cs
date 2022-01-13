@@ -72,11 +72,11 @@ namespace Iviz.App.ARDialogs
                     throw new ObjectDisposedException(ToString());
                 }
 
-                return (node != null) ? node : node = FrameNode.Instantiate("Dialog Node");
+                return node ??= FrameNode.Instantiate("Dialog Node");
             }
         }
 
-        [NotNull] public TfFrame ParentFrame => Node.Parent.CheckedNull() ?? TfListener.DefaultFrame;
+        [NotNull] public TfFrame ParentFrame => Node.Parent ?? TfListener.DefaultFrame;
 
         public Color BackgroundColor
         {
@@ -572,7 +572,7 @@ namespace Iviz.App.ARDialogs
                 return;
             }
 
-            node.DestroySelf();
+            node.Dispose();
         }
     }
 }

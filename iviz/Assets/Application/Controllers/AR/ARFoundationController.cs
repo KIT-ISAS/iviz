@@ -54,19 +54,12 @@ namespace Iviz.Controllers
                     return "<b>[No AR Subsystem]</b>";
                 }
 
-                string trackingState;
-                switch (ar.Session.subsystem.trackingState)
+                string trackingState = ar.Session.subsystem.trackingState switch
                 {
-                    case TrackingState.Limited:
-                        trackingState = "Tracking: Limited";
-                        break;
-                    case TrackingState.None:
-                        trackingState = "Tracking: None";
-                        break;
-                    default:
-                        trackingState = "Tracking: OK";
-                        break;
-                }
+                    TrackingState.Limited => "Tracking: Limited",
+                    TrackingState.None => "Tracking: None",
+                    _ => "Tracking: OK"
+                };
 
                 string numPlanes =
                     ar.PlaneManager.trackables.count == 0
@@ -116,7 +109,7 @@ namespace Iviz.Controllers
             set
             {
                 base.Visible = value;
-                
+
                 Settings.MainCamera = value ? ar.Camera : virtualCamera;
                 virtualCamera.gameObject.SetActive(!value);
                 ar.Camera.enabled = value;
@@ -156,12 +149,10 @@ namespace Iviz.Controllers
                 {
                     ar.Camera.cullingMask = defaultCullingMask;
                     var (sourcePosition, sourceRotation) = setupModeFrame.transform.AsPose();
-                    Pose pose = new Pose
-                    {
-                        position = sourcePosition,
-                        rotation = Quaternion.Euler(0, sourceRotation.eulerAngles.y - 90, 0)
-                    };
-
+                    
+                    Pose pose;
+                    pose.position = sourcePosition;
+                    pose.rotation = Quaternion.Euler(0, sourceRotation.eulerAngles.y - 90, 0);
                     SetWorldPose(pose, RootMover.Setup);
                 }
             }
@@ -547,24 +538,23 @@ namespace Iviz.Controllers
 
                 var colorTask = shouldPublishColor
                     ? captureManager.CaptureColorAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot?>?)null;
+                    : null;
 
                 var depthTask = shouldPublishDepth
                     ? captureManager.CaptureDepthAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot?>?)null;
+                    : null;
 
                 var confidenceTask = shouldPublishConfidence
                     ? captureManager.CaptureDepthConfidenceAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot?>?)null;
+                    : null;
 
-                var color = colorTask != null ? await colorTask.Value : null;
-                var depth = depthTask != null ? await depthTask.Value : null;
-                var confidence = confidenceTask != null ? await confidenceTask.Value : null;
+                var color = colorTask != null ? await colorTask : null;
+                var depth = depthTask != null ? await depthTask : null;
+                var confidence = confidenceTask != null ? await confidenceTask : null;
 
-                var frame = TfListener.GetOrCreateFrame(CameraFrameId);
-                frame.ForceInvisible = true;
-                string frameId = frame.Id;
 
+                string frameId = TfListener.ResolveFrameId(CameraFrameId);
+                
                 if (color != null)
                 {
                     ColorSender.Publish(color.CreateImageMessage(frameId, colorSeq));
@@ -600,8 +590,7 @@ namespace Iviz.Controllers
                 }
 
                 var absoluteArCameraPose = ARPoseToUnity(anyPose.Value);
-                var relativePose = TfListener.RelativeToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
-                TfListener.Publish(frameId, relativePose.ToCameraFrame());
+                cameraFrame.LocalPose = TfListener.RelativeToFixedFrame(absoluteArCameraPose);
             }
             catch (Exception e)
             {

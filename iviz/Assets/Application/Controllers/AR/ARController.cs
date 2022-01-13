@@ -1,13 +1,12 @@
 ﻿#nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.MarkerDetection;
@@ -19,6 +18,7 @@ using Newtonsoft.Json.Converters;
 using UnityEngine;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
+using Time = UnityEngine.Time;
 using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
@@ -63,9 +63,13 @@ namespace Iviz.Controllers
         public static bool IsActive => Instance != null;
         public static ARFoundationController? Instance { get; protected set; }
         public static bool IsXRVisible => Settings.IsHololens || Instance is { Visible: true };
-        
+
         readonly ARConfiguration config = new();
         readonly MarkerDetector detector = new();
+        readonly Dictionary<(ARMarkerType, string), float> activeMarkerHighlighters = new();
+
+        readonly IPublishedFrame headFrame;
+        protected readonly IPublishedFrame cameraFrame;
 
         float? joyVelocityAngle;
         Vector3? joyVelocityPos;
@@ -204,8 +208,8 @@ namespace Iviz.Controllers
                 }
             }
         }
-        
-        public TfFrame Frame => TfListener.GetOrCreateFrame(HeadFrameId);
+
+        public TfFrame Frame => headFrame.TfFrame;
 
         /// <summary>
         /// AR has been enabled / disabled
@@ -226,7 +230,7 @@ namespace Iviz.Controllers
             ARJoystick.PointerUp += OnARJoystickPointerUp;
             ARJoystick.Close += ModuleListPanel.Instance.ARSidePanel.ToggleARJoystick;
             GameThread.EveryFrame += Update;
-            
+
             GuiInputModule.Instance.UpdateQualityLevel();
 
             MarkerSender = new Sender<ARMarkerArray>("~xr/markers");
@@ -236,10 +240,11 @@ namespace Iviz.Controllers
             ColorInfoSender = new Sender<CameraInfo>("~xr/color/camera_info");
             DepthInfoSender = new Sender<CameraInfo>("~xr/depth/camera_info");
 
+            headFrame = TfPublisher.Instance.GetOrCreate(HeadFrameId, isInternal: true);
+            cameraFrame = TfPublisher.Instance.GetOrCreate(CameraFrameId, isInternal: true);
+
             detector.MarkerDetected += OnMarkerDetected;
 
-            Frame.ForceInvisible = true;
-            
             pulseTokenSource?.Cancel();
         }
 
@@ -253,7 +258,7 @@ namespace Iviz.Controllers
         {
             ARCameraViewChanged?.Invoke(value);
         }
-        
+
         void OnARJoystickChangedAngle(float dA)
         {
             float newVelocityAngle;
@@ -321,8 +326,9 @@ namespace Iviz.Controllers
             }
 
             SetWorldPosition(WorldPosition + deltaWorldPosition, RootMover.ControlMarker);
-            
-            static int Sign(in Vector3 v) => Math.Sign(v.x) + Math.Sign(v.y) + Math.Sign(v.z); // only one of the components is nonzero
+
+            static int Sign(in Vector3 v) =>
+                Math.Sign(v.x) + Math.Sign(v.y) + Math.Sign(v.z); // only one of the components is nonzero
         }
 
         void OnARJoystickPointerUp()
@@ -336,7 +342,7 @@ namespace Iviz.Controllers
             WorldPose = pose;
             if (Visible)
             {
-                TfListener.RootFrame.transform.SetPose(pose);
+                TfListener.RootFrame.Transform.SetPose(pose);
             }
 
             WorldPoseChanged?.Invoke(mover);
@@ -385,8 +391,7 @@ namespace Iviz.Controllers
         protected virtual void Update()
         {
             var absoluteArCameraPose = ARPoseToUnity(ARCamera.transform.AsPose());
-            var relativePose = TfListener.RelativeToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
-            TfListener.Publish(HeadFrameId, relativePose);
+            headFrame.LocalPose = TfListener.RelativeToFixedFrame(absoluteArCameraPose);
         }
 
         void OnMarkerDetected(Screenshot screenshot, IMarkerCorners[] markers)
@@ -413,12 +418,26 @@ namespace Iviz.Controllers
 
             MarkerSender?.Publish(new ARMarkerArray(array));
 
-            foreach (var corners in markers)
+            foreach (var marker in array)
             {
-                var highlighter = ResourcePool.RentDisplay<ARMarkerHighlighter>();
-                highlighter.Highlight(corners.Corners, corners.Code, screenshot.Intrinsic,
-                    detector.DelayBetweenCapturesFastInMs);
+                var key = ((ARMarkerType)marker.Type, marker.Code);
+                if (activeMarkerHighlighters.TryGetValue(key, out float existingExpirationTime) 
+                    && Time.time < existingExpirationTime)
+                {
+                    continue;
+                }
+
+                ARMarkerHighlighter.Highlight(marker, 5);
+                float expirationTime = Time.time + 5;
+                activeMarkerHighlighters[key] = expirationTime;
             }
+        }
+
+        public static Pose GetAbsoluteMarkerPose(ARMarker marker)
+        {
+            var rosPoseToFixed = (Msgs.GeometryMsgs.Transform)marker.CameraPose * marker.PoseRelativeToCamera;
+            var unityPoseToFixed = rosPoseToFixed.Ros2Unity();
+            return TfListener.FixedFramePose.Multiply(unityPoseToFixed);
         }
 
         public virtual void Dispose()
@@ -459,8 +478,8 @@ namespace Iviz.Controllers
             ARStateChanged = null;
             ARCameraViewChanged = null;
         }
-        
-        
+
+
         static readonly int PulseCenter = Shader.PropertyToID("_PulseCenter");
         static readonly int PulseTime = Shader.PropertyToID("_PulseTime");
         static readonly int PulseDelta = Shader.PropertyToID("_PulseDelta");
@@ -486,6 +505,6 @@ namespace Iviz.Controllers
                 },
                 static () => pulseTokenSource.Cancel()
             );
-        }        
+        }
     }
 }

@@ -2,15 +2,12 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
-using Iviz.Roslib;
 using Iviz.Tools;
-using UnityEngine;
 
 namespace Iviz.Ros
 {
@@ -30,12 +27,12 @@ namespace Iviz.Ros
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
         public bool KeepReconnecting { get; set; }
 
-        public event Action<ConnectionState>? ConnectionStateChanged;
-        public event Action<bool>? ConnectionWarningStateChanged;
+        public static event Action<ConnectionState>? ConnectionStateChanged;
+        public static event Action<bool>? ConnectionWarningStateChanged;
 
         protected RosConnection()
         {
-            task = TaskUtils.StartLongTask(async () => await Run().AwaitNoThrow(this));
+            task = TaskUtils.Run(() => Run().AwaitNoThrow(this));
         }
 
         public abstract ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
@@ -47,6 +44,9 @@ namespace Iviz.Ros
             connectionTs.Cancel();
             Signal();
             task.WaitNoThrow(this);
+
+            ConnectionStateChanged = null;
+            ConnectionWarningStateChanged = null;
         }
 
         void SetConnectionState(ConnectionState newState)
@@ -60,7 +60,7 @@ namespace Iviz.Ros
             GameThread.Post(() => ConnectionStateChanged?.Invoke(newState));
         }
 
-        protected void SetConnectionWarningState(bool value)
+        protected static void SetConnectionWarningState(bool value)
         {
             GameThread.Post(() => ConnectionWarningStateChanged?.Invoke(value));
         }
@@ -82,8 +82,8 @@ namespace Iviz.Ros
             {
                 while (!connectionTs.IsCancellationRequested)
                 {
-                    DateTime now = GameThread.Now;
-                    if (KeepReconnecting || tryConnectOnce
+                    var now = GameThread.Now;
+                    if ((KeepReconnecting || tryConnectOnce)
                         && ConnectionState != ConnectionState.Connected
                         && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)
                     {

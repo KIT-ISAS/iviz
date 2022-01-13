@@ -34,7 +34,7 @@ namespace Iviz.Common
 
         public Intrinsic Scale(float f) => new(Fx * f, Cx * f, Fy * f, Cy * f);
 
-        public Vector3f Unproject(in Vector2f v, float z) => new((v.X - Cx) / Fx * z, (v.Y - Cy) / Fy * z, z);
+        public Vector3f Unproject(double x, double y) => new(((float)x - Cx) / Fx, ((float)y - Cy) / Fy, 1);
 
         public double[] ToArray() => new double[] { Fx, 0, Cx, 0, Fy, Cy, 0, 0, 1 };
 

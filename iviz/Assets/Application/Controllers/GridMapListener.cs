@@ -223,7 +223,7 @@ namespace Iviz.Controllers
             }
 
             node.AttachTo(msg.Info.Header);
-            link.transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
+            link.Transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
 
             resource.Set(width, height,
                 (float)msg.Info.LengthX, (float)msg.Info.LengthY,
@@ -240,8 +240,8 @@ namespace Iviz.Controllers
 
             resource.ReturnToPool();
 
-            link.DestroySelf();
-            node.DestroySelf();
+            link.Dispose();
+            node.Dispose();
         }
     }
 }
