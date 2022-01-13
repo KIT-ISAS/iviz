@@ -1184,7 +1184,16 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            string[] md5Variables = variables.Select(x => x.GetEntryForMd5Hash(RosPackage)).ToArray();
+            string[] md5Variables;
+            try
+            {
+                md5Variables = variables.Select(x => x.GetEntryForMd5Hash(RosPackage)).ToArray();
+            }
+            catch (MessageDependencyException e)
+            {
+                throw new MessageGenException($"Failed to generate md5 field for message {FullRosName}", e);
+            }
+
             if (md5Variables.Any(md5String => md5String == null))
             {
                 return ""; // shouldn't happen, exception thrown earlier
