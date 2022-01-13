@@ -189,7 +189,7 @@ namespace Iviz.Controllers
             const float distanceMultiplier = 0.15f;
 
             var relativeCameraPose = marker.CameraPose.FromCameraFrame().Ros2Unity();
-            var (cameraPosition, cameraRotation) = TfListener.FixedFramePose.Multiply(relativeCameraPose);
+            var (cameraPosition, cameraRotation) = TfListener.FixedFrameToAbsolute(relativeCameraPose);
             var intrinsic = new Intrinsic(marker.CameraIntrinsic);
 
             Span<Vector3> dirs = stackalloc Vector3[4];

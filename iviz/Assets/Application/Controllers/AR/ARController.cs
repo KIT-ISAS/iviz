@@ -437,7 +437,7 @@ namespace Iviz.Controllers
         {
             var rosPoseToFixed = (Msgs.GeometryMsgs.Transform)marker.CameraPose * marker.PoseRelativeToCamera;
             var unityPoseToFixed = rosPoseToFixed.Ros2Unity();
-            return TfListener.FixedFramePose.Multiply(unityPoseToFixed);
+            return TfListener.FixedFrameToAbsolute(unityPoseToFixed);
         }
 
         public virtual void Dispose()

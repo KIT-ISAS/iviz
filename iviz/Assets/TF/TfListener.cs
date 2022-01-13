@@ -33,8 +33,6 @@ namespace Iviz.Controllers.TF
         static TfListener? instance;
         static uint tfSeq;
 
-        Pose cachedFixedPose = Pose.identity;
-
         readonly TfConfiguration config = new();
         readonly Func<string, TfFrame>? frameCreator;
 
@@ -50,7 +48,9 @@ namespace Iviz.Controllers.TF
         readonly TfFrame rootFrame;
         readonly TfFrame originFrame;
         readonly GameObject unityFrame;
+
         TfFrame fixedFrame;
+        Pose cachedFixedPose = Pose.identity;
 
         public static TfListener Instance =>
             instance ?? throw new NullReferenceException("No TFListener has been set!");
@@ -61,10 +61,7 @@ namespace Iviz.Controllers.TF
         public static TfFrame ListenersFrame => OriginFrame;
         public static TfFrame DefaultFrame => OriginFrame;
         public static TfFrame FixedFrame => Instance.fixedFrame;
-
-        public static IEnumerable<string> FramesUsableAsHints =>
-            Instance.frames.Values.Where(IsFrameUsableAsHint).Select(frame => frame.Id);
-
+        public static IEnumerable<string> FramesUsableAsHints => Instance.frames.Values.Select(frame => frame.Id);
         public static event Action? AfterProcessMessages;
 
         public Listener<TFMessage> Listener { get; }
@@ -290,10 +287,7 @@ namespace Iviz.Controllers.TF
         }
 
         public int NumFrames => frames.Count;
-
-        static readonly Func<TfFrame, bool> IsFrameUsableAsHint =
-            frame => frame != RootFrame && frame != OriginFrame;
-
+        
         static bool IsValid(in Msgs.GeometryMsgs.Vector3 v)
         {
             const int maxPoseMagnitude = 10000;
@@ -617,7 +611,17 @@ namespace Iviz.Controllers.TF
             return p;
         }
 
-        public static Pose FixedFramePose => FixedFrame.Transform.AsPose();
+        public static Pose FixedFrameToAbsolute(in Pose relativePose)
+        {
+            // equals unityPose unless in AR mode or flipped z 
+            var fixedFrame = FixedFrame.Transform;
+            var (position, rotation) = relativePose;
+
+            Pose p;
+            p.position = fixedFrame.TransformPoint(position); // may contain scaling
+            p.rotation = fixedFrame.rotation * rotation;
+            return p;
+        }
 
         public static void Publish(TfFrame frame)
         {

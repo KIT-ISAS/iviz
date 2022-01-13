@@ -88,7 +88,7 @@ namespace Iviz.App.ARDialogs
 
             if (line.Visible)
             {
-                Pose localToFixed = TfListener.FixedFramePose.Inverse().Multiply(Transform.AsPose());
+                Pose localToFixed = TfListener.RelativeToFixedFrame(Transform.AsPose());
                 Pose fixedToLocal = localToFixed.Inverse();
                 
                 Vector3 start = localToFixed.Multiply(Vector3.zero);
