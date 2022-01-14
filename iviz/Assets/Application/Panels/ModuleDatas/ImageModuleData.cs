@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -178,7 +179,14 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
-            imageDialogData?.Dispose();
+            try
+            {
+                imageDialogData?.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }
         }
 
         sealed class ColorImageListener : ImageDialogListener

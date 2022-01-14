@@ -10,9 +10,6 @@ namespace Iviz.Displays.Highlighters
 {
     public sealed class LineWrapperBoundsControl : WrapperBoundsControl
     {
-        static readonly Quaternion BaseRotationLeft = Quaternion.AngleAxis(-90, Vector3.up);
-        static readonly Quaternion BaseRotationRight = Quaternion.AngleAxis(+90, Vector3.up);
-
         readonly MeshMarkerResource left;
         readonly MeshMarkerResource right;
         readonly GameObject node;
@@ -64,14 +61,18 @@ namespace Iviz.Displays.Highlighters
             node = new GameObject("[Line Wrapper]");
             node.transform.SetParentLocal(parent);
 
+            var baseRotationLeft =
+                new Quaternion(0, -0.707106769f, 0, 0.707106769f); //Quaternion.AngleAxis(-90, Vector3.up);
             left = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Pyramid, node.transform);
-            left.Transform.localRotation = BaseRotationLeft;
+            left.Transform.localRotation = baseRotationLeft;
             left.Color = Resource.Colors.DraggableDefaultColor;
             left.Layer = LayerType.Clickable;
             left.ShadowsEnabled = false;
 
+            var baseRotationRight =
+                new Quaternion(0, 0.707106769f, 0, 0.707106769f); //Quaternion.AngleAxis(90, Vector3.up);
             right = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Pyramid, node.transform);
-            right.Transform.localRotation = BaseRotationRight;
+            right.Transform.localRotation = baseRotationRight;
             right.Color = Resource.Colors.DraggableDefaultColor;
             right.Layer = LayerType.Clickable;
             right.ShadowsEnabled = false;

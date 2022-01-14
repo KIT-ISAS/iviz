@@ -479,6 +479,7 @@ namespace Iviz.Controllers
 
         public static void ClearResources()
         {
+            Instance = null;
             ARStateChanged = null;
             ARCameraViewChanged = null;
         }

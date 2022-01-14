@@ -91,7 +91,7 @@ namespace Iviz.App
                 $"<b>{title}</b>";
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             Closed = null;
             panel.ClearSubscribers();

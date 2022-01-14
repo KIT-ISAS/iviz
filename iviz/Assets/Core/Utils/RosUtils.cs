@@ -19,14 +19,24 @@ namespace Iviz.Core
 {
     public static class RosUtils
     {
-        static readonly Quaternion XFrontToZFront = new(0.5, -0.5, 0.5, -0.5);
+        //static readonly Quaternion XFrontToZFront = new(0.5, -0.5, 0.5, -0.5);
 
         /// Make camera point to +Z instead of +X
-        public static Pose ToCameraFrame(this in Pose pose) =>
-            new(pose.Position, pose.Orientation * XFrontToZFront);
+        public static Pose ToCameraFrame(this in Pose p)
+        {
+            Pose q;
+            q.Position = p.Position;
+            q.Orientation = p.Orientation * /*XFrontToZFront*/ new Quaternion(0.5, -0.5, 0.5, -0.5);
+            return q;
+        }
 
-        public static Pose FromCameraFrame(this in Pose pose) =>
-            new(pose.Position, pose.Orientation * XFrontToZFront.Inverse);
+        public static Pose FromCameraFrame(this in Pose pose)
+        {
+            Pose q;
+            q.Position = pose.Position;
+            q.Orientation = pose.Orientation * /*XFrontToZFront.Inverse*/ new Quaternion(-0.5, 0.5, -0.5, -0.5);
+            return q;
+        }
 
         //----
 
@@ -64,7 +74,7 @@ namespace Iviz.Core
             q.z = p.X;
             return q;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 ToUnity(this in Msgs.GeometryMsgs.Vector3 p)
         {
@@ -110,7 +120,7 @@ namespace Iviz.Core
             q.Z = p.y;
             return q;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void Unity2Ros(this in Vector3 p, out Msgs.GeometryMsgs.Vector3 q)
         {
@@ -138,7 +148,7 @@ namespace Iviz.Core
             q.Z = p.y;
             return q;
         }
-        
+
         public static Vector3 Unity2Ros(this in Vector3 p)
         {
             //new(p.z, -p.x, p.y);
@@ -252,7 +262,7 @@ namespace Iviz.Core
                 q.w = (float)p.W;
             }
         }
-        
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void Unity2Ros(this in UnityEngine.Quaternion p, out Quaternion q)
@@ -293,7 +303,7 @@ namespace Iviz.Core
             p.rotation.Unity2Ros(out q.Rotation);
             return q;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pose Unity2RosPose(this in UnityEngine.Pose p)
         {
@@ -302,13 +312,13 @@ namespace Iviz.Core
             p.rotation.Unity2Ros(out q.Orientation);
             return q;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Unity2Ros(this in UnityEngine.Pose p, out Transform q)
         {
             p.position.Unity2Ros(out q.Translation);
             p.rotation.Unity2Ros(out q.Rotation);
-        }        
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this float f) => !float.IsFinite(f);

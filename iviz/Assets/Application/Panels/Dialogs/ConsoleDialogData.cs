@@ -67,7 +67,7 @@ namespace Iviz.App
             RosLogger.LogExternal += HandleMessage;
         }
 
-        public override void FinalizePanel()
+        public override void Dispose()
         {
             ConnectionManager.LogMessageArrived -= HandleMessage;
             RosLogger.LogExternal -= HandleMessage;

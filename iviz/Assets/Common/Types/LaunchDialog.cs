@@ -1,4 +1,5 @@
 using System.Runtime.Serialization;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.MsgsWrapper;
 using JetBrains.Annotations;
 

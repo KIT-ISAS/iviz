@@ -20,7 +20,6 @@ using Iviz.Ros;
 using Iviz.Tools;
 using Newtonsoft.Json;
 using UnityEngine;
-using Feedback = Iviz.Msgs.IvizCommonMsgs.Feedback;
 using LaunchDialog = Iviz.Msgs.IvizCommonMsgs.LaunchDialog;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 using UpdateRobot = Iviz.Msgs.IvizCommonMsgs.UpdateRobot;
@@ -813,7 +812,7 @@ namespace Iviz.Controllers
 
                         feedback.VizId = ConnectionManager.MyId ?? "";
                         feedback.Id = mDialog.Id ?? "";
-                        feedback.FeedbackType = FeedbackType.ButtonClick;
+                        feedback.Type = (byte) FeedbackType.ButtonClick;
                         feedback.EntryId = buttonId;
                         overrideExpired = true;
 
@@ -828,7 +827,7 @@ namespace Iviz.Controllers
 
                         feedback.VizId = ConnectionManager.MyId ?? "";
                         feedback.Id = mDialog.Id ?? "";
-                        feedback.FeedbackType = FeedbackType.MenuEntryClick;
+                        feedback.Type = (byte) FeedbackType.MenuEntryClick;
                         feedback.EntryId = buttonId;
                         overrideExpired = true;
 
@@ -849,7 +848,7 @@ namespace Iviz.Controllers
 
                         feedback.VizId = ConnectionManager.MyId ?? "";
                         feedback.Id = mDialog.Id ?? "";
-                        feedback.FeedbackType = FeedbackType.Expired;
+                        feedback.Type = (byte) FeedbackType.Expired;
                         feedback.EntryId = 0;
 
                         TryRelease(signal);

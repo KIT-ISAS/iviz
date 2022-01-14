@@ -3,6 +3,7 @@
 using System;
 using Iviz.Common;
 using Iviz.Controllers;
+using Iviz.Core;
 using Iviz.Resources;
 
 namespace Iviz.App
@@ -26,7 +27,14 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
-            Listener.Dispose();
+            try
+            {
+                Listener.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }              
         }
         
         public override string ToString()

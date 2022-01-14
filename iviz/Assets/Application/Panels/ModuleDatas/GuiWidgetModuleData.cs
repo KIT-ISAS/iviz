@@ -12,17 +12,17 @@ namespace Iviz.App
     public sealed class GuiWidgetModuleData : ListenerModuleData, IInteractableModuleData
     {
         readonly GuiWidgetListener dialogListener;
-        readonly GuiDialogModulePanel dialogPanel;
+        readonly GuiWidgetModulePanel dialogPanel;
 
         protected override ListenerController Listener => dialogListener;
-        public override ModuleType ModuleType => ModuleType.GuiDialog;
+        public override ModuleType ModuleType => ModuleType.GuiWidget;
         public override ModulePanel Panel => dialogPanel;
         public override IConfiguration Configuration => dialogListener.Config;
 
         public GuiWidgetModuleData(ModuleDataConstructor constructor) :
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
-            dialogPanel = ModulePanelManager.GetPanelByResourceType<GuiDialogModulePanel>(ModuleType.GuiDialog);
+            dialogPanel = ModulePanelManager.GetPanelByResourceType<GuiWidgetModulePanel>(ModuleType.GuiWidget);
             dialogListener = new GuiWidgetListener((GuiWidgetConfiguration?)constructor.Configuration, Topic);
             Interactable = ModuleListPanel.SceneInteractable;
             UpdateModuleButton();

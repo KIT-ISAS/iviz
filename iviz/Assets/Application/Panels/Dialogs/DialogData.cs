@@ -53,7 +53,7 @@ namespace Iviz.App
         {
         }
 
-        public virtual void FinalizePanel()
+        public virtual void Dispose()
         {
         }
 

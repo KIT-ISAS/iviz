@@ -207,10 +207,11 @@ namespace Iviz.Displays
 
         protected override void Stop()
         {
-            base.Stop();
             axis.ReturnToPool();
             trail.ReturnToPool();
             label.ReturnToPool();
+
+            base.Stop();
         }
         
         public override void ForceInvisible()

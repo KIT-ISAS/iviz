@@ -97,7 +97,8 @@ namespace Iviz.App
             if (Settings.MainCamera == Settings.VirtualCamera)
             {
                 rosCameraPosition = InverseTransformFixed(GuiInputModule.Instance.CameraPosition);
-            } else if (Settings.MainCamera != null)
+            }
+            else if (Settings.MainCamera != null)
             {
                 rosCameraPosition = InverseTransformFixed(Settings.MainCamera.transform.localPosition);
             }

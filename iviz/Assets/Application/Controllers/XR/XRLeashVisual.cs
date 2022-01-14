@@ -50,7 +50,7 @@ namespace Iviz.Controllers.XR
             const float interactingWidth = 0.005f;
             const float hoveringWidth = 0.0025f;
             const float noHitWidth = 0.0006f;
-            
+
             bool leashActive = Controller.IsActiveInFrame && Controller.HasCursor;
             Leash.Visible = leashActive || draggable != null;
             if (!leashActive)
@@ -71,11 +71,12 @@ namespace Iviz.Controllers.XR
                 {
                     Leash.Set(transformRay, referencePoint);
                 }
+
                 return;
             }
 
             bool hitExists = TryGetHitInfo(out var hitPosition, out var hitNormal, out bool isUIHitClosest);
-            
+
             if (Controller.ButtonUp && !isUIHitClosest)
             {
                 GuiInputModule.TriggerEnvironmentClick(new ClickHitInfo(transformRay));
@@ -93,34 +94,34 @@ namespace Iviz.Controllers.XR
             Leash.Width = noHitWidth;
             Leash.Set(transformRay, Transform.TransformPoint(Vector3.forward * noHitLength));
         }
-        
-        public bool TryGetHitInfo(out Vector3 position, out Vector3 normal, out bool isUIHitClosest)
-        {
-            position = default;
-            normal = default;
 
-            if (!Interactor.TryGetCurrentRaycast(
-                    out var raycastHit,
-                    out int raycastHitIndex,
-                    out var raycastResult,
-                    out int raycastResultIndex,
-                    out isUIHitClosest))
+        bool TryGetHitInfo(out Vector3 position, out Vector3 normal, out bool isUIHitClosest)
+        {
+            if (!Interactor.TryGetCurrentRaycast(out var raycastHit, out _, 
+                    out var raycastResult, out _, out isUIHitClosest))
             {
+                position = default;
+                normal = default;
                 return false;
             }
 
-            if (raycastResult.HasValue && isUIHitClosest)
+            if (isUIHitClosest && raycastResult is { } result)
             {
-                position = raycastResult.Value.worldPosition;
-                normal = raycastResult.Value.worldNormal;
-            }
-            else if (raycastHit.HasValue)
-            {
-                position = raycastHit.Value.point;
-                normal = raycastHit.Value.normal;
+                position = result.worldPosition;
+                normal = result.worldNormal;
+                return true;
             }
 
-            return true;
-        }        
+            if (raycastHit is { } hit)
+            {
+                position = hit.point;
+                normal = hit.normal;
+                return true;
+            }
+
+            position = default;
+            normal = default;
+            return false;
+        }
     }
 }

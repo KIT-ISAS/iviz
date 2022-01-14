@@ -12,6 +12,7 @@ using Iviz.Displays;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.GridMapMsgs;
 using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.VisualizationMsgs;
@@ -67,7 +68,7 @@ namespace Iviz.Resources
                 //{ Octomap.RosMessageType, ModuleType.Octomap },
                 //{ OctomapWithPose.RosMessageType, ModuleType.Octomap },
                 //{ Dialog.RosMessageType, ModuleType.GuiDialog },
-                { DialogArray.RosMessageType, ModuleType.GuiDialog },
+                { WidgetArray.RosMessageType, ModuleType.GuiWidget },
             }.AsReadOnly();
 
         public static readonly ColorSchema Colors = new();

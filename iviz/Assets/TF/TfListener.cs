@@ -34,7 +34,7 @@ namespace Iviz.Controllers.TF
         static uint tfSeq;
 
         readonly TfConfiguration config = new();
-        readonly Func<string, TfFrame>? frameCreator;
+        readonly Func<string, TfFrame> frameFactory;
 
         readonly ConcurrentQueue<(TransformStamped[] frame, bool isStatic)> incomingMessages = new();
         readonly ConcurrentBag<TransformStamped> outgoingMessages = new();
@@ -216,11 +216,11 @@ namespace Iviz.Controllers.TF
             }
         }
 
-        public TfListener(TfConfiguration? config, Func<string, TfFrame>? frameCreator)
+        public TfListener(TfConfiguration? config, Func<string, TfFrame> frameFactory)
         {
             instance = this;
 
-            this.frameCreator = frameCreator;
+            this.frameFactory = frameFactory ?? throw new ArgumentNullException(nameof(frameFactory));
 
             try
             {
@@ -480,12 +480,7 @@ namespace Iviz.Controllers.TF
 
         TfFrame CreateFrameObject(string id, TfFrame? parentFrame)
         {
-            if (frameCreator == null)
-            {
-                throw new NullReferenceException("TF Frame creator has not been set!");
-            }
-
-            var frame = frameCreator(id);
+            var frame = frameFactory(id);
             frame.Visible = config.Visible;
             frame.FrameSize = config.FrameSize;
             frame.LabelVisible = config.FrameLabelsVisible;

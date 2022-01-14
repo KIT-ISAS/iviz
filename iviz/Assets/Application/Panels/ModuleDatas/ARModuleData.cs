@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -35,7 +36,14 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
-            controller.Dispose();
+            try
+            {
+                controller.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }
         }
 
         public override void SetupPanel()

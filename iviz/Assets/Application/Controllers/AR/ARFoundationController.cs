@@ -149,7 +149,7 @@ namespace Iviz.Controllers
                 {
                     ar.Camera.cullingMask = defaultCullingMask;
                     var (sourcePosition, sourceRotation) = setupModeFrame.transform.AsPose();
-                    
+
                     Pose pose;
                     pose.position = sourcePosition;
                     pose.rotation = Quaternion.Euler(0, sourceRotation.eulerAngles.y - 90, 0);
@@ -467,13 +467,13 @@ namespace Iviz.Controllers
         void ProcessLights(in ARLightEstimationData lightEstimation)
         {
             // ARKit back camera only appears to have these two
-            if (lightEstimation.averageColorTemperature.HasValue && lightEstimation.averageBrightness.HasValue)
+            if (lightEstimation.averageColorTemperature is { } averageColorTemperature &&
+                lightEstimation.averageBrightness is { } averageBrightness)
             {
-                var color = Mathf.CorrelatedColorTemperatureToRGB(lightEstimation.averageColorTemperature.Value);
-                float intensity = lightEstimation.averageBrightness.Value;
+                var color = Mathf.CorrelatedColorTemperatureToRGB(averageColorTemperature);
 
                 ar.ARLight.color = color;
-                ar.ARLight.intensity = intensity;
+                ar.ARLight.intensity = averageBrightness;
 
                 // ambient light is only to prevent complete blacks
                 RenderSettings.ambientMode = AmbientMode.Flat;
@@ -482,23 +482,22 @@ namespace Iviz.Controllers
             }
 
             // ARKit front camera (unused)
-            if (lightEstimation.mainLightDirection.HasValue)
+            if (lightEstimation.mainLightDirection is { } mainLightDirection)
             {
-                ar.ARLight.transform.rotation = Quaternion.LookRotation(lightEstimation.mainLightDirection.Value);
+                ar.ARLight.transform.rotation = Quaternion.LookRotation(mainLightDirection);
             }
 
             // ARKit front camera (unused)
-            if (lightEstimation.mainLightColor.HasValue)
+            if (lightEstimation.mainLightColor is { } mainLightColor)
             {
-                ar.ARLight.color = lightEstimation.mainLightColor.Value;
+                ar.ARLight.color = mainLightColor;
             }
 
             // Android only I think
-            if (lightEstimation.ambientSphericalHarmonics.HasValue)
+            if (lightEstimation.ambientSphericalHarmonics is { } ambientSphericalHarmonics)
             {
-                var sphericalHarmonics = lightEstimation.ambientSphericalHarmonics;
                 RenderSettings.ambientMode = AmbientMode.Skybox;
-                RenderSettings.ambientProbe = sphericalHarmonics.Value;
+                RenderSettings.ambientProbe = ambientSphericalHarmonics;
             }
         }
 
@@ -554,7 +553,7 @@ namespace Iviz.Controllers
 
 
                 string frameId = TfListener.ResolveFrameId(CameraFrameId);
-                
+
                 if (color != null)
                 {
                     ColorSender.Publish(color.CreateImageMessage(frameId, colorSeq));

@@ -16,55 +16,39 @@ namespace Iviz.Ros
         Connected
     }
 
-    public sealed class ConnectionManager : MonoBehaviour
+    public sealed class ConnectionManager
     {
         static ConnectionManager? instance;
-        static RoslibConnection? connection;
 
         public delegate void LogDelegate(in Log log);
-
         public static event LogDelegate? LogMessageArrived;
         public static LogLevel MinLogLevel { get; set; } = LogLevel.Info;
         public static IExternalServiceProvider ServiceProvider => Connection;
+        public static string? MyId => instance?.connection.MyId;
+        public static bool IsConnected => instance?.connection.ConnectionState == ConnectionState.Connected;
+        public static IListener? LogListener => instance?.logListener;
+        public static ISender? LogSender => instance?.logSender;
+        public static RoslibConnection Connection => instance?.connection ??
+                                                     throw new ObjectDisposedException(
+                                                         "Connection manager has already been disposed");
+
+        readonly Listener<Log> logListener;
+        readonly Sender<Log> logSender;
+        readonly RoslibConnection connection;
 
         long frameBandwidthDown;
         long frameBandwidthUp;
         uint logSeq;
-        Listener<Log>? logListener;
-        Sender<Log>? logSender;
-
-
-        public static RoslibConnection Connection
-        {
-            get
-            {
-                if (connection != null)
-                {
-                    return connection;
-                }
-
-                if (instance == null)
-                {
-                    throw new ObjectDisposedException("Connection manager has already been disposed");
-                }
-
-                return connection = new RoslibConnection();
-            }
-        }
-
-        public static string? MyId => instance != null ? Connection.MyId : null;
-        public static bool IsConnected => instance != null && Connection.ConnectionState == ConnectionState.Connected;
-        public static IListener? LogListener => instance != null ? instance.logListener : null;
-        public static ISender? LogSender => instance != null ? instance.logSender : null;
-
-        void Awake()
+        
+        public ConnectionManager()
         {
             instance = this;
 
+            connection = new RoslibConnection();
             logSender = new Sender<Log>("/rosout");
-            RosLogger.LogExternal += LogMessage;
-
             logListener = new Listener<Log>("/rosout_agg", Handler, RosTransportHint.PreferUdp);
+            
+            RosLogger.LogExternal += LogMessage;
         }
 
         static bool Handler(Log msg)
@@ -73,16 +57,17 @@ namespace Iviz.Ros
             return true;
         }
 
-        void OnDestroy()
+        public void Dispose()
         {
-            logListener?.Dispose();
-            logSender?.Dispose();
+            logListener.Dispose();
+            logSender.Dispose();
             Connection.Dispose();
             RosServerManager.Dispose();
-            instance = null;
-            connection = null;
+            
             LogMessageArrived = null;
             RosLogger.LogExternal -= LogMessage;
+        
+            instance = null;
         }
 
         void LogMessage(in LogMessage msg)
@@ -95,7 +80,7 @@ namespace Iviz.Ros
             var logMessage = new Log
             {
                 Header = (logSeq++, ""),
-                Level = (byte) msg.Level,
+                Level = (byte)msg.Level,
                 Name = Connection.MyId ?? "/iviz",
                 Msg = msg.Message
             };

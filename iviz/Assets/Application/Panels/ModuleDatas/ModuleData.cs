@@ -111,7 +111,7 @@ namespace Iviz.App
                 ModuleType.Path => new PathModuleData(c),
                 ModuleType.GridMap => new GridMapModuleData(c),
                 ModuleType.Octomap => new OctomapModuleData(c),
-                ModuleType.GuiDialog => new GuiWidgetModuleData(c),
+                ModuleType.GuiWidget => new GuiWidgetModuleData(c),
                 ModuleType.XR => new XRModuleData(c),
                 _ => throw new IndexOutOfRangeException("Failed to find a module of the given type: " + c.ModuleType)
             };

@@ -168,6 +168,16 @@ namespace Iviz.Controllers.TF
             Transform.SetLocalPose(newPose);
             return true;
         }
+        
+        protected override void Stop()
+        {
+            foreach (var frame in children.Values)
+            {
+                frame.Parent = null;
+            }
+            
+            base.Stop();
+        }
 
         public abstract void ForceInvisible();
 

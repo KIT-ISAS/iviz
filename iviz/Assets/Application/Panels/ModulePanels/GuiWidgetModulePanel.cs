@@ -6,17 +6,11 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="ARModuleData"/> 
     /// </summary>
-    public sealed class GuiDialogModulePanel : ListenerModulePanel
+    public sealed class GuiWidgetModulePanel : ListenerModulePanel
     {
         public FrameWidget Frame { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
         public SenderWidget FeedbackSender { get; private set; }
-
-        //public ToggleWidget PublishHead { get; private set; }
-        //public ToggleWidget PublishPlanes { get; private set; }
-
-        //public SenderWidget HeadSender { get; private set; }
-        //public SenderWidget MarkersSender { get; private set; }
 
         void Awake()
         {

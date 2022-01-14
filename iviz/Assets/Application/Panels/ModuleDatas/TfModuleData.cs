@@ -34,7 +34,14 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
-            listener.Dispose();
+            try
+            {
+                listener.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }             
         }
 
         public void UpdateConfiguration(TfConfiguration configuration)

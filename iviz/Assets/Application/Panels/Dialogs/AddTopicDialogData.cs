@@ -52,7 +52,7 @@ namespace Iviz.App
                 }
 
                 bool resourceFound =
-                    Resource.ResourceByRosMessageType.TryGetValue(msgType, out ModuleType resource);
+                    Resource.ResourceByRosMessageType.TryGetValue(msgType, out var resource);
                 result.Add(new TopicWithResource(topic, msgType, resourceFound ? resource : ModuleType.Invalid));
             }
         }
@@ -105,10 +105,10 @@ namespace Iviz.App
             topics.Clear();
             topics.AddRange(newTopics);
 
-            topics.Sort((x, y) => string.CompareOrdinal(x.topic, y.topic));
+            topics.Sort((resourceA, resourceB) => string.CompareOrdinal(resourceA.topic, resourceB.topic));
             if (panel.SortByType.Value)
             {
-                topics.Sort((x, y) => string.CompareOrdinal(x.shortType, y.shortType));
+                topics.Sort((resourceA, resourceB) => string.CompareOrdinal(resourceA.shortType, resourceB.shortType));
             }
 
             bool showAll = panel.ShowAll.Value;

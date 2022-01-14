@@ -17,6 +17,7 @@ namespace Iviz.Controllers.TF
         readonly GameObject gameObject;
         TfFrame? parent;
         bool disposed;
+        string name;
 
         public Transform Transform { get; }
 
@@ -30,7 +31,7 @@ namespace Iviz.Controllers.TF
 
         void SetParent(TfFrame? value)
         {
-            if (parent == value || !IsAlive)
+            if (parent == value || !IsAlive || value is { IsAlive: false })
             {
                 return;
             }
@@ -39,7 +40,7 @@ namespace Iviz.Controllers.TF
             parent = value;
             parent?.AddListener(this);
 
-            Transform.SetParentLocal(value != null ? value.Transform : TfListener.DefaultFrame.Transform);            
+            Transform.SetParentLocal(value?.Transform);
         }
 
         public virtual bool Visible
@@ -50,12 +51,17 @@ namespace Iviz.Controllers.TF
 
         public string Name
         {
-            get => gameObject.name;
-            set => gameObject.name = value;
+            get => name;
+            set
+            {
+                name = value;
+                gameObject.name = value;
+            }
         }
 
         protected FrameNode()
         {
+            name = "";
             gameObject = new GameObject();
             Transform = gameObject.transform;
         }
@@ -89,7 +95,6 @@ namespace Iviz.Controllers.TF
         protected virtual void Stop()
         {
             Parent = null;
-            disposed = true;
         }
 
         public void Dispose()
@@ -103,9 +108,33 @@ namespace Iviz.Controllers.TF
             UnityEngine.Object.Destroy(gameObject);
             disposed = true;
         }
-        
 
         public bool IsAlive => !disposed;
+        /*
+        public bool IsAlive
+        {
+            get
+            {
+                if (disposed)
+                {
+                    return false;
+                }
+
+                
+#if UNITY_EDITOR
+                if (gameObject == null || Transform == null)
+                {
+                    Debug.LogError($"{this}: FrameNode has been deleted before being disposed!");
+                    return false;
+                }
+#endif
+
+                return true;
+            }
+        }
+        */
+
+        public override string ToString() => "{" + Name + "}";
 
         public static FrameNode Instantiate(string name)
         {

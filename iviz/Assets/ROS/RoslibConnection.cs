@@ -28,8 +28,8 @@ namespace Iviz.Ros
 
         static readonly IReadOnlyCollection<BriefTopicInfo> EmptyTopics = Array.Empty<BriefTopicInfo>();
         static readonly Random Random = new();
-
         static readonly IReadOnlyCollection<string> EmptyParameters = Array.Empty<string>();
+        
         readonly ConcurrentDictionary<int, IRosPublisher?> publishers = new();
         readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new();
         readonly Dictionary<string, IAdvertisedService> servicesByTopic = new();

@@ -16,9 +16,6 @@ namespace Iviz.Controllers
 {
     public sealed class ARMarkerHighlighter : MeshMarkerHolderResource
     {
-        static readonly Quaternion TableRosToUnity =
-            Quaternion.AngleAxis(-90, Vector3.up) * Quaternion.AngleAxis(90, Vector3.right);
-
         [SerializeField] Transform? topLeft;
         [SerializeField] Transform? topRight;
         [SerializeField] Transform? bottomRight;
@@ -116,9 +113,12 @@ namespace Iviz.Controllers
             float markerSizeInM = markerSizeInMm * 0.001f;
             var (position, rotation) = TfListener.RelativeToFixedFrame(pose);
 
+            var tableRosToUnity = new Quaternion(0.5f, -0.5f, 0.5f, 0.5f);
+            // Quaternion.AngleAxis(-90, Vector3.up) * Quaternion.AngleAxis(90, Vector3.right);
+
             var mTransform = highlighter.transform;
             mTransform.parent = TfListener.FixedFrame.Transform;
-            mTransform.localRotation = rotation * TableRosToUnity;
+            mTransform.localRotation = rotation * tableRosToUnity;
             mTransform.localPosition = position + rotation * (Vector3.up * 0.01f);
             mTransform.localScale = markerSizeInM * Vector3.one;
 

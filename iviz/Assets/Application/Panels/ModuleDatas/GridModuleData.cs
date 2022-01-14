@@ -1,10 +1,12 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
+using Iviz.Core;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -36,7 +38,14 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
-            GridController.Dispose();
+            try
+            {
+                GridController.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }            
             
             ARController.ARCameraViewChanged -= OnARCameraViewChanged;
         }

@@ -201,7 +201,12 @@ namespace Iviz.App
 
         void OnDestroy()
         {
+            /*
             TfListener.Instance.ResetFrames -= OnResetFrames;
+            TfListener.AfterProcessMessages -= ProcessPoseChanges;
+            GameThread.EveryFrame -= ProcessPointer;
+            */
+            instance = null;
         }
 
         void Start()
@@ -551,7 +556,7 @@ namespace Iviz.App
 
             if (DraggedObject != null)
             {
-                Ray pointerRay = Settings.MainCamera.ScreenPointToRay(pointerPosition);
+                var pointerRay = Settings.MainCamera.ScreenPointToRay(pointerPosition);
                 DraggedObject.OnPointerMove(pointerRay);
                 if (DraggedObject.ReferencePoint is { } referencePoint
                     && DraggedObject.ReferenceNormal is { } referenceNormal)
@@ -577,7 +582,6 @@ namespace Iviz.App
                 float timeDown = Time.time - pointerDownTime;
                 if (timeDown < shortClickTime)
                 {
-                    //ShortClick?.Invoke(clickInfo);
                     OnClick(clickInfo, true);
                 }
                 else if (timeDown > longClickTime)
@@ -702,8 +706,7 @@ namespace Iviz.App
                 if (orbitRadius < minDistanceToAdvance)
                 {
                     // move forward
-                    float diff = minDistanceToAdvance - orbitRadius;
-                    orbitCenter += diff * q.Forward();
+                    orbitCenter += (minDistanceToAdvance - orbitRadius) * q.Forward();
                     orbitRadius = minDistanceToAdvance;
                 }
 

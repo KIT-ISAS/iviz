@@ -7,7 +7,6 @@ using UnityEngine;
 
 namespace Iviz.Displays.ARDialogs
 {
-    /*
     [RequireComponent(typeof(BoxCollider))]
     public sealed class SpringDisc3D : MonoBehaviour, IWidgetWithColor
     {
@@ -15,107 +14,107 @@ namespace Iviz.Displays.ARDialogs
         [SerializeField] MeshMarkerResource? link;
         [SerializeField] XRScreenDraggable? draggable;
         [SerializeField] MeshMarkerResource? disc;
-        [SerializeField] Color color = Color.white;
-        [SerializeField] Color secondaryColor = Color.cyan;
+        [SerializeField] MeshMarkerResource? glow;
         CancellationTokenSource? tokenSource;
-        LineResource line;
-        bool dragBack;
         
         MeshMarkerResource Anchor => anchor.AssertNotNull(nameof(anchor));
         MeshMarkerResource Link => link.AssertNotNull(nameof(link));
         MeshMarkerResource Disc => disc.AssertNotNull(nameof(disc));
+        MeshMarkerResource Glow => glow.AssertNotNull(nameof(glow));
         XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         
         readonly NativeList<LineWithColor> lineBuffer = new();
+        Color color = new Color(0, 0.6f, 1f);
+        Color secondaryColor = Color.white;
 
         public event Action<Vector3>? Moved;
         
         public Color Color
         {
+            get => color;
             set
             {
                 color = value;
-                Disc.Color = value;
+                Disc.Color = value.WithValue(0.5f);
+                Link.Color = value.WithAlpha(0.8f);
+                Link.EmissiveColor = value;
+                Glow.Color = value.WithAlpha(0.8f);
+                Glow.EmissiveColor = value;
+            }
+        }
+        
+        public Color SecondaryColor
+        {
+            get => secondaryColor;
+            set
+            {
+                secondaryColor = value;
                 Anchor.Color = value;
             }
+        }    
+        
+        public Bounds? Bounds => Disc.Bounds;
+
+        public int Layer
+        {
+            set => gameObject.layer = value;
         }
 
         void Awake()
         {
+            Color = Color;
+            SecondaryColor = SecondaryColor;
+            Glow.Visible = false;
+
+            Draggable.StartDragging += () =>
+            {
+                Disc.EmissiveColor = Color;
+                Glow.Visible = true;
+            };
+            Draggable.Moved += () => OnDiscMoved(true);
             Draggable.EndDragging += () =>
             {
-                dragBack = true;
+                Disc.EmissiveColor = Color.black;
+                Glow.Visible = false;
+
                 Moved?.Invoke(Vector3.zero);
-            };
 
-            disc.StartDragging += () =>
-            {
-                line.Visible = true;
-                dragBack = false;
-            };
+                tokenSource?.Cancel();
+                tokenSource = new CancellationTokenSource();
 
-            line = ResourcePool.RentDisplay<LineResource>(transform);
-            line.Tint = Color.cyan.WithAlpha(0.8f);
-            line.ElementScale = linkWidth / 2;
-            line.Visible = false;
-            
-            lineBuffer.Add(new LineWithColor());
-        }
-
-        
-        protected override void Update()
-        {
-            base.Update();
-            
-            anchor.transform.localRotation = disc.Transform.localRotation; // copy billboard
-            
-            var discPosition = disc.Transform.localPosition;
-            float discDistance = discPosition.Magnitude();
-            if (discDistance < 0.005f)
-            {
-                if (dragBack)
+                var startPosition = Draggable.Transform.localPosition;
+                FAnimator.Spawn(tokenSource.Token, 0.1f, t =>
                 {
-                    disc.Transform.localPosition = Vector3.zero;
-                    dragBack = false;
-                    line.Visible = false;
-                }
+                    Draggable.Transform.localPosition = (1 - Mathf.Sqrt(t)) * startPosition;
+                    OnDiscMoved(false);
+                });
+            };
 
-                return;
-            }
+            Draggable.StartDragging += () => tokenSource?.Cancel();
+            Draggable.Damping = null;
+        }        
 
-            lineBuffer[0] = new LineWithColor(
-                Vector3.zero, Color.white.WithAlpha(0), 
-                disc.Transform.localPosition, Color.white);
-            line.Set(lineBuffer);
+        void OnDiscMoved(bool raiseOnMoved)
+        {
+            var discPosition = Draggable.Transform.localPosition;
+            float discDistance = discPosition.Magnitude();
+            
+            Link.Transform.localScale = new Vector3(0.2f, 0.2f, discDistance);
+            Link.Transform.localPosition = discPosition / 2;
+            Link.Transform.localRotation = Quaternion.LookRotation(discPosition);
 
-            if (dragBack)
-            {
-                disc.Transform.localPosition = 0.9f * discPosition;
-            }
-            else
+            if (raiseOnMoved)
             {
                 Moved?.Invoke(discPosition);
             }
         }
 
-        public override void Suspend()
+        public void Suspend()
         {
-            base.Suspend();
             Moved = null;
-            disc.Transform.localPosition = Vector3.zero;
-            dragBack = false;
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-            lineBuffer.Dispose();
-        }
-        
-        void IRecyclable.SplitForRecycle()
-        {
-            line.ReturnToPool();
+            Disc.Transform.localPosition = Vector3.zero;
+            OnDiscMoved(false);
+            tokenSource?.Cancel();
         }
     }
-    */
 }

@@ -24,45 +24,66 @@ namespace Iviz.Displays.ARDialogs
         [SerializeField] MeshMarkerResource? anchor;
         [SerializeField] MeshMarkerResource? link;
         [SerializeField] XRScreenDraggable? draggable;
-        [SerializeField] MeshMarkerResource? disc;
-        [SerializeField] Color color = Color.white;
-        [SerializeField] Color secondaryColor = Color.cyan;
+        [SerializeField] MeshMarkerResource? outerDisc;
+        [SerializeField] MeshMarkerResource? innerDisc;
+        [SerializeField] MeshMarkerResource? glow;
         CancellationTokenSource? tokenSource;
 
         MeshMarkerResource Anchor => anchor.AssertNotNull(nameof(anchor));
         MeshMarkerResource Link => link.AssertNotNull(nameof(link));
-        MeshMarkerResource Disc => disc.AssertNotNull(nameof(disc));
+        MeshMarkerResource OuterDisc => outerDisc.AssertNotNull(nameof(outerDisc));
+        MeshMarkerResource InnerDisc => innerDisc.AssertNotNull(nameof(innerDisc));
+        MeshMarkerResource Glow => glow.AssertNotNull(nameof(glow));
         XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         
         public event Action<Vector3>? Moved;
 
+        Color color = new Color(0, 0.6f, 1f);
+        Color secondaryColor = Color.white;
+
         public Color Color
         {
+            get => color;
             set
             {
                 color = value;
-                Disc.Color = value;
-                Anchor.Color = value;
+                OuterDisc.Color = value.WithValue(0.5f);
+                Link.Color = value.WithAlpha(0.8f);
+                Glow.Color = value.WithAlpha(0.8f);
+                Glow.EmissiveColor = value;
             }
         }
 
         public Color SecondaryColor
         {
+            get => secondaryColor;
             set
             {
                 secondaryColor = value;
-                Link.Color = value.WithAlpha(0.8f);
+                InnerDisc.Color = value;
+                Anchor.Color = value;
             }
         }
 
         void Awake()
         {
-            Color = color;
-            SecondaryColor = secondaryColor;
+            Color = Color;
+            SecondaryColor = SecondaryColor;
+            Glow.Visible = false;
 
+            Draggable.StartDragging += () =>
+            {
+                InnerDisc.EmissiveColor = SecondaryColor;
+                OuterDisc.EmissiveColor = Color;
+                Glow.Visible = true;
+            };
             Draggable.Moved += () => OnDiscMoved(true);
             Draggable.EndDragging += () =>
             {
+                InnerDisc.EmissiveColor = Color.black;
+                OuterDisc.EmissiveColor = Color.black;
+                Glow.Visible = false;
+
                 Moved?.Invoke(Vector3.zero);
 
                 tokenSource?.Cancel();
@@ -78,16 +99,16 @@ namespace Iviz.Displays.ARDialogs
 
             Draggable.StartDragging += () => tokenSource?.Cancel();
             Draggable.Damping = null;
-            //.cyan.WithAlpha(0.8f);
         }
 
         void OnDiscMoved(bool raiseOnMoved)
         {
             var discPosition = Draggable.Transform.localPosition;
             float discDistance = discPosition.Magnitude();
-            float angle = -Mathf.Atan2(discPosition.z, discPosition.x) * Mathf.Rad2Deg;
-            Link.Transform.localScale = new Vector3(discDistance, 0.002f, 0.2f);
-            Link.Transform.SetLocalPose(new Pose(discPosition / 2, Quaternion.AngleAxis(angle, Vector3.up)));
+
+            Link.Transform.localScale = new Vector3(0.2f, 0.002f, discDistance);
+            Link.Transform.localPosition = discPosition / 2;
+            Link.Transform.localRotation = Quaternion.LookRotation(discPosition);
 
             if (raiseOnMoved)
             {
@@ -95,22 +116,18 @@ namespace Iviz.Displays.ARDialogs
             }
         }
 
-        public Bounds? Bounds => Disc.Bounds;
+        public Bounds? Bounds => OuterDisc.Bounds;
 
         public int Layer
         {
-            set
-            {
-                Disc.Layer = value;
-                Link.Layer = value;
-                Anchor.Layer = value;
-            }
+            set => gameObject.layer = value;
         }
 
         public void Suspend()
         {
             Moved = null;
-            Disc.Transform.localPosition = Vector3.zero;
+            OuterDisc.Transform.localPosition = Vector3.zero;
+            OnDiscMoved(false);
             tokenSource?.Cancel();
         }
     }

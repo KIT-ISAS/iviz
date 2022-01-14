@@ -82,7 +82,7 @@ namespace Iviz.App
             RosLogger.LogInternal += OnLogInternal;
         }
 
-        public override void FinalizePanel()
+        public override void Dispose()
         {
             RosLogger.LogInternal -= OnLogInternal;
         }

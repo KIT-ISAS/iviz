@@ -1,10 +1,12 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Controllers.XR;
+using Iviz.Core;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -32,9 +34,15 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
-            controller.Dispose();
+            try
+            {
+                controller.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }             
         }
-
 
         public override void SetupPanel()
         {

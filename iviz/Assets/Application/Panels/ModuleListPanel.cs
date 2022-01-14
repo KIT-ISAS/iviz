@@ -72,6 +72,7 @@ namespace Iviz.App
         readonly HashSet<string> topicsWithModule = new();
         readonly HashSet<ImageDialogData> imageDatas = new();
         readonly TfPublisher tfPublisher = new();
+        readonly ConnectionManager connectionManager = new();
 
         int frameCounter;
         bool allGuiVisible = true;
@@ -82,6 +83,7 @@ namespace Iviz.App
         DialogManager? dialogs;
         IMenuDialogContents? menuDialog;
         CameraPanelData? cameraPanelData;
+
 
         UpperCanvasPanel UpperCanvas => upperCanvasPanel.AssertNotNull(nameof(upperCanvasPanel));
         BottomCanvasPanel BottomCanvas => bottomCanvasPanel.AssertNotNull(nameof(bottomCanvasPanel));
@@ -172,21 +174,39 @@ namespace Iviz.App
             ARController.ClearResources();
         }
 
-        void OnDestroy()
+        void OnApplicationQuit()
         {
-            instance = null;
+            Dispose();
+        }
+
+        void Dispose()
+        {
             GameThread.LateEverySecond -= UpdateFpsStats;
             GameThread.EveryFrame -= UpdateFpsCounter;
             GameThread.EveryTenthSecond -= UpdateCameraStats;
 
+            foreach (var moduleData in moduleDatas)
+            {
+                moduleData.Dispose();
+            }
+
             foreach (var dialogData in Dialogs.DialogDatas)
             {
-                dialogData.FinalizePanel();
+                dialogData.Dispose();
+            }
+
+            foreach (var imageData in imageDatas)
+            {
+                imageData.Dispose();
             }
 
             tfPublisher.Dispose();
             cameraPanelData?.Dispose();
+            connectionManager.Dispose();
+
             GuiWidgetListener.DisposeDefaultHandler();
+
+            instance = null;
         }
 
         static string MasterUriToString(Uri? uri) =>
