@@ -13,13 +13,19 @@ public static class TaskUtils
 {
     const string GenericExceptionFormat = "{0}: Exception thrown.{1}";
 
-    /// Same as Task.Run, but ensures that the async overload (with <see cref="Func{Task}"/>) is called
+    /// <summary>
+    /// Same as <see cref="Task.Run(Func{Task})"/>, but prevents the use of <see cref="ValueTask"/>
+    /// as this would call the overload <see cref="Task.Run(Action)"/> instead
+    /// </summary> 
     public static Task Run(Func<Task> task, CancellationToken token = default)
     {
         return Task.Run(task, token);
     }
 
-    /// Same as Task.Run, but ensures that the async overload (with <see cref="Func{Task}"/>) is called 
+    /// <summary>
+    /// Same as <see cref="Task.Run(Func{Task})"/>, but prevents the use of <see cref="ValueTask{T}"/>
+    /// as this would call the overload <see cref="Task.Run(Action)"/> instead
+    /// </summary> 
     public static Task<T> Run<T>(Func<Task<T>> task, CancellationToken token = default)
     {
         return Task.Run(task, token);
@@ -140,7 +146,7 @@ public static class TaskUtils
             }
         }
     }
-        
+
     /// <summary>
     /// Waits for the task and suppresses all exceptions, prints an error message instead.
     /// </summary>
@@ -192,7 +198,7 @@ public static class TaskUtils
             }
         }
     }
-        
+
     /// <summary>
     /// Waits for the task to finish. If an exception happens, unwraps the aggregated exception and rethrows it.
     /// </summary>
