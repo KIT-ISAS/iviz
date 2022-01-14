@@ -45,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosServiceType = "iviz_msgs/LaunchDialog";
         
         /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "106553f64c8ef760e23ed6e9e0dea9e7";
+        [Preserve] public const string RosMd5Sum = "5bdfa67e074336dd486c3d0782c7da45";
         
         public override string ToString() => Extensions.ToString(this);
     }

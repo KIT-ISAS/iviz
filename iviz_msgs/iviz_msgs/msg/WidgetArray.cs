@@ -5,27 +5,27 @@ using System.Runtime.Serialization;
 namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
-    public sealed class GuiArray : IDeserializable<GuiArray>, IMessage
+    public sealed class WidgetArray : IDeserializable<WidgetArray>, IMessage
     {
         [DataMember (Name = "dialogs")] public IvizMsgs.Dialog[] Dialogs;
         [DataMember (Name = "widgets")] public IvizMsgs.Widget[] Widgets;
     
         /// Constructor for empty message.
-        public GuiArray()
+        public WidgetArray()
         {
             Dialogs = System.Array.Empty<IvizMsgs.Dialog>();
             Widgets = System.Array.Empty<IvizMsgs.Widget>();
         }
         
         /// Explicit constructor.
-        public GuiArray(IvizMsgs.Dialog[] Dialogs, IvizMsgs.Widget[] Widgets)
+        public WidgetArray(IvizMsgs.Dialog[] Dialogs, IvizMsgs.Widget[] Widgets)
         {
             this.Dialogs = Dialogs;
             this.Widgets = Widgets;
         }
         
         /// Constructor with buffer.
-        public GuiArray(ref ReadBuffer b)
+        public WidgetArray(ref ReadBuffer b)
         {
             Dialogs = b.DeserializeArray<IvizMsgs.Dialog>();
             for (int i = 0; i < Dialogs.Length; i++)
@@ -39,9 +39,9 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
         
-        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GuiArray(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new WidgetArray(ref b);
         
-        public GuiArray RosDeserialize(ref ReadBuffer b) => new GuiArray(ref b);
+        public WidgetArray RosDeserialize(ref ReadBuffer b) => new WidgetArray(ref b);
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         public string RosType => RosMessageType;
     
         /// Full ROS name of this message.
-        [Preserve] public const string RosMessageType = "iviz_msgs/GuiArray";
+        [Preserve] public const string RosMessageType = "iviz_msgs/WidgetArray";
     
         /// MD5 hash of a compact representation of the message.
         [Preserve] public const string RosMd5Sum = "36009101b34a5d35990a50aa9e1bf68c";

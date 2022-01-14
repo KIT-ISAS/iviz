@@ -17,13 +17,13 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "corners")] public GeometryMsgs.Vector3[/*4*/] Corners;
         /// Camera intrinsic matrix, row major.
         [DataMember (Name = "camera_intrinsic")] public double[/*9*/] CameraIntrinsic;
-        /// Pose of the camera in relation to the frame in the header. Y points up, Z forward.
+        /// Pose of the camera in relation to the frame in the header. Y points down, Z forward.
         [DataMember (Name = "camera_pose")] public GeometryMsgs.Pose CameraPose;
         /// If true, the next two fields use a user-given size. If false, they were estimated using 3d data.
         [DataMember (Name = "has_reliable_pose")] public bool HasReliablePose;
         /// Marker size in mm.
         [DataMember (Name = "marker_size_in_mm")] public double MarkerSizeInMm;
-        /// Pose relative to the camera_pose field. Y points up, Z forward.
+        /// Pose relative to the camera_pose field. Y points down, Z forward.
         [DataMember (Name = "pose_relative_to_camera")] public GeometryMsgs.Pose PoseRelativeToCamera;
     
         /// Constructor for empty message.
@@ -113,19 +113,19 @@ namespace Iviz.Msgs.IvizMsgs
                 "10Ww7qGNYVgUyfvu7rvvzssxMN2+v3pVnN38df6GXtIv2XLeu745f3PxCpu/ZtmfrCp21MRHuhPGnjMf" +
                 "nDY1lbbin+RzQLe8DfGd9IqubxakTeAatsrT/W0cnLmhtHlWs+04uLHofO2fvuMyWHfy4fk/AHCGnRfA" +
                 "87ikXm+5pd56HbQ1fkEbHRq6k5jzbNVaFX57/uEFLFXHThXwCl9elzGo87hJ8yZ1CqvtgpzdYP3Ruq9j" +
-                "ubKeJyw45QgTN+2KQjOdAZIct0piomDjycrhSA7kJTGW03uEDveehn5Bf9PKuo1yVZ5lS2tbapQvAKPV" +
-                "suXJHfxdwpUbeBGRjBAbNpZWmtsKQIhFya87rvWaDXl9x7nYrFTrk9FIG3ZM7INGxlzhuhTgpKJKBTXz" +
-                "BgrcJ3aFIIC5ouui+9dxN+JKOl33IEkSbpE4WHMRbJGYmeiaTiZ2vuA0ZfIf3Lz8zp/s9ds/TqHCKoWf" +
-                "RJ0d0NugTAWXhNyUMCMxUKPrBuS2vIbwfFBdz4m3KH2fw/C20Z7wrRkSVW07Sj0qSbW0XTcYXSrpFN3x" +
-                "nj0swaeiXrmgy6FVDvetq7SR61E/go6v588Dm5Lp8uIUd4znchA24Umb0rGK9by8oGwAgyfPxCA7uN3Y" +
-                "46ntZudgXwUJlre9Yy9xKn8KHz+n5HJggxyGF6jrMO4VePVHUICEwL0tGzpE5FdjaGzS91q5qFoBLsEA" +
-                "UJ+I0ZOjL5BNhDbK2Ak+Ie58/B9YM+NKTscNatZK9n6oQSAu9s6udYWryzFJrdVsArV66ZQbM7FKLrOD" +
-                "32OPBilfrAieyntb6tglMlqm0RarUejqR6nxwRE4ScuxlIqlNxSt45koZ+UYmfSqRL/j6mUsqzUQRccK" +
-                "GUN/syUMK+1gigmVAxXzAOLGeNCBKsuejA3A6NQnQDI4FmvV9wCD0J0yfjfdYHLIeZ1j+DYYOPGWcBQV" +
-                "HXsAo9XpWlfJEo662VjRfXKYTKtn4LhtU8zJGQoGEGdDNDiKg2y0A20kISzcfetZWvIcV5RIsHYRp2GC" +
-                "+HpEoRFAi/eqlinmA5oeo2WafNt5Nc6ru0cptUxHhHu2K1WiCv8vcTju1XkhA0W2q/vz+C9IaAGyTk+2" +
-                "UEPKd7qQXQ8QtDMRd3fvcbQcQ5mUjLYPCvTHxpzjRy4qDf/9dL9RnkcJf0fdQ924x+d+8PL2ece7NME3" +
-                "BTetNln2L5pGodeVCQAA";
+                "ubKeJyw45QgTN+2KQjOdAZIct0piomDjycrhSA7kJTGW03uEDveeKrsxC/qbVtZtlKvyLFta21KjfAEg" +
+                "rZYtTw7h8RLO3MCLiGWE2rCxtNLcVp4GRKPk1x3Xes2GvL7jXGxWqvXJaKQNOyb2QSNnrnBdSnBSUaWC" +
+                "mpkDCe4Tu0IQwF3RddH967gbcSWhrnuQJgm3SCysuQi2SNxMhE0nEz9fsJoy+U92Xn7nT/b67R+nUGKV" +
+                "EkjCzg7obVCmgktCdkq4kRio0XUDelteQ3w+qK7nxFyUv89heNtoT/jWDJmqth2lIpUkW9quG4wulXSL" +
+                "7njPHpZgVFGvXNDl0CqH+9ZV2sj1qCFBx9fz54FNyXR5cYo7xnM5CJ/wpE3pWMWKXl5QNoDDk2dikB3c" +
+                "buzx1Hqzc/CvggTL296xlziVP4WPn1NyObBBDsML9HUY9wq8+iNoQELg3pYNHSLyqzE0Nml8rVzUrQCX" +
+                "YACoT8ToydEXyCZCG2XsBJ8Qdz7+D6yZcSWn4wY1ayV7P9QgEBd7Z9e6wtXlmMTWajaBWr10yo2ZWCWX" +
+                "2cHvsU+DlC9WBE/lvS117BMZL9N4i9UodPWj1PjgGJyk5VhKxdIditbxTJSzcoxMelWi43H1MpbVGoii" +
+                "Y4WMob/ZEoaVdjDFlMqBiokAcWNA6ICOY0/GBmB06hMgGRyLtep7gEHoThm/m3AwOeS8zjGAG4yceEs4" +
+                "ioqOPYDx6nStq2QJR91srOg+Ocym1TNw3LYp5uQMBQOIsyEaHMVRNtqBNpIQFu6+9SwteY4rSiRYu4jz" +
+                "MEF8PaTQCKDFe1XLHPMBTY/RMs2+7bwa59Xdo5Ra5iPCPduVKlGF/5g4HvfqvJCBItvV/Xn8JyS0AFmn" +
+                "J1uoIeU7XciuBwjamYi7u/c4Wo6hTEpG2wcF+mNjzvEjF5XG/3663yjPo4S/o+6hbtzjcz94efu8412a" +
+                "4JuCm1abLPsXXcfcmJkJAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }
