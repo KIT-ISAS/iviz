@@ -200,6 +200,16 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Pose InverseMultiply(this in Pose p, in Pose o)
+        {
+            Quaternion inv = p.rotation.Inverse();
+            Pose q;
+            q.rotation = inv * o.rotation;
+            q.position = inv * (o.position - p.position);
+            return q;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Quaternion Inverse(this in Quaternion p)
         {
             Quaternion q;

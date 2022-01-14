@@ -23,7 +23,7 @@ namespace Iviz.Displays.Highlighters
 
         public TfFrameHighlighter(TfFrame frame)
         {
-            node = FrameNode.Instantiate("Frame Highlighter");
+            node = new FrameNode("Frame Highlighter", frame);
 
             axisResource = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
             axisResource.ShadowsEnabled = false;
@@ -39,10 +39,7 @@ namespace Iviz.Displays.Highlighters
             if (!frame.IsAlive) // ?
             {
                 node.Visible = false;
-                return;
             }
-
-            node.AttachTo(frame);
         }
 
         public void Update(float t)

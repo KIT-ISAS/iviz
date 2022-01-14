@@ -376,13 +376,13 @@ namespace Iviz.App
 
         void OnToggleARClicked()
         {
-            if (ARController.Instance == null)
+            if (ARController.Instance is not { } arController)
             {
                 CreateModule(ModuleType.AugmentedReality);
             }
             else
             {
-                ARController.Instance.Visible = !ARController.Instance.Visible;
+                arController.Visible = !arController.Visible;
             }
         }
 
@@ -770,7 +770,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Error($"Error clearing cache", e);
+                RosLogger.Error($"{this}: Error clearing cache", e);
             }
         }
 
@@ -786,7 +786,7 @@ namespace Iviz.App
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"Error deleting file '{file}'", e);
+                    RosLogger.Error($"ModuleListPanel: Error deleting saved file '{file}'", e);
                 }
             }
         }
@@ -1040,6 +1040,8 @@ namespace Iviz.App
         {
             frameCounter++;
         }
+
+        public override string ToString() => "[ModuleListPanel]";
 
         public static string CreateButtonTextForModule(ModuleData moduleData)
         {

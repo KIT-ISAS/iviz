@@ -115,7 +115,7 @@ namespace Iviz.App
 
         public override string ToString()
         {
-            return $"[{ModuleType} Topic='{TfListener.DefaultTopic}' guid={Configuration.Id}]";
+            return $"[{ModuleType} Topic='{TfListener.DefaultTopic}' id='{Configuration.Id}']";
         }
     }
 }

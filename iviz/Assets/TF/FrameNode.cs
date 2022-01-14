@@ -14,29 +14,32 @@ namespace Iviz.Controllers.TF
     /// </summary>
     public class FrameNode
     {
-        bool disposed;
-        TfFrame? parent;
-
         readonly GameObject gameObject;
+        TfFrame? parent;
+        bool disposed;
+
         public Transform Transform { get; }
+
+        public string? ParentId => parent?.Id;
 
         public virtual TfFrame? Parent
         {
             get => parent;
-            set
+            set => SetParent(value);
+        }
+
+        void SetParent(TfFrame? value)
+        {
+            if (parent == value || !IsAlive)
             {
-                //SetParent(value, true);
-                if (parent == value || !IsAlive)
-                {
-                    return;
-                }
-
-                parent?.RemoveListener(this);
-                parent = value;
-                parent?.AddListener(this);
-
-                Transform.SetParentLocal(value == null ? TfListener.OriginFrame.Transform : value.Transform);
+                return;
             }
+
+            parent?.RemoveListener(this);
+            parent = value;
+            parent?.AddListener(this);
+
+            Transform.SetParentLocal(value != null ? value.Transform : TfListener.DefaultFrame.Transform);            
         }
 
         public virtual bool Visible
@@ -44,8 +47,6 @@ namespace Iviz.Controllers.TF
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
-
-        public string? ParentId => parent?.Id;
 
         public string Name
         {
@@ -57,6 +58,12 @@ namespace Iviz.Controllers.TF
         {
             gameObject = new GameObject();
             Transform = gameObject.transform;
+        }
+
+        public FrameNode(string name, TfFrame? parent = null) : this()
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name));
+            SetParent(parent is { IsAlive: true } ? parent : TfListener.DefaultFrame);
         }
 
         public void AttachTo(in Msgs.StdMsgs.Header header)
@@ -73,21 +80,9 @@ namespace Iviz.Controllers.TF
 
             if (Parent == null || parentId != Parent.Id)
             {
-                Parent = string.IsNullOrEmpty(parentId)
+                Parent = parentId.Length == 0
                     ? TfListener.DefaultFrame
                     : TfListener.GetOrCreateFrame(parentId);
-            }
-        }
-
-        public void AttachTo(TfFrame frame)
-        {
-            if (!frame.IsAlive)
-            {
-                Parent = TfListener.DefaultFrame;
-            }
-            else if (Parent == null || frame.Id != Parent.Id)
-            {
-                Parent = frame;
             }
         }
 
@@ -108,20 +103,13 @@ namespace Iviz.Controllers.TF
             UnityEngine.Object.Destroy(gameObject);
             disposed = true;
         }
-
-        sealed class SimpleFrameNode : FrameNode
-        {
-        }
+        
 
         public bool IsAlive => !disposed;
 
         public static FrameNode Instantiate(string name)
         {
-            return new SimpleFrameNode
-            {
-                Name = name ?? throw new ArgumentNullException(nameof(name)),
-                Parent = TfListener.DefaultFrame
-            };
+            return new FrameNode(name);
         }
     }
 }

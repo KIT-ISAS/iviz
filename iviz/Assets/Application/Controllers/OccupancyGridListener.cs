@@ -211,8 +211,8 @@ namespace Iviz.Controllers
 
         public OccupancyGridListener(OccupancyGridConfiguration? config, string topic)
         {
-            cubeNode = FrameNode.Instantiate("OccupancyGrid Cube Node");
-            textureNode = FrameNode.Instantiate("OccupancyGrid Texture Node");
+            cubeNode = new FrameNode("OccupancyGrid Cube Node");
+            textureNode = new FrameNode("OccupancyGrid Texture Node");
 
             Config = config ?? new OccupancyGridConfiguration
             {

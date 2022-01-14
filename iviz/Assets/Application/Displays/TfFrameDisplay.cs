@@ -84,6 +84,7 @@ namespace Iviz.Displays
             get => visible;
             set
             {
+                // visible in FrameNode hides children too, here we only hide the frame display 
                 visible = value;
                 axis.Visible = value && !forceInvisible;
                 LabelVisible = LabelVisible;

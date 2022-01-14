@@ -275,7 +275,7 @@ namespace Iviz.Controllers
             depthImageTexture = new ImageTexture();
             colorImageTexture = new ImageTexture();
 
-            node = FrameNode.Instantiate("DepthCloud");
+            node = new FrameNode("DepthCloud");
             node.Transform.localRotation = new Quaternion(0, 0.7071f, 0.7071f, 0);
 
             projector = ResourcePool.RentDisplay<DepthCloudResource>(node.Transform);

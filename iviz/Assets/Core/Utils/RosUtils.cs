@@ -28,9 +28,6 @@ namespace Iviz.Core
         public static Pose FromCameraFrame(this in Pose pose) =>
             new(pose.Position, pose.Orientation * XFrontToZFront.Inverse);
 
-        public static Transform ToCameraFrame(this in Transform pose) =>
-            new(pose.Translation, pose.Rotation * XFrontToZFront);
-
         //----
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -173,6 +170,7 @@ namespace Iviz.Core
             q.w = w;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Ros2Unity(this in Point p, out Vector3 q)
         {
             q.x = (float)-p.Y;
@@ -180,6 +178,7 @@ namespace Iviz.Core
             q.z = (float)p.X;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void Ros2Unity(this in Msgs.GeometryMsgs.Vector3 p, out Vector3 q)
         {
             q.x = (float)-p.Y;
@@ -187,6 +186,7 @@ namespace Iviz.Core
             q.z = (float)p.X;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color ToUnityColor(this in ColorRGBA c)
         {
             Color d;
@@ -197,6 +197,7 @@ namespace Iviz.Core
             return d;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ColorRGBA Sanitize(this in ColorRGBA c)
         {
             ColorRGBA d;
@@ -210,7 +211,6 @@ namespace Iviz.Core
             static float SanitizeChannel(float f) => float.IsFinite(f) ? Math.Clamp(f, 0, 1) : 0;
         }
 
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color32 ToUnityColor32(this in ColorRGBA c)
         {
@@ -223,6 +223,7 @@ namespace Iviz.Core
             );
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ColorRGBA ToRos(this in Color p) => new(p.r, p.g, p.b, p.a);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -302,6 +303,7 @@ namespace Iviz.Core
             return q;
         }
         
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Unity2Ros(this in UnityEngine.Pose p, out Transform q)
         {
             p.position.Unity2Ros(out q.Translation);
@@ -342,9 +344,11 @@ namespace Iviz.Core
         public static bool IsInvalid(this in Point32 v) =>
             v.X.IsInvalid() || v.Y.IsInvalid() || v.Z.IsInvalid();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool IsInvalid(this in Quaternion v) =>
             v.X.IsInvalid() || v.Y.IsInvalid() || v.Z.IsInvalid() || v.W.IsInvalid();
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this in UnityEngine.Quaternion v) =>
             v.x.IsInvalid() || v.y.IsInvalid() || v.z.IsInvalid() || v.w.IsInvalid();
 

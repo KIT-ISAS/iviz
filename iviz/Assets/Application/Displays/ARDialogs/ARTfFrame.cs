@@ -60,7 +60,7 @@ namespace Iviz.App.ARDialogs
             {
                 if (node == null)
                 {
-                    node = FrameNode.Instantiate("ARTfFrame Node");
+                    node = new FrameNode("ARTfFrame Node");
                     Transform.parent = node.Transform;
                 }
 

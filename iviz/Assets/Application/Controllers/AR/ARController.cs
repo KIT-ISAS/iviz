@@ -370,22 +370,24 @@ namespace Iviz.Controllers
         void SetWorldAngle(float angle, RootMover mover)
         {
             WorldAngle = angle;
-            Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
-            UpdateWorldPose(new Pose(WorldPosition, rotation), mover);
+            var rotation = Quaternion.AngleAxis(angle, Vector3.up);
+            UpdateWorldPose(WorldPose.WithRotation(rotation), mover);
         }
 
         /// <summary>
         /// Compensates the offset between AR View and Virtual View when AR is enabled. 
         /// </summary>
-        /// <param name="unityPose">The pose to compensate</param>
         public static Pose ARPoseToUnity(in Pose unityPose)
         {
-            if (Instance is null || Instance.Visible)
+            // if AR is visible, or completely disabled, then we do nothing
+            if (Instance is not { } instance || instance.Visible)
             {
                 return unityPose;
             }
 
-            return Instance.WorldPose.Inverse().Multiply(unityPose);
+            // but when AR is enabled and we are in virtual view, we compensate for the fact that the camera
+            // is displaced depending on where we put the AR origin during setup.
+            return instance.WorldPose.InverseMultiply(unityPose);
         }
 
         protected virtual void Update()
@@ -421,14 +423,16 @@ namespace Iviz.Controllers
             foreach (var marker in array)
             {
                 var key = ((ARMarkerType)marker.Type, marker.Code);
-                if (activeMarkerHighlighters.TryGetValue(key, out float existingExpirationTime) 
+                if (activeMarkerHighlighters.TryGetValue(key, out float existingExpirationTime)
                     && Time.time < existingExpirationTime)
                 {
                     continue;
                 }
 
-                ARMarkerHighlighter.Highlight(marker, 5);
-                float expirationTime = Time.time + 5;
+                ARMarkerHighlighter.Highlight(marker);
+
+                const float markerLifetimeInSec = 5;
+                float expirationTime = Time.time + markerLifetimeInSec;
                 activeMarkerHighlighters[key] = expirationTime;
             }
         }

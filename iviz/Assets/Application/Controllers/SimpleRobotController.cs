@@ -249,7 +249,7 @@ namespace Iviz.Controllers
 
         public SimpleRobotController(RobotConfiguration? config)
         {
-            node = FrameNode.Instantiate("SimpleRobotNode");
+            node = new FrameNode("SimpleRobotNode");
             Config = config ?? new RobotConfiguration();
         }
 

@@ -173,12 +173,8 @@ namespace Iviz.Controllers
 
         public MarkerObject(TfFrame parent, in (string Ns, int Id) id)
         {
-            node = FrameNode.Instantiate("[MarkerObject]");
-            node.Parent = parent;
-
             this.id = id;
-            node.Name = $"{id.Ns}/{id.Id.ToString()}";
-
+            node = new FrameNode($"{id.Ns}/{id.Id.ToString()}", parent);
             UniqueNodeName = (++globalIdCounter).ToString();
         }
 

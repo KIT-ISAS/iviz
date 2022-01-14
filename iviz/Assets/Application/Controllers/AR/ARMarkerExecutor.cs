@@ -147,7 +147,7 @@ namespace Iviz.Controllers
                         : RentFrame();
 
                     var unityPoseToFixed = TfListener.RelativeToFixedFrame(unityPoseAbsolute);
-                    
+
                     frameDisplay.ParentFrame = TfListener.FixedFrameId;
                     frameDisplay.TargetPose = unityPoseToFixed;
 
@@ -263,7 +263,7 @@ namespace Iviz.Controllers
             float sizeInM = sizeInMm / 1000f;
             var intrinsic = new Intrinsic(marker.CameraIntrinsic);
             var corners = marker.Corners;
-            ReadOnlySpan<Vector2f> imageCorners = stackalloc Vector2f[]
+            ReadOnlySpan<Vector2f> imageCorners = stackalloc[]
             {
                 ToVector2f(corners[0]),
                 ToVector2f(corners[1]),

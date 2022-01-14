@@ -56,8 +56,7 @@ namespace Iviz.App
         Text PublishingText => publishingText.AssertNotNull(nameof(publishingText));
         RectTransform ContentTransform => contentTransform.AssertNotNull(nameof(contentTransform));
 
-        FrameNode PlaceHolder =>
-            placeHolder != null ? placeHolder : (placeHolder = FrameNode.Instantiate("TFLog Placeholder"));
+        FrameNode PlaceHolder => placeHolder ??= new FrameNode("TFLog Placeholder");
 
         readonly List<TfNode> nodes = new();
 

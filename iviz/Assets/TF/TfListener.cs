@@ -36,7 +36,7 @@ namespace Iviz.Controllers.TF
         readonly TfConfiguration config = new();
         readonly Func<string, TfFrame>? frameCreator;
 
-        readonly ConcurrentQueue<(TransformStamped[] frame, string? callerId, bool isStatic)> incomingMessages = new();
+        readonly ConcurrentQueue<(TransformStamped[] frame, bool isStatic)> incomingMessages = new();
         readonly ConcurrentBag<TransformStamped> outgoingMessages = new();
 
         readonly Dictionary<string, TfFrame> frames = new();
@@ -227,10 +227,10 @@ namespace Iviz.Controllers.TF
                 // hierarchy:  unityFrame ("TF") -> rootFrame -> originFrame -> fixedFrame
                 // unityFrame: container for all TF stuff. has no parents. 
                 // rootFrame:  managed by the AR system. any movements in the AR origin are instead reversed and applied to rootFrame.
-                //             the root frame may have a uniform scale that is not 1. invisible. 
+                //             the root frame may have a uniform scale that is not 1. 
                 // originFrame: managed by the fixed frame. originFrame is set to the inverse of the fixedFrame pose,
                 //              to ensure that fixedFrame is always on the unity origin (excluding AR changes in root).
-                //              the transformation also applies FlipZ if active. invisible.
+                //              the transformation also applies FlipZ if active.
                 // fixedFrame: whatever TF frame the user has selected as fixed.
                 // mapFrame:   the default fixed frame. cannot be deleted, to ensure that there is always at least
                 //             one visible frame.
@@ -246,18 +246,14 @@ namespace Iviz.Controllers.TF
                 originFrame.Parent = rootFrame;
                 originFrame.ForceInvisible();
 
-                keepAllListenerNode = FrameNode.Instantiate("[TFNode]");
-                keepAllListenerNode.Visible = false;
-                
-                staticListenerNode = FrameNode.Instantiate("[TFStatic]");
-                staticListenerNode.Visible = false;
-                
-                fixedFrameListenerNode = FrameNode.Instantiate("[TFFixedFrame]");
-                fixedFrameListenerNode.Visible = false;
-
-                var defaultListener = FrameNode.Instantiate("[.]");
-                defaultListener.Visible = false;
-                defaultListener.Transform.parent = unityFrame.transform;
+                keepAllListenerNode = new FrameNode("[TFNode]") { Visible = false };
+                staticListenerNode = new FrameNode("[TFStatic]") { Visible = false };
+                fixedFrameListenerNode = new FrameNode("[TFFixedFrame]") { Visible = false };
+                var defaultListener = new FrameNode("[.]")
+                {
+                    Visible = false,
+                    Transform = { parent = unityFrame.transform }
+                };
 
                 rootFrame.AddListener(defaultListener);
                 originFrame.AddListener(defaultListener);
@@ -287,7 +283,7 @@ namespace Iviz.Controllers.TF
         }
 
         public int NumFrames => frames.Count;
-        
+
         static bool IsValid(in Msgs.GeometryMsgs.Vector3 v)
         {
             const int maxPoseMagnitude = 10000;
@@ -303,7 +299,7 @@ namespace Iviz.Controllers.TF
 
             while (incomingMessages.TryDequeue(out var value))
             {
-                var (transforms, callerId, isStatic) = value;
+                var (transforms, isStatic) = value;
                 foreach (var (parentIdUnchecked, childIdUnchecked, rosTransform, _) in transforms)
                 {
                     if (childIdUnchecked.Length == 0
@@ -347,7 +343,7 @@ namespace Iviz.Controllers.TF
                     if (parentIdUnchecked.Length == 0)
                     {
                         child.TrySetParent(DefaultFrame);
-                        child.SetLocalPose(unityPose, callerId);
+                        child.SetLocalPose(unityPose);
                         continue;
                     }
 
@@ -357,14 +353,14 @@ namespace Iviz.Controllers.TF
 
                     if (child.Parent is not null && parentId == child.Parent.Id)
                     {
-                        child.SetLocalPose(unityPose, callerId);
+                        child.SetLocalPose(unityPose);
                     }
                     else
                     {
                         var parent = GetOrCreateFrame(parentId);
                         if (child.TrySetParent(parent))
                         {
-                            child.SetLocalPose(unityPose, callerId);
+                            child.SetLocalPose(unityPose);
                         }
                     }
                 }
@@ -453,7 +449,7 @@ namespace Iviz.Controllers.TF
                 throw new ArgumentNullException(nameof(frameId));
             }
 
-            if (frameId is "")
+            if (frameId.Length == 0)
             {
                 throw new ArgumentException("Cannot create frame with empty name", nameof(frameId));
             }
@@ -504,25 +500,25 @@ namespace Iviz.Controllers.TF
             return frames.TryGetValue(id, out t);
         }
 
-        bool HandlerNonStatic(TFMessage msg, IRosReceiver? receiver)
+        bool HandlerNonStatic(TFMessage msg, IRosReceiver? _)
         {
             if (incomingMessages.Count > MaxQueueSize)
             {
                 return false;
             }
 
-            incomingMessages.Enqueue((msg.Transforms, receiver?.RemoteId, false));
+            incomingMessages.Enqueue((msg.Transforms, false));
             return true;
         }
 
-        bool HandlerStatic(TFMessage msg, IRosReceiver? receiver)
+        bool HandlerStatic(TFMessage msg, IRosReceiver? _)
         {
             if (incomingMessages.Count > MaxQueueSize)
             {
                 return false;
             }
 
-            incomingMessages.Enqueue((msg.Transforms, receiver?.RemoteId, true));
+            incomingMessages.Enqueue((msg.Transforms, true));
             return true;
         }
 
@@ -636,13 +632,13 @@ namespace Iviz.Controllers.TF
                 return;
             }
 
-            TransformStamped transformStamped;
-            transformStamped.Header.Seq = tfSeq++;
-            transformStamped.Header.Stamp = GameThread.TimeNow;
-            transformStamped.Header.FrameId = parentFrame;
-            transformStamped.ChildFrameId = ResolveFrameId(childFrame);
-            localPose.Unity2Ros(out transformStamped.Transform);
-            instance?.outgoingMessages.Add(transformStamped);
+            TransformStamped t;
+            t.Header.Seq = tfSeq++;
+            t.Header.Stamp = GameThread.TimeNow;
+            t.Header.FrameId = parentFrame;
+            t.ChildFrameId = ResolveFrameId(childFrame);
+            localPose.Unity2Ros(out t.Transform);
+            instance?.outgoingMessages.Add(t);
         }
 
         void DoPublish()
@@ -665,7 +661,7 @@ namespace Iviz.Controllers.TF
             }
             else
             {
-                incomingMessages.Enqueue((messages, null, false));
+                incomingMessages.Enqueue((messages, false));
             }
         }
 

@@ -156,7 +156,7 @@ namespace Iviz.Controllers
             internal TfPublishedFrame(string id, bool isInternal)
             {
                 this.id = id;
-                frameNode = FrameNode.Instantiate("[Publisher]");
+                frameNode = new FrameNode("[Publisher]");
                 frameNode.AttachTo(id);
                 TfFrame = frameNode.Parent ??
                           throw new NullReferenceException("Failed to set origin parent"); // shouldn't happen

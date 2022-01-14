@@ -1,10 +1,8 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using AOT;
 using Iviz.Common;
 using Iviz.Core;
@@ -12,6 +10,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;
+using Newtonsoft.Json;
 
 namespace Iviz.MarkerDetection
 {
@@ -245,32 +244,11 @@ namespace Iviz.MarkerDetection
                 throw new ArgumentException("Input and output lengths do not match");
             }
 
-            //using var inputFloats = new Rent<float>(input.Count * 2);
-            //using var outputFloats = new Rent<float>(output.Count * 3);
-            //using var cameraFloats = new Rent<float>(6);
-            //using var resultFloats = new Rent<float>(6);
-
             var inputFloats = MemoryMarshal.Cast<Vector2f, float>(input);
             var outputFloats = MemoryMarshal.Cast<Vector3f, float>(output);
 
             Span<float> cameraFloats = stackalloc float[6];
             Span<float> resultFloats = stackalloc float[6];
-
-            /*
-            int o = 0;
-            foreach (var v in input)
-            {
-                (inputFloats[o], inputFloats[o + 1]) = v;
-                o += 2;
-            }
-
-            o = 0;
-            foreach (var v in output)
-            {
-                (outputFloats[o], outputFloats[o + 1], outputFloats[o + 2]) = v;
-                o += 3;
-            }
-            */
 
             intrinsic.CopyTo(cameraFloats);
 
@@ -283,14 +261,14 @@ namespace Iviz.MarkerDetection
             }
 
             var angleAxis = new Vector3(resultFloats[0], resultFloats[1], resultFloats[2]);
-            var translation = new Vector3(resultFloats[3], resultFloats[4], resultFloats[5]);
+            var translation = new Point(resultFloats[3], resultFloats[4], resultFloats[5]);
 
             double angle = angleAxis.Norm;
             var rotation = angle == 0
                 ? Quaternion.Identity
                 : Quaternion.AngleAxis(angle, angleAxis / angle);
 
-            return (translation, rotation);
+            return new Pose(translation, rotation);
         }
 
         void ReleaseUnmanagedResources()
@@ -495,29 +473,25 @@ namespace Iviz.MarkerDetection
         ARMarkerType Type { get; }
     }
 
+    [DataContract]
     public sealed class ArucoMarkerCorners : IMarkerCorners
     {
-        readonly int id;
+        [DataMember] public ARMarkerType Type => ARMarkerType.Aruco;
+        [DataMember] public string Code { get; }
+        [DataMember] public Vector2f[] Corners { get; }
 
-        public ARMarkerType Type => ARMarkerType.Aruco;
-        public string Code => id.ToString();
-        public Vector2f[] Corners { get; }
-
-        internal ArucoMarkerCorners(int id, Vector2f[] corners) => (this.id, Corners) = (id, corners);
-
-        public override string ToString() => "{\"Id\":" + id + ", \"Corners\":" +
-                                             string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
+        internal ArucoMarkerCorners(int id, Vector2f[] corners) => (Code, Corners) = (id.ToString(), corners);
+        public override string ToString() => JsonConvert.SerializeObject(this, Formatting.None);
     }
 
+    [DataContract]
     public sealed class QrMarkerCorners : IMarkerCorners
     {
-        public ARMarkerType Type => ARMarkerType.QrCode;
-        public string Code { get; }
-        public Vector2f[] Corners { get; }
+        [DataMember] public ARMarkerType Type => ARMarkerType.QrCode;
+        [DataMember] public string Code { get; }
+        [DataMember] public Vector2f[] Corners { get; }
 
         internal QrMarkerCorners(string code, Vector2f[] corners) => (Code, Corners) = (code, corners);
-
-        public override string ToString() => "{\"Code\":" + Code + ", \"Corners\":" +
-                                             string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
+        public override string ToString() => JsonConvert.SerializeObject(this, Formatting.None);
     }
 }

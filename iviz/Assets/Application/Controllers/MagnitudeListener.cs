@@ -206,18 +206,16 @@ namespace Iviz.Controllers
 
         public MagnitudeListener(MagnitudeConfiguration? config, string topic, string type)
         {
-            frameNode = FrameNode.Instantiate("DisplayNode");
-
-            trail = ResourcePool.RentDisplay<TrailResource>();
-            trail.DataSource = () => frameNode.Transform.position;
-
             Config = config ?? new MagnitudeConfiguration
             {
                 Topic = topic,
                 Type = type
             };
 
-            frameNode.Name = $"[{Config.Topic}]";
+            frameNode = new FrameNode($"[{Config.Topic}]");
+            
+            trail = ResourcePool.RentDisplay<TrailResource>();
+            trail.DataSource = () => frameNode.Transform.position;
 
             var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
             Listener = Config.Type switch
@@ -266,7 +264,7 @@ namespace Iviz.Controllers
                 case Odometry.RosMessageType:
                     RentFrame(frameNode, out axisFrame);
                     RentSphere(frameNode, Color, out sphere);
-                    childNode = FrameNode.Instantiate($"[{Config.Topic} | Child]");
+                    childNode = new FrameNode($"[{Config.Topic} | Child]");
                     RentArrow(childNode, Color, out arrow);
                     RentAngleAxis(childNode, out angleAxis);
                     trail.DataSource = TrailDataSource;

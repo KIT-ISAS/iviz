@@ -52,11 +52,11 @@ namespace Iviz.App
 
                 active = value;
 
+                var parent = (RectTransform)Transform.parent;
                 FAnimator.Spawn(tokenSource.Token, 0.15f, t =>
                 {
                     float scaledT = Mathf.Sqrt(t);
                     float x = Mathf.Lerp(shiftLeft, shiftRight, active ? scaledT : (1 - scaledT));
-                    var parent = (RectTransform)Transform.parent;
                     parent.anchoredPosition = parent.anchoredPosition.WithX(x);
                 });
             }

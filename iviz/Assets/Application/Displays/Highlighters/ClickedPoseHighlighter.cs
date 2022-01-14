@@ -27,7 +27,7 @@ namespace Iviz.Displays.Highlighters
 
             Duration = duration;
             
-            node = FrameNode.Instantiate("[Clicked Pose Highlighter]");
+            node = new FrameNode("[Clicked Pose Highlighter]");
             node.Transform.SetPose(unityPose);
 
             reticle = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Reticle, node.Transform);

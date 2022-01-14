@@ -82,7 +82,7 @@ namespace Iviz.App
 
         public override string ToString()
         {
-            return $"[{ModuleType} guid={Configuration.Id}]";
+            return $"[{ModuleType} id='{Configuration.Id}']";
         }
 
         public static ModuleData CreateFromResource(ModuleDataConstructor c)

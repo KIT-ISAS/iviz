@@ -124,8 +124,7 @@ namespace Iviz.Controllers
             this.listener = listener;
             this.rosId = rosId;
 
-            node = FrameNode.Instantiate($"[InteractiveMarkerObject '{rosId}']");
-            node.Parent = parent;
+            node = new FrameNode($"[InteractiveMarkerObject '{rosId}']", parent);
 
             ControlNode = new GameObject("[ControlNode]").transform;
             ControlNode.SetParentLocal(node.Transform);
@@ -209,8 +208,7 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            listener.OnControlMouseEvent(rosId, rosControlId,
-                node.Parent != null ? node.Parent.Id : null, ControlNode.AsLocalPose(), point, type);
+            listener.OnControlMouseEvent(rosId, rosControlId, node.Parent?.Id, ControlNode.AsLocalPose(), point, type);
         }
 
         internal void OnMoved(string rosControlId)
@@ -220,8 +218,7 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            listener.OnControlMoved(rosId, rosControlId,
-                node.Parent != null ? node.Parent.Id : null, ControlNode.AsLocalPose());
+            listener.OnControlMoved(rosId, rosControlId, node.Parent?.Id, ControlNode.AsLocalPose());
         }
 
         void OnMenuClick(uint entryId)
@@ -231,8 +228,7 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            listener.OnControlMenuSelect(rosId,
-                node.Parent != null ? node.Parent.Id : null, entryId, ControlNode.AsLocalPose());
+            listener.OnControlMenuSelect(rosId, node.Parent?.Id, entryId, ControlNode.AsLocalPose());
         }
 
         public void Dispose()

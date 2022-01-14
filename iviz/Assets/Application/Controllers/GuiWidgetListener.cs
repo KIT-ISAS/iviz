@@ -487,7 +487,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             public GuiObject(Widget msg, ResourceKey<GameObject> resourceKey)
             {
                 this.resourceKey = resourceKey;
-                node = FrameNode.Instantiate("Widget Node");
+                node = new FrameNode("Widget Node");
                 node.AttachTo(msg.Header.FrameId);
                 Id = msg.Id;
 

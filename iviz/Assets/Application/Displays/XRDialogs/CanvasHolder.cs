@@ -211,7 +211,7 @@ namespace Iviz.Displays
             const float maxZ = 2.0f;
             const float angleThreshold = 15; 
 
-            var (currentPositionLocal, currentRotationLocal) = mainCameraPose.Inverse().Multiply(currentPose);
+            var (currentPositionLocal, currentRotationLocal) = mainCameraPose.InverseMultiply(currentPose);
             var targetPositionLocal = Clamp(currentPositionLocal);
 
             float currentAngleLocal = UnityUtils.RegularizeAngle(currentRotationLocal.eulerAngles.y);

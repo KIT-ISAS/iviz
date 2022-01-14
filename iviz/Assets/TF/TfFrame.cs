@@ -10,30 +10,19 @@ namespace Iviz.Controllers.TF
     public abstract class TfFrame : FrameNode
     {
         readonly SortedDictionary<string, TfFrame> children = new();
-        readonly List<FrameNode> listeners = new();
+        List<FrameNode>? listeners;
         Pose localPose;
 
-        public SortedDictionary<string, TfFrame>.ValueCollection Children => children.Values;
+        bool HasNoListeners => listeners == null || listeners.Count == 0;
+        bool IsChildless => children.Count == 0;
 
         public string Id { get; }
         public virtual bool LabelVisible { get; set; }
         public abstract bool ConnectorVisible { get; set; }
         public abstract float FrameSize { get; set; }
         public virtual bool TrailVisible { get; set; }
-        
-        public override TfFrame? Parent
-        {
-            get => base.Parent;
-            set
-            {
-                if (!TrySetParent(value))
-                {
-                    RosLogger.Error(
-                        $"{this}: Failed to set '{(value != null ? value.Id : "null")}' as a parent to {Id}");
-                }
-            }
-        }
 
+        public SortedDictionary<string, TfFrame>.ValueCollection Children => children.Values;
 
         /// <summary>
         /// Pose in relation to the origin frame in Unity coordinates
@@ -50,11 +39,18 @@ namespace Iviz.Controllers.TF
         /// </summary>
         public Pose AbsoluteUnityPose => Transform.AsPose();
 
-        bool HasNoListeners => listeners.Count == 0;
 
-        bool IsChildless => children.Count == 0;
-
-        //public string? LastCallerId { get; private set; }
+        public override TfFrame? Parent
+        {
+            get => base.Parent;
+            set
+            {
+                if (!TrySetParent(value))
+                {
+                    RosLogger.Error($"{this}: Failed to set '{value?.Id ?? "null"}' as a parent to {Id}");
+                }
+            }
+        }
 
         protected TfFrame(string id)
         {
@@ -69,7 +65,17 @@ namespace Iviz.Controllers.TF
                 throw new ArgumentNullException(nameof(frame));
             }
 
-            if (!listeners.Contains(frame))
+            if (!frame.IsAlive)
+            {
+                Debug.LogWarning($"{this}: Rejecting listener node '{frame.Name}' that was already disposed.");
+                return;
+            }
+
+            if (listeners == null)
+            {
+                listeners = new List<FrameNode> { frame };
+            }
+            else if (!listeners.Contains(frame))
             {
                 listeners.Add(frame);
             }
@@ -87,7 +93,7 @@ namespace Iviz.Controllers.TF
                 return;
             }
 
-            listeners.Remove(frame);
+            listeners?.Remove(frame);
             CheckIfDead();
         }
 
@@ -108,9 +114,9 @@ namespace Iviz.Controllers.TF
 
         void CheckIfDead()
         {
-            if (listeners.RemoveAll(listener => listener == null) != 0)
+            if (listeners != null && listeners.RemoveAll(listener => !listener.IsAlive) != 0)
             {
-                Debug.LogWarning($"Frame '{Id}' had a listener that was previously destroyed.");
+                Debug.LogWarning($"{this}: Frame has a listener that was previously destroyed.");
             }
 
             if (HasNoListeners && IsChildless)
@@ -125,7 +131,7 @@ namespace Iviz.Controllers.TF
             {
                 return false;
             }
-            
+
             if (parent == Parent)
             {
                 return true;
@@ -151,6 +157,22 @@ namespace Iviz.Controllers.TF
             return true;
         }
 
+        public bool SetLocalPose(in Pose newPose)
+        {
+            if (localPose.EqualsApprox(newPose))
+            {
+                return false;
+            }
+
+            localPose = newPose;
+            Transform.SetLocalPose(newPose);
+            return true;
+        }
+
+        public abstract void ForceInvisible();
+
+        public abstract void Highlight();
+
         static bool IsChildOf(TfFrame? maybeChild, TfFrame frame)
         {
             while (true)
@@ -168,21 +190,5 @@ namespace Iviz.Controllers.TF
                 maybeChild = maybeChild.Parent;
             }
         }
-
-        public bool SetLocalPose(in Pose newPose, string? callerId = null)
-        {
-            if (localPose.EqualsApprox(newPose))
-            {
-                return false;
-            }
-
-            localPose = newPose;
-            Transform.SetLocalPose(newPose);
-            return true;
-        }
-        
-        public abstract void ForceInvisible();
-
-        public abstract void Highlight();
     }
 }
