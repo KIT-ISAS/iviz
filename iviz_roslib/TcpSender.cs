@@ -345,7 +345,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
     public ValueTask PublishAndWaitAsync(in T message, CancellationToken token)
     {
         return !IsRunning
-            ? ValueTask2.FromException(new InvalidOperationException("Sender has been disposed."))
+            ? new ValueTask(Task.FromException(new ObjectDisposedException("this")))
             : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
     }
 

@@ -326,9 +326,9 @@ public static class TaskUtils
     {
         var (t1, t2) = ts;
         return t1.IsCompleted
-            ? ValueTask2.FromResult(t1)
+            ? new ValueTask<Task>(t1)
             : t2.IsCompleted
-                ? ValueTask2.FromResult(t2)
+                ? new ValueTask<Task>(t2)
                 : Task.WhenAny(t1, t2).AsValueTask();
     }
 }
@@ -336,8 +336,6 @@ public static class TaskUtils
 public static class ValueTask2
 {
     public static ValueTask<T> FromResult<T>(T t) => new(t);
-    public static ValueTask<T> FromException<T>(Exception e) => new(Task.FromException<T>(e));
-    public static ValueTask FromException(Exception e) => new(Task.FromException(e));
     public static ValueTask<T> AsValueTask<T>(this Task<T> t) => new(t);
     public static ValueTask AsValueTask(this Task t) => new(t);
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Tools;
 using Newtonsoft.Json;
@@ -212,17 +213,10 @@ namespace Iviz.XmlRpc
             _ => throw new ArgumentOutOfRangeException()
         };
 
-        [StructLayout(LayoutKind.Explicit)]
-        readonly struct DoubleLongReinterpret
+        static class DoubleLongReinterpret
         {
-            [FieldOffset(0)] readonly long l;
-            [FieldOffset(0)] readonly double d;
-
-            DoubleLongReinterpret(long ll) => (d, l) = (0, ll);
-            DoubleLongReinterpret(double dd) => (l, d) = (0, dd);
-
-            public static double ToDouble(long l) => new DoubleLongReinterpret(l).d;
-            public static long ToLong(double d) => new DoubleLongReinterpret(d).l;
+            public static double ToDouble(long l) => Unsafe.As<long, double>(ref l);
+            public static long ToLong(double d) => Unsafe.As<double, long>(ref d);
         }
 
         public class JsonConverter : JsonConverter<XmlRpcValue>
@@ -241,7 +235,7 @@ namespace Iviz.XmlRpc
                         }
                         else
                         {
-                            writer.WriteValue(str.Substring(0, MaxStringLength));
+                            writer.WriteValue(str[..MaxStringLength]);
                             writer.WriteComment("... + " + (str.Length - MaxStringLength) + " chars");
                         }
                         break;

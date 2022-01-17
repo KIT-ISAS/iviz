@@ -1353,7 +1353,7 @@ public sealed class RosClient : IRosClient
         IRosPublisher? publisher =
             publishersByTopic.Values.FirstOrDefault(tmpPublisher => tmpPublisher.ContainsId(topicId));
 
-        return publisher?.UnadvertiseAsync(topicId) ?? ValueTask2.FromResult(false);
+        return publisher?.UnadvertiseAsync(topicId) ?? new ValueTask<bool>(false);
     }
 
     internal async ValueTask RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)
@@ -1886,7 +1886,8 @@ public sealed class RosClient : IRosClient
     public bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
         where T : IService, new()
     {
-        return TaskUtils.Run(() => AdvertiseServiceAsync(serviceName, callback, token).AsTask(), token).WaitAndRethrow();
+        return TaskUtils.Run(() => AdvertiseServiceAsync(serviceName, callback, token).AsTask(), token)
+            .WaitAndRethrow();
     }
 
     /// <summary>
@@ -1982,8 +1983,8 @@ public sealed class RosClient : IRosClient
     internal bool TryGetLoopbackReceiver<T>(string topic, in Endpoint endpoint, out ILoopbackReceiver<T>? receiver)
         where T : IMessage
     {
-        if (subscribersByTopic.TryGetValue(topic, out var tmpSubscriber) &&
-            tmpSubscriber is IRosSubscriber<T> subscriber)
+        if (subscribersByTopic.TryGetValue(topic, out var existingSubscriber) &&
+            existingSubscriber is IRosSubscriber<T> subscriber)
         {
             return subscriber.TryGetLoopbackReceiver(endpoint, out receiver);
         }

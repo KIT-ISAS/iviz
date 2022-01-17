@@ -19,15 +19,11 @@ namespace Iviz.Rosbag.Reader
         [DataMember] readonly long dataEnd;
         IMessage? message;
 
-        internal int ConnectionId { get; }
-
         [DataMember] public time Time { get; }
         [DataMember] public Connection? Connection { get; internal set; }
         public string? Topic => Connection?.Topic;
         public string? Type => Connection?.MessageType;
-
         public string? Md5Sum => Connection?.Md5Sum;
-
         public string? MessageDefinition => Connection?.MessageDefinition;
 
         internal MessageData(Stream reader, long dataStart, long dataEnd, int connectionId, time time)
@@ -35,7 +31,6 @@ namespace Iviz.Rosbag.Reader
             this.reader = reader;
             this.dataStart = dataStart;
             this.dataEnd = dataEnd;
-            ConnectionId = connectionId;
             Time = time;
         }
 
@@ -93,6 +88,6 @@ namespace Iviz.Rosbag.Reader
 
         public T GetMessage<T>() where T : IMessage => (T)Message;
 
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => BuiltIns.ToJsonString(this);
     }
 }

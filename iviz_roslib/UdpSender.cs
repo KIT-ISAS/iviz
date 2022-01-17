@@ -35,7 +35,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 
     int numDropped;
     long numSent;
-        
+
     byte msgId;
 
     bool KeepRunning => !runningTs.IsCancellationRequested;
@@ -329,16 +329,13 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             // 2 bytes block id (total blocks)
             array[6] = (byte)blockNr;
             array[7] = (byte)(blockNr >> 8);
-            // no message length here! it was written in the first datagram
+            // message length ignored here! it was written in the first datagram
             // total 8
         }
 
-        ValueTask<int> WriteChunkAsync(int toWrite)
-        {
-            return UdpClient.WriteChunkAsync(array, 0, toWrite, runningTs.Token);
-        }
+        ValueTask<int> WriteChunkAsync(int toWrite) => UdpClient.WriteChunkAsync(array, 0, toWrite, runningTs.Token);
     }
-        
+
     async Task KeepAliveMessages()
     {
         while (KeepRunning)
@@ -391,7 +388,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
     public ValueTask PublishAndWaitAsync(in T message, CancellationToken token)
     {
         return !IsAlive
-            ? ValueTask2.FromException(new InvalidOperationException("Sender has been disposed."))
+            ? new ValueTask(Task.FromException(new ObjectDisposedException("this")))
             : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
     }
 
