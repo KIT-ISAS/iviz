@@ -29,6 +29,7 @@ namespace Iviz.Controllers.TF
         public abstract bool ConnectorVisible { get; set; }
         public abstract float FrameSize { get; set; }
         public virtual bool TrailVisible { get; set; }
+        public abstract bool EnableCollider { set; }
 
         public SortedDictionary<string, TfFrame>.ValueCollection Children => children.Values;
 

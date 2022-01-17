@@ -132,6 +132,11 @@ namespace Iviz.Displays
                 }
             }
         }
+        
+        public override bool EnableCollider
+        {
+            set => axis.EnableCollider = value;
+        }
 
         public override float FrameSize
         {

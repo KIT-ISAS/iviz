@@ -209,10 +209,11 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                var colliders = Robot.BaseLinkObject
-                    .GetComponentsInChildren<Collider>(true)
-                    .Where(collider => collider.gameObject.layer == LayerType.Collider);
-                foreach (var collider in colliders)
+                var allColliders = Robot.LinkObjects.Values.SelectMany(
+                    linkObject => linkObject
+                        .GetComponentsInChildren<Collider>(true)
+                        .Where(collider => collider.gameObject.layer == LayerType.Collider));
+                foreach (var collider in allColliders)
                 {
                     collider.enabled = value;
                 }

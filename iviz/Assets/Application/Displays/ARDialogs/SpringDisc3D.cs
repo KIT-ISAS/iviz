@@ -100,7 +100,7 @@ namespace Iviz.Displays.ARDialogs
             
             Link.Transform.localScale = new Vector3(0.2f, 0.2f, discDistance);
             Link.Transform.localPosition = discPosition / 2;
-            Link.Transform.localRotation = discPosition.ApproximatelyZero() 
+            Link.Transform.localRotation = discPosition.sqrMagnitude < 0.01f 
                 ? Quaternion.identity 
                 : Quaternion.LookRotation(discPosition);
 

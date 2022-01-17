@@ -14,6 +14,7 @@
         public ToggleWidget ConnectToParent { get; private set; }
         public ToggleWidget KeepAllFrames { get; private set; }
         public ToggleWidget FlipZ { get; private set; }
+        public ToggleWidget Interactable { get; private set; }
         public TfPublisherWidget Publisher { get; private set; }
         public SenderWidget Sender { get; private set; }
         //public SenderWidget TapSender { get; private set; }
@@ -32,6 +33,7 @@
             ShowFrameLabels = p.AddToggle("Show Frame Names");
             ConnectToParent = p.AddToggle("Connect Children to Parents");
             FlipZ = p.AddToggle("Make Z Axis Point Down");
+            Interactable = p.AddToggle("Enable Colliders");
             FrameSize = p.AddSlider("Frame Size").SetMinValue(0.01f).SetMaxValue(0.5f).SetNumberOfSteps(49);
             Publisher = p.AddTfPublisher();
             Sender = p.AddSender();

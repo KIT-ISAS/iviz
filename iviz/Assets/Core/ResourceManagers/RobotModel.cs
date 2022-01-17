@@ -52,8 +52,8 @@ namespace Iviz.Displays
         public string? BaseLink { get; private set; }
         public GameObject BaseLinkObject { get; }
         public string Description { get; }
-        public ReadOnlyDictionary<string, string> LinkParents { get; }
-        public ReadOnlyDictionary<string, GameObject> LinkObjects { get; }
+        public IReadOnlyDictionary<string, string> LinkParents => linkParents;
+        public IReadOnlyDictionary<string, GameObject> LinkObjects => linkObjects;
 
         public bool OcclusionOnly
         {
@@ -130,8 +130,6 @@ namespace Iviz.Displays
 
             Name = robot.Name;
             Description = robotDescription;
-            LinkParents = linkParents.AsReadOnly();
-            LinkObjects = linkObjects.AsReadOnly();
             BaseLinkObject = new GameObject(Name);
         }
 

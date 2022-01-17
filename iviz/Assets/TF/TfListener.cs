@@ -52,6 +52,8 @@ namespace Iviz.Controllers.TF
         TfFrame fixedFrame;
         Pose cachedFixedPose = Pose.identity;
 
+        public static bool HasInstance => instance != null;
+        
         public static TfListener Instance =>
             instance ?? throw new NullReferenceException("No TFListener has been set!");
 
@@ -88,6 +90,7 @@ namespace Iviz.Controllers.TF
                 KeepAllFrames = value.KeepAllFrames;
                 FixedFrameId = value.FixedFrameId;
                 PreferUdp = value.PreferUdp;
+                Interactable = value.Interactable;
                 FlipZ = value.FlipZ;
             }
         }
@@ -181,6 +184,19 @@ namespace Iviz.Controllers.TF
                 }
             }
         }
+        
+        public bool Interactable
+        {
+            get => config.Interactable;
+            set
+            {
+                config.Interactable = value;
+                foreach (var frame in frames.Values)
+                {
+                    frame.EnableCollider = value;
+                }
+            }
+        }        
 
         bool PreferUdp
         {
@@ -263,6 +279,7 @@ namespace Iviz.Controllers.TF
                 fixedFrame = mapFrame;
 
                 Publisher = new Sender<TFMessage>(DefaultTopic);
+                //Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic, RosTransportHint.PreferTcp);
                 Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic,
                     PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
                 ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);

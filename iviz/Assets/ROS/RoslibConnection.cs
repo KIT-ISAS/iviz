@@ -163,7 +163,7 @@ namespace Iviz.Ros
                 const int rpcTimeoutInMs = 3000;
 
 
-                //Tools.Logger.LogDebug = Core.Logger.Debug;
+                //Tools.Logger.LogDebug = RosLogger.Debug;
                 Tools.Logger.LogError = RosLogger.Error;
                 Tools.Logger.Log = RosLogger.Info;
 

@@ -107,7 +107,7 @@ namespace Iviz.Displays
 
             CanvasSize = CanvasSize;
 
-            if (Title is "")
+            if (Title.Length == 0)
             {
                 Title = "Main";
             }

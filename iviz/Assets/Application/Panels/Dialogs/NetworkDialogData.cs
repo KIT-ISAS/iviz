@@ -2,6 +2,7 @@
 
 using System;
 using System.Text;
+using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Tools;
@@ -88,9 +89,8 @@ namespace Iviz.App
                     totalDropped += receiver.NumDropped;
                 }
 
-                long totalKBytes = totalBytes / 1000;
-                builder.Append("<b>Received ").Append(totalMessages.ToString("N0")).Append(" msgs | ")
-                    .Append(totalKBytes.ToString("N0")).Append(" kB total</b>").AppendLine();
+                builder.Append("<b>Received ").Append(totalMessages.ToString("N0")).Append(" msgs | ");
+                    builder.AppendBandwidth(totalBytes).Append(" total</b>").AppendLine();
 
                 if (totalDropped != 0)
                 {
@@ -130,8 +130,7 @@ namespace Iviz.App
                                 );
                             }
 
-                            long kbytes = receiver.BytesReceived / 1000;
-                            builder.Append(" | ").Append(kbytes.ToString("N0")).Append("kB");
+                            builder.Append(" | ").AppendBandwidth(receiver.BytesReceived);
                             break;
                         case ReceiverStatus.ConnectingRpc:
                             builder.Append(" (Connecting)");
@@ -176,9 +175,8 @@ namespace Iviz.App
                     totalBytes += sender.BytesSent;
                 }
 
-                long totalKbytes = totalBytes / 1000;
                 builder.Append("<b>Sent ").Append(totalMessages.ToString("N0")).Append(" msgs | ")
-                    .Append(totalKbytes.ToString("N0")).Append(" kB</b> total").AppendLine();
+                    .AppendBandwidth(totalBytes).Append("</b> total").AppendLine();
 
                 if (stat.Senders.Count == 0)
                 {
@@ -210,8 +208,7 @@ namespace Iviz.App
 
                     if (isAlive)
                     {
-                        long kbytes = sender.BytesSent / 1000;
-                        builder.Append(" | ").Append(kbytes.ToString("N0")).Append("kB");
+                        builder.Append(" | ").AppendBandwidth(sender.BytesSent);
                     }
                     else
                     {

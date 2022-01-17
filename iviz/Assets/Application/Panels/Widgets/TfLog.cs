@@ -144,7 +144,10 @@ namespace Iviz.App
 
         void OnDestroy()
         {
-            TfListener.Instance.ResetFrames -= OnResetFrames;
+            if (TfListener.HasInstance)
+            {
+                TfListener.Instance.ResetFrames -= OnResetFrames;
+            }
         }
 
         void OnResetFrames()

@@ -27,9 +27,9 @@ namespace Iviz.App
             string frameStr = (numTfFrames, publishedFrames) switch
             {
                 (0, 0) => "Transform Frames\n<b>No frames</b>",
-                (1, 0) => "Transform Frames\n<b>1 frame, none published</b>",
+                (1, 0) => "Transform Frames\n<b>1 frame</b>",
                 (1, _) => $"Transform Frames\n<b>1 frame, {numTfFrames.ToString()} published</b>",
-                (_, 0) => $"Transform Frames\n<b>{numTfFrames.ToString()} frames, none published</b>",
+                (_, 0) => $"Transform Frames\n<b>{numTfFrames.ToString()} frames</b>",
                 _ => $"Transform Frames\n<b>{numTfFrames.ToString()} frames, {numTfFrames.ToString()} published</b>"
             };
             

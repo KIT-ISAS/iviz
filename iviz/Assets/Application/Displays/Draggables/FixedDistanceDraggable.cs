@@ -1,7 +1,6 @@
 #nullable enable
 
 using System;
-using Iviz.Core;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -38,7 +37,6 @@ namespace Iviz.Displays
                         lastControllerPosition - pointerRay.origin);
                     distance = Math.Max(0.1f, distance - forwardScale * deltaDistance);
                 }
-
 
                 var intersectionWorld = pointerRay.origin + distance * pointerRay.direction;
                 var referencePointWorld = mTransform.TransformPoint(referencePointLocal);

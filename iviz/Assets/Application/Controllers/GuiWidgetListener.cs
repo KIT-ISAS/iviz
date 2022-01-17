@@ -72,7 +72,7 @@ namespace Iviz.Controllers
 
         void Handler(Widget msg)
         {
-            switch (msg.Action.AsActionType())
+            switch ((ActionType)msg.Action)
             {
                 case ActionType.Remove:
                 {
@@ -104,7 +104,7 @@ namespace Iviz.Controllers
                 oldGuiObject.Dispose();
             }
 
-            var info = msg.Type.AsWidgetType() switch
+            var info = (WidgetType)msg.Type switch
             {
                 WidgetType.RotationDisc => Resource.Displays.RotationDisc,
                 WidgetType.SpringDisc => Resource.Displays.SpringDisc,
@@ -146,16 +146,16 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
 
             var guiObject = new GuiObject(msg, info);
 
-            switch (msg.Type.AsWidgetType())
+            switch ((WidgetType)msg.Type)
             {
                 case WidgetType.RotationDisc:
                     guiObject.As<RotationDisc>().Moved += angle => OnDiscRotated(guiObject, angle);
                     break;
                 case WidgetType.SpringDisc:
-                    guiObject.As<SpringDisc>().Moved += direction => OnDiscMoved(guiObject, direction);
+                    guiObject.As<SpringDisc>().Moved += direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
                     break;
                 case WidgetType.SpringDisc3D:
-                    guiObject.As<SpringDisc3D>().Moved += direction => OnDiscMoved(guiObject, direction);
+                    guiObject.As<SpringDisc3D>().Moved += direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
                     break;
                 case WidgetType.TrajectoryDisc:
                     guiObject.As<TrajectoryDisc>().Moved += (direction, period) =>
@@ -167,10 +167,10 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
                     targetWidget.Cancelled += () => OnTargetAreaCanceled(guiObject);
                     break;
                 case WidgetType.PositionDisc3D:
-                    guiObject.As<PositionDisc3D>().Moved += direction => OnDiscMoved(guiObject, direction);
+                    guiObject.As<PositionDisc3D>().Moved += direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
                     break;
                 case WidgetType.PositionDisc:
-                    guiObject.As<PositionDisc>().Moved += direction => OnDiscMoved(guiObject, direction);
+                    guiObject.As<PositionDisc>().Moved += direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
                     break;
                 /*
                 case WidgetType.Tooltip:
@@ -185,7 +185,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             }
 
             guiObject.Transform.SetLocalPose(msg.Pose.Ros2Unity());
-            guiObject.Transform.localScale = Vector3.one * (float)msg.Scale;
+            guiObject.Scale = (float)msg.Scale;
             widgets[guiObject.Id] = guiObject;
         }
 
@@ -193,7 +193,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
         public ARDialog? AddDialog(Dialog msg)
         {
             Handler(msg);
-            return msg.Action.AsActionType() == ActionType.Add
+            return (ActionType)msg.Action == ActionType.Add
                 ? dialogs[msg.Id].As<ARDialog>()
                 : null;
         }
@@ -311,7 +311,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
 
         public override bool Visible
         {
-            get => false;
+            get => true;
             set { }
         }
 
@@ -357,7 +357,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             {
                 VizId = ConnectionManager.MyId ?? "",
                 Id = dialog.Id,
-                Type = (byte) FeedbackType.MenuEntryClick,
+                Type = (byte)FeedbackType.MenuEntryClick,
                 EntryId = buttonId,
             });
 
@@ -480,16 +480,27 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             readonly FrameNode node;
             readonly ResourceKey<GameObject> resourceKey;
             readonly IDisplay display;
+            float scale = 1;
 
             public Transform Transform => node.Transform;
-            public string ParentId => node.Parent != null ? node.Parent.Id : TfListener.DefaultFrame.Id;
+            public string ParentId => node.Parent?.Id ?? TfListener.DefaultFrame.Id;
             public string Id { get; }
+
+            public float Scale
+            {
+                get => scale;
+                set
+                {
+                    scale = value;
+                    Transform.localScale = Vector3.one * scale;
+                }
+            } 
             public DateTime ExpirationTime { get; }
 
             public GuiObject(Widget msg, ResourceKey<GameObject> resourceKey)
             {
                 this.resourceKey = resourceKey;
-                node = new FrameNode("Widget Node");
+                node = new FrameNode(msg.Id);
                 node.AttachTo(msg.Header.FrameId);
                 Id = msg.Id;
 
@@ -537,12 +548,6 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
 
             public GuiObject AsExpired() => new(this);
         }
-    }
-
-    static class DialogUtils
-    {
-        public static ActionType AsActionType(this byte a) => (ActionType)a;
-        public static WidgetType AsWidgetType(this byte a) => (WidgetType)a;
     }
 
     public enum ActionType : byte

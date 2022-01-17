@@ -66,9 +66,9 @@ namespace Iviz.App
                 .Append(MessagesPerSecond)
                 .Append(" Hz | ");
 
-            RosUtils.WriteFormattedBandwidth(description, BytesPerSecond);
+            RosUtils.AppendBandwidth(description, BytesPerSecond);
 
-            description.Append("</b>");
+            description.Append("/s</b>");
             Text.SetText(description);
 
             Panel.color = listener.Subscribed ? Resource.Colors.EnabledListener : Resource.Colors.DisabledPanel;

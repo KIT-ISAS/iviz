@@ -60,6 +60,7 @@ namespace Iviz.App
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
             panel.KeepAllFrames.Value = listener.KeepAllFrames;
             panel.FlipZ.Value = listener.FlipZ;
+            panel.Interactable.Value = listener.Interactable;
             panel.Sender.Set(listener.Publisher);
             //panel.TapSender.Set(listener.TapPublisher);
             panel.Publisher.UpdateText();
@@ -70,6 +71,7 @@ namespace Iviz.App
             panel.ConnectToParent.ValueChanged += f => listener.ParentConnectorVisible = f;
             panel.KeepAllFrames.ValueChanged += f => listener.KeepAllFrames = f;
             panel.FlipZ.ValueChanged += f => listener.FlipZ = f;
+            panel.Interactable.ValueChanged += f => listener.Interactable = f;
             panel.ResetButton.Clicked += () => listener.ResetController();
         }
 

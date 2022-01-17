@@ -369,23 +369,25 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this in Pose pose) => IsInvalid(pose.Orientation) || IsInvalid(pose.Position);
 
-        public static void WriteFormattedBandwidth(StringBuilder description, long bytesPerSecond)
+        public static StringBuilder AppendBandwidth(this StringBuilder description, long bytesPerSecond)
         {
             switch (bytesPerSecond)
             {
                 case < 1024:
                     string bPerSecond = bytesPerSecond.ToString("#,0", UnityUtils.Culture);
-                    description.Append(bPerSecond).Append(" B/s");
+                    description.Append(bPerSecond).Append(" B");
                     break;
                 case < 1024 * 1024:
-                    string kbPerSecond = (bytesPerSecond * (1f / 1024)).ToString("#,0.0", UnityUtils.Culture);
-                    description.Append(kbPerSecond).Append(" kB/s");
+                    string kbPerSecond = (bytesPerSecond / 1024.0).ToString("#,0.0", UnityUtils.Culture);
+                    description.Append(kbPerSecond).Append(" kB");
                     break;
                 default:
-                    string mbPerSecond = (bytesPerSecond * (1f / 1024 / 1024)).ToString("#,0.0", UnityUtils.Culture);
-                    description.Append(mbPerSecond).Append(" MB/s");
+                    string mbPerSecond = (bytesPerSecond / 1024.0 / 1024.0).ToString("#,0.0", UnityUtils.Culture);
+                    description.Append(mbPerSecond).Append(" MB");
                     break;
             }
+
+            return description;
         }
 
         public enum PoseFormat

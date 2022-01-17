@@ -11,34 +11,35 @@ namespace Iviz.App
 {
     public sealed class GuiWidgetModuleData : ListenerModuleData, IInteractableModuleData
     {
-        readonly GuiWidgetListener dialogListener;
-        readonly GuiWidgetModulePanel dialogPanel;
+        readonly GuiWidgetListener listener;
+        readonly GuiWidgetModulePanel panel;
 
-        protected override ListenerController Listener => dialogListener;
+        protected override ListenerController Listener => listener;
         public override ModuleType ModuleType => ModuleType.GuiWidget;
-        public override ModulePanel Panel => dialogPanel;
-        public override IConfiguration Configuration => dialogListener.Config;
+        public override ModulePanel Panel => panel;
+        public override IConfiguration Configuration => listener.Config;
 
         public GuiWidgetModuleData(ModuleDataConstructor constructor) :
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
-            dialogPanel = ModulePanelManager.GetPanelByResourceType<GuiWidgetModulePanel>(ModuleType.GuiWidget);
-            dialogListener = new GuiWidgetListener((GuiWidgetConfiguration?)constructor.Configuration, Topic);
+            panel = ModulePanelManager.GetPanelByResourceType<GuiWidgetModulePanel>(ModuleType.GuiWidget);
+            listener = new GuiWidgetListener((GuiWidgetConfiguration?)constructor.Configuration, Topic);
             Interactable = ModuleListPanel.SceneInteractable;
             UpdateModuleButton();
         }
 
         public bool Interactable
         {
-            set => dialogListener.Interactable = value;
+            set => listener.Interactable = value;
         }
 
         public override void SetupPanel()
         {
-            dialogPanel.Frame.Owner = dialogListener;
-            dialogPanel.Listener.Listener = dialogListener.Listener;
-            dialogPanel.FeedbackSender.Set(dialogListener.FeedbackSender);
-            dialogPanel.CloseButton.Clicked += Close;
+            panel.HideButton.State = listener.Visible;
+            panel.Frame.Owner = listener;
+            panel.Listener.Listener = listener.Listener;
+            panel.FeedbackSender.Set(listener.FeedbackSender);
+            panel.CloseButton.Clicked += Close;
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
@@ -62,7 +63,7 @@ namespace Iviz.App
 
         public override void AddToState(StateConfiguration config)
         {
-            config.Dialogs.Add(dialogListener.Config);
+            config.Dialogs.Add(listener.Config);
         }
     }
 }

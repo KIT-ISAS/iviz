@@ -15,7 +15,7 @@ namespace Iviz.App
         void Awake()
         {
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
-            p.AddHeadTitleWidget("GUI Dialogs");
+            p.AddHeadTitleWidget("GUI Widgets");
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             Listener = p.AddListener();

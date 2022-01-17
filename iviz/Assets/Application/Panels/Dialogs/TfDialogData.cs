@@ -31,7 +31,7 @@ namespace Iviz.App
             panel.CreateFrameClicked += () =>
             {
                 string frameName = ValidateFrameName(panel.FrameName.Value.Trim());
-                if (frameName is "")
+                if (frameName.Length == 0)
                 {
                     RosLogger.Error($"{this}: Cannot create frame with empty name.");
                     return;
