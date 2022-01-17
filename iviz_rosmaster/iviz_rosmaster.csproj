@@ -5,6 +5,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>Iviz.Rosmaster</AssemblyName>
         <RootNamespace>Iviz.Rosmaster</RootNamespace>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>

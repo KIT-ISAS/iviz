@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 using System.Xml;
-using Newtonsoft.Json;
+using Iviz.Msgs;
 
 namespace Iviz.Urdf
 {
@@ -14,6 +14,6 @@ namespace Iviz.Urdf
             Link = Utils.ParseString(node.Attributes?["link"]);
         }
         
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => BuiltIns.ToJsonString(this);
     }
 }

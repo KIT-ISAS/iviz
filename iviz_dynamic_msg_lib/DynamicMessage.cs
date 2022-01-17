@@ -240,7 +240,7 @@ namespace Iviz.MsgsGen.Dynamic
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 = "";
 
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => this.ToJsonString();
 
         static ClassInfo CreateDefinitionFromDependencyString(string fullRosMsgName, string dependencies)
         {

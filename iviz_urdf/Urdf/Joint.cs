@@ -166,6 +166,6 @@ namespace Iviz.Urdf
             };
         }
 
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => BuiltIns.ToJsonString(this);
     }
 }

@@ -3,7 +3,7 @@
     <PropertyGroup>
         <AssemblyName>Iviz.Rosmaster.Lib</AssemblyName>
         <RootNamespace>Iviz.Rosmaster</RootNamespace>
-        <LangVersion>9</LangVersion>
+        <LangVersion>default</LangVersion>
         <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
         <Nullable>enable</Nullable>
     </PropertyGroup>
