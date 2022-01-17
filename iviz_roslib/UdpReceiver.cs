@@ -34,9 +34,9 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
     bool KeepRunning => !runningTs.IsCancellationRequested;
 
     public ErrorMessage? ErrorDescription { get; private set; }
-    public bool IsAlive => true;
+    public bool IsAlive => !task.IsCompleted;
     public bool IsPaused { get; set; }
-    public bool IsConnected => true;
+    public bool IsConnected => UdpClient.Client.Connected;
     public Endpoint Endpoint { get; }
     public Endpoint RemoteEndpoint { get; }
     public Uri RemoteUri { get; }
@@ -131,7 +131,8 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         BytesReceived = bytesReceived,
         NumDropped = numDropped,
         ErrorDescription = ErrorDescription,
-        MaxPacketSize = MaxPacketSize
+        MaxPacketSize = MaxPacketSize,
+        IsAlive = IsAlive, 
     };
 
     public async ValueTask DisposeAsync(CancellationToken token)

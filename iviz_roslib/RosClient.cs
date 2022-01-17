@@ -640,9 +640,8 @@ public sealed class RosClient : IRosClient
     /// </summary>
     public async ValueTask EnsureCleanSlateAsync(CancellationToken token = default)
     {
-        Console.WriteLine("entering");
-        SystemState state = await GetSystemStateAsync(token);
-        List<Task> tasks = new();
+        var state = await GetSystemStateAsync(token);
+        var tasks = new List<Task>();
         tasks.AddRange(
             state.Subscribers
                 .Where(tuple => tuple.Members.Contains(CallerId))
@@ -664,8 +663,6 @@ public sealed class RosClient : IRosClient
         {
             throw new RosConnectionException($"Failed to contact the master URI '{MasterUri}'", e);
         }
-
-        Console.WriteLine("leaving");
     }
 
     /// <summary>

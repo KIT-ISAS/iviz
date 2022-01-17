@@ -323,7 +323,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
                 await TcpClient.WriteChunkAsync(writeBuffer.Array, msgLength + 4, runningTs.Token);
 
                 numSent++;
-                bytesSent += msgLength + UdpRosParams.HeaderLength + 4;
+                bytesSent += msgLength + 4;
                 msgSignal?.TrySetResult(null);
             }
         }

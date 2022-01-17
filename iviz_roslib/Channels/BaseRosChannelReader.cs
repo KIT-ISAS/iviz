@@ -268,9 +268,11 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
             return false;
         }
 
+        var cancelledToken = new CancellationToken(true);
+
         try
         {
-            t = messageQueue.Take(new CancellationToken(true));
+            t = messageQueue.Take(cancelledToken);
             return true;
         }
         catch (OperationCanceledException)
@@ -309,10 +311,12 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
                 yield break;
             }
 
+            var cancelledToken = new CancellationToken(true);
+
             T element;
             try
             {
-                element = messageQueue.Take(new CancellationToken(true));
+                element = messageQueue.Take(cancelledToken);
             }
             catch (OperationCanceledException)
             {

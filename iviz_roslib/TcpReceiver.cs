@@ -67,7 +67,8 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         RemoteEndpoint = RemoteEndpoint,
         NumReceived = numReceived,
         BytesReceived = bytesReceived,
-        ErrorDescription = ErrorDescription
+        ErrorDescription = ErrorDescription,
+        IsAlive = IsAlive, 
     };
 
     async ValueTask StartSession()
