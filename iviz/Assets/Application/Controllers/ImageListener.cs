@@ -319,21 +319,27 @@ namespace Iviz.Controllers
 
         void InfoHandler(CameraInfo info)
         {
-            if (UseIntrinsicScale)
+            if (!UseIntrinsicScale)
             {
-                billboard.Intrinsic = new Intrinsic(info.K);
+                return;
             }
+            
+            var intrinsic = new Intrinsic(info.K);
+            if (!intrinsic.IsValid)
+            {
+                RosLogger.Error($"{this}: Ignoring invalid intrinsic {intrinsic.ToString()}.");
+                return;
+                    
+            } 
+            billboard.Intrinsic = intrinsic;
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            billboard.Texture = null;
             billboard.ReturnToPool();
-
             imageTexture.Dispose();
             infoListener.Dispose();
-
             node.Dispose();
         }
     }

@@ -13,7 +13,7 @@ using UnityEngine;
 namespace Iviz.Displays
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class Tooltip : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class Tooltip : MonoBehaviour, IDisplay, IRecyclable, ISupportsColor, ISupportsPbr, ISupportsTint
     {
         [SerializeField] BoxCollider? boxCollider;
         [SerializeField] TMP_Text? text;
@@ -74,6 +74,21 @@ namespace Iviz.Displays
             set => Text.color = value;
         }
 
+        public float Metallic
+        {
+            set => Background.Metallic = value;
+        }
+
+        public float Smoothness
+        {
+            set => Background.Smoothness = value;
+        }
+
+        public Color Tint
+        {
+            set => Background.Tint = value;
+        }
+        
         public string Caption
         {
             set
@@ -92,7 +107,6 @@ namespace Iviz.Displays
 
         public bool Visible
         {
-            get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
 
@@ -109,7 +123,7 @@ namespace Iviz.Displays
             UpdateSize();
         }
 
-        public bool FixedWidth { get; set; } = false;
+        public bool FixedWidth { get; set; }
         public float PaddingX { get; set; } = 5;
         public float PaddingY { get; set; } = 2;
 

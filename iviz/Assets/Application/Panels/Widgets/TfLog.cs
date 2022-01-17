@@ -88,16 +88,13 @@ namespace Iviz.App
                     return;
                 }
 
-                if (selectedFrame != null)
-                {
-                    selectedFrame.RemoveListener(PlaceHolder);
-                }
-
+                
                 selectedFrame = value;
 
+                PlaceHolder.Parent = selectedFrame;
+                
                 if (selectedFrame != null)
                 {
-                    selectedFrame.AddListener(PlaceHolder);
                     TfPublisher.ShowPanelIfPublishing(selectedFrame.Id);
                 }
 
@@ -108,10 +105,7 @@ namespace Iviz.App
                 FixedFrame.interactable = interactable;
 
                 Flush();
-                if (value != null)
-                {
-                    value.Highlight();
-                }
+                value?.Highlight();
 
                 UpdateFrameButtons();
             }

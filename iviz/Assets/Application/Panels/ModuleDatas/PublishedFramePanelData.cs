@@ -112,7 +112,7 @@ namespace Iviz.App
 
         void UpdateHints()
         {
-            panel.ParentId.Hints = TfListener.FramesUsableAsHints.Prepend(TfListener.OriginFrameId);
+            panel.ParentId.Hints = TfListener.FrameNames.Prepend(TfListener.OriginFrameId);
         }
 
         void UpdateTop()

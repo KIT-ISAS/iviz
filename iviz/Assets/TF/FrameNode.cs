@@ -7,12 +7,12 @@ using Iviz.Core;
 namespace Iviz.Controllers.TF
 {
     /// <summary>
-    /// Class for displays that want to attach themselves to a TF frame.
-    /// This increases the reference count of the frame, and prevents the TFListener from
-    /// removing it.
-    /// Also used by controllers to have a GameObject they can attach their displays to.
+    /// A wrapper around a GameObject that can be attached to a <see cref="TfFrame"/>.
+    /// TfFrames should not have displays as direct children. Instead, controllers should create a FrameNode,
+    /// attach the node to the TFFrame, and then the displays to this node.
+    /// FrameNodes allow <see cref="TfListener"/> to keep track of which frames are being used, and to forget those that are empty if necessary. 
     /// </summary>
-    public class FrameNode
+    public class FrameNode // not sealed! has children
     {
         readonly GameObject gameObject;
         TfFrame? parent;
@@ -110,29 +110,6 @@ namespace Iviz.Controllers.TF
         }
 
         public bool IsAlive => !disposed;
-        /*
-        public bool IsAlive
-        {
-            get
-            {
-                if (disposed)
-                {
-                    return false;
-                }
-
-                
-#if UNITY_EDITOR
-                if (gameObject == null || Transform == null)
-                {
-                    Debug.LogError($"{this}: FrameNode has been deleted before being disposed!");
-                    return false;
-                }
-#endif
-
-                return true;
-            }
-        }
-        */
 
         public override string ToString() => "{" + Name + "}";
 

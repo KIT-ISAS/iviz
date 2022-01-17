@@ -141,7 +141,7 @@ namespace Iviz.Displays
         Task WriteResourceFileAsync(CancellationToken token)
         {
             return FileUtils.WriteAllTextAsync(Settings.ResourcesFilePath,
-                JsonConvert.SerializeObject(resourceFiles, Formatting.Indented), token).AwaitNoThrow(this);
+                BuiltIns.ToJsonString(resourceFiles), token).AwaitNoThrow(this);
         }
 
         public static string SanitizeFilename(string input)

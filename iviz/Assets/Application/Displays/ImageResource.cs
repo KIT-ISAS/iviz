@@ -26,8 +26,18 @@ namespace Iviz.Displays
         MeshRenderer Front => front.AssertNotNull(nameof(front));
         BoxCollider Collider => boxCollider.AssertNotNull(nameof(boxCollider));
 
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        float Width => Scale;
+        float Height => Width * AspectRatio;
+        float AspectRatio => Texture != null && Texture.Width != 0 ? (float)Texture.Height / Texture.Width : 1;
+        bool IHighlightable.IsAlive => gameObject.activeSelf;
+        string IHasBounds.Caption => $"<b>{Title}</b>\n{(Texture != null ? Texture.Description : "(unset)")}";
+
         public string Title { get; set; } = "";
+        public Bounds? Bounds => Collider.GetBounds();
+        public Transform BoundsTransform => Billboard.transform;
+        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        
+        public event Action? BoundsChanged;
 
         public Intrinsic? Intrinsic
         {
@@ -62,10 +72,6 @@ namespace Iviz.Displays
             }
         }
 
-        public Bounds? Bounds => Collider.GetBounds();
-        public Transform BoundsTransform => Billboard.transform;
-        public event Action? BoundsChanged;
-
         public int Layer
         {
             set => Billboard.gameObject.layer = value;
@@ -99,43 +105,14 @@ namespace Iviz.Displays
                 UpdateSize();
             }
         }
-
-        float Width => Scale;
-        float Height => Width * AspectRatio;
-        float AspectRatio => Texture != null && Texture.Width != 0 ? (float)Texture.Height / Texture.Width : 1;
-
-        bool IHighlightable.IsAlive => gameObject.activeSelf;
-        string IHasBounds.Caption => $"<b>{Title}</b>\n{(Texture != null ? Texture.Description : "(unset)")}";
-
+        
         void Awake()
         {
             Billboard.UseAbsoluteOffset = false;
             billboardStartPose = Billboard.transform.AsLocalPose();
         }
 
-        public void Set(int width, int height, int bpp, byte[] data, bool generateMipmaps = false)
-        {
-            Texture ??= new ImageTexture();
-
-            string? encoding = bpp switch
-            {
-                1 => "mono8",
-                2 => "mono16",
-                3 => "rgb8",
-                4 => "rgba8",
-                _ => null
-            };
-
-            if (encoding is null)
-            {
-                Debug.LogWarning("ImageResource: Set function could not find encoding!");
-                return;
-            }
-
-            Texture.Set(width, height, encoding, data, generateMipmaps);
-        }
-
-        void IDisplay.Suspend()
+        public void Suspend()
         {
             Visible = true;
             Texture = null;
@@ -149,7 +126,6 @@ namespace Iviz.Displays
 
         public bool Visible
         {
-            get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
 
@@ -158,13 +134,15 @@ namespace Iviz.Displays
             var billboardTransform = Billboard.transform;
             var baseScale = new Vector3(Width, Height, 1);
 
-            if (intrinsic is { } validatedIntrinsic && !billboardEnabled && Texture is { Width: not 0 })
+            if (intrinsic is { } mIntrinsic
+                && !billboardEnabled
+                && Texture is { Width: not 0 })
             {
                 float perspectiveScale = Math.Abs(offset.y) / Texture.Width;
-                billboardTransform.localScale = baseScale * (validatedIntrinsic.Fx * perspectiveScale);
+                billboardTransform.localScale = baseScale * (mIntrinsic.Fx * perspectiveScale);
                 var intrinsicOffset = new Vector3(
-                    validatedIntrinsic.Cx - Texture.Width / 2f,
-                    Texture.Height / 2f - validatedIntrinsic.Cy,
+                    mIntrinsic.Cx - Texture.Width / 2f,
+                    Texture.Height / 2f - mIntrinsic.Cy,
                     0);
                 billboardTransform.localPosition = offset + intrinsicOffset.Ros2Unity() * perspectiveScale;
                 billboardTransform.localRotation = billboardStartPose.rotation;

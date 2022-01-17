@@ -84,7 +84,7 @@ namespace Iviz.Displays
                 ref var l0 = ref line.c0;
                 ref var l1 = ref line.c1;
 
-                float3 p = c0;
+                var p = c0;
 
                 float colorA = colorBase.a;
 
@@ -96,7 +96,7 @@ namespace Iviz.Displays
                 foreach (int i in ..numSegments)
                 {
                     float t = (i + 1f) / numSegments;
-                    float3 q = Bezier(t, f);
+                    var q = Bezier(t, f);
 
                     var delta = q - p;
                     (l0.x, l0.y, l0.z) = p + 0.25f * delta;

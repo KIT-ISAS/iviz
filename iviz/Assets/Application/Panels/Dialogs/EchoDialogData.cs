@@ -92,7 +92,7 @@ namespace Iviz.App
 
             foreach ((string topic, string msgType) in newTopics)
             {
-                Type csType = TryGetType(msgType, out Type? newCsType) ? newCsType : typeof(DynamicMessage);
+                var csType = TryGetType(msgType, out Type? newCsType) ? newCsType : typeof(DynamicMessage);
                 entries.Add(new TopicEntry(topic, msgType, csType));
             }
 

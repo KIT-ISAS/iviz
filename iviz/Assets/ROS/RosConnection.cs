@@ -16,6 +16,9 @@ namespace Iviz.Ros
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
 
+        public static event Action<ConnectionState>? ConnectionStateChanged;
+        public static event Action<bool>? ConnectionWarningStateChanged;
+
         readonly SemaphoreSlim signal = new(0);
         readonly Task task;
         readonly ConcurrentQueue<Func<ValueTask>> toDos = new();
@@ -26,9 +29,6 @@ namespace Iviz.Ros
 
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
         public bool KeepReconnecting { get; set; }
-
-        public static event Action<ConnectionState>? ConnectionStateChanged;
-        public static event Action<bool>? ConnectionWarningStateChanged;
 
         protected RosConnection()
         {
@@ -82,32 +82,7 @@ namespace Iviz.Ros
             {
                 while (!connectionTs.IsCancellationRequested)
                 {
-                    var now = GameThread.Now;
-                    if ((KeepReconnecting || tryConnectOnce)
-                        && ConnectionState != ConnectionState.Connected
-                        && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)
-                    {
-                        SetConnectionState(ConnectionState.Connecting);
-
-                        tryConnectOnce = false;
-                        bool connectionResult;
-
-                        try
-                        {
-                            lastConnectionTry = now;
-                            connectionResult = await ConnectAsync();
-                        }
-                        catch (Exception e)
-                        {
-                            RosLogger.Error("Unexpected error in RosConnection.Connect", e);
-                            continue;
-                        }
-
-                        SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
-                    }
-
-                    await signal.WaitAsync(TaskWaitTimeInMs);
-                    await ExecuteTasks().AwaitNoThrow(this);
+                    await RunTasks();
                 }
 
                 SetConnectionState(ConnectionState.Disconnected);
@@ -123,6 +98,50 @@ namespace Iviz.Ros
             connectionTs.Cancel();
         }
 
+        async ValueTask RunTasks()
+        {
+            var now = GameThread.Now;
+            if ((KeepReconnecting || tryConnectOnce)
+                && ConnectionState != ConnectionState.Connected
+                && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)
+            {
+                await TryToConnect(now);
+            }
+
+            await signal.WaitAsync(TaskWaitTimeInMs);
+            await ExecuteTasks().AwaitNoThrow(this);
+        }
+
+        async ValueTask TryToConnect(DateTime now)
+        {
+            SetConnectionState(ConnectionState.Connecting);
+
+            tryConnectOnce = false;
+            bool connectionResult;
+
+            try
+            {
+                lastConnectionTry = now;
+                connectionResult = await ConnectAsync();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error("Unexpected error in RosConnection.Connect", e);
+                return;
+            }
+
+            SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
+            if (connectionResult)
+            {
+                KeepReconnecting = true;
+                SetConnectionState(ConnectionState.Connected);
+            }
+            else
+            {
+                SetConnectionState(ConnectionState.Disconnected);
+            }            
+        }
+
         async ValueTask ExecuteTasks()
         {
             while (toDos.TryDequeue(out var action))
@@ -131,7 +150,7 @@ namespace Iviz.Ros
             }
         }
 
-        public void ConnectOneShot()
+        public void TryOnceToConnect()
         {
             tryConnectOnce = true;
             Signal();

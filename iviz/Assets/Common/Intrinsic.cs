@@ -69,8 +69,11 @@ namespace Iviz.Common
         public bool Equals(double[] array) =>
             (Fx, Cx, Fy, Cy) == (array[0], array[2], array[4], array[5]);
 
-        public bool IsValid => Fx > 0 && Fy > 0; 
-
+        public bool IsValid => float.IsFinite(Fx) &&
+                               float.IsFinite(Fy) &&
+                               float.IsFinite(Cx) &&
+                               float.IsFinite(Cy) &&
+                               Fx != 0 && Fy != 0;
         public override int GetHashCode() => (Fx, Cx, Fy, Cy).GetHashCode();
     }
 }

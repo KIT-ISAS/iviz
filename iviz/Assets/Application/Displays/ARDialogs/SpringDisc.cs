@@ -17,7 +17,7 @@ namespace Iviz.Displays.ARDialogs
     {
         string Caption { set; }
     }
-    
+
     [RequireComponent(typeof(BoxCollider))]
     public sealed class SpringDisc : MonoBehaviour, IWidgetWithColor
     {
@@ -35,10 +35,10 @@ namespace Iviz.Displays.ARDialogs
         MeshMarkerResource InnerDisc => innerDisc.AssertNotNull(nameof(innerDisc));
         MeshMarkerResource Glow => glow.AssertNotNull(nameof(glow));
         XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
-        
+
         public event Action<Vector3>? Moved;
 
-        Color color = new Color(0, 0.6f, 1f);
+        Color color = new(0, 0.6f, 1f);
         Color secondaryColor = Color.white;
 
         public Color Color
@@ -108,7 +108,9 @@ namespace Iviz.Displays.ARDialogs
 
             Link.Transform.localScale = new Vector3(0.2f, 0.002f, discDistance);
             Link.Transform.localPosition = discPosition / 2;
-            Link.Transform.localRotation = Quaternion.LookRotation(discPosition);
+            Link.Transform.localRotation = discPosition.ApproximatelyZero() 
+                ? Quaternion.identity 
+                : Quaternion.LookRotation(discPosition);
 
             if (raiseOnMoved)
             {

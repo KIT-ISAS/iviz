@@ -7,6 +7,9 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
+    /// <summary>
+    /// Axis frame shown on the top right of the camera overlay.
+    /// </summary>
     [RequireComponent(typeof(AxisFrameResource))]
     public class CameraOverlayDisplay : MonoBehaviour
     {

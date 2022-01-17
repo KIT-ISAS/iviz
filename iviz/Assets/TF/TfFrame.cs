@@ -3,10 +3,18 @@
 using System;
 using System.Collections.Generic;
 using Iviz.Core;
+using Iviz.Msgs.Tf2Msgs;
 using UnityEngine;
 
 namespace Iviz.Controllers.TF
 {
+    /// <summary>
+    /// Class that represents a ROS transform frame as described in a <see cref="TFMessage"/>.
+    /// Displays or other nodes that want to attach themselves to a TF frame should spawn a <see cref="FrameNode"/>,
+    /// attach themselves to that node, and then attach the node to the TFFrame.
+    /// The presence of FrameNodes is used by <see cref="TfListener"/> to keep track of which frames are being used and which
+    /// ones can be forgotten if necessary.
+    /// </summary>
     public abstract class TfFrame : FrameNode
     {
         readonly SortedDictionary<string, TfFrame> children = new();
@@ -55,10 +63,10 @@ namespace Iviz.Controllers.TF
         protected TfFrame(string id)
         {
             Id = id;
-            Name = "{" + Id + "}";
+            Name = "{" + id + "}";
         }
 
-        public void AddListener(FrameNode frame)
+        internal void AddListener(FrameNode frame)
         {
             if (frame == null)
             {
@@ -67,7 +75,7 @@ namespace Iviz.Controllers.TF
 
             if (!frame.IsAlive)
             {
-                Debug.LogWarning($"{this}: Rejecting listener node '{frame.Name}' that was already disposed.");
+                Debug.LogWarning($"{this}: Rejecting listener node '{frame}' that was already disposed.");
                 return;
             }
 

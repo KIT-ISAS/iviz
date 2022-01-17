@@ -1,3 +1,5 @@
+#nullable enable
+
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Iviz.Common;
@@ -12,14 +14,13 @@ namespace Iviz.Resources
 {
     public sealed class ColormapsType
     {
-        public const int Size = 14;
         public const int AtlasSize = 16;
-        [NotNull] public ReadOnlyDictionary<ColormapId, Texture2D> Textures { get; }
-        [NotNull] public ReadOnlyCollection<string> Names { get; }
+        public IReadOnlyDictionary<ColormapId, Texture2D> Textures { get; }
+        public IEnumerable<string> Names { get; }
         
         public ColormapsType()
         {
-            string[] names =
+            Names = new[]
             {
                 "lines",
                 "pink",
@@ -36,10 +37,9 @@ namespace Iviz.Resources
                 "jet",
                 "parula"
             };
-            Names = names.AsReadOnly();
 
             var assetHolder = Resource.Extras.AssetHolder;
-            Dictionary<ColormapId, Texture2D> textures = new Dictionary<ColormapId, Texture2D>()
+            Textures = new Dictionary<ColormapId, Texture2D>()
             {
                 [ColormapId.autumn] = assetHolder.Autumn,
                 [ColormapId.bone] = assetHolder.Bone,
@@ -56,8 +56,6 @@ namespace Iviz.Resources
                 [ColormapId.summer] = assetHolder.Summer,
                 [ColormapId.winter] = assetHolder.Winter,
             };
-
-            Textures = textures.AsReadOnly();
         }
     }
 }

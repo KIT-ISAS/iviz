@@ -14,6 +14,7 @@ using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Controllers.XR;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
@@ -378,7 +379,7 @@ namespace Iviz.App
             if (Connection.MasterUri != null && Connection.MyUri != null && Connection.MyId != null)
             {
                 RosLogger.Internal("Trying to connect to previous ROS server.");
-                Connection.ConnectOneShot();
+                Connection.TryOnceToConnect();
             }
         }
 
@@ -518,7 +519,7 @@ namespace Iviz.App
             try
             {
                 RosLogger.Internal("Saving config file...");
-                string text = JsonConvert.SerializeObject(config, Formatting.Indented);
+                string text = BuiltIns.ToJsonString(config);
                 await FileUtils.WriteAllTextAsync($"{Settings.SavedFolder}/{file}", text, default);
                 RosLogger.Internal("Done.");
             }
@@ -656,7 +657,7 @@ namespace Iviz.App
 
             try
             {
-                string text = JsonConvert.SerializeObject(config, Formatting.Indented);
+                string text = BuiltIns.ToJsonString(config);
                 await FileUtils.WriteAllTextAsync(Settings.SimpleConfigurationPath, text, default);
             }
             catch (Exception e) when
@@ -681,7 +682,7 @@ namespace Iviz.App
                 config.Settings = Settings.SettingsManager.Config;
                 config.HostAliases = Dialogs.SystemData.HostAliases;
                 config.MarkersConfiguration = Dialogs.ARMarkerData.Configuration;
-                string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
+                string outText = BuiltIns.ToJsonString(config);
                 File.WriteAllText(path, outText);
             }
             catch (Exception e) when (e is IOException or SecurityException or JsonException)
@@ -756,7 +757,7 @@ namespace Iviz.App
 
             try
             {
-                string text = JsonConvert.SerializeObject(config, Formatting.Indented);
+                string text = BuiltIns.ToJsonString(config);
                 await FileUtils.WriteAllTextAsync(Settings.XRStartConfigurationPath, text, default);
             }
             catch (Exception e) when
@@ -782,7 +783,7 @@ namespace Iviz.App
                 var config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
                 config.LastMasterUris.Clear();
 
-                string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
+                string outText = BuiltIns.ToJsonString(config);
                 await FileUtils.WriteAllTextAsync(path, outText, token);
             }
             catch (Exception e) when (e is IOException or SecurityException or JsonException)

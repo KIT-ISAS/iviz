@@ -9,6 +9,9 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
+    /// <summary>
+    /// Implements the visualization of a <see cref="TfFrame"/>.
+    /// </summary>
     public sealed class TfFrameDisplay : TfFrame, IHighlightable
     {
         const int TrailTimeWindowInMs = 5000;

@@ -4,6 +4,7 @@ using System;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.RosgraphMsgs;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Roslib;
 using UnityEngine;
 
@@ -21,13 +22,16 @@ namespace Iviz.Ros
         static ConnectionManager? instance;
 
         public delegate void LogDelegate(in Log log);
+
         public static event LogDelegate? LogMessageArrived;
+
         public static LogLevel MinLogLevel { get; set; } = LogLevel.Info;
         public static IExternalServiceProvider ServiceProvider => Connection;
         public static string? MyId => instance?.connection.MyId;
         public static bool IsConnected => instance?.connection.ConnectionState == ConnectionState.Connected;
         public static IListener? LogListener => instance?.logListener;
         public static ISender? LogSender => instance?.logSender;
+
         public static RoslibConnection Connection => instance?.connection ??
                                                      throw new ObjectDisposedException(
                                                          "Connection manager has already been disposed");
@@ -39,7 +43,7 @@ namespace Iviz.Ros
         long frameBandwidthDown;
         long frameBandwidthUp;
         uint logSeq;
-        
+
         public ConnectionManager()
         {
             instance = this;
@@ -47,7 +51,7 @@ namespace Iviz.Ros
             connection = new RoslibConnection();
             logSender = new Sender<Log>("/rosout");
             logListener = new Listener<Log>("/rosout_agg", Handler, RosTransportHint.PreferUdp);
-            
+
             RosLogger.LogExternal += LogMessage;
         }
 
@@ -63,10 +67,10 @@ namespace Iviz.Ros
             logSender.Dispose();
             Connection.Dispose();
             RosServerManager.Dispose();
-            
+
             LogMessageArrived = null;
             RosLogger.LogExternal -= LogMessage;
-        
+
             instance = null;
         }
 
@@ -79,12 +83,12 @@ namespace Iviz.Ros
 
             var logMessage = new Log
             {
-                Header = (logSeq++, ""),
+                Header = new Header(logSeq++, GameThread.TimeNow, ""),
                 Level = (byte)msg.Level,
                 Name = Connection.MyId ?? "/iviz",
                 Msg = msg.Message
             };
-            logSender?.Publish(logMessage);
+            logSender.Publish(logMessage);
         }
 
         internal static void ReportBandwidthUp(long size)

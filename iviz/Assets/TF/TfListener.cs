@@ -61,7 +61,7 @@ namespace Iviz.Controllers.TF
         public static TfFrame ListenersFrame => OriginFrame;
         public static TfFrame DefaultFrame => OriginFrame;
         public static TfFrame FixedFrame => Instance.fixedFrame;
-        public static IEnumerable<string> FramesUsableAsHints => Instance.frames.Values.Select(frame => frame.Id);
+        public static IEnumerable<string> FrameNames => Instance.frames.Keys;
         public static event Action? AfterProcessMessages;
 
         public Listener<TFMessage> Listener { get; }
@@ -237,7 +237,6 @@ namespace Iviz.Controllers.TF
 
                 unityFrame = GameObject.Find("TF").CheckedNull() ?? new GameObject("TF");
 
-
                 rootFrame = CreateFrameObject("/", null);
                 rootFrame.Transform.parent = unityFrame.transform;
                 rootFrame.ForceInvisible();
@@ -268,10 +267,7 @@ namespace Iviz.Controllers.TF
                     PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
                 ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
 
-                Config = config ?? new TfConfiguration
-                {
-                    Topic = DefaultTopic
-                };
+                Config = config ?? new TfConfiguration { Topic = DefaultTopic };
 
                 GameThread.LateEveryFrame += LateUpdate;
             }
@@ -405,12 +401,7 @@ namespace Iviz.Controllers.TF
 
         public static bool TryGetFrame(string id, [NotNullWhen(true)] out TfFrame? frame)
         {
-            if (id == null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
-
-            return Instance.TryGetFrameImpl(id, out frame);
+            return Instance.TryGetFrameImpl(id ?? throw new ArgumentNullException(nameof(id)), out frame);
         }
 
         public static string ResolveFrameId(string frameId)

@@ -9,6 +9,10 @@ using JetBrains.Annotations;
 
 namespace Iviz.Displays
 {
+    /// <summary>
+    /// Display that uses three cubes to represent an axis frame.
+    /// Used mostly by <see cref="TfFrameDisplay"/> and <see cref="CameraOverlayDisplay"/>.
+    /// </summary>
     public sealed class AxisFrameResource : MeshMarkerHolderResource, IRecyclable, IHighlightable
     {
         static readonly string[] Names = {"Axis-X", "Axis-Y", "Axis-Z"};

@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -11,6 +12,7 @@ using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
+using Iviz.Roslib;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -73,7 +75,7 @@ namespace Iviz.App
 
             panel.MaxSpeed.Value = controller.MaxSpeed;
             panel.AttachToFrame.Value = controller.AttachToFrame;
-            panel.AttachToFrame.Hints = TfListener.FramesUsableAsHints;
+            panel.AttachToFrame.Hints = TfListener.FrameNames;
             panel.XIsFront.Value = controller.XIsFront;
 
             panel.JoyTopic.Interactable = controller.PublishJoy;
@@ -136,21 +138,22 @@ namespace Iviz.App
         {
             base.UpdatePanel();
             UpdateHints();
-            panel.AttachToFrame.Hints = TfListener.FramesUsableAsHints;
+            panel.AttachToFrame.Hints = TfListener.FrameNames;
         }
 
         void UpdateHints()
         {
-            var topicTypes = ConnectionManager.Connection.GetSystemTopicTypes();
-            panel.JoyTopic.Hints = topicTypes
+            panel.JoyTopic.Hints = GetTopicTypes()
                 .Where(info => info.Type == Joy.RosMessageType)
                 .Select(info => info.Topic);            
             string expectedType = controller.UseTwistStamped
                 ? TwistStamped.RosMessageType
                 : Twist.RosMessageType;
-            panel.TwistTopic.Hints = topicTypes
+            panel.TwistTopic.Hints = GetTopicTypes()
                 .Where(info => info.Type == expectedType)
                 .Select(info => info.Topic);            
+            
+            static IEnumerable<BriefTopicInfo> GetTopicTypes() => ConnectionManager.Connection.GetSystemTopicTypes();
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

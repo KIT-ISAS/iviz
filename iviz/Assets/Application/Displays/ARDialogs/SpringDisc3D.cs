@@ -23,8 +23,7 @@ namespace Iviz.Displays.ARDialogs
         MeshMarkerResource Glow => glow.AssertNotNull(nameof(glow));
         XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         
-        readonly NativeList<LineWithColor> lineBuffer = new();
-        Color color = new Color(0, 0.6f, 1f);
+        Color color = new(0, 0.6f, 1f);
         Color secondaryColor = Color.white;
 
         public event Action<Vector3>? Moved;
@@ -101,7 +100,9 @@ namespace Iviz.Displays.ARDialogs
             
             Link.Transform.localScale = new Vector3(0.2f, 0.2f, discDistance);
             Link.Transform.localPosition = discPosition / 2;
-            Link.Transform.localRotation = Quaternion.LookRotation(discPosition);
+            Link.Transform.localRotation = discPosition.ApproximatelyZero() 
+                ? Quaternion.identity 
+                : Quaternion.LookRotation(discPosition);
 
             if (raiseOnMoved)
             {

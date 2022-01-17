@@ -149,26 +149,28 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             switch (msg.Type.AsWidgetType())
             {
                 case WidgetType.RotationDisc:
-                    guiObject.Get<RotationDisc>().Moved += angle => OnDiscRotated(guiObject, angle);
+                    guiObject.As<RotationDisc>().Moved += angle => OnDiscRotated(guiObject, angle);
                     break;
                 case WidgetType.SpringDisc:
+                    guiObject.As<SpringDisc>().Moved += direction => OnDiscMoved(guiObject, direction);
+                    break;
                 case WidgetType.SpringDisc3D:
-                    guiObject.Get<SpringDisc>().Moved += direction => OnDiscMoved(guiObject, direction);
+                    guiObject.As<SpringDisc3D>().Moved += direction => OnDiscMoved(guiObject, direction);
                     break;
                 case WidgetType.TrajectoryDisc:
-                    guiObject.Get<TrajectoryDisc>().Moved += (direction, period) =>
+                    guiObject.As<TrajectoryDisc>().Moved += (direction, period) =>
                         OnTrajectoryDiscMoved(guiObject, direction, period);
                     break;
                 case WidgetType.TargetArea:
-                    var targetWidget = guiObject.Get<TargetWidget>();
+                    var targetWidget = guiObject.As<TargetWidget>();
                     targetWidget.Moved += (scale, position) => OnTargetAreaMoved(guiObject, scale, position);
                     targetWidget.Cancelled += () => OnTargetAreaCanceled(guiObject);
                     break;
                 case WidgetType.PositionDisc3D:
-                    guiObject.Get<PositionDisc3D>().Moved += direction => OnDiscMoved(guiObject, direction);
+                    guiObject.As<PositionDisc3D>().Moved += direction => OnDiscMoved(guiObject, direction);
                     break;
                 case WidgetType.PositionDisc:
-                    guiObject.Get<PositionDisc>().Moved += direction => OnDiscMoved(guiObject, direction);
+                    guiObject.As<PositionDisc>().Moved += direction => OnDiscMoved(guiObject, direction);
                     break;
                 /*
                 case WidgetType.Tooltip:
@@ -192,7 +194,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
         {
             Handler(msg);
             return msg.Action.AsActionType() == ActionType.Add
-                ? dialogs[msg.Id].Get<ARDialog>()
+                ? dialogs[msg.Id].As<ARDialog>()
                 : null;
         }
 
@@ -522,7 +524,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
                 ExpirationTime = DateTime.MinValue;
             }
 
-            public T Get<T>() where T : IDisplay
+            public T As<T>() where T : IDisplay
             {
                 return (T)display;
             }

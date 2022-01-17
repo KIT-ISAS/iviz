@@ -21,7 +21,7 @@ namespace Iviz.App
         const string EmptyTopText = "<b>State:</b> Disconnected. Nothing to show!";
         const string EmptyBottomText = "(Click on an item for more information)";
 
-        static readonly XmlRpcValue.JsonConverter JsonConverter = new();
+        static readonly JsonConverter[] JsonConverter = { new XmlRpcValue.JsonConverter() };
 
         readonly SystemDialogPanel panel;
         public override IDialogPanel Panel => panel;
@@ -373,8 +373,7 @@ namespace Iviz.App
             {
                 description.Append("<b>Value:</b>").AppendLine();
 
-                string value = JsonConvert
-                    .SerializeObject(paramValue, Formatting.Indented, JsonConverter);
+                string value = JsonConvert.SerializeObject(paramValue, Formatting.Indented, JsonConverter);
                 if (paramValue.ValueType != XmlRpcValue.Type.String)
                 {
                     description.Append(value);

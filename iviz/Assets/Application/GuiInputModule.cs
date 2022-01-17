@@ -959,9 +959,8 @@ namespace Iviz.App
 
         static bool TryGetHighlightable(GameObject gameObject, out IHighlightable h)
         {
-            Transform parent;
             return gameObject.TryGetComponent(out h) ||
-                   (parent = gameObject.transform.parent) != null && parent.TryGetComponent(out h);
+                   gameObject.transform.parent is { } parent && parent.TryGetComponent(out h);
         }
 
         public static void PlayClickAudio(in Vector3 position)

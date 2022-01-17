@@ -140,10 +140,7 @@ namespace Iviz.App.ARDialogs
         
         void OnDestroy()
         {
-            if (node != null)
-            {
-                node.Dispose();
-            }
+            node?.Dispose();
         }
     }
 }

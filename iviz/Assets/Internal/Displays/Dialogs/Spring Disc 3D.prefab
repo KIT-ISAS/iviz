@@ -46,7 +46,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 0.03, z: 1}
+  m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3602615320837110326
 MonoBehaviour:
@@ -709,7 +709,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Transform: {fileID: 3834849191497203498}
   boxCollider: {fileID: 7016720609295999487}
-  diffuseTexture: {fileID: 0}
+  diffuseTexture: {fileID: 2800000, guid: 0efa62481efb940378bf2592d1a12fa6, type: 3}
   bumpTexture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 1, g: 1, b: 1, a: 1}

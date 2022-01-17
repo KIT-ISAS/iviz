@@ -428,7 +428,14 @@ namespace Iviz.Controllers
 
         void InfoHandler(CameraInfo info)
         {
-            projector.Intrinsic = new Intrinsic(info.K);
+            var intrinsic = new Intrinsic(info.K);
+            if (!intrinsic.IsValid)
+            {
+                RosLogger.Error($"{this}: Ignoring invalid intrinsic {intrinsic.ToString()}.");
+                return;
+                    
+            } 
+            projector.Intrinsic = intrinsic;            
         }
 
         public bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format, out Vector4 color) =>

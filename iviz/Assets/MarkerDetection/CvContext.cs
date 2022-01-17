@@ -481,7 +481,7 @@ namespace Iviz.MarkerDetection
         [DataMember] public Vector2f[] Corners { get; }
 
         internal ArucoMarkerCorners(int id, Vector2f[] corners) => (Code, Corners) = (id.ToString(), corners);
-        public override string ToString() => JsonConvert.SerializeObject(this, Formatting.None);
+        public override string ToString() => BuiltIns.ToJsonString(this, false);
     }
 
     [DataContract]
@@ -492,6 +492,6 @@ namespace Iviz.MarkerDetection
         [DataMember] public Vector2f[] Corners { get; }
 
         internal QrMarkerCorners(string code, Vector2f[] corners) => (Code, Corners) = (code, corners);
-        public override string ToString() => JsonConvert.SerializeObject(this, Formatting.None);
+        public override string ToString() => BuiltIns.ToJsonString(this, false);
     }
 }

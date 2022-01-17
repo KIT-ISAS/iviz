@@ -22,10 +22,9 @@ namespace Iviz.Ros
         static RoslibConnection Connection => ConnectionManager.Connection;
 
         readonly ConcurrentQueue<T> messageQueue = new();
-        readonly Action<T>? delayedHandler;
+        readonly Action<T>? handlerOnGameThread;
         readonly Func<T, IRosReceiver, bool>? directHandler;
-        readonly List<T> tmpMessageBag = new(32);
-        readonly bool callbackInGameThread;
+        readonly List<T> messageBuffer = new(32);
 
         int droppedMsgCounter;
         long lastMsgBytes;
@@ -33,10 +32,12 @@ namespace Iviz.Ros
         int recentMsgCounter;
         RosTransportHint transportHint;
 
+        bool CallbackInGameThread => handlerOnGameThread != null;
+        (int active, int total) NumPublishers => Connection.GetNumPublishers(Topic);
+
         public string Topic { get; }
         public string Type { get; }
         public RosListenerStats Stats { get; private set; }
-        public (int active, int total) NumPublishers => Connection.GetNumPublishers(Topic);
         public int MaxQueueSize { get; set; } = 1;
         public bool Subscribed { get; private set; }
 
@@ -66,7 +67,7 @@ namespace Iviz.Ros
             Type = BuiltIns.GetMessageType(typeof(T));
             this.transportHint = transportHint;
 
-            RosLogger.Info($"Subscribing to <b>{topic}</b> <i>[{Type}]</i>.");
+            RosLogger.Info($"{this}: Subscribing.");
 
             GameThread.EverySecond += UpdateStats;
         }
@@ -81,9 +82,8 @@ namespace Iviz.Ros
         public Listener(string topic, Action<T> handler,
             RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
         {
-            delayedHandler = handler ?? throw new ArgumentNullException(nameof(handler));
-            callbackInGameThread = true;
-            GameThread.ListenersEveryFrame += CallHandlerDelayed;
+            handlerOnGameThread = handler ?? throw new ArgumentNullException(nameof(handler));
+            GameThread.ListenersEveryFrame += CallHandlerOnGameThread;
             Connection.Subscribe(this);
             Subscribed = true;
         }
@@ -105,7 +105,6 @@ namespace Iviz.Ros
             RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
         {
             directHandler = handler ?? throw new ArgumentNullException(nameof(handler));
-            callbackInGameThread = false;
             Connection.Subscribe(this);
             Subscribed = true;
         }
@@ -137,12 +136,12 @@ namespace Iviz.Ros
         public void Dispose()
         {
             GameThread.EverySecond -= UpdateStats;
-            if (callbackInGameThread)
+            if (CallbackInGameThread)
             {
-                GameThread.ListenersEveryFrame -= CallHandlerDelayed;
+                GameThread.ListenersEveryFrame -= CallHandlerOnGameThread;
             }
 
-            RosLogger.Info($"Unsubscribing from {Topic}.");
+            RosLogger.Info($"{this}: Unsubscribing.");
             Unsubscribe();
         }
 
@@ -204,7 +203,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            if (callbackInGameThread)
+            if (CallbackInGameThread)
             {
                 if (messageQueue.Count >= MaxQueueSize)
                 {
@@ -219,34 +218,34 @@ namespace Iviz.Ros
             CallHandlerDirect(msg, receiver);
         }
 
-        void CallHandlerDelayed()
+        void CallHandlerOnGameThread()
         {
-            if (delayedHandler == null)
+            int messageCount = messageQueue.Count;
+            if (messageCount == 0 || handlerOnGameThread == null)
             {
                 return;
             }
+            
+            messageBuffer.Clear();
 
-            tmpMessageBag.Clear();
-
-            int messageCount = messageQueue.Count;
             foreach (int _ in ..messageCount) // copy a fixed amount, in case messages are still being added
             {
                 messageQueue.TryDequeue(out T t);
-                tmpMessageBag.Add(t);
+                messageBuffer.Add(t);
             }
 
-            int start = Math.Max(0, tmpMessageBag.Count - MaxQueueSize); // should be 0 unless MaxQueueSize changed
-            foreach (var msg in tmpMessageBag.Skip(start))
+            int start = Math.Max(0, messageBuffer.Count - MaxQueueSize); // should be 0 unless MaxQueueSize changed
+            foreach (var msg in messageBuffer.Skip(start))
             {
                 Interlocked.Increment(ref recentMsgCounter);
                 try
                 {
                     lastMsgBytes += msg.RosMessageLength;
-                    delayedHandler(msg);
+                    handlerOnGameThread(msg);
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"{this} Error during callback: ", e);
+                    RosLogger.Error($"{this}: Error during callback", e);
                 }
             }
 
@@ -273,7 +272,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this} Error during callback: ", e);
+                RosLogger.Error($"{this}: Error during callback", e);
                 processed = false;
             }
 
