@@ -1,7 +1,17 @@
-﻿namespace Iviz.App
+﻿using System;
+using UnityEngine;
+
+namespace Iviz.App
 {
-    public class ModuleDisposer
+    /// <summary>
+    /// This module is attached to the iviz object on the scene and exists only
+    /// to call Dispose() on <see cref="ModuleListPanel"/> to finalize gracefully.
+    /// </summary>
+    public class ModuleDisposer : MonoBehaviour
     {
-        
+        void OnApplicationQuit()
+        {
+            ModuleListPanel.Instance.Dispose();
+        }
     }
 }

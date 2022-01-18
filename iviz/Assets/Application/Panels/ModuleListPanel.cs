@@ -73,7 +73,8 @@ namespace Iviz.App
         readonly HashSet<string> topicsWithModule = new();
         readonly HashSet<ImageDialogData> imageDatas = new();
         readonly TfPublisher tfPublisher = new();
-        readonly ConnectionManager connectionManager = new();
+
+        ConnectionManager? connectionManager;
 
         int frameCounter;
         bool allGuiVisible = true;
@@ -175,13 +176,10 @@ namespace Iviz.App
             ARController.ClearResources();
         }
 
-        void OnApplicationQuit()
+        public void Dispose()
         {
-            Dispose();
-        }
+            Debug.LogWarning("DISPOSING!");
 
-        void Dispose()
-        {
             GameThread.LateEverySecond -= UpdateFpsStats;
             GameThread.EveryFrame -= UpdateFpsCounter;
             GameThread.EveryTenthSecond -= UpdateCameraStats;
@@ -203,7 +201,7 @@ namespace Iviz.App
 
             tfPublisher.Dispose();
             cameraPanelData?.Dispose();
-            connectionManager.Dispose();
+            connectionManager?.Dispose();
 
             GuiWidgetListener.DisposeDefaultHandler();
 
@@ -215,6 +213,8 @@ namespace Iviz.App
 
         void Start()
         {
+            connectionManager = new ConnectionManager();
+            
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
 

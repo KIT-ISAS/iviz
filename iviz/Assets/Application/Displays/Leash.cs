@@ -20,6 +20,7 @@ namespace Iviz.Displays
         protected override IDisplay Display => Resource;
 
         public Color Color { get; set; } = Color.white;
+        public Color ReticleColor { get; set; } = Color.white;
 
         public float Width
         {
@@ -39,6 +40,7 @@ namespace Iviz.Displays
 
             float scale = 0.03f * Vector3.Distance(target, Settings.MainCameraTransform.position);
             Reticle.Transform.localScale = scale * Vector3.one;
+            Reticle.Color = ReticleColor;
 
             BuildLeash(pointerRay, target + normal * offset);
         }

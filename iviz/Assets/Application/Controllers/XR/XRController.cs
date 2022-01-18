@@ -34,6 +34,8 @@ namespace Iviz.Controllers.XR
         public Sender<XRHandState> LeftHandSender { get; } = new("~xr/left_hand");
         public Sender<XRHandState> RightHandSender { get; } = new("~xr/right_hand");
 
+        public const float NearDistance = 0.2f;
+        
         readonly GazeController gaze;
         readonly XRRayInteractor gazeInteractor;
         readonly HandController leftHand;
@@ -186,7 +188,7 @@ namespace Iviz.Controllers.XR
 
         void ManageGestureLeft()
         {
-            if (leftGestures.IsHandOpen && palmCompass == null)
+            if (leftGestures.IsPalmUp && palmCompass == null)
             {
                 if (leftHand.PalmTransform is not { } palmTransform)
                 {
@@ -201,7 +203,7 @@ namespace Iviz.Controllers.XR
                 FAnimator.Spawn(default, 0.1f,
                     t => newPalmCompass.Transform.localScale = Mathf.Sqrt(t) * baseScale * Vector3.one);
             }
-            else if (!leftGestures.IsHandOpen && palmCompass != null)
+            else if (!leftGestures.IsPalmUp && palmCompass != null)
             {
                 var oldPalmCompass = palmCompass;
                 float baseScale = 0.125f / oldPalmCompass.transform.parent.localScale.x;

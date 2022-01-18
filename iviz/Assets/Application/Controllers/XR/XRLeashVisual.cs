@@ -62,6 +62,9 @@ namespace Iviz.Controllers.XR
             if (draggable != null && draggable.ReferencePoint is { } referencePoint)
             {
                 Leash.Color = Color.cyan;
+                Leash.ReticleColor = Vector3.Distance(transformRay.origin, referencePoint) < XRController.NearDistance
+                    ? Color.blue
+                    : Color.white;
                 Leash.Width = interactingWidth;
                 if (draggable.ReferenceNormal is { } referenceNormal)
                 {
@@ -85,6 +88,9 @@ namespace Iviz.Controllers.XR
             if (hitExists)
             {
                 Leash.Color = Color.white;
+                Leash.ReticleColor = Vector3.Distance(transformRay.origin, hitPosition) < XRController.NearDistance
+                    ? Color.blue
+                    : Color.white;
                 Leash.Width = hoveringWidth;
                 Leash.Set(transformRay, hitPosition, hitNormal, isUIHitClosest ? 0.01f : 0.001f);
                 return;

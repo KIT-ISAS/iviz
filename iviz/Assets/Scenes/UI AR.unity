@@ -10598,6 +10598,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1360200844}
   - component: {fileID: 1360200845}
+  - component: {fileID: 1360200846}
   m_Layer: 0
   m_Name: iviz
   m_TagString: Untagged
@@ -10642,6 +10643,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isXREnabled: 0
   isHololens: 0
+--- !u!114 &1360200846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1360200843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd76475009fd4568a6b434b0768481c4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1371331134 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2498166935032724990, guid: 6303af998896f4ad29bf3fbf96bd0cdd,
@@ -11336,7 +11349,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -30.222137, y: 0}
+  m_AnchoredPosition: {x: -30.222168, y: 0}
   m_SizeDelta: {x: 67.16193, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1408667568

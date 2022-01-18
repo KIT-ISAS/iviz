@@ -47,6 +47,8 @@ namespace Iviz.Ros
         public ConnectionManager()
         {
             instance = this;
+            
+            Debug.Log("ConnectionManager: Creating");
 
             connection = new RoslibConnection();
             logSender = new Sender<Log>("/rosout");

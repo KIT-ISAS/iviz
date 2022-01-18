@@ -11,8 +11,7 @@ namespace Iviz.Controllers.XR
         bool isPalmClicking;
 
         public bool IsPalmUp { get; private set; }
-        //public bool IsHandOpen { get; private set; }
-        public bool IsHandOpen => true;
+        public bool IsHandOpen { get; private set; }
         public bool IsIndexPointing { get; private set; }
 
         public event Action? GestureChanged;
@@ -58,12 +57,12 @@ namespace Iviz.Controllers.XR
 
             if (!IsHandOpen && CheckPalmOpen(0.08f, 0.105f))
             {
-                //IsHandOpen = true;
+                IsHandOpen = true;
                 triggerStateChanged = true;
             }
             else if (IsHandOpen && !CheckPalmOpen(0.07f, 0.095f))
             {
-                //IsHandOpen = false;
+                IsHandOpen = false;
                 triggerStateChanged = true;
             }
 
@@ -120,9 +119,9 @@ namespace Iviz.Controllers.XR
                 PalmClicked?.Invoke();
             }
 
-            bool CheckPalmClicking() => IsHandOpen &&
-                                        Vector3.Distance(
-                                            otherState.IndexFingertip.position, state.Palm.position) < 0.035f;
+            bool CheckPalmClicking() => IsPalmUp &&
+                                        Vector3.Distance(otherState.IndexFingertip.position,
+                                            state.Palm.position + 0.02f * Vector3.up) < 0.035f;
         }
     }
 }

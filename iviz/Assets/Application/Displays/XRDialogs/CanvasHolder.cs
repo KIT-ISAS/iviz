@@ -25,6 +25,9 @@ namespace Iviz.Displays
         SelectionFrame? frame;
         Transform? mTransform;
 
+        bool isDragging;
+        float cameraZ = 1.5f;
+
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
 
         RoundedPlaneResource Background =>
@@ -103,6 +106,7 @@ namespace Iviz.Displays
                 }
             };
 
+            Draggable.StartDragging += OnStartDragging;
             Draggable.EndDragging += OnEndDragging;
 
             CanvasSize = CanvasSize;
@@ -124,8 +128,9 @@ namespace Iviz.Displays
 
             var canvasTransform = (RectTransform)Canvas.transform;
             float sizeY = canvasTransform.rect.size.y * canvasTransform.localScale.y;
-            var targetPosition = mainCameraPose.position + mainCameraPose.forward * 1.5f;
+            var targetPosition = mainCameraPose.position + mainCameraPose.forward * 1.5f - mainCameraPose.up * 0.2f;
             targetPosition.y = Math.Max(targetPosition.y, sizeY / 2 + 0.5f);
+            cameraZ = 1.5f;
 
             var targetRotation = CalculateOrientationToCamera();
 
@@ -146,10 +151,28 @@ namespace Iviz.Displays
             });
         }
 
+        void OnStartDragging()
+        {
+            isDragging = true;
+        }
+        
         void OnEndDragging()
         {
+            isDragging = false;
+            
             tokenSource?.Cancel();
             tokenSource = new CancellationTokenSource();
+            
+            var mainCameraPose = new Pose(
+                Settings.MainCameraTransform.position,
+                Quaternion.Euler(0, Settings.MainCameraTransform.eulerAngles.y, 0)
+            );
+            var currentPose = Transform.AsPose();
+
+            const float minZ = 1.0f;
+            const float maxZ = 2.0f;
+
+            cameraZ = Mathf.Clamp(mainCameraPose.InverseMultiply(currentPose).position.z, minZ, maxZ);
 
             var start = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
             FAnimator.Spawn(tokenSource.Token, 0.25f,
@@ -201,18 +224,23 @@ namespace Iviz.Displays
                 Quaternion.Lerp(currentPose.rotation, targetRotation, damping * 0.5f));
         }
 
-        static Pose ClampTargetPose(in Pose currentPose, in Pose mainCameraPose)
+        Pose ClampTargetPose(in Pose currentPose, in Pose mainCameraPose)
         {
             const float minX = -0.5f;
             const float maxX = 0.5f;
             const float minY = -0.4f;
-            const float maxY = -0.2f;
-            const float minZ = 1.5f;
+            const float maxY = 0f;
+            const float minZ = 1.0f;
             const float maxZ = 2.0f;
             const float angleThreshold = 15; 
 
             var (currentPositionLocal, currentRotationLocal) = mainCameraPose.InverseMultiply(currentPose);
             var targetPositionLocal = Clamp(currentPositionLocal);
+
+            if (!isDragging)
+            {
+                targetPositionLocal.z = cameraZ;
+            }
 
             float currentAngleLocal = UnityUtils.RegularizeAngle(currentRotationLocal.eulerAngles.y);
 

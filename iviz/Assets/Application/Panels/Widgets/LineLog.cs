@@ -15,12 +15,12 @@ namespace Iviz.App
 
         static readonly char[] Separators = { '\n' };
 
-        [SerializeField] TMP_Text? text2 = null;
+        [SerializeField] TMP_Text? text;
 
         readonly List<string> lines = new();
         bool active = true;
 
-        TMP_Text Text2 => text2.AssertNotNull(nameof(text2));
+        TMP_Text Text => text.AssertNotNull(nameof(text));
 
         public bool Active
         {
@@ -77,7 +77,7 @@ namespace Iviz.App
                 }
             }
 
-            Text2.SetText(description);
+            Text.SetText(description);
         }
 
         public void ClearSubscribers()
