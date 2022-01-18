@@ -20,7 +20,4 @@
     <ProjectReference Include="..\iviz_msgs\iviz_msgs.csproj" />
     <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Publish" />
-  </ItemGroup>
 </Project>
