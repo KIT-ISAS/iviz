@@ -8,6 +8,9 @@ namespace Iviz.Msgs
     [StructLayout(LayoutKind.Sequential)]
     public readonly struct time : IEquatable<time>, IComparable<time>
     {
+        /// <summary>
+        /// Time offset to add to all timestamps.
+        /// </summary>
         public static TimeSpan GlobalTimeOffset { get; set; } = TimeSpan.Zero;
         
         [DataMember(Name = "secs")] public uint Secs { get; }
@@ -21,6 +24,9 @@ namespace Iviz.Msgs
 
         static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
+        /// <summary>
+        /// Constructs a time from the given DateTime. Does not consider <see cref="GlobalTimeOffset"/>.
+        /// </summary>
         public time(in DateTime time)
         {
             TimeSpan diff = time.ToUniversalTime() - UnixEpoch;
@@ -28,10 +34,10 @@ namespace Iviz.Msgs
             Nsecs = (uint) (diff.Ticks % 10000000) * 100;
         }
 
-        public static time Now()
-        {
-            return new(DateTime.Now + GlobalTimeOffset);
-        }
+        /// <summary>
+        /// Current time with added <see cref="GlobalTimeOffset"/>.
+        /// </summary>
+        public static time Now() => new(DateTime.Now + GlobalTimeOffset);
 
         public DateTime ToDateTime()
         {

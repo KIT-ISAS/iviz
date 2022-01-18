@@ -23,7 +23,7 @@ namespace Iviz.Msgs.StdMsgs
         [DataMember (Name = "stamp")] public time Stamp;
         //Frame this data is associated with
         [DataMember (Name = "frame_id")] public string FrameId;
-    
+
         /// Explicit constructor.
         public Header(uint Seq, time Stamp, string FrameId)
         {
