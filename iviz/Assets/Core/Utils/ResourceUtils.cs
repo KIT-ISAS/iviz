@@ -24,7 +24,7 @@ namespace Iviz.Core
             ResourcePool.ReturnDisplay(resource);
         }
 
-        public static void ReturnToPool(this IDisplay? resource, Info<GameObject> info)
+        public static void ReturnToPool(this IDisplay? resource, ResourceKey<GameObject> resourceKey)
         {
             if (resource == null)
             {
@@ -37,60 +37,10 @@ namespace Iviz.Core
             }            
 
             resource.Suspend();
-            ResourcePool.Return(info, behaviour.gameObject);
-        }
-
-        public static ReadOnlyDictionary<T, TU> AsReadOnly<T, TU>(this Dictionary<T, TU> t)
-        {
-            return new ReadOnlyDictionary<T, TU>(t);
-        }
-
-        
-        public static WithIndexEnumerable<T> WithIndex<T>(this IEnumerable<T> source)
-        { 
-            return new WithIndexEnumerable<T>(source);
-        }
-
-        public static T EnsureComponent<T>(this GameObject gameObject) where T : Component =>
-            gameObject.TryGetComponent(out T comp) ? comp : gameObject.AddComponent<T>();
-
-        public static T Instantiate<T>(this Info<GameObject> o, Transform? parent = null)
-        {
-            var component = o.Instantiate(parent).GetComponent<T>();
-            if (component == null)
-            {
-                throw new NullReferenceException("While instantiating " + o + " the component " +
-                                                 typeof(T).Name + " was not found.");
-            }
-
-            return component;
+            ResourcePool.Return(resourceKey, behaviour.gameObject);
         }
     }
 
-    public readonly struct WithIndexEnumerable<T>
-    {
-        readonly IEnumerable<T> a;
-
-        public struct Enumerator
-        {
-            readonly IEnumerator<T> a;
-            int index;
-
-            internal Enumerator(IEnumerator<T> a) => (this.a, index) = (a, -1);
-
-            public bool MoveNext()
-            {
-                ++index;
-                return a.MoveNext();
-            }
-
-            public (T, int) Current => (a.Current, index);
-        }
-
-        public WithIndexEnumerable(IEnumerable<T> a) => this.a = a;
-        public Enumerator GetEnumerator() => new(a.GetEnumerator());
-    }    
-    
     public class MissingAssetFieldException : Exception
     {
         public MissingAssetFieldException(string message) : base(message)

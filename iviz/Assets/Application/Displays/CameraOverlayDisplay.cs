@@ -7,11 +7,12 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
+    /// <summary>
+    /// Axis frame shown on the top right of the camera overlay.
+    /// </summary>
     [RequireComponent(typeof(AxisFrameResource))]
     public class CameraOverlayDisplay : MonoBehaviour
     {
-        static readonly Quaternion BaseTransform = Quaternion.AngleAxis(90, Vector3.up);
-
         [SerializeField] AxisFrameResource? resource;
         [SerializeField] Camera? parentCamera;
         [SerializeField] Camera? grandparentCamera;
@@ -72,7 +73,9 @@ namespace Iviz.Displays
             }
 
             CheckSettings();
-            Transform.rotation = TfListener.OriginFrame.Transform.rotation * BaseTransform;
+
+            var baseTransform = new Quaternion(0, 0.707106769f, 0, 0.707106769f); // Quaternion.AngleAxis(90, Vector3.up);
+            Transform.rotation = TfListener.OriginFrame.Transform.rotation * baseTransform;
         }
     }
 }

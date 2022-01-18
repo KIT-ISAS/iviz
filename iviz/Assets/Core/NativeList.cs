@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -23,6 +24,11 @@ namespace Iviz.Core
 
         public void EnsureCapacity(int value)
         {
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+            
             if (value <= Capacity)
             {
                 return;
@@ -50,6 +56,12 @@ namespace Iviz.Core
             EnsureCapacity(nextLength);
             UnsafeGet(length) = t;
             length = nextLength;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void AddUnsafe(in T t)
+        {
+            UnsafeGet(length++) = t;
         }
 
         public void AddRange(ReadOnlySpan<T> otherArray)
@@ -85,6 +97,8 @@ namespace Iviz.Core
 
         public unsafe ReadOnlySpan<T> AsReadOnlySpan() => new(array.GetUnsafeReadOnlyPtr(), length);
 
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         unsafe ref T UnsafeGet(int index) =>
             ref *((T*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(array) + index);
 

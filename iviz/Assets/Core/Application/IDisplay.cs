@@ -48,20 +48,29 @@ namespace Iviz.Displays
         Color Tint { set; }
     }
     
+    /// <summary>
+    /// Interface for displays that support setting a material color and emissive color. 
+    /// </summary>
     public interface ISupportsColor
     {
         Color Color { set; }
         Color EmissiveColor { set; }
     }
     
+    /// <summary>
+    /// Interface for displays that support physically based rendering. 
+    /// </summary>
     public interface ISupportsPbr
     {
         float Metallic { set; }
         float Smoothness { set; }
     }
     
+    /// <summary>
+    /// Interface for displays that support enabling and disabling shadows. 
+    /// </summary>
     public interface ISupportsShadows
     {
-        bool ShadowsEnabled { set; }
+        bool EnableShadows { set; }
     }
 }

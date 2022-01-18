@@ -22,7 +22,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal ColorChannel(ref ReadBuffer b)
+        public ColorChannel(ref ReadBuffer b)
         {
             Colors = b.DeserializeStructArray<Color32>();
         }

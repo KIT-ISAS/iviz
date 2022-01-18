@@ -58,7 +58,6 @@ namespace Iviz.Msgs
                 return string.Empty;
             }
 
-            ThrowIfOutOfRange(count);
             string val = BuiltIns.UTF8.GetString(ptr[..count]);
             Advance(count);
             return val;

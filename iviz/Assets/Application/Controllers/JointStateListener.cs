@@ -25,8 +25,6 @@ namespace Iviz.Controllers
 
     public sealed class JointStateListener : ListenerController
     {
-        public override IModuleData ModuleData { get; }
-
         [NotNull] public override TfFrame Frame => TfListener.DefaultFrame;
 
         readonly JointStateConfiguration config = new JointStateConfiguration();
@@ -97,14 +95,9 @@ namespace Iviz.Controllers
 
         readonly HashSet<string> warnNotFound = new HashSet<string>();
 
-        IListener listener;
+        [CanBeNull] IListener listener;
         public override IListener Listener => listener;
         
-        public JointStateListener([NotNull] IModuleData moduleData)
-        {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-        }
-
         void OnRobotStopped()
         {
             Robot = null;

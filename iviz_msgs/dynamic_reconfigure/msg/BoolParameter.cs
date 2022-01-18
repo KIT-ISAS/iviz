@@ -24,7 +24,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal BoolParameter(ref ReadBuffer b)
+        public BoolParameter(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Value = b.Deserialize<bool>();

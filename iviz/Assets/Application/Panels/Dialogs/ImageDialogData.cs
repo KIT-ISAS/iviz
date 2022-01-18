@@ -12,13 +12,13 @@ namespace Iviz.App
 {
     public sealed class ImageDialogData : DialogData
     {
-        readonly ImageDialogContents panel;
+        readonly ImageDialogPanel panel;
         readonly GameObject canvas;
         readonly ImageDialogListener listener;
         string title = "";
         string lastSample = "";
 
-        public override IDialogPanelContents Panel => panel;
+        public override IDialogPanel Panel => panel;
         public event Action? Closed;
 
         public string Title
@@ -30,16 +30,16 @@ namespace Iviz.App
             }
         }
 
-        public ImageDialogData(ImageDialogListener listener, Transform holder)
+        public ImageDialogData(ImageDialogListener listener, Transform? holder)
         {
-            this.listener = listener;
+            this.listener = listener ?? throw new ArgumentNullException(nameof(listener));
             canvas = ResourcePool.Rent(Resource.Widgets.ImageCanvas, holder);
             if (Settings.IsXR)
             {
                 canvas.ProcessCanvasForXR();
             }
 
-            panel = canvas.GetComponentInChildren<ImageDialogContents>();
+            panel = canvas.GetComponentInChildren<ImageDialogPanel>();
             panel.Closed += () => Closed?.Invoke();
 
 
@@ -91,7 +91,7 @@ namespace Iviz.App
                 $"<b>{title}</b>";
         }
 
-        public void Stop()
+        public override void Dispose()
         {
             Closed = null;
             panel.ClearSubscribers();

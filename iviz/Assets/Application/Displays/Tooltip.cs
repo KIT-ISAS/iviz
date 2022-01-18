@@ -1,5 +1,6 @@
 #nullable enable
 
+using System;
 using System.Text;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -12,7 +13,7 @@ using UnityEngine;
 namespace Iviz.Displays
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class Tooltip : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class Tooltip : MonoBehaviour, IDisplay, IRecyclable, ISupportsColor, ISupportsPbr, ISupportsTint
     {
         [SerializeField] BoxCollider? boxCollider;
         [SerializeField] TMP_Text? text;
@@ -28,7 +29,7 @@ namespace Iviz.Displays
             background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneResource>(Transform);
 
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
-        public Bounds? Bounds => new Bounds(BoxCollider.center, BoxCollider.size);
+        public Bounds? Bounds => BoxCollider.GetBounds();
 
         public int Layer
         {
@@ -73,6 +74,21 @@ namespace Iviz.Displays
             set => Text.color = value;
         }
 
+        public float Metallic
+        {
+            set => Background.Metallic = value;
+        }
+
+        public float Smoothness
+        {
+            set => Background.Smoothness = value;
+        }
+
+        public Color Tint
+        {
+            set => Background.Tint = value;
+        }
+        
         public string Caption
         {
             set
@@ -91,7 +107,6 @@ namespace Iviz.Displays
 
         public bool Visible
         {
-            get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
 
@@ -108,7 +123,7 @@ namespace Iviz.Displays
             UpdateSize();
         }
 
-        public bool FixedWidth { get; set; } = false;
+        public bool FixedWidth { get; set; }
         public float PaddingX { get; set; } = 5;
         public float PaddingY { get; set; } = 2;
 
@@ -145,13 +160,8 @@ namespace Iviz.Displays
 
         public static float GetRecommendedSize(in Vector3 unityPosition)
         {
-            /*
-            float distanceToCam = Settings.MainCameraTransform
-                .InverseTransformDirection(unityPosition - Settings.MainCameraTransform.position).z;
-                */
             float distanceToCam = Vector3.Distance(Settings.MainCameraTransform.position, unityPosition);
-            float size = 0.2f * Mathf.Max(distanceToCam, 0);
-
+            float size = 0.2f * Math.Max(distanceToCam, 0);
             float baseFrameSize = TfListener.Instance.FrameSize;
             float labelSize = baseFrameSize * size * (1.2f * 0.375f / 2);
             return labelSize;

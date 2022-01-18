@@ -9,7 +9,7 @@ namespace Iviz.App.ARDialogs
     public sealed class RingDisplay : MeshMarkerResource
     {
         static Mesh baseMesh;
-        [NotNull] static Mesh BaseMesh => baseMesh != null ? baseMesh : (baseMesh = CreateMesh(0.9f, 1.1f));
+        [NotNull] static Mesh BaseMesh => baseMesh != null ? baseMesh : (baseMesh = CreateMesh(0.85f, 1.0f));
 
         protected override void Awake()
         {

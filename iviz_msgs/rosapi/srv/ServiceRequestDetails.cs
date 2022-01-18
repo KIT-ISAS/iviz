@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal ServiceRequestDetailsRequest(ref ReadBuffer b)
+        public ServiceRequestDetailsRequest(ref ReadBuffer b)
         {
             Type = b.DeserializeString();
         }
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal ServiceRequestDetailsResponse(ref ReadBuffer b)
+        public ServiceRequestDetailsResponse(ref ReadBuffer b)
         {
             Typedefs = b.DeserializeArray<TypeDef>();
             for (int i = 0; i < Typedefs.Length; i++)

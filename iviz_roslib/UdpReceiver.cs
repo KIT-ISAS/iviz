@@ -34,9 +34,9 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
     bool KeepRunning => !runningTs.IsCancellationRequested;
 
     public ErrorMessage? ErrorDescription { get; private set; }
-    public bool IsAlive => true;
+    public bool IsAlive => !task.IsCompleted;
     public bool IsPaused { get; set; }
-    public bool IsConnected => true;
+    public bool IsConnected => UdpClient.Client.Connected;
     public Endpoint Endpoint { get; }
     public Endpoint RemoteEndpoint { get; }
     public Uri RemoteUri { get; }
@@ -61,8 +61,6 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         this.topicInfo = topicInfo;
         MaxPacketSize = newMaxPacketSize;
         task = Task.CompletedTask;
-
-        client.Client.ReceiveBufferSize = 32768 * 32;
 
         var udpEndpoint = (IPEndPoint?)client.Client.LocalEndPoint;
         if (udpEndpoint == null)
@@ -120,7 +118,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
             }
         }
 
-        task = TaskUtils.StartLongTask(async () => await StartSession().AwaitNoThrow(this));
+        task = TaskUtils.Run(async () => await StartSession().AwaitNoThrow(this));
     }
 
     public SubscriberReceiverState State => new UdpReceiverState(RemoteUri)
@@ -133,7 +131,8 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         BytesReceived = bytesReceived,
         NumDropped = numDropped,
         ErrorDescription = ErrorDescription,
-        MaxPacketSize = MaxPacketSize
+        MaxPacketSize = MaxPacketSize,
+        IsAlive = IsAlive, 
     };
 
     public async ValueTask DisposeAsync(CancellationToken token)
@@ -233,8 +232,6 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
                 case UdpRosParams.OpCodeErr:
                     Logger.LogFormat("{0}: Partner sent UDPROS error code. Disconnecting.", this);
                     return;
-                case UdpRosParams.OpCodePing:
-                    continue;
                 case UdpRosParams.OpCodeData0 when blockNr <= 1:
                     if (totalBlocks != 0)
                     {
@@ -304,7 +301,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         }
     }
 
-    void ProcessMessage(IDeserializable<T> generator, Span<byte> array, int rcvLength)
+    void ProcessMessage(IDeserializable<T> generator, ReadOnlySpan<byte> array, int rcvLength)
     {
         if (IsPaused)
         {
@@ -344,8 +341,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
             recommendedSize / 1024);
     }
 
-    public static RpcUdpTopicRequest CreateRequest(string ownHostname, string remoteHostname,
-        TopicInfo<T> topicInfo)
+    public static RpcUdpTopicRequest CreateRequest(string ownHostname, string remoteHostname, TopicInfo<T> topicInfo)
     {
         string[] contents =
         {

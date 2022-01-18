@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Xml;
+using Iviz.Msgs;
 using Newtonsoft.Json;
 
 namespace Iviz.Urdf
@@ -59,6 +60,6 @@ namespace Iviz.Urdf
             out ReadOnlyCollection<Collision> collisions) =>
             (name, inertial, visuals, collisions) = (Name, Inertial, Visuals, Collisions);
 
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => BuiltIns.ToJsonString(this);
     }
 }

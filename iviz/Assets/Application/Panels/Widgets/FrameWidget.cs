@@ -27,11 +27,11 @@ namespace Iviz.App
             {
                 if (owner == null && value != null)
                 {
-                    GameThread.EveryFastTick += UpdateStats;
+                    GameThread.EveryTenthSecond += UpdateStats;
                 }
                 else if (owner != null && value == null)
                 {
-                    GameThread.EveryFastTick -= UpdateStats;
+                    GameThread.EveryTenthSecond -= UpdateStats;
                 }
 
                 owner = value;
@@ -58,7 +58,7 @@ namespace Iviz.App
                 else
                 {
                     description.Append("<b>").Append(frame.Id).Append("</b>\n");
-                    RosUtils.FormatPose(frame.OriginWorldPose, description, RosUtils.PoseFormat.OnlyPosition);
+                    RosUtils.FormatPose(frame.FixedWorldPose, description, RosUtils.PoseFormat.OnlyPosition);
                 }
 
                 uint newHash = Crc32Calculator.Compute(description);

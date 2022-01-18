@@ -23,10 +23,10 @@ namespace Iviz.Displays.Highlighters
 
         public TfFrameHighlighter(TfFrame frame)
         {
-            node = FrameNode.Instantiate("Frame Highlighter");
+            node = new FrameNode("Frame Highlighter", frame);
 
             axisResource = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
-            axisResource.ShadowsEnabled = false;
+            axisResource.EnableShadows = false;
             axisResource.Emissive = 1;
             axisResource.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
             axisResource.Tint = Color.white;
@@ -39,10 +39,7 @@ namespace Iviz.Displays.Highlighters
             if (!frame.IsAlive) // ?
             {
                 node.Visible = false;
-                return;
             }
-
-            node.AttachTo(frame);
         }
 
         public void Update(float t)
@@ -50,12 +47,12 @@ namespace Iviz.Displays.Highlighters
             var nodePosition = node.Transform.position;
             float distanceToCam = Settings.MainCameraTransform.InverseTransformPoint(nodePosition).z;
 
-            float size = 0.25f * Mathf.Abs(distanceToCam);
-            float clampedSize = Mathf.Max(size, 2);
+            float size = 0.25f * Math.Abs(distanceToCam);
+            float clampedSize = Math.Max(size, 2);
 
             float baseFrameSize = TfListener.Instance.FrameSize;
             float frameSize = baseFrameSize * clampedSize;
-            float labelSize = baseFrameSize * Mathf.Max(size * 0.375f / 2, 0.15f);
+            float labelSize = baseFrameSize * Math.Max(size * 0.375f / 2, 0.15f);
 
             float alpha = 1 - t * t;
             var color = Color.white.WithAlpha(alpha);
@@ -83,7 +80,7 @@ namespace Iviz.Displays.Highlighters
         {
             axisResource.ReturnToPool();
             tooltip.ReturnToPool();
-            node.DestroySelf();
+            node.Dispose();
         }
     }
 }

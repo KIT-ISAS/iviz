@@ -41,7 +41,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal AllowedCollisionMatrix(ref ReadBuffer b)
+        public AllowedCollisionMatrix(ref ReadBuffer b)
         {
             EntryNames = b.DeserializeStringArray();
             EntryValues = b.DeserializeArray<AllowedCollisionEntry>();

@@ -23,7 +23,7 @@ namespace Iviz.Msgs.Actionlib
         }
         
         /// Constructor with buffer.
-        internal TwoIntsGoal(ref ReadBuffer b)
+        public TwoIntsGoal(ref ReadBuffer b)
         {
             A = b.Deserialize<long>();
             B = b.Deserialize<long>();

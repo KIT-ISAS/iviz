@@ -33,7 +33,6 @@ namespace Iviz.Controllers
         /// Temporary buffer to hold incoming marker messages from the network thread
         readonly Dictionary<(string Ns, int Id), Marker> newMarkerBuffer = new();
 
-        public override IModuleData ModuleData { get; }
         public override TfFrame Frame => TfListener.DefaultFrame;
 
         public MarkerConfiguration Config
@@ -212,10 +211,8 @@ namespace Iviz.Controllers
         
         public override IListener Listener { get; }
         
-        public MarkerListener(IModuleData moduleData, MarkerConfiguration? config, string topic, string type)
+        public MarkerListener(MarkerConfiguration? config, string topic, string type)
         {        
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            
             Config = config ?? new MarkerConfiguration
             {
                 Topic = topic,
@@ -243,14 +240,14 @@ namespace Iviz.Controllers
             foreach (var (key, value) in deadEntries)
             {
                 markers.Remove(key);
-                value.Stop();
+                value.Dispose();
             }
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            DestroyAllMarkers();
+            DisposeAllMarkers();
 
             GameThread.EverySecond -= CheckDeadMarkers;
             GameThread.EveryFrame -= HandleAsync;
@@ -281,7 +278,7 @@ namespace Iviz.Controllers
 
         public void Reset()
         {
-            DestroyAllMarkers();
+            DisposeAllMarkers();
         }
 
         public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
@@ -297,14 +294,14 @@ namespace Iviz.Controllers
         public override void ResetController()
         {
             base.ResetController();
-            DestroyAllMarkers();
+            DisposeAllMarkers();
         }
 
-        void DestroyAllMarkers()
+        void DisposeAllMarkers()
         {
             foreach (var marker in markers.Values)
             {
-                marker.Stop();
+                marker.Dispose();
             }
 
             markers.Clear();
@@ -359,12 +356,10 @@ namespace Iviz.Controllers
             config.VisibleMask[i] = newVisible;
 
             var markerType = (MarkerType) i;
-            foreach (var marker in markers.Values)
+            var markersToUpdate = markers.Values.Where(marker => marker.MarkerType == markerType);
+            foreach (var marker in markersToUpdate)
             {
-                if (marker.MarkerType == markerType)
-                {
-                    marker.Visible = newVisible;
-                }
+                marker.Visible = newVisible;
             }
         }
 
@@ -422,13 +417,13 @@ namespace Iviz.Controllers
             switch (msg.Action)
             {
                 case Marker.ADD:
-                    if (msg.Pose.HasNaN())
+                    if (msg.Pose.IsInvalid())
                     {
                         RosLogger.Debug($"{this}: NaN in pose! Rejecting marker update {id.ToString()}.");
                         break;
                     }
 
-                    if (msg.Scale.HasNaN())
+                    if (msg.Scale.IsInvalid())
                     {
                         RosLogger.Debug($"{this}: NaN in scale! Rejecting marker update {id.ToString()}.");
                         break;
@@ -444,18 +439,18 @@ namespace Iviz.Controllers
                         ? existingMarker
                         : CreateMarkerObject(id, msg.Type);
 
-                    _ = markerToUpdate.SetAsync(msg).AwaitNoThrow(this);
+                    markerToUpdate.SetAsync(msg);
                     break;
                 case Marker.DELETE:
                     if (markers.TryGetValue(id, out var markerToDelete))
                     {
-                        markerToDelete.Stop();
+                        markerToDelete.Dispose();
                         markers.Remove(id);
                     }
 
                     break;
                 case Marker.DELETEALL:
-                    DestroyAllMarkers();
+                    DisposeAllMarkers();
                     break;
                 default:
                     RosLogger.Debug($"{this}: Unknown action {msg.Action.ToString()}");

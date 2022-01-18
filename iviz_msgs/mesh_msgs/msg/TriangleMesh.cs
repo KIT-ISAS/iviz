@@ -50,7 +50,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal TriangleMesh(ref ReadBuffer b)
+        public TriangleMesh(ref ReadBuffer b)
         {
             Triangles = b.DeserializeArray<TriangleIndices>();
             for (int i = 0; i < Triangles.Length; i++)

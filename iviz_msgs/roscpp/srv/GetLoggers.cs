@@ -60,7 +60,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// Constructor with buffer.
-        internal GetLoggersRequest(ref ReadBuffer b)
+        public GetLoggersRequest(ref ReadBuffer b)
         {
         }
         
@@ -104,7 +104,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// Constructor with buffer.
-        internal GetLoggersResponse(ref ReadBuffer b)
+        public GetLoggersResponse(ref ReadBuffer b)
         {
             Loggers = b.DeserializeArray<Logger>();
             for (int i = 0; i < Loggers.Length; i++)

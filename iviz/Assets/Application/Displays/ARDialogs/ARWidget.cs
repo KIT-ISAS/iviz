@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
+    [Obsolete]
     [RequireComponent(typeof(BoxCollider))]
     public abstract class ARWidget : MonoBehaviour, IDisplay
     {
@@ -21,14 +22,14 @@ namespace Iviz.App.ARDialogs
 
         FrameNode node;
         [NotNull] FrameNode Node => (node != null) ? node : node = FrameNode.Instantiate("Widget Node");
-        [NotNull] public TfFrame ParentFrame => Node.Parent.CheckedNull() ?? TfListener.DefaultFrame;
+        [NotNull] public TfFrame ParentFrame => Node.Parent ?? TfListener.DefaultFrame;
 
         Transform mTransform;
         [NotNull] public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         float? popupStartTime;
 
-        public Bounds? Bounds => new Bounds(BoxCollider.center, BoxCollider.size);
+        public Bounds? Bounds => BoxCollider.GetBounds();
         public virtual Color MainColor { get; set; }
         public virtual Color SecondaryColor { get; set; }
 
@@ -90,7 +91,7 @@ namespace Iviz.App.ARDialogs
                 return;
             }
 
-            node.DestroySelf();
+            node.Dispose();
         }
 
         public void AttachTo(string parentId)

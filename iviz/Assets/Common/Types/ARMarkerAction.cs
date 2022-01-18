@@ -7,7 +7,7 @@ namespace Iviz.Common
     public enum ARMarkerAction
     {
         None,
-        Publish,
+        PublishTf,
         Origin
     }
 }

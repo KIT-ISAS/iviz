@@ -1,5 +1,6 @@
 using System.Runtime.Serialization;
 using System.Xml;
+using Iviz.Msgs;
 using Newtonsoft.Json;
 
 namespace Iviz.Urdf
@@ -14,6 +15,6 @@ namespace Iviz.Urdf
             Filename = Utils.ParseString(node.Attributes?["filename"]);
         }
         
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => BuiltIns.ToJsonString(this);
     }
 }

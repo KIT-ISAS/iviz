@@ -1,9 +1,8 @@
 #nullable enable
 
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using AOT;
 using Iviz.Common;
 using Iviz.Core;
@@ -11,6 +10,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;
+using Newtonsoft.Json;
 
 namespace Iviz.MarkerDetection
 {
@@ -48,7 +48,7 @@ namespace Iviz.MarkerDetection
             set
             {
                 dictionaryName = value;
-                if (!Native.SetDictionary(ContextPtr, (int) value))
+                if (!Native.SetDictionary(ContextPtr, (int)value))
                 {
                     throw new CvMarkerException();
                 }
@@ -146,41 +146,6 @@ namespace Iviz.MarkerDetection
             }
         }
 
-        public void GetImageData(byte[] image)
-        {
-            if (image == null)
-            {
-                throw new ArgumentNullException(nameof(image));
-            }
-
-            if (Width * Height * 3 > image.Length)
-            {
-                throw new ArgumentException("Image size is too small", nameof(image));
-            }
-
-            Native.CopyTo(ContextPtr, image, image.Length);
-        }
-
-        public void SetCameraMatrix(float fx, float ox, float fy, float oy)
-        {
-            using var array = new Rent<float>(9);
-            array.Array[0] = fx;
-            array.Array[1] = 0;
-            array.Array[2] = ox;
-
-            array.Array[3] = 0;
-            array.Array[4] = fy;
-            array.Array[5] = oy;
-
-            array.Array[6] = 0;
-            array.Array[7] = 0;
-            array.Array[8] = 1;
-            if (!Native.SetCameraMatrix(ContextPtr, array.Array, array.Length))
-            {
-                throw new CvMarkerException();
-            }
-        }
-
         public QrMarkerCorners[] DetectQrMarkers()
         {
             Native.DetectQrMarkers(ContextPtr);
@@ -196,35 +161,40 @@ namespace Iviz.MarkerDetection
                 return Array.Empty<QrMarkerCorners>();
             }
 
-            var markers = new QrMarkerCorners[numDetected];
-
             using var pointers = new Rent<IntPtr>(numDetected);
             using var pointerLengths = new Rent<int>(numDetected);
             using var corners = new Rent<float>(8 * numDetected);
-            
-            if (!Native.GetQrMarkerCodes(ContextPtr, pointers.Array, pointerLengths.Array, numDetected) ||
-                !Native.GetMarkerCorners(ContextPtr, corners.Array, corners.Length))
+
+            if (!Native.GetQrMarkerCodes(ContextPtr, ref pointers.Array[0], ref pointerLengths.Array[0], numDetected)
+                || !Native.GetMarkerCorners(ContextPtr, ref corners.Array[0], corners.Length))
             {
                 throw new CvMarkerException();
             }
 
-            int o = 0;
-            for (int i = 0; i < numDetected; i++)
+            var srcCorners = MemoryMarshal.Cast<float, Vector2f>(corners);
+
+            var markers = new QrMarkerCorners[numDetected];
+            foreach (int i in ..numDetected)
             {
-                string code;
+                /*
                 using (var strBytes = new Rent<byte>(pointerLengths[i]))
                 {
+                    
                     Marshal.Copy(pointers[i], strBytes.Array, 0, strBytes.Length);
                     code = BuiltIns.UTF8.GetString(strBytes.Array, 0, strBytes.Length);
                 }
+                */
 
-                markers[i] = new QrMarkerCorners(code, new Vector2f[]
+                ReadOnlySpan<byte> strBytes;
+                unsafe
                 {
-                    (corners[o++], corners[o++]),
-                    (corners[o++], corners[o++]),
-                    (corners[o++], corners[o++]),
-                    (corners[o++], corners[o++]),
-                });
+                    strBytes = new ReadOnlySpan<byte>(pointers[i].ToPointer(), pointerLengths[i]);
+                }
+
+                string code = BuiltIns.UTF8.GetString(strBytes);
+                var vectorCorners = new Vector2f[4];
+                srcCorners.Slice(4 * i, 4).CopyTo(vectorCorners);
+                markers[i] = new QrMarkerCorners(code, vectorCorners);
             }
 
             return markers;
@@ -245,87 +215,60 @@ namespace Iviz.MarkerDetection
                 return Array.Empty<ArucoMarkerCorners>();
             }
 
-            var markers = new ArucoMarkerCorners[numDetected];
-
             using var indices = new Rent<int>(numDetected);
             using var corners = new Rent<float>(8 * numDetected);
-            
-            if (!Native.GetArucoMarkerIds(ContextPtr, indices.Array, indices.Length) ||
-                !Native.GetMarkerCorners(ContextPtr, corners.Array, corners.Length))
+
+            var srcCorners = MemoryMarshal.Cast<float, Vector2f>(corners.AsReadOnlySpan());
+
+            if (!Native.GetArucoMarkerIds(ContextPtr, ref indices.Array[0], indices.Length) ||
+                !Native.GetMarkerCorners(ContextPtr, ref corners.Array[0], corners.Length))
             {
                 throw new CvMarkerException();
             }
 
-            int o = 0;
-            for (int i = 0; i < numDetected; i++)
+            var markers = new ArucoMarkerCorners[numDetected];
+            foreach (int i in ..numDetected)
             {
-                markers[i] = new ArucoMarkerCorners(indices[i], new Vector2f[]
-                {
-                    (corners[o++], corners[o++]),
-                    (corners[o++], corners[o++]),
-                    (corners[o++], corners[o++]),
-                    (corners[o++], corners[o++]),
-                });
+                var vectorCorners = new Vector2f[4];
+                srcCorners.Slice(4 * i, 4).CopyTo(vectorCorners);
+                markers[i] = new ArucoMarkerCorners(indices[i], vectorCorners);
             }
 
             return markers;
         }
 
-        public static Pose SolvePnp(IReadOnlyList<Vector2f> input,
-            IReadOnlyList<Vector3f> output,
-            Intrinsic intrinsic,
-            SolvePnPMethod method = SolvePnPMethod.Iterative)
+        public static Pose SolvePnp(ReadOnlySpan<Vector2f> input, ReadOnlySpan<Vector3f> output, Intrinsic intrinsic)
         {
-            if (input == null)
-            {
-                throw new ArgumentNullException(nameof(input));
-            }
-
-            if (output == null)
-            {
-                throw new ArgumentNullException(nameof(output));
-            }
-
-            if (input.Count != output.Count)
+            if (input.Length != output.Length)
             {
                 throw new ArgumentException("Input and output lengths do not match");
             }
 
-            using var inputFloats = new Rent<float>(input.Count * 2);
-            using var outputFloats = new Rent<float>(output.Count * 3);
-            using var cameraFloats = new Rent<float>(6);
-            using var resultFloats = new Rent<float>(6);
-            
-            int o = 0;
-            foreach (var v in input)
-            {
-                (inputFloats[o], inputFloats[o + 1]) = v;
-                o += 2;
-            }
+            var inputFloats = MemoryMarshal.Cast<Vector2f, float>(input);
+            var outputFloats = MemoryMarshal.Cast<Vector3f, float>(output);
 
-            o = 0;
-            foreach (var v in output)
-            {
-                (outputFloats[o], outputFloats[o + 1], outputFloats[o + 2]) = v;
-                o += 3;
-            }
+            Span<float> cameraFloats = stackalloc float[6];
+            Span<float> resultFloats = stackalloc float[6];
 
             intrinsic.CopyTo(cameraFloats);
 
-            if (!Native.EstimatePnp(inputFloats.Array, inputFloats.Length, outputFloats.Array, outputFloats.Length,
-                cameraFloats.Array, cameraFloats.Length, resultFloats.Array, resultFloats.Length))
+            if (!Native.EstimatePnp(in inputFloats.GetPinnableReference(), inputFloats.Length,
+                    in outputFloats.GetPinnableReference(), outputFloats.Length,
+                    in cameraFloats.GetPinnableReference(), cameraFloats.Length,
+                    ref resultFloats.GetPinnableReference(), resultFloats.Length))
             {
                 throw new CvMarkerException();
             }
 
-            Vector3 translation = (resultFloats[3], resultFloats[4], resultFloats[5]);
-            Vector3 angleAxis = (resultFloats[0], resultFloats[1], resultFloats[2]);
+            var angleAxis = new Vector3(resultFloats[0], resultFloats[1], resultFloats[2]);
+            var translation = new Point(resultFloats[3], resultFloats[4], resultFloats[5]);
+
             double angle = angleAxis.Norm;
             var rotation = angle == 0
                 ? Quaternion.Identity
                 : Quaternion.AngleAxis(angle, angleAxis / angle);
 
-            return (translation, rotation);
+            return new Pose(translation, rotation);
         }
 
         void ReleaseUnmanagedResources()
@@ -408,7 +351,7 @@ namespace Iviz.MarkerDetection
             public static extern bool CopyFrom(IntPtr ctx, /* const */ byte[] ptr, int size);
 
             [DllImport(IvizOpencvDll)]
-            public static extern bool CopyTo( /* const */ IntPtr ctx, byte[] ptr, int size);
+            public static extern bool CopyTo( /* const */ IntPtr ctx, ref byte ptr, int size);
 
             [DllImport(IvizOpencvDll)]
             public static extern IntPtr GetImagePtr(IntPtr ctx);
@@ -426,14 +369,14 @@ namespace Iviz.MarkerDetection
             public static extern int GetNumDetectedMarkers(IntPtr ctx);
 
             [DllImport(IvizOpencvDll)]
-            public static extern bool GetArucoMarkerIds(IntPtr ctx, int[] arrayPtr, int arraySize);
+            public static extern bool GetArucoMarkerIds(IntPtr ctx, ref int arrayPtr, int arraySize);
 
             [DllImport(IvizOpencvDll)]
-            public static extern bool GetQrMarkerCodes(IntPtr ctx, IntPtr[] arrayPtr, int[] arrayLengths,
+            public static extern bool GetQrMarkerCodes(IntPtr ctx, ref IntPtr arrayPtr, ref int arrayLengths,
                 int arraySize);
 
             [DllImport(IvizOpencvDll)]
-            public static extern bool GetMarkerCorners(IntPtr ctx, float[] arrayPtr, int arraySize);
+            public static extern bool GetMarkerCorners(IntPtr ctx, ref float arrayPtr, int arraySize);
 
             [DllImport(IvizOpencvDll)]
             public static extern bool SetCameraMatrix(IntPtr ctx, float[] arrayPtr, int arraySize);
@@ -443,8 +386,8 @@ namespace Iviz.MarkerDetection
                 int rotationsSize, float[] translations, int translationsSize);
 
             [DllImport(IvizOpencvDll)]
-            public static extern bool EstimatePnp(float[] inputs, int inputSize, float[] outputs, int outputSize,
-                float[] cameraArray, int cameraArraySize, float[] result, int resultSize);
+            public static extern bool EstimatePnp(in float inputs, int inputSize, in float outputs, int outputSize,
+                in float cameraArray, int cameraArraySize, ref float result, int resultSize);
 
             [DllImport(IvizOpencvDll)]
             public static extern bool EstimateUmeyama(float[] inputs, int inputSize, float[] outputs, int outputSize,
@@ -525,35 +468,30 @@ namespace Iviz.MarkerDetection
 
     public interface IMarkerCorners
     {
-        ReadOnlyCollection<Vector2f> Corners { get; }
+        Vector2f[] Corners { get; }
         string Code { get; }
         ARMarkerType Type { get; }
     }
 
+    [DataContract]
     public sealed class ArucoMarkerCorners : IMarkerCorners
     {
-        public ARMarkerType Type => ARMarkerType.Aruco;
-        public int Id { get; }
-        public string Code => Id.ToString();
-        public ReadOnlyCollection<Vector2f> Corners { get; }
+        [DataMember] public ARMarkerType Type => ARMarkerType.Aruco;
+        [DataMember] public string Code { get; }
+        [DataMember] public Vector2f[] Corners { get; }
 
-        internal ArucoMarkerCorners(int id, IList<Vector2f> corners) =>
-            (Id, Corners) = (id, corners.AsReadOnly());
-
-        public override string ToString() => "{\"Id\":" + Id + ", \"Corners\":" +
-                                             string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
+        internal ArucoMarkerCorners(int id, Vector2f[] corners) => (Code, Corners) = (id.ToString(), corners);
+        public override string ToString() => BuiltIns.ToJsonString(this, false);
     }
 
+    [DataContract]
     public sealed class QrMarkerCorners : IMarkerCorners
     {
-        public ARMarkerType Type => ARMarkerType.QrCode;
-        public string Code { get; }
-        public ReadOnlyCollection<Vector2f> Corners { get; }
+        [DataMember] public ARMarkerType Type => ARMarkerType.QrCode;
+        [DataMember] public string Code { get; }
+        [DataMember] public Vector2f[] Corners { get; }
 
-        internal QrMarkerCorners(string code, IList<Vector2f> corners) =>
-            (Code, Corners) = (code, corners.AsReadOnly());
-
-        public override string ToString() => "{\"Code\":" + Code + ", \"Corners\":" +
-                                             string.Join(", ", Corners.Select(corner => corner.ToString())) + "}";
+        internal QrMarkerCorners(string code, Vector2f[] corners) => (Code, Corners) = (code, corners);
+        public override string ToString() => BuiltIns.ToJsonString(this, false);
     }
 }

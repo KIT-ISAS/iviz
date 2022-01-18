@@ -124,8 +124,7 @@ namespace Iviz.Controllers
             this.listener = listener;
             this.rosId = rosId;
 
-            node = FrameNode.Instantiate($"[InteractiveMarkerObject '{rosId}']");
-            node.Parent = parent;
+            node = new FrameNode($"[InteractiveMarkerObject '{rosId}']", parent);
 
             ControlNode = new GameObject("[ControlNode]").transform;
             ControlNode.SetParentLocal(node.Transform);
@@ -144,7 +143,7 @@ namespace Iviz.Controllers
             node.AttachTo(msg.Header);
 
             var controlsToDelete = new HashSet<string>(controls.Keys);
-            float defaultScale = Mathf.Approximately(msg.Scale, 0) ? 1 : msg.Scale;
+            float defaultScale = msg.Scale.ApproximatelyZero() ? 1 : msg.Scale;
             int numUnnamed = 0;
             foreach (var controlMsg in msg.Controls)
             {
@@ -176,7 +175,7 @@ namespace Iviz.Controllers
 
             foreach (string controlId in controlsToDelete)
             {
-                controls[controlId].Stop();
+                controls[controlId].Dispose();
                 controls.Remove(controlId);
             }
 
@@ -209,8 +208,7 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            listener.OnControlMouseEvent(rosId, rosControlId,
-                node.Parent != null ? node.Parent.Id : null, ControlNode.AsLocalPose(), point, type);
+            listener.OnControlMouseEvent(rosId, rosControlId, node.Parent?.Id, ControlNode.AsLocalPose(), point, type);
         }
 
         internal void OnMoved(string rosControlId)
@@ -220,8 +218,7 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            listener.OnControlMoved(rosId, rosControlId,
-                node.Parent != null ? node.Parent.Id : null, ControlNode.AsLocalPose());
+            listener.OnControlMoved(rosId, rosControlId, node.Parent?.Id, ControlNode.AsLocalPose());
         }
 
         void OnMenuClick(uint entryId)
@@ -231,15 +228,14 @@ namespace Iviz.Controllers
                 return; // destroyed while interacting
             }
 
-            listener.OnControlMenuSelect(rosId,
-                node.Parent != null ? node.Parent.Id : null, entryId, ControlNode.AsLocalPose());
+            listener.OnControlMenuSelect(rosId, node.Parent?.Id, entryId, ControlNode.AsLocalPose());
         }
 
-        public void Stop()
+        public void Dispose()
         {
             foreach (var controlObject in controls.Values)
             {
-                controlObject.Stop();
+                controlObject.Dispose();
             }
 
             controls.Clear();
@@ -247,7 +243,7 @@ namespace Iviz.Controllers
             text.ReturnToPool();
 
             Object.Destroy(ControlNode.gameObject);
-            node.DestroySelf();
+            node.Dispose();
         }
 
         public void GenerateLog(StringBuilder description)
@@ -275,7 +271,7 @@ namespace Iviz.Controllers
                 : "[]";
             description.Append("Description: ").Append(msgDescription).AppendLine();
 
-            if (Mathf.Approximately(lastMessage.Scale, 0))
+            if (lastMessage.Scale.ApproximatelyZero())
             {
                 description.Append("Scale: 0 <i>(1)</i>").AppendLine();
             }

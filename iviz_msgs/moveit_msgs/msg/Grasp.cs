@@ -75,7 +75,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal Grasp(ref ReadBuffer b)
+        public Grasp(ref ReadBuffer b)
         {
             Id = b.DeserializeString();
             PreGraspPosture = new TrajectoryMsgs.JointTrajectory(ref b);

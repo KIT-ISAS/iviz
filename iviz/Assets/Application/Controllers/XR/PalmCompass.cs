@@ -27,9 +27,9 @@ namespace Iviz.Controllers.XR
 
         void Awake()
         {
-            Ring.ShadowsEnabled = false;
+            Ring.EnableShadows = false;
             Frame.Transform.localPosition = new Vector3(0, 0.15f, 0);
-            Frame.ShadowsEnabled = false;
+            Frame.EnableShadows = false;
             Tooltip.Transform.localPosition = new Vector3(0, 0.55f, 0);
             Tooltip.Transform.localScale = Vector3.one * 0.02f;
             Tooltip.Color = Resource.Colors.TooltipBackground;

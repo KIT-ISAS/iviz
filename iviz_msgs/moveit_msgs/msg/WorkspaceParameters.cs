@@ -32,7 +32,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal WorkspaceParameters(ref ReadBuffer b)
+        public WorkspaceParameters(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out MinCorner);

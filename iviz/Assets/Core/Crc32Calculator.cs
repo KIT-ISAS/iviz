@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using Iviz.Tools;
@@ -38,9 +39,10 @@ namespace Iviz.Core
             return createTable;
         }
 
-        public static uint Compute<T>(T value, uint startHash = DefaultSeed) where T : unmanaged
+        public static uint Compute<T>(in T value, uint startHash = DefaultSeed) where T : unmanaged
         {
-            ReadOnlySpan<T> span = stackalloc T[] { value };
+            ref T valueRef = ref Unsafe.AsRef(value);
+            var span = MemoryMarshal.CreateReadOnlySpan(ref valueRef, 1);
             return Compute(MemoryMarshal.AsBytes(span), startHash);
         }
 

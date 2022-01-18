@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -12,16 +13,16 @@ using UnityEngine;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="ImagePanelContents"/> 
+    /// <see cref="ImageModulePanel"/> 
     /// </summary>
     public sealed class ImageModuleData : ListenerModuleData
     {
         readonly ImageListener listener;
-        readonly ImagePanelContents panel;
+        readonly ImageModulePanel panel;
 
         protected override ListenerController Listener => listener;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.Image;
         public override IConfiguration Configuration => listener.Config;
 
@@ -31,8 +32,8 @@ namespace Iviz.App
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
                 constructor.TryGetConfigurationType() ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<ImagePanelContents>(ModuleType.Image);
-            listener = new ImageListener(this, (ImageConfiguration?)constructor.Configuration, Topic, Type);
+            panel = ModulePanelManager.GetPanelByResourceType<ImageModulePanel>(ModuleType.Image);
+            listener = new ImageListener((ImageConfiguration?)constructor.Configuration, Topic, TopicType);
             UpdateModuleButton();
         }
 
@@ -178,7 +179,14 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
-            imageDialogData?.Stop();
+            try
+            {
+                imageDialogData?.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }
         }
 
         sealed class ColorImageListener : ImageDialogListener
@@ -192,7 +200,7 @@ namespace Iviz.App
                 out Vector4 color) =>
                 moduleData.listener.TrySampleColor(rawUV, out uv, out format, out color);
 
-            protected override void Stop() => moduleData.OnDialogClosed();
+            protected override void Dispose() => moduleData.OnDialogClosed();
         }
     }
 }

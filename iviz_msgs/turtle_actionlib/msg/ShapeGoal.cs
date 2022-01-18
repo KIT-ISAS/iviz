@@ -24,7 +24,7 @@ namespace Iviz.Msgs.TurtleActionlib
         }
         
         /// Constructor with buffer.
-        internal ShapeGoal(ref ReadBuffer b)
+        public ShapeGoal(ref ReadBuffer b)
         {
             Edges = b.Deserialize<int>();
             Radius = b.Deserialize<float>();

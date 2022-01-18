@@ -46,7 +46,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal ObjectType(ref ReadBuffer b)
+        public ObjectType(ref ReadBuffer b)
         {
             Key = b.DeserializeString();
             Db = b.DeserializeString();

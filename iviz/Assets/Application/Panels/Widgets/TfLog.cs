@@ -6,9 +6,12 @@ using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using System;
+using System.Linq;
+using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Tools;
+using Object = UnityEngine.Object;
 
 namespace Iviz.App
 {
@@ -21,25 +24,27 @@ namespace Iviz.App
             ToFixed
         }
 
-        [SerializeField] TMP_Text? tfText = null;
-        [SerializeField] TMP_Text? tfName = null;
-        [SerializeField] RectTransform? contentTransform = null;
-        [SerializeField] Button? gotoButton = null;
-        [SerializeField] Button? trail = null;
+        [SerializeField] TMP_Text? tfText;
+        [SerializeField] TMP_Text? tfName;
+        [SerializeField] RectTransform? contentTransform;
+        [SerializeField] Button? publishing;
+        [SerializeField] Button? trail;
 
-        [SerializeField] Button? lockPivot = null;
-        [SerializeField] Button? fixedFrame = null;
+        [SerializeField] Button? lockPivot;
+        [SerializeField] Button? fixedFrame;
 
-        [SerializeField] Text? trailText = null;
-        [SerializeField] Text? lockPivotText = null;
+        [SerializeField] Text? trailText;
+        [SerializeField] Text? lockPivotText;
+        [SerializeField] Text? publishingText;
 
-        [SerializeField] LinkResolver? tfLink = null;
-        [SerializeField] DropdownWidget? showAs = null;
-        [SerializeField] DropdownWidget? poseAs = null;
+        [SerializeField] LinkResolver? tfLink;
+        [SerializeField] DropdownWidget? showAs;
+        [SerializeField] DropdownWidget? poseAs;
 
+        static TfPublisher TfPublisher => TfPublisher.Instance;
         TMP_Text TfText => tfText.AssertNotNull(nameof(tfText));
         TMP_Text TfName => tfName.AssertNotNull(nameof(tfName));
-        Button GotoButton => gotoButton.AssertNotNull(nameof(gotoButton));
+        Button Publishing => publishing.AssertNotNull(nameof(publishing));
         Button Trail => trail.AssertNotNull(nameof(trail));
         Button LockPivot => lockPivot.AssertNotNull(nameof(lockPivot));
         Button FixedFrame => fixedFrame.AssertNotNull(nameof(fixedFrame));
@@ -48,10 +53,10 @@ namespace Iviz.App
         LinkResolver TfLink => tfLink.AssertNotNull(nameof(tfLink));
         Text TrailText => trailText.AssertNotNull(nameof(trailText));
         Text LockPivotText => lockPivotText.AssertNotNull(nameof(lockPivotText));
+        Text PublishingText => publishingText.AssertNotNull(nameof(publishingText));
         RectTransform ContentTransform => contentTransform.AssertNotNull(nameof(contentTransform));
 
-        FrameNode PlaceHolder =>
-            placeHolder != null ? placeHolder : (placeHolder = FrameNode.Instantiate("TFLog Placeholder"));
+        FrameNode PlaceHolder => placeHolder ??= new FrameNode("TFLog Placeholder");
 
         readonly List<TfNode> nodes = new();
 
@@ -77,35 +82,30 @@ namespace Iviz.App
                     if (value != null)
                     {
                         value.Highlight();
+                        TfPublisher.ShowPanelIfPublishing(value.Id);
                     }
 
                     return;
                 }
 
-                if (selectedFrame != null)
-                {
-                    selectedFrame.RemoveListener(PlaceHolder);
-                }
-
+                
                 selectedFrame = value;
 
+                PlaceHolder.Parent = selectedFrame;
+                
                 if (selectedFrame != null)
                 {
-                    selectedFrame.AddListener(PlaceHolder);
+                    TfPublisher.ShowPanelIfPublishing(selectedFrame.Id);
                 }
 
-
                 bool interactable = selectedFrame != null;
-                GotoButton.interactable = interactable;
+                Publishing.interactable = interactable;
                 Trail.interactable = interactable;
                 LockPivot.interactable = interactable;
                 FixedFrame.interactable = interactable;
 
                 Flush();
-                if (value != null)
-                {
-                    value.Highlight();
-                }
+                value?.Highlight();
 
                 UpdateFrameButtons();
             }
@@ -144,7 +144,10 @@ namespace Iviz.App
 
         void OnDestroy()
         {
-            TfListener.Instance.ResetFrames -= OnResetFrames;
+            if (TfListener.HasInstance)
+            {
+                TfListener.Instance.ResetFrames -= OnResetFrames;
+            }
         }
 
         void OnResetFrames()
@@ -162,9 +165,10 @@ namespace Iviz.App
             isInitialized = true;
 
             TfLink.LinkClicked += OnLinkClicked;
+            TfLink.LinkDoubleClicked += OnLinkDoubleClicked;
             SelectedFrame = null;
 
-            GotoButton.interactable = false;
+            Publishing.interactable = false;
             Trail.interactable = false;
             LockPivot.interactable = false;
             FixedFrame.interactable = false;
@@ -177,6 +181,11 @@ namespace Iviz.App
             SelectedFrame = frameId == null || !TfListener.TryGetFrame(frameId, out TfFrame? frame)
                 ? null
                 : frame;
+        }
+
+        void OnLinkDoubleClicked(string? _)
+        {
+            OnGotoClicked();
         }
 
         public void Flush()
@@ -199,7 +208,7 @@ namespace Iviz.App
         {
             using (var description = BuilderPool.Rent())
             {
-                new TfNode(TfListener.OriginFrame, SelectedFrame).Write(description);
+                new TfNode(TfListener.OriginFrame).Write(description, SelectedFrame);
 
                 description.AppendLine().AppendLine();
                 uint newHash = Crc32Calculator.Compute(description);
@@ -220,14 +229,14 @@ namespace Iviz.App
         void UpdateFrameListAsList()
         {
             nodes.Clear();
-            new TfNode(TfListener.OriginFrame, SelectedFrame).AddTo(nodes);
+            new TfNode(TfListener.OriginFrame).AddTo(nodes);
             nodes.Sort();
-            
+
             using (var description = BuilderPool.Rent())
             {
                 foreach (var node in nodes)
                 {
-                    node.WriteSingle(description);
+                    node.WriteSingle(description, SelectedFrame);
                 }
 
                 description.AppendLine().AppendLine();
@@ -263,10 +272,12 @@ namespace Iviz.App
             {
                 string id = frame.Id;
                 description.Append("<b>[")
-                    .Append(id)
-                    .Append(id == TfListener.FixedFrameId
+                    .Append(id);
+                description.Append(id == TfListener.FixedFrameId
                         ? "]</b>  <i>[Fixed]</i>"
-                        : "]</b>")
+                        : TfPublisher.IsPublishing(id)
+                            ? "]</b>  <i>[Publ]</i>"
+                            : "]</b>")
                     .AppendLine();
 
                 description.Append(
@@ -275,15 +286,17 @@ namespace Iviz.App
                             : frame.Parent.Id)
                     .AppendLine();
 
+                /*
                 if (frame.LastCallerId != null)
                 {
                     description.Append("[").Append(frame.LastCallerId).Append("]").AppendLine();
                 }
+                */
 
                 Pose pose = poseDisplay switch
                 {
                     PoseDisplayType.ToRoot => frame.OriginWorldPose,
-                    PoseDisplayType.ToFixed => TfListener.RelativeToFixedFrame(frame.AbsoluteUnityPose),
+                    PoseDisplayType.ToFixed => frame.FixedWorldPose,
                     PoseDisplayType.ToParent => frame.Transform.AsLocalPose(),
                     _ => Pose.identity
                 };
@@ -305,16 +318,23 @@ namespace Iviz.App
         {
             if (SelectedFrame == null)
             {
-                TrailText.text = "Trail:\nOff";
-                LockPivotText.text = "Lock Pivot\nOff";
+                TrailText.text = "Trail:\n<b>Off</b>";
+                LockPivotText.text = "Lock Pivot\n<b>Off</b>";
+                PublishingText.text = "Publishing\n<b>Off</b>";
             }
             else
             {
-                TrailText.text = SelectedFrame.TrailVisible ? "Trail:\n<b>On</b>" : "Trail:\nOff";
+                TrailText.text = SelectedFrame.TrailVisible
+                    ? "Trail:\n<b>On</b>"
+                    : "Trail:\n<b>Off</b>";
 
-                LockPivotText.text = GuiInputModule.Instance.OrbitCenterOverride == SelectedFrame
+                LockPivotText.text = SelectedFrame == GuiInputModule.Instance.OrbitCenterOverride
                     ? "Lock Pivot\n<b>On</b>"
-                    : "Lock Pivot\nOff";
+                    : "Lock Pivot\n<b>Off</b>";
+
+                PublishingText.text = TfPublisher.IsPublishing(SelectedFrame.Id)
+                    ? "Publishing\n<b>On</b>"
+                    : "Publishing\n<b>Off</b>";
             }
         }
 
@@ -327,6 +347,23 @@ namespace Iviz.App
 
             SelectedFrame.Highlight();
             GuiInputModule.Instance.LookAt(SelectedFrame.Transform);
+        }
+
+        public void OnPublishingClicked()
+        {
+            if (SelectedFrame == null)
+            {
+                return;
+            }
+
+            string selectedFrameId = SelectedFrame.Id;
+            if (!TfPublisher.Remove(selectedFrameId))
+            {
+                var publishedFrame  = TfPublisher.GetOrCreate(selectedFrameId, true);
+                TfListener.Publish(publishedFrame.TfFrame);
+            }
+
+            UpdateFrameButtons();
         }
 
         public void OnTrailClicked()
@@ -361,7 +398,6 @@ namespace Iviz.App
             Close?.Invoke();
         }
 
-
         public void OnLock1PVClicked()
         {
             GuiInputModule.Instance.CameraViewOverride =
@@ -378,108 +414,98 @@ namespace Iviz.App
         }
 
         // ------------------------------------------
-
         readonly struct TfNode : IComparable<TfNode>
         {
-            readonly string name;
-            readonly TfNode[] children;
-            readonly bool hasTrail;
-            readonly bool selected;
+            readonly TfFrame frame;
 
-            public TfNode(TfFrame frame, TfFrame? selectedFrame)
+            string Name => frame.Id;
+            bool HasTrail => frame.TrailVisible;
+
+            public TfNode(TfFrame frame)
             {
-                name = frame.Id;
-                hasTrail = frame.TrailVisible;
-                selected = (frame == selectedFrame);
-                children = new TfNode[frame.Children.Count];
-
-                foreach (var (childFrame, i) in frame.Children.WithIndex())
-                {
-                    children[i] = new TfNode(childFrame, selectedFrame);
-                }
-
-                Array.Sort(children);
+                this.frame = frame;
             }
 
-            void Write(StringBuilder str, int level, bool withChildren)
+            void Write(StringBuilder str, TfFrame? selectedFrame, int level, bool withChildren)
             {
                 if (level != 0)
                 {
                     str.Append(' ', level * 4);
                 }
 
-                str.Append("<link=").Append(name).Append("><b>");
+                str.Append("<link=").Append(Name).Append("><b>");
 
-                if (selected)
+                if (frame == selectedFrame)
                 {
                     str.Append("<color=blue>");
-                    if (hasTrail)
-                    {
-                        str.Append("~");
-                    }
-
-                    str.Append("<u>").Append(name).Append("</u>");
-                    if (hasTrail)
-                    {
-                        str.Append("~");
-                    }
-
+                    AppendName(str);
                     str.Append("</color>");
                 }
-                else if (name == TfListener.FixedFrameId)
+                else if (TfPublisher.IsPublishing(Name))
+                {
+                    str.Append("<color=#880000>");
+                    AppendName(str);
+                    str.Append("</color>");
+                }
+                else if (Name == TfListener.FixedFrameId)
                 {
                     str.Append("<color=#008800>");
-                    if (hasTrail)
-                    {
-                        str.Append("~");
-                    }
-
-                    str.Append("<u>").Append(name).Append("</u>");
-                    if (hasTrail)
-                    {
-                        str.Append("~");
-                    }
-
+                    AppendName(str);
                     str.Append("</color>");
                 }
                 else
                 {
-                    str.Append("<u>").Append(name).Append("</u>");
+                    str.Append("<u>").Append(Name).Append("</u>");
                 }
 
                 str.AppendLine("</b></link>");
 
                 if (withChildren)
                 {
-                    foreach (TfNode node in children)
+                    foreach (var child in frame.Children)
                     {
-                        node.Write(str, level + 1, true);
+                        new TfNode(child).Write(str, selectedFrame, level + 1, true);
                     }
                 }
             }
 
-            public void Write(StringBuilder str)
+            void AppendName(StringBuilder str)
             {
-                foreach (TfNode node in children)
+                if (HasTrail)
                 {
-                    node.Write(str, 0, true);
+                    str.Append("~");
+                }
+
+                str.Append("<u>").Append(Name).Append("</u>");
+                if (HasTrail)
+                {
+                    str.Append("~");
                 }
             }
 
-            public void WriteSingle(StringBuilder str)
+            public void Write(StringBuilder str, TfFrame? selectedFrame)
             {
-                Write(str, 0, false);
+                foreach (var child in frame.Children)
+                {
+                    new TfNode(child).Write(str, selectedFrame, 0, true);
+                }
+            }
+
+            public void WriteSingle(StringBuilder str, TfFrame? selectedFrame)
+            {
+                Write(str, selectedFrame, 0, false);
             }
 
             public int CompareTo(TfNode other)
             {
-                return string.CompareOrdinal(name, other.name);
+                return string.CompareOrdinal(Name, other.Name);
             }
 
             public void AddTo(List<TfNode> nodes)
             {
-                foreach (TfNode node in children)
+                foreach (var child in frame.Children)
                 {
+                    var node = new TfNode(child);
                     nodes.Add(node);
                     node.AddTo(nodes);
                 }

@@ -4,42 +4,46 @@ using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
-using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Displays;
 using Newtonsoft.Json;
 
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="TfPanelContents"/> 
+    /// <see cref="TfModulePanel"/> 
     /// </summary>
     public sealed class TfModuleData : ModuleData
     {
         readonly TfListener listener;
-        readonly TfPanelContents panel;
+        readonly TfModulePanel panel;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.TF;
         public override IConfiguration Configuration => listener.Config;
         public override IController Controller => listener;
 
-        public TfModuleData(ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
-                constructor.Type)
+        public TfModuleData(ModuleDataConstructor constructor)
         {
-            panel = DataPanelManager.GetPanelByResourceType<TfPanelContents>(ModuleType.TF);
-            listener = new TfListener(this, (TfConfiguration?)constructor.Configuration, Topic);
+            panel = ModulePanelManager.GetPanelByResourceType<TfModulePanel>(ModuleType.TF);
+            listener = new TfListener((TfConfiguration?)constructor.Configuration, id => new TfFrameDisplay(id));
             UpdateModuleButton();
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            listener.Dispose();
+            try
+            {
+                listener.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }             
         }
-        
+
         public void UpdateConfiguration(TfConfiguration configuration)
         {
             listener.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -56,8 +60,9 @@ namespace Iviz.App
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
             panel.KeepAllFrames.Value = listener.KeepAllFrames;
             panel.FlipZ.Value = listener.FlipZ;
+            panel.Interactable.Value = listener.Interactable;
             panel.Sender.Set(listener.Publisher);
-            panel.TapSender.Set(listener.TapPublisher);
+            //panel.TapSender.Set(listener.TapPublisher);
             panel.Publisher.UpdateText();
 
             panel.HideButton.Clicked += ToggleVisible;
@@ -66,6 +71,7 @@ namespace Iviz.App
             panel.ConnectToParent.ValueChanged += f => listener.ParentConnectorVisible = f;
             panel.KeepAllFrames.ValueChanged += f => listener.KeepAllFrames = f;
             panel.FlipZ.ValueChanged += f => listener.FlipZ = f;
+            panel.Interactable.ValueChanged += f => listener.Interactable = f;
             panel.ResetButton.Clicked += () => listener.ResetController();
         }
 
@@ -115,10 +121,10 @@ namespace Iviz.App
         {
             config.Tf = listener.Config;
         }
-        
+
         public override string ToString()
         {
-            return $"[{ModuleType} Topic='{Topic}' [{Type}] guid={Configuration.Id}]";
-        }        
+            return $"[{ModuleType} Topic='{TfListener.DefaultTopic}' id='{Configuration.Id}']";
+        }
     }
 }

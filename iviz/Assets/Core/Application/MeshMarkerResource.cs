@@ -13,8 +13,8 @@ namespace Iviz.Displays
     /// </summary>
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    public class MeshMarkerResource : MarkerResource, ISupportsColor, ISupportsTint, ISupportsAROcclusion, ISupportsPbr,
-        ISupportsShadows
+    public class MeshMarkerResource : MarkerResource,
+        ISupportsColor, ISupportsTint, ISupportsAROcclusion, ISupportsPbr, ISupportsShadows
     {
         static readonly int MainTex = Shader.PropertyToID("_MainTex");
 
@@ -100,7 +100,7 @@ namespace Iviz.Displays
             set => MainRenderer.SetPropertyMetallic(value);
         }
 
-        public bool ShadowsEnabled
+        public bool EnableShadows
         {
             set
             {
@@ -178,9 +178,9 @@ namespace Iviz.Displays
             Color = Color.white;
             Tint = Color.white;
             EmissiveColor = Color.black;
-            ColliderEnabled = true;
+            EnableCollider = true;
             OcclusionOnly = false;
-            ShadowsEnabled = true;
+            EnableShadows = true;
         }
 
         void SetEffectiveColor()

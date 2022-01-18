@@ -64,7 +64,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         }
         
         /// Constructor with buffer.
-        internal InteractiveMarkerFeedback(ref ReadBuffer b)
+        public InteractiveMarkerFeedback(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             ClientId = b.DeserializeString();

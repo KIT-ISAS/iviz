@@ -29,7 +29,7 @@ namespace Iviz.Displays
             instance = null;
         }
 
-        public static GameObject Rent(Info<GameObject> resource, Transform? parent = null, bool enable = true)
+        public static GameObject Rent(ResourceKey<GameObject> resource, Transform? parent = null, bool enable = true)
         {
             if (resource == null)
             {
@@ -46,7 +46,7 @@ namespace Iviz.Displays
             return obj;
         }
 
-        public static T Rent<T>(Info<GameObject> resource, Transform? parent = null, bool enable = true)
+        public static T Rent<T>(ResourceKey<GameObject> resource, Transform? parent = null, bool enable = true)
             where T : MonoBehaviour
         {
             if (resource == null)
@@ -67,7 +67,7 @@ namespace Iviz.Displays
             return Rent<T>(info, parent);
         }
 
-        public static void Return(Info<GameObject> resource, GameObject gameObject)
+        public static void Return(ResourceKey<GameObject> resource, GameObject gameObject)
         {
             if (resource == null)
             {
@@ -134,7 +134,7 @@ namespace Iviz.Displays
             }
         }
 
-        GameObject Get(Info<GameObject> resource, Transform? parent, bool enable)
+        GameObject Get(ResourceKey<GameObject> resource, Transform? parent, bool enable)
         {
             if (!pool.TryGetValue(resource.Id, out var instances) || instances.Count == 0)
             {
@@ -152,7 +152,7 @@ namespace Iviz.Displays
             return newObject;
         }
 
-        void Add(Info<GameObject> resource, GameObject obj)
+        void Add(ResourceKey<GameObject> resource, GameObject obj)
         {
             if (obj == null)
             {

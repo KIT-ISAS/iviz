@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Iviz.Common;
@@ -41,11 +42,9 @@ namespace Iviz.Controllers
             set
             {
                 isProcessing = value;
-                Listener?.SetPause(value);
+                Listener.SetPause(value);
             }
         }
-
-        public override IModuleData ModuleData { get; }
 
         public Vector2 MeasuredIntensityBounds =>
             PointCloudType == PointCloudType.Points
@@ -202,14 +201,9 @@ namespace Iviz.Controllers
 
         public override IListener Listener { get; }
 
-        public PointCloudListener(IModuleData moduleData, PointCloudConfiguration? config, string topic)
+        public PointCloudListener(PointCloudConfiguration? config, string topic)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             FieldNames = fieldNames.AsReadOnly();
-            node = FrameNode.Instantiate("[PointCloudNode]");
-            pointCloud = ResourcePool.RentDisplay<PointListResource>(node.transform);
-            meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.transform);
-            meshCloud.ShadowsEnabled = false;
 
             Config = config ?? new PointCloudConfiguration
             {
@@ -217,7 +211,11 @@ namespace Iviz.Controllers
             };
 
             Listener = new Listener<PointCloud2>(Config.Topic, Handler);
-            node.name = $"[{Config.Topic}]";
+
+            node = new FrameNode($"[{Config.Topic}]");
+            pointCloud = ResourcePool.RentDisplay<PointListResource>(node.Transform);
+            meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.Transform);
+            meshCloud.EnableShadows = false;
         }
 
         static int FieldSizeFromType(int datatype)
@@ -251,7 +249,11 @@ namespace Iviz.Controllers
 
             IsProcessing = true;
 
-            Task.Run(() => ProcessMessage(msg));
+            Task.Run(() =>
+            {
+                ProcessMessage(msg);
+                msg.Data.TryReturn();
+            });
 
             return true;
         }
@@ -345,66 +347,72 @@ namespace Iviz.Controllers
                     : EmptyPointField;
 
                 int iOffset = (int)iField.Offset;
-                int iSize = FieldSizeFromType(iField.Datatype);
-                if (iSize == -1 || msg.PointStep < iOffset + iSize)
+                int iFieldSize = FieldSizeFromType(iField.Datatype);
+                if (iFieldSize == -1)
                 {
-                    RosLogger.Info($"{this}: Invalid or unsupported intensity field type!");
+                    RosLogger.Info($"{this}: Invalid or unsupported intensity field type {iField.Datatype.ToString()}");
                     IsProcessing = false;
                     return;
                 }
 
-                bool rgbaHint = iSize == 4 && iField.Name is "rgb" or "rgba";
-                var header = msg.Header;
-                int numPoints = (int)(msg.Width * msg.Height);
-
-                GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
-
-                GameThread.PostInListenerQueue(() =>
+                if (msg.PointStep < iOffset + iFieldSize)
                 {
-                    try
+                    RosLogger.Info($"{this}: Invalid field properties iOffset={iOffset.ToString()} " +
+                                   $"iFieldSize={iFieldSize.ToString()} dataType={iField.Datatype.ToString()}");
+                    IsProcessing = false;
+                    return;
+                }
+
+
+                bool rgbaHint = iFieldSize == 4 && iField.Name is "rgb" or "rgba";
+                GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
+                {
+                    bool useColormap = !rgbaHint;
+                    var header = msg.Header;
+                    int numPoints = (int)(msg.Width * msg.Height);
+                    GameThread.PostInListenerQueue(() =>
                     {
-                        if (!node.IsAlive)
+                        try
                         {
-                            // we're dead
-                            return;
-                        }
+                            if (!node.IsAlive)
+                            {
+                                // we're dead
+                                return;
+                            }
 
-                        node.AttachTo(header);
+                            node.AttachTo(header);
 
-                        NumPoints = numPoints;
+                            NumPoints = numPoints;
 
-                        if (pointBufferLength == 0)
-                        {
-                            pointCloud.Reset();
-                            meshCloud.Reset();
+                            if (pointBufferLength == 0)
+                            {
+                                pointCloud.Reset();
+                                meshCloud.Reset();
+                            }
+                            else if (PointCloudType == PointCloudType.Points)
+                            {
+                                pointCloud.UseColormap = useColormap;
+                                pointCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
+                                meshCloud.Reset();
+                            }
+                            else
+                            {
+                                meshCloud.UseColormap = useColormap;
+                                meshCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
+                                pointCloud.Reset();
+                            }
                         }
-                        else if (PointCloudType == PointCloudType.Points)
+                        finally
                         {
-                            pointCloud.UseColormap = !rgbaHint;
-                            pointCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
-                            meshCloud.Reset();
+                            IsProcessing = false;
                         }
-                        else
-                        {
-                            meshCloud.UseColormap = !rgbaHint;
-                            meshCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
-                            pointCloud.Reset();
-                        }
-                    }
-                    finally
-                    {
-                        IsProcessing = false;
-                    }
-                });
+                    });
+                }
             }
             catch (Exception e)
             {
                 RosLogger.Error($"{this}: Error handling point cloud", e);
                 IsProcessing = false;
-            }
-            finally
-            {
-                msg.Data.TryReturn();
             }
         }
 
@@ -503,14 +511,20 @@ namespace Iviz.Controllers
             var dstBuffer = pointBuffer;
             int dstOff = 0;
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void TryAdd(ReadOnlySpan<byte> span, float w)
             {
                 var data = span.Read<float3>();
-                if (!data.HasNaN() && data.MaxAbsCoeff() <= maxPositionMagnitude)
+                if (data.IsInvalid() || data.MaxAbsCoeff() > maxPositionMagnitude)
                 {
-                    ref float4 f = ref dstBuffer[dstOff++];
-                    (f.x, f.y, f.z, f.w) = (-data.y, data.z, data.x, w);
+                    return;
                 }
+                
+                ref float4 f = ref dstBuffer[dstOff++];
+                f.x = -data.y;
+                f.y = data.z;
+                f.z = data.x;
+                f.w = w;
             }
 
             ReadOnlySpan<byte> dataRowOff = msg.Data.AsSpan();
@@ -524,11 +538,17 @@ namespace Iviz.Controllers
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
                             var data = dataOff.Read<float4>();
-                            if (!data.HasNaN() && !(data.MaxAbsCoeff3() > maxPositionMagnitude))
+                            if (data.IsInvalid3() || data.MaxAbsCoeff3() > maxPositionMagnitude)
                             {
-                                ref float4 f = ref dstBuffer[dstOff++];
-                                (f.x, f.y, f.z, f.w) = (-data.y, data.z, data.x, data.w);
+                                continue;
                             }
+                            
+                            ref float4 f = ref dstBuffer[dstOff++];
+                            f.x = -data.y;
+                            f.y = data.z;
+                            f.z = data.x;
+                            f.w = data.w;
+                            //(f.x, f.y, f.z, f.w) = (-data.y, data.z, data.x, data.w);
                         }
                     }
 
@@ -633,7 +653,7 @@ namespace Iviz.Controllers
             pointCloud.ReturnToPool();
             meshCloud.ReturnToPool();
 
-            node.DestroySelf();
+            node.Dispose();
             pointBuffer = Array.Empty<float4>();
         }
     }

@@ -45,7 +45,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal JointLimits(ref ReadBuffer b)
+        public JointLimits(ref ReadBuffer b)
         {
             JointName = b.DeserializeString();
             HasPositionLimits = b.Deserialize<bool>();

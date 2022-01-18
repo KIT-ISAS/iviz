@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PlaceGoal(ref ReadBuffer b)
+        public PlaceGoal(ref ReadBuffer b)
         {
             GroupName = b.DeserializeString();
             AttachedObjectName = b.DeserializeString();

@@ -60,7 +60,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal GetActionServersRequest(ref ReadBuffer b)
+        public GetActionServersRequest(ref ReadBuffer b)
         {
         }
         
@@ -104,7 +104,7 @@ namespace Iviz.Msgs.Rosapi
         }
         
         /// Constructor with buffer.
-        internal GetActionServersResponse(ref ReadBuffer b)
+        public GetActionServersResponse(ref ReadBuffer b)
         {
             ActionServers = b.DeserializeStringArray();
         }

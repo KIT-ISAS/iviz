@@ -1,10 +1,12 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Controllers.XR;
+using Iviz.Core;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -12,20 +14,19 @@ namespace Iviz.App
 {
     public sealed class XRModuleData : ModuleData
     {
-        readonly XRPanelContents panel;
+        readonly XRModulePanel panel;
         readonly XRController controller;
 
         public override ModuleType ModuleType => ModuleType.XR;
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public XRModuleData(ModuleDataConstructor constructor) : base(constructor.Topic, constructor.Type)
+        public XRModuleData(ModuleDataConstructor constructor)
         {
-            panel = DataPanelManager.GetPanelByResourceType<XRPanelContents>(ModuleType.XR);
+            panel = ModulePanelManager.GetPanelByResourceType<XRModulePanel>(ModuleType.XR);
 
-            controller = new XRController(this, ModuleListPanel.Instance.XRController,
-                (XRConfiguration?)constructor.Configuration);
+            controller = new XRController(ModuleListPanel.Instance.XRController, (XRConfiguration?)constructor.Configuration);
 
             UpdateModuleButton();
         }
@@ -33,9 +34,15 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
-            controller.Dispose();
+            try
+            {
+                controller.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }             
         }
-
 
         public override void SetupPanel()
         {

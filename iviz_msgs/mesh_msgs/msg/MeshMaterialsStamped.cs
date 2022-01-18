@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal MeshMaterialsStamped(ref ReadBuffer b)
+        public MeshMaterialsStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Uuid = b.DeserializeString();

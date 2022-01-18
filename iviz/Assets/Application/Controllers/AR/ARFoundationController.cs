@@ -28,75 +28,43 @@ namespace Iviz.Controllers
         static AnchorToggleButton ARSet => ModuleListPanel.Instance.AnchorCanvasPanel.ARSet;
         static GameObject ARInfoPanel => ModuleListPanel.Instance.AnchorCanvasPanel.ARInfoPanel;
 
-        [SerializeField] Camera? arCamera = null;
-        [SerializeField] ARSession? arSession = null;
-        [SerializeField] ARSessionOrigin? arSessionOrigin = null;
-        [SerializeField] Light? arLight = null;
-        [SerializeField] ARCameraFovDisplay? fovDisplay = null;
-        [SerializeField] MeshFilter? meshPrefab = null;
-        [SerializeField] ARCameraManager? cameraManager = null;
-        [SerializeField] AROcclusionManager? occlusionManager = null;
-        [SerializeField] ARPlaneManager? planeManager = null;
-        [SerializeField] ARRaycastManager? raycaster = null;
-        [SerializeField] ARAnchorManager? anchorManager = null;
-
+        readonly ARContents ar;
         readonly CancellationTokenSource tokenSource = new();
+        readonly int defaultCullingMask;
+        readonly AxisFrameResource setupModeFrame;
+        readonly Camera virtualCamera;
+        readonly Canvas canvas;
 
         bool setupModeEnabled = true;
-        int defaultCullingMask;
         uint colorSeq, depthSeq;
         float? lastAnchorMoved;
         float lastScreenCapture;
 
-        AxisFrameResource? setupModeFrame;
-        Camera? mainCamera;
         ARAnchorResource? worldAnchor;
 
-        Camera ARCamera => arCamera.AssertNotNull(nameof(arCamera));
-        Light ARLight => arLight.AssertNotNull(nameof(arLight));
-        ARSessionOrigin ARSessionOrigin => arSessionOrigin.AssertNotNull(nameof(arSessionOrigin));
-        ARSession Session => arSession.AssertNotNull(nameof(arSession));
-        ARCameraManager CameraManager => cameraManager.AssertNotNull(nameof(cameraManager));
-        AROcclusionManager OcclusionManager => occlusionManager.AssertNotNull(nameof(occlusionManager));
-        ARPlaneManager PlaneManager => planeManager.AssertNotNull(nameof(planeManager));
-        ARRaycastManager Raycaster => raycaster.AssertNotNull(nameof(raycaster));
-        ARAnchorManager AnchorManager => anchorManager.AssertNotNull(nameof(anchorManager));
-
-        AxisFrameResource SetupModeFrame => setupModeFrame != null
-            ? setupModeFrame
-            : (setupModeFrame = ResourcePool.RentDisplay<AxisFrameResource>(ARCamera.transform));
-
-        Camera MainCamera => mainCamera != null
-            ? mainCamera
-            : (mainCamera = Settings.FindMainCamera().GetComponent<Camera>());
+        public ARMeshManager? MeshManager { get; private set; }
+        public ARAnchorManager AnchorManager => ar.AnchorManager;
 
         public string Description
         {
             get
             {
-                if (Session.subsystem == null)
+                if (ar.Session.subsystem == null)
                 {
                     return "<b>[No AR Subsystem]</b>";
                 }
 
-                string trackingState;
-                switch (Session.subsystem.trackingState)
+                string trackingState = ar.Session.subsystem.trackingState switch
                 {
-                    case TrackingState.Limited:
-                        trackingState = "Tracking: Limited";
-                        break;
-                    case TrackingState.None:
-                        trackingState = "Tracking: None";
-                        break;
-                    default:
-                        trackingState = "Tracking: OK";
-                        break;
-                }
+                    TrackingState.Limited => "Tracking: Limited",
+                    TrackingState.None => "Tracking: None",
+                    _ => "Tracking: OK"
+                };
 
                 string numPlanes =
-                    PlaneManager.trackables.count == 0
+                    ar.PlaneManager.trackables.count == 0
                         ? "Planes: None"
-                        : "Planes: " + PlaneManager.trackables.count;
+                        : "Planes: " + ar.PlaneManager.trackables.count;
 
                 return $"<b>{trackingState}</b>\n{numPlanes}";
             }
@@ -111,24 +79,24 @@ namespace Iviz.Controllers
                 switch (value)
                 {
                     case OcclusionQualityType.Off:
-                        OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Disabled;
-                        OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Disabled;
-                        OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Disabled;
+                        ar.OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Disabled;
+                        ar.OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Disabled;
+                        ar.OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Disabled;
                         break;
                     case OcclusionQualityType.Fast:
-                        OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Fastest;
-                        OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Fastest;
-                        OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Fastest;
+                        ar.OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Fastest;
+                        ar.OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Fastest;
+                        ar.OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Fastest;
                         break;
                     case OcclusionQualityType.Medium:
-                        OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Medium;
-                        OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Fastest;
-                        OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Medium;
+                        ar.OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Medium;
+                        ar.OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Fastest;
+                        ar.OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Medium;
                         break;
                     case OcclusionQualityType.Best:
-                        OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Best;
-                        OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Best;
-                        OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Best;
+                        ar.OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Best;
+                        ar.OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Best;
+                        ar.OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Best;
                         break;
                 }
             }
@@ -141,12 +109,13 @@ namespace Iviz.Controllers
             set
             {
                 base.Visible = value;
-                MainCamera.gameObject.SetActive(!value);
-                ARCamera.enabled = value;
-                ARLight.gameObject.SetActive(value);
+
+                Settings.MainCamera = value ? ar.Camera : virtualCamera;
+                virtualCamera.gameObject.SetActive(!value);
+                ar.Camera.enabled = value;
+                ar.ARLight.gameObject.SetActive(value);
                 ARSet.Visible = SetupModeEnabled;
-                Settings.MainCamera = value ? ARCamera : MainCamera;
-                Canvas.worldCamera = Settings.MainCamera;
+                canvas.worldCamera = Settings.MainCamera;
 
                 if (value)
                 {
@@ -157,6 +126,8 @@ namespace Iviz.Controllers
                     RenderSettings.ambientMode = AmbientMode.Trilight;
                     Settings.SettingsManager.BackgroundColor = Settings.SettingsManager.BackgroundColor;
                 }
+
+                RaiseARCameraViewChanged(value);
             }
         }
 
@@ -171,20 +142,17 @@ namespace Iviz.Controllers
 
                 if (value)
                 {
-                    ARCamera.cullingMask = (1 << LayerType.ARSetupMode) | (1 << LayerType.UI);
+                    ar.Camera.cullingMask = (1 << LayerType.ARSetupMode) | (1 << LayerType.UI);
                     ARInfoPanel.SetActive(true);
                 }
                 else
                 {
-                    ARCamera.cullingMask = defaultCullingMask;
-                    var (sourcePosition, sourceRotation) = SetupModeFrame.transform.AsPose();
-                    Pose pose = new Pose
-                    {
-                        position = sourcePosition,
-                        rotation = Quaternion.Euler(0, sourceRotation.eulerAngles.y - 90, 0)
-                    };
+                    ar.Camera.cullingMask = defaultCullingMask;
+                    var (sourcePosition, sourceRotation) = setupModeFrame.transform.AsPose();
 
-                    //Debug.Log(sourcePose);
+                    Pose pose;
+                    pose.position = sourcePosition;
+                    pose.rotation = Quaternion.Euler(0, sourceRotation.eulerAngles.y - 90, 0);
                     SetWorldPose(pose, RootMover.Setup);
                 }
             }
@@ -192,8 +160,8 @@ namespace Iviz.Controllers
 
         public bool EnableAutoFocus
         {
-            get => CameraManager.autoFocusRequested;
-            set => CameraManager.autoFocusRequested = value;
+            get => ar.CameraManager.autoFocusRequested;
+            set => ar.CameraManager.autoFocusRequested = value;
         }
 
         public override bool EnableMeshing
@@ -204,21 +172,18 @@ namespace Iviz.Controllers
                 base.EnableMeshing = value;
                 if (value)
                 {
-                    MeshManager = ARCamera.gameObject.EnsureComponent<ARMeshManager>();
-                    MeshManager.meshPrefab = meshPrefab;
+                    MeshManager = ar.Camera.gameObject.EnsureComponent<ARMeshManager>();
+                    MeshManager.meshPrefab = ar.MeshPrefab;
                     MeshManager.normals = false;
                 }
                 else if (MeshManager != null)
                 {
                     MeshManager.DestroyAllMeshes();
-                    Destroy(MeshManager);
+                    UnityEngine.Object.Destroy(MeshManager);
                     MeshManager = null;
                 }
             }
         }
-
-        public bool ProvidesMesh { get; private set; }
-        public bool ProvidesOcclusion { get; private set; }
 
         public override bool PinRootMarker
         {
@@ -234,46 +199,54 @@ namespace Iviz.Controllers
             }
         }
 
-        protected override void Awake()
+        public ARFoundationController(ARConfiguration? config)
         {
-            base.Awake();
             Instance = this;
 
-            Settings.ARCamera = ARCamera;
+            ar = UnityEngine.Object.Instantiate(Resource.Extras.AppAssetHolder.ARPrefab).GetComponent<ARContents>();
+            if (ar == null)
+            {
+                throw new MissingAssetFieldException("AR object does not have contents");
+            }
 
-            MeshManager = ARCamera.gameObject.EnsureComponent<ARMeshManager>();
+            Settings.ARCamera = ar.Camera;
+
+            canvas = GameObject.Find("Canvas").GetComponent<Canvas>().AssertNotNull(nameof(canvas));
+            virtualCamera = Settings.FindMainCamera().GetComponent<Camera>();
+
+            MeshManager = ar.Camera.gameObject.GetComponent<ARMeshManager>();
 
             lastAnchorMoved = Time.time;
 
-            defaultCullingMask = ARCamera.cullingMask;
+            defaultCullingMask = ar.Camera.cullingMask;
 
-            CameraManager.frameReceived += args => ProcessLights(args.lightEstimation);
+            ar.CameraManager.frameReceived += args => ProcessLights(args.lightEstimation);
 
+            /*
             var subsystems = new List<ISubsystem>();
             SubsystemManager.GetInstances(subsystems);
             ProvidesMesh = subsystems.Any(s => s is XRMeshSubsystem);
             ProvidesOcclusion = subsystems.Any(s => s is XROcclusionSubsystem);
+            */
 
-            Config = new ARConfiguration();
+            Config = config ?? new ARConfiguration();
 
-            //SetupModeFrame = ResourcePool.RentDisplay<AxisFrameResource>(ArCamera.transform);
-            SetupModeFrame.Layer = LayerType.ARSetupMode;
-
+            setupModeFrame = ResourcePool.RentDisplay<AxisFrameResource>(ar.Camera.transform);
+            setupModeFrame.Layer = LayerType.ARSetupMode;
+            setupModeFrame.AxisLength = 0.5f * TfListener.Instance.FrameSize;
             SetupModeEnabled = true;
-            SetupModeFrame.AxisLength = 0.5f * TfListener.Instance.FrameSize;
 
             ARSet.Clicked += ArSetOnClicked;
             ARSet.Visible = false;
             ARInfoPanel.SetActive(true);
 
             WorldPoseChanged += OnWorldPoseChanged;
-
-            Settings.ScreenCaptureManager =
-                new ARFoundationScreenCaptureManager(CameraManager, ARCamera.transform, OcclusionManager);
-
             GuiInputModule.Instance.LongClick += TriggerPulse;
 
-            RaiseARActiveChanged();
+            Settings.ScreenCaptureManager =
+                new ARFoundationScreenCaptureManager(ar.CameraManager, ar.Camera.transform, ar.OcclusionManager);
+
+            RaiseARStateChanged();
         }
 
         void ArSetOnClicked()
@@ -291,7 +264,7 @@ namespace Iviz.Controllers
             bool meshingEnabled = EnableMeshing;
             var occlusionQuality = OcclusionQuality;
             EnableMeshing = false;
-            Session.Reset();
+            ar.Session.Reset();
             ResetSetupMode();
 
             await Task.Delay(200);
@@ -302,7 +275,7 @@ namespace Iviz.Controllers
         bool IsSamePose(in Pose b)
         {
             return Vector3.Distance(WorldPosition, b.position) < 0.001f &&
-                   Mathf.Abs(WorldAngle - AngleFromPose(b)) < 0.1f;
+                   Math.Abs(WorldAngle - AngleFromPose(b)) < 0.1f;
         }
 
         void OnWorldPoseChanged(RootMover mover)
@@ -321,7 +294,7 @@ namespace Iviz.Controllers
         {
             if (worldAnchor != null)
             {
-                AnchorManager.RemoveAnchor(worldAnchor.Anchor);
+                ar.AnchorManager.RemoveAnchor(worldAnchor.Anchor);
                 worldAnchor = null;
             }
 
@@ -344,20 +317,20 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var cameraTransform = ARCamera.transform;
-            SetupModeFrame.Transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
+            var cameraTransform = ar.Camera.transform;
+            setupModeFrame.Transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
             var ray = new Ray(cameraTransform.position, cameraTransform.forward);
             if (TryGetRaycastHit(ray, out Pose hit))
             {
-                SetupModeFrame.Transform.position = hit.position;
-                SetupModeFrame.Tint = Color.white;
+                setupModeFrame.Transform.position = hit.position;
+                setupModeFrame.Tint = Color.white;
                 ARSet.Visible = true;
                 ARInfoPanel.SetActive(false);
             }
             else
             {
-                SetupModeFrame.Transform.localPosition = new Vector3(0, 0, 0.5f);
-                SetupModeFrame.Tint = Color.white.WithAlpha(0.3f);
+                setupModeFrame.Transform.localPosition = new Vector3(0, 0, 0.5f);
+                setupModeFrame.Tint = Color.white.WithAlpha(0.3f);
                 ARSet.Visible = false;
             }
         }
@@ -419,7 +392,7 @@ namespace Iviz.Controllers
         {
             try
             {
-                var anchor = AnchorManager.AddAnchor(WorldPose).GetComponent<ARAnchorResource>();
+                var anchor = ar.AnchorManager.AddAnchor(WorldPose).GetComponent<ARAnchorResource>();
                 anchor.Moved += OnWorldAnchorMoved;
                 worldAnchor = anchor;
             }
@@ -436,7 +409,7 @@ namespace Iviz.Controllers
 
         bool TryGetRaycastHit(in Ray ray, out Pose hit)
         {
-            if (ARSessionOrigin.trackablesParent == null)
+            if (ar.ARSessionOrigin.trackablesParent == null)
             {
                 // not initialized yet!
                 hit = default;
@@ -444,7 +417,7 @@ namespace Iviz.Controllers
             }
 
             var results = new List<ARRaycastHit>();
-            Raycaster.Raycast(ray, results);
+            ar.Raycaster.Raycast(ray, results);
             results.RemoveAll(static rayHit => (rayHit.hitType & TrackableType.PlaneWithinPolygon) == 0);
 
             switch (results.Count)
@@ -475,7 +448,7 @@ namespace Iviz.Controllers
 
         public bool TryGetRaycastHits(in Ray ray, [NotNullWhen(true)] out List<ARRaycastHit>? hits)
         {
-            if (ARSessionOrigin.trackablesParent == null)
+            if (ar.ARSessionOrigin.trackablesParent == null)
             {
                 // not initialized yet!
                 hits = null;
@@ -483,7 +456,7 @@ namespace Iviz.Controllers
             }
 
             hits = new List<ARRaycastHit>();
-            Raycaster.Raycast(ray, hits);
+            ar.Raycaster.Raycast(ray, hits);
             hits.RemoveAll(rayHit => (rayHit.hitType & TrackableType.PlaneWithinPolygon) == 0);
             hits.Sort((a, b) => a.distance.CompareTo(b.distance));
 
@@ -494,13 +467,13 @@ namespace Iviz.Controllers
         void ProcessLights(in ARLightEstimationData lightEstimation)
         {
             // ARKit back camera only appears to have these two
-            if (lightEstimation.averageColorTemperature.HasValue && lightEstimation.averageBrightness.HasValue)
+            if (lightEstimation.averageColorTemperature is { } averageColorTemperature &&
+                lightEstimation.averageBrightness is { } averageBrightness)
             {
-                var color = Mathf.CorrelatedColorTemperatureToRGB(lightEstimation.averageColorTemperature.Value);
-                float intensity = lightEstimation.averageBrightness.Value;
+                var color = Mathf.CorrelatedColorTemperatureToRGB(averageColorTemperature);
 
-                ARLight.color = color;
-                ARLight.intensity = intensity;
+                ar.ARLight.color = color;
+                ar.ARLight.intensity = averageBrightness;
 
                 // ambient light is only to prevent complete blacks
                 RenderSettings.ambientMode = AmbientMode.Flat;
@@ -509,23 +482,22 @@ namespace Iviz.Controllers
             }
 
             // ARKit front camera (unused)
-            if (lightEstimation.mainLightDirection.HasValue)
+            if (lightEstimation.mainLightDirection is { } mainLightDirection)
             {
-                ARLight.transform.rotation = Quaternion.LookRotation(lightEstimation.mainLightDirection.Value);
+                ar.ARLight.transform.rotation = Quaternion.LookRotation(mainLightDirection);
             }
 
             // ARKit front camera (unused)
-            if (lightEstimation.mainLightColor.HasValue)
+            if (lightEstimation.mainLightColor is { } mainLightColor)
             {
-                ARLight.color = lightEstimation.mainLightColor.Value;
+                ar.ARLight.color = mainLightColor;
             }
 
             // Android only I think
-            if (lightEstimation.ambientSphericalHarmonics.HasValue)
+            if (lightEstimation.ambientSphericalHarmonics is { } ambientSphericalHarmonics)
             {
-                var sphericalHarmonics = lightEstimation.ambientSphericalHarmonics;
                 RenderSettings.ambientMode = AmbientMode.Skybox;
-                RenderSettings.ambientProbe = sphericalHarmonics.Value;
+                RenderSettings.ambientProbe = ambientSphericalHarmonics;
             }
         }
 
@@ -536,7 +508,7 @@ namespace Iviz.Controllers
                 ARController.TriggerPulse(results[0].Position);
             }
         }
-        
+
         async void CaptureScreenForPublish(CancellationToken token)
         {
             if (ColorSender == null
@@ -565,23 +537,22 @@ namespace Iviz.Controllers
 
                 var colorTask = shouldPublishColor
                     ? captureManager.CaptureColorAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot?>?)null;
+                    : null;
 
                 var depthTask = shouldPublishDepth
                     ? captureManager.CaptureDepthAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot?>?)null;
+                    : null;
 
                 var confidenceTask = shouldPublishConfidence
                     ? captureManager.CaptureDepthConfidenceAsync(captureReuseTimeInMs, token).AwaitNoThrow(this)
-                    : (ValueTask<Screenshot?>?)null;
+                    : null;
 
-                var color = colorTask != null ? await colorTask.Value : null;
-                var depth = depthTask != null ? await depthTask.Value : null;
-                var confidence = confidenceTask != null ? await confidenceTask.Value : null;
+                var color = colorTask != null ? await colorTask : null;
+                var depth = depthTask != null ? await depthTask : null;
+                var confidence = confidenceTask != null ? await confidenceTask : null;
 
-                var frame = TfListener.GetOrCreateFrame(CameraFrameId);
-                frame.ForceInvisible = true;
-                string frameId = frame.Id;
+
+                string frameId = TfListener.ResolveFrameId(CameraFrameId);
 
                 if (color != null)
                 {
@@ -618,33 +589,35 @@ namespace Iviz.Controllers
                 }
 
                 var absoluteArCameraPose = ARPoseToUnity(anyPose.Value);
-                var relativePose = TfListener.RelativeToFixedFrame(absoluteArCameraPose).Unity2RosTransform();
-                TfListener.Publish(frameId, relativePose.ToCameraFrame());
+                cameraFrame.LocalPose = TfListener.RelativeToFixedFrame(absoluteArCameraPose);
             }
             catch (Exception e)
             {
-                RosLogger.Error("CaptureScreenForPublish failed", e);
+                RosLogger.Error($"{this}: CaptureScreenForPublish failed", e);
             }
         }
 
         public override void Dispose()
         {
             base.Dispose();
+
             tokenSource.Cancel();
             ARSet.Clicked -= ArSetOnClicked;
             WorldPoseChanged -= OnWorldPoseChanged;
             GuiInputModule.Instance.LongClick -= TriggerPulse;
-
-            if (fovDisplay != null)
-            {
-                Destroy(fovDisplay.gameObject);
-            }
 
             ARSet.Visible = false;
             ARInfoPanel.SetActive(false);
 
             Settings.ARCamera = null;
             Settings.ScreenCaptureManager = null;
+
+            if (ar.FovDisplay != null)
+            {
+                UnityEngine.Object.Destroy(ar.FovDisplay.gameObject);
+            }
+
+            UnityEngine.Object.Destroy(ar.gameObject);
         }
     }
 }

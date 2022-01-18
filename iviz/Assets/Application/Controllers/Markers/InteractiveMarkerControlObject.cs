@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Text;
 using Iviz.App;
@@ -126,7 +127,7 @@ namespace Iviz.Controllers
                             ? existingMarker
                             : CreateMarker(markerId);
 
-                        _ = markerObject.SetAsync(marker); // TODO: deal with mesh loading
+                        markerObject.SetAsync(marker); // TODO: deal with mesh loading
                         markerObject.Transform.SetParent(Transform,
                             marker.Header.FrameId.Length != 0); // world position stays
 
@@ -134,13 +135,13 @@ namespace Iviz.Controllers
                     case Marker.DELETE:
                         if (markers.TryGetValue(markerId, out var markerToDelete))
                         {
-                            markerToDelete.Stop();
+                            markerToDelete.Dispose();
                             markers.Remove(markerId);
                         }
 
                         break;
                     case Marker.DELETEALL:
-                        DestroyAllMarkers();
+                        DisposeAllMarkers();
                         break;
                 }
             }
@@ -184,7 +185,7 @@ namespace Iviz.Controllers
                         continue;
                     }
 
-                    var baseOrientation = orientation * Quaternion.Inverse(marker.Pose.rotation);
+                    var baseOrientation = orientation * marker.LocalRotation.Inverse();
                     control.BaseOrientation = baseOrientation;
                     boundsControls.Add(control, baseOrientation);
                 }
@@ -260,7 +261,7 @@ namespace Iviz.Controllers
             {
                 var forwardWorld = Settings.MainCameraTransform.position - node.transform.position;
                 var deltaRotationWorld = Quaternion.LookRotation(forwardWorld);
-                var deltaRotationLocal = Quaternion.Inverse(node.transform.rotation) * deltaRotationWorld;
+                var deltaRotationLocal = node.transform.rotation.Inverse() * deltaRotationWorld;
 
                 foreach (var (boundsControl, baseOrientation) in boundsControls)
                 {
@@ -273,20 +274,20 @@ namespace Iviz.Controllers
             }
         }
 
-        void DestroyAllMarkers()
+        void DisposeAllMarkers()
         {
             foreach (var markerObject in markers.Values)
             {
-                markerObject.Stop();
+                markerObject.Dispose();
             }
 
             markers.Clear();
         }
 
-        public void Stop()
+        public void Dispose()
         {
             GameThread.EveryFrame -= KeepPointingForward;
-            DestroyAllMarkers();
+            DisposeAllMarkers();
             Object.Destroy(node);
         }
 
@@ -424,7 +425,7 @@ namespace Iviz.Controllers
         static Color ColorFromOrientation(in Quaternion orientation, in Vector3 direction)
         {
             var (x, y, z) = orientation * direction;
-            return new Color(Mathf.Abs(x), Mathf.Abs(y), Mathf.Abs(z));
+            return new Color(Math.Abs(x), Math.Abs(y), Math.Abs(z));
         }
     }
 }

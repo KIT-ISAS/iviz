@@ -1,6 +1,8 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -10,29 +12,29 @@ using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
+using Iviz.Roslib;
 using Newtonsoft.Json;
 
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="JoystickPanelContents"/> 
+    /// <see cref="JoystickModulePanel"/> 
     /// </summary>
     public sealed class JoystickModuleData : ModuleData
     {
         readonly JoystickController controller;
-        readonly JoystickPanelContents panel;
+        readonly JoystickModulePanel panel;
 
         public override ModuleType ModuleType => ModuleType.Joystick;
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public JoystickModuleData(ModuleDataConstructor constructor) :
-            base(constructor.Topic, constructor.Type)
+        public JoystickModuleData(ModuleDataConstructor constructor)
         {
-            panel = DataPanelManager.GetPanelByResourceType<JoystickPanelContents>(ModuleType.Joystick);
+            panel = ModulePanelManager.GetPanelByResourceType<JoystickModulePanel>(ModuleType.Joystick);
 
-            controller = new JoystickController(this, ModuleListPanel.TwistJoystick);
+            controller = new JoystickController(ModuleListPanel.TwistJoystick);
             if (constructor.Configuration != null)
             {
                 controller.Config = (JoystickConfiguration)constructor.Configuration;
@@ -44,7 +46,14 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
-            controller.Dispose();
+            try
+            {
+                controller.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }            
         }
 
         public override void SetupPanel()
@@ -66,7 +75,7 @@ namespace Iviz.App
 
             panel.MaxSpeed.Value = controller.MaxSpeed;
             panel.AttachToFrame.Value = controller.AttachToFrame;
-            panel.AttachToFrame.Hints = TfListener.FramesUsableAsHints;
+            panel.AttachToFrame.Hints = TfListener.FrameNames;
             panel.XIsFront.Value = controller.XIsFront;
 
             panel.JoyTopic.Interactable = controller.PublishJoy;
@@ -129,21 +138,22 @@ namespace Iviz.App
         {
             base.UpdatePanel();
             UpdateHints();
-            panel.AttachToFrame.Hints = TfListener.FramesUsableAsHints;
+            panel.AttachToFrame.Hints = TfListener.FrameNames;
         }
 
         void UpdateHints()
         {
-            var topicTypes = ConnectionManager.Connection.GetSystemTopicTypes();
-            panel.JoyTopic.Hints = topicTypes
+            panel.JoyTopic.Hints = GetTopicTypes()
                 .Where(info => info.Type == Joy.RosMessageType)
                 .Select(info => info.Topic);            
             string expectedType = controller.UseTwistStamped
                 ? TwistStamped.RosMessageType
                 : Twist.RosMessageType;
-            panel.TwistTopic.Hints = topicTypes
+            panel.TwistTopic.Hints = GetTopicTypes()
                 .Where(info => info.Type == expectedType)
                 .Select(info => info.Topic);            
+            
+            static IEnumerable<BriefTopicInfo> GetTopicTypes() => ConnectionManager.Connection.GetSystemTopicTypes();
         }
 
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)

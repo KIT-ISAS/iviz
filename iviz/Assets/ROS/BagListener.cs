@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Rosbag.Writer;
+using Iviz.Tools;
 using Nito.AsyncEx;
 
 namespace Iviz.Ros
@@ -33,14 +34,14 @@ namespace Iviz.Ros
                 RosLogger.Info($"{this}: Writing rosbag to path {path}");
             }
 
-            task = Task.Run(WriteMessagesAsync);
+            task = TaskUtils.Run(() => WriteMessagesAsync().AsTask());
         }
 
         public async ValueTask DisposeAsync()
         {
             if (disposed)
             {
-                RosLogger.Error("Tried to close rosbag file twice");
+                RosLogger.Error($"{this}: Tried to close rosbag file twice");
                 return;
             }
 
@@ -70,7 +71,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Debug($"{this}: Exception during EnqueueMessage: ", e);
+                RosLogger.Debug($"{this}: Exception during EnqueueMessage", e);
             }
         }
 
@@ -96,7 +97,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Debug($"{this}: Exception during WriteMessagesAsync: ", e);
+                RosLogger.Debug($"{this}: Exception during WriteMessagesAsync", e);
             }
 
             if (writer != null)

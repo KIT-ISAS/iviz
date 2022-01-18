@@ -11,134 +11,134 @@ namespace Iviz.Resources
 {
     public sealed class DisplaysType
     {
-        readonly Dictionary<Type, Info<GameObject>?> resourceByType;
+        readonly Dictionary<Type, ResourceKey<GameObject>?> resourceByType;
 
-        public Info<GameObject> Cube { get; }
-        public Info<GameObject> Cylinder { get; }
-        public Info<GameObject> Sphere { get; }
-        public Info<GameObject> Pyramid { get; }
-        public Info<GameObject> Text { get; }
-        public Info<GameObject> LineConnector { get; }
-        public Info<GameObject> BoundaryFrame { get; }
-        public Info<GameObject> Arrow { get; }
-        public Info<GameObject> MeshList { get; }
-        public Info<GameObject> PointList { get; }
-        public Info<GameObject> MeshTriangles { get; }
-        public Info<GameObject> TfFrame { get; }
-        public Info<GameObject> Image { get; }
-        public Info<GameObject> Square { get; }
-        public Info<GameObject> Line { get; }
-        public Info<GameObject> Grid { get; }
-        public Info<GameObject> DepthImageResource { get; }
-        public Info<GameObject> OccupancyGridResource { get; }
-        public Info<GameObject> RadialScanResource { get; }
-        public Info<GameObject> ARMarkerResource { get; }
-        public Info<GameObject> AxisFrame { get; }
-        public Info<GameObject> AngleAxis { get; }
-        public Info<GameObject> Trail { get; }
-        public Info<GameObject> InteractiveControl { get; }
-        public Info<GameObject> GridMap { get; }
-        public Info<GameObject> OccupancyGridTextureResource { get; }
+        public ResourceKey<GameObject> Cube { get; }
+        public ResourceKey<GameObject> Cylinder { get; }
+        public ResourceKey<GameObject> Sphere { get; }
+        public ResourceKey<GameObject> Pyramid { get; }
+        public ResourceKey<GameObject> Text { get; }
+        public ResourceKey<GameObject> LineConnector { get; }
+        public ResourceKey<GameObject> BoundaryFrame { get; }
+        public ResourceKey<GameObject> Arrow { get; }
+        public ResourceKey<GameObject> MeshList { get; }
+        public ResourceKey<GameObject> PointList { get; }
+        public ResourceKey<GameObject> MeshTriangles { get; }
+        //public ResourceKey<GameObject> TfFrame { get; }
+        public ResourceKey<GameObject> Image { get; }
+        public ResourceKey<GameObject> Square { get; }
+        public ResourceKey<GameObject> Line { get; }
+        public ResourceKey<GameObject> Grid { get; }
+        public ResourceKey<GameObject> DepthImageResource { get; }
+        public ResourceKey<GameObject> OccupancyGridResource { get; }
+        public ResourceKey<GameObject> RadialScanResource { get; }
+        public ResourceKey<GameObject> AxisFrame { get; }
+        public ResourceKey<GameObject> AngleAxis { get; }
+        public ResourceKey<GameObject> Trail { get; }
+        public ResourceKey<GameObject> InteractiveControl { get; }
+        public ResourceKey<GameObject> GridMap { get; }
+        public ResourceKey<GameObject> OccupancyGridTextureResource { get; }
 
-        public Info<GameObject> ARDialog { get; }
-        public Info<GameObject> ARDialogIcon { get; }
-        public Info<GameObject> ARDialogMenu { get; }
-        public Info<GameObject> ARDialogShort { get; }
-        public Info<GameObject> ARTfFrame { get; }
-        public Info<GameObject> ARDialogNotice { get; }
-        public Info<GameObject> ARButtonDialog { get; }
-        public Info<GameObject> RotationDisc { get; }
-        public Info<GameObject> SpringDisc { get; }
-        public Info<GameObject> SpringDisc3D { get; }
-        public Info<GameObject> TrajectoryDisc { get; }
-        public Info<GameObject> Tooltip { get; }
-        public Info<GameObject> TargetArea { get; }
-        public Info<GameObject> PositionDisc3D { get; }
-        public Info<GameObject> PositionDisc { get; }
-        public Info<GameObject> ARMarkerHighlighter { get; }
-        public Info<GameObject> RoundedPlane { get; }
-        public Info<GameObject> Leash { get; }
-        public Info<GameObject> Reticle { get; }
-        public Info<GameObject> Ring { get; }
-        public Info<GameObject> SelectionFrame { get; }
-        public Info<GameObject> CanvasHolder { get; }
-        public Info<GameObject> PalmCompass { get; }
+        public ResourceKey<GameObject> ARDialog { get; }
+        public ResourceKey<GameObject> ARDialogIcon { get; }
+        public ResourceKey<GameObject> ARDialogMenu { get; }
+        public ResourceKey<GameObject> ARDialogShort { get; }
+        public ResourceKey<GameObject> ARTfFrame { get; }
+        public ResourceKey<GameObject> ARDialogNotice { get; }
+        public ResourceKey<GameObject> ARButtonDialog { get; }
+        public ResourceKey<GameObject> RotationDisc { get; }
+        public ResourceKey<GameObject> SpringDisc { get; }
+        public ResourceKey<GameObject> SpringDisc3D { get; }
+        public ResourceKey<GameObject> TrajectoryDisc { get; }
+        public ResourceKey<GameObject> Tooltip { get; }
+        public ResourceKey<GameObject> TargetArea { get; }
+        public ResourceKey<GameObject> PositionDisc3D { get; }
+        public ResourceKey<GameObject> PositionDisc { get; }
+        public ResourceKey<GameObject> ARMarkerHighlighter { get; }
+        public ResourceKey<GameObject> RoundedPlane { get; }
+        public ResourceKey<GameObject> Leash { get; }
+        public ResourceKey<GameObject> Reticle { get; }
+        public ResourceKey<GameObject> Ring { get; }
+        public ResourceKey<GameObject> SelectionFrame { get; }
+        public ResourceKey<GameObject> CanvasHolder { get; }
+        public ResourceKey<GameObject> PalmCompass { get; }
 
         public DisplaysType()
         {
             var assetHolder = Resource.Extras.AssetHolder;
             var appAssetHolder = Resource.Extras.AppAssetHolder;
 
-            Cube = new Info<GameObject>(assetHolder.Cube);
-            Cylinder = new Info<GameObject>(assetHolder.Cylinder);
-            Sphere = new Info<GameObject>(assetHolder.Sphere);
-            Text = new Info<GameObject>(assetHolder.Text);
-            LineConnector = new Info<GameObject>(appAssetHolder.LineConnector);
-            BoundaryFrame = new Info<GameObject>(appAssetHolder.BoundaryFrame);
-            Arrow = new Info<GameObject>(appAssetHolder.Arrow);
-            MeshList = new Info<GameObject>(assetHolder.MeshList);
-            PointList = new Info<GameObject>(assetHolder.PointList);
-            MeshTriangles = new Info<GameObject>(assetHolder.MeshTriangles);
-            TfFrame = new Info<GameObject>(appAssetHolder.TFFrame);
-            Image = new Info<GameObject>(appAssetHolder.Image);
-            Square = new Info<GameObject>(assetHolder.Plane);
-            Line = new Info<GameObject>(assetHolder.Line);
-            Grid = new Info<GameObject>(appAssetHolder.Grid);
-            DepthImageResource = new Info<GameObject>(appAssetHolder.DepthImage);
-            OccupancyGridResource = new Info<GameObject>(appAssetHolder.OccupancyGrid);
-            RadialScanResource = new Info<GameObject>(appAssetHolder.RadialScan);
-            ARMarkerResource = new Info<GameObject>(appAssetHolder.ARMarkerResource);
-            AxisFrame = new Info<GameObject>(appAssetHolder.AxisFrame);
-            AngleAxis = new Info<GameObject>(appAssetHolder.AngleAxis);
-            Trail = new Info<GameObject>(appAssetHolder.Trail);
-            InteractiveControl = new Info<GameObject>(appAssetHolder.InteractiveControl);
-            GridMap = new Info<GameObject>(appAssetHolder.GridMap);
-            OccupancyGridTextureResource = new Info<GameObject>(appAssetHolder.OccupancyGridTexture);
+            Cube = Create(assetHolder.Cube);
+            Cylinder = Create(assetHolder.Cylinder);
+            Sphere = Create(assetHolder.Sphere);
+            Text = Create(assetHolder.Text);
+            LineConnector = Create(appAssetHolder.LineConnector);
+            BoundaryFrame = Create(appAssetHolder.BoundaryFrame);
+            Arrow = Create(appAssetHolder.Arrow);
+            MeshList = Create(assetHolder.MeshList);
+            PointList = Create(assetHolder.PointList);
+            MeshTriangles = Create(assetHolder.MeshTriangles);
+            //TfFrame = Create(appAssetHolder.TFFrame);
+            Image = Create(appAssetHolder.Image);
+            Square = Create(assetHolder.Plane);
+            Line = Create(assetHolder.Line);
+            Grid = Create(appAssetHolder.Grid);
+            DepthImageResource = Create(appAssetHolder.DepthImage);
+            OccupancyGridResource = Create(appAssetHolder.OccupancyGrid);
+            RadialScanResource = Create(appAssetHolder.RadialScan);
+            AxisFrame = Create(appAssetHolder.AxisFrame);
+            AngleAxis = Create(appAssetHolder.AngleAxis);
+            Trail = Create(appAssetHolder.Trail);
+            InteractiveControl = Create(appAssetHolder.InteractiveControl);
+            GridMap = Create(appAssetHolder.GridMap);
+            OccupancyGridTextureResource = Create(appAssetHolder.OccupancyGridTexture);
 
-            Pyramid = new Info<GameObject>(appAssetHolder.Pyramid, nameof(appAssetHolder.Pyramid));
+            Pyramid = Create(appAssetHolder.Pyramid, nameof(appAssetHolder.Pyramid));
 
-            ARDialog = new Info<GameObject>(appAssetHolder.ARDialog, nameof(appAssetHolder.ARDialog));
-            ARDialogIcon = new Info<GameObject>(appAssetHolder.ARDialogIcon, nameof(appAssetHolder.ARDialogIcon));
-            ARDialogMenu = new Info<GameObject>(appAssetHolder.ARDialogMenu, nameof(appAssetHolder.ARDialogMenu));
-            ARDialogShort = new Info<GameObject>(appAssetHolder.ARDialogShort, nameof(appAssetHolder.ARDialogShort));
-            ARTfFrame = new Info<GameObject>(appAssetHolder.ARTfFrame, nameof(appAssetHolder.ARTfFrame));
-            ARDialogNotice = new Info<GameObject>(appAssetHolder.ARDialogNotice, nameof(appAssetHolder.ARDialogNotice));
-            ARButtonDialog = new Info<GameObject>(appAssetHolder.ARButtonDialog, nameof(appAssetHolder.ARButtonDialog));
-            ARMarkerHighlighter = new Info<GameObject>(appAssetHolder.ARMarkerHighlighter,
-                nameof(appAssetHolder.ARMarkerHighlighter));
+            ARDialog = Create(appAssetHolder.ARDialog, nameof(appAssetHolder.ARDialog));
+            ARDialogIcon = Create(appAssetHolder.ARDialogIcon, nameof(appAssetHolder.ARDialogIcon));
+            ARDialogMenu = Create(appAssetHolder.ARDialogMenu, nameof(appAssetHolder.ARDialogMenu));
+            ARDialogShort = Create(appAssetHolder.ARDialogShort, nameof(appAssetHolder.ARDialogShort));
+            ARTfFrame = Create(appAssetHolder.ARTfFrame, nameof(appAssetHolder.ARTfFrame));
+            ARDialogNotice = Create(appAssetHolder.ARDialogNotice, nameof(appAssetHolder.ARDialogNotice));
+            ARButtonDialog = Create(appAssetHolder.ARButtonDialog, nameof(appAssetHolder.ARButtonDialog));
+            ARMarkerHighlighter =
+                Create(appAssetHolder.ARMarkerHighlighter, nameof(appAssetHolder.ARMarkerHighlighter));
 
-            RotationDisc = new Info<GameObject>(appAssetHolder.RotationDisc, nameof(appAssetHolder.RotationDisc));
-            SpringDisc = new Info<GameObject>(appAssetHolder.SpringDisc, nameof(appAssetHolder.SpringDisc));
-            SpringDisc3D = new Info<GameObject>(appAssetHolder.SpringDisc3D, nameof(appAssetHolder.SpringDisc3D));
-            TrajectoryDisc = new Info<GameObject>(appAssetHolder.TrajectoryDisc, nameof(appAssetHolder.TrajectoryDisc));
-            Tooltip = new Info<GameObject>(appAssetHolder.Tooltip, nameof(appAssetHolder.Tooltip));
-            TargetArea = new Info<GameObject>(appAssetHolder.TargetArea, nameof(appAssetHolder.TargetArea));
-            PositionDisc3D = new Info<GameObject>(appAssetHolder.PositionDisc3D, nameof(appAssetHolder.PositionDisc3D));
-            PositionDisc = new Info<GameObject>(appAssetHolder.PositionDisc, nameof(appAssetHolder.PositionDisc));
+            RotationDisc = Create(appAssetHolder.RotationDisc, nameof(appAssetHolder.RotationDisc));
+            SpringDisc = Create(appAssetHolder.SpringDisc, nameof(appAssetHolder.SpringDisc));
+            SpringDisc3D = Create(appAssetHolder.SpringDisc3D, nameof(appAssetHolder.SpringDisc3D));
+            TrajectoryDisc = Create(appAssetHolder.TrajectoryDisc, nameof(appAssetHolder.TrajectoryDisc));
+            Tooltip = Create(appAssetHolder.Tooltip, nameof(appAssetHolder.Tooltip));
+            TargetArea = Create(appAssetHolder.TargetArea, nameof(appAssetHolder.TargetArea));
+            PositionDisc3D = Create(appAssetHolder.PositionDisc3D, nameof(appAssetHolder.PositionDisc3D));
+            PositionDisc = Create(appAssetHolder.PositionDisc, nameof(appAssetHolder.PositionDisc));
 
-            RoundedPlane = new Info<GameObject>(appAssetHolder.RoundedPlane, nameof(appAssetHolder.RoundedPlane));
-            Leash = new Info<GameObject>(appAssetHolder.Leash, nameof(appAssetHolder.Leash));
-            Reticle = new Info<GameObject>(appAssetHolder.Reticle, nameof(appAssetHolder.Reticle));
-            Ring = new Info<GameObject>(appAssetHolder.Ring, nameof(appAssetHolder.Ring));
-            SelectionFrame = new Info<GameObject>(appAssetHolder.SelectionFrame, nameof(appAssetHolder.SelectionFrame));
-            CanvasHolder = new Info<GameObject>(appAssetHolder.CanvasHolder, nameof(appAssetHolder.CanvasHolder));
-            PalmCompass = new Info<GameObject>(appAssetHolder.PalmCompass, nameof(appAssetHolder.PalmCompass));
+            RoundedPlane = Create(appAssetHolder.RoundedPlane, nameof(appAssetHolder.RoundedPlane));
+            Leash = Create(appAssetHolder.Leash, nameof(appAssetHolder.Leash));
+            Reticle = Create(appAssetHolder.Reticle, nameof(appAssetHolder.Reticle));
+            Ring = Create(appAssetHolder.Ring, nameof(appAssetHolder.Ring));
+            SelectionFrame = Create(appAssetHolder.SelectionFrame, nameof(appAssetHolder.SelectionFrame));
+            CanvasHolder = Create(appAssetHolder.CanvasHolder, nameof(appAssetHolder.CanvasHolder));
+            PalmCompass = Create(appAssetHolder.PalmCompass, nameof(appAssetHolder.PalmCompass));
 
             resourceByType = CreateTypeDictionary(this);
+
+            static ResourceKey<GameObject> Create(GameObject obj, string? msg = null) => new(obj, msg);
         }
 
-        static Dictionary<Type, Info<GameObject>?> CreateTypeDictionary(DisplaysType o)
+        static Dictionary<Type, ResourceKey<GameObject>?> CreateTypeDictionary(DisplaysType o)
         {
-            Dictionary<Type, Info<GameObject>?> resourceByType = new();
+            Dictionary<Type, ResourceKey<GameObject>?> resourceByType = new();
             PropertyInfo[] properties = typeof(DisplaysType).GetProperties();
             foreach (var property in properties)
             {
-                if (typeof(Info<GameObject>) != property.PropertyType)
+                if (typeof(ResourceKey<GameObject>) != property.PropertyType)
                 {
                     continue;
                 }
 
-                var info = (Info<GameObject>?)property.GetValue(o);
+                var info = (ResourceKey<GameObject>?)property.GetValue(o);
                 if (info == null)
                 {
                     Debug.LogError("DisplaysType: Property " + property.Name + " has not been set!");
@@ -165,7 +165,7 @@ namespace Iviz.Resources
             return resourceByType;
         }
 
-        public bool TryGetResource(Type type, [NotNullWhen(true)] out Info<GameObject>? info)
+        public bool TryGetResource(Type type, [NotNullWhen(true)] out ResourceKey<GameObject>? info)
         {
             if (type == null)
             {

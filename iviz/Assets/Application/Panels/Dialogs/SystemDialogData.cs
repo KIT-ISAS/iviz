@@ -21,10 +21,10 @@ namespace Iviz.App
         const string EmptyTopText = "<b>State:</b> Disconnected. Nothing to show!";
         const string EmptyBottomText = "(Click on an item for more information)";
 
-        static readonly XmlRpcValue.JsonConverter JsonConverter = new();
+        static readonly JsonConverter[] JsonConverter = { new XmlRpcValue.JsonConverter() };
 
-        readonly SystemDialogContents panel;
-        public override IDialogPanelContents Panel => panel;
+        readonly SystemDialogPanel panel;
+        public override IDialogPanel Panel => panel;
 
         readonly SortedSet<string> hostsBuffer = new();
 
@@ -40,7 +40,7 @@ namespace Iviz.App
 
         public SystemDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<SystemDialogContents>(DialogPanelType.System);
+            panel = DialogPanelManager.GetPanelByType<SystemDialogPanel>(DialogPanelType.System);
         }
 
         public override void SetupPanel()
@@ -56,7 +56,7 @@ namespace Iviz.App
                 descriptionHash = null;
 
                 panel.TextBottom.text = EmptyBottomText;
-                if (panel.Mode == SystemDialogContents.ModeType.Aliases)
+                if (panel.Mode == SystemDialogPanel.ModeType.Aliases)
                 {
                     SetupAliases();
                 }
@@ -72,19 +72,19 @@ namespace Iviz.App
         {
             switch (panel.Mode)
             {
-                case SystemDialogContents.ModeType.Topics:
+                case SystemDialogPanel.ModeType.Topics:
                     UpdateTopics();
                     break;
-                case SystemDialogContents.ModeType.Services:
+                case SystemDialogPanel.ModeType.Services:
                     UpdateServices();
                     break;
-                case SystemDialogContents.ModeType.Params:
+                case SystemDialogPanel.ModeType.Params:
                     UpdateParameters();
                     break;
-                case SystemDialogContents.ModeType.Nodes:
+                case SystemDialogPanel.ModeType.Nodes:
                     UpdateNodes();
                     break;
-                case SystemDialogContents.ModeType.Aliases:
+                case SystemDialogPanel.ModeType.Aliases:
                     UpdateAliases();
                     break;
             }
@@ -230,18 +230,18 @@ namespace Iviz.App
         {
             switch (panel.Mode)
             {
-                case SystemDialogContents.ModeType.Topics:
+                case SystemDialogPanel.ModeType.Topics:
                     UpdateTopicsLink(link);
                     break;
-                case SystemDialogContents.ModeType.Services:
+                case SystemDialogPanel.ModeType.Services:
                     providerAddress = null;
                     UpdateServicesLink(link);
                     break;
-                case SystemDialogContents.ModeType.Params:
+                case SystemDialogPanel.ModeType.Params:
                     paramValue = default;
                     UpdateParametersLink(link);
                     break;
-                case SystemDialogContents.ModeType.Nodes:
+                case SystemDialogPanel.ModeType.Nodes:
                     nodeAddress = null;
                     UpdateNodesLink(link);
                     break;
@@ -373,8 +373,7 @@ namespace Iviz.App
             {
                 description.Append("<b>Value:</b>").AppendLine();
 
-                string value = JsonConvert
-                    .SerializeObject(paramValue, Formatting.Indented, JsonConverter);
+                string value = JsonConvert.SerializeObject(paramValue, Formatting.Indented, JsonConverter);
                 if (paramValue.ValueType != XmlRpcValue.Type.String)
                 {
                     description.Append(value);
@@ -569,7 +568,7 @@ namespace Iviz.App
             string address = panel.Addresses[index].Value;
             if (!string.IsNullOrWhiteSpace(hostname) && !string.IsNullOrWhiteSpace(address))
             {
-                var newHostAlias = new HostAlias(hostname, address);
+                var newHostAlias = new HostAlias { Hostname = hostname, Address = address };
                 if (!newHostAlias.Equals(HostAliases[index]))
                 {
                     return;
@@ -597,23 +596,12 @@ namespace Iviz.App
     }
 
     [DataContract]
-    public sealed class HostAlias : IEquatable<HostAlias>
+    public sealed class HostAlias
     {
         [DataMember] public string Hostname { get; set; } = "";
         [DataMember] public string Address { get; set; } = "";
 
-        public HostAlias()
-        {
-        }
-
-        public HostAlias(string hostname, string address) => (Hostname, Address) = (hostname, address);
-
         public void Deconstruct(out string hostname, out string address) => (hostname, address) = (Hostname, Address);
-
         public bool Equals(HostAlias? a) => a is var (hostname, address) && hostname == Hostname && address == Address;
-
-        public override bool Equals(object obj) => obj is HostAlias other && Equals(other);
-
-        public override int GetHashCode() => (Hostname, Address).GetHashCode();
     }
 }

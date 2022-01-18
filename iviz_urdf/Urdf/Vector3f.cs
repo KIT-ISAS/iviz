@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Newtonsoft.Json;
 
@@ -68,7 +69,7 @@ namespace Iviz.Urdf
 
         public void Deconstruct(out float x, out float y, out float z) => (x, y, z) = (X, Y, Z);
 
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => BuiltIns.ToJsonString(this);
 
         public static implicit operator Vector3(Vector3f v) => (v.X, v.Y, v.Z);
         public static implicit operator Point(Vector3f v) => (v.X, v.Y, v.Z);

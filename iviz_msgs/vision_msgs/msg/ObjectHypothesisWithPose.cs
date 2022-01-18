@@ -41,7 +41,7 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// Constructor with buffer.
-        internal ObjectHypothesisWithPose(ref ReadBuffer b)
+        public ObjectHypothesisWithPose(ref ReadBuffer b)
         {
             Id = b.DeserializeString();
             Score = b.Deserialize<double>();

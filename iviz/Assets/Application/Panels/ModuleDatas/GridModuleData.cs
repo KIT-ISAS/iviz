@@ -1,49 +1,51 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
+using Iviz.Core;
 using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="GridPanelContents"/> 
+    /// <see cref="GridModulePanel"/> 
     /// </summary>
     public sealed class GridModuleData : ModuleData
     {
         const float InteriorColorFactor = 0.25f;
 
-        readonly GridPanelContents panel;
+        readonly GridModulePanel panel;
 
         public GridController GridController { get; }
         public override ModuleType ModuleType => ModuleType.Grid;
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => GridController.Config;
         public override IController Controller => GridController;
 
-        public GridModuleData(ModuleDataConstructor constructor) : base(constructor.Topic, constructor.Type)
+        public GridModuleData(ModuleDataConstructor constructor)
         {
-            panel = DataPanelManager.GetPanelByResourceType<GridPanelContents>(ModuleType.Grid);
-
-            GridController = new GridController(this);
-            if (constructor.Configuration != null)
-            {
-                GridController.Config = (GridConfiguration) constructor.Configuration;
-            }
-
+            panel = ModulePanelManager.GetPanelByResourceType<GridModulePanel>(ModuleType.Grid);
+            GridController = new GridController((GridConfiguration?) constructor.Configuration);
             UpdateModuleButton();
-
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            GridController.Dispose();
+            try
+            {
+                GridController.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }            
             
             ARController.ARCameraViewChanged -= OnARCameraViewChanged;
         }

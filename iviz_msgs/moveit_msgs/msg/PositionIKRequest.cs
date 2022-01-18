@@ -75,7 +75,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PositionIKRequest(ref ReadBuffer b)
+        public PositionIKRequest(ref ReadBuffer b)
         {
             GroupName = b.DeserializeString();
             RobotState = new MoveitMsgs.RobotState(ref b);

@@ -51,8 +51,8 @@ namespace Iviz.Displays
             MeshMarkerResource CreateObject()
             {
                 var resource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, transform);
-                resource.ShadowsEnabled = false;
-                resource.ColliderEnabled = false;
+                resource.EnableShadows = false;
+                resource.EnableCollider = false;
                 return resource;
             }
 
@@ -121,19 +121,6 @@ namespace Iviz.Displays
             }            
         }
 
-        public override void Suspend()
-        {
-            //OcclusionOnly = false;
-            //ShadowsEnabled = false;
-            //EmissiveColor = Color.black;
-        }
-
-        public string Name
-        {
-            get => name;
-            set => name = value;
-        }
-
         void Awake()
         {
             Layer = LayerType.IgnoreRaycast;
@@ -143,7 +130,7 @@ namespace Iviz.Displays
                 RebuildSize();
             }
             
-            ShadowsEnabled = false;
+            EnableShadows = false;
         }
 
         public void SetBounds(in Bounds bounds)

@@ -1,6 +1,5 @@
 ﻿#nullable enable
 
-using System;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -27,7 +26,6 @@ namespace Iviz.Controllers
         TextureFormat? lastDepthFormat;
         Listener<CameraInfo>? depthInfoListener;
 
-        public IModuleData ModuleData { get; }
         public TfFrame? Frame => node.Parent;
         public IListener? DepthListener { get; private set; }
         public IListener? ColorListener { get; private set; }
@@ -99,7 +97,7 @@ namespace Iviz.Controllers
                 {
                     var intensityBounds = new Vector2(MinIntensity, MaxIntensity);
                     depthImageTexture.IntensityBounds = intensityBounds;
-                    projector.IntensityBounds = intensityBounds;
+                    projector.IntensityBounds = depthImageTexture.NormalizedIntensityBounds;
                 }
             }
         }
@@ -114,7 +112,7 @@ namespace Iviz.Controllers
                 {
                     var intensityBounds = new Vector2(MinIntensity, MaxIntensity);
                     depthImageTexture.IntensityBounds = intensityBounds;
-                    projector.IntensityBounds = intensityBounds;
+                    projector.IntensityBounds = depthImageTexture.NormalizedIntensityBounds;
                 }
             }
         }
@@ -130,7 +128,7 @@ namespace Iviz.Controllers
                 {
                     var intensityBounds = new Vector2(MinIntensity, MaxIntensity);
                     depthImageTexture.IntensityBounds = intensityBounds;
-                    projector.IntensityBounds = intensityBounds;
+                    projector.IntensityBounds = depthImageTexture.NormalizedIntensityBounds;
                 }
             }
         }
@@ -272,13 +270,12 @@ namespace Iviz.Controllers
             }
         }
 
-        public DepthCloudController(IModuleData moduleData, DepthCloudConfiguration? config)
+        public DepthCloudController(DepthCloudConfiguration? config)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             depthImageTexture = new ImageTexture();
             colorImageTexture = new ImageTexture();
 
-            node = FrameNode.Instantiate("DepthCloud");
+            node = new FrameNode("DepthCloud");
             node.Transform.localRotation = new Quaternion(0, 0.7071f, 0.7071f, 0);
 
             projector = ResourcePool.RentDisplay<DepthCloudResource>(node.Transform);
@@ -431,7 +428,14 @@ namespace Iviz.Controllers
 
         void InfoHandler(CameraInfo info)
         {
-            projector.Intrinsic = new Intrinsic(info.K);
+            var intrinsic = new Intrinsic(info.K);
+            if (!intrinsic.IsValid)
+            {
+                RosLogger.Error($"{this}: Ignoring invalid intrinsic {intrinsic.ToString()}.");
+                return;
+                    
+            } 
+            projector.Intrinsic = intrinsic;            
         }
 
         public bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format, out Vector4 color) =>
@@ -447,11 +451,16 @@ namespace Iviz.Controllers
             depthInfoListener?.Dispose();
 
             projector.ReturnToPool();
-            node.DestroySelf();
+            depthImageTexture.Dispose();
+            colorImageTexture.Dispose();
+            node.Dispose();
         }
 
         public void ResetController()
         {
+            ColorListener?.Reset();
+            DepthListener?.Reset();
+            depthInfoListener?.Reset();
         }
     }
 }

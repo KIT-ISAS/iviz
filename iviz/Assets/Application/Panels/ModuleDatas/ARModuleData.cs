@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -13,41 +14,36 @@ using UnityEngine;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="ARPanelContents"/> 
+    /// <see cref="ARModulePanel"/> 
     /// </summary>
     public sealed class ARModuleData : ModuleData
     {
         readonly ARFoundationController controller;
-        readonly ARPanelContents panel;
+        readonly ARModulePanel panel;
 
         public override ModuleType ModuleType => ModuleType.AugmentedReality;
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public ARModuleData(ModuleDataConstructor constructor) :
-            base(constructor.Topic, constructor.Type)
+        public ARModuleData(ModuleDataConstructor constructor)
         {
-            panel = DataPanelManager.GetPanelByResourceType<ARPanelContents>(ModuleType.AugmentedReality);
-
-            controller = Object.Instantiate(Resource.Extras.AppAssetHolder.ARPrefab)
-                .GetComponent<ARFoundationController>();
-
-            controller.ModuleData = this;
-            if (constructor.Configuration != null)
-            {
-                controller.Config = (ARConfiguration)constructor.Configuration;
-            }
-
+            panel = ModulePanelManager.GetPanelByResourceType<ARModulePanel>(ModuleType.AugmentedReality);
+            controller = new ARFoundationController((ARConfiguration?)constructor.Configuration);
             UpdateModuleButton();
         }
 
         public override void Dispose()
         {
             base.Dispose();
-
-            controller.Dispose();
-            Object.Destroy(controller.gameObject);
+            try
+            {
+                controller.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }
         }
 
         public override void SetupPanel()
@@ -64,7 +60,7 @@ namespace Iviz.App
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
-            panel.ResetButton.Clicked += () => { controller.ResetSession(); };
+            panel.ResetButton.Clicked += controller.ResetSession;
             panel.PublishFrequency.Index = (int)controller.PublicationFrequency;
 
 
@@ -99,7 +95,7 @@ namespace Iviz.App
                         controller.Visible = config.Visible;
                         break;
                     default:
-                        Core.RosLogger.Error($"{this}: Unknown field '{field}'");
+                        RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

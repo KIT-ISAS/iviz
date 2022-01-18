@@ -282,7 +282,8 @@ namespace Iviz.Msgs
             return ReadBuffer.Deserialize(new T(), bytes);
         }
 
-        internal static int GetArraySize<T>(T[]? array) where T : IMessage
+        /// Returns the size in bytes of a message array when deserialized in ROS
+        public static int GetArraySize<T>(T[]? array) where T : IMessage
         {
             if (array == null)
             {
@@ -298,7 +299,8 @@ namespace Iviz.Msgs
             return size;
         }
 
-        internal static int GetArraySize(string[]? array)
+        /// Returns the size in bytes of a string array when deserialized in ROS
+        public static int GetArraySize(string[]? array)
         {
             if (array == null)
             {
@@ -314,8 +316,9 @@ namespace Iviz.Msgs
             return size;
         }
 
+        /// Returns the size in bytes of a string when deserialized in ROS
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int GetStringSize(string? s)
+        public static int GetStringSize(string? s)
         {
             return s == null ? 0 : UTF8.GetByteCount(s);
         }

@@ -10,7 +10,7 @@ namespace Iviz.XmlRpc
 {
     /// <summary>
     /// A simplified version of <see cref="XmlRpcValue"/>.
-    /// It converts the value directly to an XML-RPC string and stores that.
+    /// It converts a value directly to an XML-RPC string and stores that.
     /// </summary>
     public readonly struct XmlRpcArg
     {

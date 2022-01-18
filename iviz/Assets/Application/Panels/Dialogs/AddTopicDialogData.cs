@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BigGustave;
@@ -27,16 +28,16 @@ namespace Iviz.App
             Color.Lerp(Color.blue, Color.white, 0.95f),
         };
 
-        readonly AddTopicDialogContents panel;
+        readonly AddTopicDialogPanel panel;
         readonly List<TopicWithResource> topics = new();
         readonly List<TopicWithResource> newTopics = new();
         uint? previousHash;
 
-        public override IDialogPanelContents Panel => panel;
+        public override IDialogPanel Panel => panel;
 
         public AddTopicDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<AddTopicDialogContents>(DialogPanelType.AddTopic);
+            panel = DialogPanelManager.GetPanelByType<AddTopicDialogPanel>(DialogPanelType.AddTopic);
             panel.ShowAll.Value = false;
         }
 
@@ -51,9 +52,8 @@ namespace Iviz.App
                 }
 
                 bool resourceFound =
-                    Resource.ResourceByRosMessageType.TryGetValue(msgType, out ModuleType resource);
-                result.Add(new TopicWithResource(topic, msgType,
-                    resourceFound ? resource : ModuleType.Invalid));
+                    Resource.ResourceByRosMessageType.TryGetValue(msgType, out var resource);
+                result.Add(new TopicWithResource(topic, msgType, resourceFound ? resource : ModuleType.Invalid));
             }
         }
 
@@ -66,8 +66,8 @@ namespace Iviz.App
 
             UpdatePanel();
 
-            panel.ShowAll.ValueChanged += _ => UpdatePanel();
-            panel.SortByType.ValueChanged += _ => UpdatePanel();
+            panel.ShowAll.ValueChanged += _ => RebuildTopics(true);
+            panel.SortByType.ValueChanged += _ => RebuildTopics(true);
         }
 
         bool TopicsHaveChanged()
@@ -75,24 +75,29 @@ namespace Iviz.App
             uint hash = Crc32Calculator.DefaultSeed;
             foreach (var topic in newTopics)
             {
-                hash = Crc32Calculator.Compute(topic.Topic, hash);
-                hash = Crc32Calculator.Compute(topic.Type, hash);
+                hash = Crc32Calculator.Compute(topic.topic, hash);
+                hash = Crc32Calculator.Compute(topic.type, hash);
             }
 
             if (previousHash == hash)
             {
                 return false;
             }
-            
+
             previousHash = hash;
             return true;
         }
 
         public override void UpdatePanel()
         {
+            RebuildTopics();
+        }
+
+        void RebuildTopics(bool forceRebuild = false)
+        {
             newTopics.Clear();
             GetTopicCandidates(newTopics);
-            if (!TopicsHaveChanged())
+            if (!forceRebuild && !TopicsHaveChanged())
             {
                 return;
             }
@@ -100,17 +105,17 @@ namespace Iviz.App
             topics.Clear();
             topics.AddRange(newTopics);
 
-            topics.Sort((x, y) => string.CompareOrdinal(x.Topic, y.Topic));
+            topics.Sort((resourceA, resourceB) => string.CompareOrdinal(resourceA.topic, resourceB.topic));
             if (panel.SortByType.Value)
             {
-                topics.Sort((x, y) => string.CompareOrdinal(x.ShortType, y.ShortType));
+                topics.Sort((resourceA, resourceB) => string.CompareOrdinal(resourceA.shortType, resourceB.shortType));
             }
 
             bool showAll = panel.ShowAll.Value;
 
             if (!showAll)
             {
-                topics.RemoveAll(topic => topic.ResourceType == ModuleType.Invalid);
+                topics.RemoveAll(topic => topic.resourceType == ModuleType.Invalid);
             }
 
             panel.SetItems(topics.Select(topic => topic.ToString()));
@@ -119,15 +124,15 @@ namespace Iviz.App
             {
                 foreach (var (item, topic) in panel.Zip(topics))
                 {
-                    item.Color = ColorList[(int)topic.ResourceType % ColorList.Length];
-                    item.Interactable = topic.ResourceType != ModuleType.Invalid;
+                    item.Color = ColorList[(int)topic.resourceType % ColorList.Length];
+                    item.Interactable = topic.resourceType != ModuleType.Invalid;
                 }
             }
             else
             {
                 foreach (var (item, topic) in panel.Zip(topics))
                 {
-                    item.Color = ColorList[(int)topic.ResourceType % ColorList.Length];
+                    item.Color = ColorList[(int)topic.resourceType % ColorList.Length];
                 }
             }
 
@@ -144,42 +149,52 @@ namespace Iviz.App
             else
             {
                 clickedTopic = topics
-                    .Where(topic => topic.ResourceType != ModuleType.Invalid)
+                    .Where(topic => topic.resourceType != ModuleType.Invalid)
                     .ElementAtOrDefault(index);
             }
 
-            if (clickedTopic.ResourceType == ModuleType.Invalid)
+            if (clickedTopic.resourceType == ModuleType.Invalid)
             {
                 return;
             }
 
-            var moduleData = ModuleListPanel.CreateModuleForTopic(clickedTopic.Topic, clickedTopic.Type);
+            ModuleData moduleData;
+            try
+            {
+                moduleData = ModuleListPanel.CreateModuleForTopic(clickedTopic.topic, clickedTopic.type);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to create module for topic '{clickedTopic.topic}'", e);
+                return;
+            }
+
             Close();
             moduleData.ShowPanel();
         }
 
         readonly struct TopicWithResource
         {
-            public string Topic { get; }
-            public string Type { get; }
-            public string ShortType { get; }
-            public ModuleType ResourceType { get; }
+            public readonly string topic;
+            public readonly string type;
+            public readonly string shortType;
+            public readonly ModuleType resourceType;
 
             public TopicWithResource(string topic, string type, ModuleType resourceType)
             {
-                Topic = topic;
-                Type = type;
-                ResourceType = resourceType;
+                this.topic = topic;
+                this.type = type;
+                this.resourceType = resourceType;
 
-                int lastSlash = Type.LastIndexOf('/');
-                ShortType = (lastSlash == -1) ? Type : Type[(lastSlash + 1)..];
+                int lastSlash = type.LastIndexOf('/');
+                shortType = (lastSlash == -1) ? type : type[(lastSlash + 1)..];
             }
 
             public override string ToString()
             {
-                string type = (ResourceType == ModuleType.Invalid) ? Type : ShortType;
-                return $"{Resource.Font.Split(Topic, MaxLineWidth)}\n" +
-                       $"<b>{Resource.Font.Split(type, MaxLineWidth)}</b>";
+                string typeStr = (resourceType == ModuleType.Invalid) ? type : shortType;
+                return $"{Resource.Font.Split(topic, MaxLineWidth)}\n" +
+                       $"<b>{Resource.Font.Split(typeStr, MaxLineWidth)}</b>";
             }
         }
     }

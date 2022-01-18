@@ -19,7 +19,7 @@ internal sealed class ResizableRent : IDisposable
 
     public Span<byte> AsSpan() => buffer;
     public ReadOnlySpan<byte> AsReadOnlySpan() => buffer;
-    public Span<byte> this[Range range] => buffer.Slice(range);
+    public Span<byte> this[Range range] => buffer.AsSpan(range);
         
     public ResizableRent()
     {

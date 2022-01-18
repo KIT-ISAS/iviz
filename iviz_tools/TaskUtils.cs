@@ -13,9 +13,21 @@ public static class TaskUtils
 {
     const string GenericExceptionFormat = "{0}: Exception thrown.{1}";
 
-    public static Task StartLongTask(Func<Task> task, CancellationToken token = default)
+    /// <summary>
+    /// Same as <see cref="Task.Run(Func{Task})"/>, but prevents the use of <see cref="ValueTask"/>
+    /// as this would call the overload <see cref="Task.Run(Action)"/> instead
+    /// </summary> 
+    public static Task Run(Func<Task> task, CancellationToken token = default)
     {
-        // need some logging here
+        return Task.Run(task, token);
+    }
+
+    /// <summary>
+    /// Same as <see cref="Task.Run(Func{Task})"/>, but prevents the use of <see cref="ValueTask{T}"/>
+    /// as this would call the overload <see cref="Task.Run(Action)"/> instead
+    /// </summary> 
+    public static Task<T> Run<T>(Func<Task<T>> task, CancellationToken token = default)
+    {
         return Task.Run(task, token);
     }
 
@@ -110,6 +122,11 @@ public static class TaskUtils
     /// <returns>Whether the task ran to completion</returns>
     static bool RanToCompletion(this Task task) => task.Status == TaskStatus.RanToCompletion;
 
+    /// <summary>
+    /// Waits for the task and suppresses all exceptions, prints an error message instead.
+    /// </summary>
+    /// <param name="t">The task to await</param>
+    /// <param name="caller">The name of the caller to use in the error message</param>
     public static void WaitNoThrow(this Task? t, object caller)
     {
         if (t == null)
@@ -129,7 +146,12 @@ public static class TaskUtils
             }
         }
     }
-        
+
+    /// <summary>
+    /// Waits for the task and suppresses all exceptions, prints an error message instead.
+    /// </summary>
+    /// <param name="t">The task to await</param>
+    /// <param name="caller">The name of the caller to use in the error message</param>
     public static void WaitNoThrow(this ValueTask t, object caller)
     {
         try
@@ -143,8 +165,14 @@ public static class TaskUtils
                 Logger.LogErrorFormat(GenericExceptionFormat, caller, e);
             }
         }
-    }        
+    }
 
+    /// <summary>
+    /// Waits for the task up to a given time and suppresses all exceptions, prints an error message instead.
+    /// </summary>
+    /// <param name="t">The task to await</param>
+    /// <param name="timeoutInMs">The time to wait in milliseconds</param>
+    /// <param name="caller">The name of the caller to use in the error message</param>
     public static void WaitNoThrow(this Task? t, int timeoutInMs, object caller)
     {
         if (t == null || t.IsCompleted)
@@ -170,9 +198,9 @@ public static class TaskUtils
             }
         }
     }
-        
+
     /// <summary>
-    /// Waits for the task to finish. If an exception happens, unwraps the aggregated exception.
+    /// Waits for the task to finish. If an exception happens, unwraps the aggregated exception and rethrows it.
     /// </summary>
     /// <param name="t">The task to await.</param>
     public static void WaitAndRethrow(this Task? t)
@@ -192,6 +220,10 @@ public static class TaskUtils
         }
     }
 
+    /// <summary>
+    /// Waits for the task to finish. If an exception happens, unwraps the aggregated exception and rethrows it.
+    /// </summary>
+    /// <param name="t">The task to await.</param>
     public static T WaitAndRethrow<T>(this Task<T>? t)
     {
         if (t == null)
@@ -210,6 +242,11 @@ public static class TaskUtils
         }
     }
 
+    /// <summary>
+    /// Waits for the task and suppresses all exceptions, prints an error message instead.
+    /// </summary>
+    /// <param name="t">The task to await</param>
+    /// <param name="caller">The name of the caller to use in the error message</param>
     public static async Task AwaitNoThrow(this Task? t, object caller)
     {
         if (t == null || t.RanToCompletion())
@@ -230,7 +267,12 @@ public static class TaskUtils
         }
     }
 
-    public static async ValueTask<T?> AwaitNoThrow<T>(this ValueTask<T> t, object caller)
+    /// <summary>
+    /// Waits for the task and suppresses all exceptions, prints an error message instead.
+    /// </summary>
+    /// <param name="t">The task to await</param>
+    /// <param name="caller">The name of the caller to use in the error message</param>
+    public static async Task<T?> AwaitNoThrow<T>(this ValueTask<T> t, object caller)
     {
         try
         {
@@ -247,7 +289,12 @@ public static class TaskUtils
         return default;
     }
 
-    public static async ValueTask AwaitNoThrow(this ValueTask t, object caller)
+    /// <summary>
+    /// Waits for the task and suppresses all exceptions, prints an error message instead.
+    /// </summary>
+    /// <param name="t">The task to await</param>
+    /// <param name="caller">The name of the caller to use in the error message</param>
+    public static async Task AwaitNoThrow(this ValueTask t, object caller)
     {
         try
         {
@@ -279,9 +326,9 @@ public static class TaskUtils
     {
         var (t1, t2) = ts;
         return t1.IsCompleted
-            ? ValueTask2.FromResult(t1)
+            ? new ValueTask<Task>(t1)
             : t2.IsCompleted
-                ? ValueTask2.FromResult(t2)
+                ? new ValueTask<Task>(t2)
                 : Task.WhenAny(t1, t2).AsValueTask();
     }
 }
@@ -289,8 +336,6 @@ public static class TaskUtils
 public static class ValueTask2
 {
     public static ValueTask<T> FromResult<T>(T t) => new(t);
-    public static ValueTask<T> FromException<T>(Exception e) => new(Task.FromException<T>(e));
-    public static ValueTask FromException(Exception e) => new(Task.FromException(e));
     public static ValueTask<T> AsValueTask<T>(this Task<T> t) => new(t);
     public static ValueTask AsValueTask(this Task t) => new(t);
 }

@@ -21,7 +21,7 @@ namespace Iviz.Displays
                 return; // shouldn't happen
             }
             
-            manager = ARController.Instance.GetComponentInChildren<ARAnchorManager>();
+            manager = ARController.Instance.AnchorManager;
             manager.anchorsChanged += OnAnchorsChanged;
             Anchor = GetComponent<ARAnchor>();
         }

@@ -44,7 +44,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal AttachedCollisionObject(ref ReadBuffer b)
+        public AttachedCollisionObject(ref ReadBuffer b)
         {
             LinkName = b.DeserializeString();
             Object = new CollisionObject(ref b);

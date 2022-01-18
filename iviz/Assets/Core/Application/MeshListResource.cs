@@ -31,7 +31,7 @@ namespace Iviz.Displays
 
         readonly uint[] argsBuffer = { 0, 0, 0, 0, 0 };
         ComputeBuffer? argsComputeBuffer;
-        Info<GameObject>? meshResource;
+        ResourceKey<GameObject>? meshResource;
 
         readonly NativeList<float4> pointBuffer = new();
 
@@ -60,7 +60,7 @@ namespace Iviz.Displays
         /// <summary>
         /// The resource to be multiplied.
         /// </summary>
-        public Info<GameObject>? MeshResource
+        public ResourceKey<GameObject>? MeshResource
         {
             get => meshResource;
             set
@@ -121,7 +121,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Whether to enable shadows. Displayed shadows can get bugged if the number of instances is too high.
         /// </summary>
-        public bool ShadowsEnabled { get; set; } = true;
+        public bool EnableShadows { get; set; } = true;
 
         public override float ElementScale
         {
@@ -179,7 +179,7 @@ namespace Iviz.Displays
             var material = FindMaterial();
 
             Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer,
-                0, Properties, ShadowsEnabled && !OcclusionOnly ? ShadowCastingMode.On : ShadowCastingMode.Off);
+                0, Properties, EnableShadows && !OcclusionOnly ? ShadowCastingMode.On : ShadowCastingMode.Off);
         }
 
         Material FindMaterial()
@@ -246,17 +246,17 @@ namespace Iviz.Displays
         public void Set(ReadOnlySpan<PointWithColor> points)
         {
             pointBuffer.EnsureCapacity(points.Length);
-
             pointBuffer.Clear();
+            
             for (int i = 0; i < points.Length; i++)
             {
                 ref readonly var t = ref points[i];
-                if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
+                if (t.f.IsInvalid3() || t.f.MaxAbsCoeff3() > MaxPositionMagnitude)
                 {
                     continue;
                 }
 
-                pointBuffer.Add(t.f);
+                pointBuffer.AddUnsafe(t.f);
             }
 
             UpdateBuffer();
@@ -326,7 +326,7 @@ namespace Iviz.Displays
             if (pointComputeBuffer == null || pointComputeBuffer.count < pointBuffer.Capacity)
             {
                 pointComputeBuffer?.Release();
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Unsafe.SizeOf<PointWithColor>(),
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Unsafe.SizeOf<float4>(),
                     ComputeBufferType.Default, ComputeBufferMode.Dynamic);
                 Properties.SetBuffer(PointsID, pointComputeBuffer);
             }
@@ -343,7 +343,7 @@ namespace Iviz.Displays
             Vector3 meshScale = ElementScale * ElementScale3;
             if (UseIntensityForScaleY)
             {
-                meshScale.y *= Mathf.Max(Mathf.Abs(span.x), Mathf.Abs(span.y));
+                meshScale.y *= Math.Max(Math.Abs(span.x), Math.Abs(span.y));
             }
 
             var baseMeshBounds = Mesh.bounds;
@@ -378,7 +378,7 @@ namespace Iviz.Displays
 
             if (pointBuffer.Capacity != 0)
             {
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<float4>());
                 pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(PointsID, pointComputeBuffer);
             }

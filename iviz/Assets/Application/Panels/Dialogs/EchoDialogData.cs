@@ -31,7 +31,7 @@ namespace Iviz.App
                 Converters = { new ClampJsonConverter(MaxMessageLength) }
             });
 
-        readonly EchoDialogContents dialog;
+        readonly EchoDialogPanel dialog;
         readonly Dictionary<string, Type> topicTypes = new();
         readonly ConcurrentQueue<(string DateTime, string? CallerId, IMessage Msg)> messageQueue = new();
         readonly List<TopicEntry> entries = new();
@@ -40,11 +40,11 @@ namespace Iviz.App
         bool queueIsDirty;
         bool isPaused;
 
-        public override IDialogPanelContents Panel => dialog;
+        public override IDialogPanel Panel => dialog;
 
         public EchoDialogData()
         {
-            dialog = DialogPanelManager.GetPanelByType<EchoDialogContents>(DialogPanelType.Echo);
+            dialog = DialogPanelManager.GetPanelByType<EchoDialogPanel>(DialogPanelType.Echo);
             dialog.Text.vertexBufferAutoSizeReduction = false;
         }
 
@@ -92,7 +92,7 @@ namespace Iviz.App
 
             foreach ((string topic, string msgType) in newTopics)
             {
-                Type csType = TryGetType(msgType, out Type? newCsType) ? newCsType : typeof(DynamicMessage);
+                var csType = TryGetType(msgType, out Type? newCsType) ? newCsType : typeof(DynamicMessage);
                 entries.Add(new TopicEntry(topic, msgType, csType));
             }
 

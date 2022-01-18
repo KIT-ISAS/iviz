@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetSdfRequest(ref ReadBuffer b)
+        public GetSdfRequest(ref ReadBuffer b)
         {
             Uri = b.DeserializeString();
         }
@@ -120,7 +120,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal GetSdfResponse(ref ReadBuffer b)
+        public GetSdfResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Scene = new Scene(ref b);

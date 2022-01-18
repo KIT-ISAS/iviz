@@ -46,8 +46,8 @@ namespace Iviz.App
             "<color=#ff0000>Fatal Only</color>"
         };
 
-        readonly ConsoleDialogContents dialog;
-        public override IDialogPanelContents Panel => dialog;
+        readonly ConsoleDialogPanel dialog;
+        public override IDialogPanel Panel => dialog;
 
         readonly ConcurrentQueue<LogMessage> messageQueue = new();
 
@@ -62,12 +62,12 @@ namespace Iviz.App
 
         public ConsoleDialogData()
         {
-            dialog = DialogPanelManager.GetPanelByType<ConsoleDialogContents>(DialogPanelType.Console);
+            dialog = DialogPanelManager.GetPanelByType<ConsoleDialogPanel>(DialogPanelType.Console);
             ConnectionManager.LogMessageArrived += HandleMessage;
             RosLogger.LogExternal += HandleMessage;
         }
 
-        public override void FinalizePanel()
+        public override void Dispose()
         {
             ConnectionManager.LogMessageArrived -= HandleMessage;
             RosLogger.LogExternal -= HandleMessage;

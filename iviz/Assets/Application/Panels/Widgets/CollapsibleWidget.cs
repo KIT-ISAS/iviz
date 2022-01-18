@@ -58,7 +58,7 @@ namespace Iviz.App
                 child.gameObject.SetActive(open);
             }
             
-            UpdateSize();
+            FinishAttaching();
             if (parent != null)
             {
                 parent.UpdateSize();
@@ -74,7 +74,7 @@ namespace Iviz.App
         }
         
         [NotNull]
-        public CollapsibleWidget UpdateSize()
+        public CollapsibleWidget FinishAttaching()
         {
             const float yOffset = 5;
 

@@ -134,7 +134,7 @@ namespace Iviz.Rosbag.Reader
             return false;
         }
 
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => BuiltIns.ToJsonString(this);
     }
 
     public struct RecordEnumerator : IEnumerator<Record>

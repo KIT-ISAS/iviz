@@ -1,4 +1,5 @@
 ﻿using System;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using TMPro;
@@ -39,12 +40,17 @@ namespace Iviz.App
             get => value;
             set
             {
+                if ((this.value - value).ApproximatelyZero())
+                {
+                    return;
+                }
+                
                 this.value = value;
                 Mean = value;
                 UpdateInputLabels();
             }
         }
-
+        
         float range;
 
         public float Range

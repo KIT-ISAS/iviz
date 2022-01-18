@@ -68,7 +68,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal ReconfigureRequest(ref ReadBuffer b)
+        public ReconfigureRequest(ref ReadBuffer b)
         {
             Config = new Config(ref b);
         }
@@ -111,7 +111,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal ReconfigureResponse(ref ReadBuffer b)
+        public ReconfigureResponse(ref ReadBuffer b)
         {
             Config = new Config(ref b);
         }

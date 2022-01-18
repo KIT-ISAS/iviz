@@ -11,24 +11,24 @@ using Newtonsoft.Json;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="LaserScanPanelContents"/> 
+    /// <see cref="LaserScanModulePanel"/> 
     /// </summary>
     public sealed class LaserScanModuleData : ListenerModuleData
     {
         readonly LaserScanListener listener;
-        readonly LaserScanPanelContents panel;
+        readonly LaserScanModulePanel panel;
 
         protected override ListenerController Listener => listener;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.LaserScan;
         public override IConfiguration Configuration => listener.Config;
 
         public LaserScanModuleData(ModuleDataConstructor constructor) :
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<LaserScanPanelContents>(ModuleType.LaserScan);
-            listener = new LaserScanListener(this, (LaserScanConfiguration?)constructor.Configuration, Topic);
+            panel = ModulePanelManager.GetPanelByResourceType<LaserScanModulePanel>(ModuleType.LaserScan);
+            listener = new LaserScanListener((LaserScanConfiguration?)constructor.Configuration, Topic);
             UpdateModuleButton();
         }
 

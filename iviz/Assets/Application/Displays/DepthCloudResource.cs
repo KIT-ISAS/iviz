@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Common;
 using Iviz.Core;
@@ -29,7 +30,7 @@ namespace Iviz.Displays
         static readonly int IntensityAddID = Shader.PropertyToID("_IntensityAdd");
         static readonly int AtlasRowId = Shader.PropertyToID("_AtlasRow");
 
-        [SerializeField] Material? material = null;
+        [SerializeField] Material? material;
         [SerializeField] int width;
         [SerializeField] int height;
         ColormapId colormap;
@@ -48,11 +49,11 @@ namespace Iviz.Displays
             ? material
             : (material = Resource.Materials.DepthCloud.Instantiate());
 
-        public Intrinsic Intrinsic
+        public Intrinsic? Intrinsic
         {
             set
             {
-                if (value.Equals(intrinsic))
+                if (value is not { IsValid: true } || Nullable.Equals(intrinsic, value))
                 {
                     return;
                 }
@@ -171,16 +172,17 @@ namespace Iviz.Displays
 
         void Update()
         {
-            if (DepthImage?.Texture == null || Material == null)
+            if (DepthImage?.Texture == null)
             {
                 return;
             }
 
-            Material.SetFloat(PropPointSize, Transform.lossyScale.x * pointSize);
-            Material.SetMatrix(PLocalToWorld, Transform.localToWorldMatrix);
-            Material.SetMatrix(PWorldToLocal, Transform.worldToLocalMatrix);
+            var mMaterial = Material;
+            mMaterial.SetFloat(PropPointSize, Transform.lossyScale.x * pointSize);
+            mMaterial.SetMatrix(PLocalToWorld, Transform.localToWorldMatrix);
+            mMaterial.SetMatrix(PWorldToLocal, Transform.worldToLocalMatrix);
 
-            Graphics.DrawProcedural(Material, WorldBounds, MeshTopology.Quads, 4, uvs.Length,
+            Graphics.DrawProcedural(mMaterial, WorldBounds, MeshTopology.Quads, 4, uvs.Length,
                 castShadows: ShadowCastingMode.Off, receiveShadows: false, layer: gameObject.layer);
         }
 
@@ -205,9 +207,9 @@ namespace Iviz.Displays
             ColorImage = ColorImage;
             DepthImage = DepthImage;
 
-            if (intrinsic is { } validatedIntrinsic)
+            if (intrinsic != null)
             {
-                Intrinsic = validatedIntrinsic;
+                Intrinsic = intrinsic;
             }
 
             if (ColorImage?.Texture != null)
@@ -240,8 +242,7 @@ namespace Iviz.Displays
             UpdatePointComputeBuffers(texture);
             UpdatePosValues(texture);
 
-
-            if (depthImage == null || depthImage.Texture == null)
+            if (depthImage?.Texture == null)
             {
                 return;
             }
@@ -250,8 +251,8 @@ namespace Iviz.Displays
                 depthImage.Texture.format switch
                 {
                     TextureFormat.RFloat => 1,
-                    TextureFormat.R16 => 65.535f, // 0..65535 values in mm
-                    TextureFormat.R8 => 2.55f, // 0..255 values in cm
+                    TextureFormat.R16 => 65.535f, // 0..65535 values in mm to m
+                    TextureFormat.R8 => 2.55f, // 0..255 values in cm to m
                     _ => 1
                 };
 
@@ -281,7 +282,7 @@ namespace Iviz.Displays
             }
 
             pointComputeBuffer?.Release();
-            pointComputeBuffer = new ComputeBuffer(uvs.Length, Marshal.SizeOf<Vector2>());
+            pointComputeBuffer = new ComputeBuffer(uvs.Length, Unsafe.SizeOf<Vector2>());
             pointComputeBuffer.SetData(uvs, 0, 0, uvs.Length);
             Material.SetBuffer(PPoints, pointComputeBuffer);
         }
@@ -293,10 +294,9 @@ namespace Iviz.Displays
                 return;
             }
 
-            var mIntrinsic = intrinsic is { } validatedIntrinsic
-                ? validatedIntrinsic
-                // create default intrinsic so we can at least see something
-                : new Intrinsic(60 * Mathf.Deg2Rad, texture.width, texture.height);
+            var mIntrinsic = intrinsic ??
+                             // create default intrinsic so we can at least see something
+                             new Intrinsic(60 * Mathf.Deg2Rad, texture.width, texture.height);
 
             float posMulX = texture.width / mIntrinsic.Fx;
             float posMulY = texture.height / mIntrinsic.Fy;

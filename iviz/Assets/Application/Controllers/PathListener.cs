@@ -19,8 +19,6 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         readonly LineResource resource;
 
-        public override IModuleData ModuleData { get; }
-
         public override TfFrame Frame => node.Parent;
 
         readonly PathConfiguration config = new();
@@ -118,10 +116,8 @@ namespace Iviz.Controllers
         IListener listener;
         public override IListener Listener => listener;
 
-        public PathListener([NotNull] IModuleData moduleData)
+        public PathListener()
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
             node = FrameNode.Instantiate("PathNode");
             resource = ResourcePool.Rent<LineResource>(Resource.Displays.Line, node.Transform);
             resource.ElementScale = 0.005f;
@@ -151,7 +147,7 @@ namespace Iviz.Controllers
                     break;
             }
 
-            node.name = $"[{config.Topic}]";
+            node.Name = $"[{config.Topic}]";
         }
 
 
@@ -173,8 +169,8 @@ namespace Iviz.Controllers
             savedPoses.Clear();
             foreach (Msgs.GeometryMsgs.PoseStamped ps in msg.Poses)
             {
-                string header = ps.Header.FrameId ?? "";
-                Msgs.time stamp = ps.Header.Stamp;
+                string header = ps.Header.FrameId;
+                var stamp = ps.Header.Stamp;
 
                 if (topHeader == header && topStamp == stamp)
                 {
@@ -211,7 +207,7 @@ namespace Iviz.Controllers
             savedPoses.Clear();
             foreach (Msgs.GeometryMsgs.Pose ps in msg.Poses)
             {
-                if (ps.HasNaN())
+                if (ps.IsInvalid())
                 {
                     continue;
                 }
@@ -233,7 +229,7 @@ namespace Iviz.Controllers
             savedPoses.Clear();
             foreach (var p in msg.Points)
             {
-                if (p.HasNaN())
+                if (p.IsInvalid())
                 {
                     continue;
                 }
@@ -284,7 +280,7 @@ namespace Iviz.Controllers
         {
             base.Dispose();
             resource.ReturnToPool();
-            node.DestroySelf();
+            node.Dispose();
             lines.Dispose();
         }
     }

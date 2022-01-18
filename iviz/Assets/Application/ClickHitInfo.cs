@@ -38,9 +38,8 @@ namespace Iviz.App
                 return hits.Length != 0;
             }
 
-            if (ARController.Instance == null
-                || !ARController.IsVisible
-                || !ARController.Instance.TryGetRaycastHits(ray, out var results)
+            if (ARController.Instance is not { Visible: true } 
+                || !ARController.Instance.TryGetRaycastHits(ray, out var results) 
                 || results.Count == 0)
             {
                 hits = Array.Empty<ClickHitResult>();

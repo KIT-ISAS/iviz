@@ -257,7 +257,7 @@ namespace Iviz.MsgsGen
             {
                 // nope? we bail out
                 throw new MessageDependencyException(
-                    $"Cannot find md5 for message '{RosClassName}' or '{fullRosClassName}'.");
+                    $"Cannot find md5 for type '{RosClassName}' or '{fullRosClassName}'.");
             }
 
             string md5Sum = BuiltIns.GetMd5Sum(guessType);

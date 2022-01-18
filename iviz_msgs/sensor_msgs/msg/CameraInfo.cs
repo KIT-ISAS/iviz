@@ -157,7 +157,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal CameraInfo(ref ReadBuffer b)
+        public CameraInfo(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Height = b.Deserialize<uint>();

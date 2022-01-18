@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Triangle : IMessage, IDeserializable<Triangle>
+    public struct Triangle : IMessage, IDeserializable<Triangle>, System.IEquatable<Triangle>
     {
         [DataMember (Name = "a")] public uint A;
         [DataMember (Name = "b")] public uint B;
@@ -24,7 +24,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Triangle(ref ReadBuffer b)
+        public Triangle(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
@@ -33,8 +33,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public readonly Triangle RosDeserialize(ref ReadBuffer b) => new Triangle(ref b);
         
-        public override readonly int GetHashCode() => (A, B, C).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Triangle s && Equals(s);
+        public readonly override int GetHashCode() => (A, B, C).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Triangle s && Equals(s);
         public readonly bool Equals(Triangle o) => (A, B, C) == (o.A, o.B, o.C);
         public static bool operator==(in Triangle a, in Triangle b) => a.Equals(b);
         public static bool operator!=(in Triangle a, in Triangle b) => !a.Equals(b);

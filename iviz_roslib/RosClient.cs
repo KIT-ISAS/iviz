@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net;
@@ -630,7 +631,7 @@ public sealed class RosClient : IRosClient
     /// </summary>
     public void EnsureCleanSlate(CancellationToken token = default)
     {
-        Task.Run(() => EnsureCleanSlateAsync(token), token).WaitAndRethrow();
+        TaskUtils.Run(() => EnsureCleanSlateAsync(token).AsTask(), token).WaitAndRethrow();
     }
 
     /// <summary>
@@ -639,8 +640,8 @@ public sealed class RosClient : IRosClient
     /// </summary>
     public async ValueTask EnsureCleanSlateAsync(CancellationToken token = default)
     {
-        SystemState state = await GetSystemStateAsync(token);
-        List<Task> tasks = new();
+        var state = await GetSystemStateAsync(token);
+        var tasks = new List<Task>();
         tasks.AddRange(
             state.Subscribers
                 .Where(tuple => tuple.Members.Contains(CallerId))
@@ -650,7 +651,8 @@ public sealed class RosClient : IRosClient
         tasks.AddRange(
             state.Publishers
                 .Where(tuple => tuple.Members.Contains(CallerId))
-                .Select(tuple => RosMasterClient.UnregisterPublisherAsync(tuple.Topic, token).AsTask())
+                .Select(tuple => RosMasterClient.UnregisterPublisherAsync(tuple.Topic, token).AsTask()
+                )
         );
 
         try
@@ -670,7 +672,7 @@ public sealed class RosClient : IRosClient
     /// <param name="token">An optional cancellation token</param>
     public void CheckOwnUri(CancellationToken token = default)
     {
-        Task.Run(() => CheckOwnUriAsync(token), token).WaitAndRethrow();
+        TaskUtils.Run(() => CheckOwnUriAsync(token).AsTask(), token).WaitAndRethrow();
     }
 
     /// <summary>
@@ -709,7 +711,7 @@ public sealed class RosClient : IRosClient
             IDeserializable<T> generator, RosTransportHint transportHint)
         where T : IMessage
     {
-        TopicInfo<T> topicInfo = new(CallerId, topic, generator);
+        var topicInfo = new TopicInfo<T>(CallerId, topic, generator);
         int timeoutInMs = (int)TcpRosTimeout.TotalMilliseconds;
 
         RosSubscriber<T> subscription = new(this, topicInfo, requestNoDelay, timeoutInMs, transportHint);
@@ -1348,7 +1350,7 @@ public sealed class RosClient : IRosClient
         IRosPublisher? publisher =
             publishersByTopic.Values.FirstOrDefault(tmpPublisher => tmpPublisher.ContainsId(topicId));
 
-        return publisher?.UnadvertiseAsync(topicId) ?? ValueTask2.FromResult(false);
+        return publisher?.UnadvertiseAsync(topicId) ?? new ValueTask<bool>(false);
     }
 
     internal async ValueTask RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)
@@ -1557,7 +1559,7 @@ public sealed class RosClient : IRosClient
     /// </summary>
     public void Close(CancellationToken token = default)
     {
-        Task.Run(() => CloseAsync(token), token).WaitNoThrow(this);
+        TaskUtils.Run(() => CloseAsync(token).AsTask(), token).WaitNoThrow(this);
     }
 
     /// <summary>
@@ -1583,10 +1585,8 @@ public sealed class RosClient : IRosClient
 
         foreach (var publisher in publishers)
         {
-            tasks.Add(publisher.DisposeAsync(innerToken).AwaitNoThrow(this).AsTask());
-            tasks.Add(RosMasterClient.UnregisterPublisherAsync(publisher.Topic, innerToken)
-                .AwaitNoThrow(this)
-                .AsTask());
+            tasks.Add(publisher.DisposeAsync(innerToken).AwaitNoThrow(this));
+            tasks.Add(RosMasterClient.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this));
         }
 
         var subscribers = subscribersByTopic.Values.ToArray();
@@ -1594,10 +1594,8 @@ public sealed class RosClient : IRosClient
 
         foreach (var subscriber in subscribers)
         {
-            tasks.Add(subscriber.DisposeAsync(innerToken).AwaitNoThrow(this).AsTask());
-            tasks.Add(RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, innerToken)
-                .AwaitNoThrow(this)
-                .AsTask());
+            tasks.Add(subscriber.DisposeAsync(innerToken).AwaitNoThrow(this));
+            tasks.Add(RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this));
         }
 
         var receivers = subscribedServicesByName.Values.ToArray();
@@ -1613,10 +1611,9 @@ public sealed class RosClient : IRosClient
 
         foreach (var serviceManager in serviceManagers)
         {
-            tasks.Add(serviceManager.DisposeAsync(innerToken).AwaitNoThrow(this).AsTask());
+            tasks.Add(serviceManager.DisposeAsync(innerToken).AwaitNoThrow(this));
             tasks.Add(RosMasterClient.UnregisterServiceAsync(serviceManager.Service, serviceManager.Uri, innerToken)
-                .AwaitNoThrow(this)
-                .AsTask());
+                .AwaitNoThrow(this));
         }
 
         Task timeoutTask = Task.Delay(timeoutInMs, innerToken);
@@ -1720,7 +1717,7 @@ public sealed class RosClient : IRosClient
         CancellationToken token = default)
         where T : IService
     {
-        return Task.Run(() => CallServiceAsync(serviceName, service, persistent, token).AsTask(), token)
+        return TaskUtils.Run(() => CallServiceAsync(serviceName, service, persistent, token).AsTask(), token)
             .WaitAndRethrow();
     }
 
@@ -1886,7 +1883,8 @@ public sealed class RosClient : IRosClient
     public bool AdvertiseService<T>(string serviceName, Action<T> callback, CancellationToken token = default)
         where T : IService, new()
     {
-        return Task.Run(() => AdvertiseServiceAsync(serviceName, callback, token).AsTask(), token).WaitAndRethrow();
+        return TaskUtils.Run(() => AdvertiseServiceAsync(serviceName, callback, token).AsTask(), token)
+            .WaitAndRethrow();
     }
 
     /// <summary>
@@ -1954,7 +1952,7 @@ public sealed class RosClient : IRosClient
     /// <exception cref="ArgumentException">Thrown if name is null</exception>
     public bool UnadvertiseService(string name, CancellationToken token = default)
     {
-        return Task.Run(() => UnadvertiseServiceAsync(name, token).AsTask(), token).WaitAndRethrow();
+        return TaskUtils.Run(() => UnadvertiseServiceAsync(name, token).AsTask(), token).WaitAndRethrow();
     }
 
     /// <summary>
@@ -1982,8 +1980,8 @@ public sealed class RosClient : IRosClient
     internal bool TryGetLoopbackReceiver<T>(string topic, in Endpoint endpoint, out ILoopbackReceiver<T>? receiver)
         where T : IMessage
     {
-        if (subscribersByTopic.TryGetValue(topic, out var tmpSubscriber) &&
-            tmpSubscriber is IRosSubscriber<T> subscriber)
+        if (subscribersByTopic.TryGetValue(topic, out var existingSubscriber) &&
+            existingSubscriber is IRosSubscriber<T> subscriber)
         {
             return subscriber.TryGetLoopbackReceiver(endpoint, out receiver);
         }

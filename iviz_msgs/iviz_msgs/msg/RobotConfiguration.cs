@@ -46,7 +46,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal RobotConfiguration(ref ReadBuffer b)
+        public RobotConfiguration(ref ReadBuffer b)
         {
             SourceParameter = b.DeserializeString();
             SavedRobotName = b.DeserializeString();

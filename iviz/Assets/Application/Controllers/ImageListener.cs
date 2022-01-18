@@ -53,7 +53,6 @@ namespace Iviz.Controllers
         public bool IsMono => imageTexture.IsMono;
         public string Topic => config.Topic;
         public override TfFrame? Frame => node.Parent;
-        public override IModuleData ModuleData { get; }
 
         public Vector2Int ImageSize =>
             Texture != null ? new Vector2Int(Texture.width, Texture.height) : Vector2Int.zero;
@@ -213,14 +212,13 @@ namespace Iviz.Controllers
 
         public override IListener Listener { get; }
 
-        public ImageListener(IModuleData moduleData, ImageConfiguration? config, string topic, string type)
+        public ImageListener(ImageConfiguration? config, string topic, string type)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
             imageTexture = new ImageTexture();
-            node = FrameNode.Instantiate("[ImageNode]");
+            node = new FrameNode("[ImageNode]");
             billboard = ResourcePool.RentDisplay<ImageResource>();
             billboard.Texture = imageTexture;
-            billboard.Transform.SetParentLocal(node.transform);
+            billboard.Transform.SetParentLocal(node.Transform);
 
             Config = config ?? new ImageConfiguration
             {
@@ -321,23 +319,28 @@ namespace Iviz.Controllers
 
         void InfoHandler(CameraInfo info)
         {
-            if (UseIntrinsicScale)
+            if (!UseIntrinsicScale)
             {
-                billboard.Intrinsic = new Intrinsic(info.K);
+                return;
             }
+            
+            var intrinsic = new Intrinsic(info.K);
+            if (!intrinsic.IsValid)
+            {
+                RosLogger.Error($"{this}: Ignoring invalid intrinsic {intrinsic.ToString()}.");
+                return;
+                    
+            } 
+            billboard.Intrinsic = intrinsic;
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            billboard.Texture = null;
             billboard.ReturnToPool();
-
-            imageTexture.Stop();
             imageTexture.Dispose();
             infoListener.Dispose();
-
-            node.DestroySelf();
+            node.Dispose();
         }
     }
 }

@@ -1,5 +1,6 @@
 #nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Iviz.Core;
@@ -21,7 +22,7 @@ namespace Iviz.Displays
         Vector2 size;
         float radius;
 
-        public new Bounds Bounds => new(Collider.center, Collider.size);
+        public new Bounds Bounds => Collider.GetBounds();
 
         public Vector2 Size
         {
@@ -60,7 +61,7 @@ namespace Iviz.Displays
             }
 
 
-            float vRadius = Mathf.Min(radius, Mathf.Min(size.x / 2, size.y / 2));
+            float vRadius = Math.Min(radius, Math.Min(size.x / 2, size.y / 2));
 
             const float zScale = 0.001f;
 
@@ -91,8 +92,8 @@ namespace Iviz.Displays
                 var resource = o.AddComponent<MeshMarkerResource>();
                 resource.Mesh = QuadMesh;
                 resource.Transform.SetParentLocal(transform);
-                resource.ColliderEnabled = false;
-                resource.ShadowsEnabled = false;
+                resource.EnableCollider = false;
+                resource.EnableShadows = false;
                 resource.Layer = LayerType.IgnoreRaycast;
                 objects[i] = resource;
             }
@@ -103,16 +104,19 @@ namespace Iviz.Displays
                 var resource = o.AddComponent<MeshMarkerResource>();
                 resource.Mesh = CornerMesh;
                 resource.Transform.SetParentLocal(transform);
-                resource.ColliderEnabled = false;
-                resource.ShadowsEnabled = false;
+                resource.EnableCollider = false;
+                resource.EnableShadows = false;
                 resource.Layer = LayerType.IgnoreRaycast;
                 objects[i] = resource;
             }
 
             objects[0].Transform.localPosition = Vector3.zero;
-            objects[4].Transform.localRotation = Quaternion.AngleAxis(90, Vector3.up);
-            objects[5].Transform.localRotation = Quaternion.AngleAxis(180, Vector3.up);
-            objects[6].Transform.localRotation = Quaternion.AngleAxis(270, Vector3.up);
+            objects[4].Transform.localRotation =
+                new Quaternion(0, 0.707106769f, 0, 0.707106769f); // Quaternion.AngleAxis(90, Vector3.up);
+            objects[5].Transform.localRotation =
+                new Quaternion(0, 1, 0, 0); // Quaternion.AngleAxis(180, Vector3.up);
+            objects[6].Transform.localRotation =
+                new Quaternion(0, 0.707106769f, 0, -0.707106769f); // Quaternion.AngleAxis(90, Vector3.up);
             return objects;
         }
 
@@ -186,8 +190,9 @@ namespace Iviz.Displays
 
         public override void Suspend()
         {
+            base.Suspend();
             OcclusionOnly = false;
-            ShadowsEnabled = false;
+            EnableShadows = false;
             EmissiveColor = Color.black;
         }
     }

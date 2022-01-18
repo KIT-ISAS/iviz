@@ -16,14 +16,8 @@ namespace Iviz.Core
     public class GameThread : MonoBehaviour
     {
         static GameThread? instance;
-        readonly ConcurrentQueue<Action> actionsQueue = new();
-        readonly ConcurrentQueue<Action> listenerQueue = new();
-        float lastSecondRunTime;
-        float lastTickRunTime;
-        Thread? gameThread; // only used for id
-        int counter;
-
         static int networkFrameSkip = 1;
+        static string? nowFormatted;
 
         public static int NetworkFrameSkip
         {
@@ -40,11 +34,13 @@ namespace Iviz.Core
         public static DateTime Now { get; private set; } = DateTime.Now;
 
         /// <summary>
-        /// ROS timestamp of the start of the frame.
+        /// ROS timestamp of the start of the frame. Takes into account NTP adjustment.
         /// </summary>
         public static time TimeNow { get; private set; } = time.Now();
 
-        static string? nowFormatted;
+        /// <summary>
+        /// Cached current time as string.
+        /// </summary>
         public static string NowFormatted => nowFormatted ??= Now.ToString("HH:mm:ss.fff");
 
         /// <summary>
@@ -68,13 +64,22 @@ namespace Iviz.Core
         /// </summary>
         public static event Action? EverySecond;
 
-        public static event Action? EveryFastTick;
+        /// <summary>
+        /// Runs 10 times per second
+        /// </summary>
+        public static event Action? EveryTenthSecond;
 
         /// <summary>
         /// Runs once per second, but after EverySecond has finished.
         /// </summary>
         public static event Action? LateEverySecond;
 
+        readonly ConcurrentQueue<Action> actionsQueue = new();
+        readonly ConcurrentQueue<Action> listenerQueue = new();
+        float lastSecondRunTime;
+        float lastTickRunTime;
+        Thread? gameThread; // only used for id
+        int frameCounter;
 
         void Awake()
         {
@@ -91,7 +96,7 @@ namespace Iviz.Core
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Error during EveryFrame" + e);
+                RosLogger.Error($"{this}: Error during EveryFrame", e);
             }
 
             Now = DateTime.Now;
@@ -143,7 +148,7 @@ namespace Iviz.Core
             {
                 try
                 {
-                    EveryFastTick?.Invoke();
+                    EveryTenthSecond?.Invoke();
                 }
                 catch (Exception e)
                 {
@@ -165,8 +170,8 @@ namespace Iviz.Core
                 }
             }
 
-            counter++;
-            if (counter < NetworkFrameSkip)
+            frameCounter++;
+            if (frameCounter < NetworkFrameSkip)
             {
                 return;
             }
@@ -180,8 +185,7 @@ namespace Iviz.Core
                 RosLogger.Error($"{this}: Error during ListenersEveryFrame", e);
             }
 
-            int queueSize = listenerQueue.Count;
-            foreach (int _ in ..queueSize)
+            foreach (int _ in ..listenerQueue.Count)
             {
                 if (!listenerQueue.TryDequeue(out Action action))
                 {
@@ -198,13 +202,10 @@ namespace Iviz.Core
                 }
             }
 
-            counter = 0;
+            frameCounter = 0;
         }
 
-        public override string ToString()
-        {
-            return "[GameThread]";
-        }
+        public override string ToString() => "[GameThread]";
 
         void LateUpdate()
         {
@@ -226,13 +227,10 @@ namespace Iviz.Core
             LateEveryFrame = null;
             EverySecond = null;
             LateEverySecond = null;
-            EveryFastTick = null;
+            EveryTenthSecond = null;
             GameTime = 0;
 
-            while (actionsQueue.Count != 0)
-            {
-                actionsQueue.TryDequeue(out _);
-            }
+            actionsQueue.Clear();
         }
 
         /// <summary>
@@ -261,8 +259,7 @@ namespace Iviz.Core
         /// The return type is treated as async void. 
         /// </summary>
         /// <param name="action">Action to be run.</param>
-        public static void Post(Func<Task> action) =>
-            Post(() => { action(); });
+        public static void Post(Func<Task> action) => Post(() => { action(); });
 
         /// <summary>
         /// Puts this async action in a queue to be run on the main thread.

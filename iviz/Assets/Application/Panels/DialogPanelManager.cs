@@ -26,12 +26,11 @@ namespace Iviz.App
         Echo,
         System,
         ARMarkers,
-        TfPublisher,
     }
 
     public class DialogPanelManager : MonoBehaviour
     {
-        readonly Dictionary<DialogPanelType, IDialogPanelContents> panelByType = new();
+        readonly Dictionary<DialogPanelType, IDialogPanel> panelByType = new();
         readonly HashSet<DialogData> detachedDialogDatas = new();
 
         DialogData? selectedDialogData;
@@ -51,22 +50,21 @@ namespace Iviz.App
         void Awake()
         {
             gameObject.SetActive(false);
-            (DialogPanelType type, IDialogPanelContents panel)[] panels =
+            (DialogPanelType type, IDialogPanel panel)[] panels =
             {
-                (DialogPanelType.AddModule, CreatePanel<ItemListDialogContents>(Resource.Widgets.ItemListPanel)),
-                (DialogPanelType.Connection, CreatePanel<ConnectionDialogContents>(Resource.Widgets.ConnectionPanel)),
-                (DialogPanelType.Tf, CreatePanel<TfDialogContents>(Resource.Widgets.TfPanel)),
-                (DialogPanelType.SaveAs, CreatePanel<SaveConfigDialogContents>(Resource.Widgets.SaveAsPanel)),
-                (DialogPanelType.Load, CreatePanel<ItemListDialogContents>(Resource.Widgets.ItemListPanel)),
-                (DialogPanelType.AddTopic, CreatePanel<AddTopicDialogContents>(Resource.Widgets.AddTopicPanel)),
-                (DialogPanelType.Marker, CreatePanel<MarkerDialogContents>(Resource.Widgets.MarkerPanel)),
-                (DialogPanelType.Network, CreatePanel<NetworkDialogContents>(Resource.Widgets.NetworkPanel)),
-                (DialogPanelType.Console, CreatePanel<ConsoleDialogContents>(Resource.Widgets.ConsolePanel)),
-                (DialogPanelType.Settings, CreatePanel<SettingsDialogContents>(Resource.Widgets.SettingsPanel)),
-                (DialogPanelType.Echo, CreatePanel<EchoDialogContents>(Resource.Widgets.EchoPanel)),
-                (DialogPanelType.System, CreatePanel<SystemDialogContents>(Resource.Widgets.SystemPanel)),
+                (DialogPanelType.AddModule, CreatePanel<ItemListDialogPanel>(Resource.Widgets.ItemListPanel)),
+                (DialogPanelType.Connection, CreatePanel<ConnectionDialogPanel>(Resource.Widgets.ConnectionPanel)),
+                (DialogPanelType.Tf, CreatePanel<TfDialogPanel>(Resource.Widgets.TfPanel)),
+                (DialogPanelType.SaveAs, CreatePanel<SaveConfigDialogPanel>(Resource.Widgets.SaveAsPanel)),
+                (DialogPanelType.Load, CreatePanel<ItemListDialogPanel>(Resource.Widgets.ItemListPanel)),
+                (DialogPanelType.AddTopic, CreatePanel<AddTopicDialogPanel>(Resource.Widgets.AddTopicPanel)),
+                (DialogPanelType.Marker, CreatePanel<MarkerDialogPanel>(Resource.Widgets.MarkerPanel)),
+                (DialogPanelType.Network, CreatePanel<NetworkDialogPanel>(Resource.Widgets.NetworkPanel)),
+                (DialogPanelType.Console, CreatePanel<ConsoleDialogPanel>(Resource.Widgets.ConsolePanel)),
+                (DialogPanelType.Settings, CreatePanel<SettingsDialogPanel>(Resource.Widgets.SettingsPanel)),
+                (DialogPanelType.Echo, CreatePanel<EchoDialogPanel>(Resource.Widgets.EchoPanel)),
+                (DialogPanelType.System, CreatePanel<SystemDialogPanel>(Resource.Widgets.SystemPanel)),
                 (DialogPanelType.ARMarkers, CreatePanel<ARMarkerDialogContents>(Resource.Widgets.ARMarkerPanel)),
-                (DialogPanelType.TfPublisher, CreatePanel<TfPublisherDialogContents>(Resource.Widgets.TfPublisherPanel)),
             };
 
             foreach (var (type, panel) in panels)
@@ -82,10 +80,10 @@ namespace Iviz.App
             started = true;
 
             GameThread.EverySecond += UpdateAll;
-            GameThread.EveryFastTick += UpdateAllFast;
+            GameThread.EveryTenthSecond += UpdateAllFast;
         }
 
-        T CreatePanel<T>(Info<GameObject> source) where T : IDialogPanelContents
+        T CreatePanel<T>(ResourceKey<GameObject> source) where T : IDialogPanel
         {
             if (source == null)
             {
@@ -99,7 +97,7 @@ namespace Iviz.App
         void OnDestroy()
         {
             GameThread.EverySecond -= UpdateAll;
-            GameThread.EveryFastTick -= UpdateAllFast;
+            GameThread.EveryTenthSecond -= UpdateAllFast;
         }
 
         void UpdateAll()
@@ -152,9 +150,9 @@ namespace Iviz.App
             }            
         }
 
-        public T GetPanelByType<T>(DialogPanelType resource) where T : IDialogPanelContents
+        public T GetPanelByType<T>(DialogPanelType resource) where T : IDialogPanel
         {
-            if (!panelByType.TryGetValue(resource, out IDialogPanelContents cm))
+            if (!panelByType.TryGetValue(resource, out IDialogPanel cm))
             {
                 throw new InvalidOperationException("There is no panel for this type!");
             }
@@ -216,7 +214,6 @@ namespace Iviz.App
             dialogData.Panel.ClearSubscribers();
         }
 
-
         public void HidePanelFor(DialogData? deselected)
         {
             if (deselected == null)
@@ -259,7 +256,9 @@ namespace Iviz.App
             detachedDialogDatas.Add(selectedDialogData);
             selectedDialogData.Detached = true;
             selectedDialogData = null;
-        } 
+        }
+
+        public bool IsActive(DialogData dialogData) => selectedDialogData == dialogData || dialogData.Detached;
 
         public override string ToString() => "[DialogPanelManager]";
     }

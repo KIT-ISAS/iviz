@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
@@ -8,7 +9,6 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -20,30 +20,36 @@ namespace Iviz.App
         const string NoneStr = "<none>";
 
         readonly DepthCloudController controller;
-        readonly DepthCloudPanelContents panel;
+        readonly DepthCloudModulePanel panel;
 
         ImageDialogData? colorDialogData;
         ImageDialogData? depthDialogData;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.DepthCloud;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
-        public DepthCloudModuleData(ModuleDataConstructor constructor) :
-            base(constructor.Topic, constructor.Type)
+        public DepthCloudModuleData(ModuleDataConstructor constructor) 
         {
-            panel = DataPanelManager.GetPanelByResourceType<DepthCloudPanelContents>(ModuleType.DepthCloud);
-            controller = new DepthCloudController(this, (DepthCloudConfiguration?)constructor.Configuration);
+            panel = ModulePanelManager.GetPanelByResourceType<DepthCloudModulePanel>(ModuleType.DepthCloud);
+            controller = new DepthCloudController((DepthCloudConfiguration?)constructor.Configuration);
             UpdateModuleButton();
         }
 
         public override void Dispose()
         {
             base.Dispose();
-            controller.Dispose();
-            colorDialogData?.Stop();
-            depthDialogData?.Stop();
+            try
+            {
+                controller.Dispose();
+                colorDialogData?.Dispose();
+                depthDialogData?.Dispose();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }            
         }
 
         public override void SetupPanel()
@@ -76,8 +82,8 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
 
             var topics = GetImageTopics();
-            panel.Color.Hints = topics;
-            panel.Depth.Hints = topics;
+            panel.Color.SetHints(topics);
+            panel.Depth.SetHints(topics);
 
             panel.Color.EndEdit += f =>
             {
@@ -214,10 +220,8 @@ namespace Iviz.App
 
         protected override void UpdateModuleButton()
         {
-            string text = controller.DepthTopic.Length != 0
-                ? GetDescriptionForTopic(controller.DepthTopic, ModuleTypeStr)
-                : $"<b>{ModuleTypeStr}</b>";
-            ButtonText = Controller.Visible ? text : $"<color=grey>{text}</color>";
+            ModuleListButtonText =
+                ModuleListPanel.CreateButtonTextForListenerModule(this, controller.DepthTopic, ModuleTypeStr);
         }
 
         sealed class ColorImageDialogListener : ImageDialogListener
@@ -231,7 +235,7 @@ namespace Iviz.App
                 out Vector4 color) =>
                 moduleData.controller.TrySampleColor(rawUV, out uv, out format, out color);
 
-            protected override void Stop() => moduleData.OnDialogClosed(DialogData);
+            protected override void Dispose() => moduleData.OnDialogClosed(DialogData);
         }
 
         sealed class DepthImageDialogListener : ImageDialogListener
@@ -245,7 +249,7 @@ namespace Iviz.App
                 out Vector4 color) =>
                 moduleData.controller.TrySampleDepth(rawUV, out uv, out format, out color);
 
-            protected override void Stop() => moduleData.OnDialogClosed(DialogData);
+            protected override void Dispose() => moduleData.OnDialogClosed(DialogData);
         }
     }
 }

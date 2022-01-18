@@ -2,15 +2,12 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
-using Iviz.Roslib;
 using Iviz.Tools;
-using UnityEngine;
 
 namespace Iviz.Ros
 {
@@ -19,33 +16,37 @@ namespace Iviz.Ros
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
 
+        public static event Action<ConnectionState>? ConnectionStateChanged;
+        public static event Action<bool>? ConnectionWarningStateChanged;
+
         readonly SemaphoreSlim signal = new(0);
         readonly Task task;
         readonly ConcurrentQueue<Func<ValueTask>> toDos = new();
         readonly CancellationTokenSource connectionTs = new();
 
         DateTime lastConnectionTry = DateTime.MinValue;
+        bool tryConnectOnce;
 
         public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
         public bool KeepReconnecting { get; set; }
 
-        public event Action<ConnectionState>? ConnectionStateChanged;
-        public event Action<bool>? ConnectionWarningStateChanged;
-
         protected RosConnection()
         {
-            task = TaskUtils.StartLongTask(async () => await Run().AwaitNoThrow(this));
+            task = TaskUtils.Run(() => Run().AwaitNoThrow(this));
         }
 
         public abstract ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
             CancellationToken token)
             where T : IService;
 
-        internal virtual void Stop()
+        internal virtual void Dispose()
         {
             connectionTs.Cancel();
             Signal();
             task.WaitNoThrow(this);
+
+            ConnectionStateChanged = null;
+            ConnectionWarningStateChanged = null;
         }
 
         void SetConnectionState(ConnectionState newState)
@@ -59,7 +60,7 @@ namespace Iviz.Ros
             GameThread.Post(() => ConnectionStateChanged?.Invoke(newState));
         }
 
-        protected void SetConnectionWarningState(bool value)
+        protected static void SetConnectionWarningState(bool value)
         {
             GameThread.Post(() => ConnectionWarningStateChanged?.Invoke(value));
         }
@@ -81,31 +82,7 @@ namespace Iviz.Ros
             {
                 while (!connectionTs.IsCancellationRequested)
                 {
-                    DateTime now = GameThread.Now;
-                    if (KeepReconnecting
-                        && ConnectionState != ConnectionState.Connected
-                        && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)
-                    {
-                        SetConnectionState(ConnectionState.Connecting);
-
-                        bool connectionResult;
-
-                        try
-                        {
-                            lastConnectionTry = now;
-                            connectionResult = await ConnectAsync();
-                        }
-                        catch (Exception e)
-                        {
-                            RosLogger.Error("Unexpected error in RosConnection.Connect", e);
-                            continue;
-                        }
-
-                        SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
-                    }
-
-                    await signal.WaitAsync(TaskWaitTimeInMs);
-                    await ExecuteTasks().AwaitNoThrow(this);
+                    await RunTasks();
                 }
 
                 SetConnectionState(ConnectionState.Disconnected);
@@ -121,12 +98,62 @@ namespace Iviz.Ros
             connectionTs.Cancel();
         }
 
+        async ValueTask RunTasks()
+        {
+            var now = GameThread.Now;
+            if ((KeepReconnecting || tryConnectOnce)
+                && ConnectionState != ConnectionState.Connected
+                && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)
+            {
+                await TryToConnect(now);
+            }
+
+            await signal.WaitAsync(TaskWaitTimeInMs);
+            await ExecuteTasks().AwaitNoThrow(this);
+        }
+
+        async ValueTask TryToConnect(DateTime now)
+        {
+            SetConnectionState(ConnectionState.Connecting);
+
+            tryConnectOnce = false;
+            bool connectionResult;
+
+            try
+            {
+                lastConnectionTry = now;
+                connectionResult = await ConnectAsync();
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error("Unexpected error in RosConnection.Connect", e);
+                return;
+            }
+
+            SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
+            if (connectionResult)
+            {
+                KeepReconnecting = true;
+                SetConnectionState(ConnectionState.Connected);
+            }
+            else
+            {
+                SetConnectionState(ConnectionState.Disconnected);
+            }            
+        }
+
         async ValueTask ExecuteTasks()
         {
             while (toDos.TryDequeue(out var action))
             {
                 await action().AwaitNoThrow(this);
             }
+        }
+
+        public void TryOnceToConnect()
+        {
+            tryConnectOnce = true;
+            Signal();
         }
 
         protected abstract ValueTask<bool> ConnectAsync();

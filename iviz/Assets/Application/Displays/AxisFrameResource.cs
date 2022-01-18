@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using Iviz.Common;
 using Iviz.Core;
 using UnityEngine;
 using Iviz.Resources;
@@ -8,7 +9,11 @@ using JetBrains.Annotations;
 
 namespace Iviz.Displays
 {
-    public sealed class AxisFrameResource : MeshMarkerHolderResource, IRecyclable
+    /// <summary>
+    /// Display that uses three cubes to represent an axis frame.
+    /// Used mostly by <see cref="TfFrameDisplay"/> and <see cref="CameraOverlayDisplay"/>.
+    /// </summary>
+    public sealed class AxisFrameResource : MeshMarkerHolderResource, IRecyclable, IHighlightable
     {
         static readonly string[] Names = {"Axis-X", "Axis-Y", "Axis-Z"};
 
@@ -57,13 +62,15 @@ namespace Iviz.Displays
                 Frames[2].EmissiveColor = value * Frames[2].Color;
             }
         }
+        
+        public IHighlightable? Highlightable { get; set; }
 
         void Awake()
         {
             foreach (var (frame, frameName) in Frames.Zip(Names))
             {
                 frame.gameObject.name = frameName;
-                frame.ColliderEnabled = false;
+                frame.EnableCollider = false;
                 frame.Layer = Layer;
             }
 
@@ -117,5 +124,9 @@ namespace Iviz.Displays
             Tint = Color.white;
             Emissive = 0;
         }
+        
+        public bool IsAlive => Highlightable?.IsAlive ?? false;
+        
+        public void Highlight(in Vector3 hitPoint) => Highlightable?.Highlight(hitPoint);
     }
 }

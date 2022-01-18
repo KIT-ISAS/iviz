@@ -19,15 +19,12 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;
         readonly GridResource grid;
-
-        public IModuleData ModuleData { get; }
-
         readonly GridConfiguration config = new();
 
         public GridConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 Orientation = value.Orientation;
                 Visible = value.Visible;
@@ -57,7 +54,7 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
 
-                bool arEnabled = ARController.IsVisible;
+                bool arEnabled = ARController.Instance is { Visible: true };
                 bool gridVisible = value && (arEnabled && !HideInARMode || !arEnabled);
                 if (!gridVisible)
                 {
@@ -134,21 +131,19 @@ namespace Iviz.Controllers
             set
             {
                 config.Offset = value;
-                node.transform.localPosition = value.Ros2Unity();
+                node.Transform.localPosition = value.Ros2Unity();
                 UpdateMesh();
             }
         }
 
-        public GridController(IModuleData moduleData)
+        public GridController(GridConfiguration? config)
         {
             grid = ResourcePool.RentDisplay<GridResource>();
             grid.name = "Grid";
             grid.Layer = LayerType.Collider;
 
-            node = FrameNode.Instantiate("GridNode");
-            grid.transform.SetParentLocal(node.transform);
-
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
+            node = new FrameNode("GridNode");
+            grid.transform.SetParentLocal(node.Transform);
 
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";
@@ -172,7 +167,7 @@ namespace Iviz.Controllers
 
             UpdateMesh();
 
-            Config = new GridConfiguration();
+            Config = config ?? new GridConfiguration();
         }
 
         void UpdateMesh()
@@ -188,7 +183,7 @@ namespace Iviz.Controllers
         public void Dispose()
         {
             grid.ReturnToPool();
-            node.DestroySelf();
+            node.Dispose();
             UnityEngine.Object.Destroy(reflectionProbe.gameObject);
         }
 

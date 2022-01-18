@@ -26,7 +26,7 @@ namespace Iviz.App.ARDialogs
         void Awake()
         {
             node = new GameObject("AR LineConnector Node");
-            node.transform.SetParentLocal(TfListener.OriginFrame.transform);
+            node.transform.SetParentLocal(TfListener.OriginFrame.Transform);
             lines = ResourcePool.RentDisplay<LineResource>(node.transform);
             lines.ElementScale = 0.005f;
 
@@ -34,7 +34,7 @@ namespace Iviz.App.ARDialogs
             {
                 var sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.transform);
                 sphere.Transform.localScale = 0.05f * Vector3.one;
-                sphere.ShadowsEnabled = false;
+                sphere.EnableShadows = false;
                 spheres[i] = sphere;
             }
 

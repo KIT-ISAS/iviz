@@ -34,7 +34,7 @@ public static class Extensions
             throw new ArgumentNullException(nameof(service));
         }
 
-        Task.Run(() => client.WaitForServiceAsync(service, token), token).WaitAndRethrow();
+        TaskUtils.Run(() => client.WaitForServiceAsync(service, token).AsTask(), token).WaitAndRethrow();
     }
 
     public static async ValueTask WaitForServiceAsync(this RosClient client, string service,
@@ -88,7 +88,7 @@ public static class Extensions
             throw new ArgumentNullException(nameof(publisher));
         }
 
-        Task.Run(() => publisher.WaitForAnySubscriberAsync(token), token).WaitAndRethrow();
+        TaskUtils.Run(() => publisher.WaitForAnySubscriberAsync(token).AsTask(), token).WaitAndRethrow();
     }
 
     public static void WaitForAnySubscriber(this IRosChannelWriter writer, CancellationToken token = default)
@@ -141,7 +141,7 @@ public static class Extensions
             throw new ArgumentNullException(nameof(subscriber));
         }
 
-        Task.Run(() => subscriber.WaitForAnyPublisherAsync(token), token).WaitAndRethrow();
+        TaskUtils.Run(() => subscriber.WaitForAnyPublisherAsync(token).AsTask(), token).WaitAndRethrow();
     }
 
     public static async ValueTask WaitForAnyPublisherAsync(this IRosSubscriber subscriber,
@@ -189,7 +189,7 @@ public static class Extensions
             throw new ArgumentNullException(nameof(topic));
         }
 
-        Task.Run(() => client.WaitForTopicAsync(topic, token), token).WaitAndRethrow();
+        TaskUtils.Run(() => client.WaitForTopicAsync(topic, token).AsTask(), token).WaitAndRethrow();
     }
 
     public static async ValueTask WaitForTopicAsync(this RosClient client, string topic,

@@ -1,6 +1,5 @@
 #nullable enable
 
-using System;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -10,35 +9,20 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
+    /// <summary>
+    /// Implements the visualization of a <see cref="TfFrame"/>.
+    /// </summary>
     public sealed class TfFrameDisplay : TfFrame, IHighlightable
     {
         const int TrailTimeWindowInMs = 5000;
 
-        float labelSize = 1.0f;
-        
-        AxisFrameResource? axis;
+        readonly AxisFrameResource axis;
         TextMarkerResource? label;
         LineConnector? parentConnector;
         TrailResource? trail;
         bool visible = true;
-
-        AxisFrameResource Axis
-        {
-            get
-            {
-                if (axis != null)
-                {
-                    return axis;
-                }
-
-                axis = ResourcePool.RentDisplay<AxisFrameResource>(Transform);
-                axis.ColliderEnabled = true;
-                axis.Layer = LayerType.IgnoreRaycast;
-                axis.gameObject.layer = LayerType.TfAxis;
-                axis.name = "[Axis]";
-                return axis;
-            }
-        }
+        float labelSize = 1.0f;
+        bool forceInvisible;
 
         TrailResource Trail
         {
@@ -49,7 +33,7 @@ namespace Iviz.Displays
                     return trail;
                 }
 
-                trail = ResourcePool.RentDisplay<TrailResource>(TfListener.UnityFrame.Transform);
+                trail = ResourcePool.RentDisplay<TrailResource>(TfListener.UnityFrameTransform);
                 trail.TimeWindowInMs = TrailTimeWindowInMs;
                 trail.Color = Color.yellow;
                 trail.Name = $"[Trail:{Id}]";
@@ -70,7 +54,7 @@ namespace Iviz.Displays
                 label.gameObject.name = "[Label]";
                 label.Text = Id;
                 label.ElementSize = 0.5f * LabelSize * FrameSize;
-                label.Visible = !ForceInvisible && LabelVisible && Visible;
+                label.Visible = !forceInvisible && LabelVisible && Visible;
                 label.BillboardOffset = 1.5f * FrameSize * Vector3.up;
                 label.Layer = LayerType.IgnoreRaycast;
                 return label;
@@ -98,44 +82,14 @@ namespace Iviz.Displays
             }
         }
 
-        public override string Id
-        {
-            get => base.Id;
-            protected set
-            {
-                base.Id = value ?? throw new ArgumentNullException(nameof(value));
-
-                if (label != null)
-                {
-                    label.Text = base.Id;
-                }
-
-                if (trail != null)
-                {
-                    trail.Name = $"[Trail:{base.Id}]";
-                }
-            }
-        }
-
-        public override bool ForceInvisible
-        {
-            get => base.ForceInvisible;
-            set
-            {
-                base.ForceInvisible = value;
-                Visible = Visible;
-                LabelVisible = LabelVisible;
-                ConnectorVisible = ConnectorVisible;
-            }
-        }
-
         public override bool Visible
         {
             get => visible;
             set
             {
+                // visible in FrameNode hides children too, here we only hide the frame display 
                 visible = value;
-                Axis.Visible = value && !ForceInvisible;
+                axis.Visible = value && !forceInvisible;
                 LabelVisible = LabelVisible;
                 TrailVisible = TrailVisible;
             }
@@ -149,7 +103,7 @@ namespace Iviz.Displays
                 base.LabelVisible = value;
                 if (label != null || value)
                 {
-                    Label.Visible = !ForceInvisible && Visible && value;
+                    Label.Visible = !forceInvisible && Visible && value;
                 }
             }
         }
@@ -174,17 +128,22 @@ namespace Iviz.Displays
             {
                 if (parentConnector != null || value)
                 {
-                    ParentConnector.Visible = !ForceInvisible && Visible && value;
+                    ParentConnector.Visible = !forceInvisible && Visible && value;
                 }
             }
+        }
+        
+        public override bool EnableCollider
+        {
+            set => axis.EnableCollider = value;
         }
 
         public override float FrameSize
         {
-            get => Axis.AxisLength;
+            get => axis.AxisLength;
             set
             {
-                Axis.AxisLength = value;
+                axis.AxisLength = value;
                 if (parentConnector != null)
                 {
                     parentConnector.LineWidth = FrameSize / 20;
@@ -211,44 +170,32 @@ namespace Iviz.Displays
                 }
 
                 Trail.Visible = value && Visible;
-                Trail.DataSource = value 
-                    ? () => Transform.position 
+                Trail.DataSource = value
+                    ? () => Transform.position
                     : null;
             }
         }
 
-        public override TfFrame? Parent
+        public TfFrameDisplay(string id) : base(id)
         {
-            get => base.Parent;
-            set
-            {
-                if (!SetParent(value))
-                {
-                    RosLogger.Error($"{this}: Failed to set '{(value != null ? value.Id : "null")}' as a parent to {Id}");
-                }
-            }
-        }
+            axis = ResourcePool.RentDisplay<AxisFrameResource>(Transform);
+            axis.EnableCollider = true;
+            axis.Layer = LayerType.IgnoreRaycast;
+            axis.gameObject.layer = LayerType.TfAxis;
+            axis.name = "[Axis]";
+            axis.Highlightable = this;
 
-        void Awake()
-        {
             FrameSize = 0.125f;
         }
 
-        public override bool SetParent(TfFrame? newParent)
+        public override bool TrySetParent(TfFrame? parent)
         {
-            if (!ParentCanChange)
+            if (!base.TrySetParent(parent))
             {
                 return false;
             }
-            
-            if (!IsAlive)
-            {
-                return false; // destroying!
-            }
 
-            base.SetParent(newParent);
-
-            if (newParent is null)
+            if (parent is null)
             {
                 if (parentConnector != null)
                 {
@@ -268,16 +215,22 @@ namespace Iviz.Displays
 
         protected override void Stop()
         {
-            base.Stop();
             axis.ReturnToPool();
             trail.ReturnToPool();
             label.ReturnToPool();
 
-            trail = null;
-            axis = null;
+            base.Stop();
+        }
+        
+        public override void ForceInvisible()
+        {
+            forceInvisible = true;
+            Visible = Visible;
+            LabelVisible = LabelVisible;
+            ConnectorVisible = ConnectorVisible;
         }
 
-        public void Highlight(in Vector3 hitPoint) => Highlight();
+        public void Highlight(in Vector3 _) => Highlight();
 
         public override void Highlight()
         {

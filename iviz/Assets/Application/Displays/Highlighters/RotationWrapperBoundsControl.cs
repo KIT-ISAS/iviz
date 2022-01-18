@@ -76,7 +76,7 @@ namespace Iviz.Displays.Highlighters
 
                 var rotation = node.transform.localRotation;
                 var bounds = value.TransformBound(Pose.identity.WithRotation(rotation), Vector3.one);
-                
+
                 SizeX = bounds.size.x + markerScale * 0.707f;
                 SizeY = bounds.size.y + markerScale * 0.707f;
             }
@@ -110,8 +110,9 @@ namespace Iviz.Displays.Highlighters
             {
                 marker.Color = Resource.Colors.DraggableDefaultColor;
                 marker.Layer = LayerType.Clickable;
-                marker.ShadowsEnabled = false;
-                marker.Transform.localRotation = Quaternion.AngleAxis(90, Vector3.left);
+                marker.EnableShadows = false;
+                marker.Transform.localRotation =
+                    new Quaternion(-0.707106769f, 0, 0, 0.707106769f); // Quaternion.AngleAxis(90, Vector3.left);
             }
 
             draggable.StateChanged += () =>
@@ -120,8 +121,8 @@ namespace Iviz.Displays.Highlighters
                 {
                     foreach (var marker in markers)
                     {
-                        marker.EmissiveColor = draggable.IsDragging 
-                            ? Resource.Colors.DraggableSelectedEmissive 
+                        marker.EmissiveColor = draggable.IsDragging
+                            ? Resource.Colors.DraggableSelectedEmissive
                             : Color.black;
                         marker.Color = draggable.IsDragging
                             ? Resource.Colors.DraggableSelectedColor
@@ -170,7 +171,7 @@ namespace Iviz.Displays.Highlighters
             ring.Transform.localScale = new Vector3(radius, radius, 0.001f);
             ring.EmissiveColor = Resource.Colors.DraggableSelectedEmissive;
             ring.Color = Resource.Colors.DraggableSelectedColor.WithAlpha(0.25f);
-            ring.ShadowsEnabled = false;            
+            ring.EnableShadows = false;
         }
 
         void UpdateSize()
@@ -192,7 +193,7 @@ namespace Iviz.Displays.Highlighters
         public override void Dispose()
         {
             base.Dispose();
-            
+
             foreach (var marker in markers)
             {
                 marker.ReturnToPool(Resource.Displays.Cylinder);

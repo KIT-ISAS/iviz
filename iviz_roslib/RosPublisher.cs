@@ -11,20 +11,20 @@ namespace Iviz.Roslib;
 /// <summary>
 ///     Manager for a ROS publisher.
 /// </summary>
-/// <typeparam name="T">Topic type</typeparam>
-public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
+/// <typeparam name="TMessage">Topic type</typeparam>
+public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMessage : IMessage
 {
     readonly RosClient client;
     readonly List<string> ids = new();
-    readonly SenderManager<T> manager;
+    readonly SenderManager<TMessage> manager;
     readonly CancellationTokenSource runningTs = new();
     int totalPublishers;
     bool disposed;
 
-    internal RosPublisher(RosClient client, TopicInfo<T> topicInfo)
+    internal RosPublisher(RosClient client, TopicInfo<TMessage> topicInfo)
     {
         this.client = client;
-        manager = new SenderManager<T>(this, topicInfo) { ForceTcpNoDelay = true };
+        manager = new SenderManager<TMessage>(this, topicInfo) { ForceTcpNoDelay = true };
     }
 
     /// <summary>
@@ -56,13 +56,6 @@ public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
     public string TopicType => manager.TopicType;
     public int NumSubscribers => manager.NumConnections;
 
-    public bool LatchingEnabled
-    {
-        get => manager.Latching;
-        set => manager.Latching = value;
-    }
-
-
     public int TimeoutInMs
     {
         get => manager.TimeoutInMs;
@@ -73,6 +66,17 @@ public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
     {
         get => manager.ForceTcpNoDelay;
         set => manager.ForceTcpNoDelay = value;
+    }
+    
+    public bool LatchingEnabled
+    {
+        get => manager.Latching;
+        set => manager.Latching = value;
+    }
+    
+    public TMessage LatchedMessage
+    {
+        set => manager.LatchedMessage = value;
     }
 
     public PublisherTopicState GetState()
@@ -88,14 +92,14 @@ public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
             throw new ArgumentNullException(nameof(message));
         }
 
-        if (!MessageTypeMatches(message.GetType()))
+        if (message is not TMessage tMessage)
         {
             throw new RosInvalidMessageTypeException("Type does not match publisher.");
         }
 
         message.RosValidate();
         AssertIsAlive();
-        manager.Publish((T)message);
+        manager.Publish(tMessage);
     }
 
     ValueTask IRosPublisher.PublishAsync(IMessage message, RosPublishPolicy policy, CancellationToken token)
@@ -105,12 +109,12 @@ public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
             throw new ArgumentNullException(nameof(message));
         }
 
-        if (!MessageTypeMatches(message.GetType()))
+        if (message is not TMessage tMessage)
         {
             throw new RosInvalidMessageTypeException("Type does not match publisher.");
         }
 
-        return PublishAsync((T)message, policy, token);
+        return PublishAsync(tMessage, policy, token);
     }
 
 
@@ -120,7 +124,7 @@ public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
     /// <param name="message">The message to be published.</param>
     /// <exception cref="ArgumentNullException">The message is null</exception>
     /// <exception cref="RosInvalidMessageTypeException">The message type does not match.</exception>
-    public void Publish(in T message)
+    public void Publish(in TMessage message)
     {
         if (message is null)
         {
@@ -132,10 +136,10 @@ public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
         manager.Publish(message);
     }
 
-    public ValueTask PublishAsync(in T message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+    public ValueTask PublishAsync(in TMessage message, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
         CancellationToken token = default)
     {
-        if (message == null)
+        if (message is null)
         {
             throw new ArgumentNullException(nameof(message));
         }
@@ -235,11 +239,11 @@ public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
             return true;
         }
 
-        bool removed = RemoveId(id);
+        bool removed = RemoveId(id ?? throw new ArgumentNullException(nameof(id)));
 
         if (ids.Count == 0)
         {
-            Task.Run(() => RemovePublisherAsync(token), token).WaitAndRethrow();
+            TaskUtils.Run(() => RemovePublisherAsync(token), token).WaitAndRethrow();
         }
 
         return removed;
@@ -252,7 +256,7 @@ public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
             return true;
         }
 
-        bool removed = RemoveId(id);
+        bool removed = RemoveId(id ?? throw new ArgumentNullException(nameof(id)));
 
         if (ids.Count == 0)
         {
@@ -264,8 +268,8 @@ public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
 
     Task RemovePublisherAsync(CancellationToken token)
     {
-        Task disposeTask = DisposeAsync(token).AwaitNoThrow(this).AsTask();
-        Task unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this).AsTask();
+        var disposeTask = DisposeAsync(token).AwaitNoThrow(this);
+        var unadvertiseTask = client.RemovePublisherAsync(this, token).AwaitNoThrow(this);
         return (disposeTask, unadvertiseTask).WhenAll();
     }
 
@@ -280,17 +284,17 @@ public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
     }
 
     /// <summary>
-    /// Checks whether the given type matches the publisher message type <see cref="T"/>  
+    /// Checks whether the given type matches the publisher message type <see cref="TMessage"/>  
     /// </summary>
     public bool MessageTypeMatches(Type type)
     {
-        return type == typeof(T);
+        return type == typeof(TMessage);
     }
 
     /// <summary>
     ///     Called when the number of subscribers has changed.
     /// </summary>
-    public event Action<RosPublisher<T>>? NumSubscribersChanged;
+    public event Action<RosPublisher<TMessage>>? NumSubscribersChanged;
 
     internal void RaiseNumSubscribersChanged()
     {
@@ -322,24 +326,24 @@ public sealed class RosPublisher<T> : IRosPublisher<T> where T : IMessage
 
     string GenerateId()
     {
-        Interlocked.Increment(ref totalPublishers);
-        int prevNumPublishers = totalPublishers - 1;
-        return prevNumPublishers == 0 ? Topic : $"{Topic}-{prevNumPublishers.ToString()}";
+        int currentCount = Interlocked.Increment(ref totalPublishers);
+        int lastId = currentCount - 1;
+        return lastId == 0 ? Topic : $"{Topic}-{lastId.ToString()}";
     }
 
     bool RemoveId(string topicId)
     {
-        if (topicId is null)
-        {
-            throw new ArgumentNullException(nameof(topicId));
-        }
-
         return ids.Remove(topicId);
     }
 
-    internal bool TryGetLoopbackReceiver(in Endpoint endpoint, out ILoopbackReceiver<T>? receiver)
+    internal bool TryGetLoopbackReceiver(in Endpoint endpoint, out ILoopbackReceiver<TMessage>? receiver)
     {
         return client.TryGetLoopbackReceiver(Topic, endpoint, out receiver);
+    }
+    
+    public void UnsetLatch()
+    {
+        manager.UnsetLatch();
     }
 
     public override string ToString()

@@ -17,12 +17,12 @@ namespace Iviz.App
         const string NoneStr = "<none>";
 
         [NotNull] readonly JointStateListener listener;
-        [NotNull] readonly JointStatePanelContents panel;
+        [NotNull] readonly JointStateModulePanel panel;
         readonly List<string> robotNames = new List<string>();
 
         protected override ListenerController Listener => listener;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.JointState;
 
         public override IConfiguration Configuration => listener.Config;
@@ -30,11 +30,11 @@ namespace Iviz.App
         public JointStateModuleData([NotNull] ModuleDataConstructor constructor) :
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<JointStatePanelContents>(ModuleType.JointState);
-            listener = new JointStateListener(this);
+            panel = ModulePanelManager.GetPanelByResourceType<JointStateModulePanel>(ModuleType.JointState);
+            listener = new JointStateListener();
             if (constructor.Configuration != null)
             {
-                listener.Config = (JointStateConfiguration) constructor.Configuration;
+                listener.Config = (JointStateConfiguration)constructor.Configuration;
                 listener.Robot = GetRobotWithName(listener.RobotName);
             }
             else
@@ -64,7 +64,7 @@ namespace Iviz.App
 
             panel.JointPrefix.EndEdit += f => { listener.MsgJointPrefix = f; };
             panel.JointSuffix.EndEdit += f => { listener.MsgJointSuffix = f; };
-            panel.TrimFromEnd.ValueChanged += f => { listener.MsgTrimFromEnd = (int) f; };
+            panel.TrimFromEnd.ValueChanged += f => { listener.MsgTrimFromEnd = (int)f; };
             panel.Robot.ValueChanged += (i, s) =>
             {
                 listener.Robot = (i == 0) ? null : GetRobotWithName(s);
@@ -95,7 +95,7 @@ namespace Iviz.App
                         break;
                     case nameof(JointStateConfiguration.RobotName):
                         listener.Robot = GetRobotWithId(config.RobotName);
-                        listener.RobotName = listener.Robot.Name;                        
+                        listener.RobotName = listener.Robot.Name;
                         break;
                     case nameof(JointStateConfiguration.MsgJointPrefix):
                         listener.MsgJointPrefix = config.MsgJointPrefix;
@@ -130,7 +130,7 @@ namespace Iviz.App
                 throw new InvalidOperationException($"Module with id '{robotId}' is not a robot");
             }
 
-            return ((SimpleRobotModuleData) robotData).RobotController;
+            return ((SimpleRobotModuleData)robotData).RobotController;
         }
 
         public override void AddToState(StateConfiguration config)

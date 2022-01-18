@@ -35,7 +35,7 @@ namespace Iviz.Msgs.SensorMsgs
         }
         
         /// Constructor with buffer.
-        internal PointCloud(ref ReadBuffer b)
+        public PointCloud(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Points = b.DeserializeStructArray<GeometryMsgs.Point32>();

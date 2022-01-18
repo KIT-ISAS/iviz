@@ -115,7 +115,7 @@ namespace Iviz.Controllers
                 Pose pBeforeLatest = sortedPoses[n - 2].Pose;
                 Pose pExtrapolated = new Pose(
                     (pLatest.position - pBeforeLatest.position) + pLatest.position,
-                    pLatest.rotation * Quaternion.Inverse(pBeforeLatest.rotation) * pLatest.rotation
+                    pLatest.rotation * pBeforeLatest.rotation.Inverse() * pLatest.rotation
                 );
                 return pLatest.Lerp(pExtrapolated, (float) t);
 

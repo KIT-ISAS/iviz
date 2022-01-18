@@ -30,8 +30,6 @@ namespace Iviz.Controllers
         int numCellsY;
         float cellSize;
 
-        public override IModuleData ModuleData { get; }
-
         public Vector2 MeasuredIntensityBounds => resource.MeasuredIntensityBounds;
 
         public override TfFrame? Frame => node.Parent;
@@ -158,10 +156,8 @@ namespace Iviz.Controllers
 
         public override IListener Listener { get; }
 
-        public GridMapListener(IModuleData moduleData, GridMapConfiguration? config, string topic)
+        public GridMapListener(GridMapConfiguration? config, string topic)
         {
-            ModuleData = moduleData ?? throw new System.ArgumentNullException(nameof(moduleData));
-
             FieldNames = fieldNames.AsReadOnly();
 
             node = FrameNode.Instantiate("[GridMapNode]");
@@ -187,7 +183,7 @@ namespace Iviz.Controllers
             if (IsInvalidSize(msg.Info.LengthX) ||
                 IsInvalidSize(msg.Info.LengthY) ||
                 IsInvalidSize(msg.Info.Resolution) ||
-                msg.Info.Pose.HasNaN())
+                msg.Info.Pose.IsInvalid())
             {
                 RosLogger.Debug("GridMapListener: Message info has NaN!");
                 return;
@@ -227,7 +223,7 @@ namespace Iviz.Controllers
             }
 
             node.AttachTo(msg.Info.Header);
-            link.transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
+            link.Transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
 
             resource.Set(width, height,
                 (float)msg.Info.LengthX, (float)msg.Info.LengthY,
@@ -244,8 +240,8 @@ namespace Iviz.Controllers
 
             resource.ReturnToPool();
 
-            link.DestroySelf();
-            node.DestroySelf();
+            link.Dispose();
+            node.Dispose();
         }
     }
 }

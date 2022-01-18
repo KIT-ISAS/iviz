@@ -76,7 +76,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal UpdateRobotRequest(ref ReadBuffer b)
+        public UpdateRobotRequest(ref ReadBuffer b)
         {
             Operation = b.Deserialize<int>();
             Id = b.DeserializeString();
@@ -142,7 +142,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal UpdateRobotResponse(ref ReadBuffer b)
+        public UpdateRobotResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

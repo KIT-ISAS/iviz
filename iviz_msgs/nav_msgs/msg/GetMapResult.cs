@@ -22,7 +22,7 @@ namespace Iviz.Msgs.NavMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMapResult(ref ReadBuffer b)
+        public GetMapResult(ref ReadBuffer b)
         {
             Map = new NavMsgs.OccupancyGrid(ref b);
         }

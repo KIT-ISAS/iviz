@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal KinematicSolverInfo(ref ReadBuffer b)
+        public KinematicSolverInfo(ref ReadBuffer b)
         {
             JointNames = b.DeserializeStringArray();
             Limits = b.DeserializeArray<MoveitMsgs.JointLimits>();

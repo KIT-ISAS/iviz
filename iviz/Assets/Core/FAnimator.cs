@@ -28,18 +28,17 @@ namespace Iviz.Core
                 TryCallDispose();
                 return;
             }
-
-            try
-            {
-                update(0);
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{this}: Error during Animator update", e);
-            }
-
-            GameThread.EveryFrame += OnFrameUpdate;
             
+            TryCallUpdate(0);
+
+            if (duration <= 0)
+            {
+                TryCallUpdate(1);
+                TryCallDispose();
+                return;
+            }
+            
+            GameThread.EveryFrame += OnFrameUpdate;
         }
 
         void OnFrameUpdate()
@@ -51,7 +50,7 @@ namespace Iviz.Core
                 return;
             }
 
-            float t = Mathf.Min((GameThread.GameTime - startTime) / duration, 1);
+            float t = Math.Min((GameThread.GameTime - startTime) / duration, 1);
 
             TryCallUpdate(t);
 
@@ -78,9 +77,14 @@ namespace Iviz.Core
 
         void TryCallDispose()
         {
+            if (dispose == null)
+            {
+                return;
+            }
+            
             try
             {
-                dispose?.Invoke();
+                dispose();
             }
             catch (Exception e)
             {
@@ -88,14 +92,14 @@ namespace Iviz.Core
             }            
         }
 
-        public static void Spawn(CancellationToken token, float duration, Action<float> update, Action? dispose = null)
+        public static void Spawn(CancellationToken token, float durationInSec, Action<float> update, Action? dispose = null)
         {
             if (update == null)
             {
                 throw new ArgumentNullException(nameof(update));
             }
 
-            _ = new FAnimator(update, dispose, token, duration); // won't be GC'd as long as it remains in EveryFrame
+            _ = new FAnimator(update, dispose, token, durationInSec); // won't be GC'd as long as it remains in EveryFrame
         }
 
         public static void Start(IAnimatable highlighter) =>

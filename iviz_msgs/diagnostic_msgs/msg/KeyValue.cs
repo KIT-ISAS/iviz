@@ -27,7 +27,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         }
         
         /// Constructor with buffer.
-        internal KeyValue(ref ReadBuffer b)
+        public KeyValue(ref ReadBuffer b)
         {
             Key = b.DeserializeString();
             Value = b.DeserializeString();

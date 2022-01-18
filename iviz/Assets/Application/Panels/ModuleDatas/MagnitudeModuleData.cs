@@ -12,14 +12,14 @@ using Newtonsoft.Json;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="MagnitudePanelContents"/> 
+    /// <see cref="MagnitudeModulePanel"/> 
     /// </summary>
     public sealed class MagnitudeModuleData : ListenerModuleData
     {
         readonly MagnitudeListener listener;
-        readonly MagnitudePanelContents panel;
+        readonly MagnitudeModulePanel panel;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         protected override ListenerController Listener => listener;
         public override ModuleType ModuleType => ModuleType.Magnitude;
         public override IConfiguration Configuration => listener.Config;
@@ -29,8 +29,8 @@ namespace Iviz.App
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
                 constructor.TryGetConfigurationType() ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<MagnitudePanelContents>(ModuleType.Magnitude);
-            listener = new MagnitudeListener(this, (MagnitudeConfiguration?)constructor.Configuration, Topic, Type);
+            panel = ModulePanelManager.GetPanelByResourceType<MagnitudeModulePanel>(ModuleType.Magnitude);
+            listener = new MagnitudeListener((MagnitudeConfiguration?)constructor.Configuration, Topic, TopicType);
             UpdateModuleButton();
         }
 

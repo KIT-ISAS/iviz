@@ -10,7 +10,7 @@ using Iviz.Tools;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="ConnectionDialogContents"/> 
+    /// <see cref="ConnectionDialogPanel"/> 
     /// </summary>
     public sealed class ConnectionDialogData : DialogData
     {
@@ -19,8 +19,8 @@ namespace Iviz.App
         static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
         static string DefaultMyId => "iviz_" + UnityEngine.Application.platform.ToString().ToLower();
 
-        readonly ConnectionDialogContents panel;
-        public override IDialogPanelContents Panel => panel;
+        readonly ConnectionDialogPanel panel;
+        public override IDialogPanel Panel => panel;
 
         readonly List<Uri> lastMasterUris = new();
 
@@ -78,11 +78,11 @@ namespace Iviz.App
 
         public ConnectionDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<ConnectionDialogContents>(DialogPanelType.Connection);
+            panel = DialogPanelManager.GetPanelByType<ConnectionDialogPanel>(DialogPanelType.Connection);
             RosLogger.LogInternal += OnLogInternal;
         }
 
-        public override void FinalizePanel()
+        public override void Dispose()
         {
             RosLogger.LogInternal -= OnLogInternal;
         }

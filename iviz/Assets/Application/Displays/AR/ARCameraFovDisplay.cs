@@ -1,4 +1,6 @@
-using System.Collections.Generic;
+#nullable enable
+
+using System;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -10,25 +12,26 @@ namespace Iviz.Displays
 {
     public sealed class ARCameraFovDisplay : MeshMarkerResource
     {
-        [SerializeField] LineResource resource = null;
-        [SerializeField] GameObject arCamera = null;
-        Transform arCameraTransform;
+        [SerializeField] LineResource? resource;
+        [SerializeField] GameObject? arCamera;
+        Transform? arCameraTransform;
         bool isSetup;
         bool arActive;
+
+        GameObject ArCamera => arCamera.AssertNotNull(nameof(arCamera));
+
+        LineResource Resource =>
+            resource != null ? resource : (resource = ResourcePool.RentDisplay<LineResource>(Transform));
+
+        Transform ArCameraTransform =>
+            arCameraTransform != null ? arCameraTransform : (arCameraTransform = ArCamera.transform);
 
         void Start()
         {
             Color = Color.yellow;
-
-            if (resource == null)
-            {
-                resource = ResourcePool.RentDisplay<LineResource>(Transform);
-            }
-
-            arCameraTransform = arCamera.transform;
             Transform.SetParentLocal(TfListener.OriginFrame.Transform);
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
-            gameObject.SetActive(!ARController.IsVisible);
+            gameObject.SetActive(ARController.Instance is not { Visible: true });
         }
 
         void OnARCameraViewChanged(bool newState)
@@ -39,27 +42,18 @@ namespace Iviz.Displays
 
         void Update()
         {
-            if (arCamera == null)
-            {
-                return;
-            }
-
             if (!isSetup)
             {
-                ARCameraManager manager = arCamera.GetComponent<ARCameraManager>();
+                var manager = ArCamera.GetComponent<ARCameraManager>();
                 if (manager.TryGetIntrinsics(out var intrinsics))
                 {
+                    // may take a few frames
                     ConstructCameraFrame(intrinsics);
                     isSetup = true;
                 }
             }
 
-            var pose = ARController.ARPoseToUnity(arCameraTransform.AsPose());
-            //var relativePose = TfListener.RelativePoseToFixedFrame(pose);
-            //Transform.SetParentLocal(TfListener.Instance.FixedFrame.Transform);
-
-            //var relativePose = TfListener.RelativePoseToOrigin(pose);
-            //Transform.SetParentLocal(TfListener.OriginFrame.Transform);
+            var pose = ARController.ARPoseToUnity(ArCameraTransform.AsPose());
             Transform.SetLocalPose(pose);
         }
 
@@ -72,13 +66,13 @@ namespace Iviz.Displays
             float minY = (0 - intrinsics.principalPoint.y) / intrinsics.focalLength.y * farClip;
             float maxY = (intrinsics.resolution.y - intrinsics.principalPoint.y) / intrinsics.focalLength.y * farClip;
 
-            Vector3 a = new Vector3(minX, minY, farClip);
-            Vector3 b = new Vector3(maxX, minY, farClip);
-            Vector3 c = new Vector3(maxX, maxY, farClip);
-            Vector3 d = new Vector3(minX, maxY, farClip);
-            Vector3 o = Vector3.zero;
+            var a = new Vector3(minX, minY, farClip);
+            var b = new Vector3(maxX, minY, farClip);
+            var c = new Vector3(maxX, maxY, farClip);
+            var d = new Vector3(minX, maxY, farClip);
+            var o = Vector3.zero;
 
-            var lines = new[]
+            ReadOnlySpan<LineWithColor> lines = stackalloc[]
             {
                 new LineWithColor(o, a),
                 new LineWithColor(o, b),
@@ -89,9 +83,9 @@ namespace Iviz.Displays
                 new LineWithColor(c, d),
                 new LineWithColor(d, a),
             };
-            resource.Set(lines);
-            resource.Tint = Color.yellow;
-            resource.ElementScale = 0.005f;
+            Resource.Set(lines);
+            Resource.Tint = Color.yellow;
+            Resource.ElementScale = 0.005f;
         }
 
         void OnDestroy()

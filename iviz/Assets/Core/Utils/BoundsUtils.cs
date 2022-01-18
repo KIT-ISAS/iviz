@@ -52,9 +52,9 @@ namespace Iviz.Core
 
             if (scale == Vector3.one)
             {
-                foreach (Vector3 point in CubePoints)
+                foreach (var point in CubePoints)
                 {
-                    Vector3 position = pose.rotation * point.Mult(boundsExtents);
+                    var position = pose.rotation * point.Mult(boundsExtents);
                     positionMin = Vector3.Min(positionMin, position);
                     positionMax = Vector3.Max(positionMax, position);
                 }
@@ -64,7 +64,7 @@ namespace Iviz.Core
                     positionMax - positionMin);
             }
 
-            foreach (Vector3 point in CubePoints)
+            foreach (var point in CubePoints)
             {
                 var localPoint = boundsCenter + point.Mult(boundsExtents);
                 var position = pose.rotation * localPoint.Mult(scale);
@@ -80,6 +80,7 @@ namespace Iviz.Core
             return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
         }
 
+        /*
         static Bounds TransformBoundWithInverse(this in Bounds bounds, Transform transform)
         {
             var (x, y, z) = transform.localScale;
@@ -87,6 +88,7 @@ namespace Iviz.Core
                 new Vector3(1f / x, 1f / y, 1f / z));
         }
 
+        
         public static Bounds? TransformBoundWithInverse(this in Bounds? bounds, Transform transform)
         {
             if (transform == null)
@@ -106,7 +108,7 @@ namespace Iviz.Core
 
             return bounds == null ? null : TransformBound(bounds.Value, transform);
         }
-
+        */
 
         public static Bounds? CombineBounds(this IEnumerable<Bounds?> enumOfBounds)
         {
@@ -140,7 +142,9 @@ namespace Iviz.Core
 
         public static Bounds? TransformBoundsUntil(Bounds? bounds, Transform transform, Transform endTransform)
         {
-            return bounds is { } notNullBounds ? TransformBoundsUntil(notNullBounds, transform, endTransform) : null;
+            return bounds is { } notNullBounds
+                ? TransformBoundsUntil(notNullBounds, transform, endTransform)
+                : null;
         }
 
         static Bounds TransformBoundsUntil(Bounds bounds, Transform transform, Transform endTransform)
@@ -162,7 +166,8 @@ namespace Iviz.Core
             return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
         }
 
-        public static bool TryIntersectRay(this Collider collider, Ray pointerRay, out Vector3 intersection, out Vector3 normal)
+        public static bool TryIntersectRay(this Collider collider, Ray pointerRay, out Vector3 intersection,
+            out Vector3 normal)
         {
             if (collider.Raycast(pointerRay, out var hitInfo, 100))
             {

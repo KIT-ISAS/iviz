@@ -1,22 +1,19 @@
 #nullable enable
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.App.ARDialogs;
-using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Displays.ARDialogs;
 using Iviz.Msgs;
-using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
 using UnityEngine;
-using Quaternion = Iviz.Msgs.GeometryMsgs.Quaternion;
+using Widget = Iviz.Msgs.IvizMsgs.Widget;
 
 namespace Iviz.Controllers
 {
@@ -26,32 +23,57 @@ namespace Iviz.Controllers
         public static void DisposeDefaultHandler() => defaultHandler?.Dispose();
 
         public static GuiWidgetListener DefaultHandler =>
-            defaultHandler ??= new GuiWidgetListener(null, null, "~dialogs");
+            defaultHandler ??= new GuiWidgetListener(null, "~dialogs");
 
 
-        readonly IModuleData? moduleData;
         readonly GuiWidgetConfiguration config = new();
-        readonly Dictionary<string, GuiObject> widgets = new();
-        readonly Dictionary<string, GuiObject> dialogs = new();
+        readonly Dictionary<string, GuiWidgetObject> widgets = new();
+        readonly Dictionary<string, GuiWidgetObject> dialogs = new();
         uint feedbackSeq;
 
-        public override TfFrame Frame => TfListener.Instance.FixedFrame;
+        public override TfFrame Frame => TfListener.FixedFrame;
         public Sender<Feedback>? FeedbackSender { get; }
-        public bool Interactable { get; set; }
         public override IListener Listener { get; }
-
-        public override IModuleData ModuleData =>
-            moduleData ?? throw new InvalidOperationException("Listener has no module data");
 
         public GuiWidgetConfiguration Config
         {
             get => config;
-            set { config.Topic = value.Topic; }
+            private set
+            {
+                config.Topic = value.Topic;
+                Visible = value.Visible;
+                Interactable = value.Interactable;
+            }
         }
 
-        public GuiWidgetListener(IModuleData? moduleData, GuiWidgetConfiguration? configuration, string topic)
+        public override bool Visible
         {
-            this.moduleData = moduleData;
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+                foreach (var widget in widgets.Values)
+                {
+                    widget.Visible = value;
+                }
+            }
+        }
+
+        public bool Interactable
+        {
+            get => config.Interactable;
+            set
+            {
+                config.Interactable = value;
+                foreach (var widget in widgets.Values)
+                {
+                    widget.Interactable = value;
+                }
+            }
+        }
+
+        public GuiWidgetListener(GuiWidgetConfiguration? configuration, string topic)
+        {
             Config = configuration ?? new GuiWidgetConfiguration
             {
                 Topic = topic
@@ -59,11 +81,11 @@ namespace Iviz.Controllers
 
             GameThread.EveryFrame += CheckDeadDialogs;
 
-            Listener = new Listener<DialogArray>(config.Topic, Handler) { MaxQueueSize = 50 };
+            Listener = new Listener<WidgetArray>(config.Topic, Handler) { MaxQueueSize = 50 };
             FeedbackSender = new Sender<Feedback>($"{config.Topic}/feedback");
         }
 
-        void Handler(DialogArray msg)
+        void Handler(WidgetArray msg)
         {
             foreach (var dialog in msg.Dialogs)
             {
@@ -78,7 +100,7 @@ namespace Iviz.Controllers
 
         void Handler(Widget msg)
         {
-            switch (msg.Action)
+            switch ((ActionType)msg.Action)
             {
                 case ActionType.Remove:
                 {
@@ -110,7 +132,7 @@ namespace Iviz.Controllers
                 oldGuiObject.Dispose();
             }
 
-            var info = msg.Type switch
+            var info = (WidgetType)msg.Type switch
             {
                 WidgetType.RotationDisc => Resource.Displays.RotationDisc,
                 WidgetType.SpringDisc => Resource.Displays.SpringDisc,
@@ -150,31 +172,37 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
 }
 */
 
-            var guiObject = new GuiObject(msg, info);
+            var guiObject = new GuiWidgetObject(msg, info) { Interactable = Interactable };
 
-            switch (msg.Type)
+            switch ((WidgetType)msg.Type)
             {
                 case WidgetType.RotationDisc:
-                    guiObject.Get<RotationDisc>().Moved += angle => OnDiscRotated(guiObject, angle);
+                    guiObject.As<RotationDisc>().Moved += angle => OnDiscRotated(guiObject, angle);
                     break;
                 case WidgetType.SpringDisc:
+                    guiObject.As<SpringDisc>().Moved +=
+                        direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
+                    break;
                 case WidgetType.SpringDisc3D:
-                    guiObject.Get<SpringDisc>().Moved += direction => OnDiscMoved(guiObject, direction);
+                    guiObject.As<SpringDisc3D>().Moved +=
+                        direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
                     break;
                 case WidgetType.TrajectoryDisc:
-                    guiObject.Get<TrajectoryDisc>().Moved += (direction, period) =>
+                    guiObject.As<TrajectoryDisc>().Moved += (direction, period) =>
                         OnTrajectoryDiscMoved(guiObject, direction, period);
                     break;
                 case WidgetType.TargetArea:
-                    var targetWidget = guiObject.Get<TargetWidget>();
+                    var targetWidget = guiObject.As<TargetWidget>();
                     targetWidget.Moved += (scale, position) => OnTargetAreaMoved(guiObject, scale, position);
                     targetWidget.Cancelled += () => OnTargetAreaCanceled(guiObject);
                     break;
                 case WidgetType.PositionDisc3D:
-                    guiObject.Get<PositionDisc3D>().Moved += direction => OnDiscMoved(guiObject, direction);
+                    guiObject.As<PositionDisc3D>().Moved +=
+                        direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
                     break;
                 case WidgetType.PositionDisc:
-                    guiObject.Get<PositionDisc>().Moved += direction => OnDiscMoved(guiObject, direction);
+                    guiObject.As<PositionDisc>().Moved +=
+                        direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
                     break;
                 /*
                 case WidgetType.Tooltip:
@@ -189,7 +217,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             }
 
             guiObject.Transform.SetLocalPose(msg.Pose.Ros2Unity());
-            guiObject.Transform.localScale = Vector3.one * (float)msg.Scale;
+            guiObject.Scale = (float)msg.Scale;
             widgets[guiObject.Id] = guiObject;
         }
 
@@ -197,8 +225,8 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
         public ARDialog? AddDialog(Dialog msg)
         {
             Handler(msg);
-            return msg.Action == ActionType.Add
-                ? dialogs[msg.Id].Get<ARDialog>()
+            return (ActionType)msg.Action == ActionType.Add
+                ? dialogs[msg.Id].As<ARDialog>()
                 : null;
         }
 
@@ -313,13 +341,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             DestroyAll(widgets);
         }
 
-        public override bool Visible
-        {
-            get => false;
-            set { }
-        }
-
-        static void DestroyAll(Dictionary<string, GuiObject> dict)
+        static void DestroyAll(Dictionary<string, GuiWidgetObject> dict)
         {
             foreach (var guiObject in dict.Values)
             {
@@ -348,7 +370,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             {
                 VizId = ConnectionManager.MyId ?? "",
                 Id = dialog.Id,
-                FeedbackType = FeedbackType.ButtonClick,
+                Type = (byte)FeedbackType.ButtonClick,
                 EntryId = buttonId,
             });
 
@@ -361,7 +383,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             {
                 VizId = ConnectionManager.MyId ?? "",
                 Id = dialog.Id,
-                FeedbackType = FeedbackType.MenuEntryClick,
+                Type = (byte)FeedbackType.MenuEntryClick,
                 EntryId = buttonId,
             });
 
@@ -376,49 +398,50 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             }
         }
 
-        void OnDialogExpired(GuiObject dialog)
+        void OnDialogExpired(GuiWidgetObject dialog)
         {
             FeedbackSender?.Publish(new Feedback
             {
                 Header = (feedbackSeq++, dialog.ParentId),
                 VizId = ConnectionManager.MyId ?? "",
                 Id = dialog.Id,
-                FeedbackType = FeedbackType.Expired,
+                Type = (byte)FeedbackType.Expired,
             });
         }
 
-        void OnDiscRotated(GuiObject widget, float angleInDeg)
+        void OnDiscRotated(GuiWidgetObject widget, float angleInDeg)
         {
             FeedbackSender?.Publish(new Feedback
             {
                 Header = (feedbackSeq++, widget.ParentId),
                 VizId = ConnectionManager.MyId ?? "",
                 Id = widget.Id,
-                FeedbackType = FeedbackType.OrientationChanged,
-                Orientation = Quaternion.AngleAxis(angleInDeg * Mathf.Deg2Rad, Msgs.GeometryMsgs.Vector3.UnitZ)
+                Type = (byte)FeedbackType.OrientationChanged,
+                Orientation = Msgs.GeometryMsgs.Quaternion.AngleAxis(angleInDeg * Mathf.Deg2Rad,
+                    Msgs.GeometryMsgs.Vector3.UnitZ)
             });
         }
 
-        void OnDiscMoved(GuiObject widget, in Vector3 direction)
+        void OnDiscMoved(GuiWidgetObject widget, in Vector3 direction)
         {
             FeedbackSender?.Publish(new Feedback
             {
                 Header = (feedbackSeq++, widget.ParentId),
                 VizId = ConnectionManager.MyId ?? "",
                 Id = widget.Id,
-                FeedbackType = FeedbackType.PositionChanged,
+                Type = (byte)FeedbackType.PositionChanged,
                 Position = direction.Unity2RosPoint()
             });
         }
 
-        void OnTrajectoryDiscMoved(GuiObject widget, IReadOnlyList<Vector3> points, float periodInSec)
+        void OnTrajectoryDiscMoved(GuiWidgetObject widget, IReadOnlyList<Vector3> points, float periodInSec)
         {
             FeedbackSender?.Publish(new Feedback
             {
                 Header = (feedbackSeq++, widget.ParentId),
                 VizId = ConnectionManager.MyId ?? "",
                 Id = widget.Id,
-                FeedbackType = FeedbackType.TrajectoryChanged,
+                Type = (byte)FeedbackType.TrajectoryChanged,
                 Trajectory = new Trajectory
                 {
                     Poses = points
@@ -431,26 +454,26 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             });
         }
 
-        void OnTargetAreaMoved(GuiObject widget, in Vector2 scale, Vector3 position)
+        void OnTargetAreaMoved(GuiWidgetObject widget, in Vector2 scale, Vector3 position)
         {
             FeedbackSender?.Publish(new Feedback
             {
                 Header = (feedbackSeq++, widget.ParentId),
                 VizId = ConnectionManager.MyId ?? "",
                 Id = widget.Id,
-                FeedbackType = FeedbackType.ScaleChanged,
+                Type = (byte)FeedbackType.ScaleChanged,
                 Scale = new Vector3(scale.x, 0, scale.y).Unity2RosVector3(),
                 Position = position.Unity2RosPoint()
             });
         }
 
-        void OnTargetAreaCanceled(GuiObject widget)
+        void OnTargetAreaCanceled(GuiWidgetObject widget)
         {
             FeedbackSender?.Publish(new Feedback
             {
                 VizId = ConnectionManager.MyId ?? "",
                 Id = widget.Id,
-                FeedbackType = FeedbackType.ButtonClick,
+                Type = (byte)FeedbackType.ButtonClick,
                 EntryId = -1,
             });
         }
@@ -474,71 +497,36 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
         {
             defaultHandler = null;
         }
+    }
 
 
-        // ----------------------------------------------------------------------------------------
+    public enum ActionType : byte
+    {
+        Add = Widget.ACTION_ADD,
+        Remove = Widget.ACTION_REMOVE,
+        RemoveAll = Widget.ACTION_REMOVEALL
+    }
 
-        sealed class GuiObject
-        {
-            readonly FrameNode node;
-            readonly Info<GameObject> info;
-            readonly IDisplay display;
+    public enum WidgetType : byte
+    {
+        RotationDisc = Widget.TYPE_ROTATIONDISC,
+        SpringDisc = Widget.TYPE_SPRINGDISC,
+        SpringDisc3D = Widget.TYPE_SPRINGDISC3D,
+        TrajectoryDisc = Widget.TYPE_TRAJECTORYDISC,
+        Tooltip = Widget.TYPE_TOOLTIP,
+        TargetArea = Widget.TYPE_TARGETAREA,
+        PositionDisc = Widget.TYPE_POSITIONDISC,
+        PositionDisc3D = Widget.TYPE_POSITIONDISC3D,
+    }
 
-            public Transform Transform => node.Transform;
-            public string ParentId => node.Parent != null ? node.Parent.Id : TfListener.DefaultFrame.Id;
-            public string Id { get; }
-            public DateTime ExpirationTime { get; }
-
-            public GuiObject(Widget msg, Info<GameObject> info)
-            {
-                this.info = info;
-                node = FrameNode.Instantiate("Widget Node");
-                node.AttachTo(msg.Header.FrameId);
-                Id = msg.Id;
-
-                display = ResourcePool.Rent(info, node.Transform).GetComponent<IDisplay>();
-                if (display is IWidgetWithCaption withCaption && msg.Caption.Length != 0)
-                {
-                    withCaption.Caption = msg.Caption;
-                }
-
-                if (display is IWidgetWithColor withColor)
-                {
-                    if (msg.MainColor.A != 0)
-                    {
-                        withColor.Color = msg.MainColor.ToUnityColor();
-                    }
-
-                    if (msg.SecondaryColor.A != 0)
-                    {
-                        withColor.SecondaryColor = msg.SecondaryColor.ToUnityColor();
-                    }
-                }
-
-                ExpirationTime = DateTime.MaxValue;
-            }
-
-            GuiObject(GuiObject source)
-            {
-                node = source.node;
-                info = source.info;
-                display = source.display;
-                Id = source.Id;
-                ExpirationTime = DateTime.MinValue;
-            }
-
-            public T Get<T>() where T : IDisplay
-            {
-                return (T)display;
-            }
-
-            public void Dispose()
-            {
-                display.ReturnToPool(info);
-                node.DestroySelf();
-            }
-
-            public GuiObject AsExpired() => new(this);
-        }
+    public enum FeedbackType : byte
+    {
+        Expired = Feedback.TYPE_EXPIRED,
+        ButtonClick = Feedback.TYPE_BUTTON_CLICK,
+        MenuEntryClick = Feedback.TYPE_MENUENTRY_CLICK,
+        PositionChanged = Feedback.TYPE_POSITION_CHANGED,
+        OrientationChanged = Feedback.TYPE_ORIENTATION_CHANGED,
+        ScaleChanged = Feedback.TYPE_SCALE_CHANGED,
+        TrajectoryChanged = Feedback.TYPE_TRAJECTORY_CHANGED,
     }
 }

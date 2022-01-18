@@ -54,7 +54,7 @@ namespace Iviz.Displays
             var (start, tangent) = pointerRay;
             float distance = Vector3.Distance(target, start);
 
-            if (Mathf.Approximately(distance, 0))
+            if (distance.ApproximatelyZero())
             {
                 Resource.Reset();
                 return;
@@ -84,19 +84,19 @@ namespace Iviz.Displays
                 ref var l0 = ref line.c0;
                 ref var l1 = ref line.c1;
 
-                float3 p = c0;
+                var p = c0;
 
                 float colorA = colorBase.a;
 
                 Color32 color = colorBase;
                 color.a = 0;
 
-                l0.w = PointWithColor.RecastToFloat(color);
+                l0.w = UnityUtils.AsFloat(color);
 
                 foreach (int i in ..numSegments)
                 {
                     float t = (i + 1f) / numSegments;
-                    float3 q = Bezier(t, f);
+                    var q = Bezier(t, f);
 
                     var delta = q - p;
                     (l0.x, l0.y, l0.z) = p + 0.25f * delta;
@@ -104,7 +104,7 @@ namespace Iviz.Displays
 
                     color.a = (byte)(AlphaFromDistance(q, c0, c3) * colorA * 255);
 
-                    l1.w = PointWithColor.RecastToFloat(color);
+                    l1.w = UnityUtils.AsFloat(color);
 
                     array.Add(line);
 

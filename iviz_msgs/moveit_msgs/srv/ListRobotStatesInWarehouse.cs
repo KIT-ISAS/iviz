@@ -71,7 +71,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ListRobotStatesInWarehouseRequest(ref ReadBuffer b)
+        public ListRobotStatesInWarehouseRequest(ref ReadBuffer b)
         {
             Regex = b.DeserializeString();
             Robot = b.DeserializeString();
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ListRobotStatesInWarehouseResponse(ref ReadBuffer b)
+        public ListRobotStatesInWarehouseResponse(ref ReadBuffer b)
         {
             States = b.DeserializeStringArray();
         }

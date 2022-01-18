@@ -34,7 +34,7 @@ namespace Iviz.Common
 
         public Intrinsic Scale(float f) => new(Fx * f, Cx * f, Fy * f, Cy * f);
 
-        public Vector3f Unproject(in Vector2f v, float z) => new((v.X - Cx) / Fx * z, (v.Y - Cy) / Fy * z, z);
+        public Vector3f Unproject(double x, double y) => new(((float)x - Cx) / Fx, ((float)y - Cy) / Fy, 1);
 
         public double[] ToArray() => new double[] { Fx, 0, Cx, 0, Fy, Cy, 0, 0, 1 };
 
@@ -69,6 +69,11 @@ namespace Iviz.Common
         public bool Equals(double[] array) =>
             (Fx, Cx, Fy, Cy) == (array[0], array[2], array[4], array[5]);
 
+        public bool IsValid => float.IsFinite(Fx) &&
+                               float.IsFinite(Fy) &&
+                               float.IsFinite(Cx) &&
+                               float.IsFinite(Cy) &&
+                               Fx != 0 && Fy != 0;
         public override int GetHashCode() => (Fx, Cx, Fy, Cy).GetHashCode();
     }
 }

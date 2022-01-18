@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal MoveGroupGoal(ref ReadBuffer b)
+        public MoveGroupGoal(ref ReadBuffer b)
         {
             Request = new MotionPlanRequest(ref b);
             PlanningOptions = new PlanningOptions(ref b);

@@ -8,8 +8,9 @@ namespace Iviz.Common.Configurations
     public sealed class GuiWidgetConfiguration : IConfigurationWithTopic
     {
         [DataMember] public string Id { get; set; } = System.Guid.NewGuid().ToString();
-        [DataMember] public ModuleType ModuleType => ModuleType.GuiDialog;
+        [DataMember] public ModuleType ModuleType => ModuleType.GuiWidget;
         [DataMember] public bool Visible { get; set; } = true;
+        [DataMember] public bool Interactable { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
     }
 }

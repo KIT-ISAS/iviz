@@ -60,7 +60,7 @@ namespace Iviz.App.ARDialogs
             {
                 if (node == null)
                 {
-                    node = FrameNode.Instantiate("ARTfFrame Node");
+                    node = new FrameNode("ARTfFrame Node");
                     Transform.parent = node.Transform;
                 }
 
@@ -78,7 +78,7 @@ namespace Iviz.App.ARDialogs
             const float maxDistance = 0.5f;
             const float minDistance = 0.3f;
 
-            if (!ARController.IsVisible)
+            if (ARController.Instance is not { Visible: true })
             {
                 axisFrame.Visible = true;
                 cylinder.Visible = true;
@@ -88,7 +88,7 @@ namespace Iviz.App.ARDialogs
             else
             {
                 float distance = (Transform.position - Settings.MainCameraTransform.position).magnitude;
-                float alpha = Mathf.Max(Mathf.Min(1 - (distance - minDistance) / (maxDistance - minDistance), 1), 0);
+                float alpha = Mathf.Clamp01(1 - (distance - minDistance) / (maxDistance - minDistance));
 
                 if (alpha == 0)
                 {
@@ -140,10 +140,7 @@ namespace Iviz.App.ARDialogs
         
         void OnDestroy()
         {
-            if (node != null)
-            {
-                node.DestroySelf();
-            }
+            node?.Dispose();
         }
     }
 }

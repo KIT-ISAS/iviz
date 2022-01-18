@@ -35,7 +35,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 
     int numDropped;
     long numSent;
-        
+
     byte msgId;
 
     bool KeepRunning => !runningTs.IsCancellationRequested;
@@ -123,13 +123,13 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             $"md5sum={topicInfo.Md5Sum}",
             $"type={topicInfo.Type}",
             $"callerid={topicInfo.CallerId}",
-            latchedMsg.HasValue ? "latching=1" : "latching=0",
+            latchedMsg.hasValue ? "latching=1" : "latching=0",
             $"message_definition={topicInfo.MessageDependencies}",
         };
 
         responseHeader = StreamUtils.WriteHeaderToArray(responseHeaderContents);
 
-        task = TaskUtils.StartLongTask(async () => await StartSession(latchedMsg).AwaitNoThrow(this));
+        task = TaskUtils.Run(async () => await StartSession(latchedMsg).AwaitNoThrow(this));
     }
 
     async ValueTask StartSession(NullableMessage<T> latchedMsg)
@@ -172,9 +172,9 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 
     async ValueTask ProcessLoop(NullableMessage<T> latchedMsg)
     {
-        if (latchedMsg.HasValue)
+        if (latchedMsg.hasValue)
         {
-            Publish(latchedMsg.Value);
+            Publish(latchedMsg.value!);
         }
 
         using var writeBuffer = new Rent<byte>(MaxPacketSize);
@@ -183,7 +183,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             writeBuffer[i] = 0;
         }
 
-        _ = Task.Run(KeepAliveMessages);
+        _ = TaskUtils.Run(KeepAliveMessages);
 
         while (KeepRunning)
         {
@@ -329,17 +329,14 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             // 2 bytes block id (total blocks)
             array[6] = (byte)blockNr;
             array[7] = (byte)(blockNr >> 8);
-            // no message length here! it was written in the first datagram
+            // message length ignored here! it was written in the first datagram
             // total 8
         }
 
-        ValueTask<int> WriteChunkAsync(int toWrite)
-        {
-            return UdpClient.WriteChunkAsync(array, 0, toWrite, runningTs.Token);
-        }
+        ValueTask<int> WriteChunkAsync(int toWrite) => UdpClient.WriteChunkAsync(array, 0, toWrite, runningTs.Token);
     }
-        
-    async ValueTask KeepAliveMessages()
+
+    async Task KeepAliveMessages()
     {
         while (KeepRunning)
         {
@@ -391,7 +388,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
     public ValueTask PublishAndWaitAsync(in T message, CancellationToken token)
     {
         return !IsAlive
-            ? ValueTask2.FromException(new InvalidOperationException("Sender has been disposed."))
+            ? new ValueTask(Task.FromException(new ObjectDisposedException("this")))
             : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
     }
 

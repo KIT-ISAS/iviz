@@ -91,7 +91,7 @@ internal sealed class RosNodeServer
 
     public void Start()
     {
-        task = TaskUtils.StartLongTask(async() => await Run().AwaitNoThrow(this));
+        task = TaskUtils.Run(async() => await Run().AwaitNoThrow(this));
     }
 
     public override string ToString()

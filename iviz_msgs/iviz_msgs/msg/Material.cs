@@ -45,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Material(ref ReadBuffer b)
+        public Material(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             b.Deserialize(out Ambient);

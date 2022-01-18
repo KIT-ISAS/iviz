@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetGeometryRequest(ref ReadBuffer b)
+        public GetGeometryRequest(ref ReadBuffer b)
         {
             Uuid = b.DeserializeString();
         }
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
         
         /// Constructor with buffer.
-        internal GetGeometryResponse(ref ReadBuffer b)
+        public GetGeometryResponse(ref ReadBuffer b)
         {
             MeshGeometryStamped = new MeshMsgs.MeshGeometryStamped(ref b);
         }

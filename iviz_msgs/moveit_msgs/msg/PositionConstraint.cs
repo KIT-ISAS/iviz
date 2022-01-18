@@ -36,7 +36,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal PositionConstraint(ref ReadBuffer b)
+        public PositionConstraint(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             LinkName = b.DeserializeString();

@@ -23,7 +23,7 @@ namespace Iviz.Msgs.ShapeMsgs
         }
         
         /// Constructor with buffer.
-        internal MeshTriangle(ref ReadBuffer b)
+        public MeshTriangle(ref ReadBuffer b)
         {
             VertexIndices = b.DeserializeStructArray<uint>(3);
         }

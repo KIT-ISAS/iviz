@@ -10,16 +10,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Controllers.XR;
 using Iviz.Core;
-using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -30,7 +28,7 @@ namespace Iviz.App
 {
     public sealed class ModuleListPanel : MonoBehaviour
     {
-        public const int ModuleDataCaptionWidth = 200;
+        const int ModuleDataCaptionWidth = 200;
 
         static ModuleListPanel? instance;
 
@@ -58,7 +56,7 @@ namespace Iviz.App
         [SerializeField] UpperCanvasPanel? upperCanvasPanel;
         [SerializeField] BottomCanvasPanel? bottomCanvasPanel;
         [SerializeField] ARSidePanel? arSidePanel;
-        [SerializeField] DataPanelManager? dataPanelManager;
+        [SerializeField] ModulePanelManager? dataPanelManager;
         [SerializeField] DialogPanelManager? dialogPanelManager;
         [SerializeField] ARJoystick? arJoystick;
         [SerializeField] TwistJoystick? twistJoystick;
@@ -74,6 +72,8 @@ namespace Iviz.App
         readonly List<ModuleData> moduleDatas = new();
         readonly HashSet<string> topicsWithModule = new();
         readonly HashSet<ImageDialogData> imageDatas = new();
+        readonly TfPublisher tfPublisher = new();
+        readonly ConnectionManager connectionManager = new();
 
         int frameCounter;
         bool allGuiVisible = true;
@@ -83,6 +83,8 @@ namespace Iviz.App
         ModuleListButtons? buttons;
         DialogManager? dialogs;
         IMenuDialogContents? menuDialog;
+        CameraPanelData? cameraPanelData;
+
 
         UpperCanvasPanel UpperCanvas => upperCanvasPanel.AssertNotNull(nameof(upperCanvasPanel));
         BottomCanvasPanel BottomCanvas => bottomCanvasPanel.AssertNotNull(nameof(bottomCanvasPanel));
@@ -90,6 +92,9 @@ namespace Iviz.App
         Button LeftHideGuiButton => AnchorCanvasPanel.LeftHideGui;
         Button MiddleHideGuiButton => middleHideGuiButton.AssertNotNull(nameof(middleHideGuiButton));
         AnchorToggleButton InteractableButton => AnchorCanvasPanel.Interact;
+        GameObject ModuleListCanvas => moduleListCanvas.AssertNotNull(nameof(moduleListCanvas));
+        GameObject DataPanelCanvas => dataPanelCanvas.AssertNotNull(nameof(dataPanelCanvas));
+
 
         ModuleListButtons Buttons =>
             buttons ??= new ModuleListButtons(contentObject.AssertNotNull(nameof(contentObject)));
@@ -97,14 +102,20 @@ namespace Iviz.App
         DialogManager Dialogs => dialogs ??= new DialogManager();
         TfModuleData TfData => (TfModuleData)moduleDatas[0];
         Canvas RootCanvas => rootCanvas.AssertNotNull(nameof(rootCanvas));
+        static RoslibConnection Connection => ConnectionManager.Connection;
+
         public AnchorCanvasPanel AnchorCanvasPanel => anchorCanvasPanel.AssertNotNull(nameof(anchorCanvasPanel));
         public Button UnlockButton => AnchorCanvasPanel.Unlock;
-        public DataPanelManager DataPanelManager => dataPanelManager.AssertNotNull(nameof(dataPanelManager));
+        public ModulePanelManager ModulePanelManager => dataPanelManager.AssertNotNull(nameof(dataPanelManager));
         public DialogPanelManager DialogPanelManager => dialogPanelManager.AssertNotNull(nameof(dialogPanelManager));
         public TwistJoystick TwistJoystick => twistJoystick.AssertNotNull(nameof(twistJoystick));
         public ARJoystick ARJoystick => arJoystick.AssertNotNull(nameof(arJoystick));
         public ARSidePanel ARSidePanel => arSidePanel.AssertNotNull(nameof(arSidePanel));
-        public XRContents XRController => xrController.AssertNotNull(nameof(xrController));
+
+        public XRContents XRController => xrController != null
+            ? xrController
+            : throw new InvalidOperationException("Tried to access XRController, but the scene has not set any!");
+
         public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
@@ -115,8 +126,8 @@ namespace Iviz.App
             {
                 allGuiVisible = value;
                 BottomHideGuiButton.State = value;
-                moduleListCanvas.SetActive(value);
-                dataPanelCanvas.SetActive(value);
+                ModuleListCanvas.SetActive(value);
+                DataPanelCanvas.SetActive(value);
                 DialogPanelManager.Active = value;
                 ARSidePanel.Visible = !value;
             }
@@ -145,14 +156,13 @@ namespace Iviz.App
         {
             set
             {
-                ConnectionManager.Connection.KeepReconnecting = value;
+                Connection.KeepReconnecting = value;
                 UpperCanvas.Status.enabled = value;
             }
         }
-        
+
         public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
-        public int NumTfFramesPublished => Dialogs.TfPublisherData.NumFrames;
-        
+
         public ModuleListPanel()
         {
             ModuleDatas = moduleDatas.AsReadOnly();
@@ -165,19 +175,39 @@ namespace Iviz.App
             ARController.ClearResources();
         }
 
-        void OnDestroy()
+        void OnApplicationQuit()
         {
-            instance = null;
+            Dispose();
+        }
+
+        void Dispose()
+        {
             GameThread.LateEverySecond -= UpdateFpsStats;
             GameThread.EveryFrame -= UpdateFpsCounter;
-            GameThread.EveryFastTick -= UpdateCameraStats;
+            GameThread.EveryTenthSecond -= UpdateCameraStats;
+
+            foreach (var moduleData in moduleDatas)
+            {
+                moduleData.Dispose();
+            }
 
             foreach (var dialogData in Dialogs.DialogDatas)
             {
-                dialogData.FinalizePanel();
+                dialogData.Dispose();
             }
-            
+
+            foreach (var imageData in imageDatas)
+            {
+                imageData.Dispose();
+            }
+
+            tfPublisher.Dispose();
+            cameraPanelData?.Dispose();
+            connectionManager.Dispose();
+
             GuiWidgetListener.DisposeDefaultHandler();
+
+            instance = null;
         }
 
         static string MasterUriToString(Uri? uri) =>
@@ -192,7 +222,7 @@ namespace Iviz.App
             RosLogger.Internal("This is the log for connection messages. " +
                                "For general ROS log messages check the Log dialog.");
 
-            CreateModule(ModuleType.TF, TfListener.DefaultTopic);
+            CreateModule(ModuleType.TF);
 
             if (!Settings.IsHololens)
             {
@@ -210,7 +240,7 @@ namespace Iviz.App
 
             ARController.ARStateChanged += OnARStateChanged;
 
-            BottomHideGuiButton.Visible = !Settings.IsMobile;
+            BottomHideGuiButton.Visible = !Settings.IsXR;
             MiddleHideGuiButton.gameObject.SetActive(Settings.IsMobile && !Settings.IsXR);
             UpdateLeftHideVisible();
 
@@ -233,14 +263,14 @@ namespace Iviz.App
             UpperCanvas.MasterUriStr.Text = MasterUriToString(connectionData.MasterUri);
             UpperCanvas.MasterUriButton.Clicked += connectionData.Show;
 
-            ConnectionManager.Connection.MasterUri = connectionData.MasterUri;
-            ConnectionManager.Connection.MyUri = connectionData.MyUri;
-            ConnectionManager.Connection.MyId = connectionData.MyId;
+            Connection.MasterUri = connectionData.MasterUri;
+            Connection.MyUri = connectionData.MyUri;
+            Connection.MyId = connectionData.MyId;
             KeepReconnecting = false;
 
             connectionData.MasterUriChanged += uri =>
             {
-                ConnectionManager.Connection.MasterUri = uri;
+                Connection.MasterUri = uri;
                 KeepReconnecting = false;
                 if (uri == null)
                 {
@@ -269,13 +299,13 @@ namespace Iviz.App
                     return;
                 }
 
-                ConnectionManager.Connection.MyId = id;
+                Connection.MyId = id;
                 KeepReconnecting = false;
                 RosLogger.Internal($"Changing my ROS id to '{id}'");
             };
             connectionData.MyUriChanged += uri =>
             {
-                ConnectionManager.Connection.MyUri = uri;
+                Connection.MyUri = uri;
                 KeepReconnecting = false;
                 RosLogger.Internal(uri == null
                     ? "<b>Error:</b> Failed to set caller uri. Reason: Uri is not valid."
@@ -290,23 +320,29 @@ namespace Iviz.App
                         : "Already disconnected."
                 );
                 KeepReconnecting = false;
-                ConnectionManager.Connection.Disconnect();
+                Connection.Disconnect();
             };
             UpperCanvas.ConnectButton.Clicked += () =>
             {
                 RosLogger.Internal(
                     ConnectionManager.IsConnected ? "Reconnection requested." : "Connection requested."
                 );
-                ConnectionManager.Connection.Disconnect();
+                Connection.Disconnect();
                 KeepReconnecting = true;
             };
 
-            connectionData.MasterActiveChanged += _ => ConnectionManager.Connection.Disconnect();
-            ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
-            ConnectionManager.Connection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
+            BottomCanvas.CameraButtonClicked += () =>
+            {
+                cameraPanelData ??= new CameraPanelData();
+                cameraPanelData.ToggleShowPanel();
+            };
+
+            connectionData.MasterActiveChanged += _ => Connection.Disconnect();
+            RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
+            RosConnection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
-            GameThread.EveryFastTick += UpdateCameraStats;
+            GameThread.EveryTenthSecond += UpdateCameraStats;
             UpdateFpsStats();
 
             ServiceFunctions.Start();
@@ -339,6 +375,12 @@ namespace Iviz.App
 
             InitFinished?.Invoke();
             InitFinished = null;
+
+            if (Connection.MasterUri != null && Connection.MyUri != null && Connection.MyId != null)
+            {
+                RosLogger.Internal("Trying to connect to previous ROS server.");
+                Connection.TryOnceToConnect();
+            }
         }
 
         public static void CallAfterInitialized(Action action)
@@ -355,13 +397,13 @@ namespace Iviz.App
 
         void OnToggleARClicked()
         {
-            if (ARController.Instance == null)
+            if (ARController.Instance is not { } arController)
             {
                 CreateModule(ModuleType.AugmentedReality);
             }
             else
             {
-                ARController.Instance.Visible = !ARController.Instance.Visible;
+                arController.Visible = !arController.Visible;
             }
         }
 
@@ -377,9 +419,9 @@ namespace Iviz.App
 
         void OnStartRecordBag()
         {
-            if (ConnectionManager.Connection.BagListener != null)
+            if (Connection.BagListener != null)
             {
-                ConnectionManager.Connection.BagListener = null;
+                Connection.BagListener = null;
                 UpperCanvas.RecordBagImage.color = Color.black;
                 UpperCanvas.RecordBagText.text = "Rec Bag";
             }
@@ -387,7 +429,7 @@ namespace Iviz.App
             {
                 string filename = $"iviz-{GameThread.Now:yyyy-MM-dd-HH-mm-ss}.bag";
                 Directory.CreateDirectory(Settings.BagsFolder);
-                ConnectionManager.Connection.BagListener = new BagListener($"{Settings.BagsFolder}/{filename}");
+                Connection.BagListener = new BagListener($"{Settings.BagsFolder}/{filename}");
                 UpperCanvas.RecordBagImage.color = Color.red;
                 UpperCanvas.RecordBagText.text = "0 MB";
             }
@@ -397,9 +439,9 @@ namespace Iviz.App
         {
             UpperCanvas.Status.rectTransform.localRotation = Quaternion.identity;
 
-            if (ConnectionManager.Connection.MasterUri == null ||
-                ConnectionManager.Connection.MyUri == null ||
-                ConnectionManager.Connection.MyId == null)
+            if (Connection.MasterUri == null ||
+                Connection.MyUri == null ||
+                Connection.MyId == null)
             {
                 UpperCanvas.Status.sprite = UpperCanvas.QuestionSprite;
                 return;
@@ -408,7 +450,7 @@ namespace Iviz.App
             switch (state)
             {
                 case ConnectionState.Connected:
-                    GameThread.EverySecond -= RotateSprite;
+                    GameThread.EveryTenthSecond -= RotateSprite;
                     UpperCanvas.Status.sprite = UpperCanvas.ConnectedSprite;
                     UpperCanvas.TopPanel.color = RosServerManager.IsActive
                         ? Resource.Colors.ConnectionPanelOwnMaster
@@ -416,14 +458,14 @@ namespace Iviz.App
                     SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
-                    GameThread.EverySecond -= RotateSprite;
+                    GameThread.EveryTenthSecond -= RotateSprite;
                     UpperCanvas.Status.sprite = UpperCanvas.DisconnectedSprite;
                     UpperCanvas.TopPanel.color = Resource.Colors.ConnectionPanelDisconnected;
                     break;
                 case ConnectionState.Connecting:
                     UpperCanvas.Status.sprite = UpperCanvas.ConnectingSprite;
 
-                    GameThread.EverySecond += RotateSprite;
+                    GameThread.EveryTenthSecond += RotateSprite;
                     break;
             }
         }
@@ -477,7 +519,7 @@ namespace Iviz.App
             try
             {
                 RosLogger.Internal("Saving config file...");
-                string text = JsonConvert.SerializeObject(config, Formatting.Indented);
+                string text = BuiltIns.ToJsonString(config);
                 await FileUtils.WriteAllTextAsync($"{Settings.SavedFolder}/{file}", text, default);
                 RosLogger.Internal("Done.");
             }
@@ -516,6 +558,7 @@ namespace Iviz.App
                 return;
             }
 
+            // delete all modules except TF (module 0)
             while (moduleDatas.Count > 1)
             {
                 // TODO: refine this
@@ -572,16 +615,28 @@ namespace Iviz.App
                     .ToArray();
                 Dialogs.SystemData.HostAliases = validHostAliases;
 
-                var validHostPairs = validHostAliases.Select(alias => (alias!.Hostname, alias.Address));
-                ConnectionManager.Connection.SetHostAliases(validHostPairs);
+                var validHostPairs = validHostAliases
+                    .Select(alias => (alias!.Hostname, alias.Address))
+                    .ToArray();
+                Connection.SetHostAliases(validHostPairs);
 
                 Dialogs.ARMarkerData.Configuration = config.MarkersConfiguration;
+                return;
             }
             catch (Exception e) when
                 (e is IOException or SecurityException or JsonException)
             {
                 RosLogger.Debug($"{this}: Error loading simple configuration", e);
+                // pass through
+            }
+
+            try
+            {
                 File.Delete(path);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Debug($"{this}: Failed to reset simple configuration", e);
             }
         }
 
@@ -602,7 +657,7 @@ namespace Iviz.App
 
             try
             {
-                string text = JsonConvert.SerializeObject(config, Formatting.Indented);
+                string text = BuiltIns.ToJsonString(config);
                 await FileUtils.WriteAllTextAsync(Settings.SimpleConfigurationPath, text, default);
             }
             catch (Exception e) when
@@ -627,7 +682,7 @@ namespace Iviz.App
                 config.Settings = Settings.SettingsManager.Config;
                 config.HostAliases = Dialogs.SystemData.HostAliases;
                 config.MarkersConfiguration = Dialogs.ARMarkerData.Configuration;
-                string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
+                string outText = BuiltIns.ToJsonString(config);
                 File.WriteAllText(path, outText);
             }
             catch (Exception e) when (e is IOException or SecurityException or JsonException)
@@ -675,12 +730,22 @@ namespace Iviz.App
                 (e is IOException or SecurityException or JsonException)
             {
                 RosLogger.Debug($"{this}: Error loading XR configuration", e);
-                File.Delete(path);
                 unityPose = Pose.identity;
-                return false; // empty text
+                // pass through
             }
+
+            try
+            {
+                File.Delete(path);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Debug($"{this}: Failed to reset XR configuration", e);
+            }
+
+            return false; // empty text
         }
-        
+
         public async void SaveXRConfiguration(Pose unityPose)
         {
             var (position, rotation) = unityPose;
@@ -692,7 +757,7 @@ namespace Iviz.App
 
             try
             {
-                string text = JsonConvert.SerializeObject(config, Formatting.Indented);
+                string text = BuiltIns.ToJsonString(config);
                 await FileUtils.WriteAllTextAsync(Settings.XRStartConfigurationPath, text, default);
             }
             catch (Exception e) when
@@ -701,7 +766,7 @@ namespace Iviz.App
                 RosLogger.Debug($"{this}: Error saving XR configuration", e);
             }
         }
-        
+
         public async ValueTask ClearMastersCacheAsync(CancellationToken token = default)
         {
             string path = Settings.SimpleConfigurationPath;
@@ -718,7 +783,7 @@ namespace Iviz.App
                 var config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
                 config.LastMasterUris.Clear();
 
-                string outText = JsonConvert.SerializeObject(config, Formatting.Indented);
+                string outText = BuiltIns.ToJsonString(config);
                 await FileUtils.WriteAllTextAsync(path, outText, token);
             }
             catch (Exception e) when (e is IOException or SecurityException or JsonException)
@@ -726,7 +791,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Error($"Error clearing cache", e);
+                RosLogger.Error($"{this}: Error clearing cache", e);
             }
         }
 
@@ -742,7 +807,7 @@ namespace Iviz.App
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"Error deleting file '{file}'", e);
+                    RosLogger.Error($"ModuleListPanel: Error deleting saved file '{file}'", e);
                 }
             }
         }
@@ -755,18 +820,19 @@ namespace Iviz.App
         public ModuleData CreateModule(ModuleType resource, string topic = "", string type = "",
             IConfiguration? configuration = null, string? requestedId = null)
         {
-            if (topic == null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
-
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
             var constructor = new ModuleDataConstructor(resource, topic, type, configuration);
-            var moduleData = ModuleData.CreateFromResource(constructor);
+
+            ModuleData moduleData;
+            try
+            {
+                moduleData = ModuleData.CreateFromResource(constructor);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException("Failed to create module of type " + resource + ". " +
+                                                    "Topic='" + topic + "' Type='" + type + "' Configuration: '" +
+                                                    configuration + "'", e);
+            }
 
             if (requestedId != null)
             {
@@ -820,7 +886,7 @@ namespace Iviz.App
             {
                 throw new InvalidOperationException($"Tried to remove non-existing module '{entry}'");
             }
-            
+
             RemoveModule(index);
 
             if (entry.ModuleType == ModuleType.InteractiveMarker)
@@ -831,15 +897,19 @@ namespace Iviz.App
 
         void RemoveModule(int index)
         {
-            topicsWithModule.Remove(moduleDatas[index].Topic);
-            moduleDatas[index].Dispose();
-            moduleDatas.RemoveAt(index);
+            var moduleData = moduleDatas[index];
+            if (moduleData is ListenerModuleData listenerData)
+            {
+                topicsWithModule.Remove(listenerData.Topic);
+            }
 
+            moduleData.Dispose();
+            moduleDatas.RemoveAt(index);
             Buttons.RemoveButton(index);
         }
 
 
-        public void UpdateModuleButton(ModuleData entry, string content)
+        public void UpdateModuleButtonText(ModuleData entry, string content)
         {
             if (entry == null)
             {
@@ -857,12 +927,7 @@ namespace Iviz.App
 
         public void RegisterDisplayedTopic(string topic)
         {
-            if (topic == null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
-
-            topicsWithModule.Add(topic);
+            topicsWithModule.Add(topic ?? throw new ArgumentNullException(nameof(topic)));
         }
 
         public ImageDialogData CreateImageDialog(ImageDialogListener caller)
@@ -888,17 +953,52 @@ namespace Iviz.App
             Dialogs.ARMarkerData.Show();
         }
 
-        public void ShowTfPublisherDialog()
+        public void ShowTfDialog()
         {
-            Dialogs.TfPublisherData.Show();
+            Dialogs.TfTreeData.Show();
         }
+
+        public void FlushTfDialog()
+        {
+            if (DialogPanelManager.IsActive(Dialogs.TfTreeData))
+            {
+                Dialogs.TfTreeData.UpdatePanel();
+            }
+        }
+
+        public void ShowARPanel()
+        {
+            var arModuleData = ModuleDatas.FirstOrDefault(moduleData => moduleData is ARModuleData);
+            arModuleData?.ShowPanel();
+        }
+
+        public void ResetTfPanel()
+        {
+            ModuleDatas[0].ResetPanel();
+        }
+
+        public void ShowMenu(MenuEntryDescription[] menuEntries, Action<uint> callback)
+        {
+            if (menuEntries == null)
+            {
+                throw new ArgumentNullException(nameof(menuEntries));
+            }
+
+            if (menuDialog == null)
+            {
+                throw new NullReferenceException("Menu dialog has not been set!");
+            }
+
+            menuDialog.Set(menuEntries, callback);
+        }
+
         void UpdateCameraStats()
         {
             using var description = BuilderPool.Rent();
             description.Append(
                 Settings.IsXR
                     ? "<b>XR View</b>\n"
-                    : ARController.IsVisible
+                    : ARController.Instance is { Visible: true }
                         ? "<b>AR View</b>\n"
                         : "<b>Virtual View</b>\n"
             );
@@ -916,7 +1016,7 @@ namespace Iviz.App
             long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
             BottomCanvas.Time.text = $"M: {memBytesKb.ToString()}M";
 #else
-            BottomCanvas.BottomTime.text = GameThread.Now.ToString("HH:mm:ss");
+            BottomCanvas.Time.text = GameThread.Now.ToString("HH:mm:ss");
 #endif
             BottomCanvas.Fps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
@@ -924,7 +1024,7 @@ namespace Iviz.App
             (long downB, long upB) = ConnectionManager.CollectBandwidthReport();
             BottomCanvas.Bandwidth.text = $"↓{FormatBandwidth(downB)} ↑{FormatBandwidth(upB)}";
 
-            var bagListener = ConnectionManager.Connection.BagListener;
+            var bagListener = Connection.BagListener;
             if (bagListener != null)
             {
                 long bagSizeMb = bagListener.Length / (1024 * 1024);
@@ -962,19 +1062,39 @@ namespace Iviz.App
             frameCounter++;
         }
 
-        public void ShowMenu(MenuEntryDescription[] menuEntries, Action<uint> callback)
+        public override string ToString() => "[ModuleListPanel]";
+
+        public static string CreateButtonTextForModule(ModuleData moduleData)
         {
-            if (menuEntries == null)
+            if (moduleData is ListenerModuleData listenerData
+                && listenerData.Topic != ""
+                && listenerData.TopicType != "")
             {
-                throw new ArgumentNullException(nameof(menuEntries));
+                return CreateButtonTextForListenerModule(listenerData, listenerData.Topic, listenerData.TopicType);
             }
 
-            if (menuDialog == null)
-            {
-                throw new NullReferenceException("Menu dialog has not been set!");
-            }
+            string buttonText = $"<b>{moduleData.ModuleType}</b>";
+            return moduleData.Controller.Visible ? buttonText : $"<color=grey>{buttonText}</color>";
+        }
 
-            menuDialog.Set(menuEntries, callback);
+        public static string CreateButtonTextForListenerModule(ModuleData moduleData, string topic, string type)
+        {
+            string topicShort = Resource.Font.Split(topic, ModuleDataCaptionWidth);
+            int lastSlash = type.LastIndexOf('/');
+            string shortType = (lastSlash == -1) ? type : type[(lastSlash + 1)..];
+            string clampedType = Resource.Font.Split(shortType, ModuleDataCaptionWidth);
+            string buttonText = $"{topicShort}\n<b>{clampedType}</b>";
+
+            return moduleData.Controller.Visible ? buttonText : $"<color=grey>{buttonText}</color>";
+        }
+
+        public static string CreateButtonTextForModule(ModuleData moduleData, string customTitle)
+        {
+            string buttonText =
+                $"{Resource.Font.Split(customTitle, ModuleDataCaptionWidth)}\n" +
+                $"<b>{moduleData.ModuleType}</b>";
+
+            return moduleData.Controller.Visible ? buttonText : $"<color=grey>{buttonText}</color>";
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Iviz.Msgs.IvizMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3f : IMessage, IDeserializable<Vector3f>
+    public struct Vector3f : IMessage, IDeserializable<Vector3f>, System.IEquatable<Vector3f>
     {
         [DataMember (Name = "x")] public float X;
         [DataMember (Name = "y")] public float Y;
@@ -24,7 +24,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Vector3f(ref ReadBuffer b)
+        public Vector3f(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
@@ -33,8 +33,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public readonly Vector3f RosDeserialize(ref ReadBuffer b) => new Vector3f(ref b);
         
-        public override readonly int GetHashCode() => (X, Y, Z).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Vector3f s && Equals(s);
+        public readonly override int GetHashCode() => (X, Y, Z).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Vector3f s && Equals(s);
         public readonly bool Equals(Vector3f o) => (X, Y, Z) == (o.X, o.Y, o.Z);
         public static bool operator==(in Vector3f a, in Vector3f b) => a.Equals(b);
         public static bool operator!=(in Vector3f a, in Vector3f b) => !a.Equals(b);

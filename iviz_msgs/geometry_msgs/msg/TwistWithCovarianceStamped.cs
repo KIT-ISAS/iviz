@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal TwistWithCovarianceStamped(ref ReadBuffer b)
+        public TwistWithCovarianceStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Twist = new TwistWithCovariance(ref b);

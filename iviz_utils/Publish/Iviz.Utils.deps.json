@@ -940,6 +940,9 @@
         }
       },
       "Iviz.MsgsGen.Lib/1.0.0": {
+        "dependencies": {
+          "Iviz.Tools": "1.0.0"
+        },
         "runtime": {
           "Iviz.MsgsGen.Lib.dll": {}
         }

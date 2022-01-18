@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -10,21 +11,22 @@ using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Urdf;
 using Newtonsoft.Json;
 
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="SimpleRobotPanelContents"/> 
+    /// <see cref="SimpleRobotModulePanel"/> 
     /// </summary>
     public sealed class SimpleRobotModuleData : ModuleData
     {
         const string ParamSubstring = "_description";
         const string NoneStr = "<color=#b0b0b0ff><i><none></i></color>";
 
-        readonly SimpleRobotPanelContents panel;
+        readonly SimpleRobotModulePanel panel;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.Robot;
         public override IConfiguration Configuration => RobotController.Config;
         public override IController Controller => RobotController;
@@ -33,19 +35,14 @@ namespace Iviz.App
 
         CancellationTokenSource? tokenSource;
 
-        public SimpleRobotModuleData(ModuleDataConstructor constructor) :
-            base(constructor.Topic, constructor.Type)
+        public SimpleRobotModuleData(ModuleDataConstructor constructor)
         {
-            RobotController = new SimpleRobotController(this);
-            if (constructor.Configuration != null)
-            {
-                RobotController.Config = (RobotConfiguration) constructor.Configuration;
-            }
-
-            panel = DataPanelManager.GetPanelByResourceType<SimpleRobotPanelContents>(ModuleType.Robot);
+            RobotController = new SimpleRobotController((RobotConfiguration?) constructor.Configuration);
+            panel = ModulePanelManager.GetPanelByResourceType<SimpleRobotModulePanel>(ModuleType.Robot);
             UpdateModuleButton();
 
-            ConnectionManager.Connection.ConnectionStateChanged += OnConnectionStateChanged;
+            RobotController.RobotFinishedLoading += OnRobotFinishedLoading;
+            RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -67,8 +64,16 @@ namespace Iviz.App
         public override void Dispose()
         {
             base.Dispose();
-            RobotController.Dispose();
-            ConnectionManager.Connection.ConnectionStateChanged -= OnConnectionStateChanged;
+            try
+            {
+                RobotController.RobotFinishedLoading -= OnRobotFinishedLoading;
+                RobotController.Dispose();
+                RosConnection.ConnectionStateChanged -= OnConnectionStateChanged;
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to dispose controller", e);
+            }               
         }
 
         public override void SetupPanel()
@@ -96,7 +101,7 @@ namespace Iviz.App
             panel.HideButton.State = RobotController.Visible;
 
             panel.OcclusionOnlyMode.Value = RobotController.RenderAsOcclusionOnly;
-            panel.EnableColliders.Value = RobotController.EnableColliders;
+            panel.EnableColliders.Value = RobotController.Interactable;
             panel.Tint.Value = RobotController.Tint;
             panel.Alpha.Value = RobotController.Tint.a;
             panel.Metallic.Value = RobotController.Metallic;
@@ -112,7 +117,7 @@ namespace Iviz.App
             panel.Metallic.ValueChanged += f => RobotController.Metallic = f;
             panel.Smoothness.ValueChanged += f => RobotController.Smoothness = f;
             panel.OcclusionOnlyMode.ValueChanged += f => RobotController.RenderAsOcclusionOnly = f;
-            panel.EnableColliders.ValueChanged += f => RobotController.EnableColliders = f;
+            panel.EnableColliders.ValueChanged += f => RobotController.Interactable = f;
             panel.SavedRobotName.ValueChanged += (i, name) =>
             {
                 RobotController.TryLoadSavedRobot(i == 0 ? null : name);
@@ -194,13 +199,10 @@ namespace Iviz.App
 
         protected override void UpdateModuleButton()
         {
-            string text =
-                $"{Resource.Font.Split(RobotController.Name, ModuleListPanel.ModuleDataCaptionWidth)}\n" +
-                $"<b>{ModuleType}</b>";
-            ButtonText = RobotController.Visible ? text : $"<color=grey>{text}</color>";
+            ModuleListButtonText = ModuleListPanel.CreateButtonTextForModule(this, RobotController.Name);
         }
 
-        public void OnRobotFinishedLoading()
+        void OnRobotFinishedLoading()
         {
             UpdateModuleButton();
         }
@@ -276,7 +278,7 @@ namespace Iviz.App
 
                 RobotController.ProcessRobotSource(config.SavedRobotName, config.SourceParameter);
 
-                if (IsSelected)
+                if (IsPanelSelected)
                 {
                     panel.HelpText.Text = RobotController.HelpText;
                 }

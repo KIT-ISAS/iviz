@@ -24,7 +24,7 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        internal Accel(ref ReadBuffer b)
+        public Accel(ref ReadBuffer b)
         {
             b.Deserialize(out Linear);
             b.Deserialize(out Angular);

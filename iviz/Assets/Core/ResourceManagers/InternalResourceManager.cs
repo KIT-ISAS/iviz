@@ -13,14 +13,14 @@ namespace Iviz.Resources
 {
     public sealed class InternalResourceManager
     {
-        readonly Dictionary<string, Info<GameObject>> gameObjects = new()
+        readonly Dictionary<string, ResourceKey<GameObject>> gameObjects = new()
         {
             ["package://iviz_internal/cube"] = Resource.Displays.Cube,
             ["package://iviz_internal/cylinder"] = Resource.Displays.Cylinder,
             ["package://iviz_internal/sphere"] = Resource.Displays.Sphere,
         };
 
-        readonly Dictionary<string, Info<Texture2D>> textures = new();
+        readonly Dictionary<string, ResourceKey<Texture2D>> textures = new();
 
         readonly HashSet<string> negGameObjects = new();
         readonly HashSet<string> negTextures = new();
@@ -78,20 +78,20 @@ namespace Iviz.Resources
             return robotDescriptions.TryGetValue(robotName, out robotDescription);
         }
 
-        public bool TryGet(string uriString, [NotNullWhen(true)] out Info<GameObject>? info)
+        public bool TryGet(string uriString, [NotNullWhen(true)] out ResourceKey<GameObject>? info)
         {
             return TryGet(uriString, gameObjects, negGameObjects, out info);
         }
 
-        public bool TryGet(string uriString, [NotNullWhen(true)] out Info<Texture2D>? info)
+        public bool TryGet(string uriString, [NotNullWhen(true)] out ResourceKey<Texture2D>? info)
         {
             return TryGet(uriString, textures, negTextures, out info);
         }
 
         bool TryGet<T>(string uriString,
-            Dictionary<string, Info<T>> repository,
+            Dictionary<string, ResourceKey<T>> repository,
             HashSet<string> negRepository,
-            [NotNullWhen(true)] out Info<T>? info)
+            [NotNullWhen(true)] out ResourceKey<T>? info)
             where T : UnityEngine.Object
         {
             if (uriString is null)
@@ -138,7 +138,7 @@ namespace Iviz.Resources
                 return false;
             }
 
-            info = new Info<T>(resource);
+            info = new ResourceKey<T>(resource);
             repository[uriString] = info;
             return true;
         }

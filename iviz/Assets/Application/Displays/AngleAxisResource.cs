@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Resources;
@@ -27,7 +28,7 @@ namespace Iviz.Displays
             {
                 color = value;
 
-                float colorAsFloat = PointWithColor.RecastToFloat(color);
+                float colorAsFloat = UnityUtils.AsFloat(color);
 
                 var linesAsSpan = lines.AsSpan();
                 for (int i = 0; i < linesAsSpan.Length; i++)
@@ -68,7 +69,7 @@ namespace Iviz.Displays
         public void Set(in Vector3 rod, float scale = 0.3f)
         {
             float angle = rod.Magnitude();
-            if (Mathf.Approximately(angle, 0))
+            if (angle.ApproximatelyZero())
             {
                 Set(0, Vector3.zero, 0);
             }
@@ -81,8 +82,7 @@ namespace Iviz.Displays
 
         void Set(float angle, Vector3 axis, float scale = 0.3f)
         {
-            if (Mathf.Approximately(angle, 0)
-                || Mathf.Approximately(axis.MagnitudeSq(), 0))
+            if (angle.ApproximatelyZero() || axis.ApproximatelyZero())
             {
                 Resource.Visible = false;
                 return;
@@ -101,7 +101,7 @@ namespace Iviz.Displays
             lines.Clear();
 
             Vector3 notX = Vector3.forward;
-            if (Mathf.Approximately(axis.Cross(notX).MagnitudeSq(), 0))
+            if (axis.Cross(notX).ApproximatelyZero())
             {
                 notX = Vector3.right;
             }
@@ -111,7 +111,7 @@ namespace Iviz.Displays
             dirX *= scale;
             dirY *= scale;
 
-            int n = (int)(Mathf.Abs(angle) / (2 * Mathf.PI) * 32 + 1);
+            int n = (int)(Math.Abs(angle) / (2 * Mathf.PI) * 32 + 1);
 
             Vector3 v0 = dirX;
             Vector3 v1 = Vector3.zero;

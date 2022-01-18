@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
+    [Obsolete]
     [RequireComponent(typeof(BoxCollider))]
     public sealed class BoundaryFrame : MonoBehaviour, IDisplay, IRecyclable
     {
@@ -71,9 +72,9 @@ namespace Iviz.Controllers
                 Vector3 center = bounds.center;
                 (float sizeX, float sizeY, float sizeZ) = bounds.size.Abs();
 
-                float minAxisLength = Mathf.Min(Mathf.Min(sizeX, sizeY), sizeZ);
-                float maxAxisLength = Mathf.Max(Mathf.Max(sizeX, sizeY), sizeZ);
-                FrameAxisLength = Mathf.Min(maxAxisLength * 0.2f, minAxisLength * 0.5f);
+                float minAxisLength = Math.Min(Math.Min(sizeX, sizeY), sizeZ);
+                float maxAxisLength = Math.Max(Math.Max(sizeX, sizeY), sizeZ);
+                FrameAxisLength = Math.Min(maxAxisLength * 0.2f, minAxisLength * 0.5f);
                 frames[0].transform.localPosition = center + new Vector3(sizeX, -sizeY, sizeZ) / 2;
                 frames[1].transform.localPosition = center + new Vector3(sizeX, -sizeY, -sizeZ) / 2;
                 frames[2].transform.localPosition = center + new Vector3(-sizeX, -sizeY, -sizeZ) / 2;
@@ -178,7 +179,7 @@ namespace Iviz.Controllers
             frameLink.gameObject.name = "Cube";
             frameLink.EmissiveColor = (Color / 2).WithAlpha(1);
             frameLink.Color = Color;
-            frameLink.ShadowsEnabled = false;
+            frameLink.EnableShadows = false;
             return frameLink;
         }
     }

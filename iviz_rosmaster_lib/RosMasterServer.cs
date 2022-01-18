@@ -11,688 +11,539 @@ using Nito.AsyncEx;
 using HttpListenerContext = Iviz.XmlRpc.HttpListenerContext;
 using Logger = Iviz.Tools.Logger;
 
-namespace Iviz.RosMaster
+namespace Iviz.RosMaster;
+
+public sealed class RosMasterServer : IDisposable
 {
-    public sealed class RosMasterServer : IDisposable
+    public const int DefaultPort = 11311;
+
+    readonly HttpListener listener;
+    readonly AsyncLock rosLock = new();
+    readonly Dictionary<string, Func<XmlRpcValue[], XmlRpcArg>> methods;
+    readonly Dictionary<string, Func<XmlRpcValue[], CancellationToken, ValueTask>> lateCallbacks;
+    readonly Dictionary<string, Dictionary<string, Uri>> publishersByTopic = new();
+    readonly Dictionary<string, Dictionary<string, Uri>> subscribersByTopic = new();
+    readonly Dictionary<string, (string Id, Uri Uri)> serviceProviders = new();
+    readonly Dictionary<string, string> topicTypes = new();
+    readonly Dictionary<string, XmlRpcArg> parameters = new();
+    readonly Dictionary<string, HashSet<Uri>> parameterSubscribers = new();
+    readonly CancellationTokenSource runningTs = new();
+    readonly Task? backgroundTask;
+
+    bool disposed;
+
+    CancellationToken Token => runningTs.Token;
+    public Uri MasterUri { get; }
+    public string MasterCallerId { get; }
+
+    static class StatusCode
     {
-        public const int DefaultPort = 11311;
+        public const int Error = -1;
+        public const int Failure = 0;
+        public const int Success = 1;
+    }
 
-        readonly HttpListener listener;
+    public RosMasterServer(Uri masterUri, string callerId = "/iviz_master", bool startInBackground = false)
+    {
+        MasterUri = masterUri;
+        MasterCallerId = callerId;
+        listener = new HttpListener(masterUri.Port);
 
-        readonly AsyncLock rosLock = new();
-
-        readonly Dictionary<string, Func<XmlRpcValue[], XmlRpcArg>> methods;
-
-        readonly Dictionary<string, Func<XmlRpcValue[], CancellationToken, ValueTask>> lateCallbacks;
-
-        readonly Dictionary<string, Dictionary<string, Uri>> publishersByTopic = new();
-
-        readonly Dictionary<string, Dictionary<string, Uri>> subscribersByTopic = new();
-
-        readonly Dictionary<string, (string Id, Uri Uri)> serviceProviders = new();
-
-        readonly Dictionary<string, string> topicTypes = new();
-
-        readonly Dictionary<string, XmlRpcArg> parameters = new();
-
-        readonly Dictionary<string, HashSet<Uri>> parameterSubscribers = new();
-
-        readonly CancellationTokenSource runningTs = new();
-
-        readonly Task? backgroundTask;
-
-        bool disposed;
-
-        CancellationToken Token => runningTs.Token;
-
-        public Uri MasterUri { get; }
-
-        public string MasterCallerId { get; }
-
-        static class StatusCode
+        methods = new Dictionary<string, Func<XmlRpcValue[], XmlRpcArg>>
         {
-            public const int Error = -1;
-            public const int Failure = 0;
-            public const int Success = 1;
+            ["getPid"] = GetPid,
+            ["getUri"] = GetUri,
+            ["registerPublisher"] = RegisterPublisher,
+            ["registerSubscriber"] = RegisterSubscriber,
+            ["lookupNode"] = LookupNode,
+            ["getTopicTypes"] = GetTopicTypes,
+            ["getPublishedTopics"] = GetPublishedTopics,
+            ["getSystemState"] = GetSystemState,
+            ["deleteParam"] = DeleteParam,
+            ["setParam"] = SetParam,
+            ["getParam"] = GetParam,
+            ["hasParam"] = HasParam,
+            ["getParamNames"] = GetParamNames,
+            ["subscribeParam"] = SubscribeParam,
+            ["unsubscribeParam"] = UnsubscribeParam,
+            ["searchParam"] = SearchParam,
+            ["registerService"] = RegisterService,
+            ["unregisterService"] = UnregisterService,
+            ["lookupService"] = LookupService,
+            ["unregisterPublisher"] = UnregisterPublisher,
+            ["unregisterSubscriber"] = UnregisterSubscriber,
+            ["system.multicall"] = SystemMulticall,
+        };
+
+        lateCallbacks = new Dictionary<string, Func<XmlRpcValue[], CancellationToken, ValueTask>>
+        {
+            ["registerPublisher"] = RegisterPublisherLateCallback,
+            ["unregisterPublisher"] = RegisterPublisherLateCallback
+        };
+
+        backgroundTask = startInBackground ? StartAsync().AsTask() : null;
+    }
+
+    public void Dispose()
+    {
+        if (disposed)
+        {
+            return;
         }
 
-        public RosMasterServer(Uri masterUri, string callerId = "/iviz_master", bool startInBackground = false)
+        runningTs.Cancel();
+        listener.Dispose();
+        runningTs.Dispose();
+
+        backgroundTask?.WaitNoThrow(2000, this);
+
+        disposed = true;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (disposed)
         {
-            MasterUri = masterUri;
-            MasterCallerId = callerId;
-            listener = new HttpListener(masterUri.Port);
-
-            methods = new Dictionary<string, Func<XmlRpcValue[], XmlRpcArg>>
-            {
-                ["getPid"] = GetPid,
-                ["getUri"] = GetUri,
-                ["registerPublisher"] = RegisterPublisher,
-                ["registerSubscriber"] = RegisterSubscriber,
-                ["lookupNode"] = LookupNode,
-                ["getTopicTypes"] = GetTopicTypes,
-                ["getPublishedTopics"] = GetPublishedTopics,
-                ["getSystemState"] = GetSystemState,
-                ["deleteParam"] = DeleteParam,
-                ["setParam"] = SetParam,
-                ["getParam"] = GetParam,
-                ["hasParam"] = HasParam,
-                ["getParamNames"] = GetParamNames,
-                ["subscribeParam"] = SubscribeParam,
-                ["unsubscribeParam"] = UnsubscribeParam,
-                ["searchParam"] = SearchParam,
-                ["registerService"] = RegisterService,
-                ["unregisterService"] = UnregisterService,
-                ["lookupService"] = LookupService,
-                ["unregisterPublisher"] = UnregisterPublisher,
-                ["unregisterSubscriber"] = UnregisterSubscriber,
-                ["system.multicall"] = SystemMulticall,
-            };
-
-            lateCallbacks = new Dictionary<string, Func<XmlRpcValue[], CancellationToken, ValueTask>>
-            {
-                ["registerPublisher"] = RegisterPublisherLateCallback,
-                ["unregisterPublisher"] = RegisterPublisherLateCallback
-            };
-
-            backgroundTask = startInBackground ? StartAsync().AsTask() : null;
+            return;
         }
 
-        public void Dispose()
+        runningTs.Cancel();
+        await listener.DisposeAsync();
+        runningTs.Dispose();
+
+        if (backgroundTask != null)
         {
-            if (disposed)
-            {
-                return;
-            }
-
-            runningTs.Cancel();
-            listener.Dispose();
-            runningTs.Dispose();
-
-            backgroundTask?.WaitNoThrow(2000, this);
-
-            disposed = true;
+            await backgroundTask.AwaitNoThrow(2000, this);
         }
 
-        public async ValueTask DisposeAsync()
+        disposed = true;
+    }
+
+    public override string ToString()
+    {
+        return $"[RosMaster Uri={MasterUri}]";
+    }
+
+    public void AddKey(string key, XmlRpcArg value)
+    {
+        parameters[key] = value;
+    }
+
+    public static async ValueTask<RosMasterServer> CreateAsync(Uri masterUri, string callerId = "/iviz_master")
+    {
+        var masterServer = new RosMasterServer(masterUri, callerId);
+        await masterServer.StartAsync();
+        return masterServer;
+    }
+
+    public async ValueTask StartAsync()
+    {
+        if (backgroundTask != null)
         {
-            if (disposed)
-            {
-                return;
-            }
-
-            runningTs.Cancel();
-            await listener.DisposeAsync();
-            runningTs.Dispose();
-
-            if (backgroundTask != null)
-            {
-                await backgroundTask.AwaitNoThrow(2000, this);
-            }
-
-            disposed = true;
+            throw new InvalidOperationException(
+                "RosMasterServer has already been initialized as a background task");
         }
 
-        public override string ToString()
-        {
-            return $"[RosMaster Uri={MasterUri}]";
-        }
+        Logger.LogDebugFormat("** {0}: Starting!", this);
+        AddKey("/run_id", Guid.NewGuid().ToString());
+        var startTask = TaskUtils.Run(() => listener.StartAsync(StartContext, true).AwaitNoThrow(this), Token);
+        var rosoutTask = TaskUtils.Run(() => ManageRosoutAggAsync().AwaitNoThrow(this), Token);
+        await (startTask, rosoutTask).WhenAll();
+        Logger.LogDebugFormat("** {0}: Leaving thread.", this);
+    }
 
-        public void AddKey(string key, XmlRpcArg value)
+    async ValueTask StartContext(HttpListenerContext context, CancellationToken token)
+    {
+        try
         {
-            //Logger.Log($"** Adding key '{key}'");
-            parameters[key] = value;
+            await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks, token);
         }
-
-        public static async ValueTask<RosMasterServer> CreateAsync(Uri masterUri, string callerId = "/iviz_master")
+        catch (Exception e)
         {
-            RosMasterServer masterServer = new(masterUri, callerId);
-            await masterServer.StartAsync();
-            return masterServer;
+            Logger.LogErrorFormat("{0}: Error in StartContext: {1}", this, e);
         }
+    }
 
-        public async ValueTask StartAsync()
+    async ValueTask ManageRosoutAggAsync()
+    {
+        await Task.Delay(100, Token);
+
+        var ownUri = new Uri($"http://{MasterUri.Host}:0");
+
+        Logger.LogDebug("** Starting Rosout routine...");
+        
+        try
         {
-            if (backgroundTask != null)
+            await using var client = await RosClient.CreateAsync(MasterUri, "/rosout", ownUri, token: Token);
+            await using var reader = new RosChannelReader<Log>();
+            await using var writer = new RosChannelWriter<Log>();
+            
+            await reader.StartAsync(client, "/rosout", Token);
+            await writer.StartAsync(client, "/rosout_agg", Token);
+
+            Logger.LogDebug("** Rosout running!");
+            while (!runningTs.IsCancellationRequested)
             {
-                throw new InvalidOperationException(
-                    "RosMasterServer has already been initialized as a background task");
-            }
-
-            Logger.Log($"** {this}: Starting!");
-            AddKey("/run_id", Guid.NewGuid().ToString());
-            Task startTask = Task.Run(() => listener.StartAsync(StartContext, true).AwaitNoThrow(this), Token);
-            Task rosoutTask = Task.Run(() => ManageRosoutAggAsync().AwaitNoThrow(this), Token);
-            await (startTask, rosoutTask).WhenAll();
-            Logger.Log($"** {this}: Leaving thread.");
-        }
-
-        async ValueTask StartContext(HttpListenerContext context, CancellationToken token)
-        {
-            try
-            {
-                await XmlRpcService.MethodResponseAsync(context, methods, lateCallbacks, token);
-            }
-            catch (Exception e)
-            {
-                Logger.LogErrorFormat("{0}: Error in StartContext: {1}", this, e);
+                writer.Write(await reader.ReadAsync(Token));
             }
         }
-
-        async ValueTask ManageRosoutAggAsync()
+        catch (OperationCanceledException)
         {
-            await Task.Delay(100);
+        }
+        catch (Exception e)
+        {
+            Logger.LogDebugFormat("** Rosout stopped with exception: {0}", e);
+        }
+    }
 
-            Uri ownUri = new($"http://{MasterUri.Host}:0");
-            RosClient client;
+    static readonly (int code, string msg, XmlRpcArg arg) DefaultOkResponse = OkResponse(0);
 
-            try
-            {
-                client = await RosClient.CreateAsync(MasterUri, "/rosout", ownUri);
-            }
-            catch (Exception e)
-            {
-                if (e is not OperationCanceledException)
-                {
-                    Logger.LogDebugFormat("** Rosout failed to initialize client: {0}", e);
-                }
+    static (int code, string msg, XmlRpcArg arg) OkResponse(XmlRpcArg arg) => (StatusCode.Success, "", arg);
 
-                return;
-            }
+    static (int code, string msg, XmlRpcArg arg) FailResponse() => (StatusCode.Failure, "Request failed", 0);
 
-            Logger.LogDebug("** Starting Rosout routine...");
+    static (int code, string msg, XmlRpcArg arg) ErrorResponse(string msg) => (StatusCode.Error, msg, 0);
 
-            var reader = new RosChannelReader<Log>();
-            var writer = new RosChannelWriter<Log>();
+    static XmlRpcArg GetPid(XmlRpcValue[] _)
+    {
+        return OkResponse(ConnectionUtils.GetProcessId());
+    }
 
-            try
-            {
-                await reader.StartAsync(client, "/rosout");
-                await writer.StartAsync(client, "/rosout_agg");
+    XmlRpcArg GetUri(XmlRpcValue[] _)
+    {
+        return OkResponse(MasterUri);
+    }
 
-                while (!runningTs.IsCancellationRequested)
-                {
-                    writer.Write(await reader.ReadAsync(runningTs.Token));
-                }
-            }
-            catch (OperationCanceledException)
-            {
-            }
-            catch (Exception e)
-            {
-                Logger.LogDebugFormat("** Rosout stopped with exception: {0}", e);
-            }
-            finally
-            {
-                await writer.DisposeAsync();
-                await reader.DisposeAsync();
-                await client.DisposeAsync();
-            }
+    XmlRpcArg RegisterPublisher(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+        if (args.Length != 4 ||
+            !args[0].TryGetString(out string callerId) ||
+            !args[1].TryGetString(out string topic) ||
+            !args[2].TryGetString(out string topicType) ||
+            !args[3].TryGetString(out string callerApi))
+        {
+            return ErrorResponse("Failed to parse arguments");
         }
 
-        static readonly (int code, string msg, XmlRpcArg arg) DefaultOkResponse = OkResponse(0);
-
-        static (int code, string msg, XmlRpcArg arg) OkResponse(XmlRpcArg arg) => (StatusCode.Success, "ok", arg);
-
-        static (int code, string msg, XmlRpcArg arg) FailResponse() => (StatusCode.Failure, "Request failed", 0);
-
-        static (int code, string msg, XmlRpcArg arg) ErrorResponse(string msg) => (StatusCode.Error, msg, 0);
-
-        static XmlRpcArg GetPid(XmlRpcValue[] _)
+        if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
         {
-            return OkResponse(ConnectionUtils.GetProcessId());
+            return ErrorResponse("Caller api is not an uri");
         }
 
-        XmlRpcArg GetUri(XmlRpcValue[] _)
+        if (!publishersByTopic.TryGetValue(topic, out var publishers))
         {
-            return OkResponse(MasterUri);
+            publishers = new Dictionary<string, Uri>();
+            publishersByTopic[topic] = publishers;
+            topicTypes[topic] = topicType;
+
+            Logger.LogDebugFormat("++ Topic: {0} [{1}]", topic, topicType);
         }
 
-        XmlRpcArg RegisterPublisher(XmlRpcValue[] args)
+        publishers[callerId] = callerUri;
+        Logger.LogDebugFormat("++ Publisher: {0}@{1} -> {2} [{3}]", callerId, callerUri, topic, topicType);
+
+        var currentSubscribers =
+            subscribersByTopic.TryGetValue(topic, out var subscribers)
+                ? subscribers.Values.ToArray()
+                : Array.Empty<Uri>();
+
+        return OkResponse(new XmlRpcArg(currentSubscribers));
+    }
+
+    ValueTask RegisterPublisherLateCallback(XmlRpcValue[] args, CancellationToken token)
+    {
+        XmlRpcArg[] methodArgs;
+        Uri[] subscribersToNotify;
+
+        using (rosLock.Lock(token))
         {
-            using var myLock = rosLock.Lock(Token);
-            if (args.Length != 4 ||
-                !args[0].TryGetString(out string callerId) ||
-                !args[1].TryGetString(out string topic) ||
-                !args[2].TryGetString(out string topicType) ||
-                !args[3].TryGetString(out string callerApi))
+            if (!args[1].TryGetString(out string topic) ||
+                !subscribersByTopic.TryGetValue(topic, out var subscribers))
             {
-                return ErrorResponse("Failed to parse arguments");
+                return default;
             }
 
-            if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
-            {
-                return ErrorResponse("Caller api is not an uri");
-            }
-
-            if (!publishersByTopic.TryGetValue(topic, out var publishers))
-            {
-                publishers = new Dictionary<string, Uri>();
-                publishersByTopic[topic] = publishers;
-                topicTypes[topic] = topicType;
-
-                Logger.Log($"++ Topic: {topic} [{topicType}]");
-            }
-
-            publishers[callerId] = callerUri;
-            Logger.Log($"++ Publisher: {callerId}@{callerUri} -> {topic} [{topicType}]");
-
-            var currentSubscribers =
-                subscribersByTopic.TryGetValue(topic, out var subscribers)
-                    ? subscribers.Values.ToArray()
-                    : Array.Empty<Uri>();
-
-            return OkResponse(new XmlRpcArg(currentSubscribers));
-        }
-
-        ValueTask RegisterPublisherLateCallback(XmlRpcValue[] args, CancellationToken token)
-        {
-            XmlRpcArg[] methodArgs;
-            Uri[] subscribersToNotify;
-
-            using (rosLock.Lock(token))
-            {
-                if (!args[1].TryGetString(out string topic) ||
-                    !subscribersByTopic.TryGetValue(topic, out var subscribers))
-                {
-                    return default;
-                }
-
-                var publisherUris =
-                    publishersByTopic.TryGetValue(topic, out var publishers)
-                        ? publishers.Values.ToArray()
-                        : Array.Empty<Uri>();
-
-                if (subscribers.Count == 0 || token.IsCancellationRequested)
-                {
-                    return default;
-                }
-
-                methodArgs = new XmlRpcArg[] { MasterCallerId, topic, new(publisherUris) };
-                subscribersToNotify = subscribers.Values.ToArray();
-            }
-
-            foreach (var uri in subscribersToNotify)
-            {
-                NotifySubscriber(uri, methodArgs, token);
-            }
-
-            return default;
-        }
-
-        async void NotifySubscriber(Uri remoteUri, XmlRpcArg[] methodArgs, CancellationToken token)
-        {
-            try
-            {
-                await XmlRpcService.MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs, token);
-            }
-            catch (Exception e)
-            {
-                Logger.LogFormat("{0}: {1}", this, e);
-            }
-        }
-
-        XmlRpcArg RegisterSubscriber(XmlRpcValue[] args)
-        {
-            using var myLock = rosLock.Lock(Token);
-
-            if (args.Length != 4 ||
-                !args[0].TryGetString(out string callerId) ||
-                !args[1].TryGetString(out string topic) ||
-                !args[3].TryGetString(out string callerApi))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
-
-            if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
-            {
-                return ErrorResponse("Caller api is not an uri");
-            }
-
-            if (!subscribersByTopic.TryGetValue(topic, out var subscribers))
-            {
-                subscribers = new Dictionary<string, Uri>();
-                subscribersByTopic[topic] = subscribers;
-            }
-
-            subscribers[callerId] = callerUri;
-
-            var currentPublishers =
+            var publisherUris =
                 publishersByTopic.TryGetValue(topic, out var publishers)
                     ? publishers.Values.ToArray()
                     : Array.Empty<Uri>();
 
-            return OkResponse(new XmlRpcArg(currentPublishers));
+            if (subscribers.Count == 0 || token.IsCancellationRequested)
+            {
+                return default;
+            }
+
+            methodArgs = new XmlRpcArg[] { MasterCallerId, topic, new(publisherUris) };
+            subscribersToNotify = subscribers.Values.ToArray();
         }
 
-        XmlRpcArg UnregisterSubscriber(XmlRpcValue[] args)
+        foreach (var uri in subscribersToNotify)
         {
-            using var myLock = rosLock.Lock(Token);
-
-            if (args.Length != 3 ||
-                !args[0].TryGetString(out string callerId) ||
-                !args[1].TryGetString(out string topic) ||
-                !args[2].TryGetString(out string callerApi))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
-
-            if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
-            {
-                return ErrorResponse("Caller api is not an uri");
-            }
-
-            if (!subscribersByTopic.TryGetValue(topic, out var subscribers) ||
-                !(subscribers.TryGetValue(callerId, out Uri? tmpUri) && tmpUri == callerUri) ||
-                !subscribers.Remove(callerId))
-            {
-                return DefaultOkResponse;
-            }
-
-            if (subscribers.Count == 0)
-            {
-                subscribersByTopic.Remove(topic);
-            }
-
-            return OkResponse(1);
+            NotifySubscriber(uri, methodArgs, token);
         }
 
-        XmlRpcArg UnregisterPublisher(XmlRpcValue[] args)
+        return default;
+    }
+
+    async void NotifySubscriber(Uri remoteUri, XmlRpcArg[] methodArgs, CancellationToken token)
+    {
+        try
         {
-            using var myLock = rosLock.Lock(Token);
+            await XmlRpcService.MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs, token);
+        }
+        catch (Exception e)
+        {
+            Logger.LogFormat("{0}: {1}", this, e);
+        }
+    }
 
-            if (args.Length != 3 ||
-                !args[0].TryGetString(out string callerId) ||
-                !args[1].TryGetString(out string topic) ||
-                !args[2].TryGetString(out string callerApi))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
+    XmlRpcArg RegisterSubscriber(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
 
-            if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
-            {
-                return ErrorResponse("Caller api is not an uri");
-            }
-
-            if (!publishersByTopic.TryGetValue(topic, out var publishers) ||
-                !(publishers.TryGetValue(callerId, out Uri? tmpUri) && tmpUri == callerUri) ||
-                !publishers.Remove(callerId))
-            {
-                return DefaultOkResponse;
-            }
-
-            Logger.Log($"-- Publisher: {callerId}@{callerUri} -> {topic}");
-
-            if (publishers.Count == 0)
-            {
-                publishersByTopic.Remove(topic);
-                topicTypes.Remove(topic);
-
-                Logger.Log($"-- Topic: {topic}");
-            }
-
-            return OkResponse(1);
+        if (args.Length != 4 ||
+            !args[0].TryGetString(out string callerId) ||
+            !args[1].TryGetString(out string topic) ||
+            !args[3].TryGetString(out string callerApi))
+        {
+            return ErrorResponse("Failed to parse arguments");
         }
 
-        XmlRpcArg RegisterService(XmlRpcValue[] args)
+        if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
         {
-            using var myLock = rosLock.Lock(Token);
+            return ErrorResponse("Caller api is not an uri");
+        }
 
-            if (args.Length != 4 ||
-                !args[0].TryGetString(out string callerId) ||
-                !args[1].TryGetString(out string service) ||
-                !args[2].TryGetString(out string serviceApi))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
+        if (!subscribersByTopic.TryGetValue(topic, out var subscribers))
+        {
+            subscribers = new Dictionary<string, Uri>();
+            subscribersByTopic[topic] = subscribers;
+        }
 
-            if (!Uri.TryCreate(serviceApi, UriKind.Absolute, out Uri? serviceUri))
-            {
-                return ErrorResponse("Service api is not an uri");
-            }
+        subscribers[callerId] = callerUri;
 
-            Logger.Log($"++ Service: {service}");
+        var currentPublishers =
+            publishersByTopic.TryGetValue(topic, out var publishers)
+                ? publishers.Values.ToArray()
+                : Array.Empty<Uri>();
 
-            serviceProviders[service] = (callerId, serviceUri);
+        return OkResponse(new XmlRpcArg(currentPublishers));
+    }
 
+    XmlRpcArg UnregisterSubscriber(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        if (args.Length != 3 ||
+            !args[0].TryGetString(out string callerId) ||
+            !args[1].TryGetString(out string topic) ||
+            !args[2].TryGetString(out string callerApi))
+        {
+            return ErrorResponse("Failed to parse arguments");
+        }
+
+        if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
+        {
+            return ErrorResponse("Caller api is not an uri");
+        }
+
+        if (!subscribersByTopic.TryGetValue(topic, out var subscribers) ||
+            !(subscribers.TryGetValue(callerId, out Uri? existingUri) && existingUri == callerUri) ||
+            !subscribers.Remove(callerId))
+        {
             return DefaultOkResponse;
         }
 
-        XmlRpcArg UnregisterService(XmlRpcValue[] args)
+        if (subscribers.Count == 0)
         {
-            using var myLock = rosLock.Lock(Token);
+            subscribersByTopic.Remove(topic);
+        }
 
+        return OkResponse(1);
+    }
+
+    XmlRpcArg UnregisterPublisher(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        if (args.Length != 3 ||
+            !args[0].TryGetString(out string callerId) ||
+            !args[1].TryGetString(out string topic) ||
+            !args[2].TryGetString(out string callerApi))
+        {
+            return ErrorResponse("Failed to parse arguments");
+        }
+
+        if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
+        {
+            return ErrorResponse("Caller api is not an uri");
+        }
+
+        if (!publishersByTopic.TryGetValue(topic, out var publishers) ||
+            !(publishers.TryGetValue(callerId, out Uri? tmpUri) && tmpUri == callerUri) ||
+            !publishers.Remove(callerId))
+        {
+            return DefaultOkResponse;
+        }
+
+        Logger.LogDebugFormat("-- Publisher: {0}@{1} -> {2}", callerId, callerUri, topic);
+
+        if (publishers.Count == 0)
+        {
+            publishersByTopic.Remove(topic);
+            topicTypes.Remove(topic);
+
+            Logger.LogDebugFormat("-- Topic: {0}", topic);
+        }
+
+        return OkResponse(1);
+    }
+
+    XmlRpcArg RegisterService(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        if (args.Length != 4 ||
+            !args[0].TryGetString(out string callerId) ||
+            !args[1].TryGetString(out string service) ||
+            !args[2].TryGetString(out string serviceApi))
+        {
+            return ErrorResponse("Failed to parse arguments");
+        }
+
+        if (!Uri.TryCreate(serviceApi, UriKind.Absolute, out Uri? serviceUri))
+        {
+            return ErrorResponse("Service api is not an uri");
+        }
+
+        Logger.LogDebugFormat("++ Service: {0}", service);
+
+        serviceProviders[service] = (callerId, serviceUri);
+
+        return DefaultOkResponse;
+    }
+
+    XmlRpcArg UnregisterService(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        if (args.Length != 3 ||
+            !args[1].TryGetString(out string service) ||
+            !args[2].TryGetString(out string serviceApi))
+        {
+            return ErrorResponse("Failed to parse arguments");
+        }
+
+        if (!Uri.TryCreate(serviceApi, UriKind.Absolute, out Uri? serviceUri))
+        {
+            return ErrorResponse("Service api is not an uri");
+        }
+
+        if (!serviceProviders.TryGetValue(service, out var currentService) || serviceUri != currentService.Uri)
+        {
+            return DefaultOkResponse;
+        }
+
+        Logger.LogDebugFormat("-- Service: {0}", service);
+        serviceProviders.Remove(service);
+        return OkResponse(1);
+    }
+
+    XmlRpcArg LookupNode(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        if (args.Length != 2 ||
+            !args[1].TryGetString(out string node))
+        {
+            return ErrorResponse("Failed to parse arguments");
+        }
+
+        var publishersLookup = publishersByTopic.SelectMany(pair => pair.Value);
+        var subscribersLookup = subscribersByTopic.SelectMany(pair => pair.Value);
+
+        Uri? uri = publishersLookup
+            .Concat(subscribersLookup)
+            .FirstOrDefault(tuple => tuple.Key == node)
+            .Value;
+
+        return uri == null
+            ? ErrorResponse($"No node with id '{node}'")
+            : OkResponse(uri);
+    }
+
+    XmlRpcArg LookupService(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        if (args.Length != 2 ||
+            !args[1].TryGetString(out string service))
+        {
+            return ErrorResponse("Failed to parse arguments");
+        }
+
+        return serviceProviders.TryGetValue(service, out var provider)
+            ? OkResponse(provider.Uri)
+            : ErrorResponse($"No service with name '{service}'");
+    }
+
+    XmlRpcArg GetPublishedTopics(XmlRpcValue[] _)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        var topics = topicTypes.Select(pair => (pair.Key, pair.Value));
+
+        return OkResponse(new XmlRpcArg(topics));
+    }
+
+    XmlRpcArg GetTopicTypes(XmlRpcValue[] _)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        var topics = topicTypes.Select(pair => (pair.Key, pair.Value));
+
+        return OkResponse(new XmlRpcArg(topics));
+    }
+
+    XmlRpcArg GetSystemState(XmlRpcValue[] _)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        var publishers = publishersByTopic.Select(
+                pair => ((XmlRpcArg)pair.Key, new XmlRpcArg(pair.Value.Select(tuple => tuple.Key))))
+            .ToArray();
+        var subscribers = subscribersByTopic.Select(
+                pair => ((XmlRpcArg)pair.Key, new XmlRpcArg(pair.Value.Select(tuple => tuple.Key))))
+            .ToArray();
+        var providers = serviceProviders.Select(
+            pair => ((XmlRpcArg)pair.Key, new XmlRpcArg(new[] { pair.Value.Id }))).ToArray();
+
+        return OkResponse(((XmlRpcArg)publishers, (XmlRpcArg)subscribers, (XmlRpcArg)providers));
+    }
+
+    XmlRpcArg DeleteParam(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        if (args.Length != 2 ||
+            !args[1].TryGetString(out string key))
+        {
+            return ErrorResponse("Failed to parse arguments");
+        }
+
+        parameters.Remove(key);
+        return DefaultOkResponse;
+    }
+
+    XmlRpcArg SetParam(XmlRpcValue[] args)
+    {
+        Uri[] subscribersToNotify;
+        XmlRpcArg[] methodArgs;
+
+        using (rosLock.Lock(Token))
+        {
             if (args.Length != 3 ||
-                !args[1].TryGetString(out string service) ||
-                !args[2].TryGetString(out string serviceApi))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
-
-            if (!Uri.TryCreate(serviceApi, UriKind.Absolute, out Uri? serviceUri))
-            {
-                return ErrorResponse("Service api is not an uri");
-            }
-
-            if (!serviceProviders.TryGetValue(service, out var currentService) || serviceUri != currentService.Uri)
-            {
-                return DefaultOkResponse;
-            }
-
-            Logger.Log($"-- Service: {service}");
-            serviceProviders.Remove(service);
-            return OkResponse(1);
-        }
-
-        XmlRpcArg LookupNode(XmlRpcValue[] args)
-        {
-            using var myLock = rosLock.Lock(Token);
-
-            if (args.Length != 2 ||
-                !args[1].TryGetString(out string node))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
-
-            var publishersLookup = publishersByTopic.SelectMany(pair => pair.Value);
-            var subscribersLookup = subscribersByTopic.SelectMany(pair => pair.Value);
-
-            Uri? uri = publishersLookup
-                .Concat(subscribersLookup)
-                .FirstOrDefault(tuple => tuple.Key == node)
-                .Value;
-
-            return uri == null
-                ? ErrorResponse($"No node with id '{node}'")
-                : OkResponse(uri);
-        }
-
-        XmlRpcArg LookupService(XmlRpcValue[] args)
-        {
-            using var myLock = rosLock.Lock(Token);
-
-            if (args.Length != 2 ||
-                !args[1].TryGetString(out string service))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
-
-            return serviceProviders.TryGetValue(service, out var provider)
-                ? OkResponse(provider.Uri)
-                : ErrorResponse($"No service with name '{service}'");
-        }
-
-        XmlRpcArg GetPublishedTopics(XmlRpcValue[] _)
-        {
-            using var myLock = rosLock.Lock(Token);
-
-            var topics = topicTypes.Select(pair => (pair.Key, pair.Value));
-
-            return OkResponse(new XmlRpcArg(topics));
-        }
-
-        XmlRpcArg GetTopicTypes(XmlRpcValue[] _)
-        {
-            using var myLock = rosLock.Lock(Token);
-
-            var topics = topicTypes.Select(pair => (pair.Key, pair.Value));
-
-            return OkResponse(new XmlRpcArg(topics));
-        }
-
-        XmlRpcArg GetSystemState(XmlRpcValue[] _)
-        {
-            using var myLock = rosLock.Lock(Token);
-
-            var publishers = publishersByTopic.Select(
-                    pair => ((XmlRpcArg)pair.Key, new XmlRpcArg(pair.Value.Select(tuple => tuple.Key))))
-                .ToArray();
-            var subscribers = subscribersByTopic.Select(
-                    pair => ((XmlRpcArg)pair.Key, new XmlRpcArg(pair.Value.Select(tuple => tuple.Key))))
-                .ToArray();
-            var providers = serviceProviders.Select(
-                pair => ((XmlRpcArg)pair.Key, new XmlRpcArg(new[] { pair.Value.Id }))).ToArray();
-
-            return OkResponse(((XmlRpcArg)publishers, (XmlRpcArg)subscribers, (XmlRpcArg)providers));
-        }
-
-        XmlRpcArg DeleteParam(XmlRpcValue[] args)
-        {
-            using var myLock = rosLock.Lock(Token);
-
-            if (args.Length != 2 ||
-                !args[1].TryGetString(out string key))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
-
-            parameters.Remove(key);
-            return DefaultOkResponse;
-        }
-
-        XmlRpcArg SetParam(XmlRpcValue[] args)
-        {
-            Uri[] subscribersToNotify;
-            XmlRpcArg[] methodArgs;
-
-            using (rosLock.Lock(Token))
-            {
-                if (args.Length != 3 ||
-                    !args[1].TryGetString(out string key))
-                {
-                    return ErrorResponse("Failed to parse arguments");
-                }
-
-                if (key.Length == 0)
-                {
-                    return ErrorResponse("Empty key");
-                }
-
-                if (key[0] != '/')
-                {
-                    key = "/" + key;
-                }
-
-                if (args[2].TryGetArray(out XmlRpcValue[] argObj) &&
-                    argObj.Length != 0 &&
-                    argObj[0].TryGetStruct(out (string, XmlRpcValue)[] argEntries))
-                {
-                    try
-                    {
-                        AddDictionary(argEntries, key);
-                        return DefaultOkResponse;
-                    }
-                    catch (ParseException e)
-                    {
-                        return ErrorResponse(e.Message);
-                    }
-                }
-
-                XmlRpcArg arg = args[2].AsArg();
-                if (!arg.IsValid)
-                {
-                    return ErrorResponse($"Parameter [{key}] could not be parsed'");
-                }
-
-                //Console.WriteLine("++ Param " + key + " --> " + args[2]);
-                parameters[key] = arg;
-
-                if (!parameterSubscribers.TryGetValue(key, out var subscribers)
-                    || runningTs.IsCancellationRequested)
-                {
-                    return DefaultOkResponse;
-                }
-
-                subscribersToNotify = subscribers.ToArray();
-                methodArgs = new XmlRpcArg[] { MasterCallerId, key, arg };
-            }
-
-            Task.Run(() =>
-            {
-                foreach (var subscriberUri in subscribersToNotify)
-                {
-                    NotifyParamSubscriber(subscriberUri, methodArgs);
-                }
-            });
-
-            return DefaultOkResponse;
-        }
-
-        void AddDictionary((string, XmlRpcValue)[] entries, string root)
-        {
-            foreach ((string name, XmlRpcValue value) in entries)
-            {
-                string key = $"{root}/{name}";
-
-                if (value.TryGetStruct(out (string, XmlRpcValue)[] subEntries))
-                {
-                    AddDictionary(subEntries, key);
-                }
-                else
-                {
-                    XmlRpcArg arg = value.AsArg();
-                    if (!arg.IsValid)
-                    {
-                        throw new ParseException($"Parameter [{key}] could not be parsed'");
-                    }
-
-                    //Console.WriteLine("++ Param " + key + " --> " + value);
-                    parameters[key] = arg;
-
-                    if (!parameterSubscribers.TryGetValue(key, out var subscribers))
-                    {
-                        continue;
-                    }
-
-                    var methodArgs = new XmlRpcArg[] { MasterCallerId, key, arg };
-                    var subscribersToNotify = subscribers.ToArray();
-                    Task.Run(() =>
-                    {
-                        foreach (var subscriberUri in subscribersToNotify)
-                        {
-                            NotifyParamSubscriber(subscriberUri, methodArgs);
-                        }
-                    });
-                }
-            }
-        }
-
-        async void NotifyParamSubscriber(Uri remoteUri, XmlRpcArg[] methodArgs)
-        {
-            try
-            {
-                await XmlRpcService.MethodCallAsync(remoteUri, MasterUri, "paramUpdate", methodArgs, runningTs.Token);
-            }
-            catch (Exception e)
-            {
-                Logger.LogFormat("{0}: {1}", this, e);
-            }
-        }
-
-        XmlRpcArg GetParam(XmlRpcValue[] args)
-        {
-            using var myLock = rosLock.Lock();
-
-            if (args.Length != 2 ||
                 !args[1].TryGetString(out string key))
             {
                 return ErrorResponse("Failed to parse arguments");
@@ -708,208 +559,323 @@ namespace Iviz.RosMaster
                 key = "/" + key;
             }
 
-            if (parameters.TryGetValue(key, out XmlRpcArg arg))
+            if (args[2].TryGetArray(out XmlRpcValue[] argObj) &&
+                argObj.Length != 0 &&
+                argObj[0].TryGetStruct(out (string, XmlRpcValue)[] argEntries))
             {
-                return OkResponse(arg);
+                try
+                {
+                    AddDictionary(argEntries, key);
+                    return DefaultOkResponse;
+                }
+                catch (ParseException e)
+                {
+                    return ErrorResponse(e.Message);
+                }
             }
 
-            string keyAsNamespace = key;
-            if (keyAsNamespace[keyAsNamespace.Length - 1] != '/')
+            XmlRpcArg arg = args[2].AsArg();
+            if (!arg.IsValid)
             {
-                keyAsNamespace += "/";
+                return ErrorResponse($"Parameter [{key}] could not be parsed'");
             }
 
-            var candidates = parameters.Where(pair => pair.Key.StartsWith(keyAsNamespace)).ToArray();
-            if (candidates.Length == 0)
+            //Console.WriteLine("++ Param " + key + " --> " + args[2]);
+            parameters[key] = arg;
+
+            if (!parameterSubscribers.TryGetValue(key, out var subscribers)
+                || runningTs.IsCancellationRequested)
             {
-                //Console.WriteLine("**** " + key + " is missing");
-                return ErrorResponse($"Parameter [{key}] is not set");
+                return DefaultOkResponse;
             }
 
-            arg = new XmlRpcArg(candidates.Select(pair => (pair.Key, pair.Value)).ToArray());
+            subscribersToNotify = subscribers.ToArray();
+            methodArgs = new XmlRpcArg[] { MasterCallerId, key, arg };
+        }
+
+        Task.Run(() =>
+        {
+            foreach (var subscriberUri in subscribersToNotify)
+            {
+                NotifyParamSubscriber(subscriberUri, methodArgs);
+            }
+        });
+
+        return DefaultOkResponse;
+    }
+
+    void AddDictionary((string, XmlRpcValue)[] entries, string root)
+    {
+        foreach ((string name, XmlRpcValue value) in entries)
+        {
+            string key = $"{root}/{name}";
+
+            if (value.TryGetStruct(out (string, XmlRpcValue)[] subEntries))
+            {
+                AddDictionary(subEntries, key);
+            }
+            else
+            {
+                var arg = value.AsArg();
+                if (!arg.IsValid)
+                {
+                    throw new ParseException($"Parameter [{key}] could not be parsed'");
+                }
+
+                parameters[key] = arg;
+
+                if (!parameterSubscribers.TryGetValue(key, out var subscribers))
+                {
+                    continue;
+                }
+
+                var methodArgs = new XmlRpcArg[] { MasterCallerId, key, arg };
+                var subscribersToNotify = subscribers.ToArray();
+                Task.Run(() =>
+                {
+                    foreach (var subscriberUri in subscribersToNotify)
+                    {
+                        NotifyParamSubscriber(subscriberUri, methodArgs);
+                    }
+                });
+            }
+        }
+    }
+
+    async void NotifyParamSubscriber(Uri remoteUri, XmlRpcArg[] methodArgs)
+    {
+        try
+        {
+            await XmlRpcService.MethodCallAsync(remoteUri, MasterUri, "paramUpdate", methodArgs, runningTs.Token);
+        }
+        catch (Exception e)
+        {
+            Logger.LogFormat("{0}: {1}", this, e);
+        }
+    }
+
+    XmlRpcArg GetParam(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock();
+
+        if (args.Length != 2 ||
+            !args[1].TryGetString(out string key))
+        {
+            return ErrorResponse("Failed to parse arguments");
+        }
+
+        if (key.Length == 0)
+        {
+            return ErrorResponse("Empty key");
+        }
+
+        if (key[0] != '/')
+        {
+            key = "/" + key;
+        }
+
+        if (parameters.TryGetValue(key, out XmlRpcArg arg))
+        {
             return OkResponse(arg);
         }
 
-        XmlRpcArg GetParamNames(XmlRpcValue[] args)
+        string keyAsNamespace = key;
+        if (keyAsNamespace[^1] != '/')
         {
-            using var myLock = rosLock.Lock(Token);
-
-            return OkResponse(new XmlRpcArg(parameters.Keys));
+            keyAsNamespace += "/";
         }
 
-        XmlRpcArg HasParam(XmlRpcValue[] args)
+        var candidates = parameters.Where(pair => pair.Key.StartsWith(keyAsNamespace)).ToArray();
+        if (candidates.Length == 0)
         {
-            using var myLock = rosLock.Lock(Token);
-
-            if (args.Length != 2 ||
-                !args[1].TryGetString(out string key))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
-
-            bool success = parameters.ContainsKey(key);
-
-            return OkResponse(success);
+            return ErrorResponse($"Parameter [{key}] is not set");
         }
 
-        XmlRpcArg SubscribeParam(XmlRpcValue[] args)
+        arg = new XmlRpcArg(candidates.Select(pair => (pair.Key, pair.Value)).ToArray());
+        return OkResponse(arg);
+    }
+
+    XmlRpcArg GetParamNames(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        return OkResponse(new XmlRpcArg(parameters.Keys));
+    }
+
+    XmlRpcArg HasParam(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        if (args.Length != 2 ||
+            !args[1].TryGetString(out string key))
         {
-            using var myLock = rosLock.Lock();
-
-            if (args.Length != 3 ||
-                !args[1].TryGetString(out string key) ||
-                !args[2].TryGetString(out string callerApi))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
-
-            if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
-            {
-                return ErrorResponse("Caller api is not an uri");
-            }
-
-            if (!parameterSubscribers.TryGetValue(key, out var subscribers))
-            {
-                subscribers = new HashSet<Uri>();
-                parameterSubscribers[key] = subscribers;
-            }
-
-            subscribers.Add(callerUri);
-
-            var response =
-                parameters.TryGetValue(key, out XmlRpcArg arg)
-                    ? arg
-                    : Array.Empty<(string, XmlRpcArg)>();
-            return OkResponse(response);
+            return ErrorResponse("Failed to parse arguments");
         }
 
-        XmlRpcArg UnsubscribeParam(XmlRpcValue[] args)
+        bool success = parameters.ContainsKey(key);
+
+        return OkResponse(success);
+    }
+
+    XmlRpcArg SubscribeParam(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock();
+
+        if (args.Length != 3 ||
+            !args[1].TryGetString(out string key) ||
+            !args[2].TryGetString(out string callerApi))
         {
-            using var myLock = rosLock.Lock(Token);
-
-            if (args.Length != 3 ||
-                !args[1].TryGetString(out string key) ||
-                !args[2].TryGetString(out string callerApi))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
-
-            if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
-            {
-                return ErrorResponse("Caller api is not an uri");
-            }
-
-            int numUnsubscribed =
-                parameterSubscribers.TryGetValue(key, out var subscribers)
-                && subscribers.Remove(callerUri)
-                    ? 1
-                    : 0;
-
-            return OkResponse(numUnsubscribed);
+            return ErrorResponse("Failed to parse arguments");
         }
 
-        XmlRpcArg SearchParam(XmlRpcValue[] args)
+        if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
         {
-            if (args.Length != 2 ||
-                !args[0].TryGetString(out string callerId) ||
-                !args[1].TryGetString(out string key))
-            {
-                return ErrorResponse("Failed to parse arguments");
-            }
+            return ErrorResponse("Caller api is not an uri");
+        }
 
-            string fullKey = callerId + "/" + key;
-            if (parameters.ContainsKey(fullKey))
-            {
-                return OkResponse(fullKey);
-            }
+        if (!parameterSubscribers.TryGetValue(key, out var subscribers))
+        {
+            subscribers = new HashSet<Uri>();
+            parameterSubscribers[key] = subscribers;
+        }
 
-            if (callerId == "/")
-            {
-                return FailResponse();
-            }
+        subscribers.Add(callerUri);
 
-            string[] nodes = callerId.Split('/');
-            for (int i = nodes.Length - 2; i >= 0; i--)
-            {
-                string subKey = string.Join("/", nodes, 0, i) + "/" + key;
-                if (parameters.ContainsKey(subKey))
-                {
-                    return OkResponse(subKey);
-                }
-            }
+        var response =
+            parameters.TryGetValue(key, out XmlRpcArg arg)
+                ? arg
+                : Array.Empty<(string, XmlRpcArg)>();
+        return OkResponse(response);
+    }
 
+    XmlRpcArg UnsubscribeParam(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        if (args.Length != 3 ||
+            !args[1].TryGetString(out string key) ||
+            !args[2].TryGetString(out string callerApi))
+        {
+            return ErrorResponse("Failed to parse arguments");
+        }
+
+        if (!Uri.TryCreate(callerApi, UriKind.Absolute, out Uri? callerUri))
+        {
+            return ErrorResponse("Caller api is not an uri");
+        }
+
+        int numUnsubscribed =
+            parameterSubscribers.TryGetValue(key, out var subscribers)
+            && subscribers.Remove(callerUri)
+                ? 1
+                : 0;
+
+        return OkResponse(numUnsubscribed);
+    }
+
+    XmlRpcArg SearchParam(XmlRpcValue[] args)
+    {
+        using var myLock = rosLock.Lock(Token);
+
+        if (args.Length != 2 ||
+            !args[0].TryGetString(out string callerId) ||
+            !args[1].TryGetString(out string key))
+        {
+            return ErrorResponse("Failed to parse arguments");
+        }
+
+        string fullKey = callerId + "/" + key;
+        if (parameters.ContainsKey(fullKey))
+        {
+            return OkResponse(fullKey);
+        }
+
+        if (callerId == "/")
+        {
             return FailResponse();
         }
 
-        XmlRpcArg SystemMulticall(XmlRpcValue[] args)
+        string[] nodes = callerId.Split('/');
+        for (int i = nodes.Length - 2; i >= 0; i--)
         {
-            if (args.Length != 1 ||
-                !args[0].TryGetArray(out XmlRpcValue[] calls))
+            string subKey = string.Join("/", nodes, 0, i) + "/" + key;
+            if (parameters.ContainsKey(subKey))
+            {
+                return OkResponse(subKey);
+            }
+        }
+
+        return FailResponse();
+    }
+
+    XmlRpcArg SystemMulticall(XmlRpcValue[] args)
+    {
+        if (args.Length != 1 ||
+            !args[0].TryGetArray(out XmlRpcValue[] calls))
+        {
+            return ErrorResponse("Failed to parse arguments");
+        }
+
+        var responses = new List<XmlRpcArg>(calls.Length);
+        foreach (var callObject in calls)
+        {
+            if (!callObject.TryGetStruct(out (string ElementName, XmlRpcValue Element)[] call))
             {
                 return ErrorResponse("Failed to parse arguments");
             }
 
-            List<XmlRpcArg> responses = new(calls.Length);
-            foreach (var callObject in calls)
+            string? methodName = null;
+            XmlRpcValue[]? arguments = null;
+            foreach ((string elementName, XmlRpcValue element) in call)
             {
-                if (!callObject.TryGetStruct(out (string ElementName, XmlRpcValue Element)[] call))
+                switch (elementName)
                 {
-                    return ErrorResponse("Failed to parse arguments");
-                }
-
-                string? methodName = null;
-                XmlRpcValue[]? arguments = null;
-                foreach ((string elementName, XmlRpcValue element) in call)
-                {
-                    switch (elementName)
+                    case "methodName":
                     {
-                        case "methodName":
+                        if (!element.TryGetString(out string elementStr))
                         {
-                            if (!element.TryGetString(out string elementStr))
-                            {
-                                return ErrorResponse("Failed to parse methodname");
-                            }
-
-                            methodName = elementStr;
-                            break;
+                            return ErrorResponse("Failed to parse methodname tag, not a string");
                         }
-                        case "params":
-                        {
-                            if (!element.TryGetArray(out XmlRpcValue[] elementObjs) ||
-                                elementObjs.Length == 0)
-                            {
-                                return ErrorResponse("Failed to parse params");
-                            }
 
-                            arguments = elementObjs;
-                            break;
-                        }
-                        default:
-                            return ErrorResponse("Failed to parse struct array");
+                        methodName = elementStr;
+                        break;
                     }
-                }
+                    case "params":
+                    {
+                        if (!element.TryGetArray(out XmlRpcValue[] elementObjs) ||
+                            elementObjs.Length == 0)
+                        {
+                            return ErrorResponse("Failed to parse params tag, not an array");
+                        }
 
-                if (methodName == null || arguments == null)
-                {
-                    return ErrorResponse("methodname or params missing");
-                }
-
-                if (!methods.TryGetValue(methodName, out var method))
-                {
-                    return ErrorResponse("Method not found");
-                }
-
-                XmlRpcArg response = method(arguments);
-                responses.Add(response);
-
-                if (lateCallbacks != null &&
-                    lateCallbacks.TryGetValue(methodName, out var lateCallback))
-                {
-                    lateCallback(args, default);
+                        arguments = elementObjs;
+                        break;
+                    }
+                    default:
+                        return ErrorResponse($"Unexpected element '{elementName}' in struct array");
                 }
             }
 
-            return new[] { (XmlRpcArg)responses.ToArray() };
+            if (methodName == null || arguments == null)
+            {
+                return ErrorResponse("methodname or params missing");
+            }
+
+            if (!methods.TryGetValue(methodName, out var method))
+            {
+                return ErrorResponse("Method not found");
+            }
+
+            var response = method(arguments);
+            responses.Add(response);
+
+            if (lateCallbacks != null &&
+                lateCallbacks.TryGetValue(methodName, out var lateCallback))
+            {
+                lateCallback(args, default);
+            }
         }
+
+        return new[] { (XmlRpcArg)responses.ToArray() };
     }
 }

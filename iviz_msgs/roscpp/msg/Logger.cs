@@ -25,7 +25,7 @@ namespace Iviz.Msgs.Roscpp
         }
         
         /// Constructor with buffer.
-        internal Logger(ref ReadBuffer b)
+        public Logger(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Level = b.DeserializeString();

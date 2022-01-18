@@ -20,7 +20,6 @@ using Iviz.Ros;
 using Iviz.Tools;
 using Newtonsoft.Json;
 using UnityEngine;
-using Feedback = Iviz.Msgs.IvizCommonMsgs.Feedback;
 using LaunchDialog = Iviz.Msgs.IvizCommonMsgs.LaunchDialog;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 using UpdateRobot = Iviz.Msgs.IvizCommonMsgs.UpdateRobot;
@@ -157,12 +156,12 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    RosLogger.Info($"Creating module of type {moduleType}");
+                    RosLogger.Debug($"ControllerService: Creating module of type {moduleType}");
                     var newModuleData = ModuleListPanel.Instance.CreateModule(moduleType,
                         requestedId: requestedId.Length != 0 ? requestedId : null);
                     result.id = newModuleData.Configuration.Id;
                     result.success = true;
-                    RosLogger.Info("Done!");
+                    RosLogger.Debug("ControllerService: Done!");
                 }
                 catch (Exception e)
                 {
@@ -195,7 +194,7 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            var data = ModuleDatas.FirstOrDefault(module => module.Topic == topic);
+            var data = ModuleDatas.OfType<ListenerModuleData>().FirstOrDefault(module => module.Topic == topic);
             if (data != null)
             {
                 result.message = requestedId == data.Configuration.Id
@@ -212,15 +211,15 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            var topics = Connection.GetSystemPublishedTopicTypes(RequestType.CachedOnly);
-            string? type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
+            string? GetCachedPublishedType() =>
+                Connection.GetSystemPublishedTopicTypes(RequestType.CachedOnly)
+                    .FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
 
-            if (type == null)
-            {
-                topics = await Connection.GetSystemPublishedTopicTypesAsync(DefaultTimeoutInMs);
-                type = topics.FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
-            }
+            async ValueTask<string?> GetPublishedTypeFromServer() =>
+                (await Connection.GetSystemPublishedTopicTypesAsync(DefaultTimeoutInMs))
+                    .FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
 
+            string? type = GetCachedPublishedType() ?? await GetPublishedTypeFromServer();
             if (type == null)
             {
                 return ("", false, $"EE Failed to find topic '{topic}'");
@@ -243,7 +242,7 @@ namespace Iviz.Controllers
                 catch (Exception e)
                 {
                     result.message = $"EE An exception was raised: {e.Message}";
-                    RosLogger.Error("Exception raised in TryAddModuleFromTopicAsync", e);
+                    RosLogger.Error($"ControllerService: Failed to create module for topic '{topic}'", e);
                 }
                 finally
                 {
@@ -355,14 +354,14 @@ namespace Iviz.Controllers
         {
             (bool success, string message) = await TrySetFixedFrame(srv.Request.Id);
             srv.Response.Success = success;
-            srv.Response.Message = message ?? "";
+            srv.Response.Message = message;
         }
 
         static async ValueTask<(bool success, string message)> TrySetFixedFrame(string id)
         {
             (bool success, string message) result = default;
 
-            using (SemaphoreSlim signal = new SemaphoreSlim(0))
+            using (var signal = new SemaphoreSlim(0))
             {
                 GameThread.Post(() =>
                 {
@@ -416,7 +415,7 @@ namespace Iviz.Controllers
                             else
                             {
                                 successList.Add(true);
-                                posesList.Add(frame.OriginWorldPose.Unity2RosPose());
+                                posesList.Add(frame.FixedWorldPose.Unity2RosPose());
                             }
                         }
 
@@ -627,22 +626,12 @@ namespace Iviz.Controllers
         {
             return Task.Run(() =>
             {
-                int bpp;
-                bool flipRb;
-
-                switch (ss.Format)
+                (int bpp, bool flipRb) = ss.Format switch
                 {
-                    case ScreenshotFormat.Bgra:
-                        bpp = 4;
-                        flipRb = true;
-                        break;
-                    case ScreenshotFormat.Rgb:
-                        bpp = 3;
-                        flipRb = false;
-                        break;
-                    default:
-                        throw new InvalidOperationException("Unknown screenshot format");
-                }
+                    ScreenshotFormat.Bgra => (bpp: 4, flipRb: true),
+                    ScreenshotFormat.Rgb => (bpp: 3, flipRb: false),
+                    _ => throw new InvalidOperationException("Unknown screenshot format")
+                };
 
                 var builder = new BigGustave.PngBuilder(ss.Bytes, bpp == 4, ss.Width, ss.Height, bpp, flipRb);
                 return builder.Save();
@@ -759,6 +748,7 @@ namespace Iviz.Controllers
                 {
                     srv.Response.Success = false;
                     srv.Response.Message = $"EE An exception was raised: {e.Message}";
+                    RosLogger.Error("ControllerService: Failed to create robot", e);
                 }
                 finally
                 {
@@ -822,7 +812,7 @@ namespace Iviz.Controllers
 
                         feedback.VizId = ConnectionManager.MyId ?? "";
                         feedback.Id = mDialog.Id ?? "";
-                        feedback.FeedbackType = FeedbackType.ButtonClick;
+                        feedback.Type = (byte) FeedbackType.ButtonClick;
                         feedback.EntryId = buttonId;
                         overrideExpired = true;
 
@@ -837,7 +827,7 @@ namespace Iviz.Controllers
 
                         feedback.VizId = ConnectionManager.MyId ?? "";
                         feedback.Id = mDialog.Id ?? "";
-                        feedback.FeedbackType = FeedbackType.MenuEntryClick;
+                        feedback.Type = (byte) FeedbackType.MenuEntryClick;
                         feedback.EntryId = buttonId;
                         overrideExpired = true;
 
@@ -858,7 +848,7 @@ namespace Iviz.Controllers
 
                         feedback.VizId = ConnectionManager.MyId ?? "";
                         feedback.Id = mDialog.Id ?? "";
-                        feedback.FeedbackType = FeedbackType.Expired;
+                        feedback.Type = (byte) FeedbackType.Expired;
                         feedback.EntryId = 0;
 
                         TryRelease(signal);

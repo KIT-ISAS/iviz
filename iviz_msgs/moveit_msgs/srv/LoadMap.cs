@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal LoadMapRequest(ref ReadBuffer b)
+        public LoadMapRequest(ref ReadBuffer b)
         {
             Filename = b.DeserializeString();
         }
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal LoadMapResponse(ref ReadBuffer b)
+        public LoadMapResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }

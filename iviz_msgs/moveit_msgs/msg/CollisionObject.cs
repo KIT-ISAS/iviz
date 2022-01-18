@@ -65,7 +65,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal CollisionObject(ref ReadBuffer b)
+        public CollisionObject(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Id = b.DeserializeString();

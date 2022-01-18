@@ -70,7 +70,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMotionPlanRequest(ref ReadBuffer b)
+        public GetMotionPlanRequest(ref ReadBuffer b)
         {
             MotionPlanRequest = new MotionPlanRequest(ref b);
         }
@@ -113,7 +113,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal GetMotionPlanResponse(ref ReadBuffer b)
+        public GetMotionPlanResponse(ref ReadBuffer b)
         {
             MotionPlanResponse = new MotionPlanResponse(ref b);
         }

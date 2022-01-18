@@ -21,7 +21,7 @@ namespace Iviz.Msgs.StdMsgs
         }
         
         /// Constructor with buffer.
-        internal UInt16(ref ReadBuffer b)
+        public UInt16(ref ReadBuffer b)
         {
             Data = b.Deserialize<ushort>();
         }

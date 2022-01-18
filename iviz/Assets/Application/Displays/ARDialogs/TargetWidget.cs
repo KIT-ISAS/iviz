@@ -132,7 +132,7 @@ namespace Iviz.App.ARDialogs
             if (scaling)
             {
                 (float x, _, float z) = corner.Transform.localPosition;
-                TargetScale = 2 * new Vector2(Mathf.Abs(x), Mathf.Abs(z));
+                TargetScale = 2 * new Vector2(x, z).Abs();
             }
         }
 

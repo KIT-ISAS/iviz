@@ -9,6 +9,7 @@ using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -24,20 +25,17 @@ namespace Iviz.Controllers
 
         readonly FrameNode cubeNode;
         readonly FrameNode textureNode;
-
-        OccupancyGridResource[] gridTiles = Array.Empty<OccupancyGridResource>();
         readonly List<OccupancyGridTextureResource> textureTiles = new();
 
+        OccupancyGridResource[] gridTiles = Array.Empty<OccupancyGridResource>();
+        
         int numCellsX;
         int numCellsY;
         float cellSize;
-
-        public override IModuleData ModuleData { get; }
-
-        public override TfFrame? Frame => cubeNode.Parent;
-
         bool isProcessing;
 
+        public override TfFrame? Frame => cubeNode.Parent;
+        
         bool IsProcessing
         {
             get => isProcessing;
@@ -66,9 +64,10 @@ namespace Iviz.Controllers
                     numValid = 0;
                 }
 
-                return $"<b>{numCellsX.ToString("N0")}x{numCellsY.ToString("N0")} cells | " +
-                       $"{cellSize.ToString("#,0.###")} m/cell</b>\n" +
-                       $"{numValid.ToString("N0")} valid";
+                return $"<b>{numCellsX.ToString("N0", BuiltIns.Culture)}x" +
+                       $"{numCellsY.ToString("N0", BuiltIns.Culture)} cells | " +
+                       $"{cellSize.ToString("#,0.###", BuiltIns.Culture)} m/cell</b>\n" +
+                       $"{numValid.ToString("N0", BuiltIns.Culture)} valid";
             }
         }
 
@@ -152,7 +151,7 @@ namespace Iviz.Controllers
             {
                 config.ScaleZ = value;
 
-                float yScale = Mathf.Approximately(cellSize, 0) ? 1 : value / cellSize;
+                float yScale = cellSize.ApproximatelyZero() ? 1 : value / cellSize;
                 cubeNode.Transform.localScale = new Vector3(1, yScale, 1);
             }
         }
@@ -194,7 +193,7 @@ namespace Iviz.Controllers
             set
             {
                 config.CubesVisible = value;
-                cubeNode.gameObject.SetActive(value);
+                cubeNode.Visible = value;
             }
         }
 
@@ -204,18 +203,16 @@ namespace Iviz.Controllers
             set
             {
                 config.TextureVisible = value;
-                textureNode.gameObject.SetActive(value);
+                textureNode.Visible = value;
             }
         }
 
         public override IListener Listener { get; }
 
-        public OccupancyGridListener(IModuleData moduleData, OccupancyGridConfiguration? config, string topic)
+        public OccupancyGridListener(OccupancyGridConfiguration? config, string topic)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
-            cubeNode = FrameNode.Instantiate("OccupancyGrid Cube Node");
-            textureNode = FrameNode.Instantiate("OccupancyGrid Texture Node");
+            cubeNode = new FrameNode("OccupancyGrid Cube Node");
+            textureNode = new FrameNode("OccupancyGrid Texture Node");
 
             Config = config ?? new OccupancyGridConfiguration
             {
@@ -229,28 +226,32 @@ namespace Iviz.Controllers
         {
             if (IsProcessing)
             {
+                msg.Data.TryReturn();
                 return;
             }
 
             if (msg.Data.Length != msg.Info.Width * msg.Info.Height)
             {
-                RosLogger.Debug(
-                    $"{this}: Size {msg.Info.Width}x{msg.Info.Height} but data length {msg.Data.Length}");
+                RosLogger.Debug($"{this}: Size {msg.Info.Width.ToString()}x{msg.Info.Height.ToString()} " +
+                                $"does not match data length {msg.Data.Length.ToString()}");
+                msg.Data.TryReturn();
                 return;
             }
 
             if (float.IsNaN(msg.Info.Resolution))
             {
                 RosLogger.Debug($"{this}: NaN in header!");
+                msg.Data.TryReturn();
                 return;
             }
 
             cubeNode.AttachTo(msg.Header);
             textureNode.AttachTo(msg.Header);
 
-            if (msg.Info.Origin.HasNaN())
+            if (msg.Info.Origin.IsInvalid())
             {
                 RosLogger.Debug($"{this}: NaN in origin!");
+                msg.Data.TryReturn();
                 return;
             }
 
@@ -258,8 +259,10 @@ namespace Iviz.Controllers
             Pose validatedOrigin;
             if (!origin.IsUsable())
             {
-                RosLogger.Error($"{this}: Cannot use ({origin.position.x}, {origin.position.y}, " +
-                                $"{origin.position.z}) as position. Values too large!");
+                RosLogger.Error($"{this}: Cannot use ({origin.position.x.ToString(BuiltIns.Culture)}, " +
+                                $"{origin.position.y.ToString(BuiltIns.Culture)}, " +
+                                $"{origin.position.z.ToString(BuiltIns.Culture)}) " +
+                                "as position. Values too large!");
                 validatedOrigin = Pose.identity;
             }
             else
@@ -278,28 +281,31 @@ namespace Iviz.Controllers
                 IsProcessing = true;
                 if (CubesVisible)
                 {
-                    SetCubes(msg.Data, validatedOrigin, tasks);
+                    tasks.AddRange(SetCubes(msg.Data, validatedOrigin));
                 }
 
                 if (TextureVisible)
                 {
-                    SetTextures(msg.Data, validatedOrigin, tasks);
+                    tasks.AddRange(SetTextures(msg.Data, validatedOrigin));
                 }
             }
             finally
             {
                 AwaitAndReset();
             }
-            
+
             async void AwaitAndReset()
             {
                 await tasks.WhenAll().AwaitNoThrow(this);
-                IsProcessing = false; 
+                msg.Data.TryReturn();
+                IsProcessing = false;
             }
         }
-        
-        void SetCubes(Memory<sbyte> data, Pose pose, ICollection<Task> tasks)
+
+        IEnumerable<Task> SetCubes(Memory<sbyte> data, Pose pose)
         {
+            var tasks = new List<Task>();
+
             if (gridTiles.Length != 16)
             {
                 gridTiles = new OccupancyGridResource[16];
@@ -350,10 +356,13 @@ namespace Iviz.Controllers
 
 
             ScaleZ = ScaleZ;
+            return tasks; 
         }
 
-        void SetTextures(Memory<sbyte> data, Pose pose, ICollection<Task> tasks)
+        IEnumerable<Task> SetTextures(Memory<sbyte> data, Pose pose)
         {
+            var tasks = new List<Task>();
+
             int tileSizeX = (numCellsX + MaxTileSize - 1) / MaxTileSize;
             int tileSizeY = (numCellsY + MaxTileSize - 1) / MaxTileSize;
             int tileTotalSize = tileSizeY * tileSizeX;
@@ -410,6 +419,8 @@ namespace Iviz.Controllers
                     }));
                 }
             }
+
+            return tasks;
         }
 
 
@@ -426,8 +437,8 @@ namespace Iviz.Controllers
                 texture.ReturnToPool();
             }
 
-            cubeNode.DestroySelf();
-            textureNode.DestroySelf();
+            cubeNode.Dispose();
+            textureNode.Dispose();
         }
     }
 }

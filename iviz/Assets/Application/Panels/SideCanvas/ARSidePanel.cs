@@ -13,7 +13,7 @@ namespace Iviz.App
     {
         [NotNull]
         static ARFoundationController Controller =>
-            ARController.Instance.CheckedNull() ?? throw new NullReferenceException("AR Controller is not set");
+            ARController.Instance ?? throw new NullReferenceException("AR Controller is not set");
 
         [CanBeNull] RectTransform mTransform;
         [NotNull] RectTransform Transform => mTransform != null ? mTransform : (mTransform = (RectTransform)transform);
@@ -52,11 +52,11 @@ namespace Iviz.App
 
                 active = value;
 
+                var parent = (RectTransform)Transform.parent;
                 FAnimator.Spawn(tokenSource.Token, 0.15f, t =>
                 {
                     float scaledT = Mathf.Sqrt(t);
                     float x = Mathf.Lerp(shiftLeft, shiftRight, active ? scaledT : (1 - scaledT));
-                    var parent = (RectTransform)Transform.parent;
                     parent.anchoredPosition = parent.anchoredPosition.WithX(x);
                 });
             }
@@ -105,7 +105,7 @@ namespace Iviz.App
             {
                 if (ARController.Instance != null)
                 {
-                    ARController.Instance.ModuleData.ShowPanel();
+                    ModuleListPanel.Instance.ShowARPanel();
                 }
             });
 
@@ -114,7 +114,7 @@ namespace Iviz.App
             arVisible.Clicked += () => Controller.Visible = (arVisible.Enabled = !arVisible.Enabled);
             move.Clicked += () =>
             {
-                if (ARController.Instance != null && !ARController.Instance.SetupModeEnabled)
+                if (ARController.Instance is { SetupModeEnabled: false })
                 {
                     ToggleARJoystick();
                 }

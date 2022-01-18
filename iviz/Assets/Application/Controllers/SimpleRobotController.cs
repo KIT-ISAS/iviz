@@ -31,6 +31,8 @@ namespace Iviz.Controllers
 
         GameObject? RobotObject => Robot?.BaseLinkObject;
 
+        public event Action? RobotFinishedLoading;
+
         public RobotModel? Robot
         {
             get => robot;
@@ -50,7 +52,7 @@ namespace Iviz.Controllers
         public RobotConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 AttachedToTf = value.AttachedToTf;
                 FramePrefix = value.FramePrefix;
@@ -61,7 +63,7 @@ namespace Iviz.Controllers
                 Smoothness = value.Smoothness;
                 Metallic = value.Metallic;
                 KeepMeshMaterials = value.KeepMeshMaterials;
-                EnableColliders = value.EnableColliders;
+                Interactable = value.Interactable;
 
                 ProcessRobotSource(value.SavedRobotName, value.SourceParameter);
             }
@@ -196,20 +198,22 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool EnableColliders
+        public bool Interactable
         {
-            get => config.EnableColliders;
+            get => config.Interactable;
             set
             {
-                config.EnableColliders = value;
+                config.Interactable = value;
                 if (Robot is null)
                 {
                     return;
                 }
 
-                var colliders = Robot.BaseLinkObject.GetComponentsInChildren<Collider>(true)
-                    .Where(collider => collider.gameObject.layer == LayerType.Collider);
-                foreach (var collider in colliders)
+                var allColliders = Robot.LinkObjects.Values.SelectMany(
+                    linkObject => linkObject
+                        .GetComponentsInChildren<Collider>(true)
+                        .Where(collider => collider.gameObject.layer == LayerType.Collider));
+                foreach (var collider in allColliders)
                 {
                     collider.enabled = value;
                 }
@@ -221,8 +225,6 @@ namespace Iviz.Controllers
             get => config.KeepMeshMaterials;
             set => config.KeepMeshMaterials = value;
         }
-
-        public IModuleData ModuleData { get; }
 
         public TfFrame? Frame => node.Parent;
 
@@ -246,12 +248,10 @@ namespace Iviz.Controllers
 
         public event Action? Stopped;
 
-        public SimpleRobotController(IModuleData moduleData)
+        public SimpleRobotController(RobotConfiguration? config)
         {
-            node = FrameNode.Instantiate("SimpleRobotNode");
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-
-            Config = new RobotConfiguration();
+            node = new FrameNode("SimpleRobotNode");
+            Config = config ?? new RobotConfiguration();
         }
 
 
@@ -444,15 +444,15 @@ namespace Iviz.Controllers
                         HelpText = "[Error Loading Robot. See Log.]";
                         Robot = null;
                         robotLoadingTask = null;
-                        ((SimpleRobotModuleData)ModuleData).OnRobotFinishedLoading();
+                        RobotFinishedLoading?.Invoke();
                         return;
                     case TaskStatus.Canceled:
                         HelpText = "[Robot Task canceled.]";
                         robotLoadingTask = null;
-                        ((SimpleRobotModuleData)ModuleData).OnRobotFinishedLoading();
+                        RobotFinishedLoading?.Invoke();
                         return;
                     case TaskStatus.RanToCompletion:
-                        node.name = "SimpleRobotNode:" + Name;
+                        node.Name = "SimpleRobotNode:" + Name;
                         if (Robot == null)
                         {
                             HelpText = "[Invalid Robot]";
@@ -477,7 +477,7 @@ namespace Iviz.Controllers
                         Smoothness = Smoothness;
                         Metallic = Metallic;
                         robotLoadingTask = null;
-                        ((SimpleRobotModuleData)ModuleData).OnRobotFinishedLoading();
+                        RobotFinishedLoading?.Invoke();
                         break;
                 }
             }
@@ -557,9 +557,9 @@ namespace Iviz.Controllers
             }
 
             Robot = null;
+            RobotFinishedLoading = null;
             Stopped?.Invoke();
-
-            node.DestroySelf();
+            node.Dispose();
         }
 
         public void ResetController()

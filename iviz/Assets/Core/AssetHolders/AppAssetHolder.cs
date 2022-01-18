@@ -11,7 +11,6 @@ namespace Iviz.Displays
         public GameObject ARPrefab;
         public GameObject AngleAxis;
         public GameObject ARCameraFovDisplay;
-        public GameObject ARMarkerResource;
         public GameObject Arrow;
         public GameObject AxisFrame;
         public GameObject BoundaryFrame;
@@ -28,7 +27,7 @@ namespace Iviz.Displays
         public GameObject RadialScan;
         public GameObject Ring;
         public GameObject Square;
-        public GameObject TFFrame;
+        //public GameObject TFFrame;
         public GameObject Trail;
         public GameObject Triangle;
         

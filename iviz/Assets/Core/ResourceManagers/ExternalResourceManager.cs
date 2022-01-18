@@ -32,50 +32,35 @@ namespace Iviz.Displays
         const string StrMissingFileRemoving = "ExternalResourceManager: Missing file '{0}'. Removing.";
         const string StrServiceFailedWithMessage = "Model Loader Service failed to load '{0}'. Reason: {1}";
 
-        const string StrCallServiceFailed =
-            "ExternalResourceManager: Call Service failed! Are you sure iviz is connected and the Iviz.Model.Service program is running?";
+        const string StrCallServiceFailed = "ExternalResourceManager: Call Service failed! " +
+                                            "Are you sure iviz is connected and the Iviz.Model.Service program is running?";
 
         const int TimeoutInMs = 10000;
-
         const int Md5SumLength = 32;
 
 
         [DataContract]
-        public class ResourceFiles
+        sealed class ResourceFiles
         {
             [DataMember] int Version { get; set; }
-            [DataMember] public Dictionary<string, string> Models { get; set; }
-            [DataMember] public Dictionary<string, string> Textures { get; set; }
-            [DataMember] public Dictionary<string, string> Scenes { get; set; }
-            [DataMember] public Dictionary<string, string> RobotDescriptions { get; set; }
-
-            public ResourceFiles()
-            {
-                Models = new Dictionary<string, string>();
-                Textures = new Dictionary<string, string>();
-                Scenes = new Dictionary<string, string>();
-                RobotDescriptions = new Dictionary<string, string>();
-            }
+            [DataMember] public Dictionary<string, string> Models { get; set; } = new();
+            [DataMember] public Dictionary<string, string> Textures { get; set; } = new();
+            [DataMember] public Dictionary<string, string> Scenes { get; set; } = new();
+            [DataMember] public Dictionary<string, string> RobotDescriptions { get; set; } = new();
         }
 
         readonly ResourceFiles resourceFiles = new();
-
-        readonly Dictionary<string, Info<GameObject>> loadedModels = new();
-
-        readonly Dictionary<string, Info<Texture2D>> loadedTextures = new();
-
-        readonly Dictionary<string, Info<GameObject>> loadedScenes = new();
-
+        readonly Dictionary<string, ResourceKey<GameObject>> loadedModels = new();
+        readonly Dictionary<string, ResourceKey<Texture2D>> loadedTextures = new();
+        readonly Dictionary<string, ResourceKey<GameObject>> loadedScenes = new();
         readonly Dictionary<string, float> temporaryBlacklist = new();
-
         readonly AsyncLock mutex = new();
+        readonly GameObject? node;
 
         CancellationTokenSource runningTs = new();
 
         public int ResourceCount => resourceFiles.Models.Count + resourceFiles.Textures.Count +
                                     resourceFiles.Scenes.Count + resourceFiles.RobotDescriptions.Count;
-
-        readonly GameObject? node;
 
         public ReadOnlyCollection<string> GetListOfModels() => resourceFiles.Models.Keys.ToList().AsReadOnly();
 
@@ -99,11 +84,11 @@ namespace Iviz.Displays
 
             if (!File.Exists(Settings.ResourcesFilePath))
             {
-                RosLogger.Debug($"{this}: Failed to find file " + Settings.ResourcesFilePath);
+                RosLogger.Debug($"{this}: Failed to find file {Settings.ResourcesFilePath}");
                 return;
             }
 
-            RosLogger.Debug($"{this}: Using resource file " + Settings.ResourcesFilePath);
+            RosLogger.Debug($"{this}: Using resource file {Settings.ResourcesFilePath}");
 
             try
             {
@@ -116,7 +101,7 @@ namespace Iviz.Displays
             }
         }
 
-        public ValueTask ClearModelCacheAsync(CancellationToken token = default)
+        public Task ClearModelCacheAsync(CancellationToken token = default)
         {
             runningTs.Cancel();
             runningTs = new CancellationTokenSource();
@@ -153,10 +138,10 @@ namespace Iviz.Displays
             return WriteResourceFileAsync(token);
         }
 
-        ValueTask WriteResourceFileAsync(CancellationToken token)
+        Task WriteResourceFileAsync(CancellationToken token)
         {
             return FileUtils.WriteAllTextAsync(Settings.ResourcesFilePath,
-                JsonConvert.SerializeObject(resourceFiles, Formatting.Indented), token).AwaitNoThrow(this);
+                BuiltIns.ToJsonString(resourceFiles), token).AwaitNoThrow(this);
         }
 
         public static string SanitizeFilename(string input)
@@ -263,12 +248,12 @@ namespace Iviz.Displays
 
         #endregion
 
-        public bool TryGetGameObject(string uriString, [NotNullWhen(true)] out Info<GameObject>? resource)
+        public bool TryGetGameObject(string uriString, [NotNullWhen(true)] out ResourceKey<GameObject>? resource)
         {
             return TryGetModel(uriString, out resource) || TryGetScene(uriString, out resource);
         }
 
-        public async ValueTask<Info<GameObject>?> TryGetGameObjectAsync(string uriString,
+        public async ValueTask<ResourceKey<GameObject>?> TryGetGameObjectAsync(string uriString,
             IExternalServiceProvider? provider, CancellationToken token = default)
         {
             if (uriString is null)
@@ -315,7 +300,7 @@ namespace Iviz.Displays
             }
         }
 
-        bool TryGetModel(string uriString, [NotNullWhen(true)] out Info<GameObject>? resource)
+        bool TryGetModel(string uriString, [NotNullWhen(true)] out ResourceKey<GameObject>? resource)
         {
             if (!loadedModels.TryGetValue(uriString, out var resourceCandidate))
             {
@@ -334,10 +319,10 @@ namespace Iviz.Displays
             return false;
         }
 
-        async ValueTask<Info<GameObject>?> TryGetModelAsync(string uriString, IExternalServiceProvider? provider,
+        async ValueTask<ResourceKey<GameObject>?> TryGetModelAsync(string uriString, IExternalServiceProvider? provider,
             CancellationToken token)
         {
-            if (loadedModels.TryGetValue(uriString, out Info<GameObject> resource))
+            if (loadedModels.TryGetValue(uriString, out ResourceKey<GameObject> resource))
             {
                 return resource;
             }
@@ -364,7 +349,7 @@ namespace Iviz.Displays
                 : await TryGetModelFromServerAsync(uriString, provider, token);
         }
 
-        async ValueTask<Info<GameObject>?> TryGetModelFromServerAsync(string uriString,
+        async ValueTask<ResourceKey<GameObject>?> TryGetModelFromServerAsync(string uriString,
             IExternalServiceProvider provider, CancellationToken token)
         {
             var msg = new GetModelResource { Request = { Uri = uriString } };
@@ -404,15 +389,15 @@ namespace Iviz.Displays
             return null;
         }
 
-        bool TryGetScene(string uriString, [NotNullWhen(true)] out Info<GameObject>? resource)
+        bool TryGetScene(string uriString, [NotNullWhen(true)] out ResourceKey<GameObject>? resource)
         {
             return loadedScenes.TryGetValue(uriString, out resource);
         }
 
-        async ValueTask<Info<GameObject>?> TryGetSceneAsync(string uriString, IExternalServiceProvider? provider,
+        async ValueTask<ResourceKey<GameObject>?> TryGetSceneAsync(string uriString, IExternalServiceProvider? provider,
             CancellationToken token)
         {
-            if (loadedScenes.TryGetValue(uriString, out Info<GameObject> resource))
+            if (loadedScenes.TryGetValue(uriString, out ResourceKey<GameObject> resource))
             {
                 return resource;
             }
@@ -434,7 +419,7 @@ namespace Iviz.Displays
                 : await TryGetSceneFromServerAsync(uriString, provider, token);
         }
 
-        async ValueTask<Info<GameObject>?> TryGetSceneFromServerAsync(string uriString,
+        async ValueTask<ResourceKey<GameObject>?> TryGetSceneFromServerAsync(string uriString,
             IExternalServiceProvider provider, CancellationToken token)
         {
             var msg = new GetSdf { Request = { Uri = uriString } };
@@ -455,7 +440,7 @@ namespace Iviz.Displays
             return null;
         }
 
-        public async ValueTask<Info<Texture2D>?> TryGetTextureAsync(string uriString,
+        public async ValueTask<ResourceKey<Texture2D>?> TryGetTextureAsync(string uriString,
             IExternalServiceProvider? provider, CancellationToken token)
         {
             if (uriString is null)
@@ -498,7 +483,7 @@ namespace Iviz.Displays
                 : await TryGetTextureFromServerAsync(uriString, provider, tokenSource.Token, currentTime);
         }
 
-        async ValueTask<Info<Texture2D>?> TryGetTextureFromServerAsync(string uriString,
+        async ValueTask<ResourceKey<Texture2D>?> TryGetTextureFromServerAsync(string uriString,
             IExternalServiceProvider provider, CancellationToken token, float currentTime)
         {
             var msg = new GetModelTexture { Request = { Uri = uriString } };
@@ -544,7 +529,7 @@ namespace Iviz.Displays
             return BuiltIns.DeserializeMessage<Model>(buffer[Md5SumLength..]);
         }
 
-        async ValueTask<Info<GameObject>?> LoadLocalModelAsync(string uriString, string localPath,
+        async ValueTask<ResourceKey<GameObject>?> LoadLocalModelAsync(string uriString, string localPath,
             IExternalServiceProvider? provider, CancellationToken token)
         {
             GameObject obj;
@@ -564,13 +549,13 @@ namespace Iviz.Displays
                 return null;
             }
 
-            var resource = new Info<GameObject>(obj);
+            var resource = new ResourceKey<GameObject>(obj);
             loadedModels[uriString] = resource;
 
             return resource;
         }
 
-        async ValueTask<Info<Texture2D>?> LoadLocalTextureAsync(string uriString, string localPath,
+        async ValueTask<ResourceKey<Texture2D>?> LoadLocalTextureAsync(string uriString, string localPath,
             CancellationToken token)
         {
             Texture2D texture;
@@ -591,13 +576,13 @@ namespace Iviz.Displays
 
             texture.name = uriString;
 
-            var resource = new Info<Texture2D>(texture);
+            var resource = new ResourceKey<Texture2D>(texture);
             loadedTextures[uriString] = resource;
 
             return resource;
         }
 
-        async ValueTask<Info<GameObject>?> LoadLocalSceneAsync(string uriString, string localPath,
+        async ValueTask<ResourceKey<GameObject>?> LoadLocalSceneAsync(string uriString, string localPath,
             IExternalServiceProvider? provider, CancellationToken token)
         {
             GameObject obj;
@@ -621,20 +606,20 @@ namespace Iviz.Displays
                 return null;
             }
 
-            var resource = new Info<GameObject>(obj);
+            var resource = new ResourceKey<GameObject>(obj);
             loadedScenes[uriString] = resource;
 
             return resource;
         }
 
-        async ValueTask<Info<GameObject>?> ProcessModelResponseAsync(string uriString,
+        async ValueTask<ResourceKey<GameObject>?> ProcessModelResponseAsync(string uriString,
             GetModelResourceResponse msg, IExternalServiceProvider provider,
             CancellationToken token)
         {
             try
             {
                 var obj = await CreateModelObjectAsync(uriString, msg.Model, provider, token);
-                var info = new Info<GameObject>(obj);
+                var info = new ResourceKey<GameObject>(obj);
                 loadedModels[uriString] = info;
 
                 string localPath = SanitizeFilename(uriString);
@@ -660,7 +645,7 @@ namespace Iviz.Displays
             }
         }
 
-        async ValueTask<Info<Texture2D>?> ProcessTextureResponseAsync(string uriString, GetModelTextureResponse msg,
+        async ValueTask<ResourceKey<Texture2D>?> ProcessTextureResponseAsync(string uriString, GetModelTextureResponse msg,
             CancellationToken token)
         {
             try
@@ -670,7 +655,7 @@ namespace Iviz.Displays
                 texture.LoadImage(msg.Image.Data);
                 texture.name = uriString;
 
-                var info = new Info<Texture2D>(texture);
+                var info = new ResourceKey<Texture2D>(texture);
                 loadedTextures[uriString] = info;
 
                 string localPath = SanitizeFilename(uriString);
@@ -690,14 +675,14 @@ namespace Iviz.Displays
             }
         }
 
-        async ValueTask<Info<GameObject>?> ProcessSceneResponseAsync(string uriString,
+        async ValueTask<ResourceKey<GameObject>?> ProcessSceneResponseAsync(string uriString,
             GetSdfResponse msg, IExternalServiceProvider? provider, CancellationToken token)
         {
             try
             {
                 Debug.Log($"{this}: Processing {uriString}");
                 var sceneNode = await CreateSceneNodeAsync(msg.Scene, provider, token);
-                var info = new Info<GameObject>(sceneNode);
+                var info = new ResourceKey<GameObject>(sceneNode);
 
                 loadedScenes[uriString] = info;
 

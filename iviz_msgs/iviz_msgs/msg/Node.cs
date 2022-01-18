@@ -30,7 +30,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Node(ref ReadBuffer b)
+        public Node(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Parent = b.Deserialize<int>();

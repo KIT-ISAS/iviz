@@ -15,6 +15,7 @@ namespace Iviz.App
         TMP_Text Text => text != null ? text : text = GetComponent<TMP_Text>();
 
         public event Action<string>? LinkClicked;
+        public event Action<string>? LinkDoubleClicked;
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {
@@ -26,7 +27,10 @@ namespace Iviz.App
             }
 
             var linkInfo = Text.textInfo.linkInfo[linkIndex];
-            LinkClicked?.Invoke(linkInfo.GetLinkID());
+            var eventToInvoke = eventData.clickCount == 1 
+                ? LinkClicked 
+                : LinkDoubleClicked;
+            eventToInvoke?.Invoke(linkInfo.GetLinkID());
         }
     }
 }

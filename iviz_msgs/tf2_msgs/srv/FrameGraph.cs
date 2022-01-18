@@ -60,7 +60,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal FrameGraphRequest(ref ReadBuffer b)
+        public FrameGraphRequest(ref ReadBuffer b)
         {
         }
         
@@ -104,7 +104,7 @@ namespace Iviz.Msgs.Tf2Msgs
         }
         
         /// Constructor with buffer.
-        internal FrameGraphResponse(ref ReadBuffer b)
+        public FrameGraphResponse(ref ReadBuffer b)
         {
             FrameYaml = b.DeserializeString();
         }

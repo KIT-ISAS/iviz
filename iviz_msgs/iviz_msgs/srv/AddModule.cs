@@ -74,7 +74,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal AddModuleRequest(ref ReadBuffer b)
+        public AddModuleRequest(ref ReadBuffer b)
         {
             ModuleType = b.DeserializeString();
             Id = b.DeserializeString();
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal AddModuleResponse(ref ReadBuffer b)
+        public AddModuleResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
             Message = b.DeserializeString();

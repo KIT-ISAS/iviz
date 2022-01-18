@@ -68,7 +68,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestArrayRequestRequest(ref ReadBuffer b)
+        public TestArrayRequestRequest(ref ReadBuffer b)
         {
             @int = b.DeserializeStructArray<int>();
         }
@@ -102,7 +102,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
         
         /// Constructor with buffer.
-        internal TestArrayRequestResponse(ref ReadBuffer b)
+        public TestArrayRequestResponse(ref ReadBuffer b)
         {
         }
         

@@ -32,7 +32,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
         
         /// Constructor with buffer.
-        internal Group(ref ReadBuffer b)
+        public Group(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Type = b.DeserializeString();

@@ -2,6 +2,7 @@
 
 using System;
 using Iviz.Common;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -64,7 +65,7 @@ namespace Iviz.Displays
                 float intensitySpan = intensityBounds.y - intensityBounds.x;
 
                 float coeff, add;
-                if (Mathf.Approximately(intensitySpan, 0))
+                if (intensitySpan.ApproximatelyZero())
                 {
                     coeff = 1;
                     add = 0;

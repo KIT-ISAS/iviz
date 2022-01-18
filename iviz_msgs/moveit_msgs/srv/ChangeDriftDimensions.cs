@@ -86,7 +86,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ChangeDriftDimensionsRequest(ref ReadBuffer b)
+        public ChangeDriftDimensionsRequest(ref ReadBuffer b)
         {
             DriftXTranslation = b.Deserialize<bool>();
             DriftYTranslation = b.Deserialize<bool>();
@@ -141,7 +141,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ChangeDriftDimensionsResponse(ref ReadBuffer b)
+        public ChangeDriftDimensionsResponse(ref ReadBuffer b)
         {
             Success = b.Deserialize<bool>();
         }

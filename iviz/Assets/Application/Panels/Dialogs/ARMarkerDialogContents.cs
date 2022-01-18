@@ -10,13 +10,13 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public sealed class ARMarkerDialogContents : PanelContents
+    public sealed class ARMarkerDialogContents : DialogPanel
     {
         static readonly string[] TypesStr = {"Aruco", "QR", "Unset"};
         static readonly string[] ActionsStr = Enum.GetNames(typeof(ARMarkerAction));
 
-        [SerializeField] GameObject[] rows = null;
-        [SerializeField] TrashButtonWidget close = null;
+        [SerializeField] GameObject[] rows;
+        [SerializeField] TrashButtonWidget close;
         bool initialized;
 
         public TrashButtonWidget Close => close;

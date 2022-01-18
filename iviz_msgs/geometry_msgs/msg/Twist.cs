@@ -8,7 +8,7 @@ namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Twist : IMessage, IDeserializable<Twist>
+    public struct Twist : IMessage, IDeserializable<Twist>, System.IEquatable<Twist>
     {
         // This expresses velocity in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear;
@@ -23,7 +23,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         /// Constructor with buffer.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Twist(ref ReadBuffer b)
+        public Twist(ref ReadBuffer b)
         {
             b.Deserialize(out this);
         }
@@ -32,8 +32,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public readonly Twist RosDeserialize(ref ReadBuffer b) => new Twist(ref b);
         
-        public override readonly int GetHashCode() => (Linear, Angular).GetHashCode();
-        public override readonly bool Equals(object? o) => o is Twist s && Equals(s);
+        public readonly override int GetHashCode() => (Linear, Angular).GetHashCode();
+        public readonly override bool Equals(object? o) => o is Twist s && Equals(s);
         public readonly bool Equals(Twist o) => (Linear, Angular) == (o.Linear, o.Angular);
         public static bool operator==(in Twist a, in Twist b) => a.Equals(b);
         public static bool operator!=(in Twist a, in Twist b) => !a.Equals(b);

@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Xml;
+using Iviz.Msgs;
 using Iviz.Msgs.StdMsgs;
 using Newtonsoft.Json;
 
@@ -38,7 +39,7 @@ namespace Iviz.Urdf
             A = a;
         }
         
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => BuiltIns.ToJsonString(this);
         
         public void Deconstruct(out float r, out float g, out float b, out float a) => (r, g, b, a) = (R, G, B, A);
 

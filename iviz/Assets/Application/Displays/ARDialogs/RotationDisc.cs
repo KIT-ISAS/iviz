@@ -1,148 +1,182 @@
+#nullable enable
+
 using System;
+using System.Threading;
 using Iviz.Core;
 using Iviz.Displays;
-using JetBrains.Annotations;
+using Iviz.Tools;
 using UnityEngine;
+using UnityEngine.UIElements;
 
-namespace Iviz.App.ARDialogs
+namespace Iviz.Displays.ARDialogs
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class RotationDisc : ARWidget, IRecyclable
+    public sealed class RotationDisc : MonoBehaviour, IWidgetWithColor, IRecyclable
     {
-        [SerializeField] LinkDisplay link = null;
-        [SerializeField] PlaneDraggable disc = null;
-        [SerializeField] RingDisplay ringUp = null;
-        [SerializeField] RingDisplay ringDown = null;
-        [SerializeField] float linkWidth = 0.2f;
-        [SerializeField] float dragBackDistance = 0.5f;
-        [SerializeField] LineResource lines;
-        //[SerializeField] ARLineConnector connector = null;
+        [SerializeField] CirclePlaneDraggable? planeCircle;
+        [SerializeField] CircleFixedDistanceDraggable? fixedCircle;
+        [SerializeField] MeshMarkerResource? disc;
+        [SerializeField] MeshMarkerResource? ring;
+        [SerializeField] MeshMarkerResource? glow;
+        LineResource? lines;
 
-        readonly NativeList<LineWithColor> lineBuffer = new();
-        float? currentAngle;
-        bool dragBack;
-        
-        Vector3 DiscRestPosition => new(0, 0, dragBackDistance);
-        
-        public event Action<float> Moved;
+        const int RingElements = 64;
+        readonly LineWithColor[] lineBuffer = new LineWithColor[RingElements];
+        float currentAngle;
 
-        protected override void Awake()
+        MeshMarkerResource Glow => glow.AssertNotNull(nameof(glow));
+        MeshMarkerResource Disc => disc.AssertNotNull(nameof(disc));
+        MeshMarkerResource Ring => ring.AssertNotNull(nameof(ring));
+        LineResource Lines => lines != null ? lines : (lines = ResourcePool.RentDisplay<LineResource>(transform));
+
+        XRScreenDraggable Draggable => Settings.IsXR
+            ? fixedCircle.AssertNotNull(nameof(fixedCircle))
+            : planeCircle.AssertNotNull(nameof(planeCircle));
+
+        Color color = new(0, 0.6f, 1f);
+        Color secondaryColor = Color.white;
+        CancellationTokenSource? tokenSource;
+
+        public Color Color
         {
-            base.Awake();
-            disc.EndDragging += () =>
+            get => color;
+            set
             {
-                dragBack = true;
-                Moved?.Invoke(0);
-                lines.Reset();
-                currentAngle = null;
-            };
-            
-            disc.StartDragging += () =>
-            {
-                dragBack = false;
-            };
-            
-
-            link.Color = Color.cyan.WithAlpha(0.8f);
-            link.EmissiveColor = Color.cyan;
-            ringUp.Color = Color.cyan.WithAlpha(0.5f);
-            ringUp.EmissiveColor = Color.cyan;
-            ringDown.Color = Color.cyan.WithAlpha(0.5f);
-            ringDown.EmissiveColor = Color.cyan;
-            lines = ResourcePool.RentDisplay<LineResource>(transform);
-            lines.ElementScale = 0.02f;
-            lines.RenderType = LineResource.LineRenderType.AlwaysCapsule;
+                color = value;
+                Ring.Color = value.WithAlpha(0.2f);
+                Ring.EmissiveColor = value;
+                Glow.Color = value.WithAlpha(0.8f);
+                Glow.EmissiveColor = value;
+            }
         }
 
-        protected override void Update()
+        public Color SecondaryColor
         {
-            base.Update();;
-
-            var discPosition = disc.Transform.localPosition;
-            float discDistance = discPosition.Magnitude();
-            if (Vector3.Distance(discPosition, DiscRestPosition) < 0.005f)
+            get => secondaryColor;
+            set
             {
-                if (dragBack)
-                {
-                    disc.Transform.localPosition = DiscRestPosition;
-                    ringUp.Transform.localScale = dragBackDistance * Vector3.one;
-                    ringDown.Transform.localScale = dragBackDistance * Vector3.one;
-                    dragBack = false;
-                    lines.Reset();
-                }
-
-                return;
+                secondaryColor = value;
+                Disc.Color = value;
+                Lines.Tint = value;
             }
+        }
 
-            float angle = -Mathf.Atan2(discPosition.z, discPosition.x) * Mathf.Rad2Deg;
-            link.Transform.localScale = new Vector3(discDistance, 0.002f, linkWidth);
-            link.Transform.SetLocalPose(new Pose(discPosition / 2, Quaternion.AngleAxis(angle, Vector3.up)));
+        public float SecondaryScale
+        {
+            set => Disc.Transform.localScale = value * Vector3.one;
+        }
+        
+        public bool Interactable
+        {
+            set => Draggable.enabled = value;
+        }
 
-            float ringSize = dragBackDistance + 0.1f * (discDistance - dragBackDistance);
-            ringUp.Transform.localScale = ringSize * Vector3.one;
-            ringDown.Transform.localScale = ringSize * Vector3.one;
+        public Bounds? Bounds => Disc.Bounds;
 
-            if (dragBack)
+        public event Action<float>? Moved;
+
+        void Awake()
+        {
+            Color = Color;
+            SecondaryColor = SecondaryColor;
+            Glow.Visible = false;
+
+            Lines.ElementScale = 0.02f;
+            Lines.RenderType = LineResource.LineRenderType.AlwaysCapsule;
+
+            var draggable = Draggable;
+
+            draggable.enabled = true;
+            draggable.StartDragging += () =>
             {
-                disc.Transform.localPosition += 0.2f * (DiscRestPosition - discPosition);
-                return;
-            }
+                tokenSource?.Cancel();
+                Ring.Color = Color.WithAlpha(0.8f);
+                Disc.Color = Color;
+                Disc.EmissiveColor = Color;
+                Glow.Visible = true;
+                currentAngle = 0;
+            };
 
-            float openingAngle = -90 - angle;
-            if (currentAngle != null)
+            draggable.Moved += () => OnDiscMoved(draggable, true);
+
+            draggable.EndDragging += () =>
             {
-                if (openingAngle - currentAngle.Value > 180)
+                Disc.Color = SecondaryColor;
+                Disc.EmissiveColor = Color.black;
+                Ring.Color = Color.WithAlpha(0.2f);
+                Glow.Visible = false;
+
+                Moved?.Invoke(0);
+
+                tokenSource?.Cancel();
+                tokenSource = new CancellationTokenSource();
+
                 {
-                    openingAngle -= 360;
+                    float startAngle = currentAngle;
+                    FAnimator.Spawn(tokenSource.Token, 0.1f, t =>
+                    {
+                        float angle = (1 - Mathf.Sqrt(t)) * startAngle;
+                        currentAngle = angle;
+                        draggable.Transform.localPosition = new Vector3(Mathf.Sin(angle), 0, Mathf.Cos(angle));
+                        OnDiscMoved(draggable, false);
+                    });
                 }
-                else if (openingAngle - currentAngle.Value < -180)
-                {
-                    openingAngle += 360;
-                }
-            }
+            };
+        }
 
-            currentAngle = openingAngle;
+        void OnDiscMoved(ScreenDraggable draggable, bool raiseOnMoved)
+        {
+            var (discX, _, discZ) = draggable.Transform.localPosition;
+            float discAngle = Mathf.Atan2(discX, discZ);
+            currentAngle += AngleDifference(discAngle, currentAngle);
 
-            const int ringElements = 32;
-            
-            lineBuffer.Clear();
-            lineBuffer.EnsureCapacity(ringElements + 1);
-            Vector3 a0 = 1.1f * ringSize * Vector3.forward;
-            Vector3 a = a0;
-            for (int i = 0; i < ringElements; i++)
+            var line = new LineWithColor(Vector3.zero, Vector3.zero);
+            ref var a = ref line.f.c0;
+            ref var b = ref line.f.c1;
+
+            (a.x, a.z) = (0, 1);
+            foreach (int i in ..RingElements)
             {
-                float bAngle = Mathf.Deg2Rad / ringElements * openingAngle * (i + 1) + Mathf.PI / 2;
-                Vector3 b = 1.1f * ringSize * new Vector3(Mathf.Cos(bAngle), 0, Mathf.Sin(bAngle));
-                lineBuffer.Add(new LineWithColor(a, b));
+                float angle = currentAngle * (i + 1) / RingElements;
+                float scale = 1 - Mathf.Abs(angle) * 0.01f;
+                (b.x, b.z) = (Mathf.Sin(angle) * scale, Mathf.Cos(angle) * scale);
+                lineBuffer[i] = line;
                 a = b;
             }
 
-            lineBuffer.Add(new LineWithColor(Vector3.zero, a0));
-            lines.Set(lineBuffer);
+            Lines.Set(lineBuffer, false);
 
-            Moved?.Invoke(openingAngle);
+            if (raiseOnMoved)
+            {
+                Moved?.Invoke(currentAngle);
+            }
         }
 
-        void IRecyclable.SplitForRecycle()
+        static float AngleDifference(float angle2, float angle1)
+        {
+            float diff = (angle2 - angle1 + Mathf.PI) % (2 * Mathf.PI) - Mathf.PI;
+            return diff < -Mathf.PI ? diff + 2 * Mathf.PI : diff;
+        }
+
+        public int Layer
+        {
+            set => gameObject.layer = value;
+        }
+
+        public void SplitForRecycle()
         {
             lines.ReturnToPool();
         }
 
-        public override void Suspend()
+        public void Suspend()
         {
-            base.Suspend();
             Moved = null;
-            disc.Transform.localPosition = DiscRestPosition;
-            ringUp.Transform.localScale = dragBackDistance * Vector3.one;
-            ringDown.Transform.localScale = dragBackDistance * Vector3.one;
-            dragBack = false;
-            lines.Reset();            
-        }
+            Disc.Transform.localPosition = Vector3.forward;
+            Lines.Reset();
 
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-            lineBuffer.Dispose();
+            Color = Color;
+            SecondaryColor = SecondaryColor;
+            Glow.Visible = false;
         }
     }
 }

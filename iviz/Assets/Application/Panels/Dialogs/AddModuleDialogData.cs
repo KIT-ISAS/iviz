@@ -1,7 +1,9 @@
 ﻿#nullable enable
 
+using System;
 using System.Linq;
 using Iviz.Common;
+using Iviz.Core;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Tools;
 
@@ -24,12 +26,12 @@ namespace Iviz.App
             ModuleType.Joystick
         };
 
-        readonly ItemListDialogContents itemList;
-        public override IDialogPanelContents Panel => itemList;
+        readonly ItemListDialogPanel itemList;
+        public override IDialogPanel Panel => itemList;
 
         public AddModuleDialogData()
         {
-            itemList = DialogPanelManager.GetPanelByType<ItemListDialogContents>(DialogPanelType.AddModule);
+            itemList = DialogPanelManager.GetPanelByType<ItemListDialogPanel>(DialogPanelType.AddModule);
         }
 
         public override void SetupPanel()
@@ -52,7 +54,19 @@ namespace Iviz.App
 
         void OnItemClicked(int index, int _)
         {
-            var moduleData = ModuleListPanel.CreateModule(Modules[index].Module);
+            var moduleType = Modules[index].Module;
+
+            ModuleData moduleData;
+            try
+            {
+                moduleData = ModuleListPanel.CreateModule(moduleType);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{this}: Failed to create module for type '{moduleType}'", e);
+                return;
+            }
+
             Close();
 
             if (moduleData is not ARModuleData)

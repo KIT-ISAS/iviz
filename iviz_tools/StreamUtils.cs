@@ -18,7 +18,7 @@ public static class StreamUtils
         }
 
         int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
-        return ValueTask2.FromResult(received == toRead);
+        return new ValueTask<bool>(received == toRead);
     }
 
     static async ValueTask<bool> DoReadChunkAsync(Socket socket, byte[] buffer, int toRead, CancellationToken token)
@@ -86,7 +86,7 @@ public static class StreamUtils
         }
 
         int received = socket.Receive(buffer, offset, toRead, SocketFlags.None);
-        return ValueTask2.FromResult(received);
+        return new ValueTask<int>(received);
     }
 
     static async ValueTask<int> DoReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,

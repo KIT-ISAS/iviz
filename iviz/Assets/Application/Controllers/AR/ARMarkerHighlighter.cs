@@ -1,115 +1,159 @@
+#nullable enable
+
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.MarkerDetection;
+using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.XmlRpc;
-using JetBrains.Annotations;
+using Iviz.Tools;
 using TMPro;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public class ARMarkerHighlighter : MonoBehaviour, IDisplay
+    public sealed class ARMarkerHighlighter : MeshMarkerHolderResource
     {
-        [SerializeField] Transform topLeft = null;
-        [SerializeField] Transform topRight = null;
-        [SerializeField] Transform bottomRight = null;
-        [SerializeField] Transform bottomLeft = null;
-        [SerializeField] BoxCollider boxCollider = null;
-        [SerializeField] TextMeshPro text = null;
-        MeshMarkerResource[] resources;
-        const float Scale = 0.005f;
-        const float Z = 0.05f;
+        [SerializeField] Transform? topLeft;
+        [SerializeField] Transform? topRight;
+        [SerializeField] Transform? bottomRight;
+        [SerializeField] Transform? bottomLeft;
+        [SerializeField] TextMeshPro? text;
 
-        const float HighlightScale = Scale * 1.05f;
+        Transform TopLeft => topLeft.AssertNotNull(nameof(topLeft));
+        Transform TopRight => topRight.AssertNotNull(nameof(topRight));
+        Transform BottomLeft => bottomLeft.AssertNotNull(nameof(bottomLeft));
+        Transform BottomRight => bottomRight.AssertNotNull(nameof(bottomRight));
+        TextMeshPro Text => text.AssertNotNull(nameof(text));
 
-        float highlightTime = 0.5f;
-        float? highlightStart;
-
-        public void Highlight([NotNull] IEnumerable<Vector2f> corners2, [NotNull] string code, Intrinsic intrinsic,
-            float highlightTimeInMs)
+        public override void Suspend()
         {
-            resources ??= GetComponentsInChildren<MeshMarkerResource>();
+            base.Suspend();
+            var scale = new Vector3(2, 2, 1);
+            TopLeft.localScale = scale;
+            TopRight.localScale = scale;
+            BottomRight.localScale = scale;
+            BottomLeft.localScale = scale;
+            Text.transform.localScale = 0.05f * Vector3.one;
 
-            var cornersWorld = corners2.Select(corner => intrinsic.Unproject(corner, Z)).ToArray();
-            if (cornersWorld.Length == 0)
+            TopLeft.localPosition = new Vector3(-0.5f, 0.5f, 0);
+            TopRight.localPosition = new Vector3(0.5f, 0.5f, 0);
+            BottomRight.localPosition = new Vector3(0.5f, -0.5f, 0);
+            BottomLeft.localPosition = new Vector3(-0.5f, -0.5f, 0);
+        }
+
+        public static void Highlight(ARMarker marker)
+        {
+            if (marker.MarkerSizeInMm != 0)
             {
-                throw new ArgumentException("[ARMarkerHighlighter] Cannot highlight marker with no corners.");
+                var pose = ARController.GetAbsoluteMarkerPose(marker);
+                Highlight(pose, (float)marker.MarkerSizeInMm, marker.Code, 5);
             }
-            
-            float minX = cornersWorld.Min(corner => corner.X);
-            float maxX = cornersWorld.Max(corner => corner.X);
-            float minY = cornersWorld.Min(corner => -corner.Y);
-            float maxY = cornersWorld.Max(corner => -corner.Y);
+            else
+            {
+                Highlight(marker.Corners, marker.Code, marker.CameraIntrinsic, 1);
+            }
+        }
 
-            Vector3 center = new Vector3((maxX + minX) / 2, (maxY + minY) / 2, Z);
+        static void Highlight(Msgs.GeometryMsgs.Vector3[] corners, string code, double[] intrinsicArray,
+            float highlightTimeInSec)
+        {
+            const float cameraZ = 0.05f;
+            const float cornerScale = 0.005f;
+            const float highlightScale = cornerScale * 1.05f;
+
+            if (corners.Length == 0)
+            {
+                throw new ArgumentException("Cannot highlight marker with no corners.");
+            }
+
+            var intrinsic = new Intrinsic(intrinsicArray);
+
+            float minX = float.MaxValue, minY = float.MaxValue;
+            float maxX = float.MinValue, maxY = float.MinValue;
+            foreach (var (cornerX, cornerY, _) in corners)
+            {
+                var (x, y, _) = intrinsic.Unproject(cornerX, cornerY) * cameraZ;
+                minX = Math.Min(x, minX);
+                minY = Math.Min(y, minY);
+                maxX = Math.Max(x, maxX);
+                maxY = Math.Max(y, maxY);
+            }
+
+            var center = new Vector3((maxX + minX) / 2, (maxY + minY) / 2, cameraZ);
             float sizeX = maxX - center.x;
             float sizeY = maxY - center.y;
+            float scaleX = sizeX / cornerScale;
+            float scaleY = sizeY / cornerScale;
 
+            var highlighter = ResourcePool.RentDisplay<ARMarkerHighlighter>();
 
-            Transform mTransform = transform;
-            mTransform.parent = Settings.ARCamera.CheckedNull()?.transform;
+            var mTransform = highlighter.transform;
+            mTransform.parent = Settings.ARCamera != null ? Settings.ARCamera.transform : null;
             mTransform.localRotation = Quaternion.identity;
             mTransform.localPosition = center;
-            mTransform.localScale = HighlightScale * Vector3.one;
+            mTransform.localScale = highlightScale * Vector3.one;
 
-            topLeft.localPosition = new Vector3(-sizeX, sizeY, 0) / Scale;
-            topRight.localPosition = new Vector3(sizeX, sizeY, 0) / Scale;
-            bottomRight.localPosition = new Vector3(sizeX, -sizeY, 0) / Scale;
-            bottomLeft.localPosition = new Vector3(-sizeX, -sizeY, 0) / Scale;
-            text.transform.localPosition = new Vector3(0, sizeY, 0) / Scale;
-            text.text = code;
+            highlighter.TopLeft.localPosition = new Vector3(-scaleX, scaleY, 0);
+            highlighter.TopRight.localPosition = new Vector3(scaleX, scaleY, 0);
+            highlighter.BottomRight.localPosition = new Vector3(scaleX, -scaleY, 0);
+            highlighter.BottomLeft.localPosition = new Vector3(-scaleX, -scaleY, 0);
 
-            highlightStart = GameThread.GameTime;
-            highlightTime = Mathf.Max(highlightTimeInMs / 1000f, 0);
+            highlighter.Text.transform.localPosition = new Vector3(0, scaleY, 0);
+            highlighter.Text.text = code;
+
+            Spawn(highlighter, highlightTimeInSec);
         }
 
-        public Bounds? Bounds => boxCollider.bounds;
-
-        public int Layer
+        static void Highlight(in Pose pose, float markerSizeInMm, string code, float highlightTimeInSec)
         {
-            get => gameObject.layer;
-            set => gameObject.layer = value;
+            var highlighter = ResourcePool.RentDisplay<ARMarkerHighlighter>();
+            float markerSizeInM = markerSizeInMm * 0.001f;
+            var (position, rotation) = TfListener.RelativeToFixedFrame(pose);
+
+            var tableRosToUnity = new Quaternion(0.5f, -0.5f, 0.5f, 0.5f);
+            // Quaternion.AngleAxis(-90, Vector3.up) * Quaternion.AngleAxis(90, Vector3.right);
+
+            var mTransform = highlighter.transform;
+            mTransform.parent = TfListener.FixedFrame.Transform;
+            mTransform.localRotation = rotation * tableRosToUnity;
+            mTransform.localPosition = position + rotation * (Vector3.up * 0.01f);
+            mTransform.localScale = markerSizeInM * Vector3.one;
+
+            var scale = new Vector3(2, 2, 1) * 0.25f;
+            highlighter.TopLeft.localScale = scale;
+            highlighter.TopRight.localScale = scale;
+            highlighter.BottomRight.localScale = scale;
+            highlighter.BottomLeft.localScale = scale;
+            highlighter.Text.transform.localScale = 0.025f * Vector3.one;
+
+            highlighter.Text.text = code;
+
+            Spawn(highlighter, highlightTimeInSec);
         }
 
-        public bool Visible
+        static void Spawn(ARMarkerHighlighter highlighter, float highlightTimeInSec)
         {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
+            Color baseColor = new(0.78f, 0.98f, 1);
 
-        [NotNull]
-        public string Name
-        {
-            get => gameObject.name;
-            set => gameObject.name = value;
-        }
+            highlighter.EmissiveColor = Color.blue;
+            highlighter.Color = baseColor;
 
-        void Update()
-        {
-            if (highlightStart == null)
+            void Update(float t)
             {
-                return;
+                var color = baseColor.WithAlpha(Mathf.Sqrt(1 - t));
+                highlighter.Color = color;
+                highlighter.Text.color = color;
             }
 
-            float diff = GameThread.GameTime - highlightStart.Value;
-            if (diff > highlightTime)
+            void Dispose()
             {
-                highlightStart = null;
-                this.ReturnToPool();
-                return;
+                highlighter.ReturnToPool();
             }
 
-            float t = Mathf.Sqrt(1 - diff / highlightTime);
-            transform.localScale = (Scale + (HighlightScale - Scale) * t) * Vector3.one;
-        }
-
-        public void Suspend()
-        {
+            FAnimator.Spawn(default, highlightTimeInSec, Update, Dispose);
         }
     }
 }

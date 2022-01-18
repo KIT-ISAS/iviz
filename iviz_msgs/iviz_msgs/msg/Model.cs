@@ -37,7 +37,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Constructor with buffer.
-        internal Model(ref ReadBuffer b)
+        public Model(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
             Filename = b.DeserializeString();

@@ -29,8 +29,7 @@ namespace Iviz.Displays
         bool overrideIntensityBounds;
 
         public event Action<Texture2D?>? TextureChanged;
-        public event Action<Texture2D?>? ColormapChanged;
-
+        
         public Vector2 IntensityBounds
         {
             get => NormalizedIntensityBounds / normalizationFactor;
@@ -104,13 +103,11 @@ namespace Iviz.Displays
             set
             {
                 colormap = value;
-
                 Material.SetTexture(IntensityID, ColormapTexture);
-                ColormapChanged?.Invoke(ColormapTexture);
             }
         }
 
-        public Texture2D ColormapTexture => Resource.Colormaps.Textures[Colormap];
+        Texture2D ColormapTexture => Resource.Colormaps.Textures[Colormap];
 
         public ImageTexture()
         {
@@ -314,8 +311,8 @@ namespace Iviz.Displays
 
                     if (encoding == null)
                     {
-                        RosLogger.Debug(
-                            $"{this}: Unsupported encoding '{image.Colorspace}' with size {image.BitsPerComponent.ToString()}");
+                        RosLogger.Debug($"{this}: Unsupported encoding '{image.Colorspace}' " +
+                                        $"with size {image.BitsPerComponent.ToString()}");
                         return;
                     }
 
@@ -338,7 +335,7 @@ namespace Iviz.Displays
                     {
                         try
                         {
-                            Set(image.Width, image.Height, encoding, newBitmapBuffer.Slice(bmpHeaderLength..));
+                            Set(image.Width, image.Height, encoding, newBitmapBuffer.AsSpan(bmpHeaderLength..));
                         }
                         finally
                         {
@@ -362,18 +359,17 @@ namespace Iviz.Displays
             }
 
             int size = width * height;
-            int? bpp = FieldSizeFromEncoding(encoding);
 
-            if (bpp is not { } validatedBpp)
+            if (FieldSizeFromEncoding(encoding) is not { } bpp)
             {
                 RosLogger.Debug($"{this}: Unsupported encoding '{encoding}'");
                 return;
             }
 
-            if (data.Length < size * validatedBpp)
+            if (data.Length < size * bpp)
             {
                 RosLogger.Debug(
-                    $"{this}: Invalid image! Expected at least {(size * validatedBpp).ToString()} bytes, " +
+                    $"{this}: Invalid image! Expected at least {(size * bpp).ToString()} bytes, " +
                     $"received {data.Length.ToString()}");
                 return;
             }
@@ -421,11 +417,10 @@ namespace Iviz.Displays
                     return;
             }
 
-            ApplyTexture(width, height, data, encoding, size * validatedBpp, generateMipmaps);
+            ApplyTexture(width, height, data[..(size * bpp)], encoding, generateMipmaps);
         }
 
-        void ApplyTexture(int width, int height, ReadOnlySpan<byte> data, string encoding, int length,
-            bool generateMipmaps)
+        void ApplyTexture(int width, int height, ReadOnlySpan<byte> data, string encoding, bool generateMipmaps)
         {
             bool alreadyCopied = false;
             Texture2D texture;
@@ -441,7 +436,7 @@ namespace Iviz.Displays
                     if (!Settings.SupportsRGB24)
                     {
                         texture = EnsureSize(width, height, TextureFormat.RGBA32);
-                        CopyRgb24ToRgba32(data, texture.GetRawTextureData<byte>().AsSpan(), length);
+                        CopyRgb24ToRgba32(data, texture.GetRawTextureData<byte>().AsSpan());
                         alreadyCopied = true;
                     }
                     else
@@ -470,7 +465,7 @@ namespace Iviz.Displays
                     if (!Settings.SupportsR16)
                     {
                         texture = EnsureSize(width, height, TextureFormat.R8);
-                        CopyR16ToR8(data, texture.GetRawTextureData<byte>().AsSpan(), length);
+                        CopyR16ToR8(data, texture.GetRawTextureData<byte>().AsSpan());
                         alreadyCopied = true;
                     }
                     else
@@ -478,7 +473,7 @@ namespace Iviz.Displays
                         texture = EnsureSize(width, height, TextureFormat.R16);
                     }
 
-                    intensityBounds = CalculateBoundsR16(data);
+                    intensityBounds = CalculateBounds(data.Cast<ushort>());
                     MeasuredIntensityBounds = intensityBounds;
                     normalizationFactor = 1f / ushort.MaxValue;
                     if (!OverrideIntensityBounds)
@@ -493,7 +488,7 @@ namespace Iviz.Displays
                 case "8SC1":
                 case "8SC":
                     texture = EnsureSize(width, height, TextureFormat.R8);
-                    intensityBounds = CalculateBoundsR8(data);
+                    intensityBounds = CalculateBounds(data);
                     MeasuredIntensityBounds = intensityBounds;
                     normalizationFactor = 1f / byte.MaxValue;
                     if (!OverrideIntensityBounds)
@@ -505,7 +500,7 @@ namespace Iviz.Displays
                 case "32FC1":
                 case "32FC":
                     texture = EnsureSize(width, height, TextureFormat.RFloat);
-                    intensityBounds = CalculateBoundsRFloat(data);
+                    intensityBounds = CalculateBounds(data.Cast<float>());
                     MeasuredIntensityBounds = intensityBounds;
                     normalizationFactor = 1;
                     if (!OverrideIntensityBounds)
@@ -520,25 +515,10 @@ namespace Iviz.Displays
 
             if (!alreadyCopied)
             {
-                texture.GetRawTextureData<byte>().CopyFrom(data[..length]);
+                texture.GetRawTextureData<byte>().CopyFrom(data);
             }
 
             texture.Apply(generateMipmaps);
-        }
-
-        void CopyR16ToR8(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
-        {
-            int numElements = lengthInBytes / 2;
-            if (lengthInBytes > src.Length || numElements > dst.Length)
-            {
-                throw new InvalidOperationException($"{this}: Skipping copy. Possible buffer overflow.");
-            }
-
-            var srcPtr = src.Cast<R16>();
-            for (int i = 0; i < srcPtr.Length; i++)
-            {
-                dst[i] = srcPtr[i].low;
-            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -547,22 +527,16 @@ namespace Iviz.Displays
             readonly byte high;
             public readonly byte low;
         }
-
-        static void CopyRgb24ToRgba32(ReadOnlySpan<byte> src, Span<byte> dst, int lengthInBytes)
+        
+        static void CopyR16ToR8(ReadOnlySpan<byte> src, Span<byte> dst)
         {
-            var srcPtr = src.Cast<Rgb>();
-            var dstPtr = dst.Cast<Rgba>();
-            var colorOut = new Rgba { a = 255 };
+            var srcPtr = src.Cast<R16>();
             for (int i = 0; i < srcPtr.Length; i++)
             {
-                var colorIn = srcPtr[i];
-                colorOut.r = colorIn.r;
-                colorOut.g = colorIn.g;
-                colorOut.b = colorIn.b;
-                dstPtr[i] = colorOut;
+                dst[i] = srcPtr[i].low;
             }
         }
-
+        
         [StructLayout(LayoutKind.Sequential)]
         struct Rgba
         {
@@ -574,8 +548,26 @@ namespace Iviz.Displays
         {
             public readonly byte r, g, b;
         }
+        
+        static void CopyRgb24ToRgba32(ReadOnlySpan<byte> src, Span<byte> dst)
+        {
+            var srcPtr = src.Cast<Rgb>();
+            var dstPtr = dst.Cast<Rgba>();
+            for (int i = 0; i < srcPtr.Length; i++)
+            {
+                var colorIn = srcPtr[i];
 
-        static Vector2 CalculateBoundsR8(ReadOnlySpan<byte> src)
+                Rgba colorOut;
+                colorOut.r = colorIn.r;
+                colorOut.g = colorIn.g;
+                colorOut.b = colorIn.b;
+                colorOut.a = 255;
+                
+                dstPtr[i] = colorOut;
+            }
+        }
+
+        static Vector2 CalculateBounds(ReadOnlySpan<byte> src)
         {
             byte min = byte.MaxValue;
             byte max = byte.MinValue;
@@ -595,12 +587,11 @@ namespace Iviz.Displays
             return new Vector2(min, max);
         }
 
-        static Vector2 CalculateBoundsR16(ReadOnlySpan<byte> src)
+        static Vector2 CalculateBounds(ReadOnlySpan<ushort> src)
         {
             ushort min = ushort.MaxValue;
             ushort max = ushort.MinValue;
-            var span = src.Cast<ushort>();
-            foreach (ushort b in span)
+            foreach (ushort b in src)
             {
                 if (b > max)
                 {
@@ -616,12 +607,11 @@ namespace Iviz.Displays
             return new Vector2(min, max);
         }
 
-        static Vector2 CalculateBoundsRFloat(ReadOnlySpan<byte> src)
+        static Vector2 CalculateBounds(ReadOnlySpan<float> src)
         {
             float min = float.MaxValue;
             float max = float.MinValue;
-            var span = src.Cast<float>();
-            foreach (float b in span)
+            foreach (float b in src)
             {
                 if (b > max)
                 {
@@ -719,16 +709,11 @@ namespace Iviz.Displays
             TextureChanged?.Invoke(Texture);
         }
 
-        public void Stop()
+        public void Dispose()
         {
             TextureChanged?.Invoke(null);
             TextureChanged = null;
-            ColormapChanged?.Invoke(null);
-            ColormapChanged = null;
-        }
 
-        public void Dispose()
-        {
             if (Texture != null)
             {
                 UnityEngine.Object.Destroy(Texture);

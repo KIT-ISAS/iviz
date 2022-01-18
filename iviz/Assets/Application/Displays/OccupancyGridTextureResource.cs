@@ -344,19 +344,18 @@ namespace Iviz.Displays
             int sum = value.x + value.y + value.z + value.w;
             */
 
-
+/*
             int signA = ~a >> 8; // a >= 0 ? -1 : 0
             int signB = ~b >> 8; // b >= 0 ? -1 : 0
             int signC = ~c >> 8; // c >= 0 ? -1 : 0
             int signD = ~d >> 8; // d >= 0 ? -1 : 0
 
             int numValid = -(signA + signB + signC + signD);
-            /*
+
             if (numValid <= 1)
             {
                 return -1;
             }
-            */
 
             int valueA = a & signA; // a >= 0 ? a : 0
             int valueB = b & signB; // b >= 0 ? b : 0
@@ -364,15 +363,41 @@ namespace Iviz.Displays
             int valueD = d & signD; // d >= 0 ? d : 0
 
             int sum = valueA + valueB + valueC + valueD;
-
             return numValid switch
             {
-                0 => -1,
-                1 => -1,
                 2 => sum >> 1, // sum / 2
                 3 => (sum * 21845) >> 16, // sum * (65536/3) / 65536
                 _ => sum >> 2
             };
+            */
+
+            int signA = ~a >> 8; // a >= 0 ? -1 : 0
+            int valueA = a & signA; // a >= 0 ? a : 0
+            int numValid = -signA;
+            int sum = valueA;
+
+            int signB = ~b >> 8; // b >= 0 ? -1 : 0
+            int valueB = b & signB; // b >= 0 ? b : 0
+            numValid -= signB;
+            sum += valueB;
+
+            int signC = ~c >> 8; // c >= 0 ? -1 : 0
+            int valueC = c & signC; // c >= 0 ? c : 0
+            numValid -= signC;
+            sum += valueC;
+
+            int signD = ~d >> 8; // d >= 0 ? -1 : 0
+            int valueD = d & signD; // d >= 0 ? d : 0
+            numValid -= signD;
+            sum += valueD;
+
+            return numValid switch
+            {
+                <2 => -1,
+                2 => sum >> 1, // sum / 2
+                3 => (sum * 21845) >> 16, // sum * (65536/3) / 65536
+                _ => sum >> 2
+            };            
         }
 
         public void Highlight(in Vector3 hitPoint)

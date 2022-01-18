@@ -36,7 +36,7 @@ namespace Iviz.Msgs.VisionMsgs
         }
         
         /// Constructor with buffer.
-        internal Classification2D(ref ReadBuffer b)
+        public Classification2D(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Results = b.DeserializeArray<ObjectHypothesis>();

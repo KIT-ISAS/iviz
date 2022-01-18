@@ -1,19 +1,19 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Resources
 {
     public sealed class TexturedMaterialsType
     {
-        readonly Dictionary<(Texture Diffuse, Texture Bump, bool alpha), Material> materialsByTexture =
-            new Dictionary<(Texture, Texture, bool), Material>();
+        readonly Dictionary<(Texture? Diffuse, Texture? Bump, bool alpha), Material> materialsByTexture = new();
 
         static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
         static readonly int MainTex = Shader.PropertyToID("_MainTex");
 
-        public Material Get([CanBeNull] Texture diffuse = null, [CanBeNull] Texture bump = null)
+        public Material Get(Texture? diffuse = null, Texture? bump = null)
         {
             if (diffuse == null && bump == null)
             {
@@ -30,22 +30,21 @@ namespace Iviz.Resources
             if (bump != null)
             {
                 material = Resource.Materials.BumpLit.Instantiate();
-                material.SetTexture(MainTex, diffuse);
                 material.SetTexture(BumpMap, bump);
-                material.name = $"{Resource.Materials.BumpLit.Name} - {materialsByTexture.Count}";
+                material.name = $"{Resource.Materials.BumpLit.Name} - {materialsByTexture.Count.ToString()}";
             }
             else
             {
                 material = Resource.Materials.TexturedLit.Instantiate();
-                material.SetTexture(MainTex, diffuse);
-                material.name = $"{Resource.Materials.TexturedLit.Name} - {materialsByTexture.Count}";
+                material.name = $"{Resource.Materials.TexturedLit.Name} - {materialsByTexture.Count.ToString()}";
             }
 
+            material.SetTexture(MainTex, diffuse);
             materialsByTexture[key] = material;
             return material;
         }
 
-        public Material GetAlpha([CanBeNull] Texture diffuse = null, [CanBeNull] Texture bump = null)
+        public Material GetAlpha(Texture? diffuse = null, Texture? bump = null)
         {
             if (diffuse == null && bump == null)
             {
@@ -62,17 +61,16 @@ namespace Iviz.Resources
             if (bump != null)
             {
                 material = Resource.Materials.TransparentBumpLit.Instantiate();
-                material.SetTexture(MainTex, diffuse);
                 material.SetTexture(BumpMap, bump);
-                material.name = Resource.Materials.TransparentBumpLit.Name + " - " + materialsByTexture.Count;
+                material.name = $"{Resource.Materials.TransparentBumpLit.Name} - {materialsByTexture.Count.ToString()}";
             }
             else
             {
                 material = Resource.Materials.TransparentTexturedLit.Instantiate();
-                material.SetTexture(MainTex, diffuse);
-                material.name = Resource.Materials.TransparentTexturedLit.Name + " - " + materialsByTexture.Count;
+                material.name = $"{Resource.Materials.TransparentTexturedLit.Name} - {materialsByTexture.Count.ToString()}";
             }
 
+            material.SetTexture(MainTex, diffuse);
             materialsByTexture[key] = material;
             return material;
         }

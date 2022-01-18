@@ -20,8 +20,7 @@ public abstract class SubscriberReceiverState : JsonToString
     [DataMember] public long NumDropped { get; internal set; }
     [DataMember] public long BytesReceived { get; internal set; }
     [DataMember] public ErrorMessage? ErrorDescription { get; internal set; }
-
-    public bool IsAlive => Status == ReceiverStatus.Connected;
+    [DataMember] public bool IsAlive { get; internal set; }
 
     protected SubscriberReceiverState(Uri remoteUri)
     {

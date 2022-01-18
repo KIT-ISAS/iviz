@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Core;
+using Iviz.Tools;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -25,16 +27,15 @@ namespace Iviz.Displays
         [SerializeField] float maxLineDistance;
 
         readonly List<LineWithColor> lineBuffer = new();
-        readonly List<PointWithColor> pointBuffer = new();
-        readonly List<Vector2> cache = new();
+        readonly List<float4> pointBuffer = new();
+        Vector2[] cache = Array.Empty<Vector2>();
 
         LineResource? lines;
         PointListResource? pointCloud;
         (float angleMin, float angleIncrement, int length) cacheProperties;
-        bool colliderEnabled;
         bool visible = true;
         int layer;
-        
+
         LineResource Lines => lines != null
             ? lines
             : (lines = ResourcePool.RentDisplay<LineResource>(transform));
@@ -175,7 +176,7 @@ namespace Iviz.Displays
                 }
             }
         }
-        
+
         public Bounds? Bounds => UseLines ? Lines.Bounds : PointCloud.Bounds;
 
         public int Layer
@@ -198,7 +199,7 @@ namespace Iviz.Displays
                 Lines.Visible = value && UseLines;
             }
         }
-        
+
         void Awake()
         {
             PointCloud.UseColormap = true;
@@ -211,11 +212,12 @@ namespace Iviz.Displays
             PointSize = 0.01f;
             MaxLineDistance = 0.3f;
         }
-        
+
         void IDisplay.Suspend()
         {
             PointCloud.Suspend();
             Lines.Suspend();
+            cache = Array.Empty<Vector2>();
         }
 
         public void SplitForRecycle()
@@ -225,18 +227,8 @@ namespace Iviz.Displays
         }
 
         public void Set(float angleMin, float angleIncrement, float rangeMin, float rangeMax,
-            float[] ranges, float[] intensities)
+            ReadOnlySpan<float> ranges, ReadOnlySpan<float> intensities)
         {
-            if (ranges == null)
-            {
-                throw new ArgumentNullException(nameof(ranges));
-            }
-
-            if (intensities == null)
-            {
-                throw new ArgumentNullException(nameof(intensities));
-            }
-
             if (float.IsNaN(rangeMin) || rangeMin > rangeMax)
             {
                 throw new ArgumentException("rangeMin is nan or invalid!", nameof(rangeMin));
@@ -256,21 +248,28 @@ namespace Iviz.Displays
                 !Mathf.Approximately(angleIncrement, cacheProperties.angleIncrement) ||
                 intensities.Length != cacheProperties.length)
             {
-                cache.Clear();
+                if (cache.Length < ranges.Length)
+                {
+                    cache = new Vector2[Math.Max(2 * cache.Length, ranges.Length)];
+                }
+
                 cacheProperties = (angleMin, angleIncrement, intensities.Length);
-                for (int i = 0; i < ranges.Length; i++)
+
+                Vector2 xz = default;
+                foreach (int i in ..ranges.Length)
                 {
                     float a = angleMin + angleIncrement * i;
-                    var rosPos = new Vector3(Mathf.Cos(a), Mathf.Sin(a), 0);
-                    var (x, _, z) = rosPos.Ros2Unity();
-                    cache.Add(new Vector2(x, z));
+                    //(xz.x, _, xz.y) = ( Mathf.Cos(a),  Mathf.Sin(a), 0 ).Ros2Unity();
+                    xz.x = -Mathf.Sin(a);
+                    xz.y = Mathf.Cos(a);
+                    cache[i] = xz;
                 }
             }
 
             pointBuffer.Clear();
-
             bool useIntensity = UseIntensityNotRange && intensities.Length != 0;
-            for (int i = 0; i < ranges.Length; i++)
+            var mCache = cache;
+            foreach (int i in ..ranges.Length)
             {
                 float range = ranges[i];
                 if (float.IsNaN(range) || range > rangeMax || range < rangeMin)
@@ -278,10 +277,14 @@ namespace Iviz.Displays
                     continue;
                 }
 
-                var (x, z) = cache[i];
-                pointBuffer.Add(new PointWithColor(
-                    x * range, 0, z * range,
-                    useIntensity ? intensities[i] : range));
+                var (x, z) = mCache[i];
+
+                float4 f;
+                f.x = x * range;
+                f.y = 0;
+                f.z = z * range;
+                f.w = useIntensity ? intensities[i] : range;
+                pointBuffer.Add(f);
             }
 
             Size = pointBuffer.Count;
@@ -304,27 +307,26 @@ namespace Iviz.Displays
         void SetLines()
         {
             var points = pointBuffer.AsReadOnlySpan();
-            int numPoints = points.Length;
             lineBuffer.Clear();
 
             var line = new LineWithColor();
             ref var pA = ref line.f.c0;
             ref var pB = ref line.f.c1;
-            
+
             for (int i = 0; i < points.Length - 1; i++)
             {
-                pA = points[i].f;
-                pB = points[i + 1].f;
+                pA = points[i];
+                pB = points[i + 1];
                 if ((pB - pA).MaxAbsCoeff3() < maxLineDistance)
                 {
                     lineBuffer.Add(line);
                 }
             }
 
-            if (numPoints != 0)
+            if (points.Length != 0)
             {
-                pA = points[^1].f;
-                pB = points[0].f;
+                pA = points[^1];
+                pB = points[0];
                 if ((pB - pA).MaxAbsCoeff3() < maxLineDistance)
                 {
                     lineBuffer.Add(line);

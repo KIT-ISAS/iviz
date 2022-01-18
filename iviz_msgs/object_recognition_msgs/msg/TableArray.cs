@@ -25,7 +25,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         }
         
         /// Constructor with buffer.
-        internal TableArray(ref ReadBuffer b)
+        public TableArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Tables = b.DeserializeArray<ObjectRecognitionMsgs.Table>();

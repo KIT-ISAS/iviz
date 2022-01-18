@@ -15,11 +15,19 @@ public readonly struct IndexRangeEnumerable : IReadOnlyList<int>
     {
         int index;
         readonly int end;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Enumerator(int start, int end) => (index, this.end) = (start - 1, end);
-        public int Current => index;
+
+        public int Current
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get => index;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool MoveNext() => ++index < end;
+
         object IEnumerator.Current => Current;
 
         public void Dispose()
@@ -34,20 +42,13 @@ public readonly struct IndexRangeEnumerable : IReadOnlyList<int>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IndexRangeEnumerable(Range range)
     {
-        if (range.Start.IsFromEnd || range.End.IsFromEnd)
-        {
-            throw new ArgumentException("Range start and end must not be from end");
-        }
+        start = range.Start.Value;
+        end = range.End.Value;
+    }
 
-        if (range.Start.Value > range.End.Value)
-        {
-            throw new ArgumentException("start is greater than end");                
-        }
-
-        (start, end) = (range.Start.Value, range.End.Value);
-    } 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Enumerator GetEnumerator() => new(start, end);
+
     IEnumerator<int> IEnumerable<int>.GetEnumerator() => GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     public int Count => end - start;

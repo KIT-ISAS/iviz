@@ -24,7 +24,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal MotionSequenceRequest(ref ReadBuffer b)
+        public MotionSequenceRequest(ref ReadBuffer b)
         {
             Items = b.DeserializeArray<MotionSequenceItem>();
             for (int i = 0; i < Items.Length; i++)

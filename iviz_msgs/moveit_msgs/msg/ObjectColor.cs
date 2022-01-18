@@ -26,7 +26,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
         
         /// Constructor with buffer.
-        internal ObjectColor(ref ReadBuffer b)
+        public ObjectColor(ref ReadBuffer b)
         {
             Id = b.DeserializeString();
             b.Deserialize(out Color);

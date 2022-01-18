@@ -7,6 +7,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
+using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -18,8 +19,6 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         readonly LaserScanConfiguration config = new();
 
-        public override IModuleData ModuleData { get; }
-
         public override TfFrame? Frame => node.Parent;
 
         public Vector2 MeasuredIntensityBounds => resource.MeasuredIntensityBounds;
@@ -29,7 +28,7 @@ namespace Iviz.Controllers
         public LaserScanConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 config.Topic = value.Topic;
                 Visible = value.Visible;
@@ -134,22 +133,19 @@ namespace Iviz.Controllers
                 resource.UseLines = value;
             }
         }
-        
+
         public override IListener Listener { get; }
 
-        public LaserScanListener(IModuleData moduleData, LaserScanConfiguration? config, string topic)
+        public LaserScanListener(LaserScanConfiguration? config, string topic)
         {
-            ModuleData = moduleData;
-
-            node = FrameNode.Instantiate("[LaserScanNode]");
-            resource = ResourcePool.RentDisplay<RadialScanResource>(node.transform);
             Config = config ?? new LaserScanConfiguration
             {
                 Topic = topic,
             };
 
-            Listener = new Listener<LaserScan>(Config.Topic, Handler);
-            node.name = "[" + Config.Topic + "]";
+            Listener = new Listener<LaserScan>(Config.Topic, Handler, RosTransportHint.PreferUdp);
+            node = new FrameNode($"[{Config.Topic}]");
+            resource = ResourcePool.RentDisplay<RadialScanResource>(node.Transform);
         }
 
         void Handler(LaserScan msg)
@@ -160,30 +156,38 @@ namespace Iviz.Controllers
                 float.IsNaN(msg.RangeMin) || float.IsNaN(msg.RangeMax) ||
                 float.IsNaN(msg.AngleIncrement))
             {
-                RosLogger.Info("LaserScanListener: NaN in header!");
+                RosLogger.Info($"{this}: NaN in header!");
                 return;
             }
 
             if (msg.AngleMin >= msg.AngleMax || msg.RangeMin >= msg.RangeMax)
             {
-                RosLogger.Info("LaserScanListener: Invalid angle or range dimensions!");
+                RosLogger.Info($"{this}: Invalid angle or range dimensions!");
                 return;
             }
 
             if (msg.Intensities.Length != 0 && msg.Intensities.Length != msg.Ranges.Length)
             {
-                RosLogger.Info("LaserScanListener: Invalid intensities length!");
+                RosLogger.Info($"{this}: Invalid intensities length!");
                 return;
             }
 
-            resource.Set(msg.AngleMin, msg.AngleIncrement, msg.RangeMin, msg.RangeMax, msg.Ranges, msg.Intensities);
+            try
+            {
+                resource.Set(msg.AngleMin, msg.AngleIncrement, msg.RangeMin, msg.RangeMax, msg.Ranges, msg.Intensities);
+            }
+            finally
+            {
+                msg.Ranges.TryReturn();
+                msg.Intensities.TryReturn();
+            }
         }
 
         public override void Dispose()
         {
             base.Dispose();
             resource.ReturnToPool();
-            node.DestroySelf();
+            node.Dispose();
         }
     }
 }

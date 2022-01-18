@@ -1,5 +1,6 @@
 using System.Runtime.Serialization;
 using System.Xml;
+using Iviz.Msgs;
 using Newtonsoft.Json;
 
 namespace Iviz.Urdf
@@ -37,6 +38,6 @@ namespace Iviz.Urdf
         public void Deconstruct(out Box? box, out Cylinder? cylinder, out Sphere? sphere, out Mesh? mesh) => 
             (box, cylinder, sphere, mesh) = (Box, Cylinder, Sphere, Mesh);
         
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => BuiltIns.ToJsonString(this);
     }
 }

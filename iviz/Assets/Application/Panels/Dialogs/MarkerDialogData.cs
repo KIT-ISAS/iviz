@@ -12,28 +12,28 @@ namespace Iviz.App
 {
     public sealed class MarkerDialogData : DialogData
     {
-        readonly MarkerDialogContents panel;
-        public override IDialogPanelContents Panel => panel;
-        IMarkerDialogListener? Listener { get; set; }
+        readonly MarkerDialogPanel panel;
+        IMarkerDialogListener? listener;
+        public override IDialogPanel Panel => panel;
 
         public MarkerDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<MarkerDialogContents>(DialogPanelType.Marker);
+            panel = DialogPanelManager.GetPanelByType<MarkerDialogPanel>(DialogPanelType.Marker);
         }
 
         public override void SetupPanel()
         {
             ResetPanelPosition();
 
-            if (Listener == null)
+            if (listener == null)
             {
                 throw new InvalidOperationException("Cannot setup panel without a listener!");
             }
 
-            panel.Label.Text = $"<b>Topic:</b> {Listener.Topic}";
+            panel.Label.Text = $"<b>Topic:</b> {listener.Topic}";
             panel.Close.Clicked += Close;
-            panel.ResetAll += Listener.Reset;
-            panel.LinkClicked += markerId => HighlightMarker(Listener, markerId);
+            panel.ResetAll += listener.Reset;
+            panel.LinkClicked += markerId => HighlightMarker(listener, markerId);
 
             UpdatePanel();
         }
@@ -55,20 +55,20 @@ namespace Iviz.App
 
         public override void UpdatePanel()
         {
-            if (Listener == null)
+            if (listener == null)
             {
                 return;
             }
 
             using var description = BuilderPool.Rent();
-            Listener.GenerateLog(description);
+            listener.GenerateLog(description);
             panel.Text.SetText(description);
         }
 
 
-        public void Show(IMarkerDialogListener listener)
+        public void Show(IMarkerDialogListener newListener)
         {
-            Listener = listener ?? throw new ArgumentNullException(nameof(listener));
+            listener = newListener ?? throw new ArgumentNullException(nameof(newListener));
             Show();
         }
     }

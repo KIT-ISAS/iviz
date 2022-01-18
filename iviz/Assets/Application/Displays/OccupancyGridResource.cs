@@ -116,7 +116,7 @@ namespace Iviz.Displays
             Resource.MeshResource = Resources.Resource.Displays.Cube;
             Resource.UseColormap = true;
             Resource.UseIntensityForScaleY = true;
-            Resource.ShadowsEnabled = false; // fix weird shadow bug
+            Resource.EnableShadows = false; // fix weird shadow bug
 
             Layer = LayerType.IgnoreRaycast;
         }
@@ -135,18 +135,17 @@ namespace Iviz.Displays
         public void SetOccupancy(ReadOnlySpan<sbyte> values, Rect? inBounds, Pose pose)
         {
             IsProcessing = true;
-            Rect bounds = inBounds ?? new Rect(0, numCellsX, 0, numCellsY);
+            
+            var bounds = inBounds ?? new Rect(0, numCellsX, 0, numCellsY);
 
             pointBuffer.Clear();
 
-            //var mul = new float4(cellSize, cellSize, 0, 0.01f);
             float size = cellSize;
-            var p = new float4();
 
             foreach (int v in bounds.yMin..bounds.yMax)
             {
                 var row = values[(v * numCellsX)..];
-                p.y = v * size;
+                float y = -v * size;
 
                 foreach (int u in bounds.xMin..bounds.xMax)
                 {
@@ -156,9 +155,18 @@ namespace Iviz.Displays
                         continue;
                     }
 
+                    
+                    float4 p;
+                    /*
                     p.x = u * size;
+                    p.y = y;
+                    p.z = 0;
+                    */
+                    p.x = y;
+                    p.y = 0;
+                    p.z = u * size;
                     p.w = val * 0.01f;
-                    pointBuffer.Add(p.Ros2Unity());
+                    pointBuffer.Add(p);
                 }
             }
 

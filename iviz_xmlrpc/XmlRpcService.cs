@@ -259,7 +259,7 @@ namespace Iviz.XmlRpc
         public static XmlRpcValue MethodCall(Uri remoteUri, Uri callerUri, string method, XmlRpcArg[] args,
             CancellationToken token = default)
         {
-            return Task.Run(() => MethodCallAsync(remoteUri, callerUri, method, args, token).AsTask(), token)
+            return TaskUtils.Run(() => MethodCallAsync(remoteUri, callerUri, method, args, token).AsTask(), token)
                 .WaitAndRethrow();
         }
 

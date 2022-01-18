@@ -37,7 +37,6 @@ namespace Iviz.Controllers
         public Listener<InteractiveMarkerInit>? FullListener { get; }
         public Sender<InteractiveMarkerFeedback>? Publisher { get; }
         public override TfFrame Frame => TfListener.DefaultFrame;
-        public override IModuleData ModuleData { get; }
 
         public InteractiveMarkerConfiguration Config
         {
@@ -167,16 +166,16 @@ namespace Iviz.Controllers
         
         public override IListener Listener { get; }
 
-        public InteractiveMarkerListener(IModuleData moduleData, InteractiveMarkerConfiguration? config, string topic)
+        public InteractiveMarkerListener(InteractiveMarkerConfiguration? config, string topic)
         {
-            ModuleData = moduleData ?? throw new ArgumentNullException(nameof(moduleData));
-            node = FrameNode.Instantiate("[InteractiveMarkerListener]");
-            Listener = new Listener<InteractiveMarkerUpdate>(Config.Topic, HandlerUpdate) { MaxQueueSize = 50 };
+            node = new FrameNode("[InteractiveMarkerListener]");
             Config = config ?? new InteractiveMarkerConfiguration
             {
                 Topic = topic,
             };
             
+            Listener = new Listener<InteractiveMarkerUpdate>(Config.Topic, HandlerUpdate) { MaxQueueSize = 50 };
+
             string root;
             if (Config.Topic.HasSuffix("/update"))
             {
@@ -216,13 +215,13 @@ namespace Iviz.Controllers
 
             foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
             {
-                markerObject.Stop();
+                markerObject.Dispose();
             }
 
             interactiveMarkers.Clear();
             Publisher?.Dispose();
 
-            node.DestroySelf();
+            node.Dispose();
         }
 
         public override void ResetController()
@@ -308,7 +307,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            interactiveMarker.Stop();
+            interactiveMarker.Dispose();
             interactiveMarkers.Remove(id);
         }
 
@@ -375,7 +374,7 @@ namespace Iviz.Controllers
         {
             foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
             {
-                markerObject.Stop();
+                markerObject.Dispose();
             }
 
             interactiveMarkers.Clear();

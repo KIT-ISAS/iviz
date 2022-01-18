@@ -24,7 +24,7 @@ namespace Iviz.App.ARDialogs
                 vertices = vertices,
                 normals = cubeMesh.normals,
                 colors = vertices.Select(
-                    vertex => vertex.x < 0
+                    vertex => vertex.z < 0
                         ? Color.white.WithAlpha(0)
                         : Color.white
                 ).ToArray(),

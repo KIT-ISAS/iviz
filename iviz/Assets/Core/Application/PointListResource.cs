@@ -5,11 +5,13 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Common;
 using Iviz.Core;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Displays
 {
@@ -163,16 +165,23 @@ namespace Iviz.Displays
             using (var vertices = new Rent<Vector3>(points.Length))
             using (var indices = new Rent<int>(points.Length))
             {
+                var vArray = vertices.Array;
+                int[] iArray = indices.Array;
+
                 if (UseColormap)
                 {
                     using var uvs = new Rent<Vector2>(points.Length);
+                    var uvsArray = uvs.Array;
                     for (int i = 0; i < points.Length; i++)
                     {
+                        iArray[i] = i;
+
                         ref readonly var p = ref points[i];
-                        ref var v = ref vertices.Array[i];
-                        (v.x, v.y, v.z) = p;
-                        indices.Array[i] = i;
-                        uvs.Array[i].x = p.w;
+                        ref var v = ref vArray[i];
+                        v.x = p.x;
+                        v.y = p.y;
+                        v.z = p.z;
+                        uvsArray[i].x = p.w;
                     }
 
                     mesh.SetVertices(vertices);
@@ -182,13 +191,17 @@ namespace Iviz.Displays
                 else
                 {
                     using var colors = new Rent<Color32>(points.Length);
+                    var cArray = colors.Array;
                     for (int i = 0; i < points.Length; i++)
                     {
+                        iArray[i] = i;
+
                         ref readonly var p = ref points[i];
-                        ref var v = ref vertices.Array[i];
-                        (v.x, v.y, v.z) = p;
-                        indices.Array[i] = i;
-                        colors.Array[i] = PointWithColor.RecastToColor32(p.w);
+                        ref var v = ref vArray[i];
+                        v.x = p.x;
+                        v.y = p.y;
+                        v.z = p.z;
+                        cArray[i] = UnityUtils.AsColor32(p.w);
                     }
 
                     mesh.SetVertices(vertices);
@@ -221,22 +234,23 @@ namespace Iviz.Displays
         /// <param name="points">The list of points.</param>
         public void Set(ReadOnlySpan<PointWithColor> points)
         {
-            if (points == null)
-            {
-                throw new ArgumentNullException(nameof(points));
-            }
+            Set(MemoryMarshal.Cast<PointWithColor, float4>(points));
+        }
 
+        public void Set(ReadOnlySpan<float4> points)
+        {
             pointBuffer.EnsureCapacity(points.Length);
             pointBuffer.Clear();
+
             for (int i = 0; i < points.Length; i++)
             {
                 ref readonly var t = ref points[i];
-                if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
+                if (t.IsInvalid3() || t.MaxAbsCoeff3() > MaxPositionMagnitude)
                 {
                     continue;
                 }
 
-                pointBuffer.Add(t.f);
+                pointBuffer.AddUnsafe(t);
             }
 
             isDirty = true;
@@ -255,24 +269,21 @@ namespace Iviz.Displays
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsElementValid(in float4 t)
+        public static bool IsElementValid(in Point t)
         {
-            return !(t.HasNaN() || t.MaxAbsCoeff3() > MaxPositionMagnitude);
+            return !(t.IsInvalid() || t.MaxAbsCoeff() > MaxPositionMagnitude);
         }
 
-        public void SetDirect(Action<NativeList<float4>> callback, int reserve = 0)
+        public void SetDirect(Action<NativeList<float4>> callback, int reserve)
         {
             if (callback == null)
             {
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            if (reserve != 0)
-            {
-                pointBuffer.EnsureCapacity(reserve);
-            }
-
+            pointBuffer.EnsureCapacity(reserve);
             pointBuffer.Clear();
+
             callback(pointBuffer);
             isDirty = true;
         }
@@ -287,7 +298,7 @@ namespace Iviz.Displays
             if (pointComputeBuffer == null || pointComputeBuffer.count < pointBuffer.Capacity)
             {
                 pointComputeBuffer?.Release();
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<float4>());
                 Properties.SetBuffer(PointsId, pointComputeBuffer);
             }
 
@@ -337,7 +348,7 @@ namespace Iviz.Displays
 
             if (pointBuffer.Capacity != 0)
             {
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<PointWithColor>());
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<float4>());
                 pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(PointsId, pointComputeBuffer);
             }

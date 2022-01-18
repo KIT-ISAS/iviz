@@ -12,16 +12,16 @@ using Newtonsoft.Json;
 namespace Iviz.App
 {
     /// <summary>
-    /// <see cref="PathPanelContents"/> 
+    /// <see cref="PathModulePanel"/> 
     /// </summary>
     public sealed class PathModuleData : ListenerModuleData
     {
         [NotNull] readonly PathListener listener;
-        [NotNull] readonly PathPanelContents panel;
+        [NotNull] readonly PathModulePanel panel;
 
         protected override ListenerController Listener => listener;
 
-        public override DataPanelContents Panel => panel;
+        public override ModulePanel Panel => panel;
         public override ModuleType ModuleType => ModuleType.Path;
         public override IConfiguration Configuration => listener.Config;
 
@@ -30,12 +30,12 @@ namespace Iviz.App
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
                 constructor.TryGetConfigurationType() ?? constructor.Type)
         {
-            panel = DataPanelManager.GetPanelByResourceType<PathPanelContents>(ModuleType.Path);
-            listener = new PathListener(this);
+            panel = ModulePanelManager.GetPanelByResourceType<PathModulePanel>(ModuleType.Path);
+            listener = new PathListener();
             if (constructor.Configuration == null)
             {
                 listener.Config.Topic = Topic;
-                listener.Config.Type = Type;
+                listener.Config.Type = TopicType;
             }
             else
             {
@@ -58,7 +58,7 @@ namespace Iviz.App
             panel.ShowLines.Value = listener.LinesVisible;
             panel.LineColor.Value = listener.LineColor;
 
-            switch (Type)
+            switch (TopicType)
             {
                 case PoseArray.RosMessageType:
                     panel.ShowAxes.Interactable = false;

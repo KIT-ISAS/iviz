@@ -1,5 +1,6 @@
 using System.Runtime.Serialization;
 using System.Xml;
+using Iviz.Msgs;
 using Newtonsoft.Json;
 
 namespace Iviz.Urdf
@@ -21,6 +22,6 @@ namespace Iviz.Urdf
             Xyz = Vector3f.Parse(node.Attributes?["xyz"], Vector3f.UnitX);
         }
         
-        public override string ToString() => JsonConvert.SerializeObject(this);
+        public override string ToString() => BuiltIns.ToJsonString(this);
     }
 }

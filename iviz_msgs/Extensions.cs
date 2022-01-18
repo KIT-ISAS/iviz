@@ -96,28 +96,47 @@ namespace Iviz.Msgs
             return q;
         }
 
-        public static Pose WithPosition(this Pose pose, in Point position)
+        public static Pose WithPosition(this in Pose pose, in Point position)
         {
-            pose.Position = position;
-            return pose;
+            Pose q;
+            q.Position = position;
+            q.Orientation = pose.Orientation;
+            return q;
         }
 
-        public static Pose WithPosition(this in Pose pose, double x, double y, double z) =>
-            new(new Point(x, y, z), pose.Orientation);
-
-        public static Pose WithOrientation(this in Pose pose, in Quaternion orientation) =>
-            new(pose.Position, orientation);
-
-        public static Transform WithTranslation(this Transform t, in Vector3 translation)
+        public static Pose WithPosition(this in Pose pose, double x, double y, double z)
         {
-            t.Translation = translation;
-            return t;
+            Pose q;
+            q.Position.X = x;
+            q.Position.Y = y;
+            q.Position.Z = z;
+            q.Orientation = pose.Orientation;
+            return q;
         }
 
-        public static Transform WithRotation(this Transform t, in Quaternion rotation)
+
+        public static Pose WithOrientation(this in Pose pose, in Quaternion orientation)
         {
-            t.Rotation = rotation;
-            return t;
+            Pose q;
+            q.Position = pose.Position;
+            q.Orientation = orientation;
+            return q;
+        }
+        
+        public static Transform WithTranslation(this in Transform t, in Vector3 translation)
+        {
+            Transform q;
+            q.Translation = translation;
+            q.Rotation = t.Rotation;
+            return q;
+        }
+
+        public static Transform WithRotation(this in Transform t, in Quaternion rotation)
+        {
+            Transform q;
+            q.Translation = t.Translation;
+            q.Rotation = rotation;
+            return q;
         }
 
         public static Transform Translate(this in Transform t, in Vector3 translation) =>
@@ -235,9 +254,9 @@ namespace Iviz.Msgs
             $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, " +
             $"\"z\": {p.Z.ToString(BuiltIns.Culture)}, \"w\": {p.W.ToString(BuiltIns.Culture)}}}";
 
-        public static string ToString(in ISerializable t) => JsonConvert.SerializeObject(t);
+        public static string ToString(in ISerializable t) => t.ToJsonString();
 
-        public static string ToString(IService t) => JsonConvert.SerializeObject(t);
+        public static string ToString(IService t) => t.ToJsonString();
     }
 
 

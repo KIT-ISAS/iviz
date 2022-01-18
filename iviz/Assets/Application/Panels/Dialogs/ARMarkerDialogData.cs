@@ -1,31 +1,30 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿#nullable enable
+
+using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Tools;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace Iviz.App
 {
 
     public sealed class ARMarkerDialogData : DialogData
     {
-        [NotNull] readonly ARMarkerDialogContents panel;
-        public override IDialogPanelContents Panel => panel;
+        readonly ARMarkerDialogContents panel;
+        public override IDialogPanel Panel => panel;
 
-        [NotNull] public ARMarkersConfiguration Configuration { get; set; } = new ARMarkersConfiguration();
+        public ARMarkersConfiguration Configuration { get; set; } = new();
 
         public ARMarkerDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<ARMarkerDialogContents>(DialogPanelType.ARMarkers);
             ARController.ARStateChanged += OnARStateChanged;
         }
-
-
-        public override void FinalizePanel()
+        
+        public override void Dispose()
         {
             ARController.ARStateChanged -= OnARStateChanged;
         }
@@ -44,10 +43,10 @@ namespace Iviz.App
 
             WriteConfigurationToPanel();
             panel.Close.Clicked += Close;
-            panel.ActionsChanged += (_, __) => WritePanelToConfiguration();
-            panel.TypesChanged += (_, __) => WritePanelToConfiguration();
-            panel.CodesEndEdit += (_, __) => WritePanelToConfiguration();
-            panel.SizesEndEdit += (_, __) => WritePanelToConfiguration();
+            panel.ActionsChanged += (_, _) => WritePanelToConfiguration();
+            panel.TypesChanged += (_, _) => WritePanelToConfiguration();
+            panel.CodesEndEdit += (_, _) => WritePanelToConfiguration();
+            panel.SizesEndEdit += (_, _) => WritePanelToConfiguration();
 
             UpdatePanel();
         }
@@ -67,7 +66,7 @@ namespace Iviz.App
         void WritePanelToConfiguration()
         {
             var markers = new List<ARExecutableMarker>();
-            for (int index = 0; index < panel.Types.Count; index++)
+            foreach (int index in ..panel.Types.Count)
             {
                 var type = (ARMarkerType) panel.Types[index].Index;
                 if (type == ARMarkerType.Unset)
@@ -75,21 +74,21 @@ namespace Iviz.App
                     continue;
                 }
 
-                if (!float.TryParse(panel.Sizes[index].Value, out float sizeInMm) || sizeInMm <= 0)
+                if (!float.TryParse(panel.Sizes[index].Value, out float sizeInMm) || sizeInMm < 0)
                 {
-                    RosLogger.Info($"{this}: Ignoring size for entry {index}, cannot parse '{panel.Sizes[index].Value}' " +
-                                "into a positive number.");
+                    RosLogger.Info($"{this}: Ignoring size for entry {index.ToString()}, " +
+                                   $"cannot parse '{panel.Sizes[index].Value}' into a nonnegative number.");
                     continue;
                 }
 
                 string code = panel.Codes[index].Value.Trim();
                 if (string.IsNullOrEmpty(code))
                 {
-                    RosLogger.Info($"{this}: Ignoring empty code for entry {index}.");
+                    RosLogger.Info($"{this}: Ignoring empty code for entry {index.ToString()}.");
                     continue;
                 }
 
-                ARExecutableMarker marker = new ARExecutableMarker
+                var marker = new ARExecutableMarker
                 {
                     Type = type,
                     Action = (ARMarkerAction) panel.Actions[index].Index,

@@ -25,47 +25,39 @@ namespace Iviz.Displays
     /// <summary>
     /// Wrapper around the 3D models of a robot.
     /// </summary>
-    public sealed class RobotModel : ISupportsTint, ISupportsPbr, ISupportsAROcclusion
+    public sealed class RobotModel : ISupportsTint, ISupportsPbr, ISupportsAROcclusion, ISupportsShadows
     {
         public const string ColliderTag = "RobotCollider";
-        
+
         readonly List<MeshMarkerResource> displays = new();
         readonly Dictionary<string, GameObject> jointObjects = new();
         readonly Dictionary<string, Joint> joints = new();
         readonly Dictionary<string, GameObject> linkObjects = new();
         readonly Dictionary<GameObject, GameObject> linkParentObjects = new();
         readonly Dictionary<string, string> linkParents = new();
-        readonly List<(GameObject, Info<GameObject>)> objectResources = new();
+        readonly List<(GameObject, ResourceKey<GameObject>)> objectResources = new();
         readonly Dictionary<MeshMarkerResource, Color> originalColors = new();
 
         readonly Robot robot;
         readonly CancellationTokenSource runningTs = new();
 
-        bool occlusionOnly;
-        bool visible = true;
         Color tint = Color.white;
         float smoothness = 0.5f;
         float metallic = 0.5f;
+        bool occlusionOnly;
+        bool enableShadows = true;
+        bool visible = true;
         int numErrors;
 
         public string Name { get; }
         public string? BaseLink { get; private set; }
         public GameObject BaseLinkObject { get; }
-
         public string Description { get; }
-        public ReadOnlyDictionary<string, string> LinkParents { get; private set; }
-        public ReadOnlyDictionary<string, GameObject> LinkObjects { get; private set; }
-        public ReadOnlyDictionary<string, Joint> Joints { get; private set; }
-
-        public string UnityName
-        {
-            get => BaseLinkObject.name;
-            set => BaseLinkObject.name = value;
-        }
+        public IReadOnlyDictionary<string, string> LinkParents => linkParents;
+        public IReadOnlyDictionary<string, GameObject> LinkObjects => linkObjects;
 
         public bool OcclusionOnly
         {
-            get => occlusionOnly;
             set
             {
                 occlusionOnly = value;
@@ -78,7 +70,6 @@ namespace Iviz.Displays
 
         public Color Tint
         {
-            get => tint;
             set
             {
                 tint = value;
@@ -91,7 +82,6 @@ namespace Iviz.Displays
 
         public bool Visible
         {
-            get => visible;
             set
             {
                 visible = value;
@@ -104,7 +94,6 @@ namespace Iviz.Displays
 
         public float Smoothness
         {
-            get => smoothness;
             set
             {
                 smoothness = value;
@@ -117,7 +106,6 @@ namespace Iviz.Displays
 
         public float Metallic
         {
-            get => metallic;
             set
             {
                 metallic = value;
@@ -127,6 +115,19 @@ namespace Iviz.Displays
                 }
             }
         }
+        
+        public bool EnableShadows
+        {
+            set
+            {
+                enableShadows = value;
+                foreach (var display in displays)
+                {
+                    display.EnableShadows = value;
+                }
+            }
+        }
+
 
         /// <summary>
         /// Initializes a robot with the given URDF text. Call <see cref="StartAsync"/> to construct it.
@@ -143,10 +144,6 @@ namespace Iviz.Displays
 
             Name = robot.Name;
             Description = robotDescription;
-
-            LinkParents = new Dictionary<string, string>().AsReadOnly();
-            LinkObjects = new Dictionary<string, GameObject>().AsReadOnly();
-            Joints = new Dictionary<string, Joint>().AsReadOnly();
             BaseLinkObject = new GameObject(Name);
         }
 
@@ -176,12 +173,12 @@ namespace Iviz.Displays
                 linkObject.transform.parent = BaseLinkObject.transform;
                 linkObjects[link.Name ?? ""] = linkObject;
             }
-            
+
             foreach (var joint in robot.Joints)
             {
                 ProcessJoint(joint);
             }
-            
+
             try
             {
                 var modelLoadingTasks = robot.Links.SelectMany(
@@ -209,21 +206,18 @@ namespace Iviz.Displays
             }
 
             HideChildlessLinks();
-            
-            LinkParents = linkParents.AsReadOnly();
-            LinkObjects = linkObjects.AsReadOnly();
-            Joints = joints.AsReadOnly();
 
             Tint = tint;
             OcclusionOnly = occlusionOnly;
             Visible = visible;
             Smoothness = smoothness;
             Metallic = metallic;
+            EnableShadows = enableShadows; 
             ApplyAnyValidConfiguration();
 
             string errorStr = numErrors == 0 ? "" : $"There were {numErrors.ToString()} errors.";
-            RosLogger.Info($"Finished constructing robot '{Name}' with {LinkObjects.Count.ToString()} " +
-                           $"links and {Joints.Count.ToString()} joints. {errorStr}");
+            RosLogger.Info($"Finished constructing robot '{Name}' with {linkObjects.Count.ToString()} " +
+                           $"links and {joints.Count.ToString()} joints. {errorStr}");
         }
 
         void HideChildlessLinks()
@@ -235,12 +229,12 @@ namespace Iviz.Displays
             {
                 links[link.Name ?? ""] = link;
             }
-            
+
             foreach (string child in linkObjects.Keys)
             {
                 linkChildren[child] = new HashSet<string>();
             }
-            
+
             foreach (var (child, parent) in linkParents)
             {
                 linkChildren[parent].Add(child);
@@ -252,7 +246,7 @@ namespace Iviz.Displays
             do
             {
                 hasChanges = false;
-                
+
                 foreach (var (linkName, children) in linkChildren)
                 {
                     if (children.Count != 0)
@@ -297,11 +291,11 @@ namespace Iviz.Displays
         {
             if (link.Visuals.Count == 0 && link.Collisions.Count == 0)
             {
-                return Array.Empty<Task>();
+                return Enumerable.Empty<Task>();
             }
-            
+
             var linkObject = linkObjects[link.Name ?? ""];
-            
+
             var tasks = new List<Task>(link.Collisions.Count + link.Visuals.Count);
             foreach (var visual in link.Visuals)
             {
@@ -335,7 +329,7 @@ namespace Iviz.Displays
             if (geometry.Mesh != null)
             {
                 string uri = geometry.Mesh.Filename;
-                Info<GameObject>? info;
+                ResourceKey<GameObject>? info;
                 try
                 {
                     info = await Resource.GetGameObjectResourceAsync(geometry.Mesh.Filename, provider, token);
@@ -421,12 +415,12 @@ namespace Iviz.Displays
                 visualObject.transform.SetParent(linkObject.transform, false);
                 visualObject.transform.SetLocalPose(origin.ToPose());
             }
-            
+
             GameObject resourceObject;
             if (mesh != null)
             {
                 string uri = mesh.Filename;
-                Info<GameObject>? info;
+                ResourceKey<GameObject>? info;
                 try
                 {
                     info = await Resource.GetGameObjectResourceAsync(uri, provider, token);
@@ -458,14 +452,14 @@ namespace Iviz.Displays
             }
             else if (sphere != null)
             {
-                Rent(Resource.Displays.Sphere, Mathf.Abs(sphere.Radius) * Vector3.one);
+                Rent(Resource.Displays.Sphere, Math.Abs(sphere.Radius) * Vector3.one);
             }
             else
             {
                 return; //?
             }
 
-            void Rent(Info<GameObject> info, in Vector3 scale)
+            void Rent(ResourceKey<GameObject> info, in Vector3 scale)
             {
                 resourceObject = ResourcePool.Rent(info);
                 resourceObject.layer = LayerType.IgnoreRaycast;
@@ -641,24 +635,23 @@ namespace Iviz.Displays
                 return false;
             }
 
-            Pose unityPose;
-            switch (joint.Type)
+            var axis = joint.Axis.Xyz.ToVector3();
+            Pose? unityPose = joint.Type switch
             {
-                case Joint.JointType.Revolute:
-                case Joint.JointType.Continuous:
-                    float angle = value * Mathf.Rad2Deg;
-                    unityPose = Pose.identity.WithRotation(Quaternion.AngleAxis(-angle, joint.Axis.Xyz.ToVector3()));
-                    break;
-                case Joint.JointType.Prismatic:
-                    unityPose = Pose.identity.WithPosition(joint.Axis.Xyz.ToVector3() * value);
-                    break;
-                default:
-                    return false;
+                Joint.JointType.Revolute or Joint.JointType.Continuous => 
+                    Pose.identity.WithRotation(Quaternion.AngleAxis(-value * Mathf.Rad2Deg, axis)),
+                Joint.JointType.Prismatic => 
+                    Pose.identity.WithPosition(axis * value),
+                _ => null
+            };
+
+            if (unityPose is not { } validatedPose)
+            {
+                return false;
             }
-
+            
             var jointObject = jointObjects[jointName];
-            jointObject.transform.SetLocalPose(unityPose);
-
+            jointObject.transform.SetLocalPose(validatedPose);
             return true;
         }
 

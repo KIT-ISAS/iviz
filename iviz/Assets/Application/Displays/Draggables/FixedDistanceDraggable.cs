@@ -1,7 +1,6 @@
 #nullable enable
 
 using System;
-using Iviz.Core;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -36,9 +35,8 @@ namespace Iviz.Displays
                 {
                     float deltaDistance = Vector3.Dot(interactorTransform.forward,
                         lastControllerPosition - pointerRay.origin);
-                    distance = Mathf.Max(0.1f, distance - forwardScale * deltaDistance);
+                    distance = Math.Max(0.1f, distance - forwardScale * deltaDistance);
                 }
-
 
                 var intersectionWorld = pointerRay.origin + distance * pointerRay.direction;
                 var referencePointWorld = mTransform.TransformPoint(referencePointLocal);
