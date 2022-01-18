@@ -18118,6 +18118,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 3602615320837110326, guid: 68518ad40aa4f4b588e6061d42800afe,
         type: 3}
+      propertyPath: forwardScale
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3602615320837110326, guid: 68518ad40aa4f4b588e6061d42800afe,
+        type: 3}
       propertyPath: baseForwardScale
       value: 5
       objectReference: {fileID: 0}
@@ -18126,10 +18131,20 @@ PrefabInstance:
       propertyPath: minDistanceForScale
       value: 0.15
       objectReference: {fileID: 0}
+    - target: {fileID: 3602615320837110326, guid: 68518ad40aa4f4b588e6061d42800afe,
+        type: 3}
+      propertyPath: minDistanceForForwardScale
+      value: 0.15
+      objectReference: {fileID: 0}
     - target: {fileID: 7002819732865035587, guid: 68518ad40aa4f4b588e6061d42800afe,
         type: 3}
       propertyPath: m_Name
       value: Spring Disc 3D
+      objectReference: {fileID: 0}
+    - target: {fileID: 7002819732865035587, guid: 68518ad40aa4f4b588e6061d42800afe,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7002819732865035588, guid: 68518ad40aa4f4b588e6061d42800afe,
         type: 3}
