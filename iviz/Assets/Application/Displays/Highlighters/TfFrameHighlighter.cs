@@ -26,7 +26,7 @@ namespace Iviz.Displays.Highlighters
             node = new FrameNode("Frame Highlighter", frame);
 
             axisResource = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
-            axisResource.ShadowsEnabled = false;
+            axisResource.EnableShadows = false;
             axisResource.Emissive = 1;
             axisResource.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);
             axisResource.Tint = Color.white;

@@ -33,7 +33,7 @@ namespace Iviz.Displays.Highlighters
             nodeTransform.SetParentLocal(holder.BoundsTransform);
 
             frame = ResourcePool.RentDisplay<SelectionFrame>(nodeTransform);
-            frame.ShadowsEnabled = false;
+            frame.EnableShadows = false;
             frame.EmissiveColor = Color.blue;
             frame.Color = Color.white;
 

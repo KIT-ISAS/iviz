@@ -142,7 +142,7 @@ namespace Iviz.Controllers
                 shadowsEnabled = value;
                 if (resource is ISupportsShadows shadowResource)
                 {
-                    shadowResource.ShadowsEnabled = value;
+                    shadowResource.EnableShadows = value;
                 }
             }
         }

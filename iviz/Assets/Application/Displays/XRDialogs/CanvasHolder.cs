@@ -81,7 +81,7 @@ namespace Iviz.Displays
 
             Background.Radius = 0.01f;
             Background.Color = Resource.Colors.TooltipBackground;
-            Background.ShadowsEnabled = false;
+            Background.EnableShadows = false;
             Background.Layer = LayerType.Clickable;
 
             Draggable.ForwardScale = 5f;

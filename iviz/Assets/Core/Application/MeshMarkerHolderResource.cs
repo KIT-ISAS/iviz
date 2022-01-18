@@ -122,13 +122,13 @@ namespace Iviz.Displays
             }
         }
 
-        public bool ShadowsEnabled
+        public bool EnableShadows
         {
             set
             {
                 foreach (var resource in children)
                 {
-                    resource.ShadowsEnabled = value;
+                    resource.EnableShadows = value;
                 }
             }
         }

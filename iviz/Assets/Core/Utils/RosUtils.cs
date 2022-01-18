@@ -327,8 +327,8 @@ namespace Iviz.Core
         public static bool IsInvalid(this double f) => !double.IsFinite(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this in float4 v) =>
-            v.x.IsInvalid() || v.y.IsInvalid() || v.z.IsInvalid() || v.w.IsInvalid();
+        public static bool IsInvalid3(this in float4 v) =>
+            v.x.IsInvalid() || v.y.IsInvalid() || v.z.IsInvalid();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this in float3 v) =>

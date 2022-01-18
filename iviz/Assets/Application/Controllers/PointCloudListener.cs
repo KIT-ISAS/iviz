@@ -215,7 +215,7 @@ namespace Iviz.Controllers
             node = new FrameNode($"[{Config.Topic}]");
             pointCloud = ResourcePool.RentDisplay<PointListResource>(node.Transform);
             meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.Transform);
-            meshCloud.ShadowsEnabled = false;
+            meshCloud.EnableShadows = false;
         }
 
         static int FieldSizeFromType(int datatype)
@@ -538,7 +538,7 @@ namespace Iviz.Controllers
                         for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                         {
                             var data = dataOff.Read<float4>();
-                            if (data.IsInvalid() || data.MaxAbsCoeff3() > maxPositionMagnitude)
+                            if (data.IsInvalid3() || data.MaxAbsCoeff3() > maxPositionMagnitude)
                             {
                                 continue;
                             }

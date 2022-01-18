@@ -1,13 +1,11 @@
 #nullable enable
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.App.ARDialogs;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Displays.ARDialogs;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
@@ -29,19 +27,49 @@ namespace Iviz.Controllers
 
 
         readonly GuiWidgetConfiguration config = new();
-        readonly Dictionary<string, GuiObject> widgets = new();
-        readonly Dictionary<string, GuiObject> dialogs = new();
+        readonly Dictionary<string, GuiWidgetObject> widgets = new();
+        readonly Dictionary<string, GuiWidgetObject> dialogs = new();
         uint feedbackSeq;
 
         public override TfFrame Frame => TfListener.FixedFrame;
         public Sender<Feedback>? FeedbackSender { get; }
-        public bool Interactable { get; set; }
         public override IListener Listener { get; }
 
         public GuiWidgetConfiguration Config
         {
             get => config;
-            set => config.Topic = value.Topic;
+            private set
+            {
+                config.Topic = value.Topic;
+                Visible = value.Visible;
+                Interactable = value.Interactable;
+            }
+        }
+
+        public override bool Visible
+        {
+            get => config.Visible;
+            set
+            {
+                config.Visible = value;
+                foreach (var widget in widgets.Values)
+                {
+                    widget.Visible = value;
+                }
+            }
+        }
+
+        public bool Interactable
+        {
+            get => config.Interactable;
+            set
+            {
+                config.Interactable = value;
+                foreach (var widget in widgets.Values)
+                {
+                    widget.Interactable = value;
+                }
+            }
         }
 
         public GuiWidgetListener(GuiWidgetConfiguration? configuration, string topic)
@@ -144,7 +172,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
 }
 */
 
-            var guiObject = new GuiObject(msg, info);
+            var guiObject = new GuiWidgetObject(msg, info) { Interactable = Interactable };
 
             switch ((WidgetType)msg.Type)
             {
@@ -152,10 +180,12 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
                     guiObject.As<RotationDisc>().Moved += angle => OnDiscRotated(guiObject, angle);
                     break;
                 case WidgetType.SpringDisc:
-                    guiObject.As<SpringDisc>().Moved += direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
+                    guiObject.As<SpringDisc>().Moved +=
+                        direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
                     break;
                 case WidgetType.SpringDisc3D:
-                    guiObject.As<SpringDisc3D>().Moved += direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
+                    guiObject.As<SpringDisc3D>().Moved +=
+                        direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
                     break;
                 case WidgetType.TrajectoryDisc:
                     guiObject.As<TrajectoryDisc>().Moved += (direction, period) =>
@@ -167,10 +197,12 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
                     targetWidget.Cancelled += () => OnTargetAreaCanceled(guiObject);
                     break;
                 case WidgetType.PositionDisc3D:
-                    guiObject.As<PositionDisc3D>().Moved += direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
+                    guiObject.As<PositionDisc3D>().Moved +=
+                        direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
                     break;
                 case WidgetType.PositionDisc:
-                    guiObject.As<PositionDisc>().Moved += direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
+                    guiObject.As<PositionDisc>().Moved +=
+                        direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
                     break;
                 /*
                 case WidgetType.Tooltip:
@@ -309,13 +341,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             DestroyAll(widgets);
         }
 
-        public override bool Visible
-        {
-            get => true;
-            set { }
-        }
-
-        static void DestroyAll(Dictionary<string, GuiObject> dict)
+        static void DestroyAll(Dictionary<string, GuiWidgetObject> dict)
         {
             foreach (var guiObject in dict.Values)
             {
@@ -372,7 +398,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             }
         }
 
-        void OnDialogExpired(GuiObject dialog)
+        void OnDialogExpired(GuiWidgetObject dialog)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -383,7 +409,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             });
         }
 
-        void OnDiscRotated(GuiObject widget, float angleInDeg)
+        void OnDiscRotated(GuiWidgetObject widget, float angleInDeg)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -396,7 +422,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             });
         }
 
-        void OnDiscMoved(GuiObject widget, in Vector3 direction)
+        void OnDiscMoved(GuiWidgetObject widget, in Vector3 direction)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -408,7 +434,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             });
         }
 
-        void OnTrajectoryDiscMoved(GuiObject widget, IReadOnlyList<Vector3> points, float periodInSec)
+        void OnTrajectoryDiscMoved(GuiWidgetObject widget, IReadOnlyList<Vector3> points, float periodInSec)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -428,7 +454,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             });
         }
 
-        void OnTargetAreaMoved(GuiObject widget, in Vector2 scale, Vector3 position)
+        void OnTargetAreaMoved(GuiWidgetObject widget, in Vector2 scale, Vector3 position)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -441,7 +467,7 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
             });
         }
 
-        void OnTargetAreaCanceled(GuiObject widget)
+        void OnTargetAreaCanceled(GuiWidgetObject widget)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -471,84 +497,8 @@ case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
         {
             defaultHandler = null;
         }
-
-
-        // ----------------------------------------------------------------------------------------
-
-        sealed class GuiObject
-        {
-            readonly FrameNode node;
-            readonly ResourceKey<GameObject> resourceKey;
-            readonly IDisplay display;
-            float scale = 1;
-
-            public Transform Transform => node.Transform;
-            public string ParentId => node.Parent?.Id ?? TfListener.DefaultFrame.Id;
-            public string Id { get; }
-
-            public float Scale
-            {
-                get => scale;
-                set
-                {
-                    scale = value;
-                    Transform.localScale = Vector3.one * scale;
-                }
-            } 
-            public DateTime ExpirationTime { get; }
-
-            public GuiObject(Widget msg, ResourceKey<GameObject> resourceKey)
-            {
-                this.resourceKey = resourceKey;
-                node = new FrameNode(msg.Id);
-                node.AttachTo(msg.Header.FrameId);
-                Id = msg.Id;
-
-                display = ResourcePool.Rent(resourceKey, node.Transform).GetComponent<IDisplay>();
-                if (display is IWidgetWithCaption withCaption && msg.Caption.Length != 0)
-                {
-                    withCaption.Caption = msg.Caption;
-                }
-
-                if (display is IWidgetWithColor withColor)
-                {
-                    if (msg.MainColor.A != 0)
-                    {
-                        withColor.Color = msg.MainColor.ToUnityColor();
-                    }
-
-                    if (msg.SecondaryColor.A != 0)
-                    {
-                        withColor.SecondaryColor = msg.SecondaryColor.ToUnityColor();
-                    }
-                }
-
-                ExpirationTime = DateTime.MaxValue;
-            }
-
-            GuiObject(GuiObject source)
-            {
-                node = source.node;
-                resourceKey = source.resourceKey;
-                display = source.display;
-                Id = source.Id;
-                ExpirationTime = DateTime.MinValue;
-            }
-
-            public T As<T>() where T : IDisplay
-            {
-                return (T)display;
-            }
-
-            public void Dispose()
-            {
-                display.ReturnToPool(resourceKey);
-                node.Dispose();
-            }
-
-            public GuiObject AsExpired() => new(this);
-        }
     }
+
 
     public enum ActionType : byte
     {

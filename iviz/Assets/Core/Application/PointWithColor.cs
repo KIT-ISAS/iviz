@@ -15,7 +15,6 @@ namespace Iviz.Displays
     {
         public float4 f;
         
-        public readonly float3 Position => f.xyz;
         readonly Color32 Color => UnityUtils.AsColor32(f.w);
         readonly float Intensity => f.w;
 
@@ -31,8 +30,8 @@ namespace Iviz.Displays
         {
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] 
-        public PointWithColor(float x, float y, float z, float w)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        PointWithColor(float x, float y, float z, float w)
         {
             f.x = x;
             f.y = y;
@@ -40,15 +39,9 @@ namespace Iviz.Displays
             f.w = w;
         }
 
-        /// <summary>
-        /// Do the positions have a Nan? (ignores intensity) 
-        /// </summary>        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]        
-        public readonly bool HasNaN() => f.IsInvalid();
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [NotNull]
-        public override readonly string ToString()
+        public readonly override string ToString()
         {
             return $"[x={f.x} y={f.y} z={f.z} i={Intensity} c={Color}]";
         }

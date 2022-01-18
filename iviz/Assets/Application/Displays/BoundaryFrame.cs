@@ -179,7 +179,7 @@ namespace Iviz.Controllers
             frameLink.gameObject.name = "Cube";
             frameLink.EmissiveColor = (Color / 2).WithAlpha(1);
             frameLink.Color = Color;
-            frameLink.ShadowsEnabled = false;
+            frameLink.EnableShadows = false;
             return frameLink;
         }
     }

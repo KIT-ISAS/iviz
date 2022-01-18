@@ -100,7 +100,7 @@ namespace Iviz.Displays
             set => MainRenderer.SetPropertyMetallic(value);
         }
 
-        public bool ShadowsEnabled
+        public bool EnableShadows
         {
             set
             {
@@ -180,7 +180,7 @@ namespace Iviz.Displays
             EmissiveColor = Color.black;
             EnableCollider = true;
             OcclusionOnly = false;
-            ShadowsEnabled = true;
+            EnableShadows = true;
         }
 
         void SetEffectiveColor()

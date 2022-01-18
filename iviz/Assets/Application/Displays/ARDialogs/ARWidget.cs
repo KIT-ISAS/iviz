@@ -9,6 +9,7 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
+    [Obsolete]
     [RequireComponent(typeof(BoxCollider))]
     public abstract class ARWidget : MonoBehaviour, IDisplay
     {

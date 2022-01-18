@@ -245,7 +245,7 @@ namespace Iviz.Displays
             for (int i = 0; i < points.Length; i++)
             {
                 ref readonly var t = ref points[i];
-                if (t.IsInvalid() || t.MaxAbsCoeff3() > MaxPositionMagnitude)
+                if (t.IsInvalid3() || t.MaxAbsCoeff3() > MaxPositionMagnitude)
                 {
                     continue;
                 }
@@ -266,12 +266,6 @@ namespace Iviz.Displays
             pointBuffer.Clear();
             pointBuffer.AddRange(points);
             isDirty = true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsElementValid(in float4 t)
-        {
-            return !(t.IsInvalid() || t.MaxAbsCoeff3() > MaxPositionMagnitude);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -95,9 +95,9 @@ namespace Iviz.Displays
             set => Arrow.OcclusionOnly = value;
         }
 
-        public bool ShadowsEnabled
+        public bool EnableShadows
         {
-            set => Arrow.ShadowsEnabled = value;
+            set => Arrow.EnableShadows = value;
         }
     }
 }

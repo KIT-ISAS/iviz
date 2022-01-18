@@ -71,6 +71,6 @@ namespace Iviz.Displays
     /// </summary>
     public interface ISupportsShadows
     {
-        bool ShadowsEnabled { set; }
+        bool EnableShadows { set; }
     }
 }

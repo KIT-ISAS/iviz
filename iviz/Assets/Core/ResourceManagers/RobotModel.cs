@@ -25,7 +25,7 @@ namespace Iviz.Displays
     /// <summary>
     /// Wrapper around the 3D models of a robot.
     /// </summary>
-    public sealed class RobotModel : ISupportsTint, ISupportsPbr, ISupportsAROcclusion
+    public sealed class RobotModel : ISupportsTint, ISupportsPbr, ISupportsAROcclusion, ISupportsShadows
     {
         public const string ColliderTag = "RobotCollider";
 
@@ -41,11 +41,12 @@ namespace Iviz.Displays
         readonly Robot robot;
         readonly CancellationTokenSource runningTs = new();
 
-        bool occlusionOnly;
-        bool visible = true;
         Color tint = Color.white;
         float smoothness = 0.5f;
         float metallic = 0.5f;
+        bool occlusionOnly;
+        bool enableShadows = true;
+        bool visible = true;
         int numErrors;
 
         public string Name { get; }
@@ -114,6 +115,19 @@ namespace Iviz.Displays
                 }
             }
         }
+        
+        public bool EnableShadows
+        {
+            set
+            {
+                enableShadows = value;
+                foreach (var display in displays)
+                {
+                    display.EnableShadows = value;
+                }
+            }
+        }
+
 
         /// <summary>
         /// Initializes a robot with the given URDF text. Call <see cref="StartAsync"/> to construct it.
@@ -198,6 +212,7 @@ namespace Iviz.Displays
             Visible = visible;
             Smoothness = smoothness;
             Metallic = metallic;
+            EnableShadows = enableShadows; 
             ApplyAnyValidConfiguration();
 
             string errorStr = numErrors == 0 ? "" : $"There were {numErrors.ToString()} errors.";

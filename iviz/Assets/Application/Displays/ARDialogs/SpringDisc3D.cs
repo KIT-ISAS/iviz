@@ -58,6 +58,11 @@ namespace Iviz.Displays.ARDialogs
         {
             set => gameObject.layer = value;
         }
+        
+        public bool Interactable
+        {
+            set => Draggable.enabled = value;
+        }        
 
         void Awake()
         {
@@ -67,6 +72,7 @@ namespace Iviz.Displays.ARDialogs
 
             Draggable.StartDragging += () =>
             {
+                tokenSource?.Cancel();
                 Disc.EmissiveColor = Color;
                 Glow.Visible = true;
             };

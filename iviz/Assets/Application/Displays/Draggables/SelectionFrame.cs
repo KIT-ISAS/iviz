@@ -51,7 +51,7 @@ namespace Iviz.Displays
             MeshMarkerResource CreateObject()
             {
                 var resource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, transform);
-                resource.ShadowsEnabled = false;
+                resource.EnableShadows = false;
                 resource.EnableCollider = false;
                 return resource;
             }
@@ -130,7 +130,7 @@ namespace Iviz.Displays
                 RebuildSize();
             }
             
-            ShadowsEnabled = false;
+            EnableShadows = false;
         }
 
         public void SetBounds(in Bounds bounds)

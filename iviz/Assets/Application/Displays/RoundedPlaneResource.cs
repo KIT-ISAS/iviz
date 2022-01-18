@@ -93,7 +93,7 @@ namespace Iviz.Displays
                 resource.Mesh = QuadMesh;
                 resource.Transform.SetParentLocal(transform);
                 resource.EnableCollider = false;
-                resource.ShadowsEnabled = false;
+                resource.EnableShadows = false;
                 resource.Layer = LayerType.IgnoreRaycast;
                 objects[i] = resource;
             }
@@ -105,7 +105,7 @@ namespace Iviz.Displays
                 resource.Mesh = CornerMesh;
                 resource.Transform.SetParentLocal(transform);
                 resource.EnableCollider = false;
-                resource.ShadowsEnabled = false;
+                resource.EnableShadows = false;
                 resource.Layer = LayerType.IgnoreRaycast;
                 objects[i] = resource;
             }
@@ -192,7 +192,7 @@ namespace Iviz.Displays
         {
             base.Suspend();
             OcclusionOnly = false;
-            ShadowsEnabled = false;
+            EnableShadows = false;
             EmissiveColor = Color.black;
         }
     }

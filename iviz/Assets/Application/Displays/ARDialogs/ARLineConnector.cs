@@ -34,7 +34,7 @@ namespace Iviz.App.ARDialogs
             {
                 var sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.transform);
                 sphere.Transform.localScale = 0.05f * Vector3.one;
-                sphere.ShadowsEnabled = false;
+                sphere.EnableShadows = false;
                 spheres[i] = sphere;
             }
 

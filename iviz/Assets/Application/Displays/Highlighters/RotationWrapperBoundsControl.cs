@@ -110,7 +110,7 @@ namespace Iviz.Displays.Highlighters
             {
                 marker.Color = Resource.Colors.DraggableDefaultColor;
                 marker.Layer = LayerType.Clickable;
-                marker.ShadowsEnabled = false;
+                marker.EnableShadows = false;
                 marker.Transform.localRotation =
                     new Quaternion(-0.707106769f, 0, 0, 0.707106769f); // Quaternion.AngleAxis(90, Vector3.left);
             }
@@ -171,7 +171,7 @@ namespace Iviz.Displays.Highlighters
             ring.Transform.localScale = new Vector3(radius, radius, 0.001f);
             ring.EmissiveColor = Resource.Colors.DraggableSelectedEmissive;
             ring.Color = Resource.Colors.DraggableSelectedColor.WithAlpha(0.25f);
-            ring.ShadowsEnabled = false;
+            ring.EnableShadows = false;
         }
 
         void UpdateSize()

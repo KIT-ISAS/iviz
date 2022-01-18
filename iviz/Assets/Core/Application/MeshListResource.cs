@@ -121,7 +121,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Whether to enable shadows. Displayed shadows can get bugged if the number of instances is too high.
         /// </summary>
-        public bool ShadowsEnabled { get; set; } = true;
+        public bool EnableShadows { get; set; } = true;
 
         public override float ElementScale
         {
@@ -179,7 +179,7 @@ namespace Iviz.Displays
             var material = FindMaterial();
 
             Graphics.DrawMeshInstancedIndirect(mesh, 0, material, worldBounds, argsComputeBuffer,
-                0, Properties, ShadowsEnabled && !OcclusionOnly ? ShadowCastingMode.On : ShadowCastingMode.Off);
+                0, Properties, EnableShadows && !OcclusionOnly ? ShadowCastingMode.On : ShadowCastingMode.Off);
         }
 
         Material FindMaterial()
@@ -251,7 +251,7 @@ namespace Iviz.Displays
             for (int i = 0; i < points.Length; i++)
             {
                 ref readonly var t = ref points[i];
-                if (t.HasNaN() || t.Position.MaxAbsCoeff() > MaxPositionMagnitude)
+                if (t.f.IsInvalid3() || t.f.MaxAbsCoeff3() > MaxPositionMagnitude)
                 {
                     continue;
                 }

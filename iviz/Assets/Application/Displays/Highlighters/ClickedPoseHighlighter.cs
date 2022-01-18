@@ -31,7 +31,7 @@ namespace Iviz.Displays.Highlighters
             node.Transform.SetPose(unityPose);
 
             reticle = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Reticle, node.Transform);
-            reticle.ShadowsEnabled = false;
+            reticle.EnableShadows = false;
             reticle.Color = Color.white.WithAlpha(0.3f);
             reticle.EmissiveColor = Color.white;
             reticle.Layer = LayerType.IgnoreRaycast;

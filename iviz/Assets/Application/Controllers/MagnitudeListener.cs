@@ -275,7 +275,7 @@ namespace Iviz.Controllers
         static void RentFrame(FrameNode node, out AxisFrameResource axisFrame)
         {
             axisFrame = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
-            axisFrame.ShadowsEnabled = false;
+            axisFrame.EnableShadows = false;
         }
 
         static void RentArrow(FrameNode node, Color color, out ArrowResource arrow)
@@ -283,7 +283,7 @@ namespace Iviz.Controllers
             arrow = ResourcePool.RentDisplay<ArrowResource>(node.Transform);
             arrow.Color = color;
             arrow.Set(Vector3.one * 0.01f);
-            arrow.ShadowsEnabled = false;
+            arrow.EnableShadows = false;
         }
 
         static void RentAngleAxis(FrameNode node, out AngleAxisResource angleAxis)
@@ -297,7 +297,7 @@ namespace Iviz.Controllers
             sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.Transform);
             sphere.Transform.localScale = 0.05f * Vector3.one;
             sphere.Color = color;
-            sphere.ShadowsEnabled = false;
+            sphere.EnableShadows = false;
         }
 
         void Handler(PoseStamped msg)

@@ -7,17 +7,6 @@ using UnityEngine;
 
 namespace Iviz.Displays.ARDialogs
 {
-    public interface IWidgetWithColor : IDisplay
-    {
-        Color Color { set; }
-        Color SecondaryColor { set; }
-    }
-
-    public interface IWidgetWithCaption : IDisplay
-    {
-        string Caption { set; }
-    }
-
     [RequireComponent(typeof(BoxCollider))]
     public sealed class SpringDisc : MonoBehaviour, IWidgetWithColor
     {
@@ -65,6 +54,11 @@ namespace Iviz.Displays.ARDialogs
             }
         }
 
+        public bool Interactable
+        {
+            set => Draggable.enabled = value;
+        }
+
         void Awake()
         {
             Color = Color;
@@ -73,6 +67,7 @@ namespace Iviz.Displays.ARDialogs
 
             Draggable.StartDragging += () =>
             {
+                tokenSource?.Cancel();
                 InnerDisc.EmissiveColor = SecondaryColor;
                 OuterDisc.EmissiveColor = Color;
                 Glow.Visible = true;

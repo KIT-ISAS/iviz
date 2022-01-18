@@ -67,7 +67,7 @@ namespace Iviz.Displays.Highlighters
             left.Transform.localRotation = baseRotationLeft;
             left.Color = Resource.Colors.DraggableDefaultColor;
             left.Layer = LayerType.Clickable;
-            left.ShadowsEnabled = false;
+            left.EnableShadows = false;
 
             var baseRotationRight =
                 new Quaternion(0, 0.707106769f, 0, 0.707106769f); //Quaternion.AngleAxis(90, Vector3.up);
@@ -75,7 +75,7 @@ namespace Iviz.Displays.Highlighters
             right.Transform.localRotation = baseRotationRight;
             right.Color = Resource.Colors.DraggableDefaultColor;
             right.Layer = LayerType.Clickable;
-            right.ShadowsEnabled = false;
+            right.EnableShadows = false;
 
             leftDraggable = left.gameObject.AddComponent<LineDraggable>();
             leftDraggable.TargetTransform = target;
