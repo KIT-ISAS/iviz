@@ -58,12 +58,8 @@ namespace Iviz.Core
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID)
         public const bool IsHololens = false;
         public const bool IsXR = false;
-#elif !UNITY_EDITOR && UNITY_WSA
-        public const bool IsHololens = true;
-        public const bool IsXR = true;
 #else
         static bool? isHololens;
-
         static bool? isXR;
 
         static bool TryReadXRInfo()

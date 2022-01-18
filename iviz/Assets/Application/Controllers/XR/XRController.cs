@@ -231,19 +231,19 @@ namespace Iviz.Controllers.XR
                 }
                 else
                 {
-                    TfListener.Publish(GazeFrameId, default(Pose));
+                    TfListener.Publish(GazeFrameId, Pose.identity);
                 }
             }
 
             TfListener.Publish(LeftControllerFrameId,
                 LeftController is { IsActiveInFrame: true } leftController
                     ? leftController.transform.AsPose()
-                    : default);
+                    : Pose.identity);
 
             TfListener.Publish(RightControllerFrameId,
                 RightController is { IsActiveInFrame: true } rightController
                     ? rightController.transform.AsPose()
-                    : default);
+                    : Pose.identity);
 
 
             leftGestures.Process(leftHand.State);
