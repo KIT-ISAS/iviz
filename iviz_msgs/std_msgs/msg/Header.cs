@@ -23,7 +23,7 @@ namespace Iviz.Msgs.StdMsgs
         [DataMember (Name = "stamp")] public time Stamp;
         //Frame this data is associated with
         [DataMember (Name = "frame_id")] public string FrameId;
-
+    
         /// Explicit constructor.
         public Header(uint Seq, time Stamp, string FrameId)
         {
@@ -88,8 +88,8 @@ namespace Iviz.Msgs.StdMsgs
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
-        public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);
-        public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new Header(p.seqId, p.stamp, p.frameId);
-        public static implicit operator Header(string frameId) => new Header(0, time.Now(), frameId);
+        public static implicit operator Header((uint seqId, string frameId) p) => new(p.seqId, time.Now(), p.frameId);
+        public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new(p.seqId, p.stamp, p.frameId);
+        public static implicit operator Header(string frameId) => new(0, time.Now(), frameId);
     }
 }

@@ -71,14 +71,13 @@ namespace Iviz.Msgs.GeometryMsgs
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
-        public readonly Quaternion Inverse => new Quaternion(-X, -Y, -Z, W);
-        public static readonly Quaternion Identity = (0, 0, 0, 1);
+        public readonly Quaternion Inverse => new(-X, -Y, -Z, W);
+        public static readonly Quaternion Identity = new(0, 0, 0, 1);
         public static Quaternion operator *(in Quaternion a, in Quaternion b) => Extensions.Multiply(a, b).Normalized;
         public static Vector3 operator *(in Quaternion q, in Vector3 v) => Extensions.Multiply(q, v);
         public static Point operator *(in Quaternion q, in (double X, double Y, double Z) v) => q * (Vector3) v;
         public static Point operator *(in Quaternion q, in Point v) => q * (Vector3) v;
         public readonly Quaternion Normalized => Extensions.Normalize(this);
-        public Vector3 XYZ { readonly get => (X, Y, Z); set => (X, Y, Z) = value; }
         public static implicit operator Quaternion(in (double X, double Y, double Z, double W) p) => new Quaternion(p.X, p.Y, p.Z, p.W);
         public static implicit operator Quaternion(in (Vector3 p, double W) q) => new Quaternion(q.p.X, q.p.Y, q.p.Z, q.W);
         public static Quaternion AngleAxis(double angleInRad, in Vector3 axis) => Extensions.AngleAxis(angleInRad, axis);

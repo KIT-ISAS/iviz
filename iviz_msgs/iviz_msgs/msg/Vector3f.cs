@@ -67,24 +67,24 @@ namespace Iviz.Msgs.IvizMsgs
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
-        public static readonly Vector3f Zero = new Vector3f(0, 0, 0);
-        public static readonly Vector3f One = new Vector3f(1, 1, 1);
-        public static readonly Vector3f UnitX = new Vector3f(1, 0, 0);
-        public static readonly Vector3f UnitY = new Vector3f(0, 1, 0);
-        public static readonly Vector3f UnitZ = new Vector3f(0, 0, 1);
-        public static implicit operator GeometryMsgs.Point(in Vector3f p) => new GeometryMsgs.Point(p.X, p.Y, p.Z);
-        public static implicit operator GeometryMsgs.Vector3(in Vector3f p) => new GeometryMsgs.Vector3(p.X, p.Y, p.Z);
-        public static Vector3f operator +(in Vector3f v, in Vector3f w) => new Vector3f(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
-        public static Vector3f operator -(in Vector3f v, in Vector3f w) => new Vector3f(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
-        public static Vector3f operator *(float f, in Vector3f v) => new Vector3f(f * v.X, f * v.Y, f * v.Z);
-        public static Vector3f operator *(in Vector3f v, float f) => new Vector3f(f * v.X, f * v.Y, f * v.Z);
-        public static Vector3f operator /(in Vector3f v, float f) => new Vector3f(v.X / f, v.Y / f, v.Z / f);
-        public static Vector3f operator -(in Vector3f v) => new Vector3f(-v.X, -v.Y, -v.Z);
+        public static readonly Vector3f Zero;
+        public static readonly Vector3f One = new(1, 1, 1);
+        public static readonly Vector3f UnitX = new(1, 0, 0);
+        public static readonly Vector3f UnitY = new(0, 1, 0);
+        public static readonly Vector3f UnitZ = new(0, 0, 1);
+        public static implicit operator GeometryMsgs.Point(in Vector3f p) => new(p.X, p.Y, p.Z);
+        public static implicit operator GeometryMsgs.Vector3(in Vector3f p) => new(p.X, p.Y, p.Z);
+        public static Vector3f operator +(in Vector3f v, in Vector3f w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
+        public static Vector3f operator -(in Vector3f v, in Vector3f w) => new(v.X - w.X, v.Y - w.Y, v.Z - w.Z);
+        public static Vector3f operator *(float f, in Vector3f v) => new(f * v.X, f * v.Y, f * v.Z);
+        public static Vector3f operator *(in Vector3f v, float f) => new(f * v.X, f * v.Y, f * v.Z);
+        public static Vector3f operator /(in Vector3f v, float f) => new(v.X / f, v.Y / f, v.Z / f);
+        public static Vector3f operator -(in Vector3f v) => new(-v.X, -v.Y, -v.Z);
         public readonly float Dot(in Vector3f v) => X * v.X + Y * v.Y + Z * v.Z;
         public readonly float SquaredNorm => Dot(this);
         public readonly float Norm => (float)System.Math.Sqrt(SquaredNorm);
         public readonly Vector3f Normalized => this / Norm;
-        public readonly Vector3f Cross(in Vector3f v) => new Vector3f(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
-        public static implicit operator Vector3f(in (float X, float Y, float Z) p) => new Vector3f(p.X, p.Y, p.Z);
+        public readonly Vector3f Cross(in Vector3f v) => new(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
+        public static implicit operator Vector3f(in (float X, float Y, float Z) p) => new(p.X, p.Y, p.Z);
     }
 }

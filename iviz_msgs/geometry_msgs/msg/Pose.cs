@@ -69,8 +69,8 @@ namespace Iviz.Msgs.GeometryMsgs
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
-        public static readonly Pose Identity = (Point.Zero, Quaternion.Identity);
-        public static implicit operator Transform(in Pose p) => new Transform(p.Position, p.Orientation);
-        public static implicit operator Pose(in (Point position, Quaternion orientation) p) => new Pose(p.position, p.orientation);
+        public static readonly Pose Identity = new(Point.Zero, Quaternion.Identity);
+        public static implicit operator Transform(in Pose p) => Extensions.AsTransform(in p);
+        public static implicit operator Pose(in (Point position, Quaternion orientation) p) => new(p.position, p.orientation);
     }
 }

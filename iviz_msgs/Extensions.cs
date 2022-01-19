@@ -10,25 +10,74 @@ namespace Iviz.Msgs
     {
         public static Quaternion Multiply(in Quaternion a, in Quaternion b)
         {
-            return new(
-                a.W * b.X + a.X * b.W + a.Y * b.Z - a.Z * b.Y,
-                a.W * b.Y - a.X * b.Z + a.Y * b.W + a.Z * b.X,
-                a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W,
-                a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z
-            );
+            Quaternion q;
+            q.X = a.W * b.X + a.X * b.W + a.Y * b.Z - a.Z * b.Y;
+            q.Y = a.W * b.Y - a.X * b.Z + a.Y * b.W + a.Z * b.X;
+            q.Z = a.W * b.Z + a.X * b.Y - a.Y * b.X + a.Z * b.W;
+            q.W = a.W * b.W - a.X * b.X - a.Y * b.Y - a.Z * b.Z;
+            return q;
         }
 
+        /*
         public static Vector3 Multiply(in Quaternion q, in Vector3 v) => Multiply(q.XYZ, q.W, v);
 
         static Vector3 Multiply(in Vector3 qv, double w, in Vector3 v)
         {
             return v + 2 * qv.Cross(qv.Cross(v) + w * v);
         }
+        */
+        public static Vector3 Multiply(in Quaternion q, in Vector3 v)
+        {
+            Vector3 qv;
+            qv.X = q.X;
+            qv.Y = q.Y;
+            qv.Z = q.Z;
+            return v + 2 * qv.Cross(qv.Cross(v) + q.W * v);
+        }
+
+        public static Vector3 Cross(this in Vector3 p, in Vector3 v)
+        {
+            //  new(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
+            Vector3 q;
+            q.X = p.Y * v.Z - p.Z * v.Y;
+            q.Y = p.Z * v.X - p.X * v.Z;
+            q.Z = p.X * v.Y - p.Y * v.X;
+            return q;
+        }
+        
+        public static Point Cross(this in Point p, in Point v)
+        {
+            //  new(Y * v.Z - Z * v.Y, Z * v.X - X * v.Z, X * v.Y - Y * v.X);
+            Point q;
+            q.X = p.Y * v.Z - p.Z * v.Y;
+            q.Y = p.Z * v.X - p.X * v.Z;
+            q.Z = p.X * v.Y - p.Y * v.X;
+            return q;
+        }
+
+        public static double Dot(this in Vector3 p, in Vector3 v)
+        {
+            return p.X * v.X + p.Y * v.Y + p.Z * v.Z;
+        } 
+
+        public static double Dot(this in Point p, in Point v)
+        {
+            return p.X * v.X + p.Y * v.Y + p.Z * v.Z;
+        } 
+        
+        public static Transform RotateAround(this in Quaternion q, in Point p) => new(p - q * p, q);
 
         public static Quaternion AngleAxis(double angleInRad, in Vector3 axis)
         {
             double halfAngleInRad = angleInRad / 2;
-            return (System.Math.Sin(halfAngleInRad) * axis, System.Math.Cos(halfAngleInRad));
+            Quaternion q;
+            q.W = System.Math.Cos(halfAngleInRad);
+
+            double s = System.Math.Sin(halfAngleInRad);
+            q.X = axis.X * s;
+            q.Y = axis.Y * s;
+            q.Z = axis.Z * s;
+            return q;
         }
 
         public static Quaternion AngleAxis(double angleInRad, VectorUnitX _)
@@ -62,7 +111,7 @@ namespace Iviz.Msgs
             var q = rpy.Z != 0
                 ? AngleAxis(rpy.Z, new VectorUnitZ())
                 : Quaternion.Identity;
-            
+
             if (rpy.Y != 0)
             {
                 q *= AngleAxis(rpy.Y, new VectorUnitY());
@@ -122,7 +171,7 @@ namespace Iviz.Msgs
             q.Orientation = orientation;
             return q;
         }
-        
+
         public static Transform WithTranslation(this in Transform t, in Vector3 translation)
         {
             Transform q;
@@ -168,16 +217,25 @@ namespace Iviz.Msgs
             new ColorRGBA(c.R + f * (v.R - c.R), c.G + f * (v.G - c.G), c.B + f * (v.B - c.B), c.A + f * (v.A - c.A));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this in ColorRGBA v, out float R, out float G, out float B, out float A) =>
-            (R, G, B, A) = (v.R, v.G, v.B, v.A);
+        public static void Deconstruct(this in ColorRGBA v, out float R, out float G, out float B, out float A)
+        {
+            R = v.R;
+            G = v.G;
+            B = v.B;
+            A = v.A;
+        }
 
         public static Point WithX(this in Point p, double x) => new(x, p.Y, p.Z);
         public static Point WithY(this in Point p, double y) => new(p.X, y, p.Z);
         public static Point WithZ(this in Point p, double z) => new(p.X, p.Y, z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this in Point v, out double X, out double Y, out double Z) =>
-            (X, Y, Z) = (v.X, v.Y, v.Z);
+        public static void Deconstruct(this in Point v, out double X, out double Y, out double Z)
+        {
+            X = v.X;
+            Y = v.Y;
+            Z = v.Z;
+        }
 
         public static Vector3 WithX(this in Vector3 p, double x) => new(x, p.Y, p.Z);
         public static Vector3 WithY(this in Vector3 p, double y) => new(p.X, y, p.Z);
@@ -187,12 +245,20 @@ namespace Iviz.Msgs
         public static Point32 AsPoint32(this in Point p) => new((float)p.X, (float)p.Y, (float)p.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this in Vector3 v, out double X, out double Y, out double Z) =>
-            (X, Y, Z) = (v.X, v.Y, v.Z);
+        public static void Deconstruct(this in Vector3 v, out double X, out double Y, out double Z)
+        {
+            X = v.X;
+            Y = v.Y;
+            Z = v.Z;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this in Vector3f v, out float X, out float Y, out float Z) =>
-            (X, Y, Z) = (v.X, v.Y, v.Z);
+        public static void Deconstruct(this in Vector3f v, out float X, out float Y, out float Z)
+        {
+            X = v.X;
+            Y = v.Y;
+            Z = v.Z;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Vector2f v, out float X, out float Y) => (X, Y) = (v.X, v.Y);
@@ -217,8 +283,12 @@ namespace Iviz.Msgs
         public static Header WithNextSeq(this in Header h) => new(h.Seq + 1, time.Now(), h.FrameId ?? "");
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this in Header h, out uint Seq, out time Stamp, out string FrameId) =>
-            (Seq, Stamp, FrameId) = (h.Seq, h.Stamp, h.FrameId ?? "");
+        public static void Deconstruct(this in Header h, out uint Seq, out time Stamp, out string FrameId)
+        {
+            Seq = h.Seq;
+            Stamp = h.Stamp;
+            FrameId = h.FrameId;
+        }
 
         public static TransformStamped WithTransform(this in TransformStamped ts, in Transform t) =>
             new(ts.Header, ts.ChildFrameId ?? "", t);
@@ -240,6 +310,12 @@ namespace Iviz.Msgs
             ChildFrameId = t.ChildFrameId ?? "";
             Transform = t.Transform;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Transform AsTransform(in Pose p) => Unsafe.As<Pose, Transform>(ref Unsafe.AsRef(in p));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Pose AsPose(in Transform p) => Unsafe.As<Transform, Pose>(ref Unsafe.AsRef(in p));
 
         public static string ToString(in Point p) =>
             $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, \"z\": {p.Z.ToString(BuiltIns.Culture)}}}";
