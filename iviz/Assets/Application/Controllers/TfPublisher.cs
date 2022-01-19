@@ -65,7 +65,10 @@ namespace Iviz.Controllers
                 .Where(frame => (GameThread.Now - frame.lastUpdate).TotalSeconds >= PublishTimeInSec);
             foreach (var frame in framesToPublish)
             {
-                TfListener.Publish(frame.TfFrame);
+                if (!frame.isInternal)
+                {
+                    TfListener.Publish(frame.TfFrame);
+                }
             }
         }
 

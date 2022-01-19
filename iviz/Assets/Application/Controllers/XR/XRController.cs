@@ -111,7 +111,7 @@ namespace Iviz.Controllers.XR
 
             if (Settings.IsHololens)
             {
-                gazeFrame = TfPublisher.Instance.GetOrCreate(HeadFrameId, isInternal: true);
+                gazeFrame = TfPublisher.Instance.GetOrCreate(GazeFrameId, isInternal: true);
             }
 
             GameThread.EveryFrame += Update;
@@ -199,6 +199,7 @@ namespace Iviz.Controllers.XR
                 float baseScale = 0.125f / palmTransform.localScale.x;
                 newPalmCompass.Transform.localScale = Vector3.zero;
                 newPalmCompass.Transform.localRotation = new Quaternion(1, 0, 0, 0);
+                newPalmCompass.gameObject.SetActive(false);
                 palmCompass = newPalmCompass;
                 FAnimator.Spawn(default, 0.1f,
                     t => newPalmCompass.Transform.localScale = Mathf.Sqrt(t) * baseScale * Vector3.one);

@@ -53,7 +53,7 @@ namespace Iviz.Controllers.TF
         Pose cachedFixedPose = Pose.identity;
 
         public static bool HasInstance => instance != null;
-        
+
         public static TfListener Instance =>
             instance ?? throw new NullReferenceException("No TFListener has been set!");
 
@@ -184,7 +184,7 @@ namespace Iviz.Controllers.TF
                 }
             }
         }
-        
+
         public bool Interactable
         {
             get => config.Interactable;
@@ -196,7 +196,7 @@ namespace Iviz.Controllers.TF
                     frame.EnableCollider = value;
                 }
             }
-        }        
+        }
 
         bool PreferUdp
         {
@@ -624,22 +624,23 @@ namespace Iviz.Controllers.TF
 
         public static void Publish(TfFrame frame)
         {
-            string parentFrame = frame.Parent == OriginFrame ? "" : frame.Id;
-            string childFrame = frame.Id;
+            string parentFrameId =
+                frame.Parent is not { } parentFrame || parentFrame == OriginFrame ? "" : parentFrame.Id;
+            string childFrameId = frame.Id;
             var localPose = frame.Transform.AsLocalPose();
             if (localPose.position.IsInvalid() || localPose.rotation.IsInvalid())
             {
                 RosLogger.Error(
-                    $"TfListener: Cannot publish invalid transform: ChildFrameId='{childFrame}' " +
-                    $"Parent='{parentFrame}' Transform={localPose.ToString()}");
+                    $"TfListener: Cannot publish invalid transform: ChildFrameId='{childFrameId}' " +
+                    $"Parent='{parentFrameId}' Transform={localPose.ToString()}");
                 return;
             }
 
             TransformStamped t;
             t.Header.Seq = tfSeq++;
             t.Header.Stamp = GameThread.TimeNow;
-            t.Header.FrameId = parentFrame;
-            t.ChildFrameId = ResolveFrameId(childFrame);
+            t.Header.FrameId = parentFrameId;
+            t.ChildFrameId = ResolveFrameId(childFrameId);
             localPose.Unity2Ros(out t.Transform);
             instance?.outgoingMessages.Add(t);
         }
