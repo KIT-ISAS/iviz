@@ -178,8 +178,6 @@ namespace Iviz.App
 
         public void Dispose()
         {
-            Debug.LogWarning("DISPOSING!");
-
             GameThread.LateEverySecond -= UpdateFpsStats;
             GameThread.EveryFrame -= UpdateFpsCounter;
             GameThread.EveryTenthSecond -= UpdateCameraStats;

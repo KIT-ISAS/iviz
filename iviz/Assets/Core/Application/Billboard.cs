@@ -34,7 +34,8 @@ namespace Iviz.Displays
             }
             else
             {
-                Vector3 up = (Transform.position - Settings.MainCameraTransform.position).Cross(Settings.MainCameraTransform.right);
+                //Vector3 up = (Transform.position - Settings.MainCameraTransform.position).Cross(Settings.MainCameraTransform.right);
+                Vector3 up = Vector3.up;
                 Transform.LookAt(z, up);
             }
             if (UseAbsoluteOffset && Transform.parent != null)

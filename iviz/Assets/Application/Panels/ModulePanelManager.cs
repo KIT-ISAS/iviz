@@ -19,7 +19,7 @@ namespace Iviz.App
         bool started;
         Canvas? parentCanvas;
 
-        Canvas ParentCanvas => (parentCanvas != null) ? parentCanvas : GetComponentInParent<Canvas>();
+        Canvas ParentCanvas => (parentCanvas != null) ? parentCanvas : (parentCanvas = GetComponentInParent<Canvas>());
 
         bool Active
         {

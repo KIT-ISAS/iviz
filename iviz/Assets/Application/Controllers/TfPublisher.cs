@@ -62,7 +62,10 @@ namespace Iviz.Controllers
         {
             foreach (var frame in frames.Values)
             {
-                TfListener.Publish(frame.TfFrame);
+                if (!frame.isInternal)
+                {
+                    TfListener.Publish(frame.TfFrame);
+                }
             }
         }
 
