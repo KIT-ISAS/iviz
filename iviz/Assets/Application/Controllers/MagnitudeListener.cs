@@ -393,10 +393,7 @@ namespace Iviz.Controllers
         void Handler(Odometry msg)
         {
             frameNode.AttachTo(msg.Header);
-            if (childNode != null)
-            {
-                childNode.AttachTo(msg.ChildFrameId);
-            }
+            childNode?.AttachTo(msg.ChildFrameId);
 
             if (msg.Pose.Pose.IsInvalid())
             {
@@ -446,20 +443,14 @@ namespace Iviz.Controllers
             base.Dispose();
 
             trail.DataSource = null;
-
-            frameNode.Dispose();
-
             trail.ReturnToPool();
-
-            if (childNode != null)
-            {
-                childNode.Dispose();
-            }
-
             axisFrame.ReturnToPool();
             angleAxis.ReturnToPool();
             arrow.ReturnToPool();
             sphere.ReturnToPool(Resource.Displays.Sphere);
+            
+            frameNode.Dispose();
+            childNode?.Dispose();
         }
     }
 }

@@ -60,6 +60,7 @@ namespace Iviz.Core
         public const bool IsXR = false;
 #else
         static bool? isHololens;
+
         static bool? isXR;
 
         static bool TryReadXRInfo()
@@ -69,7 +70,9 @@ namespace Iviz.Core
                 return true;
             }
 
-            if (!GameObject.Find("iviz").TryGetComponent<XRStatusInfo>(out var info))
+            if (GameObject.Find("iviz") is not { } ivizObject
+                || !ivizObject.TryGetComponent<XRStatusInfo>(out var info))
+
             {
                 return false;
             }
@@ -86,6 +89,11 @@ namespace Iviz.Core
         public static bool IsXR =>
             TryReadXRInfo() && (isXR ?? throw new InvalidOperationException("Could not check if we are running in XR"));
 
+        public static void ResetXRInfo()
+        {
+            isHololens = null;
+            isXR = null;
+        }
 #endif
 
         public static bool SupportsAR => IsPhone;
@@ -114,7 +122,8 @@ namespace Iviz.Core
         public static string SimpleConfigurationPath =>
             simpleConfigurationPath ??= $"{PersistentDataPath}/connection.json";
 
-        public static string XRStartConfigurationPath => xrStartConfigurationPath ??= $"{PersistentDataPath}/xr_start.json";
+        public static string XRStartConfigurationPath =>
+            xrStartConfigurationPath ??= $"{PersistentDataPath}/xr_start.json";
 
         public static string ResourcesPath => resourcesPath ??= $"{PersistentDataPath}/resources";
         public static string SavedRobotsPath => savedRobotsPath ??= $"{PersistentDataPath}/robots";
@@ -130,6 +139,7 @@ namespace Iviz.Core
             get => mainCamera != null
                 ? mainCamera
                 : mainCamera = FindMainCamera().GetComponent<Camera>().AssertNotNull(nameof(mainCamera));
+
             set
             {
                 mainCamera = value.CheckedNull() ?? throw new NullReferenceException("Camera cannot be null!");

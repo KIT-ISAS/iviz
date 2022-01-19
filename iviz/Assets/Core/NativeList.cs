@@ -82,6 +82,7 @@ namespace Iviz.Core
 
         public ref T this[int index]
         {
+            [UsedImplicitly]
             get
             {
                 if (index >= length)
@@ -96,7 +97,6 @@ namespace Iviz.Core
         public unsafe Span<T> AsSpan() => new(array.GetUnsafePtr(), length);
 
         public unsafe ReadOnlySpan<T> AsReadOnlySpan() => new(array.GetUnsafeReadOnlyPtr(), length);
-
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         unsafe ref T UnsafeGet(int index) =>
@@ -105,6 +105,17 @@ namespace Iviz.Core
         public void Clear()
         {
             length = 0;
+        }
+
+        public void Trim()
+        {
+            if (Capacity <= 16)
+            {
+                return;
+            }
+            
+            array.Dispose();
+            array = new NativeArray<T>(16, Allocator.Persistent);
         }
 
         public void Dispose()

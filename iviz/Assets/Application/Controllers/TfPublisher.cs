@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Iviz.App;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -55,12 +56,14 @@ namespace Iviz.Controllers
             }
 
             secondCounter = 0;
-            Publish();
+            PublishFramesWithoutUpdate();
         }
 
-        void Publish()
+        void PublishFramesWithoutUpdate()
         {
-            foreach (var frame in frames.Values)
+            var framesToPublish = frames.Values
+                .Where(frame => (GameThread.Now - frame.lastUpdate).TotalSeconds >= PublishTimeInSec);
+            foreach (var frame in framesToPublish)
             {
                 TfListener.Publish(frame.TfFrame);
             }
@@ -150,6 +153,7 @@ namespace Iviz.Controllers
         {
             readonly string id;
             readonly FrameNode frameNode;
+            public DateTime lastUpdate;
             public readonly bool isInternal;
             public TfFrame TfFrame { get; private set; }
 
@@ -181,6 +185,8 @@ namespace Iviz.Controllers
                     {
                         TfListener.Publish(TfFrame);
                     }
+
+                    lastUpdate = GameThread.Now;
                 }
             }
 

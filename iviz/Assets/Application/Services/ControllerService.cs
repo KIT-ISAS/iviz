@@ -784,7 +784,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            Feedback feedback = new Feedback();
+            var feedback = new Feedback();
             bool overrideExpired = false;
             using var signal = new SemaphoreSlim(0);
             GameThread.Post(() =>

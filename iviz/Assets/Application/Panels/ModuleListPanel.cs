@@ -38,13 +38,18 @@ namespace Iviz.App
         {
             get
             {
-                GameObject instanceObject;
-                return instance != null
-                    ? instance
-                    : (instanceObject = GameObject.Find("ModuleList Panel")) != null
-                      && (instance = instanceObject.GetComponent<ModuleListPanel>()) != null
-                        ? instance
-                        : throw new MissingAssetFieldException("Module list panel has not been set!");
+                if (instance != null)
+                {
+                    return instance;
+                }
+
+                if (GameObject.Find("ModuleList Panel") is { } instanceObject
+                     && instanceObject.GetComponent<ModuleListPanel>() is { } newInstance)
+                {
+                    return instance = newInstance;
+                }
+                
+                throw new MissingAssetFieldException("Module list panel has not been set!");
             }
         }
 
@@ -115,7 +120,7 @@ namespace Iviz.App
 
         public XRContents XRController => xrController != null
             ? xrController
-            : throw new InvalidOperationException("Tried to access XRController, but the scene has not set any!");
+            : throw new MissingAssetFieldException("Tried to access XRController, but the scene has not set any!");
 
         public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
         public IEnumerable<string> DisplayedTopics => topicsWithModule;
@@ -178,8 +183,6 @@ namespace Iviz.App
 
         public void Dispose()
         {
-            Debug.LogWarning("DISPOSING!");
-
             GameThread.LateEverySecond -= UpdateFpsStats;
             GameThread.EveryFrame -= UpdateFpsCounter;
             GameThread.EveryTenthSecond -= UpdateCameraStats;
@@ -204,6 +207,7 @@ namespace Iviz.App
             connectionManager?.Dispose();
 
             GuiWidgetListener.DisposeDefaultHandler();
+            Settings.ResetXRInfo();
 
             instance = null;
         }
@@ -214,7 +218,7 @@ namespace Iviz.App
         void Start()
         {
             connectionManager = new ConnectionManager();
-            
+
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
 

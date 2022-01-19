@@ -402,7 +402,9 @@ namespace Iviz.Displays
             Mesh.Clear();
             MeshRenderer.enabled = false;
             MaterialOverride = null;
+            
             lineBuffer.Clear();
+            lineBuffer.Trim();
 
             lineComputeBuffer?.Release();
             lineComputeBuffer = null;

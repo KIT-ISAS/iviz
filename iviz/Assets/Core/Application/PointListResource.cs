@@ -362,6 +362,7 @@ namespace Iviz.Displays
             base.Suspend();
 
             pointBuffer.Clear();
+            pointBuffer.Trim();
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;

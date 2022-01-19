@@ -9,6 +9,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Tools;
+using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
@@ -126,8 +127,11 @@ namespace Iviz.Ros
         {
         }
 
-        // used in reflection by EchoDialogData, do not delete
-        [Preserve]
+        /// <summary>
+        /// Creates a listener with a synchronous handler. Used in reflection by EchoDialogData.
+        /// Normal code should use the other constructors.
+        /// </summary>
+        [Preserve, UsedImplicitly]
         public Listener(string topic, Func<IMessage, IRosReceiver, bool> handler, RosTransportHint transportHint)
             : this(topic, (T msg, IRosReceiver receiver) => handler(msg, receiver), transportHint)
         {

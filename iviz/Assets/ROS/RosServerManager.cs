@@ -1,10 +1,11 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.RosMaster;
 using Iviz.Tools;
-using Iviz.XmlRpc;
 using JetBrains.Annotations;
 
 namespace Iviz.Ros
@@ -14,23 +15,23 @@ namespace Iviz.Ros
         public const int DefaultPort = RosMasterServer.DefaultPort;
         const int DisposeTimeoutInMs = 2000;
 
-        static readonly List<(string key, string value)> DefaultKeys = new List<(string, string)>
+        static readonly List<(string key, string value)> DefaultKeys = new()
         {
             ("/rosdistro", "noetic"),
             ("/rosversion", "1.15.8"),
             ("/ivizversion", "1.0.0")
         };
 
-        static RosServerManager instance;
+        static RosServerManager? instance;
 
-        RosMasterServer server;
-        Task serverTask;
-        
-        [NotNull] static RosServerManager Instance => instance ?? (instance = new RosServerManager());
+        RosMasterServer? server;
+        Task? serverTask;
+
+        static RosServerManager Instance => instance ??= new RosServerManager();
         public static bool IsActive => instance?.server != null;
-        [CanBeNull] public static Uri MasterUri => instance?.server?.MasterUri;
+        public static Uri? MasterUri => instance?.server?.MasterUri;
 
-        public static bool Create([NotNull] Uri masterUri, [NotNull] string masterId)
+        public static bool Create(Uri masterUri, string masterId)
         {
             return Instance.TryCreate(
                 masterUri ?? throw new ArgumentNullException(nameof(masterUri)),
