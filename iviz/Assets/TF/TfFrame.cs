@@ -56,7 +56,7 @@ namespace Iviz.Controllers.TF
             {
                 if (!TrySetParent(value))
                 {
-                    RosLogger.Error($"{this}: Failed to set '{value?.Id ?? "null"}' as a parent to {Id}");
+                    RosLogger.Error($"{this}: Failed to set parent '{value?.Id ?? "null"}'");
                 }
             }
         }

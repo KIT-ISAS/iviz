@@ -233,6 +233,7 @@ namespace Iviz.Displays
             UseIntensityForScaleY = false;
 
             pointBuffer.Clear();
+            pointBuffer.Trim();
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;

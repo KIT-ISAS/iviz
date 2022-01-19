@@ -624,8 +624,7 @@ namespace Iviz.Controllers.TF
 
         public static void Publish(TfFrame frame)
         {
-            string parentFrameId =
-                frame.Parent is not { } parentFrame || parentFrame == OriginFrame ? "" : parentFrame.Id;
+            string parentFrameId = frame.Parent is { } parentFrame && parentFrame != OriginFrame ? parentFrame.Id : "";
             string childFrameId = frame.Id;
             var localPose = frame.Transform.AsLocalPose();
             if (localPose.position.IsInvalid() || localPose.rotation.IsInvalid())

@@ -784,8 +784,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var feedback = new Feedback();
-            bool overrideExpired = false;
+            Feedback feedback = new();
             using var signal = new SemaphoreSlim(0);
             GameThread.Post(() =>
             {
@@ -793,6 +792,8 @@ namespace Iviz.Controllers
                 {
                     RosLogger.Info($"ControllerService: Creating dialog");
 
+                    bool overrideExpired = false;
+                    string id = srv.Request.Dialog.Id;
                     var dialog = GuiWidgetListener.DefaultHandler.AddDialog(srv.Request.Dialog);
                     if (dialog == null)
                     {
@@ -800,18 +801,18 @@ namespace Iviz.Controllers
                         return;
                     }
 
-                    dialog.ButtonClicked += TriggerButton;
-                    dialog.MenuEntryClicked += TriggerMenu;
-                    dialog.Expired += Expired;
-
-                    void TriggerButton(ARDialog mDialog, int buttonId)
+                    if (dialog is IDialogCanBeClicked canBeClicked)
                     {
-                        mDialog.ButtonClicked -= TriggerButton;
-                        mDialog.MenuEntryClicked -= TriggerMenu;
-                        mDialog.Expired -= Expired;
+                        canBeClicked.Clicked += TriggerButton;
+                    }
 
+                    //dialog.MenuEntryClicked += TriggerMenu;
+                    dialog.Expired += OnExpired;
+
+                    void TriggerButton(int buttonId)
+                    {
                         feedback.VizId = ConnectionManager.MyId ?? "";
-                        feedback.Id = mDialog.Id ?? "";
+                        feedback.Id = id;
                         feedback.Type = (byte) FeedbackType.ButtonClick;
                         feedback.EntryId = buttonId;
                         overrideExpired = true;
@@ -819,14 +820,10 @@ namespace Iviz.Controllers
                         TryRelease(signal);
                     }
 
-                    void TriggerMenu(ARDialog mDialog, int buttonId)
+                    void TriggerMenu(int buttonId)
                     {
-                        mDialog.ButtonClicked -= TriggerButton;
-                        mDialog.MenuEntryClicked -= TriggerMenu;
-                        mDialog.Expired -= Expired;
-
                         feedback.VizId = ConnectionManager.MyId ?? "";
-                        feedback.Id = mDialog.Id ?? "";
+                        feedback.Id = id;
                         feedback.Type = (byte) FeedbackType.MenuEntryClick;
                         feedback.EntryId = buttonId;
                         overrideExpired = true;
@@ -834,7 +831,7 @@ namespace Iviz.Controllers
                         TryRelease(signal);
                     }
 
-                    void Expired(ARDialog mDialog)
+                    void OnExpired()
                     {
                         // ReSharper disable once AccessToModifiedClosure
                         if (overrideExpired)
@@ -842,12 +839,8 @@ namespace Iviz.Controllers
                             return;
                         }
 
-                        mDialog.ButtonClicked -= TriggerButton;
-                        mDialog.MenuEntryClicked -= TriggerMenu;
-                        mDialog.Expired -= Expired;
-
                         feedback.VizId = ConnectionManager.MyId ?? "";
-                        feedback.Id = mDialog.Id ?? "";
+                        feedback.Id = id;
                         feedback.Type = (byte) FeedbackType.Expired;
                         feedback.EntryId = 0;
 
@@ -858,7 +851,7 @@ namespace Iviz.Controllers
                 {
                     srv.Response.Success = false;
                     srv.Response.Message = $"EE An exception was raised: {e.Message}";
-                    signal.Release();
+                    TryRelease(signal);
                 }
             });
 

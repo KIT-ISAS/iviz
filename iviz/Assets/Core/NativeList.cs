@@ -26,7 +26,7 @@ namespace Iviz.Core
         {
             if (value < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(value));
+                throw new ArgumentOutOfRangeException(nameof(value), "Capacity cannot be negative");
             }
             
             if (value <= Capacity)
@@ -34,6 +34,11 @@ namespace Iviz.Core
                 return;
             }
 
+            if (value > NativeList.MaxElements)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "Capacity exceeds maximal size");
+            }
+            
             int newCapacity = Math.Max(Capacity, 16);
             while (newCapacity < value)
             {
@@ -149,5 +154,10 @@ namespace Iviz.Core
         {
             return list.AsReadOnlySpan();
         }
+    }
+
+    public static class NativeList
+    {
+        public const int MaxElements = 1024 * 1024 * 64;
     }
 }

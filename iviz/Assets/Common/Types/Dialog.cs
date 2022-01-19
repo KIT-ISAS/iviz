@@ -9,15 +9,6 @@ using JetBrains.Annotations;
 
 namespace Iviz.Msgs.IvizCommonMsgs
 {
-    public enum DialogType : byte
-    {
-        Dialog,
-        Short,
-        Notice,
-        MenuMode,
-        Button,
-    }
-
     public enum ButtonType : byte
     {
         Ok,

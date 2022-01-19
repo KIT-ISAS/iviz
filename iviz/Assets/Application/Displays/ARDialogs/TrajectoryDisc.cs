@@ -49,7 +49,7 @@ namespace Iviz.App.ARDialogs
             Lines.ElementScale = 0.02f;
             Lines.RenderType = LineResource.LineRenderType.AlwaysCapsule;
 
-            button.Icon = XRButton.ButtonIcon.Ok;
+            button.Icon = XRButtonIcon.Ok;
             button.Visible = false;
             button.Transform.parent = Transform.parent;
             MainButtonCaption = mainButtonCaption;

@@ -11,7 +11,8 @@ using UnityEngine.UIElements;
 namespace Iviz.Displays.ARDialogs
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class RotationDisc : MonoBehaviour, IWidgetWithColor, IRecyclable
+    public sealed class RotationDisc : MonoBehaviour, 
+        IWidget, IWidgetWithColor, IWidgetWithScale, IWidgetCanBeRotated, IRecyclable
     {
         [SerializeField] CirclePlaneDraggable? planeCircle;
         [SerializeField] CircleFixedDistanceDraggable? fixedCircle;
@@ -65,7 +66,7 @@ namespace Iviz.Displays.ARDialogs
         {
             set => Disc.Transform.localScale = value * Vector3.one;
         }
-        
+
         public bool Interactable
         {
             set => Draggable.enabled = value;

@@ -44,11 +44,11 @@ namespace Iviz.App
                 }
 
                 if (GameObject.Find("ModuleList Panel") is { } instanceObject
-                     && instanceObject.GetComponent<ModuleListPanel>() is { } newInstance)
+                    && instanceObject.GetComponent<ModuleListPanel>() is { } newInstance)
                 {
                     return instance = newInstance;
                 }
-                
+
                 throw new MissingAssetFieldException("Module list panel has not been set!");
             }
         }
@@ -185,7 +185,7 @@ namespace Iviz.App
         {
             GameThread.LateEverySecond -= UpdateFpsStats;
             GameThread.EveryFrame -= UpdateFpsCounter;
-            GameThread.EveryTenthSecond -= UpdateCameraStats;
+            GameThread.EveryTenthOfASecond -= UpdateCameraStats;
 
             foreach (var moduleData in moduleDatas)
             {
@@ -346,7 +346,7 @@ namespace Iviz.App
             RosConnection.ConnectionWarningStateChanged += OnConnectionWarningChanged;
             GameThread.LateEverySecond += UpdateFpsStats;
             GameThread.EveryFrame += UpdateFpsCounter;
-            GameThread.EveryTenthSecond += UpdateCameraStats;
+            GameThread.EveryTenthOfASecond += UpdateCameraStats;
             UpdateFpsStats();
 
             ServiceFunctions.Start();
@@ -454,7 +454,7 @@ namespace Iviz.App
             switch (state)
             {
                 case ConnectionState.Connected:
-                    GameThread.EveryTenthSecond -= RotateSprite;
+                    GameThread.EveryTenthOfASecond -= RotateSprite;
                     UpperCanvas.Status.sprite = UpperCanvas.ConnectedSprite;
                     UpperCanvas.TopPanel.color = RosServerManager.IsActive
                         ? Resource.Colors.ConnectionPanelOwnMaster
@@ -462,14 +462,14 @@ namespace Iviz.App
                     SaveSimpleConfiguration();
                     break;
                 case ConnectionState.Disconnected:
-                    GameThread.EveryTenthSecond -= RotateSprite;
+                    GameThread.EveryTenthOfASecond -= RotateSprite;
                     UpperCanvas.Status.sprite = UpperCanvas.DisconnectedSprite;
                     UpperCanvas.TopPanel.color = Resource.Colors.ConnectionPanelDisconnected;
                     break;
                 case ConnectionState.Connecting:
                     UpperCanvas.Status.sprite = UpperCanvas.ConnectingSprite;
 
-                    GameThread.EveryTenthSecond += RotateSprite;
+                    GameThread.EveryTenthOfASecond += RotateSprite;
                     break;
             }
         }
@@ -485,7 +485,9 @@ namespace Iviz.App
 
         void RotateSprite()
         {
-            UpperCanvas.Status.rectTransform.Rotate(new Vector3(0, 0, 10.0f), Space.Self);
+            const float rotationSpeedInDeg = 10;
+            var euler = new Vector3(0, 0, rotationSpeedInDeg);
+            UpperCanvas.Status.rectTransform.Rotate(euler, Space.Self);
         }
 
         void OnHideGuiButtonClick()
@@ -499,7 +501,6 @@ namespace Iviz.App
 
         void UpdateLeftHideVisible()
         {
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             bool isMobile = Settings.IsMobile && !ARController.IsActive && !AllGuiVisible;
             LeftHideGuiButton.gameObject.SetActive(isMobile);
         }
@@ -533,7 +534,7 @@ namespace Iviz.App
                 return;
             }
 
-            RosLogger.Debug("DisplayListPanel: Writing config to " + Settings.SavedFolder + "/" + file);
+            RosLogger.Debug($"{this}: Writing config to {Settings.SavedFolder}/{file}");
         }
 
         public async void LoadStateConfiguration(string file, CancellationToken token = default)
@@ -543,7 +544,7 @@ namespace Iviz.App
                 throw new ArgumentNullException(nameof(file));
             }
 
-            RosLogger.Debug($"DisplayListPanel: Reading config from {Settings.SavedFolder}/{file}");
+            RosLogger.Debug($"{this}: Reading config from {Settings.SavedFolder}/{file}");
             string text;
             try
             {
@@ -691,7 +692,7 @@ namespace Iviz.App
             }
             catch (Exception e) when (e is IOException or SecurityException or JsonException)
             {
-                RosLogger.Debug("ModuleListPanel: Error updating simple configuration", e);
+                RosLogger.Debug($"{this}: Error updating simple configuration", e);
             }
         }
 
@@ -715,8 +716,6 @@ namespace Iviz.App
                     unityPose = Pose.identity;
                     return false;
                 }
-
-                Debug.Log("Using XR settings from " + path);
 
                 string text = File.ReadAllText(path);
                 var config = JsonConvert.DeserializeObject<XRStartConfiguration?>(text);

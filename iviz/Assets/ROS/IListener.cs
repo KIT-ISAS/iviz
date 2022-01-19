@@ -14,7 +14,7 @@ namespace Iviz.Ros
     {
         string Topic { get; }
         string Type { get; }
-        RosTransportHint TransportHint { get; set; }
+        RosTransportHint TransportHint { get; }
         RosListenerStats Stats { get; }
         bool Subscribed { get; }
         

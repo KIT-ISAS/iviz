@@ -44,7 +44,7 @@ namespace Iviz.App.ARDialogs
             lineBuffer.Add(new LineWithColor());
             lineBuffer.Add(new LineWithColor());
 
-            button.Icon = XRButton.ButtonIcon.Ok;
+            button.Icon = XRButtonIcon.Ok;
             button.Visible = false;
             button.Transform.SetParentLocal(Transform);
             MainButtonCaption = mainButtonCaption;
@@ -103,7 +103,7 @@ namespace Iviz.App.ARDialogs
                 lineBuffer[0] = new LineWithColor(p0, p1, Color.blue.WithAlpha(0.5f));
                 lineBuffer[1] = new LineWithColor(p1, p2, Color.red.WithAlpha(0.5f));
                 lineBuffer[2] = new LineWithColor(p2, p3, Color.green.WithAlpha(0.5f));
-                line.Set(lineBuffer);
+                line.Set(lineBuffer, true);
             }
 
             float discDistance = discPosition.Magnitude();

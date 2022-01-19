@@ -320,6 +320,14 @@ namespace Iviz.Controllers
                     return;
                 }
 
+                if (msg.Data.Length > NativeList.MaxElements)
+                {
+                    RosLogger.Info($"{this}: Number of elements is greater than maximum of {NativeList.MaxElements.ToString()}");
+                    IsProcessing = false;
+                    return;
+                }
+
+                
                 if (!FieldsEqual(msg.Fields))
                 {
                     fieldNames.Clear();

@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Iviz.Displays.ARDialogs
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class SpringDisc3D : MonoBehaviour, IWidgetWithColor
+    public sealed class SpringDisc3D : MonoBehaviour, IWidget, IWidgetWithColor, IWidgetCanBeMoved
     {
         [SerializeField] MeshMarkerResource? anchor;
         [SerializeField] MeshMarkerResource? link;

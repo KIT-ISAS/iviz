@@ -60,7 +60,6 @@ namespace Iviz.Core
         public const bool IsXR = false;
 #else
         static bool? isHololens;
-
         static bool? isXR;
 
         static bool TryReadXRInfo()

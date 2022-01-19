@@ -83,7 +83,7 @@ namespace Iviz.Displays
                 new LineWithColor(c, d),
                 new LineWithColor(d, a),
             };
-            Resource.Set(lines);
+            Resource.Set(lines, false);
             Resource.Tint = Color.yellow;
             Resource.ElementScale = 0.005f;
         }

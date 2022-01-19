@@ -261,7 +261,8 @@ namespace Iviz.Controllers
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || msg.Color.A.ApproximatelyZero()
                 || msg.Color.IsInvalid()
-                || msg.Points.Length % 3 != 0)
+                || msg.Points.Length % 3 != 0
+                || msg.Points.Length > NativeList.MaxElements)
             {
                 meshTriangles.Clear();
                 return;
@@ -301,7 +302,8 @@ namespace Iviz.Controllers
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || msg.Color.A.ApproximatelyZero()
-                || msg.Color.IsInvalid())
+                || msg.Color.IsInvalid()
+                || msg.Points.Length > NativeList.MaxElements)
             {
                 pointList.Reset();
                 return;
@@ -326,7 +328,8 @@ namespace Iviz.Controllers
                 || elementScale.ApproximatelyZero()
                 || elementScale.IsInvalid()
                 || msg.Color.A.ApproximatelyZero()
-                || msg.Color.IsInvalid())
+                || msg.Color.IsInvalid()
+                || msg.Points.Length > NativeList.MaxElements)
             {
                 lineResource.Reset();
                 return;
@@ -359,7 +362,8 @@ namespace Iviz.Controllers
                 || msg.Color.IsInvalid()
                 || msg.Color.A.ApproximatelyZero()
                 || msg.Scale.IsInvalid()
-                || msg.Scale.ApproximatelyZero())
+                || msg.Scale.ApproximatelyZero()
+                || msg.Points.Length > NativeList.MaxElements)
             {
                 meshList.Reset();
                 return;
@@ -834,6 +838,12 @@ namespace Iviz.Controllers
                     return;
                 }
 
+                if (msg.Points.Length > NativeList.MaxElements)
+                {
+                    description.Append(ErrorStr).Append("Number of points exceeds maximum of ")
+                        .Append(NativeList.MaxElements);
+                }
+
                 if (msg.Color.A.ApproximatelyZero())
                 {
                     description.Append(WarnStr).Append("Color field has alpha 0").AppendLine();
@@ -876,6 +886,12 @@ namespace Iviz.Controllers
                         .AppendLine();
                     return;
                 }
+                
+                if (msg.Points.Length > NativeList.MaxElements)
+                {
+                    description.Append(ErrorStr).Append("Number of points exceeds maximum of ")
+                        .Append(NativeList.MaxElements);
+                }
 
                 if (msg.Color.IsInvalid() || msg.Color.A.ApproximatelyZero())
                 {
@@ -909,6 +925,12 @@ namespace Iviz.Controllers
                 {
                     description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
                 }
+                
+                if (msg.Points.Length > NativeList.MaxElements)
+                {
+                    description.Append(ErrorStr).Append("Number of points exceeds maximum of ")
+                        .Append(NativeList.MaxElements);
+                }
             }
 
             void CreateTriangleListLog()
@@ -930,6 +952,12 @@ namespace Iviz.Controllers
                     description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
                         .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
                     return;
+                }
+
+                if (msg.Points.Length > NativeList.MaxElements)
+                {
+                    description.Append(ErrorStr).Append("Number of points exceeds maximum of ")
+                        .Append(NativeList.MaxElements);
                 }
 
                 if (msg.Color.A.ApproximatelyZero())

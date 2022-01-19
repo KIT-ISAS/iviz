@@ -7,6 +7,10 @@ using UnityEngine;
 
 namespace Iviz.Core
 {
+    /// <summary>
+    /// Convenience class that will call back a given function each frame for a given time interval.
+    /// Used by displays to implement animations. 
+    /// </summary>
     public sealed class FAnimator
     {
         readonly Action<float> update;

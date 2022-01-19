@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,62 +23,53 @@ namespace Iviz.App.ARDialogs
 
         static readonly Color DefaultBackgroundColor = new Color(0, 0.2f, 0.5f);
 
-        [SerializeField] TextMesh title = null;
-        [SerializeField] TMP_Text caption = null;
-        [SerializeField] XRButton button1 = null;
-        [SerializeField] XRButton button2 = null;
-        [SerializeField] XRButton button3 = null;
-        [SerializeField] ARLineConnector connector = null;
-        [SerializeField] MeshRenderer iconMeshRenderer = null;
+        [SerializeField] TextMesh? title;
+        [SerializeField] TMP_Text? caption;
+        [SerializeField] XRButton? button1;
+        [SerializeField] XRButton? button2;
+        [SerializeField] XRButton? button3;
+        [SerializeField] DialogConnector connector;
+        [SerializeField] MeshRenderer? iconMeshRenderer;
 
-        [SerializeField] Texture2D[] icons = null;
+        [SerializeField] Texture2D[] icons;
 
-        [SerializeField] XRButton[] menuButtons = null;
-        [SerializeField] XRButton upButton = null;
-        [SerializeField] XRButton downButton = null;
+        [SerializeField] XRButton[] menuButtons;
+        [SerializeField] XRButton? upButton;
+        [SerializeField] XRButton? downButton;
 
         [SerializeField] Color backgroundColor = DefaultBackgroundColor;
-        [SerializeField] MeshMarkerResource background = null;
+        [SerializeField] MeshMarkerResource? background;
 
         [SerializeField] Vector3 socketPosition = Vector3.zero;
 
-        [NotNull] public string Id { get; internal set; } = "";
+        public string Id { get; internal set; } = "";
 
-        public event Action<ARDialog, int> ButtonClicked;
-        public event Action<ARDialog, int> MenuEntryClicked;
-        public event Action<ARDialog> Expired;
+        public event Action<ARDialog, int>? ButtonClicked;
+        public event Action<ARDialog, int>? MenuEntryClicked;
+        public event Action<ARDialog>? Expired;
 
-        Material iconMaterial;
+        Material? iconMaterial;
 
-        [NotNull]
         Material IconMaterial =>
             iconMaterial != null ? iconMaterial : (iconMaterial = Instantiate(iconMeshRenderer.material));
 
-        float? popupStartTime;
+        TextMesh TitleObject => title.AssertNotNull(nameof(title));
+        TMP_Text CaptionObject => caption.AssertNotNull(nameof(caption));
 
-        //float? currentAngle;
-        bool resetOrientation;
+        FrameNode? node;
+        string? pivotFrameId;
+
         Vector3? currentPosition;
         float scale;
+        string[] menuEntries = Array.Empty<string>();
+        int menuPage;
+        bool resetOrientation;
+        IconTextureType icon;
 
-        FrameNode node;
 
-        [NotNull]
-        FrameNode Node
-        {
-            get
-            {
-                if (this == null)
-                {
-                    Debug.Log($"{this}: Accessing dead dialog!");
-                    throw new ObjectDisposedException(ToString());
-                }
+        FrameNode Node => node ??= FrameNode.Instantiate("Dialog Node");
 
-                return node ??= FrameNode.Instantiate("Dialog Node");
-            }
-        }
-
-        [NotNull] public TfFrame ParentFrame => Node.Parent ?? TfListener.DefaultFrame;
+        public TfFrame ParentFrame => Node.Parent ?? TfListener.DefaultFrame;
 
         public Color BackgroundColor
         {
@@ -106,7 +99,7 @@ namespace Iviz.App.ARDialogs
             }
         }
 
-        static void SetBackgroundColor(XRButton button, Color color)
+        static void SetBackgroundColor(XRButton? button, Color color)
         {
             if (button != null)
             {
@@ -116,23 +109,23 @@ namespace Iviz.App.ARDialogs
 
         public string Caption
         {
-            get => caption.text;
-            set => caption.text = value;
+            get => CaptionObject.text;
+            set => CaptionObject.text = value;
         }
 
         public CaptionAlignmentType CaptionAlignment
         {
-            get => (CaptionAlignmentType) caption.alignment;
-            set => caption.alignment =
+            get => (CaptionAlignmentType)CaptionObject.alignment;
+            set => CaptionObject.alignment =
                 value == CaptionAlignmentType.Default
                     ? TextAlignmentOptions.Center
-                    : (TextAlignmentOptions) value;
+                    : (TextAlignmentOptions)value;
         }
 
         public string Title
         {
-            get => title.text;
-            set => title.text = value;
+            get => TitleObject.text;
+            set => TitleObject.text = value;
         }
 
         public bool Active
@@ -141,10 +134,7 @@ namespace Iviz.App.ARDialogs
             set => gameObject.SetActive(value);
         }
 
-        string pivotFrameId;
-
-        [CanBeNull]
-        public string PivotFrameId
+        public string? PivotFrameId
         {
             get => pivotFrameId;
             set
@@ -158,7 +148,7 @@ namespace Iviz.App.ARDialogs
                 }
                 else
                 {
-                    connector.End = null;
+                    //connector.End = null;
                 }
 
                 connector.Visible = pivotFrameId != null;
@@ -192,17 +182,17 @@ namespace Iviz.App.ARDialogs
             {
                 case ButtonType.Ok:
                     button1.Visible = true;
-                    button1.Icon = XRButton.ButtonIcon.Ok;
+                    button1.Icon = XRButtonIcon.Ok;
                     button1.Caption = "Ok";
                     break;
                 case ButtonType.Forward:
                     button1.Visible = true;
-                    button1.Icon = XRButton.ButtonIcon.Forward;
+                    button1.Icon = XRButtonIcon.Forward;
                     button1.Caption = "Ok";
                     break;
                 case ButtonType.Backward:
                     button1.Visible = true;
-                    button1.Icon = XRButton.ButtonIcon.Backward;
+                    button1.Icon = XRButtonIcon.Backward;
                     button1.Caption = "Back";
                     break;
                 case ButtonType.YesNo:
@@ -212,10 +202,10 @@ namespace Iviz.App.ARDialogs
                     }
 
                     button2.Visible = true;
-                    button2.Icon = XRButton.ButtonIcon.Ok;
+                    button2.Icon = XRButtonIcon.Ok;
                     button2.Caption = "Yes";
                     button3.Visible = true;
-                    button3.Icon = XRButton.ButtonIcon.Cross;
+                    button3.Icon = XRButtonIcon.Cross;
                     button3.Caption = "No";
                     break;
                 case ButtonType.ForwardBackward:
@@ -225,10 +215,10 @@ namespace Iviz.App.ARDialogs
                     }
 
                     button2.Visible = true;
-                    button2.Icon = XRButton.ButtonIcon.Backward;
+                    button2.Icon = XRButtonIcon.Backward;
                     button2.Caption = "Back";
                     button3.Visible = true;
-                    button3.Icon = XRButton.ButtonIcon.Forward;
+                    button3.Icon = XRButtonIcon.Forward;
                     button3.Caption = "Forward";
                     break;
                 case ButtonType.OkCancel:
@@ -238,10 +228,10 @@ namespace Iviz.App.ARDialogs
                     }
 
                     button2.Visible = true;
-                    button2.Icon = XRButton.ButtonIcon.Ok;
+                    button2.Icon = XRButtonIcon.Ok;
                     button2.Caption = "Ok";
                     button3.Visible = true;
-                    button3.Icon = XRButton.ButtonIcon.Cross;
+                    button3.Icon = XRButtonIcon.Cross;
                     button3.Caption = "Cancel";
                     break;
                 default:
@@ -260,15 +250,13 @@ namespace Iviz.App.ARDialogs
             Question
         }
 
-        IconTextureType icon;
-
         IconTextureType Icon
         {
             get => icon;
             set
             {
                 icon = value;
-                IconMaterial.mainTexture = icons[(int) value];
+                IconMaterial.mainTexture = icons[(int)value];
             }
         }
 
@@ -301,9 +289,6 @@ namespace Iviz.App.ARDialogs
                     break;
             }
         }
-
-        string[] menuEntries = Array.Empty<string>();
-        int menuPage;
 
         public IEnumerable<string> MenuEntries
         {
@@ -342,19 +327,6 @@ namespace Iviz.App.ARDialogs
 
                 upButton.Visible = menuPage > 0;
                 downButton.Visible = offset + menuButtons.Length < menuEntries.Length;
-            }
-        }
-
-        public float Scale
-        {
-            get => scale;
-            set
-            {
-                scale = value;
-                if (popupStartTime != null)
-                {
-                    transform.localScale = scale * Vector3.one;
-                }
             }
         }
 
@@ -402,10 +374,11 @@ namespace Iviz.App.ARDialogs
             }
         }
 
-        Vector3 BaseDisplacement => -socketPosition * Scale;
+        Vector3 BaseDisplacement => -socketPosition; /* * Scale; */
 
         void Awake()
         {
+            /*
             connector.Start = () => Transform.localPosition - BaseDisplacement;
             connector.End = () =>
             {
@@ -415,6 +388,7 @@ namespace Iviz.App.ARDialogs
                     ? framePosition
                     : framePosition + GetFlatCameraRotation(framePosition) * PivotDisplacement;
             };
+            */
 
             if (button1 != null)
             {
@@ -455,29 +429,13 @@ namespace Iviz.App.ARDialogs
 
         void Update()
         {
-            if (popupStartTime != null)
-            {
-                float now = Time.time;
-                if (now - popupStartTime.Value < PopupDuration)
-                {
-                    float tempScale = (now - popupStartTime.Value) / PopupDuration;
-                    transform.localScale = (tempScale * 0.5f + 0.5f) * Scale * Vector3.one;
-                }
-                else
-                {
-                    transform.localScale = Scale * Vector3.one;
-                    popupStartTime = null;
-                }
-            }
-
             UpdatePosition();
             UpdateRotation();
         }
 
         void UpdateRotation()
         {
-            Quaternion targetRotation =
-                Quaternion.LookRotation(Transform.position - Settings.MainCameraTransform.position);
+            var targetRotation = Quaternion.LookRotation(Transform.position - Settings.MainCameraTransform.position);
             if (resetOrientation)
             {
                 Transform.rotation = targetRotation;
@@ -485,7 +443,7 @@ namespace Iviz.App.ARDialogs
                 return;
             }
 
-            Quaternion currentRotation = Transform.rotation;
+            var currentRotation = Transform.rotation;
             Transform.rotation = Quaternion.Lerp(currentRotation, targetRotation, 0.05f);
         }
 
@@ -496,11 +454,12 @@ namespace Iviz.App.ARDialogs
                 return;
             }
 
-            Vector3 frameLocalPosition = TfListener.RelativeToOrigin(Node.Transform.position) + PivotFrameOffset;
-            Quaternion cameraLocalRotation = GetFlatCameraRotation(frameLocalPosition);
+            var frameLocalPosition = TfListener.RelativeToOrigin(Node.Transform.position) + PivotFrameOffset;
+            var cameraLocalRotation = GetFlatCameraRotation(frameLocalPosition);
 
-            Vector3 targetLocalPosition = frameLocalPosition + cameraLocalRotation * DialogDisplacement + BaseDisplacement;
-            Vector3 targetAbsolutePosition = TfListener.OriginFrame.Transform.TransformPoint(targetLocalPosition);
+            var targetLocalPosition = frameLocalPosition + cameraLocalRotation * DialogDisplacement + BaseDisplacement;
+            var targetAbsolutePosition = TfListener.OriginFrame.Transform.TransformPoint(targetLocalPosition);
+
             if (currentPosition == null)
             {
                 currentPosition = targetAbsolutePosition;
@@ -516,16 +475,15 @@ namespace Iviz.App.ARDialogs
                 currentPosition = currentPosition.Value + deltaPosition * 0.05f;
             }
 
-
             Transform.position = currentPosition.Value;
         }
 
         static Quaternion GetFlatCameraRotation(in Vector3 localPosition)
         {
-            Vector3 absolutePosition = TfListener.OriginFrame.Transform.TransformPoint(localPosition);
+            var absolutePosition = TfListener.OriginFrame.Transform.TransformPoint(localPosition);
             (float x, _, float z) = absolutePosition - Settings.MainCameraTransform.position;
             float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
-            Quaternion absoluteRotation = Quaternion.AngleAxis(targetAngle, Vector3.up);
+            var absoluteRotation = Quaternion.AngleAxis(targetAngle, Vector3.up);
 
             return TfListener.OriginFrame.Transform.rotation.Inverse() * absoluteRotation;
         }
@@ -536,8 +494,6 @@ namespace Iviz.App.ARDialogs
 
             connector.Visible = true;
             resetOrientation = true;
-
-            popupStartTime = Time.time;
             Update();
         }
 
@@ -546,7 +502,6 @@ namespace Iviz.App.ARDialogs
             base.Suspend();
             connector.Visible = false;
             currentPosition = null;
-            popupStartTime = null;
             ButtonClicked = null;
             MenuEntryClicked = null;
 
@@ -554,7 +509,6 @@ namespace Iviz.App.ARDialogs
             Expired = null;
         }
 
-        [NotNull]
         public override string ToString()
         {
             return $"[Dialog Id='{Id}']";
@@ -567,12 +521,7 @@ namespace Iviz.App.ARDialogs
 
         public void OnDestroy()
         {
-            if (node == null)
-            {
-                return;
-            }
-
-            node.Dispose();
+            node?.Dispose();
         }
     }
 }

@@ -80,7 +80,7 @@ namespace Iviz.App
             started = true;
 
             GameThread.EverySecond += UpdateAll;
-            GameThread.EveryTenthSecond += UpdateAllFast;
+            GameThread.EveryTenthOfASecond += UpdateAllFast;
         }
 
         T CreatePanel<T>(ResourceKey<GameObject> source) where T : IDialogPanel
@@ -97,7 +97,7 @@ namespace Iviz.App
         void OnDestroy()
         {
             GameThread.EverySecond -= UpdateAll;
-            GameThread.EveryTenthSecond -= UpdateAllFast;
+            GameThread.EveryTenthOfASecond -= UpdateAllFast;
         }
 
         void UpdateAll()

@@ -45,7 +45,7 @@ namespace Iviz.App.ARDialogs
             lineBuffer.Add(new LineWithColor());
             lineBuffer.Add(new LineWithColor());
 
-            button.Icon = XRButton.ButtonIcon.Ok;
+            button.Icon = XRButtonIcon.Ok;
             button.Caption = "Send!";
             button.Visible = false;
             button.Transform.SetParentLocal(Transform);

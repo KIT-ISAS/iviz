@@ -16,8 +16,8 @@ namespace Iviz.Displays.XRDialogs
     public sealed class XRButton : MonoBehaviour, IDisplay, IHasBounds, IRecyclable
     {
         [SerializeField] string? caption;
-        [SerializeField] ButtonIcon icon;
-        
+        [SerializeField] XRButtonIcon icon;
+
         [SerializeField] Texture2D[] icons = Array.Empty<Texture2D>();
         [SerializeField] TMP_Text? text;
         [SerializeField] MeshRenderer? iconMeshRenderer;
@@ -37,22 +37,19 @@ namespace Iviz.Displays.XRDialogs
         Material Material => material != null ? material : material = Instantiate(IconMeshRenderer.material);
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
         Transform IHasBounds.BoundsTransform => BoxCollider.transform;
-        
+
+        Bounds? IHasBounds.Bounds => Bounds;
+        Bounds? IDisplay.Bounds => Bounds;
+        Bounds Bounds => BoxCollider.GetBounds();
+
+        public int Layer
+        {
+            set { }
+        }
+
         public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
         public event Action? BoundsChanged;
         public event Action? Clicked;
-
-        public enum ButtonIcon
-        {
-            Cross,
-            Ok,
-            Forward,
-            Backward,
-            Dialog,
-            Up,
-            Down,
-            None
-        }
 
         public Color BackgroundColor
         {
@@ -74,7 +71,7 @@ namespace Iviz.Displays.XRDialogs
             {
                 caption = value;
                 Text.text = value;
-            } 
+            }
         }
 
         public bool Visible
@@ -83,13 +80,13 @@ namespace Iviz.Displays.XRDialogs
             set => gameObject.SetActive(value);
         }
 
-        public ButtonIcon Icon
+        public XRButtonIcon Icon
         {
             get => icon;
             set
             {
                 icon = value;
-                if (icon != ButtonIcon.None)
+                if (icon != XRButtonIcon.None)
                 {
                     Material.mainTexture = icons[(int)icon];
                     IconMeshRenderer.enabled = true;
@@ -130,20 +127,22 @@ namespace Iviz.Displays.XRDialogs
             background.ReturnToPool();
         }
 
-        Bounds? IHasBounds.Bounds => Bounds;
-        Bounds? IDisplay.Bounds => Bounds;
-        Bounds Bounds => BoxCollider.GetBounds();
-        public int Layer { get; set; }
-
-        public void TriggerBoundsChanged()
-        {
-            BoundsChanged?.Invoke();
-        }
-
         void IDisplay.Suspend()
         {
             BoundsChanged = null;
             Clicked = null;
         }
+    }
+
+    public enum XRButtonIcon
+    {
+        Cross,
+        Ok,
+        Forward,
+        Backward,
+        Dialog,
+        Up,
+        Down,
+        None
     }
 }

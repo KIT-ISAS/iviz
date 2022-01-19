@@ -67,7 +67,7 @@ namespace Iviz.Core
         /// <summary>
         /// Runs 10 times per second
         /// </summary>
-        public static event Action? EveryTenthSecond;
+        public static event Action? EveryTenthOfASecond;
 
         /// <summary>
         /// Runs once per second, but after EverySecond has finished.
@@ -148,7 +148,7 @@ namespace Iviz.Core
             {
                 try
                 {
-                    EveryTenthSecond?.Invoke();
+                    EveryTenthOfASecond?.Invoke();
                 }
                 catch (Exception e)
                 {
@@ -227,7 +227,7 @@ namespace Iviz.Core
             LateEveryFrame = null;
             EverySecond = null;
             LateEverySecond = null;
-            EveryTenthSecond = null;
+            EveryTenthOfASecond = null;
             GameTime = 0;
 
             actionsQueue.Clear();
@@ -301,12 +301,10 @@ namespace Iviz.Core
                 return;
             }
 
-            if (instance == null)
+            if (instance != null)
             {
-                return;
+                instance.actionsQueue.Enqueue(action);
             }
-
-            instance.actionsQueue.Enqueue(action);
         }
 
         static bool IsGameThread => instance != null && Thread.CurrentThread == instance.gameThread;

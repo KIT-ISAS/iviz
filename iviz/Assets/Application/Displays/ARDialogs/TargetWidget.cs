@@ -106,11 +106,11 @@ namespace Iviz.App.ARDialogs
             corner.StartDragging += () => scaling = true;
             corner.EndDragging += () => scaling = false;
 
-            okButton.Icon = XRButton.ButtonIcon.Ok;
+            okButton.Icon = XRButtonIcon.Ok;
             MainButtonCaption = MainButtonCaption;
 
             cancelButton.Caption = "Cancel";
-            cancelButton.Icon = XRButton.ButtonIcon.Cross;
+            cancelButton.Icon = XRButtonIcon.Cross;
 
             okButton.Clicked += () =>
             {
@@ -124,7 +124,7 @@ namespace Iviz.App.ARDialogs
 
         protected override void Update()
         {
-            base.Update();;
+            base.Update();
             
             var camPosition = Settings.MainCameraTransform.position;
             buttonPivotTransform.LookAt(2 * buttonPivotTransform.position - camPosition, Vector3.up);

@@ -35,13 +35,13 @@ namespace Iviz.App
             gameObject.SetActive(true);
             started = true;
             GameThread.EverySecond += UpdateSelected;
-            GameThread.EveryTenthSecond += UpdateSelectedFast;
+            GameThread.EveryTenthOfASecond += UpdateSelectedFast;
         }
 
         void OnDestroy()
         {
             GameThread.EverySecond -= UpdateSelected;
-            GameThread.EveryTenthSecond -= UpdateSelectedFast;
+            GameThread.EveryTenthOfASecond -= UpdateSelectedFast;
         }
 
         public T GetPanelByResourceType<T>(ModuleType resource) where T : ModulePanel

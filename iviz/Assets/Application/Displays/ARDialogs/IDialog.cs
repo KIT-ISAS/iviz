@@ -1,11 +1,16 @@
+#nullable enable
+
 using System;
+using Iviz.Displays;
+using Iviz.Displays.XRDialogs;
 using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public interface IDialog
+    public interface IDialog : IDisplay
     {
-        event Action<IDialog>? Expired;
+        event Action? Expired;
+        float Scale { set; }
         Color Color { set; }
         Vector3 DialogDisplacement { set; }
         Vector3 PivotFrameOffset { set; }
@@ -13,4 +18,19 @@ namespace Iviz.App.ARDialogs
         string? PivotFrameId { set; }
         void Initialize();
     }
+    
+    public interface IDialogWithCaption
+    {
+        string Caption { set; }
+    }
+
+    public interface IDialogWithIcon
+    {
+        XRButtonIcon Icon { set; }
+    }    
+    
+    public interface IDialogCanBeClicked
+    {
+        event Action<int>? Clicked;
+    }  
 }
