@@ -12,7 +12,7 @@ namespace Iviz.App.ARDialogs
 {
     public sealed class DialogConnector : MonoBehaviour
     {
-        [SerializeField] XRDialog dialog;
+        [SerializeField] XRDialog? dialog;
         
         MeshMarkerResource[]? spheres;
         FrameNode? node;
@@ -44,6 +44,7 @@ namespace Iviz.App.ARDialogs
             {
                 gameObject.SetActive(value);
                 Node.Visible = value;
+                Lines.Visible = value;
             }
         }
 
