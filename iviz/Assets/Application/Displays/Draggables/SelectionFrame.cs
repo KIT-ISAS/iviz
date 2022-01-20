@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public sealed class SelectionFrame : MeshMarkerHolderResource, IRecyclable
+    public sealed class SelectionFrame : MeshMarkerHolderDisplay, IRecyclable
     {
         float columnWidth = 0.005f;
         Vector3 size = Vector3.one;
@@ -46,11 +46,11 @@ namespace Iviz.Displays
             }
         }        
 
-        static MeshMarkerResource[] CreateObjects(Transform transform)
+        static MeshMarkerDisplay[] CreateObjects(Transform transform)
         {
-            MeshMarkerResource CreateObject()
+            MeshMarkerDisplay CreateObject()
             {
-                var resource = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, transform);
+                var resource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, transform);
                 resource.EnableShadows = false;
                 resource.EnableCollider = false;
                 return resource;

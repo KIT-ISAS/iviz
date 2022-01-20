@@ -17,7 +17,7 @@ using Material = UnityEngine.Material;
 
 namespace Iviz.App.ARDialogs
 {
-    public sealed class ARDialog : MarkerResource, IRecyclable
+    public sealed class ARDialog : MarkerDisplay, IRecyclable
     {
         const float PopupDuration = 0.1f;
 
@@ -28,7 +28,7 @@ namespace Iviz.App.ARDialogs
         [SerializeField] XRButton? button1;
         [SerializeField] XRButton? button2;
         [SerializeField] XRButton? button3;
-        [SerializeField] DialogConnector connector;
+        [SerializeField] XRDialogConnector connector;
         [SerializeField] MeshRenderer? iconMeshRenderer;
 
         [SerializeField] Texture2D[] icons;
@@ -38,7 +38,7 @@ namespace Iviz.App.ARDialogs
         [SerializeField] XRButton? downButton;
 
         [SerializeField] Color backgroundColor = DefaultBackgroundColor;
-        [SerializeField] MeshMarkerResource? background;
+        [SerializeField] MeshMarkerDisplay? background;
 
         [SerializeField] Vector3 socketPosition = Vector3.zero;
 
@@ -159,7 +159,7 @@ namespace Iviz.App.ARDialogs
         public Vector3 PivotFrameOffset { get; set; }
         public Vector3 PivotDisplacement { get; set; }
 
-        public void SetButtonMode(ButtonType value)
+        public void SetButtonMode(XRButtonSetup value)
         {
             if (button1 == null)
             {
@@ -180,58 +180,58 @@ namespace Iviz.App.ARDialogs
 
             switch (value)
             {
-                case ButtonType.Ok:
+                case XRButtonSetup.Ok:
                     button1.Visible = true;
-                    button1.Icon = XRButtonIcon.Ok;
+                    button1.Icon = XRIcon.Ok;
                     button1.Caption = "Ok";
                     break;
-                case ButtonType.Forward:
+                case XRButtonSetup.Forward:
                     button1.Visible = true;
-                    button1.Icon = XRButtonIcon.Forward;
+                    button1.Icon = XRIcon.Forward;
                     button1.Caption = "Ok";
                     break;
-                case ButtonType.Backward:
+                case XRButtonSetup.Backward:
                     button1.Visible = true;
-                    button1.Icon = XRButtonIcon.Backward;
+                    button1.Icon = XRIcon.Backward;
                     button1.Caption = "Back";
                     break;
-                case ButtonType.YesNo:
+                case XRButtonSetup.YesNo:
                     if (button2 == null || button3 == null)
                     {
                         break;
                     }
 
                     button2.Visible = true;
-                    button2.Icon = XRButtonIcon.Ok;
+                    button2.Icon = XRIcon.Ok;
                     button2.Caption = "Yes";
                     button3.Visible = true;
-                    button3.Icon = XRButtonIcon.Cross;
+                    button3.Icon = XRIcon.Cross;
                     button3.Caption = "No";
                     break;
-                case ButtonType.ForwardBackward:
+                case XRButtonSetup.ForwardBackward:
                     if (button2 == null || button3 == null)
                     {
                         break;
                     }
 
                     button2.Visible = true;
-                    button2.Icon = XRButtonIcon.Backward;
+                    button2.Icon = XRIcon.Backward;
                     button2.Caption = "Back";
                     button3.Visible = true;
-                    button3.Icon = XRButtonIcon.Forward;
+                    button3.Icon = XRIcon.Forward;
                     button3.Caption = "Forward";
                     break;
-                case ButtonType.OkCancel:
+                case XRButtonSetup.OkCancel:
                     if (button2 == null || button3 == null)
                     {
                         break;
                     }
 
                     button2.Visible = true;
-                    button2.Icon = XRButtonIcon.Ok;
+                    button2.Icon = XRIcon.Ok;
                     button2.Caption = "Ok";
                     button3.Visible = true;
-                    button3.Icon = XRButtonIcon.Cross;
+                    button3.Icon = XRIcon.Cross;
                     button3.Caption = "Cancel";
                     break;
                 default:

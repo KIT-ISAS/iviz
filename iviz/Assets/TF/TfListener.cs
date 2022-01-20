@@ -261,10 +261,10 @@ namespace Iviz.Controllers.TF
                 originFrame.Parent = rootFrame;
                 originFrame.ForceInvisible();
 
-                keepAllListenerNode = new FrameNode("[TFNode]") { Visible = false };
-                staticListenerNode = new FrameNode("[TFStatic]") { Visible = false };
-                fixedFrameListenerNode = new FrameNode("[TFFixedFrame]") { Visible = false };
-                var defaultListener = new FrameNode("[.]")
+                keepAllListenerNode = new FrameNode("TFNode") { Visible = false };
+                staticListenerNode = new FrameNode("TFStatic") { Visible = false };
+                fixedFrameListenerNode = new FrameNode("TFFixedFrame") { Visible = false };
+                var defaultListener = new FrameNode(".")
                 {
                     Visible = false,
                     Transform = { parent = unityFrame.transform }

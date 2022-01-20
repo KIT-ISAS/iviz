@@ -56,19 +56,12 @@ namespace Iviz.Controllers
             set => gameObject.SetActive(value);
         }
 
-        public int Layer
-        {
-            get => gameObject.layer;
-            set => gameObject.layer = value;
-        }
-
-        public Bounds? Bounds
+        public Bounds Bounds
         {
             get => bounds;
             set
             {
-                bounds = value ?? throw new NullReferenceException();
-
+                bounds = value;
                 Vector3 center = bounds.center;
                 (float sizeX, float sizeY, float sizeZ) = bounds.size.Abs();
 
@@ -98,7 +91,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                foreach (var resource in holder.GetComponentsInChildren<MeshMarkerResource>())
+                foreach (var resource in holder.GetComponentsInChildren<MeshMarkerDisplay>())
                 {
                     resource.EmissiveColor = value / 2;
                     resource.Color = value;
@@ -124,7 +117,7 @@ namespace Iviz.Controllers
 
             foreach (MeshRenderer meshRenderer in holder.GetComponentsInChildren<MeshRenderer>())
             {
-                var resource = meshRenderer.GetComponent<MeshMarkerResource>();
+                var resource = meshRenderer.GetComponent<MeshMarkerDisplay>();
                 resource.ReturnToPool(Resource.Displays.Cube);
             }
 
@@ -154,7 +147,7 @@ namespace Iviz.Controllers
             frameLinkHolder.transform.SetParentLocal(parent.transform);
             frameLinkHolder.transform.localRotation = rotation;
 
-            MeshMarkerResource[] frameLinks =
+            MeshMarkerDisplay[] frameLinks =
             {
                 CreateFrameLink(frameLinkHolder),
                 CreateFrameLink(frameLinkHolder),
@@ -172,10 +165,10 @@ namespace Iviz.Controllers
         }
 
         [NotNull]
-        MeshMarkerResource CreateFrameLink([NotNull] GameObject frameLinkHolder)
+        MeshMarkerDisplay CreateFrameLink([NotNull] GameObject frameLinkHolder)
         {
             var frameLink =
-                ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cube, frameLinkHolder.transform);
+                ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, frameLinkHolder.transform);
             frameLink.gameObject.name = "Cube";
             frameLink.EmissiveColor = (Color / 2).WithAlpha(1);
             frameLink.Color = Color;

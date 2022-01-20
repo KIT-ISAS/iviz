@@ -1,21 +1,18 @@
 #nullable enable
 
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Threading;
+using System.Runtime.CompilerServices;
 using Iviz.Controllers;
-using Iviz.Controllers.XR;
 using Iviz.Core;
-using Iviz.Resources;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
-using XRUtils = Iviz.Controllers.XRUtils;
+using XRUtils = Iviz.Controllers.XR.XRUtils;
 
 namespace Iviz.Displays
 {
     [RequireComponent(typeof(MeshFilter))]
-    public sealed class ARMeshLines : MonoBehaviour, IDisplay
+    public sealed class ARMeshLines : DisplayWrapper, IRecyclable
     {
         static GameObject? container;
 
@@ -24,14 +21,12 @@ namespace Iviz.Displays
         readonly List<int> indices = new();
         readonly List<Vector3> vertices = new();
 
-        Transform? mTransform;
         MeshFilter? meshFilter;
-        LineResource? resource;
+        LineDisplay? resource;
 
-        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         MeshFilter MeshFilter => meshFilter != null ? meshFilter : (meshFilter = GetComponent<MeshFilter>());
 
-        LineResource Resource
+        LineDisplay Resource
         {
             get
             {
@@ -45,7 +40,7 @@ namespace Iviz.Displays
                     container = new GameObject("AR Mesh Lines");
                 }
 
-                resource = ResourcePool.RentDisplay<LineResource>(container.transform);
+                resource = ResourcePool.RentDisplay<LineDisplay>(container.transform);
                 resource.ElementScale = 0.001f;
                 resource.Visible = ARController.IsXRVisible;
                 resource.MaterialOverride = ARController.IsPulseActive
@@ -56,21 +51,7 @@ namespace Iviz.Displays
             }
         }
 
-        public Bounds? Bounds => Resource != null ? Resource.Bounds : null;
-
-        public int Layer { get; set; }
-
-        public bool Visible
-        {
-            get => gameObject.activeSelf;
-            set => gameObject.SetActive(value);
-        }
-
-        public string Name
-        {
-            get => gameObject.name;
-            set => gameObject.name = value;
-        }
+        protected override IDisplay Display => Resource;
 
         void Awake()
         {
@@ -79,7 +60,7 @@ namespace Iviz.Displays
                 enabled = false;
                 return;
             }
-            
+
             pulseMaterialSet = ARController.IsPulseActive;
             MeshFilter.sharedMesh = new Mesh { name = "AR Mesh" };
             Resource.Visible = Visible;
@@ -168,7 +149,7 @@ namespace Iviz.Displays
             var mesh = MeshFilter.sharedMesh;
             var topology = mesh.GetTopology(0);
             int[] mIndices = indices.ExtractArray();
-            Vector3[] mVertices = vertices.ExtractArray();
+            var mVertices = vertices.ExtractArray();
 
             int count = indices.Count;
             lineBuffer.Resize(count);
@@ -180,14 +161,16 @@ namespace Iviz.Displays
                     for (int i = 0; i < count; i += 3)
                     {
                         int ia = mIndices[i];
-                        int ib = mIndices[i + 1];
-                        int ic = mIndices[i + 2];
+                        ref var a = ref mVertices[ia];
 
-                        Vector3 a = mVertices[ia];
-                        Vector3 b = mVertices[ib];
-                        Vector3 c = mVertices[ic];
+                        int ib = mIndices[i + 1];
+                        ref var b = ref mVertices[ib];
 
                         Write(ref lines[i], a, b);
+
+                        int ic = mIndices[i + 2];
+                        ref var c = ref mVertices[ic];
+
                         Write(ref lines[i + 1], b, c);
                         Write(ref lines[i + 2], c, a);
                     }
@@ -197,14 +180,16 @@ namespace Iviz.Displays
                     for (int i = 0; i < count; i += 4)
                     {
                         int ia = mIndices[i];
-                        int ib = mIndices[i + 1];
-                        int ic = mIndices[i + 2];
-                        int id = mIndices[i + 3];
+                        ref var a = ref mVertices[ia];
 
-                        Vector3 a = mVertices[ia];
-                        Vector3 b = mVertices[ib];
-                        Vector3 c = mVertices[ic];
-                        Vector3 d = mVertices[id];
+                        int ib = mIndices[i + 1];
+                        ref var b = ref mVertices[ib];
+
+                        int ic = mIndices[i + 2];
+                        ref var c = ref mVertices[ic];
+
+                        int id = mIndices[i + 3];
+                        ref var d = ref mVertices[id];
 
                         Write(ref lines[i], a, b);
                         Write(ref lines[i + 1], b, c);
@@ -220,25 +205,34 @@ namespace Iviz.Displays
 
             return false;
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static void Write(ref float4x2 f, in Vector3 a, in Vector3 b)
             {
-                (f.c0.x, f.c0.y, f.c0.z) = a;
-                (f.c1.x, f.c1.y, f.c1.z) = b;
+                f.c0.x = a.x;
+                f.c0.y = a.y;
+                f.c0.z = a.z;
+
+                f.c1.x = b.x;
+                f.c1.y = b.y;
+                f.c1.z = b.z;
             }
         }
 
-        public void Suspend()
+        public override void Suspend()
         {
             indices.Clear();
             vertices.Clear();
         }
 
+        public void SplitForRecycle()
+        {
+            resource.ReturnToPool();
+            resource = null;
+        }
+        
         void OnDestroy()
         {
-            if (resource != null)
-            {
-                resource.ReturnToPool();
-            }
+            resource.ReturnToPool();
 
             ARController.ARCameraViewChanged -= OnARCameraViewChanged;
 

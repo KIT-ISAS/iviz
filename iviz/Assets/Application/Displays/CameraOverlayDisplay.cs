@@ -10,17 +10,17 @@ namespace Iviz.Displays
     /// <summary>
     /// Axis frame shown on the top right of the camera overlay.
     /// </summary>
-    [RequireComponent(typeof(AxisFrameResource))]
+    [RequireComponent(typeof(AxisFrameDisplay))]
     public class CameraOverlayDisplay : MonoBehaviour
     {
-        [SerializeField] AxisFrameResource? resource;
+        [SerializeField] AxisFrameDisplay? resource;
         [SerializeField] Camera? parentCamera;
         [SerializeField] Camera? grandparentCamera;
 
         Vector3 settings;
         
         Transform? mTransform;
-        AxisFrameResource Resource => resource.AssertNotNull(nameof(resource));
+        AxisFrameDisplay Display => resource.AssertNotNull(nameof(resource));
         Camera ParentCamera => parentCamera.AssertNotNull(nameof(parentCamera));
 
         Camera GrandparentCamera => grandparentCamera != null
@@ -32,11 +32,11 @@ namespace Iviz.Displays
 
         void Start()
         {
-            Resource.ColorX = Resources.Resource.Colors.CameraOverlayAxisX;
-            Resource.ColorY = Resources.Resource.Colors.CameraOverlayAxisY;
-            Resource.ColorZ = Resources.Resource.Colors.CameraOverlayAxisZ;
-            Resource.AxisLength = 0.001f;
-            Resource.Layer = gameObject.layer;
+            Display.ColorX = Resources.Resource.Colors.CameraOverlayAxisX;
+            Display.ColorY = Resources.Resource.Colors.CameraOverlayAxisY;
+            Display.ColorZ = Resources.Resource.Colors.CameraOverlayAxisZ;
+            Display.AxisLength = 0.001f;
+            Display.Layer = gameObject.layer;
             CheckSettings();
         }
 
@@ -57,7 +57,7 @@ namespace Iviz.Displays
             var point = new Vector3(
                 0.9f * newSettings.x,
                 0.9f * newSettings.y,
-                newSettings.z + Resource.AxisLength);
+                newSettings.z + Display.AxisLength);
             var widgetWorldPos = ParentCamera.ScreenToWorldPoint(point);
             Transform.position = widgetWorldPos;
         }
@@ -65,10 +65,10 @@ namespace Iviz.Displays
         void LateUpdate()
         {
             bool isParentEnabled = GrandparentCamera.enabled;
-            if (Resource.Visible != isParentEnabled)
+            if (Display.Visible != isParentEnabled)
             {
                 ParentCamera.enabled = isParentEnabled;
-                Resource.Visible = isParentEnabled;
+                Display.Visible = isParentEnabled;
                 return;
             }
 

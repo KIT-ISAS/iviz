@@ -137,6 +137,12 @@ namespace Iviz.Displays.Highlighters
             }
         }
 
+        public void Reset()
+        {
+            frame.ReturnToPool();
+            frame = null;
+        }
+
         public void Dispose()
         {
             PointerDown = null;

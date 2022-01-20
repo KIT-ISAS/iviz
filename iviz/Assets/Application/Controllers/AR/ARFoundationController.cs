@@ -31,7 +31,7 @@ namespace Iviz.Controllers
         readonly ARContents ar;
         readonly CancellationTokenSource tokenSource = new();
         readonly int defaultCullingMask;
-        readonly AxisFrameResource setupModeFrame;
+        readonly AxisFrameDisplay setupModeFrame;
         readonly Camera virtualCamera;
         readonly Canvas canvas;
 
@@ -231,7 +231,7 @@ namespace Iviz.Controllers
 
             Config = config ?? new ARConfiguration();
 
-            setupModeFrame = ResourcePool.RentDisplay<AxisFrameResource>(ar.Camera.transform);
+            setupModeFrame = ResourcePool.RentDisplay<AxisFrameDisplay>(ar.Camera.transform);
             setupModeFrame.Layer = LayerType.ARSetupMode;
             setupModeFrame.AxisLength = 0.5f * TfListener.Instance.FrameSize;
             SetupModeEnabled = true;

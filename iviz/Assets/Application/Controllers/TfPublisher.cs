@@ -164,7 +164,7 @@ namespace Iviz.Controllers
             {
                 this.id = id;
                 this.isInternal = isInternal;
-                frameNode = new FrameNode("[TfPublisher]");
+                frameNode = new FrameNode("TfPublisher");
                 frameNode.AttachTo(id);
                 TfFrame = frameNode.Parent ??
                           throw new NullReferenceException("Newly created frame has null parent"); // shouldn't happen

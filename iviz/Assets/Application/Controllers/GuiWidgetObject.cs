@@ -7,6 +7,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.ARDialogs;
 using Iviz.Displays.XRDialogs;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using UnityEngine;
@@ -116,14 +117,35 @@ namespace Iviz.Controllers
             dialog.DialogDisplacement = AdjustDisplacement(msg.DialogDisplacement);
             dialog.Color = msg.BackgroundColor.ToUnityColor();
 
+            if (dialog is IDialogWithTitle withTitle)
+            {
+                withTitle.Title = msg.Title;
+            }
+
             if (dialog is IDialogWithCaption withCaption)
             {
                 withCaption.Caption = msg.Caption;
             }
 
+            if (dialog is IDialogWithAlignment withAlignment)
+            {
+                withAlignment.CaptionAlignment = (CaptionAlignmentType)msg.CaptionAlignment;
+            }
+            
             if (dialog is IDialogWithIcon withIcon)
             {
-                withIcon.Icon = (XRButtonIcon)msg.Icon;
+                if (msg.Icon >= (byte) XRIcon.None)
+                {
+                    
+                }
+                
+                
+                withIcon.Icon = (XRIcon)msg.Icon;
+            }
+
+            if (dialog is IDialogHasButtonSetup hasButtonSetup)
+            {
+                hasButtonSetup.ButtonSetup = (XRButtonSetup)msg.Buttons;
             }
 
             dialog.Expired += () => parent.OnDialogExpired(this);
@@ -132,7 +154,7 @@ namespace Iviz.Controllers
             {
                 canBeClicked.Clicked += index => parent.OnDialogButtonClicked(this, index);
             }
-            
+
             dialog.Initialize();
 
             ExpirationTime = msg.Lifetime == default

@@ -122,7 +122,7 @@ namespace Iviz.Editor
             }
 
             GameObject obj = resourceInfo.Object;
-            MeshTrianglesResource[] resources = obj.GetComponentsInChildren<MeshTrianglesResource>();
+            MeshTrianglesDisplay[] resources = obj.GetComponentsInChildren<MeshTrianglesDisplay>();
             HashSet<Mesh> writtenMeshes = new HashSet<Mesh>();
 
             int meshId = 0;
@@ -243,7 +243,7 @@ namespace Iviz.Editor
                 resource.enabled = false;
             }
 
-            foreach (var marker in obj.GetComponentsInChildren<MeshMarkerHolderResource>())
+            foreach (var marker in obj.GetComponentsInChildren<MeshMarkerHolderDisplay>())
             {
                 //DestroyImmediate(marker);
                 marker.enabled = false;

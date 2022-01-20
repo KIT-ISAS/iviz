@@ -21,8 +21,6 @@ namespace Iviz.Displays
             }
         }
 
-        public Bounds? Bounds => null;
-
         void Awake()
         {
             line = GetComponent<LineRenderer>();
@@ -47,11 +45,7 @@ namespace Iviz.Displays
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
-        public int Layer
-        {
-            set => gameObject.layer = value;
-        }
-
+        
         public void Suspend()
         {
         }

@@ -17,7 +17,7 @@ namespace Iviz.Controllers
     {
         readonly DepthCloudConfiguration config = new();
         readonly FrameNode node;
-        readonly DepthCloudResource projector;
+        readonly DepthCloudDisplay projector;
         readonly ImageTexture depthImageTexture;
         readonly ImageTexture colorImageTexture;
 
@@ -278,7 +278,7 @@ namespace Iviz.Controllers
             node = new FrameNode("DepthCloud");
             node.Transform.localRotation = new Quaternion(0, 0.7071f, 0.7071f, 0);
 
-            projector = ResourcePool.RentDisplay<DepthCloudResource>(node.Transform);
+            projector = ResourcePool.RentDisplay<DepthCloudDisplay>(node.Transform);
             projector.DepthImage = depthImageTexture;
             projector.ColorImage = colorImageTexture;
             Config = config ?? new DepthCloudConfiguration();

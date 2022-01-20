@@ -18,28 +18,17 @@ namespace Iviz.Displays
         [SerializeField] BoxCollider? boxCollider;
         [SerializeField] TMP_Text? text;
 
-        RoundedPlaneResource? background;
+        RoundedPlaneDisplay? background;
         uint? prevTextHash;
         Transform? mTransform;
 
         BoxCollider BoxCollider => boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
         TMP_Text Text => text.AssertNotNull(nameof(text));
 
-        public RoundedPlaneResource Background =>
-            background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneResource>(Transform);
+        public RoundedPlaneDisplay Background =>
+            background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Transform);
 
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
-        public Bounds? Bounds => BoxCollider.GetBounds();
-
-        public int Layer
-        {
-            set
-            {
-                gameObject.layer = value;
-                Text.gameObject.layer = value;
-                Background.Layer = value;
-            }
-        }
 
         public float Scale
         {
@@ -52,11 +41,6 @@ namespace Iviz.Displays
                                           (Transform.parent is { } parent
                                               ? parent.lossyScale.InvCoeff()
                                               : Vector3.one);
-        }
-
-        void Awake()
-        {
-            Layer = LayerType.IgnoreRaycast;
         }
 
         public Color Color

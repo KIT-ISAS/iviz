@@ -72,11 +72,6 @@ namespace Iviz.Displays
             }
         }
 
-        public int Layer
-        {
-            set => Billboard.gameObject.layer = value;
-        }
-
         public bool BillboardEnabled
         {
             set

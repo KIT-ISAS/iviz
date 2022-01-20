@@ -10,11 +10,11 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public sealed class ARTfFrame : MarkerResource, ISupportsTint
+    public sealed class ARTfFrame : MarkerDisplay, ISupportsTint
     {
         [SerializeField] TMP_Text text = null;
-        [SerializeField] AxisFrameResource axisFrame = null;
-        [SerializeField] MeshMarkerResource cylinder = null;
+        [SerializeField] AxisFrameDisplay axisFrame = null;
+        [SerializeField] MeshMarkerDisplay cylinder = null;
         [CanBeNull] FrameNode node;
         
         public string Caption

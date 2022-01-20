@@ -10,19 +10,19 @@ namespace Iviz.Displays.ARDialogs
     [RequireComponent(typeof(BoxCollider))]
     public sealed class SpringDisc : MonoBehaviour, IWidget, IWidgetWithColor, IWidgetCanBeMoved
     {
-        [SerializeField] MeshMarkerResource? anchor;
-        [SerializeField] MeshMarkerResource? link;
+        [SerializeField] MeshMarkerDisplay? anchor;
+        [SerializeField] MeshMarkerDisplay? link;
         [SerializeField] XRScreenDraggable? draggable;
-        [SerializeField] MeshMarkerResource? outerDisc;
-        [SerializeField] MeshMarkerResource? innerDisc;
-        [SerializeField] MeshMarkerResource? glow;
+        [SerializeField] MeshMarkerDisplay? outerDisc;
+        [SerializeField] MeshMarkerDisplay? innerDisc;
+        [SerializeField] MeshMarkerDisplay? glow;
         CancellationTokenSource? tokenSource;
 
-        MeshMarkerResource Anchor => anchor.AssertNotNull(nameof(anchor));
-        MeshMarkerResource Link => link.AssertNotNull(nameof(link));
-        MeshMarkerResource OuterDisc => outerDisc.AssertNotNull(nameof(outerDisc));
-        MeshMarkerResource InnerDisc => innerDisc.AssertNotNull(nameof(innerDisc));
-        MeshMarkerResource Glow => glow.AssertNotNull(nameof(glow));
+        MeshMarkerDisplay Anchor => anchor.AssertNotNull(nameof(anchor));
+        MeshMarkerDisplay Link => link.AssertNotNull(nameof(link));
+        MeshMarkerDisplay OuterDisc => outerDisc.AssertNotNull(nameof(outerDisc));
+        MeshMarkerDisplay InnerDisc => innerDisc.AssertNotNull(nameof(innerDisc));
+        MeshMarkerDisplay Glow => glow.AssertNotNull(nameof(glow));
         XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
 
         public event Action<Vector3>? Moved;
@@ -111,13 +111,6 @@ namespace Iviz.Displays.ARDialogs
             {
                 Moved?.Invoke(discPosition);
             }
-        }
-
-        public Bounds? Bounds => OuterDisc.Bounds;
-
-        public int Layer
-        {
-            set => gameObject.layer = value;
         }
 
         public void Suspend()

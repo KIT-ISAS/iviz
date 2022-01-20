@@ -55,7 +55,7 @@ namespace Iviz.Controllers.TF
             set
             {
                 name = value;
-                gameObject.name = value;
+                gameObject.name = $"[{value}]";
             }
         }
 

@@ -29,8 +29,8 @@ namespace Iviz.Controllers
         readonly PointCloudConfiguration config = new();
         readonly List<string> fieldNames = new() { "x", "y", "z" };
         readonly FrameNode node;
-        readonly PointListResource pointCloud;
-        readonly MeshListResource meshCloud;
+        readonly PointListDisplay pointCloud;
+        readonly MeshListDisplay meshCloud;
 
         float4[] pointBuffer = Array.Empty<float4>();
         int pointBufferLength;
@@ -212,9 +212,9 @@ namespace Iviz.Controllers
 
             Listener = new Listener<PointCloud2>(Config.Topic, Handler);
 
-            node = new FrameNode($"[{Config.Topic}]");
-            pointCloud = ResourcePool.RentDisplay<PointListResource>(node.Transform);
-            meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.Transform);
+            node = new FrameNode(Config.Topic);
+            pointCloud = ResourcePool.RentDisplay<PointListDisplay>(node.Transform);
+            meshCloud = ResourcePool.RentDisplay<MeshListDisplay>(node.Transform);
             meshCloud.EnableShadows = false;
         }
 
@@ -503,7 +503,7 @@ namespace Iviz.Controllers
 
         void GeneratePointBufferXYZ(PointCloud2 msg, int iOffset, int iType)
         {
-            const float maxPositionMagnitude = PointListResource.MaxPositionMagnitude;
+            const float maxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
 
             int rowStep = (int)msg.RowStep;
             int pointStep = (int)msg.PointStep;

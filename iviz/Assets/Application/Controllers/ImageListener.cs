@@ -215,7 +215,7 @@ namespace Iviz.Controllers
         public ImageListener(ImageConfiguration? config, string topic, string type)
         {
             imageTexture = new ImageTexture();
-            node = new FrameNode("[ImageNode]");
+            node = new FrameNode("ImageNode");
             billboard = ResourcePool.RentDisplay<ImageResource>();
             billboard.Texture = imageTexture;
             billboard.Transform.SetParentLocal(node.Transform);

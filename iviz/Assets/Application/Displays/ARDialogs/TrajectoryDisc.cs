@@ -21,8 +21,8 @@ namespace Iviz.App.ARDialogs
         readonly List<Vector3> positions = new();
         readonly NativeList<LineWithColor> lineBuffer = new();
 
-        [CanBeNull] LineResource lines;
-        [NotNull] LineResource Lines => (lines != null) ? lines : lines = ResourcePool.RentDisplay<LineResource>();
+        [CanBeNull] LineDisplay lines;
+        [NotNull] LineDisplay Lines => (lines != null) ? lines : lines = ResourcePool.RentDisplay<LineDisplay>();
 
         public event Action<Vector3[], float> Moved;
 
@@ -47,9 +47,9 @@ namespace Iviz.App.ARDialogs
             button.Clicked += SendTrajectory;
 
             Lines.ElementScale = 0.02f;
-            Lines.RenderType = LineResource.LineRenderType.AlwaysCapsule;
+            Lines.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
 
-            button.Icon = XRButtonIcon.Ok;
+            button.Icon = XRIcon.Ok;
             button.Visible = false;
             button.Transform.parent = Transform.parent;
             MainButtonCaption = mainButtonCaption;

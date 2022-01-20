@@ -16,19 +16,19 @@ namespace Iviz.Displays.ARDialogs
     {
         [SerializeField] CirclePlaneDraggable? planeCircle;
         [SerializeField] CircleFixedDistanceDraggable? fixedCircle;
-        [SerializeField] MeshMarkerResource? disc;
-        [SerializeField] MeshMarkerResource? ring;
-        [SerializeField] MeshMarkerResource? glow;
-        LineResource? lines;
+        [SerializeField] MeshMarkerDisplay? disc;
+        [SerializeField] MeshMarkerDisplay? ring;
+        [SerializeField] MeshMarkerDisplay? glow;
+        LineDisplay? lines;
 
         const int RingElements = 64;
         readonly LineWithColor[] lineBuffer = new LineWithColor[RingElements];
         float currentAngle;
 
-        MeshMarkerResource Glow => glow.AssertNotNull(nameof(glow));
-        MeshMarkerResource Disc => disc.AssertNotNull(nameof(disc));
-        MeshMarkerResource Ring => ring.AssertNotNull(nameof(ring));
-        LineResource Lines => lines != null ? lines : (lines = ResourcePool.RentDisplay<LineResource>(transform));
+        MeshMarkerDisplay Glow => glow.AssertNotNull(nameof(glow));
+        MeshMarkerDisplay Disc => disc.AssertNotNull(nameof(disc));
+        MeshMarkerDisplay Ring => ring.AssertNotNull(nameof(ring));
+        LineDisplay Lines => lines != null ? lines : (lines = ResourcePool.RentDisplay<LineDisplay>(transform));
 
         XRScreenDraggable Draggable => Settings.IsXR
             ? fixedCircle.AssertNotNull(nameof(fixedCircle))
@@ -72,8 +72,6 @@ namespace Iviz.Displays.ARDialogs
             set => Draggable.enabled = value;
         }
 
-        public Bounds? Bounds => Disc.Bounds;
-
         public event Action<float>? Moved;
 
         void Awake()
@@ -83,7 +81,7 @@ namespace Iviz.Displays.ARDialogs
             Glow.Visible = false;
 
             Lines.ElementScale = 0.02f;
-            Lines.RenderType = LineResource.LineRenderType.AlwaysCapsule;
+            Lines.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
 
             var draggable = Draggable;
 
@@ -157,11 +155,6 @@ namespace Iviz.Displays.ARDialogs
         {
             float diff = (angle2 - angle1 + Mathf.PI) % (2 * Mathf.PI) - Mathf.PI;
             return diff < -Mathf.PI ? diff + 2 * Mathf.PI : diff;
-        }
-
-        public int Layer
-        {
-            set => gameObject.layer = value;
         }
 
         public void SplitForRecycle()

@@ -1,8 +1,10 @@
 ﻿#nullable enable
 
+using System.Diagnostics.CodeAnalysis;
 using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.Interaction.Toolkit.UI;
 
 namespace Iviz.Controllers.XR
@@ -31,5 +33,23 @@ namespace Iviz.Controllers.XR
                 Object.Destroy(mask);
             }            
         }
+        
+        public static bool TryGetMeshManager([NotNullWhen(true)] out ARMeshManager? meshManager)
+        {
+            if (ARController.Instance != null)
+            {
+                meshManager = ARController.Instance.MeshManager;
+                return meshManager != null;
+            }
+
+            if (XRController.Instance != null)
+            {
+                meshManager = XRController.Instance.MeshManager;
+                return meshManager != null;
+            }
+
+            meshManager = null;
+            return false;
+        }            
     }
 }

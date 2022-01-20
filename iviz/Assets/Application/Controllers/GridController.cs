@@ -18,7 +18,7 @@ namespace Iviz.Controllers
     {
         readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;
-        readonly GridResource grid;
+        readonly GridDisplay grid;
         readonly GridConfiguration config = new();
 
         public GridConfiguration Config
@@ -138,7 +138,7 @@ namespace Iviz.Controllers
 
         public GridController(GridConfiguration? config)
         {
-            grid = ResourcePool.RentDisplay<GridResource>();
+            grid = ResourcePool.RentDisplay<GridDisplay>();
             grid.name = "Grid";
             grid.Layer = LayerType.Collider;
 

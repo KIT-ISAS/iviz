@@ -22,7 +22,7 @@ namespace Iviz.App.ARDialogs
         [SerializeField] XRButton cancelButton = null;
         [SerializeField] Transform buttonPivotTransform = null;
         [SerializeField] Transform pivotTransform = null;
-        LineResource lines;
+        LineDisplay lines;
 
         Vector2 targetScale;
         ModeType mode;
@@ -95,7 +95,7 @@ namespace Iviz.App.ARDialogs
 
             //Scale = 10;
             
-            lines = ResourcePool.RentDisplay<LineResource>(pivotTransform);
+            lines = ResourcePool.RentDisplay<LineDisplay>(pivotTransform);
             poly.EmissiveColor = poly.Color.WithAlpha(1);
             lines.ElementScale = 0.05f;
             disc.TargetTransform = Transform;
@@ -106,11 +106,11 @@ namespace Iviz.App.ARDialogs
             corner.StartDragging += () => scaling = true;
             corner.EndDragging += () => scaling = false;
 
-            okButton.Icon = XRButtonIcon.Ok;
+            okButton.Icon = XRIcon.Ok;
             MainButtonCaption = MainButtonCaption;
 
             cancelButton.Caption = "Cancel";
-            cancelButton.Icon = XRButtonIcon.Cross;
+            cancelButton.Icon = XRIcon.Cross;
 
             okButton.Clicked += () =>
             {

@@ -16,15 +16,15 @@ namespace Iviz.Displays
     {
         const int TrailTimeWindowInMs = 5000;
 
-        readonly AxisFrameResource axis;
-        TextMarkerResource? label;
+        readonly AxisFrameDisplay axis;
+        TextMarkerDisplay? label;
         LineConnector? parentConnector;
-        TrailResource? trail;
+        TrailDisplay? trail;
         bool visible = true;
         float labelSize = 1.0f;
         bool forceInvisible;
 
-        TrailResource Trail
+        TrailDisplay Trail
         {
             get
             {
@@ -33,7 +33,7 @@ namespace Iviz.Displays
                     return trail;
                 }
 
-                trail = ResourcePool.RentDisplay<TrailResource>(TfListener.UnityFrameTransform);
+                trail = ResourcePool.RentDisplay<TrailDisplay>(TfListener.UnityFrameTransform);
                 trail.TimeWindowInMs = TrailTimeWindowInMs;
                 trail.Color = Color.yellow;
                 trail.Name = $"[Trail:{Id}]";
@@ -41,7 +41,7 @@ namespace Iviz.Displays
             }
         }
 
-        TextMarkerResource Label
+        TextMarkerDisplay Label
         {
             get
             {
@@ -50,7 +50,7 @@ namespace Iviz.Displays
                     return label;
                 }
 
-                label = ResourcePool.RentDisplay<TextMarkerResource>(Transform);
+                label = ResourcePool.RentDisplay<TextMarkerDisplay>(Transform);
                 label.gameObject.name = "[Label]";
                 label.Text = Id;
                 label.ElementSize = 0.5f * LabelSize * FrameSize;
@@ -76,7 +76,6 @@ namespace Iviz.Displays
 
                 parentConnector.name = "[Connector]";
                 parentConnector.LineWidth = FrameSize / 20;
-                parentConnector.Layer = LayerType.IgnoreRaycast;
                 parentConnector.gameObject.SetActive(false);
                 return parentConnector;
             }
@@ -178,7 +177,7 @@ namespace Iviz.Displays
 
         public TfFrameDisplay(string id) : base(id)
         {
-            axis = ResourcePool.RentDisplay<AxisFrameResource>(Transform);
+            axis = ResourcePool.RentDisplay<AxisFrameDisplay>(Transform);
             axis.EnableCollider = true;
             axis.Layer = LayerType.IgnoreRaycast;
             axis.gameObject.layer = LayerType.TfAxis;

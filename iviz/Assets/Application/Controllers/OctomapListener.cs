@@ -23,7 +23,7 @@ namespace Iviz.Controllers
     {
         static readonly Vector2 WhiteBounds = new Vector2(-10, 1);
 
-        readonly MeshListResource resource;
+        readonly MeshListDisplay resource;
         readonly FrameNode node;
         [CanBeNull] OctreeHelper helper;
         [CanBeNull] Octomap lastMsg;
@@ -100,7 +100,7 @@ namespace Iviz.Controllers
         {
             node = FrameNode.Instantiate("Octomap Node");
 
-            resource = ResourcePool.RentDisplay<MeshListResource>(node.Transform);
+            resource = ResourcePool.RentDisplay<MeshListDisplay>(node.Transform);
             resource.UseIntensityForAllScales = true;
             resource.MeshResource = Resource.Displays.Cube;
             resource.UseColormap = false;

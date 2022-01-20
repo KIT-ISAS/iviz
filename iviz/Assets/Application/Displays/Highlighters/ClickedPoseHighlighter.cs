@@ -14,7 +14,7 @@ namespace Iviz.Displays.Highlighters
     public sealed class ClickedPoseHighlighter : IAnimatable
     {
         readonly FrameNode node;
-        readonly MeshMarkerResource reticle;
+        readonly MeshMarkerDisplay reticle;
         readonly Tooltip tooltip;
 
         public CancellationToken Token => default;
@@ -27,10 +27,10 @@ namespace Iviz.Displays.Highlighters
 
             Duration = duration;
             
-            node = new FrameNode("[Clicked Pose Highlighter]");
+            node = new FrameNode("Clicked Pose Highlighter");
             node.Transform.SetPose(unityPose);
 
-            reticle = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Reticle, node.Transform);
+            reticle = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Reticle, node.Transform);
             reticle.EnableShadows = false;
             reticle.Color = Color.white.WithAlpha(0.3f);
             reticle.EmissiveColor = Color.white;
@@ -43,7 +43,6 @@ namespace Iviz.Displays.Highlighters
             tooltip = ResourcePool.RentDisplay<Tooltip>(node.Transform);
             tooltip.CaptionColor = Color.white;
             tooltip.Color = Resource.Colors.TooltipBackground;
-            tooltip.Layer = LayerType.IgnoreRaycast;
             tooltip.Scale = labelSize;
             tooltip.Transform.localPosition = 2f * (frameSize * 0.3f + labelSize) * Vector3.up;
             tooltip.PointToCamera();

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public sealed class PolyGlowDisplay : MeshMarkerResource
+    public sealed class PolyGlowDisplay : MeshMarkerDisplay
     {
         static Mesh squareMesh;
         [NotNull] static Mesh SquareMesh => squareMesh != null ? squareMesh : (squareMesh = CreateMesh(4));

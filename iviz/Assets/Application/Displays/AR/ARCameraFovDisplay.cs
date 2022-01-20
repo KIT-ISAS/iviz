@@ -10,9 +10,9 @@ using UnityEngine.XR.ARSubsystems;
 
 namespace Iviz.Displays
 {
-    public sealed class ARCameraFovDisplay : MeshMarkerResource
+    public sealed class ARCameraFovDisplay : MeshMarkerDisplay
     {
-        [SerializeField] LineResource? resource;
+        [SerializeField] LineDisplay? resource;
         [SerializeField] GameObject? arCamera;
         Transform? arCameraTransform;
         bool isSetup;
@@ -20,8 +20,8 @@ namespace Iviz.Displays
 
         GameObject ArCamera => arCamera.AssertNotNull(nameof(arCamera));
 
-        LineResource Resource =>
-            resource != null ? resource : (resource = ResourcePool.RentDisplay<LineResource>(Transform));
+        LineDisplay Resource =>
+            resource != null ? resource : (resource = ResourcePool.RentDisplay<LineDisplay>(Transform));
 
         Transform ArCameraTransform =>
             arCameraTransform != null ? arCameraTransform : (arCameraTransform = ArCamera.transform);

@@ -10,17 +10,17 @@ namespace Iviz.Displays.ARDialogs
     [RequireComponent(typeof(BoxCollider))]
     public sealed class SpringDisc3D : MonoBehaviour, IWidget, IWidgetWithColor, IWidgetCanBeMoved
     {
-        [SerializeField] MeshMarkerResource? anchor;
-        [SerializeField] MeshMarkerResource? link;
+        [SerializeField] MeshMarkerDisplay? anchor;
+        [SerializeField] MeshMarkerDisplay? link;
         [SerializeField] XRScreenDraggable? draggable;
-        [SerializeField] MeshMarkerResource? disc;
-        [SerializeField] MeshMarkerResource? glow;
+        [SerializeField] MeshMarkerDisplay? disc;
+        [SerializeField] MeshMarkerDisplay? glow;
         CancellationTokenSource? tokenSource;
         
-        MeshMarkerResource Anchor => anchor.AssertNotNull(nameof(anchor));
-        MeshMarkerResource Link => link.AssertNotNull(nameof(link));
-        MeshMarkerResource Disc => disc.AssertNotNull(nameof(disc));
-        MeshMarkerResource Glow => glow.AssertNotNull(nameof(glow));
+        MeshMarkerDisplay Anchor => anchor.AssertNotNull(nameof(anchor));
+        MeshMarkerDisplay Link => link.AssertNotNull(nameof(link));
+        MeshMarkerDisplay Disc => disc.AssertNotNull(nameof(disc));
+        MeshMarkerDisplay Glow => glow.AssertNotNull(nameof(glow));
         XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         
         Color color = new(0, 0.6f, 1f);
@@ -51,13 +51,6 @@ namespace Iviz.Displays.ARDialogs
                 Anchor.Color = value;
             }
         }    
-        
-        public Bounds? Bounds => Disc.Bounds;
-
-        public int Layer
-        {
-            set => gameObject.layer = value;
-        }
         
         public bool Interactable
         {

@@ -14,7 +14,7 @@ namespace Iviz.App.ARDialogs
         [SerializeField] PlaneDraggable disc;
         [SerializeField] Transform anchor;
         [SerializeField] float linkWidth = 0.02f;
-        LineResource line;
+        LineDisplay line;
         Tooltip tooltipX;
         Tooltip tooltipY;
         
@@ -38,14 +38,14 @@ namespace Iviz.App.ARDialogs
         protected override void Awake()
         {
             base.Awake();
-            line = ResourcePool.RentDisplay<LineResource>(Transform);
+            line = ResourcePool.RentDisplay<LineDisplay>(Transform);
             line.ElementScale = linkWidth;
             line.Visible = false;
 
             lineBuffer.Add(new LineWithColor());
             lineBuffer.Add(new LineWithColor());
 
-            button.Icon = XRButtonIcon.Ok;
+            button.Icon = XRIcon.Ok;
             button.Caption = "Send!";
             button.Visible = false;
             button.Transform.SetParentLocal(Transform);

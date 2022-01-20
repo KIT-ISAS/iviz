@@ -189,11 +189,6 @@ namespace Iviz.Displays
             }
         }
 
-        int IDisplay.Layer
-        {
-            set { }
-        }
-
         void IDisplay.Suspend()
         {
             control?.Dispose();
@@ -222,7 +217,6 @@ namespace Iviz.Displays
         Transform IHasBounds.BoundsTransform => childTransform.AssertNotNull(nameof(childTransform));
         string? IHasBounds.Caption => null;
         bool IHasBounds.AcceptsHighlighter => true;
-        Bounds? IDisplay.Bounds => bounds;
     }
 
     [Flags]

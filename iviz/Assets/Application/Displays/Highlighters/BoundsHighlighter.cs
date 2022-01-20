@@ -50,7 +50,6 @@ namespace Iviz.Displays.Highlighters
                 tooltip = ResourcePool.RentDisplay<Tooltip>();
                 tooltip.CaptionColor = Color.white;
                 tooltip.Color = Resource.Colors.TooltipBackground;
-                tooltip.Layer = LayerType.IgnoreRaycast;
                 tooltip.Caption = caption;
             }
 

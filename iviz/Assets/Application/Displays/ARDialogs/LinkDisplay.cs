@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public sealed class LinkDisplay : MeshMarkerResource
+    public sealed class LinkDisplay : MeshMarkerDisplay
     {
         static Mesh? baseLinkMesh;
         static Mesh BaseLinkMesh => baseLinkMesh != null ? baseLinkMesh : (baseLinkMesh = CreateMesh());

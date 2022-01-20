@@ -14,16 +14,20 @@ namespace Iviz.Displays
         /// <summary>
         /// Bounds of the display in local coordinates, or null if the display is empty.
         /// </summary>
-        Bounds? Bounds { get; }
-        /// <summary>
-        /// Unity layer of the display.
-        /// </summary>
-        int Layer { set; }
+        Bounds? Bounds => null;
         /// <summary>
         /// Tells the display that it is about to be sent to the Resource Pool, and that it should undo
         /// any changes that would prevent it from being reused.
         /// </summary>
         void Suspend();
+    }
+
+    public interface ISupportsLayer
+    {
+        /// <summary>
+        /// Unity layer of the display.
+        /// </summary>
+        int Layer { set; }
     }
     
     /// <summary>

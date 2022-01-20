@@ -10,7 +10,7 @@ namespace Iviz.Displays.Highlighters
 {
     public sealed class RotationWrapperBoundsControl : WrapperBoundsControl
     {
-        readonly MeshMarkerResource[] markers;
+        readonly MeshMarkerDisplay[] markers;
         readonly GameObject node;
         readonly BoxCollider collider;
         readonly RotationDraggable draggable;
@@ -18,7 +18,7 @@ namespace Iviz.Displays.Highlighters
         float sizeY;
         float markerScale;
 
-        MeshMarkerResource? ring;
+        MeshMarkerDisplay? ring;
 
         public override bool Interactable
         {
@@ -100,10 +100,10 @@ namespace Iviz.Displays.Highlighters
 
             markers = new[]
             {
-                ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cylinder, nodeTransform),
-                ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cylinder, nodeTransform),
-                ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cylinder, nodeTransform),
-                ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Cylinder, nodeTransform),
+                ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cylinder, nodeTransform),
+                ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cylinder, nodeTransform),
+                ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cylinder, nodeTransform),
+                ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cylinder, nodeTransform),
             };
 
             foreach (var marker in markers)
@@ -164,7 +164,7 @@ namespace Iviz.Displays.Highlighters
 
         void RentRing(Transform nodeTransform)
         {
-            ring = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Ring, nodeTransform);
+            ring = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Ring, nodeTransform);
             ring.Layer = LayerType.IgnoreRaycast;
 
             float radius = Mathf.Sqrt(sizeX * sizeX + sizeY * sizeY) * 1.1f;

@@ -49,7 +49,7 @@ namespace Iviz.Controllers.XR
         static readonly InputFeatureUsage HandDataBase = (InputFeatureUsage)HandData;
 
         readonly List<Bone> cachedBoneList = new();
-        readonly MeshMarkerResource?[] fingerTips = new MeshMarkerResource?[5];
+        readonly MeshMarkerDisplay?[] fingerTips = new MeshMarkerDisplay?[5];
         readonly HandState cachedHandState = new();
 
         [SerializeField] HandType handType;
@@ -257,9 +257,9 @@ namespace Iviz.Controllers.XR
             index.Transform.localScale = scale;
         }
 
-        MeshMarkerResource HandleBoneMesh(MeshMarkerResource? resource, in Pose pose)
+        MeshMarkerDisplay HandleBoneMesh(MeshMarkerDisplay? resource, in Pose pose)
         {
-            MeshMarkerResource result;
+            MeshMarkerDisplay result;
             if (resource == null)
             {
                 result = CreateBoneObject();
@@ -275,9 +275,9 @@ namespace Iviz.Controllers.XR
             return result;
         }
 
-        MeshMarkerResource CreateBoneObject()
+        MeshMarkerDisplay CreateBoneObject()
         {
-            var boneObject = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Reticle, RootTransform);
+            var boneObject = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Reticle, RootTransform);
             boneObject.transform.localScale = 0.005f * Vector3.one;
             boneObject.Color = Color.white.WithAlpha(0.3f);
             boneObject.EmissiveColor = Color.blue;

@@ -11,17 +11,17 @@ namespace Iviz.Controllers.XR
 {
     public class PalmCompass : MonoBehaviour, IDisplay, IRecyclable
     {
-        [SerializeField] MeshMarkerResource? ring;
-        AxisFrameResource? frame;
+        [SerializeField] MeshMarkerDisplay? ring;
+        AxisFrameDisplay? frame;
         Tooltip? tooltip;
 
         Transform? mTransform;
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
-        MeshMarkerResource Ring => ring.AssertNotNull(nameof(ring));
+        MeshMarkerDisplay Ring => ring.AssertNotNull(nameof(ring));
 
-        AxisFrameResource Frame =>
-            frame != null ? frame : (frame = ResourcePool.RentDisplay<AxisFrameResource>(Transform));
+        AxisFrameDisplay Frame =>
+            frame != null ? frame : (frame = ResourcePool.RentDisplay<AxisFrameDisplay>(Transform));
 
         Tooltip Tooltip => tooltip != null ? tooltip : (tooltip = ResourcePool.RentDisplay<Tooltip>(Transform));
 
@@ -34,18 +34,6 @@ namespace Iviz.Controllers.XR
             Tooltip.Transform.localScale = Vector3.one * 0.02f;
             Tooltip.Color = Resource.Colors.TooltipBackground;
             Tooltip.Caption = "";
-        }
-
-        public Bounds? Bounds => Frame.Bounds;
-
-        public int Layer
-        {
-            set
-            {
-                Frame.Layer = value;
-                Tooltip.Layer = value;
-                Ring.Layer = value;
-            }
         }
 
         void LateUpdate()

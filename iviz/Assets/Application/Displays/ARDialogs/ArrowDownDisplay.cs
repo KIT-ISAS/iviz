@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public sealed class ArrowDownDisplay : MeshMarkerResource
+    public sealed class ArrowDownDisplay : MeshMarkerDisplay
     {
         static Mesh baseMesh;
         float? currentAngle;

@@ -90,10 +90,10 @@ namespace Iviz.App
         float distancePointerAndAlt;
         float lastAltDistancePointerAndAlt;
 
-        Leash? leash;
+        LeashDisplay? leash;
         Transform? mTransform;
 
-        Leash Leash => leash != null ? leash : (leash = ResourcePool.RentDisplay<Leash>());
+        LeashDisplay Leash => leash != null ? leash : (leash = ResourcePool.RentDisplay<LeashDisplay>());
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         bool IsLookAtAnimationRunning => lookAtTokenSource is { IsCancellationRequested: false };
         Quaternion OrbitRotation => Quaternion.Euler(CameraPitch, CameraYaw, CameraRoll);
@@ -108,9 +108,25 @@ namespace Iviz.App
                     return;
                 }
 
-                draggedObject?.OnEndDragging();
+                try
+                {
+                    draggedObject?.OnEndDragging();
+                }
+                catch (Exception e)
+                {
+                    RosLogger.Error($"{this}: Error during {nameof(IScreenDraggable.OnEndDragging)}", e);
+                }
+
                 draggedObject = value;
-                draggedObject?.OnStartDragging();
+                
+                try
+                {
+                    draggedObject?.OnStartDragging();
+                }
+                catch (Exception e)
+                {
+                    RosLogger.Error($"{this}: Error during {nameof(IScreenDraggable.OnStartDragging)}", e);
+                }
 
                 Leash.Visible = draggedObject != null;
             }

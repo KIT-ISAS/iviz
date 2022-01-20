@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XRDialogs
 {
-    public class XRNotification : DisplayWrapperResource
+    public class XRNotification : DisplayWrapper
     {
         public enum LevelType
         {
@@ -19,7 +19,7 @@ namespace Iviz.Displays.XRDialogs
         }
 
         [SerializeField] Tooltip? tooltip;
-        RoundedPlaneResource? background;
+        RoundedPlaneDisplay? background;
 
         string title = "";
         string text = "";

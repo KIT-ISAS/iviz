@@ -17,7 +17,7 @@ namespace Iviz.Controllers
     public sealed class PathListener : ListenerController
     {
         readonly FrameNode node;
-        readonly LineResource resource;
+        readonly LineDisplay resource;
 
         public override TfFrame Frame => node.Parent;
 
@@ -119,7 +119,7 @@ namespace Iviz.Controllers
         public PathListener()
         {
             node = FrameNode.Instantiate("PathNode");
-            resource = ResourcePool.Rent<LineResource>(Resource.Displays.Line, node.Transform);
+            resource = ResourcePool.Rent<LineDisplay>(Resource.Displays.Line, node.Transform);
             resource.ElementScale = 0.005f;
             resource.Tint = Color.white;
             Config = new PathConfiguration();

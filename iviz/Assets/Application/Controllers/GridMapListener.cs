@@ -24,7 +24,7 @@ namespace Iviz.Controllers
 
         readonly FrameNode node;
         readonly FrameNode link;
-        readonly GridMapResource resource;
+        readonly GridMapDisplay resource;
 
         int numCellsX;
         int numCellsY;
@@ -160,10 +160,10 @@ namespace Iviz.Controllers
         {
             FieldNames = fieldNames.AsReadOnly();
 
-            node = new FrameNode("[GridMapNode]");
-            link = new FrameNode("[GridMapLink]");
+            node = new FrameNode("GridMapNode");
+            link = new FrameNode("GridMapLink");
             link.Transform.parent = node.Transform;
-            resource = ResourcePool.Rent<GridMapResource>(Resource.Displays.GridMap, link.Transform);
+            resource = ResourcePool.Rent<GridMapDisplay>(Resource.Displays.GridMap, link.Transform);
 
             Config = config ?? new GridMapConfiguration
             {

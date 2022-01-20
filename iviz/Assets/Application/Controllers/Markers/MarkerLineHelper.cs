@@ -74,7 +74,7 @@ namespace Iviz.Controllers.Markers
             {
                 c0 = c1;
                 lPoints[i].Ros2Unity(colorAsFloat, out c1);
-                if (LineResource.IsElementValid(f))
+                if (LineDisplay.IsElementValid(f))
                 {
                     lineBuffer.AddUnsafe(f);
                 }
@@ -110,7 +110,7 @@ namespace Iviz.Controllers.Markers
                 float w = UnityUtils.AsFloat(lColors[i].ToUnityColor32());
                 lPoints[i].Ros2Unity(w, out c1);
 
-                if (LineResource.IsElementValid(f))
+                if (LineDisplay.IsElementValid(f))
                 {
                     lineBuffer.AddUnsafe(f);
                 }
@@ -147,7 +147,7 @@ namespace Iviz.Controllers.Markers
                 float w = UnityUtils.AsFloat(color * lColors[i].ToUnityColor());
                 lPoints[i].Ros2Unity(w, out c1);
 
-                if (LineResource.IsElementValid(f))
+                if (LineDisplay.IsElementValid(f))
                 {
                     lineBuffer.AddUnsafe(f);
                 }
@@ -191,7 +191,7 @@ namespace Iviz.Controllers.Markers
             {
                 lPoints[i + 0].Ros2Unity(colorAsFloat, out c0);
                 lPoints[i + 1].Ros2Unity(colorAsFloat, out c1);
-                if (LineResource.IsElementValid(f))
+                if (LineDisplay.IsElementValid(f))
                 {
                     lineBuffer.AddUnsafe(f);
                 }
@@ -219,7 +219,7 @@ namespace Iviz.Controllers.Markers
                 float w1 = UnityUtils.AsFloat(lColors[i + 1].ToUnityColor32());
                 lPoints[i + 1].Ros2Unity(w1, out c1);
 
-                if (LineResource.IsElementValid(f))
+                if (LineDisplay.IsElementValid(f))
                 {
                     lineBuffer.AddUnsafe(f);
                 }
@@ -248,7 +248,7 @@ namespace Iviz.Controllers.Markers
                 float w1 = UnityUtils.AsFloat(color * lColors[i + 1].ToUnityColor());
                 lPoints[i + 1].Ros2Unity(w1, out c1);
 
-                if (LineResource.IsElementValid(f))
+                if (LineDisplay.IsElementValid(f))
                 {
                     lineBuffer.AddUnsafe(f);
                 }

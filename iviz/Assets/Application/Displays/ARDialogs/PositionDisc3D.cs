@@ -15,7 +15,7 @@ namespace Iviz.App.ARDialogs
         [SerializeField] PlaneDraggable disc = null;
         [SerializeField] Transform anchor = null;
         [SerializeField] float linkWidth = 0.02f;
-        LineResource line;
+        LineDisplay line;
         bool dragBack;
 
         readonly NativeList<LineWithColor> lineBuffer = new();
@@ -36,7 +36,7 @@ namespace Iviz.App.ARDialogs
         protected override void Awake()
         {
             base.Awake();
-            line = ResourcePool.RentDisplay<LineResource>(transform);
+            line = ResourcePool.RentDisplay<LineDisplay>(transform);
             line.ElementScale = linkWidth;
             line.Visible = false;
 
@@ -44,7 +44,7 @@ namespace Iviz.App.ARDialogs
             lineBuffer.Add(new LineWithColor());
             lineBuffer.Add(new LineWithColor());
 
-            button.Icon = XRButtonIcon.Ok;
+            button.Icon = XRIcon.Ok;
             button.Visible = false;
             button.Transform.SetParentLocal(Transform);
             MainButtonCaption = mainButtonCaption;

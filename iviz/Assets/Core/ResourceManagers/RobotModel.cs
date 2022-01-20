@@ -29,14 +29,14 @@ namespace Iviz.Displays
     {
         public const string ColliderTag = "RobotCollider";
 
-        readonly List<MeshMarkerResource> displays = new();
+        readonly List<MeshMarkerDisplay> displays = new();
         readonly Dictionary<string, GameObject> jointObjects = new();
         readonly Dictionary<string, Joint> joints = new();
         readonly Dictionary<string, GameObject> linkObjects = new();
         readonly Dictionary<GameObject, GameObject> linkParentObjects = new();
         readonly Dictionary<string, string> linkParents = new();
         readonly List<(GameObject, ResourceKey<GameObject>)> objectResources = new();
-        readonly Dictionary<MeshMarkerResource, Color> originalColors = new();
+        readonly Dictionary<MeshMarkerDisplay, Color> originalColors = new();
 
         readonly Robot robot;
         readonly CancellationTokenSource runningTs = new();
@@ -474,11 +474,11 @@ namespace Iviz.Displays
                 var color = resolvedMaterial?.Color?.ToColor() ?? Color.white;
 
                 var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
-                var resources = new List<MeshMarkerResource>();
+                var resources = new List<MeshMarkerDisplay>();
 
                 foreach (var renderer in renderers)
                 {
-                    var meshResource = renderer.gameObject.GetComponent<MeshMarkerResource>();
+                    var meshResource = renderer.gameObject.GetComponent<MeshMarkerDisplay>();
                     if (meshResource == null)
                     {
                         continue;
@@ -493,7 +493,7 @@ namespace Iviz.Displays
             }
             else
             {
-                var resource = resourceObject.AddComponent<MeshMarkerResource>();
+                var resource = resourceObject.AddComponent<MeshMarkerDisplay>();
                 displays.Add(resource);
 
                 var resolvedMaterial = GetMaterialForVisual(material, rootMaterials);

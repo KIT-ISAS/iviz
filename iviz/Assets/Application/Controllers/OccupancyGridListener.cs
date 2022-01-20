@@ -25,9 +25,9 @@ namespace Iviz.Controllers
 
         readonly FrameNode cubeNode;
         readonly FrameNode textureNode;
-        readonly List<OccupancyGridTextureResource> textureTiles = new();
+        readonly List<OccupancyGridTextureDisplay> textureTiles = new();
 
-        OccupancyGridResource[] gridTiles = Array.Empty<OccupancyGridResource>();
+        OccupancyGridDisplay[] gridTiles = Array.Empty<OccupancyGridDisplay>();
         
         int numCellsX;
         int numCellsY;
@@ -308,10 +308,10 @@ namespace Iviz.Controllers
 
             if (gridTiles.Length != 16)
             {
-                gridTiles = new OccupancyGridResource[16];
+                gridTiles = new OccupancyGridDisplay[16];
                 foreach (int j in ..16)
                 {
-                    var resource = ResourcePool.Rent<OccupancyGridResource>(
+                    var resource = ResourcePool.Rent<OccupancyGridDisplay>(
                         Resource.Displays.OccupancyGridResource,
                         cubeNode.Transform);
                     resource.gameObject.name = $"OccupancyGridResource-{j.ToString()}";
@@ -332,7 +332,7 @@ namespace Iviz.Controllers
                     grid.NumCellsY = numCellsY;
                     grid.CellSize = cellSize;
 
-                    var rect = new OccupancyGridResource.Rect
+                    var rect = new OccupancyGridDisplay.Rect
                     (
                         xMin: u * numCellsX / 4,
                         xMax: (u + 1) * numCellsX / 4,
@@ -373,7 +373,7 @@ namespace Iviz.Controllers
                 {
                     foreach (int j in textureTiles.Count..tileTotalSize)
                     {
-                        var resource = ResourcePool.RentDisplay<OccupancyGridTextureResource>(textureNode.Transform);
+                        var resource = ResourcePool.RentDisplay<OccupancyGridTextureDisplay>(textureNode.Transform);
                         resource.gameObject.name = $"OccupancyGridTextureResource-{j.ToString()}";
                         resource.Visible = Visible;
                         resource.Colormap = Colormap;
@@ -403,7 +403,7 @@ namespace Iviz.Controllers
                     int yMin = v * MaxTileSize;
                     int yMax = Math.Min(yMin + MaxTileSize, numCellsY);
 
-                    var rect = new OccupancyGridResource.Rect(xMin, xMax, yMin, yMax);
+                    var rect = new OccupancyGridDisplay.Rect(xMin, xMax, yMin, yMax);
 
                     var texture = textureTiles[i++];
                     tasks.Add(Task.Run(() =>

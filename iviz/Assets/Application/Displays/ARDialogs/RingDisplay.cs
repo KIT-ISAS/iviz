@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.App.ARDialogs
 {
-    public sealed class RingDisplay : MeshMarkerResource
+    public sealed class RingDisplay : MeshMarkerDisplay
     {
         static Mesh baseMesh;
         [NotNull] static Mesh BaseMesh => baseMesh != null ? baseMesh : (baseMesh = CreateMesh(0.85f, 1.0f));

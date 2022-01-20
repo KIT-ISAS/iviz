@@ -14,7 +14,7 @@ namespace Iviz.Displays.Highlighters
 {
     public sealed class TfFrameHighlighter : IAnimatable
     {
-        readonly AxisFrameResource axisResource;
+        readonly AxisFrameDisplay axisResource;
         readonly Tooltip tooltip;
         readonly FrameNode node;
 
@@ -25,7 +25,7 @@ namespace Iviz.Displays.Highlighters
         {
             node = new FrameNode("Frame Highlighter", frame);
 
-            axisResource = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
+            axisResource = ResourcePool.RentDisplay<AxisFrameDisplay>(node.Transform);
             axisResource.EnableShadows = false;
             axisResource.Emissive = 1;
             axisResource.OverrideMaterial(Resource.Materials.TransparentLitAlwaysVisible.Object);

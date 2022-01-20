@@ -69,7 +69,7 @@ namespace Iviz.Displays
         static void CreateMeshListResource(float z)
         {
             {
-                var resource = ResourcePool.RentDisplay<MeshListResource>();
+                var resource = ResourcePool.RentDisplay<MeshListDisplay>();
                 using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
                 {
                     for (int i = 0; i < 40; i++)
@@ -87,7 +87,7 @@ namespace Iviz.Displays
             }
 
             {
-                var resource = ResourcePool.RentDisplay<MeshListResource>();
+                var resource = ResourcePool.RentDisplay<MeshListDisplay>();
                 using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
                 {
                     for (int i = 0; i < 40; i++)
@@ -105,7 +105,7 @@ namespace Iviz.Displays
             }
 
             {
-                var resource = ResourcePool.RentDisplay<MeshListResource>();
+                var resource = ResourcePool.RentDisplay<MeshListDisplay>();
                 using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
                 {
                     for (int i = 0; i < 40; i++)
@@ -123,7 +123,7 @@ namespace Iviz.Displays
             }
 
             {
-                var resource = ResourcePool.RentDisplay<MeshListResource>();
+                var resource = ResourcePool.RentDisplay<MeshListDisplay>();
                 using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
                 {
                     for (int i = 0; i < 40; i++)
@@ -140,7 +140,7 @@ namespace Iviz.Displays
             }
 
             {
-                var resource = ResourcePool.RentDisplay<MeshListResource>();
+                var resource = ResourcePool.RentDisplay<MeshListDisplay>();
                 using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
                 {
                     for (int i = 0; i < 40; i++)
@@ -162,7 +162,7 @@ namespace Iviz.Displays
         static void CreateLineResourceShort(float z)
         {
             {
-                LineResource resource = ResourcePool.RentDisplay<LineResource>();
+                LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
                 NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
                 for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
@@ -176,7 +176,7 @@ namespace Iviz.Displays
             }
 
             {
-                LineResource resource = ResourcePool.RentDisplay<LineResource>();
+                LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
                 NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
                 for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
@@ -192,7 +192,7 @@ namespace Iviz.Displays
             }
 
             {
-                LineResource resource = ResourcePool.RentDisplay<LineResource>();
+                LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
                 NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
                 for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
@@ -206,7 +206,7 @@ namespace Iviz.Displays
             }
 
             {
-                LineResource resource = ResourcePool.RentDisplay<LineResource>();
+                LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
                 NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
                 for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
@@ -228,7 +228,7 @@ namespace Iviz.Displays
         {
             using (NativeList<LineWithColor> lines = new NativeList<LineWithColor>())
             {
-                LineResource resource = ResourcePool.RentDisplay<LineResource>();
+                LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
 
                 for (int i = 0; i < MaxSegmentsForMesh + 10; i++)
                 {
@@ -243,7 +243,7 @@ namespace Iviz.Displays
 
             using (NativeList<LineWithColor> lines = new NativeList<LineWithColor>())
             {
-                LineResource resource = ResourcePool.RentDisplay<LineResource>();
+                LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
                 for (int i = 0; i < MaxSegmentsForMesh + 10; i++)
                 {
                     lines.Add(new LineWithColor(
@@ -259,7 +259,7 @@ namespace Iviz.Displays
 
             using (NativeList<LineWithColor> lines = new NativeList<LineWithColor>())
             {
-                LineResource resource = ResourcePool.RentDisplay<LineResource>();
+                LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
                 for (int i = 0; i < MaxSegmentsForMesh + 10; i++)
                 {
                     lines.Add(new LineWithColor(
@@ -273,7 +273,7 @@ namespace Iviz.Displays
 
             using (NativeList<LineWithColor> lines = new NativeList<LineWithColor>())
             {
-                LineResource resource = ResourcePool.RentDisplay<LineResource>();
+                LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
                 for (int i = 0; i < MaxSegmentsForMesh + 10; i++)
                 {
                     lines.Add(new LineWithColor(
@@ -293,7 +293,7 @@ namespace Iviz.Displays
         {
             using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
             {
-                var resource = ResourcePool.RentDisplay<PointListResource>();
+                var resource = ResourcePool.RentDisplay<PointListDisplay>();
                 for (int i = 0; i < 40; i++)
                 {
                     points.Add(new PointWithColor(new Vector3(i, 0, z + 1), Color.magenta));
@@ -305,7 +305,7 @@ namespace Iviz.Displays
 
             using (var points = new NativeList<PointWithColor>())
             {
-                var resource = ResourcePool.RentDisplay<PointListResource>();
+                var resource = ResourcePool.RentDisplay<PointListDisplay>();
 
                 for (int i = 0; i < 40; i++)
                 {

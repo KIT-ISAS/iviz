@@ -51,7 +51,7 @@ namespace Iviz.Controllers.Markers
 
             for (int i = 0; i < points.Length; i++)
             {
-                if (!PointListResource.IsElementValid(points[i]))
+                if (!PointListDisplay.IsElementValid(points[i]))
                 {
                     continue;
                 }
@@ -68,7 +68,7 @@ namespace Iviz.Controllers.Markers
             
             for (int i = 0; i < points.Length; i++)
             {
-                if (!PointListResource.IsElementValid(points[i]))
+                if (!PointListDisplay.IsElementValid(points[i]))
                 {
                     continue;
                 }
@@ -87,7 +87,7 @@ namespace Iviz.Controllers.Markers
             
             for (int i = 0; i < points.Length; i++)
             {
-                if (!PointListResource.IsElementValid(points[i]))
+                if (!PointListDisplay.IsElementValid(points[i]))
                 {
                     continue;
                 }

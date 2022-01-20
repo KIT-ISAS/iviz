@@ -21,7 +21,7 @@ namespace Iviz.Displays
         [SerializeField] Vector2 canvasSize = new Vector2(800, 600);
 
         CancellationTokenSource? tokenSource;
-        RoundedPlaneResource? background;
+        RoundedPlaneDisplay? background;
         SelectionFrame? frame;
         Transform? mTransform;
 
@@ -30,10 +30,10 @@ namespace Iviz.Displays
 
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
 
-        RoundedPlaneResource Background =>
+        RoundedPlaneDisplay Background =>
             background != null
                 ? background
-                : (background = ResourcePool.RentDisplay<RoundedPlaneResource>(Holder));
+                : (background = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Holder));
 
         FixedDistanceDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         Transform Holder => Draggable.Transform;
@@ -198,13 +198,6 @@ namespace Iviz.Displays
                 transform.localScale = Vector3.one;
                 ResourceUtils.ReturnToPool(this);
             });
-        }
-
-        public Bounds? Bounds => BoxCollider.GetBounds();
-
-        public int Layer
-        {
-            set { }
         }
 
         void Update()

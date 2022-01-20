@@ -14,7 +14,7 @@ namespace Iviz.App.Tests
 
         void Awake()
         {
-            var resource = ResourcePool.RentDisplay<LineResource>();
+            var resource = ResourcePool.RentDisplay<LineDisplay>();
             resource.ElementScale = 0.005f;
             resource.MaterialOverride = Resource.Materials.LinePulse.Object;
 

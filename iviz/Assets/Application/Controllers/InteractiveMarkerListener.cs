@@ -168,7 +168,7 @@ namespace Iviz.Controllers
 
         public InteractiveMarkerListener(InteractiveMarkerConfiguration? config, string topic)
         {
-            node = new FrameNode("[InteractiveMarkerListener]");
+            node = new FrameNode("InteractiveMarkerListener");
             Config = config ?? new InteractiveMarkerConfiguration
             {
                 Topic = topic,

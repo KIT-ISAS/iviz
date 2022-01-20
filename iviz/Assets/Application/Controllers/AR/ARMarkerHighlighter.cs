@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public sealed class ARMarkerHighlighter : MeshMarkerHolderResource
+    public sealed class ARMarkerHighlighter : MeshMarkerHolderDisplay
     {
         [SerializeField] Transform? topLeft;
         [SerializeField] Transform? topRight;

@@ -16,36 +16,31 @@ namespace Iviz.Displays.XRDialogs
     public sealed class XRButton : MonoBehaviour, IDisplay, IHasBounds, IRecyclable
     {
         [SerializeField] string? caption;
-        [SerializeField] XRButtonIcon icon;
+        [SerializeField] XRIcon icon;
+        [SerializeField] bool backgroundVisible = true;
 
-        [SerializeField] Texture2D[] icons = Array.Empty<Texture2D>();
         [SerializeField] TMP_Text? text;
-        [SerializeField] MeshRenderer? iconMeshRenderer;
         [SerializeField] Transform? m_Transform;
         [SerializeField] BoxCollider? boxCollider;
+        [SerializeField] MeshMarkerDisplay? cylinder;
+        [SerializeField] XRIconPlane? iconPlane;
 
         Color backgroundColor = Resource.Colors.TooltipBackground;
+        Color color = new(0.47f, 0.68f, 1);
         Material? material;
         StaticBoundsControl? boundsControl;
-        RoundedPlaneResource? background;
+        RoundedPlaneDisplay? background;
 
-        RoundedPlaneResource Background =>
-            background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneResource>(Transform);
+        RoundedPlaneDisplay Background =>
+            background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Transform);
 
         TMP_Text Text => text.AssertNotNull(nameof(text));
-        MeshRenderer IconMeshRenderer => iconMeshRenderer.AssertNotNull(nameof(iconMeshRenderer));
-        Material Material => material != null ? material : material = Instantiate(IconMeshRenderer.material);
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
         Transform IHasBounds.BoundsTransform => BoxCollider.transform;
-
         Bounds? IHasBounds.Bounds => Bounds;
-        Bounds? IDisplay.Bounds => Bounds;
         Bounds Bounds => BoxCollider.GetBounds();
-
-        public int Layer
-        {
-            set { }
-        }
+        MeshMarkerDisplay Cylinder => cylinder.AssertNotNull(nameof(cylinder));
+        XRIconPlane IconObject => iconPlane.AssertNotNull(nameof(iconPlane));
 
         public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
         public event Action? BoundsChanged;
@@ -53,14 +48,28 @@ namespace Iviz.Displays.XRDialogs
 
         public Color BackgroundColor
         {
-            get => backgroundColor;
             set
             {
                 backgroundColor = value;
-                if (background != null)
-                {
-                    background.Color = value;
-                }
+                Background.Color = value;
+            }
+        }
+
+        public Color Color
+        {
+            set
+            {
+                color = value;
+                Cylinder.Color = value;
+            }
+        }
+
+        public bool BackgroundVisible
+        {
+            set
+            {
+                backgroundVisible = value;
+                Background.Visible = value;
             }
         }
 
@@ -80,34 +89,42 @@ namespace Iviz.Displays.XRDialogs
             set => gameObject.SetActive(value);
         }
 
-        public XRButtonIcon Icon
+        public XRIcon Icon
         {
-            get => icon;
             set
             {
                 icon = value;
-                if (icon != XRButtonIcon.None)
-                {
-                    Material.mainTexture = icons[(int)icon];
-                    IconMeshRenderer.enabled = true;
-                }
-                else
-                {
-                    IconMeshRenderer.enabled = false;
-                }
+                IconObject.Icon = value;
             }
         }
 
         void Awake()
         {
-            Icon = Icon;
+            Icon = icon;
             Caption = Caption;
-            IconMeshRenderer.material = Material;
+
+            IconObject.Color = Color.white;
+            IconObject.EmissiveColor = Color.white.WithValue(0.5f);
+
             boundsControl = new StaticBoundsControl(this);
             boundsControl.PointerUp += OnClick;
+
+            boundsControl.StartDragging += () =>
+            {
+                Cylinder.EmissiveColor = color;
+                IconObject.EmissiveColor = Color.white;
+            };
+            boundsControl.EndDragging += () =>
+            {
+                Cylinder.EmissiveColor = Color.black;
+                IconObject.EmissiveColor = Color.white.WithValue(0.5f);
+            };
+
             Background.Size = new Vector2(1, 1);
             Background.Radius = 0.3f;
-            Background.Color = BackgroundColor;
+            BackgroundVisible = backgroundVisible;
+            BackgroundColor = backgroundColor;
+            Color = color;
         }
 
         void Start()
@@ -127,22 +144,35 @@ namespace Iviz.Displays.XRDialogs
             background.ReturnToPool();
         }
 
-        void IDisplay.Suspend()
+        public void ResetHighlights()
+        {
+            Cylinder.EmissiveColor = Color.black;
+            IconObject.EmissiveColor = Color.white.WithValue(0.5f);
+            boundsControl?.Reset();
+        }
+
+        public void Suspend()
         {
             BoundsChanged = null;
             Clicked = null;
+            ResetHighlights();
         }
     }
 
-    public enum XRButtonIcon
+    public enum XRIcon
     {
-        Cross,
-        Ok,
-        Forward,
-        Backward,
-        Dialog,
-        Up,
-        Down,
-        None
+        None = Msgs.IvizMsgs.Dialog.ICON_NONE,
+        Cross = Msgs.IvizMsgs.Dialog.ICON_CROSS,
+        Ok = Msgs.IvizMsgs.Dialog.ICON_OK,
+        Forward = Msgs.IvizMsgs.Dialog.ICON_FORWARD,
+        Backward = Msgs.IvizMsgs.Dialog.ICON_BACKWARD,
+        Dialog = Msgs.IvizMsgs.Dialog.ICON_DIALOG,
+        Up = Msgs.IvizMsgs.Dialog.ICON_UP,
+        Down = Msgs.IvizMsgs.Dialog.ICON_DOWN,
+        Info = Msgs.IvizMsgs.Dialog.ICON_INFO,
+        Warn = Msgs.IvizMsgs.Dialog.ICON_WARN,
+        Error = Msgs.IvizMsgs.Dialog.ICON_ERROR,
+        Dialogs = Msgs.IvizMsgs.Dialog.ICON_DIALOGS,
+        Question = Msgs.IvizMsgs.Dialog.ICON_QUESTION,
     }
 }

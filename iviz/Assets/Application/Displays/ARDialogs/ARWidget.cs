@@ -29,11 +29,9 @@ namespace Iviz.App.ARDialogs
 
         float? popupStartTime;
 
-        public Bounds? Bounds => BoxCollider.GetBounds();
         public virtual Color MainColor { get; set; }
         public virtual Color SecondaryColor { get; set; }
 
-        public int Layer { get; set; }
         public bool UseAnimation { get; set; } = true;
         
         float scale = 1;
