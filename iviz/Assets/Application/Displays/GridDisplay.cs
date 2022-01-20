@@ -106,10 +106,7 @@ namespace Iviz.Displays
             set
             {
                 numberOfGridCells = value;
-                //if (!(mesh is null))
-                {
-                    UpdateMesh();
-                }
+                UpdateMesh();
             }
         }
 
@@ -117,7 +114,6 @@ namespace Iviz.Displays
 
         public bool ShowInterior
         {
-            get => showInterior;
             set
             {
                 showInterior = value;
@@ -159,10 +155,10 @@ namespace Iviz.Displays
             UpdateMesh();
         }
 
-        void OnQualityChanged(QualityType newType)
+        void OnQualityChanged(QualityType qualityType)
         {
             interiorRenderer.sharedMaterial =
-                newType == QualityType.VeryLow
+                qualityType == QualityType.VeryLow
                     ? Resource.Materials.GridInteriorSimple.Object
                     : Resource.Materials.GridInterior.Object;
         }

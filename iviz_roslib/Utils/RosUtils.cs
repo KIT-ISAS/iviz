@@ -40,7 +40,7 @@ internal static class RosUtils
             if (numRead + length > toRead)
             {
                 throw new RosInvalidHeaderException(
-                    $"Invalid header entry size {length}, buffer has only {toRead - numRead} bytes left.");
+                    $"Invalid header entry size {length}, buffer has only {toRead - numRead} bytes left");
             }
 
             string entry;
@@ -50,7 +50,7 @@ internal static class RosUtils
             }
             catch (Exception e)
             {
-                throw new RosInvalidHeaderException("Error parsing header line.", e);
+                throw new RosInvalidHeaderException("Error parsing header line", e);
             }
 
             numRead += length;
@@ -72,8 +72,8 @@ internal static class RosUtils
                 throw new RosInvalidHeaderException($"Missing '=' separator in ROS header field '{entry}'.");
             }
 
-            string key = entry.Substring(0, index);
-            values[key] = entry.Substring(index + 1);
+            string key = entry[..index];
+            values[key] = entry[(index + 1)..];
         }
 
         return values;
@@ -105,8 +105,7 @@ internal static class RosUtils
             return new TopicInfo<T>(callerId, topicName, (IDeserializable<T>)lookupGenerator);
         }
 
-        DynamicMessage generator =
-            DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
+        var generator = DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
         return new TopicInfo<T>(callerId, topicName, generator);
     }
 
@@ -246,7 +245,7 @@ internal static class RosUtils
         }
         catch (Exception)
         {
-            return Array.Empty<string>();
+            return Enumerable.Empty<string>();
         }
     }
 
@@ -270,7 +269,7 @@ internal static class RosUtils
         }
         catch (Exception)
         {
-            // this shouldn't throw at all!
+            // this shouldn't throw at all! yet it does
             return null;
         }
 

@@ -92,9 +92,9 @@ namespace Iviz.Displays
                 {
                     for (int i = 0; i < triangles.Length; i += 3)
                     {
-                        tArray[i + 2] = i + 1;
-                        tArray[i + 1] = i + 2;
                         tArray[i] = i;
+                        tArray[i + 1] = i + 2;
+                        tArray[i + 2] = i + 1;
                     }
                 }
                 else

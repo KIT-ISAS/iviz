@@ -23,12 +23,10 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
     readonly Task task;
     readonly ReceiverManager<T> manager;
 
-    int receiveBufferSize = 8192;
-
     long numReceived;
     long numDropped;
     long bytesReceived;
-
+    int receiveBufferSize = 8192;
     bool disposed;
 
     bool KeepRunning => !runningTs.IsCancellationRequested;
@@ -36,7 +34,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
     public ErrorMessage? ErrorDescription { get; private set; }
     public bool IsAlive => !task.IsCompleted;
     public bool IsPaused { get; set; }
-    public bool IsConnected => UdpClient.Client.Connected;
+    public bool IsConnected => Status == ReceiverStatus.Running;
     public Endpoint Endpoint { get; }
     public Endpoint RemoteEndpoint { get; }
     public Uri RemoteUri { get; }
@@ -358,8 +356,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
                             (UdpRosParams.DefaultMTU - UdpRosParams.Ip4UdpHeadersLength);
         return new RpcUdpTopicRequest(header, ownHostname, maxPacketSize);
     }
-
-
+    
     void ILoopbackReceiver<T>.Post(in T message, int rcvLength)
     {
         if (!IsAlive)

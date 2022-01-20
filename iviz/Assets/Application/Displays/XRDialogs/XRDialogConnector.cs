@@ -44,6 +44,7 @@ namespace Iviz.Displays.XRDialogs
             {
                 gameObject.SetActive(value);
                 Node.Visible = value;
+                Lines.Visible = value;
             }
         }
 

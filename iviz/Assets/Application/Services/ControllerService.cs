@@ -786,7 +786,7 @@ namespace Iviz.Controllers
             }
 
             Feedback feedback = new();
-            using var signal = new SemaphoreSlim(0);
+            using SemaphoreSlim signal = new(0);
             GameThread.Post(() =>
             {
                 try

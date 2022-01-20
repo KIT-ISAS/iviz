@@ -209,6 +209,139 @@ namespace Iviz.App
 
         public TfFrame Frame => TfListener.FixedFrame;
 
+        public int SunDirection
+        {
+            get => config.SunDirection;
+            set
+            {
+                config.SunDirection = value;
+                if (mainLight != null)
+                {
+                    mainLight.transform.rotation = Quaternion.Euler(90 + value, 0, 0);
+                }
+            }
+        }
+
+        public QualityType QualityInAr
+        {
+            get => config.QualityInAr;
+            set
+            {
+                config.QualityInAr = ValidateQuality(value);
+                if (!ARController.IsActive)
+                {
+                    return;
+                }
+                QualitySettings.SetQualityLevel((int)config.QualityInAr, true);
+                UpdateLightProperties(config.QualityInAr);
+                Settings.RaiseQualityTypeChanged(value);
+            }
+        }
+
+        public QualityType QualityInView
+        {
+            get => config.QualityInView;
+            set
+            {
+                config.QualityInView = ValidateQuality(value);
+
+                var qualityToUse = Settings.IsHololens ? QualityType.VeryLow : config.QualityInView;
+
+                if (ARController.IsActive)
+                {
+                    return;
+                }
+                
+                QualitySettings.SetQualityLevel((int)qualityToUse, true);
+                UpdateLightProperties(qualityToUse);
+                Settings.RaiseQualityTypeChanged(qualityToUse);
+            }
+        }
+
+        void UpdateLightProperties(QualityType qualityToUse)
+        {
+            if (mainLight == null)
+            {
+                return;
+            }
+            
+            if (qualityToUse == QualityType.VeryLow)
+            {
+                mainLight.renderMode = LightRenderMode.ForceVertex;
+                mainLight.intensity = Settings.IsHololens ? 2 : 1;
+                mainLight.shadows = LightShadows.None;
+            }
+            else
+            {
+                mainLight.renderMode = LightRenderMode.Auto;
+                mainLight.intensity = 1;
+                mainLight.shadows = LightShadows.Soft;
+            }
+        }
+
+        static QualityType ValidateQuality(QualityType qualityType)
+        {
+            return qualityType switch
+            {
+                < QualityType.VeryLow => QualityType.VeryLow,
+                > QualityType.Ultra => QualityType.Ultra,
+                _ => qualityType
+            };
+        }
+
+        public int TargetFps
+        {
+            get => config.TargetFps;
+            set
+            {
+                config.TargetFps = value;
+                Application.targetFrameRate = value;
+            }
+        }
+
+        public Color BackgroundColor
+        {
+            get => config.BackgroundColor;
+            set
+            {
+                config.BackgroundColor = value.WithAlpha(1);
+
+                Color colorToUse = Settings.IsHololens ? Color.black : value;
+                MainCamera.backgroundColor = colorToUse.WithAlpha(0);
+
+                RenderSettings.ambientSkyColor = value.WithAlpha(0);
+                RenderSettings.ambientEquatorColor = value.WithValue(0.5f).WithSaturation(0.3f).WithAlpha(0);
+            }
+        }
+
+        public int NetworkFrameSkip
+        {
+            get => config.NetworkFrameSkip;
+            set
+            {
+                config.NetworkFrameSkip = value;
+                GameThread.NetworkFrameSkip = value;
+            }
+        }
+
+        public IEnumerable<string> QualityLevelsInView => QualityInViewOptions;
+
+        public IEnumerable<string> QualityLevelsInAR => QualityInArOptions;
+
+        public SettingsConfiguration Config
+        {
+            get => config;
+            set
+            {
+                BackgroundColor = value.BackgroundColor;
+                SunDirection = value.SunDirection;
+                NetworkFrameSkip = value.NetworkFrameSkip;
+                QualityInAr = value.QualityInAr;
+                QualityInView = value.QualityInView;
+                TargetFps = value.TargetFps;
+            }
+        }        
+        
         void Awake()
         {
             EnhancedTouchSupport.Enable();
@@ -217,11 +350,6 @@ namespace Iviz.App
 
         void OnDestroy()
         {
-            /*
-            TfListener.Instance.ResetFrames -= OnResetFrames;
-            TfListener.AfterProcessMessages -= ProcessPoseChanges;
-            GameThread.EveryFrame -= ProcessPointer;
-            */
             instance = null;
         }
 
@@ -230,7 +358,6 @@ namespace Iviz.App
             if (!Settings.IsPhone)
             {
                 QualitySettings.vSyncCount = 0;
-                MainCamera.allowHDR = true;
             }
 
             if (!Settings.IsXR)
@@ -243,11 +370,11 @@ namespace Iviz.App
                 RosLogger.Info("Platform does not support compute shaders. Point cloud rendering may look weird.");
             }
 
+            mainLight = GameObject.Find("MainLight")?.GetComponent<Light>();
+
             Config = new SettingsConfiguration();
 
             ModuleListPanel.Instance.UnlockButton.onClick.AddListener(DisableCameraLock);
-
-            mainLight = GameObject.Find("MainLight")?.GetComponent<Light>();
 
             StartOrbiting();
 
@@ -336,129 +463,6 @@ namespace Iviz.App
         {
             CameraViewOverride = null;
             OrbitCenterOverride = null;
-        }
-
-        public int SunDirection
-        {
-            get => config.SunDirection;
-            set
-            {
-                config.SunDirection = value;
-                if (mainLight != null)
-                {
-                    mainLight.transform.rotation = Quaternion.Euler(90 + value, 0, 0);
-                }
-            }
-        }
-
-        public QualityType QualityInAr
-        {
-            get => config.QualityInAr;
-            set
-            {
-                //config.QualityInAr = value != QualityType.Mega ? value : QualityType.Ultra;
-                config.QualityInAr = ValidateQuality(value);
-                if (ARController.IsActive)
-                {
-                    QualitySettings.SetQualityLevel((int)config.QualityInAr, true);
-                    Settings.RaiseQualityTypeChanged(value);
-                }
-            }
-        }
-
-        public QualityType QualityInView
-        {
-            get => config.QualityInView;
-            set
-            {
-                config.QualityInView = ValidateQuality(value);
-
-                QualityType qualityToUse = Settings.IsHololens ? QualityType.Low : config.QualityInView;
-
-                if (ARController.IsActive)
-                {
-                    return;
-                }
-
-                /*
-                if (qualityToUse == QualityType.Mega)
-                {
-                    QualitySettings.SetQualityLevel((int)QualityType.Ultra, true);
-                    Settings.RaiseQualityTypeChanged(qualityToUse);
-                    MainCamera.renderingPath = RenderingPath.DeferredShading;
-                    GetComponent<PostProcessLayer>().enabled = true;
-                    return;
-                }
-                */
-
-                GetComponent<PostProcessLayer>().enabled = false;
-                MainCamera.renderingPath = RenderingPath.Forward;
-                QualitySettings.SetQualityLevel((int)qualityToUse, true);
-                Settings.RaiseQualityTypeChanged(qualityToUse);
-            }
-        }
-
-        static QualityType ValidateQuality(QualityType qualityType)
-        {
-            return qualityType switch
-            {
-                < QualityType.VeryLow => QualityType.VeryLow,
-                > QualityType.Ultra => QualityType.Ultra,
-                _ => qualityType
-            };
-        }
-
-        public int TargetFps
-        {
-            get => config.TargetFps;
-            set
-            {
-                config.TargetFps = value;
-                Application.targetFrameRate = value;
-            }
-        }
-
-        public Color BackgroundColor
-        {
-            get => config.BackgroundColor;
-            set
-            {
-                config.BackgroundColor = value.WithAlpha(1);
-
-                Color colorToUse = Settings.IsHololens ? Color.black : value;
-                MainCamera.backgroundColor = colorToUse.WithAlpha(0);
-
-                RenderSettings.ambientSkyColor = value.WithAlpha(0);
-                RenderSettings.ambientEquatorColor = value.WithValue(0.5f).WithSaturation(0.3f).WithAlpha(0);
-            }
-        }
-
-        public int NetworkFrameSkip
-        {
-            get => config.NetworkFrameSkip;
-            set
-            {
-                config.NetworkFrameSkip = value;
-                GameThread.NetworkFrameSkip = value;
-            }
-        }
-
-        public IEnumerable<string> QualityLevelsInView => QualityInViewOptions;
-
-        public IEnumerable<string> QualityLevelsInAR => QualityInArOptions;
-
-        public SettingsConfiguration Config
-        {
-            get => config;
-            set
-            {
-                BackgroundColor = value.BackgroundColor;
-                SunDirection = value.SunDirection;
-                NetworkFrameSkip = value.NetworkFrameSkip;
-                QualityInAr = value.QualityInAr;
-                QualityInView = value.QualityInView;
-                TargetFps = value.TargetFps;
-            }
         }
 
         public void DisableCameraLock()
