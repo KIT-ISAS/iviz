@@ -74,6 +74,9 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
         set => manager.Latching = value;
     }
     
+    /// <summary>
+    /// Manually sets the latched message.
+    /// </summary>
     public TMessage LatchedMessage
     {
         set => manager.LatchedMessage = value;
