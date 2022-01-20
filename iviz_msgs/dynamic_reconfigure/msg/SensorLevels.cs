@@ -8,9 +8,12 @@ namespace Iviz.Msgs.DynamicReconfigure
     public sealed class SensorLevels : IDeserializable<SensorLevels>, IMessage
     {
         // This message is deprecated, please use driver_base/SensorLevels instead.
-        public const byte RECONFIGURE_CLOSE = 3; // Parameters that need a sensor to be stopped completely when changed
-        public const byte RECONFIGURE_STOP = 1; // Parameters that need a sensor to stop streaming when changed
-        public const byte RECONFIGURE_RUNNING = 0; // Parameters that can be changed while a sensor is streaming
+        /// Parameters that need a sensor to be stopped completely when changed
+        public const byte RECONFIGURE_CLOSE = 3;
+        /// Parameters that need a sensor to stop streaming when changed
+        public const byte RECONFIGURE_STOP = 1;
+        /// Parameters that can be changed while a sensor is streaming
+        public const byte RECONFIGURE_RUNNING = 0;
     
         /// Constructor for empty message.
         public SensorLevels()

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Iviz.MsgsGen
 {
@@ -25,36 +26,34 @@ namespace Iviz.MsgsGen
 
         public IEnumerable<string> ToCsString(bool _)
         {
-            string commentStr = Comment.Length == 0 ? "" : $" //{Comment}";
-
-            string result;
-            if (MsgParser.BuiltInsMaps.TryGetValue(ClassName, out string? alias))
+            if (!MsgParser.BuiltInsMaps.TryGetValue(ClassName, out string? alias))
             {
-                if (alias == "string")
-                {
+                return Enumerable.Empty<string>();
+            }
+
+            switch (alias)
+            {
+                case "string":
                     // const string have no comments
-                    result = $"public const string {FieldName} = \"{Value}\";";
-                }
-                else if (alias != "time" && alias != "duration")
-                {
-                    result = $"public const {alias} {FieldName} = {Value};{commentStr}";
-                }
-                
-                else
-                {
-                    //result = $"public static readonly {alias} {FieldName} = {Value};{commentStr}";
-                    result = "";
-                }
-                
-            }
-            else
-            {
-                // not really a valid constant!
-                result = "";
-            }
+                    return new[] { $"public const string {FieldName} = \"{Value}\";" };
 
-
-            return new[] {result};
+                case "time" or "duration":
+                    return Enumerable.Empty<string>();
+                
+                default:
+                    string result = $"public const {alias} {FieldName} = {Value};";
+                    string comment = Comment.Trim();
+                    if (comment.Length == 0)
+                    {
+                        return new[] { result };
+                    }
+                    
+                    return new[]
+                        {
+                            "/// " + char.ToUpper(comment[0]) + comment[1..],
+                            result
+                        };
+            }
         }
 
         public string GetEntryForMd5Hash()

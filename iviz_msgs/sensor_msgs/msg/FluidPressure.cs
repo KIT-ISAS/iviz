@@ -11,7 +11,7 @@ namespace Iviz.Msgs.SensorMsgs
         // pressure inside of a fluid (air, water, etc).  This also includes
         // atmospheric or barometric pressure.
         // This message is not appropriate for force/pressure contact sensors.
-        /// timestamp of the measurement
+        /// Timestamp of the measurement
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // frame_id is the location of the pressure sensor
         /// Absolute pressure reading in Pascals.

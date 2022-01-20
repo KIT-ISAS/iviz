@@ -8,7 +8,7 @@ namespace Iviz.Msgs.SensorMsgs
     public sealed class Temperature : IDeserializable<Temperature>, IMessage
     {
         // Single temperature reading.
-        /// timestamp is the time the temperature was measured
+        /// Timestamp is the time the temperature was measured
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // frame_id is the location of the temperature reading
         /// Measurement of the Temperature in Degrees Celsius

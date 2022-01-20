@@ -8,11 +8,11 @@ namespace Iviz.Msgs.SensorMsgs
     public sealed class Joy : IDeserializable<Joy>, IMessage
     {
         // Reports the state of a joysticks axes and buttons.
-        /// timestamp in the header is the time the data is received from the joystick
+        /// Timestamp in the header is the time the data is received from the joystick
         [DataMember (Name = "header")] public StdMsgs.Header Header;
-        /// the axes measurements from a joystick
+        /// The axes measurements from a joystick
         [DataMember (Name = "axes")] public float[] Axes;
-        /// the buttons measurements from a joystick
+        /// The buttons measurements from a joystick
         [DataMember (Name = "buttons")] public int[] Buttons;
     
         /// Constructor for empty message.

@@ -20,9 +20,9 @@ namespace Iviz.Msgs.SensorMsgs
         // If the frame_id here and the frame_id of the CameraInfo
         // message associated with the image conflict
         // the behavior is undefined
-        /// image height, that is, number of rows
+        /// Image height, that is, number of rows
         [DataMember (Name = "height")] public uint Height;
-        /// image width, that is, number of columns
+        /// Image width, that is, number of columns
         [DataMember (Name = "width")] public uint Width;
         // The legal values for encoding are in file src/image_encodings.cpp
         // If you want to standardize a new string format, join
@@ -30,7 +30,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Encoding of pixels -- channel meaning, ordering, size
         [DataMember (Name = "encoding")] public string Encoding;
         // taken from the list of strings in include/sensor_msgs/image_encodings.h
-        /// is this data bigendian?
+        /// Is this data bigendian?
         [DataMember (Name = "is_bigendian")] public byte IsBigendian;
         /// Full row length in bytes
         [DataMember (Name = "step")] public uint Step;

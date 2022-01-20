@@ -53,7 +53,7 @@ namespace Iviz.Msgs.StdSrvs
     [DataContract]
     public sealed class SetBoolRequest : IRequest<SetBool, SetBoolResponse>, IDeserializable<SetBoolRequest>
     {
-        /// e.g. for hardware enabling / disabling
+        /// E.g. for hardware enabling / disabling
         [DataMember (Name = "data")] public bool Data;
     
         /// Constructor for empty message.
@@ -97,9 +97,9 @@ namespace Iviz.Msgs.StdSrvs
     [DataContract]
     public sealed class SetBoolResponse : IResponse, IDeserializable<SetBoolResponse>
     {
-        /// indicate successful run of triggered service
+        /// Indicate successful run of triggered service
         [DataMember (Name = "success")] public bool Success;
-        /// informational, e.g. for error messages
+        /// Informational, e.g. for error messages
         [DataMember (Name = "message")] public string Message;
     
         /// Constructor for empty message.

@@ -9,9 +9,9 @@ namespace Iviz.Msgs.StdMsgs
     {
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
-        /// specification of data layout
+        /// Specification of data layout
         [DataMember (Name = "layout")] public MultiArrayLayout Layout;
-        /// array of data
+        /// Array of data
         [DataMember (Name = "data")] public float[] Data;
     
         /// Constructor for empty message.

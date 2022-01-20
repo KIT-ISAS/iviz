@@ -8,9 +8,9 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class TriangleMesh : IDeserializable<TriangleMesh>, IMessage
     {
         //# Definition of a triangle mesh
-        /// list of triangles; the index values refer to positions in vertices (and vertex_normals, if given)
+        /// List of triangles; the index values refer to positions in vertices (and vertex_normals, if given)
         [DataMember (Name = "triangles")] public TriangleIndices[] Triangles;
-        /// the actual vertices that make up the mesh
+        /// The actual vertices that make up the mesh
         [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices;
         //optional:
         [DataMember (Name = "vertex_normals")] public GeometryMsgs.Point[] VertexNormals;

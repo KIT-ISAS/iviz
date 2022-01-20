@@ -13,25 +13,30 @@ namespace Iviz.Msgs.RosgraphMsgs
         //#
         //# Severity level constants
         //#
-        public const byte DEBUG = 1; //debug level
-        public const byte INFO = 2; //general level
-        public const byte WARN = 4; //warning level
-        public const byte ERROR = 8; //error level
-        public const byte FATAL = 16; //fatal/critical level
+        /// Debug level
+        public const byte DEBUG = 1;
+        /// General level
+        public const byte INFO = 2;
+        /// Warning level
+        public const byte WARN = 4;
+        /// Error level
+        public const byte ERROR = 8;
+        /// Fatal/critical level
+        public const byte FATAL = 16;
         //#
         //# Fields
         //#
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "level")] public byte Level;
-        /// name of the node
+        /// Name of the node
         [DataMember (Name = "name")] public string Name;
-        /// message
+        /// Message
         [DataMember (Name = "msg")] public string Msg;
-        /// file the message came from
+        /// File the message came from
         [DataMember (Name = "file")] public string File;
-        /// function the message came from
+        /// Function the message came from
         [DataMember (Name = "function")] public string Function;
-        /// line the message came from
+        /// Line the message came from
         [DataMember (Name = "line")] public uint Line;
         //string[] topics # topic names that the node publishes
         /// [Ignore]

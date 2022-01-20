@@ -19,7 +19,7 @@ namespace Iviz.Msgs.SensorMsgs
         // Luminous intensity (candela/light source output)
         // Luminance (nits/light output per area)
         // Irradiance (watt/area), etc.
-        /// timestamp is the time the illuminance was measured
+        /// Timestamp is the time the illuminance was measured
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // frame_id is the location and direction of the reading
         /// Measurement of the Photometric Illuminance in Lux.

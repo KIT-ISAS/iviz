@@ -12,7 +12,7 @@ namespace Iviz.Msgs.StdMsgs
         // to inner most.
         /// Array of dimension properties
         [DataMember (Name = "dim")] public MultiArrayDimension[] Dim;
-        /// padding elements at front of data
+        /// Padding elements at front of data
         [DataMember (Name = "data_offset")] public uint DataOffset;
         // Accessors should ALWAYS be written in terms of dimension stride
         // and specified outer-most dimension first.

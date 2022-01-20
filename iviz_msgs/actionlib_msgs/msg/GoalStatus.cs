@@ -9,22 +9,32 @@ namespace Iviz.Msgs.ActionlibMsgs
     {
         [DataMember (Name = "goal_id")] public GoalID GoalId;
         [DataMember (Name = "status")] public byte Status;
-        public const byte PENDING = 0; // The goal has yet to be processed by the action server
-        public const byte ACTIVE = 1; // The goal is currently being processed by the action server
-        public const byte PREEMPTED = 2; // The goal received a cancel request after it started executing
+        /// The goal has yet to be processed by the action server
+        public const byte PENDING = 0;
+        /// The goal is currently being processed by the action server
+        public const byte ACTIVE = 1;
+        /// The goal received a cancel request after it started executing
+        public const byte PREEMPTED = 2;
         //   and has since completed its execution (Terminal State)
-        public const byte SUCCEEDED = 3; // The goal was achieved successfully by the action server (Terminal State)
-        public const byte ABORTED = 4; // The goal was aborted during execution by the action server due
+        /// The goal was achieved successfully by the action server (Terminal State)
+        public const byte SUCCEEDED = 3;
+        /// The goal was aborted during execution by the action server due
+        public const byte ABORTED = 4;
         //    to some failure (Terminal State)
-        public const byte REJECTED = 5; // The goal was rejected by the action server without being processed,
+        /// The goal was rejected by the action server without being processed,
+        public const byte REJECTED = 5;
         //    because the goal was unattainable or invalid (Terminal State)
-        public const byte PREEMPTING = 6; // The goal received a cancel request after it started executing
+        /// The goal received a cancel request after it started executing
+        public const byte PREEMPTING = 6;
         //    and has not yet completed execution
-        public const byte RECALLING = 7; // The goal received a cancel request before it started executing,
+        /// The goal received a cancel request before it started executing,
+        public const byte RECALLING = 7;
         //    but the action server has not yet confirmed that the goal is canceled
-        public const byte RECALLED = 8; // The goal received a cancel request before it started executing
+        /// The goal received a cancel request before it started executing
+        public const byte RECALLED = 8;
         //    and was successfully cancelled (Terminal State)
-        public const byte LOST = 9; // An action client can determine that a goal is LOST. This should not be
+        /// An action client can determine that a goal is LOST. This should not be
+        public const byte LOST = 9;
         //    sent over the wire by an action server
         //Allow for the user to associate a string with GoalStatus for debugging
         [DataMember (Name = "text")] public string Text;

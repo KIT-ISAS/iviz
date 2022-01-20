@@ -12,34 +12,34 @@ namespace Iviz.Msgs.SensorMsgs
         // If you have another ranging device with different behavior (e.g. a sonar
         // array), please find or create a different message, since applications
         // will make fairly laser-specific assumptions about this data
-        /// timestamp in the header is the acquisition time of
+        /// Timestamp in the header is the acquisition time of
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // the first ray in the scan.
         //
         // in frame frame_id, angles are measured around 
         // the positive Z axis (counterclockwise, if Z is up)
         // with zero angle being forward along the x axis
-        /// start angle of the scan [rad]
+        /// Start angle of the scan [rad]
         [DataMember (Name = "angle_min")] public float AngleMin;
-        /// end angle of the scan [rad]
+        /// End angle of the scan [rad]
         [DataMember (Name = "angle_max")] public float AngleMax;
-        /// angular distance between measurements [rad]
+        /// Angular distance between measurements [rad]
         [DataMember (Name = "angle_increment")] public float AngleIncrement;
-        /// time between measurements [seconds] - if your scanner
+        /// Time between measurements [seconds] - if your scanner
         [DataMember (Name = "time_increment")] public float TimeIncrement;
         // is moving, this will be used in interpolating position
         // of 3d points
-        /// time between scans [seconds]
+        /// Time between scans [seconds]
         [DataMember (Name = "scan_time")] public float ScanTime;
-        /// minimum range value [m]
+        /// Minimum range value [m]
         [DataMember (Name = "range_min")] public float RangeMin;
-        /// maximum range value [m]
+        /// Maximum range value [m]
         [DataMember (Name = "range_max")] public float RangeMax;
-        /// range data [m] (Note: NaNs, values < range_min or > range_max should be discarded)
+        /// Range data [m] (Note: NaNs, values < range_min or > range_max should be discarded)
         [DataMember (Name = "ranges")] public LaserEcho[] Ranges;
         // +Inf measurements are out of range
         // -Inf measurements are too close to determine exact distance.
-        /// intensity data [device-specific units].  If your
+        /// Intensity data [device-specific units].  If your
         [DataMember (Name = "intensities")] public LaserEcho[] Intensities;
         // device does not provide intensities, please leave
         // the array empty.

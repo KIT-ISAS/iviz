@@ -9,7 +9,7 @@ namespace Iviz.Msgs.SensorMsgs
     {
         // Single reading from a relative humidity sensor.  Defines the ratio of partial
         // pressure of water vapor to the saturated vapor pressure at a temperature.
-        /// timestamp of the measurement
+        /// Timestamp of the measurement
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // frame_id is the location of the humidity sensor
         /// Expression of the relative humidity

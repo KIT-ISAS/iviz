@@ -24,11 +24,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte MODIFY = 0;
         public const byte DELETE = 2;
         public const byte DELETEALL = 3;
-        /// header for time/frame information
+        /// Header for time/frame information
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         /// Namespace to place this object in... used in conjunction with id to create a unique name for the object
         [DataMember (Name = "ns")] public string Ns;
-        /// object ID useful in conjunction with the namespace for manipulating and deleting the object later
+        /// Object ID useful in conjunction with the namespace for manipulating and deleting the object later
         [DataMember (Name = "id")] public int Id;
         /// Type of object
         [DataMember (Name = "type")] public int Type;

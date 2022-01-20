@@ -33,10 +33,10 @@ namespace Iviz.MsgsGen
 
         static bool IsIdentifierLetter(char c)
         {
-            return c == '[' || c == ']' || char.IsLetterOrDigit(c) || c == '_' || c == '/' || c == '-';
+            return char.IsLetterOrDigit(c) || c is '[' or ']' or '_' or '/' or '-';
         }
 
-        static bool IsWhitespace(char c)
+        static bool IsWhiteSpace(char c)
         {
             return char.IsWhiteSpace(c);
         }
@@ -57,9 +57,9 @@ namespace Iviz.MsgsGen
                 List<string> terms = new List<string>();
                 while (index < line.Length)
                 {
-                    if (IsWhitespace(line[index]))
+                    if (IsWhiteSpace(line[index]))
                     {
-                        while (index < line.Length && IsWhitespace(line[index]))
+                        while (index < line.Length && IsWhiteSpace(line[index]))
                         {
                             index++;
                         }
@@ -82,7 +82,7 @@ namespace Iviz.MsgsGen
                     }
                     else if (line[index] == '#')
                     {
-                        terms.Add(line.Substring(index));
+                        terms.Add(line[index..]);
                         index = line.Length;
                     }
                     else if (line[index] == '\"')
@@ -109,7 +109,7 @@ namespace Iviz.MsgsGen
                 if (terms.Count >= 3 && terms[0] == "string" && terms[1] != "=" && terms[2][0] == '=')
                 {
                     int eqPosition = line.IndexOf("=", StringComparison.InvariantCulture);
-                    string constStr = line.Substring(eqPosition + 1).Trim().Replace("\"", "\\\"");
+                    string constStr = line[(eqPosition + 1)..].Trim().Replace("\"", "\\\"");
                     elements.Add(new ConstantElement("", "string", terms[1], constStr));
                     continue;
                 }

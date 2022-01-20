@@ -17,7 +17,7 @@ namespace Iviz.Msgs.GeometryMsgs
         // <a href="http://wiki.ros.org/tf">tf</a> package. 
         // See its documentation for more information.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
-        /// the frame id of the child frame
+        /// The frame id of the child frame
         [DataMember (Name = "child_frame_id")] public string ChildFrameId;
         [DataMember (Name = "transform")] public Transform Transform;
     

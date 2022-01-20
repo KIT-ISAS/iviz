@@ -8,9 +8,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
     public sealed class DiagnosticArray : IDeserializable<DiagnosticArray>, IMessage
     {
         // This message is used to send diagnostic information about the state of the robot
-        /// for timestamp
+        /// For timestamp
         [DataMember (Name = "header")] public StdMsgs.Header Header;
-        /// an array of components being reported on
+        /// An array of components being reported on
         [DataMember (Name = "status")] public DiagnosticStatus[] Status;
     
         /// Constructor for empty message.
