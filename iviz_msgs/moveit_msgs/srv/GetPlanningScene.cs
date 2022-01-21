@@ -90,7 +90,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Components.RosValidate();
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;

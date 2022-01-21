@@ -43,20 +43,20 @@ namespace Iviz.Msgs.Actionlib
         {
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 5;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "actionlib/TestRequestResult";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "61c2364524499c7c5017e2f3fce7ba06";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE8vMKzE2UijJSI0vSi0uzSnhSsrPz1HILI4vzswtyEmNL04tKkst4gIAoJWh1ycAAAA=";
                 

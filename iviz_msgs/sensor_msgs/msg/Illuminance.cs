@@ -19,12 +19,12 @@ namespace Iviz.Msgs.SensorMsgs
         // Luminous intensity (candela/light source output)
         // Luminance (nits/light output per area)
         // Irradiance (watt/area), etc.
-        /// Timestamp is the time the illuminance was measured
+        /// <summary> Timestamp is the time the illuminance was measured </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // frame_id is the location and direction of the reading
-        /// Measurement of the Photometric Illuminance in Lux.
+        /// <summary> Measurement of the Photometric Illuminance in Lux. </summary>
         [DataMember (Name = "illuminance")] public double Illuminance_;
-        /// 0 is interpreted as variance unknown
+        /// <summary> 0 is interpreted as variance unknown </summary>
         [DataMember (Name = "variance")] public double Variance;
     
         /// Constructor for empty message.
@@ -67,13 +67,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/Illuminance";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "8cf5febb0952fca9d650c3d11a81a188";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61UwW7bMAy9+ysI5NBmW9JiG3YosMOAYluAFijWHnYrWJmxhcmSJ1FJs68fKduJeyiw" +
                 "wwwDtijq8ZGPIizg3vrGEfRt4NARR2vAOpc769Ebgo4w5UgdeV4D3NimZUhtyK6GJwJMKXdUAwdZVbCY" +

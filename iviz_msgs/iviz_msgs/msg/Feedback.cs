@@ -99,13 +99,13 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "iviz_msgs/Feedback";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "81c203474b59127ee99d69899254825c";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71V32/bNhB+119xQB6aDI63JV1RBOiDl3it1zZxE3VYMQwGI50lbhKpkpRd96/fd5Qt" +
                 "26mH7mGpIcBH3t13v4+tNuE5pR+m49n49+nkdnxFL+iHpN1e//w+TW+uZ5dvJpevwftxl/d2fP1+fJ3e" +

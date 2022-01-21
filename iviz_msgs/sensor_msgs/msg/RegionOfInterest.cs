@@ -13,15 +13,15 @@ namespace Iviz.Msgs.SensorMsgs
         // taken, the height and width fields should either match the height and
         // width fields for the associated image; or height = width = 0
         // indicates that the full resolution image was captured.
-        /// Leftmost pixel of the ROI
+        /// <summary> Leftmost pixel of the ROI </summary>
         [DataMember (Name = "x_offset")] public uint XOffset;
         // (0 if the ROI includes the left edge of the image)
-        /// Topmost pixel of the ROI
+        /// <summary> Topmost pixel of the ROI </summary>
         [DataMember (Name = "y_offset")] public uint YOffset;
         // (0 if the ROI includes the top edge of the image)
-        /// Height of ROI
+        /// <summary> Height of ROI </summary>
         [DataMember (Name = "height")] public uint Height;
-        /// Width of ROI
+        /// <summary> Width of ROI </summary>
         [DataMember (Name = "width")] public uint Width;
         // True if a distinct rectified ROI should be calculated from the "raw"
         // ROI in this message. Typically this should be False if the full image
@@ -71,20 +71,20 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 17;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/RegionOfInterest";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "bdb633039d588fcccb441a4d43ccfe09";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61STWvcMBC9+1c84ksCYQntseRaWigUykKOQSuNViKyZKQRjv99R7I32ybQU32SpXkf" +
                 "82ZGHJ0vmKgUdSbIsRYy4IQyk/Z2hUKms08RycJHpkyFsXh2PkJF+Elwh2EcRjw5ih/g7Ai/fn5HIWYf" +

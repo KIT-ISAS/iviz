@@ -127,7 +127,7 @@ namespace Iviz.Msgs.Rosapi
         {
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;

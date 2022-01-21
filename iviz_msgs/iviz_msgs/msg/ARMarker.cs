@@ -11,19 +11,19 @@ namespace Iviz.Msgs.IvizMsgs
         public const byte TYPE_QRCODE = 1;
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "type")] public byte Type;
-        /// Text code if QR, integer as string if Aruco.
+        /// <summary> Text code if QR, integer as string if Aruco. </summary>
         [DataMember (Name = "code")] public string Code;
-        /// Corner pixel positions, with z = 0.
+        /// <summary> Corner pixel positions, with z = 0. </summary>
         [DataMember (Name = "corners")] public GeometryMsgs.Vector3[/*4*/] Corners;
-        /// Camera intrinsic matrix, row major.
+        /// <summary> Camera intrinsic matrix, row major. </summary>
         [DataMember (Name = "camera_intrinsic")] public double[/*9*/] CameraIntrinsic;
-        /// Pose of the camera in relation to the frame in the header. Y points down, Z forward.
+        /// <summary> Pose of the camera in relation to the frame in the header. Y points down, Z forward. </summary>
         [DataMember (Name = "camera_pose")] public GeometryMsgs.Pose CameraPose;
-        /// If true, the next two fields use a user-given size. If false, they were estimated using 3d data.
+        /// <summary> If true, the next two fields use a user-given size. If false, they were estimated using 3d data. </summary>
         [DataMember (Name = "has_reliable_pose")] public bool HasReliablePose;
-        /// Marker size in mm.
+        /// <summary> Marker size in mm. </summary>
         [DataMember (Name = "marker_size_in_mm")] public double MarkerSizeInMm;
-        /// Pose relative to the camera_pose field. Y points down, Z forward.
+        /// <summary> Pose relative to the camera_pose field. Y points down, Z forward. </summary>
         [DataMember (Name = "pose_relative_to_camera")] public GeometryMsgs.Pose PoseRelativeToCamera;
     
         /// Constructor for empty message.
@@ -101,13 +101,13 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "iviz_msgs/ARMarker";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "c8f6b41386c19105b6644958405c417b";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VUW/bNhB+nn7FAXloMjjq1hQDGqAPQdJteSiapFmBrhgEWjpLbCVSJSnbyq/fd2Qk" +
                 "10Ww7qGNYVgUyfvu7rvvzssxMN2+v3pVnN38df6GXtIv2XLeu745f3PxCpu/ZtmfrCp21MRHuhPGnjMf" +

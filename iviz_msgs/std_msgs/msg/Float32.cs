@@ -39,20 +39,20 @@ namespace Iviz.Msgs.StdMsgs
         {
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/Float32";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "73fcbf46b49191e672908e50842a83d4";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE0vLyU8sMTZSSEksSeQCAK0qjc8NAAAA";
                 

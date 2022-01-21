@@ -17,7 +17,7 @@ namespace Iviz.Msgs.GeometryMsgs
         // <a href="http://wiki.ros.org/tf">tf</a> package. 
         // See its documentation for more information.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
-        /// The frame id of the child frame
+        /// <summary> The frame id of the child frame </summary>
         [DataMember (Name = "child_frame_id")] public string ChildFrameId;
         [DataMember (Name = "transform")] public Transform Transform;
     
@@ -68,13 +68,13 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public readonly string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/TransformStamped";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "b5764a33bfeb3588febc2682852579b0";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VTU/cMBC951eMugeggqwEVQ8IOKG2HCpRgXpFQzJJLBI72BOW9Nf32dnN8iW1h5ZV" +
                 "pLUdz5uP92ayoOvGBJLH3ksIEohJPdtQOd9R5V1HhXO+NJZVsOdOqBEuxedpc2PKbEHqSBt5fbNoTFve" +

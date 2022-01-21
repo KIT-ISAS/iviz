@@ -7,11 +7,11 @@ namespace Iviz.Msgs.StdMsgs
     [Preserve, DataContract (Name = RosMessageType)]
     public sealed class MultiArrayDimension : IDeserializable<MultiArrayDimension>, IMessage
     {
-        /// Label of given dimension
+        /// <summary> Label of given dimension </summary>
         [DataMember (Name = "label")] public string Label;
-        /// Size of given dimension (in type units)
+        /// <summary> Size of given dimension (in type units) </summary>
         [DataMember (Name = "size")] public uint Size;
-        /// Stride of given dimension
+        /// <summary> Stride of given dimension </summary>
         [DataMember (Name = "stride")] public uint Stride;
     
         /// Constructor for empty message.
@@ -56,13 +56,13 @@ namespace Iviz.Msgs.StdMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/MultiArrayDimension";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "4cd0c83a8683deae40ecdac60e53bfa8";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE22NMQqAMBAEe1+xYKOtvkjJGRbiRbxE0NcrUWy0m2KGsbRSPcIwSgBQPxQneG6icJxF" +
                 "jVGrTE19B+MhKGahr4iGirQvgqxM1r7hdXJSwpt+HicAFGWdjgAAAA==";

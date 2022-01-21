@@ -50,7 +50,7 @@ namespace Iviz.MsgsGen
                     
                     return new[]
                         {
-                            "/// " + char.ToUpper(comment[0]) + comment[1..],
+                            $"/// <summary> {char.ToUpper(comment[0]).ToString()}{comment[1..]} </summary>",
                             result
                         };
             }

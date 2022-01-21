@@ -11,20 +11,20 @@ namespace Iviz.Msgs.SensorMsgs
         // Whether to output an augmented fix is determined by both the fix
         // type and the last time differential corrections were received.  A
         // fix is valid when status >= STATUS_FIX.
-        /// Unable to fix position
+        /// <summary> Unable to fix position </summary>
         public const sbyte STATUS_NO_FIX = -1;
-        /// Unaugmented fix
+        /// <summary> Unaugmented fix </summary>
         public const sbyte STATUS_FIX = 0;
-        /// With satellite-based augmentation
+        /// <summary> With satellite-based augmentation </summary>
         public const sbyte STATUS_SBAS_FIX = 1;
-        /// With ground-based augmentation
+        /// <summary> With ground-based augmentation </summary>
         public const sbyte STATUS_GBAS_FIX = 2;
         [DataMember (Name = "status")] public sbyte Status;
         // Bits defining which Global Navigation Satellite System signals were
         // used by the receiver.
         public const ushort SERVICE_GPS = 1;
         public const ushort SERVICE_GLONASS = 2;
-        /// Includes BeiDou.
+        /// <summary> Includes BeiDou. </summary>
         public const ushort SERVICE_COMPASS = 4;
         public const ushort SERVICE_GALILEO = 8;
         [DataMember (Name = "service")] public ushort Service;
@@ -62,20 +62,20 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 3;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/NavSatStatus";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "331cdbddfa4bc96ffc3b9ad98900a54c";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE42RT0/DMAzF7/0UlnZmYgghLiB1MKZJY0OUfzeUtm5rKUumxNnYt8ehLWyMA7nV7vvZ" +
                 "fm8AC7WhWjFZA5li1JoYoaIP8Kw4eKisA2V2MNU2V/rv37OdZ1wlyQBeG+QGHbAFG3gdWLSgQr1Cw1h+" +

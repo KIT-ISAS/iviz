@@ -15,28 +15,28 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte ADD = 0;
         public const byte REMOVE = 1;
         [DataMember (Name = "header")] public StdMsgs.Header Header;
-        /// Namespace, used with id to form a unique id
+        /// <summary> Namespace, used with id to form a unique id </summary>
         [DataMember (Name = "ns")] public string Ns;
-        /// Unique id within the namespace
+        /// <summary> Unique id within the namespace </summary>
         [DataMember (Name = "id")] public int Id;
-        /// CIRCLE/LINE_STRIP/etc.
+        /// <summary> CIRCLE/LINE_STRIP/etc. </summary>
         [DataMember (Name = "type")] public int Type;
-        /// ADD/REMOVE
+        /// <summary> ADD/REMOVE </summary>
         [DataMember (Name = "action")] public int Action;
-        /// 2D, in pixel-coords
+        /// <summary> 2D, in pixel-coords </summary>
         [DataMember (Name = "position")] public GeometryMsgs.Point Position;
-        /// The diameter for a circle, etc.
+        /// <summary> The diameter for a circle, etc. </summary>
         [DataMember (Name = "scale")] public float Scale;
         [DataMember (Name = "outline_color")] public StdMsgs.ColorRGBA OutlineColor;
-        /// Whether to fill in the shape with color
+        /// <summary> Whether to fill in the shape with color </summary>
         [DataMember (Name = "filled")] public byte Filled;
-        /// Color [0.0-1.0]
+        /// <summary> Color [0.0-1.0] </summary>
         [DataMember (Name = "fill_color")] public StdMsgs.ColorRGBA FillColor;
-        /// How long the object should last before being automatically deleted.  0 means forever
+        /// <summary> How long the object should last before being automatically deleted.  0 means forever </summary>
         [DataMember (Name = "lifetime")] public duration Lifetime;
-        /// Used for LINE_STRIP/LINE_LIST/POINTS/etc., 2D in pixel coords
+        /// <summary> Used for LINE_STRIP/LINE_LIST/POINTS/etc., 2D in pixel coords </summary>
         [DataMember (Name = "points")] public GeometryMsgs.Point[] Points;
-        /// A color for each line, point, etc.
+        /// <summary> A color for each line, point, etc. </summary>
         [DataMember (Name = "outline_colors")] public StdMsgs.ColorRGBA[] OutlineColors;
     
         /// Constructor for empty message.
@@ -125,13 +125,13 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "visualization_msgs/ImageMarker";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "1de93c67ec8858b831025a08fbf1b35c";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VU227TQBB9rr9ipDxwUXOhIIQq5QGaUiL1piZCQghFE3sSL1rvmt112/D1nF07bhF9" +
                 "4AGiSHvxzJmZc2anUSa8o5P5zcn56XSSNel4Pr88XS2WN/Pr6avHV+fzxXJ61N1cX51/Obu6nL7uz/PL" +

@@ -60,7 +60,7 @@ namespace Iviz.Msgs.SensorMsgs
         // camera is currently outputting on its camera_info topic, and the camera
         // will assume that the region of the imager that is being referred to is
         // the region that the camera is currently capturing.
-        /// The camera_info to store
+        /// <summary> The camera_info to store </summary>
         [DataMember (Name = "camera_info")] public SensorMsgs.CameraInfo CameraInfo;
     
         /// Constructor for empty message.
@@ -104,9 +104,9 @@ namespace Iviz.Msgs.SensorMsgs
     [DataContract]
     public sealed class SetCameraInfoResponse : IResponse, IDeserializable<SetCameraInfoResponse>
     {
-        /// True if the call succeeded
+        /// <summary> True if the call succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
-        /// Used to give details about success
+        /// <summary> Used to give details about success </summary>
         [DataMember (Name = "status_message")] public string StatusMessage;
     
         /// Constructor for empty message.

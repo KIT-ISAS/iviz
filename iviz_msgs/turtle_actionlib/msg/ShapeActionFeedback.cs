@@ -57,13 +57,13 @@ namespace Iviz.Msgs.TurtleActionlib
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "turtle_actionlib/ShapeActionFeedback";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "aae20e09065c3809e8a8e87c4c8953fd";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71W23LbNhB951dgRg+xO7XSJr2kntGDKimOOk7isdS+ekByRaIFQRUXyfr7ngUpinKs" +
                 "Rg9JNLJ1A84enD272Hckc7KijC+JzLyqjVbpQ+UK9/KmlnrhpQ9OuPiSLEq5prdEeSqzf8SqfZOMvvAj" +

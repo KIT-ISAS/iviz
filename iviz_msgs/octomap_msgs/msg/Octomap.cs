@@ -77,13 +77,13 @@ namespace Iviz.Msgs.OctomapMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "octomap_msgs/Octomap";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "9a45536b45c5e409cd49f04bb2d9999f";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61TTW8TMRC9+1eMlEMT1KQSRQhF4oCoCj0gEO2tQtWsPdm15LUX25uy/Hre7DYFbhyI" +
                 "Iu3XvDfz3huv6B1dXlHPA/lIjY+cJzqk3HM9Jy702dYsYj4KO8nUzRdjVnQduKWayElMVYhP0HWKAQTA" +

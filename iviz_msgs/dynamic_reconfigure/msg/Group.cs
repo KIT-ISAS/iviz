@@ -83,13 +83,13 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "dynamic_reconfigure/Group";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "9e8cd9e9423c94823db3614dd8b1cf7a";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAEysuKcrMS1fIS8xN5SqGsEsqC1K5AhKLEnNdUouTizILSjLz86JjFQpAQqklqUXFXJl5" +
                 "JcZGIIHUvBIFKC8zhYvLlsqAyzfY3UohpRLovMzk+KLU5Py8tMz00qJUfXT3wRyP4ZFSiOtyUstSc2AS" +

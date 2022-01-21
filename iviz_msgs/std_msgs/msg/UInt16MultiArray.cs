@@ -9,9 +9,9 @@ namespace Iviz.Msgs.StdMsgs
     {
         // Please look at the MultiArrayLayout message definition for
         // documentation on all multiarrays.
-        /// Specification of data layout
+        /// <summary> Specification of data layout </summary>
         [DataMember (Name = "layout")] public MultiArrayLayout Layout;
-        /// Array of data
+        /// <summary> Array of data </summary>
         [DataMember (Name = "data")] public ushort[] Data;
     
         /// Constructor for empty message.
@@ -56,13 +56,13 @@ namespace Iviz.Msgs.StdMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/UInt16MultiArray";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "52f264f1c973c4b73790d384c6cb4484";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71U32vbMBB+919xJC9tlmb5Ucpa6ENgsJcWBh2MEkJQrXOsRLaCJDfr/vp9kh3bafc4" +
                 "ZgyW73R33/fpTkP6rlk4Jm3MnoQnnzM9VtqrpbXi7UG8mcpTwc6JLZPkTJXKK1NSZmwyJGnSquDSi2jD" +

@@ -8,12 +8,12 @@ namespace Iviz.Msgs.SensorMsgs
     public sealed class Temperature : IDeserializable<Temperature>, IMessage
     {
         // Single temperature reading.
-        /// Timestamp is the time the temperature was measured
+        /// <summary> Timestamp is the time the temperature was measured </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // frame_id is the location of the temperature reading
-        /// Measurement of the Temperature in Degrees Celsius
+        /// <summary> Measurement of the Temperature in Degrees Celsius </summary>
         [DataMember (Name = "temperature")] public double Temperature_;
-        /// 0 is interpreted as variance unknown
+        /// <summary> 0 is interpreted as variance unknown </summary>
         [DataMember (Name = "variance")] public double Variance;
     
         /// Constructor for empty message.
@@ -56,13 +56,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/Temperature";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "ff71b307acdbe7c871a5a6d7ed359100";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61TTYvbMBC961cM5LC7haSlLT0s9NSlH4eFwuYeJvbEFpUlVzNO6n/fJ7nZpJRCDxUG" +
                 "y9KbNzPvjWlFTz52QchkGCWzTVkoC7c43ThHn7GVTP3yuqwVmR9EjYeRvJL1Ug+WzRXViZUGYcW+dfS3" +

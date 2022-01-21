@@ -10,9 +10,9 @@ namespace Iviz.Msgs.StdMsgs
         // The multiarray declares a generic multi-dimensional array of a
         // particular data type.  Dimensions are ordered from outer most
         // to inner most.
-        /// Array of dimension properties
+        /// <summary> Array of dimension properties </summary>
         [DataMember (Name = "dim")] public MultiArrayDimension[] Dim;
-        /// Padding elements at front of data
+        /// <summary> Padding elements at front of data </summary>
         [DataMember (Name = "data_offset")] public uint DataOffset;
         // Accessors should ALWAYS be written in terms of dimension stride
         // and specified outer-most dimension first.
@@ -82,13 +82,13 @@ namespace Iviz.Msgs.StdMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/MultiArrayLayout";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "0fed2a11c13e11c5571b4e2a995a91a3";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61UTWvbQBC961cM9sV2bdcfITQBHwyFXppTCqUYYTbakbS2tGt2V3HTX9+3kizLaY4V" +
                 "Aq3m872nGQ3pR85UVoVXwlrxRpKTQlh2JChjzVYljXcmVcnaKaNFQU2oSUlEQzoJ61VSIYuk8IL824nn" +

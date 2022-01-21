@@ -8,9 +8,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
     public sealed class DiagnosticArray : IDeserializable<DiagnosticArray>, IMessage
     {
         // This message is used to send diagnostic information about the state of the robot
-        /// For timestamp
+        /// <summary> For timestamp </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
-        /// An array of components being reported on
+        /// <summary> An array of components being reported on </summary>
         [DataMember (Name = "status")] public DiagnosticStatus[] Status;
     
         /// Constructor for empty message.
@@ -61,13 +61,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "diagnostic_msgs/DiagnosticArray";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "60810da900de1dd6ddd437c3503511da";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UwW7bMAy96ysI5NB2QNutvRXIoUC7rei2FmmwHYahoG3WFmpLniQn89/vSYqTrMCA" +
                 "HbYFDiTZ5CP5+KgZLRvtqRPvuRbCdvBSUbDkxVRUaa6N9UGXpM2TdR0HbQ1xYYdAoRHygYOQfUoHZwsb" +

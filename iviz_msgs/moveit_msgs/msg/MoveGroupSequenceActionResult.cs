@@ -66,13 +66,13 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "moveit_msgs/MoveGroupSequenceActionResult";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "e995e5b2d6c322a0395df341caa51d8e";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE+07a3PbNrbf+Ssw65lreysrTZymre/og2IriVpbciUl2zaT4UAkJHFNESpAWlZ39r/v" +
                 "eQAgJctJdu7ad+7MdVPLJICD834BeqdkqoxY0EckkzLTRZ5N46Wd22dvtczHpSwrKyx9RFf6Vr01ulqN" +

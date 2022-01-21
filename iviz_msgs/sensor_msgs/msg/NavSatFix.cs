@@ -102,13 +102,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/NavSatFix";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "2d3a8cd499b9b4a0249fb98fd05cfa48";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VWXW/bNhR9968g4Icmg+M1aVF0GTrAadzMWGobUdJ2KDqDlq4lbhKpkpQd//udS31Y" +
                 "aZuhA7YgLzJ5z/0691wOxVxuVSq9MlpE0lOeK09io+7Fxlgh9V5c5WYt82/fi/bOUzEYDoYiKilWG0WJ" +

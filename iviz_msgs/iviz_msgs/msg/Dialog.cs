@@ -10,17 +10,17 @@ namespace Iviz.Msgs.IvizMsgs
         public const byte ACTION_ADD = 0;
         public const byte ACTION_REMOVE = 1;
         public const byte ACTION_REMOVEALL = 2;
-        /// A dialog with title, text, and a row of buttons
+        /// <summary> A dialog with title, text, and a row of buttons </summary>
         public const byte TYPE_PLAIN = 0;
-        /// A smaller dialog with title and text
+        /// <summary> A smaller dialog with title and text </summary>
         public const byte TYPE_SHORT = 1;
-        /// A dialog with an icon and a text
+        /// <summary> A dialog with an icon and a text </summary>
         public const byte TYPE_NOTICE = 2;
-        /// A dialog with a menu of multiple options
+        /// <summary> A dialog with a menu of multiple options </summary>
         public const byte TYPE_MENU = 3;
-        /// A tiny clickable dialog
+        /// <summary> A tiny clickable dialog </summary>
         public const byte TYPE_BUTTON = 4;
-        /// A dialog with title, text, icon, and a row of buttons
+        /// <summary> A dialog with title, text, icon, and a row of buttons </summary>
         public const byte TYPE_ICON = 5;
         public const byte BUTTONS_OK = 0;
         public const byte BUTTONS_YESNO = 1;
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "action")] public byte Action;
         [DataMember (Name = "id")] public string Id;
-        /// If not zero, the dialog will be removed after this time
+        /// <summary> If not zero, the dialog will be removed after this time </summary>
         [DataMember (Name = "lifetime")] public duration Lifetime;
         [DataMember (Name = "scale")] public double Scale;
         [DataMember (Name = "type")] public byte Type;
@@ -175,13 +175,13 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "iviz_msgs/Dialog";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "bbe9e66b575853ee815ca21e671ed62b";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VWW2/iOBR+z684Uh+mXbVsSy/brTQPFEKbHSAshBlVq1VkEidYk8QZ22nL/Po9di4k" +
                 "wGj3YadCJTn+zufP52YKlql7GAw9x535g9EIPsKlVbSNC3vqfrbRfnXMPphMcKlvVWvey9z255OBMwPN" +

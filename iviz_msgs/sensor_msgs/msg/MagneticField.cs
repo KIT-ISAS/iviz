@@ -14,17 +14,17 @@ namespace Iviz.Msgs.SensorMsgs
         // A covariance matrix of all zeros will be interpreted as "covariance unknown",
         // and to use the data a covariance will have to be assumed or gotten from some
         // other source
-        /// Timestamp is the time the
+        /// <summary> Timestamp is the time the </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // field was measured
         // frame_id is the location and orientation
         // of the field measurement
-        /// X, y, and z components of the
+        /// <summary> X, y, and z components of the </summary>
         [DataMember (Name = "magnetic_field")] public GeometryMsgs.Vector3 MagneticField_;
         // field vector in Tesla
         // If your sensor does not output 3 axes,
         // put NaNs in the components not reported.
-        /// Row major about x, y, z axes
+        /// <summary> Row major about x, y, z axes </summary>
         [DataMember (Name = "magnetic_field_covariance")] public double[/*9*/] MagneticFieldCovariance;
         // 0 is interpreted as variance unknown
     
@@ -71,13 +71,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/MagneticField";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "2f3b0b43eed0c9501de0fa3ff89a45aa";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VVXYvbRhR916+4RA/ZDVq3ZEugC30ohLT7sCE0S19KMdfSlTSJNKPOjGxrf33PHVle" +
                 "sTTgQmsMtuV7z/2Yc85QTg/CYfTSi43kaoqt0AM3VqIp6YORrqK9lNF54khMYZDS1PircyVH4+wmyyin" +

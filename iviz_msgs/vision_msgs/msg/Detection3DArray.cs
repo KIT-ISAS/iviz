@@ -61,13 +61,13 @@ namespace Iviz.Msgs.VisionMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "vision_msgs/Detection3DArray";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "ce4a6fa9e38b86b8d286a82799ca586d";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71ZbW/cuBH+XP0K4vwh9mFXvcRXX5DCKC5ZpDFwTXKX9PoSBAZX4u7yIokKSdlWfn2f" +
                 "mSG1srPp9UNjI3EkihzOyzPPDJkj9aNqbIjKbdTpStUmmipa14WF2jivtGqHJtqlW/+G8f0M58uieGF0" +

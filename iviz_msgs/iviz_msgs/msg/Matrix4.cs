@@ -7,7 +7,7 @@ namespace Iviz.Msgs.IvizMsgs
     [Preserve, DataContract (Name = RosMessageType)]
     public sealed class Matrix4 : IDeserializable<Matrix4>, IMessage
     {
-        /// Row major
+        /// <summary> Row major </summary>
         [DataMember (Name = "m")] public float[/*16*/] M;
     
         /// Constructor for empty message.
@@ -43,20 +43,20 @@ namespace Iviz.Msgs.IvizMsgs
             if (M.Length != 16) throw new RosInvalidSizeForFixedArrayException(nameof(M), M.Length, 16);
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 64;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "iviz_msgs/Matrix4";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "a50ec1c8c2829b160e4e35c9b42372f7";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE0vLyU8sMTaKNjSLVchVUFYoyi9XyE3Myi9S4OICAE9KojAcAAAA";
                 

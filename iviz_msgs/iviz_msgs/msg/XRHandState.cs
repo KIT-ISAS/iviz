@@ -93,13 +93,13 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "iviz_msgs/XRHandState";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "7e63e355743ca3360c1e27ce5a4ea185";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71UwW7TQBC9+ytG6qEtSoNUEIdK3BDQA1JRKy4IRRPvxF6x3nV3x0nN1/PWTpwW2sAB" +
                 "GkXy2jPvzcybmV2G4MimxZqdNcVHYSOR6uFRVBIa0dgvmlSllzeRfVqF2FDLrnnK+PUbad01ywN2643c" +

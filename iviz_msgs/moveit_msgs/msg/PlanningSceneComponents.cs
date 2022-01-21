@@ -63,20 +63,20 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "moveit_msgs/PlanningSceneComponents";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "bc993e784476960b918b6e7ad5bb58ce";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE41TwY6bMBS88xVP2ksrVZWS7a564eAQmmZLcIQtbXtCxpjEXbCR7Wy6f99HNqaq1Ep7" +
                 "QID9Zt7M8/gG+FF7GJT34qCgVZ02ykM4KpB2GK1RJky/IsAgnhScxsvevhfGaHNgUhkV0R+TG2RT8Cz6" +

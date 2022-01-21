@@ -17,13 +17,13 @@ namespace Iviz.Msgs.SensorMsgs
         public const byte UINT32 = 6;
         public const byte FLOAT32 = 7;
         public const byte FLOAT64 = 8;
-        /// Name of field
+        /// <summary> Name of field </summary>
         [DataMember (Name = "name")] public string Name;
-        /// Offset from start of point struct
+        /// <summary> Offset from start of point struct </summary>
         [DataMember (Name = "offset")] public uint Offset;
-        /// Datatype enumeration, see above
+        /// <summary> Datatype enumeration, see above </summary>
         [DataMember (Name = "datatype")] public byte Datatype;
-        /// How many elements in the field
+        /// <summary> How many elements in the field </summary>
         [DataMember (Name = "count")] public uint Count;
     
         /// Constructor for empty message.
@@ -71,13 +71,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/PointField";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "268eacb2962780ceac86cbd17e328150";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE02Qz06EMBCH7zzFL+FqTJZdkQsHozGamF0P6wNUGJYmtEPaQcPb20LXZU6Tr9/86eQ4" +
                 "99rDkPfqQuh5aD2kJ7TkG6dH0WzBHdgSRtZWQFbcDG2jleX4jPB54Kkt/rt07IyS+2wKTxXej+cKIWrs" +

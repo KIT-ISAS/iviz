@@ -24,25 +24,25 @@ namespace Iviz.Msgs.VisualizationMsgs
         public const byte MODIFY = 0;
         public const byte DELETE = 2;
         public const byte DELETEALL = 3;
-        /// Header for time/frame information
+        /// <summary> Header for time/frame information </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
-        /// Namespace to place this object in... used in conjunction with id to create a unique name for the object
+        /// <summary> Namespace to place this object in... used in conjunction with id to create a unique name for the object </summary>
         [DataMember (Name = "ns")] public string Ns;
-        /// Object ID useful in conjunction with the namespace for manipulating and deleting the object later
+        /// <summary> Object ID useful in conjunction with the namespace for manipulating and deleting the object later </summary>
         [DataMember (Name = "id")] public int Id;
-        /// Type of object
+        /// <summary> Type of object </summary>
         [DataMember (Name = "type")] public int Type;
-        /// 0 add/modify an object, 1 (deprecated), 2 deletes an object, 3 deletes all objects
+        /// <summary> 0 add/modify an object, 1 (deprecated), 2 deletes an object, 3 deletes all objects </summary>
         [DataMember (Name = "action")] public int Action;
-        /// Pose of the object
+        /// <summary> Pose of the object </summary>
         [DataMember (Name = "pose")] public GeometryMsgs.Pose Pose;
-        /// Scale of the object 1,1,1 means default (usually 1 meter square)
+        /// <summary> Scale of the object 1,1,1 means default (usually 1 meter square) </summary>
         [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale;
-        /// Color [0.0-1.0]
+        /// <summary> Color [0.0-1.0] </summary>
         [DataMember (Name = "color")] public StdMsgs.ColorRGBA Color;
-        /// How long the object should last before being automatically deleted.  0 means forever
+        /// <summary> How long the object should last before being automatically deleted.  0 means forever </summary>
         [DataMember (Name = "lifetime")] public duration Lifetime;
-        /// If this marker should be frame-locked, i.e. retransformed into its frame every timestep
+        /// <summary> If this marker should be frame-locked, i.e. retransformed into its frame every timestep </summary>
         [DataMember (Name = "frame_locked")] public bool FrameLocked;
         //Only used if the type specified has some use for them (eg. POINTS, LINE_STRIP, ...)
         [DataMember (Name = "points")] public GeometryMsgs.Point[] Points;
@@ -154,13 +154,13 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "visualization_msgs/Marker";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "4048c9de2a16f4ae8e0538085ebf1b97";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71X227bOBB9rr5igKBosnDkXLrdbgA/pLGbGMhtbbfdoigMWqJtNrKoklRc9+t7hpTk" +
                 "uEnafdg2MWKK4sycuZ1htmgoJc2dK47a7eVyGRttY21m7aW6UW1zq762u8oWmViNVoW07QthbqQhkac/" +

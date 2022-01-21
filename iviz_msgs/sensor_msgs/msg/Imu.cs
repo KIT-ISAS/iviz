@@ -22,13 +22,13 @@ namespace Iviz.Msgs.SensorMsgs
         // covariance matrix, and disregard the associated estimate.
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation;
-        /// Row major about x, y, z axes
+        /// <summary> Row major about x, y, z axes </summary>
         [DataMember (Name = "orientation_covariance")] public double[/*9*/] OrientationCovariance;
         [DataMember (Name = "angular_velocity")] public GeometryMsgs.Vector3 AngularVelocity;
-        /// Row major about x, y, z axes
+        /// <summary> Row major about x, y, z axes </summary>
         [DataMember (Name = "angular_velocity_covariance")] public double[/*9*/] AngularVelocityCovariance;
         [DataMember (Name = "linear_acceleration")] public GeometryMsgs.Vector3 LinearAcceleration;
-        /// Row major x, y z
+        /// <summary> Row major x, y z </summary>
         [DataMember (Name = "linear_acceleration_covariance")] public double[/*9*/] LinearAccelerationCovariance;
     
         /// Constructor for empty message.
@@ -92,13 +92,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/Imu";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "6a62c6daae103f4ff57a132d6f95cec2";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71WTW/bRhC981cMooOlQpIbpwhQAz0UCNrqYCBtkl6KVBiRI3JjclfZXVqWf33e7IoS" +
                 "7SRogX4IAkSRO+/NvPnihN42JhC+TJ2EwLVQdNS4tqKKI9PWu47Y0urmHU1XVnw03NKNcOi9dGIjvbMm" +

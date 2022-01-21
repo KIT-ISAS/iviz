@@ -8,13 +8,13 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class Scene : IDeserializable<Scene>, IMessage
     {
         // A complete scene 
-        /// Name of the scene
+        /// <summary> Name of the scene </summary>
         [DataMember (Name = "name")] public string Name;
-        /// Original filename
+        /// <summary> Original filename </summary>
         [DataMember (Name = "filename")] public string Filename;
-        /// List of models to be included
+        /// <summary> List of models to be included </summary>
         [DataMember (Name = "includes")] public Include[] Includes;
-        /// List of lights
+        /// <summary> List of lights </summary>
         [DataMember (Name = "lights")] public Light[] Lights;
     
         /// Constructor for empty message.
@@ -96,13 +96,13 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "iviz_msgs/Scene";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "5e11da295d41bbfbd413d6274556c4a9";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VyW7bMBA9R19BINcCbZN0BXpQJDomqg2SnDYoCoGWKZutNpBUln59h5Io08i1qQ+m" +
                 "9GY4fPM4MzpHLiq7pq+ZYkiWrGXIcaQSvN2jljbs7OwcRbCirkLqMLsYh4rXzDjFgu95S+sFdEhb1sOO" +

@@ -66,13 +66,13 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "actionlib_tutorials/FibonacciActionResult";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "bee73a9fe29ae25e966e105f5553dd03";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71WTXPbNhC981dgRofYnVppkzZNPaODKimOOk7isdVeOh0PCK5ItCSo4kOy/n3eghRF" +
                 "OVajQxKNbVoS8Pbh7dvFviWZkRVFfCRSeV2bUqf3lcvd86talnde+uCEi4/kjU5rI5XSt+RC6YWNj2T0" +

@@ -344,7 +344,7 @@ namespace Iviz.MsgsGen
             {
                 return new[]
                 {
-                    "/// Constant size of this message.",
+                    "/// <summary> Constant size of this message. </summary> ",
                     $"[Preserve] public const int RosFixedMessageLength = {fixedSize};",
                     "",
                     $"public {readOnlyId}int RosMessageLength => RosFixedMessageLength;"
@@ -1075,7 +1075,7 @@ namespace Iviz.MsgsGen
             lines.Add($"    public {readOnlyId}string RosType => RosMessageType;");
 
             lines.Add("");
-            lines.Add("    /// Full ROS name of this message.");
+            lines.Add("    /// <summary> Full ROS name of this message. </summary>");
             lines.Add($"    [Preserve] public const string RosMessageType = \"{RosPackage}/{Name}\";");
 
 
@@ -1084,7 +1084,7 @@ namespace Iviz.MsgsGen
             const string emptyMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
             const string emptyDependenciesBase64 = "H4sIAAAAAAAAE+MCAJMG1zIBAAAA";
 
-            lines.Add("    /// MD5 hash of a compact representation of the message.");
+            lines.Add("    /// <summary> MD5 hash of a compact representation of the message. </summary>");
 
             string md5Hash = Md5Hash switch
             {
@@ -1097,7 +1097,7 @@ namespace Iviz.MsgsGen
             lines.Add("");
 
             lines.Add(
-                "    /// Base64 of the GZip'd compression of the concatenated dependencies file.");
+                "    /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>");
 
             string catDependencies = CreateCatDependencies();
             string compressedDeps = Compress(catDependencies);

@@ -15,29 +15,29 @@ namespace Iviz.Msgs.SensorMsgs
         // sensor will have min_range===max_range===distance of detection.
         // These sensors follow REP 117 and will output -Inf if the object is detected
         // and +Inf if the object is outside of the detection range.
-        /// Timestamp in the header is the time the ranger
+        /// <summary> Timestamp in the header is the time the ranger </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // returned the distance reading
         // Radiation type enums
         // If you want a value added to this list, send an email to the ros-users list
         public const byte ULTRASOUND = 0;
         public const byte INFRARED = 1;
-        /// The type of radiation used by the sensor
+        /// <summary> The type of radiation used by the sensor </summary>
         [DataMember (Name = "radiation_type")] public byte RadiationType;
         // (sound, IR, etc) [enum]
-        /// The size of the arc that the distance reading is
+        /// <summary> The size of the arc that the distance reading is </summary>
         [DataMember (Name = "field_of_view")] public float FieldOfView;
         // valid for [rad]
         // the object causing the range reading may have
         // been anywhere within -field_of_view/2 and
         // field_of_view/2 at the measured range. 
         // 0 angle corresponds to the x-axis of the sensor.
-        /// Minimum range value [m]
+        /// <summary> Minimum range value [m] </summary>
         [DataMember (Name = "min_range")] public float MinRange;
-        /// Maximum range value [m]
+        /// <summary> Maximum range value [m] </summary>
         [DataMember (Name = "max_range")] public float MaxRange;
         // Fixed distance rangers require min_range==max_range
-        /// Range data [m]
+        /// <summary> Range data [m] </summary>
         [DataMember (Name = "range")] public float Range_;
         // (Note: values < range_min or > range_max
         // should be discarded)
@@ -96,13 +96,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/Range";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "c005c34273dc426c67a020a87bc24148";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61W224bNxB9368YQA+RGkuJ04cGRlQggONWQOoEkvNkBAK1pLRsuaRMcnXp1/cMuVpZ" +
                 "jqM2QBeGtUtyzsycuXB6NNN2ZRR5YVf4r4TENy29q0lYEmXUm3bTU6xEJFXrGEhZ5Vd7HJGQWTsfQ9Ej" +
