@@ -540,6 +540,12 @@ namespace Iviz.Core
             return MemoryMarshal.Read<T>(span);
         }
 
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array, Range range)
+        {
+            return array.AsSpan(range);
+        }
+
+
         public static void TryReturn(this Array _)
         {
         }

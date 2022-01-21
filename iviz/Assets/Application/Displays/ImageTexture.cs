@@ -29,7 +29,7 @@ namespace Iviz.Displays
         bool overrideIntensityBounds;
 
         public event Action<Texture2D?>? TextureChanged;
-        
+
         public Vector2 IntensityBounds
         {
             get => NormalizedIntensityBounds / normalizationFactor;
@@ -335,7 +335,7 @@ namespace Iviz.Displays
                     {
                         try
                         {
-                            Set(image.Width, image.Height, encoding, newBitmapBuffer.AsSpan(bmpHeaderLength..));
+                            Set(image.Width, image.Height, encoding, newBitmapBuffer.AsReadOnlySpan(bmpHeaderLength..));
                         }
                         finally
                         {
@@ -527,7 +527,7 @@ namespace Iviz.Displays
             readonly byte high;
             public readonly byte low;
         }
-        
+
         static void CopyR16ToR8(ReadOnlySpan<byte> src, Span<byte> dst)
         {
             var srcPtr = src.Cast<R16>();
@@ -536,7 +536,7 @@ namespace Iviz.Displays
                 dst[i] = srcPtr[i].low;
             }
         }
-        
+
         [StructLayout(LayoutKind.Sequential)]
         struct Rgba
         {
@@ -548,7 +548,7 @@ namespace Iviz.Displays
         {
             public readonly byte r, g, b;
         }
-        
+
         static void CopyRgb24ToRgba32(ReadOnlySpan<byte> src, Span<byte> dst)
         {
             var srcPtr = src.Cast<Rgb>();
@@ -562,7 +562,7 @@ namespace Iviz.Displays
                 colorOut.g = colorIn.g;
                 colorOut.b = colorIn.b;
                 colorOut.a = 255;
-                
+
                 dstPtr[i] = colorOut;
             }
         }

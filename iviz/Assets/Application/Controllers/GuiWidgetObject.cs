@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Numerics;
 using Iviz.App.ARDialogs;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -11,7 +12,9 @@ using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using UnityEngine;
+using Vector3 = UnityEngine.Vector3;
 
+// ReSharper disable ConvertIfStatementToSwitchStatement
 namespace Iviz.Controllers
 {
     internal sealed class GuiWidgetObject
@@ -49,7 +52,7 @@ namespace Iviz.Controllers
             Id = msg.Id;
             ExpirationTime = DateTime.MaxValue;
 
-            float scale = (float)msg.Scale;
+            float scale = msg.Scale == 0 ? 1f : (float)msg.Scale;
 
             var widget = ResourcePool.Rent(resourceKey, node.Transform).GetComponent<IWidget>();
             if (widget == null)
@@ -57,10 +60,12 @@ namespace Iviz.Controllers
                 throw new MissingAssetFieldException("Gui object does not have a widget!");
             }
 
+            /*
             if (widget is IWidgetWithCaption withCaption && msg.Caption.Length != 0)
             {
                 withCaption.Caption = msg.Caption;
             }
+            */
 
             if (widget is IWidgetWithColor withColor)
             {
@@ -75,7 +80,7 @@ namespace Iviz.Controllers
                 }
             }
 
-            if (widget is IWidgetWithScale withScale && msg.SecondaryScale != 0)
+            if (msg.SecondaryScale != 0 && widget is IWidgetWithScale withScale)
             {
                 withScale.SecondaryScale = (float)msg.SecondaryScale;
             }
@@ -110,7 +115,7 @@ namespace Iviz.Controllers
                 throw new MissingAssetFieldException("Gui object does not have a dialog!");
             }
 
-            dialog.Scale = (float)msg.Scale;
+            dialog.Scale = msg.Scale == 0 ? 1f : (float)msg.Scale;
             dialog.PivotFrameId = msg.Header.FrameId;
             dialog.PivotFrameOffset = msg.TfOffset.Ros2Unity();
             dialog.PivotDisplacement = AdjustDisplacement(msg.TfDisplacement);
@@ -134,12 +139,6 @@ namespace Iviz.Controllers
             
             if (dialog is IDialogWithIcon withIcon)
             {
-                if (msg.Icon >= (byte) XRIcon.None)
-                {
-                    
-                }
-                
-                
                 withIcon.Icon = (XRIcon)msg.Icon;
             }
 
@@ -166,8 +165,11 @@ namespace Iviz.Controllers
 
         static Vector3 AdjustDisplacement(in Msgs.GeometryMsgs.Vector3 displacement)
         {
-            var (x, y, z) = displacement.ToUnity();
-            return new Vector3(x, y, -z);
+            Vector3 v;
+            v.x = (float)displacement.X;
+            v.y = (float)displacement.Y;
+            v.z = -(float)displacement.Z;
+            return v;
         }
 
         GuiWidgetObject(GuiWidgetObject source)

@@ -1,12 +1,10 @@
 #nullable enable
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using Iviz.App.ARDialogs;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Iviz.Displays.ARDialogs;
 using Iviz.Displays.XRDialogs;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
@@ -128,9 +126,28 @@ namespace Iviz.Controllers
 
         void HandleAddWidget(Widget msg)
         {
-            if (widgets.TryGetValue(msg.Id, out var oldGuiObject))
+            if (string.IsNullOrEmpty(msg.Id))
             {
-                oldGuiObject.Dispose();
+                RosLogger.Info($"{this}: Cannot add dialog with empty id");
+                return;
+            }
+
+            if (msg.Color.IsInvalid() || msg.SecondaryColor.IsInvalid())
+            {
+                RosLogger.Info($"{this}: Color of widget '{msg.Id}' contains invalid values");
+                return;
+            }
+
+            if (msg.Scale.IsInvalid() || msg.SecondaryScale.IsInvalid())
+            {
+                RosLogger.Info($"{this}: Scale of widget '{msg.Id}' contains invalid values");
+                return;
+            }
+
+            if (msg.Pose.IsInvalid())
+            {
+                RosLogger.Info($"{this}: Pose of widget '{msg.Id}' contains invalid values");
+                return;
             }
 
             var resourceKey = (WidgetType)msg.Type switch
@@ -147,8 +164,13 @@ namespace Iviz.Controllers
 
             if (resourceKey == null)
             {
-                RosLogger.Error($"{this}: Widget '{msg.Id}' has unknown type {((int)msg.Type).ToString()}");
+                RosLogger.Error($"{this}: Widget '{msg.Id}' has unknown type {msg.Type.ToString()}");
                 return;
+            }
+
+            if (widgets.TryGetValue(msg.Id, out var existingGuiObject))
+            {
+                existingGuiObject.Dispose();
             }
 
             var guiObject = new GuiWidgetObject(this, msg, resourceKey) { Interactable = Interactable };
@@ -182,16 +204,41 @@ namespace Iviz.Controllers
                     HandleAddDialog(msg);
                     break;
                 default:
-                    RosLogger.Info($"{this}: Unknown action id {((int)msg.Action).ToString()}");
+                    RosLogger.Info($"{this}: Unknown action id {msg.Action.ToString()}");
                     break;
             }
         }
 
         void HandleAddDialog(Dialog msg)
         {
-            if (dialogs.TryGetValue(msg.Id, out var oldGuiObject))
+            if (string.IsNullOrEmpty(msg.Id))
             {
-                oldGuiObject.Dispose();
+                RosLogger.Info($"{this}: Cannot add dialog with empty id");
+                return;
+            }
+
+            if (msg.Icon > (byte)XRIcon.Question)
+            {
+                RosLogger.Info($"{this}: Dialog '{msg.Id}' has unknown icon id {msg.Action.ToString()}");
+                return;
+            }
+
+            if (msg.Buttons > (byte)XRButtonSetup.Backward)
+            {
+                RosLogger.Info($"{this}: Dialog '{msg.Id}' has unknown button setup id {msg.Action.ToString()}");
+                return;
+            }
+
+            if (msg.BackgroundColor.IsInvalid())
+            {
+                RosLogger.Info($"{this}: Color of dialog '{msg.Id}' contains invalid values");
+                return;
+            }
+
+            if (msg.TfDisplacement.IsInvalid() || msg.TfOffset.IsInvalid() || msg.DialogDisplacement.IsInvalid())
+            {
+                RosLogger.Info($"{this}: One of the offset fields of dialog '{msg.Id}' contains invalid values");
+                return;
             }
 
             var resourceKey = (DialogType)msg.Type switch
@@ -207,8 +254,19 @@ namespace Iviz.Controllers
 
             if (resourceKey == null)
             {
-                RosLogger.Error($"{this}: Dialog '{msg.Id}' has unknown type {((int)msg.Type).ToString()}");
+                RosLogger.Error($"{this}: Dialog '{msg.Id}' has unknown type {msg.Type.ToString()}");
                 return;
+            }
+
+            if (dialogs.TryGetValue(msg.Id, out var existingGuiObject))
+            {
+                if (msg.Lifetime.ToTimeSpan() < TimeSpan.Zero)
+                {
+                    MarkAsExpired(existingGuiObject);
+                    return;
+                }
+
+                existingGuiObject.Dispose();
             }
 
             var guiObject = new GuiWidgetObject(this, msg, resourceKey);
@@ -234,13 +292,27 @@ namespace Iviz.Controllers
 
         void CheckDeadDialogs()
         {
+            var now = GameThread.Now;
+
+            List<GuiWidgetObject>? deadObjects = null;
             foreach (var guiObject in dialogs.Values)
             {
-                if (guiObject.ExpirationTime > GameThread.Now)
+                if (guiObject.ExpirationTime > now)
                 {
                     return;
                 }
-                
+
+                deadObjects ??= new List<GuiWidgetObject>();
+                deadObjects.Add(guiObject);
+            }
+
+            if (deadObjects == null)
+            {
+                return;
+            }
+
+            foreach (var guiObject in deadObjects)
+            {
                 guiObject.Dispose();
                 dialogs.Remove(guiObject.Id);
             }

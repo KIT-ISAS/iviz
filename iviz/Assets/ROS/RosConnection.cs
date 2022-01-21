@@ -155,7 +155,7 @@ namespace Iviz.Ros
             tryConnectOnce = true;
             Signal();
         }
-
+        
         protected abstract ValueTask<bool> ConnectAsync();
 
         public virtual void Disconnect()
