@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>Iviz.RemoteLib</AssemblyName>
+        <RootNamespace>Iviz.RemoteLib</RootNamespace>
+        <LangVersion>default</LangVersion>
+        <TargetFramework>net6.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\iviz_roslib\iviz_roslib.csproj" />
+    </ItemGroup>
+
+</Project>
