@@ -1,9 +1,14 @@
-﻿using System.Text;
+﻿using System.Collections;
+using System.Text;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Roslib;
 
 namespace Iviz.RemoteLib;
 
+/// <summary>
+/// Class that can be used to remotely control an instance of the iviz app.
+/// For this class to work, the app must be already running and connected to a ROS master.
+/// </summary>
 public sealed class RemoteController
 {
     readonly RosClient client;
@@ -17,6 +22,19 @@ public sealed class RemoteController
         this.ivizId = ivizId;
     }
 
+    /// <summary>
+    /// Creates a module that listens to the given topic, or returns the name of the module already listening to it.
+    /// Note that only one module can listen to a given topic at the same time.
+    /// </summary>
+    /// <param name="topic">The topic to listen to.</param>
+    /// <param name="requestedId">
+    /// An identifier to refer to the created module. If null, the identifier will be set to the topic.
+    /// This argument will be ignored if a module for that topic already exists.
+    /// </param>
+    /// <returns>
+    /// If no module that listens to the topic already exists, the call will return <see cref="requestedId"/>.
+    /// Otherwise, it will return the id of the existing module. 
+    /// </returns>
     public string AddModuleFromTopic(string topic, string? requestedId = null)
     {
         if (string.IsNullOrEmpty(topic))
@@ -40,6 +58,19 @@ public sealed class RemoteController
         return addModuleResponse.Id;
     }
 
+    /// <summary>
+    /// Adds a module of type <see cref="AddModuleType"/>. Some module types such as <see cref="AddModuleType.AugmentedReality"/>
+    /// are unique, while others such as <see cref="AddModuleType.Robot"/> can be instanced multiple times.
+    /// If a module type is unique and it already exists, the id of the existing module will be returned.
+    /// Note that if the module should listen to a given ROS topic, <see cref="AddModuleFromTopic"/> must be used instead.
+    /// </summary>
+    /// <param name="type">The module type to create.</param>
+    /// <param name="requestedId">The id to use if the call creates a new module.</param>
+    /// <returns>
+    /// The id of the module. Equal to <see cref="requestedId"/> if a new module was created, otherwise the call
+    /// returns the id of the existing module.
+    /// Applications are encouraged to use the returned value instead of assuming that <see cref="requestedId"/> was used. 
+    /// </returns>
     public string AddModule(AddModuleType type, string requestedId)
     {
         if (requestedId == null)
@@ -86,6 +117,11 @@ public sealed class RemoteController
         }
     }
     
+    /// <summary>
+    /// Toggles the visibility of the given module, if supported.
+    /// </summary>
+    /// <param name="id">The id of the module.</param>
+    /// <param name="value">The requested visibility.</param>
     public void SetVisible(string id, bool value)
     {
         if (string.IsNullOrEmpty(id))
@@ -97,7 +133,7 @@ public sealed class RemoteController
         configFields.Clear();
         using (var processor = new ConfigurationSerializer(configStr, configFields))
         {
-            new BasicConfiguration(value).Serialize(processor);
+            processor.Serialize(value, "Visible");
         }
 
         var updateModuleResponse = client.CallService($"{ivizId}/update_module",
@@ -121,6 +157,7 @@ public enum AddModuleType
     AugmentedReality = ModuleType.AugmentedReality,
     Joystick = ModuleType.Joystick,
     Robot = ModuleType.Robot,
+    DepthCloud = ModuleType.DepthCloud,
 }
 
 public enum ModuleType

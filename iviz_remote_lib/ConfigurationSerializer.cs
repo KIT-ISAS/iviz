@@ -9,6 +9,12 @@ namespace Iviz.RemoteLib;
 
 internal readonly struct ConfigurationSerializer : IDisposable
 {
+    static readonly Dictionary<ModuleType, string> ModuleNames =
+        typeof(ModuleType).GetEnumValues()
+            .Cast<ModuleType>()
+            .Select(module => (key: module, value: module.ToString()))
+            .ToDictionary(entry => entry.key, entry => entry.value);
+
     readonly JsonTextWriter writer;
     readonly List<string> fields;
 
@@ -51,7 +57,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
         fields.Add(fieldName!);
     }
 
-    public void Serialize(ColorRGBA? field, [CallerArgumentExpression("field")] string? fieldName = null)
+    public void Serialize(in ColorRGBA? field, [CallerArgumentExpression("field")] string? fieldName = null)
     {
         if (field is not { } value)
         {
@@ -63,7 +69,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
         fields.Add(fieldName!);
     }
     
-    public void Serialize(Vector3? field, [CallerArgumentExpression("field")] string? fieldName = null)
+    public void Serialize(in Vector3? field, [CallerArgumentExpression("field")] string? fieldName = null)
     {
         if (field is not { } value)
         {
@@ -90,7 +96,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
     public void Serialize(ModuleType field, [CallerArgumentExpression("field")] string? fieldName = null)
     {
         writer.WritePropertyName(fieldName!);
-        writer.WriteValue(field.ToString());
+        writer.WriteValue(ModuleNames[field]);
         fields.Add(fieldName!);
     }
 }
