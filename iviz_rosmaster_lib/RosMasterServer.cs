@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs.RosgraphMsgs;
@@ -17,7 +19,6 @@ public sealed class RosMasterServer : IDisposable
 {
     public const int DefaultPort = 11311;
 
-    readonly HttpListener listener;
     readonly AsyncLock rosLock = new();
     readonly Dictionary<string, Func<XmlRpcValue[], XmlRpcArg>> methods;
     readonly Dictionary<string, Func<XmlRpcValue[], CancellationToken, ValueTask>> lateCallbacks;
@@ -28,6 +29,7 @@ public sealed class RosMasterServer : IDisposable
     readonly Dictionary<string, XmlRpcArg> parameters = new();
     readonly Dictionary<string, HashSet<Uri>> parameterSubscribers = new();
     readonly CancellationTokenSource runningTs = new();
+
     readonly Task? backgroundTask;
 
     bool disposed;
@@ -43,11 +45,16 @@ public sealed class RosMasterServer : IDisposable
         public const int Success = 1;
     }
 
+    static readonly XmlRpcArg DefaultOkResponse = OkResponse(0);
+    static readonly XmlRpcArg FailResponse = new(StatusCode.Failure, "Request failed", 0);
+
+    static XmlRpcArg OkResponse(XmlRpcArg arg) => new(StatusCode.Success, "", arg);
+    static XmlRpcArg ErrorResponse(string msg) => new(StatusCode.Error, msg, 0);
+
     public RosMasterServer(Uri masterUri, string callerId = "/iviz_master", bool startInBackground = false)
     {
         MasterUri = masterUri;
         MasterCallerId = callerId;
-        listener = new HttpListener(masterUri.Port);
 
         methods = new Dictionary<string, Func<XmlRpcValue[], XmlRpcArg>>
         {
@@ -91,13 +98,9 @@ public sealed class RosMasterServer : IDisposable
             return;
         }
 
-        runningTs.Cancel();
-        listener.Dispose();
-        runningTs.Dispose();
-
-        backgroundTask?.WaitNoThrow(2000, this);
-
         disposed = true;
+        runningTs.Cancel();
+        backgroundTask?.WaitNoThrow(2000, this);
     }
 
     public async ValueTask DisposeAsync()
@@ -107,16 +110,12 @@ public sealed class RosMasterServer : IDisposable
             return;
         }
 
+        disposed = true;
         runningTs.Cancel();
-        await listener.DisposeAsync();
-        runningTs.Dispose();
-
         if (backgroundTask != null)
         {
-            await backgroundTask.AwaitNoThrow(2000, this);
+            await backgroundTask.AwaitNoThrow(2000, this, default);
         }
-
-        disposed = true;
     }
 
     public override string ToString()
@@ -144,12 +143,20 @@ public sealed class RosMasterServer : IDisposable
                 "RosMasterServer has already been initialized as a background task");
         }
 
-        Logger.LogDebugFormat("** {0}: Starting!", this);
+        var listener = new HttpListener(MasterUri.Port);
+
+        Logger.LogDebugFormat("{0}: Starting!", this);
         AddKey("/run_id", Guid.NewGuid().ToString());
+
         var startTask = TaskUtils.Run(() => listener.StartAsync(StartContext, true).AwaitNoThrow(this), Token);
-        var rosoutTask = TaskUtils.Run(() => ManageRosoutAggAsync().AwaitNoThrow(this), Token);
-        await (startTask, rosoutTask).WhenAll();
-        Logger.LogDebugFormat("** {0}: Leaving thread.", this);
+
+        await TaskUtils.Run(() => ManageRosoutAggAsync(MasterUri, Token).AwaitNoThrow(this), Token);
+
+        await listener.DisposeAsync();
+        await startTask;
+
+        runningTs.Dispose();
+        Logger.LogDebugFormat("{0}: Leaving thread.", this);
     }
 
     async ValueTask StartContext(HttpListenerContext context, CancellationToken token)
@@ -160,49 +167,34 @@ public sealed class RosMasterServer : IDisposable
         }
         catch (Exception e)
         {
+            if (e is SocketException or IOException)
+            {
+                Logger.LogDebugFormat("{0}: Error in StartContext: {1}", this, e);
+                return;
+            }
+
             Logger.LogErrorFormat("{0}: Error in StartContext: {1}", this, e);
         }
     }
 
-    async ValueTask ManageRosoutAggAsync()
+    static async ValueTask ManageRosoutAggAsync(Uri masterUri, CancellationToken token)
     {
-        await Task.Delay(100, Token);
+        await Task.Delay(100, token);
 
-        var ownUri = new Uri($"http://{MasterUri.Host}:0");
+        var ownUri = new Uri($"http://{masterUri.Host}:0");
 
         Logger.LogDebug("** Starting Rosout routine...");
-        
-        try
-        {
-            await using var client = await RosClient.CreateAsync(MasterUri, "/rosout", ownUri, token: Token);
-            await using var reader = new RosChannelReader<Log>();
-            await using var writer = new RosChannelWriter<Log>();
-            
-            await reader.StartAsync(client, "/rosout", Token);
-            await writer.StartAsync(client, "/rosout_agg", Token);
 
-            Logger.LogDebug("** Rosout running!");
-            while (!runningTs.IsCancellationRequested)
-            {
-                writer.Write(await reader.ReadAsync(Token));
-            }
-        }
-        catch (OperationCanceledException)
+        await using var client = await RosClient.CreateAsync(masterUri, "/rosout", ownUri, token: token);
+        await using var reader = await client.CreateReaderAsync<Log>("/rosout", token);
+        await using var writer = await client.CreateWriterAsync<Log>("/rosout_agg", true, token);
+
+        Logger.LogDebug("** Rosout running!");
+        while (!token.IsCancellationRequested)
         {
-        }
-        catch (Exception e)
-        {
-            Logger.LogDebugFormat("** Rosout stopped with exception: {0}", e);
+            writer.Write(await reader.ReadAsync(token));
         }
     }
-
-    static readonly (int code, string msg, XmlRpcArg arg) DefaultOkResponse = OkResponse(0);
-
-    static (int code, string msg, XmlRpcArg arg) OkResponse(XmlRpcArg arg) => (StatusCode.Success, "", arg);
-
-    static (int code, string msg, XmlRpcArg arg) FailResponse() => (StatusCode.Failure, "Request failed", 0);
-
-    static (int code, string msg, XmlRpcArg arg) ErrorResponse(string msg) => (StatusCode.Error, msg, 0);
 
     static XmlRpcArg GetPid(XmlRpcValue[] _)
     {
@@ -294,7 +286,7 @@ public sealed class RosMasterServer : IDisposable
         }
         catch (Exception e)
         {
-            Logger.LogFormat("{0}: {1}", this, e);
+            Logger.LogDebugFormat("{0}: {1}", this, e);
         }
     }
 
@@ -574,13 +566,12 @@ public sealed class RosMasterServer : IDisposable
                 }
             }
 
-            XmlRpcArg arg = args[2].AsArg();
+            var arg = args[2].AsArg();
             if (!arg.IsValid)
             {
                 return ErrorResponse($"Parameter [{key}] could not be parsed'");
             }
 
-            //Console.WriteLine("++ Param " + key + " --> " + args[2]);
             parameters[key] = arg;
 
             if (!parameterSubscribers.TryGetValue(key, out var subscribers)
@@ -599,7 +590,7 @@ public sealed class RosMasterServer : IDisposable
             {
                 NotifyParamSubscriber(subscriberUri, methodArgs);
             }
-        });
+        }, default);
 
         return DefaultOkResponse;
     }
@@ -637,7 +628,7 @@ public sealed class RosMasterServer : IDisposable
                     {
                         NotifyParamSubscriber(subscriberUri, methodArgs);
                     }
-                });
+                }, default);
             }
         }
     }
@@ -792,7 +783,7 @@ public sealed class RosMasterServer : IDisposable
 
         if (callerId == "/")
         {
-            return FailResponse();
+            return FailResponse;
         }
 
         string[] nodes = callerId.Split('/');
@@ -805,7 +796,7 @@ public sealed class RosMasterServer : IDisposable
             }
         }
 
-        return FailResponse();
+        return FailResponse;
     }
 
     XmlRpcArg SystemMulticall(XmlRpcValue[] args)

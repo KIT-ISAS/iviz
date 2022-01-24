@@ -117,13 +117,13 @@ namespace Iviz.XmlRpc
             content = str.ToString();
         }
 
-        XmlRpcArg((int code, string message, XmlRpcArg arg) f)
+        public XmlRpcArg(int code, string message, XmlRpcArg arg)
         {
             using var str = BuilderPool.Rent();
             str.Append("<value><array><data>");
-            str.Append(new XmlRpcArg(f.code).content);
-            str.Append(new XmlRpcArg(f.message).content);
-            str.Append(f.arg.content);
+            str.Append(new XmlRpcArg(code).content);
+            str.Append(new XmlRpcArg(message).content);
+            str.Append(arg.content);
             str.Append("</data></array></value>");
             content = str.ToString();
         }
@@ -247,7 +247,5 @@ namespace Iviz.XmlRpc
         public static implicit operator XmlRpcArg((XmlRpcArg, XmlRpcArg)[] f) => new(f);
 
         public static implicit operator XmlRpcArg((XmlRpcArg, XmlRpcArg, XmlRpcArg) f) => new(f);
-
-        public static implicit operator XmlRpcArg((int, string, XmlRpcArg) f) => new(f);
     }
 }

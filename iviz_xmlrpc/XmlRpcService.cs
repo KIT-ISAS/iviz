@@ -3,7 +3,9 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -126,17 +128,18 @@ namespace Iviz.XmlRpc
             str.Append("<?xml version=\"1.0\"?>\n" +
                        "<methodCall>\n");
             str.Append("<methodName>").Append(method).Append("</methodName>\n");
-            
+
             str.Append("<params>\n");
             foreach (var arg in args)
             {
                 str.Append("<param>").Append(arg.ToString()).Append("</param>\n");
             }
+
             str.Append("</params>\n" +
                        "</methodCall>\n");
 
             //Logger.Log(">> Payload " + str);
-            
+
             return str.AsRent();
         }
 
@@ -222,7 +225,7 @@ namespace Iviz.XmlRpc
             }
 
             string inData;
-            
+
             try
             {
                 using var outData = CreateRequest(method, args);
@@ -230,7 +233,7 @@ namespace Iviz.XmlRpc
 
                 await request.StartAsync(token);
                 await request.SendRequestAsync(outData, false, false, token);
-                
+
                 (inData, _, _) = await request.GetResponseAsync(token);
             }
             catch (OperationCanceledException)
@@ -349,14 +352,14 @@ namespace Iviz.XmlRpc
                     await httpContext.RespondAsync(response, token: token);
                 }
             }
-            catch (OperationCanceledException)
-            {
-                throw;
-            }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("XmlRpcService: Error during parsing {0}", e.ToString());
-                await httpContext.RespondWithUnexpectedErrorAsync(token: token);
+                if (e is not IOException or SocketException or OperationCanceledException)
+                {
+                    Logger.LogErrorFormat("XmlRpcService: Error during parsing", e);
+                    await httpContext.RespondWithUnexpectedErrorAsync(token: token);
+                }
+
                 throw;
             }
         }
