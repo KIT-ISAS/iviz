@@ -22,10 +22,12 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         readonly ResourceKey<GameObject> resourceKey;
         readonly IDisplay display;
+        float scale = 1; 
 
         public string ParentId => node.Parent?.Id ?? TfListener.DefaultFrame.Id;
         public string Id { get; }
         public DateTime ExpirationTime { get; }
+        public WidgetType Type { get; }
 
         public bool Visible
         {
@@ -48,24 +50,40 @@ namespace Iviz.Controllers
         {
             this.resourceKey = resourceKey;
             node = new FrameNode(msg.Id);
-            node.AttachTo(msg.Header.FrameId);
             Id = msg.Id;
             ExpirationTime = DateTime.MaxValue;
-
-            float scale = msg.Scale == 0 ? 1f : (float)msg.Scale;
-
+            Type = (WidgetType)msg.Type;
+            
             var widget = ResourcePool.Rent(resourceKey, node.Transform).GetComponent<IWidget>();
-            if (widget == null)
+
+            display = widget ?? throw new MissingAssetFieldException("Gui object does not have a widget!");
+
+            if (widget is IWidgetCanBeMoved canBeMoved)
             {
-                throw new MissingAssetFieldException("Gui object does not have a widget!");
+                canBeMoved.Moved += direction => parent.OnWidgetMoved(this, direction * scale);
             }
 
+            if (widget is IWidgetCanBeRotated canBeRotated)
+            {
+                canBeRotated.Moved += angle => parent.OnWidgetRotated(this, angle);
+            }
+            
+            UpdateWidget(msg);
+        }
+
+        public void UpdateWidget(Widget msg)
+        {
             /*
             if (widget is IWidgetWithCaption withCaption && msg.Caption.Length != 0)
             {
                 withCaption.Caption = msg.Caption;
             }
             */
+            node.AttachTo(msg.Header.FrameId);
+
+            scale = msg.Scale == 0 ? 1f : (float)msg.Scale;
+
+            var widget = (IWidget)display;
 
             if (widget is IWidgetWithColor withColor)
             {
@@ -84,18 +102,6 @@ namespace Iviz.Controllers
             {
                 withScale.SecondaryScale = (float)msg.SecondaryScale;
             }
-
-            if (widget is IWidgetCanBeMoved canBeMoved)
-            {
-                canBeMoved.Moved += direction => parent.OnWidgetMoved(this, direction * scale);
-            }
-
-            if (widget is IWidgetCanBeRotated canBeRotated)
-            {
-                canBeRotated.Moved += angle => parent.OnWidgetRotated(this, angle);
-            }
-
-            display = widget;
 
             var transform = node.Transform;
             transform.SetLocalPose(msg.Pose.Ros2Unity());
@@ -137,7 +143,7 @@ namespace Iviz.Controllers
                 {
                     RosLogger.Info($"{this}: Dialog '{Id}' supports captions but the caption is empty");
                 }
-                
+
                 withCaption.Caption = msg.Caption;
             }
 
@@ -145,7 +151,7 @@ namespace Iviz.Controllers
             {
                 withAlignment.CaptionAlignment = (CaptionAlignmentType)msg.CaptionAlignment;
             }
-            
+
             if (dialog is IDialogWithIcon withIcon)
             {
                 withIcon.Icon = (XRIcon)msg.Icon;

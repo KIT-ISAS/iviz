@@ -10,7 +10,7 @@ Shader "iviz/Simple Lit"
         LOD 150
 
         CGPROGRAM
-        #pragma surface surf Lambert noforwardadd
+        #pragma surface surf Lambert noforwardadd 
 
         struct Input
         {

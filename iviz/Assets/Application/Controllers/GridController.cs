@@ -34,6 +34,7 @@ namespace Iviz.Controllers
                 FollowCamera = value.FollowCamera;
                 HideInARMode = value.HideInARMode;
                 Offset = value.Offset;
+                Interactable = value.Interactable;
             }
         }
 

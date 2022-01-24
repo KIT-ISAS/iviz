@@ -12,7 +12,7 @@
         LOD 150
 
         CGPROGRAM
-        #pragma surface surf Lambert noforwardadd
+        #pragma surface surf Lambert noforwardadd alpha:fade
 
         sampler2D _MainTex;
 

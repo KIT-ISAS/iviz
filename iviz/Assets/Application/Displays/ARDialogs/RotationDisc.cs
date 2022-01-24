@@ -151,7 +151,6 @@ namespace Iviz.Displays.ARDialogs
 
             if (raiseOnMoved)
             {
-                Debug.Log(currentAngle);
                 Moved?.Invoke(-currentAngle);
             }
         }

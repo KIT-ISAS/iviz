@@ -152,7 +152,22 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var resourceKey = (WidgetType)msg.Type switch
+            var widgetType = (WidgetType)msg.Type;
+            if (widgets.TryGetValue(msg.Id, out var existingGuiObject))
+            {
+                if (existingGuiObject.Type == widgetType)
+                {
+                    existingGuiObject.UpdateWidget(msg);
+                    return;
+                }
+                
+                RosLogger.Info($"{this}: Widget '{msg.Id}' of type {existingGuiObject.Type} " +
+                                $"is being replaced with type {widgetType}");
+                existingGuiObject.Dispose();
+                // pass through
+            }
+
+            var resourceKey = widgetType switch
             {
                 WidgetType.RotationDisc => Resource.Displays.RotationDisc,
                 WidgetType.SpringDisc => Resource.Displays.SpringDisc,
@@ -170,10 +185,6 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (widgets.TryGetValue(msg.Id, out var existingGuiObject))
-            {
-                existingGuiObject.Dispose();
-            }
 
             var guiObject = new GuiWidgetObject(this, msg, resourceKey) { Interactable = Interactable };
             widgets[guiObject.Id] = guiObject;
