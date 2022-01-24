@@ -333,6 +333,32 @@ namespace Iviz.Msgs
         public static string ToString(in ISerializable t) => t.ToJsonString();
 
         public static string ToString(IService t) => t.ToJsonString();
+
+        public static void WriteValueExtended(this JsonTextWriter writer, in ColorRGBA value)
+        {
+            writer.WriteStartObject();
+            writer.WritePropertyName(nameof(value.R));
+            writer.WriteValue(value.R);
+            writer.WritePropertyName(nameof(value.G));
+            writer.WriteValue(value.G);
+            writer.WritePropertyName(nameof(value.B));
+            writer.WriteValue(value.B);
+            writer.WritePropertyName(nameof(value.A));
+            writer.WriteValue(value.A);
+            writer.WriteEndObject();
+        } 
+        
+        public static void WriteValueExtended(this JsonTextWriter writer, in Vector3 value)
+        {
+            writer.WriteStartObject();
+            writer.WritePropertyName(nameof(value.X));
+            writer.WriteValue(value.X);
+            writer.WritePropertyName(nameof(value.Y));
+            writer.WriteValue(value.Y);
+            writer.WritePropertyName(nameof(value.Z));
+            writer.WriteValue(value.Z);
+            writer.WriteEndObject();
+        } 
     }
 
 
