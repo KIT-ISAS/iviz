@@ -348,7 +348,7 @@ namespace Iviz.App
             GameThread.EveryTenthOfASecond += UpdateCameraStats;
             UpdateFpsStats();
 
-            ServiceFunctions.Start();
+            ControllerService.Start();
 
             if (menuObject != null)
             {

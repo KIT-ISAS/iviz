@@ -285,7 +285,8 @@ namespace Iviz.Ros
 
             if (!hostsObj.TryGetArray(out XmlRpcValue[] array))
             {
-                RosLogger.Error("RoslibConnection: Error reading /iviz/hosts. Expected array of string pairs.");
+                RosLogger.Error($"{nameof(RoslibConnection)}: Error reading /iviz/hosts. " +
+                                $"Expected array of string pairs.");
                 return;
             }
 
@@ -297,8 +298,9 @@ namespace Iviz.Ros
                     !pair[0].TryGetString(out string hostname) ||
                     !pair[1].TryGetString(out string address))
                 {
-                    RosLogger.Error("RoslibConnection: Error reading /iviz/hosts entry '" + entry + "'. " +
-                                    "Expected a pair of strings.");
+                    RosLogger.Error(
+                        $"{nameof(RoslibConnection)}: Error reading /iviz/hosts entry '{entry.ToString()}'. " +
+                        $"Expected a pair of strings.");
                     return;
                 }
 
@@ -308,7 +310,7 @@ namespace Iviz.Ros
             ConnectionUtils.GlobalResolver.Clear();
             foreach (var (key, value) in hosts)
             {
-                RosLogger.Info($"RoslibConnection: Adding custom host {key} -> {value}");
+                RosLogger.Info($"{nameof(RoslibConnection)}: Adding custom host {key} -> {value}");
                 ConnectionUtils.GlobalResolver[key] = value;
             }
         }

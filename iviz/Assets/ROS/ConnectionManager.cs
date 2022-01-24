@@ -47,8 +47,8 @@ namespace Iviz.Ros
         public ConnectionManager()
         {
             instance = this;
-            
-            Debug.Log("ConnectionManager: Creating");
+
+            Debug.Log($"{this}: Creating");
 
             connection = new RoslibConnection();
             logSender = new Sender<Log>("/rosout");
@@ -89,6 +89,7 @@ namespace Iviz.Ros
                 Name = Connection.MyId ?? "/iviz",
                 Msg = msg.Message
             };
+            
             logSender.Publish(logMessage);
         }
 
@@ -120,5 +121,7 @@ namespace Iviz.Ros
             instance.frameBandwidthUp = 0;
             return result;
         }
-    }
+
+        public override string ToString() => $"[{nameof(ConnectionManager)}]";
+}
 }
