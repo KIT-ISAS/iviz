@@ -13,8 +13,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool FrameLabelsVisible { get; set; }
         [DataMember] public bool ParentConnectorVisible { get; set; }
         [DataMember] public bool KeepAllFrames { get; set; } = true;
-        [DataMember] public bool PreferUdp { get; set; } = true;
-        [DataMember] public string Id { get; set; } = "tf";
+        [DataMember] public string Id { get; set; } = "";
         [DataMember] public ModuleType ModuleType => ModuleType.TF;
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public HashSet<string> BlacklistedFrames { get; set; } = new();

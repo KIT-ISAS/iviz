@@ -11,6 +11,7 @@ namespace Iviz.App
         public ToggleWidget ShowInterior { get; private set; }
         public ToggleWidget FollowCamera { get; private set; }
         public ToggleWidget HideInARMode { get; private set; }
+        public ToggleWidget Interactable { get; private set; }
         public Vector3SliderWidget Offset { get; private set; }
         public ColorPickerWidget ColorPicker { get; private set; }
 
@@ -22,6 +23,7 @@ namespace Iviz.App
             HideButton = p.AddHideButton();
             ShowInterior = p.AddToggle("Show Interior").SetValue(true);
             FollowCamera = p.AddToggle("Follow Camera").SetValue(true);
+            Interactable = p.AddToggle("Enable Collider").SetValue(true);
             HideInARMode = p.AddToggle("Hide in AR Mode").SetValue(true);
             Offset = p.AddVector3Slider("Offset");
             ColorPicker = p.AddColorPicker("Grid Color").SetValue(Color.gray);

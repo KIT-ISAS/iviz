@@ -42,6 +42,7 @@ namespace Iviz.Controllers
             {
                 config.Topic = value.Topic;
                 config.Type = value.Type;
+                config.Id = value.Id;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
                 Tint = value.Tint.ToUnityColor();
                 Visible = value.Visible;
@@ -216,7 +217,8 @@ namespace Iviz.Controllers
             Config = config ?? new MarkerConfiguration
             {
                 Topic = topic,
-                Type = type
+                Type = type,
+                Id = topic
             };            
 
             var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;

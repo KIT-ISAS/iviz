@@ -197,14 +197,21 @@ namespace Iviz.Displays
                 return;
             }
 
+            bool isOpaque = effectiveColor.a > 254f / 255;
+            bool useSimpleMaterials = Settings.UseSimpleMaterials;
+
             if (DiffuseTexture == null && BumpTexture == null)
             {
-                var material = effectiveColor.a > 254f / 255f
-                    ? Resource.Materials.Lit.Object
-                    : Resource.Materials.TransparentLit.Object;
+                var material = (isOpaque, useSimpleMaterials) switch
+                {
+                    (true, false) => Resource.Materials.Lit.Object,
+                    (false, false) => Resource.Materials.TransparentLit.Object,
+                    (true, true) => Resource.Materials.SimpleLit.Object,
+                    (false, true) => Resource.Materials.SimpleTransparentLit.Object,
+                };
                 MainRenderer.sharedMaterial = material;
             }
-            else if (effectiveColor.a > 254f / 255f)
+            else if (isOpaque)
             {
                 if (textureMaterial == null)
                 {
@@ -240,6 +247,13 @@ namespace Iviz.Displays
                 autoSelectMaterial = false;
             }
 
+            SetEffectiveColor();
+        }
+
+        public void UpdateMaterial()
+        {
+            textureMaterial = null;
+            textureMaterialAlpha = null;
             SetEffectiveColor();
         }
 

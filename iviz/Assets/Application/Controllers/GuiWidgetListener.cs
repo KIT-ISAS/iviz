@@ -40,6 +40,7 @@ namespace Iviz.Controllers
             private set
             {
                 config.Topic = value.Topic;
+                config.Id = value.Id;
                 Visible = value.Visible;
                 Interactable = value.Interactable;
             }
@@ -75,7 +76,8 @@ namespace Iviz.Controllers
         {
             Config = configuration ?? new GuiWidgetConfiguration
             {
-                Topic = topic
+                Topic = topic,
+                Id = topic
             };
 
             GameThread.EveryFrame += CheckDeadDialogs;
@@ -360,7 +362,7 @@ namespace Iviz.Controllers
             });
         }
 
-        internal void OnWidgetRotated(GuiWidgetObject widget, float angleInDeg)
+        internal void OnWidgetRotated(GuiWidgetObject widget, float angleInRad)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -368,8 +370,7 @@ namespace Iviz.Controllers
                 VizId = ConnectionManager.MyId ?? "",
                 Id = widget.Id,
                 Type = (byte)FeedbackType.OrientationChanged,
-                Orientation = Msgs.GeometryMsgs.Quaternion.AngleAxis(angleInDeg * Mathf.Deg2Rad,
-                    Msgs.GeometryMsgs.Vector3.UnitZ)
+                Orientation = Extensions.AngleAxis(angleInRad, default(VectorUnitZ))
             });
         }
 

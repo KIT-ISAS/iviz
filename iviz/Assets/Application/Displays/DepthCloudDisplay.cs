@@ -30,6 +30,7 @@ namespace Iviz.Displays
         static readonly int IntensityAddID = Shader.PropertyToID("_IntensityAdd");
         static readonly int AtlasRowId = Shader.PropertyToID("_AtlasRow");
 
+        [SerializeField] Texture2D? atlas;
         [SerializeField] Material? material;
         [SerializeField] int width;
         [SerializeField] int height;
@@ -49,6 +50,8 @@ namespace Iviz.Displays
             ? material
             : (material = Resource.Materials.DepthCloud.Instantiate());
 
+        Texture2D Atlas => atlas.AssertNotNull(nameof(atlas)); 
+        
         public Intrinsic? Intrinsic
         {
             set
@@ -158,7 +161,7 @@ namespace Iviz.Displays
             set
             {
                 colormap = value;
-                Material.SetTexture(PColor, Resource.Materials.Atlas);
+                Material.SetTexture(PColor, Atlas);
                 Material.SetFloat(AtlasRowId,
                     (ColormapsType.AtlasSize - 0.5f - (float)value) / ColormapsType.AtlasSize);
                 Material.EnableKeyword("USE_INTENSITY");

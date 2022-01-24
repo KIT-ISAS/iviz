@@ -93,9 +93,6 @@ namespace Iviz.App
             {
                 switch (field)
                 {
-                    case nameof(TfConfiguration.Visible):
-                        listener.FramesVisible = config.Visible;
-                        break;
                     case nameof(TfConfiguration.FrameSize):
                         listener.FrameSize = config.FrameSize;
                         break;
@@ -107,6 +104,17 @@ namespace Iviz.App
                         break;
                     case nameof(TfConfiguration.KeepAllFrames):
                         listener.KeepAllFrames = config.KeepAllFrames;
+                        break;
+                    case nameof(TfConfiguration.Visible):
+                        listener.FramesVisible = config.Visible;
+                        break;
+                    case nameof(TfConfiguration.Interactable):
+                        listener.Interactable = config.Interactable;
+                        break;
+                    case nameof(TfConfiguration.FlipZ):
+                        listener.FlipZ = config.FlipZ;
+                        break;
+                    case nameof(IConfiguration.ModuleType):
                         break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");

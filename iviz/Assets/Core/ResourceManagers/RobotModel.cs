@@ -351,7 +351,8 @@ namespace Iviz.Displays
                 }
 
                 var resourceObject = info.Object;
-                foreach (var meshFilter in resourceObject.GetComponentsInChildren<MeshFilter>())
+                //foreach (var meshFilter in resourceObject.GetComponentsInChildren<MeshFilter>())
+                foreach (var meshFilter in resourceObject.GetAllChildren().WithComponent<MeshFilter>())
                 {
                     var child = new GameObject("[Collider]");
                     child.transform.parent = collisionObject.transform;
@@ -473,7 +474,8 @@ namespace Iviz.Displays
                 var resolvedMaterial = GetMaterialForVisual(material, keepMeshMaterials ? null : rootMaterials);
                 var color = resolvedMaterial?.Color?.ToColor() ?? Color.white;
 
-                var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
+                //var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
+                var renderers = resourceObject.GetAllChildren().WithComponent<MeshRenderer>();
                 var resources = new List<MeshMarkerDisplay>();
 
                 foreach (var renderer in renderers)

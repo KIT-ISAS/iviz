@@ -37,6 +37,16 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool Interactable
+        {
+            get => config.Interactable;
+            set
+            {
+                config.Interactable = value;
+                grid.EnableCollider = value;
+            }
+        }
+        
         GridOrientation Orientation
         {
             get => config.Orientation;

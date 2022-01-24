@@ -17,7 +17,7 @@ namespace Iviz.Displays
         LineDisplay? resource;
 
         LineDisplay Resource =>
-            resource != null ? resource : (resource = ResourcePool.RentDisplay<LineDisplay>(transform));
+            resource != null ? resource : (resource = ResourcePool.RentDisplay<LineDisplay>(Transform));
 
         protected override IDisplay Display => Resource;
 
@@ -56,7 +56,6 @@ namespace Iviz.Displays
 
         public Color Tint
         {
-            get => Resource.Tint;
             set => Resource.Tint = value;
         }
 

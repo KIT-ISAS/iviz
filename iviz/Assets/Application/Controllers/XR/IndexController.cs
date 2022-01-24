@@ -20,7 +20,6 @@ namespace Iviz.Controllers.XR
             base.UpdateTrackingInput(controllerState);
 
             controllerState.poseDataFlags = PoseDataFlags.NoData;
-
             controllerState.poseDataFlags |= PoseDataFlags.Rotation;
             controllerState.poseDataFlags |= PoseDataFlags.Position;
             //Pose = referenceTransform.TransformPose(new Pose(controllerState.position, controllerState.rotation));

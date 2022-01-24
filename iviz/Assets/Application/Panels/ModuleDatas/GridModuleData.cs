@@ -59,6 +59,7 @@ namespace Iviz.App
             panel.Offset.Value = GridController.Offset;
             panel.FollowCamera.Value = GridController.FollowCamera;
             panel.HideInARMode.Value = GridController.HideInARMode;
+            panel.Interactable.Value = GridController.Interactable;
 
             panel.ColorPicker.ValueChanged += f => UpdateColor();
             panel.ShowInterior.ValueChanged += f =>
@@ -71,6 +72,7 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
             panel.FollowCamera.ValueChanged += f => GridController.FollowCamera = f;
             panel.HideInARMode.ValueChanged += f => GridController.HideInARMode = f;
+            panel.Interactable.ValueChanged += f => GridController.Interactable = f;
         }
 
         void UpdateColor()
@@ -95,9 +97,6 @@ namespace Iviz.App
             {
                 switch (field)
                 {
-                    case nameof(GridConfiguration.Visible):
-                        GridController.Visible = config.Visible;
-                        break;
                     case nameof(GridConfiguration.GridColor):
                         GridController.GridColor = config.GridColor;
                         break;
@@ -113,11 +112,19 @@ namespace Iviz.App
                     case nameof(GridConfiguration.HideInARMode):
                         GridController.HideInARMode = config.HideInARMode;
                         break;
+                    case nameof(GridConfiguration.Visible):
+                        GridController.Visible = config.Visible;
+                        break;
+                    case nameof(GridConfiguration.Interactable):
+                        GridController.Interactable = config.Interactable;
+                        break;
                     case nameof(GridConfiguration.Offset):
                         GridController.Offset = config.Offset;
                         break;
+                    case nameof(IConfiguration.ModuleType):
+                        break;
                     default:
-                        Core.RosLogger.Error($"{this}: Unknown field '{field}'");
+                        RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

@@ -20,7 +20,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public GuiWidgetModuleData(ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<GuiWidgetModulePanel>(ModuleType.GuiWidget);
             listener = new GuiWidgetListener((GuiWidgetConfiguration?)constructor.Configuration, Topic);

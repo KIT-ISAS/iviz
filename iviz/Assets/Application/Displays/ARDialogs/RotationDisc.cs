@@ -16,7 +16,8 @@ namespace Iviz.Displays.ARDialogs
     {
         [SerializeField] CirclePlaneDraggable? planeCircle;
         [SerializeField] CircleFixedDistanceDraggable? fixedCircle;
-        [SerializeField] MeshMarkerDisplay? disc;
+        [SerializeField] Transform? disc;
+        [SerializeField] MeshMarkerDisplay? outer;
         [SerializeField] MeshMarkerDisplay? ring;
         [SerializeField] MeshMarkerDisplay? glow;
         LineDisplay? lines;
@@ -26,8 +27,9 @@ namespace Iviz.Displays.ARDialogs
         float currentAngle;
 
         MeshMarkerDisplay Glow => glow.AssertNotNull(nameof(glow));
-        MeshMarkerDisplay Disc => disc.AssertNotNull(nameof(disc));
+        MeshMarkerDisplay Outer => outer.AssertNotNull(nameof(outer));
         MeshMarkerDisplay Ring => ring.AssertNotNull(nameof(ring));
+        Transform Disc => disc.AssertNotNull(nameof(disc));
         LineDisplay Lines => lines != null ? lines : (lines = ResourcePool.RentDisplay<LineDisplay>(transform));
 
         XRScreenDraggable Draggable => Settings.IsXR
@@ -57,14 +59,14 @@ namespace Iviz.Displays.ARDialogs
             set
             {
                 secondaryColor = value;
-                Disc.Color = value;
+                Outer.Color = value;
                 Lines.Tint = value;
             }
         }
 
         public float SecondaryScale
         {
-            set => Disc.Transform.localScale = value * Vector3.one;
+            set => Disc.localScale = value * Vector3.one;
         }
 
         public bool Interactable
@@ -90,8 +92,8 @@ namespace Iviz.Displays.ARDialogs
             {
                 tokenSource?.Cancel();
                 Ring.Color = Color.WithAlpha(0.8f);
-                Disc.Color = Color;
-                Disc.EmissiveColor = Color;
+                Outer.Color = Color;
+                Outer.EmissiveColor = Color;
                 Glow.Visible = true;
                 currentAngle = 0;
             };
@@ -100,8 +102,8 @@ namespace Iviz.Displays.ARDialogs
 
             draggable.EndDragging += () =>
             {
-                Disc.Color = SecondaryColor;
-                Disc.EmissiveColor = Color.black;
+                Outer.Color = SecondaryColor;
+                Outer.EmissiveColor = Color.black;
                 Ring.Color = Color.WithAlpha(0.2f);
                 Glow.Visible = false;
 
@@ -125,10 +127,12 @@ namespace Iviz.Displays.ARDialogs
 
         void OnDiscMoved(ScreenDraggable draggable, bool raiseOnMoved)
         {
+            // update angle
             var (discX, _, discZ) = draggable.Transform.localPosition;
             float discAngle = Mathf.Atan2(discX, discZ);
             currentAngle += AngleDifference(discAngle, currentAngle);
 
+            // update lines
             var line = new LineWithColor(Vector3.zero, Vector3.zero);
             ref var a = ref line.f.c0;
             ref var b = ref line.f.c1;
@@ -147,7 +151,8 @@ namespace Iviz.Displays.ARDialogs
 
             if (raiseOnMoved)
             {
-                Moved?.Invoke(currentAngle);
+                Debug.Log(currentAngle);
+                Moved?.Invoke(-currentAngle);
             }
         }
 
@@ -165,11 +170,12 @@ namespace Iviz.Displays.ARDialogs
         public void Suspend()
         {
             Moved = null;
-            Disc.Transform.localPosition = Vector3.forward;
+            Disc.localPosition = Vector3.forward;
             Lines.Reset();
 
             Color = Color;
             SecondaryColor = SecondaryColor;
+            SecondaryScale = 0.4f;
             Glow.Visible = false;
         }
     }

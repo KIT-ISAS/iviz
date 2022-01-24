@@ -144,11 +144,16 @@ namespace Iviz.Displays.XRDialogs
             background.ReturnToPool();
         }
 
-        public void ResetHighlights()
+        void ResetHighlights()
         {
             Cylinder.EmissiveColor = Color.black;
             IconObject.EmissiveColor = Color.white.WithValue(0.5f);
             boundsControl?.Reset();
+        }
+
+        void OnDisable()
+        {
+            ResetHighlights();
         }
 
         public void Suspend()

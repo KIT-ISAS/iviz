@@ -110,7 +110,7 @@ namespace Iviz.Controllers
             Id = msg.Id;
 
             var dialog = ResourcePool.Rent(resourceKey, node.Transform).GetComponent<IDialog>();
-            if (display == null)
+            if (dialog == null)
             {
                 throw new MissingAssetFieldException("Gui object does not have a dialog!");
             }
@@ -120,7 +120,11 @@ namespace Iviz.Controllers
             dialog.PivotFrameOffset = msg.TfOffset.Ros2Unity();
             dialog.PivotDisplacement = AdjustDisplacement(msg.TfDisplacement);
             dialog.DialogDisplacement = AdjustDisplacement(msg.DialogDisplacement);
-            dialog.Color = msg.BackgroundColor.ToUnityColor();
+
+            if (msg.BackgroundColor.A != 0)
+            {
+                dialog.Color = msg.BackgroundColor.ToUnityColor();
+            }
 
             if (dialog is IDialogWithTitle withTitle)
             {
@@ -129,6 +133,11 @@ namespace Iviz.Controllers
 
             if (dialog is IDialogWithCaption withCaption)
             {
+                if (msg.Caption.Length == 0)
+                {
+                    RosLogger.Info($"{this}: Dialog '{Id}' supports captions but the caption is empty");
+                }
+                
                 withCaption.Caption = msg.Caption;
             }
 

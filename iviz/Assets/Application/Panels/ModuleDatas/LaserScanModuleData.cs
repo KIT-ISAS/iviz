@@ -25,7 +25,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public LaserScanModuleData(ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<LaserScanModulePanel>(ModuleType.LaserScan);
             listener = new LaserScanListener((LaserScanConfiguration?)constructor.Configuration, Topic);

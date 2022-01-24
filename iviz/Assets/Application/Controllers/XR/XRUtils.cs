@@ -23,17 +23,19 @@ namespace Iviz.Controllers.XR
 
         static void ProcessCanvasForXR(this Transform root)
         {
-            foreach (var subCanvas in root.GetComponentsInChildren<Canvas>(true))
+            //foreach (var subCanvas in root.GetComponentsInChildren<Canvas>(true))
+            foreach (var subCanvas in root.GetAllChildren().WithComponent<Canvas>())
             {
                 subCanvas.gameObject.EnsureComponent<TrackedDeviceGraphicRaycaster>();
             }
-            
-            foreach (var mask in root.GetComponentsInChildren<RectMask2D>(true))
+
+//            foreach (var mask in root.GetComponentsInChildren<RectMask2D>(true))
+            foreach (var mask in root.GetAllChildren().WithComponent<RectMask2D>())
             {
                 Object.Destroy(mask);
-            }            
+            }
         }
-        
+
         public static bool TryGetMeshManager([NotNullWhen(true)] out ARMeshManager? meshManager)
         {
             if (ARController.Instance != null)
@@ -50,6 +52,6 @@ namespace Iviz.Controllers.XR
 
             meshManager = null;
             return false;
-        }            
+        }
     }
 }

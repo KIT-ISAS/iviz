@@ -91,7 +91,6 @@ namespace Iviz.App
         IMenuDialogContents? menuDialog;
         CameraPanelData? cameraPanelData;
 
-
         UpperCanvasPanel UpperCanvas => upperCanvasPanel.AssertNotNull(nameof(upperCanvasPanel));
         BottomCanvasPanel BottomCanvas => bottomCanvasPanel.AssertNotNull(nameof(bottomCanvasPanel));
         AnchorToggleButton BottomHideGuiButton => AnchorCanvasPanel.BottomHideGui;
@@ -230,7 +229,7 @@ namespace Iviz.App
 
             if (!Settings.IsHololens)
             {
-                CreateModule(ModuleType.Grid);
+                CreateModule(ModuleType.Grid, configuration: new GridConfiguration { Id = "Grid" });
             }
 
             UpperCanvas.Save.onClick.AddListener(Dialogs.SaveConfigData.Show);
@@ -374,6 +373,8 @@ namespace Iviz.App
                 CreateModule(ModuleType.XR);
                 RootCanvas.ProcessCanvasForXR();
             }
+
+            TryLoadDefaultStateConfiguration();
 
             initialized = true;
 
@@ -537,6 +538,16 @@ namespace Iviz.App
             RosLogger.Debug($"{this}: Writing config to {Settings.SavedFolder}/{file}");
         }
 
+        void TryLoadDefaultStateConfiguration()
+        {
+            const string defaultConfigPrefix = "_default";
+            string defaultConfigFile = $"{Settings.SavedFolder}/{defaultConfigPrefix}{LoadConfigDialogData.Suffix}";
+            if (File.Exists(defaultConfigFile))
+            {
+                LoadStateConfiguration(defaultConfigFile);
+            }
+        }
+        
         public async void LoadStateConfiguration(string file, CancellationToken token = default)
         {
             if (file == null)
@@ -562,23 +573,14 @@ namespace Iviz.App
                 RosLogger.Internal("Error loading state configuration", e);
                 return;
             }
+            
+            RemoveAllModulesButFirst(); // delete all modules except TF (module 0)
 
-            // delete all modules except TF (module 0)
-            while (moduleDatas.Count > 1)
-            {
-                // TODO: refine this
-                RemoveModule(1);
-            }
-
-            StateConfiguration stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
+            var stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
 
             TfData.UpdateConfiguration(stateConfig.Tf);
 
-            var configurations = stateConfig.CreateListOfEntries()
-                .SelectMany(config => config)
-                .Where(config => config != null);
-
-            foreach (var config in configurations)
+            foreach (var config in stateConfig.CreateListOfEntries())
             {
                 CreateModule(config.ModuleType, configuration: config);
             }
@@ -810,7 +812,7 @@ namespace Iviz.App
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error($"ModuleListPanel: Error deleting saved file '{file}'", e);
+                    RosLogger.Error($"{nameof(ModuleListPanel)}: Error deleting saved file '{file.FullPath}'", e);
                 }
             }
         }
@@ -910,6 +912,25 @@ namespace Iviz.App
             moduleDatas.RemoveAt(index);
             Buttons.RemoveButton(index);
         }
+        
+        void RemoveAllModulesButFirst()
+        {
+            foreach (var moduleData in moduleDatas.Skip(1))
+            {
+                if (moduleData is ListenerModuleData listenerData)
+                {
+                    topicsWithModule.Remove(listenerData.Topic);
+                }
+                
+                moduleData.Dispose();
+            }
+
+            var firstModuleData = moduleDatas[0];
+            moduleDatas.Clear();
+            moduleDatas.Add(firstModuleData);
+
+            Buttons.RemoveAllButtonsButFirst();
+        }        
 
 
         public void UpdateModuleButtonText(ModuleData entry, string content)
@@ -1065,7 +1086,7 @@ namespace Iviz.App
             frameCounter++;
         }
 
-        public override string ToString() => "[ModuleListPanel]";
+        public override string ToString() => $"[{nameof(ModuleListPanel)}]";
 
         public static string CreateButtonTextForModule(ModuleData moduleData)
         {

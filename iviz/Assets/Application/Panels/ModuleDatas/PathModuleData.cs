@@ -27,8 +27,7 @@ namespace Iviz.App
 
 
         public PathModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
-                constructor.TryGetConfigurationType() ?? constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<PathModulePanel>(ModuleType.Path);
             listener = new PathListener();

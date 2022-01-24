@@ -17,6 +17,8 @@ namespace Iviz.Displays
         readonly List<GameObject> objectsToDestroy = new();
         readonly Dictionary<int, Queue<ObjectWithDeadline>> pool = new();
 
+        public static Transform? Transform => instance != null ? instance.transform : null; 
+        
         void Awake()
         {
             instance = this;
@@ -116,9 +118,9 @@ namespace Iviz.Displays
 
             foreach (var (_, queue) in pool)
             {
-                while (queue.Count != 0 && queue.Peek().ExpirationTime < now)
+                while (queue.Count != 0 && queue.Peek().expirationTime < now)
                 {
-                    objectsToDestroy.Add(queue.Dequeue().GameObject);
+                    objectsToDestroy.Add(queue.Dequeue().gameObject);
                 }
             }
 
@@ -141,7 +143,7 @@ namespace Iviz.Displays
                 return Instantiate(resource.Object, parent);
             }
 
-            var newObject = instances.Dequeue().GameObject;
+            var newObject = instances.Dequeue().gameObject;
             newObject.transform.SetParentLocal(parent);
             if (enable)
             {
@@ -189,14 +191,14 @@ namespace Iviz.Displays
 
         readonly struct ObjectWithDeadline
         {
+            public readonly float expirationTime;
+            public readonly GameObject gameObject;
+
             public ObjectWithDeadline(GameObject o)
             {
-                GameObject = o;
-                ExpirationTime = Time.time + TimeToDestroyInSec;
+                gameObject = o;
+                expirationTime = Time.time + TimeToDestroyInSec;
             }
-
-            public float ExpirationTime { get; }
-            public GameObject GameObject { get; }
         }
     }
 }

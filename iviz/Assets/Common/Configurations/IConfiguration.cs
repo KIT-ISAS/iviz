@@ -20,9 +20,4 @@
     {
         string Topic { get; }
     }
-    
-    public interface IConfigurationWithType : IConfigurationWithTopic
-    {
-        string Type { get; }
-    }
 }

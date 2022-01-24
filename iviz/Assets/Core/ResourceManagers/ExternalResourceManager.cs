@@ -151,7 +151,7 @@ namespace Iviz.Displays
 
         #region RobotStuff
 
-        public IEnumerable<string> GetRobotNames() => resourceFiles.RobotDescriptions.Keys.ToArray();
+        public Dictionary<string, string>.KeyCollection GetRobotNames() => resourceFiles.RobotDescriptions.Keys;
 
         public bool ContainsRobot(string robotName)
         {
@@ -159,7 +159,7 @@ namespace Iviz.Displays
                                                                throw new ArgumentNullException(nameof(robotName)));
         }
 
-        public async ValueTask<(bool result, string? robotDescription)> TryGetRobotAsync(string robotName,
+        public async ValueTask<(bool result, string robotDescription)> TryGetRobotAsync(string robotName,
             CancellationToken token = default)
         {
             if (string.IsNullOrEmpty(robotName))
@@ -169,7 +169,7 @@ namespace Iviz.Displays
 
             if (!resourceFiles.RobotDescriptions.TryGetValue(robotName, out string localPath))
             {
-                return default;
+                return (false, "Robot not found");
             }
 
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
@@ -179,7 +179,7 @@ namespace Iviz.Displays
                 Debug.LogWarningFormat(StrMissingFileRemoving, localPath);
                 resourceFiles.RobotDescriptions.Remove(robotName);
                 await WriteResourceFileAsync(tokenSource.Token);
-                return default;
+                return (false, "Robot resource file is missing");
             }
 
             try
@@ -189,7 +189,7 @@ namespace Iviz.Displays
             catch (IOException e)
             {
                 RosLogger.Error($"{this}: Failed to read robot '{robotName}' :", e);
-                return default;
+                return (false, "Cannot read robot resource file");
             }
         }
 

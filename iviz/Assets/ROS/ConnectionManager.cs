@@ -68,7 +68,6 @@ namespace Iviz.Ros
             logListener.Dispose();
             logSender.Dispose();
             Connection.Dispose();
-            RosServerManager.Dispose();
 
             LogMessageArrived = null;
             RosLogger.LogExternal -= LogMessage;

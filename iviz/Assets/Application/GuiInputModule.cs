@@ -12,13 +12,12 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.Highlighters;
-using Iviz.Msgs.GeometryMsgs;
 using Iviz.Resources;
+using Iviz.Tools;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
-using UnityEngine.Rendering.PostProcessing;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
@@ -38,7 +37,9 @@ namespace Iviz.App
             { "Very Low", "Low", "Medium", "High", "Very High", "Ultra" };
 
         static readonly string[] QualityInArOptions = { "Very Low", "Low", "Medium", "High", "Very High", "Ultra" };
-        static readonly Vector3 DirectionWeight = new(1.5f, 1.5f, 1);
+        
+        /// Weights for keyboard movements. Forward is slower.
+        static readonly Vector3 MoveDirectionWeight = new(1.5f, 1.5f, 1);
 
         static GuiInputModule? instance;
         static uint tapSeq;
@@ -118,7 +119,7 @@ namespace Iviz.App
                 }
 
                 draggedObject = value;
-                
+
                 try
                 {
                     draggedObject?.OnStartDragging();
@@ -132,8 +133,6 @@ namespace Iviz.App
             }
         }
 
-        //public event Action<ClickHitInfo>? PointerDown;
-        //public event Action<ClickHitInfo>? ShortClick;
         public event Action<ClickHitInfo>? LongClick;
 
         public TfFrame? OrbitCenterOverride
@@ -232,8 +231,9 @@ namespace Iviz.App
                 {
                     return;
                 }
+
                 QualitySettings.SetQualityLevel((int)config.QualityInAr, true);
-                UpdateLightProperties(config.QualityInAr);
+                UpdateQualityLevel(config.QualityInAr);
                 Settings.RaiseQualityTypeChanged(value);
             }
         }
@@ -251,21 +251,33 @@ namespace Iviz.App
                 {
                     return;
                 }
-                
+
                 QualitySettings.SetQualityLevel((int)qualityToUse, true);
-                UpdateLightProperties(qualityToUse);
+                UpdateQualityLevel(qualityToUse);
                 Settings.RaiseQualityTypeChanged(qualityToUse);
             }
         }
 
-        void UpdateLightProperties(QualityType qualityToUse)
+        void UpdateQualityLevel(QualityType qualityToUse)
         {
+            // update materials
+            bool isVeryLow = qualityToUse == QualityType.VeryLow;
+            if (Settings.UseSimpleMaterials != isVeryLow)
+            {
+                Settings.UseSimpleMaterials = isVeryLow;
+                foreach (var display in GetAllRootChildren().WithComponent<MeshMarkerDisplay>())
+                {
+                    display.UpdateMaterial();
+                }
+            }
+
+            // update main light
             if (mainLight == null)
             {
                 return;
             }
-            
-            if (qualityToUse == QualityType.VeryLow)
+
+            if (isVeryLow)
             {
                 mainLight.renderMode = LightRenderMode.ForceVertex;
                 mainLight.intensity = Settings.IsHololens ? 2 : 1;
@@ -340,8 +352,8 @@ namespace Iviz.App
                 QualityInView = value.QualityInView;
                 TargetFps = value.TargetFps;
             }
-        }        
-        
+        }
+
         void Awake()
         {
             EnhancedTouchSupport.Enable();
@@ -785,7 +797,7 @@ namespace Iviz.App
             float deltaTime = Time.deltaTime;
             const float minAccelToStop = 0.001f;
 
-            accel += baseInput.Mult(MainAccel * DirectionWeight) * deltaTime;
+            accel += baseInput.Mult(MainAccel * MoveDirectionWeight) * deltaTime;
 
             if (baseInput.x == 0)
             {
@@ -814,7 +826,7 @@ namespace Iviz.App
                 }
             }
 
-            velocity = deltaTime * (baseInput.Mult(MainSpeed * DirectionWeight) + accel);
+            velocity = deltaTime * (baseInput.Mult(MainSpeed * MoveDirectionWeight) + accel);
         }
 
         public void LookAt(Transform targetTransform, Vector3? localOffset = null)
@@ -987,6 +999,19 @@ namespace Iviz.App
         {
             var assetHolder = Resource.Extras.AppAssetHolder;
             AudioSource.PlayClipAtPoint(assetHolder.Click, position);
+        }
+
+        static IEnumerable<Transform> GetAllRootChildren()
+        {
+            var resourcePoolChildren = ResourcePool.Transform is { } poolTransform
+                ? poolTransform.GetAllChildren()
+                : Enumerable.Empty<Transform>();
+
+            var rootChildren = TfListener.HasInstance
+                ? TfListener.RootFrame.Transform.GetAllChildren()
+                : Enumerable.Empty<Transform>();
+
+            return rootChildren.Concat(resourcePoolChildren);
         }
     }
 }

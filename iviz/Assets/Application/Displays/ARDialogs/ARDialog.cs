@@ -146,10 +146,6 @@ namespace Iviz.App.ARDialogs
                     currentPosition = null;
                     resetOrientation = true;
                 }
-                else
-                {
-                    //connector.End = null;
-                }
 
                 connector.Visible = pivotFrameId != null;
             }

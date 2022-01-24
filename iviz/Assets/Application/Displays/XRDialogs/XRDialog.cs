@@ -14,18 +14,18 @@ namespace Iviz.Displays.XRDialogs
         [SerializeField] Vector3 socketPosition = Vector3.zero;
         [SerializeField] MeshMarkerDisplay? background;
         [SerializeField] Color backgroundColor = Resource.Colors.DefaultBackgroundColor;
+        [SerializeField] XRDialogConnector? connector;
 
-        float scale = 1;
-        XRDialogConnector? connector;
         FrameNode? node;
         string? pivotFrameId;
         bool resetOrientation;
         Vector3? currentPosition;
+        float scale = 1;
 
         FrameNode Node => node ??= FrameNode.Instantiate("Dialog Node");
         XRDialogConnector Connector => connector.AssertNotNull(nameof(connector));
         MeshMarkerDisplay Background => background.AssertNotNull(nameof(background));
-        Vector3 BaseDisplacement => -socketPosition * scale;
+        Vector3 baseDisplacement;
 
         public event Action? Expired;
 
@@ -38,6 +38,7 @@ namespace Iviz.Displays.XRDialogs
             set
             {
                 scale = value;
+                baseDisplacement = -socketPosition * scale;
                 transform.localScale = scale * Vector3.one;
             }
         }
@@ -78,9 +79,7 @@ namespace Iviz.Displays.XRDialogs
 
         Transform Transform => _transform != null ? _transform : (_transform = transform);
 
-        internal bool NeedsConnector => pivotFrameId != null;
-
-        internal Vector3 ConnectorStart => Transform.localPosition - BaseDisplacement;
+        internal Vector3 ConnectorStart => Transform.AsLocalPose().Multiply(-baseDisplacement);
 
         internal Vector3 ConnectorEnd
         {
@@ -104,6 +103,7 @@ namespace Iviz.Displays.XRDialogs
         protected virtual void Awake()
         {
             Color = backgroundColor;
+            Scale = scale;
         }
 
         void Update()
@@ -136,7 +136,7 @@ namespace Iviz.Displays.XRDialogs
             var frameLocalPosition = TfListener.RelativeToOrigin(Node.Transform.position) + PivotFrameOffset;
             var cameraLocalRotation = GetFlatCameraRotation(frameLocalPosition);
 
-            var targetLocalPosition = frameLocalPosition + cameraLocalRotation * DialogDisplacement + BaseDisplacement;
+            var targetLocalPosition = frameLocalPosition + cameraLocalRotation * DialogDisplacement + baseDisplacement;
             var targetAbsolutePosition = TfListener.OriginFrame.Transform.TransformPoint(targetLocalPosition);
 
             Vector3 nextAbsolutePosition;

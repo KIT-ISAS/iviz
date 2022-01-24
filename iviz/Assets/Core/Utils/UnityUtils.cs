@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Tools;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -372,6 +374,12 @@ namespace Iviz.Core
             return Color.HSVToRGB(h, s, value).WithAlpha(c.a);
         }
 
+        public static float GetValue(this in Color c)
+        {
+            Color.RGBToHSV(c, out _, out _, out float value);
+            return value;
+        }
+
         public static bool IsUsable(this in Pose pose)
         {
             const int maxPoseMagnitude = 100000;
@@ -692,6 +700,51 @@ namespace Iviz.Core
 
         public static T EnsureComponent<T>(this GameObject gameObject) where T : Component =>
             gameObject.TryGetComponent(out T comp) ? comp : gameObject.AddComponent<T>();
+
+        /// <summary>
+        /// Retrieves the given component from each entry in the enumerable, if it exists.
+        /// </summary>
+        public static IEnumerable<T> WithComponent<T>(this IEnumerable<Transform> transforms)
+        {
+            foreach (var transform in transforms)
+            {
+                if (transform.TryGetComponent(out T t))
+                {
+                    yield return t;
+                }
+            }
+        }
+
+        /// <inheritdoc cref="GetAllChildren(UnityEngine.Transform)"/>
+        public static IEnumerable<Transform> GetAllChildren(this GameObject transform) => GetAllChildren(transform.transform);
+
+        /// <summary>
+        /// Retrieves all children without allocating an array with all results.
+        /// Note: The parent is included in the enumeration.
+        /// </summary>
+        /// <param name="parent">The node to start the search in</param>
+        /// <returns></returns>
+        public static IEnumerable<Transform> GetAllChildren(this Transform parent)
+        {
+            return parent.childCount == 0 
+                ? new[] { parent } 
+                : GetAllChildrenImpl(parent);
+
+            static IEnumerable<Transform> GetAllChildrenImpl(Transform transform)
+            {
+                var stack = new Stack<Transform>();
+                stack.Push(transform);
+
+                while (stack.TryPop(out var childTransform))
+                {
+                    yield return childTransform;
+                    foreach (int i in ..childTransform.childCount)
+                    {
+                        stack.Push(childTransform.GetChild(i));
+                    }
+                }
+            }
+        }
     }
 
     public readonly struct WithIndexEnumerable<T>

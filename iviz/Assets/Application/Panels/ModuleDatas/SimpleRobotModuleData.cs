@@ -222,9 +222,6 @@ namespace Iviz.App
             {
                 switch (field)
                 {
-                    case nameof(RobotConfiguration.Visible):
-                        RobotController.Visible = config.Visible;
-                        break;
                     case nameof(RobotConfiguration.SourceParameter)
                         when config.SourceParameter != RobotController.Config.SourceParameter:
                         hasSourceParameter = true;
@@ -257,6 +254,17 @@ namespace Iviz.App
                         break;
                     case nameof(RobotConfiguration.Smoothness):
                         RobotController.Smoothness = config.Smoothness;
+                        break;
+                    case nameof(RobotConfiguration.Visible):
+                        RobotController.Visible = config.Visible;
+                        break;
+                    case nameof(RobotConfiguration.Interactable):
+                        RobotController.Interactable = config.Interactable;
+                        break;
+                    case nameof(RobotConfiguration.KeepMeshMaterials):
+                        RobotController.KeepMeshMaterials = config.KeepMeshMaterials;
+                        break;
+                    case nameof(IConfiguration.ModuleType):
                         break;
                     default:
                         RosLogger.Warn($"{this}: Unknown field '{field}'");

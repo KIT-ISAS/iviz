@@ -4,26 +4,32 @@ namespace Iviz.Displays
 {
     public class AssetHolder : MonoBehaviour
     {
-        public GameObject Cube = null;
-        public GameObject Cylinder = null;
-        public GameObject Line = null;
-        public GameObject MeshList = null;
-        public GameObject MeshTriangles = null;
-        public GameObject Plane = null;
-        public GameObject PointList = null;
-        public GameObject Sphere = null;
-        public GameObject Text = null;
+        public GameObject Cube;
+        public GameObject Cylinder;
+        public GameObject Line;
+        public GameObject MeshList;
+        public GameObject MeshTriangles;
+        public GameObject Plane;
+        public GameObject PointList;
+        public GameObject Sphere;
+        public GameObject Text;
 
         public Material FontMaterial;
         public Material FontMaterialZWrite;
 
         public Material Lit;
-        public Material TexturedLit;
         public Material TransparentLit;
+        public Material TexturedLit;
         public Material TransparentTexturedLit;
         public Material TransparentLitAlwaysVisible;
         public Material BumpLit;
         public Material TransparentBumpLit;
+
+        public Material SimpleLit;
+        public Material SimpleTransparentLit;
+        public Material SimpleTexturedLit;
+        public Material SimpleTransparentTexturedLit;
+
         public Material PointCloud;
         public Material PointCloudWithColormap;
         public Material PointCloudDirect;

@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e352f93572734d6e9d4c74001ef27df5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dialog: {fileID: 0}
+  dialog: {fileID: 1716189969000061512}
 --- !u!1 &1175303611142707320
 GameObject:
   m_ObjectHideFlags: 0
@@ -514,6 +514,7 @@ MonoBehaviour:
   socketPosition: {x: 0, y: -0.5, z: 0}
   background: {fileID: 6014099797948075304}
   backgroundColor: {r: 0, g: 0.2, b: 0.5, a: 1}
+  connector: {fileID: 586438443107256636}
   title: {fileID: 8960573374294847403}
   caption: {fileID: 8773447123176557361}
   button1: {fileID: 1379410029039570407}
@@ -933,7 +934,7 @@ PrefabInstance:
     - target: {fileID: 791139870075898102, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.01
+      value: 0.001
       objectReference: {fileID: 0}
     - target: {fileID: 791139870075898102, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}

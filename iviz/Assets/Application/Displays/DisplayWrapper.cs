@@ -11,12 +11,6 @@ namespace Iviz.Displays
 
         protected abstract IDisplay Display { get; }
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
-
-        public string Name
-        {
-            set => gameObject.name = value;
-        }
-
         public Bounds? Bounds => Display.Bounds;
 
         public int Layer

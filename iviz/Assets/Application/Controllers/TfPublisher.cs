@@ -149,7 +149,7 @@ namespace Iviz.Controllers
 
         public override string ToString()
         {
-            return "[TfPublisher]";
+            return $"[{nameof(TfPublisher)}]";
         }
 
         sealed class TfPublishedFrame : IPublishedFrame

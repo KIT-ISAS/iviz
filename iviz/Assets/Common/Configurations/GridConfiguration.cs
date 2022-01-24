@@ -16,7 +16,7 @@ namespace Iviz.Common.Configurations
     }
 
     [DataContract]
-    public class GridConfiguration : IConfiguration
+    public sealed class GridConfiguration : IConfiguration
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.Grid;
@@ -27,6 +27,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool InteriorVisible { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
         [DataMember] public bool HideInARMode { get; set; } = true;
+        [DataMember] public bool Interactable { get; set; } = true;
         [DataMember] public SerializableVector3 Offset { get; set; } = Vector3.zero;
     }
 }

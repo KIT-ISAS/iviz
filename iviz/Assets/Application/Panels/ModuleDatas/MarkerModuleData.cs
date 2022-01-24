@@ -29,8 +29,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public MarkerModuleData(ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
-                constructor.TryGetConfigurationType() ?? constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<MarkerModulePanel>(ModuleType.Marker);
             listener = new MarkerListener((MarkerConfiguration?)constructor.Configuration, Topic, TopicType);

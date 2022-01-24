@@ -232,7 +232,7 @@ namespace Iviz.Controllers
 
             if (msg.Data.Length != msg.Info.Width * msg.Info.Height)
             {
-                RosLogger.Debug($"{this}: Size {msg.Info.Width.ToString()}x{msg.Info.Height.ToString()} " +
+                RosLogger.Info($"{this}: Size {msg.Info.Width.ToString()}x{msg.Info.Height.ToString()} " +
                                 $"does not match data length {msg.Data.Length.ToString()}");
                 msg.Data.TryReturn();
                 return;
@@ -240,7 +240,7 @@ namespace Iviz.Controllers
 
             if (float.IsNaN(msg.Info.Resolution))
             {
-                RosLogger.Debug($"{this}: NaN in header!");
+                RosLogger.Info($"{this}: NaN in header!");
                 msg.Data.TryReturn();
                 return;
             }
@@ -250,7 +250,7 @@ namespace Iviz.Controllers
 
             if (msg.Info.Origin.IsInvalid())
             {
-                RosLogger.Debug($"{this}: NaN in origin!");
+                RosLogger.Info($"{this}: NaN in origin!");
                 msg.Data.TryReturn();
                 return;
             }
@@ -259,10 +259,10 @@ namespace Iviz.Controllers
             Pose validatedOrigin;
             if (!origin.IsUsable())
             {
-                RosLogger.Error($"{this}: Cannot use ({origin.position.x.ToString(BuiltIns.Culture)}, " +
-                                $"{origin.position.y.ToString(BuiltIns.Culture)}, " +
-                                $"{origin.position.z.ToString(BuiltIns.Culture)}) " +
-                                "as position. Values too large!");
+                RosLogger.Info($"{this}: Cannot use ({origin.position.x.ToString(BuiltIns.Culture)}, " +
+                               $"{origin.position.y.ToString(BuiltIns.Culture)}, " +
+                               $"{origin.position.z.ToString(BuiltIns.Culture)}) " +
+                               "as position. Values too large!");
                 validatedOrigin = Pose.identity;
             }
             else
@@ -312,7 +312,7 @@ namespace Iviz.Controllers
                 foreach (int j in ..16)
                 {
                     var resource = ResourcePool.Rent<OccupancyGridDisplay>(
-                        Resource.Displays.OccupancyGridResource,
+                        Resource.Displays.OccupancyGridDisplay,
                         cubeNode.Transform);
                     resource.gameObject.name = $"OccupancyGridResource-{j.ToString()}";
                     resource.Transform.SetLocalPose(Pose.identity);

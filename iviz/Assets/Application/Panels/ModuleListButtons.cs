@@ -63,6 +63,21 @@ namespace Iviz.App
 
             contentObjectTransform.sizeDelta = new Vector2(0, 2 * YOffset + buttons.Count * (buttonHeight + YOffset));
         }
+        
+        public void RemoveAllButtonsButFirst()
+        {
+            foreach (var button in buttons.Skip(1))
+            {
+                button.ClearSubscribers();
+                ResourcePool.Return(Resource.Widgets.DraggableDisplayButton, button.GameObject);
+            }
+
+            var firstButton = buttons[0];
+            buttons.Clear();
+            buttons.Add(firstButton);
+
+            contentObjectTransform.sizeDelta = new Vector2(0, 3 * YOffset + buttonHeight);
+        }        
 
         public void UpdateButton(int index, string content)
         {

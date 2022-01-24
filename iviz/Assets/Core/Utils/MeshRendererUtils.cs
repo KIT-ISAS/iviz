@@ -67,6 +67,18 @@ namespace Iviz.Core
             PropBlock.SetFloat(MetallicPropId, metallic);
             meshRenderer.SetPropertyBlock(PropBlock, id);
         }
+        
+        public static void SetPropertyTextureScale(this MeshRenderer meshRenderer, float scaleX, float scaleY)
+        {
+            if (meshRenderer == null)
+            {
+                throw new ArgumentNullException(nameof(meshRenderer));
+            }
+
+            meshRenderer.GetPropertyBlock(PropBlock, 0);
+            PropBlock.SetVector(MainTexStPropId, new Vector4(scaleX, scaleY, 0, 0));
+            meshRenderer.SetPropertyBlock(PropBlock, 0);
+        }
 
         public static void ResetPropertyTextureScale(this MeshRenderer meshRenderer)
         {

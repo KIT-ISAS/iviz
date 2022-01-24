@@ -17,9 +17,8 @@ namespace Iviz.Displays
     {
         static float baseOffset = 0.001f;
         static readonly int AtlasTex = Shader.PropertyToID("_AtlasTex");
-        static Texture2D AtlasLarge => Resource.Materials.AtlasLarge;
-        static Texture2D AtlasLargeFlipped => Resource.Materials.AtlasLargeFlip;
-
+        [SerializeField] Texture2D? atlasLarge;
+        [SerializeField] Texture2D? atlasLargeFlipped;
         [SerializeField] Texture2D? texture;
         [SerializeField] MeshRenderer? meshRenderer;
 
@@ -38,6 +37,8 @@ namespace Iviz.Displays
             : material = Resource.Materials.OccupancyGridTexture.Instantiate();
 
         MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
+        Texture2D AtlasLarge => atlasLarge.AssertNotNull(nameof(atlasLarge));
+        Texture2D AtlasLargeFlipped => atlasLargeFlipped.AssertNotNull(nameof(atlasLargeFlipped));
 
         bool IsProcessing { get; set; }
         public int NumValidValues { get; private set; }

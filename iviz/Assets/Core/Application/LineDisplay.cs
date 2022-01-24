@@ -108,11 +108,6 @@ namespace Iviz.Displays
         /// <param name="overrideNeedsAlpha">A check of alpha colors will be done if <see cref="UseColormap"/> is disabled. Use this to override the check.</param>
         public void Set(ReadOnlySpan<LineWithColor> lines, bool? overrideNeedsAlpha = null)
         {
-            if (lines == null)
-            {
-                throw new ArgumentNullException(nameof(lines));
-            }
-
             lineBuffer.EnsureCapacity(lines.Length);
             lineBuffer.Clear();
             for (int i = 0; i < lines.Length; i++)

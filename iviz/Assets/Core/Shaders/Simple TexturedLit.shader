@@ -1,8 +1,7 @@
-﻿Shader "iviz/TexturedLit Simple"
+﻿Shader "iviz/Simple TexturedLit"
 {
     Properties
     {
-        _MainTex("Color Texture", 2D) = "white" {}
     }
     SubShader
     {
@@ -33,6 +32,4 @@
         }
         ENDCG
     }
-
-    FallBack "Standard"
 }

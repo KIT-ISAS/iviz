@@ -59,8 +59,6 @@ namespace Iviz.Controllers.XR
         GameObject? modelRoot;
 
         public HandState? State { get; private set; }
-        public Transform? ThumbFingertipTransform => fingerTips[0].CheckedNull()?.Transform;
-        public Transform? IndexFingertipTransform => fingerTips[1].CheckedNull()?.Transform;
         public Transform? PalmTransform => fingerTips[2].CheckedNull()?.Transform;
 
         Transform RootTransform
@@ -110,8 +108,7 @@ namespace Iviz.Controllers.XR
 
             controllerState.poseDataFlags = PoseDataFlags.NoData;
 
-            if (!TryGetDevice(out var device)
-                || !device.TryGetFeatureValue(HandData, out var hand))
+            if (!TryGetDevice(out var device) || !device.TryGetFeatureValue(HandData, out var hand))
             {
                 return;
             }

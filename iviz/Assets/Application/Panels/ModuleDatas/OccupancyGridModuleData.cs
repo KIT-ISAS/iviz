@@ -27,7 +27,7 @@ namespace Iviz.App
 
 
         public OccupancyGridModuleData(ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<OccupancyGridModulePanel>(ModuleType.OccupancyGrid);
             listener = new OccupancyGridListener((OccupancyGridConfiguration?)constructor.Configuration, Topic);

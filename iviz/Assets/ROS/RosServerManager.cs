@@ -19,7 +19,7 @@ namespace Iviz.Ros
         {
             ("/rosdistro", "noetic"),
             ("/rosversion", "1.15.8"),
-            ("/ivizversion", "1.0.0")
+            ("/ivizversion", "1.0.1")
         };
 
         static RosServerManager? instance;
@@ -36,12 +36,6 @@ namespace Iviz.Ros
             return Instance.TryCreate(
                 masterUri ?? throw new ArgumentNullException(nameof(masterUri)),
                 masterId ?? throw new ArgumentNullException(nameof(masterId)));
-        }
-
-        public static void Dispose()
-        {
-            instance?.DisposeImpl();
-            instance = null;
         }
 
         bool TryCreate(Uri masterUri, string masterId)
@@ -66,7 +60,13 @@ namespace Iviz.Ros
                 }
 
                 // start in background
-                serverTask = TaskUtils.Run(() => server.StartAsync().AwaitNoThrow(this));
+                serverTask = TaskUtils.Run(async () =>
+                {
+                    var task = server.StartAsync().AwaitNoThrow(this);
+                    await Task.Delay(100);
+                    ConnectionManager.Connection.TryOnceToConnect();
+                    await task;
+                });
             }
             catch (Exception e)
             {
@@ -85,8 +85,42 @@ namespace Iviz.Ros
             }
 
             server.Dispose();
-            serverTask.AwaitNoThrow(DisposeTimeoutInMs, this);
+            _ = serverTask.AwaitNoThrow(DisposeTimeoutInMs, this); // should return immediately
             server = null;
+        }
+
+        public static void Dispose()
+        {
+            if (instance != null)
+            {
+                RosLogger.Info("RosServerManager: Disposing!");
+                instance.DisposeImpl();
+            }
+
+            instance = null;
+        }
+
+        async ValueTask DisposeImplAsync()
+        {
+            if (server == null)
+            {
+                return;
+            }
+
+            await server.DisposeAsync();
+            await serverTask.AwaitNoThrow(DisposeTimeoutInMs, this);
+            server = null;
+        }
+
+        public static async ValueTask DisposeAsync()
+        {
+            if (instance != null)
+            {
+                RosLogger.Info("RosServerManager: Disposing!");
+                await instance.DisposeImplAsync();
+            }
+
+            instance = null;
         }
     }
 }

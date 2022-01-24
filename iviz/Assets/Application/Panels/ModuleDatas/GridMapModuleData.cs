@@ -25,7 +25,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public GridMapModuleData(ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<GridMapModulePanel>(ModuleType.GridMap);
             listener = new GridMapListener((GridMapConfiguration?) constructor.Configuration, Topic);

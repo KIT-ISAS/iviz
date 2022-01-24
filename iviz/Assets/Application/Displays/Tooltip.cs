@@ -35,14 +35,6 @@ namespace Iviz.Displays
             set => Transform.localScale = value * Vector3.one;
         }
 
-        public float AbsoluteScale
-        {
-            set => Transform.localScale = value *
-                                          (Transform.parent is { } parent
-                                              ? parent.lossyScale.InvCoeff()
-                                              : Vector3.one);
-        }
-
         public Color Color
         {
             set => Background.Color = value;

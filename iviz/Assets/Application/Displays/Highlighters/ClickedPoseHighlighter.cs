@@ -26,7 +26,7 @@ namespace Iviz.Displays.Highlighters
             float frameSize = labelSize * 10;
 
             Duration = duration;
-            
+
             node = new FrameNode("Clicked Pose Highlighter");
             node.Transform.SetPose(unityPose);
 
@@ -47,17 +47,16 @@ namespace Iviz.Displays.Highlighters
             tooltip.Transform.localPosition = 2f * (frameSize * 0.3f + labelSize) * Vector3.up;
             tooltip.PointToCamera();
 
-            if (customText == null)
-            {
-                using var description = BuilderPool.Rent();
-                RosUtils.FormatPose(TfListener.RelativeToFixedFrame(unityPose), description,
-                    RosUtils.PoseFormat.OnlyPosition, 2);
-                tooltip.SetCaption(description);
-            }
-            else
+            if (customText != null)
             {
                 tooltip.Caption = customText;
+                return;
             }
+
+            using var description = BuilderPool.Rent();
+            RosUtils.FormatPose(TfListener.RelativeToFixedFrame(unityPose), description,
+                RosUtils.PoseFormat.OnlyPosition, 2);
+            tooltip.SetCaption(description);
         }
 
         public void Update(float t)

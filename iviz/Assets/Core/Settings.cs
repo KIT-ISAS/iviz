@@ -127,6 +127,8 @@ namespace Iviz.Core
         public static string ResourcesPath => resourcesPath ??= $"{PersistentDataPath}/resources";
         public static string SavedRobotsPath => savedRobotsPath ??= $"{PersistentDataPath}/robots";
         public static string ResourcesFilePath => resourcesFilePath ??= $"{PersistentDataPath}/resources.json";
+        
+        public static bool UseSimpleMaterials { get; set; }
 
         public static GameObject FindMainCamera() =>
             GameObject.FindWithTag("MainCamera").CheckedNull()

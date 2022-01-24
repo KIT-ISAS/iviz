@@ -16,7 +16,7 @@
 
         struct Input
         {
-            float4 color : COLOR;
+            fixed4 color : COLOR;
         };
 
         UNITY_INSTANCING_BUFFER_START(Props)

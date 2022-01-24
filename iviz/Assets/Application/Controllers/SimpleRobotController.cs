@@ -209,9 +209,15 @@ namespace Iviz.Controllers
                     return;
                 }
 
+                /*
                 var allColliders = Robot.LinkObjects.Values.SelectMany(
                     linkObject => linkObject
                         .GetComponentsInChildren<Collider>(true)
+                        .Where(collider => collider.gameObject.layer == LayerType.Collider));
+                        */
+                var allColliders = Robot.LinkObjects.Values.SelectMany(
+                    linkObject => linkObject.transform.GetAllChildren()
+                        .WithComponent<Collider>()
                         .Where(collider => collider.gameObject.layer == LayerType.Collider));
                 foreach (var collider in allColliders)
                 {
@@ -377,11 +383,11 @@ namespace Iviz.Controllers
                 return;
             }
 
-            (bool result, string? robotDescription) = await Resource.TryGetRobotAsync(robotName);
+            (bool result, string robotDescription) = await Resource.TryGetRobotAsync(robotName);
             if (!result)
             {
-                RosLogger.Debug($"{this}: Failed to load robot!");
-                HelpText = "[Failed to Load Saved Robot]";
+                RosLogger.Debug($"{this}: Failed to load robot! Error message: {robotDescription}");
+                HelpText = $"[{robotDescription}]";
                 return;
             }
 

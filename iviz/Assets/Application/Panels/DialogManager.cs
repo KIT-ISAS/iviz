@@ -1,13 +1,13 @@
 #nullable enable
 
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using Iviz.Tools;
 
 namespace Iviz.App
 {
     internal sealed class DialogManager
     {
-        public ReadOnlyCollection<DialogData> DialogDatas { get; }
+        public IReadOnlyList<DialogData> DialogDatas { get; }
         public AddModuleDialogData AvailableModules { get; }
         public AddTopicDialogData AvailableTopics { get; }
         public ConnectionDialogData ConnectionData { get; }
@@ -39,7 +39,7 @@ namespace Iviz.App
                 EchoData = new EchoDialogData(),
                 SystemData = new SystemDialogData(),
                 ARMarkerData = new ARMarkerDialogData(),
-            }.AsReadOnly();                
+            };                
         }
     }
 }

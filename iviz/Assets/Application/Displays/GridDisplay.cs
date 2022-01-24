@@ -1,43 +1,54 @@
-﻿using UnityEngine;
+﻿#nullable enable
+
+using UnityEngine;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json;
 using Iviz.Resources;
 using Iviz.Tools;
-using JetBrains.Annotations;
 
 namespace Iviz.Displays
 {
     public sealed class GridDisplay : MarkerDisplay, IRecyclable
     {
-        MeshRenderer meshRenderer;
+        public static readonly List<string> OrientationNames = new() { "XY", "YZ", "XZ" };
 
-        [NotNull]
-        MeshRenderer MeshRenderer => meshRenderer != null ? meshRenderer : meshRenderer = GetComponent<MeshRenderer>();
+        static readonly Dictionary<GridOrientation, Quaternion> RotationByOrientation = new()
+        {
+            { GridOrientation.XZ, Quaternion.identity },
+            { GridOrientation.XY, Quaternion.Euler(90, 0, 0) },
+            { GridOrientation.YZ, Quaternion.Euler(0, 90, 0) }
+        };
 
-        GameObject interiorObject;
-        MeshRenderer interiorRenderer;
         readonly List<MeshMarkerDisplay> horizontals = new();
         readonly List<MeshMarkerDisplay> verticals = new();
 
-        int lastX = 0, lastZ = 0;
+        [SerializeField] Texture2D? texture;
+        [SerializeField] MeshRenderer? meshRenderer;
 
-        public static readonly List<string> OrientationNames = new() { "XY", "YZ", "XZ" };
-
-        static readonly Dictionary<GridOrientation, Quaternion> RotationByOrientation =
-            new()
-            {
-                { GridOrientation.XZ, Quaternion.identity },
-                { GridOrientation.XY, Quaternion.Euler(90, 0, 0) },
-                { GridOrientation.YZ, Quaternion.Euler(0, 90, 0) }
-            };
-
+        MeshMarkerDisplay? interiorObject;
+        MeshRenderer? interiorRenderer;
         GridOrientation orientation;
+        Color gridColor;
+        Color interiorColor;
+        int numberOfGridCells = 90;
+        int lastX, lastZ;
+        float gridCellSize = 1;
+        float gridLineWidth;
+
+        MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
+
+        MeshRenderer InteriorRenderer =>
+            interiorRenderer != null
+                ? interiorRenderer
+                : interiorRenderer = InteriorObject.GetComponent<MeshRenderer>();
+
+        MeshMarkerDisplay InteriorObject => interiorObject != null
+            ? interiorObject
+            : interiorObject = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, Transform);
+
 
         public GridOrientation Orientation
         {
@@ -49,8 +60,6 @@ namespace Iviz.Displays
             }
         }
 
-        Color gridColor;
-
         public Color GridColor
         {
             get => gridColor;
@@ -61,7 +70,6 @@ namespace Iviz.Displays
             }
         }
 
-        Color interiorColor;
 
         public Color InteriorColor
         {
@@ -69,12 +77,22 @@ namespace Iviz.Displays
             set
             {
                 interiorColor = value;
-                interiorColor.a = 0.1f;
-                interiorRenderer.SetPropertyColor(value);
+                InteriorObject.Color = value;
+
+                float colorValue = value.GetValue();
+                var verticalColor = Color.red.WithValue(colorValue).WithSaturation(0.75f);
+                var horizontalColor = Color.green.WithValue(colorValue).WithSaturation(0.75f);
+                foreach (var display in verticals)
+                {
+                    display.Color = verticalColor;
+                }
+
+                foreach (var display in horizontals)
+                {
+                    display.Color = horizontalColor;
+                }
             }
         }
-
-        float gridLineWidth;
 
         float GridLineWidth
         {
@@ -86,8 +104,6 @@ namespace Iviz.Displays
             }
         }
 
-        float gridCellSize = 1;
-
         float GridCellSize
         {
             get => gridCellSize;
@@ -97,8 +113,6 @@ namespace Iviz.Displays
                 UpdateMesh();
             }
         }
-
-        int numberOfGridCells = 90;
 
         int NumberOfGridCells
         {
@@ -110,39 +124,24 @@ namespace Iviz.Displays
             }
         }
 
-        bool showInterior;
-
         public bool ShowInterior
         {
-            set
-            {
-                showInterior = value;
-                interiorObject.SetActive(value);
-            }
+            set => InteriorObject.Visible = value;
         }
 
         public bool FollowCamera { get; set; } = true;
 
         void Awake()
         {
-            interiorObject = Resource.Displays.Cube.Instantiate(transform);
-            interiorObject.name = "Grid Interior";
-            interiorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
-            interiorObject.layer = LayerType.IgnoreRaycast;
-            interiorRenderer = interiorObject.GetComponent<MeshRenderer>();
-            interiorRenderer.sharedMaterial =
-                Settings.SettingsManager.QualityInView == QualityType.VeryLow
-                    ? Resource.Materials.GridInteriorSimple.Object
-                    : Resource.Materials.GridInterior.Object;
+            InteriorObject.name = "Grid Interior";
+            InteriorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
+            InteriorObject.Layer = LayerType.IgnoreRaycast;
+            InteriorObject.DiffuseTexture = texture;
+            InteriorObject.Metallic = 0.5f;
+            InteriorObject.Smoothness = 0.5f;
 
-            var resource = interiorObject.GetComponent<MeshMarkerDisplay>();
-            resource.Metallic = 0.5f;
-            resource.Smoothness = 0.5f;
-
-            Settings.QualityTypeChanged += OnQualityChanged;
-
-            interiorRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            interiorRenderer.receiveShadows = true;
+            InteriorRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            InteriorRenderer.receiveShadows = true;
 
             Orientation = GridOrientation.XY;
             GridColor = Color.white.WithAlpha(0.25f);
@@ -153,14 +152,6 @@ namespace Iviz.Displays
             ShowInterior = true;
 
             UpdateMesh();
-        }
-
-        void OnQualityChanged(QualityType qualityType)
-        {
-            interiorRenderer.sharedMaterial =
-                qualityType == QualityType.VeryLow
-                    ? Resource.Materials.GridInteriorSimple.Object
-                    : Resource.Materials.GridInterior.Object;
         }
 
         void Update()
@@ -192,20 +183,20 @@ namespace Iviz.Displays
             const float zPosForX = 3e-4f;
             const float zPosForY = 2e-4f; // prevent z-fighting
 
-            transform.localPosition = new Vector3(x, offsetY, z);
+            Transform.localPosition = new Vector3(x, offsetY, z);
 
             int baseHoriz = Mathf.FloorToInt((z + 5) / 10f) * 10;
             foreach (int i in ..horizontals.Count)
             {
                 float za = (i - (horizontals.Count - 1f) / 2) * 10;
-                horizontals[i].transform.localPosition = new Vector3(0, baseHoriz + za - z, -zPosForX);
+                horizontals[i].Transform.localPosition = new Vector3(0, baseHoriz + za - z, -zPosForX);
             }
 
             int baseVert = Mathf.FloorToInt((x + 5) / 10f) * 10;
             foreach (int i in ..verticals.Count)
             {
                 float xa = (i - (verticals.Count - 1f) / 2) * 10;
-                verticals[i].transform.localPosition = new Vector3(baseVert + xa - x, 0, -zPosForY);
+                verticals[i].Transform.localPosition = new Vector3(baseVert + xa - x, 0, -zPosForY);
             }
 
             lastX = x;
@@ -214,11 +205,15 @@ namespace Iviz.Displays
 
         void UpdateMesh()
         {
+            var tilingScale = new Vector2(NumberOfGridCells, NumberOfGridCells);
+            Resource.TexturedMaterials.GetFull(texture).mainTextureScale = tilingScale;
+            Resource.TexturedMaterials.GetSimple(texture).mainTextureScale = tilingScale;
+
             float totalSize = GridCellSize * NumberOfGridCells + GridLineWidth;
 
             const float interiorHeight = 1 / 512f;
-            interiorObject.transform.localScale = new Vector3(totalSize, totalSize, interiorHeight);
-            interiorObject.transform.localPosition = new Vector3(0, 0, interiorHeight / 2);
+            InteriorObject.Transform.localScale = new Vector3(totalSize, totalSize, interiorHeight);
+            InteriorObject.Transform.localPosition = new Vector3(0, 0, interiorHeight / 2);
 
             Collider.size = new Vector3(totalSize, totalSize, interiorHeight);
             Collider.center = new Vector3(0, 0, interiorHeight / 2);
@@ -239,12 +234,12 @@ namespace Iviz.Displays
                 foreach (int _ in horizontals.Count..size)
                 {
                     var hResource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Square, transform);
-                    hResource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
+                    hResource.Transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
                     hResource.Layer = LayerType.IgnoreRaycast;
                     horizontals.Add(hResource);
 
                     var vResource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Square, transform);
-                    vResource.transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
+                    vResource.Transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
                     vResource.Layer = LayerType.IgnoreRaycast;
                     verticals.Add(vResource);
                 }
@@ -252,16 +247,15 @@ namespace Iviz.Displays
 
             foreach (var resource in horizontals)
             {
-                resource.transform.localScale = new Vector3(totalSize, 1, 2 * GridLineWidth);
-                resource.Color = Resource.Colors.GridGreenLine;
+                resource.Transform.localScale = new Vector3(totalSize, 1, 2 * GridLineWidth);
             }
 
             foreach (var resource in verticals)
             {
-                resource.transform.localScale = new Vector3(2 * GridLineWidth, 1, totalSize);
-                resource.Color = Resource.Colors.GridRedLine;
+                resource.Transform.localScale = new Vector3(2 * GridLineWidth, 1, totalSize);
             }
 
+            InteriorColor = InteriorColor;
             lastX = int.MaxValue;
             lastZ = int.MaxValue;
         }
@@ -277,11 +271,8 @@ namespace Iviz.Displays
             {
                 plane.ReturnToPool(Resource.Displays.Square);
             }
-        }
-
-        void OnDestroy()
-        {
-            Settings.QualityTypeChanged -= OnQualityChanged;
+            
+            interiorObject.ReturnToPool(Resource.Displays.Square);
         }
     }
 }

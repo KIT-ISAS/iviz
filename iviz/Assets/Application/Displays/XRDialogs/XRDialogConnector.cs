@@ -30,6 +30,16 @@ namespace Iviz.Displays.XRDialogs
             Color = color;
         }
 
+        void OnEnable()
+        {
+            Node.Parent = TfListener.OriginFrame;
+        }
+
+        void OnDisable()
+        {
+            Node.Parent = null;
+        }
+
         MeshMarkerDisplay RentSphere()
         {
             var sphere = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Sphere, Node.Transform);
@@ -86,11 +96,6 @@ namespace Iviz.Displays.XRDialogs
         void Update()
         {
             var mDialog = Dialog;
-            if (!mDialog.NeedsConnector)
-            {
-                return;
-            }
-            
             var a = mDialog.ConnectorStart;
             var b = mDialog.ConnectorEnd;
             var mid = new Vector3((a.x + b.x) / 2, b.y, (a.z + b.z) / 2);

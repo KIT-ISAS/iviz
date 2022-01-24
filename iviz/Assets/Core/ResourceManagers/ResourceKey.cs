@@ -20,7 +20,7 @@ namespace Iviz.Resources
         /// Returns the instance id of the resource.
         /// </summary>
         public int Id { get; }
-        
+
         /// <summary>
         /// Name of this resource.
         /// </summary>
@@ -31,11 +31,12 @@ namespace Iviz.Resources
         /// </summary>
         /// <param name="baseObject">Loaded instance of this type, if already available.</param>
         /// <param name="objectName">>Optional descriptive name for this object, in case of an error.</param>
-        public ResourceKey(T baseObject, string? objectName = null) 
+        public ResourceKey(T baseObject, string? objectName = null)
         {
             if (baseObject == null)
             {
-                throw new ArgumentNullException(objectName ?? nameof(baseObject));
+                throw new ArgumentNullException(nameof(baseObject),
+                    $"Resource key was not set for asset '{objectName}'");
             }
 
             Object = baseObject;

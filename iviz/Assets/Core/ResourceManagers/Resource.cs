@@ -90,10 +90,10 @@ namespace Iviz.Resources
 
         public static IEnumerable<string> GetRobotNames() => Internal.GetRobotNames().Concat(External.GetRobotNames());
 
-        public static ValueTask<(bool result, string? robotDescription)> TryGetRobotAsync(string robotName,
+        public static ValueTask<(bool result, string robotDescription)> TryGetRobotAsync(string robotName,
             CancellationToken token = default) =>
             Internal.TryGetRobot(robotName, out string? robotDescription)
-                ? new ValueTask<(bool, string?)>((true, robotDescription))
+                ? new ValueTask<(bool, string)>((true, robotDescription))
                 : External.TryGetRobotAsync(robotName, token);
 
         public static bool TryGetResource(string uriString, [NotNullWhen(true)] out ResourceKey<GameObject>? info) =>

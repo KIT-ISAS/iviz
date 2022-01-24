@@ -45,24 +45,24 @@ namespace Iviz.Controllers
 
         public static void Start()
         {
-            RoslibConnection connection = ConnectionManager.Connection;
+            var connection = ConnectionManager.Connection;
 
-            connection.AdvertiseService<GetLoggers>("get_loggers", GetLoggers);
-            connection.AdvertiseService<SetLoggerLevel>("set_logger_level", SetLoggerLevel);
+            connection.AdvertiseService<GetLoggers>("~get_loggers", GetLoggers);
+            connection.AdvertiseService<SetLoggerLevel>("~set_logger_level", SetLoggerLevel);
 
-            connection.AdvertiseService<AddModule>("add_module", AddModuleAsync);
-            connection.AdvertiseService<AddModuleFromTopic>("add_module_from_topic", AddModuleFromTopicAsync);
-            connection.AdvertiseService<UpdateModule>("update_module", UpdateModuleAsync);
-            connection.AdvertiseService<GetModules>("get_modules", GetModulesAsync);
-            connection.AdvertiseService<SetFixedFrame>("set_fixed_frame", SetFixedFrameAsync);
-            connection.AdvertiseService<GetFramePose>("get_frame_poses", GetFramePoseAsync);
-            connection.AdvertiseService<GetCaptureResolutions>("get_capture_resolutions", GetCaptureResolutions);
-            connection.AdvertiseService<StartCapture>("start_capture", StartCaptureAsync);
-            connection.AdvertiseService<StopCapture>("stop_capture", StopCaptureAsync);
-            connection.AdvertiseService<CaptureScreenshot>("capture_screenshot", CaptureScreenshotAsync);
+            connection.AdvertiseService<AddModule>("~add_module", AddModuleAsync);
+            connection.AdvertiseService<AddModuleFromTopic>("~add_module_from_topic", AddModuleFromTopicAsync);
+            connection.AdvertiseService<UpdateModule>("~update_module", UpdateModuleAsync);
+            connection.AdvertiseService<GetModules>("~get_modules", GetModulesAsync);
+            connection.AdvertiseService<SetFixedFrame>("~set_fixed_frame", SetFixedFrameAsync);
+            //connection.AdvertiseService<GetFramePose>("get_frame_poses", GetFramePoseAsync);
+            //connection.AdvertiseService<GetCaptureResolutions>("get_capture_resolutions", GetCaptureResolutions);
+            //connection.AdvertiseService<StartCapture>("start_capture", StartCaptureAsync);
+            //connection.AdvertiseService<StopCapture>("stop_capture", StopCaptureAsync);
+            //connection.AdvertiseService<CaptureScreenshot>("capture_screenshot", CaptureScreenshotAsync);
 
-            connection.AdvertiseService<UpdateRobot>("update_robot", UpdateRobotAsync);
-            connection.AdvertiseService<LaunchDialog>("launch_dialog", LaunchDialogAsync);
+            //connection.AdvertiseService<UpdateRobot>("update_robot", UpdateRobotAsync);
+            //connection.AdvertiseService<LaunchDialog>("launch_dialog", LaunchDialogAsync);
         }
 
         static void GetLoggers(GetLoggers srv)
@@ -569,10 +569,8 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        var assetHolder = UnityEngine.Resources
-                            .Load<GameObject>("App Asset Holder")
-                            .GetComponent<AppAssetHolder>();
-                        AudioSource.PlayClipAtPoint(assetHolder.Screenshot, Settings.MainCamera.transform.position);
+                        var screenshot = Resource.Extras.AppAssetHolder.Screenshot;
+                        AudioSource.PlayClipAtPoint(screenshot, Settings.MainCamera.transform.position);
 
                         ss = await Settings.ScreenCaptureManager.CaptureColorAsync();
                         pose = ss != null

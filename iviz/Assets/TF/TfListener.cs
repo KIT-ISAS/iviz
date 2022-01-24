@@ -82,14 +82,14 @@ namespace Iviz.Controllers.TF
             get => config;
             set
             {
-                config.Topic = DefaultTopic;
+                config.Topic = value.Topic;
+                config.Id = value.Id;
                 FramesVisible = value.Visible;
                 FrameSize = value.FrameSize;
                 FrameLabelsVisible = value.FrameLabelsVisible;
                 ParentConnectorVisible = value.ParentConnectorVisible;
                 KeepAllFrames = value.KeepAllFrames;
                 FixedFrameId = value.FixedFrameId;
-                PreferUdp = value.PreferUdp;
                 Interactable = value.Interactable;
                 FlipZ = value.FlipZ;
             }
@@ -198,12 +198,6 @@ namespace Iviz.Controllers.TF
             }
         }
 
-        bool PreferUdp
-        {
-            get => config.PreferUdp;
-            set => config.PreferUdp = value;
-        }
-
         public static string FixedFrameId
         {
             get => Instance.FixedFrameIdImpl;
@@ -279,12 +273,14 @@ namespace Iviz.Controllers.TF
                 fixedFrame = mapFrame;
 
                 Publisher = new Sender<TFMessage>(DefaultTopic);
-                //Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic, RosTransportHint.PreferTcp);
-                Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic,
-                    PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
+                Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic, RosTransportHint.PreferUdp);
                 ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
 
-                Config = config ?? new TfConfiguration { Topic = DefaultTopic };
+                Config = config ?? new TfConfiguration
+                {
+                    Topic = DefaultTopic,
+                    Id = DefaultTopic
+                };
 
                 GameThread.LateEveryFrame += LateUpdate;
             }
@@ -297,8 +293,9 @@ namespace Iviz.Controllers.TF
 
         public int NumFrames => frames.Count;
 
-        static bool IsValid(in Msgs.GeometryMsgs.Vector3 v)
+        static bool IsWithinThreshold(in Msgs.GeometryMsgs.Vector3 v)
         {
+            // unity cannot deal with very large floats, so we have to limit translation sizes
             const int maxPoseMagnitude = 10000;
             return Math.Abs(v.X) < maxPoseMagnitude
                    && Math.Abs(v.Y) < maxPoseMagnitude
@@ -315,10 +312,23 @@ namespace Iviz.Controllers.TF
                 var (transforms, isStatic) = value;
                 foreach (var (parentIdUnchecked, childIdUnchecked, rosTransform, _) in transforms)
                 {
-                    if (childIdUnchecked.Length == 0
-                        || rosTransform.IsInvalid()
-                        || !IsValid(rosTransform.Translation))
+                    if (childIdUnchecked.Length == 0)
                     {
+                        continue;
+                    }
+
+                    // keep the following two strings simple, it is expected that they will be printed with frequency
+                    if (rosTransform.IsInvalid())
+                    {
+                        RosLogger.Info($"{nameof(TfListener)}: Ignoring transform with invalid values. " +
+                                       $"ChildFrameId={childIdUnchecked} ParentId={parentIdUnchecked}");
+                        continue;
+                    }
+
+                    if (!IsWithinThreshold(rosTransform.Translation))
+                    {
+                        RosLogger.Info($"{nameof(TfListener)}: Ignoring transform with too large values. " +
+                                       $"ChildFrameId={childIdUnchecked} ParentId={parentIdUnchecked}");
                         continue;
                     }
 
@@ -364,7 +374,7 @@ namespace Iviz.Controllers.TF
                         ? parentIdUnchecked
                         : parentIdUnchecked[1..];
 
-                    if (child.Parent is not null && parentId == child.Parent.Id)
+                    if (child.Parent != null && parentId == child.Parent.Id)
                     {
                         child.SetLocalPose(unityPose);
                     }
@@ -576,6 +586,8 @@ namespace Iviz.Controllers.TF
             ListenerStatic.Dispose();
             Publisher.Dispose();
 
+            OriginFrame.Dispose(); // get rid of children so they won't get deleted when it does
+
             GameThread.LateEveryFrame -= LateUpdate;
             staticListenerNode.Dispose();
             ResetFrames = null;
@@ -630,7 +642,7 @@ namespace Iviz.Controllers.TF
             if (localPose.position.IsInvalid() || localPose.rotation.IsInvalid())
             {
                 RosLogger.Error(
-                    $"TfListener: Cannot publish invalid transform: ChildFrameId='{childFrameId}' " +
+                    $"{nameof(TfListener)}: Cannot publish invalid transform: ChildFrameId='{childFrameId}' " +
                     $"Parent='{parentFrameId}' Transform={localPose.ToString()}");
                 return;
             }
@@ -667,6 +679,8 @@ namespace Iviz.Controllers.TF
                 incomingMessages.Enqueue((messages, false));
             }
         }
+
+        public override string ToString() => $"[{nameof(TfListener)} '{DefaultTopic}']";
 
         /// <summary>
         /// Creates a header using the fixed frame as the frame id and the frame start as the timestamp.

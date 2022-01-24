@@ -20,12 +20,14 @@ namespace Iviz.App
         static string DefaultMyId => "iviz_" + UnityEngine.Application.platform.ToString().ToLower();
 
         readonly ConnectionDialogPanel panel;
-        public override IDialogPanel Panel => panel;
-
         readonly List<Uri> lastMasterUris = new();
 
         Uri? masterUri = DefaultMasterUri;
+        Uri? myUri = DefaultMyUri;
+        string? myId = DefaultMyId;
 
+        public override IDialogPanel Panel => panel;
+        
         public Uri? MasterUri
         {
             get => masterUri;
@@ -36,7 +38,6 @@ namespace Iviz.App
             }
         }
 
-        Uri? myUri = DefaultMyUri;
 
         public Uri? MyUri
         {
@@ -48,7 +49,6 @@ namespace Iviz.App
             }
         }
 
-        string? myId = DefaultMyId;
 
         public string? MyId
         {
@@ -193,7 +193,7 @@ namespace Iviz.App
                 {
                     if (ConnectionManager.IsConnected)
                     {
-                        RosLogger.Internal("Cannot remove master node while connected!");
+                        RosLogger.Internal("Master shutdown failed. Please <b>disconnect first</b>.");
                         return;
                     }
 

@@ -11,16 +11,16 @@ namespace Iviz.App
     public abstract class ListenerModuleData : ModuleData
     {
         protected abstract ListenerController Listener { get; }
+
         /// ROS topic type
-        public string TopicType { get; }
+        public string TopicType => Listener.Listener.Type;
         /// ROS topic name
         public string Topic { get; }
         public override IController Controller => Listener;
 
-        protected ListenerModuleData(string topic, string type)
+        protected ListenerModuleData(string topic)
         {
             Topic = topic ?? throw new ArgumentNullException(nameof(topic));
-            TopicType = type ?? throw new ArgumentNullException(nameof(type));
             ModuleListPanel.RegisterDisplayedTopic(Topic);
         }
         

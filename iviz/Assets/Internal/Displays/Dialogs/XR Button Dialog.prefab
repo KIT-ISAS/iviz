@@ -163,6 +163,8 @@ MonoBehaviour:
   _transform: {fileID: 9024825353754890542}
   socketPosition: {x: 0, y: -0.145, z: 0}
   background: {fileID: 6014099797948075304}
+  backgroundColor: {r: 0, g: 0.2, b: 0.5, a: 1}
+  connector: {fileID: 586438443107256636}
   button: {fileID: 1379410029039570407}
 --- !u!1001 &586438442386524082
 PrefabInstance:
@@ -481,7 +483,7 @@ PrefabInstance:
     - target: {fileID: 791139870075898102, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.01
+      value: 0.001
       objectReference: {fileID: 0}
     - target: {fileID: 791139870075898102, guid: c3b1afd1b19444c57b708ecc2b861ad8,
         type: 3}

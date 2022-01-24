@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Iviz.Core;
 using Iviz.Msgs.Tf2Msgs;
 using UnityEngine;
@@ -63,7 +64,7 @@ namespace Iviz.Controllers.TF
 
         protected TfFrame(string id)
         {
-            Id = id;
+            Id = id ?? throw new ArgumentNullException(nameof(id));
             Name = "{" + id + "}";
         }
 
@@ -180,7 +181,14 @@ namespace Iviz.Controllers.TF
         
         protected override void Stop()
         {
-            foreach (var frame in children.Values)
+            if (children.Count == 0)
+            {
+                base.Stop();
+                return;
+            }
+
+            var childrenCopy = children.Values.ToArray();
+            foreach (var frame in childrenCopy)
             {
                 frame.Parent = null;
             }

@@ -22,6 +22,9 @@ namespace Iviz.Displays
         void Suspend();
     }
 
+    /// <summary>
+    /// Interface for displays that support setting the layer.
+    /// </summary>
     public interface ISupportsLayer
     {
         /// <summary>

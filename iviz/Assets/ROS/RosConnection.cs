@@ -126,7 +126,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error("Unexpected error in RosConnection.Connect", e);
+                RosLogger.Error($"{this}: Unexpected error in Connect", e);
                 return;
             }
 
@@ -164,7 +164,7 @@ namespace Iviz.Ros
             lastConnectionTry = DateTime.MinValue;
         }
 
-        public override string ToString() => "[RosConnection]";
+        public sealed override string ToString() => "[RosConnection]";
     }
 
     public enum RequestType

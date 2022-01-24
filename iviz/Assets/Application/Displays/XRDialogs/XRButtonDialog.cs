@@ -36,7 +36,7 @@ namespace Iviz.Displays.XRDialogs
         {
             base.Suspend();
             Clicked = null;
-            Button.ResetHighlights();
+            //Button.ResetHighlights();
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Iviz.App
         const string Suffix = LoadConfigDialogData.Suffix;
 
         readonly SaveConfigDialogPanel panel;
-        readonly List<SavedFileInfo> files = new();
+        readonly List<ISavedFileInfo> files = new();
         
         public override IDialogPanel Panel => panel;
 
