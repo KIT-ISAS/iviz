@@ -42,6 +42,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_octree_helper", "iviz_
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_tools", "iviz_tools\iviz_tools.csproj", "{73125E88-C810-4E18-9F66-B1C005C3CE9C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "iviz_remote_lib", "iviz_remote_lib\iviz_remote_lib.csproj", "{ECA2BAFD-C030-42B7-8742-3A072B6FB88F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -128,6 +130,10 @@ Global
 		{73125E88-C810-4E18-9F66-B1C005C3CE9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73125E88-C810-4E18-9F66-B1C005C3CE9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73125E88-C810-4E18-9F66-B1C005C3CE9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECA2BAFD-C030-42B7-8742-3A072B6FB88F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECA2BAFD-C030-42B7-8742-3A072B6FB88F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECA2BAFD-C030-42B7-8742-3A072B6FB88F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECA2BAFD-C030-42B7-8742-3A072B6FB88F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
