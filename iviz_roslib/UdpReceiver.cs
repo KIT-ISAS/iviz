@@ -104,8 +104,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         {
             try
             {
-                this.topicInfo =
-                    RosUtils.GenerateDynamicTopicInfo<T>(topicInfo.CallerId, topicInfo.Topic, RosHeader);
+                this.topicInfo = RosUtils.GenerateDynamicTopicInfo<T>(topicInfo.CallerId, topicInfo.Topic, RosHeader);
             }
             catch (RosHandshakeException e)
             {
@@ -116,7 +115,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
             }
         }
 
-        task = TaskUtils.Run(async () => await StartSession().AwaitNoThrow(this));
+        task = TaskUtils.Run(() => StartSession().AwaitNoThrow(this));
     }
 
     public SubscriberReceiverState State => new UdpReceiverState(RemoteUri)
@@ -130,7 +129,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         NumDropped = numDropped,
         ErrorDescription = ErrorDescription,
         MaxPacketSize = MaxPacketSize,
-        IsAlive = IsAlive, 
+        IsAlive = IsAlive,
     };
 
     public async ValueTask DisposeAsync(CancellationToken token)
@@ -356,7 +355,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
                             (UdpRosParams.DefaultMTU - UdpRosParams.Ip4UdpHeadersLength);
         return new RpcUdpTopicRequest(header, ownHostname, maxPacketSize);
     }
-    
+
     void ILoopbackReceiver<T>.Post(in T message, int rcvLength)
     {
         if (!IsAlive)

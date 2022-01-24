@@ -289,7 +289,8 @@ internal static class RosUtils
     {
         return rcvLength switch
         {
-            < 64 * 1024 => defaultSize,
+            < 8 * 1024 => defaultSize,
+            < 32 * 1024 => 32 * 1024,
             < 128 * 1024 => 128 * 1024,
             < 1024 * 1024 => 1024 * 1024,
             _ => 4 * 1024 * 1024,
