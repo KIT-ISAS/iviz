@@ -38,10 +38,14 @@ namespace Iviz.App
             {
                 listener.Dispose();
             }
+            catch (ObjectDisposedException)
+            {
+                // system shutting down, ROS modules already disposed
+            }
             catch (Exception e)
             {
                 RosLogger.Error($"{this}: Failed to dispose controller", e);
-            }             
+            }
         }
 
         public void UpdateConfiguration(TfConfiguration configuration)
@@ -132,7 +136,7 @@ namespace Iviz.App
 
         public override string ToString()
         {
-            return $"[{ModuleType} Topic='{TfListener.DefaultTopic}' id='{Configuration.Id}']";
+            return $"[{nameof(TfModuleData)} Topic='{TfListener.DefaultTopic}' id='{Configuration.Id}']";
         }
     }
 }

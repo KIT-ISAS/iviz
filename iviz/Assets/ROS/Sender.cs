@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Iviz.Core;
 using Iviz.Msgs;
+using UnityEngine;
 
 namespace Iviz.Ros
 {

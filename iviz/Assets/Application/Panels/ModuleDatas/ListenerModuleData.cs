@@ -39,7 +39,7 @@ namespace Iviz.App
         
         public override string ToString()
         {
-            return $"[{ModuleType} Topic='{Topic}' [{TopicType}] id='{Configuration.Id}']";
+            return $"[{GetType().Name} Topic='{Topic}' [{TopicType}] id='{Configuration.Id}']";
         }
     }
 }

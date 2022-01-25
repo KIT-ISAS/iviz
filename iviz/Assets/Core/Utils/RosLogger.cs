@@ -2,6 +2,7 @@
 
 using System;
 using System.Text;
+using System.Threading;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Tools;
 
@@ -12,24 +13,31 @@ namespace Iviz.Core
         const string NullMessage = "[null message]";
         const string NullException = "[null exception]";
 
-        public delegate void ExternalLogDelegate(in LogMessage msg);
+        const int MaxPublishedPerSecond = 30;
+        static int publishedThisSec;
 
+        public delegate void ExternalLogDelegate(in LogMessage msg);
         public static event Action<string>? LogInternal;
         public static event ExternalLogDelegate? LogExternal;
 
+        public static void ResetCounter()
+        {
+            Interlocked.Exchange(ref publishedThisSec, 0);
+        }
+
         public static void Info(object? t)
         {
-            ExternalImpl(t?.ToString(), LogLevel.Info);
+            PublishExternal(t?.ToString(), LogLevel.Info);
         }
 
         public static void Error(object? t)
         {
-            ExternalImpl((string?)t, LogLevel.Error);
+            PublishExternal((string?)t, LogLevel.Error);
         }
 
         public static void Error(object? t, Exception? e)
         {
-            ExternalImpl(t, LogLevel.Error, e);
+            PublishExternal(t, LogLevel.Error, e);
         }
 
         [Obsolete]
@@ -39,17 +47,17 @@ namespace Iviz.Core
 
         public static void Warn(object? t)
         {
-            ExternalImpl(t?.ToString(), LogLevel.Warn);
+            PublishExternal(t?.ToString(), LogLevel.Warn);
         }
 
         public static void Debug(object? t)
         {
-            ExternalImpl(t?.ToString(), LogLevel.Debug);
+            PublishExternal(t?.ToString(), LogLevel.Debug);
         }
 
         public static void Debug(object? t, Exception e)
         {
-            ExternalImpl(t, LogLevel.Debug, e);
+            PublishExternal(t, LogLevel.Debug, e);
         }
 
         public static void Internal(string? msg)
@@ -99,9 +107,24 @@ namespace Iviz.Core
         }
 
 
-        static void ExternalImpl(string? msg, LogLevel level)
+        static void PublishExternal(string? msg, LogLevel level)
         {
+            Interlocked.Increment(ref publishedThisSec);
+            if (publishedThisSec == MaxPublishedPerSecond)
+            {
+                UnityEngine.Debug.LogWarning($"{nameof(RosLogger)}: Already published " +
+                                             $"{MaxPublishedPerSecond.ToString()} messages this second." +
+                                             "Suppressing the rest.");
+                return;
+            }
+
+            if (publishedThisSec > MaxPublishedPerSecond)
+            {
+                return;
+            }
+
             LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage));
+            
             switch (level)
             {
                 case LogLevel.Debug:
@@ -118,8 +141,22 @@ namespace Iviz.Core
             }
         }
 
-        static void ExternalImpl(object? msg, LogLevel level, Exception? e)
+        static void PublishExternal(object? msg, LogLevel level, Exception? e)
         {
+            Interlocked.Increment(ref publishedThisSec);
+            if (publishedThisSec == MaxPublishedPerSecond)
+            {
+                UnityEngine.Debug.LogWarning($"{nameof(RosLogger)}: Already published " +
+                                             $"{MaxPublishedPerSecond.ToString()} messages this second." +
+                                             "Suppressing the rest.");
+                return;
+            }
+
+            if (publishedThisSec > MaxPublishedPerSecond)
+            {
+                return;
+            }
+
             string message;
             using (var description = BuilderPool.Rent())
             {
@@ -144,7 +181,7 @@ namespace Iviz.Core
                         childException = childException.InnerException;
                     }
                 }
-                
+
                 message = description.ToString();
             }
 
