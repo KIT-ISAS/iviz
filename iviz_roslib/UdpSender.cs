@@ -87,7 +87,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             throw new RosInvalidHeaderException(
                 $"Expected topic '{topicInfo.Topic}' but received request for '{receivedTopic}'");
         }
-
+        
         if (!fields.TryGetValue("type", out string? receivedType) || receivedType != topicInfo.Type)
         {
             if (receivedType != DynamicMessage.RosMessageType) // "*"

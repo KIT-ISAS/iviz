@@ -10,7 +10,7 @@ I have tested it in Windows, Ubuntu Linux, macOS, iOS, Android, and UWP (Hololen
 There is a project called __iviz_utils__ in the root of the repository that references all the other projects.
 You can either:
 * include the project into your VS, VSCode, or Rider solution, or
-* reference all the DLLs in either __iviz_utils/Publish__ (NET Standard 2) or __iviz_utils/Publish5__ (NET 5) in your project.
+* reference all the DLLs in either __iviz_utils/Publish__ (NET Standard 2.1) or __iviz_utils/Publish5__ (NET 5) in your project.
 
 If you are in Unity, all you need to do is copy all the DLLs and put them somewhere in your Assets directory.
 If you are recompiling the library, or adapting the code to your own libraries, keep in mind that Unity only supports .NETStandard 2.0 (2.1  in 2021.2, but not Core).
@@ -46,7 +46,7 @@ Uri masterUri = RosClient.EnvironmentMasterUri ?? new Uri("http://192.168.0.1:11
 Uri callerUri = new Uri("http://192.168.0.2:7614");
 
 // alternative that tries to guess your address and uses the port 7614
-// Uri callerUri = TryGetCallerUriFor(masterUri, 7614) 
+// Uri callerUri = RosClient.TryGetCallerUriFor(masterUri, 7614) 
 
 // set the name of our node
 string callerId = "/iviz_test";

@@ -63,17 +63,21 @@ internal static class RosUtils
 
     internal static Dictionary<string, string> CreateHeaderDictionary(List<string> fields)
     {
-        Dictionary<string, string> values = new();
+        var values = new Dictionary<string, string>();
         foreach (string entry in fields)
         {
             int index = entry.IndexOf('=');
-            if (index < 0)
+            switch (index)
             {
-                throw new RosInvalidHeaderException($"Missing '=' separator in ROS header field '{entry}'.");
+                case < 0:
+                    throw new RosInvalidHeaderException($"Missing '=' separator in ROS header field '{entry}'.");
+                case 0:
+                    continue;
+                default:
+                    string key = entry[..index];
+                    values[key] = entry[(index + 1)..];
+                    break;
             }
-
-            string key = entry[..index];
-            values[key] = entry[(index + 1)..];
         }
 
         return values;
@@ -86,21 +90,21 @@ internal static class RosUtils
         const string typePrefix = "type=";
         const string definitionPrefix = "message_definition=";
 
-        string? dynamicMsgName = responses.FirstOrDefault(
-            entry => entry.HasPrefix(typePrefix))?.Substring(typePrefix.Length);
-        string? dynamicDependencies = responses.FirstOrDefault(
-            entry => entry.HasPrefix(definitionPrefix))?.Substring(definitionPrefix.Length);
+        string? dynamicMsgName = responses
+            .FirstOrDefault(entry => entry.HasPrefix(typePrefix))
+            ?[typePrefix.Length..];
+        string? dynamicDependencies = responses
+            .FirstOrDefault(entry => entry.HasPrefix(definitionPrefix))
+            ?[definitionPrefix.Length..];
         if (dynamicMsgName == null || dynamicDependencies == null)
         {
             throw new RosHandshakeException(
                 "Partner did not send type and definition, required to instantiate dynamic messages.");
         }
 
-        Type? lookupMsgName;
-        object? lookupGenerator;
         if (DynamicMessage.IsGenericMessage<T>()
-            && (lookupMsgName = BuiltIns.TryGetTypeFromMessageName(dynamicMsgName)) != null
-            && (lookupGenerator = Activator.CreateInstance(lookupMsgName)) != null)
+            && BuiltIns.TryGetTypeFromMessageName(dynamicMsgName) is { } lookupMsgName
+            && Activator.CreateInstance(lookupMsgName) is { } lookupGenerator)
         {
             return new TopicInfo<T>(callerId, topicName, (IDeserializable<T>)lookupGenerator);
         }
@@ -117,7 +121,7 @@ internal static class RosUtils
             ? info.IPv4Mask.GetAddressBytes()
             : GtSubnetMaskFromV6PrefixLength(info.PrefixLength);
 
-        for (int i = 0; i < addressABytes.Length; i++)
+        foreach (int i in ..addressABytes.Length)
         {
             if ((addressABytes[i] & subnetMaskBytes[i]) != (addressBBytes[i] & subnetMaskBytes[i]))
             {

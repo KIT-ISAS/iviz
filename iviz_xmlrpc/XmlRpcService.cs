@@ -356,7 +356,7 @@ namespace Iviz.XmlRpc
             {
                 if (e is not IOException or SocketException or OperationCanceledException)
                 {
-                    Logger.LogErrorFormat("XmlRpcService: Error during parsing", e);
+                    Logger.LogErrorFormat("XmlRpcService: Error during parsing. {0}", e);
                     await httpContext.RespondWithUnexpectedErrorAsync(token: token);
                 }
 

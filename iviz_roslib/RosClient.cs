@@ -29,14 +29,14 @@ public sealed class RosClient : IRosClient
 {
     public const int AnyPort = 0;
 
-    RosNodeServer? listener;
-
     readonly ConcurrentDictionary<string, IRosSubscriber> subscribersByTopic = new();
     readonly ConcurrentDictionary<string, IRosPublisher> publishersByTopic = new();
     readonly ConcurrentDictionary<string, IServiceCaller> subscribedServicesByName = new();
     readonly ConcurrentDictionary<string, IServiceRequestManager> publishedServicesByName = new();
     readonly string namespacePrefix;
 
+    RosNodeServer? listener;
+    
     public delegate void ShutdownActionCall(string callerId, string reason);
 
     /// <summary>
@@ -714,7 +714,7 @@ public sealed class RosClient : IRosClient
         var topicInfo = new TopicInfo<T>(CallerId, topic, generator);
         int timeoutInMs = (int)TcpRosTimeout.TotalMilliseconds;
 
-        RosSubscriber<T> subscription = new(this, topicInfo, requestNoDelay, timeoutInMs, transportHint);
+        var subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs, transportHint);
         string id = subscription.Subscribe(firstCallback);
 
         subscribersByTopic[topic] = subscription;
