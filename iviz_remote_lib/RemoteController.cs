@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Text;
 using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.Tf2Msgs;
+using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Roslib;
 
 namespace Iviz.RemoteLib;
@@ -41,14 +43,15 @@ public sealed class RemoteController
         {
             throw new ArgumentNullException(nameof(topic));
         }
-        
+
         if (requestedId == "")
         {
             throw new ArgumentException("Requested id name cannot be empty");
         }
 
         var addModuleResponse =
-            client.CallService($"{ivizId}/add_module_from_topic", new AddModuleFromTopicRequest(topic, requestedId ?? topic));
+            client.CallService($"{ivizId}/add_module_from_topic",
+                new AddModuleFromTopicRequest(topic, requestedId ?? topic));
 
         if (!addModuleResponse.Success)
         {
@@ -82,7 +85,7 @@ public sealed class RemoteController
             client.CallService($"{ivizId}/add_module", new AddModuleRequest(type.ToString(), requestedId));
 
         if (!addModuleResponse.Success)
-        { 
+        {
             throw new RemoteException(addModuleResponse.Message);
         }
 
@@ -95,7 +98,7 @@ public sealed class RemoteController
         {
             throw new ArgumentNullException(nameof(config));
         }
-        
+
         if (string.IsNullOrEmpty(id))
         {
             throw new ArgumentNullException(nameof(id));
@@ -116,7 +119,7 @@ public sealed class RemoteController
             throw new RemoteException(updateModuleResponse.Message);
         }
     }
-    
+
     /// <summary>
     /// Toggles the visibility of the given module, if supported.
     /// </summary>
@@ -153,19 +156,36 @@ public sealed class RemoteController
 
 public enum AddModuleType
 {
+    /// <inheritdoc cref="ModuleType.Grid"/>
     Grid = ModuleType.Grid,
     AugmentedReality = ModuleType.AugmentedReality,
     Joystick = ModuleType.Joystick,
+
+    /// <inheritdoc cref="ModuleType.Robot"/>
     Robot = ModuleType.Robot,
+    
     DepthCloud = ModuleType.DepthCloud,
 }
 
 public enum ModuleType
 {
+    /// <summary>
+    /// A grid plane. See <see cref="GridConfiguration"/>.
+    /// </summary>
     Grid = 1,
+
+    /// <summary>
+    /// Visualizer and manager for TF frames, listens to <see cref="TFMessage"/> messages.
+    /// See <see cref="TFConfiguration"/>.
+    /// </summary>
     TF = 2,
     PointCloud = 3,
     Image = 4,
+
+    /// <summary>
+    /// Visualizer and manager for markers, listens to <see cref="Msgs.VisualizationMsgs.Marker"/> and <see cref="MarkerArray"/> messages.
+    /// See <see cref="MarkerConfiguration"/>.
+    /// </summary>
     Marker = 5,
     InteractiveMarker = 6,
     DepthCloud = 8,
@@ -176,6 +196,10 @@ public enum ModuleType
     Joystick = 13,
     Path = 14,
     GridMap = 15,
+
+    /// <summary>
+    /// Visualizer for robots. See <see cref="RobotConfiguration"/>. 
+    /// </summary>
     Robot = 16,
     GuiWidget = 18,
     XR = 19,

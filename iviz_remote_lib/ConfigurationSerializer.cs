@@ -7,6 +7,10 @@ using Newtonsoft.Json;
 
 namespace Iviz.RemoteLib;
 
+/// <summary>
+/// Class that filters out null values from <see cref="IConfiguration"/> objects and converts the rest to JSON.
+/// Pretty much the same as <see cref="JsonConvert.SerializeObject(object)"/> but without reflection and boxing.
+/// </summary>
 internal readonly struct ConfigurationSerializer : IDisposable
 {
     static readonly Dictionary<ModuleType, string> ModuleNames =
@@ -68,7 +72,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
         writer.WriteValueExtended(value);
         fields.Add(fieldName!);
     }
-    
+
     public void Serialize(in Vector3? field, [CallerArgumentExpression("field")] string? fieldName = null)
     {
         if (field is not { } value)
@@ -97,6 +101,24 @@ internal readonly struct ConfigurationSerializer : IDisposable
     {
         writer.WritePropertyName(fieldName!);
         writer.WriteValue(ModuleNames[field]);
+        fields.Add(fieldName!);
+    }
+
+    public void Serialize(bool[]? field, [CallerArgumentExpression("field")] string? fieldName = null)
+    {
+        if (field is not { } value)
+        {
+            return;
+        }
+
+        writer.WritePropertyName(fieldName!);
+        writer.WriteStartArray();
+        foreach (bool b in value)
+        {
+            writer.WriteValue(b);
+        }
+
+        writer.WriteEndArrayAsync();
         fields.Add(fieldName!);
     }
 }
