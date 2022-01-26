@@ -299,6 +299,16 @@ namespace Iviz.Core
             c.a = alpha;
             return c;
         }
+        
+        public static Color Clamp(this in Color c)
+        {
+            Color q;
+            q.r = Mathf.Clamp01(c.r);
+            q.g = Mathf.Clamp01(c.g);
+            q.b = Mathf.Clamp01(c.b);
+            q.a = Mathf.Clamp01(c.a);
+            return q;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Pose WithPosition(this in Pose p, in Vector3 v)
@@ -704,7 +714,7 @@ namespace Iviz.Core
         /// <summary>
         /// Retrieves the given component from each entry in the enumerable, if it exists.
         /// </summary>
-        public static IEnumerable<T> WithComponent<T>(this IEnumerable<Transform> transforms)
+        public static IEnumerable<T> WithComponent<T>(this IEnumerable<Component> transforms)
         {
             foreach (var transform in transforms)
             {

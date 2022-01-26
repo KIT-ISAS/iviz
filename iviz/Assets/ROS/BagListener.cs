@@ -77,6 +77,7 @@ namespace Iviz.Ros
 
         async ValueTask WriteMessagesAsync()
         {
+            // keep the writer within this function!
             RosbagFileWriter? writer = null;
             
             try

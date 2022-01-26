@@ -17,6 +17,8 @@ namespace Iviz.Common.Configurations
         [DataMember] public float MinIntensity { get; set; }
         [DataMember] public float MaxIntensity { get; set; } = 1;
         [DataMember] public bool FlipMinMax { get; set; }
+        [DataMember] public float Smoothness { get; set; } = 0.5f;
+        [DataMember] public float Metallic { get; set; } = 0.5f;
         [DataMember] public SerializableColor Tint { get; set; } = Color.white;
     }
 }

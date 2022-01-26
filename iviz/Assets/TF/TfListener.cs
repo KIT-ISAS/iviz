@@ -394,7 +394,7 @@ namespace Iviz.Controllers.TF
         }
 
         // unity cannot deal with very large floats, so we have to limit translation sizes
-        bool CheckIfTransformWithinThreshold(string childIdUnchecked, in Msgs.GeometryMsgs.Transform rosTransform)
+        bool CheckIfTransformWithinThreshold(string childId, in Msgs.GeometryMsgs.Transform rosTransform)
         {
             const int maxPoseMagnitude = 10000;
             var (x, y, z) = rosTransform.Translation;
@@ -405,14 +405,14 @@ namespace Iviz.Controllers.TF
                 return true;
             }
 
-            if (warningTimestamps.TryGetValue(childIdUnchecked, out float expirationTimestamp)
+            if (warningTimestamps.TryGetValue(childId, out float expirationTimestamp)
                 && expirationTimestamp >= GameThread.GameTime)
             {
                 return false;
             }
 
-            RosLogger.Info($"{nameof(TfListener)}: Ignoring transform '{childIdUnchecked}' with too large values.");
-            warningTimestamps[childIdUnchecked] = GameThread.GameTime + WarningBlacklistTimeInSec;
+            RosLogger.Info($"{nameof(TfListener)}: Ignoring transform '{childId}' with too large values.");
+            warningTimestamps[childId] = GameThread.GameTime + WarningBlacklistTimeInSec;
 
             return false;
         }
@@ -723,14 +723,7 @@ namespace Iviz.Controllers.TF
         /// <summary>
         /// Creates a header using the fixed frame as the frame id and the frame start as the timestamp.
         /// </summary>
-        public static Header CreateHeader(uint seqId)
-        {
-            Header h;
-            h.Seq = seqId;
-            h.Stamp = GameThread.TimeNow;
-            h.FrameId = FixedFrameId;
-            return h;
-        }
+        public static Header CreateHeader(uint seqId) => CreateHeader(seqId, FixedFrameId);
 
         /// <summary>
         /// Creates a header with the given frame id using the frame start as the timestamp.

@@ -1,56 +1,82 @@
+#nullable enable
+
 using System;
 using Iviz.Common;
 using Iviz.Core;
-using Iviz.Msgs;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
-using JetBrains.Annotations;
-using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Iviz.Displays
 {
     [RequireComponent(typeof(MeshFilter))]
     [RequireComponent(typeof(MeshRenderer))]
-    public sealed class GridMapDisplay : MarkerDisplayWithColormap
+    public sealed class GridMapDisplay : MarkerDisplayWithColormap, ISupportsPbr, ISupportsShadows
     {
         static readonly int PropInputTexture = Shader.PropertyToID("_InputTex");
         static readonly int PropSquareTexture = Shader.PropertyToID("_SquareTex");
         static readonly int PropSquareCoeff = Shader.PropertyToID("_SquareCoeff");
         static readonly int PropTint = Shader.PropertyToID("_Tint");
+        static readonly int PropSmoothness = Shader.PropertyToID("_Smoothness");
+        static readonly int PropMetallic = Shader.PropertyToID("_Metallic");
 
-        Texture2D inputTexture;
+        [SerializeField] Material? opaqueMaterial;
+        [SerializeField] Material? transparentMaterial;
+        [SerializeField] MeshRenderer? meshRenderer;
 
-        [SerializeField] Material opaqueMaterial = null;
-        [SerializeField] Material transparentMaterial = null;
-        [SerializeField] MeshRenderer meshRenderer = null;
-
-        Mesh mesh;
+        Texture2D? texture;
+        Mesh? mesh;
         int cellsX;
         int cellsY;
-        
-        [NotNull]
-        MeshRenderer MeshRenderer => meshRenderer;
+        float smoothness = 0.5f;
+        float metallic = 0.5f;
+        float scaleHeight = 1;
 
-        protected override void Awake()
+        MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
+
+        public float ScaleHeight
         {
-            opaqueMaterial = Resource.Materials.GridMap.Instantiate();
-            mesh = new Mesh {name = "GridMap Mesh"};
-
-            base.Awake();
-
-            MeshRenderer.material = opaqueMaterial;
-            GetComponent<MeshFilter>().sharedMesh = mesh;
-
-            Colormap = ColormapId.gray;
+            set
+            {
+                scaleHeight = value;
+                Transform.localScale = Transform.localScale.WithY(value);
+            }
         }
 
+        public float Smoothness
+        {
+            set
+            {
+                smoothness = value;
+                UpdateMaterial();
+            }
+        }
+        
+        public float Metallic
+        {
+            set
+            {
+                metallic = value;
+                UpdateMaterial();
+            }
+        }
+
+        public bool EnableShadows
+        {
+            set
+            {
+                MeshRenderer.shadowCastingMode = value ? ShadowCastingMode.On : ShadowCastingMode.Off;
+                MeshRenderer.receiveShadows = value;
+            }
+        }
+        
         public override Color Tint
         {
             get => base.Tint;
             set
             {
+                base.Tint = value;
                 if (value.a <= 254f / 255)
                 {
                     if (transparentMaterial == null)
@@ -58,33 +84,40 @@ namespace Iviz.Displays
                         transparentMaterial = Resource.Materials.TransparentGridMap.Instantiate();
                     }
 
-                    if (MeshRenderer.material != transparentMaterial)
-                    {
-                        transparentMaterial.SetTexture(PropInputTexture, inputTexture);
-                        transparentMaterial.SetVector(PropSquareCoeff,
-                            new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
-                        UpdateProperties();
-                    }
- 
-                    MeshRenderer.material = transparentMaterial;
-                    transparentMaterial.SetColor(PropTint, value);
+                    MeshRenderer.sharedMaterial = transparentMaterial;
                 }
                 else
                 {
-                    if (MeshRenderer.material != opaqueMaterial)
+                    if (opaqueMaterial == null)
                     {
-                        opaqueMaterial.SetTexture(PropInputTexture, inputTexture);
-                        opaqueMaterial.SetVector(PropSquareCoeff,
-                            new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
-                        UpdateProperties();
+                        opaqueMaterial = Resource.Materials.GridMap.Instantiate();
                     }
 
-                    MeshRenderer.material = opaqueMaterial;
-                    opaqueMaterial.SetColor(PropTint, value);
+                    MeshRenderer.sharedMaterial = opaqueMaterial;
                 }
 
-                base.Tint = value;
+                UpdateMaterial();
             }
+        }
+
+        protected override void Awake()
+        {
+            base.Awake();
+
+            Tint = Tint;
+            Colormap = ColormapId.jet;
+        }
+        
+        void UpdateMaterial()
+        {
+            var material = MeshRenderer.sharedMaterial;
+            material.SetTexture(PropInputTexture, texture);
+            material.SetVector(PropSquareCoeff,
+                new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
+            material.SetColor(PropTint, Tint);
+            material.SetFloat(PropSmoothness, smoothness);
+            material.SetFloat(PropMetallic, metallic);
+            UpdateProperties();
         }
 
         protected override void Rebuild()
@@ -92,27 +125,29 @@ namespace Iviz.Displays
             // not needed
         }
 
-        public void Set(int newCellsX, int newCellsY, float width, float height, [NotNull] float[] data, int length)
+        public void Set(int newCellsX, int newCellsY, float width, float height, ReadOnlySpan<float> data)
         {
-            if (data == null)
+            if (texture == null)
             {
-                throw new ArgumentNullException(nameof(data));
+                throw new NullReferenceException("Input texture has not been set!");
             }
 
             EnsureSize(newCellsX, newCellsY);
 
-            Transform mTransform = transform;
-            mTransform.localScale = new Vector3(width, height, 1).Ros2Unity().Abs();
-            mTransform.localPosition = new Vector3(-width / 2, -height / 2, 0).Ros2Unity();
+            Transform.localScale = new Vector3(width, height, scaleHeight).Ros2Unity().Abs();
+            Transform.localPosition = new Vector3(-width / 2, -height / 2, 0).Ros2Unity();
 
+            texture.GetRawTextureData<float>().CopyFrom(data);
+            /*
             NativeArray<float>.Copy(data, 0,
                 inputTexture.GetRawTextureData<float>().GetSubArray(0, length), 0, length);
-            inputTexture.Apply();
+                */
+
+            texture.Apply();
 
             float min = float.MaxValue, max = float.MinValue;
-            for (int i = 0; i < length; i++)
+            foreach (float val in data)
             {
-                float val = data[i];
                 if (val < min)
                 {
                     min = val;
@@ -123,7 +158,6 @@ namespace Iviz.Displays
                     max = val;
                 }
             }
-
 
             Collider.center = new Vector3(0.5f, 0.5f, (max + min) / 2).Ros2Unity();
             Collider.size = new Vector3(1, 1, max - min).Ros2Unity().Abs();
@@ -141,6 +175,12 @@ namespace Iviz.Displays
             if (newWidth == cellsX && newHeight == cellsY)
             {
                 return;
+            }
+
+            if (mesh == null)
+            {
+                mesh = new Mesh { name = "GridMap Mesh" };
+                GetComponent<MeshFilter>().sharedMesh = mesh;
             }
 
             cellsX = newWidth;
@@ -174,10 +214,10 @@ namespace Iviz.Displays
                     int pOffset = v * (cellsX + 1);
                     for (int u = 0; u < cellsX; u++, iOffset += 4, pOffset++)
                     {
-                        indices[iOffset + 3] = pOffset;
-                        indices[iOffset + 2] = pOffset + 1;
-                        indices[iOffset + 1] = pOffset + (cellsX + 1) + 1;
                         indices[iOffset + 0] = pOffset + (cellsX + 1);
+                        indices[iOffset + 1] = pOffset + (cellsX + 1) + 1;
+                        indices[iOffset + 2] = pOffset + 1;
+                        indices[iOffset + 3] = pOffset;
                     }
                 }
 
@@ -186,27 +226,31 @@ namespace Iviz.Displays
                 mesh.Optimize();
             }
 
-            if (inputTexture != null)
+            if (texture != null)
             {
-                Destroy(inputTexture);
+                Destroy(texture);
             }
 
-            inputTexture = new Texture2D(cellsX, cellsY, TextureFormat.RFloat, true);
-            opaqueMaterial.SetTexture(PropInputTexture, inputTexture);
-            opaqueMaterial.SetVector(PropSquareCoeff, new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
+            texture = new Texture2D(cellsX, cellsY, TextureFormat.RFloat, true);
+            var textureParams = new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY);
+            if (opaqueMaterial != null)
+            {
+                opaqueMaterial.SetTexture(PropInputTexture, texture);
+                opaqueMaterial.SetVector(PropSquareCoeff, textureParams);
+            }
 
             if (transparentMaterial != null)
             {
-                transparentMaterial.SetTexture(PropInputTexture, inputTexture);
-                transparentMaterial.SetVector(PropSquareCoeff, new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
+                transparentMaterial.SetTexture(PropInputTexture, texture);
+                transparentMaterial.SetVector(PropSquareCoeff, textureParams);
             }
         }
 
         void OnDestroy()
         {
-            if (inputTexture != null)
+            if (texture != null)
             {
-                Destroy(inputTexture);
+                Destroy(texture);
             }
 
             if (opaqueMaterial != null)
@@ -219,21 +263,23 @@ namespace Iviz.Displays
                 Destroy(transparentMaterial);
             }
 
-            Destroy(mesh);
+            if (mesh != null)
+            {
+                Destroy(mesh);
+            }
         }
 
         protected override void UpdateProperties()
         {
             MeshRenderer.SetPropertyBlock(Properties);
         }
-        
+
         public override void Suspend()
         {
             base.Suspend();
             Tint = Color.white;
         }
 
-        [NotNull]
         static Texture2D GenerateSquareTexture()
         {
             const int size = 64;

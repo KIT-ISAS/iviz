@@ -7,6 +7,9 @@ using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
+    /// <summary>
+    /// Struct that contains statistics about a ROS listener
+    /// </summary>
     [DataContract]
     public readonly struct RosListenerStats
     {
