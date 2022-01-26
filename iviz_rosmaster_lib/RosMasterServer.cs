@@ -167,13 +167,17 @@ public sealed class RosMasterServer : IDisposable
         }
         catch (Exception e)
         {
-            if (e is SocketException or IOException)
+            switch (e)
             {
-                Logger.LogDebugFormat("{0}: Error in StartContext: {1}", this, e);
-                return;
+                case OperationCanceledException:
+                    break; // do nothing
+                case SocketException or IOException:
+                    Logger.LogDebugFormat("{0}: Error in StartContext: {1}", this, e);
+                    break;
+                default:
+                    Logger.LogErrorFormat("{0}: Error in StartContext: {1}", this, e);
+                    break;
             }
-
-            Logger.LogErrorFormat("{0}: Error in StartContext: {1}", this, e);
         }
     }
 
@@ -283,6 +287,9 @@ public sealed class RosMasterServer : IDisposable
         try
         {
             await XmlRpcService.MethodCallAsync(remoteUri, MasterUri, "publisherUpdate", methodArgs, token);
+        }
+        catch (OperationCanceledException)
+        {
         }
         catch (Exception e)
         {
@@ -460,6 +467,7 @@ public sealed class RosMasterServer : IDisposable
             .FirstOrDefault(tuple => tuple.Key == node)
             .Value;
 
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
         return uri == null
             ? ErrorResponse($"No node with id '{node}'")
             : OkResponse(uri);
