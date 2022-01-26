@@ -258,7 +258,8 @@ namespace Iviz.Ros
                         if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
                         {
                             RosLogger.Internal("Note: This appears to be a local ROS master. " +
-                                               "Make sure that <b>My URI</b> is a reachable address, and restart the master.");
+                                               "Make sure that <b>My Caller URI</b> is a reachable address and that " +
+                                               "you are in the right network. Then stop and restart the master.");
                         }
 
                         break;

@@ -85,7 +85,10 @@ namespace Iviz.Ros
             }
 
             server.Dispose();
-            _ = serverTask.AwaitNoThrow(DisposeTimeoutInMs, this); // should return immediately
+            
+            // should return immediately, the waiting happened in Dispose()
+            _ = serverTask.AwaitNoThrow(DisposeTimeoutInMs, this);
+            
             server = null;
         }
 
@@ -117,7 +120,7 @@ namespace Iviz.Ros
             if (instance != null)
             {
                 RosLogger.Info("RosServerManager: Disposing!");
-                await instance.DisposeImplAsync();
+                await instance.DisposeImplAsync().AwaitNoThrow(nameof(RosServerManager));
             }
 
             instance = null;

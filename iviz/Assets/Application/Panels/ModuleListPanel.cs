@@ -382,11 +382,18 @@ namespace Iviz.App
             InitFinished?.Invoke();
             InitFinished = null;
 
-            if (Connection.MasterUri != null && Connection.MyUri != null && Connection.MyId != null)
+            if (Connection.MasterUri == null || Connection.MyUri == null || Connection.MyId == null)
             {
-                RosLogger.Internal("Trying to connect to previous ROS server.");
-                Connection.TryOnceToConnect();
+                return;
             }
+            
+            if (!Settings.IsLinux && Connection.MyUri.Host == Connection.MasterUri.Host)
+            {
+                connectionData.TryCreateMaster();
+            }
+
+            RosLogger.Internal("Trying to connect to previous ROS server.");
+            Connection.TryOnceToConnect();
         }
 
         public static void CallAfterInitialized(Action action)

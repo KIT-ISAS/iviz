@@ -15,6 +15,8 @@ namespace Iviz.App
         [SerializeField] string inactiveText = "";
         [SerializeField] Text? text = null;
 
+        bool state;
+
         /*
         public Sprite ActiveSprite
         {
@@ -41,7 +43,6 @@ namespace Iviz.App
             set => inactiveText = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        bool state;
         public bool State
         {
             get => state;

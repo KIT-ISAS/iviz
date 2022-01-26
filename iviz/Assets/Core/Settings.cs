@@ -52,6 +52,8 @@ namespace Iviz.Core
             false;
 #endif
 
+        public static bool IsLinux => Application.platform is RuntimePlatform.LinuxEditor or RuntimePlatform.LinuxPlayer;
+
         /// <summary>
         /// Is this being run in a Hololens?
         /// </summary>

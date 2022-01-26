@@ -116,7 +116,6 @@ namespace Iviz.Ros
         {
             SetConnectionState(ConnectionState.Connecting);
 
-            tryConnectOnce = false;
             bool connectionResult;
 
             try
@@ -128,6 +127,10 @@ namespace Iviz.Ros
             {
                 RosLogger.Error($"{this}: Unexpected error in Connect", e);
                 return;
+            }
+            finally
+            {
+                tryConnectOnce = false;
             }
 
             SetConnectionState(connectionResult ? ConnectionState.Connected : ConnectionState.Disconnected);
@@ -152,6 +155,11 @@ namespace Iviz.Ros
 
         public void TryOnceToConnect()
         {
+            if (ConnectionState != ConnectionState.Disconnected)
+            {
+                return;
+            } 
+            
             tryConnectOnce = true;
             Signal();
         }
