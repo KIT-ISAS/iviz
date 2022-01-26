@@ -48,9 +48,8 @@ namespace Iviz.Controllers.TF
         /// Pose in relation to the Unity origin in Unity coordinates
         /// </summary>
         public Pose AbsoluteUnityPose => Transform.AsPose();
-
-
-        public override TfFrame? Parent
+        
+        public sealed override TfFrame? Parent
         {
             get => base.Parent;
             set

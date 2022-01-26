@@ -99,14 +99,13 @@ namespace Iviz.App
         AnchorToggleButton InteractableButton => AnchorCanvasPanel.Interact;
         GameObject ModuleListCanvas => moduleListCanvas.AssertNotNull(nameof(moduleListCanvas));
         GameObject DataPanelCanvas => dataPanelCanvas.AssertNotNull(nameof(dataPanelCanvas));
-
-
-        ModuleListButtons Buttons =>
-            buttons ??= new ModuleListButtons(contentObject.AssertNotNull(nameof(contentObject)));
-
         DialogManager Dialogs => dialogs ??= new DialogManager();
         TfModuleData TfData => (TfModuleData)moduleDatas[0];
         Canvas RootCanvas => rootCanvas.AssertNotNull(nameof(rootCanvas));
+        
+        ModuleListButtons Buttons =>
+            buttons ??= new ModuleListButtons(contentObject.AssertNotNull(nameof(contentObject)));
+
         static RoslibConnection Connection => ConnectionManager.Connection;
 
         public AnchorCanvasPanel AnchorCanvasPanel => anchorCanvasPanel.AssertNotNull(nameof(anchorCanvasPanel));
@@ -186,7 +185,7 @@ namespace Iviz.App
             GameThread.EveryFrame -= UpdateFpsCounter;
             GameThread.EveryTenthOfASecond -= UpdateCameraStats;
 
-            foreach (var moduleData in moduleDatas)
+            foreach (var moduleData in moduleDatas.Skip(1))
             {
                 moduleData.Dispose();
             }
@@ -204,6 +203,8 @@ namespace Iviz.App
             tfPublisher.Dispose();
             cameraPanelData?.Dispose();
             connectionManager?.Dispose();
+
+            TfData.Dispose();
 
             GuiWidgetListener.DisposeDefaultHandler();
             Settings.ResetXRInfo();
@@ -925,7 +926,7 @@ namespace Iviz.App
                 moduleData.Dispose();
             }
 
-            var firstModuleData = moduleDatas[0];
+            var firstModuleData = TfData;
             moduleDatas.Clear();
             moduleDatas.Add(firstModuleData);
 
@@ -998,7 +999,7 @@ namespace Iviz.App
 
         public void ResetTfPanel()
         {
-            ModuleDatas[0].ResetPanel();
+            TfData.ResetPanel();
         }
 
         public void ShowMenu(MenuEntryDescription[] menuEntries, Action<uint> callback)

@@ -7,6 +7,7 @@ using Iviz.Core;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
+using UnityEngine;
 
 namespace Iviz.App
 {

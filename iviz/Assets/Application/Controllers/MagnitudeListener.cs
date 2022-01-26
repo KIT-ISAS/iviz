@@ -206,15 +206,15 @@ namespace Iviz.Controllers
 
         public MagnitudeListener(MagnitudeConfiguration? config, string topic, string type)
         {
+            trail = ResourcePool.RentDisplay<TrailDisplay>();
+            
             Config = config ?? new MagnitudeConfiguration
             {
                 Topic = topic,
                 Type = type
             };
-
-            frameNode = new FrameNode(Config.Topic);
             
-            trail = ResourcePool.RentDisplay<TrailDisplay>();
+            frameNode = new FrameNode(Config.Topic);
             trail.DataSource = () => frameNode.Transform.position;
 
             var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;

@@ -205,17 +205,18 @@ namespace Iviz.Controllers
         {
             FieldNames = fieldNames.AsReadOnly();
 
+            node = new FrameNode("[PointCloudListener]");
+            pointCloud = ResourcePool.RentDisplay<PointListDisplay>(node.Transform);
+            meshCloud = ResourcePool.RentDisplay<MeshListDisplay>(node.Transform);
+            meshCloud.EnableShadows = false;
+
             Config = config ?? new PointCloudConfiguration
             {
                 Topic = topic,
             };
 
+            node.Name = Config.Topic;
             Listener = new Listener<PointCloud2>(Config.Topic, Handler);
-
-            node = new FrameNode(Config.Topic);
-            pointCloud = ResourcePool.RentDisplay<PointListDisplay>(node.Transform);
-            meshCloud = ResourcePool.RentDisplay<MeshListDisplay>(node.Transform);
-            meshCloud.EnableShadows = false;
         }
 
         static int FieldSizeFromType(int datatype)

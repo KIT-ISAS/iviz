@@ -150,6 +150,7 @@ namespace Iviz.Core
                     RosLogger.Error($"{this}: Error during LateEverySecond", e);
                 }
 
+                RosLogger.ResetCounter();
                 lastSecondRunTime = GameTime;
             }
 
@@ -264,7 +265,8 @@ namespace Iviz.Core
 
         /// <summary>
         /// Puts this async action in a queue to be run on the main thread.
-        /// If it is already on the main thread, it will run on the next frame - though the run order of async tasks is not very well defined.
+        /// If it is already on the main thread, it will run on the next frame -
+        /// though the run order of async tasks is not very well defined.
         /// The return type is treated as async void. 
         /// </summary>
         /// <param name="action">Action to be run.</param>
