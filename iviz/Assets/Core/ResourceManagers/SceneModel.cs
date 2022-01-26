@@ -169,7 +169,7 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        RosLogger.Warn("SceneModel: Failed to retrieve normal texture " +
+                        RosLogger.Warn("SceneModel: Failed to retrieve bump texture " +
                                        $"'{bumpTexture.Path}' required by '{uriString}'");
                     }
                 }

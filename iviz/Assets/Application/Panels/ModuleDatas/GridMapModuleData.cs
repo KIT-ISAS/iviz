@@ -57,8 +57,12 @@ namespace Iviz.App
             panel.MinIntensity.Interactable = listener.ForceMinMax;
             panel.MaxIntensity.Interactable = listener.ForceMinMax;
             panel.FlipMinMax.Value = listener.FlipMinMax;
-            panel.Alpha.Value = listener.Tint.a;
 
+            panel.Tint.Value = listener.Tint;
+            panel.Alpha.Value = listener.Tint.a;
+            panel.Metallic.Value = listener.Metallic;
+            panel.Smoothness.Value = listener.Smoothness;
+            
             panel.IntensityChannel.ValueChanged += (_, s) => { listener.IntensityChannel = s; };
             panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId) i; };
             panel.CloseButton.Clicked += Close;
@@ -72,8 +76,12 @@ namespace Iviz.App
             panel.FlipMinMax.ValueChanged += f => listener.FlipMinMax = f;
             panel.MinIntensity.ValueChanged += f => listener.MinIntensity = f;
             panel.MaxIntensity.ValueChanged += f => listener.MaxIntensity = f;
-            panel.Alpha.ValueChanged += f => listener.Tint = Color.white.WithAlpha(f);
             panel.Description.Text = listener.Description;
+            
+            panel.Tint.ValueChanged += f => listener.Tint = f.WithAlpha(panel.Alpha.Value);
+            panel.Alpha.ValueChanged += f => listener.Tint = panel.Tint.Value.WithAlpha(f);
+            panel.Smoothness.ValueChanged += f => listener.Smoothness = panel.Smoothness.Value;
+            panel.Metallic.ValueChanged += f => listener.Metallic = panel.Metallic.Value;
         }
 
         public override void UpdatePanel()

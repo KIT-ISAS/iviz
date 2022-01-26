@@ -9,6 +9,8 @@ using UnityEngine;
 
 namespace Iviz.Ros
 {
+    /// <inheritdoc cref="ISender"/>
+    /// <typeparam name="T">The ROS message type</typeparam>
     public sealed class Sender<T> : ISender where T : IMessage
     {
         static RoslibConnection Connection => ConnectionManager.Connection;

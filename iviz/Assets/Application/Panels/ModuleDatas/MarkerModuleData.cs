@@ -6,9 +6,11 @@ using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
+using Iviz.Controllers.Markers;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.Highlighters;
+using Iviz.Tools;
 using Newtonsoft.Json;
 using UnityEngine;
 
@@ -43,33 +45,48 @@ namespace Iviz.App
             panel.OcclusionOnlyMode.Value = listener.RenderAsOcclusionOnly;
             panel.Tint.Value = listener.Tint;
             panel.Alpha.Value = listener.Tint.a;
+            panel.Metallic.Value = listener.Metallic;
+            panel.Smoothness.Value = listener.Smoothness;
             panel.Marker.MarkerListener = listener;
             panel.HideButton.State = listener.Visible;
             panel.TriangleListFlipWinding.Value = listener.TriangleListFlipWinding;
             panel.ShowDescriptions.Value = listener.ShowDescriptions;
             //panel.PreferUdp.Value = listener.PreferUdp;
 
-            panel.Mask.Options = listener.GetMaskEntries();
+            panel.Mask.Options = GetMaskEntries();
 
-            panel.Tint.ValueChanged += f => listener.Tint = f.WithAlpha(panel.Alpha.Value);
-            panel.Alpha.ValueChanged += f => listener.Tint = panel.Tint.Value.WithAlpha(f);
-            panel.OcclusionOnlyMode.ValueChanged += f => listener.RenderAsOcclusionOnly = f;
             panel.TriangleListFlipWinding.ValueChanged += f => listener.TriangleListFlipWinding = f;
             panel.ShowDescriptions.ValueChanged += f => listener.ShowDescriptions = f;
+            panel.OcclusionOnlyMode.ValueChanged += f => listener.RenderAsOcclusionOnly = f;
+            panel.Tint.ValueChanged += f => listener.Tint = f.WithAlpha(panel.Alpha.Value);
+            panel.Alpha.ValueChanged += f => listener.Tint = panel.Tint.Value.WithAlpha(f);
+            panel.Smoothness.ValueChanged += f => listener.Smoothness = panel.Smoothness.Value;
+            panel.Metallic.ValueChanged += f => listener.Metallic = panel.Metallic.Value;
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
             panel.Mask.ValueChanged += (i, _) =>
             {
                 if (i == 0) return;
-                listener.ToggleMaskEntry(i - 1);
-                panel.Mask.Options = listener.GetMaskEntries();
+                listener.ToggleVisibleMask(i - 1);
+                panel.Mask.Options = GetMaskEntries();
                 panel.Mask.OverrideCaption("---");
             };
             //panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
 
             HighlightAll();
         }
+        
+        IEnumerable<string> GetMaskEntries()
+        {
+            var masks = listener.VisibleMask;
+            yield return "---";
+            foreach (int i in ..masks.Count)
+            {
+                string name = ((MarkerType) i).ToString();
+                yield return masks[i] ? name : $"<color=#A0A0A0>({name})</color>";
+            }
+        }        
 
         void HighlightAll()
         {
@@ -104,6 +121,20 @@ namespace Iviz.App
                         break;
                     case nameof(MarkerConfiguration.TriangleListFlipWinding):
                         listener.TriangleListFlipWinding = config.TriangleListFlipWinding;
+                        break;
+                    case nameof(MarkerConfiguration.Metallic):
+                        listener.Metallic = config.Metallic;
+                        break;
+                    case nameof(MarkerConfiguration.Smoothness):
+                        listener.Smoothness = config.Smoothness;
+                        break;
+                    case nameof(MarkerConfiguration.ShowDescriptions):
+                        listener.ShowDescriptions = config.ShowDescriptions;
+                        break;
+                    case nameof(MarkerConfiguration.VisibleMask):
+                        listener.VisibleMask = config.VisibleMask;
+                        break;
+                    case nameof(MarkerConfiguration.ModuleType):
                         break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");

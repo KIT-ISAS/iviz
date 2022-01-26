@@ -8,15 +8,22 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
+    /// <summary>
+    /// Repository from where objects can be rented and returned to, in order reuse them between modules instead
+    /// of destroying and re-creating them.
+    /// </summary>
     public sealed class ResourcePool : MonoBehaviour
     {
         const int TimeToDestroyInSec = 60;
 
         static ResourcePool? instance;
-        readonly HashSet<int> destroyedObjects = new();
         readonly List<GameObject> objectsToDestroy = new();
-        readonly Dictionary<int, Queue<ObjectWithDeadline>> pool = new();
+        readonly HashSet<int> disposedObjectIds = new();
+        readonly Dictionary<int, Queue<ObjectWithExpirationTime>> disposedObjectPool = new();
 
+        /// <summary>
+        /// Transform of the node where disposed objects are stored.
+        /// </summary>
         public static Transform? Transform => instance != null ? instance.transform : null; 
         
         void Awake()
@@ -31,6 +38,14 @@ namespace Iviz.Displays
             instance = null;
         }
 
+        /// <summary>
+        /// Rents an object of the given resource type. If no object of the type exists in the pool, a new one
+        /// is instantiated.
+        /// </summary>
+        /// <param name="resource">The resource identifier.</param>
+        /// <param name="parent">Parent transform to attach the rented object.</param>
+        /// <param name="enable">Whether the object should be enabled before returning.</param>
+        /// <returns>The rented object.</returns>
         public static GameObject Rent(ResourceKey<GameObject> resource, Transform? parent = null, bool enable = true)
         {
             if (resource == null)
@@ -48,6 +63,15 @@ namespace Iviz.Displays
             return obj;
         }
 
+        /// <summary>
+        /// Rents an object of the given resource type, and obtains the Unity component of type T.
+        /// If no object of the type exists in the pool, a new one is instantiated.
+        /// </summary>
+        /// <param name="resource">The resource identifier.</param>
+        /// <param name="parent">Parent transform to attach the rented object.</param>
+        /// <param name="enable">Whether the object should be enabled before returning.</param>
+        /// <typeparam name="T">The component type.</typeparam>
+        /// <returns>The rented object.</returns>
         public static T Rent<T>(ResourceKey<GameObject> resource, Transform? parent = null, bool enable = true)
             where T : MonoBehaviour
         {
@@ -59,6 +83,13 @@ namespace Iviz.Displays
             return Rent(resource, parent, enable).GetComponent<T>();
         }
 
+        /// <summary>
+        /// Rents an object of the given display type, performing a lookup of the resource type that corresponds
+        /// to the display type T. If no object of the type exists in the pool, a new one is instantiated.
+        /// </summary>
+        /// <param name="parent">Parent transform to attach the rented object.</param>
+        /// <typeparam name="T">The display type.</typeparam>
+        /// <returns>The rented object.</returns>
         public static T RentDisplay<T>(Transform? parent = null) where T : MonoBehaviour, IDisplay
         {
             if (!Resource.Displays.TryGetResource(typeof(T), out var info))
@@ -69,6 +100,11 @@ namespace Iviz.Displays
             return Rent<T>(info, parent);
         }
 
+        /// <summary>
+        /// Returns a rented object to the pool. 
+        /// </summary>
+        /// <param name="resource">The resource identifier.</param>
+        /// <param name="gameObject">The object to return.</param>
         public static void Return(ResourceKey<GameObject> resource, GameObject gameObject)
         {
             if (resource == null)
@@ -90,20 +126,20 @@ namespace Iviz.Displays
                 instance.Add(resource, gameObject);
             }
         }
-
-        internal static void ReturnDisplay(IDisplay resource)
+        
+        internal static void ReturnDisplay(IDisplay display)
         {
-            if (resource == null)
+            if (display == null)
             {
-                throw new ArgumentNullException(nameof(resource));
+                throw new ArgumentNullException(nameof(display));
             }
 
-            if (resource is not MonoBehaviour behaviour)
+            if (display is not MonoBehaviour behaviour)
             {
-                throw new ArgumentException("Argument is not a MonoBehavior");
+                throw new ArgumentException("Argument must be an object that inherits from MonoBehavior");
             }
 
-            if (!Resource.Displays.TryGetResource(resource.GetType(), out var info))
+            if (!Resource.Displays.TryGetResource(display.GetType(), out var info))
             {
                 throw new ResourceNotFoundException("Cannot find unique display type for resource");
             }
@@ -113,10 +149,10 @@ namespace Iviz.Displays
 
         void CheckForDead()
         {
-            float now = Time.time;
+            float now = GameThread.GameTime;
             objectsToDestroy.Clear();
 
-            foreach (var (_, queue) in pool)
+            foreach (var (_, queue) in disposedObjectPool)
             {
                 while (queue.Count != 0 && queue.Peek().expirationTime < now)
                 {
@@ -138,19 +174,19 @@ namespace Iviz.Displays
 
         GameObject Get(ResourceKey<GameObject> resource, Transform? parent, bool enable)
         {
-            if (!pool.TryGetValue(resource.Id, out var instances) || instances.Count == 0)
+            if (!disposedObjectPool.TryGetValue(resource.Id, out var instanceQueue) || instanceQueue.Count == 0)
             {
                 return Instantiate(resource.Object, parent);
             }
 
-            var newObject = instances.Dequeue().gameObject;
+            var newObject = instanceQueue.Dequeue().gameObject;
             newObject.transform.SetParentLocal(parent);
             if (enable)
             {
                 newObject.SetActive(true);
             }
 
-            destroyedObjects.Remove(newObject.GetInstanceID());
+            disposedObjectIds.Remove(newObject.GetInstanceID());
             return newObject;
         }
 
@@ -158,26 +194,26 @@ namespace Iviz.Displays
         {
             if (obj == null)
             {
-                Debug.LogWarning("ResourcePool: Attempted to dispose null object of type '" + resource + "'");
+                Debug.LogWarning($"{this}: Attempted to return null or destroyed object of type '{resource}'");
                 return;
             }
 
-            if (destroyedObjects.Contains(obj.GetInstanceID()))
+            if (disposedObjectIds.Contains(obj.GetInstanceID()))
             {
-                Debug.LogWarning($"ResourcePool: Attempting to dispose of object {obj} " +
-                                 $"[ type={resource.Object.name} id {obj.GetInstanceID().ToString()} ] multiple times!");
+                Debug.LogWarning($"{this}: Attempting to return object {obj} " +
+                                 $"[ type={resource.Name} id={obj.GetInstanceID().ToString()} ] multiple times!");
                 return;
             }
 
-            if (pool.TryGetValue(resource.Id, out var objects))
+            if (disposedObjectPool.TryGetValue(resource.Id, out var instanceQueue))
             {
-                objects.Enqueue(new ObjectWithDeadline(obj));
+                instanceQueue.Enqueue(new ObjectWithExpirationTime(obj));
             }
             else
             {
-                var queue = new Queue<ObjectWithDeadline>();
-                queue.Enqueue(new ObjectWithDeadline(obj));
-                pool[resource.Id] = queue;
+                var newQueue = new Queue<ObjectWithExpirationTime>();
+                newQueue.Enqueue(new ObjectWithExpirationTime(obj));
+                disposedObjectPool[resource.Id] = newQueue;
             }
 
             obj.SetActive(false);
@@ -186,18 +222,20 @@ namespace Iviz.Displays
             obj.transform.localPosition = resource.Object.transform.localPosition;
             obj.transform.localRotation = resource.Object.transform.localRotation;
             obj.transform.localScale = resource.Object.transform.localScale;
-            destroyedObjects.Add(obj.GetInstanceID());
+            disposedObjectIds.Add(obj.GetInstanceID());
         }
 
-        readonly struct ObjectWithDeadline
+        public override string ToString() => $"[{nameof(ResourcePool)}]";
+
+        readonly struct ObjectWithExpirationTime
         {
             public readonly float expirationTime;
             public readonly GameObject gameObject;
 
-            public ObjectWithDeadline(GameObject o)
+            public ObjectWithExpirationTime(GameObject o)
             {
                 gameObject = o;
-                expirationTime = Time.time + TimeToDestroyInSec;
+                expirationTime = GameThread.GameTime + TimeToDestroyInSec;
             }
         }
     }

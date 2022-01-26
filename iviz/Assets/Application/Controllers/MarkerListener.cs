@@ -55,11 +55,8 @@ namespace Iviz.Controllers
                     RosLogger.Error($"{this}: Invalid visibility array of size {value.VisibleMask.Length.ToString()}");
                     return;
                 }
-
-                foreach (int i in ..value.VisibleMask.Length)
-                {
-                    config.VisibleMask[i] = value.VisibleMask[i];
-                }
+                
+                VisibleMask = value.VisibleMask;
             }
         }
 
@@ -212,6 +209,36 @@ namespace Iviz.Controllers
         
         public override IListener Listener { get; }
         
+
+        public IReadOnlyList<bool> VisibleMask
+        {
+            get => config.VisibleMask;
+            set
+            {
+                if (value.Count != config.VisibleMask.Length)
+                {
+                    RosLogger.Error($"{this}: Invalid visibility array of size {value.Count.ToString()}");
+                    return;
+                }
+                
+                foreach (int i in ..value.Count)
+                {
+                    config.VisibleMask[i] = value[i];
+                }
+
+                if (!Visible)
+                {
+                    return;
+                }
+
+                foreach (var marker in markers.Values)
+                {
+                    int type = (int) marker.MarkerType;
+                    marker.Visible = config.VisibleMask[type];
+                }
+            }
+        }
+        
         public MarkerListener(MarkerConfiguration? config, string topic, string type)
         {        
             Config = config ?? new MarkerConfiguration
@@ -342,27 +369,17 @@ namespace Iviz.Controllers
             return true;
         }
 
-        public IEnumerable<string> GetMaskEntries()
+        public void ToggleVisibleMask(int i)
         {
-            yield return "---";
-            foreach (int i in ..config.VisibleMask.Length)
-            {
-                string name = ((MarkerType) i).ToString();
-                yield return config.VisibleMask[i] ? name : $"<color=#A0A0A0>({name})</color>";
-            }
-        }
-
-        public void ToggleMaskEntry(int i)
-        {
-            bool newVisible = !config.VisibleMask[i];
-            config.VisibleMask[i] = newVisible;
-
+            bool value = !config.VisibleMask[i];
             var markerType = (MarkerType) i;
             var markersToUpdate = markers.Values.Where(marker => marker.MarkerType == markerType);
             foreach (var marker in markersToUpdate)
             {
-                marker.Visible = newVisible;
+                marker.Visible = value;
             }
+            
+            config.VisibleMask[i] = value;
         }
 
         void HandleAsync()

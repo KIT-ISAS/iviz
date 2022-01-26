@@ -17,16 +17,34 @@ namespace Iviz.Displays
         [SerializeField] Transform? m_Transform;
         [SerializeField] BoxCollider? boxCollider;
 
+        /// <summary>
+        /// Retrieves the bounds of the object's <see cref="BoxCollider"/> in absolute coordinates.
+        /// </summary>
         protected Bounds WorldBounds => Collider.bounds;
+        
+        /// <summary>
+        /// Retrieves the cached transform of the object.
+        /// </summary>
         public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
+        
+        /// <summary>
+        /// Retrieves the <see cref="BoxCollider"/> of the object.
+        /// </summary>
         public BoxCollider Collider => boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
+        
         public virtual Bounds? Bounds => Collider.GetBounds();
 
+        /// <summary>
+        /// Gets or sets whether the object's <see cref="BoxCollider"/> should be enabled. 
+        /// </summary>
         public bool EnableCollider
         {
             set => Collider.enabled = value;
         }
 
+        /// <summary>
+        /// Gets or sets whether the object is active/visible. 
+        /// </summary>
         public virtual bool Visible
         {
             get => gameObject.activeSelf;

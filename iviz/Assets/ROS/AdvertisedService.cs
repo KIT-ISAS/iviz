@@ -16,14 +16,14 @@ namespace Iviz.Ros
         const int WaitBetweenRetriesInMs = 500;
         
         readonly string service;
-        readonly Func<T, ValueTask> callCallback;
+        readonly Func<T, ValueTask> callToCallback; // cached delegate that calls callback()
         Func<T, ValueTask> callback;
 
         public AdvertisedService(string service, Func<T, ValueTask> callback)
         {
             this.service = service ?? throw new ArgumentNullException(nameof(service));
             this.callback = callback ?? throw new ArgumentNullException(nameof(callback));
-            callCallback = t => this.callback(t);
+            callToCallback = t => this.callback(t);
         }
 
         public bool TrySetCallback<TU>(Func<TU, ValueTask> newCallback) where TU : IService
@@ -33,12 +33,12 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(newCallback));
             }
             
-            if (newCallback is not Func<T, ValueTask> newCallbackT)
+            if (newCallback is not Func<T, ValueTask> validatedCallback)
             {
                 return false;
             }
 
-            callback = newCallbackT;
+            callback = validatedCallback;
             return true;
         }
 
@@ -51,7 +51,7 @@ namespace Iviz.Ros
                 {
                     try
                     {
-                        await client.AdvertiseServiceAsync(service, callCallback, token);
+                        await client.AdvertiseServiceAsync(service, callToCallback, token);
                         break;
                     }
                     catch (RoslibException e)
@@ -66,10 +66,9 @@ namespace Iviz.Ros
         public async ValueTask UnadvertiseAsync(RosClient? client, CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
-            string fullService = service[0] == '/' ? service : $"{client?.CallerId}/{service}";
             if (client != null)
             {
-                await client.UnadvertiseServiceAsync(fullService, token);
+                await client.UnadvertiseServiceAsync(service, token);
             }
         }
 

@@ -13,10 +13,7 @@ using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
-    /// <summary>
-    /// A wrapper around a <see cref="RosSubscriber{T}"/> that persists even if the connection is interrupted.
-    /// After a connection is reestablished, this listener is used to resubscribe transparently.
-    /// </summary>
+    /// <inheritdoc cref="IListener"/>
     /// <typeparam name="T">The ROS message type</typeparam>
     public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
     {
@@ -61,7 +58,7 @@ namespace Iviz.Ros
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
-                throw new ArgumentException("Invalid topic!", nameof(topic));
+                throw new ArgumentException("Invalid or empty topic name", nameof(topic));
             }
 
             Topic = topic;
@@ -229,7 +226,7 @@ namespace Iviz.Ros
             {
                 return;
             }
-            
+
             messageBuffer.Clear();
 
             foreach (int _ in ..messageCount) // copy a fixed amount, in case messages are still being added
