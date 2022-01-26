@@ -18,7 +18,13 @@ namespace Iviz.Core
         static GameThread? instance;
         static int networkFrameSkip = 1;
         static string? nowFormatted;
-
+        
+        static bool IsGameThread => instance != null && Thread.CurrentThread == instance.gameThread;
+        
+        /// <summary>
+        /// How many frames <see cref="ListenersEveryFrame"/> should skip.
+        /// A value of 1 means no skips, a value of 2 means every second frame, and so on.
+        /// </summary>
         public static int NetworkFrameSkip
         {
             get => networkFrameSkip;
@@ -26,6 +32,9 @@ namespace Iviz.Core
                 (value >= 1) ? value : throw new ArgumentException($"Invalid argument {value}");
         }
 
+        /// <summary>
+        /// Same as <see cref="Time.time"/> for the start of the frame, but can be accessed from any thread.
+        /// </summary>
         public static float GameTime { get; private set; }
 
         /// <summary>
@@ -49,13 +58,13 @@ namespace Iviz.Core
         public static event Action? EveryFrame;
 
         /// <summary>
-        /// Runs every frame on the Unity thread, but may be slowed down if the CPU load is too high.
-        /// Used by the ROS listeners.
+        /// Runs every frame on the Unity thread, but can be set to skip frames with <see cref="NetworkFrameSkip"/>
+        /// if the CPU load is too high. Used by ROS listeners.
         /// </summary>
         public static event Action? ListenersEveryFrame;
 
         /// <summary>
-        /// Runs every frame on the Unity thread, but after EveryFrame has finished.
+        /// Runs every frame on the Unity thread, but after <see cref="EveryFrame"/> has finished.
         /// </summary>
         public static event Action? LateEveryFrame;
 
@@ -65,12 +74,12 @@ namespace Iviz.Core
         public static event Action? EverySecond;
 
         /// <summary>
-        /// Runs 10 times per second
+        /// Runs multiple times per second.
         /// </summary>
         public static event Action? EveryTenthOfASecond;
 
         /// <summary>
-        /// Runs once per second, but after EverySecond has finished.
+        /// Runs once per second, but after <see cref="EverySecond"/> has finished.
         /// </summary>
         public static event Action? LateEverySecond;
 
@@ -306,7 +315,5 @@ namespace Iviz.Core
                 instance.actionsQueue.Enqueue(action);
             }
         }
-
-        static bool IsGameThread => instance != null && Thread.CurrentThread == instance.gameThread;
     }
 }

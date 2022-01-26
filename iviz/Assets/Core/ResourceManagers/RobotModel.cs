@@ -677,9 +677,6 @@ namespace Iviz.Displays
         }
         */
 
-        public override string ToString()
-        {
-            return $"[Robot {Name}]";
-        }
+        public override string ToString() => $"[Robot {Name}]";
     }
 }

@@ -22,7 +22,6 @@ namespace Iviz.Ros
         static ConnectionManager? instance;
 
         public delegate void LogDelegate(in Log log);
-
         public static event LogDelegate? LogMessageArrived;
 
         public static LogLevel MinLogLevel { get; set; } = LogLevel.Info;

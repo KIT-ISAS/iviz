@@ -15,8 +15,9 @@ namespace Iviz.Displays
         /// Bounds of the display in local coordinates, or null if the display is empty.
         /// </summary>
         Bounds? Bounds => null;
+
         /// <summary>
-        /// Tells the display that it is about to be sent to the Resource Pool, and that it should undo
+        /// Tells the display that it is about to be sent to the Resource Pool, and that it should revert
         /// any changes that would prevent it from being reused.
         /// </summary>
         void Suspend();
@@ -28,11 +29,11 @@ namespace Iviz.Displays
     public interface ISupportsLayer
     {
         /// <summary>
-        /// Unity layer of the display.
+        /// Gets or sets the Unity layer of the display.
         /// </summary>
         int Layer { set; }
     }
-    
+
     /// <summary>
     /// Interface for displays that support the AR occlusion mode.
     /// </summary>
@@ -54,30 +55,47 @@ namespace Iviz.Displays
         /// </summary>
         Color Tint { set; }
     }
-    
+
     /// <summary>
     /// Interface for displays that support setting a material color and emissive color. 
     /// </summary>
     public interface ISupportsColor
     {
+        /// <summary>
+        /// Gets or sets the material diffuse color.
+        /// </summary>
         Color Color { set; }
+
+        /// <summary>
+        /// Gets or sets the material emissive color.
+        /// </summary>
         Color EmissiveColor { set; }
     }
-    
+
     /// <summary>
-    /// Interface for displays that support physically based rendering. 
+    /// Interface for displays with materials that support physically based rendering (PBR). 
     /// </summary>
     public interface ISupportsPbr
     {
+        /// <summary>
+        /// Gets or sets the metallic PBR material property.
+        /// </summary>
         float Metallic { set; }
+
+        /// <summary>
+        /// Gets or sets the smoothness PBR material property.
+        /// </summary>
         float Smoothness { set; }
     }
-    
+
     /// <summary>
     /// Interface for displays that support enabling and disabling shadows. 
     /// </summary>
     public interface ISupportsShadows
     {
+        /// <summary>
+        /// Gets or sets whether shadows are enabled.
+        /// </summary>
         bool EnableShadows { set; }
     }
 }
