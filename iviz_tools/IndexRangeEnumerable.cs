@@ -5,53 +5,24 @@ using System.Runtime.CompilerServices;
 
 namespace Iviz.Tools;
 
-// Adapted from https://github.com/YairHalberstadt/RangeForeach/blob/master/RangeForeach/RangeExtensions.cs
-public readonly struct IndexRangeEnumerable : IReadOnlyList<int>
+public struct IndexRangeEnumerator
 {
-    readonly int start;
+    int index;
     readonly int end;
 
-    public struct Enumerator : IEnumerator<int>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public IndexRangeEnumerator(int start, int end)
     {
-        int index;
-        readonly int end;
+        index = start;
+        this.end = end;
+    }
 
+    public int Current
+    {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Enumerator(int start, int end) => (index, this.end) = (start - 1, end);
-
-        public int Current
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => index;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool MoveNext() => ++index < end;
-
-        object IEnumerator.Current => Current;
-
-        public void Dispose()
-        {
-        }
-
-        public void Reset()
-        {
-        }
+        get => index++;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IndexRangeEnumerable(Range range)
-    {
-        start = range.Start.Value;
-        end = range.End.Value;
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Enumerator GetEnumerator() => new(start, end);
-
-    IEnumerator<int> IEnumerable<int>.GetEnumerator() => GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    public int Count => end - start;
-    public int this[int index] => start + index;
-    public SelectEnumerable<IndexRangeEnumerable, int, TC> Select<TC>(Func<int, TC> f) => new(this, f);
+    public bool MoveNext() => index < end;
 }

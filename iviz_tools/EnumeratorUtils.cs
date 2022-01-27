@@ -87,21 +87,8 @@ public static class EnumeratorUtils
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    static IndexRangeEnumerable GetEnumerable(this Range range) => new(range);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static IndexRangeEnumerable.Enumerator GetEnumerator(this Range range) =>
-        new(range.Start.Value, range.End.Value);
-
-    public static SelectEnumerable<IndexRangeEnumerable, int, T> Select<T>(this Range range, Func<int, T> f)
-    {
-        return range.GetEnumerable().Select(f);
-    }
-
-    public static SelectEnumerable<IndexRangeEnumerable, int, T> Select<T>(this Range range, Func<T> a)
-    {
-        return range.GetEnumerable().Select(_ => a());
-    }
+    public static IndexRangeEnumerator GetEnumerator(this Range range) =>
+        new(range.Start.GetHashCode(), range.End.GetHashCode());
 
     public static Span<T> Slice<T>(this T[] t, Range range)
     {

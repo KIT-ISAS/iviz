@@ -331,6 +331,17 @@ public static class TaskUtils
                 ? new ValueTask<Task>(t2)
                 : Task.WhenAny(t1, t2).AsValueTask();
     }
+
+    public static void TryCancel(this CancellationTokenSource tokenSource)
+    {
+        try
+        {
+            tokenSource.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }        
+    }
 }
 
 public static class ValueTask2

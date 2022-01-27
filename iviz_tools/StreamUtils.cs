@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -89,21 +91,23 @@ public static class StreamUtils
         return new ValueTask<int>(received);
     }
 
-    static async ValueTask<int> DoReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
+    static ValueTask<int> DoReadChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
         CancellationToken token)
     {
         var tcs = new TaskCompletionSource<IAsyncResult>();
 
         socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, OnComplete, tcs);
 
-        if (tcs.Task.IsCompleted)
-        {
-            return socket.EndReceive(await tcs.Task);
-        }
+        return tcs.Task.IsCompleted 
+            ? new ValueTask<int>(socket.EndReceive(tcs.Task.Result)) 
+            : DoReadChunkWithTokenAsync();
 
-        await using (token.Register(OnCanceled, tcs))
+        async ValueTask<int> DoReadChunkWithTokenAsync()
         {
-            return socket.EndReceive(await tcs.Task);
+            await using (token.Register(OnCanceled, tcs))
+            {
+                return socket.EndReceive(await tcs.Task);
+            }
         }
     }
 
@@ -130,25 +134,28 @@ public static class StreamUtils
     public static ValueTask<int> WriteChunkAsync(this UdpClient udpClient, byte[] buffer, int offset, int toWrite,
         CancellationToken token) => DoWriteChunkAsync(udpClient.Client, buffer, offset, toWrite, token);
 
-    static async ValueTask<int> DoWriteChunkAsync(Socket socket, byte[] buffer, int offset, int toWrite,
+    static ValueTask<int> DoWriteChunkAsync(Socket socket, byte[] buffer, int offset, int toWrite,
         CancellationToken token)
     {
         var tcs = new TaskCompletionSource<IAsyncResult>();
 
         socket.BeginSend(buffer, offset, toWrite, SocketFlags.None, OnComplete, tcs);
+        
+        return tcs.Task.IsCompleted 
+            ? new ValueTask<int>(socket.EndSend(tcs.Task.Result)) 
+            : DoWriteWithTokenAsync();
 
-        if (tcs.Task.IsCompleted)
+        async ValueTask<int> DoWriteWithTokenAsync()
         {
-            return socket.EndSend(await tcs.Task);
-        }
-
-        await using (token.Register(OnCanceled, tcs))
-        {
-            return socket.EndSend(await tcs.Task);
+            await using (token.Register(OnCanceled, tcs))
+            {
+                return socket.EndSend(await tcs.Task);
+            }
         }
     }
 
-    public static async ValueTask WriteChunkAsync(this TcpClient client, Rent<byte> bytes, CancellationToken token, int timeoutInMs)
+    public static async ValueTask WriteChunkAsync(this TcpClient client, Rent<byte> bytes, CancellationToken token,
+        int timeoutInMs)
     {
         if (timeoutInMs == -1)
         {
@@ -211,8 +218,8 @@ public static class StreamUtils
         if (e is not SocketException se)
         {
             return e.Message;
-        } 
-            
+        }
+
         // fix mono bug!
         if (!se.Message.HasPrefix("mono-io-layer-error"))
         {
@@ -230,7 +237,7 @@ public static class StreamUtils
     static string CheckSocketExceptionMessage(string message)
     {
         // in windows and hololens the socket error may be padded with \0s after a \r
-        int terminatorIndex = message.IndexOf('\r'); 
+        int terminatorIndex = message.IndexOf('\r');
         return terminatorIndex != -1 ? message[..terminatorIndex] : message;
     }
 }
