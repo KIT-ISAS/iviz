@@ -76,8 +76,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         TcpClient = client;
         Endpoint = new Endpoint((IPEndPoint)TcpClient.Client.LocalEndPoint!);
         RemoteEndpoint = new Endpoint((IPEndPoint)TcpClient.Client.RemoteEndPoint!);
-        task = TaskUtils.Run(async () => await StartSession(latchedMsg).AwaitNoThrow(this),
-            runningTs.Token);
+        task = TaskUtils.Run(() => StartSession(latchedMsg).AwaitNoThrow(this), runningTs.Token);
     }
 
     public async ValueTask DisposeAsync(CancellationToken token)
@@ -257,14 +256,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         }
 
         TcpClient.Dispose();
-        try
-        {
-            runningTs.Cancel();
-        }
-        catch (ObjectDisposedException)
-        {
-        }
-
+        runningTs.TryCancel();
         senderQueue.FlushRemaining();
     }
 

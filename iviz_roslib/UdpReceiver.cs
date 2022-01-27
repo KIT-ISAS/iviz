@@ -178,14 +178,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
 
         Status = ReceiverStatus.Dead;
         UdpClient.Dispose();
-
-        try
-        {
-            runningTs.Cancel();
-        }
-        catch (ObjectDisposedException)
-        {
-        }
+        runningTs.TryCancel();
 
         Logger.LogDebugFormat("{0}: Stopped!", this);
     }

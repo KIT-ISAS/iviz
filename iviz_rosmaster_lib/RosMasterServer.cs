@@ -99,7 +99,7 @@ public sealed class RosMasterServer : IDisposable
         }
 
         disposed = true;
-        runningTs.Cancel();
+        runningTs.TryCancel();
         backgroundTask?.WaitNoThrow(2000, this);
     }
 
@@ -111,7 +111,7 @@ public sealed class RosMasterServer : IDisposable
         }
 
         disposed = true;
-        runningTs.Cancel();
+        runningTs.TryCancel();
         if (backgroundTask != null)
         {
             await backgroundTask.AwaitNoThrow(2000, this, default);
@@ -150,7 +150,7 @@ public sealed class RosMasterServer : IDisposable
 
         var startTask = TaskUtils.Run(() => listener.StartAsync(StartContext, true).AwaitNoThrow(this), Token);
 
-        await TaskUtils.Run(() => ManageRosoutAggAsync(MasterUri, Token).AwaitNoThrow(this), Token);
+        await TaskUtils.Run(() => ManageRosoutAggAsync(Token).AwaitNoThrow(this), Token);
 
         await listener.DisposeAsync();
         await startTask;
@@ -181,22 +181,30 @@ public sealed class RosMasterServer : IDisposable
         }
     }
 
-    static async ValueTask ManageRosoutAggAsync(Uri masterUri, CancellationToken token)
+    async ValueTask ManageRosoutAggAsync(CancellationToken token)
     {
         await Task.Delay(100, token);
 
-        var ownUri = new Uri($"http://{masterUri.Host}:0");
+        var ownUri = new Uri($"http://{MasterUri.Host}:0");
 
         Logger.LogDebug("** Starting Rosout routine...");
 
-        await using var client = await RosClient.CreateAsync(masterUri, "/rosout", ownUri, token: token);
-        await using var reader = await client.CreateReaderAsync<Log>("/rosout", token);
-        await using var writer = await client.CreateWriterAsync<Log>("/rosout_agg", true, token);
-
-        Logger.LogDebug("** Rosout running!");
-        while (!token.IsCancellationRequested)
+        try
         {
-            writer.Write(await reader.ReadAsync(token));
+            await using var client = await RosClient.CreateAsync(MasterUri, "/rosout", ownUri, token: token);
+            await using var reader = await client.CreateReaderAsync<Log>("/rosout", token);
+            await using var writer = await client.CreateWriterAsync<Log>("/rosout_agg", true, token);
+
+            Logger.LogDebug("** Rosout running!");
+            while (!token.IsCancellationRequested)
+            {
+                writer.Write(await reader.ReadAsync(token));
+            }
+        }
+        catch (RosConnectionException e)
+        {
+            Logger.LogErrorFormat("{0}: Failed to start the rosout routine. " +
+                                  "Our own uri is not reachable! {1}", this, e);
         }
     }
 
@@ -380,7 +388,7 @@ public sealed class RosMasterServer : IDisposable
         }
 
         if (!publishersByTopic.TryGetValue(topic, out var publishers) ||
-            !(publishers.TryGetValue(callerId, out Uri? tmpUri) && tmpUri == callerUri) ||
+            !(publishers.TryGetValue(callerId, out var tmpUri) && tmpUri == callerUri) ||
             !publishers.Remove(callerId))
         {
             return DefaultOkResponse;

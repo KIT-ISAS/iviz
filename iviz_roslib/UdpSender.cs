@@ -87,7 +87,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             throw new RosInvalidHeaderException(
                 $"Expected topic '{topicInfo.Topic}' but received request for '{receivedTopic}'");
         }
-        
+
         if (!fields.TryGetValue("type", out string? receivedType) || receivedType != topicInfo.Type)
         {
             if (receivedType != DynamicMessage.RosMessageType) // "*"
@@ -129,7 +129,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 
         responseHeader = StreamUtils.WriteHeaderToArray(responseHeaderContents);
 
-        task = TaskUtils.Run(async () => await StartSession(latchedMsg).AwaitNoThrow(this));
+        task = TaskUtils.Run(() => StartSession(latchedMsg).AwaitNoThrow(this));
     }
 
     async ValueTask StartSession(NullableMessage<T> latchedMsg)
@@ -159,14 +159,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         }
 
         UdpClient.Dispose();
-        try
-        {
-            runningTs.Cancel();
-        }
-        catch (ObjectDisposedException)
-        {
-        }
-
+        runningTs.TryCancel();
         senderQueue.FlushRemaining();
     }
 

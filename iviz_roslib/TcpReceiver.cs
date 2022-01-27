@@ -68,7 +68,7 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         NumReceived = numReceived,
         BytesReceived = bytesReceived,
         ErrorDescription = ErrorDescription,
-        IsAlive = IsAlive, 
+        IsAlive = IsAlive,
     };
 
     async ValueTask StartSession()
@@ -121,13 +121,7 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         Status = ReceiverStatus.Dead;
         TcpClient?.Dispose();
         TcpClient = null;
-        try
-        {
-            runningTs.Cancel();
-        }
-        catch (ObjectDisposedException)
-        {
-        }
+        runningTs.TryCancel();
 
         Logger.LogDebugFormat("{0}: Stopped!", this);
 
@@ -258,12 +252,12 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
 
         List<string> responseHeader = RosUtils.ParseHeader(readBuffer.Array, receivedLength);
         var dictionary = RosUtils.CreateHeaderDictionary(responseHeader);
-            
+
         if (dictionary.TryGetValue("callerid", out string? remoteCallerId))
         {
             RemoteId = remoteCallerId;
         }
-            
+
         if (dictionary.TryGetValue("error", out string? message)) // TODO: improve error handling here
         {
             throw new RosHandshakeException($"Partner sent error message: [{message}]");
