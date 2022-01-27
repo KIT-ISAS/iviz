@@ -11,20 +11,18 @@ namespace Iviz.Controllers
     {
         [SerializeField] FixedJoystick? left;
         [SerializeField] FixedJoystick? right;
+        [SerializeField] FixedJoystick? midLeft;
+        [SerializeField] FixedJoystick? midRight;
         [SerializeField] Canvas? canvas;
         bool visible;
 
         FixedJoystick LeftJoystick => left.AssertNotNull(nameof(left));
         FixedJoystick RightJoystick  => right.AssertNotNull(nameof(right));
+        FixedJoystick MiddleLeftJoystick => midLeft.AssertNotNull(nameof(midLeft));
+        FixedJoystick MiddleRightJoystick  => midRight.AssertNotNull(nameof(midRight));
         Canvas JoystickCanvas => canvas.AssertNotNull(nameof(canvas));
-
-        public enum Source
-        {
-            Left,
-            Right
-        }
-
-        public event Action<Source, Vector2>? Changed;
+        
+        public event Action? Changed;
         
         public bool Visible
         {
@@ -36,14 +34,39 @@ namespace Iviz.Controllers
         }
 
         public Vector2 Left => LeftJoystick.Direction;
-
         public Vector2 Right => RightJoystick.Direction;
+        public Vector2 MiddleLeft => MiddleLeftJoystick.Direction;
+        public Vector2 MiddleRight => MiddleRightJoystick.Direction;
+        
+        public bool LeftVisible
+        {
+            set => LeftJoystick.gameObject.SetActive(value);
+        }
+
+        public bool RightVisible
+        {
+            set => RightJoystick.gameObject.SetActive(value);
+        }
+        public bool MiddleLeftVisible
+        {
+            set => MiddleLeftJoystick.gameObject.SetActive(value);
+        }
+        public bool MiddleRightVisible
+        {
+            set => MiddleRightJoystick.gameObject.SetActive(value);
+        }
 
         void Awake()
         {
             Visible = false;
-            LeftJoystick.Changed += direction => Changed?.Invoke(Source.Left, direction);
-            RightJoystick.Changed += direction => Changed?.Invoke(Source.Right, direction);
+            
+            // ReSharper disable once ConvertToLocalFunction
+            Action<Vector2> callChanged = _ => Changed?.Invoke();
+            
+            LeftJoystick.Changed += callChanged;
+            RightJoystick.Changed += callChanged;
+            MiddleLeftJoystick.Changed += callChanged;
+            MiddleRightJoystick.Changed += callChanged;
         }
     }
 }

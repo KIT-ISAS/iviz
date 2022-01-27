@@ -4,6 +4,14 @@ using UnityEngine;
 
 namespace Iviz.Common.Configurations
 {
+    public enum JoystickMode
+    {
+        Left,
+        Right,
+        Two,
+        Four
+    }
+    
     [DataContract]
     public sealed class JoystickConfiguration : IConfiguration
     {
@@ -16,6 +24,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public string AttachToFrame { get; set; } = "";
         [DataMember] public bool XIsFront { get; set; } = true;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
+        [DataMember] public JoystickMode Mode { get; set; } = JoystickMode.Two;
         [DataMember] public ModuleType ModuleType => ModuleType.Joystick;
         [DataMember] public bool Visible { get; set; } = true;
     }

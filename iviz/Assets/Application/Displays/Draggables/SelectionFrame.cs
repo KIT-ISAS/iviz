@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Linq;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
@@ -30,7 +31,7 @@ namespace Iviz.Displays
                 RebuildSize();
             }
         }
-        
+
         public float ColumnWidth
         {
             get => columnWidth;
@@ -44,19 +45,20 @@ namespace Iviz.Displays
                 columnWidth = value;
                 UpdateColumnWidth();
             }
-        }        
+        }
 
         static MeshMarkerDisplay[] CreateObjects(Transform transform)
         {
-            MeshMarkerDisplay CreateObject()
+            var array = new MeshMarkerDisplay[12];
+            foreach (int i in ..12)
             {
                 var resource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, transform);
                 resource.EnableShadows = false;
                 resource.EnableCollider = false;
-                return resource;
+                array[i] = resource;
             }
 
-            return (..12).Select(CreateObject).ToArray();
+            return array;
         }
 
         void RebuildSize()
@@ -118,7 +120,7 @@ namespace Iviz.Displays
             foreach (var child in children.Skip(8))
             {
                 child.Transform.localScale = new Vector3(ColumnWidth, size.y, ColumnWidth);
-            }            
+            }
         }
 
         void Awake()
@@ -129,7 +131,7 @@ namespace Iviz.Displays
             {
                 RebuildSize();
             }
-            
+
             EnableShadows = false;
         }
 

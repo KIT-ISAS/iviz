@@ -364,10 +364,10 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this in Transform transform) =>
-            IsInvalid(transform.Rotation) || IsInvalid(transform.Translation);
+            IsInvalid(transform.Translation) || IsInvalid(transform.Rotation);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this in Pose pose) => IsInvalid(pose.Orientation) || IsInvalid(pose.Position);
+        public static bool IsInvalid(this in Pose pose) => IsInvalid(pose.Position) || IsInvalid(pose.Orientation);
 
         public static StringBuilder AppendBandwidth(this StringBuilder description, long bytesPerSecond)
         {

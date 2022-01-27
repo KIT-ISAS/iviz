@@ -55,7 +55,7 @@ namespace Iviz.App
             if (newSender == null)
             {
                 Text.text = "<i>Empty</i>\n" +
-                            "<b>(?)</b>";
+                            "<b>Off</b>";
             }
         }
 

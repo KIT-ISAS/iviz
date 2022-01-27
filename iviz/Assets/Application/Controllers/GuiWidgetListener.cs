@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -410,7 +411,7 @@ namespace Iviz.Controllers
                     Poses = points
                         .Select(point => Msgs.GeometryMsgs.Pose.Identity.WithPosition(point.Unity2RosVector3()))
                         .ToArray(),
-                    Timestamps = (..points.Count)
+                    Timestamps = Enumerable.Range(0, points.Count)
                         .Select(i => SecsToTime(i * periodInSec))
                         .ToArray()
                 }

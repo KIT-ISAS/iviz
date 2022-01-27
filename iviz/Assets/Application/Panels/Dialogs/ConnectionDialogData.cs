@@ -185,26 +185,28 @@ namespace Iviz.App
 
                         async void DoDisposeMaster()
                         {
-                            // wait 200 ms for roslib to disconnect and hope the user does not click to create a
-                            // new master until we're finished 
+                            // wait 200 ms for roslib to disconnect gracefully and hope the user
+                            // does not click to create a new master until we're finished 
                             await Task.Delay(200);
                             await RosServerManager.DisposeAsync();
-                            RosLogger.Internal("Master node removed. Switched to <b>client mode</b>.");
-                            panel.ServerMode.State = false;
-                            MasterActiveChanged?.Invoke(false);
+                            OnMasterDisconnected();
                         }
                     }
                     else
                     {
                         // if we're not connected then we don't need to worry
                         RosServerManager.Dispose();
+                        OnMasterDisconnected();
+                    }
+
+                    void OnMasterDisconnected()
+                    {
                         RosLogger.Internal("Master node removed. Switched to <b>client mode</b>.");
                         panel.ServerMode.State = false;
-                        MasterActiveChanged?.Invoke(false);
+                        panel.MasterUri.Interactable = true;
+                        MasterActiveChanged?.Invoke(false);                        
                     }
                 }
-
-                panel.MasterUri.Interactable = !RosServerManager.IsActive;
             };
         }
 
@@ -226,6 +228,7 @@ namespace Iviz.App
             }
 
             panel.ServerMode.State = true;
+            panel.MasterUri.Interactable = false;
             RosLogger.Internal(
                 $"Created <b>master node</b> using my uri {ownMasterUri}. You can connect now!");
             MasterActiveChanged?.Invoke(true);

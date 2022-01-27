@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Core;
@@ -305,11 +306,27 @@ namespace Iviz.Controllers.TF
             while (incomingMessages.TryDequeue(out var value))
             {
                 var (transforms, isStatic) = value;
-                foreach (var (parentIdUnchecked, childIdUnchecked, rosTransform, _) in transforms)
+                for (int i = 0; i < transforms.Length; i++)
                 {
-                    if (childIdUnchecked.Length == 0
-                        || !CheckIfTransformValid(childIdUnchecked, rosTransform)
-                        || !CheckIfTransformWithinThreshold(childIdUnchecked, rosTransform))
+                    ref readonly var transform = ref transforms[i];
+                    ref readonly var rosTransform = ref transform.Transform;
+                    
+                    if (!CheckIfWithinThreshold(rosTransform.Translation))
+                    {
+                        SetFailedThreshold(transform.ChildFrameId);
+                        continue;
+                    }
+
+                    if (rosTransform.IsInvalid())
+                    {
+                        SetFailedValid(transform.ChildFrameId);
+                        continue;
+                    }
+
+                    var unityPose = rosTransform.Ros2Unity();
+
+                    string childIdUnchecked = transform.ChildFrameId;
+                    if (childIdUnchecked.Length == 0)
                     {
                         continue;
                     }
@@ -343,8 +360,7 @@ namespace Iviz.Controllers.TF
 
                     lastChild = child;
 
-                    var unityPose = rosTransform.Ros2Unity();
-
+                    string parentIdUnchecked = transform.Header.FrameId;
                     if (parentIdUnchecked.Length == 0)
                     {
                         child.TrySetParent(DefaultFrame);
@@ -374,47 +390,38 @@ namespace Iviz.Controllers.TF
             AfterProcessMessages?.Invoke();
         }
 
-        bool CheckIfTransformValid(string childId, in Msgs.GeometryMsgs.Transform rosTransform)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool CheckIfWithinThreshold(in Msgs.GeometryMsgs.Vector3 t)
         {
-            if (!rosTransform.IsInvalid())
-            {
-                return true;
-            }
-
-            if (warningTimestamps.TryGetValue(childId, out float timestamp)
-                && timestamp >= GameThread.GameTime)
-            {
-                return false;
-            }
-
-            RosLogger.Info($"{nameof(TfListener)}: Ignoring transform '{childId}' with invalid values.");
-            warningTimestamps[childId] = GameThread.GameTime + WarningBlacklistTimeInSec;
-
-            return false;
+            // unity cannot deal with very large floats, so we have to limit translation sizes
+            const int maxPoseMagnitude = 10000;
+            return Math.Abs(t.X) < maxPoseMagnitude
+                   && Math.Abs(t.Y) < maxPoseMagnitude
+                   && Math.Abs(t.Z) < maxPoseMagnitude;
         }
 
-        // unity cannot deal with very large floats, so we have to limit translation sizes
-        bool CheckIfTransformWithinThreshold(string childId, in Msgs.GeometryMsgs.Transform rosTransform)
+        void SetFailedThreshold(string childId)
         {
-            const int maxPoseMagnitude = 10000;
-            var (x, y, z) = rosTransform.Translation;
-            if (Math.Abs(x) < maxPoseMagnitude
-                && Math.Abs(y) < maxPoseMagnitude
-                && Math.Abs(z) < maxPoseMagnitude)
-            {
-                return true;
-            }
-
             if (warningTimestamps.TryGetValue(childId, out float expirationTimestamp)
                 && expirationTimestamp >= GameThread.GameTime)
             {
-                return false;
+                return;
             }
 
             RosLogger.Info($"{nameof(TfListener)}: Ignoring transform '{childId}' with too large values.");
             warningTimestamps[childId] = GameThread.GameTime + WarningBlacklistTimeInSec;
+        }
 
-            return false;
+        void SetFailedValid(string childId)
+        {
+            if (warningTimestamps.TryGetValue(childId, out float timestamp)
+                && timestamp >= GameThread.GameTime)
+            {
+                return;
+            }
+
+            RosLogger.Info($"{nameof(TfListener)}: Ignoring transform '{childId}' with invalid values.");
+            warningTimestamps[childId] = GameThread.GameTime + WarningBlacklistTimeInSec;
         }
 
         public void ResetController()

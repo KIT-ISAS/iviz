@@ -519,12 +519,11 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in TransformStamped p,
-            out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp)
+            out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform)
         {
             parentId = p.Header.FrameId;
             childId = p.ChildFrameId;
             transform = p.Transform;
-            stamp = p.Header.Stamp;
         }
 
         public static unsafe Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged

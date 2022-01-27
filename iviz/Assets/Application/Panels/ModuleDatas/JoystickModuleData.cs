@@ -53,7 +53,7 @@ namespace Iviz.App
             catch (Exception e)
             {
                 RosLogger.Error($"{this}: Failed to dispose controller", e);
-            }            
+            }
         }
 
         public override void SetupPanel()
@@ -63,13 +63,14 @@ namespace Iviz.App
             panel.JoySender.Set(controller.SenderJoy);
             panel.TwistSender.Set(controller.SenderTwist);
             panel.SendJoy.Value = controller.PublishJoy;
-
             panel.SendTwist.Value = controller.PublishTwist;
 
             panel.JoyTopic.Value = controller.JoyTopic;
             panel.TwistTopic.Value = controller.TwistTopic;
 
             UpdateHints();
+
+            panel.Mode.Index = (int)controller.Mode;
 
             panel.UseStamped.Value = controller.UseTwistStamped;
 
@@ -86,6 +87,7 @@ namespace Iviz.App
             panel.XIsFront.Interactable = controller.PublishTwist;
             panel.UseStamped.Interactable = controller.PublishTwist;
 
+            panel.Mode.ValueChanged += (i, _) => controller.Mode = (JoystickMode)i;
             panel.SendJoy.ValueChanged += f =>
             {
                 controller.PublishJoy = f;
@@ -102,18 +104,9 @@ namespace Iviz.App
                 panel.TwistTopic.Interactable = f;
                 panel.UseStamped.Interactable = f;
             };
-            panel.MaxSpeed.ValueChanged += f =>
-            {
-                controller.MaxSpeed = f;
-            };
-            panel.AttachToFrame.EndEdit += f =>
-            {
-                controller.AttachToFrame = f;
-            };
-            panel.XIsFront.ValueChanged += f =>
-            {
-                controller.XIsFront = f;
-            };
+            panel.MaxSpeed.ValueChanged += f => controller.MaxSpeed = f;
+            panel.AttachToFrame.EndEdit += f => controller.AttachToFrame = f;
+            panel.XIsFront.ValueChanged += f => controller.XIsFront = f;
             panel.JoyTopic.EndEdit += f =>
             {
                 controller.JoyTopic = f;
@@ -145,14 +138,14 @@ namespace Iviz.App
         {
             panel.JoyTopic.Hints = GetTopicTypes()
                 .Where(info => info.Type == Joy.RosMessageType)
-                .Select(info => info.Topic);            
+                .Select(info => info.Topic);
             string expectedType = controller.UseTwistStamped
                 ? TwistStamped.RosMessageType
                 : Twist.RosMessageType;
             panel.TwistTopic.Hints = GetTopicTypes()
                 .Where(info => info.Type == expectedType)
-                .Select(info => info.Topic);            
-            
+                .Select(info => info.Topic);
+
             static IEnumerable<BriefTopicInfo> GetTopicTypes() => ConnectionManager.Connection.GetSystemTopicTypes();
         }
 
@@ -198,7 +191,7 @@ namespace Iviz.App
             }
 
             ResetPanel();
-        }        
+        }
 
         public override void AddToState(StateConfiguration config)
         {
