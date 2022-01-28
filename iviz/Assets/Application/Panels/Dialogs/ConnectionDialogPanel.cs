@@ -30,7 +30,7 @@ namespace Iviz.App
         {
             serverMode.InactiveText = "Master Off";
             serverMode.ActiveText = "Master On";
-            serverMode.State = RosServerManager.IsActive;
+            serverMode.State = RosManager.Server.IsActive;
         }
 
         public override void ClearSubscribers()

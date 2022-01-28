@@ -184,7 +184,7 @@ namespace Iviz.App
 
         static IEnumerable<string> GetParameterCandidates(CancellationToken token)
         {
-            var list = ConnectionManager.Connection.GetSystemParameterList(token)
+            var list = RosManager.Connection.GetSystemParameterList(token)
                 .Where(x => x.Contains(ParamSubstring))
                 .ToList();
             list.Sort();

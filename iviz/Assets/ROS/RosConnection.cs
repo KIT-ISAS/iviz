@@ -11,6 +11,10 @@ using Iviz.Tools;
 
 namespace Iviz.Ros
 {
+    /// <summary>
+    /// Partial implementation of a ROS connection. The rest is in <see cref="RoslibConnection"/>.
+    /// Here we only handle initializing connections and task queues.
+    /// </summary>
     public abstract class RosConnection : IExternalServiceProvider
     {
         const int TaskWaitTimeInMs = 2000;
@@ -24,20 +28,17 @@ namespace Iviz.Ros
         readonly ConcurrentQueue<Func<ValueTask>> toDos = new();
         readonly CancellationTokenSource connectionTs = new();
 
+        ConnectionState connectionState = ConnectionState.Disconnected;
         DateTime lastConnectionTry = DateTime.MinValue;
         bool tryConnectOnce;
-
-        public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
+        
+        public bool IsConnected => connectionState == ConnectionState.Connected;
         public bool KeepReconnecting { get; set; }
 
         protected RosConnection()
         {
             task = TaskUtils.Run(() => Run().AwaitNoThrow(this));
         }
-
-        public abstract ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
-            CancellationToken token)
-            where T : IService;
 
         internal virtual void Dispose()
         {
@@ -51,12 +52,12 @@ namespace Iviz.Ros
 
         void SetConnectionState(ConnectionState newState)
         {
-            if (ConnectionState == newState)
+            if (connectionState == newState)
             {
                 return;
             }
 
-            ConnectionState = newState;
+            connectionState = newState;
             GameThread.Post(() => ConnectionStateChanged?.Invoke(newState));
         }
 
@@ -102,7 +103,7 @@ namespace Iviz.Ros
         {
             var now = GameThread.Now;
             if ((KeepReconnecting || tryConnectOnce)
-                && ConnectionState != ConnectionState.Connected
+                && connectionState != ConnectionState.Connected
                 && (now - lastConnectionTry).TotalMilliseconds > ConnectionRetryTimeInMs)
             {
                 await TryToConnect(now);
@@ -155,7 +156,7 @@ namespace Iviz.Ros
 
         public void TryOnceToConnect()
         {
-            if (ConnectionState != ConnectionState.Disconnected)
+            if (connectionState != ConnectionState.Disconnected)
             {
                 return;
             } 
@@ -166,12 +167,16 @@ namespace Iviz.Ros
         
         protected abstract ValueTask<bool> ConnectAsync();
 
+        public abstract ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
+            CancellationToken token)
+            where T : IService;
+
         public virtual void Disconnect()
         {
             SetConnectionState(ConnectionState.Disconnected);
             lastConnectionTry = DateTime.MinValue;
         }
-
+        
         public sealed override string ToString() => "[RosConnection]";
     }
 

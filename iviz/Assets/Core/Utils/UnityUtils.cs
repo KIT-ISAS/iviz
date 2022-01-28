@@ -553,10 +553,12 @@ namespace Iviz.Core
             return array.AsSpan(range);
         }
 
-        public static void TryReturn(this Array _)
-        {
-        }
-
+        /// <summary>
+        /// Returns the array inside a <see cref="Memory{T}"/> object to the <see cref="ArrayPool{T}"/>.
+        /// Used by some iviz messages which rent arrays from the pool instead of creating a new one.
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <typeparam name="T"></typeparam>
         public static void TryReturn<T>(this Memory<T> memory) where T : unmanaged
         {
             if (memory.Length != 0
@@ -565,7 +567,18 @@ namespace Iviz.Core
                 ArrayPool<T>.Shared.Return(segment.Array);
             }
         }
+        
+        /// <summary>
+        /// Empty function. Used for debugging purposes as an overload for <see cref="TryReturn{T}(Memory{T})"/>,
+        /// in case an iviz message is temporarily set to contain an array instead of a Memory.
+        /// </summary>
+        public static void TryReturn(this Array _)
+        {
+        }        
 
+        /// <summary>
+        /// Convenience function to obtain spans from <see cref="Memory{T}"/> the same way as with arrays. 
+        /// </summary>
         public static Span<T> AsSpan<T>(this Memory<T> memory) where T : unmanaged => memory.Span;
 
         /// Creates a temporary native array that lasts one frame.

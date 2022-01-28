@@ -44,7 +44,7 @@ namespace Iviz.App
         }
 
         int NumSubscribers =>
-            (!ConnectionManager.IsConnected || Sender == null) ? -1 : Sender.NumSubscribers;
+            (!RosManager.IsConnected || Sender == null) ? -1 : Sender.NumSubscribers;
 
         int MessagesPerSecond => Sender?.Stats.MessagesPerSecond ?? 0;
         long BytesPerSecond => Sender?.Stats.BytesPerSecond ?? 0;

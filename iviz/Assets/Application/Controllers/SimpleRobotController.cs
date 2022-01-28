@@ -333,7 +333,7 @@ namespace Iviz.Controllers
             {
                 HelpText = "- Requesting parameter -";
                 (parameterValue, errorMsg) =
-                    await ConnectionManager.Connection.GetParameterAsync(value, ParameterTimeoutInMs);
+                    await RosManager.Connection.GetParameterAsync(value, ParameterTimeoutInMs);
             }
             catch (OperationCanceledException)
             {
@@ -423,7 +423,7 @@ namespace Iviz.Controllers
 
             async void LoadRobotAsync()
             {
-                robotLoadingTask = newRobot.StartAsync(ConnectionManager.ServiceProvider, KeepMeshMaterials).AsTask();
+                robotLoadingTask = newRobot.StartAsync(RosManager.ServiceProvider, KeepMeshMaterials).AsTask();
                 await robotLoadingTask;
                 RobotLinkHighlightable.ProcessRobot(newRobot.Name, newRobot.BaseLinkObject);
                 UpdateStartTaskStatus();

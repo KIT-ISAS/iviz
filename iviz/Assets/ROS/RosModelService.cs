@@ -9,11 +9,10 @@ using Iviz.Core;
 using Iviz.ModelService;
 #endif
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Ros;
 
-namespace Iviz.Controllers
+namespace Iviz.Ros
 {
-    public sealed class ModelService
+    public sealed class RosModelService
     {
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
         public bool IsEnabled => modelServer != null;
@@ -38,35 +37,35 @@ namespace Iviz.Controllers
             if (enableFileScheme)
             {
                 RosLogger.Warn(
-                    "Iviz.ModelService started. Uris starting with 'package://' and 'file://' are now enabled." +
+                    $"{nameof(RosModelService)} started. Uris starting with 'package://' and 'file://' are now enabled." +
                     " This grants access to all files from the outside");
             }
             else if (modelServer.NumPackages == 0)
             {
                 RosLogger.Info(
-                    "Iviz.Model.Service started. However, no packages were found. Try creating a ros_package_path file with a list of ROS root paths.");
+                    $"{nameof(RosModelService)} started. However, no packages were found. Try creating a ros_package_path file with a list of ROS root paths.");
                 return;
             }
             else
             {
                 RosLogger.Info(
-                    "Iviz.ModelService started. Uris starting with 'package://' are now enabled." +
+                    $"{nameof(RosModelService)} started. Uris starting with 'package://' are now enabled." +
                     " This grants access to all files within the ROS packages.");
             }
 
-            ConnectionManager.Connection.AdvertiseService<GetModelResource>(
+            RosManager.Connection.AdvertiseService<GetModelResource>(
                 ModelServer.ModelServiceName, ModelCallback);
 
-            ConnectionManager.Connection.AdvertiseService<GetModelTexture>(
+            RosManager.Connection.AdvertiseService<GetModelTexture>(
                 ModelServer.TextureServiceName, modelServer.TextureCallback);
 
-            ConnectionManager.Connection.AdvertiseService<GetFile>(
+            RosManager.Connection.AdvertiseService<GetFile>(
                 ModelServer.FileServiceName, modelServer.FileCallback);
 
-            ConnectionManager.Connection.AdvertiseService<GetSdf>(
+            RosManager.Connection.AdvertiseService<GetSdf>(
                 ModelServer.SdfServiceName, modelServer.SdfCallback);
 
-            RosLogger.Info($"Iviz.Model.Service started with {modelServer.NumPackages} paths.");
+            RosLogger.Info($"{nameof(RosModelService)} started with {modelServer.NumPackages} paths.");
 #endif
         }
 
@@ -86,7 +85,7 @@ namespace Iviz.Controllers
                     homeFolder = Environment.GetEnvironmentVariable("%HOMEDRIVE%%HOMEPATH%");
                     break;
                 default:
-                    RosLogger.Info("Iviz.Model.Service will not start, mobile platform detected. " +
+                    RosLogger.Info($"{nameof(RosModelService)} will not start, mobile platform detected. " +
                                 "You will need to start it as an external node.");
                     return null;
             }
@@ -97,7 +96,7 @@ namespace Iviz.Controllers
             }
 
             string extrasPath = homeFolder + "/.iviz/ros_package_path";
-            RosLogger.Info($"Iviz.ModelService: Searching for ROS package file in '{extrasPath}'");
+            RosLogger.Info($"{nameof(RosModelService)}: Searching for ROS package file in '{extrasPath}'");
             if (!File.Exists(extrasPath))
             {
                 return null;
@@ -109,7 +108,7 @@ namespace Iviz.Controllers
             }
             catch (IOException e)
             {
-                RosLogger.Error($"Iviz.ModelService: ROS package file '{extrasPath}' exists but could not be read", e);
+                RosLogger.Error($"{nameof(RosModelService)}: ROS package file '{extrasPath}' exists but could not be read", e);
                 return null;
             }
         }
@@ -140,10 +139,10 @@ namespace Iviz.Controllers
         public void Dispose()
         {
 #if UNITY_EDITOR || !(UNITY_IOS || UNITY_ANDROID || UNITY_WSA || UNITY_WEBGL)
-            ConnectionManager.Connection.UnadvertiseService(ModelServer.ModelServiceName);
-            ConnectionManager.Connection.UnadvertiseService(ModelServer.TextureServiceName);
-            ConnectionManager.Connection.UnadvertiseService(ModelServer.FileServiceName);
-            ConnectionManager.Connection.UnadvertiseService(ModelServer.SdfServiceName);
+            RosManager.Connection.UnadvertiseService(ModelServer.ModelServiceName);
+            RosManager.Connection.UnadvertiseService(ModelServer.TextureServiceName);
+            RosManager.Connection.UnadvertiseService(ModelServer.FileServiceName);
+            RosManager.Connection.UnadvertiseService(ModelServer.SdfServiceName);
 
             modelServer?.Dispose();
             modelServer = null;

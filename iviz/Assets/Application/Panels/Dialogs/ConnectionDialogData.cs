@@ -40,7 +40,6 @@ namespace Iviz.App
             }
         }
 
-
         public Uri? MyUri
         {
             get => myUri;
@@ -51,7 +50,6 @@ namespace Iviz.App
             }
         }
 
-
         public string? MyId
         {
             get => myId;
@@ -61,7 +59,6 @@ namespace Iviz.App
                 MyIdChanged?.Invoke(value);
             }
         }
-
 
         public List<Uri> LastMasterUris
         {
@@ -118,10 +115,10 @@ namespace Iviz.App
             panel.MyId.Value = MyId ?? "";
             panel.MyId.Hints = new[] { DefaultMyId };
             panel.MasterUri.Value = MasterUri == null ? "" : MasterUri.ToString();
-            panel.MasterUri.Interactable = !RosServerManager.IsActive;
+            panel.MasterUri.Interactable = !RosManager.Server.IsActive;
             panel.MasterUri.SetHints(LastMasterUris.Select(uri => uri.ToString()));
             panel.LineLog.Active = true;
-            panel.ServerMode.State = RosServerManager.IsActive;
+            panel.ServerMode.State = RosManager.Server.IsActive;
 
             panel.Close.Clicked += Close;
             panel.MyUri.EndEdit += text =>
@@ -169,18 +166,18 @@ namespace Iviz.App
             };
             panel.ServerMode.Clicked += () =>
             {
-                if (!RosServerManager.IsActive)
+                if (!RosManager.Server.IsActive)
                 {
                     TryCreateMaster();
                 }
                 else
                 {
-                    if (ConnectionManager.IsConnected)
+                    if (RosManager.IsConnected)
                     {
                         // this is a bit of a hack, but the roslib module will complain
                         // hard if we just yank the master away and it cannot unregister its stuff
-                        ConnectionManager.Connection.KeepReconnecting = false; // do not retry
-                        ConnectionManager.Connection.Disconnect();
+                        RosManager.Connection.KeepReconnecting = false; // do not retry
+                        RosManager.Connection.Disconnect();
                         DoDisposeMaster();
 
                         async void DoDisposeMaster()
@@ -188,35 +185,36 @@ namespace Iviz.App
                             // wait 200 ms for roslib to disconnect gracefully and hope the user
                             // does not click to create a new master until we're finished 
                             await Task.Delay(200);
-                            await RosServerManager.DisposeAsync();
+                            await RosManager.Server.DisposeAsync();
                             OnMasterDisconnected();
                         }
                     }
                     else
                     {
                         // if we're not connected then we don't need to worry
-                        RosServerManager.Dispose();
+                        RosManager.Server.Dispose();
                         OnMasterDisconnected();
-                    }
-
-                    void OnMasterDisconnected()
-                    {
-                        RosLogger.Internal("Master node removed. Switched to <b>client mode</b>.");
-                        panel.ServerMode.State = false;
-                        panel.MasterUri.Interactable = true;
-                        MasterActiveChanged?.Invoke(false);                        
                     }
                 }
             };
         }
+        
+        void OnMasterDisconnected()
+        {
+            RosLogger.Internal("Master node removed. Switched to <b>client mode</b>.");
+            panel.ServerMode.State = false;
+            panel.MasterUri.Interactable = true;
+            MasterActiveChanged?.Invoke(false);                        
+        }        
 
         public void TryCreateMaster()
         {
             string ownHost = MyUri?.Host ?? RosClient.TryGetCallerUri().Host;
-            var ownMasterUri = new Uri($"http://{ownHost}:{RosServerManager.DefaultPort.ToString()}/");
+            Uri ownMasterUri = new Uri($"http://{ownHost}:{RosServerManager.DefaultPort.ToString()}/");
+            
             const string ownMasterId = "iviz_master";
 
-            if (!RosServerManager.Create(ownMasterUri, ownMasterId))
+            if (!RosManager.Server.Start(ownMasterUri, ownMasterId))
             {
                 return;
             }

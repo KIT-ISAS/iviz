@@ -179,7 +179,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                var topicInfos = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
+                var topicInfos = RosManager.Connection.GetSystemPublishedTopicTypes();
                 string? type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == colorTopic)?.Type;
                 ColorListener = type switch
                 {
@@ -223,7 +223,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                var topicInfos = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
+                var topicInfos = RosManager.Connection.GetSystemPublishedTopicTypes();
                 string? type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == depthTopic)?.Type;
                 DepthListener = type switch
                 {

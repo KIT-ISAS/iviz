@@ -5,6 +5,7 @@ using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Ros;
 
 namespace Iviz.App
 {
@@ -23,7 +24,6 @@ namespace Iviz.App
         static readonly string[] ModelServerModesNames = {"Off", "On", "On + File"};
 
         readonly SettingsDialogPanel panel;
-        readonly Controllers.ModelService modelService = new();
         public override IDialogPanel Panel => panel;
 
         static ISettingsManager SettingsManager => Settings.SettingsManager ??
@@ -161,13 +161,13 @@ namespace Iviz.App
                 switch ((ModelServerModes) i)
                 {
                     case ModelServerModes.Off:
-                        modelService.Dispose();
+                        RosManager.ModelService.Dispose();
                         break;
                     case ModelServerModes.On:
-                        _ = modelService.RestartAsync(false);
+                        _ = RosManager.ModelService.RestartAsync(false);
                         break;
                     case ModelServerModes.OnWithFile:
-                        _ = modelService.RestartAsync(true);
+                        _ = RosManager.ModelService.RestartAsync(true);
                         break;
                 }
 
@@ -182,18 +182,18 @@ namespace Iviz.App
                 return "<b>Model Service:</b> Off (Mobile)";
             }
 
-            if (!modelService.IsEnabled)
+            if (!RosManager.ModelService.IsEnabled)
             {
                 return "<b>Model Service:</b> Off";
             }
 
-            if (modelService.IsFileSchemeEnabled)
+            if (RosManager.ModelService.IsFileSchemeEnabled)
             {
-                return "<b>Model Service:</b> " + modelService.NumPackages +
+                return "<b>Model Service:</b> " + RosManager.ModelService.NumPackages +
                        " packages\n<b>[File scheme enabled]</b>";
             }
 
-            return "<b>Model Service:</b> " + modelService.NumPackages + " packages";
+            return "<b>Model Service:</b> " + RosManager.ModelService.NumPackages + " packages";
         }
     }
 }

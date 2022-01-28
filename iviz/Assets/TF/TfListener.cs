@@ -477,7 +477,7 @@ namespace Iviz.Controllers.TF
                 return frameId;
             }
 
-            string? myId = ConnectionManager.MyId;
+            string? myId = RosManager.MyId;
             if (frameId.Length == 1)
             {
                 return myId ?? FixedFrameId;
@@ -715,7 +715,7 @@ namespace Iviz.Controllers.TF
                 outgoingMessages.TryTake(out messages[i]);
             }
 
-            if (ConnectionManager.IsConnected)
+            if (RosManager.IsConnected)
             {
                 Publisher.Publish(new TFMessage(messages));
             }

@@ -31,7 +31,7 @@ namespace Iviz.Controllers
     {
         const int DefaultTimeoutInMs = 5000;
 
-        static RoslibConnection Connection => ConnectionManager.Connection;
+        static RoslibConnection Connection => RosManager.Connection;
         static IEnumerable<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
 
         static readonly Dictionary<ModuleType, string> ModuleNames =
@@ -50,7 +50,7 @@ namespace Iviz.Controllers
 
         public static void Start()
         {
-            var connection = ConnectionManager.Connection;
+            var connection = RosManager.Connection;
 
             connection.AdvertiseService<GetLoggers>("~get_loggers", GetLoggers);
             connection.AdvertiseService<SetLoggerLevel>("~set_logger_level", SetLoggerLevel);
@@ -75,7 +75,7 @@ namespace Iviz.Controllers
             srv.Response.Loggers = new[]
             {
                 new Msgs.Roscpp.Logger("ros.iviz",
-                    LogLevelNames[ConsoleDialogData.IndexFromLevel(ConnectionManager.MinLogLevel)])
+                    LogLevelNames[ConsoleDialogData.IndexFromLevel(RosManager.Logger.MinLogLevel)])
             };
         }
 
@@ -90,7 +90,7 @@ namespace Iviz.Controllers
             {
                 if (LogLevelNames[i] == srv.Request.Level)
                 {
-                    ConnectionManager.MinLogLevel = ConsoleDialogData.LevelFromIndex(i);
+                    RosManager.Logger.MinLogLevel = ConsoleDialogData.LevelFromIndex(i);
                     break;
                 }
             }
@@ -813,7 +813,7 @@ namespace Iviz.Controllers
 
                     void TriggerButton(int buttonId)
                     {
-                        feedback.VizId = ConnectionManager.MyId ?? "";
+                        feedback.VizId = RosManager.MyId ?? "";
                         feedback.Id = id;
                         feedback.Type = (byte)FeedbackType.ButtonClick;
                         feedback.EntryId = buttonId;
@@ -824,7 +824,7 @@ namespace Iviz.Controllers
 
                     void TriggerMenu(int buttonId)
                     {
-                        feedback.VizId = ConnectionManager.MyId ?? "";
+                        feedback.VizId = RosManager.MyId ?? "";
                         feedback.Id = id;
                         feedback.Type = (byte)FeedbackType.MenuEntryClick;
                         feedback.EntryId = buttonId;
@@ -841,7 +841,7 @@ namespace Iviz.Controllers
                             return;
                         }
 
-                        feedback.VizId = ConnectionManager.MyId ?? "";
+                        feedback.VizId = RosManager.MyId ?? "";
                         feedback.Id = id;
                         feedback.Type = (byte)FeedbackType.Expired;
                         feedback.EntryId = 0;

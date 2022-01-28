@@ -26,6 +26,11 @@ using Quaternion = UnityEngine.Quaternion;
 
 namespace Iviz.App
 {
+    /// <summary>
+    /// Handles the buttons on the panel on the left in the iviz GUI.
+    /// In practice a central hub for all the modules. Needs heavy refactoring.
+    /// <see cref="Start"/> is basically the "starting point" of the program.
+    /// </summary>
     public sealed class ModuleListPanel : MonoBehaviour
     {
         const int ModuleDataCaptionWidth = 200;
@@ -79,7 +84,7 @@ namespace Iviz.App
         readonly HashSet<ImageDialogData> imageDatas = new();
         readonly TfPublisher tfPublisher = new();
 
-        ConnectionManager? connectionManager;
+        RosManager? connectionManager;
 
         int frameCounter;
         bool allGuiVisible = true;
@@ -106,7 +111,7 @@ namespace Iviz.App
         ModuleListButtons Buttons =>
             buttons ??= new ModuleListButtons(contentObject.AssertNotNull(nameof(contentObject)));
 
-        static RoslibConnection Connection => ConnectionManager.Connection;
+        static RoslibConnection Connection => RosManager.Connection;
 
         public AnchorCanvasPanel AnchorCanvasPanel => anchorCanvasPanel.AssertNotNull(nameof(anchorCanvasPanel));
         public Button UnlockButton => AnchorCanvasPanel.Unlock;
@@ -120,7 +125,7 @@ namespace Iviz.App
             ? xrController
             : throw new MissingAssetFieldException("Tried to access XRController, but the scene has not set any!");
 
-        public ReadOnlyCollection<ModuleData> ModuleDatas { get; }
+        public IReadOnlyCollection<ModuleData> ModuleDatas => moduleDatas;
         public IEnumerable<string> DisplayedTopics => topicsWithModule;
 
         public bool AllGuiVisible
@@ -167,13 +172,9 @@ namespace Iviz.App
 
         public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
 
-        public ModuleListPanel()
-        {
-            ModuleDatas = moduleDatas.AsReadOnly();
-        }
-
         void Awake()
         {
+            // clear static stuff in case domain reloading is disabled
             Resource.ClearResources();
             GuiWidgetListener.ClearResources();
             ARController.ClearResources();
@@ -217,7 +218,7 @@ namespace Iviz.App
 
         void Start()
         {
-            connectionManager = new ConnectionManager();
+            connectionManager = new RosManager();
 
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
@@ -281,7 +282,7 @@ namespace Iviz.App
                     RosLogger.Internal("<b>Error:</b> Failed to set master uri. Reason: Uri is not valid.");
                     UpperCanvas.MasterUriStr.Text = "(?) →";
                 }
-                else if (RosServerManager.IsActive)
+                else if (RosManager.Server.IsActive)
                 {
                     RosLogger.Internal($"Changing master uri to local master '{uri}'");
                     UpperCanvas.MasterUriStr.Text = MasterUriToString(uri);
@@ -319,7 +320,7 @@ namespace Iviz.App
             UpperCanvas.StopButton.Clicked += () =>
             {
                 RosLogger.Internal(
-                    ConnectionManager.IsConnected
+                    RosManager.IsConnected
                         ? "Disconnection requested."
                         : "Already disconnected."
                 );
@@ -329,7 +330,7 @@ namespace Iviz.App
             UpperCanvas.ConnectButton.Clicked += () =>
             {
                 RosLogger.Internal(
-                    ConnectionManager.IsConnected ? "Reconnection requested." : "Connection requested."
+                    RosManager.IsConnected ? "Reconnection requested." : "Connection requested."
                 );
                 Connection.Disconnect();
                 KeepReconnecting = true;
@@ -465,7 +466,7 @@ namespace Iviz.App
                 case ConnectionState.Connected:
                     GameThread.EveryTenthOfASecond -= RotateSprite;
                     UpperCanvas.Status.sprite = UpperCanvas.ConnectedSprite;
-                    UpperCanvas.TopPanel.color = RosServerManager.IsActive
+                    UpperCanvas.TopPanel.color = RosManager.Server.IsActive
                         ? Resource.Colors.ConnectionPanelOwnMaster
                         : Resource.Colors.ConnectionPanelConnected;
                     SaveSimpleConfiguration();
@@ -487,7 +488,7 @@ namespace Iviz.App
         {
             UpperCanvas.TopPanel.color = value
                 ? Resource.Colors.ConnectionPanelWarning
-                : RosServerManager.IsActive
+                : RosManager.Server.IsActive
                     ? Resource.Colors.ConnectionPanelOwnMaster
                     : Resource.Colors.ConnectionPanelConnected;
         }
@@ -1053,7 +1054,7 @@ namespace Iviz.App
             BottomCanvas.Fps.text = $"{frameCounter.ToString()} FPS";
             frameCounter = 0;
 
-            (long downB, long upB) = ConnectionManager.CollectBandwidthReport();
+            (long downB, long upB) = RosManager.CollectBandwidthReport();
             BottomCanvas.Bandwidth.text = $"↓{FormatBandwidth(downB)} ↑{FormatBandwidth(upB)}";
 
             var bagListener = Connection.BagListener;

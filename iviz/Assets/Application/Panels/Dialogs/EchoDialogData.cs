@@ -85,7 +85,7 @@ namespace Iviz.App
 
         void CreateTopicList()
         {
-            var newTopics = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
+            var newTopics = RosManager.Connection.GetSystemPublishedTopicTypes();
 
             entries.Clear();
             entries.Add(TopicEntry.Empty);

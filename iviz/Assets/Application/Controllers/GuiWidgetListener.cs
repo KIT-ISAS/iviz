@@ -336,7 +336,7 @@ namespace Iviz.Controllers
         {
             FeedbackSender?.Publish(new Feedback
             {
-                VizId = ConnectionManager.MyId ?? "",
+                VizId = RosManager.MyId ?? "",
                 Id = dialog.Id,
                 Type = (byte)FeedbackType.ButtonClick,
                 EntryId = buttonId,
@@ -349,7 +349,7 @@ namespace Iviz.Controllers
         {
             FeedbackSender?.Publish(new Feedback
             {
-                VizId = ConnectionManager.MyId ?? "",
+                VizId = RosManager.MyId ?? "",
                 Id = dialog.Id,
                 Type = (byte)FeedbackType.MenuEntryClick,
                 EntryId = buttonId,
@@ -368,7 +368,7 @@ namespace Iviz.Controllers
             FeedbackSender?.Publish(new Feedback
             {
                 Header = (feedbackSeq++, dialog.ParentId),
-                VizId = ConnectionManager.MyId ?? "",
+                VizId = RosManager.MyId ?? "",
                 Id = dialog.Id,
                 Type = (byte)FeedbackType.Expired,
             });
@@ -379,7 +379,7 @@ namespace Iviz.Controllers
             FeedbackSender?.Publish(new Feedback
             {
                 Header = (feedbackSeq++, widget.ParentId),
-                VizId = ConnectionManager.MyId ?? "",
+                VizId = RosManager.MyId ?? "",
                 Id = widget.Id,
                 Type = (byte)FeedbackType.OrientationChanged,
                 Orientation = Extensions.AngleAxis(angleInRad, default(VectorUnitZ))
@@ -391,7 +391,7 @@ namespace Iviz.Controllers
             FeedbackSender?.Publish(new Feedback
             {
                 Header = (feedbackSeq++, widget.ParentId),
-                VizId = ConnectionManager.MyId ?? "",
+                VizId = RosManager.MyId ?? "",
                 Id = widget.Id,
                 Type = (byte)FeedbackType.PositionChanged,
                 Position = direction.Unity2RosPoint()
@@ -403,7 +403,7 @@ namespace Iviz.Controllers
             FeedbackSender?.Publish(new Feedback
             {
                 Header = (feedbackSeq++, widget.ParentId),
-                VizId = ConnectionManager.MyId ?? "",
+                VizId = RosManager.MyId ?? "",
                 Id = widget.Id,
                 Type = (byte)FeedbackType.TrajectoryChanged,
                 Trajectory = new Trajectory
@@ -423,7 +423,7 @@ namespace Iviz.Controllers
             FeedbackSender?.Publish(new Feedback
             {
                 Header = (feedbackSeq++, widget.ParentId),
-                VizId = ConnectionManager.MyId ?? "",
+                VizId = RosManager.MyId ?? "",
                 Id = widget.Id,
                 Type = (byte)FeedbackType.ScaleChanged,
                 Scale = new Vector3(scale.x, 0, scale.y).Unity2RosVector3(),
@@ -435,7 +435,7 @@ namespace Iviz.Controllers
         {
             FeedbackSender?.Publish(new Feedback
             {
-                VizId = ConnectionManager.MyId ?? "",
+                VizId = RosManager.MyId ?? "",
                 Id = widget.Id,
                 Type = (byte)FeedbackType.ButtonClick,
                 EntryId = -1,

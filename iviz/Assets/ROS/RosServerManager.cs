@@ -22,23 +22,20 @@ namespace Iviz.Ros
             ("/ivizversion", "1.0.1")
         };
 
-        static RosServerManager? instance;
-
         RosMasterServer? server;
         Task? serverTask;
 
-        static RosServerManager Instance => instance ??= new RosServerManager();
-        public static bool IsActive => instance?.server != null;
-        public static Uri? MasterUri => instance?.server?.MasterUri;
+        public bool IsActive => server != null;
+        public Uri? MasterUri => server?.MasterUri;
 
-        public static bool Create(Uri masterUri, string masterId)
+        public bool Start(Uri masterUri, string masterId)
         {
-            return Instance.TryCreate(
+            return TryStart(
                 masterUri ?? throw new ArgumentNullException(nameof(masterUri)),
                 masterId ?? throw new ArgumentNullException(nameof(masterId)));
         }
 
-        bool TryCreate(Uri masterUri, string masterId)
+        bool TryStart(Uri masterUri, string masterId)
         {
             if (server != null)
             {
@@ -47,7 +44,8 @@ namespace Iviz.Ros
                     return true;
                 }
 
-                DisposeImpl();
+                Dispose();
+                // pass through
             }
 
             try
@@ -64,7 +62,7 @@ namespace Iviz.Ros
                 {
                     var task = server.StartAsync().AwaitNoThrow(this);
                     await Task.Delay(100);
-                    ConnectionManager.Connection.TryOnceToConnect();
+                    RosManager.Connection.TryOnceToConnect();
                     await task;
                 });
             }
@@ -77,53 +75,33 @@ namespace Iviz.Ros
             return server != null;
         }
 
-        void DisposeImpl()
+        public void Dispose()
         {
             if (server == null)
             {
                 return;
             }
 
+            RosLogger.Info("RosServerManager: Disposing!");
             server.Dispose();
             
-            // should return immediately, the waiting happened in Dispose()
+            // should return immediately, the waiting happened in server.Dispose()
             _ = serverTask.AwaitNoThrow(DisposeTimeoutInMs, this);
             
             server = null;
         }
 
-        public static void Dispose()
-        {
-            if (instance != null)
-            {
-                RosLogger.Info("RosServerManager: Disposing!");
-                instance.DisposeImpl();
-            }
-
-            instance = null;
-        }
-
-        async ValueTask DisposeImplAsync()
+        public async ValueTask DisposeAsync()
         {
             if (server == null)
             {
                 return;
             }
 
+            RosLogger.Info("RosServerManager: Disposing!");
             await server.DisposeAsync();
             await serverTask.AwaitNoThrow(DisposeTimeoutInMs, this);
             server = null;
-        }
-
-        public static async ValueTask DisposeAsync()
-        {
-            if (instance != null)
-            {
-                RosLogger.Info("RosServerManager: Disposing!");
-                await instance.DisposeImplAsync().AwaitNoThrow(nameof(RosServerManager));
-            }
-
-            instance = null;
         }
     }
 }

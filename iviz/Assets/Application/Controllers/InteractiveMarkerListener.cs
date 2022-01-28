@@ -319,7 +319,7 @@ namespace Iviz.Controllers
         {
             var msg = new InteractiveMarkerFeedback(
                 TfListener.CreateHeader(feedSeq++, frameId ?? ""),
-                ConnectionManager.MyId ?? "",
+                RosManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
                 (byte)eventType,
@@ -339,7 +339,7 @@ namespace Iviz.Controllers
             var msg = new InteractiveMarkerFeedback
             (
                 TfListener.CreateHeader(feedSeq++, frameId ?? ""),
-                ConnectionManager.MyId ?? "",
+                RosManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
                 InteractiveMarkerFeedback.POSE_UPDATE,
@@ -358,7 +358,7 @@ namespace Iviz.Controllers
             var msg = new InteractiveMarkerFeedback
             (
                 TfListener.CreateHeader(feedSeq++, frameId ?? ""),
-                ConnectionManager.MyId ?? "",
+                RosManager.MyId ?? "",
                 interactiveMarkerId,
                 "",
                 InteractiveMarkerFeedback.MENU_SELECT,

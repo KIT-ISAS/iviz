@@ -552,7 +552,7 @@ namespace Iviz.Controllers
             try
             {
                 var result = await Resource.GetGameObjectResourceAsync(meshResource,
-                    ConnectionManager.ServiceProvider, runningTs.Token);
+                    RosManager.ServiceProvider, runningTs.Token);
                 runningTs.Token.ThrowIfCancellationRequested();
                 return result;
             }

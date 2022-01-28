@@ -17,7 +17,7 @@ namespace Iviz.Ros
     /// <typeparam name="T">The ROS message type</typeparam>
     public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
     {
-        static RoslibConnection Connection => ConnectionManager.Connection;
+        static RoslibConnection Connection => RosManager.Connection;
 
         readonly ConcurrentQueue<T> messageQueue = new();
         readonly Action<T>? handlerOnGameThread;
@@ -299,7 +299,7 @@ namespace Iviz.Ros
                 droppedMsgCounter
             );
 
-            ConnectionManager.ReportBandwidthDown(lastMsgBytes);
+            RosManager.ReportBandwidthDown(lastMsgBytes);
 
             Interlocked.Exchange(ref lastMsgBytes, 0);
             Interlocked.Exchange(ref droppedMsgCounter, 0);

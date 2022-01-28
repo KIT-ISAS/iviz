@@ -43,7 +43,7 @@ namespace Iviz.App
 
         static void GetTopicCandidates(List<TopicWithResource> result)
         {
-            var newTopics = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
+            var newTopics = RosManager.Connection.GetSystemPublishedTopicTypes();
             foreach ((string topic, string msgType) in newTopics)
             {
                 if (ModuleListPanel.Instance.DisplayedTopics.Contains(topic))
@@ -136,7 +136,7 @@ namespace Iviz.App
                 }
             }
 
-            panel.EmptyText = ConnectionManager.IsConnected ? "No Topics Available" : "(Not Connected)";
+            panel.EmptyText = RosManager.IsConnected ? "No Topics Available" : "(Not Connected)";
         }
 
         void OnItemClicked(int index, int _)
