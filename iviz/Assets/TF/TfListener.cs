@@ -337,7 +337,7 @@ namespace Iviz.Controllers.TF
                         : childIdUnchecked[1..];
 
                     TfFrame? child;
-                    if (lastChild is not null && lastChild.Id == childId)
+                    if (lastChild != null && lastChild.Id == childId)
                     {
                         child = lastChild;
                     }

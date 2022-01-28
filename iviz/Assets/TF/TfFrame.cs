@@ -203,7 +203,7 @@ namespace Iviz.Controllers.TF
         {
             while (true)
             {
-                if (maybeChild is null)
+                if (maybeChild == null)
                 {
                     return false;
                 }

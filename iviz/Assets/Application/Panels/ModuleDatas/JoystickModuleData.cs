@@ -184,6 +184,9 @@ namespace Iviz.App
                     case nameof(JoystickConfiguration.XIsFront):
                         controller.XIsFront = config.XIsFront;
                         break;
+                    case nameof(JoystickConfiguration.Mode):
+                        controller.Mode = config.Mode;
+                        break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;

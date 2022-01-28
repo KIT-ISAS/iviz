@@ -233,13 +233,13 @@ namespace Iviz.Core
             float num1 = lhs.x - rhs.x;
             float num2 = lhs.y - rhs.y;
             float num3 = lhs.z - rhs.z;
-            return num1 * num1 + num2 * num2 + num3 * num3 < 9.999999439624929E-11;
+            return num1 * num1 + num2 * num2 + num3 * num3 < 9.999999439624929E-11f;
         }
 
         static bool EqualsApprox(in Quaternion a, in Quaternion b)
         {
             // from unity
-            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w > 0.9999989867210388;
+            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w > 0.9999989867210388f;
         }
 
         public static Pose Lerp(this in Pose p, in Pose o, float t) => new Pose(
@@ -517,15 +517,6 @@ namespace Iviz.Core
         public static void Deconstruct(this in Ray r, out Vector3 origin, out Vector3 direction) =>
             (origin, direction) = (r.origin, r.direction);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this in TransformStamped p,
-            out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform)
-        {
-            parentId = p.Header.FrameId;
-            childId = p.ChildFrameId;
-            transform = p.Transform;
-        }
-
         public static unsafe Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return new Span<T>(array.GetUnsafePtr(), array.Length);
@@ -561,7 +552,6 @@ namespace Iviz.Core
         {
             return array.AsSpan(range);
         }
-
 
         public static void TryReturn(this Array _)
         {
@@ -645,19 +635,13 @@ namespace Iviz.Core
         /// Color representation from the bits of a float.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Color32 AsColor32(float f)
-        {
-            return Unsafe.As<float, Color32>(ref f);
-        }
+        internal static Color32 AsColor32(float f) => Unsafe.As<float, Color32>(ref f);
 
         /// <summary>
         /// Float representation from the bits of a Color32.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float AsFloat(Color32 f)
-        {
-            return Unsafe.As<Color32, float>(ref f);
-        }
+        public static float AsFloat(Color32 f) => Unsafe.As<Color32, float>(ref f);
 
         public static Vector3 Forward(this in Quaternion rotation)
         {

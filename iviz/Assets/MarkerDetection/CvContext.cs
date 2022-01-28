@@ -14,17 +14,6 @@ using Newtonsoft.Json;
 
 namespace Iviz.MarkerDetection
 {
-    public sealed class CvMarkerException : Exception
-    {
-        public CvMarkerException() : base("An error happened in the native call")
-        {
-        }
-
-        public CvMarkerException(string message) : base(message)
-        {
-        }
-    }
-
     public sealed class CvContext : IDisposable
     {
         static bool loggerSet;
@@ -67,6 +56,8 @@ namespace Iviz.MarkerDetection
                 throw new ArgumentOutOfRangeException(nameof(width));
             }
 
+            // these functions will fail if the OpenCV library is not present
+            // only Dispose() may be called if this throws
             try
             {
                 if (!loggerSet)
@@ -88,11 +79,11 @@ namespace Iviz.MarkerDetection
             }
             catch (EntryPointNotFoundException e)
             {
-                UnityEngine.Debug.LogError(e);
+                throw new CvNotAvailableException(e);
             }
             catch (DllNotFoundException e)
             {
-                UnityEngine.Debug.LogError(e);
+                throw new CvNotAvailableException(e);  
             }
         }
 
@@ -273,7 +264,10 @@ namespace Iviz.MarkerDetection
 
         void ReleaseUnmanagedResources()
         {
-            Native.DisposeContext(mContextPtr);
+            if (mContextPtr != default)
+            {
+                Native.DisposeContext(mContextPtr);
+            }
         }
 
         public void Dispose()
