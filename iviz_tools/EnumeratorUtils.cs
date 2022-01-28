@@ -86,8 +86,12 @@ public static class EnumeratorUtils
         return rent;
     }
 
+    /// <summary>
+    /// Returns an enumerable for a <see cref="Range"/> that can be used in a foreach.
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IndexRangeEnumerator GetEnumerator(this Range range) =>
+        // GetHashCode returns the value without additional validation
         new(range.Start.GetHashCode(), range.End.GetHashCode());
 
     public static Span<T> Slice<T>(this T[] t, Range range)

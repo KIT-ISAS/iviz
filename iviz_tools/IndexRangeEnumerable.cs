@@ -5,6 +5,13 @@ using System.Runtime.CompilerServices;
 
 namespace Iviz.Tools;
 
+/// <summary>
+/// Simple enumerator for a <see cref="Range"/> to use it in a foreach.
+/// Example code:
+/// <code>
+/// foreach (int i in 0..10) { /* iterates i from 0 to 9 inclusive */ }
+/// </code>
+/// </summary>
 public struct IndexRangeEnumerator
 {
     int index;
@@ -20,7 +27,8 @@ public struct IndexRangeEnumerator
     public int Current
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => index++;
+        // this assumes that Current is called only once per cycle
+        get => index++;   
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

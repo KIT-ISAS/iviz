@@ -85,20 +85,6 @@ public static class BaseUtils
 
         return sum;
     }
-    
-    public static int Count<T>(this ReadOnlySpan<T> ts, Func<T, bool> selector)
-    {
-        int sum = 0;
-        foreach (T t in ts)
-        {
-            if (selector(t))
-            {
-                sum++;
-            }
-        }
-
-        return sum;
-    }    
 
     public static int Sum<T>(this T[] ts, Func<T, int> selector)
     {
@@ -111,19 +97,11 @@ public static class BaseUtils
         return sum;
     }
 
-    public static bool Any<T>(this T[] ts, Predicate<T> predicate)
-    {
-        foreach (var t in ts)
-        {
-            if (predicate(t))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
+    /// <summary>
+    /// Copies the content of the string into a byte <see cref="Rent{T}"/>.
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns></returns>
     public static Rent<byte> AsRent(this string s)
     {
         var bytes = new Rent<byte>(Defaults.UTF8.GetMaxByteCount(s.Length));
