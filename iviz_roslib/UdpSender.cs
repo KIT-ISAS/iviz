@@ -159,7 +159,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         }
 
         UdpClient.Dispose();
-        runningTs.TryCancel();
+        runningTs.Cancel();
         senderQueue.FlushRemaining();
     }
 
@@ -351,7 +351,6 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         UdpClient.Dispose();
 
         await task.AwaitNoThrow(5000, this, token);
-        runningTs.Dispose();
     }
 
     public PublisherSenderState State =>

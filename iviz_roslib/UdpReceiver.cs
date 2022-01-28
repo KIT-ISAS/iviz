@@ -144,7 +144,6 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         UdpClient.Dispose();
 
         await task.AwaitNoThrow(DisposeTimeoutInMs, this, token);
-        runningTs.Dispose();
     }
 
     async ValueTask StartSession()
@@ -178,7 +177,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
 
         Status = ReceiverStatus.Dead;
         UdpClient.Dispose();
-        runningTs.TryCancel();
+        runningTs.Cancel();
 
         Logger.LogDebugFormat("{0}: Stopped!", this);
     }

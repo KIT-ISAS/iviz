@@ -92,7 +92,6 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         TcpClient.Dispose();
 
         await task.AwaitNoThrow(5000, this, token);
-        runningTs.Dispose();
     }
 
     async ValueTask<Rent<byte>> ReceivePacket()
@@ -256,7 +255,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         }
 
         TcpClient.Dispose();
-        runningTs.TryCancel();
+        runningTs.Cancel();
         senderQueue.FlushRemaining();
     }
 

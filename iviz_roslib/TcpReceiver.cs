@@ -121,7 +121,7 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         Status = ReceiverStatus.Dead;
         TcpClient?.Dispose();
         TcpClient = null;
-        runningTs.TryCancel();
+        runningTs.Cancel();
 
         Logger.LogDebugFormat("{0}: Stopped!", this);
 
@@ -358,7 +358,6 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         TcpClient?.Dispose();
 
         await task.AwaitNoThrow(DisposeTimeoutInMs, this, token);
-        runningTs.Dispose();
     }
 
     public override string ToString()

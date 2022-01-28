@@ -99,7 +99,7 @@ public sealed class RosMasterServer : IDisposable
         }
 
         disposed = true;
-        runningTs.TryCancel();
+        runningTs.Cancel();
         backgroundTask?.WaitNoThrow(2000, this);
     }
 
@@ -111,7 +111,7 @@ public sealed class RosMasterServer : IDisposable
         }
 
         disposed = true;
-        runningTs.TryCancel();
+        runningTs.Cancel();
         if (backgroundTask != null)
         {
             await backgroundTask.AwaitNoThrow(2000, this, default);
@@ -155,7 +155,7 @@ public sealed class RosMasterServer : IDisposable
         await listener.DisposeAsync();
         await startTask;
 
-        runningTs.Dispose();
+        runningTs.Cancel();
         Logger.LogDebugFormat("{0}: Leaving thread.", this);
     }
 
@@ -203,7 +203,7 @@ public sealed class RosMasterServer : IDisposable
         }
         catch (RosConnectionException e)
         {
-            Logger.LogErrorFormat("{0}: Failed to start the rosout routine. " +
+            Logger.LogErrorFormat("{0}: Failed to start the rosout_agg node. " +
                                   "Our own uri is not reachable! {1}", this, e);
         }
     }
