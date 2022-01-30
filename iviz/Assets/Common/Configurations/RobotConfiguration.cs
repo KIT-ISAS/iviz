@@ -19,7 +19,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public float Metallic { get; set; } = 0.5f;
         [DataMember] public float Smoothness { get; set; } = 0.5f;
         [DataMember] public bool Interactable { get; set; } = true;
-        [DataMember] public bool KeepMeshMaterials { get; set; } = false;
+        [DataMember] public bool KeepMeshMaterials { get; set; } = true;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.Robot;
         [DataMember] public bool Visible { get; set; } = true;

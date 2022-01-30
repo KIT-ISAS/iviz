@@ -111,6 +111,7 @@ namespace Iviz.Core
         static Camera? mainCamera;
         static Transform? mainCameraTransform;
         static ISettingsManager? settingsManager;
+        static IDraggableHandler? inputModule;
 
         static bool? supportsComputeBuffersHelper;
         static bool? supportsR16;
@@ -170,6 +171,8 @@ namespace Iviz.Core
                 : settingsManager = FindMainCamera().GetComponent<ISettingsManager>()
                                     ?? throw new MissingAssetFieldException("Failed to find SettingsManager!");
 
+        public static IDraggableHandler DraggableHandler => inputModule ??= (IDraggableHandler)SettingsManager;
+        
         public static IScreenCaptureManager? ScreenCaptureManager { get; set; }
 
         public static bool SupportsComputeBuffers => supportsComputeBuffersHelper ??
@@ -190,4 +193,12 @@ namespace Iviz.Core
             AotHelper.EnsureType<StringEnumConverter>();
         }
     }
+    
+    public interface IDraggableHandler
+    {
+        void TryUnsetDraggedObject(IScreenDraggable draggable);
+        void TrySetDraggedObject(IScreenDraggable draggable);
+        float XRDraggableNearDistance { get; }
+    }
+    
 }

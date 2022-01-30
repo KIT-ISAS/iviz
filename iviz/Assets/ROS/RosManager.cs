@@ -24,10 +24,10 @@ namespace Iviz.Ros
         public static RosServerManager Server => instance?.server ?? throw NewDisposeException();
         public static RosModelService ModelService => instance?.modelService ?? throw NewDisposeException();
 
-        readonly RoslibConnection connection = new();
-        readonly RosLoggerManager logger = new();
-        readonly RosServerManager server = new();
-        readonly RosModelService modelService = new();
+        readonly RoslibConnection connection;
+        readonly RosLoggerManager logger;
+        readonly RosServerManager server;
+        readonly RosModelService modelService;
 
         long bandwidthDownInFrame;
         long bandwidthUpInFrame;
@@ -35,6 +35,10 @@ namespace Iviz.Ros
         public RosManager()
         {
             instance = this;
+            connection = new RoslibConnection();
+            logger = new RosLoggerManager();
+            server = new RosServerManager();
+            modelService = new RosModelService();            
         }
 
         public void Dispose()

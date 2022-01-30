@@ -17,14 +17,14 @@ namespace Iviz.App
 
         [SerializeField] bool state;
 
-        [SerializeField] Image image = null;
+        [SerializeField] Image image;
 
-        [SerializeField] Button button = null;
+        [SerializeField] Button button;
         Button Button => button == null ? (button = GetComponent<Button>()) : button;
 
-        [SerializeField] Text text = null;
-        [SerializeField] string enabledText = null;
-        [SerializeField] string disabledText = null;
+        [SerializeField] Text text;
+        [SerializeField] string enabledText;
+        [SerializeField] string disabledText;
 
         public event Action Clicked;
 

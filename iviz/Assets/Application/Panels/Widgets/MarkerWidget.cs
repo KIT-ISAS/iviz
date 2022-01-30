@@ -8,9 +8,9 @@ namespace Iviz.App
 {
     public sealed class MarkerWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text text = null;
+        [SerializeField] Text text;
         [CanBeNull] IMarkerDialogListener listener;
-        [SerializeField] Button button = null;
+        [SerializeField] Button button;
         
         [CanBeNull]
         public IMarkerDialogListener MarkerListener

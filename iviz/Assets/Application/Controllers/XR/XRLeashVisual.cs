@@ -3,7 +3,6 @@
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Resources;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 

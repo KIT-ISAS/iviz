@@ -1,19 +1,16 @@
 ﻿#nullable enable
 
-using System.Text;
-using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Tools;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Iviz.App
 {
     public sealed class FrameWidget : DraggableButtonWidget
     {
-        [SerializeField] TMP_Text? text = null;
+        [SerializeField] TMP_Text? text;
         TMP_Text Text => text.AssertNotNull(nameof(text));
 
         TfFrame? frame;

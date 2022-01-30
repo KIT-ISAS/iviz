@@ -6,7 +6,6 @@ using UnityEngine.SpatialTracking;
 using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.Interaction.Toolkit;
-using UnityEngine.XR.OpenXR;
 
 namespace Iviz.Controllers.XR
 {

@@ -3,7 +3,6 @@
 using System;
 using System.Globalization;
 using Iviz.Core;
-using Iviz.Msgs;
 using Iviz.Resources;
 using TMPro;
 using UnityEngine;

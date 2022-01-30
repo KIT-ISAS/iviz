@@ -6,12 +6,9 @@ using System.Collections.Generic;
 using System.Text;
 using TMPro;
 using System;
-using System.Linq;
-using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Tools;
-using Object = UnityEngine.Object;
 
 namespace Iviz.App
 {

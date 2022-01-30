@@ -167,15 +167,6 @@ namespace Iviz.MarkerDetection
             var markers = new QrMarkerCorners[numDetected];
             foreach (int i in ..numDetected)
             {
-                /*
-                using (var strBytes = new Rent<byte>(pointerLengths[i]))
-                {
-                    
-                    Marshal.Copy(pointers[i], strBytes.Array, 0, strBytes.Length);
-                    code = BuiltIns.UTF8.GetString(strBytes.Array, 0, strBytes.Length);
-                }
-                */
-
                 ReadOnlySpan<byte> strBytes;
                 unsafe
                 {

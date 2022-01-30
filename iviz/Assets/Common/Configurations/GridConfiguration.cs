@@ -23,7 +23,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
         [DataMember] public SerializableColor GridColor { get; set; } = new Color(0.3f, 0.3f,0.3f);
-        [DataMember] public SerializableColor InteriorColor { get; set; } = new Color(0.6f, 0.6f, 0.6f);
+        [DataMember] public SerializableColor InteriorColor { get; set; } = new Color(0.4f, 0.4f, 0.4f);
         [DataMember] public bool InteriorVisible { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
         [DataMember] public bool HideInARMode { get; set; } = true;

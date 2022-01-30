@@ -4,14 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.App;
-using Iviz.Common;
-using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Ros;
 using UnityEngine;
 
-namespace Iviz.Controllers
+namespace Iviz.Controllers.TF
 {
     public sealed class TfPublisher
     {
@@ -206,7 +204,10 @@ namespace Iviz.Controllers
             }
         }
     }
+}
 
+namespace Iviz.Controllers
+{
     public interface IPublishedFrame
     {
         public Pose LocalPose { set; }

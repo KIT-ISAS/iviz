@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.App;
@@ -15,7 +14,6 @@ using Iviz.Resources;
 using Iviz.Tools;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 

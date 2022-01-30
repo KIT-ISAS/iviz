@@ -5,15 +5,11 @@ using System.Collections.ObjectModel;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Msgs.GridMapMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
@@ -244,7 +240,7 @@ namespace Iviz.Controllers
                                 $"Expected {(width * height).ToString()} entries, but got {length.ToString()}!");
                 return;
             }
-
+            
             node.AttachTo(msg.Info.Header);
             node.Transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
 

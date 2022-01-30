@@ -1,19 +1,17 @@
 ﻿#nullable enable
 
 using System;
-using System.Text;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Iviz.App
 {
     public sealed class DataLabelWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] TMP_Text? label = null;
+        [SerializeField] TMP_Text? label;
         bool interactable = true;
         uint? textHash;
 

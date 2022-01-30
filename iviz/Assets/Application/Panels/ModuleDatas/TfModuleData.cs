@@ -48,6 +48,11 @@ namespace Iviz.App
             }
         }
 
+        protected override void UpdateModuleButton()
+        {
+            ModuleListButtonText = ModuleListPanel.CreateButtonTextForModule(this, listener.Config.Topic);
+        }
+        
         public void UpdateConfiguration(TfConfiguration configuration)
         {
             listener.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));

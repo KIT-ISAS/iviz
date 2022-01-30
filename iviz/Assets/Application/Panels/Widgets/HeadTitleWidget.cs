@@ -9,7 +9,7 @@ namespace Iviz.App
 {
     public sealed class HeadTitleWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] TMP_Text? text = null;
+        [SerializeField] TMP_Text? text;
 
         TMP_Text Text => text.AssertNotNull(nameof(text));
         

@@ -8,7 +8,6 @@ using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers

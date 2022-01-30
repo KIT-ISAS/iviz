@@ -2,6 +2,7 @@
 
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Displays.XR;
 using Iviz.Resources;
 using UnityEngine;
 using UnityEngine.UI;

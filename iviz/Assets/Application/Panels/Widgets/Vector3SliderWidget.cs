@@ -10,11 +10,11 @@ namespace Iviz.App
 {
     public sealed class Vector3SliderWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] SliderWidget inputX = null;
-        [SerializeField] SliderWidget inputY = null;
-        [SerializeField] SliderWidget inputZ = null;
-        [SerializeField] TMP_Text label = null;
-        [SerializeField] Image panel = null;
+        [SerializeField] SliderWidget inputX;
+        [SerializeField] SliderWidget inputY;
+        [SerializeField] SliderWidget inputZ;
+        [SerializeField] TMP_Text label;
+        [SerializeField] Image panel;
         //bool disableUpdates;
 
         [NotNull]

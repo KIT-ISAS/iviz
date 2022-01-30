@@ -1,4 +1,3 @@
-using System;
 using Iviz.Core;
 using JetBrains.Annotations;
 using UnityEngine;

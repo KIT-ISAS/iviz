@@ -13,7 +13,6 @@ using Iviz.MarkerDetection;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers

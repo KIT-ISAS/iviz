@@ -7,14 +7,13 @@ using Iviz.Core;
 using Iviz.Resources;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Iviz.App
 {
     public class DropdownWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] TMP_Text? label = null;
-        [SerializeField] TMP_Dropdown? dropdown = null;
+        [SerializeField] TMP_Text? label;
+        [SerializeField] TMP_Dropdown? dropdown;
 
         readonly List<TMP_Dropdown.OptionData> optionDatas = new();
 

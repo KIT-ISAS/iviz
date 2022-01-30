@@ -15,8 +15,8 @@ namespace Iviz.App
     {
         const int MaxTopicLength = 200;
 
-        [SerializeField] TMP_Text? text = null;
-        [SerializeField] Image? panel = null;
+        [SerializeField] TMP_Text? text;
+        [SerializeField] Image? panel;
 
         ISender? sender;
 

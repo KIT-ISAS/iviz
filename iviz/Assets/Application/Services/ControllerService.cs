@@ -13,7 +13,7 @@ using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Displays.XRDialogs;
+using Iviz.Displays.XR;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.Roscpp;
 using Iviz.Resources;

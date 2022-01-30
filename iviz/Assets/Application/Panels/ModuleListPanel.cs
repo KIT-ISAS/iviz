@@ -14,6 +14,7 @@ using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Controllers.XR;
 using Iviz.Core;
+using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -178,6 +179,7 @@ namespace Iviz.App
             Resource.ClearResources();
             GuiWidgetListener.ClearResources();
             ARController.ClearResources();
+            ResourcePool.ClearResources();
         }
 
         public void Dispose()

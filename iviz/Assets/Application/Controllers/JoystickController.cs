@@ -8,8 +8,6 @@ using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
-using JetBrains.Annotations;
-using UnityEngine;
 using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers

@@ -479,8 +479,8 @@ namespace Iviz.Displays
                 foreach (var display in meshMarkerDisplays)
                 {
                     originalColors[display] = display.Color;
-                    //display.Color *= color;
-                    display.Color = (display.Color + color).Clamp(); // how are colors blended??
+                    display.Color *= color;
+                    //display.Color = (display.Color + color).Clamp(); // how are colors blended??
                     displays.Add(display);
                 }
             }

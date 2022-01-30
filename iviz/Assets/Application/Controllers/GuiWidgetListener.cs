@@ -6,7 +6,7 @@ using System.Linq;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Iviz.Displays.XRDialogs;
+using Iviz.Displays.XR;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
@@ -445,7 +445,7 @@ namespace Iviz.Controllers
         static time SecsToTime(float time)
         {
             uint numSecs = (uint)time;
-            uint numNSecs = (uint)((time - numSecs) * 10000000);
+            uint numNSecs = (uint)((time - numSecs) * 10_000_000);
             return new time(numSecs, numNSecs);
         }
 

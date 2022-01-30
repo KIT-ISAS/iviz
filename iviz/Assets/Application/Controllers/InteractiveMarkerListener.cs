@@ -5,18 +5,15 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using Iviz.App;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
-using UnityEngine;
 using Pose = UnityEngine.Pose;
 using Vector3 = UnityEngine.Vector3;
 

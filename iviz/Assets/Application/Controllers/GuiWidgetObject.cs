@@ -1,14 +1,11 @@
 #nullable enable
 
 using System;
-using System.Numerics;
-using Iviz.App.ARDialogs;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.ARDialogs;
-using Iviz.Displays.XRDialogs;
-using Iviz.Msgs.IvizCommonMsgs;
+using Iviz.Displays.XR;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using UnityEngine;

@@ -38,6 +38,11 @@ namespace Iviz.Displays
             instance = null;
         }
 
+        public static void ClearResources()
+        {
+            instance = null;
+        } 
+
         /// <summary>
         /// Rents an object of the given resource type. If no object of the type exists in the pool, a new one
         /// is instantiated.

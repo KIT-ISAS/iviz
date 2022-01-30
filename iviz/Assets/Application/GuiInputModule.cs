@@ -9,6 +9,7 @@ using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
+using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.Highlighters;
@@ -26,7 +27,7 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.App
 {
-    public sealed class GuiInputModule : MonoBehaviour, ISettingsManager, IHasFrame
+    public sealed class GuiInputModule : MonoBehaviour, ISettingsManager, IHasFrame, IDraggableHandler
     {
         const float MainSpeed = 2f;
         const float MainAccel = 5f;
@@ -489,7 +490,9 @@ namespace Iviz.App
             QualityInView = QualityInView;
         }
 
-        public static void TryUnsetDraggedObject(IScreenDraggable draggable)
+        public float XRDraggableNearDistance => XRController.NearDistance;
+
+        public void TryUnsetDraggedObject(IScreenDraggable draggable)
         {
             // do not fetch Instance here, we may be in the middle of shutting down the scene
             if (instance == null)
@@ -505,7 +508,7 @@ namespace Iviz.App
             instance.DraggedObject = null;
         }
 
-        public static void TrySetDraggedObject(IScreenDraggable draggable)
+        public void TrySetDraggedObject(IScreenDraggable draggable)
         {
             if (!IsDraggingAllowed)
             {

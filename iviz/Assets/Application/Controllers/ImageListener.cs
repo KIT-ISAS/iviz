@@ -8,7 +8,6 @@ using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs.StdMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
 

@@ -11,10 +11,10 @@ namespace Iviz.App
 {
     public sealed class InputFieldWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] TMP_Text? label = null;
-        [SerializeField] TMP_InputField? text = null;
-        [SerializeField] TMP_Text? placeholder = null;
-        [SerializeField] Image? textImage = null;
+        [SerializeField] TMP_Text? label;
+        [SerializeField] TMP_InputField? text;
+        [SerializeField] TMP_Text? placeholder;
+        [SerializeField] Image? textImage;
 
         TMP_Text Label => label.AssertNotNull(nameof(label));
         TMP_InputField Text => text.AssertNotNull(nameof(text));

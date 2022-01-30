@@ -9,7 +9,6 @@ using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Ros;
