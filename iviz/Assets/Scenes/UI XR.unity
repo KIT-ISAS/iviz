@@ -23942,7 +23942,7 @@ MonoBehaviour:
     linkageSettings:
       useExisting: 0
       applyAdjustment: 1
-      NoPitchAndRoll: 0
+      NoPitchAndRoll: 1
       AdjustmentFrame: {fileID: 1729554121}
       CameraParent: {fileID: 1438579879}
     anchorSettings:
