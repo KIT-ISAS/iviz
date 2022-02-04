@@ -234,7 +234,6 @@ namespace Iviz.Controllers.TF
         public TfListener(TfConfiguration? config, Func<string, TfFrame> frameFactory)
         {
             instance = this;
-
             this.frameFactory = frameFactory ?? throw new ArgumentNullException(nameof(frameFactory));
 
             try

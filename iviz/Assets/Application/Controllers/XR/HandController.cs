@@ -129,7 +129,7 @@ namespace Iviz.Controllers.XR
 
             fingerTips[0] = HandleBoneMesh(fingerTips[0], cachedHandState.ThumbFingertip);
             fingerTips[1] = HandleBoneMesh(fingerTips[1], cachedHandState.IndexFingertip);
-            
+
             var palmResource = HandleBoneMesh(fingerTips[2], cachedHandState.Palm);
             fingerTips[2] = palmResource;
 
@@ -140,18 +140,32 @@ namespace Iviz.Controllers.XR
             var controllerPosition = palmPosition + palmRotation *
                 ((handType == HandType.Left ? palmOffset : -palmOffset) * Vector3.right);
             var pivot = cameraTransform.TransformPoint(shoulderToCamera);
-            var controllerForward = controllerPosition - pivot;
-            var controllerRotation = Quaternion.LookRotation(controllerForward);
-            var controllerPose = new Pose(controllerPosition, controllerRotation);
-            
-            controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
-            (controllerState.position, controllerState.rotation) = 
-                referenceTransform.InverseTransformPose(controllerPose);
 
+            controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
+
+            Vector3 controllerForward;
+            if (LockedPosition is { } lockedPosition)
+            {
+                controllerForward = lockedPosition - controllerPosition;
+            }
+            else
+            {
+                controllerForward = controllerPosition - pivot;
+            }
+
+            var controllerPose = new Pose(controllerPosition, Quaternion.LookRotation(controllerForward));
+            (controllerState.position, controllerState.rotation) =
+                referenceTransform.InverseTransformPose(controllerPose);
+            
             HasCursor = Vector3.Dot(palmRotation * Vector3.up, cameraTransform.forward) < 0;
             cachedHandState.Cursor = HasCursor
                 ? new Ray(controllerPosition, controllerForward.normalized)
                 : null;
+            
+            if (ButtonUp)
+            {
+                LockedPosition = null;
+            }
         }
 
         bool TryGetHandData(Hand hand, Transform referenceTransform)
@@ -219,9 +233,10 @@ namespace Iviz.Controllers.XR
                 ButtonDown = false;
                 ButtonUp = ButtonState;
                 ButtonState = false;
-                
+
                 controllerState.selectInteractionState.SetFrameState(false);
                 controllerState.uiPressInteractionState.SetFrameState(false);
+                LockedPosition = null;
                 return;
             }
 
@@ -230,7 +245,7 @@ namespace Iviz.Controllers.XR
             {
                 return;
             }
-            
+
             float distance = Vector3.Distance(thumb.Transform.position, index.Transform.position);
             bool newButtonState = distance < (ButtonState ? distanceTransitionToOpen : distanceTransitionToClose);
 
@@ -243,12 +258,12 @@ namespace Iviz.Controllers.XR
 
             // --------
 
-            var color = ButtonState ? Color.white : Color.white.WithAlpha(0.3f);
-            var scale = 0.005f * (ButtonState ? 2 : 1) * Vector3.one;
+            var color = ButtonState ? Color.black : Color.blue;
+            var scale = 0.005f * (ButtonState ? 3 : 1) * Vector3.one;
 
-            thumb.Color = color;
+            thumb.EmissiveColor = color;
             thumb.Transform.localScale = scale;
-            index.Color = color;
+            index.EmissiveColor = color;
             index.Transform.localScale = scale;
         }
 

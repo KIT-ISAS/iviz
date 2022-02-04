@@ -204,7 +204,7 @@ namespace Iviz.Controllers
         {
             FieldNames = fieldNames.AsReadOnly();
 
-            node = new FrameNode("[PointCloudListener]");
+            node = new FrameNode("PointCloudListener");
             pointCloud = ResourcePool.RentDisplay<PointListDisplay>(node.Transform);
             meshCloud = ResourcePool.RentDisplay<MeshListDisplay>(node.Transform);
             meshCloud.EnableShadows = false;
