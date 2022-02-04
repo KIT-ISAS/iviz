@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
 
         <IsPackable>false</IsPackable>
 
@@ -11,7 +11,7 @@
 
         <OutputType>Library</OutputType>
 
-        <LangVersion>9</LangVersion>
+        <LangVersion>default</LangVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -22,6 +22,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\iviz_msgs_wrapper\iviz_msgs_wrapper.csproj" />
+      <ProjectReference Include="..\iviz_remote_lib\iviz_remote_lib.csproj" />
       <ProjectReference Include="..\iviz_roslib\iviz_roslib.csproj" />
       <ProjectReference Include="..\iviz_rosmaster_lib\iviz_rosmaster_lib.csproj" />
       <ProjectReference Include="..\iviz_xmlrpc\iviz_xmlrpc.csproj" />

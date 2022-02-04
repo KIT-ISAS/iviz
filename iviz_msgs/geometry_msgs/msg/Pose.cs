@@ -47,20 +47,20 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 56;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
         public readonly string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Pose";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "e45d45a5a1ce597b249e23fb30fc871f";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71RsQrCMBTc31c8cJW6iIPg4OQkKLpLqC9twOTVvIjWrzctNrGTi5jpLrm83F0muEZP" +
                 "jSchF1Qw7JA1NiyExqH2RCiNKmmKJdtu+/w+N71Wuci9Ge4WCDs2LiQB7G8qkHf93KwDWP14wfawWWJF" +
@@ -69,8 +69,8 @@ namespace Iviz.Msgs.GeometryMsgs
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
-        public static readonly Pose Identity = (Point.Zero, Quaternion.Identity);
-        public static implicit operator Transform(in Pose p) => new Transform(p.Position, p.Orientation);
-        public static implicit operator Pose(in (Point position, Quaternion orientation) p) => new Pose(p.position, p.orientation);
+        public static readonly Pose Identity = new(Point.Zero, Quaternion.Identity);
+        public static implicit operator Transform(in Pose p) => Extensions.AsTransform(in p);
+        public static implicit operator Pose(in (Point position, Quaternion orientation) p) => new(p.position, p.orientation);
     }
 }

@@ -25,7 +25,7 @@ namespace Iviz.Controllers.XR
             {
                 bool hasGesture = IsPalmUp || IsHandOpen || IsIndexPointing;
                 IsPalmUp = false;
-                //IsHandOpen = false;
+                IsHandOpen = false;
                 IsIndexPointing = false;
                 if (hasGesture)
                 {

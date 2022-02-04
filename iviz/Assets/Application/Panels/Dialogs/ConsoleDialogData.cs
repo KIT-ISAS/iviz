@@ -7,6 +7,7 @@ using Iviz.Core;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -63,13 +64,13 @@ namespace Iviz.App
         public ConsoleDialogData()
         {
             dialog = DialogPanelManager.GetPanelByType<ConsoleDialogPanel>(DialogPanelType.Console);
-            ConnectionManager.LogMessageArrived += HandleMessage;
+            RosManager.Logger.MessageArrived += HandleMessage;
             RosLogger.LogExternal += HandleMessage;
         }
 
         public override void Dispose()
         {
-            ConnectionManager.LogMessageArrived -= HandleMessage;
+            RosManager.Logger.MessageArrived -= HandleMessage;
             RosLogger.LogExternal -= HandleMessage;
         }
 
@@ -96,13 +97,13 @@ namespace Iviz.App
             };
 
             isPaused = dialog.Pause.State;
-            ConnectionManager.LogListener?.SetSuspend(isPaused);
+            RosManager.Logger.Listener.SetSuspend(isPaused);
 
             dialog.Pause.Clicked += () =>
             {
                 dialog.Pause.State = !dialog.Pause.State;
                 isPaused = dialog.Pause.State;
-                ConnectionManager.LogListener?.SetSuspend(isPaused);
+                RosManager.Logger.Listener.SetSuspend(isPaused);
             };
         }
 
@@ -115,13 +116,7 @@ namespace Iviz.App
 
         void UpdateStats()
         {
-            var listener = ConnectionManager.LogListener;
-            if (listener == null)
-            {
-                dialog.BottomText.SetText("Error: No Log Listener");
-                return;
-            }
-
+            var listener = RosManager.Logger.Listener;
             using var description = BuilderPool.Rent();
             listener.WriteDescriptionTo(description);
             string kbPerSecond = (listener.Stats.BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
@@ -167,7 +162,7 @@ namespace Iviz.App
         {
             if (log.Level < (byte)minLogLevel
                 || idCode is FromIdCode.None or FromIdCode.Me
-                || log.Name == ConnectionManager.MyId)
+                || log.Name == RosManager.MyId)
             {
                 return;
             }

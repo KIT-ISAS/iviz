@@ -9,7 +9,7 @@ namespace Iviz.Msgs.SensorMsgs
     {
         // This message is a submessage of MultiEchoLaserScan and is not intended
         // to be used separately.
-        /// Multiple values of ranges or intensities.
+        /// <summary> Multiple values of ranges or intensities. </summary>
         [DataMember (Name = "echoes")] public float[] Echoes;
         // Each array represents data from the same angle increment.
     
@@ -49,13 +49,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/LaserEcho";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "8bc5ae449b200fba4d552b4225586696";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE2WOsQ7CMBBD93yFpe4d4BvYYIINMRyN20ZKk+ruitS/Jwgx4ck+Wc/X4TYnw0IzmYhm" +
                 "BbY9f7mOuGzZ02mY61mMeh2kQEr8NEt1pOIskTF08IonsRkjjKuoOPPehzDmKn483B9go9CA7gtdM/GS" +

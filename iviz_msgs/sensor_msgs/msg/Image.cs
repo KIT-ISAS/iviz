@@ -10,7 +10,7 @@ namespace Iviz.Msgs.SensorMsgs
         // This message contains an uncompressed image
         // (0, 0) is at top-left corner of image
         //
-        /// Header timestamp should be acquisition time of image
+        /// <summary> Header timestamp should be acquisition time of image </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
@@ -20,22 +20,22 @@ namespace Iviz.Msgs.SensorMsgs
         // If the frame_id here and the frame_id of the CameraInfo
         // message associated with the image conflict
         // the behavior is undefined
-        /// image height, that is, number of rows
+        /// <summary> Image height, that is, number of rows </summary>
         [DataMember (Name = "height")] public uint Height;
-        /// image width, that is, number of columns
+        /// <summary> Image width, that is, number of columns </summary>
         [DataMember (Name = "width")] public uint Width;
         // The legal values for encoding are in file src/image_encodings.cpp
         // If you want to standardize a new string format, join
         // ros-users@lists.sourceforge.net and send an email proposing a new encoding.
-        /// Encoding of pixels -- channel meaning, ordering, size
+        /// <summary> Encoding of pixels -- channel meaning, ordering, size </summary>
         [DataMember (Name = "encoding")] public string Encoding;
         // taken from the list of strings in include/sensor_msgs/image_encodings.h
-        /// is this data bigendian?
+        /// <summary> Is this data bigendian? </summary>
         [DataMember (Name = "is_bigendian")] public byte IsBigendian;
-        /// Full row length in bytes
+        /// <summary> Full row length in bytes </summary>
         [DataMember (Name = "step")] public uint Step;
         //uint8[] data          # actual matrix data, size is (step * rows)
-        /// [Rent]
+        /// <summary> [Rent] </summary>
         [DataMember (Name = "data")] public System.Memory<byte> Data;
     
         /// Constructor for empty message.
@@ -102,13 +102,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/Image";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "060021388200f6f0f447d0fcd9c64743";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61VTW8bNxA9l7+CgA6xE0sJmkthIGiBpml9KFA0vgWBMCJHu2y55Jofkje/vo+kVrJg" +
                 "O80hC1nykpw3H+/NcCFvexPlwDFSx1J5l8i4KMnJ7JQfxoAd1tIM2BYLefHmSr65lDChJJMfl5a3CWbB" +

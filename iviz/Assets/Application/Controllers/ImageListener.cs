@@ -8,7 +8,6 @@ using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs.StdMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
 
@@ -215,7 +214,7 @@ namespace Iviz.Controllers
         public ImageListener(ImageConfiguration? config, string topic, string type)
         {
             imageTexture = new ImageTexture();
-            node = new FrameNode("[ImageNode]");
+            node = new FrameNode("ImageNode");
             billboard = ResourcePool.RentDisplay<ImageResource>();
             billboard.Texture = imageTexture;
             billboard.Transform.SetParentLocal(node.Transform);

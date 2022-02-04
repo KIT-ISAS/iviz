@@ -8,12 +8,12 @@ namespace Iviz.Msgs.SensorMsgs
     public sealed class TimeReference : IDeserializable<TimeReference>, IMessage
     {
         // Measurement from an external time source not actively synchronized with the system clock.
-        /// stamp is system time for which measurement was valid
+        /// <summary> Stamp is system time for which measurement was valid </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // frame_id is not used 
-        /// corresponding time from this external source
+        /// <summary> Corresponding time from this external source </summary>
         [DataMember (Name = "time_ref")] public time TimeRef;
-        /// (optional) name of time source
+        /// <summary> (optional) name of time source </summary>
         [DataMember (Name = "source")] public string Source;
     
         /// Constructor for empty message.
@@ -58,13 +58,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/TimeReference";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "fded64a0265108ba86c3d38fb11c0c16";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61TwYrbMBC96ysGfNikkBTaW6C3Zds9LBR272EiTSxReeRK46Tu13ckJ2naUw8VBmP7" +
                 "zXsz7407eCEsU6aBWOCY0wDIQD+EMmMECQNBSVO2BJwE0Eo4UZyhzGx9Thx+koNzEA/iFTkXoQFsTPbb" +

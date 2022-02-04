@@ -1,14 +1,12 @@
-﻿using Iviz.Core;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
-using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public sealed class ARMarkerWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text text = null;
-        [SerializeField] Button button = null;
+        [SerializeField] Text text;
+        [SerializeField] Button button;
 
         public string Description
         {

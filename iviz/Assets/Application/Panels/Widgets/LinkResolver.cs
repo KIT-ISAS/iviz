@@ -5,7 +5,6 @@ using Iviz.Core;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.InputSystem;
 
 namespace Iviz.App
 {

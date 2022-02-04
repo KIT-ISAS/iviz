@@ -112,5 +112,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Transform: {fileID: 2407072229022344813}
   boxCollider: {fileID: 9001608685486769029}
+  atlasLarge: {fileID: 2800000, guid: 35ecb0d50786d49268687f6e935cbdf7, type: 3}
+  atlasLargeFlipped: {fileID: 2800000, guid: ea3d2e3990a0e40d088ee931e8e1c3a1, type: 3}
   texture: {fileID: 0}
   meshRenderer: {fileID: 3543364979145727234}

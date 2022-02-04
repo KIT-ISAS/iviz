@@ -52,6 +52,8 @@ namespace Iviz.Core
             false;
 #endif
 
+        public static bool IsLinux => Application.platform is RuntimePlatform.LinuxEditor or RuntimePlatform.LinuxPlayer;
+
         /// <summary>
         /// Is this being run in a Hololens?
         /// </summary>
@@ -69,7 +71,9 @@ namespace Iviz.Core
                 return true;
             }
 
-            if (!GameObject.Find("iviz").TryGetComponent<XRStatusInfo>(out var info))
+            if (GameObject.Find("iviz") is not { } ivizObject
+                || !ivizObject.TryGetComponent<XRStatusInfo>(out var info))
+
             {
                 return false;
             }
@@ -86,6 +90,11 @@ namespace Iviz.Core
         public static bool IsXR =>
             TryReadXRInfo() && (isXR ?? throw new InvalidOperationException("Could not check if we are running in XR"));
 
+        public static void ResetXRInfo()
+        {
+            isHololens = null;
+            isXR = null;
+        }
 #endif
 
         public static bool SupportsAR => IsPhone;
@@ -102,6 +111,7 @@ namespace Iviz.Core
         static Camera? mainCamera;
         static Transform? mainCameraTransform;
         static ISettingsManager? settingsManager;
+        static IDraggableHandler? inputModule;
 
         static bool? supportsComputeBuffersHelper;
         static bool? supportsR16;
@@ -114,11 +124,14 @@ namespace Iviz.Core
         public static string SimpleConfigurationPath =>
             simpleConfigurationPath ??= $"{PersistentDataPath}/connection.json";
 
-        public static string XRStartConfigurationPath => xrStartConfigurationPath ??= $"{PersistentDataPath}/xr_start.json";
+        public static string XRStartConfigurationPath =>
+            xrStartConfigurationPath ??= $"{PersistentDataPath}/xr_start.json";
 
         public static string ResourcesPath => resourcesPath ??= $"{PersistentDataPath}/resources";
         public static string SavedRobotsPath => savedRobotsPath ??= $"{PersistentDataPath}/robots";
         public static string ResourcesFilePath => resourcesFilePath ??= $"{PersistentDataPath}/resources.json";
+        
+        public static bool UseSimpleMaterials { get; set; }
 
         public static GameObject FindMainCamera() =>
             GameObject.FindWithTag("MainCamera").CheckedNull()
@@ -130,6 +143,7 @@ namespace Iviz.Core
             get => mainCamera != null
                 ? mainCamera
                 : mainCamera = FindMainCamera().GetComponent<Camera>().AssertNotNull(nameof(mainCamera));
+
             set
             {
                 mainCamera = value.CheckedNull() ?? throw new NullReferenceException("Camera cannot be null!");
@@ -157,6 +171,8 @@ namespace Iviz.Core
                 : settingsManager = FindMainCamera().GetComponent<ISettingsManager>()
                                     ?? throw new MissingAssetFieldException("Failed to find SettingsManager!");
 
+        public static IDraggableHandler DraggableHandler => inputModule ??= (IDraggableHandler)SettingsManager;
+        
         public static IScreenCaptureManager? ScreenCaptureManager { get; set; }
 
         public static bool SupportsComputeBuffers => supportsComputeBuffersHelper ??
@@ -177,4 +193,12 @@ namespace Iviz.Core
             AotHelper.EnsureType<StringEnumConverter>();
         }
     }
+    
+    public interface IDraggableHandler
+    {
+        void TryUnsetDraggedObject(IScreenDraggable draggable);
+        void TrySetDraggedObject(IScreenDraggable draggable);
+        float XRDraggableNearDistance { get; }
+    }
+    
 }

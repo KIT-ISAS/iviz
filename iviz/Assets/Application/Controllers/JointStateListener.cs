@@ -2,15 +2,10 @@
 using System.Collections.Generic;
 using System;
 using Iviz.Msgs.SensorMsgs;
-using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
-using Iviz.Roslib;
-using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
-using Iviz.XmlRpc;
 using JetBrains.Annotations;
 
 namespace Iviz.Controllers

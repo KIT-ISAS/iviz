@@ -12,34 +12,34 @@ namespace Iviz.Msgs.SensorMsgs
         // If you have another ranging device with different behavior (e.g. a sonar
         // array), please find or create a different message, since applications
         // will make fairly laser-specific assumptions about this data
-        /// timestamp in the header is the acquisition time of
+        /// <summary> Timestamp in the header is the acquisition time of </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // the first ray in the scan.
         //
         // in frame frame_id, angles are measured around 
         // the positive Z axis (counterclockwise, if Z is up)
         // with zero angle being forward along the x axis
-        /// start angle of the scan [rad]
+        /// <summary> Start angle of the scan [rad] </summary>
         [DataMember (Name = "angle_min")] public float AngleMin;
-        /// end angle of the scan [rad]
+        /// <summary> End angle of the scan [rad] </summary>
         [DataMember (Name = "angle_max")] public float AngleMax;
-        /// angular distance between measurements [rad]
+        /// <summary> Angular distance between measurements [rad] </summary>
         [DataMember (Name = "angle_increment")] public float AngleIncrement;
-        /// time between measurements [seconds] - if your scanner
+        /// <summary> Time between measurements [seconds] - if your scanner </summary>
         [DataMember (Name = "time_increment")] public float TimeIncrement;
         // is moving, this will be used in interpolating position
         // of 3d points
-        /// time between scans [seconds]
+        /// <summary> Time between scans [seconds] </summary>
         [DataMember (Name = "scan_time")] public float ScanTime;
-        /// minimum range value [m]
+        /// <summary> Minimum range value [m] </summary>
         [DataMember (Name = "range_min")] public float RangeMin;
-        /// maximum range value [m]
+        /// <summary> Maximum range value [m] </summary>
         [DataMember (Name = "range_max")] public float RangeMax;
-        /// range data [m] (Note: NaNs, values < range_min or > range_max should be discarded)
+        /// <summary> Range data [m] (Note: NaNs, values < range_min or > range_max should be discarded) </summary>
         [DataMember (Name = "ranges")] public LaserEcho[] Ranges;
         // +Inf measurements are out of range
         // -Inf measurements are too close to determine exact distance.
-        /// intensity data [device-specific units].  If your
+        /// <summary> Intensity data [device-specific units].  If your </summary>
         [DataMember (Name = "intensities")] public LaserEcho[] Intensities;
         // device does not provide intensities, please leave
         // the array empty.
@@ -136,13 +136,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/MultiEchoLaserScan";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "6fefb0c6da89d7c8abe4b339f5c2f8fb";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VWwW7jNhC96ysG8GGTNnaB7i1oe9ptG6AbFMieGgQBTY0sYilSISk77tf3DSnJyiJx" +
                 "99AKhhNaM2/INzNvuKI743aWKWrlqAm+I0XdYJNZs2499VY5FciqyIGCcjteN8bVHKpVtaKbho5+oFbt" +

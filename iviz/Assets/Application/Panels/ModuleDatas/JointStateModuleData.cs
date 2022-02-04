@@ -28,7 +28,7 @@ namespace Iviz.App
         public override IConfiguration Configuration => listener.Config;
 
         public JointStateModuleData([NotNull] ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<JointStateModulePanel>(ModuleType.JointState);
             listener = new JointStateListener();

@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.App;
@@ -15,7 +14,6 @@ using Iviz.Resources;
 using Iviz.Tools;
 using UnityEngine;
 using UnityEngine.Rendering;
-using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
@@ -31,7 +29,7 @@ namespace Iviz.Controllers
         readonly ARContents ar;
         readonly CancellationTokenSource tokenSource = new();
         readonly int defaultCullingMask;
-        readonly AxisFrameResource setupModeFrame;
+        readonly AxisFrameDisplay setupModeFrame;
         readonly Camera virtualCamera;
         readonly Canvas canvas;
 
@@ -231,7 +229,7 @@ namespace Iviz.Controllers
 
             Config = config ?? new ARConfiguration();
 
-            setupModeFrame = ResourcePool.RentDisplay<AxisFrameResource>(ar.Camera.transform);
+            setupModeFrame = ResourcePool.RentDisplay<AxisFrameDisplay>(ar.Camera.transform);
             setupModeFrame.Layer = LayerType.ARSetupMode;
             setupModeFrame.AxisLength = 0.5f * TfListener.Instance.FrameSize;
             SetupModeEnabled = true;

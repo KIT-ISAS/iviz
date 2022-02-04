@@ -148,13 +148,13 @@ namespace Iviz.Msgs.VisualizationMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerControl";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "b3c81e785788195d1840b86c28da1aac";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71YbXPbNhL+XP0KTDyd2FeZfktzre78QbHkRFPb8klKmkyno4FISEJNEQpAWlZ+/T27" +
                 "ACnKspv7cInjiUkQ2Pd9dhd7YqCWVjmV5U5IEZsstyYV+VzmQjuRGzFRItFumcq1SvA+U/lcWbHS+VzI" +

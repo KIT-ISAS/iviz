@@ -23,16 +23,16 @@ namespace Iviz.Msgs.SensorMsgs
         [DataMember (Name = "width")] public uint Width;
         // Describes the channels and their layout in the binary data blob.
         [DataMember (Name = "fields")] public PointField[] Fields;
-        /// Is this data bigendian?
+        /// <summary> Is this data bigendian? </summary>
         [DataMember (Name = "is_bigendian")] public bool IsBigendian;
-        /// Length of a point in bytes
+        /// <summary> Length of a point in bytes </summary>
         [DataMember (Name = "point_step")] public uint PointStep;
-        /// Length of a row in bytes
+        /// <summary> Length of a row in bytes </summary>
         [DataMember (Name = "row_step")] public uint RowStep;
         //uint8[] data         # Actual point data, size is (row_step*height)
-        /// [Rent]
+        /// <summary> [Rent] </summary>
         [DataMember (Name = "data")] public System.Memory<byte> Data;
-        /// True if there are no invalid points
+        /// <summary> True if there are no invalid points </summary>
         [DataMember (Name = "is_dense")] public bool IsDense;
     
         /// Constructor for empty message.
@@ -114,13 +114,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/PointCloud2";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "1158d486dd51d683ce2f1be655c3c181";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VVTW8bNxA9d3/FIDpECiQVtlPXMCAUQQ03BlInaNxTEAjcJaUlyiU3JFfu9tf3DbmU" +
                 "lLaHHlrBhrSzM49vvh5n9NTqQJ0KQewVtc7IQIIaZ4xqonaW3I4eV1J3ygY8CkO90zaGJT23ummpE2M1" +

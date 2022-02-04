@@ -163,14 +163,6 @@ public static class Logger
         }
     }
 
-    public static void LogErrorFormat<TT, TU>(string format, TT? arg1, TU? arg2)
-    {
-        if (LogError != None)
-        {
-            LogError(string.Format(format, arg1, arg2));
-        }
-    }
-
     public static void LogErrorFormat<TT>(string format, TT? arg1, Exception? arg2)
     {
         if (LogError != None)
@@ -178,6 +170,17 @@ public static class Logger
             LogError(string.Format(format, arg1, ExceptionToString(arg2)));
         }
     }
+
+    /*
+    public static void LogErrorFormat<TT, TU>(string format, TT? arg1, TU? arg2)
+    {
+        if (LogError != None)
+        {
+            LogError(string.Format(format, arg1, arg2));
+        }
+    }
+    */
+
 
     public static void LogErrorFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
     {

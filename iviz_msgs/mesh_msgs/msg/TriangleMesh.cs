@@ -8,9 +8,9 @@ namespace Iviz.Msgs.MeshMsgs
     public sealed class TriangleMesh : IDeserializable<TriangleMesh>, IMessage
     {
         //# Definition of a triangle mesh
-        /// list of triangles; the index values refer to positions in vertices (and vertex_normals, if given)
+        /// <summary> List of triangles; the index values refer to positions in vertices (and vertex_normals, if given) </summary>
         [DataMember (Name = "triangles")] public TriangleIndices[] Triangles;
-        /// the actual vertices that make up the mesh
+        /// <summary> The actual vertices that make up the mesh </summary>
         [DataMember (Name = "vertices")] public GeometryMsgs.Point[] Vertices;
         //optional:
         [DataMember (Name = "vertex_normals")] public GeometryMsgs.Point[] VertexNormals;
@@ -148,13 +148,13 @@ namespace Iviz.Msgs.MeshMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/TriangleMesh";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "b112c5b670c2c3e8b1571aae11ccc3da";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71XS2/jNhA+l7+CgA9JdmNnsSmKIkXRR9Ld+hBgsZtbsDBoaSSxpUiFpPzIr+9HUpTt" +
                 "vLqHpoIdU+TMN8N5ZzLhV1RJLb00mpuKC+6tFLpWxFtyDWM3w+tcl7Igd/t1JHB8wpV0PrCNez9x3xCX" +

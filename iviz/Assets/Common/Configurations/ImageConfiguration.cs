@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class ImageConfiguration : IConfigurationWithType
+    public sealed class ImageConfiguration : IConfigurationWithTopic
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.Image;

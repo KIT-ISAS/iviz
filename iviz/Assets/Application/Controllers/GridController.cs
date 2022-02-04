@@ -1,11 +1,9 @@
 ﻿#nullable enable
 
 using UnityEngine;
-using System;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Displays;
@@ -18,7 +16,7 @@ namespace Iviz.Controllers
     {
         readonly FrameNode node;
         readonly ReflectionProbe reflectionProbe;
-        readonly GridResource grid;
+        readonly GridDisplay grid;
         readonly GridConfiguration config = new();
 
         public GridConfiguration Config
@@ -34,9 +32,20 @@ namespace Iviz.Controllers
                 FollowCamera = value.FollowCamera;
                 HideInARMode = value.HideInARMode;
                 Offset = value.Offset;
+                Interactable = value.Interactable;
             }
         }
 
+        public bool Interactable
+        {
+            get => config.Interactable;
+            set
+            {
+                config.Interactable = value;
+                grid.EnableCollider = value;
+            }
+        }
+        
         GridOrientation Orientation
         {
             get => config.Orientation;
@@ -138,7 +147,7 @@ namespace Iviz.Controllers
 
         public GridController(GridConfiguration? config)
         {
-            grid = ResourcePool.RentDisplay<GridResource>();
+            grid = ResourcePool.RentDisplay<GridDisplay>();
             grid.name = "Grid";
             grid.Layer = LayerType.Collider;
 

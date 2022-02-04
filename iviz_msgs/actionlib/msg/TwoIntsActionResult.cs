@@ -57,13 +57,13 @@ namespace Iviz.Msgs.Actionlib
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "actionlib/TwoIntsActionResult";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "3ba7dea8b8cddcae4528ade4ef74b6e7";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71WwXLbNhC98yswo0PsTq20SZqmntFBlVRHGSfx2EqvHpBYkWhBUAVAyfr7vgUpinKs" +
                 "RIckGtu0JODtw9u3i31LUpETRXwkMgu6skan96XP/fOrSpq7IEPthY+PZLGp5jb4W/K1CcLFRzL6xq/k" +

@@ -9,15 +9,15 @@ namespace Iviz.Msgs.SensorMsgs
     {
         // Single reading from a relative humidity sensor.  Defines the ratio of partial
         // pressure of water vapor to the saturated vapor pressure at a temperature.
-        /// timestamp of the measurement
+        /// <summary> Timestamp of the measurement </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // frame_id is the location of the humidity sensor
-        /// Expression of the relative humidity
+        /// <summary> Expression of the relative humidity </summary>
         [DataMember (Name = "relative_humidity")] public double RelativeHumidity_;
         // from 0.0 to 1.0.
         // 0.0 is no partial pressure of water vapor
         // 1.0 represents partial pressure of saturation
-        /// 0 is interpreted as variance unknown
+        /// <summary> 0 is interpreted as variance unknown </summary>
         [DataMember (Name = "variance")] public double Variance;
     
         /// Constructor for empty message.
@@ -60,13 +60,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/RelativeHumidity";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "8730015b05955b7e992ce29a2678d90f";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61Uy27bMBC88ysW0CFJAavuAz0Y6M195FCgQHI31tLaIkqRKknZ9d93loofTZu0hwoG" +
                 "bMkzs7uzQ1FFd9ZvnVAUbvGLNjH0xLh1nO1OqBt729p8oCQ+hVgTLWVjvSTKHVgABQobGjhmy85QRUOU" +

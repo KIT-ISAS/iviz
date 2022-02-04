@@ -92,7 +92,7 @@ namespace Iviz.App
 
         void UpdateTopics()
         {
-            var systemState = ConnectionManager.Connection.GetSystemState();
+            var systemState = RosManager.Connection.GetSystemState();
             if (systemState == null)
             {
                 panel.TextTop.text = EmptyTopText;
@@ -100,7 +100,7 @@ namespace Iviz.App
                 return;
             }
 
-            var topicTypes = ConnectionManager.Connection.GetSystemTopicTypes()
+            var topicTypes = RosManager.Connection.GetSystemTopicTypes()
                 .ToDictionary(info => info.Topic, info => info.Type);
 
             var topicHasSubscribers = new SortedDictionary<string, bool>();
@@ -141,7 +141,7 @@ namespace Iviz.App
 
         void UpdateServices()
         {
-            var systemState = ConnectionManager.Connection.GetSystemState();
+            var systemState = RosManager.Connection.GetSystemState();
             if (systemState == null)
             {
                 panel.TextTop.text = EmptyTopText;
@@ -165,14 +165,14 @@ namespace Iviz.App
 
         void UpdateParameters()
         {
-            if (!ConnectionManager.IsConnected)
+            if (!RosManager.IsConnected)
             {
                 panel.TextTop.text = EmptyTopText;
                 panel.TextBottom.text = EmptyBottomText;
                 return;
             }
 
-            var parameters = new SortedSet<string>(ConnectionManager.Connection.GetSystemParameterList());
+            var parameters = new SortedSet<string>(RosManager.Connection.GetSystemParameterList());
 
             using var description = BuilderPool.Rent();
 
@@ -187,7 +187,7 @@ namespace Iviz.App
 
         void UpdateNodes()
         {
-            var systemState = ConnectionManager.Connection.GetSystemState();
+            var systemState = RosManager.Connection.GetSystemState();
             if (systemState == null)
             {
                 panel.TextTop.text = EmptyTopText;
@@ -252,7 +252,7 @@ namespace Iviz.App
         {
             using var description = BuilderPool.Rent();
 
-            var systemState = ConnectionManager.Connection.GetSystemState(RequestType.CachedOnly);
+            var systemState = RosManager.Connection.GetSystemState(RequestType.CachedOnly);
             if (systemState == null)
             {
                 panel.TextBottom.text = EmptyBottomText;
@@ -296,7 +296,7 @@ namespace Iviz.App
         {
             using var description = BuilderPool.Rent();
 
-            var systemState = ConnectionManager.Connection.GetSystemState(RequestType.CachedOnly);
+            var systemState = RosManager.Connection.GetSystemState(RequestType.CachedOnly);
             if (systemState == null)
             {
                 panel.TextBottom.text = EmptyBottomText;
@@ -334,12 +334,12 @@ namespace Iviz.App
 
             async void GetServiceInfo(string service, CancellationToken token)
             {
-                if (!ConnectionManager.IsConnected)
+                if (!RosManager.IsConnected)
                 {
                     return;
                 }
 
-                var client = ConnectionManager.Connection.Client;
+                var client = RosManager.Connection.Client;
                 try
                 {
                     var response = await client.RosMasterClient.LookupServiceAsync(service, token);
@@ -361,7 +361,7 @@ namespace Iviz.App
         {
             using var description = BuilderPool.Rent();
 
-            if (!ConnectionManager.IsConnected)
+            if (!RosManager.IsConnected)
             {
                 panel.TextBottom.text = EmptyBottomText;
                 return;
@@ -399,14 +399,14 @@ namespace Iviz.App
 
             async void GetParamValue(string param, CancellationToken token)
             {
-                if (!ConnectionManager.IsConnected)
+                if (!RosManager.IsConnected)
                 {
                     return;
                 }
 
                 try
                 {
-                    (paramValue, _) = await ConnectionManager.Connection.GetParameterAsync(param, 5000, token);
+                    (paramValue, _) = await RosManager.Connection.GetParameterAsync(param, 5000, token);
                     GameThread.Post(() => UpdateParametersLink(link));
                 }
                 catch (OperationCanceledException)
@@ -418,7 +418,7 @@ namespace Iviz.App
 
         void UpdateNodesLink(string link)
         {
-            var systemState = ConnectionManager.Connection.GetSystemState(RequestType.CachedOnly);
+            var systemState = RosManager.Connection.GetSystemState(RequestType.CachedOnly);
             if (systemState == null)
             {
                 panel.TextBottom.text = EmptyBottomText;
@@ -487,12 +487,12 @@ namespace Iviz.App
 
             async void GetNodeInfo(string node, CancellationToken token)
             {
-                if (!ConnectionManager.IsConnected)
+                if (!RosManager.IsConnected)
                 {
                     return;
                 }
 
-                var client = ConnectionManager.Connection.Client;
+                var client = RosManager.Connection.Client;
                 try
                 {
                     var response = await client.RosMasterClient.LookupNodeAsync(node, token);
@@ -534,12 +534,12 @@ namespace Iviz.App
 
         void UpdateAliases()
         {
-            if (!ConnectionManager.IsConnected)
+            if (!RosManager.IsConnected)
             {
                 return;
             }
 
-            var state = ConnectionManager.Connection.Client.GetSubscriberStatistics();
+            var state = RosManager.Connection.Client.GetSubscriberStatistics();
             var hostsEnum = state.Topics
                 .SelectMany(topic => topic.Receivers)
                 .Select(receiver => receiver.RemoteUri.Host)

@@ -79,7 +79,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -90,7 +90,7 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class GetModulesResponse : IResponse, IDeserializable<GetModulesResponse>
     {
-        /// List of module configurations in JSON encoding
+        /// <summary> List of module configurations in JSON encoding </summary>
         [DataMember (Name = "configs")] public string[] Configs;
     
         /// Constructor for empty message.

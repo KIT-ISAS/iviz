@@ -1,9 +1,6 @@
 ﻿#nullable enable
 
-using System;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.SpatialTracking;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 

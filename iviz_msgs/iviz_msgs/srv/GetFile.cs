@@ -54,7 +54,7 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetFileRequest : IRequest<GetFile, GetFileResponse>, IDeserializable<GetFileRequest>
     {
         // Retrieves a file
-        /// Uri of the file. Example: package://some_package/file.dae
+        /// <summary> Uri of the file. Example: package://some_package/file.dae </summary>
         [DataMember (Name = "uri")] public string Uri;
     
         /// Constructor for empty message.
@@ -97,11 +97,11 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class GetFileResponse : IResponse, IDeserializable<GetFileResponse>
     {
-        /// Whether the retrieval succeeded
+        /// <summary> Whether the retrieval succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
-        /// The content of the file as byte array
+        /// <summary> The content of the file as byte array </summary>
         [DataMember (Name = "bytes")] public byte[] Bytes;
-        /// An error message if success is false
+        /// <summary> An error message if success is false </summary>
         [DataMember (Name = "message")] public string Message;
     
         /// Constructor for empty message.

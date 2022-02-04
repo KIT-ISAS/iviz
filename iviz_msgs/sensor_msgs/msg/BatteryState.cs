@@ -36,37 +36,37 @@ namespace Iviz.Msgs.SensorMsgs
         public const byte POWER_SUPPLY_TECHNOLOGY_NICD = 5;
         public const byte POWER_SUPPLY_TECHNOLOGY_LIMN = 6;
         [DataMember (Name = "header")] public StdMsgs.Header Header;
-        /// Voltage in Volts (Mandatory)
+        /// <summary> Voltage in Volts (Mandatory) </summary>
         [DataMember (Name = "voltage")] public float Voltage;
-        /// Temperature in Degrees Celsius (If unmeasured NaN)
+        /// <summary> Temperature in Degrees Celsius (If unmeasured NaN) </summary>
         [DataMember (Name = "temperature")] public float Temperature;
-        /// Negative when discharging (A)  (If unmeasured NaN)
+        /// <summary> Negative when discharging (A)  (If unmeasured NaN) </summary>
         [DataMember (Name = "current")] public float Current;
-        /// Current charge in Ah  (If unmeasured NaN)
+        /// <summary> Current charge in Ah  (If unmeasured NaN) </summary>
         [DataMember (Name = "charge")] public float Charge;
-        /// Capacity in Ah (last full capacity)  (If unmeasured NaN)
+        /// <summary> Capacity in Ah (last full capacity)  (If unmeasured NaN) </summary>
         [DataMember (Name = "capacity")] public float Capacity;
-        /// Capacity in Ah (design capacity)  (If unmeasured NaN)
+        /// <summary> Capacity in Ah (design capacity)  (If unmeasured NaN) </summary>
         [DataMember (Name = "design_capacity")] public float DesignCapacity;
-        /// Charge percentage on 0 to 1 range  (If unmeasured NaN)
+        /// <summary> Charge percentage on 0 to 1 range  (If unmeasured NaN) </summary>
         [DataMember (Name = "percentage")] public float Percentage;
-        /// The charging status as reported. Values defined above
+        /// <summary> The charging status as reported. Values defined above </summary>
         [DataMember (Name = "power_supply_status")] public byte PowerSupplyStatus;
-        /// The battery health metric. Values defined above
+        /// <summary> The battery health metric. Values defined above </summary>
         [DataMember (Name = "power_supply_health")] public byte PowerSupplyHealth;
-        /// The battery chemistry. Values defined above
+        /// <summary> The battery chemistry. Values defined above </summary>
         [DataMember (Name = "power_supply_technology")] public byte PowerSupplyTechnology;
-        /// True if the battery is present
+        /// <summary> True if the battery is present </summary>
         [DataMember (Name = "present")] public bool Present;
-        /// An array of individual cell voltages for each cell in the pack
+        /// <summary> An array of individual cell voltages for each cell in the pack </summary>
         [DataMember (Name = "cell_voltage")] public float[] CellVoltage;
         // If individual voltages unknown but number of cells known set each to NaN
-        /// An array of individual cell temperatures for each cell in the pack
+        /// <summary> An array of individual cell temperatures for each cell in the pack </summary>
         [DataMember (Name = "cell_temperature")] public float[] CellTemperature;
         // If individual temperatures unknown but number of cells known set each to NaN
-        /// The location into which the battery is inserted. (slot number or plug)
+        /// <summary> The location into which the battery is inserted. (slot number or plug) </summary>
         [DataMember (Name = "location")] public string Location;
-        /// The best approximation of the battery serial number
+        /// <summary> The best approximation of the battery serial number </summary>
         [DataMember (Name = "serial_number")] public string SerialNumber;
     
         /// Constructor for empty message.
@@ -167,13 +167,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/BatteryState";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "4ddae7f048e32fda22cac764685e3974";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61WbW/iOBD+nl8xEh+WnlS6L3e3q0r7AQEFdDRBJW2vOp0ikwyJVcfmbIeWf3/jvEBo" +
                 "C909XVSpJH7mmRnP+Bl7HRgoaSyT1gDTCHGmDEqwCnJm4wxshoCyyA1wWb4ILotneEQtUXgdSHDFJSZu" +

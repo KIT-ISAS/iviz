@@ -15,7 +15,7 @@ namespace Iviz.App
         internal const string Suffix = ".config.json";
 
         readonly ItemListDialogPanel itemList;
-        readonly List<SavedFileInfo> files = new();
+        readonly List<ISavedFileInfo> files = new();
         public override IDialogPanel Panel => itemList;
 
         public LoadConfigDialogData()
@@ -24,7 +24,7 @@ namespace Iviz.App
             itemList.ButtonType = Resource.Widgets.ItemButtonWithDelete;
         }
 
-        public static IEnumerable<SavedFileInfo> SavedFiles => Directory
+        public static IEnumerable<ISavedFileInfo> SavedFiles => Directory
             .GetFiles(Settings.SavedFolder)
             .Where(name => name.HasSuffix(Suffix))
             .Select(name => new SavedFileInfo(name));
@@ -37,6 +37,7 @@ namespace Iviz.App
             itemList.CloseClicked += Close;
             itemList.EmptyText = "No Config Files Found";
         }
+
         void ReadAllFiles()
         {
             files.Clear();
@@ -69,42 +70,47 @@ namespace Iviz.App
                     break;
             }
         }
+
+        sealed class SavedFileInfo : ISavedFileInfo
+        {
+            public string FullPath { get; }
+            public string FileName => Path.GetFileName(FullPath);
+
+            DateTime date;
+            DateTime Date => date != default ? date : (date = File.GetLastWriteTime(FullPath));
+
+            public string Description
+            {
+                get
+                {
+                    string fileName = FileName;
+                    string simpleName = fileName[..^Suffix.Length];
+                    string lastModified = Date.ToString("MM/dd/yyyy HH:mm");
+                    return $"<b>{simpleName}</b>\n[{lastModified}]";
+                }
+            }
+
+            public SavedFileInfo(string fullPath)
+            {
+                FullPath = fullPath;
+            }
+
+            int CompareTo(SavedFileInfo? other)
+            {
+                if (other == this) return 0;
+                return other == null ? 1 : Date.CompareTo(other.Date);
+            }
+
+            public int CompareTo(ISavedFileInfo? other) => CompareTo((SavedFileInfo?)other);
+            
+            public override string ToString() => FullPath;
+        }
     }
 
-    public sealed class SavedFileInfo : IComparable<SavedFileInfo>
+    public interface ISavedFileInfo : IComparable<ISavedFileInfo>
     {
         public string FullPath { get; }
-        public string FileName => Path.GetFileName(FullPath);
-
-        DateTime date;
-        DateTime Date => date != default ? date : (date = File.GetLastWriteTime(FullPath));
-
-        public string Description
-        {
-            get
-            {
-                string fileName = FileName;
-                string simpleName = fileName[..^LoadConfigDialogData.Suffix.Length];
-                string lastModified = Date.ToString("MM/dd/yyyy HH:mm");
-                return $"<b>{simpleName}</b>\n[{lastModified}]";
-            }
-        } 
-
-        public SavedFileInfo(string fullPath)
-        {
-            FullPath = fullPath;
-        }
-
-        public int CompareTo(SavedFileInfo? other)
-        {
-            if (ReferenceEquals(this, other)) return 0;
-            if (ReferenceEquals(null, other)) return 1;
-            return Date.CompareTo(other.Date);
-        }
-
-        public override string ToString()
-        {
-            return FullPath;
-        }
-    } 
+        public string FileName { get; }
+        public string Description { get; }
+    }
 }

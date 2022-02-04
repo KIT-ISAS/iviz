@@ -21,9 +21,6 @@ namespace Iviz.App
         public string? TryGetConfigurationTopic() =>
             Configuration is IConfigurationWithTopic hasTopic ? hasTopic.Topic : null;
 
-        public string? TryGetConfigurationType() =>
-            Configuration is IConfigurationWithType hasType ? hasType.Type : null;
-
         public ModuleDataConstructor(ModuleType moduleType, string topic, string type, IConfiguration? configuration)
         {
             ModuleType = moduleType;

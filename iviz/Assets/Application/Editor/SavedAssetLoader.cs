@@ -64,17 +64,8 @@ namespace Iviz.Editor
         static async ValueTask CreateRobotsAsync([NotNull] ExternalResourceManager manager)
         {
             string unityDirectory = "Resources/Package/iviz/robots";
-            string absolutePath = $"{UnityEngine.Application.dataPath}/{unityDirectory}";
+            string absolutePath = $"{Application.dataPath}/{unityDirectory}";
             Directory.CreateDirectory(absolutePath);
-
-            //Dictionary<string, string> resourceFile = new Dictionary<string, string>();
-            /*
-            foreach (string robotName in manager.GetRobotNames())
-            {
-                string filename = ExternalResourceManager.SanitizeForFilename(robotName).Replace(".", "_");
-                resourceFile[robotName] = filename;
-            }
-            */
 
             Debug.LogWarning("SavedAssetLoader: Not writing robot resource files.");
 
@@ -82,7 +73,7 @@ namespace Iviz.Editor
             {
                 var (_, robotDescription) = await manager.TryGetRobotAsync(robotName);
                 string filename = ExternalResourceManager.SanitizeFilename(robotName).Replace(".", "_");
-                File.WriteAllText(absolutePath + "/" + filename + ".txt", robotDescription);
+                await File.WriteAllTextAsync($"{absolutePath}/{filename}.txt", robotDescription);
             }
         }
 
@@ -122,7 +113,7 @@ namespace Iviz.Editor
             }
 
             GameObject obj = resourceInfo.Object;
-            MeshTrianglesResource[] resources = obj.GetComponentsInChildren<MeshTrianglesResource>();
+            MeshTrianglesDisplay[] resources = obj.GetComponentsInChildren<MeshTrianglesDisplay>();
             HashSet<Mesh> writtenMeshes = new HashSet<Mesh>();
 
             int meshId = 0;
@@ -243,7 +234,7 @@ namespace Iviz.Editor
                 resource.enabled = false;
             }
 
-            foreach (var marker in obj.GetComponentsInChildren<MeshMarkerHolderResource>())
+            foreach (var marker in obj.GetComponentsInChildren<MeshMarkerHolderDisplay>())
             {
                 //DestroyImmediate(marker);
                 marker.enabled = false;

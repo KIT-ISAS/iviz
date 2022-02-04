@@ -8,14 +8,13 @@ using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
 using Iviz.Roslib;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
     public sealed class LaserScanListener : ListenerController
     {
-        readonly RadialScanResource resource;
+        readonly RadialScanDisplay resource;
         readonly FrameNode node;
         readonly LaserScanConfiguration config = new();
 
@@ -144,8 +143,8 @@ namespace Iviz.Controllers
             };
 
             Listener = new Listener<LaserScan>(Config.Topic, Handler, RosTransportHint.PreferUdp);
-            node = new FrameNode($"[{Config.Topic}]");
-            resource = ResourcePool.RentDisplay<RadialScanResource>(node.Transform);
+            node = new FrameNode(Config.Topic);
+            resource = ResourcePool.RentDisplay<RadialScanDisplay>(node.Transform);
         }
 
         void Handler(LaserScan msg)

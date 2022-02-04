@@ -1,10 +1,8 @@
 ﻿#nullable enable
 
 using System;
-using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
@@ -21,12 +19,12 @@ namespace Iviz.Controllers
     public sealed class MagnitudeListener : ListenerController
     {
         readonly FrameNode frameNode;
-        readonly TrailResource trail;
+        readonly TrailDisplay trail;
         readonly FrameNode? childNode;
-        readonly AxisFrameResource? axisFrame;
-        readonly MeshMarkerResource? sphere;
-        readonly ArrowResource? arrow;
-        readonly AngleAxisResource? angleAxis;
+        readonly AxisFrameDisplay? axisFrame;
+        readonly MeshMarkerDisplay? sphere;
+        readonly ArrowDisplay? arrow;
+        readonly AngleAxisDisplay? angleAxis;
         readonly MagnitudeConfiguration config = new();
         Vector3 cachedDirection;
 
@@ -206,15 +204,15 @@ namespace Iviz.Controllers
 
         public MagnitudeListener(MagnitudeConfiguration? config, string topic, string type)
         {
+            trail = ResourcePool.RentDisplay<TrailDisplay>();
+            
             Config = config ?? new MagnitudeConfiguration
             {
                 Topic = topic,
                 Type = type
             };
-
-            frameNode = new FrameNode($"[{Config.Topic}]");
             
-            trail = ResourcePool.RentDisplay<TrailResource>();
+            frameNode = new FrameNode(Config.Topic);
             trail.DataSource = () => frameNode.Transform.position;
 
             var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
@@ -264,7 +262,7 @@ namespace Iviz.Controllers
                 case Odometry.RosMessageType:
                     RentFrame(frameNode, out axisFrame);
                     RentSphere(frameNode, Color, out sphere);
-                    childNode = new FrameNode($"[{Config.Topic} | Child]");
+                    childNode = new FrameNode($"{Config.Topic} | Child");
                     RentArrow(childNode, Color, out arrow);
                     RentAngleAxis(childNode, out angleAxis);
                     trail.DataSource = TrailDataSource;
@@ -272,29 +270,29 @@ namespace Iviz.Controllers
             }
         }
 
-        static void RentFrame(FrameNode node, out AxisFrameResource axisFrame)
+        static void RentFrame(FrameNode node, out AxisFrameDisplay axisFrame)
         {
-            axisFrame = ResourcePool.RentDisplay<AxisFrameResource>(node.Transform);
+            axisFrame = ResourcePool.RentDisplay<AxisFrameDisplay>(node.Transform);
             axisFrame.EnableShadows = false;
         }
 
-        static void RentArrow(FrameNode node, Color color, out ArrowResource arrow)
+        static void RentArrow(FrameNode node, Color color, out ArrowDisplay arrow)
         {
-            arrow = ResourcePool.RentDisplay<ArrowResource>(node.Transform);
+            arrow = ResourcePool.RentDisplay<ArrowDisplay>(node.Transform);
             arrow.Color = color;
             arrow.Set(Vector3.one * 0.01f);
             arrow.EnableShadows = false;
         }
 
-        static void RentAngleAxis(FrameNode node, out AngleAxisResource angleAxis)
+        static void RentAngleAxis(FrameNode node, out AngleAxisDisplay angleAxis)
         {
-            angleAxis = ResourcePool.RentDisplay<AngleAxisResource>(node.Transform);
+            angleAxis = ResourcePool.RentDisplay<AngleAxisDisplay>(node.Transform);
             angleAxis.Color = Color.yellow;
         }
 
-        static void RentSphere(FrameNode node, Color color, out MeshMarkerResource sphere)
+        static void RentSphere(FrameNode node, Color color, out MeshMarkerDisplay sphere)
         {
-            sphere = ResourcePool.Rent<MeshMarkerResource>(Resource.Displays.Sphere, node.Transform);
+            sphere = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Sphere, node.Transform);
             sphere.Transform.localScale = 0.05f * Vector3.one;
             sphere.Color = color;
             sphere.EnableShadows = false;
@@ -393,10 +391,7 @@ namespace Iviz.Controllers
         void Handler(Odometry msg)
         {
             frameNode.AttachTo(msg.Header);
-            if (childNode != null)
-            {
-                childNode.AttachTo(msg.ChildFrameId);
-            }
+            childNode?.AttachTo(msg.ChildFrameId);
 
             if (msg.Pose.Pose.IsInvalid())
             {
@@ -446,20 +441,14 @@ namespace Iviz.Controllers
             base.Dispose();
 
             trail.DataSource = null;
-
-            frameNode.Dispose();
-
             trail.ReturnToPool();
-
-            if (childNode != null)
-            {
-                childNode.Dispose();
-            }
-
             axisFrame.ReturnToPool();
             angleAxis.ReturnToPool();
             arrow.ReturnToPool();
             sphere.ReturnToPool(Resource.Displays.Sphere);
+            
+            frameNode.Dispose();
+            childNode?.Dispose();
         }
     }
 }

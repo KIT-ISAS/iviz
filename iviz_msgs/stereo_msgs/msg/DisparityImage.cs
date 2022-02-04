@@ -15,9 +15,9 @@ namespace Iviz.Msgs.StereoMsgs
         // that they are verged). That is: d = x_l - x_r - (cx_l - cx_r)
         [DataMember (Name = "image")] public SensorMsgs.Image Image;
         // Stereo geometry. For disparity d, the depth from the camera is Z = fT/d.
-        /// Focal length, pixels
+        /// <summary> Focal length, pixels </summary>
         [DataMember (Name = "f")] public float F;
-        /// Baseline, world units
+        /// <summary> Baseline, world units </summary>
         [DataMember] public float T;
         // Subwindow of (potentially) valid disparity values.
         [DataMember (Name = "valid_window")] public SensorMsgs.RegionOfInterest ValidWindow;
@@ -95,13 +95,13 @@ namespace Iviz.Msgs.StereoMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "stereo_msgs/DisparityImage";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "04a177815f75271039fa21f16acad8c9";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71XW4/UNhR+bn6FxT6wA7OzCF4qqlWrlm67EhUIVqoEoiNPfDIxOHZqO3Ph1/c7dpLJ" +
                 "zALlgXak3Zk45375zvGZeE2t9DKSqEkq8qJyXpSuaWXUK2103IutjrUoO+/JRnGrG3q9t2XtndUfyS+K" +

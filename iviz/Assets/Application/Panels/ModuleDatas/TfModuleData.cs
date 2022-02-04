@@ -38,12 +38,21 @@ namespace Iviz.App
             {
                 listener.Dispose();
             }
+            catch (ObjectDisposedException)
+            {
+                // system shutting down, ROS modules already disposed
+            }
             catch (Exception e)
             {
                 RosLogger.Error($"{this}: Failed to dispose controller", e);
-            }             
+            }
         }
 
+        protected override void UpdateModuleButton()
+        {
+            ModuleListButtonText = ModuleListPanel.CreateButtonTextForModule(this, listener.Config.Topic);
+        }
+        
         public void UpdateConfiguration(TfConfiguration configuration)
         {
             listener.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -93,9 +102,6 @@ namespace Iviz.App
             {
                 switch (field)
                 {
-                    case nameof(TfConfiguration.Visible):
-                        listener.FramesVisible = config.Visible;
-                        break;
                     case nameof(TfConfiguration.FrameSize):
                         listener.FrameSize = config.FrameSize;
                         break;
@@ -107,6 +113,17 @@ namespace Iviz.App
                         break;
                     case nameof(TfConfiguration.KeepAllFrames):
                         listener.KeepAllFrames = config.KeepAllFrames;
+                        break;
+                    case nameof(TfConfiguration.Visible):
+                        listener.FramesVisible = config.Visible;
+                        break;
+                    case nameof(TfConfiguration.Interactable):
+                        listener.Interactable = config.Interactable;
+                        break;
+                    case nameof(TfConfiguration.FlipZ):
+                        listener.FlipZ = config.FlipZ;
+                        break;
+                    case nameof(IConfiguration.ModuleType):
                         break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");
@@ -124,7 +141,7 @@ namespace Iviz.App
 
         public override string ToString()
         {
-            return $"[{ModuleType} Topic='{TfListener.DefaultTopic}' id='{Configuration.Id}']";
+            return $"[{nameof(TfModuleData)} Topic='{TfListener.DefaultTopic}' id='{Configuration.Id}']";
         }
     }
 }

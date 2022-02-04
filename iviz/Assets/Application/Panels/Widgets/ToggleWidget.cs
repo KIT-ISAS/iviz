@@ -11,8 +11,8 @@ namespace Iviz.App
 {
     public sealed class ToggleWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Toggle? toggle = null;
-        [SerializeField] TMP_Text? label = null;
+        [SerializeField] Toggle? toggle;
+        [SerializeField] TMP_Text? label;
 
         TMP_Text Label => label.AssertNotNull(nameof(label));
         Toggle Toggle => toggle.AssertNotNull(nameof(toggle));

@@ -40,7 +40,7 @@ internal static class RosUtils
             if (numRead + length > toRead)
             {
                 throw new RosInvalidHeaderException(
-                    $"Invalid header entry size {length}, buffer has only {toRead - numRead} bytes left.");
+                    $"Invalid header entry size {length}, buffer has only {toRead - numRead} bytes left");
             }
 
             string entry;
@@ -50,7 +50,7 @@ internal static class RosUtils
             }
             catch (Exception e)
             {
-                throw new RosInvalidHeaderException("Error parsing header line.", e);
+                throw new RosInvalidHeaderException("Error parsing header line", e);
             }
 
             numRead += length;
@@ -63,17 +63,21 @@ internal static class RosUtils
 
     internal static Dictionary<string, string> CreateHeaderDictionary(List<string> fields)
     {
-        Dictionary<string, string> values = new();
+        var values = new Dictionary<string, string>();
         foreach (string entry in fields)
         {
             int index = entry.IndexOf('=');
-            if (index < 0)
+            switch (index)
             {
-                throw new RosInvalidHeaderException($"Missing '=' separator in ROS header field '{entry}'.");
+                case < 0:
+                    throw new RosInvalidHeaderException($"Missing '=' separator in ROS header field '{entry}'.");
+                case 0:
+                    continue;
+                default:
+                    string key = entry[..index];
+                    values[key] = entry[(index + 1)..];
+                    break;
             }
-
-            string key = entry.Substring(0, index);
-            values[key] = entry.Substring(index + 1);
         }
 
         return values;
@@ -86,27 +90,26 @@ internal static class RosUtils
         const string typePrefix = "type=";
         const string definitionPrefix = "message_definition=";
 
-        string? dynamicMsgName = responses.FirstOrDefault(
-            entry => entry.HasPrefix(typePrefix))?.Substring(typePrefix.Length);
-        string? dynamicDependencies = responses.FirstOrDefault(
-            entry => entry.HasPrefix(definitionPrefix))?.Substring(definitionPrefix.Length);
+        string? dynamicMsgName = responses
+            .FirstOrDefault(entry => entry.HasPrefix(typePrefix))
+            ?[typePrefix.Length..];
+        string? dynamicDependencies = responses
+            .FirstOrDefault(entry => entry.HasPrefix(definitionPrefix))
+            ?[definitionPrefix.Length..];
         if (dynamicMsgName == null || dynamicDependencies == null)
         {
             throw new RosHandshakeException(
                 "Partner did not send type and definition, required to instantiate dynamic messages.");
         }
 
-        Type? lookupMsgName;
-        object? lookupGenerator;
         if (DynamicMessage.IsGenericMessage<T>()
-            && (lookupMsgName = BuiltIns.TryGetTypeFromMessageName(dynamicMsgName)) != null
-            && (lookupGenerator = Activator.CreateInstance(lookupMsgName)) != null)
+            && BuiltIns.TryGetTypeFromMessageName(dynamicMsgName) is { } lookupMsgName
+            && Activator.CreateInstance(lookupMsgName) is { } lookupGenerator)
         {
             return new TopicInfo<T>(callerId, topicName, (IDeserializable<T>)lookupGenerator);
         }
 
-        DynamicMessage generator =
-            DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
+        var generator = DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
         return new TopicInfo<T>(callerId, topicName, generator);
     }
 
@@ -118,7 +121,7 @@ internal static class RosUtils
             ? info.IPv4Mask.GetAddressBytes()
             : GtSubnetMaskFromV6PrefixLength(info.PrefixLength);
 
-        for (int i = 0; i < addressABytes.Length; i++)
+        foreach (int i in ..addressABytes.Length)
         {
             if ((addressABytes[i] & subnetMaskBytes[i]) != (addressBBytes[i] & subnetMaskBytes[i]))
             {
@@ -246,7 +249,7 @@ internal static class RosUtils
         }
         catch (Exception)
         {
-            return Array.Empty<string>();
+            return Enumerable.Empty<string>();
         }
     }
 
@@ -270,7 +273,7 @@ internal static class RosUtils
         }
         catch (Exception)
         {
-            // this shouldn't throw at all!
+            // this shouldn't throw at all! yet it does
             return null;
         }
 
@@ -290,7 +293,8 @@ internal static class RosUtils
     {
         return rcvLength switch
         {
-            < 64 * 1024 => defaultSize,
+            < 8 * 1024 => defaultSize,
+            < 32 * 1024 => 32 * 1024,
             < 128 * 1024 => 128 * 1024,
             < 1024 * 1024 => 1024 * 1024,
             _ => 4 * 1024 * 1024,

@@ -1,20 +1,18 @@
 #nullable enable
 
 using System;
-using System.Linq;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Tools;
 using TMPro;
 using UnityEngine;
 
 namespace Iviz.Controllers
 {
-    public sealed class ARMarkerHighlighter : MeshMarkerHolderResource
+    public sealed class ARMarkerHighlighter : MeshMarkerHolderDisplay
     {
         [SerializeField] Transform? topLeft;
         [SerializeField] Transform? topRight;

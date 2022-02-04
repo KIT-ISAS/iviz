@@ -129,7 +129,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 
         responseHeader = StreamUtils.WriteHeaderToArray(responseHeaderContents);
 
-        task = TaskUtils.Run(async () => await StartSession(latchedMsg).AwaitNoThrow(this));
+        task = TaskUtils.Run(() => StartSession(latchedMsg).AwaitNoThrow(this));
     }
 
     async ValueTask StartSession(NullableMessage<T> latchedMsg)
@@ -159,14 +159,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         }
 
         UdpClient.Dispose();
-        try
-        {
-            runningTs.Cancel();
-        }
-        catch (ObjectDisposedException)
-        {
-        }
-
+        runningTs.Cancel();
         senderQueue.FlushRemaining();
     }
 
@@ -358,7 +351,6 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         UdpClient.Dispose();
 
         await task.AwaitNoThrow(5000, this, token);
-        runningTs.Dispose();
     }
 
     public PublisherSenderState State =>

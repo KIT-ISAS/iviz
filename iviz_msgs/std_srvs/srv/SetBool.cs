@@ -53,7 +53,7 @@ namespace Iviz.Msgs.StdSrvs
     [DataContract]
     public sealed class SetBoolRequest : IRequest<SetBool, SetBoolResponse>, IDeserializable<SetBoolRequest>
     {
-        /// e.g. for hardware enabling / disabling
+        /// <summary> E.g. for hardware enabling / disabling </summary>
         [DataMember (Name = "data")] public bool Data;
     
         /// Constructor for empty message.
@@ -86,7 +86,7 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -97,9 +97,9 @@ namespace Iviz.Msgs.StdSrvs
     [DataContract]
     public sealed class SetBoolResponse : IResponse, IDeserializable<SetBoolResponse>
     {
-        /// indicate successful run of triggered service
+        /// <summary> Indicate successful run of triggered service </summary>
         [DataMember (Name = "success")] public bool Success;
-        /// informational, e.g. for error messages
+        /// <summary> Informational, e.g. for error messages </summary>
         [DataMember (Name = "message")] public string Message;
     
         /// Constructor for empty message.

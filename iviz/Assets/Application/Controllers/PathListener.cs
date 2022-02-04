@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Iviz.Common;
+﻿using System.Collections.Generic;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -17,7 +13,7 @@ namespace Iviz.Controllers
     public sealed class PathListener : ListenerController
     {
         readonly FrameNode node;
-        readonly LineResource resource;
+        readonly LineDisplay resource;
 
         public override TfFrame Frame => node.Parent;
 
@@ -119,7 +115,7 @@ namespace Iviz.Controllers
         public PathListener()
         {
             node = FrameNode.Instantiate("PathNode");
-            resource = ResourcePool.Rent<LineResource>(Resource.Displays.Line, node.Transform);
+            resource = ResourcePool.Rent<LineDisplay>(Resource.Displays.Line, node.Transform);
             resource.ElementScale = 0.005f;
             resource.Tint = Color.white;
             Config = new PathConfiguration();

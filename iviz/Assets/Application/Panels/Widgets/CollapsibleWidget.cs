@@ -9,10 +9,10 @@ namespace Iviz.App
 {
     public class CollapsibleWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] TMP_Text label = null;
-        [SerializeField] Button button = null;
-        [SerializeField] RectTransform childrenTransform = null;
-        [SerializeField] RectTransform ownTransform = null;
+        [SerializeField] TMP_Text label;
+        [SerializeField] Button button;
+        [SerializeField] RectTransform childrenTransform;
+        [SerializeField] RectTransform ownTransform;
 
         bool open;
         string text;

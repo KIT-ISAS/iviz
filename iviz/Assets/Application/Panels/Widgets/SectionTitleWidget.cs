@@ -7,7 +7,7 @@ namespace Iviz.App
 {
     public sealed class SectionTitleWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text label = null;
+        [SerializeField] Text label;
 
         [NotNull]
         public string Label

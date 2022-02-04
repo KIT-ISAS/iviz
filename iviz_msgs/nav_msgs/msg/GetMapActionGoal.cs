@@ -57,13 +57,13 @@ namespace Iviz.Msgs.NavMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "nav_msgs/GetMapActionGoal";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "4b30be6cd12b9e72826df56b481f40e0";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VUwYrbMBC9+ysGctjdQlJob4HelmZzWCjs3sNEmtiisuRq5Lj++z7JSbqFHnroGoOQ" +
                 "PPPmzbwnPwlbSdTVpWGTXQzeHQ+9tvpxF9nvH6nFcnC22Ul+5qEc1qPmy39+mueX3ZY026X608JpRS+Z" +

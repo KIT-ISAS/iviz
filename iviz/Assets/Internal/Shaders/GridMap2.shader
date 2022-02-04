@@ -19,7 +19,9 @@
         float _IntensityCoeff;
         float _IntensityAdd;
         float4 _Tint;
-
+        float _Metallic;
+        float _Smoothness;
+        
         float4 _SquareCoeff;
 
         struct Input
@@ -32,7 +34,7 @@
         {
             UNITY_INITIALIZE_OUTPUT(Input, o);
 
-            float2 uv = v.vertex.xz * float2(1, 1); // ros transform
+            float2 uv = v.vertex.xz; // ros transform
             uv = uv.yx * float2(-1, 1); // row major
             const float input = tex2Dlod(_InputTex, float4(uv, 0, 0));
             v.vertex.y = input;
@@ -48,6 +50,8 @@
                 tex2D(_SquareTex, IN.squareTextureUV) *
                 _Tint;
             o.Emission = o.Albedo;
+            o.Metallic = _Metallic;
+            o.Smoothness = _Smoothness;
         }
         ENDCG
     }

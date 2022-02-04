@@ -25,9 +25,9 @@ namespace Iviz.Controllers
 
         readonly FrameNode cubeNode;
         readonly FrameNode textureNode;
-        readonly List<OccupancyGridTextureResource> textureTiles = new();
+        readonly List<OccupancyGridTextureDisplay> textureTiles = new();
 
-        OccupancyGridResource[] gridTiles = Array.Empty<OccupancyGridResource>();
+        OccupancyGridDisplay[] gridTiles = Array.Empty<OccupancyGridDisplay>();
         
         int numCellsX;
         int numCellsY;
@@ -232,7 +232,7 @@ namespace Iviz.Controllers
 
             if (msg.Data.Length != msg.Info.Width * msg.Info.Height)
             {
-                RosLogger.Debug($"{this}: Size {msg.Info.Width.ToString()}x{msg.Info.Height.ToString()} " +
+                RosLogger.Info($"{this}: Size {msg.Info.Width.ToString()}x{msg.Info.Height.ToString()} " +
                                 $"does not match data length {msg.Data.Length.ToString()}");
                 msg.Data.TryReturn();
                 return;
@@ -240,7 +240,7 @@ namespace Iviz.Controllers
 
             if (float.IsNaN(msg.Info.Resolution))
             {
-                RosLogger.Debug($"{this}: NaN in header!");
+                RosLogger.Info($"{this}: NaN in header!");
                 msg.Data.TryReturn();
                 return;
             }
@@ -250,7 +250,7 @@ namespace Iviz.Controllers
 
             if (msg.Info.Origin.IsInvalid())
             {
-                RosLogger.Debug($"{this}: NaN in origin!");
+                RosLogger.Info($"{this}: NaN in origin!");
                 msg.Data.TryReturn();
                 return;
             }
@@ -259,10 +259,10 @@ namespace Iviz.Controllers
             Pose validatedOrigin;
             if (!origin.IsUsable())
             {
-                RosLogger.Error($"{this}: Cannot use ({origin.position.x.ToString(BuiltIns.Culture)}, " +
-                                $"{origin.position.y.ToString(BuiltIns.Culture)}, " +
-                                $"{origin.position.z.ToString(BuiltIns.Culture)}) " +
-                                "as position. Values too large!");
+                RosLogger.Info($"{this}: Cannot use ({origin.position.x.ToString(BuiltIns.Culture)}, " +
+                               $"{origin.position.y.ToString(BuiltIns.Culture)}, " +
+                               $"{origin.position.z.ToString(BuiltIns.Culture)}) " +
+                               "as position. Values too large!");
                 validatedOrigin = Pose.identity;
             }
             else
@@ -308,11 +308,11 @@ namespace Iviz.Controllers
 
             if (gridTiles.Length != 16)
             {
-                gridTiles = new OccupancyGridResource[16];
+                gridTiles = new OccupancyGridDisplay[16];
                 foreach (int j in ..16)
                 {
-                    var resource = ResourcePool.Rent<OccupancyGridResource>(
-                        Resource.Displays.OccupancyGridResource,
+                    var resource = ResourcePool.Rent<OccupancyGridDisplay>(
+                        Resource.Displays.OccupancyGridDisplay,
                         cubeNode.Transform);
                     resource.gameObject.name = $"OccupancyGridResource-{j.ToString()}";
                     resource.Transform.SetLocalPose(Pose.identity);
@@ -332,7 +332,7 @@ namespace Iviz.Controllers
                     grid.NumCellsY = numCellsY;
                     grid.CellSize = cellSize;
 
-                    var rect = new OccupancyGridResource.Rect
+                    var rect = new OccupancyGridDisplay.Rect
                     (
                         xMin: u * numCellsX / 4,
                         xMax: (u + 1) * numCellsX / 4,
@@ -373,7 +373,7 @@ namespace Iviz.Controllers
                 {
                     foreach (int j in textureTiles.Count..tileTotalSize)
                     {
-                        var resource = ResourcePool.RentDisplay<OccupancyGridTextureResource>(textureNode.Transform);
+                        var resource = ResourcePool.RentDisplay<OccupancyGridTextureDisplay>(textureNode.Transform);
                         resource.gameObject.name = $"OccupancyGridTextureResource-{j.ToString()}";
                         resource.Visible = Visible;
                         resource.Colormap = Colormap;
@@ -403,7 +403,7 @@ namespace Iviz.Controllers
                     int yMin = v * MaxTileSize;
                     int yMax = Math.Min(yMin + MaxTileSize, numCellsY);
 
-                    var rect = new OccupancyGridResource.Rect(xMin, xMax, yMin, yMax);
+                    var rect = new OccupancyGridDisplay.Rect(xMin, xMax, yMin, yMax);
 
                     var texture = textureTiles[i++];
                     tasks.Add(Task.Run(() =>

@@ -29,14 +29,14 @@ namespace Iviz.Displays
     {
         public const string ColliderTag = "RobotCollider";
 
-        readonly List<MeshMarkerResource> displays = new();
+        readonly List<MeshMarkerDisplay> displays = new();
         readonly Dictionary<string, GameObject> jointObjects = new();
         readonly Dictionary<string, Joint> joints = new();
         readonly Dictionary<string, GameObject> linkObjects = new();
         readonly Dictionary<GameObject, GameObject> linkParentObjects = new();
         readonly Dictionary<string, string> linkParents = new();
         readonly List<(GameObject, ResourceKey<GameObject>)> objectResources = new();
-        readonly Dictionary<MeshMarkerResource, Color> originalColors = new();
+        readonly Dictionary<MeshMarkerDisplay, Color> originalColors = new();
 
         readonly Robot robot;
         readonly CancellationTokenSource runningTs = new();
@@ -115,7 +115,7 @@ namespace Iviz.Displays
                 }
             }
         }
-        
+
         public bool EnableShadows
         {
             set
@@ -212,7 +212,7 @@ namespace Iviz.Displays
             Visible = visible;
             Smoothness = smoothness;
             Metallic = metallic;
-            EnableShadows = enableShadows; 
+            EnableShadows = enableShadows;
             ApplyAnyValidConfiguration();
 
             string errorStr = numErrors == 0 ? "" : $"There were {numErrors.ToString()} errors.";
@@ -351,7 +351,8 @@ namespace Iviz.Displays
                 }
 
                 var resourceObject = info.Object;
-                foreach (var meshFilter in resourceObject.GetComponentsInChildren<MeshFilter>())
+                //foreach (var meshFilter in resourceObject.GetComponentsInChildren<MeshFilter>())
+                foreach (var meshFilter in resourceObject.GetAllChildren().WithComponent<MeshFilter>())
                 {
                     var child = new GameObject("[Collider]");
                     child.transform.parent = collisionObject.transform;
@@ -473,27 +474,19 @@ namespace Iviz.Displays
                 var resolvedMaterial = GetMaterialForVisual(material, keepMeshMaterials ? null : rootMaterials);
                 var color = resolvedMaterial?.Color?.ToColor() ?? Color.white;
 
-                var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
-                var resources = new List<MeshMarkerResource>();
-
-                foreach (var renderer in renderers)
+                //var renderers = resourceObject.GetComponentsInChildren<MeshRenderer>();
+                var meshMarkerDisplays = resourceObject.GetAllChildren().WithComponent<MeshMarkerDisplay>();
+                foreach (var display in meshMarkerDisplays)
                 {
-                    var meshResource = renderer.gameObject.GetComponent<MeshMarkerResource>();
-                    if (meshResource == null)
-                    {
-                        continue;
-                    }
-
-                    originalColors[meshResource] = meshResource.Color;
-                    meshResource.Color *= color;
-                    resources.Add(meshResource);
+                    originalColors[display] = display.Color;
+                    display.Color *= color;
+                    //display.Color = (display.Color + color).Clamp(); // how are colors blended??
+                    displays.Add(display);
                 }
-
-                displays.AddRange(resources);
             }
             else
             {
-                var resource = resourceObject.AddComponent<MeshMarkerResource>();
+                var resource = resourceObject.AddComponent<MeshMarkerDisplay>();
                 displays.Add(resource);
 
                 var resolvedMaterial = GetMaterialForVisual(material, rootMaterials);
@@ -593,16 +586,16 @@ namespace Iviz.Displays
             Tint = Color.white;
             OcclusionOnly = false;
 
-            foreach (var (key, color) in originalColors)
+            foreach (var (display, color) in originalColors)
             {
-                key.Color = color;
+                display.Color = color;
             }
 
-            foreach (var (gameObject, info) in objectResources)
+            foreach (var (gameObject, resourceKey) in objectResources)
             {
                 var display = gameObject.GetComponent<IDisplay>();
                 display?.Suspend();
-                ResourcePool.Return(info, gameObject);
+                ResourcePool.Return(resourceKey, gameObject);
             }
 
             Object.Destroy(BaseLinkObject);
@@ -638,9 +631,9 @@ namespace Iviz.Displays
             var axis = joint.Axis.Xyz.ToVector3();
             Pose? unityPose = joint.Type switch
             {
-                Joint.JointType.Revolute or Joint.JointType.Continuous => 
+                Joint.JointType.Revolute or Joint.JointType.Continuous =>
                     Pose.identity.WithRotation(Quaternion.AngleAxis(-value * Mathf.Rad2Deg, axis)),
-                Joint.JointType.Prismatic => 
+                Joint.JointType.Prismatic =>
                     Pose.identity.WithPosition(axis * value),
                 _ => null
             };
@@ -649,7 +642,7 @@ namespace Iviz.Displays
             {
                 return false;
             }
-            
+
             var jointObject = jointObjects[jointName];
             jointObject.transform.SetLocalPose(validatedPose);
             return true;
@@ -675,9 +668,6 @@ namespace Iviz.Displays
         }
         */
 
-        public override string ToString()
-        {
-            return $"[Robot {Name}]";
-        }
+        public override string ToString() => $"[Robot {Name}]";
     }
 }

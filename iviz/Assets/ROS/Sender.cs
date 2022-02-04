@@ -5,12 +5,15 @@ using System.Text;
 using System.Threading;
 using Iviz.Core;
 using Iviz.Msgs;
+using UnityEngine;
 
 namespace Iviz.Ros
 {
+    /// <inheritdoc cref="ISender"/>
+    /// <typeparam name="T">The ROS message type</typeparam>
     public sealed class Sender<T> : ISender where T : IMessage
     {
-        static RoslibConnection Connection => ConnectionManager.Connection;
+        static RoslibConnection Connection => RosManager.Connection;
 
         long lastMsgBytes;
         int recentMsgs;
@@ -73,7 +76,7 @@ namespace Iviz.Ros
 
             Stats = new RosSenderStats(recentMsgs, lastMsgBytes);
 
-            ConnectionManager.ReportBandwidthUp(lastMsgBytes);
+            RosManager.ReportBandwidthUp(lastMsgBytes);
 
             Interlocked.Exchange(ref recentMsgs, 0);
             Interlocked.Exchange(ref lastMsgBytes, 0);

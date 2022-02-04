@@ -8,11 +8,11 @@ namespace Iviz.Msgs.SensorMsgs
     public sealed class Joy : IDeserializable<Joy>, IMessage
     {
         // Reports the state of a joysticks axes and buttons.
-        /// timestamp in the header is the time the data is received from the joystick
+        /// <summary> Timestamp in the header is the time the data is received from the joystick </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
-        /// the axes measurements from a joystick
+        /// <summary> The axes measurements from a joystick </summary>
         [DataMember (Name = "axes")] public float[] Axes;
-        /// the buttons measurements from a joystick
+        /// <summary> The buttons measurements from a joystick </summary>
         [DataMember (Name = "buttons")] public int[] Buttons;
     
         /// Constructor for empty message.
@@ -68,13 +68,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/Joy";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "5a9ea5f83505693b71e785041e67a8bb";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61TwW7UMBC9+ytGyqEt0hYJbitxQ1AOSIj2htBq1p4kpokd7Mm2+XuenaZbcUA9YFlJ" +
                 "bM+8eX5v0tB3mWLSTNoLZWUVii0x/YpLVm/vM/Gj4BEcHWfVGPK1uRF2kqhfX+fRkPpRADJO5ENFfIrx" +

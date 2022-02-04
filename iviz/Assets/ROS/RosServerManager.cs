@@ -1,10 +1,11 @@
+#nullable enable
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.RosMaster;
 using Iviz.Tools;
-using Iviz.XmlRpc;
 using JetBrains.Annotations;
 
 namespace Iviz.Ros
@@ -14,36 +15,27 @@ namespace Iviz.Ros
         public const int DefaultPort = RosMasterServer.DefaultPort;
         const int DisposeTimeoutInMs = 2000;
 
-        static readonly List<(string key, string value)> DefaultKeys = new List<(string, string)>
+        static readonly List<(string key, string value)> DefaultKeys = new()
         {
             ("/rosdistro", "noetic"),
             ("/rosversion", "1.15.8"),
-            ("/ivizversion", "1.0.0")
+            ("/ivizversion", "1.0.1")
         };
 
-        static RosServerManager instance;
+        RosMasterServer? server;
+        Task? serverTask;
 
-        RosMasterServer server;
-        Task serverTask;
-        
-        [NotNull] static RosServerManager Instance => instance ?? (instance = new RosServerManager());
-        public static bool IsActive => instance?.server != null;
-        [CanBeNull] public static Uri MasterUri => instance?.server?.MasterUri;
+        public bool IsActive => server != null;
+        public Uri? MasterUri => server?.MasterUri;
 
-        public static bool Create([NotNull] Uri masterUri, [NotNull] string masterId)
+        public bool Start(Uri masterUri, string masterId)
         {
-            return Instance.TryCreate(
+            return TryStart(
                 masterUri ?? throw new ArgumentNullException(nameof(masterUri)),
                 masterId ?? throw new ArgumentNullException(nameof(masterId)));
         }
 
-        public static void Dispose()
-        {
-            instance?.DisposeImpl();
-            instance = null;
-        }
-
-        bool TryCreate(Uri masterUri, string masterId)
+        bool TryStart(Uri masterUri, string masterId)
         {
             if (server != null)
             {
@@ -52,7 +44,8 @@ namespace Iviz.Ros
                     return true;
                 }
 
-                DisposeImpl();
+                Dispose();
+                // pass through
             }
 
             try
@@ -65,7 +58,13 @@ namespace Iviz.Ros
                 }
 
                 // start in background
-                serverTask = TaskUtils.Run(() => server.StartAsync().AwaitNoThrow(this));
+                serverTask = TaskUtils.Run(async () =>
+                {
+                    var task = server.StartAsync().AwaitNoThrow(this);
+                    await Task.Delay(100);
+                    RosManager.Connection.TryOnceToConnect();
+                    await task;
+                });
             }
             catch (Exception e)
             {
@@ -76,15 +75,32 @@ namespace Iviz.Ros
             return server != null;
         }
 
-        void DisposeImpl()
+        public void Dispose()
         {
             if (server == null)
             {
                 return;
             }
 
+            RosLogger.Info("RosServerManager: Disposing!");
             server.Dispose();
-            serverTask.AwaitNoThrow(DisposeTimeoutInMs, this);
+            
+            // should return immediately, the waiting happened in server.Dispose()
+            _ = serverTask.AwaitNoThrow(DisposeTimeoutInMs, this);
+            
+            server = null;
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (server == null)
+            {
+                return;
+            }
+
+            RosLogger.Info("RosServerManager: Disposing!");
+            await server.DisposeAsync();
+            await serverTask.AwaitNoThrow(DisposeTimeoutInMs, this);
             server = null;
         }
     }

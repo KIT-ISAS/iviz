@@ -13,28 +13,33 @@ namespace Iviz.Msgs.RosgraphMsgs
         //#
         //# Severity level constants
         //#
-        public const byte DEBUG = 1; //debug level
-        public const byte INFO = 2; //general level
-        public const byte WARN = 4; //warning level
-        public const byte ERROR = 8; //error level
-        public const byte FATAL = 16; //fatal/critical level
+        /// <summary> Debug level </summary>
+        public const byte DEBUG = 1;
+        /// <summary> General level </summary>
+        public const byte INFO = 2;
+        /// <summary> Warning level </summary>
+        public const byte WARN = 4;
+        /// <summary> Error level </summary>
+        public const byte ERROR = 8;
+        /// <summary> Fatal/critical level </summary>
+        public const byte FATAL = 16;
         //#
         //# Fields
         //#
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         [DataMember (Name = "level")] public byte Level;
-        /// name of the node
+        /// <summary> Name of the node </summary>
         [DataMember (Name = "name")] public string Name;
-        /// message
+        /// <summary> Message </summary>
         [DataMember (Name = "msg")] public string Msg;
-        /// file the message came from
+        /// <summary> File the message came from </summary>
         [DataMember (Name = "file")] public string File;
-        /// function the message came from
+        /// <summary> Function the message came from </summary>
         [DataMember (Name = "function")] public string Function;
-        /// line the message came from
+        /// <summary> Line the message came from </summary>
         [DataMember (Name = "line")] public uint Line;
         //string[] topics # topic names that the node publishes
-        /// [Ignore]
+        /// <summary> [Ignore] </summary>
         [DataMember (Name = "topics")] public string[] Topics;
     
         /// Explicit constructor.
@@ -118,13 +123,13 @@ namespace Iviz.Msgs.RosgraphMsgs
     
         public readonly string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "rosgraph_msgs/Log";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "acffd30cd6b6de30f120938c17c593fb";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61TXWvbMBR996+4oIe2g7S0G2ME8pCRpgts7Ugz9lBKUKwbWyBLniQn87/fkdxkGevD" +
                 "HhYMkn3POffrRIhCCHrkHXsdezK4GCqdDVHaGBArNn1kmt1+/HY3uSaheNNVA2yILO7nD5MbIlGxZS/N" +

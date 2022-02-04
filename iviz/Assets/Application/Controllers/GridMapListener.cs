@@ -5,15 +5,11 @@ using System.Collections.ObjectModel;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs;
 using Iviz.Msgs.GridMapMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Roslib;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Controllers
@@ -23,8 +19,7 @@ namespace Iviz.Controllers
         const int MaxGridSize = 4096;
 
         readonly FrameNode node;
-        readonly FrameNode link;
-        readonly GridMapResource resource;
+        readonly GridMapDisplay resource;
 
         int numCellsX;
         int numCellsY;
@@ -39,7 +34,7 @@ namespace Iviz.Controllers
         public GridMapConfiguration Config
         {
             get => config;
-            set
+            private set
             {
                 config.Topic = value.Topic;
                 Visible = value.Visible;
@@ -49,6 +44,8 @@ namespace Iviz.Controllers
                 MinIntensity = value.MinIntensity;
                 MaxIntensity = value.MaxIntensity;
                 FlipMinMax = value.FlipMinMax;
+                Smoothness = value.Smoothness;
+                Metallic = value.Metallic;
                 Tint = value.Tint;
             }
         }
@@ -110,6 +107,26 @@ namespace Iviz.Controllers
                 resource.Tint = value;
             }
         }
+        
+        public float Smoothness
+        {
+            get => config.Smoothness;
+            set
+            {
+                config.Smoothness = value;
+                resource.Smoothness = value;
+            }
+        }
+
+        public float Metallic
+        {
+            get => config.Metallic;
+            set
+            {
+                config.Metallic = value;
+                resource.Metallic = value;
+            }
+        }
 
         public float MinIntensity
         {
@@ -160,32 +177,27 @@ namespace Iviz.Controllers
         {
             FieldNames = fieldNames.AsReadOnly();
 
-            node = FrameNode.Instantiate("[GridMapNode]");
-            link = FrameNode.Instantiate("[GridMapLink]");
-            link.Transform.parent = node.Transform;
-            resource = ResourcePool.Rent<GridMapResource>(Resource.Displays.GridMap, link.Transform);
+            node = new FrameNode("GridMapNode");
+            resource = ResourcePool.Rent<GridMapDisplay>(Resource.Displays.GridMap, node.Transform);
 
             Config = config ?? new GridMapConfiguration
             {
                 Topic = topic,
+                Id = topic,
             };
 
             Listener = new Listener<GridMap>(Config.Topic, Handler);
         }
 
-        static bool IsInvalidSize(double x)
-        {
-            return double.IsNaN(x) || x <= 0;
-        }
-
         void Handler(GridMap msg)
         {
+            static bool IsInvalidSize(double x) => x.IsInvalid() || x <= 0;
+
             if (IsInvalidSize(msg.Info.LengthX) ||
                 IsInvalidSize(msg.Info.LengthY) ||
-                IsInvalidSize(msg.Info.Resolution) ||
-                msg.Info.Pose.IsInvalid())
+                IsInvalidSize(msg.Info.Resolution))
             {
-                RosLogger.Debug("GridMapListener: Message info has NaN!");
+                RosLogger.Info($"{this}: Message info has invalid values!");
                 return;
             }
 
@@ -194,13 +206,20 @@ namespace Iviz.Controllers
 
             if (width > MaxGridSize || height > MaxGridSize)
             {
-                RosLogger.Debug("GridMapListener: Gridmap is too large!");
+                RosLogger.Info($"{this}: Gridmap is too large! Iviz only supports gridmap sizes " +
+                               $"up to {MaxGridSize.ToString()}");
                 return;
             }
 
-            if (msg.Data.Length == 0)
+            if (msg.Info.Pose.IsInvalid())
             {
-                RosLogger.Debug("GridMapListener: Empty gridmap!");
+                RosLogger.Info($"{this}: Pose contains invalid values!");
+                return;
+            }
+
+            if (msg.OuterStartIndex != 0 || msg.InnerStartIndex != 0)
+            {
+                RosLogger.Info($"{this}: Nonzero start indices not implemented!");
                 return;
             }
 
@@ -210,24 +229,22 @@ namespace Iviz.Controllers
             int layer = string.IsNullOrEmpty(IntensityChannel) ? 0 : fieldNames.IndexOf(IntensityChannel);
             if (layer == -1 || layer >= msg.Data.Length)
             {
-                RosLogger.Debug("GridMapListener: Gridmap layer is not available!");
+                RosLogger.Info($"{this}: Gridmap layer {layer.ToString()}is missing!");
                 return;
             }
 
             int length = msg.Data[layer].Data.Length;
             if (length != width * height)
             {
-                RosLogger.Error(
-                    $"{this}: Gridmap layer size does not match. Expected {width * height}, but got {length}");
+                RosLogger.Error($"{this}: Gridmap layer size does not match. " +
+                                $"Expected {(width * height).ToString()} entries, but got {length.ToString()}!");
                 return;
             }
-
+            
             node.AttachTo(msg.Info.Header);
-            link.Transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
+            node.Transform.SetLocalPose(msg.Info.Pose.Ros2Unity());
 
-            resource.Set(width, height,
-                (float)msg.Info.LengthX, (float)msg.Info.LengthY,
-                msg.Data[layer].Data, length);
+            resource.Set(width, height, (float)msg.Info.LengthX, (float)msg.Info.LengthY, msg.Data[layer].Data);
 
             numCellsX = width;
             numCellsY = height;
@@ -237,10 +254,7 @@ namespace Iviz.Controllers
         public override void Dispose()
         {
             base.Dispose();
-
             resource.ReturnToPool();
-
-            link.Dispose();
             node.Dispose();
         }
     }

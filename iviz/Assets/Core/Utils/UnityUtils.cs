@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Tools;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -231,13 +233,13 @@ namespace Iviz.Core
             float num1 = lhs.x - rhs.x;
             float num2 = lhs.y - rhs.y;
             float num3 = lhs.z - rhs.z;
-            return num1 * num1 + num2 * num2 + num3 * num3 < 9.999999439624929E-11;
+            return num1 * num1 + num2 * num2 + num3 * num3 < 9.999999439624929E-11f;
         }
 
         static bool EqualsApprox(in Quaternion a, in Quaternion b)
         {
             // from unity
-            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w > 0.9999989867210388;
+            return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w > 0.9999989867210388f;
         }
 
         public static Pose Lerp(this in Pose p, in Pose o, float t) => new Pose(
@@ -296,6 +298,16 @@ namespace Iviz.Core
         {
             c.a = alpha;
             return c;
+        }
+        
+        public static Color Clamp(this in Color c)
+        {
+            Color q;
+            q.r = Mathf.Clamp01(c.r);
+            q.g = Mathf.Clamp01(c.g);
+            q.b = Mathf.Clamp01(c.b);
+            q.a = Mathf.Clamp01(c.a);
+            return q;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -370,6 +382,12 @@ namespace Iviz.Core
         {
             Color.RGBToHSV(c, out float h, out float s, out _);
             return Color.HSVToRGB(h, s, value).WithAlpha(c.a);
+        }
+
+        public static float GetValue(this in Color c)
+        {
+            Color.RGBToHSV(c, out _, out _, out float value);
+            return value;
         }
 
         public static bool IsUsable(this in Pose pose)
@@ -499,16 +517,6 @@ namespace Iviz.Core
         public static void Deconstruct(this in Ray r, out Vector3 origin, out Vector3 direction) =>
             (origin, direction) = (r.origin, r.direction);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this in TransformStamped p,
-            out string parentId, out string childId, out Msgs.GeometryMsgs.Transform transform, out time stamp)
-        {
-            parentId = p.Header.FrameId;
-            childId = p.ChildFrameId;
-            transform = p.Transform;
-            stamp = p.Header.Stamp;
-        }
-
         public static unsafe Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
             return new Span<T>(array.GetUnsafePtr(), array.Length);
@@ -540,10 +548,17 @@ namespace Iviz.Core
             return MemoryMarshal.Read<T>(span);
         }
 
-        public static void TryReturn(this Array _)
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array, Range range)
         {
+            return array.AsSpan(range);
         }
 
+        /// <summary>
+        /// Returns the array inside a <see cref="Memory{T}"/> object to the <see cref="ArrayPool{T}"/>.
+        /// Used by some iviz messages which rent arrays from the pool instead of creating a new one.
+        /// </summary>
+        /// <param name="memory"></param>
+        /// <typeparam name="T"></typeparam>
         public static void TryReturn<T>(this Memory<T> memory) where T : unmanaged
         {
             if (memory.Length != 0
@@ -552,7 +567,18 @@ namespace Iviz.Core
                 ArrayPool<T>.Shared.Return(segment.Array);
             }
         }
+        
+        /// <summary>
+        /// Empty function. Used for debugging purposes as an overload for <see cref="TryReturn{T}(Memory{T})"/>,
+        /// in case an iviz message is temporarily set to contain an array instead of a Memory.
+        /// </summary>
+        public static void TryReturn(this Array _)
+        {
+        }        
 
+        /// <summary>
+        /// Convenience function to obtain spans from <see cref="Memory{T}"/> the same way as with arrays. 
+        /// </summary>
         public static Span<T> AsSpan<T>(this Memory<T> memory) where T : unmanaged => memory.Span;
 
         /// Creates a temporary native array that lasts one frame.
@@ -622,19 +648,13 @@ namespace Iviz.Core
         /// Color representation from the bits of a float.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static Color32 AsColor32(float f)
-        {
-            return Unsafe.As<float, Color32>(ref f);
-        }
+        internal static Color32 AsColor32(float f) => Unsafe.As<float, Color32>(ref f);
 
         /// <summary>
         /// Float representation from the bits of a Color32.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float AsFloat(Color32 f)
-        {
-            return Unsafe.As<Color32, float>(ref f);
-        }
+        public static float AsFloat(Color32 f) => Unsafe.As<Color32, float>(ref f);
 
         public static Vector3 Forward(this in Quaternion rotation)
         {
@@ -686,6 +706,51 @@ namespace Iviz.Core
 
         public static T EnsureComponent<T>(this GameObject gameObject) where T : Component =>
             gameObject.TryGetComponent(out T comp) ? comp : gameObject.AddComponent<T>();
+
+        /// <summary>
+        /// Retrieves the given component from each entry in the enumerable, if it exists.
+        /// </summary>
+        public static IEnumerable<T> WithComponent<T>(this IEnumerable<Component> transforms)
+        {
+            foreach (var transform in transforms)
+            {
+                if (transform.TryGetComponent(out T t))
+                {
+                    yield return t;
+                }
+            }
+        }
+
+        /// <inheritdoc cref="GetAllChildren(UnityEngine.Transform)"/>
+        public static IEnumerable<Transform> GetAllChildren(this GameObject transform) => GetAllChildren(transform.transform);
+
+        /// <summary>
+        /// Retrieves all children without allocating an array with all results.
+        /// Note: The parent is included in the enumeration.
+        /// </summary>
+        /// <param name="parent">The node to start the search in</param>
+        /// <returns></returns>
+        public static IEnumerable<Transform> GetAllChildren(this Transform parent)
+        {
+            return parent.childCount == 0 
+                ? new[] { parent } 
+                : GetAllChildrenImpl(parent);
+
+            static IEnumerable<Transform> GetAllChildrenImpl(Transform transform)
+            {
+                var stack = new Stack<Transform>();
+                stack.Push(transform);
+
+                while (stack.TryPop(out var childTransform))
+                {
+                    yield return childTransform;
+                    foreach (int i in ..childTransform.childCount)
+                    {
+                        stack.Push(childTransform.GetChild(i));
+                    }
+                }
+            }
+        }
     }
 
     public readonly struct WithIndexEnumerable<T>

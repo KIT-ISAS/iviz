@@ -26,8 +26,7 @@ namespace Iviz.App
 
 
         public MagnitudeModuleData(ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
-                constructor.TryGetConfigurationType() ?? constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<MagnitudeModulePanel>(ModuleType.Magnitude);
             listener = new MagnitudeListener((MagnitudeConfiguration?)constructor.Configuration, Topic, TopicType);

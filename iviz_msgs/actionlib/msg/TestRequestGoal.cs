@@ -14,17 +14,17 @@ namespace Iviz.Msgs.Actionlib
         public const int TERMINATE_DROP = 4;
         public const int TERMINATE_EXCEPTION = 5;
         [DataMember (Name = "terminate_status")] public int TerminateStatus;
-        /// If true, ignores requests to cancel
+        /// <summary> If true, ignores requests to cancel </summary>
         [DataMember (Name = "ignore_cancel")] public bool IgnoreCancel;
         [DataMember (Name = "result_text")] public string ResultText;
-        /// Desired value for the_result in the Result
+        /// <summary> Desired value for the_result in the Result </summary>
         [DataMember (Name = "the_result")] public int TheResult;
         [DataMember (Name = "is_simple_client")] public bool IsSimpleClient;
-        /// Delays accepting the goal by this amount of time
+        /// <summary> Delays accepting the goal by this amount of time </summary>
         [DataMember (Name = "delay_accept")] public duration DelayAccept;
-        /// Delays terminating for this amount of time
+        /// <summary> Delays terminating for this amount of time </summary>
         [DataMember (Name = "delay_terminate")] public duration DelayTerminate;
-        /// Pauses the status messages for this amount of time
+        /// <summary> Pauses the status messages for this amount of time </summary>
         [DataMember (Name = "pause_status")] public duration PauseStatus;
     
         /// Constructor for empty message.
@@ -84,13 +84,13 @@ namespace Iviz.Msgs.Actionlib
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "actionlib/TestRequestGoal";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "db5d00ba98302d6c6dd3737e9a03ceea";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE2XOwQqCQBSF4b1P4SOU1nIWpndRlIpO0G6Y9GID4ygzV6i3r8gMmu3/ceAoQ3EUcqhO" +
                 "+zzhIOpzmkJds1Wg/iTZFRWHjK09qeAA6Zsij45FDSz2clYVJdt4GS4plHxf5Gw7G6HtlZGEwpGkyQXX" +

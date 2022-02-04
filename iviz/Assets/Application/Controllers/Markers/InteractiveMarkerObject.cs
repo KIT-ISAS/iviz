@@ -24,7 +24,7 @@ namespace Iviz.Controllers
         readonly InteractiveMarkerListener listener;
         readonly string rosId;
         MenuEntryList? menuEntries;
-        TextMarkerResource? text;
+        TextMarkerDisplay? text;
 
         bool visible;
         bool descriptionVisible;
@@ -61,7 +61,7 @@ namespace Iviz.Controllers
                 {
                     if (text == null)
                     {
-                        text = ResourcePool.RentDisplay<TextMarkerResource>(ControlNode);
+                        text = ResourcePool.RentDisplay<TextMarkerDisplay>(ControlNode);
                         text.BillboardEnabled = true;
                         text.BillboardOffset = Vector3.up * 0.1f;
                         text.ElementSize = 0.1f;
@@ -124,7 +124,7 @@ namespace Iviz.Controllers
             this.listener = listener;
             this.rosId = rosId;
 
-            node = new FrameNode($"[InteractiveMarkerObject '{rosId}']", parent);
+            node = new FrameNode($"InteractiveMarkerObject '{rosId}'", parent);
 
             ControlNode = new GameObject("[ControlNode]").transform;
             ControlNode.SetParentLocal(node.Transform);

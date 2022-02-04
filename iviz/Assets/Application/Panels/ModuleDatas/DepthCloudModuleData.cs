@@ -168,7 +168,7 @@ namespace Iviz.App
         static List<string> GetImageTopics()
         {
             var topics = new List<string> { NoneStr };
-            topics.AddRange(ConnectionManager.Connection.GetSystemPublishedTopicTypes()
+            topics.AddRange(RosManager.Connection.GetSystemPublishedTopicTypes()
                 .Where(topicInfo => topicInfo.Type is Image.RosMessageType or CompressedImage.RosMessageType)
                 .Select(topicInfo => topicInfo.Topic)
             );

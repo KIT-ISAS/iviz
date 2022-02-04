@@ -5,18 +5,15 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using Iviz.App;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
-using UnityEngine;
 using Pose = UnityEngine.Pose;
 using Vector3 = UnityEngine.Vector3;
 
@@ -168,10 +165,11 @@ namespace Iviz.Controllers
 
         public InteractiveMarkerListener(InteractiveMarkerConfiguration? config, string topic)
         {
-            node = new FrameNode("[InteractiveMarkerListener]");
+            node = new FrameNode(nameof(InteractiveMarkerListener));
             Config = config ?? new InteractiveMarkerConfiguration
             {
                 Topic = topic,
+                Id = topic
             };
             
             Listener = new Listener<InteractiveMarkerUpdate>(Config.Topic, HandlerUpdate) { MaxQueueSize = 50 };
@@ -318,7 +316,7 @@ namespace Iviz.Controllers
         {
             var msg = new InteractiveMarkerFeedback(
                 TfListener.CreateHeader(feedSeq++, frameId ?? ""),
-                ConnectionManager.MyId ?? "",
+                RosManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
                 (byte)eventType,
@@ -338,7 +336,7 @@ namespace Iviz.Controllers
             var msg = new InteractiveMarkerFeedback
             (
                 TfListener.CreateHeader(feedSeq++, frameId ?? ""),
-                ConnectionManager.MyId ?? "",
+                RosManager.MyId ?? "",
                 interactiveMarkerId,
                 controlId,
                 InteractiveMarkerFeedback.POSE_UPDATE,
@@ -357,7 +355,7 @@ namespace Iviz.Controllers
             var msg = new InteractiveMarkerFeedback
             (
                 TfListener.CreateHeader(feedSeq++, frameId ?? ""),
-                ConnectionManager.MyId ?? "",
+                RosManager.MyId ?? "",
                 interactiveMarkerId,
                 "",
                 InteractiveMarkerFeedback.MENU_SELECT,

@@ -4,7 +4,7 @@ using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Displays.XRDialogs;
+using Iviz.Displays.XR;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 

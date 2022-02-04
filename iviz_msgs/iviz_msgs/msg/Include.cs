@@ -8,12 +8,12 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class Include : IDeserializable<Include>, IMessage
     {
         // Reference to an external asset
-        /// Uri of the asset
+        /// <summary> Uri of the asset </summary>
         [DataMember (Name = "uri")] public string Uri;
-        /// Pose of the asset
+        /// <summary> Pose of the asset </summary>
         [DataMember (Name = "pose")] public Matrix4 Pose;
         [DataMember (Name = "material")] public Material Material;
-        /// If uri has a model scheme, this indicates the package to search
+        /// <summary> If uri has a model scheme, this indicates the package to search </summary>
         [DataMember (Name = "package")] public string Package;
     
         /// Constructor for empty message.
@@ -78,13 +78,13 @@ namespace Iviz.Msgs.IvizMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "iviz_msgs/Include";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "89c6a6240009410a08d4bbcad467b364";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE72UyW7bMBCGz9FTEMi1QBtnaVogB1mibaLaoCWpEQQCI1M2W2uBSDlOn74jiVJo5NrU" +
                 "B1P8Zjj8Z8jhOQpZzhpWZgzJCtESsaNkTUn3iArBpGEI2fByi9qGo7Ozc5TAWOVI7phycCk4HK9QXQnW" +

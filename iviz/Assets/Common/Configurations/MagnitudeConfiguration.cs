@@ -5,7 +5,7 @@ using Iviz.Core;
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class MagnitudeConfiguration : IConfigurationWithType
+    public sealed class MagnitudeConfiguration : IConfigurationWithTopic
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.Magnitude;

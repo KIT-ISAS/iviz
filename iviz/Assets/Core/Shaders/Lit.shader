@@ -12,7 +12,7 @@
 		#pragma surface surf Standard fullforwardshadows
 
 		struct Input {
-			float4 color : COLOR;
+			fixed4 color : COLOR;
 		};
 
 

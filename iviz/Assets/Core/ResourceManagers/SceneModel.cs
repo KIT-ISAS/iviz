@@ -22,7 +22,7 @@ namespace Iviz.Displays
 {
     public static class SceneModel
     {
-        public static async ValueTask<MeshMarkerHolderResource> CreateAsync(string uriString,
+        public static async ValueTask<MeshMarkerHolderDisplay> CreateAsync(string uriString,
             Model msg, IExternalServiceProvider? provider, CancellationToken token)
         {
             if (uriString is null)
@@ -58,7 +58,7 @@ namespace Iviz.Displays
             }
         }
 
-        static async ValueTask<MeshMarkerHolderResource> CreateImpl(string uriString, Model msg,
+        static async ValueTask<MeshMarkerHolderDisplay> CreateImpl(string uriString, Model msg,
             IExternalServiceProvider? provider, CancellationToken token, GameObject root)
         {
             root.transform.localRotation =
@@ -66,9 +66,9 @@ namespace Iviz.Displays
                     ? Quaternion.Euler(0, -90, 0)
                     : Quaternion.Euler(90, 0, 90);
 
-            var marker = root.AddComponent<MeshMarkerHolderResource>();
-            var children = new List<MeshTrianglesResource>();
-            var templateMeshes = new List<MeshTrianglesResource>();
+            var marker = root.AddComponent<MeshMarkerHolderDisplay>();
+            var children = new List<MeshTrianglesDisplay>();
+            var templateMeshes = new List<MeshTrianglesDisplay>();
 
             foreach (var mesh in msg.Meshes)
             {
@@ -81,7 +81,7 @@ namespace Iviz.Displays
 
                 obj.transform.SetParent(root.transform, false);
 
-                var meshResource = obj.AddComponent<MeshTrianglesResource>();
+                var meshResource = obj.AddComponent<MeshTrianglesDisplay>();
 
                 meshResource.gameObject.name = mesh.Name;
 
@@ -169,7 +169,7 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        RosLogger.Warn("SceneModel: Failed to retrieve normal texture " +
+                        RosLogger.Warn("SceneModel: Failed to retrieve bump texture " +
                                        $"'{bumpTexture.Path}' required by '{uriString}'");
                     }
                 }
@@ -215,7 +215,7 @@ namespace Iviz.Displays
                             templateMeshes[meshId].gameObject,
                             nodeObjectTransform,
                             false);
-                        children.Add(newMesh.GetComponent<MeshTrianglesResource>());
+                        children.Add(newMesh.GetComponent<MeshTrianglesDisplay>());
                     }
                 }
             }

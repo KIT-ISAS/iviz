@@ -10,6 +10,10 @@ namespace Iviz.Tools;
 
 public static class ConnectionUtils
 {
+    /// <summary>
+    /// A list of host aliases in the form of (key: ip address, value: real name).
+    /// Used by all iviz connections. 
+    /// </summary>
     public static Dictionary<string, string> GlobalResolver { get; } = new(StringComparer.OrdinalIgnoreCase);
 
     static readonly AsyncCallback OnComplete =
@@ -21,6 +25,16 @@ public static class ConnectionUtils
     static readonly Action<object?> OnTimeout = tcs =>
         ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetException(new TimeoutException());
 
+    /// <summary>
+    /// Convenience function to connect a <see cref="TcpClient"/> to the given address,
+    /// while taking into account timeouts and cancellation tokens.
+    /// These functions are standard in NET5, but are missing in Standard 2.1.
+    /// </summary>
+    /// <param name="client">The client to connect.</param>
+    /// <param name="hostname">The destination address. Takes into account <see cref="GlobalResolver"/>.</param>
+    /// <param name="port">The destination port.</param>
+    /// <param name="token">A cancellation token.</param>
+    /// <param name="timeoutInMs">The timeout in milliseconds.</param>
     public static async ValueTask TryConnectAsync(this TcpClient client, string hostname, int port,
         CancellationToken token, int timeoutInMs = -1)
     {
@@ -59,6 +73,12 @@ public static class ConnectionUtils
         }
     }
 
+    /// <summary>
+    /// Convenience function to connect a <see cref="UdpClient"/> to the given address,
+    /// </summary>
+    /// <param name="client">The client to connect.</param>
+    /// <param name="hostname">The destination address. Takes into account <see cref="GlobalResolver"/>.</param>
+    /// <param name="port">The destination port.</param>
     public static void TryConnect(this UdpClient client, string hostname, int port)
     {
         string resolvedHostname = GlobalResolver.TryGetValue(hostname, out string? newHostname)

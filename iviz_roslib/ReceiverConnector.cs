@@ -10,7 +10,7 @@ using Iviz.XmlRpc;
 namespace Iviz.Roslib;
 
 /// <summary>
-/// Class in charge of trying to connect and reconnect over and over to a ROS publisher 
+/// Class in charge of trying to connect and reconnect to a ROS publisher 
 /// </summary>
 internal class ReceiverConnector
 {

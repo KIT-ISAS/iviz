@@ -44,7 +44,7 @@ public readonly struct RangeEnumerable<TA> : IReadOnlyList<TA>
 
     public RangeEnumerable<TA> Take(int count) => new(a, start, start + count);
 
-    public RangeEnumerable<TA> Skip(int start) => new(a, this.start + start, a.Count);
+    public RangeEnumerable<TA> Skip(int start) => new(a, this.start + start, end);
 
     public SelectEnumerable<RangeEnumerable<TA>, TA, TB> Select<TB>(Func<TA, TB> f) => new(this, f);
 }

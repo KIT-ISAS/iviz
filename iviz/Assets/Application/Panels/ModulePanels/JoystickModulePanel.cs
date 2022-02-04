@@ -8,6 +8,7 @@ namespace Iviz.App
     {
         public TrashButtonWidget CloseButton { get; private set; }
 
+        public DropdownWidget Mode { get; private set; }
         public ToggleWidget SendJoy { get; private set; }
         public InputFieldWithHintsWidget JoyTopic { get; private set; }
         public SenderWidget JoySender { get; private set; }
@@ -29,6 +30,14 @@ namespace Iviz.App
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
 
+            Mode = p.AddDropdown("Mode").SetOptions(new[]
+            {
+                "Left Joystick",
+                "Right Joystick",
+                "Two Joysticks",
+                "Four Joysticks"
+            });
+            
             SendJoy = p.AddToggle("Publish Joy Message");
             JoyTopic = p.AddInputFieldWithHints("Joy Topic").SetPlaceholder("joy");
             JoySender = p.AddSender();

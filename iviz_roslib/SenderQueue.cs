@@ -12,7 +12,7 @@ namespace Iviz.Roslib;
 
 internal sealed class SenderQueue<T> where T : IMessage
 {
-    const int MaxPacketsWithoutConstraint = 2;
+    const int NumPacketsWithoutConstraint = 2;
     const int MaxPacketsInQueue = 2048;
 
     readonly IRosSender sender;
@@ -83,7 +83,7 @@ internal sealed class SenderQueue<T> where T : IMessage
     {
         long totalQueueSizeInBytes = ReadFromQueue();
 
-        if (sendQueue.Count <= MaxPacketsWithoutConstraint ||
+        if (sendQueue.Count <= NumPacketsWithoutConstraint ||
             totalQueueSizeInBytes < MaxQueueSizeInBytes)
         {
             return sendQueue.Skip(0);
@@ -127,7 +127,7 @@ internal sealed class SenderQueue<T> where T : IMessage
         int c = sendQueue.Count - 1;
 
         long remainingBytes = maxQueueSizeInBytes;
-        for (int i = 0; i < MaxPacketsWithoutConstraint; i++)
+        for (int i = 0; i < NumPacketsWithoutConstraint; i++)
         {
             var element = sendQueue[c - i];
             if (element is { } notNullElement)
@@ -136,11 +136,11 @@ internal sealed class SenderQueue<T> where T : IMessage
             }
         }
 
-        int consideredPackets = MaxPacketsWithoutConstraint;
+        int consideredPackets = NumPacketsWithoutConstraint;
         if (remainingBytes > 0)
         {
             // start discarding old messages
-            for (int i = MaxPacketsWithoutConstraint; i < sendQueue.Count; i++)
+            for (int i = NumPacketsWithoutConstraint; i < sendQueue.Count; i++)
             {
                 var element = sendQueue[c - i];
                 if (element is not { } notNullElement)
@@ -222,7 +222,7 @@ internal sealed class SenderQueue<T> where T : IMessage
         }
     }
 
-    public readonly struct Entry
+    internal readonly struct Entry
     {
         readonly T message;
         public readonly int messageLength;

@@ -34,7 +34,7 @@ namespace Iviz.Msgs.SensorMsgs
         //                     Image acquisition info                          #
         //######################################################################
         // Time of image acquisition, camera coordinate frame ID
-        /// Header timestamp should be acquisition time of image
+        /// <summary> Header timestamp should be acquisition time of image </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
@@ -72,13 +72,13 @@ namespace Iviz.Msgs.SensorMsgs
         // Projects 3D points in the camera coordinate frame to 2D pixel
         // coordinates using the focal lengths (fx, fy) and principal point
         // (cx, cy).
-        /// 3x3 row-major matrix
+        /// <summary> 3x3 row-major matrix </summary>
         [DataMember] public double[/*9*/] K;
         // Rectification matrix (stereo cameras only)
         // A rotation matrix aligning the camera coordinate system to the ideal
         // stereo image plane so that epipolar lines in both stereo images are
         // parallel.
-        /// 3x3 row-major matrix
+        /// <summary> 3x3 row-major matrix </summary>
         [DataMember] public double[/*9*/] R;
         // Projection/camera matrix
         //     [fx'  0  cx' Tx]
@@ -104,7 +104,7 @@ namespace Iviz.Msgs.SensorMsgs
         //         x = u / w
         //         y = v / w
         //  This holds for both images of a stereo pair.
-        /// 3x4 row-major matrix
+        /// <summary> 3x4 row-major matrix </summary>
         [DataMember] public double[/*12*/] P;
         //######################################################################
         //                      Operational Parameters                         #
@@ -218,13 +218,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/CameraInfo";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "c9a58c1b0b154e0e6da7578cb991d214";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE8VZbW8buRH+rl8xsD9YyslyHF8L1IU/NBfkauTaM3IG0tYwDGqXK/GyWu4tuZY3v77P" +
                 "DMndleSkd0CCCnEkccmZ4bw+Mzqm27VxtNHOqZWmXBem0vzdKzJVYZuN8sZWhE+kKFMb3agFXXtya9uW" +

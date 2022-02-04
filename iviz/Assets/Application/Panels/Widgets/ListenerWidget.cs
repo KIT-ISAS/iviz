@@ -1,6 +1,5 @@
 ﻿#nullable enable
 
-using System;
 using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,8 +14,8 @@ namespace Iviz.App
     {
         const int MaxTopicLength = 200;
 
-        [SerializeField] TMP_Text? text = null;
-        [SerializeField] Image? panel = null;
+        [SerializeField] TMP_Text? text;
+        [SerializeField] Image? panel;
         IListener? listener;
 
         TMP_Text Text => text.AssertNotNull(nameof(text));

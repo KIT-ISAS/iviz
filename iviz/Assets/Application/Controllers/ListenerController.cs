@@ -33,6 +33,6 @@ namespace Iviz.Controllers
 
         public abstract bool Visible { get; set; }
 
-        public override string ToString() => $"[{GetType().Name} '{Listener?.Topic}']";
+        public override string ToString() => $"[{GetType().Name} '{Listener.Topic}']";
     }
 }

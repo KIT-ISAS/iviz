@@ -1,5 +1,6 @@
+#nullable enable
+
 using Iviz.Core;
-using Iviz.Displays;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -8,20 +9,26 @@ namespace Iviz.Resources
     {
         static readonly int Tint = Shader.PropertyToID("_Tint");
 
-        public Texture2D Atlas { get; }
-        public Texture2D AtlasLarge { get; }
-        public Texture2D AtlasLargeFlip { get; }
-        
+        //public Texture2D Atlas { get; }
+        //public Texture2D AtlasLarge { get; }
+        //public Texture2D AtlasLargeFlip { get; }
+
         public ResourceKey<Material> FontMaterial { get; }
         public ResourceKey<Material> FontMaterialZWrite { get; }
 
         public ResourceKey<Material> Lit { get; }
-        public ResourceKey<Material> TexturedLit { get; }
         public ResourceKey<Material> TransparentLit { get; }
+        public ResourceKey<Material> TexturedLit { get; }
         public ResourceKey<Material> TransparentTexturedLit { get; }
-        public ResourceKey<Material> TransparentLitAlwaysVisible { get; }
         public ResourceKey<Material> BumpLit { get; }
         public ResourceKey<Material> TransparentBumpLit { get; }
+
+        public ResourceKey<Material> SimpleLit { get; }
+        public ResourceKey<Material> SimpleTransparentLit { get; }
+        public ResourceKey<Material> SimpleTexturedLit { get; }
+        public ResourceKey<Material> SimpleTransparentTexturedLit { get; }
+
+        public ResourceKey<Material> TransparentLitAlwaysVisible { get; }
         public ResourceKey<Material> ImagePreview { get; }
         public ResourceKey<Material> PointCloud { get; }
         public ResourceKey<Material> PointCloudWithColormap { get; }
@@ -61,21 +68,27 @@ namespace Iviz.Resources
             var assetHolder = Resource.Extras.AssetHolder;
             var appAssetHolder = Resource.Extras.AppAssetHolder;
 
-            Atlas = assetHolder.Atlas.AssertNotNull(nameof(assetHolder.Atlas));
-            AtlasLarge = appAssetHolder.AtlasLarge.AssertNotNull(nameof(appAssetHolder.AtlasLarge));
-            AtlasLargeFlip = appAssetHolder.AtlasLargeFlip.AssertNotNull(nameof(appAssetHolder.AtlasLargeFlip));
-            
+            //Atlas = assetHolder.Atlas.AssertNotNull(nameof(assetHolder.Atlas));
+            //AtlasLarge = appAssetHolder.AtlasLarge.AssertNotNull(nameof(appAssetHolder.AtlasLarge));
+            //AtlasLargeFlip = appAssetHolder.AtlasLargeFlip.AssertNotNull(nameof(appAssetHolder.AtlasLargeFlip));
+
             FontMaterial = Create(assetHolder.FontMaterial);
             FontMaterialZWrite = Create(assetHolder.FontMaterialZWrite);
-            
-            Lit = Create(assetHolder.Lit);
-            TexturedLit = Create(assetHolder.TexturedLit);
-            TransparentLit = Create(assetHolder.TransparentLit);
-            TransparentTexturedLit = Create(assetHolder.TransparentTexturedLit);
-            TransparentLitAlwaysVisible = Create(assetHolder.TransparentLitAlwaysVisible);
 
-            BumpLit = Create(assetHolder.BumpLit);
-            TransparentBumpLit = Create(assetHolder.TransparentBumpLit);
+            Lit = Create(assetHolder.Lit, nameof(assetHolder.Lit));
+            TexturedLit = Create(assetHolder.TexturedLit, nameof(assetHolder.TexturedLit));
+            TransparentLit = Create(assetHolder.TransparentLit, nameof(assetHolder.TransparentLit));
+            TransparentTexturedLit = Create(assetHolder.TransparentTexturedLit, nameof(assetHolder.TransparentTexturedLit));
+            TransparentLitAlwaysVisible = Create(assetHolder.TransparentLitAlwaysVisible, nameof(assetHolder.TransparentLitAlwaysVisible));
+            BumpLit = Create(assetHolder.BumpLit, nameof(assetHolder.BumpLit));
+            TransparentBumpLit = Create(assetHolder.TransparentBumpLit, nameof(assetHolder.TransparentBumpLit));
+
+            SimpleLit = Create(assetHolder.SimpleLit, nameof(assetHolder.SimpleLit));
+            SimpleTransparentLit = Create(assetHolder.SimpleTransparentLit, nameof(assetHolder.SimpleTransparentLit));
+            SimpleTexturedLit = Create(assetHolder.SimpleTexturedLit, nameof(assetHolder.SimpleTexturedLit));
+            SimpleTransparentTexturedLit = Create(assetHolder.SimpleTransparentTexturedLit,
+                nameof(assetHolder.SimpleTransparentTexturedLit));
+
             ImagePreview = Create(appAssetHolder.ImagePreview);
             GridInterior = Create(appAssetHolder.GridInterior);
             GridInteriorSimple = Create(appAssetHolder.GridInteriorSimple);
@@ -121,8 +134,9 @@ namespace Iviz.Resources
             MeshListOcclusionOnlyWithScaleAll = Create(assetHolder.MeshListOcclusionOnlyWithScaleAll);
 
             LitOcclusionOnly = Create(assetHolder.LitOcclusionOnly);
-
-            static ResourceKey<Material> Create(Material m) => new(m);
         }
+        
+        static ResourceKey<Material> Create(Material m) => new(m);
+        static ResourceKey<Material> Create(Material m, string name) => new(m, name);
     }
 }

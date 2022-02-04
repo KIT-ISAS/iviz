@@ -9,17 +9,15 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Tools;
+using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
-    /// <summary>
-    /// A wrapper around a <see cref="RosSubscriber{T}"/> that persists even if the connection is interrupted.
-    /// After a connection is reestablished, this listener is used to resubscribe transparently.
-    /// </summary>
+    /// <inheritdoc cref="IListener"/>
     /// <typeparam name="T">The ROS message type</typeparam>
     public sealed class Listener<T> : IListener where T : IMessage, IDeserializable<T>, new()
     {
-        static RoslibConnection Connection => ConnectionManager.Connection;
+        static RoslibConnection Connection => RosManager.Connection;
 
         readonly ConcurrentQueue<T> messageQueue = new();
         readonly Action<T>? handlerOnGameThread;
@@ -60,7 +58,7 @@ namespace Iviz.Ros
         {
             if (string.IsNullOrWhiteSpace(topic))
             {
-                throw new ArgumentException("Invalid topic!", nameof(topic));
+                throw new ArgumentException("Invalid or empty topic name", nameof(topic));
             }
 
             Topic = topic;
@@ -126,8 +124,11 @@ namespace Iviz.Ros
         {
         }
 
-        // used in reflection by EchoDialogData, do not delete
-        [Preserve]
+        /// <summary>
+        /// Creates a listener with a synchronous handler. Used in reflection by EchoDialogData.
+        /// Normal code should use the other constructors.
+        /// </summary>
+        [Preserve, UsedImplicitly]
         public Listener(string topic, Func<IMessage, IRosReceiver, bool> handler, RosTransportHint transportHint)
             : this(topic, (T msg, IRosReceiver receiver) => handler(msg, receiver), transportHint)
         {
@@ -225,7 +226,7 @@ namespace Iviz.Ros
             {
                 return;
             }
-            
+
             messageBuffer.Clear();
 
             foreach (int _ in ..messageCount) // copy a fixed amount, in case messages are still being added
@@ -298,7 +299,7 @@ namespace Iviz.Ros
                 droppedMsgCounter
             );
 
-            ConnectionManager.ReportBandwidthDown(lastMsgBytes);
+            RosManager.ReportBandwidthDown(lastMsgBytes);
 
             Interlocked.Exchange(ref lastMsgBytes, 0);
             Interlocked.Exchange(ref droppedMsgCounter, 0);

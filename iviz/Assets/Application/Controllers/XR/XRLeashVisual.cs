@@ -3,7 +3,6 @@
 using Iviz.App;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Resources;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
@@ -16,13 +15,13 @@ namespace Iviz.Controllers.XR
         [SerializeField] float noHitLength = 1.6f;
 
         Transform? mTransform;
-        Leash? leash;
+        LeashDisplay? leash;
         ScreenDraggable? draggable;
 
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         CustomController Controller => controller.AssertNotNull(nameof(controller));
         XRRayInteractor Interactor => interactor.AssertNotNull(nameof(interactor));
-        Leash Leash => leash != null ? leash : (leash = ResourcePool.RentDisplay<Leash>());
+        LeashDisplay Leash => leash != null ? leash : (leash = ResourcePool.RentDisplay<LeashDisplay>());
 
         void Awake()
         {

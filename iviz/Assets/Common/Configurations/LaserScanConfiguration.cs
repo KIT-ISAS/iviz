@@ -11,7 +11,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public float PointSize { get; set; } = 0.03f;
-        [DataMember] public ColormapId Colormap { get; set; } = ColormapId.hsv;
+        [DataMember] public ColormapId Colormap { get; set; } = ColormapId.jet;
         [DataMember] public bool UseIntensity { get; set; } = false;
         [DataMember] public bool UseLines { get; set; } = false;
         [DataMember] public bool ForceMinMax { get; set; } = false;

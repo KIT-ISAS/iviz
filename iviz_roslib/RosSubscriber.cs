@@ -13,7 +13,7 @@ namespace Iviz.Roslib;
 /// </summary>
 public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
 {
-    static readonly RosCallback<T>[] EmptyCallback = Array.Empty<RosCallback<T>>();
+    static RosCallback<T>[] EmptyCallback => Array.Empty<RosCallback<T>>();
 
     readonly Dictionary<string, RosCallback<T>> callbacksById = new();
     readonly CancellationTokenSource runningTs = new();

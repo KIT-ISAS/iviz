@@ -25,10 +25,9 @@ namespace Iviz.Resources
         readonly HashSet<string> negGameObjects = new();
         readonly HashSet<string> negTextures = new();
 
-        readonly ReadOnlyDictionary<string, string> robotDescriptions;
+        readonly Dictionary<string, string> robotDescriptions;
 
-        public IEnumerable<string> GetRobotNames() =>
-            robotDescriptions.Keys ?? (IEnumerable<string>)Array.Empty<string>();
+        public Dictionary<string, string>.KeyCollection GetRobotNames() => robotDescriptions.Keys;
 
         public InternalResourceManager()
         {
@@ -36,12 +35,12 @@ namespace Iviz.Resources
             if (robotsFile is null or "")
             {
                 RosLogger.Warn($"{this}: Empty resource file!");
-                robotDescriptions = new Dictionary<string, string>().AsReadOnly();
+                robotDescriptions = new Dictionary<string, string>();
                 return;
             }
 
             var robots = JsonConvert.DeserializeObject<Dictionary<string, string>>(robotsFile);
-            var tmpRobotDescriptions = new Dictionary<string, string>();
+            var newRobotDescriptions = new Dictionary<string, string>();
             foreach (var (key, value) in robots)
             {
                 string? robotDescription =
@@ -52,10 +51,10 @@ namespace Iviz.Resources
                     continue;
                 }
 
-                tmpRobotDescriptions[key] = robotDescription;
+                newRobotDescriptions[key] = robotDescription;
             }
 
-            robotDescriptions = tmpRobotDescriptions.AsReadOnly();
+            robotDescriptions = newRobotDescriptions;
         }
 
         public bool ContainsRobot(string robotName)
@@ -68,7 +67,7 @@ namespace Iviz.Resources
             return robotDescriptions.ContainsKey(robotName);
         }
 
-        public bool TryGetRobot(string robotName, out string robotDescription)
+        public bool TryGetRobot(string robotName, [NotNullWhen(true)] out string? robotDescription)
         {
             if (robotName == null)
             {
@@ -88,9 +87,7 @@ namespace Iviz.Resources
             return TryGet(uriString, textures, negTextures, out info);
         }
 
-        bool TryGet<T>(string uriString,
-            Dictionary<string, ResourceKey<T>> repository,
-            HashSet<string> negRepository,
+        bool TryGet<T>(string uriString, IDictionary<string, ResourceKey<T>> repository, ISet<string> negRepository,
             [NotNullWhen(true)] out ResourceKey<T>? info)
             where T : UnityEngine.Object
         {

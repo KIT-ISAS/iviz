@@ -5,9 +5,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
@@ -29,6 +31,7 @@ namespace Iviz.Controllers.TF
         const string DefaultTopicStatic = "/tf_static";
         const string MapFrameId = "map";
         const int MaxQueueSize = 10000;
+        const int WarningBlacklistTimeInSec = 5;
 
         static TfListener? instance;
         static uint tfSeq;
@@ -38,6 +41,7 @@ namespace Iviz.Controllers.TF
 
         readonly ConcurrentQueue<(TransformStamped[] frame, bool isStatic)> incomingMessages = new();
         readonly ConcurrentBag<TransformStamped> outgoingMessages = new();
+        readonly Dictionary<string, float> warningTimestamps = new();
 
         readonly Dictionary<string, TfFrame> frames = new();
         readonly FrameNode keepAllListenerNode;
@@ -82,16 +86,17 @@ namespace Iviz.Controllers.TF
             get => config;
             set
             {
-                config.Topic = DefaultTopic;
-                FramesVisible = value.Visible;
+                config.Topic = value.Topic;
+                config.Id = value.Id;
+                Visible = value.Visible;
                 FrameSize = value.FrameSize;
                 FrameLabelsVisible = value.FrameLabelsVisible;
                 ParentConnectorVisible = value.ParentConnectorVisible;
                 KeepAllFrames = value.KeepAllFrames;
                 FixedFrameId = value.FixedFrameId;
-                PreferUdp = value.PreferUdp;
                 Interactable = value.Interactable;
                 FlipZ = value.FlipZ;
+                // todo: blacklisted frames
             }
         }
 
@@ -139,7 +144,7 @@ namespace Iviz.Controllers.TF
             set
             {
                 config.FrameSize = value;
-                foreach (TfFrame frame in frames.Values)
+                foreach (var frame in frames.Values)
                 {
                     frame.FrameSize = value;
                 }
@@ -152,7 +157,7 @@ namespace Iviz.Controllers.TF
             set
             {
                 config.ParentConnectorVisible = value;
-                foreach (TfFrame frame in frames.Values)
+                foreach (var frame in frames.Values)
                 {
                     frame.ConnectorVisible = value;
                 }
@@ -196,12 +201,6 @@ namespace Iviz.Controllers.TF
                     frame.EnableCollider = value;
                 }
             }
-        }
-
-        bool PreferUdp
-        {
-            get => config.PreferUdp;
-            set => config.PreferUdp = value;
         }
 
         public static string FixedFrameId
@@ -261,10 +260,10 @@ namespace Iviz.Controllers.TF
                 originFrame.Parent = rootFrame;
                 originFrame.ForceInvisible();
 
-                keepAllListenerNode = new FrameNode("[TFNode]") { Visible = false };
-                staticListenerNode = new FrameNode("[TFStatic]") { Visible = false };
-                fixedFrameListenerNode = new FrameNode("[TFFixedFrame]") { Visible = false };
-                var defaultListener = new FrameNode("[.]")
+                keepAllListenerNode = new FrameNode("TFNode") { Visible = false };
+                staticListenerNode = new FrameNode("TFStatic") { Visible = false };
+                fixedFrameListenerNode = new FrameNode("TFFixedFrame") { Visible = false };
+                var defaultListener = new FrameNode(".")
                 {
                     Visible = false,
                     Transform = { parent = unityFrame.transform }
@@ -279,12 +278,14 @@ namespace Iviz.Controllers.TF
                 fixedFrame = mapFrame;
 
                 Publisher = new Sender<TFMessage>(DefaultTopic);
-                //Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic, RosTransportHint.PreferTcp);
-                Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic,
-                    PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp);
+                Listener = new Listener<TFMessage>(DefaultTopic, HandlerNonStatic, RosTransportHint.PreferUdp);
                 ListenerStatic = new Listener<TFMessage>(DefaultTopicStatic, HandlerStatic);
 
-                Config = config ?? new TfConfiguration { Topic = DefaultTopic };
+                Config = config ?? new TfConfiguration
+                {
+                    Topic = DefaultTopic,
+                    Id = DefaultTopic
+                };
 
                 GameThread.LateEveryFrame += LateUpdate;
             }
@@ -297,14 +298,6 @@ namespace Iviz.Controllers.TF
 
         public int NumFrames => frames.Count;
 
-        static bool IsValid(in Msgs.GeometryMsgs.Vector3 v)
-        {
-            const int maxPoseMagnitude = 10000;
-            return Math.Abs(v.X) < maxPoseMagnitude
-                   && Math.Abs(v.Y) < maxPoseMagnitude
-                   && Math.Abs(v.Z) < maxPoseMagnitude;
-        }
-
         void ProcessMessages()
         {
             TfFrame? lastChild = null;
@@ -313,11 +306,27 @@ namespace Iviz.Controllers.TF
             while (incomingMessages.TryDequeue(out var value))
             {
                 var (transforms, isStatic) = value;
-                foreach (var (parentIdUnchecked, childIdUnchecked, rosTransform, _) in transforms)
+                for (int i = 0; i < transforms.Length; i++)
                 {
-                    if (childIdUnchecked.Length == 0
-                        || rosTransform.IsInvalid()
-                        || !IsValid(rosTransform.Translation))
+                    ref readonly var transform = ref transforms[i];
+                    ref readonly var rosTransform = ref transform.Transform;
+                    
+                    if (!CheckIfWithinThreshold(rosTransform.Translation))
+                    {
+                        SetFailedThreshold(transform.ChildFrameId);
+                        continue;
+                    }
+
+                    if (rosTransform.IsInvalid())
+                    {
+                        SetFailedValid(transform.ChildFrameId);
+                        continue;
+                    }
+
+                    var unityPose = rosTransform.Ros2Unity();
+
+                    string childIdUnchecked = transform.ChildFrameId;
+                    if (childIdUnchecked.Length == 0)
                     {
                         continue;
                     }
@@ -328,7 +337,7 @@ namespace Iviz.Controllers.TF
                         : childIdUnchecked[1..];
 
                     TfFrame? child;
-                    if (lastChild is not null && lastChild.Id == childId)
+                    if (lastChild != null && lastChild.Id == childId)
                     {
                         child = lastChild;
                     }
@@ -351,8 +360,7 @@ namespace Iviz.Controllers.TF
 
                     lastChild = child;
 
-                    var unityPose = rosTransform.Ros2Unity();
-
+                    string parentIdUnchecked = transform.Header.FrameId;
                     if (parentIdUnchecked.Length == 0)
                     {
                         child.TrySetParent(DefaultFrame);
@@ -364,7 +372,7 @@ namespace Iviz.Controllers.TF
                         ? parentIdUnchecked
                         : parentIdUnchecked[1..];
 
-                    if (child.Parent is not null && parentId == child.Parent.Id)
+                    if (child.Parent != null && parentId == child.Parent.Id)
                     {
                         child.SetLocalPose(unityPose);
                     }
@@ -380,6 +388,40 @@ namespace Iviz.Controllers.TF
             }
 
             AfterProcessMessages?.Invoke();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool CheckIfWithinThreshold(in Msgs.GeometryMsgs.Vector3 t)
+        {
+            // unity cannot deal with very large floats, so we have to limit translation sizes
+            const int maxPoseMagnitude = 10000;
+            return Math.Abs(t.X) < maxPoseMagnitude
+                   && Math.Abs(t.Y) < maxPoseMagnitude
+                   && Math.Abs(t.Z) < maxPoseMagnitude;
+        }
+
+        void SetFailedThreshold(string childId)
+        {
+            if (warningTimestamps.TryGetValue(childId, out float expirationTimestamp)
+                && expirationTimestamp >= GameThread.GameTime)
+            {
+                return;
+            }
+
+            RosLogger.Info($"{nameof(TfListener)}: Ignoring transform '{childId}' with too large values.");
+            warningTimestamps[childId] = GameThread.GameTime + WarningBlacklistTimeInSec;
+        }
+
+        void SetFailedValid(string childId)
+        {
+            if (warningTimestamps.TryGetValue(childId, out float timestamp)
+                && timestamp >= GameThread.GameTime)
+            {
+                return;
+            }
+
+            RosLogger.Info($"{nameof(TfListener)}: Ignoring transform '{childId}' with invalid values.");
+            warningTimestamps[childId] = GameThread.GameTime + WarningBlacklistTimeInSec;
         }
 
         public void ResetController()
@@ -408,6 +450,8 @@ namespace Iviz.Controllers.TF
 
             KeepAllFrames = false;
             KeepAllFrames = prevKeepAllFrames;
+
+            warningTimestamps.Clear();
         }
 
         TfFrame Add(TfFrame t)
@@ -433,7 +477,7 @@ namespace Iviz.Controllers.TF
                 return frameId;
             }
 
-            string? myId = ConnectionManager.MyId;
+            string? myId = RosManager.MyId;
             if (frameId.Length == 1)
             {
                 return myId ?? FixedFrameId;
@@ -576,6 +620,8 @@ namespace Iviz.Controllers.TF
             ListenerStatic.Dispose();
             Publisher.Dispose();
 
+            OriginFrame.Dispose(); // get rid of children so they won't get deleted when it does
+
             GameThread.LateEveryFrame -= LateUpdate;
             staticListenerNode.Dispose();
             ResetFrames = null;
@@ -624,15 +670,25 @@ namespace Iviz.Controllers.TF
 
         public static void Publish(TfFrame frame)
         {
-            string parentFrameId =
-                frame.Parent is not { } parentFrame || parentFrame == OriginFrame ? "" : parentFrame.Id;
+            instance?.PublishFrame(frame);
+        }
+
+        void PublishFrame(TfFrame frame)
+        {
+            string parentFrameId = frame.Parent is { } parentFrame && parentFrame != OriginFrame ? parentFrame.Id : "";
             string childFrameId = frame.Id;
             var localPose = frame.Transform.AsLocalPose();
+
             if (localPose.position.IsInvalid() || localPose.rotation.IsInvalid())
             {
-                RosLogger.Error(
-                    $"TfListener: Cannot publish invalid transform: ChildFrameId='{childFrameId}' " +
-                    $"Parent='{parentFrameId}' Transform={localPose.ToString()}");
+                if (warningTimestamps.TryGetValue(childFrameId, out float expirationTimestamp)
+                    && expirationTimestamp >= GameThread.GameTime)
+                {
+                    return;
+                }
+
+                RosLogger.Info($"{nameof(TfListener)}: Cannot publish transform '{childFrameId}' with invalid values.");
+                warningTimestamps[childFrameId] = GameThread.GameTime + WarningBlacklistTimeInSec;
                 return;
             }
 
@@ -642,7 +698,7 @@ namespace Iviz.Controllers.TF
             t.Header.FrameId = parentFrameId;
             t.ChildFrameId = ResolveFrameId(childFrameId);
             localPose.Unity2Ros(out t.Transform);
-            instance?.outgoingMessages.Add(t);
+            outgoingMessages.Add(t);
         }
 
         void DoPublish()
@@ -659,7 +715,7 @@ namespace Iviz.Controllers.TF
                 outgoingMessages.TryTake(out messages[i]);
             }
 
-            if (ConnectionManager.IsConnected)
+            if (RosManager.IsConnected)
             {
                 Publisher.Publish(new TFMessage(messages));
             }
@@ -669,17 +725,12 @@ namespace Iviz.Controllers.TF
             }
         }
 
+        public override string ToString() => $"[{nameof(TfListener)} '{DefaultTopic}']";
+
         /// <summary>
         /// Creates a header using the fixed frame as the frame id and the frame start as the timestamp.
         /// </summary>
-        public static Header CreateHeader(uint seqId)
-        {
-            Header h;
-            h.Seq = seqId;
-            h.Stamp = GameThread.TimeNow;
-            h.FrameId = FixedFrameId;
-            return h;
-        }
+        public static Header CreateHeader(uint seqId) => CreateHeader(seqId, FixedFrameId);
 
         /// <summary>
         /// Creates a header with the given frame id using the frame start as the timestamp.

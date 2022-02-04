@@ -13,8 +13,8 @@ namespace Iviz.Resources
         public Color AttachedPanelColor { get; } = new Color(0.91f, 0.95f, 1, 0.75f);
         public Color DetachedPanelColor { get; } = new Color(0.95f, 1f, 1, 0.75f);
 
-        public Color GridGreenLine { get; } = new Color(0, 0.5f, 0).WithSaturation(0.75f);
-        public Color GridRedLine { get; } = new Color(0.5f, 0, 0).WithSaturation(0.75f);
+        public Color GridGreenLine { get; } = new Color(0, 1f, 0).WithSaturation(0.75f);
+        public Color GridRedLine { get; } = new Color(1f, 0, 0).WithSaturation(0.75f);
         public Color GridInterior { get; } = Color.white.WithValue(0.6f);
         public Color GridLine { get; } = Color.white.WithValue(0.25f * 0.6f);
 
@@ -45,6 +45,8 @@ namespace Iviz.Resources
         public Color DisabledSideFont { get; } = new Color(0.25f, 0.25f, 0.25f, 0.5f); 
         public Color EnabledSideFrame { get; } = new Color(0.2f, 0.3f, 0.4f); 
         public Color DisabledSideFrame { get; } = new Color(0.75f, 0.75f, 0.75f, 1);
+        
+        public Color DefaultBackgroundColor { get; } = new Color(0, 0.2f, 0.5f);
 
     }
 }

@@ -49,6 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Transform: {fileID: 1346616014813264756}
   boxCollider: {fileID: 1346616014813264758}
+  texture: {fileID: 2800000, guid: cb52f4a06da684878a6532c76a6f3e80, type: 3}
+  meshRenderer: {fileID: 1346616014813264744}
 --- !u!65 &1346616014813264758
 BoxCollider:
   m_ObjectHideFlags: 0

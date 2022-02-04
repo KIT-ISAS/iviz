@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Iviz.Core;
 using Iviz.Msgs.Tf2Msgs;
 using UnityEngine;
@@ -47,23 +48,22 @@ namespace Iviz.Controllers.TF
         /// Pose in relation to the Unity origin in Unity coordinates
         /// </summary>
         public Pose AbsoluteUnityPose => Transform.AsPose();
-
-
-        public override TfFrame? Parent
+        
+        public sealed override TfFrame? Parent
         {
             get => base.Parent;
             set
             {
                 if (!TrySetParent(value))
                 {
-                    RosLogger.Error($"{this}: Failed to set '{value?.Id ?? "null"}' as a parent to {Id}");
+                    RosLogger.Error($"{this}: Failed to set parent '{value?.Id ?? "null"}'");
                 }
             }
         }
 
         protected TfFrame(string id)
         {
-            Id = id;
+            Id = id ?? throw new ArgumentNullException(nameof(id));
             Name = "{" + id + "}";
         }
 
@@ -180,7 +180,14 @@ namespace Iviz.Controllers.TF
         
         protected override void Stop()
         {
-            foreach (var frame in children.Values)
+            if (children.Count == 0)
+            {
+                base.Stop();
+                return;
+            }
+
+            var childrenCopy = children.Values.ToArray();
+            foreach (var frame in childrenCopy)
             {
                 frame.Parent = null;
             }
@@ -196,7 +203,7 @@ namespace Iviz.Controllers.TF
         {
             while (true)
             {
-                if (maybeChild is null)
+                if (maybeChild == null)
                 {
                     return false;
                 }

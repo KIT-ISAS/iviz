@@ -11,12 +11,12 @@ namespace Iviz.Msgs.SensorMsgs
         // pressure inside of a fluid (air, water, etc).  This also includes
         // atmospheric or barometric pressure.
         // This message is not appropriate for force/pressure contact sensors.
-        /// timestamp of the measurement
+        /// <summary> Timestamp of the measurement </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // frame_id is the location of the pressure sensor
-        /// Absolute pressure reading in Pascals.
+        /// <summary> Absolute pressure reading in Pascals. </summary>
         [DataMember (Name = "fluid_pressure")] public double FluidPressure_;
-        /// 0 is interpreted as variance unknown
+        /// <summary> 0 is interpreted as variance unknown </summary>
         [DataMember (Name = "variance")] public double Variance;
     
         /// Constructor for empty message.
@@ -59,13 +59,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/FluidPressure";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "804dc5cea1c5306d6a2eb80b9833befe";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61UwYrbMBC96ysGcthN6WZLW3oI9FBY2u6hUNi9h4k8sUVlyZXGSfP3fWNvkqVLoYcK" +
                 "B8fWzNOb92ZMC3oIqY1CQ5FaxyJUhBu8WhE9dqFSj9fcCuEvD0PJQwmsQrtcsMXIQCxpJ44WF4yQamiE" +

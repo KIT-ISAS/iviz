@@ -13,6 +13,7 @@ using Iviz.Controllers.TF;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Displays.XR;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.Roscpp;
 using Iviz.Resources;
@@ -26,42 +27,47 @@ using UpdateRobot = Iviz.Msgs.IvizCommonMsgs.UpdateRobot;
 
 namespace Iviz.Controllers
 {
-    internal static class ServiceFunctions
+    internal static class ControllerService
     {
         const int DefaultTimeoutInMs = 5000;
 
-        static RoslibConnection Connection => ConnectionManager.Connection;
+        static RoslibConnection Connection => RosManager.Connection;
         static IEnumerable<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
 
-        static readonly (ModuleType module, string name)[] ModuleNames =
+        static readonly Dictionary<ModuleType, string> ModuleNames =
             typeof(ModuleType).GetEnumValues()
                 .Cast<ModuleType>()
-                .Select(module => (module, module.ToString()))
-                .ToArray();
+                .Select(module => (key: module, value: module.ToString()))
+                .ToDictionary(entry => entry.key, entry => entry.value);
 
+        static readonly Dictionary<string, ModuleType> ModuleTypeFromName =
+            ModuleNames.ToDictionary(pair => pair.Value, pair => pair.Key);
 
         static readonly string[] LogLevelNames = { "debug", "info", "warn", "error", "fatal" };
 
+        static string TryGetName(ModuleType type) =>
+            ModuleNames.TryGetValue(type, out string name) ? name : "[" + (int)type + "]";
+
         public static void Start()
         {
-            RoslibConnection connection = ConnectionManager.Connection;
+            var connection = RosManager.Connection;
 
-            connection.AdvertiseService<GetLoggers>("get_loggers", GetLoggers);
-            connection.AdvertiseService<SetLoggerLevel>("set_logger_level", SetLoggerLevel);
+            connection.AdvertiseService<GetLoggers>("~get_loggers", GetLoggers);
+            connection.AdvertiseService<SetLoggerLevel>("~set_logger_level", SetLoggerLevel);
 
-            connection.AdvertiseService<AddModule>("add_module", AddModuleAsync);
-            connection.AdvertiseService<AddModuleFromTopic>("add_module_from_topic", AddModuleFromTopicAsync);
-            connection.AdvertiseService<UpdateModule>("update_module", UpdateModuleAsync);
-            connection.AdvertiseService<GetModules>("get_modules", GetModulesAsync);
-            connection.AdvertiseService<SetFixedFrame>("set_fixed_frame", SetFixedFrameAsync);
-            connection.AdvertiseService<GetFramePose>("get_frame_poses", GetFramePoseAsync);
-            connection.AdvertiseService<GetCaptureResolutions>("get_capture_resolutions", GetCaptureResolutions);
-            connection.AdvertiseService<StartCapture>("start_capture", StartCaptureAsync);
-            connection.AdvertiseService<StopCapture>("stop_capture", StopCaptureAsync);
-            connection.AdvertiseService<CaptureScreenshot>("capture_screenshot", CaptureScreenshotAsync);
+            connection.AdvertiseService<AddModule>("~add_module", AddModuleAsync);
+            connection.AdvertiseService<AddModuleFromTopic>("~add_module_from_topic", AddModuleFromTopicAsync);
+            connection.AdvertiseService<UpdateModule>("~update_module", UpdateModuleAsync);
+            connection.AdvertiseService<GetModules>("~get_modules", GetModulesAsync);
+            connection.AdvertiseService<SetFixedFrame>("~set_fixed_frame", SetFixedFrameAsync);
+            //connection.AdvertiseService<GetFramePose>("get_frame_poses", GetFramePoseAsync);
+            //connection.AdvertiseService<GetCaptureResolutions>("get_capture_resolutions", GetCaptureResolutions);
+            //connection.AdvertiseService<StartCapture>("start_capture", StartCaptureAsync);
+            //connection.AdvertiseService<StopCapture>("stop_capture", StopCaptureAsync);
+            //connection.AdvertiseService<CaptureScreenshot>("capture_screenshot", CaptureScreenshotAsync);
 
-            connection.AdvertiseService<UpdateRobot>("update_robot", UpdateRobotAsync);
-            connection.AdvertiseService<LaunchDialog>("launch_dialog", LaunchDialogAsync);
+            //connection.AdvertiseService<UpdateRobot>("update_robot", UpdateRobotAsync);
+            //connection.AdvertiseService<LaunchDialog>("launch_dialog", LaunchDialogAsync);
         }
 
         static void GetLoggers(GetLoggers srv)
@@ -69,7 +75,7 @@ namespace Iviz.Controllers
             srv.Response.Loggers = new[]
             {
                 new Msgs.Roscpp.Logger("ros.iviz",
-                    LogLevelNames[ConsoleDialogData.IndexFromLevel(ConnectionManager.MinLogLevel)])
+                    LogLevelNames[ConsoleDialogData.IndexFromLevel(RosManager.Logger.MinLogLevel)])
             };
         }
 
@@ -84,7 +90,7 @@ namespace Iviz.Controllers
             {
                 if (LogLevelNames[i] == srv.Request.Level)
                 {
-                    ConnectionManager.MinLogLevel = ConsoleDialogData.LevelFromIndex(i);
+                    RosManager.Logger.MinLogLevel = ConsoleDialogData.LevelFromIndex(i);
                     break;
                 }
             }
@@ -98,13 +104,8 @@ namespace Iviz.Controllers
             srv.Response.Id = id ?? "";
         }
 
-        static ModuleType ModuleTypeFromString(string moduleName)
-        {
-            return ModuleNames.FirstOrDefault(tuple => tuple.name == moduleName).module;
-        }
-
-        static async ValueTask<(string id, bool success, string message)> TryAddModuleAsync(string moduleTypeStr,
-            string requestedId)
+        static async ValueTask<(string id, bool success, string message)> 
+            TryAddModuleAsync(string moduleTypeStr, string requestedId)
         {
             (string id, bool success, string message) result = default;
 
@@ -114,21 +115,21 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            ModuleType moduleType = ModuleTypeFromString(moduleTypeStr);
-
-            if (moduleType == ModuleType.Invalid)
+            if (!ModuleTypeFromName.TryGetValue(moduleTypeStr, out var moduleType)
+                || moduleType == ModuleType.Invalid)
             {
                 result.message = "EE Invalid module type";
                 return result;
             }
 
-            if (moduleType != ModuleType.Grid &&
-                moduleType != ModuleType.DepthCloud &&
-                moduleType != ModuleType.AugmentedReality &&
-                moduleType != ModuleType.Joystick &&
-                moduleType != ModuleType.Robot)
+            if (moduleType is not
+                (ModuleType.Grid
+                or ModuleType.DepthCloud
+                or ModuleType.AugmentedReality
+                or ModuleType.Joystick
+                or ModuleType.Robot))
             {
-                result.message = "EE Cannot create module of that type, use AddModuleFromTopic instead";
+                result.message = $"EE Cannot create module of that type, use {nameof(AddModuleFromTopic)} instead";
                 return result;
             }
 
@@ -138,8 +139,8 @@ namespace Iviz.Controllers
             {
                 if (moduleData.ModuleType != moduleType)
                 {
-                    result.message =
-                        $"EE Another module of the same id already exists, but it has type {moduleData.ModuleType}";
+                    result.message = $"EE Another module of the same id already exists, " +
+                                     $"but it has type {TryGetName(moduleData.ModuleType)}";
                 }
                 else
                 {
@@ -156,12 +157,12 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    RosLogger.Debug($"ControllerService: Creating module of type {moduleType}");
+                    RosLogger.Debug($"{nameof(ControllerService)}: Creating module of type {TryGetName(moduleType)}");
                     var newModuleData = ModuleListPanel.Instance.CreateModule(moduleType,
                         requestedId: requestedId.Length != 0 ? requestedId : null);
                     result.id = newModuleData.Configuration.Id;
                     result.success = true;
-                    RosLogger.Debug("ControllerService: Done!");
+                    RosLogger.Debug($"{nameof(ControllerService)}: Done!");
                 }
                 catch (Exception e)
                 {
@@ -179,13 +180,12 @@ namespace Iviz.Controllers
         {
             var (id, success, message) = await TryAddModuleFromTopicAsync(srv.Request.Topic, srv.Request.Id);
             srv.Response.Success = success;
-            srv.Response.Message = message ?? "";
-            srv.Response.Id = id ?? "";
+            srv.Response.Message = message;
+            srv.Response.Id = id;
         }
 
-        static async ValueTask<(string id, bool success, string message)> TryAddModuleFromTopicAsync(
-            string topic,
-            string requestedId)
+        static async ValueTask<(string id, bool success, string message)>
+            TryAddModuleFromTopicAsync(string topic, string requestedId)
         {
             (string id, bool success, string message) result = default;
             if (string.IsNullOrWhiteSpace(topic))
@@ -217,7 +217,7 @@ namespace Iviz.Controllers
 
             async ValueTask<string?> GetPublishedTypeFromServer() =>
                 (await Connection.GetSystemPublishedTopicTypesAsync(DefaultTimeoutInMs))
-                    .FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
+                .FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
 
             string? type = GetCachedPublishedType() ?? await GetPublishedTypeFromServer();
             if (type == null)
@@ -242,7 +242,7 @@ namespace Iviz.Controllers
                 catch (Exception e)
                 {
                     result.message = $"EE An exception was raised: {e.Message}";
-                    RosLogger.Error($"ControllerService: Failed to create module for topic '{topic}'", e);
+                    RosLogger.Error($"{nameof(ControllerService)}: Failed to create module for topic '{topic}'", e);
                 }
                 finally
                 {
@@ -260,9 +260,8 @@ namespace Iviz.Controllers
             srv.Response.Message = message ?? "";
         }
 
-        static async ValueTask<(bool success, string message)> TryUpdateModuleAsync(string id,
-            string[] fields,
-            string config)
+        static async ValueTask<(bool success, string message)>
+            TryUpdateModuleAsync(string id, string[] fields, string config)
         {
             (bool success, string message) result = default;
             if (string.IsNullOrWhiteSpace(id))
@@ -331,11 +330,13 @@ namespace Iviz.Controllers
                 }
                 catch (JsonException e)
                 {
-                    RosLogger.Error("ControllerService: Unexpected JSON exception in GetModules", e);
+                    RosLogger.Error(
+                        $"{nameof(ControllerService)}: Unexpected JSON exception in {nameof(GetModulesAsync)}", e);
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error("ControllerService: Unexpected exception in GetModules", e);
+                    RosLogger.Error(
+                        $"{nameof(ControllerService)}: Unexpected exception in {nameof(GetModulesAsync)}", e);
                 }
                 finally
                 {
@@ -344,7 +345,7 @@ namespace Iviz.Controllers
             });
             if (!await signal.WaitAsync(DefaultTimeoutInMs))
             {
-                RosLogger.Error("Timeout in GetModules");
+                RosLogger.Error($"{nameof(ControllerService)}: Timeout in {nameof(GetModulesAsync)}");
             }
 
             return result;
@@ -352,12 +353,12 @@ namespace Iviz.Controllers
 
         static async ValueTask SetFixedFrameAsync(SetFixedFrame srv)
         {
-            (bool success, string message) = await TrySetFixedFrame(srv.Request.Id);
+            (bool success, string message) = await TrySetFixedFrameAsync(srv.Request.Id);
             srv.Response.Success = success;
             srv.Response.Message = message;
         }
 
-        static async ValueTask<(bool success, string message)> TrySetFixedFrame(string id)
+        static async ValueTask<(bool success, string message)> TrySetFixedFrameAsync(string id)
         {
             (bool success, string message) result = default;
 
@@ -377,7 +378,8 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    RosLogger.Error("ControllerService: Unexpected timeout in TrySetFixedFrame");
+                    RosLogger.Error(
+                        $"{nameof(ControllerService)}: Unexpected timeout in {nameof(TrySetFixedFrameAsync)}");
                     return result;
                 }
             }
@@ -430,7 +432,8 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    RosLogger.Error("ControllerService: Unexpected timeout in TryGetFramePoseAsync");
+                    RosLogger.Error(
+                        $"{nameof(ControllerService)}: Unexpected timeout in {nameof(TryGetFramePoseAsync)}");
                     return (new bool[ids.Length], new Pose[ids.Length]);
                 }
             }
@@ -484,7 +487,7 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    RosLogger.Error("ControllerService: Unexpected timeout in StartCaptureAsync");
+                    RosLogger.Error($"{nameof(ControllerService)}: Unexpected timeout in {nameof(StartCaptureAsync)}");
                     srv.Response.Success = false;
                     srv.Response.Message = "Request timed out";
                     return;
@@ -531,7 +534,7 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    RosLogger.Error("ControllerService: Unexpected timeout in StopCaptureAsync");
+                    RosLogger.Error($"{nameof(ControllerService)}: Unexpected timeout in {nameof(StopCaptureAsync)}");
                     srv.Response.Success = false;
                     srv.Response.Message = "Request timed out";
                     return;
@@ -568,10 +571,8 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        var assetHolder = UnityEngine.Resources
-                            .Load<GameObject>("App Asset Holder")
-                            .GetComponent<AppAssetHolder>();
-                        AudioSource.PlayClipAtPoint(assetHolder.Screenshot, Settings.MainCamera.transform.position);
+                        var screenshot = Resource.Extras.AppAssetHolder.Screenshot;
+                        AudioSource.PlayClipAtPoint(screenshot, Settings.MainCamera.transform.position);
 
                         ss = await Settings.ScreenCaptureManager.CaptureColorAsync();
                         pose = ss != null
@@ -590,7 +591,8 @@ namespace Iviz.Controllers
 
                 if (!await signal.WaitAsync(DefaultTimeoutInMs))
                 {
-                    RosLogger.Error("ControllerService: Unexpected timeout in CaptureScreenshotAsync");
+                    RosLogger.Error(
+                        $"{nameof(ControllerService)}: Unexpected timeout in {nameof(CaptureScreenshotAsync)}");
                     srv.Response.Success = false;
                     srv.Response.Message = "Request timed out";
                     return;
@@ -674,8 +676,8 @@ namespace Iviz.Controllers
             if (moduleData.ModuleType != ModuleType.Robot)
             {
                 srv.Response.Success = false;
-                srv.Response.Message =
-                    $"EE Another module of the same id already exists, but it has type {moduleData.ModuleType}";
+                srv.Response.Message = $"EE Another module of the same id already exists, " +
+                                       $"but it has type {TryGetName(moduleData.ModuleType)}";
                 return;
             }
 
@@ -684,7 +686,7 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    RosLogger.Info($"ControllerService: Removing robot");
+                    RosLogger.Info($"{nameof(ControllerService)}: Removing robot");
                     ModuleListPanel.Instance.RemoveModule(moduleData);
                 }
                 catch (Exception e)
@@ -721,8 +723,8 @@ namespace Iviz.Controllers
                 if (moduleData != null && moduleData.ModuleType != ModuleType.Robot)
                 {
                     srv.Response.Success = false;
-                    srv.Response.Message =
-                        $"EE Another module of the same id already exists, but it has type {moduleData.ModuleType}";
+                    srv.Response.Message = $"EE Another module of the same id already exists, " +
+                                           $"but it has type {TryGetName(moduleData.ModuleType)}";
                     return;
                 }
             }
@@ -748,7 +750,7 @@ namespace Iviz.Controllers
                 {
                     srv.Response.Success = false;
                     srv.Response.Message = $"EE An exception was raised: {e.Message}";
-                    RosLogger.Error("ControllerService: Failed to create robot", e);
+                    RosLogger.Error($"{nameof(ControllerService)}: Failed to create robot", e);
                 }
                 finally
                 {
@@ -784,15 +786,16 @@ namespace Iviz.Controllers
                 return;
             }
 
-            Feedback feedback = new Feedback();
-            bool overrideExpired = false;
-            using var signal = new SemaphoreSlim(0);
+            Feedback feedback = new();
+            using SemaphoreSlim signal = new(0);
             GameThread.Post(() =>
             {
                 try
                 {
-                    RosLogger.Info($"ControllerService: Creating dialog");
+                    RosLogger.Info($"{nameof(ControllerService)}: Creating dialog");
 
+                    bool overrideExpired = false;
+                    string id = srv.Request.Dialog.Id;
                     var dialog = GuiWidgetListener.DefaultHandler.AddDialog(srv.Request.Dialog);
                     if (dialog == null)
                     {
@@ -800,41 +803,37 @@ namespace Iviz.Controllers
                         return;
                     }
 
-                    dialog.ButtonClicked += TriggerButton;
-                    dialog.MenuEntryClicked += TriggerMenu;
-                    dialog.Expired += Expired;
-
-                    void TriggerButton(ARDialog mDialog, int buttonId)
+                    if (dialog is IDialogCanBeClicked canBeClicked)
                     {
-                        mDialog.ButtonClicked -= TriggerButton;
-                        mDialog.MenuEntryClicked -= TriggerMenu;
-                        mDialog.Expired -= Expired;
+                        canBeClicked.Clicked += TriggerButton;
+                    }
 
-                        feedback.VizId = ConnectionManager.MyId ?? "";
-                        feedback.Id = mDialog.Id ?? "";
-                        feedback.Type = (byte) FeedbackType.ButtonClick;
+                    //dialog.MenuEntryClicked += TriggerMenu;
+                    dialog.Expired += OnExpired;
+
+                    void TriggerButton(int buttonId)
+                    {
+                        feedback.VizId = RosManager.MyId ?? "";
+                        feedback.Id = id;
+                        feedback.Type = (byte)FeedbackType.ButtonClick;
                         feedback.EntryId = buttonId;
                         overrideExpired = true;
 
                         TryRelease(signal);
                     }
 
-                    void TriggerMenu(ARDialog mDialog, int buttonId)
+                    void TriggerMenu(int buttonId)
                     {
-                        mDialog.ButtonClicked -= TriggerButton;
-                        mDialog.MenuEntryClicked -= TriggerMenu;
-                        mDialog.Expired -= Expired;
-
-                        feedback.VizId = ConnectionManager.MyId ?? "";
-                        feedback.Id = mDialog.Id ?? "";
-                        feedback.Type = (byte) FeedbackType.MenuEntryClick;
+                        feedback.VizId = RosManager.MyId ?? "";
+                        feedback.Id = id;
+                        feedback.Type = (byte)FeedbackType.MenuEntryClick;
                         feedback.EntryId = buttonId;
                         overrideExpired = true;
 
                         TryRelease(signal);
                     }
 
-                    void Expired(ARDialog mDialog)
+                    void OnExpired()
                     {
                         // ReSharper disable once AccessToModifiedClosure
                         if (overrideExpired)
@@ -842,13 +841,9 @@ namespace Iviz.Controllers
                             return;
                         }
 
-                        mDialog.ButtonClicked -= TriggerButton;
-                        mDialog.MenuEntryClicked -= TriggerMenu;
-                        mDialog.Expired -= Expired;
-
-                        feedback.VizId = ConnectionManager.MyId ?? "";
-                        feedback.Id = mDialog.Id ?? "";
-                        feedback.Type = (byte) FeedbackType.Expired;
+                        feedback.VizId = RosManager.MyId ?? "";
+                        feedback.Id = id;
+                        feedback.Type = (byte)FeedbackType.Expired;
                         feedback.EntryId = 0;
 
                         TryRelease(signal);
@@ -858,7 +853,7 @@ namespace Iviz.Controllers
                 {
                     srv.Response.Success = false;
                     srv.Response.Message = $"EE An exception was raised: {e.Message}";
-                    signal.Release();
+                    TryRelease(signal);
                 }
             });
 

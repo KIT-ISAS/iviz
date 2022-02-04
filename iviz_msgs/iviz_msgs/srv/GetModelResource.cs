@@ -54,7 +54,7 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class GetModelResourceRequest : IRequest<GetModelResource, GetModelResourceResponse>, IDeserializable<GetModelResourceRequest>
     {
         // Retrieves a 3D model, and converts it into a format that can be used in iviz
-        /// Uri of the file. Example: package://some_package/file.dae
+        /// <summary> Uri of the file. Example: package://some_package/file.dae </summary>
         [DataMember (Name = "uri")] public string Uri;
     
         /// Constructor for empty message.
@@ -97,11 +97,11 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class GetModelResourceResponse : IResponse, IDeserializable<GetModelResourceResponse>
     {
-        /// Whether the retrieval succeeded
+        /// <summary> Whether the retrieval succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
-        /// The 3D model
+        /// <summary> The 3D model </summary>
         [DataMember (Name = "model")] public Model Model;
-        /// An error message if success is false
+        /// <summary> An error message if success is false </summary>
         [DataMember (Name = "message")] public string Message;
     
         /// Constructor for empty message.

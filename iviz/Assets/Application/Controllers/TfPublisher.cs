@@ -2,15 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Iviz.App;
-using Iviz.Common;
-using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Ros;
 using UnityEngine;
 
-namespace Iviz.Controllers
+namespace Iviz.Controllers.TF
 {
     public sealed class TfPublisher
     {
@@ -55,12 +54,14 @@ namespace Iviz.Controllers
             }
 
             secondCounter = 0;
-            Publish();
+            PublishFramesWithoutUpdate();
         }
 
-        void Publish()
+        void PublishFramesWithoutUpdate()
         {
-            foreach (var frame in frames.Values)
+            var framesToPublish = frames.Values
+                .Where(frame => (GameThread.Now - frame.lastUpdate).TotalSeconds >= PublishTimeInSec);
+            foreach (var frame in framesToPublish)
             {
                 if (!frame.isInternal)
                 {
@@ -146,24 +147,25 @@ namespace Iviz.Controllers
 
         public override string ToString()
         {
-            return "[TfPublisher]";
+            return $"[{nameof(TfPublisher)}]";
         }
 
         sealed class TfPublishedFrame : IPublishedFrame
         {
             readonly string id;
             readonly FrameNode frameNode;
+            public DateTime lastUpdate;
             public readonly bool isInternal;
             public TfFrame TfFrame { get; private set; }
 
             internal TfPublishedFrame(string id, bool isInternal)
             {
                 this.id = id;
-                frameNode = new FrameNode("[Publisher]");
+                this.isInternal = isInternal;
+                frameNode = new FrameNode("TfPublisher");
                 frameNode.AttachTo(id);
                 TfFrame = frameNode.Parent ??
-                          throw new NullReferenceException("Failed to set origin parent"); // shouldn't happen
-                this.isInternal = isInternal;
+                          throw new NullReferenceException("Newly created frame has null parent"); // shouldn't happen
 
                 if (isInternal)
                 {
@@ -184,6 +186,8 @@ namespace Iviz.Controllers
                     {
                         TfListener.Publish(TfFrame);
                     }
+
+                    lastUpdate = GameThread.Now;
                 }
             }
 
@@ -200,7 +204,10 @@ namespace Iviz.Controllers
             }
         }
     }
+}
 
+namespace Iviz.Controllers
+{
     public interface IPublishedFrame
     {
         public Pose LocalPose { set; }

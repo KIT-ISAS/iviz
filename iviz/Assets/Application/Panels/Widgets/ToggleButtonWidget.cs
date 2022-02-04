@@ -8,12 +8,14 @@ namespace Iviz.App
 {
     public sealed class ToggleButtonWidget : TrashButtonWidget
     {
-        [SerializeField] Sprite? activeSprite = null;
-        [SerializeField] Sprite? inactiveSprite = null;
+        [SerializeField] Sprite? activeSprite;
+        [SerializeField] Sprite? inactiveSprite;
 
         [SerializeField] string activeText = ""; 
         [SerializeField] string inactiveText = "";
-        [SerializeField] Text? text = null;
+        [SerializeField] Text? text;
+
+        bool state;
 
         /*
         public Sprite ActiveSprite
@@ -41,7 +43,6 @@ namespace Iviz.App
             set => inactiveText = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        bool state;
         public bool State
         {
             get => state;

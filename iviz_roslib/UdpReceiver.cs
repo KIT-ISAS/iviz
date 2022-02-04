@@ -23,12 +23,10 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
     readonly Task task;
     readonly ReceiverManager<T> manager;
 
-    int receiveBufferSize = 8192;
-
     long numReceived;
     long numDropped;
     long bytesReceived;
-
+    int receiveBufferSize = 8192;
     bool disposed;
 
     bool KeepRunning => !runningTs.IsCancellationRequested;
@@ -36,7 +34,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
     public ErrorMessage? ErrorDescription { get; private set; }
     public bool IsAlive => !task.IsCompleted;
     public bool IsPaused { get; set; }
-    public bool IsConnected => UdpClient.Client.Connected;
+    public bool IsConnected => Status == ReceiverStatus.Running;
     public Endpoint Endpoint { get; }
     public Endpoint RemoteEndpoint { get; }
     public Uri RemoteUri { get; }
@@ -106,8 +104,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         {
             try
             {
-                this.topicInfo =
-                    RosUtils.GenerateDynamicTopicInfo<T>(topicInfo.CallerId, topicInfo.Topic, RosHeader);
+                this.topicInfo = RosUtils.GenerateDynamicTopicInfo<T>(topicInfo.CallerId, topicInfo.Topic, RosHeader);
             }
             catch (RosHandshakeException e)
             {
@@ -118,7 +115,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
             }
         }
 
-        task = TaskUtils.Run(async () => await StartSession().AwaitNoThrow(this));
+        task = TaskUtils.Run(() => StartSession().AwaitNoThrow(this));
     }
 
     public SubscriberReceiverState State => new UdpReceiverState(RemoteUri)
@@ -132,7 +129,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         NumDropped = numDropped,
         ErrorDescription = ErrorDescription,
         MaxPacketSize = MaxPacketSize,
-        IsAlive = IsAlive, 
+        IsAlive = IsAlive,
     };
 
     public async ValueTask DisposeAsync(CancellationToken token)
@@ -147,7 +144,6 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         UdpClient.Dispose();
 
         await task.AwaitNoThrow(DisposeTimeoutInMs, this, token);
-        runningTs.Dispose();
     }
 
     async ValueTask StartSession()
@@ -181,14 +177,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
 
         Status = ReceiverStatus.Dead;
         UdpClient.Dispose();
-
-        try
-        {
-            runningTs.Cancel();
-        }
-        catch (ObjectDisposedException)
-        {
-        }
+        runningTs.Cancel();
 
         Logger.LogDebugFormat("{0}: Stopped!", this);
     }
@@ -358,7 +347,6 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
                             (UdpRosParams.DefaultMTU - UdpRosParams.Ip4UdpHeadersLength);
         return new RpcUdpTopicRequest(header, ownHostname, maxPacketSize);
     }
-
 
     void ILoopbackReceiver<T>.Post(in T message, int rcvLength)
     {

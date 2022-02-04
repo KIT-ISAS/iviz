@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs.SensorMsgs;
@@ -29,8 +28,8 @@ namespace Iviz.Controllers
         readonly PointCloudConfiguration config = new();
         readonly List<string> fieldNames = new() { "x", "y", "z" };
         readonly FrameNode node;
-        readonly PointListResource pointCloud;
-        readonly MeshListResource meshCloud;
+        readonly PointListDisplay pointCloud;
+        readonly MeshListDisplay meshCloud;
 
         float4[] pointBuffer = Array.Empty<float4>();
         int pointBufferLength;
@@ -205,17 +204,18 @@ namespace Iviz.Controllers
         {
             FieldNames = fieldNames.AsReadOnly();
 
+            node = new FrameNode("[PointCloudListener]");
+            pointCloud = ResourcePool.RentDisplay<PointListDisplay>(node.Transform);
+            meshCloud = ResourcePool.RentDisplay<MeshListDisplay>(node.Transform);
+            meshCloud.EnableShadows = false;
+
             Config = config ?? new PointCloudConfiguration
             {
                 Topic = topic,
             };
 
+            node.Name = Config.Topic;
             Listener = new Listener<PointCloud2>(Config.Topic, Handler);
-
-            node = new FrameNode($"[{Config.Topic}]");
-            pointCloud = ResourcePool.RentDisplay<PointListResource>(node.Transform);
-            meshCloud = ResourcePool.RentDisplay<MeshListResource>(node.Transform);
-            meshCloud.EnableShadows = false;
         }
 
         static int FieldSizeFromType(int datatype)
@@ -320,10 +320,19 @@ namespace Iviz.Controllers
                     return;
                 }
 
+                if (msg.Data.Length > NativeList.MaxElements)
+                {
+                    RosLogger.Info(
+                        $"{this}: Number of elements is greater than maximum of {NativeList.MaxElements.ToString()}");
+                    IsProcessing = false;
+                    return;
+                }
+
+
                 if (!FieldsEqual(msg.Fields))
                 {
                     fieldNames.Clear();
-                    foreach (PointField field in msg.Fields)
+                    foreach (var field in msg.Fields)
                     {
                         fieldNames.Add(field.Name);
                     }
@@ -392,13 +401,13 @@ namespace Iviz.Controllers
                             else if (PointCloudType == PointCloudType.Points)
                             {
                                 pointCloud.UseColormap = useColormap;
-                                pointCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
+                                pointCloud.SetDirect(pointBuffer.AsReadOnlySpan(..pointBufferLength));
                                 meshCloud.Reset();
                             }
                             else
                             {
                                 meshCloud.UseColormap = useColormap;
-                                meshCloud.SetDirect(pointBuffer.AsSpan(..pointBufferLength));
+                                meshCloud.SetDirect(pointBuffer.AsReadOnlySpan(..pointBufferLength));
                                 pointCloud.Reset();
                             }
                         }
@@ -495,7 +504,7 @@ namespace Iviz.Controllers
 
         void GeneratePointBufferXYZ(PointCloud2 msg, int iOffset, int iType)
         {
-            const float maxPositionMagnitude = PointListResource.MaxPositionMagnitude;
+            const float maxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
 
             int rowStep = (int)msg.RowStep;
             int pointStep = (int)msg.PointStep;
@@ -508,9 +517,71 @@ namespace Iviz.Controllers
                 pointBuffer = new float4[msg.Width * msg.Height];
             }
 
-            var dstBuffer = pointBuffer;
+            float4[] dstBuffer = pointBuffer;
             int dstOff = 0;
 
+            switch (iType)
+            {
+                case PointField.FLOAT32 when iOffset == 12 && pointStep == 16:
+                    ParseFloatAligned();
+                    break;
+                case PointField.FLOAT32:
+                    ParseFloat();
+                    break;
+                case PointField.FLOAT64:
+                    ParseDouble();
+                    break;
+                case PointField.INT8:
+                    ParseInt8();
+                    break;
+                case PointField.UINT8:
+                    ParseUint8();
+                    break;
+                case PointField.INT16:
+                    ParseInt16();
+                    break;
+                case PointField.UINT16 when iOffset == 12 && pointStep == 14:
+                    ParseUint16Aligned();
+                    break;
+                case PointField.UINT16:
+                    ParseUint16();
+                    break;
+                case PointField.INT32:
+                    ParseInt32();
+                    break;
+                case PointField.UINT32:
+                    ParseUint32();
+                    break;
+            }
+
+            pointBufferLength = dstOff;
+
+            // ----------       
+            
+            void ParseFloatAligned()
+            {
+                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var dataOff = dataRow.Cast<float4>();
+                    for (int u = 0; u < width; u++)
+                    {
+                        ref readonly var data = ref dataOff[u];
+                        if (data.IsInvalid3() || data.MaxAbsCoeff3() > maxPositionMagnitude)
+                        {
+                            continue;
+                        }
+
+                        ref float4 f = ref dstBuffer[dstOff++];
+                        f.x = -data.y;
+                        f.y = data.z;
+                        f.z = data.x;
+                        f.w = data.w;
+                        //(f.x, f.y, f.z, f.w) = (-data.y, data.z, data.x, data.w);
+                    }
+                }
+            }
+            
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void TryAdd(ReadOnlySpan<byte> span, float w)
             {
@@ -519,131 +590,140 @@ namespace Iviz.Controllers
                 {
                     return;
                 }
-                
+
                 ref float4 f = ref dstBuffer[dstOff++];
                 f.x = -data.y;
                 f.y = data.z;
                 f.z = data.x;
                 f.w = w;
-            }
-
-            ReadOnlySpan<byte> dataRowOff = msg.Data.AsSpan();
-
-            switch (iType)
+            }            
+            
+            void ParseFloat()
             {
-                case PointField.FLOAT32 when iOffset == 12:
-                    for (int v = height; v > 0; v--, dataRowOff = dataRowOff[rowStep..])
+                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var dataOff = dataRow;
+                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                     {
-                        var dataOff = dataRowOff;
-                        for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
-                        {
-                            var data = dataOff.Read<float4>();
-                            if (data.IsInvalid3() || data.MaxAbsCoeff3() > maxPositionMagnitude)
-                            {
-                                continue;
-                            }
-                            
-                            ref float4 f = ref dstBuffer[dstOff++];
-                            f.x = -data.y;
-                            f.y = data.z;
-                            f.z = data.x;
-                            f.w = data.w;
-                            //(f.x, f.y, f.z, f.w) = (-data.y, data.z, data.x, data.w);
-                        }
+                        TryAdd(dataOff, dataOff[iOffset..].Read<float>());
                     }
-
-                    break;
-                case PointField.FLOAT32:
-                    for (int v = height; v > 0; v--, dataRowOff = dataRowOff[rowStep..])
+                }
+            }
+            
+            void ParseDouble()
+            {
+                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var dataOff = dataRow;
+                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                     {
-                        var dataOff = dataRowOff;
-                        for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
-                        {
-                            TryAdd(dataOff, dataOff[iOffset..].Read<float>());
-                        }
+                        TryAdd(dataOff, (float)dataOff[iOffset..].Read<double>());
                     }
-
-                    break;
-                case PointField.FLOAT64:
-                    for (int v = height; v > 0; v--, dataRowOff = dataRowOff[rowStep..])
+                }
+            }
+            
+            void ParseInt8()
+            {
+                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var dataOff = dataRow;
+                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
                     {
-                        var dataOff = dataRowOff;
-                        for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
-                        {
-                            TryAdd(dataOff, (float)dataOff[iOffset..].Read<double>());
-                        }
+                        TryAdd(dataOff, (sbyte)dataOff[iOffset]);
                     }
-
-                    break;
-                case PointField.INT8:
-                    for (int v = height; v > 0; v--, dataRowOff = dataRowOff[rowStep..])
-                    {
-                        var dataOff = dataRowOff;
-                        for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
-                        {
-                            TryAdd(dataOff, (sbyte)dataOff[iOffset]);
-                        }
-                    }
-
-                    break;
-                case PointField.UINT8:
-                    for (int v = height; v > 0; v--, dataRowOff = dataRowOff[rowStep..])
-                    {
-                        var dataOff = dataRowOff;
-                        for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
-                        {
-                            TryAdd(dataOff, dataOff[iOffset]);
-                        }
-                    }
-
-                    break;
-                case PointField.INT16:
-                    for (int v = height; v > 0; v--, dataRowOff = dataRowOff[rowStep..])
-                    {
-                        var dataOff = dataRowOff;
-                        for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
-                        {
-                            TryAdd(dataOff, dataOff[iOffset..].Read<short>());
-                        }
-                    }
-
-                    break;
-                case PointField.UINT16:
-                    for (int v = height; v > 0; v--, dataRowOff = dataRowOff[rowStep..])
-                    {
-                        var dataOff = dataRowOff;
-                        for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
-                        {
-                            TryAdd(dataOff, dataOff[iOffset..].Read<ushort>());
-                        }
-                    }
-
-                    break;
-                case PointField.INT32:
-                    for (int v = height; v > 0; v--, dataRowOff = dataRowOff[rowStep..])
-                    {
-                        var dataOff = dataRowOff;
-                        for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
-                        {
-                            TryAdd(dataOff, dataOff[iOffset..].Read<int>());
-                        }
-                    }
-
-                    break;
-                case PointField.UINT32:
-                    for (int v = height; v > 0; v--, dataRowOff = dataRowOff[rowStep..])
-                    {
-                        var dataOff = dataRowOff;
-                        for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
-                        {
-                            TryAdd(dataOff, dataOff[iOffset..].Read<uint>());
-                        }
-                    }
-
-                    break;
+                }
             }
 
-            pointBufferLength = dstOff;
+            void ParseUint8()
+            {
+                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var dataOff = dataRow;
+                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    {
+                        TryAdd(dataOff, dataOff[iOffset]);
+                    }
+                }
+            }
+
+            void ParseInt16()
+            {
+                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var dataOff = dataRow;
+                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    {
+                        TryAdd(dataOff, dataOff[iOffset..].Read<short>());
+                    }
+                }
+            }
+            
+            void ParseUint16Aligned()
+            {
+                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var dataOff = dataRow.Cast<PointWithUshort>();
+                    for (int u = 0; u < width; u++)
+                    {
+                        ref readonly var data = ref dataOff[u];
+                        if (data.f.IsInvalid() || data.f.MaxAbsCoeff() > maxPositionMagnitude)
+                        {
+                            continue;
+                        }
+
+                        ref float4 f = ref dstBuffer[dstOff++];
+                        f.x = -data.f.y;
+                        f.y = data.f.z;
+                        f.z = data.f.x;
+                        f.w = data.w;
+                    }
+                }
+            }
+
+            void ParseUint16()
+            {
+                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var dataOff = dataRow;
+                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    {
+                        TryAdd(dataOff, dataOff[iOffset..].Read<ushort>());
+                    }
+                }
+            }
+
+            void ParseInt32()
+            {
+                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var dataOff = dataRow;
+                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    {
+                        TryAdd(dataOff, dataOff[iOffset..].Read<int>());
+                    }
+                }
+            }
+
+            void ParseUint32()
+            {
+                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
+                {
+                    var dataOff = dataRow;
+                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    {
+                        TryAdd(dataOff, dataOff[iOffset..].Read<uint>());
+                    }
+                }
+            }
         }
 
         public override void Dispose()
@@ -655,6 +735,13 @@ namespace Iviz.Controllers
 
             node.Dispose();
             pointBuffer = Array.Empty<float4>();
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        readonly struct PointWithUshort
+        {
+            public readonly float3 f;
+            public readonly ushort w;
         }
     }
 }

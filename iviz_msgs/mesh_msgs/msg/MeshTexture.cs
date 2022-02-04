@@ -57,13 +57,13 @@ namespace Iviz.Msgs.MeshMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "mesh_msgs/MeshTexture";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "831d05ad895f7916c0c27143f387dfa0";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VVTW8bNxA9l79iAB1iJ5YctJfCQNAWTdPqEKBocgsCgVqOdtlyyTU/JG1+fR5JrT5q" +
                 "O8mhXciSl+S8+XgzjzN6y6GjX2L0ep0i59cgWxYBC7allLQSSdv4w/cUeR+T55W2ivcisA3Or/rQhttl" +

@@ -1,16 +1,9 @@
 ﻿#nullable enable
 
-using System;
 using System.Collections.Generic;
-using Iviz.Controllers.XR;
-using Iviz.Core;
-using Iviz.Displays;
-using Iviz.Resources;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.SpatialTracking;
 using UnityEngine.XR;
-using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.Interaction.Toolkit;
 
 namespace Iviz.Controllers.XR

@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using Iviz.App;
@@ -9,7 +8,7 @@ using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Displays.XRDialogs;
+using Iviz.Displays.XR;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
@@ -19,7 +18,6 @@ using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.Interaction.Toolkit;
-using Mesh = UnityEngine.Mesh;
 
 namespace Iviz.Controllers.XR
 {

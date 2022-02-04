@@ -3,11 +3,9 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Iviz.App;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
@@ -209,9 +207,15 @@ namespace Iviz.Controllers
                     return;
                 }
 
+                /*
                 var allColliders = Robot.LinkObjects.Values.SelectMany(
                     linkObject => linkObject
                         .GetComponentsInChildren<Collider>(true)
+                        .Where(collider => collider.gameObject.layer == LayerType.Collider));
+                        */
+                var allColliders = Robot.LinkObjects.Values.SelectMany(
+                    linkObject => linkObject.transform.GetAllChildren()
+                        .WithComponent<Collider>()
                         .Where(collider => collider.gameObject.layer == LayerType.Collider));
                 foreach (var collider in allColliders)
                 {
@@ -327,7 +331,7 @@ namespace Iviz.Controllers
             {
                 HelpText = "- Requesting parameter -";
                 (parameterValue, errorMsg) =
-                    await ConnectionManager.Connection.GetParameterAsync(value, ParameterTimeoutInMs);
+                    await RosManager.Connection.GetParameterAsync(value, ParameterTimeoutInMs);
             }
             catch (OperationCanceledException)
             {
@@ -377,11 +381,11 @@ namespace Iviz.Controllers
                 return;
             }
 
-            (bool result, string? robotDescription) = await Resource.TryGetRobotAsync(robotName);
+            (bool result, string robotDescription) = await Resource.TryGetRobotAsync(robotName);
             if (!result)
             {
-                RosLogger.Debug($"{this}: Failed to load robot!");
-                HelpText = "[Failed to Load Saved Robot]";
+                RosLogger.Debug($"{this}: Failed to load robot! Error message: {robotDescription}");
+                HelpText = $"[{robotDescription}]";
                 return;
             }
 
@@ -417,7 +421,7 @@ namespace Iviz.Controllers
 
             async void LoadRobotAsync()
             {
-                robotLoadingTask = newRobot.StartAsync(ConnectionManager.ServiceProvider, KeepMeshMaterials).AsTask();
+                robotLoadingTask = newRobot.StartAsync(RosManager.ServiceProvider, KeepMeshMaterials).AsTask();
                 await robotLoadingTask;
                 RobotLinkHighlightable.ProcessRobot(newRobot.Name, newRobot.BaseLinkObject);
                 UpdateStartTaskStatus();

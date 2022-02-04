@@ -9,22 +9,32 @@ namespace Iviz.Msgs.ActionlibMsgs
     {
         [DataMember (Name = "goal_id")] public GoalID GoalId;
         [DataMember (Name = "status")] public byte Status;
-        public const byte PENDING = 0; // The goal has yet to be processed by the action server
-        public const byte ACTIVE = 1; // The goal is currently being processed by the action server
-        public const byte PREEMPTED = 2; // The goal received a cancel request after it started executing
+        /// <summary> The goal has yet to be processed by the action server </summary>
+        public const byte PENDING = 0;
+        /// <summary> The goal is currently being processed by the action server </summary>
+        public const byte ACTIVE = 1;
+        /// <summary> The goal received a cancel request after it started executing </summary>
+        public const byte PREEMPTED = 2;
         //   and has since completed its execution (Terminal State)
-        public const byte SUCCEEDED = 3; // The goal was achieved successfully by the action server (Terminal State)
-        public const byte ABORTED = 4; // The goal was aborted during execution by the action server due
+        /// <summary> The goal was achieved successfully by the action server (Terminal State) </summary>
+        public const byte SUCCEEDED = 3;
+        /// <summary> The goal was aborted during execution by the action server due </summary>
+        public const byte ABORTED = 4;
         //    to some failure (Terminal State)
-        public const byte REJECTED = 5; // The goal was rejected by the action server without being processed,
+        /// <summary> The goal was rejected by the action server without being processed, </summary>
+        public const byte REJECTED = 5;
         //    because the goal was unattainable or invalid (Terminal State)
-        public const byte PREEMPTING = 6; // The goal received a cancel request after it started executing
+        /// <summary> The goal received a cancel request after it started executing </summary>
+        public const byte PREEMPTING = 6;
         //    and has not yet completed execution
-        public const byte RECALLING = 7; // The goal received a cancel request before it started executing,
+        /// <summary> The goal received a cancel request before it started executing, </summary>
+        public const byte RECALLING = 7;
         //    but the action server has not yet confirmed that the goal is canceled
-        public const byte RECALLED = 8; // The goal received a cancel request before it started executing
+        /// <summary> The goal received a cancel request before it started executing </summary>
+        public const byte RECALLED = 8;
         //    and was successfully cancelled (Terminal State)
-        public const byte LOST = 9; // An action client can determine that a goal is LOST. This should not be
+        /// <summary> An action client can determine that a goal is LOST. This should not be </summary>
+        public const byte LOST = 9;
         //    sent over the wire by an action server
         //Allow for the user to associate a string with GoalStatus for debugging
         [DataMember (Name = "text")] public string Text;
@@ -74,13 +84,13 @@ namespace Iviz.Msgs.ActionlibMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "actionlib_msgs/GoalStatus";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "d388f9b87b3c471f784434d671988d4a";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71VTY/aMBC951eMtJdWquh3u63EgUKEqPZLC+115TgTcOs41B7D8u87Nkkgu9DlsGok" +
                 "CETjN2/evJmMK6EnI5jz7U7liVeGzsGRIO/qPzfp1WhyNYbm6sMb/j6D2QLjMVgIBxskoAoyhKWtJDqH" +

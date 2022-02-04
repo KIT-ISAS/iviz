@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -30,12 +31,13 @@ namespace Iviz.App
         [DataMember] public List<GridMapConfiguration> GridMaps { get; set; } = new();
         [DataMember] public List<OctomapConfiguration> Octomaps { get; set; } = new();
         [DataMember] public List<GuiWidgetConfiguration> Dialogs { get; set; } = new();
-        [DataMember] public ARConfiguration AR { get; set; } = new();
-        [DataMember] public JoystickConfiguration Joystick { get; set; } = new();
-        [DataMember] public XRConfiguration XR { get; set; } = new();
+        [DataMember] public ARConfiguration? AR { get; set; }
+        [DataMember] public JoystickConfiguration? Joystick { get; set; }
+
+        [DataMember] public XRConfiguration? XR { get; set; }
         //[DataMember] public TfPublisherConfiguration TfPublisher { get; set; } = new();
 
-        public IEnumerable<IEnumerable<IConfiguration>> CreateListOfEntries() => new IEnumerable<IConfiguration>[]
+        public IEnumerable<IConfiguration> CreateListOfEntries() => new[]
         {
             Grids,
             SimpleRobots,
@@ -52,10 +54,12 @@ namespace Iviz.App
             GridMaps,
             Octomaps,
             Dialogs,
-            new[] { AR },
-            new[] { Joystick },
-            new[] { XR },
-        };
+            CreateSingleton(AR),
+            CreateSingleton(Joystick),
+            CreateSingleton(XR),
+        }.SelectMany(config => config);
 
+        static IEnumerable<IConfiguration> CreateSingleton(IConfiguration? config) =>
+            config != null ? new[] { config } : Enumerable.Empty<IConfiguration>();
     }
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Iviz.Ros;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -29,7 +30,7 @@ namespace Iviz.App
         {
             serverMode.InactiveText = "Master Off";
             serverMode.ActiveText = "Master On";
-            serverMode.State = false;
+            serverMode.State = RosManager.Server.IsActive;
         }
 
         public override void ClearSubscribers()

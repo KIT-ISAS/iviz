@@ -12,16 +12,16 @@ namespace Iviz.App
     public class DraggableButtonWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler, IBeginDragHandler,
         IPointerUpHandler
     {
-        [SerializeField] Button? button = null;
-        [SerializeField] RectTransform? targetTransform = null;
-        [SerializeField] RectTransform? storeTransform = null;
-        [SerializeField] TMP_Text? buttonLabel = null;
+        [SerializeField] Button? button;
+        [SerializeField] RectTransform? targetTransform;
+        [SerializeField] RectTransform? storeTransform;
+        [SerializeField] TMP_Text? buttonLabel;
         [SerializeField] bool allowRevealLeft = true;
         [SerializeField] bool allowRevealRight = true;
         [SerializeField] float moveThresholdLeft = 40;
         [SerializeField] float moveThresholdRight = 60;
         [SerializeField] float minMotionThreshold = 5;
-        [SerializeField] ScrollRect? parentScrollRect = null;
+        [SerializeField] ScrollRect? parentScrollRect;
         [SerializeField] GameObject[] detachables = Array.Empty<GameObject>();
 
         bool isDragging;

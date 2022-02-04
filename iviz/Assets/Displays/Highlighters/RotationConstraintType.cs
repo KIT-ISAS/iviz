@@ -1,0 +1,3 @@
+namespace Iviz.Displays.Highlighters
+{
+}

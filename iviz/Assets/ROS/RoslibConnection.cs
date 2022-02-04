@@ -43,7 +43,7 @@ namespace Iviz.Ros
         RosClient? client;
         BagListener? bagListener;
 
-        CancellationTokenSource connectionTs = new();
+        CancellationTokenSource runningTs = new();
 
         Task? watchdogTask;
         Task? ntpTask;
@@ -124,9 +124,9 @@ namespace Iviz.Ros
                 return;
             }
 
-            connectionTs.Cancel();
-            connectionTs = new CancellationTokenSource();
-            await Client.CloseAsync(connectionTs.Token).AwaitNoThrow(this);
+            runningTs.Cancel();
+            runningTs = new CancellationTokenSource();
+            await Client.CloseAsync(runningTs.Token).AwaitNoThrow(this);
             client = null;
         }
 
@@ -161,19 +161,17 @@ namespace Iviz.Ros
             try
             {
                 const int rpcTimeoutInMs = 3000;
-
-
+                
                 //Tools.Logger.LogDebug = RosLogger.Debug;
                 Tools.Logger.LogError = RosLogger.Error;
                 Tools.Logger.Log = RosLogger.Info;
 
-
                 RosLogger.Internal("Connecting...");
 
-                connectionTs.Cancel();
-                connectionTs = new CancellationTokenSource();
+                runningTs.Cancel();
+                runningTs = new CancellationTokenSource();
 
-                var token = connectionTs.Token;
+                var token = runningTs.Token;
 
                 RosClient newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
                 client = newClient;
@@ -231,7 +229,7 @@ namespace Iviz.Ros
                     ntpTask = NtpCheckerTask(Client.MasterUri.Host, token);
                 });
 
-                RosLogger.Debug("Connected!");
+                RosLogger.Debug($"{this}: Connected!");
                 RosLogger.Internal("<b>Connected!</b>");
 
                 LogConnectionCheck(token);
@@ -255,19 +253,20 @@ namespace Iviz.Ros
                     case XmlRpcException _:
                     {
                         RosLogger.Internal("<b>Connection failed:</b>", e);
-                        if (RosServerManager.IsActive && RosServerManager.MasterUri == MasterUri)
+                        if (RosManager.Server.IsActive && RosManager.Server.MasterUri == MasterUri)
                         {
                             RosLogger.Internal("Note: This appears to be a local ROS master. " +
-                                               "Make sure that <b>My URI</b> is a reachable address, and restart the master.");
+                                               "Make sure that <b>My Caller URI</b> is a reachable address and that " +
+                                               "you are in the right network. Then stop and restart the master.");
                         }
 
                         break;
                     }
                     case OperationCanceledException _:
-                        RosLogger.Info("Connection cancelled!");
+                        RosLogger.Info($"{this}: Connection cancelled!");
                         break;
                     default:
-                        RosLogger.Error("Exception during Connect(): ", e);
+                        RosLogger.Error($"{this}: Exception during {nameof(ConnectAsync)}(): ", e);
                         break;
                 }
             }
@@ -285,7 +284,8 @@ namespace Iviz.Ros
 
             if (!hostsObj.TryGetArray(out XmlRpcValue[] array))
             {
-                RosLogger.Error("Error reading /iviz/hosts. Expected array of string pairs.");
+                RosLogger.Error($"{nameof(RoslibConnection)}: Error reading /iviz/hosts. " +
+                                $"Expected array of string pairs.");
                 return;
             }
 
@@ -298,7 +298,8 @@ namespace Iviz.Ros
                     !pair[1].TryGetString(out string address))
                 {
                     RosLogger.Error(
-                        "Error reading /iviz/hosts entry '" + entry + "'. Expected a pair of strings.");
+                        $"{nameof(RoslibConnection)}: Error reading /iviz/hosts entry '{entry.ToString()}'. " +
+                        $"Expected a pair of strings.");
                     return;
                 }
 
@@ -308,7 +309,7 @@ namespace Iviz.Ros
             ConnectionUtils.GlobalResolver.Clear();
             foreach (var (key, value) in hosts)
             {
-                RosLogger.Info($"Adding custom host {key} -> {value}");
+                RosLogger.Info($"{nameof(RoslibConnection)}: Adding custom host {key} -> {value}");
                 ConnectionUtils.GlobalResolver[key] = value;
             }
         }
@@ -332,13 +333,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            var sender = ConnectionManager.LogSender;
-            if (sender == null)
-            {
-                return;
-            }
-
-            if (sender.NumSubscribers == 0)
+            if (RosManager.Logger.Sender.NumSubscribers == 0)
             {
                 RosLogger.Internal("<b>Warning:</b> Our logger has no subscriptions yet. " +
                                    "Maybe /rosout hasn't seen us yet. " +
@@ -355,7 +350,7 @@ namespace Iviz.Ros
             DateTime lastMasterAccess = GameThread.Now;
             bool warningSet = false;
             Uri? lastRosOutUri = null;
-            var connection = ConnectionManager.Connection;
+            var connection = RosManager.Connection;
 
 
             SetConnectionWarningState(false);
@@ -427,7 +422,7 @@ namespace Iviz.Ros
 
         static async Task NtpCheckerTask(string hostname, CancellationToken token)
         {
-            RosLogger.Debug("[NtpChecker] Starting NTP task.");
+            RosLogger.Debug("[NtpChecker]: Starting NTP task.");
             time.GlobalTimeOffset = TimeSpan.Zero;
 
             TimeSpan offset;
@@ -439,11 +434,11 @@ namespace Iviz.Ros
             {
                 if (e is OperationCanceledException or IOException)
                 {
-                    RosLogger.Debug("[NtpChecker] Master does not appear to have an NTP clock running.");
+                    RosLogger.Debug("[NtpChecker]: Master does not appear to have an NTP clock running.");
                 }
                 else
                 {
-                    RosLogger.Error("[NtpChecker] Failed to read NTP clock from the master. Reason: ", e);
+                    RosLogger.Error("[NtpChecker]: Failed to read NTP clock from the master.", e);
                 }
 
                 return;
@@ -452,7 +447,7 @@ namespace Iviz.Ros
             const int minOffsetInMs = 2;
             if (Math.Abs(offset.TotalMilliseconds) < minOffsetInMs)
             {
-                RosLogger.Info("[NtpChecker] No significant time offset detected from master clock.");
+                RosLogger.Info("[NtpChecker]: No significant time offset detected from master clock.");
             }
             else
             {
@@ -460,7 +455,7 @@ namespace Iviz.Ros
                 string offsetStr = Math.Abs(offset.TotalSeconds) >= 1
                     ? $"{offset.TotalSeconds:#,0.###} sec"
                     : $"{offset.TotalMilliseconds:#,0.###} ms";
-                RosLogger.Info($"[NtpChecker] Master clock appears to have a time offset of {offsetStr}. " +
+                RosLogger.Info($"[NtpChecker]: Master clock appears to have a time offset of {offsetStr}. " +
                                "Local published messages will use this offset.");
             }
         }
@@ -489,7 +484,7 @@ namespace Iviz.Ros
 
         public override void Disconnect()
         {
-            connectionTs.Cancel();
+            runningTs.Cancel();
 
             if (!Connected)
             {
@@ -540,7 +535,7 @@ namespace Iviz.Ros
             }
 
             advertiser.Id = InvalidId;
-            CancellationToken token = connectionTs.Token;
+            CancellationToken token = runningTs.Token;
             AddTask(async () =>
             {
                 try
@@ -549,12 +544,11 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error("Exception during RoslibConnection.Advertise(): ", e);
+                    RosLogger.Error($"{this}: Exception during {nameof(Advertise)}()", e);
                 }
             });
         }
-
-
+        
         async ValueTask AdvertiseImpl<T>(Sender<T> advertiser, CancellationToken token) where T : IMessage
         {
             if (publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
@@ -577,7 +571,7 @@ namespace Iviz.Ros
                 var publisher = newAdvertisedTopic.Publisher;
                 if (publisher == null)
                 {
-                    RosLogger.Error($"Failed to advertise topic '{advertiser.Topic}'");
+                    RosLogger.Error($"{this}: Failed to advertise topic '{advertiser.Topic}'");
                     return;
                 }
 
@@ -626,7 +620,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            CancellationToken token = connectionTs.Token;
+            CancellationToken token = runningTs.Token;
             AddTask(async () =>
             {
                 try
@@ -635,7 +629,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error("Exception during RoslibConnection.AdvertiseService(): ", e);
+                    RosLogger.Error($"{this}: Exception during {nameof(AdvertiseService)}()", e);
                 }
             });
         }
@@ -650,8 +644,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info(
-                $"Advertising service <b>{serviceName}</b> <i>[{BuiltIns.GetServiceType(typeof(T))}]</i>.");
+            RosLogger.Info($"{this}: Advertising service <b>{serviceName}</b><i>[{BuiltIns.GetServiceType<T>()}]</i>.");
 
             var newAdvertisedService = new AdvertisedService<T>(serviceName, callback);
             servicesByTopic.Add(serviceName, newAdvertisedService);
@@ -674,14 +667,14 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(srv));
             }
 
-            if (!Connected || connectionTs.IsCancellationRequested)
+            if (!Connected || runningTs.IsCancellationRequested)
             {
                 return false;
             }
 
             token.ThrowIfCancellationRequested();
 
-            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token);
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
             tokenSource.CancelAfter(timeoutInMs);
             try
             {
@@ -689,7 +682,7 @@ namespace Iviz.Ros
                 return true;
             }
             catch (OperationCanceledException e) when (!token.IsCancellationRequested &&
-                                                       !connectionTs.IsCancellationRequested)
+                                                       !runningTs.IsCancellationRequested)
             {
                 throw new TimeoutException($"Service call to '{service}' timed out", e);
             }
@@ -697,7 +690,7 @@ namespace Iviz.Ros
 
         internal void Publish<T>(Sender<T> advertiser, in T msg) where T : IMessage
         {
-            if (advertiser.Id == InvalidId || connectionTs.IsCancellationRequested)
+            if (advertiser.Id == InvalidId || runningTs.IsCancellationRequested)
             {
                 return;
             }
@@ -708,7 +701,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Rejecting invalid message: ", e);
+                RosLogger.Error($"{this}: Rejecting invalid message", e);
                 return;
             }
 
@@ -722,7 +715,7 @@ namespace Iviz.Ros
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                RosLogger.Error($"Exception during RoslibConnection.Publish(): ", e);
+                RosLogger.Error($"{this}: Exception during {nameof(Publish)}()", e);
             }
         }
 
@@ -733,7 +726,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(listener));
             }
 
-            var token = connectionTs.Token;
+            var token = runningTs.Token;
             AddTask(async () =>
             {
                 try
@@ -742,7 +735,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    RosLogger.Error("Exception during RoslibConnection.Subscribe(): ", e);
+                    RosLogger.Error($"{this}: Exception during {nameof(Subscribe)}()", e);
                 }
             });
         }
@@ -787,7 +780,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(advertiser));
             }
 
-            var token = connectionTs.Token;
+            var token = runningTs.Token;
             AddTask(async () =>
             {
                 try
@@ -796,7 +789,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    RosLogger.Error("Exception during RoslibConnection.Unadvertise(): ", e);
+                    RosLogger.Error($"{this}: Exception during {nameof(Unadvertise)}()", e);
                 }
             });
         }
@@ -832,7 +825,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(subscriber));
             }
 
-            var token = connectionTs.Token;
+            var token = runningTs.Token;
             AddTask(async () =>
             {
                 try
@@ -841,7 +834,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    RosLogger.Error("Exception during RoslibConnection.Unsubscribe(): ", e);
+                    RosLogger.Error($"{this}: Exception during {nameof(Unsubscribe)}()", e);
                 }
             });
         }
@@ -872,7 +865,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(service));
             }
 
-            var token = connectionTs.Token;
+            var token = runningTs.Token;
             AddTask(async () =>
             {
                 try
@@ -881,7 +874,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    RosLogger.Error("Exception during RoslibConnection.AdvertiseService(): ", e);
+                    RosLogger.Error($"{this}: Exception during {nameof(UnadvertiseService)}()", e);
                 }
             });
         }
@@ -893,7 +886,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"Unadvertising service <b>{serviceName}</b>.");
+            RosLogger.Info($"{this}: Unadvertising service <b>{serviceName}</b>.");
 
             if (Connected)
             {
@@ -908,7 +901,7 @@ namespace Iviz.Ros
         {
             if (type == RequestType.CachedButRequestInBackground)
             {
-                TaskUtils.Run(() => GetSystemPublishedTopicTypesAsync().AsTask(), connectionTs.Token);
+                TaskUtils.Run(() => GetSystemPublishedTopicTypesAsync().AsTask(), runningTs.Token);
             }
 
             return cachedPublishedTopics;
@@ -917,7 +910,7 @@ namespace Iviz.Ros
         public async ValueTask<IEnumerable<BriefTopicInfo>> GetSystemPublishedTopicTypesAsync(int timeoutInMs = 2000,
             CancellationToken token = default)
         {
-            if (!Connected || token.IsCancellationRequested || connectionTs.Token.IsCancellationRequested)
+            if (!Connected || token.IsCancellationRequested || runningTs.Token.IsCancellationRequested)
             {
                 cachedPublishedTopics = EmptyTopics;
                 return EmptyTopics;
@@ -925,7 +918,7 @@ namespace Iviz.Ros
 
             try
             {
-                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token);
+                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
                 cachedPublishedTopics = await Client.GetSystemPublishedTopicsAsync(tokenSource.Token);
             }
@@ -934,7 +927,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error("Exception during RoslibConnection.GetSystemPublishedTopicTypesAsync(): ", e);
+                RosLogger.Error($"{this}: Exception during {nameof(GetSystemPublishedTopicTypesAsync)}()", e);
             }
 
             return cachedPublishedTopics;
@@ -945,7 +938,7 @@ namespace Iviz.Ros
         {
             if (type == RequestType.CachedButRequestInBackground)
             {
-                TaskUtils.Run(() => GetSystemTopicTypesAsync().AsTask(), connectionTs.Token);
+                TaskUtils.Run(() => GetSystemTopicTypesAsync().AsTask(), runningTs.Token);
             }
 
             return cachedTopics;
@@ -953,7 +946,7 @@ namespace Iviz.Ros
 
         async ValueTask GetSystemTopicTypesAsync(int timeoutInMs = 2000, CancellationToken token = default)
         {
-            if (!Connected || token.IsCancellationRequested || connectionTs.Token.IsCancellationRequested)
+            if (!Connected || token.IsCancellationRequested || runningTs.Token.IsCancellationRequested)
             {
                 cachedTopics = EmptyTopics;
                 return;
@@ -961,22 +954,23 @@ namespace Iviz.Ros
 
             try
             {
-                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token);
+                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
                 cachedTopics = await Client.GetSystemTopicTypesAsync(tokenSource.Token);
             }
             catch (OperationCanceledException)
             {
+                // ignore
             }
             catch (Exception e)
             {
-                RosLogger.Error("Exception during RoslibConnection.GetSystemTopicTypesAsync(): ", e);
+                RosLogger.Error($"{this}: Exception during {nameof(GetSystemTopicTypesAsync)}()", e);
             }
         }
 
         public IEnumerable<string> GetSystemParameterList(CancellationToken token = default)
         {
-            var internalToken = connectionTs.Token;
+            var internalToken = runningTs.Token;
             TaskUtils.Run(async () =>
             {
                 if (!Connected || token.IsCancellationRequested || internalToken.IsCancellationRequested)
@@ -992,7 +986,7 @@ namespace Iviz.Ros
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    RosLogger.Error("Exception during RoslibConnection.GetSystemParameterList(): ", e);
+                    RosLogger.Error($"{this}: Exception during {nameof(GetSystemParameterList)}()", e);
                 }
             }, internalToken);
 
@@ -1007,7 +1001,7 @@ namespace Iviz.Ros
                 throw new ArgumentNullException(nameof(parameter));
             }
 
-            if (token.IsCancellationRequested || connectionTs.Token.IsCancellationRequested)
+            if (token.IsCancellationRequested || runningTs.Token.IsCancellationRequested)
             {
                 return (default, "Cancellation requested");
             }
@@ -1019,7 +1013,7 @@ namespace Iviz.Ros
 
             try
             {
-                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, connectionTs.Token);
+                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
                 (bool success, XmlRpcValue param) =
                     await Client.Parameters.GetParameterAsync(parameter, tokenSource.Token);
@@ -1032,7 +1026,9 @@ namespace Iviz.Ros
             }
             catch (OperationCanceledException)
             {
-                return (default, "Operation timed out");
+                return token.IsCancellationRequested || runningTs.IsCancellationRequested
+                    ? (default, "Operation cancelled")
+                    : (default, "Operation timed out");
             }
             catch (XmlRpcException)
             {
@@ -1040,7 +1036,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error("Exception during RoslibConnection.GetParameter(): ", e);
+                RosLogger.Error($"{this}: Exception during {nameof(GetParameterAsync)}()", e);
                 return (default, "Unknown error");
             }
         }
@@ -1049,7 +1045,7 @@ namespace Iviz.Ros
         {
             if (type == RequestType.CachedButRequestInBackground)
             {
-                TaskUtils.Run(() => GetSystemStateAsync().AsTask(), connectionTs.Token);
+                TaskUtils.Run(() => GetSystemStateAsync().AsTask(), runningTs.Token);
             }
 
             return cachedSystemState;
@@ -1066,13 +1062,13 @@ namespace Iviz.Ros
             const int timeoutInMs = 2000;
             try
             {
-                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(connectionTs.Token);
+                using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token);
                 tokenSource.CancelAfter(timeoutInMs);
                 cachedSystemState = await Client.GetSystemStateAsync(tokenSource.Token);
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
-                RosLogger.Error("Exception during RoslibConnection.GetSystemState(): ", e);
+                RosLogger.Error($"{this}: Exception during {nameof(GetSystemStateAsync)}()", e);
             }
         }
 
@@ -1100,6 +1096,7 @@ namespace Iviz.Ros
         internal override void Dispose()
         {
             Disconnect();
+            AddTask(RosManager.Server.DisposeAsync);
             base.Dispose();
         }
     }

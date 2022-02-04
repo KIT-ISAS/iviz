@@ -75,13 +75,13 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "object_recognition_msgs/ObjectInformation";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "921ec39f51c7b927902059cf3300ecde";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE71XbU8bRxD+3PsVo/hDIAJXQJoiKlSR2ASrxkZgIjUostZ3a9+2d7uX3T3g8uv7zO6d" +
                 "7aRUaqRSixd7b+eZ92fGvd73vOjD6Ob2bDz6eDYbTSc0mpxP6bsA1q/kKfTZxegmgt5cTG/HA3o7pOnb" +

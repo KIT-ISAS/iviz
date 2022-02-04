@@ -66,13 +66,13 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "tf2_msgs/LookupTransformActionGoal";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "f2e7bcdb75c847978d0351a13e699da5";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE7VUwWobMRC971cM5JCkYBfSW6C30MTQQiG+m7E03hXZlbYayc7+fZ+0azeFHHpozIKQ" +
                 "NPPmzbwnPwlbidTVpWGTXPC92+8GbfXzY+B+80Atlp2zzfcQXvK4jez1EOJQbutd8/U//5ofz4/3pMnO" +

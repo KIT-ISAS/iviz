@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class PathConfiguration : IConfigurationWithType
+    public sealed class PathConfiguration : IConfigurationWithTopic
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.Path;

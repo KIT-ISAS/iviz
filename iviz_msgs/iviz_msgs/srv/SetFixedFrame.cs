@@ -54,7 +54,7 @@ namespace Iviz.Msgs.IvizMsgs
     public sealed class SetFixedFrameRequest : IRequest<SetFixedFrame, SetFixedFrameResponse>, IDeserializable<SetFixedFrameRequest>
     {
         // Sets the fixed frame
-        /// Id of the frame
+        /// <summary> Id of the frame </summary>
         [DataMember (Name = "id")] public string Id;
     
         /// Constructor for empty message.
@@ -97,9 +97,9 @@ namespace Iviz.Msgs.IvizMsgs
     [DataContract]
     public sealed class SetFixedFrameResponse : IResponse, IDeserializable<SetFixedFrameResponse>
     {
-        /// Whether the operation succeeded
+        /// <summary> Whether the operation succeeded </summary>
         [DataMember (Name = "success")] public bool Success;
-        /// An error message if success is false
+        /// <summary> An error message if success is false </summary>
         [DataMember (Name = "message")] public string Message;
     
         /// Constructor for empty message.

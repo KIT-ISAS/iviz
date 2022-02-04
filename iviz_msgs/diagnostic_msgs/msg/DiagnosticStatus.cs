@@ -14,15 +14,15 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public const byte WARN = 1;
         public const byte ERROR = 2;
         public const byte STALE = 3;
-        /// level of operation enumerated above
+        /// <summary> Level of operation enumerated above </summary>
         [DataMember (Name = "level")] public byte Level;
-        /// a description of the test/component reporting
+        /// <summary> A description of the test/component reporting </summary>
         [DataMember (Name = "name")] public string Name;
-        /// a description of the status
+        /// <summary> A description of the status </summary>
         [DataMember (Name = "message")] public string Message;
-        /// a hardware unique string
+        /// <summary> A hardware unique string </summary>
         [DataMember (Name = "hardware_id")] public string HardwareId;
-        /// an array of values associated with the status
+        /// <summary> An array of values associated with the status </summary>
         [DataMember (Name = "values")] public KeyValue[] Values;
     
         /// Constructor for empty message.
@@ -98,13 +98,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "diagnostic_msgs/DiagnosticStatus";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "d0ce08bc6e5ba34c7754f563a9cabaf1";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE61STW+DMAy951dY6n3dx20Shx6qHfbRiVbbYZoqQzywCgmLDYh/PwJF62W3RYr8HL/n" +
                 "2E5WcChZoCYRLAhKX1kBLQlEUVsB/wXogJ3ljm2LFeS+brwjpzEUicFnXq/MCsy4X70IZxVBRR1Vk9w3" +

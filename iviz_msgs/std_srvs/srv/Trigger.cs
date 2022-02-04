@@ -78,7 +78,7 @@ namespace Iviz.Msgs.StdSrvs
         {
         }
     
-        /// Constant size of this message.
+        /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
@@ -89,9 +89,9 @@ namespace Iviz.Msgs.StdSrvs
     [DataContract]
     public sealed class TriggerResponse : IResponse, IDeserializable<TriggerResponse>
     {
-        /// indicate successful run of triggered service
+        /// <summary> Indicate successful run of triggered service </summary>
         [DataMember (Name = "success")] public bool Success;
-        /// informational, e.g. for error messages
+        /// <summary> Informational, e.g. for error messages </summary>
         [DataMember (Name = "message")] public string Message;
     
         /// Constructor for empty message.

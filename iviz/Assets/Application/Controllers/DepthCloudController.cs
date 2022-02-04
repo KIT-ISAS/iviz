@@ -17,7 +17,7 @@ namespace Iviz.Controllers
     {
         readonly DepthCloudConfiguration config = new();
         readonly FrameNode node;
-        readonly DepthCloudResource projector;
+        readonly DepthCloudDisplay projector;
         readonly ImageTexture depthImageTexture;
         readonly ImageTexture colorImageTexture;
 
@@ -179,7 +179,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                var topicInfos = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
+                var topicInfos = RosManager.Connection.GetSystemPublishedTopicTypes();
                 string? type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == colorTopic)?.Type;
                 ColorListener = type switch
                 {
@@ -223,7 +223,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                var topicInfos = ConnectionManager.Connection.GetSystemPublishedTopicTypes();
+                var topicInfos = RosManager.Connection.GetSystemPublishedTopicTypes();
                 string? type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == depthTopic)?.Type;
                 DepthListener = type switch
                 {
@@ -278,7 +278,7 @@ namespace Iviz.Controllers
             node = new FrameNode("DepthCloud");
             node.Transform.localRotation = new Quaternion(0, 0.7071f, 0.7071f, 0);
 
-            projector = ResourcePool.RentDisplay<DepthCloudResource>(node.Transform);
+            projector = ResourcePool.RentDisplay<DepthCloudDisplay>(node.Transform);
             projector.DepthImage = depthImageTexture;
             projector.ColorImage = colorImageTexture;
             Config = config ?? new DepthCloudConfiguration();

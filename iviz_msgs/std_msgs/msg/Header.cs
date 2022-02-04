@@ -23,7 +23,7 @@ namespace Iviz.Msgs.StdMsgs
         [DataMember (Name = "stamp")] public time Stamp;
         //Frame this data is associated with
         [DataMember (Name = "frame_id")] public string FrameId;
-
+    
         /// Explicit constructor.
         public Header(uint Seq, time Stamp, string FrameId)
         {
@@ -71,13 +71,13 @@ namespace Iviz.Msgs.StdMsgs
     
         public readonly string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "std_msgs/Header";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "2176decaecbce78abc3b96ef049fabed";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE42RT2vDMAzF7/4UghzaDtrDdut5DHYbrPei2moscOxMVtrl209O2brdBobg+L3f058O" +
                 "3hVzQAkwkGJARTgXgch9JNkmulCCqjiMFGB51XmkunMdHCJXsNNTJsGUZpiqibSAL8MwZfaoBMoD/fGb" +
@@ -88,8 +88,8 @@ namespace Iviz.Msgs.StdMsgs
                 
         public override string ToString() => Extensions.ToString(this);
         /// Custom iviz code
-        public static implicit operator Header((uint seqId, string frameId) p) => new Header(p.seqId, time.Now(), p.frameId);
-        public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new Header(p.seqId, p.stamp, p.frameId);
-        public static implicit operator Header(string frameId) => new Header(0, time.Now(), frameId);
+        public static implicit operator Header((uint seqId, string frameId) p) => new(p.seqId, time.Now(), p.frameId);
+        public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new(p.seqId, p.stamp, p.frameId);
+        public static implicit operator Header(string frameId) => new(0, time.Now(), frameId);
     }
 }

@@ -47,6 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Transform: {fileID: 1287237009152467754}
   boxCollider: {fileID: 1287237009152467732}
+  atlas: {fileID: 2800000, guid: 31bf6fb355ce04e369667cb6f0764d14, type: 3}
   material: {fileID: 0}
   width: 0
   height: 0

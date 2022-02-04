@@ -2,10 +2,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Tools;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -20,11 +22,13 @@ namespace Iviz.App
         static string DefaultMyId => "iviz_" + UnityEngine.Application.platform.ToString().ToLower();
 
         readonly ConnectionDialogPanel panel;
-        public override IDialogPanel Panel => panel;
-
         readonly List<Uri> lastMasterUris = new();
 
         Uri? masterUri = DefaultMasterUri;
+        Uri? myUri = DefaultMyUri;
+        string? myId = DefaultMyId;
+
+        public override IDialogPanel Panel => panel;
 
         public Uri? MasterUri
         {
@@ -36,8 +40,6 @@ namespace Iviz.App
             }
         }
 
-        Uri? myUri = DefaultMyUri;
-
         public Uri? MyUri
         {
             get => myUri;
@@ -48,8 +50,6 @@ namespace Iviz.App
             }
         }
 
-        string? myId = DefaultMyId;
-
         public string? MyId
         {
             get => myId;
@@ -59,7 +59,6 @@ namespace Iviz.App
                 MyIdChanged?.Invoke(value);
             }
         }
-
 
         public List<Uri> LastMasterUris
         {
@@ -114,17 +113,21 @@ namespace Iviz.App
             panel.MyUri.Value = MyUri == null ? "" : MyUri.ToString();
             panel.MyUri.SetHints(RosClient.GetCallerUriCandidates(DefaultPort).Select(uri => uri.ToString()));
             panel.MyId.Value = MyId ?? "";
-            panel.MyId.Hints = new[] {DefaultMyId};
+            panel.MyId.Hints = new[] { DefaultMyId };
             panel.MasterUri.Value = MasterUri == null ? "" : MasterUri.ToString();
-            panel.MasterUri.Interactable = !RosServerManager.IsActive;
+            panel.MasterUri.Interactable = !RosManager.Server.IsActive;
             panel.MasterUri.SetHints(LastMasterUris.Select(uri => uri.ToString()));
             panel.LineLog.Active = true;
+            panel.ServerMode.State = RosManager.Server.IsActive;
 
             panel.Close.Clicked += Close;
             panel.MyUri.EndEdit += text =>
             {
                 string trimmed = text.Trim();
-                MyUri = (Uri.TryCreate(trimmed, UriKind.Absolute, out Uri uri) && uri.Scheme == "http") ? uri : null;
+                var newUri = (Uri.TryCreate(trimmed, UriKind.Absolute, out Uri uri) && uri.Scheme == "http")
+                    ? uri
+                    : null;
+                MyUri = newUri;
             };
             panel.MasterUri.EndEdit += text =>
             {
@@ -142,7 +145,7 @@ namespace Iviz.App
                 {
                     return;
                 }
-                
+
                 MyUri = newCallerUri;
                 panel.MyUri.Value = newCallerUri.ToString();
             };
@@ -163,48 +166,70 @@ namespace Iviz.App
             };
             panel.ServerMode.Clicked += () =>
             {
-                if (!panel.ServerMode.State)
+                if (!RosManager.Server.IsActive)
                 {
-                    if (ConnectionManager.IsConnected)
-                    {
-                        RosLogger.Internal("Cannot create master node while connected!");
-                        return;
-                    }
-
-                    string ownHost = MyUri?.Host ?? RosClient.TryGetCallerUri().Host;
-                    var ownMasterUri = new Uri($"http://{ownHost}:{RosServerManager.DefaultPort.ToString()}/");
-                    const string ownMasterId = "iviz_master";
-
-                    if (RosServerManager.Create(ownMasterUri, ownMasterId))
-                    {
-                        if (MasterUri != ownMasterUri)
-                        {
-                            panel.MasterUri.Value = ownMasterUri.ToString();
-                            MasterUri = ownMasterUri;
-                        }
-
-                        panel.ServerMode.State = true;
-                        RosLogger.Internal(
-                            $"Created <b>master node</b> using my uri {ownMasterUri}. You can connect now!");
-                        MasterActiveChanged?.Invoke(true);
-                    }
+                    TryCreateMaster();
                 }
                 else
                 {
-                    if (ConnectionManager.IsConnected)
+                    if (RosManager.IsConnected)
                     {
-                        RosLogger.Internal("Cannot remove master node while connected!");
-                        return;
+                        // this is a bit of a hack, but the roslib module will complain
+                        // hard if we just yank the master away and it cannot unregister its stuff
+                        RosManager.Connection.KeepReconnecting = false; // do not retry
+                        RosManager.Connection.Disconnect();
+                        DoDisposeMaster();
+
+                        async void DoDisposeMaster()
+                        {
+                            // wait 200 ms for roslib to disconnect gracefully and hope the user
+                            // does not click to create a new master until we're finished 
+                            await Task.Delay(200);
+                            await RosManager.Server.DisposeAsync();
+                            OnMasterDisconnected();
+                        }
                     }
-
-                    RosServerManager.Dispose();
-                    RosLogger.Internal("Master node removed. Switched to <b>client mode</b>.");
-                    panel.ServerMode.State = false;
-                    MasterActiveChanged?.Invoke(false);
+                    else
+                    {
+                        // if we're not connected then we don't need to worry
+                        RosManager.Server.Dispose();
+                        OnMasterDisconnected();
+                    }
                 }
-
-                panel.MasterUri.Interactable = !RosServerManager.IsActive;
             };
+        }
+        
+        void OnMasterDisconnected()
+        {
+            RosLogger.Internal("Master node removed. Switched to <b>client mode</b>.");
+            panel.ServerMode.State = false;
+            panel.MasterUri.Interactable = true;
+            MasterActiveChanged?.Invoke(false);                        
+        }        
+
+        public void TryCreateMaster()
+        {
+            string ownHost = MyUri?.Host ?? RosClient.TryGetCallerUri().Host;
+            Uri ownMasterUri = new Uri($"http://{ownHost}:{RosServerManager.DefaultPort.ToString()}/");
+            
+            const string ownMasterId = "iviz_master";
+
+            if (!RosManager.Server.Start(ownMasterUri, ownMasterId))
+            {
+                return;
+            }
+            
+            if (MasterUri != ownMasterUri)
+            {
+                panel.MasterUri.Value = ownMasterUri.ToString();
+                MasterUri = ownMasterUri;
+            }
+
+            panel.ServerMode.State = true;
+            panel.MasterUri.Interactable = false;
+            RosLogger.Internal(
+                $"Created <b>master node</b> using my uri {ownMasterUri}. You can connect now!");
+            MasterActiveChanged?.Invoke(true);
         }
     }
 }

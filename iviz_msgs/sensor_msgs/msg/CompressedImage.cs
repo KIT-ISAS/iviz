@@ -8,18 +8,18 @@ namespace Iviz.Msgs.SensorMsgs
     public sealed class CompressedImage : IDeserializable<CompressedImage>, IMessage
     {
         // This message contains a compressed image
-        /// Header timestamp should be acquisition time of image
+        /// <summary> Header timestamp should be acquisition time of image </summary>
         [DataMember (Name = "header")] public StdMsgs.Header Header;
         // Header frame_id should be optical frame of camera
         // origin of frame should be optical center of camera
         // +x should point to the right in the image
         // +y should point down in the image
         // +z should point into to plane of the image
-        /// Specifies the format of the data
+        /// <summary> Specifies the format of the data </summary>
         [DataMember (Name = "format")] public string Format;
         //   Acceptable values:
         //     jpeg, png
-        /// Compressed image buffer
+        /// <summary> Compressed image buffer </summary>
         [DataMember (Name = "data")] public byte[] Data;
     
         /// Constructor for empty message.
@@ -75,13 +75,13 @@ namespace Iviz.Msgs.SensorMsgs
     
         public string RosType => RosMessageType;
     
-        /// Full ROS name of this message.
+        /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "sensor_msgs/CompressedImage";
     
-        /// MD5 hash of a compact representation of the message.
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
         [Preserve] public const string RosMd5Sum = "8f7a12909da2c9d3332d540a0977563f";
     
-        /// Base64 of the GZip'd compression of the concatenated dependencies file.
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
                 "H4sIAAAAAAAAE62UTW/UMBCG7/4VI+2hLaVFgguqxAFRAT0gIbU3hKpZezYxcmzXdrYNv57Xzn60lEIP" +
                 "RFl5bc88850FXfU20yA5cyekgy9sfSbG3yEmHIshO+BOqc/CRhL187J5FrQ5LhaQwkOk3IfRGVoKsb4Z" +

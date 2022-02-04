@@ -14,7 +14,6 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="OctomapModulePanel"/> 
     /// </summary>
-
     public sealed class OctomapModuleData : ListenerModuleData
     {
         [NotNull] readonly OctomapListener listener;
@@ -28,7 +27,7 @@ namespace Iviz.App
 
 
         public OctomapModuleData([NotNull] ModuleDataConstructor constructor) :
-        base(constructor.TryGetConfigurationTopic() ?? constructor.Topic, constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<OctomapModulePanel>(ModuleType.Octomap);
             listener = new OctomapListener();
@@ -40,6 +39,7 @@ namespace Iviz.App
             {
                 listener.Config = (OctomapConfiguration)constructor.Configuration;
             }
+
             listener.StartListening();
             UpdateModuleButton();
         }
@@ -56,7 +56,7 @@ namespace Iviz.App
 
             panel.Tint.ValueChanged += f => listener.Tint = f.WithAlpha(1);
             panel.OcclusionOnlyMode.ValueChanged += f => listener.RenderAsOcclusionOnly = f;
-            panel.MaxDepth.ValueChanged += f => listener.MaxDepth = (int) f;
+            panel.MaxDepth.ValueChanged += f => listener.MaxDepth = (int)f;
 
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
@@ -65,10 +65,10 @@ namespace Iviz.App
         public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
         {
             var config = JsonConvert.DeserializeObject<OctomapConfiguration>(configAsJson);
-            
+
             foreach (string field in fields)
             {
-                switch (field) 
+                switch (field)
                 {
                     case nameof(OctomapConfiguration.Visible):
                         listener.Visible = config.Visible;
@@ -85,12 +85,12 @@ namespace Iviz.App
 
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");
-                        break;                    
+                        break;
                 }
             }
 
             ResetPanel();
-        }             
+        }
 
         public override void AddToState(StateConfiguration config)
         {

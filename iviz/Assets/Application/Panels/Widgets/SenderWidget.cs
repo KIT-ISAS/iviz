@@ -15,8 +15,8 @@ namespace Iviz.App
     {
         const int MaxTopicLength = 200;
 
-        [SerializeField] TMP_Text? text = null;
-        [SerializeField] Image? panel = null;
+        [SerializeField] TMP_Text? text;
+        [SerializeField] Image? panel;
 
         ISender? sender;
 
@@ -44,7 +44,7 @@ namespace Iviz.App
         }
 
         int NumSubscribers =>
-            (!ConnectionManager.IsConnected || Sender == null) ? -1 : Sender.NumSubscribers;
+            (!RosManager.IsConnected || Sender == null) ? -1 : Sender.NumSubscribers;
 
         int MessagesPerSecond => Sender?.Stats.MessagesPerSecond ?? 0;
         long BytesPerSecond => Sender?.Stats.BytesPerSecond ?? 0;
@@ -55,7 +55,7 @@ namespace Iviz.App
             if (newSender == null)
             {
                 Text.text = "<i>Empty</i>\n" +
-                            "<b>(?)</b>";
+                            "<b>Off</b>";
             }
         }
 

@@ -9,8 +9,8 @@ namespace Iviz.App
 {
     public class TrashButtonWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Button? button = null;
-        [SerializeField] Image? image = null;
+        [SerializeField] Button? button;
+        [SerializeField] Image? image;
 
         Button Button => button.AssertNotNull(nameof(button));
         Image Image => image.AssertNotNull(nameof(image));

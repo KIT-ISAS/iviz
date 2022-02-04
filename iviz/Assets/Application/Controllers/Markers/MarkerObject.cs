@@ -163,7 +163,7 @@ namespace Iviz.Controllers
                 }
 
                 triangleListFlipWinding = value;
-                if (resource is MeshTrianglesResource r)
+                if (resource is MeshTrianglesDisplay r)
                 {
                     previousHash = null;
                     r.FlipWinding = value;
@@ -250,18 +250,19 @@ namespace Iviz.Controllers
             BoundsChanged?.Invoke();
         }
 
-        T ValidateResource<T>() where T : MarkerResource =>
+        T ValidateResource<T>() where T : MarkerDisplay =>
             resource is T result
                 ? result
                 : throw new InvalidOperationException("Resource is not set!");
 
         void CreateTriangleList(Marker msg)
         {
-            var meshTriangles = ValidateResource<MeshTrianglesResource>();
+            var meshTriangles = ValidateResource<MeshTrianglesDisplay>();
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || msg.Color.A.ApproximatelyZero()
                 || msg.Color.IsInvalid()
-                || msg.Points.Length % 3 != 0)
+                || msg.Points.Length % 3 != 0
+                || msg.Points.Length > NativeList.MaxElements)
             {
                 meshTriangles.Clear();
                 return;
@@ -296,12 +297,13 @@ namespace Iviz.Controllers
 
         void CreatePoints(Marker msg)
         {
-            var pointList = ValidateResource<PointListResource>();
+            var pointList = ValidateResource<PointListDisplay>();
             pointList.ElementScale = Math.Abs((float)msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || msg.Color.A.ApproximatelyZero()
-                || msg.Color.IsInvalid())
+                || msg.Color.IsInvalid()
+                || msg.Points.Length > NativeList.MaxElements)
             {
                 pointList.Reset();
                 return;
@@ -319,14 +321,15 @@ namespace Iviz.Controllers
 
         void CreateLine(Marker msg, bool isStrip)
         {
-            var lineResource = ValidateResource<LineResource>();
+            var lineResource = ValidateResource<LineDisplay>();
             float elementScale = Math.Abs((float)msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || elementScale.ApproximatelyZero()
                 || elementScale.IsInvalid()
                 || msg.Color.A.ApproximatelyZero()
-                || msg.Color.IsInvalid())
+                || msg.Color.IsInvalid()
+                || msg.Points.Length > NativeList.MaxElements)
             {
                 lineResource.Reset();
                 return;
@@ -348,7 +351,7 @@ namespace Iviz.Controllers
 
         void CreateMeshList(Marker msg)
         {
-            var meshList = ValidateResource<MeshListResource>();
+            var meshList = ValidateResource<MeshListDisplay>();
             meshList.UseColormap = false;
             meshList.UseIntensityForScaleY = false;
             meshList.MeshResource = msg.Type() == MarkerType.CubeList
@@ -359,7 +362,8 @@ namespace Iviz.Controllers
                 || msg.Color.IsInvalid()
                 || msg.Color.A.ApproximatelyZero()
                 || msg.Scale.IsInvalid()
-                || msg.Scale.ApproximatelyZero())
+                || msg.Scale.ApproximatelyZero()
+                || msg.Points.Length > NativeList.MaxElements)
             {
                 meshList.Reset();
                 return;
@@ -378,7 +382,7 @@ namespace Iviz.Controllers
 
         void CreateTextResource(Marker msg)
         {
-            var textResource = ValidateResource<TextMarkerResource>();
+            var textResource = ValidateResource<TextMarkerDisplay>();
             textResource.Text = msg.Text;
             textResource.Color = msg.Color.Sanitize().ToUnityColor();
             textResource.BillboardEnabled = true;
@@ -398,7 +402,7 @@ namespace Iviz.Controllers
 
         void CreateArrow(Marker msg)
         {
-            var arrowMarker = ValidateResource<ArrowResource>();
+            var arrowMarker = ValidateResource<ArrowDisplay>();
             arrowMarker.Color = msg.Color.Sanitize().ToUnityColor();
             switch (msg.Points.Length)
             {
@@ -456,7 +460,6 @@ namespace Iviz.Controllers
             resource = resourceGameObject.GetComponent<IDisplay>();
             if (resource != null)
             {
-                resource.Layer = LayerType.IgnoreRaycast;
                 Tint = Tint;
                 Smoothness = Smoothness;
                 Metallic = Metallic;
@@ -467,19 +470,24 @@ namespace Iviz.Controllers
                 {
                     hasDynamicBounds.BoundsChanged += RaiseBoundsChanged;
                 }
-
-                return; // all OK
             }
-
-            if (msg.Type() != MarkerType.MeshResource)
+            else
             {
-                // shouldn't happen!
-                Debug.LogWarning($"Mesh resource '{resourceKey}' has no IDisplay!");
+                if (msg.Type() != MarkerType.MeshResource)
+                {
+                    // shouldn't happen!
+                    Debug.LogWarning($"Mesh resource '{resourceKey}' has no IDisplay!");
+                }
+
+                // add generic wrapper
+                resource = resourceGameObject.AddComponent<AssetWrapperDisplay>();
             }
 
-            // add generic wrapper
-            resource = resourceGameObject.AddComponent<AssetWrapperResource>();
-            resource.Layer = LayerType.IgnoreRaycast;
+            if (resource is ISupportsLayer supportsLayer)
+            {
+                supportsLayer.Layer = LayerType.IgnoreRaycast;
+            }
+
             BoundsChanged?.Invoke();
         }
 
@@ -544,7 +552,7 @@ namespace Iviz.Controllers
             try
             {
                 var result = await Resource.GetGameObjectResourceAsync(meshResource,
-                    ConnectionManager.ServiceProvider, runningTs.Token);
+                    RosManager.ServiceProvider, runningTs.Token);
                 runningTs.Token.ThrowIfCancellationRequested();
                 return result;
             }
@@ -834,6 +842,12 @@ namespace Iviz.Controllers
                     return;
                 }
 
+                if (msg.Points.Length > NativeList.MaxElements)
+                {
+                    description.Append(ErrorStr).Append("Number of points exceeds maximum of ")
+                        .Append(NativeList.MaxElements);
+                }
+
                 if (msg.Color.A.ApproximatelyZero())
                 {
                     description.Append(WarnStr).Append("Color field has alpha 0").AppendLine();
@@ -877,6 +891,12 @@ namespace Iviz.Controllers
                     return;
                 }
 
+                if (msg.Points.Length > NativeList.MaxElements)
+                {
+                    description.Append(ErrorStr).Append("Number of points exceeds maximum of ")
+                        .Append(NativeList.MaxElements);
+                }
+
                 if (msg.Color.IsInvalid() || msg.Color.A.ApproximatelyZero())
                 {
                     description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
@@ -909,6 +929,12 @@ namespace Iviz.Controllers
                 {
                     description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
                 }
+
+                if (msg.Points.Length > NativeList.MaxElements)
+                {
+                    description.Append(ErrorStr).Append("Number of points exceeds maximum of ")
+                        .Append(NativeList.MaxElements);
+                }
             }
 
             void CreateTriangleListLog()
@@ -930,6 +956,12 @@ namespace Iviz.Controllers
                     description.Append(ErrorStr).Append("Color array length ").Append(msg.Colors.Length)
                         .Append(" does not match point array length ").Append(msg.Points.Length).AppendLine();
                     return;
+                }
+
+                if (msg.Points.Length > NativeList.MaxElements)
+                {
+                    description.Append(ErrorStr).Append("Number of points exceeds maximum of ")
+                        .Append(NativeList.MaxElements);
                 }
 
                 if (msg.Color.A.ApproximatelyZero())

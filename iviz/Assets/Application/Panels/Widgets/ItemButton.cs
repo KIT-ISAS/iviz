@@ -11,8 +11,8 @@ namespace Iviz.App
 {
     public sealed class ItemButton : MonoBehaviour
     {
-        [SerializeField] Button? button = null;
-        [FormerlySerializedAs("text")] [SerializeField] TMP_Text? label = null;
+        [SerializeField] Button? button;
+        [FormerlySerializedAs("text")] [SerializeField] TMP_Text? label;
         
         RectTransform ButtonTransform => (RectTransform) transform;
         Button Button => button.AssertNotNull(nameof(button));

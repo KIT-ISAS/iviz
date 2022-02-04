@@ -207,14 +207,15 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            if (Comment.Length == 0)
+            string comment = Comment.Trim();
+            if (comment.Length == 0)
             {
                 return new[] { $"{attrStr} {result}" };
             }
             
             return new[]
             {
-                "/// " + Comment,
+                $"/// <summary> {char.ToUpper(comment[0]).ToString()}{comment[1..]} </summary>",
                 $"{attrStr} {result}"
             };
             

@@ -29,8 +29,7 @@ namespace Iviz.App
         ImageDialogData? imageDialogData;
 
         public ImageModuleData(ModuleDataConstructor constructor) :
-            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic,
-                constructor.TryGetConfigurationType() ?? constructor.Type)
+            base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<ImageModulePanel>(ModuleType.Image);
             listener = new ImageListener((ImageConfiguration?)constructor.Configuration, Topic, TopicType);
