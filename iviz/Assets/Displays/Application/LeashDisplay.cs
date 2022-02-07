@@ -19,6 +19,7 @@ namespace Iviz.Displays
 
         public Color Color { get; set; } = Color.white;
         public Color ReticleColor { get; set; } = Color.white;
+        public Color ReticleEmissiveColor { get; set; } = Color.white;
 
         public float Width
         {
@@ -31,7 +32,13 @@ namespace Iviz.Displays
             Lines.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
         }
 
-        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal, float offset = 0)
+        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal, float offset)
+        {
+            Set(pointerRay, target + normal * offset, normal);
+
+        }
+
+        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal)
         {
             Reticle.Visible = true;
             Reticle.Transform.SetPositionAndRotation(target, Quaternion.LookRotation(normal));
@@ -39,8 +46,9 @@ namespace Iviz.Displays
             float scale = 0.03f * Vector3.Distance(target, Settings.MainCameraTransform.position);
             Reticle.Transform.localScale = scale * Vector3.one;
             Reticle.Color = ReticleColor;
+            //Reticle.EmissiveColor = ReticleEmissiveColor;
 
-            BuildLeash(pointerRay, target + normal * offset);
+            BuildLeash(pointerRay, target);
         }
 
         public void Set(in Ray pointerRay, in Vector3 target)

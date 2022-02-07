@@ -64,6 +64,7 @@ namespace Iviz.Controllers.XR
                 Leash.ReticleColor = Vector3.Distance(transformRay.origin, referencePoint) < XRController.NearDistance
                     ? Color.blue
                     : Color.white;
+                Leash.ReticleEmissiveColor = Color.black;
                 Leash.Width = interactingWidth;
                 if (draggable.ReferenceNormal is { } referenceNormal)
                 {
@@ -90,8 +91,15 @@ namespace Iviz.Controllers.XR
                 Leash.ReticleColor = Vector3.Distance(transformRay.origin, hitPosition) < XRController.NearDistance
                     ? Color.blue
                     : Color.white;
+                Leash.ReticleEmissiveColor = isUIHitClosest ? Color.white : Color.black;
                 Leash.Width = hoveringWidth;
-                Leash.Set(transformRay, hitPosition, hitNormal, isUIHitClosest ? 0.01f : 0.001f);
+                Leash.Set(transformRay, hitPosition, hitNormal, isUIHitClosest ? 0.005f : 0.001f);
+
+                if (isUIHitClosest && Controller.ButtonDown && Controller is HandController handController)
+                {
+                    handController.LockedPosition = hitPosition;
+                }
+                
                 return;
             }
 

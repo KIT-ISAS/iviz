@@ -47,7 +47,7 @@ namespace Iviz.Ros
 
             disposed = true;
             messageQueue.CompleteAdding();
-            await task;
+            await task.AwaitNoThrow(this); // shouldn't throw
             if (Settings.IsMobile)
             {
                 string filename = Path.GetFileName(path);

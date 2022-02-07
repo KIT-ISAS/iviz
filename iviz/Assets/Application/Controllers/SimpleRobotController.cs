@@ -10,6 +10,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Tools;
 using Iviz.XmlRpc;
 using UnityEngine;
 
@@ -422,7 +423,7 @@ namespace Iviz.Controllers
             async void LoadRobotAsync()
             {
                 robotLoadingTask = newRobot.StartAsync(RosManager.ServiceProvider, KeepMeshMaterials).AsTask();
-                await robotLoadingTask;
+                await robotLoadingTask.AwaitNoThrow(this);
                 RobotLinkHighlightable.ProcessRobot(newRobot.Name, newRobot.BaseLinkObject);
                 UpdateStartTaskStatus();
             }

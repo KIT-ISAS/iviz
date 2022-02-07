@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
@@ -26,6 +27,7 @@ namespace Iviz.Controllers.XR
         public bool ButtonState { get; protected set; }
         public bool ButtonUp { get; protected set; }
         public bool ButtonDown { get; protected set; }
+        public Vector3? LockedPosition { get; set; }
 
         protected bool TryGetDevice(out InputDevice outDevice)
         {

@@ -60,10 +60,10 @@ namespace Iviz.Ros
                 // start in background
                 serverTask = TaskUtils.Run(async () =>
                 {
-                    var task = server.StartAsync().AwaitNoThrow(this);
+                    var task = server.StartAsync();
                     await Task.Delay(100);
                     RosManager.Connection.TryOnceToConnect();
-                    await task;
+                    await task.AwaitNoThrow(this);
                 });
             }
             catch (Exception e)
