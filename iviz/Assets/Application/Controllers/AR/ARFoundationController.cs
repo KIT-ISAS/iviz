@@ -16,6 +16,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
+using Object = UnityEngine.Object;
 
 namespace Iviz.Controllers
 {
@@ -177,7 +178,7 @@ namespace Iviz.Controllers
                 else if (MeshManager != null)
                 {
                     MeshManager.DestroyAllMeshes();
-                    UnityEngine.Object.Destroy(MeshManager);
+                    Object.Destroy(MeshManager);
                     MeshManager = null;
                 }
             }
@@ -201,7 +202,7 @@ namespace Iviz.Controllers
         {
             Instance = this;
 
-            ar = UnityEngine.Object.Instantiate(Resource.Extras.AppAssetHolder.ARPrefab).GetComponent<ARContents>();
+            ar = Object.Instantiate(Resource.Extras.AppAssetHolder.ARPrefab).GetComponent<ARContents>();
             if (ar == null)
             {
                 throw new MissingAssetFieldException("AR object does not have contents");
@@ -231,7 +232,7 @@ namespace Iviz.Controllers
 
             setupModeFrame = ResourcePool.RentDisplay<AxisFrameDisplay>(ar.Camera.transform);
             setupModeFrame.Layer = LayerType.ARSetupMode;
-            setupModeFrame.AxisLength = 0.5f * TfListener.Instance.FrameSize;
+            setupModeFrame.AxisLength = 0.5f * TfModule.Instance.FrameSize;
             SetupModeEnabled = true;
 
             ARSet.Clicked += ArSetOnClicked;
@@ -503,7 +504,7 @@ namespace Iviz.Controllers
         {
             if (Visible && clickHitInfo.TryGetARRaycastResults(out var results))
             {
-                ARController.TriggerPulse(results[0].Position);
+                TriggerPulse(results[0].Position);
             }
         }
 
@@ -550,7 +551,7 @@ namespace Iviz.Controllers
                 var confidence = confidenceTask != null ? await confidenceTask : null;
 
 
-                string frameId = TfListener.ResolveFrameId(CameraFrameId);
+                string frameId = TfModule.ResolveFrameId(CameraFrameId);
 
                 if (color != null)
                 {
@@ -587,7 +588,7 @@ namespace Iviz.Controllers
                 }
 
                 var absoluteArCameraPose = ARPoseToUnity(anyPose.Value);
-                cameraFrame.LocalPose = TfListener.RelativeToFixedFrame(absoluteArCameraPose);
+                cameraFrame.LocalPose = TfModule.RelativeToFixedFrame(absoluteArCameraPose);
             }
             catch (Exception e)
             {
@@ -612,10 +613,10 @@ namespace Iviz.Controllers
 
             if (ar.FovDisplay != null)
             {
-                UnityEngine.Object.Destroy(ar.FovDisplay.gameObject);
+                Object.Destroy(ar.FovDisplay.gameObject);
             }
 
-            UnityEngine.Object.Destroy(ar.gameObject);
+            Object.Destroy(ar.gameObject);
         }
     }
 }
