@@ -306,9 +306,8 @@ namespace Iviz.Controllers.TF
             while (incomingMessages.TryDequeue(out var value))
             {
                 var (transforms, isStatic) = value;
-                for (int i = 0; i < transforms.Length; i++)
+                foreach (ref readonly var transform in transforms.AsSpan())
                 {
-                    ref readonly var transform = ref transforms[i];
                     ref readonly var rosTransform = ref transform.Transform;
                     
                     if (!CheckIfWithinThreshold(rosTransform.Translation))
