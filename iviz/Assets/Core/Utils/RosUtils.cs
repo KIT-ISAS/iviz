@@ -7,6 +7,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
+using Iviz.Tools;
 using Unity.Mathematics;
 using UnityEngine;
 using Color32 = UnityEngine.Color32;
@@ -324,6 +325,9 @@ namespace Iviz.Core
         public static bool IsInvalid(this float f) => !float.IsFinite(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsValid(this float f) => float.IsFinite(f);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this double f) => !double.IsFinite(f);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -368,6 +372,13 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid(this in Pose pose) => IsInvalid(pose.Position) || IsInvalid(pose.Orientation);
+
+        public static BuilderPool.BuilderRent AppendBandwidth(
+            this in BuilderPool.BuilderRent description, long bytesPerSecond)
+        {
+            AppendBandwidth((StringBuilder)description, bytesPerSecond);
+            return description;
+        }
 
         public static StringBuilder AppendBandwidth(this StringBuilder description, long bytesPerSecond)
         {

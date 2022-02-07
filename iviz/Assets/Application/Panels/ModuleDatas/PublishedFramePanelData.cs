@@ -1,16 +1,11 @@
 ﻿#nullable enable
 
-using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
-using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Newtonsoft.Json;
 using UnityEngine;
-using UnityEngine.Diagnostics;
 
 namespace Iviz.App
 {
@@ -37,7 +32,7 @@ namespace Iviz.App
             panel.Frame.Owner = this;
             panel.Parent.Owner = parentFrameOwner;
             panel.CloseButton.Clicked += Close;
-            panel.ParentId.Value = Frame.ParentId ?? TfListener.OriginFrameId;
+            panel.ParentId.Value = Frame.ParentId ?? TfModule.OriginFrameId;
 
             UpdateHints();
             UpdatePanelPose();
@@ -85,15 +80,15 @@ namespace Iviz.App
             panel.ParentId.EndEdit += f =>
             {
                 string validatedParent = string.IsNullOrEmpty(f) 
-                    ? TfListener.OriginFrameId 
-                    : TfListener.ResolveFrameId(f);
+                    ? TfModule.OriginFrameId 
+                    : TfModule.ResolveFrameId(f);
                 
-                var parentFrame = TfListener.GetOrCreateFrame(validatedParent);
+                var parentFrame = TfModule.GetOrCreateFrame(validatedParent);
                 if (!Frame.TrySetParent(parentFrame))
                 {
                     RosLogger.Error(
                         $"{this}: Failed to set '{f}' as a parent to '{Frame.Id}'. Reason: Cycle detected.");
-                    panel.ParentId.Value = Frame.ParentId ?? TfListener.OriginFrameId;
+                    panel.ParentId.Value = Frame.ParentId ?? TfModule.OriginFrameId;
                     parentFrameOwner.Frame = Frame.Parent;
                     return;
                 }
@@ -112,7 +107,7 @@ namespace Iviz.App
 
         void UpdateHints()
         {
-            panel.ParentId.Hints = TfListener.FrameNames.Prepend(TfListener.OriginFrameId);
+            panel.ParentId.Hints = TfModule.FrameNames.Prepend(TfModule.OriginFrameId);
         }
 
         void UpdateTop()

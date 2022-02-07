@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace Iviz.App
+﻿namespace Iviz.App
 {
     public sealed class XRModulePanel : ModulePanel
     {

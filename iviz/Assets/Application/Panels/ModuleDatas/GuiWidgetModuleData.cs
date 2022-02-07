@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers;
-using JetBrains.Annotations;
+using Iviz.Core;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -53,7 +53,7 @@ namespace Iviz.App
                     case nameof(GuiWidgetConfiguration.Visible):
                         break;
                     default:
-                        Core.RosLogger.Error($"{this}: Unknown field '{field}'");
+                        RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;
                 }
             }

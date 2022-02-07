@@ -506,12 +506,12 @@ namespace Iviz.Controllers
 
             foreach (var (link, parentLink) in Robot.LinkParents)
             {
-                if (TfListener.TryGetFrame(Decorate(link), out var frame))
+                if (TfModule.TryGetFrame(Decorate(link), out var frame))
                 {
                     frame.RemoveListener(node);
                 }
 
-                if (TfListener.TryGetFrame(Decorate(parentLink), out var parentFrame))
+                if (TfModule.TryGetFrame(Decorate(parentLink), out var parentFrame))
                 {
                     parentFrame.RemoveListener(node);
                 }
@@ -532,10 +532,10 @@ namespace Iviz.Controllers
                 return;
             }
 
-            RobotObject.transform.SetParentLocal(TfListener.DefaultFrame.Transform);
+            RobotObject.transform.SetParentLocal(TfModule.DefaultFrame.Transform);
             foreach (var (link, linkObject) in Robot.LinkObjects)
             {
-                var frame = TfListener.GetOrCreateFrame(Decorate(link), node);
+                var frame = TfModule.GetOrCreateFrame(Decorate(link), node);
                 linkObject.transform.SetParentLocal(frame.Transform);
                 linkObject.transform.SetLocalPose(Pose.identity);
             }
@@ -543,10 +543,10 @@ namespace Iviz.Controllers
             // fill in missing frame parents, but only they don't already have one
             foreach (var (link, parentLink) in Robot.LinkParents)
             {
-                var frame = TfListener.GetOrCreateFrame(Decorate(link), node);
-                if (frame.Parent == TfListener.OriginFrame)
+                var frame = TfModule.GetOrCreateFrame(Decorate(link), node);
+                if (frame.Parent == TfModule.OriginFrame)
                 {
-                    frame.Parent = TfListener.GetOrCreateFrame(Decorate(parentLink), node);
+                    frame.Parent = TfModule.GetOrCreateFrame(Decorate(parentLink), node);
                 }
             }
 

@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
+using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Iviz.Displays;
 using Newtonsoft.Json;
 
 namespace Iviz.App
@@ -27,7 +27,7 @@ namespace Iviz.App
         public TfModuleData(ModuleDataConstructor constructor)
         {
             panel = ModulePanelManager.GetPanelByResourceType<TfModulePanel>(ModuleType.TF);
-            listener = new TfListener((TfConfiguration?)constructor.Configuration, id => new TfFrameDisplay(id));
+            listener = new TfListener((TfConfiguration?)constructor.Configuration);
             UpdateModuleButton();
         }
 
@@ -37,10 +37,6 @@ namespace Iviz.App
             try
             {
                 listener.Dispose();
-            }
-            catch (ObjectDisposedException)
-            {
-                // system shutting down, ROS modules already disposed
             }
             catch (Exception e)
             {
@@ -63,9 +59,9 @@ namespace Iviz.App
             panel.Frame.Owner = listener;
             panel.Listener.Listener = listener.Listener;
             panel.ListenerStatic.Listener = listener.ListenerStatic;
-            panel.HideButton.State = listener.FramesVisible;
+            panel.HideButton.State = listener.Visible;
             panel.FrameSize.Value = listener.FrameSize;
-            panel.ShowFrameLabels.Value = listener.FrameLabelsVisible;
+            panel.ShowFrameLabels.Value = listener.LabelsVisible;
             panel.ConnectToParent.Value = listener.ParentConnectorVisible;
             panel.KeepAllFrames.Value = listener.KeepAllFrames;
             panel.FlipZ.Value = listener.FlipZ;
@@ -75,7 +71,7 @@ namespace Iviz.App
             panel.Publisher.UpdateText();
 
             panel.HideButton.Clicked += ToggleVisible;
-            panel.ShowFrameLabels.ValueChanged += f => listener.FrameLabelsVisible = f;
+            panel.ShowFrameLabels.ValueChanged += f => listener.LabelsVisible = f;
             panel.FrameSize.ValueChanged += f => listener.FrameSize = f;
             panel.ConnectToParent.ValueChanged += f => listener.ParentConnectorVisible = f;
             panel.KeepAllFrames.ValueChanged += f => listener.KeepAllFrames = f;
@@ -106,7 +102,7 @@ namespace Iviz.App
                         listener.FrameSize = config.FrameSize;
                         break;
                     case nameof(TfConfiguration.FrameLabelsVisible):
-                        listener.FrameLabelsVisible = config.FrameLabelsVisible;
+                        listener.LabelsVisible = config.FrameLabelsVisible;
                         break;
                     case nameof(TfConfiguration.ParentConnectorVisible):
                         listener.ParentConnectorVisible = config.ParentConnectorVisible;
@@ -115,7 +111,7 @@ namespace Iviz.App
                         listener.KeepAllFrames = config.KeepAllFrames;
                         break;
                     case nameof(TfConfiguration.Visible):
-                        listener.FramesVisible = config.Visible;
+                        listener.Visible = config.Visible;
                         break;
                     case nameof(TfConfiguration.Interactable):
                         listener.Interactable = config.Interactable;
@@ -141,7 +137,7 @@ namespace Iviz.App
 
         public override string ToString()
         {
-            return $"[{nameof(TfModuleData)} Topic='{TfListener.DefaultTopic}' id='{Configuration.Id}']";
+            return $"[{nameof(TfModuleData)} Topic='{TfModule.DefaultTopic}' id='{Configuration.Id}']";
         }
     }
 }

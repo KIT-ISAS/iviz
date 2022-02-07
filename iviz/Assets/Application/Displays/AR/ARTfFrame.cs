@@ -1,9 +1,7 @@
-using System;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.MsgsGen.Dynamic;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
@@ -12,9 +10,9 @@ namespace Iviz.App.ARDialogs
 {
     public sealed class ARTfFrame : MarkerDisplay, ISupportsTint
     {
-        [SerializeField] TMP_Text text = null;
-        [SerializeField] AxisFrameDisplay axisFrame = null;
-        [SerializeField] MeshMarkerDisplay cylinder = null;
+        [SerializeField] TMP_Text text;
+        [SerializeField] AxisFrameDisplay axisFrame;
+        [SerializeField] MeshMarkerDisplay cylinder;
         [CanBeNull] FrameNode node;
         
         public string Caption
@@ -73,7 +71,7 @@ namespace Iviz.App.ARDialogs
 
         void Update()
         {
-            FrameVisible = !TfListener.Instance.FramesVisible;
+            FrameVisible = !TfModule.Instance.Visible;
 
             const float maxDistance = 0.5f;
             const float minDistance = 0.3f;

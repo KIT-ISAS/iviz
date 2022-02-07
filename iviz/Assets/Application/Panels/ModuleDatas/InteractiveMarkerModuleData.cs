@@ -5,7 +5,6 @@ using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Core;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 namespace Iviz.App

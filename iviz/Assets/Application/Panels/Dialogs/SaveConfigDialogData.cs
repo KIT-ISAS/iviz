@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Iviz.Core;
-using Iviz.Tools;
 using Iviz.Resources;
+using Iviz.Tools;
 
 namespace Iviz.App
 {

@@ -1,6 +1,5 @@
 ﻿#nullable enable
 
-using System;
 using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,12 +8,12 @@ namespace Iviz.App
 {
     public class AnchorCanvasPanel : MonoBehaviour
     {
-        [SerializeField] Button? sideHideGui = null;
-        [SerializeField] AnchorToggleButton? hideGui = null;
-        [SerializeField] AnchorToggleButton? arSet = null;
-        [SerializeField] Button? unlock = null;
-        [SerializeField] AnchorToggleButton? interact = null;
-        [SerializeField] GameObject? arInfoPanel = null;
+        [SerializeField] Button? sideHideGui;
+        [SerializeField] AnchorToggleButton? hideGui;
+        [SerializeField] AnchorToggleButton? arSet;
+        [SerializeField] Button? unlock;
+        [SerializeField] AnchorToggleButton? interact;
+        [SerializeField] GameObject? arInfoPanel;
 
         public AnchorToggleButton BottomHideGui => hideGui.AssertNotNull(nameof(hideGui));
         public Button LeftHideGui => sideHideGui.AssertNotNull(nameof(sideHideGui));

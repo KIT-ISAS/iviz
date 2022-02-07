@@ -1,7 +1,4 @@
-﻿using TMPro;
-using UnityEngine;
-
-namespace Iviz.App
+﻿namespace Iviz.App
 {
     public sealed class PublishedFramePanel : ModulePanel
     {

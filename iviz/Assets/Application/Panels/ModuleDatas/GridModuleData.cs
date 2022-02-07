@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Newtonsoft.Json;

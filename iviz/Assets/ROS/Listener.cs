@@ -22,7 +22,7 @@ namespace Iviz.Ros
         readonly ConcurrentQueue<T> messageQueue = new();
         readonly Action<T>? handlerOnGameThread;
         readonly Func<T, IRosReceiver, bool>? directHandler;
-        readonly List<T> messageBuffer = new(32);
+        readonly List<T> messageHelper = new(32);
 
         int droppedMsgCounter;
         long lastMsgBytes;
@@ -227,21 +227,20 @@ namespace Iviz.Ros
                 return;
             }
 
-            messageBuffer.Clear();
+            messageHelper.Clear();
 
             foreach (int _ in ..messageCount) // copy a fixed amount, in case messages are still being added
             {
                 messageQueue.TryDequeue(out T t);
-                messageBuffer.Add(t);
+                messageHelper.Add(t);
             }
 
-            int start = Math.Max(0, messageBuffer.Count - MaxQueueSize); // should be 0 unless MaxQueueSize changed
-            foreach (var msg in messageBuffer.Skip(start))
+            int start = Math.Max(0, messageHelper.Count - MaxQueueSize); // should be 0 unless MaxQueueSize changed
+            foreach (var msg in messageHelper.Skip(start))
             {
-                Interlocked.Increment(ref recentMsgCounter);
                 try
                 {
-                    lastMsgBytes += msg.RosMessageLength;
+                    Interlocked.Add(ref lastMsgBytes, msg.RosMessageLength);
                     handlerOnGameThread(msg);
                 }
                 catch (Exception e)

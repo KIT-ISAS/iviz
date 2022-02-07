@@ -7,7 +7,6 @@ using Iviz.Core;
 using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
-using UnityEngine;
 
 namespace Iviz.App
 {
@@ -23,7 +22,7 @@ namespace Iviz.App
 
         const int MaxMessageLength = 300;
 
-        const int MaxMessagesToPrint = 64;
+        const int MaxMessagesToPrint = 64; // must be stackalloc-able
         const int MaxMessages = 50000;
 
         const string FatalColor = "#ff0000";
@@ -48,18 +47,16 @@ namespace Iviz.App
         };
 
         readonly ConsoleDialogPanel dialog;
-        public override IDialogPanel Panel => dialog;
-
         readonly ConcurrentQueue<LogMessage> messageQueue = new();
-
         readonly ConcurrentSet<string> ids = new();
 
         bool isPaused;
         bool queueIsDirty;
         LogLevel minLogLevel = LogLevel.Info;
-
-        string id = AllString;
         FromIdCode idCode = FromIdCode.All;
+        string id = AllString;
+
+        public override IDialogPanel Panel => dialog;
 
         public ConsoleDialogData()
         {
@@ -119,11 +116,10 @@ namespace Iviz.App
             var listener = RosManager.Logger.Listener;
             using var description = BuilderPool.Rent();
             listener.WriteDescriptionTo(description);
-            string kbPerSecond = (listener.Stats.BytesPerSecond * 0.001f).ToString("#,0.#", UnityUtils.Culture);
             description.Append(" | ")
                 .Append(listener.Stats.MessagesPerSecond)
                 .Append(" Hz | ")
-                .Append(kbPerSecond).Append(" kB/s");
+                .AppendBandwidth(listener.Stats.BytesPerSecond);
 
             dialog.BottomText.SetText(description);
         }
@@ -170,9 +166,8 @@ namespace Iviz.App
             HandleMessage(new LogMessage(log));
         }
 
-        static string ColorFromLevel(LogLevel level)
-        {
-            return level switch
+        static string ColorFromLevel(LogLevel level) =>
+            level switch
             {
                 >= LogLevel.Fatal => FatalColor,
                 >= LogLevel.Error => ErrorColor,
@@ -180,11 +175,9 @@ namespace Iviz.App
                 >= LogLevel.Info => InfoColor,
                 _ => DefaultColor
             };
-        }
 
-        public static int IndexFromLevel(LogLevel level)
-        {
-            return level switch
+        public static int IndexFromLevel(LogLevel level) =>
+            level switch
             {
                 LogLevel.Debug => 0,
                 LogLevel.Info => 1,
@@ -193,11 +186,9 @@ namespace Iviz.App
                 LogLevel.Fatal => 4,
                 _ => throw new ArgumentException("Invalid level", nameof(level))
             };
-        }
 
-        public static LogLevel LevelFromIndex(int index)
-        {
-            return index switch
+        public static LogLevel LevelFromIndex(int index) =>
+            index switch
             {
                 0 => LogLevel.Debug,
                 1 => LogLevel.Info,
@@ -206,18 +197,15 @@ namespace Iviz.App
                 4 => LogLevel.Fatal,
                 _ => throw new ArgumentException("Invalid index", nameof(index))
             };
-        }
 
-        static FromIdCode GetIdCode(string id)
-        {
-            return id switch
+        static FromIdCode GetIdCode(string id) =>
+            id switch
             {
                 AllString => FromIdCode.All,
                 NoneString => FromIdCode.None,
                 MeString => FromIdCode.Me,
                 _ => FromIdCode.OnlyId
             };
-        }
 
         void ProcessLog(bool forceReprocess = false)
         {
@@ -233,9 +221,9 @@ namespace Iviz.App
                 return;
             }
 
+            Span<int> indices = stackalloc int[MaxMessagesToPrint];
             using var description = BuilderPool.Rent();
             using (var messages = new RentAndClear<LogMessage>(messageQueue.Count))
-            using (var indices = new Rent<int>(MaxMessagesToPrint))
             {
                 int indexStart = 0;
                 int numIndices = 0;
@@ -250,8 +238,8 @@ namespace Iviz.App
                         continue;
                     }
 
-                    if (idCode == FromIdCode.Me && message.SourceId != null ||
-                        idCode == FromIdCode.OnlyId && message.SourceId != id)
+                    if (idCode is FromIdCode.Me && message.SourceId != null ||
+                        idCode is FromIdCode.OnlyId && message.SourceId != id)
                     {
                         continue;
                     }
@@ -280,9 +268,8 @@ namespace Iviz.App
                     }
                     else
                     {
-                        string dateAsStr = message.SourceId == null
-                            ? GameThread.NowFormatted
-                            : message.Stamp.ToString(message.Stamp.Date == GameThread.Now.Date
+                        string dateAsStr = message.Stamp.ToString(
+                            message.Stamp.Date == GameThread.Now.Date
                                 ? "HH:mm:ss.fff"
                                 : "yy-MM-dd HH:mm:ss.fff");
 

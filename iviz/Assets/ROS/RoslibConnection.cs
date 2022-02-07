@@ -194,31 +194,31 @@ namespace Iviz.Ros
 
                     AddConfigHostAliases();
 
-                    RosLogger.Debug("--- Advertising services...");
+                    //RosLogger.Debug("--- Advertising services...");
                     token.ThrowIfCancellationRequested();
                     await servicesByTopic.Values
                         .Select(topic => ReAdvertiseService(topic, token).AwaitNoThrow(this))
                         .WhenAll();
-                    RosLogger.Debug("+++ Done advertising services");
+                    //RosLogger.Debug("+++ Done advertising services");
 
-                    RosLogger.Debug("--- Readvertising...");
+                    //RosLogger.Debug("--- Readvertising...");
                     token.ThrowIfCancellationRequested();
                     await publishersByTopic.Values
                         .Select(topic => ReAdvertise(topic, token).AwaitNoThrow(this))
                         .WhenAll();
-                    RosLogger.Debug("+++ Done readvertising");
+                    //RosLogger.Debug("+++ Done readvertising");
 
-                    RosLogger.Debug("--- Resubscribing...");
+                    //RosLogger.Debug("--- Resubscribing...");
                     token.ThrowIfCancellationRequested();
                     await subscribersByTopic.Values
                         .Select(topic => ReSubscribe(topic, token).AwaitNoThrow(this))
                         .WhenAll();
-                    RosLogger.Debug("+++ Done resubscribing");
+                    //RosLogger.Debug("+++ Done resubscribing");
 
-                    RosLogger.Debug("--- Requesting topics...");
+                    //RosLogger.Debug("--- Requesting topics...");
                     token.ThrowIfCancellationRequested();
                     cachedPublishedTopics = await Client.GetSystemPublishedTopicsAsync(token);
-                    RosLogger.Debug("+++ Done requesting topics");
+                    //RosLogger.Debug("+++ Done requesting topics");
 
                     cachedSystemState = null;
                     cachedTopics = EmptyTopics;

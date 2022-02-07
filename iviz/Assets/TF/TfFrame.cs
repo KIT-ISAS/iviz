@@ -13,17 +13,19 @@ namespace Iviz.Controllers.TF
     /// Class that represents a ROS transform frame as described in a <see cref="TFMessage"/>.
     /// Displays or other nodes that want to attach themselves to a TF frame should spawn a <see cref="FrameNode"/>,
     /// attach themselves to that node, and then attach the node to the TFFrame.
-    /// The presence of FrameNodes is used by <see cref="TfListener"/> to keep track of which frames are being used and which
+    /// The presence of FrameNodes is used by <see cref="TfModule"/> to keep track of which frames are being used and which
     /// ones can be forgotten if necessary.
     /// </summary>
     public abstract class TfFrame : FrameNode
     {
-        readonly SortedDictionary<string, TfFrame> children = new();
+        static readonly SortedDictionary<string, TfFrame> Empty = new();
+
+        SortedDictionary<string, TfFrame>? children;
         List<FrameNode>? listeners;
         Pose localPose;
 
         bool HasNoListeners => listeners == null || listeners.Count == 0;
-        bool IsChildless => children.Count == 0;
+        bool IsChildless => children is null || children.Count == 0;
 
         public string Id { get; }
         public virtual bool LabelVisible { get; set; }
@@ -32,23 +34,24 @@ namespace Iviz.Controllers.TF
         public virtual bool TrailVisible { get; set; }
         public abstract bool EnableCollider { set; }
 
-        public SortedDictionary<string, TfFrame>.ValueCollection Children => children.Values;
+        public SortedDictionary<string, TfFrame>.ValueCollection Children =>
+            children is null ? Empty.Values : children.Values;
 
         /// <summary>
         /// Pose in relation to the origin frame in Unity coordinates
         /// </summary>
-        public Pose OriginWorldPose => TfListener.RelativeToOrigin(AbsoluteUnityPose);
+        public Pose OriginWorldPose => TfModule.RelativeToOrigin(AbsoluteUnityPose);
 
         /// <summary>
         /// Pose in relation to the fixed frame in Unity coordinates
         /// </summary>
-        public Pose FixedWorldPose => TfListener.RelativeToFixedFrame(AbsoluteUnityPose);
+        public Pose FixedWorldPose => TfModule.RelativeToFixedFrame(AbsoluteUnityPose);
 
         /// <summary>
         /// Pose in relation to the Unity origin in Unity coordinates
         /// </summary>
         public Pose AbsoluteUnityPose => Transform.AsPose();
-        
+
         public sealed override TfFrame? Parent
         {
             get => base.Parent;
@@ -108,16 +111,17 @@ namespace Iviz.Controllers.TF
 
         void AddChild(TfFrame frame)
         {
+            children ??= new SortedDictionary<string, TfFrame>();
             children.Add(frame.Id, frame);
         }
 
         void RemoveChild(TfFrame frame)
         {
-            if (IsChildless)
+            if (children is null || children.Count == 0)
             {
                 return;
             }
-
+            
             children.Remove(frame.Id);
         }
 
@@ -130,7 +134,7 @@ namespace Iviz.Controllers.TF
 
             if (HasNoListeners && IsChildless)
             {
-                TfListener.Instance.MarkAsDead(this);
+                TfModule.Instance.MarkAsDead(this);
             }
         }
 
@@ -166,21 +170,28 @@ namespace Iviz.Controllers.TF
             return true;
         }
 
-        public bool SetLocalPose(in Pose newPose)
+        public void SetLocalPose(in Pose newPose)
+        {
+            if (!localPose.EqualsApprox(newPose))
+            {
+                Transform.SetLocalPose(localPose = newPose);
+            }
+        }
+
+        public bool TrySetLocalPose(in Pose newPose)
         {
             if (localPose.EqualsApprox(newPose))
             {
                 return false;
             }
 
-            localPose = newPose;
-            Transform.SetLocalPose(newPose);
+            Transform.SetLocalPose(localPose = newPose);
             return true;
         }
-        
+
         protected override void Stop()
         {
-            if (children.Count == 0)
+            if (children is null || children.Count == 0)
             {
                 base.Stop();
                 return;
@@ -191,7 +202,7 @@ namespace Iviz.Controllers.TF
             {
                 frame.Parent = null;
             }
-            
+
             base.Stop();
         }
 

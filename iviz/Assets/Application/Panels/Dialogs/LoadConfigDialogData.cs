@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Iviz.Tools;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 
 namespace Iviz.App
 {

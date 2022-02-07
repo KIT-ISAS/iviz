@@ -94,7 +94,7 @@ namespace Iviz.App
             move.Enabled = Controller.ShowARJoystick;
             meshEnabled.Enabled = Controller.EnableMeshing;
             occlusionEnabled.Enabled = Controller.OcclusionQuality != OcclusionQualityType.Off;
-            tfVisible.Enabled = TfListener.Instance.Visible;
+            tfVisible.Enabled = TfModule.Instance.Visible;
         }
 
         void Awake()
@@ -139,7 +139,7 @@ namespace Iviz.App
                     occlusionEnabled.Enabled ? OcclusionQualityType.Fast : OcclusionQualityType.Off;
             };
 
-            tfVisible.Clicked += () => TfListener.Instance.Visible = (tfVisible.Enabled = !tfVisible.Enabled);
+            tfVisible.Clicked += () => TfModule.Instance.Visible = (tfVisible.Enabled = !tfVisible.Enabled);
 
             Active = true;
         }

@@ -42,7 +42,7 @@ namespace Iviz.Controllers.XR
             Frame.Transform.rotation = new Quaternion(0, 0.7071f, 0, 0.7071f);
             Tooltip.Transform.position = Transform.position + new Vector3(0, 0.55f * scale, 0);
             using var description = BuilderPool.Rent();
-            RosUtils.FormatPose(TfListener.RelativeToFixedFrame(Transform.AsPose()), description,
+            RosUtils.FormatPose(TfModule.RelativeToFixedFrame(Transform.AsPose()), description,
                 RosUtils.PoseFormat.OnlyPosition, 2);
             Tooltip.SetCaption(description);
             Tooltip.PointToCamera();

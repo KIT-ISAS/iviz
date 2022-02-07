@@ -1,15 +1,14 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Tools;
 using JetBrains.Annotations;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace Iviz.App
 {

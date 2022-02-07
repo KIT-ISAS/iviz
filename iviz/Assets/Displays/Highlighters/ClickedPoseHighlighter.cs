@@ -15,15 +15,17 @@ namespace Iviz.Displays.Highlighters
         readonly MeshMarkerDisplay reticle;
         readonly Tooltip tooltip;
 
-        public CancellationToken Token => default;
+        public CancellationToken Token { get; }
         public float Duration { get; }
 
-        public ClickedPoseHighlighter(in Pose unityPose, string? customText = null, float duration = 1)
+        public ClickedPoseHighlighter(in Pose unityPose, string? customText = null, float duration = 1,
+            CancellationToken token = default)
         {
             float labelSize = Tooltip.GetRecommendedSize(unityPose.position);
             float frameSize = labelSize * 10;
 
             Duration = duration;
+            Token = token;
 
             node = new FrameNode("Clicked Pose Highlighter");
             node.Transform.SetPose(unityPose);
@@ -52,7 +54,7 @@ namespace Iviz.Displays.Highlighters
             }
 
             using var description = BuilderPool.Rent();
-            RosUtils.FormatPose(TfListener.RelativeToFixedFrame(unityPose), description,
+            RosUtils.FormatPose(Controllers.TF.TfModule.RelativeToFixedFrame(unityPose), description,
                 RosUtils.PoseFormat.OnlyPosition, 2);
             tooltip.SetCaption(description);
         }

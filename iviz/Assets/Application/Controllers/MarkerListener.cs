@@ -32,7 +32,7 @@ namespace Iviz.Controllers
         /// Temporary buffer to hold incoming marker messages from the network thread
         readonly Dictionary<(string Ns, int Id), Marker> newMarkerBuffer = new();
 
-        public override TfFrame Frame => TfListener.DefaultFrame;
+        public override TfFrame Frame => TfModule.DefaultFrame;
 
         public MarkerConfiguration Config
         {
@@ -483,7 +483,7 @@ namespace Iviz.Controllers
 
         MarkerObject CreateMarkerObject(in (string, int) id, int msgType)
         {
-            var marker = new MarkerObject(TfListener.ListenersFrame, id)
+            var marker = new MarkerObject(TfModule.ListenersFrame, id)
             {
                 OcclusionOnly = RenderAsOcclusionOnly,
                 Tint = Tint,

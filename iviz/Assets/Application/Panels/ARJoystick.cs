@@ -8,15 +8,18 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class ARJoystick : MonoBehaviour
+    /// <summary>
+    /// The joystick control used to move the AR origin 
+    /// </summary>
+    public sealed class ARJoystick : MonoBehaviour
     {
-        [SerializeField] Button? closeButton = null;
-        [SerializeField] Button? pinDownButton = null;
-        [SerializeField] Button? globalButton = null;
-        [SerializeField] Joystick? joystickX = null;
-        [SerializeField] Joystick? joystickY = null;
-        [SerializeField] Joystick? joystickZ = null;
-        [SerializeField] Joystick? joystickA = null;
+        [SerializeField] Button? closeButton;
+        [SerializeField] Button? pinDownButton;
+        [SerializeField] Button? globalButton;
+        [SerializeField] Joystick? joystickX;
+        [SerializeField] Joystick? joystickY;
+        [SerializeField] Joystick? joystickZ;
+        [SerializeField] Joystick? joystickA;
 
         Button CloseButton => closeButton.AssertNotNull(nameof(closeButton));
         Button PinDownButton => pinDownButton.AssertNotNull(nameof(pinDownButton));
@@ -35,7 +38,6 @@ namespace Iviz.App
 
         public bool Visible
         {
-            get => gameObject.activeSelf;
             set => gameObject.SetActive(value);
         }
 

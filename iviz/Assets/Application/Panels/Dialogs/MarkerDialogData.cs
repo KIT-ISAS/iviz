@@ -3,10 +3,8 @@
 using System;
 using Iviz.Common;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Displays.Highlighters;
 using Iviz.Tools;
-using UnityEngine;
 
 namespace Iviz.App
 {

@@ -113,7 +113,7 @@ namespace Iviz.Core
             if (publishedThisSec == MaxPublishedPerSecond)
             {
                 UnityEngine.Debug.LogWarning($"{nameof(RosLogger)}: Already published " +
-                                             $"{MaxPublishedPerSecond.ToString()} messages this second." +
+                                             $"{MaxPublishedPerSecond.ToString()} messages this second. " +
                                              "Suppressing the rest.");
                 return;
             }
@@ -147,7 +147,7 @@ namespace Iviz.Core
             if (publishedThisSec == MaxPublishedPerSecond)
             {
                 UnityEngine.Debug.LogWarning($"{nameof(RosLogger)}: Already published " +
-                                             $"{MaxPublishedPerSecond.ToString()} messages this second." +
+                                             $"{MaxPublishedPerSecond.ToString()} messages this second. " +
                                              "Suppressing the rest.");
                 return;
             }

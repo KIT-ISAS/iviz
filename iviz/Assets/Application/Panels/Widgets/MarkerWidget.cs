@@ -1,19 +1,23 @@
-﻿using Iviz.Common;
+﻿#nullable enable
+
+using Iviz.Common;
 using Iviz.Core;
+using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
-using JetBrains.Annotations;
 
 namespace Iviz.App
 {
     public sealed class MarkerWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text text;
-        [CanBeNull] IMarkerDialogListener listener;
-        [SerializeField] Button button;
+        [SerializeField] Text? text;
+        [SerializeField] Button? button;
+        IMarkerDialogListener? listener;
         
-        [CanBeNull]
-        public IMarkerDialogListener MarkerListener
+        Text Text => text.AssertNotNull(nameof(text));
+        Button Button => button.AssertNotNull(nameof(button));
+        
+        public IMarkerDialogListener? MarkerListener
         {
             private get => listener;
             set
@@ -26,6 +30,7 @@ namespace Iviz.App
                 {
                     GameThread.EverySecond -= UpdateStats;
                 }
+
                 listener = value;
                 if (value != null)
                 {
@@ -36,7 +41,7 @@ namespace Iviz.App
 
         void Awake()
         {
-            button.onClick.AddListener(OnClick);
+            Button.onClick.AddListener(OnClick);
         }
 
         void OnClick()
@@ -49,7 +54,7 @@ namespace Iviz.App
 
         void UpdateStats()
         {
-            text.text = listener?.BriefDescription ?? "(No listener)";
+            Text.text = listener?.BriefDescription ?? "(No listener)";
         }
 
         public void ClearSubscribers()

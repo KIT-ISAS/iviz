@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -76,7 +75,7 @@ namespace Iviz.App
 
             panel.MaxSpeed.Value = controller.MaxSpeed;
             panel.AttachToFrame.Value = controller.AttachToFrame;
-            panel.AttachToFrame.Hints = TfListener.FrameNames;
+            panel.AttachToFrame.Hints = TfModule.FrameNames;
             panel.XIsFront.Value = controller.XIsFront;
 
             panel.JoyTopic.Interactable = controller.PublishJoy;
@@ -131,7 +130,7 @@ namespace Iviz.App
         {
             base.UpdatePanel();
             UpdateHints();
-            panel.AttachToFrame.Hints = TfListener.FrameNames;
+            panel.AttachToFrame.Hints = TfModule.FrameNames;
         }
 
         void UpdateHints()

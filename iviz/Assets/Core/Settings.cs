@@ -52,7 +52,8 @@ namespace Iviz.Core
             false;
 #endif
 
-        public static bool IsLinux => Application.platform is RuntimePlatform.LinuxEditor or RuntimePlatform.LinuxPlayer;
+        public static bool IsLinux =>
+            Application.platform is RuntimePlatform.LinuxEditor or RuntimePlatform.LinuxPlayer;
 
         /// <summary>
         /// Is this being run in a Hololens?
@@ -62,6 +63,7 @@ namespace Iviz.Core
         public const bool IsXR = false;
 #else
         static bool? isHololens;
+
         static bool? isXR;
 
         static bool TryReadXRInfo()
@@ -111,7 +113,7 @@ namespace Iviz.Core
         static Camera? mainCamera;
         static Transform? mainCameraTransform;
         static ISettingsManager? settingsManager;
-        static IDraggableHandler? inputModule;
+        static IDragHandler? inputModule;
 
         static bool? supportsComputeBuffersHelper;
         static bool? supportsR16;
@@ -130,7 +132,7 @@ namespace Iviz.Core
         public static string ResourcesPath => resourcesPath ??= $"{PersistentDataPath}/resources";
         public static string SavedRobotsPath => savedRobotsPath ??= $"{PersistentDataPath}/robots";
         public static string ResourcesFilePath => resourcesFilePath ??= $"{PersistentDataPath}/resources.json";
-        
+
         public static bool UseSimpleMaterials { get; set; }
 
         public static GameObject FindMainCamera() =>
@@ -158,12 +160,6 @@ namespace Iviz.Core
 
         public static Camera? VirtualCamera { get; set; }
         public static Camera? ARCamera { get; set; }
-        public static event Action<QualityType>? QualityTypeChanged;
-
-        public static void RaiseQualityTypeChanged(QualityType newQualityType)
-        {
-            QualityTypeChanged?.Invoke(newQualityType);
-        }
 
         public static ISettingsManager SettingsManager =>
             (UnityEngine.Object?)settingsManager != null
@@ -171,8 +167,11 @@ namespace Iviz.Core
                 : settingsManager = FindMainCamera().GetComponent<ISettingsManager>()
                                     ?? throw new MissingAssetFieldException("Failed to find SettingsManager!");
 
-        public static IDraggableHandler DraggableHandler => inputModule ??= (IDraggableHandler)SettingsManager;
-        
+        public static IDragHandler DragHandler =>
+            (UnityEngine.Object?)inputModule != null
+                ? inputModule
+                : inputModule = (IDragHandler)SettingsManager;
+
         public static IScreenCaptureManager? ScreenCaptureManager { get; set; }
 
         public static bool SupportsComputeBuffers => supportsComputeBuffersHelper ??
@@ -193,12 +192,11 @@ namespace Iviz.Core
             AotHelper.EnsureType<StringEnumConverter>();
         }
     }
-    
-    public interface IDraggableHandler
+
+    public interface IDragHandler
     {
         void TryUnsetDraggedObject(IScreenDraggable draggable);
         void TrySetDraggedObject(IScreenDraggable draggable);
         float XRDraggableNearDistance { get; }
     }
-    
 }

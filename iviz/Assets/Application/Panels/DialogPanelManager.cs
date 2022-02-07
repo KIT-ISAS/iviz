@@ -1,12 +1,11 @@
 ﻿#nullable enable
 
 using System;
-using UnityEngine;
 using System.Collections.Generic;
 using Iviz.Controllers.XR;
 using Iviz.Core;
 using Iviz.Resources;
-using UnityEngine.UI;
+using UnityEngine;
 
 namespace Iviz.App
 {

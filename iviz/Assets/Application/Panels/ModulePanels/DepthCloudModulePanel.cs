@@ -1,6 +1,5 @@
 ﻿using Iviz.Common;
 using Iviz.Resources;
-using UnityEngine;
 
 namespace Iviz.App
 {

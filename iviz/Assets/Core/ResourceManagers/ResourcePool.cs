@@ -14,6 +14,7 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class ResourcePool : MonoBehaviour
     {
+        const bool CheckDuplicates = false;
         const int TimeToDestroyInSec = 60;
 
         static ResourcePool? instance;
@@ -191,7 +192,11 @@ namespace Iviz.Displays
                 newObject.SetActive(true);
             }
 
-            disposedObjectIds.Remove(newObject.GetInstanceID());
+            if (CheckDuplicates)
+            {
+                disposedObjectIds.Remove(newObject.GetInstanceID());
+            }
+
             return newObject;
         }
 
@@ -203,11 +208,14 @@ namespace Iviz.Displays
                 return;
             }
 
-            if (disposedObjectIds.Contains(obj.GetInstanceID()))
+            if (CheckDuplicates)
             {
-                Debug.LogWarning($"{this}: Attempting to return object {obj} " +
-                                 $"[ type={resource.Name} id={obj.GetInstanceID().ToString()} ] multiple times!");
-                return;
+                if (disposedObjectIds.Contains(obj.GetInstanceID()))
+                {
+                    Debug.LogWarning($"{this}: Attempting to return object {obj} " +
+                                     $"[ type={resource.Name} id={obj.GetInstanceID().ToString()} ] multiple times!");
+                    return;
+                }
             }
 
             if (disposedObjectPool.TryGetValue(resource.Id, out var instanceQueue))
@@ -216,7 +224,7 @@ namespace Iviz.Displays
             }
             else
             {
-                var newQueue = new Queue<ObjectWithExpirationTime>();
+                var newQueue = new Queue<ObjectWithExpirationTime>(16);
                 newQueue.Enqueue(new ObjectWithExpirationTime(obj));
                 disposedObjectPool[resource.Id] = newQueue;
             }
@@ -227,7 +235,11 @@ namespace Iviz.Displays
             obj.transform.localPosition = resource.Object.transform.localPosition;
             obj.transform.localRotation = resource.Object.transform.localRotation;
             obj.transform.localScale = resource.Object.transform.localScale;
-            disposedObjectIds.Add(obj.GetInstanceID());
+
+            if (CheckDuplicates)
+            {
+                disposedObjectIds.Add(obj.GetInstanceID());
+            }
         }
 
         public override string ToString() => $"[{nameof(ResourcePool)}]";

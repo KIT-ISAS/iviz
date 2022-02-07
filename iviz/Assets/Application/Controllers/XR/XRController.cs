@@ -150,7 +150,7 @@ namespace Iviz.Controllers.XR
             {
                 case startButton:
                     var newOriginAbsolute = hololensInitManipulableFrame.transform.AsPose();
-                    TfListener.RootFrame.Transform.SetPose(newOriginAbsolute);
+                    TfModule.RootFrame.Transform.SetPose(newOriginAbsolute);
                     hololensInitManipulableFrame.SetActive(false);
                     hololensInitButtonBar.Visible = false;
 
@@ -158,8 +158,8 @@ namespace Iviz.Controllers.XR
                         newOriginAbsolute.position, null,
                         adjustment =>
                         {
-                            var newPose = adjustment.Multiply(TfListener.RootFrame.Transform.AsPose());
-                            TfListener.RootFrame.Transform.SetPose(newPose);
+                            var newPose = adjustment.Multiply(TfModule.RootFrame.Transform.AsPose());
+                            TfModule.RootFrame.Transform.SetPose(newPose);
                             hololensInitManipulableFrame.transform.SetPose(newPose);
                             ModuleListPanel.Instance.SaveXRConfiguration(newPose);
                         },
@@ -220,7 +220,7 @@ namespace Iviz.Controllers.XR
             UpdateHandSender(leftHand, LeftHandSender, ref leftHandSeqNr, ref leftHandActive);
             UpdateHandSender(rightHand, RightHandSender, ref rightHandSeqNr, ref rightHandActive);
 
-            headFrame.LocalPose = TfListener.RelativeToFixedFrame(Settings.MainCameraTransform.AsPose());
+            headFrame.LocalPose = TfModule.RelativeToFixedFrame(Settings.MainCameraTransform.AsPose());
 
             if (gaze.isActiveAndEnabled && gazeFrame != null)
             {
@@ -235,7 +235,7 @@ namespace Iviz.Controllers.XR
                         ? hitPosition
                         : gazePosition + 5 * gazeForward;
                     var poseToPublish = new Pose(positionToPublish, gazeRotation);
-                    gazeFrame.LocalPose = TfListener.RelativeToFixedFrame(poseToPublish);
+                    gazeFrame.LocalPose = TfModule.RelativeToFixedFrame(poseToPublish);
                 }
                 else
                 {
@@ -332,7 +332,7 @@ namespace Iviz.Controllers.XR
         }
 
         static readonly Func<Pose, Msgs.GeometryMsgs.Transform> ToTransform = pose =>
-            TfListener.RelativeToFixedFrame(pose).Unity2RosTransform();
+            TfModule.RelativeToFixedFrame(pose).Unity2RosTransform();
 
 
         public void Dispose()

@@ -149,7 +149,7 @@ namespace Iviz.Controllers
 
         MarkerObject CreateMarker(in (string, int) markerId)
         {
-            var markerObject = new MarkerObject(TfListener.ListenersFrame, markerId)
+            var markerObject = new MarkerObject(TfModule.ListenersFrame, markerId)
             {
                 Visible = Visible
             };

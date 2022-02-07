@@ -348,7 +348,7 @@ namespace Iviz.Controllers
                         }
                         catch (Exception e)
                         {
-                            Debug.LogWarning(e);
+                            RosLogger.Error($"{this}: Error processing occupancy grid cube", e);
                         }
                     }));
                 }
@@ -414,7 +414,7 @@ namespace Iviz.Controllers
                         }
                         catch (Exception e)
                         {
-                            RosLogger.Error($"{this}: Error processing occupancy grid", e);
+                            RosLogger.Error($"{this}: Error processing occupancy grid texture", e);
                         }
                     }));
                 }

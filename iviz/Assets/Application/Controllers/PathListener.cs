@@ -3,10 +3,16 @@ using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.NavMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using JetBrains.Annotations;
 using UnityEngine;
+using Pose = UnityEngine.Pose;
+using Quaternion = UnityEngine.Quaternion;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -125,20 +131,20 @@ namespace Iviz.Controllers
         {
             switch (config.Type)
             {
-                case Msgs.NavMsgs.Path.RosMessageType:
-                    listener = new Listener<Msgs.NavMsgs.Path>(config.Topic, Handler);
+                case Path.RosMessageType:
+                    listener = new Listener<Path>(config.Topic, Handler);
                     break;
-                case Msgs.GeometryMsgs.PoseArray.RosMessageType:
-                    listener = new Listener<Msgs.GeometryMsgs.PoseArray>(config.Topic, Handler);
+                case PoseArray.RosMessageType:
+                    listener = new Listener<PoseArray>(config.Topic, Handler);
                     LinesVisible = false;
                     break;
-                case Msgs.GeometryMsgs.PolygonStamped.RosMessageType:
-                    listener = new Listener<Msgs.GeometryMsgs.PolygonStamped>(config.Topic, Handler);
+                case PolygonStamped.RosMessageType:
+                    listener = new Listener<PolygonStamped>(config.Topic, Handler);
                     FramesVisible = false;
                     break;
-                case Msgs.GeometryMsgs.Polygon.RosMessageType:
-                    node.Parent = TfListener.DefaultFrame;
-                    listener = new Listener<Msgs.GeometryMsgs.Polygon>(config.Topic, Handler);
+                case Polygon.RosMessageType:
+                    node.Parent = TfModule.DefaultFrame;
+                    listener = new Listener<Polygon>(config.Topic, Handler);
                     FramesVisible = false;
                     break;
             }
@@ -147,12 +153,12 @@ namespace Iviz.Controllers
         }
 
 
-        void Handler([NotNull] Msgs.NavMsgs.Path msg)
+        void Handler([NotNull] Path msg)
         {
             node.AttachTo(msg.Header);
 
             string topHeader = msg.Header.FrameId;
-            Msgs.time topStamp = msg.Header.Stamp;
+            time topStamp = msg.Header.Stamp;
 
             if (node.Parent == null)
             {
@@ -163,7 +169,7 @@ namespace Iviz.Controllers
             Pose topPoseInv = node.Parent.OriginWorldPose.Inverse();
 
             savedPoses.Clear();
-            foreach (Msgs.GeometryMsgs.PoseStamped ps in msg.Poses)
+            foreach (PoseStamped ps in msg.Poses)
             {
                 string header = ps.Header.FrameId;
                 var stamp = ps.Header.Stamp;
@@ -180,7 +186,7 @@ namespace Iviz.Controllers
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
                     savedPoses.Add(pose);
                 }
-                else if (TfListener.TryGetFrame(header, out TfFrame frame))
+                else if (TfModule.TryGetFrame(header, out TfFrame frame))
                 {
                     Pose newPose = frame.OriginWorldPose;
                     Pose pose = topPoseInv.Multiply(newPose.Multiply(ps.Pose.Ros2Unity()));
@@ -196,7 +202,7 @@ namespace Iviz.Controllers
             ProcessPoses();
         }
 
-        void Handler([NotNull] Msgs.GeometryMsgs.PoseArray msg)
+        void Handler([NotNull] PoseArray msg)
         {
             node.AttachTo(msg.Header);
 
@@ -214,13 +220,13 @@ namespace Iviz.Controllers
             ProcessPoses();
         }
 
-        void Handler([NotNull] Msgs.GeometryMsgs.PolygonStamped msg)
+        void Handler([NotNull] PolygonStamped msg)
         {
             node.AttachTo(msg.Header);
             Handler(msg.Polygon);
         }
 
-        void Handler([NotNull] Msgs.GeometryMsgs.Polygon msg)
+        void Handler([NotNull] Polygon msg)
         {
             savedPoses.Clear();
             foreach (var p in msg.Points)

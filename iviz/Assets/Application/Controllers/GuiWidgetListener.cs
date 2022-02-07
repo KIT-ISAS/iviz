@@ -13,7 +13,7 @@ using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
 using UnityEngine;
-using Widget = Iviz.Msgs.IvizMsgs.Widget;
+using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.Controllers
 {
@@ -31,7 +31,7 @@ namespace Iviz.Controllers
         readonly Dictionary<string, GuiWidgetObject> dialogs = new();
         uint feedbackSeq;
 
-        public override TfFrame Frame => TfListener.FixedFrame;
+        public override TfFrame Frame => TfModule.FixedFrame;
         public Sender<Feedback>? FeedbackSender { get; }
         public override IListener Listener { get; }
 
@@ -409,7 +409,7 @@ namespace Iviz.Controllers
                 Trajectory = new Trajectory
                 {
                     Poses = points
-                        .Select(point => Msgs.GeometryMsgs.Pose.Identity.WithPosition(point.Unity2RosVector3()))
+                        .Select(point => Pose.Identity.WithPosition(point.Unity2RosVector3()))
                         .ToArray(),
                     Timestamps = Enumerable.Range(0, points.Count)
                         .Select(i => SecsToTime(i * periodInSec))

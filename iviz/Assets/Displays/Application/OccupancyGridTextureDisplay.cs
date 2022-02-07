@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Threading;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -30,6 +31,8 @@ namespace Iviz.Displays
 
         float cellSize;
         OccupancyGridDisplay.Rect bounds;
+
+        CancellationTokenSource? tokenSource;
 
         Material Material => material != null
             ? material
@@ -155,7 +158,8 @@ namespace Iviz.Displays
                     0) * (cellSize / 2);
                 rosCenter.z += zOffset;
 
-                var offset = new Pose(rosCenter.Ros2Unity(), Quaternion.Euler(0, 90, 0));
+                var rotation = new Quaternion(0, 0.707106769f, 0, 0.707106769f); // 90 deg around y
+                var offset = new Pose(rosCenter.Ros2Unity(), rotation);
                 var newPose = pose.Multiply(offset);
                 mTransform.SetLocalPose(newPose);
                 mTransform.localScale = new Vector3(totalHeight, totalWidth, 1).Ros2Unity().Abs();
@@ -226,6 +230,9 @@ namespace Iviz.Displays
             previousHash = null;
             MeshRenderer.enabled = true;
             Title = "";
+            
+            tokenSource?.Cancel();
+            tokenSource = null;
         }
 
         static void CreateMipmaps(Span<sbyte> array, int width, int height)
@@ -284,19 +291,23 @@ namespace Iviz.Displays
 
             int halfWidth = width / 2;
             int halfHeight = height / 2;
-            for (int vSrc = 0, vDst = 0; vDst < halfHeight; vSrc += 2, vDst++)
+            for (int vDst = 0; vDst < halfHeight; vDst++)
             {
+                int vSrc = 2 * vDst;
                 var row0 = srcSpan.Slice(width * vSrc, width);
                 var row1 = srcSpan.Slice(width * (vSrc + 1), width);
                 var rowDst = dstSpan.Slice(halfWidth * vDst, halfWidth);
 
-                for (int uSrc = 0, uDst = 0; uDst < halfWidth; uSrc += 2, uDst++)
+                //for (int uSrc = 0, uDst = 0; uDst < halfWidth; uSrc += 2, uDst++)
+                int uSrc = 0;
+                foreach (ref sbyte dst in rowDst)
                 {
                     int a = row0[uSrc + 0];
                     int b = row0[uSrc + 1];
                     int c = row1[uSrc + 0];
                     int d = row1[uSrc + 1];
-                    rowDst[uDst] = (sbyte)Fuse(a, b, c, d);
+                    dst = (sbyte)Fuse(a, b, c, d);
+                    uSrc += 2;
                 }
             }
         }
@@ -420,7 +431,7 @@ namespace Iviz.Displays
             using (var description = BuilderPool.Rent())
             {
                 description.Append("<b>").Append(Title).Append("</b>").AppendLine();
-                RosUtils.FormatPose(TfListener.RelativeToFixedFrame(unityPose), description,
+                RosUtils.FormatPose(TfModule.RelativeToFixedFrame(unityPose), description,
                     RosUtils.PoseFormat.OnlyPosition, 2);
                 description.AppendLine();
                 description
@@ -430,7 +441,10 @@ namespace Iviz.Displays
                 caption = description.ToString();
             }
 
-            FAnimator.Start(new ClickedPoseHighlighter(unityPose, caption, 2));
+            tokenSource?.Cancel();
+            tokenSource = new CancellationTokenSource();
+            
+            FAnimator.Start(new ClickedPoseHighlighter(unityPose, caption, 2, tokenSource.Token));
         }
 
         public bool IsAlive => Visible && cellSize != 0;

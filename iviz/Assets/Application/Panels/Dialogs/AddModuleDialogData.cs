@@ -4,7 +4,6 @@ using System;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Core;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Tools;
 
 namespace Iviz.App

@@ -11,9 +11,9 @@ namespace Iviz.App
     {
         const float YCloseButton = -17.5f;
 
-        [SerializeField] GameObject? content = null;
-        [SerializeField] GameObject? statics = null;
-        [SerializeField] GameObject? nonstatics = null;
+        [SerializeField] GameObject? content;
+        [SerializeField] GameObject? statics;
+        [SerializeField] GameObject? nonstatics;
 
         GameObject Content => content.AssertNotNull(nameof(content));
         GameObject Statics => statics.AssertNotNull(nameof(statics));

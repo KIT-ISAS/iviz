@@ -17,7 +17,7 @@ namespace Iviz.Displays.XR
         LineDisplay? lines;
         Color32 color = Color.cyan;
 
-        FrameNode Node => node ??= new FrameNode("XRDialogConnector Node", TfListener.OriginFrame);
+        FrameNode Node => node ??= new FrameNode("XRDialogConnector Node", Controllers.TF.TfModule.OriginFrame);
         LineDisplay Lines => lines != null ? lines : (lines = ResourcePool.RentDisplay<LineDisplay>(Node.Transform));
         MeshMarkerDisplay[] Spheres => spheres ??= new[] { RentSphere(), RentSphere(), RentSphere() };
         XRDialog Dialog => dialog.AssertNotNull(nameof(dialog));
@@ -30,7 +30,7 @@ namespace Iviz.Displays.XR
 
         void OnEnable()
         {
-            Node.Parent = TfListener.OriginFrame;
+            Node.Parent = Controllers.TF.TfModule.OriginFrame;
         }
 
         void OnDisable()

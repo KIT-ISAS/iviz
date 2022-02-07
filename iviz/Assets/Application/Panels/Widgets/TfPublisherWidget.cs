@@ -1,5 +1,4 @@
-﻿using Iviz.Controllers;
-using Iviz.Controllers.TF;
+﻿using Iviz.Controllers.TF;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,7 +21,7 @@ namespace Iviz.App
 
         public void UpdateText()
         {
-            int numTfFrames = TfListener.Instance.NumFrames;
+            int numTfFrames = TfModule.Instance.NumFrames;
             int publishedFrames = TfPublisher.Instance.NumPublishedFrames;
             string frameStr = (numTfFrames, publishedFrames) switch
             {

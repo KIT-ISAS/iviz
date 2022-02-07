@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using System;
-using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Roslib;
@@ -60,10 +59,10 @@ namespace Iviz.App
                 panel.TfLog.Flush();
             };
 
-            panel.ShowOnlyUsed.Value = !TfListener.Instance.KeepAllFrames;
+            panel.ShowOnlyUsed.Value = !TfModule.Instance.KeepAllFrames;
             panel.ShowOnlyUsed.ValueChanged += f =>
             {
-                TfListener.Instance.KeepAllFrames = !f;
+                TfModule.Instance.KeepAllFrames = !f;
                 ModuleListPanel.Instance.ResetTfPanel();
             };
         }

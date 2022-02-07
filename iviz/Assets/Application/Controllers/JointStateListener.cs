@@ -1,12 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
-using System;
-using Iviz.Msgs.SensorMsgs;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
+using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Iviz.Controllers
 {
@@ -20,7 +20,7 @@ namespace Iviz.Controllers
 
     public sealed class JointStateListener : ListenerController
     {
-        [NotNull] public override TfFrame Frame => TfListener.DefaultFrame;
+        [NotNull] public override TfFrame Frame => TfModule.DefaultFrame;
 
         readonly JointStateConfiguration config = new JointStateConfiguration();
 

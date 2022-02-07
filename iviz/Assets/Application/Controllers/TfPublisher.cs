@@ -154,6 +154,7 @@ namespace Iviz.Controllers.TF
         {
             readonly string id;
             readonly FrameNode frameNode;
+            
             public DateTime lastUpdate;
             public readonly bool isInternal;
             public TfFrame TfFrame { get; private set; }
@@ -182,7 +183,7 @@ namespace Iviz.Controllers.TF
             {
                 set
                 {
-                    if (TfFrame.SetLocalPose(value))
+                    if (TfFrame.TrySetLocalPose(value))
                     {
                         TfListener.Publish(TfFrame);
                     }
@@ -193,7 +194,7 @@ namespace Iviz.Controllers.TF
 
             public void AttachToFixed()
             {
-                TfFrame.Parent = TfListener.FixedFrame;
+                TfFrame.Parent = TfModule.FixedFrame;
             }
 
             public void UpdateFrame()
@@ -204,10 +205,7 @@ namespace Iviz.Controllers.TF
             }
         }
     }
-}
 
-namespace Iviz.Controllers
-{
     public interface IPublishedFrame
     {
         public Pose LocalPose { set; }

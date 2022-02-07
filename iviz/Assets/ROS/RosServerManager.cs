@@ -82,7 +82,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info("RosServerManager: Disposing!");
+            RosLogger.Info($"{this}: Disposing!");
             server.Dispose();
             
             // should return immediately, the waiting happened in server.Dispose()
@@ -98,10 +98,12 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info("RosServerManager: Disposing!");
+            RosLogger.Info($"{this}: Disposing!");
             await server.DisposeAsync();
             await serverTask.AwaitNoThrow(DisposeTimeoutInMs, this);
             server = null;
         }
+
+        public override string ToString() => $"[{nameof(RosServerManager)}]";
     }
 }

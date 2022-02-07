@@ -89,23 +89,16 @@ namespace Iviz.Displays
 
         public LineRenderType RenderType { get; set; }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsElementValid(in LineWithColor t) => IsElementValid(t.f);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsElementValid(in float4x2 f) => !f.c0.IsInvalid3() &&
-                                                            f.c0.MaxAbsCoeff3() < MaxPositionMagnitude &&
-                                                            (f.c0 - f.c1).MaxAbsCoeff3() > MinLineLength &&
-                                                            !f.c1.IsInvalid3() &&
-                                                            f.c1.MaxAbsCoeff3() < MaxPositionMagnitude;
-
         public override Bounds? Bounds => Size == 0 ? null : base.Bounds;
 
         /// <summary>
         /// Sets the lines with the given list.
         /// </summary>
         /// <param name="lines">The line list.</param>
-        /// <param name="overrideNeedsAlpha">A check of alpha colors will be done if <see cref="UseColormap"/> is disabled. Use this to override the check.</param>
+        /// <param name="overrideNeedsAlpha">
+        /// A check of alpha colors will be done if <see cref="UseColormap"/> is disabled.
+        /// Use this to override the check.
+        /// </param>
         public void Set(ReadOnlySpan<LineWithColor> lines, bool? overrideNeedsAlpha = null)
         {
             lineBuffer.EnsureCapacity(lines.Length);
@@ -121,6 +114,21 @@ namespace Iviz.Displays
 
             UpdateLines(overrideNeedsAlpha);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsElementValid(in LineWithColor t) => IsElementValid(t.f);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsElementValid(in float4x2 f) => AreValid(f.c0.x, f.c1.x)
+                                                            && AreValid(f.c0.y, f.c1.y)
+                                                            && AreValid(f.c0.z, f.c1.z);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool AreValid(float a, float b) => a.IsValid()
+                                                  && Math.Abs(a) < MaxPositionMagnitude
+                                                  && b.IsValid()
+                                                  && Math.Abs(b) < MaxPositionMagnitude
+                                                  && Math.Abs(b - a) > MinLineLength;
 
         public void Reset()
         {
@@ -146,7 +154,7 @@ namespace Iviz.Displays
 
             lineBuffer.EnsureCapacity(reserve);
             lineBuffer.Clear();
-            
+
             bool? overrideNeedsAlpha = callback(lineBuffer);
             UpdateLines(overrideNeedsAlpha);
         }
@@ -397,7 +405,7 @@ namespace Iviz.Displays
             Mesh.Clear();
             MeshRenderer.enabled = false;
             MaterialOverride = null;
-            
+
             lineBuffer.Clear();
             lineBuffer.Trim();
 

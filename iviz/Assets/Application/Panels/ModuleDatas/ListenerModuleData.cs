@@ -4,7 +4,6 @@ using System;
 using Iviz.Common;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Resources;
 
 namespace Iviz.App
 {

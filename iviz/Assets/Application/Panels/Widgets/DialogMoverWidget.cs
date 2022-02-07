@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
+using IDragHandler = UnityEngine.EventSystems.IDragHandler;
 
 namespace Iviz.App
 {

@@ -16,13 +16,16 @@ namespace Iviz.Displays
     {
         const int TrailTimeWindowInMs = 5000;
 
-        readonly AxisFrameDisplay axis;
+        AxisFrameDisplay? axis;
         TextMarkerDisplay? label;
         LineConnector? parentConnector;
         TrailDisplay? trail;
+        
         bool visible = true;
         float labelSize = 1.0f;
+        float axisLength = 0.125f;
         bool forceInvisible;
+        bool enableCollider = true;
 
         TrailDisplay Trail
         {
@@ -33,7 +36,7 @@ namespace Iviz.Displays
                     return trail;
                 }
 
-                trail = ResourcePool.RentDisplay<TrailDisplay>(TfListener.UnityFrameTransform);
+                trail = ResourcePool.RentDisplay<TrailDisplay>(TfModule.UnityFrameTransform);
                 trail.TimeWindowInMs = TrailTimeWindowInMs;
                 trail.Color = Color.yellow;
                 trail.name = $"[Trail:{Id}]";
@@ -72,12 +75,31 @@ namespace Iviz.Displays
 
                 parentConnector = ResourcePool.RentDisplay<LineConnector>(Transform);
                 parentConnector.A = Transform;
-                parentConnector.B = Transform.parent.CheckedNull() ?? TfListener.RootFrame.Transform;
+                parentConnector.B = Transform.parent.CheckedNull() ?? TfModule.RootFrame.Transform;
 
                 parentConnector.name = "[Connector]";
                 parentConnector.LineWidth = FrameSize / 20;
                 parentConnector.gameObject.SetActive(false);
                 return parentConnector;
+            }
+        }
+        
+        AxisFrameDisplay Axis
+        {
+            get
+            {
+                if (axis != null)
+                {
+                    return axis;
+                }
+
+                axis = ResourcePool.RentDisplay<AxisFrameDisplay>(Transform);
+                axis.EnableCollider = enableCollider;
+                axis.Layer = LayerType.IgnoreRaycast;
+                axis.gameObject.layer = LayerType.TfAxis;
+                axis.name = "[Axis]";
+                axis.Highlightable = this;
+                return axis;
             }
         }
 
@@ -88,9 +110,20 @@ namespace Iviz.Displays
             {
                 // visible in FrameNode hides children too, here we only hide the frame display 
                 visible = value;
-                axis.Visible = value && !forceInvisible;
+                AxisVisible = value && !forceInvisible;
                 LabelVisible = LabelVisible;
                 TrailVisible = TrailVisible;
+            }
+        }
+
+        bool AxisVisible
+        {
+            set
+            {
+                if (axis != null || value)
+                {
+                    Axis.Visible = value;
+                }
             }
         }
 
@@ -134,14 +167,27 @@ namespace Iviz.Displays
         
         public override bool EnableCollider
         {
-            set => axis.EnableCollider = value;
+            set
+            {
+                enableCollider = value;
+                if (axis != null)
+                {
+                    axis.EnableCollider = value;
+                }
+            }
         }
 
         public override float FrameSize
         {
-            get => axis.AxisLength;
+            get => axisLength;
             set
             {
+                axisLength = value;
+                if (axis == null)
+                {
+                    return;
+                }
+                
                 axis.AxisLength = value;
                 if (parentConnector != null)
                 {
@@ -177,14 +223,6 @@ namespace Iviz.Displays
 
         public TfFrameDisplay(string id) : base(id)
         {
-            axis = ResourcePool.RentDisplay<AxisFrameDisplay>(Transform);
-            axis.EnableCollider = true;
-            axis.Layer = LayerType.IgnoreRaycast;
-            axis.gameObject.layer = LayerType.TfAxis;
-            axis.name = "[Axis]";
-            axis.Highlightable = this;
-
-            FrameSize = 0.125f;
         }
 
         public override bool TrySetParent(TfFrame? parent)
@@ -198,7 +236,7 @@ namespace Iviz.Displays
             {
                 if (parentConnector != null)
                 {
-                    ParentConnector.B = TfListener.OriginFrame.Transform;
+                    ParentConnector.B = TfModule.OriginFrame.Transform;
                 }
             }
             else

@@ -48,7 +48,7 @@ namespace Iviz.App
                 {
                     description.Append("<i>(none)</i>");
                 }
-                else if (TfListener.FixedFrameId == frame.Id)
+                else if (TfModule.FixedFrameId == frame.Id)
                 {
                     description.Append("<b>").Append(frame.Id).Append("</b> <i>[Fixed]</i>");
                 }

@@ -4,12 +4,9 @@ using System;
 using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
-using Iviz.Resources;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace Iviz.App
 {

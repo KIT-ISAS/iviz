@@ -36,7 +36,7 @@ namespace Iviz.Displays
                 var intersectionWorld = InitializeReferencePoint(pointerRay);
                 distance = Vector3.Distance(pointerRay.origin, intersectionWorld);
                 lastControllerPosition = pointerRay.origin;
-                isNearInteraction = distance < Settings.DraggableHandler.XRDraggableNearDistance;
+                isNearInteraction = distance < Settings.DragHandler.XRDraggableNearDistance;
             }
             else
             {

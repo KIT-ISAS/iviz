@@ -14,6 +14,8 @@ using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Tools;
 using UnityEngine;
+using Pose = Iviz.Msgs.GeometryMsgs.Pose;
+using Vector3 = Iviz.Msgs.GeometryMsgs.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -97,7 +99,7 @@ namespace Iviz.Controllers
             }
             //Debug.Log("Detected " +  key.Code + " with size " + detectedMarker.MarkerSize);
 
-            Msgs.GeometryMsgs.Pose rosMarkerPose;
+            Pose rosMarkerPose;
             try
             {
                 rosMarkerPose = SolvePnp(marker);
@@ -111,7 +113,7 @@ namespace Iviz.Controllers
             marker.HasReliablePose = true;
             marker.PoseRelativeToCamera = rosMarkerPose;
 
-            Msgs.GeometryMsgs.Vector3 rosCameraPosition = marker.CameraPose.Position;
+            Vector3 rosCameraPosition = marker.CameraPose.Position;
             double distanceMarkerToCamera = (rosCameraPosition - rosMarkerPose.Position).Norm;
             if (distanceMarkerToCamera > maxMarkerDistanceInM)
             {
@@ -133,7 +135,7 @@ namespace Iviz.Controllers
                         break;
                     }
 
-                    bool isUp = Vector3.Dot(unityPoseAbsolute.up, Vector3.up) > 1 - 0.05f;
+                    bool isUp = UnityEngine.Vector3.Dot(unityPoseAbsolute.up, UnityEngine.Vector3.up) > 1 - 0.05f;
                     if (isUp)
                     {
                         ARController.Instance.SetWorldPose(unityPoseAbsolute, ARController.RootMover.Executor);
@@ -145,9 +147,9 @@ namespace Iviz.Controllers
                         ? existingDisplay
                         : RentFrame();
 
-                    var unityPoseToFixed = TfListener.RelativeToFixedFrame(unityPoseAbsolute);
+                    var unityPoseToFixed = TfModule.RelativeToFixedFrame(unityPoseAbsolute);
 
-                    frameDisplay.ParentFrame = TfListener.FixedFrameId;
+                    frameDisplay.ParentFrame = TfModule.FixedFrameId;
                     frameDisplay.TargetPose = unityPoseToFixed;
 
                     var tfFrame = TfPublisher.Instance.GetOrCreate(marker.Code);
@@ -188,15 +190,15 @@ namespace Iviz.Controllers
             const float distanceMultiplier = 0.15f;
 
             var relativeCameraPose = marker.CameraPose.FromCameraFrame().Ros2Unity();
-            var (cameraPosition, cameraRotation) = TfListener.FixedFrameToAbsolute(relativeCameraPose);
+            var (cameraPosition, cameraRotation) = TfModule.FixedFrameToAbsolute(relativeCameraPose);
             var intrinsic = new Intrinsic(marker.CameraIntrinsic);
 
-            Span<Vector3> dirs = stackalloc Vector3[4];
+            Span<UnityEngine.Vector3> dirs = stackalloc UnityEngine.Vector3[4];
             foreach (int i in ..4)
             {
                 var (cornerX, cornerY, _) = marker.Corners[i];
                 var (dirX, dirY, dirZ) = intrinsic.Unproject(cornerX, cornerY);
-                dirs[i] = new Vector3(dirX, -dirY, dirZ); // ros y-down to unity y-up
+                dirs[i] = new UnityEngine.Vector3(dirX, -dirY, dirZ); // ros y-down to unity y-up
             }
 
             var centerDir = (dirs[0] + dirs[1] + dirs[2] + dirs[3]) / 4;
@@ -212,7 +214,7 @@ namespace Iviz.Controllers
                 rays[i] = new Ray(cameraPosition, cameraRotation * dirs[i].normalized);
             }
 
-            Span<Vector3> hitPoints = stackalloc Vector3[4];
+            Span<UnityEngine.Vector3> hitPoints = stackalloc UnityEngine.Vector3[4];
             Span<float> sizes = stackalloc float[4];
             foreach (var (hitPosition, hitNormal) in arHits)
             {
@@ -225,7 +227,7 @@ namespace Iviz.Controllers
 
                 foreach (int i in ..4)
                 {
-                    sizes[i] = Vector3.Distance(hitPoints[(i + 1) % 4], hitPoints[i]);
+                    sizes[i] = UnityEngine.Vector3.Distance(hitPoints[(i + 1) % 4], hitPoints[i]);
                 }
 
                 float averageSize = (sizes[0] + sizes[1] + sizes[2] + sizes[3]) / 4;
@@ -256,7 +258,7 @@ namespace Iviz.Controllers
             frames.Clear();
         }
 
-        static Msgs.GeometryMsgs.Pose SolvePnp(ARMarker marker)
+        static Pose SolvePnp(ARMarker marker)
         {
             float sizeInMm = (float)marker.MarkerSizeInMm;
             float sizeInM = sizeInMm / 1000f;
@@ -272,7 +274,7 @@ namespace Iviz.Controllers
 
             return MarkerDetector.SolvePnp(imageCorners, intrinsic, sizeInM);
 
-            static Vector2f ToVector2f(in Msgs.GeometryMsgs.Vector3 v) => new((float)v.X, (float)v.Y);
+            static Vector2f ToVector2f(in Vector3 v) => new((float)v.X, (float)v.Y);
         }
 
         public override string ToString() => "[ARMarkerExecutor]";

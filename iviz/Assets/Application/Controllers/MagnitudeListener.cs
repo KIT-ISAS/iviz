@@ -12,6 +12,7 @@ using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Roslib;
 using UnityEngine;
+using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
@@ -219,7 +220,7 @@ namespace Iviz.Controllers
             Listener = Config.Type switch
             {
                 PoseStamped.RosMessageType => CreateListener<PoseStamped>(Handler),
-                Msgs.GeometryMsgs.Pose.RosMessageType => CreateListener<Msgs.GeometryMsgs.Pose>(Handler),
+                Pose.RosMessageType => CreateListener<Pose>(Handler),
                 PointStamped.RosMessageType => CreateListener<PointStamped>(Handler),
                 Point.RosMessageType => CreateListener<Point>(Handler),
                 WrenchStamped.RosMessageType => CreateListener<WrenchStamped>(Handler),
@@ -236,7 +237,7 @@ namespace Iviz.Controllers
             switch (Config.Type)
             {
                 case PoseStamped.RosMessageType:
-                case Msgs.GeometryMsgs.Pose.RosMessageType:
+                case Pose.RosMessageType:
                     RentFrame(frameNode, out axisFrame);
                     break;
                 case PointStamped.RosMessageType:
@@ -304,10 +305,11 @@ namespace Iviz.Controllers
             Handler(msg.Pose);
         }
 
-        void Handler(Msgs.GeometryMsgs.Pose msg)
+        void Handler(Pose msg)
         {
             if (msg.IsInvalid())
             {
+                RosLogger.Debug($"{this}: Pose contains invalid values. Ignoring.");
                 return;
             }
 
@@ -324,6 +326,7 @@ namespace Iviz.Controllers
         {
             if (msg.IsInvalid())
             {
+                RosLogger.Debug($"{this}: Point contains invalid values. Ignoring.");
                 return;
             }
 
@@ -343,6 +346,7 @@ namespace Iviz.Controllers
         {
             if (msg.Force.IsInvalid() || msg.Torque.IsInvalid())
             {
+                RosLogger.Debug($"{this}: Wrench contains invalid values. Ignoring.");
                 return;
             }
 
@@ -371,6 +375,7 @@ namespace Iviz.Controllers
             var (linear, angular) = msg;
             if (angular.IsInvalid() || linear.IsInvalid())
             {
+                RosLogger.Debug($"{this}: Twist contains invalid values. Ignoring.");
                 return;
             }
 
@@ -395,12 +400,14 @@ namespace Iviz.Controllers
 
             if (msg.Pose.Pose.IsInvalid())
             {
+                RosLogger.Debug($"{this}: Odometry pose contains invalid values. Ignoring.");
                 return;
             }
 
             var (linear, angular) = msg.Twist.Twist;
             if (angular.IsInvalid() || linear.IsInvalid())
             {
+                RosLogger.Debug($"{this}: Odometry twist contains invalid values. Ignoring.");
                 return;
             }
 

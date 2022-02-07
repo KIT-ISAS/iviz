@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Security;
@@ -23,7 +22,7 @@ using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using Quaternion = UnityEngine.Quaternion;
+using EnumeratorUtils = Iviz.Tools.EnumeratorUtils;
 
 namespace Iviz.App
 {
@@ -86,6 +85,7 @@ namespace Iviz.App
         readonly TfPublisher tfPublisher = new();
 
         RosManager? connectionManager;
+        TfModule? tfModule;
 
         int frameCounter;
         bool allGuiVisible = true;
@@ -176,6 +176,7 @@ namespace Iviz.App
         void Awake()
         {
             // clear static stuff in case domain reloading is disabled
+            Settings.ResetXRInfo();
             Resource.ClearResources();
             GuiWidgetListener.ClearResources();
             ARController.ClearResources();
@@ -188,7 +189,7 @@ namespace Iviz.App
             GameThread.EveryFrame -= UpdateFpsCounter;
             GameThread.EveryTenthOfASecond -= UpdateCameraStats;
 
-            foreach (var moduleData in moduleDatas.Skip(1))
+            foreach (var moduleData in moduleDatas)
             {
                 moduleData.Dispose();
             }
@@ -207,11 +208,9 @@ namespace Iviz.App
             cameraPanelData?.Dispose();
             connectionManager?.Dispose();
 
-            TfData.Dispose();
+            tfModule?.Dispose();
 
             GuiWidgetListener.DisposeDefaultHandler();
-            Settings.ResetXRInfo();
-
             instance = null;
         }
 
@@ -221,6 +220,7 @@ namespace Iviz.App
         void Start()
         {
             connectionManager = new RosManager();
+            tfModule = new TfModule(id => new TfFrameDisplay(id));
 
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
@@ -926,6 +926,7 @@ namespace Iviz.App
         
         void RemoveAllModulesButFirst()
         {
+            // todo: make this consistent will all modules except AR
             foreach (var moduleData in moduleDatas.Skip(1))
             {
                 if (moduleData is ListenerModuleData listenerData)
@@ -975,7 +976,7 @@ namespace Iviz.App
 
         public void DisposeImageDialog(ImageDialogData dialogData)
         {
-            imageDatas.Remove(dialogData);
+            imageDatas.Remove(dialogData ?? throw new ArgumentNullException(nameof(dialogData)));
         }
 
         public void ShowMarkerDialog(IMarkerDialogListener caller)
@@ -1039,9 +1040,9 @@ namespace Iviz.App
             );
 
             var currentCamera = Settings.MainCameraTransform;
-            var cameraPose = TfListener.RelativeToFixedFrame(currentCamera.AsPose());
+            var cameraPose = TfModule.RelativeToFixedFrame(currentCamera.AsPose());
             RosUtils.FormatPose(cameraPose, description,
-                TfListener.Instance.FlipZ ? RosUtils.PoseFormat.All : RosUtils.PoseFormat.AllWithoutRoll);
+                TfModule.Instance.FlipZ ? RosUtils.PoseFormat.All : RosUtils.PoseFormat.AllWithoutRoll);
             BottomCanvas.CameraText.SetText(description);
         }
 

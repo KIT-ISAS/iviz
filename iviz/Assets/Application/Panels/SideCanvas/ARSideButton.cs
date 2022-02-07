@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using Iviz.Resources;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -33,22 +34,22 @@ namespace Iviz.App
                 if (image != null)
                 {
                     image.color = value
-                        ? Resources.Resource.Colors.EnabledSideFont
-                        : Resources.Resource.Colors.DisabledSideFont;
+                        ? Resource.Colors.EnabledSideFont
+                        : Resource.Colors.DisabledSideFont;
                 }
 
                 if (text != null)
                 {
                     text.color = value
-                        ? Resources.Resource.Colors.EnabledSideFont
-                        : Resources.Resource.Colors.DisabledSideFont;
+                        ? Resource.Colors.EnabledSideFont
+                        : Resource.Colors.DisabledSideFont;
                 }
 
                 if (frame != null)
                 {
                     frame.color = value
-                        ? Resources.Resource.Colors.EnabledSideFrame
-                        : Resources.Resource.Colors.DisabledSideFrame;
+                        ? Resource.Colors.EnabledSideFrame
+                        : Resource.Colors.DisabledSideFrame;
                 }
             }
         }

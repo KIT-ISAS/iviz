@@ -1,29 +1,3 @@
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Iviz.Controllers;
-using Iviz.Core;
-using Iviz.Displays;
-using Iviz.Msgs;
-using Iviz.Msgs.GeometryMsgs;
-using Iviz.Msgs.MoveitMsgs;
-using Iviz.Msgs.ObjectRecognitionMsgs;
-using Iviz.Msgs.SensorMsgs;
-using Iviz.Msgs.ShapeMsgs;
-using Iviz.Msgs.StdMsgs;
-using Iviz.Msgs.Tf2Msgs;
-using Iviz.Msgs.TrajectoryMsgs;
-using Iviz.Ros;
-using Iviz.Roslib;
-using Iviz.XmlRpc;
-using JetBrains.Annotations;
-using UnityEngine;
-using Logger = Iviz.Tools.Logger;
-using Pose = UnityEngine.Pose;
-using Quaternion = Iviz.Msgs.GeometryMsgs.Quaternion;
-using Time = UnityEngine.Time;
-
 #if false
 using Iviz.Msgs.MoveitTest;
 

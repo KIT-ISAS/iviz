@@ -19,9 +19,8 @@ namespace Iviz.App
 
         void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
         {
-            int linkIndex = Settings.IsXR
-                ? TMP_TextUtilities.FindIntersectingLink(text, eventData.pressPosition, Settings.MainCamera)
-                : TMP_TextUtilities.FindIntersectingLink(text, Input.mousePosition, null);
+            var mainCamera = Settings.IsXR ? Settings.MainCamera : null;
+            int linkIndex = TMP_TextUtilities.FindIntersectingLink(text, eventData.pressPosition, mainCamera);
 
             if (linkIndex == -1)
             {

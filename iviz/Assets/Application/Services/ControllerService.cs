@@ -5,15 +5,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BigGustave;
 using Iviz.App;
-using Iviz.App.ARDialogs;
 using Iviz.Common;
-using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Displays.XR;
+using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.Roscpp;
 using Iviz.Resources;
@@ -22,6 +20,7 @@ using Iviz.Tools;
 using Newtonsoft.Json;
 using UnityEngine;
 using LaunchDialog = Iviz.Msgs.IvizCommonMsgs.LaunchDialog;
+using Logger = Iviz.Msgs.Roscpp.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 using UpdateRobot = Iviz.Msgs.IvizCommonMsgs.UpdateRobot;
 
@@ -58,6 +57,7 @@ namespace Iviz.Controllers
             connection.AdvertiseService<AddModule>("~add_module", AddModuleAsync);
             connection.AdvertiseService<AddModuleFromTopic>("~add_module_from_topic", AddModuleFromTopicAsync);
             connection.AdvertiseService<UpdateModule>("~update_module", UpdateModuleAsync);
+            connection.AdvertiseService<ResetModule>("~reset_module", ResetModuleAsync);
             connection.AdvertiseService<GetModules>("~get_modules", GetModulesAsync);
             connection.AdvertiseService<SetFixedFrame>("~set_fixed_frame", SetFixedFrameAsync);
             //connection.AdvertiseService<GetFramePose>("get_frame_poses", GetFramePoseAsync);
@@ -74,7 +74,7 @@ namespace Iviz.Controllers
         {
             srv.Response.Loggers = new[]
             {
-                new Msgs.Roscpp.Logger("ros.iviz",
+                new Logger("ros.iviz",
                     LogLevelNames[ConsoleDialogData.IndexFromLevel(RosManager.Logger.MinLogLevel)])
             };
         }
@@ -96,18 +96,32 @@ namespace Iviz.Controllers
             }
         }
 
+        static async ValueTask<T?> AwaitAndLog<T>(this ValueTask<T> task, string name)
+        {
+            try
+            {
+                return await task;
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error($"{nameof(ControllerService)}: Error in {name}!", e);
+                return default;
+            }
+        }
+
         static async ValueTask AddModuleAsync(AddModule srv)
         {
-            var (id, success, message) = await TryAddModuleAsync(srv.Request.ModuleType, srv.Request.Id);
+            var (id, success, message) = await TryAddModuleAsync(srv.Request.ModuleType, srv.Request.Id)
+                .AwaitAndLog(nameof(AddModuleAsync));
             srv.Response.Success = success;
             srv.Response.Message = message ?? "";
             srv.Response.Id = id ?? "";
         }
 
-        static async ValueTask<(string id, bool success, string message)> 
+        static async ValueTask<(string id, bool success, string? message)>
             TryAddModuleAsync(string moduleTypeStr, string requestedId)
         {
-            (string id, bool success, string message) result = default;
+            (string id, bool success, string? message) result = default;
 
             if (string.IsNullOrWhiteSpace(moduleTypeStr))
             {
@@ -139,7 +153,7 @@ namespace Iviz.Controllers
             {
                 if (moduleData.ModuleType != moduleType)
                 {
-                    result.message = $"EE Another module of the same id already exists, " +
+                    result.message = "EE Another module of the same id already exists, " +
                                      $"but it has type {TryGetName(moduleData.ModuleType)}";
                 }
                 else
@@ -178,16 +192,18 @@ namespace Iviz.Controllers
 
         static async ValueTask AddModuleFromTopicAsync(AddModuleFromTopic srv)
         {
-            var (id, success, message) = await TryAddModuleFromTopicAsync(srv.Request.Topic, srv.Request.Id);
+            var (id, success, message) =
+                await TryAddModuleFromTopicAsync(srv.Request.Topic, srv.Request.Id)
+                    .AwaitAndLog(nameof(AddModuleFromTopicAsync));
             srv.Response.Success = success;
-            srv.Response.Message = message;
-            srv.Response.Id = id;
+            srv.Response.Message = message ?? "";
+            srv.Response.Id = id ?? "";
         }
 
-        static async ValueTask<(string id, bool success, string message)>
+        static async ValueTask<(string id, bool success, string? message)>
             TryAddModuleFromTopicAsync(string topic, string requestedId)
         {
-            (string id, bool success, string message) result = default;
+            (string id, bool success, string? message) result = default;
             if (string.IsNullOrWhiteSpace(topic))
             {
                 result.message = "EE Invalid topic name";
@@ -237,6 +253,7 @@ namespace Iviz.Controllers
                 {
                     result.id = ModuleListPanel.Instance.CreateModule(resource, topic, type,
                         requestedId: requestedId.Length != 0 ? requestedId : null).Configuration.Id;
+                    result.message = "";
                     result.success = true;
                 }
                 catch (Exception e)
@@ -255,15 +272,16 @@ namespace Iviz.Controllers
 
         static async ValueTask UpdateModuleAsync(UpdateModule srv)
         {
-            var (success, message) = await TryUpdateModuleAsync(srv.Request.Id, srv.Request.Fields, srv.Request.Config);
+            var (success, message) = await TryUpdateModuleAsync(srv.Request.Id, srv.Request.Fields, srv.Request.Config)
+                .AwaitAndLog(nameof(UpdateModuleAsync));
             srv.Response.Success = success;
             srv.Response.Message = message ?? "";
         }
 
-        static async ValueTask<(bool success, string message)>
+        static async ValueTask<(bool success, string? message)>
             TryUpdateModuleAsync(string id, string[] fields, string config)
         {
-            (bool success, string message) result = default;
+            (bool success, string? message) result = default;
             if (string.IsNullOrWhiteSpace(id))
             {
                 result.message = "EE Empty configuration id!";
@@ -296,13 +314,59 @@ namespace Iviz.Controllers
                 {
                     result.success = false;
                     result.message = $"EE Error parsing JSON config: {e.Message}";
-                    RosLogger.Error("Error:", e);
+                    RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryUpdateModuleAsync)}", e);
                 }
                 catch (Exception e)
                 {
                     result.success = false;
                     result.message = $"EE An exception was raised: {e.Message}";
-                    RosLogger.Error("Error:", e);
+                    RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryUpdateModuleAsync)}", e);
+                }
+                finally
+                {
+                    signal.Release();
+                }
+            });
+            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : (false, "EE Request timed out!");
+        }
+
+        static async ValueTask ResetModuleAsync(ResetModule srv)
+        {
+            var (success, message) = await TryResetModuleAsync(srv.Request.Id).AwaitAndLog(nameof(ResetModuleAsync));
+            srv.Response.Success = success;
+            srv.Response.Message = message ?? "";
+        }
+
+        static async ValueTask<(bool success, string? message)> TryResetModuleAsync(string id)
+        {
+            (bool success, string? message) result = default;
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                result.message = "EE Empty configuration id!";
+                return result;
+            }
+
+            using var signal = new SemaphoreSlim(0);
+            GameThread.Post(() =>
+            {
+                try
+                {
+                    var module = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
+                    if (module == null)
+                    {
+                        result.success = false;
+                        result.message = "EE There is no module with that id";
+                        return;
+                    }
+
+                    module.ResetController();
+                    result.success = true;
+                }
+                catch (Exception e)
+                {
+                    result.success = false;
+                    result.message = $"EE An exception was raised: {e.Message}";
+                    RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryResetModuleAsync)}", e);
                 }
                 finally
                 {
@@ -314,7 +378,8 @@ namespace Iviz.Controllers
 
         static async ValueTask GetModulesAsync(GetModules srv)
         {
-            srv.Response.Configs = await GetModulesAsync();
+            srv.Response.Configs =
+                await GetModulesAsync().AwaitAndLog(nameof(GetModulesAsync)) ?? Array.Empty<string>();
         }
 
         static async ValueTask<string[]> GetModulesAsync()
@@ -353,14 +418,14 @@ namespace Iviz.Controllers
 
         static async ValueTask SetFixedFrameAsync(SetFixedFrame srv)
         {
-            (bool success, string message) = await TrySetFixedFrameAsync(srv.Request.Id);
+            (bool success, string? message) = await TrySetFixedFrameAsync(srv.Request.Id).AwaitAndLog(nameof(SetFixedFrameAsync));
             srv.Response.Success = success;
-            srv.Response.Message = message;
+            srv.Response.Message = message ?? "";
         }
 
-        static async ValueTask<(bool success, string message)> TrySetFixedFrameAsync(string id)
+        static async ValueTask<(bool success, string? message)> TrySetFixedFrameAsync(string id)
         {
-            (bool success, string message) result = default;
+            (bool success, string? message) result = default;
 
             using (var signal = new SemaphoreSlim(0))
             {
@@ -368,7 +433,7 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        TfListener.FixedFrameId = id;
+                        TfModule.FixedFrameId = id;
                     }
                     finally
                     {
@@ -409,7 +474,7 @@ namespace Iviz.Controllers
                         var posesList = new List<Pose>();
                         foreach (string id in ids)
                         {
-                            if (!TfListener.TryGetFrame(id, out var frame))
+                            if (!TfModule.TryGetFrame(id, out var frame))
                             {
                                 successList.Add(false);
                                 posesList.Add(Pose.Identity);
@@ -576,7 +641,7 @@ namespace Iviz.Controllers
 
                         ss = await Settings.ScreenCaptureManager.CaptureColorAsync();
                         pose = ss != null
-                            ? TfListener.RelativeToFixedFrame(ss.CameraPose).Unity2RosPose().ToCameraFrame()
+                            ? TfModule.RelativeToFixedFrame(ss.CameraPose).Unity2RosPose().ToCameraFrame()
                             : null;
                     }
                     catch (Exception e)
@@ -617,7 +682,7 @@ namespace Iviz.Controllers
             srv.Response.Width = ss.Width;
             srv.Response.Height = ss.Height;
             srv.Response.Bpp = ss.Bpp;
-            srv.Response.Header = (screenshotSeq++, ss.Timestamp, TfListener.FixedFrameId);
+            srv.Response.Header = (screenshotSeq++, ss.Timestamp, TfModule.FixedFrameId);
             srv.Response.Intrinsics = ss.Intrinsic.ToArray();
             srv.Response.Pose = pose ?? Pose.Identity;
             srv.Response.Data = await CompressAsync(ss);
@@ -635,7 +700,7 @@ namespace Iviz.Controllers
                     _ => throw new InvalidOperationException("Unknown screenshot format")
                 };
 
-                var builder = new BigGustave.PngBuilder(ss.Bytes, bpp == 4, ss.Width, ss.Height, bpp, flipRb);
+                var builder = new PngBuilder(ss.Bytes, bpp == 4, ss.Width, ss.Height, bpp, flipRb);
                 return builder.Save();
             });
         }
@@ -676,7 +741,7 @@ namespace Iviz.Controllers
             if (moduleData.ModuleType != ModuleType.Robot)
             {
                 srv.Response.Success = false;
-                srv.Response.Message = $"EE Another module of the same id already exists, " +
+                srv.Response.Message = "EE Another module of the same id already exists, " +
                                        $"but it has type {TryGetName(moduleData.ModuleType)}";
                 return;
             }
@@ -723,7 +788,7 @@ namespace Iviz.Controllers
                 if (moduleData != null && moduleData.ModuleType != ModuleType.Robot)
                 {
                     srv.Response.Success = false;
-                    srv.Response.Message = $"EE Another module of the same id already exists, " +
+                    srv.Response.Message = "EE Another module of the same id already exists, " +
                                            $"but it has type {TryGetName(moduleData.ModuleType)}";
                     return;
                 }

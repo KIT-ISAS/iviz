@@ -7,19 +7,18 @@ using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Iviz.Msgs.IvizMsgs;
-using Iviz.Msgs.StdMsgs;
 using Iviz.MarkerDetection;
+using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
+using Iviz.Msgs.StdMsgs;
+using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using UnityEngine;
-using Pose = UnityEngine.Pose;
-using Quaternion = UnityEngine.Quaternion;
 using Time = UnityEngine.Time;
-using Vector3 = UnityEngine.Vector3;
+using Transform = Iviz.Msgs.GeometryMsgs.Transform;
 
 namespace Iviz.Controllers
 {
@@ -141,7 +140,7 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
                 GuiInputModule.Instance.DisableCameraLock();
-                TfListener.RootFrame.Transform.SetPose(value ? WorldPose : Pose.identity);
+                TfModule.RootFrame.Transform.SetPose(value ? WorldPose : Pose.identity);
             }
         }
 
@@ -185,7 +184,7 @@ namespace Iviz.Controllers
 
         static float TfRootScale
         {
-            set => TfListener.RootScale = value;
+            set => TfModule.RootScale = value;
         }
 
         public virtual bool PinRootMarker
@@ -342,7 +341,7 @@ namespace Iviz.Controllers
             WorldPose = pose;
             if (Visible)
             {
-                TfListener.RootFrame.Transform.SetPose(pose);
+                TfModule.RootFrame.Transform.SetPose(pose);
             }
 
             WorldPoseChanged?.Invoke(mover);
@@ -393,7 +392,7 @@ namespace Iviz.Controllers
         protected virtual void Update()
         {
             var absoluteArCameraPose = ARPoseToUnity(ARCamera.transform.AsPose());
-            headFrame.LocalPose = TfListener.RelativeToFixedFrame(absoluteArCameraPose);
+            headFrame.LocalPose = TfModule.RelativeToFixedFrame(absoluteArCameraPose);
         }
 
         void OnMarkerDetected(Screenshot screenshot, IMarkerCorners[] markers)
@@ -401,9 +400,9 @@ namespace Iviz.Controllers
             ARMarker ToMarker(IMarkerCorners marker) => new()
             {
                 Type = (byte)marker.Type,
-                Header = new Header(markerSeq++, screenshot.Timestamp, TfListener.FixedFrameId),
+                Header = new Header(markerSeq++, screenshot.Timestamp, TfModule.FixedFrameId),
                 Code = marker.Code,
-                CameraPose = TfListener.RelativeToFixedFrame(ARPoseToUnity(screenshot.CameraPose))
+                CameraPose = TfModule.RelativeToFixedFrame(ARPoseToUnity(screenshot.CameraPose))
                     .Unity2RosPose()
                     .ToCameraFrame(),
                 Corners = marker.Corners
@@ -439,9 +438,9 @@ namespace Iviz.Controllers
 
         public static Pose GetAbsoluteMarkerPose(ARMarker marker)
         {
-            var rosPoseToFixed = (Msgs.GeometryMsgs.Transform)marker.CameraPose * marker.PoseRelativeToCamera;
+            var rosPoseToFixed = (Transform)marker.CameraPose * marker.PoseRelativeToCamera;
             var unityPoseToFixed = rosPoseToFixed.Ros2Unity();
-            return TfListener.FixedFrameToAbsolute(unityPoseToFixed);
+            return TfModule.FixedFrameToAbsolute(unityPoseToFixed);
         }
 
         public virtual void Dispose()
@@ -497,7 +496,7 @@ namespace Iviz.Controllers
             pulseTokenSource?.Cancel();
             pulseTokenSource = new CancellationTokenSource();
 
-            var material = Resources.Resource.Materials.LinePulse.Object;
+            var material = Resource.Materials.LinePulse.Object;
             material.SetVector(PulseCenter, start);
             material.SetFloat(PulseDelta, 0.25f);
 
@@ -505,7 +504,7 @@ namespace Iviz.Controllers
                 static t =>
                 {
                     float timeDiff = t * 10;
-                    var material = Resources.Resource.Materials.LinePulse.Object;
+                    var material = Resource.Materials.LinePulse.Object;
                     material.SetFloat(PulseTime, (timeDiff - 0.5f));
                 },
                 static () => pulseTokenSource.Cancel()

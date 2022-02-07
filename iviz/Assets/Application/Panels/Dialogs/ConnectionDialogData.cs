@@ -19,7 +19,7 @@ namespace Iviz.App
         const int DefaultPort = 7613;
         static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
         static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
-        static string DefaultMyId => "iviz_" + UnityEngine.Application.platform.ToString().ToLower();
+        static string DefaultMyId => "iviz_" + Application.platform.ToString().ToLower();
 
         readonly ConnectionDialogPanel panel;
         readonly List<Uri> lastMasterUris = new();

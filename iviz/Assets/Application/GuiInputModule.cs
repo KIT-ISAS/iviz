@@ -19,15 +19,12 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
-using Pose = UnityEngine.Pose;
-using Quaternion = UnityEngine.Quaternion;
+using IDragHandler = Iviz.Core.IDragHandler;
 using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
-using Transform = UnityEngine.Transform;
-using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.App
 {
-    public sealed class GuiInputModule : MonoBehaviour, ISettingsManager, IHasFrame, IDraggableHandler
+    public sealed class GuiInputModule : MonoBehaviour, ISettingsManager, IHasFrame, IDragHandler
     {
         const float MainSpeed = 2f;
         const float MainAccel = 5f;
@@ -207,7 +204,7 @@ namespace Iviz.App
             }
         }
 
-        public TfFrame Frame => TfListener.FixedFrame;
+        public TfFrame Frame => TfModule.FixedFrame;
 
         public int SunDirection
         {
@@ -235,7 +232,6 @@ namespace Iviz.App
 
                 QualitySettings.SetQualityLevel((int)config.QualityInAr, true);
                 UpdateQualityLevel(config.QualityInAr);
-                Settings.RaiseQualityTypeChanged(value);
             }
         }
 
@@ -255,7 +251,6 @@ namespace Iviz.App
 
                 QualitySettings.SetQualityLevel((int)qualityToUse, true);
                 UpdateQualityLevel(qualityToUse);
-                Settings.RaiseQualityTypeChanged(qualityToUse);
             }
         }
 
@@ -393,7 +388,7 @@ namespace Iviz.App
 
             TfListener.AfterProcessMessages += ProcessPoseChanges;
 
-            ModuleListPanel.CallAfterInitialized(() => TfListener.Instance.ResetFrames += OnResetFrames);
+            ModuleListPanel.CallAfterInitialized(() => TfModule.Instance.ResetFrames += OnResetFrames);
         }
 
         void LateUpdate()
@@ -866,7 +861,7 @@ namespace Iviz.App
 
         Vector3 CalculateTargetCameraPosition(in Vector3 targetPosition)
         {
-            float baseScale = 1f / 0.125f * TfListener.Instance.FrameSize;
+            float baseScale = 1f / 0.125f * TfModule.Instance.FrameSize;
             float minDistanceLookAt = 0.5f * baseScale;
             float maxDistanceLookAt = 3.0f * baseScale;
 
@@ -1010,8 +1005,8 @@ namespace Iviz.App
                 ? poolTransform.GetAllChildren()
                 : Enumerable.Empty<Transform>();
 
-            var rootChildren = TfListener.HasInstance
-                ? TfListener.RootFrame.Transform.GetAllChildren()
+            var rootChildren = TfModule.HasInstance
+                ? TfModule.RootFrame.Transform.GetAllChildren()
                 : Enumerable.Empty<Transform>();
 
             return rootChildren.Concat(resourcePoolChildren);

@@ -6,12 +6,10 @@ using System.Linq;
 using System.Threading;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Ros;
-using Iviz.Urdf;
 using Newtonsoft.Json;
 
 namespace Iviz.App

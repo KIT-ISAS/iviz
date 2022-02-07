@@ -104,7 +104,7 @@ namespace Iviz.Displays
 
         protected void StartSelected()
         {
-            Settings.DraggableHandler.TrySetDraggedObject(this);
+            Settings.DragHandler.TrySetDraggedObject(this);
             PointerDown?.Invoke();
         }
 
@@ -116,7 +116,7 @@ namespace Iviz.Displays
 
         protected void EndSelected()
         {
-            Settings.DraggableHandler.TryUnsetDraggedObject(this);
+            Settings.DragHandler.TryUnsetDraggedObject(this);
             PointerUp?.Invoke();
         }
 
@@ -146,7 +146,7 @@ namespace Iviz.Displays
 
         void OnDisable()
         {
-            Settings.DraggableHandler.TryUnsetDraggedObject(this);
+            Settings.DragHandler.TryUnsetDraggedObject(this);
             if (IsHovering || IsDragging)
             {
                 IsHovering = false;

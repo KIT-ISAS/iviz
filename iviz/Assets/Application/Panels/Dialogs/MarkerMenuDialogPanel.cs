@@ -1,10 +1,8 @@
 ﻿#nullable enable
 
-using UnityEngine;
 using System;
 using Iviz.Core;
 using Iviz.Tools;
-using JetBrains.Annotations;
 
 namespace Iviz.App
 {

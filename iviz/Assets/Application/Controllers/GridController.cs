@@ -1,14 +1,13 @@
 ﻿#nullable enable
 
-using UnityEngine;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
-using Iviz.Resources;
 using Iviz.Displays;
+using Iviz.Resources;
+using UnityEngine;
 using UnityEngine.Rendering;
-using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -67,7 +66,7 @@ namespace Iviz.Controllers
                 bool gridVisible = value && (arEnabled && !HideInARMode || !arEnabled);
                 if (!gridVisible)
                 {
-                    reflectionProbe.transform.parent = TfListener.DefaultFrame.Transform;
+                    reflectionProbe.transform.parent = TfModule.DefaultFrame.Transform;
                     grid.Visible = false;
                 }
                 else
@@ -193,7 +192,7 @@ namespace Iviz.Controllers
         {
             grid.ReturnToPool();
             node.Dispose();
-            UnityEngine.Object.Destroy(reflectionProbe.gameObject);
+            Object.Destroy(reflectionProbe.gameObject);
         }
 
         public void ResetController()

@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
-using Iviz.Resources;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 

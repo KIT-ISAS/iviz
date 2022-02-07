@@ -74,7 +74,7 @@ namespace Iviz.Displays
             CheckSettings();
 
             var baseTransform = new Quaternion(0, 0.707106769f, 0, 0.707106769f); // Quaternion.AngleAxis(90, Vector3.up);
-            Transform.rotation = TfListener.OriginFrame.Transform.rotation * baseTransform;
+            Transform.rotation = Controllers.TF.TfModule.OriginFrame.Transform.rotation * baseTransform;
         }
     }
 }

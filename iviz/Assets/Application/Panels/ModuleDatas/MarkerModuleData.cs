@@ -4,15 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Common.Configurations;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Controllers;
 using Iviz.Controllers.Markers;
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Displays.Highlighters;
 using Iviz.Tools;
 using Newtonsoft.Json;
-using UnityEngine;
 
 namespace Iviz.App
 {

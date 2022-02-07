@@ -10,7 +10,7 @@ namespace Iviz.Controllers.TF
     /// A wrapper around a GameObject that can be attached to a <see cref="TfFrame"/>.
     /// TfFrames should not have displays as direct children. Instead, controllers should create a FrameNode,
     /// attach the node to the TFFrame, and then the displays to this node.
-    /// FrameNodes allow <see cref="TfListener"/> to keep track of which frames are being used, and to forget those that are empty if necessary. 
+    /// FrameNodes allow <see cref="TfModule"/> to keep track of which frames are being used, and to forget those that are empty if necessary. 
     /// </summary>
     public class FrameNode // not sealed! has children
     {
@@ -69,7 +69,7 @@ namespace Iviz.Controllers.TF
         public FrameNode(string name, TfFrame? parent = null) : this()
         {
             Name = name ?? throw new ArgumentNullException(nameof(name));
-            SetParent(parent is { IsAlive: true } ? parent : TfListener.DefaultFrame);
+            SetParent(parent is { IsAlive: true } ? parent : TfModule.DefaultFrame);
         }
 
         public void AttachTo(in Msgs.StdMsgs.Header header)
@@ -87,8 +87,8 @@ namespace Iviz.Controllers.TF
             if (Parent == null || parentId != Parent.Id)
             {
                 Parent = parentId.Length == 0
-                    ? TfListener.DefaultFrame
-                    : TfListener.GetOrCreateFrame(parentId);
+                    ? TfModule.DefaultFrame
+                    : TfModule.GetOrCreateFrame(parentId);
             }
         }
 

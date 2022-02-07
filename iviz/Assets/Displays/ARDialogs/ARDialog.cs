@@ -66,7 +66,7 @@ namespace Iviz.App.ARDialogs
 
         FrameNode Node => node ??= FrameNode.Instantiate("Dialog Node");
 
-        public TfFrame ParentFrame => Node.Parent ?? TfListener.DefaultFrame;
+        public TfFrame ParentFrame => Node.Parent ?? Controllers.TF.TfModule.DefaultFrame;
 
         public Color BackgroundColor
         {
@@ -447,11 +447,11 @@ namespace Iviz.App.ARDialogs
                 return;
             }
 
-            var frameLocalPosition = TfListener.RelativeToOrigin(Node.Transform.position) + PivotFrameOffset;
+            var frameLocalPosition = Controllers.TF.TfModule.RelativeToOrigin(Node.Transform.position) + PivotFrameOffset;
             var cameraLocalRotation = GetFlatCameraRotation(frameLocalPosition);
 
             var targetLocalPosition = frameLocalPosition + cameraLocalRotation * DialogDisplacement + BaseDisplacement;
-            var targetAbsolutePosition = TfListener.OriginFrame.Transform.TransformPoint(targetLocalPosition);
+            var targetAbsolutePosition = Controllers.TF.TfModule.OriginFrame.Transform.TransformPoint(targetLocalPosition);
 
             if (currentPosition == null)
             {
@@ -473,17 +473,17 @@ namespace Iviz.App.ARDialogs
 
         static Quaternion GetFlatCameraRotation(in Vector3 localPosition)
         {
-            var absolutePosition = TfListener.OriginFrame.Transform.TransformPoint(localPosition);
+            var absolutePosition = Controllers.TF.TfModule.OriginFrame.Transform.TransformPoint(localPosition);
             (float x, _, float z) = absolutePosition - Settings.MainCameraTransform.position;
             float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
             var absoluteRotation = Quaternion.AngleAxis(targetAngle, Vector3.up);
 
-            return TfListener.OriginFrame.Transform.rotation.Inverse() * absoluteRotation;
+            return Controllers.TF.TfModule.OriginFrame.Transform.rotation.Inverse() * absoluteRotation;
         }
 
         public void Initialize()
         {
-            Transform.SetParentLocal(TfListener.OriginFrame.Transform);
+            Transform.SetParentLocal(Controllers.TF.TfModule.OriginFrame.Transform);
 
             connector.Visible = true;
             resetOrientation = true;

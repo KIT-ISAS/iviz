@@ -222,11 +222,13 @@ namespace Iviz.Core
             return q;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool EqualsApprox(this in Pose p, in Pose q)
         {
             return EqualsApprox(p.position, q.position) && EqualsApprox(p.rotation, q.rotation);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool EqualsApprox(in Vector3 lhs, in Vector3 rhs)
         {
             // from unity
@@ -236,6 +238,7 @@ namespace Iviz.Core
             return num1 * num1 + num2 * num2 + num3 * num3 < 9.999999439624929E-11f;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool EqualsApprox(in Quaternion a, in Quaternion b)
         {
             // from unity

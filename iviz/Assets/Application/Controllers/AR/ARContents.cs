@@ -9,17 +9,17 @@ namespace Iviz.Controllers
 {
     public sealed class ARContents : MonoBehaviour
     {
-        [SerializeField] Camera? arCamera = null;
-        [SerializeField] ARSession? arSession = null;
-        [SerializeField] ARSessionOrigin? arSessionOrigin = null;
-        [SerializeField] Light? arLight = null;
-        [SerializeField] ARCameraFovDisplay? fovDisplay = null;
-        [SerializeField] MeshFilter? meshPrefab = null;
-        [SerializeField] ARCameraManager? cameraManager = null;
-        [SerializeField] AROcclusionManager? occlusionManager = null;
-        [SerializeField] ARPlaneManager? planeManager = null;
-        [SerializeField] ARRaycastManager? raycaster = null;
-        [SerializeField] ARAnchorManager? anchorManager = null;
+        [SerializeField] Camera? arCamera;
+        [SerializeField] ARSession? arSession;
+        [SerializeField] ARSessionOrigin? arSessionOrigin;
+        [SerializeField] Light? arLight;
+        [SerializeField] ARCameraFovDisplay? fovDisplay;
+        [SerializeField] MeshFilter? meshPrefab;
+        [SerializeField] ARCameraManager? cameraManager;
+        [SerializeField] AROcclusionManager? occlusionManager;
+        [SerializeField] ARPlaneManager? planeManager;
+        [SerializeField] ARRaycastManager? raycaster;
+        [SerializeField] ARAnchorManager? anchorManager;
 
         public Camera Camera => arCamera.AssertNotNull(nameof(arCamera));
         public Light ARLight => arLight.AssertNotNull(nameof(arLight));

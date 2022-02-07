@@ -33,7 +33,7 @@ namespace Iviz.Controllers
 
         public Listener<InteractiveMarkerInit>? FullListener { get; }
         public Sender<InteractiveMarkerFeedback>? Publisher { get; }
-        public override TfFrame Frame => TfListener.DefaultFrame;
+        public override TfFrame Frame => TfModule.DefaultFrame;
 
         public InteractiveMarkerConfiguration Config
         {
@@ -278,7 +278,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var newMarkerObject = new InteractiveMarkerObject(this, id, TfListener.ListenersFrame)
+            var newMarkerObject = new InteractiveMarkerObject(this, id, TfModule.ListenersFrame)
             {
                 Visible = Visible,
                 Interactable = Interactable

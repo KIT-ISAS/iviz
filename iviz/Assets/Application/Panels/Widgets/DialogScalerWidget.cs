@@ -2,7 +2,6 @@ using System;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Vector2 = UnityEngine.Vector2;
 
 namespace Iviz.App
 {

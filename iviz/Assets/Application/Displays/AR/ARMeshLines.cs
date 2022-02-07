@@ -3,11 +3,11 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Iviz.Controllers;
+using Iviz.Controllers.XR;
 using Iviz.Core;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
-using XRUtils = Iviz.Controllers.XR.XRUtils;
 
 namespace Iviz.Displays
 {

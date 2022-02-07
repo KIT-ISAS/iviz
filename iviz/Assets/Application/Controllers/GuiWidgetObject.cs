@@ -9,7 +9,6 @@ using Iviz.Displays.XR;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using UnityEngine;
-using Vector3 = UnityEngine.Vector3;
 
 // ReSharper disable ConvertIfStatementToSwitchStatement
 namespace Iviz.Controllers
@@ -21,7 +20,7 @@ namespace Iviz.Controllers
         readonly IDisplay display;
         float scale = 1; 
 
-        public string ParentId => node.Parent?.Id ?? TfListener.DefaultFrame.Id;
+        public string ParentId => node.Parent?.Id ?? TfModule.DefaultFrame.Id;
         public string Id { get; }
         public DateTime ExpirationTime { get; }
         public WidgetType Type { get; }

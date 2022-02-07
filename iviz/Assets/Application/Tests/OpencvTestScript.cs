@@ -5,14 +5,12 @@ using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.MarkerDetection;
-using Iviz.Msgs;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Tools;
-using Iviz.XmlRpc;
 using UnityEngine;
 using Transform = Iviz.Msgs.GeometryMsgs.Transform;
+using Vector3 = Iviz.Msgs.GeometryMsgs.Vector3;
 
 namespace Iviz.App.Tests
 {
@@ -66,10 +64,10 @@ namespace Iviz.App.Tests
             var detectedMarker = new ARMarker
             {
                 Type = (byte) ARMarkerType.QrCode,
-                Header = new Header(0, default, TfListener.FixedFrameId),
+                Header = new Header(0, default, TfModule.FixedFrameId),
                 Code = qr.Code,
-                CameraPose = TfListener.RelativeToFixedFrame(Pose.identity).Unity2RosPose().ToCameraFrame(),
-                Corners = qr.Corners.Select(v => new Msgs.GeometryMsgs.Vector3(v.X, v.Y, 0)).ToArray(),
+                CameraPose = TfModule.RelativeToFixedFrame(Pose.identity).Unity2RosPose().ToCameraFrame(),
+                Corners = qr.Corners.Select(v => new Vector3(v.X, v.Y, 0)).ToArray(),
                 CameraIntrinsic = new Intrinsic(3000, texture.width / 2f, 3000, texture.height / 2f).ToArray(),
             };
 
@@ -89,7 +87,7 @@ namespace Iviz.App.Tests
             }
 
             const float size = 0.175f;
-            var objectCorners = new Iviz.Msgs.GeometryMsgs.Vector3[]
+            var objectCorners = new Vector3[]
             {
                 (-size / 2, size / 2, 0),
                 (size / 2, size / 2, 0),
@@ -99,7 +97,7 @@ namespace Iviz.App.Tests
 
             for (int i = 0; i < 4; i++)
             {
-                var position = (Msgs.GeometryMsgs.Transform) localPoseInRos * objectCorners[i];
+                var position = (Transform) localPoseInRos * objectCorners[i];
 
                 float x = (float) (position.X / position.Z) * 3000 + texture.width / 2f;
                 float y = (float) (position.Y / position.Z) * 3000 + texture.height / 2f;

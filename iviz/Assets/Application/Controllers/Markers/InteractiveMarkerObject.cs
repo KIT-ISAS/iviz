@@ -195,7 +195,7 @@ namespace Iviz.Controllers
             ModuleListPanel.Instance.ShowMenu(menuEntries.RootEntries, OnMenuClick);
         }
 
-        public void Set(string frameId, in Iviz.Msgs.GeometryMsgs.Pose rosPose)
+        public void Set(string frameId, in Msgs.GeometryMsgs.Pose rosPose)
         {
             node.AttachTo(frameId);
             LocalPose = rosPose.Ros2Unity();
