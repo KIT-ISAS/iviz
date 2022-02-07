@@ -44,7 +44,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
             return;
         }
 
-        writer.WritePropertyName(fieldName!);
+        writer.WritePropertyName(fieldName);
         writer.WriteValue(field);
         fields.Add(fieldName!);
     }
@@ -56,7 +56,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
             return;
         }
 
-        writer.WritePropertyName(fieldName!);
+        writer.WritePropertyName(fieldName);
         writer.WriteValue(value);
         fields.Add(fieldName!);
     }
@@ -68,7 +68,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
             return;
         }
 
-        writer.WritePropertyName(fieldName!);
+        writer.WritePropertyName(fieldName);
         writer.WriteValueExtended(value);
         fields.Add(fieldName!);
     }
@@ -80,7 +80,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
             return;
         }
 
-        writer.WritePropertyName(fieldName!);
+        writer.WritePropertyName(fieldName);
         writer.WriteValueExtended(value);
         fields.Add(fieldName!);
     }
@@ -92,14 +92,14 @@ internal readonly struct ConfigurationSerializer : IDisposable
             return;
         }
 
-        writer.WritePropertyName(fieldName!);
+        writer.WritePropertyName(fieldName);
         writer.WriteValue(value);
         fields.Add(fieldName!);
     }
 
     public void Serialize(ModuleType field, [CallerArgumentExpression("field")] string? fieldName = null)
     {
-        writer.WritePropertyName(fieldName!);
+        writer.WritePropertyName(fieldName);
         writer.WriteValue(ModuleNames[field]);
         fields.Add(fieldName!);
     }
@@ -111,7 +111,7 @@ internal readonly struct ConfigurationSerializer : IDisposable
             return;
         }
 
-        writer.WritePropertyName(fieldName!);
+        writer.WritePropertyName(fieldName);
         writer.WriteStartArray();
         foreach (bool b in value)
         {

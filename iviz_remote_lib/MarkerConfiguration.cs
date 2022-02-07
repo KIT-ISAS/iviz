@@ -6,7 +6,7 @@ namespace Iviz.RemoteLib;
 
 public sealed class MarkerConfiguration : IConfiguration
 {
-    public ModuleType ModuleType => ModuleType.Marker;
+    public static ModuleType ModuleType => ModuleType.Marker;
     public bool? RenderAsOcclusionOnly { get; set; }
     public bool? TriangleListFlipWinding { get; set; }
     public bool? ShowDescriptions { get; set; }

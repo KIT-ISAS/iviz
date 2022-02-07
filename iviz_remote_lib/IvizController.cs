@@ -1,8 +1,6 @@
 ﻿using System.Collections;
 using System.Text;
 using Iviz.Msgs.IvizMsgs;
-using Iviz.Msgs.Tf2Msgs;
-using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Roslib;
 
 namespace Iviz.RemoteLib;
@@ -11,15 +9,21 @@ namespace Iviz.RemoteLib;
 /// Class that can be used to remotely control an instance of the iviz app.
 /// For this class to work, the app must be already running and connected to a ROS master.
 /// </summary>
-public sealed class RemoteController
+public sealed class IvizController
 {
     readonly RosClient client;
     readonly string ivizId;
     readonly StringBuilder configStr = new(256);
     readonly List<string> configFields = new(16);
 
-    public RemoteController(RosClient client, string ivizId)
+    /// <summary>
+    /// Creates a new iviz controller.
+    /// </summary>
+    /// <param name="client">An initialized ROS client.</param>
+    /// <param name="ivizId">The id of the iviz instance, as found in the 'My ROS ID' field. For example: iviz_wineditor.</param>
+    public IvizController(RosClient client, string ivizId)
     {
+        RosClient.ValidateResourceName(ivizId);
         this.client = client;
         this.ivizId = ivizId;
     }
@@ -152,59 +156,22 @@ public sealed class RemoteController
     {
         return client.CallService($"{ivizId}/get_modules", GetModulesRequest.Singleton).Configs;
     }
-}
-
-public enum AddModuleType
-{
-    /// <inheritdoc cref="ModuleType.Grid"/>
-    Grid = ModuleType.Grid,
-    AugmentedReality = ModuleType.AugmentedReality,
-    Joystick = ModuleType.Joystick,
-
-    /// <inheritdoc cref="ModuleType.Robot"/>
-    Robot = ModuleType.Robot,
     
-    DepthCloud = ModuleType.DepthCloud,
-}
+    public void ResetModule(string id)
+    {
+        if (string.IsNullOrEmpty(id))
+        {
+            throw new ArgumentNullException(nameof(id));
+        }
 
-public enum ModuleType
-{
-    /// <summary>
-    /// A grid plane. See <see cref="GridConfiguration"/>.
-    /// </summary>
-    Grid = 1,
+        var response = client.CallService($"{ivizId}/reset_module", new ResetModuleRequest(id));
 
-    /// <summary>
-    /// Visualizer and manager for TF frames, listens to <see cref="TFMessage"/> messages.
-    /// See <see cref="TFConfiguration"/>.
-    /// </summary>
-    TF = 2,
-    PointCloud = 3,
-    Image = 4,
-
-    /// <summary>
-    /// Visualizer and manager for markers, listens to <see cref="Msgs.VisualizationMsgs.Marker"/> and <see cref="MarkerArray"/> messages.
-    /// See <see cref="MarkerConfiguration"/>.
-    /// </summary>
-    Marker = 5,
-    InteractiveMarker = 6,
-    DepthCloud = 8,
-    LaserScan = 9,
-    AugmentedReality = 10,
-    Magnitude = 11,
-    OccupancyGrid = 12,
-    Joystick = 13,
-    Path = 14,
-    GridMap = 15,
-
-    /// <summary>
-    /// Visualizer for robots. See <see cref="RobotConfiguration"/>. 
-    /// </summary>
-    Robot = 16,
-    GuiWidget = 18,
-    XR = 19,
-    Camera = 20,
-    TFPublisher = 21
+        if (!response.Success)
+        {
+            throw new RemoteException(response.Message);
+        }
+    }
+    
 }
 
 public interface IConfiguration
