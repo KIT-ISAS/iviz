@@ -108,19 +108,24 @@ namespace Iviz.Displays
         /// <param name="overrideNeedsAlpha">A check of alpha colors will be done if <see cref="UseColormap"/> is disabled. Use this to override the check.</param>
         public void Set(ReadOnlySpan<LineWithColor> lines, bool? overrideNeedsAlpha = null)
         {
+            Set(MemoryMarshal.Cast<LineWithColor, float4x2>(lines), overrideNeedsAlpha);
+        }
+        
+        void Set(ReadOnlySpan<float4x2> lines, bool? overrideNeedsAlpha = null)
+        {
             lineBuffer.EnsureCapacity(lines.Length);
             lineBuffer.Clear();
-            for (int i = 0; i < lines.Length; i++)
+            
+            foreach (ref readonly var line in lines)
             {
-                ref readonly var t = ref lines[i];
-                if (IsElementValid(t))
+                if (IsElementValid(line))
                 {
-                    lineBuffer.AddUnsafe(t.f);
+                    lineBuffer.AddUnsafe(line);
                 }
             }
 
             UpdateLines(overrideNeedsAlpha);
-        }
+        }        
 
         public void Reset()
         {
@@ -173,16 +178,15 @@ namespace Iviz.Displays
             }
 
             ReadOnlySpan<float4x2> lines = lineBuffer;
-            for (int i = 0; i < lines.Length; i++)
+            foreach (ref readonly var line in lines)
             {
-                ref readonly var t = ref lines[i];
-                Color32 cA = UnityUtils.AsColor32(t.c0.w);
+                Color32 cA = UnityUtils.AsColor32(line.c0.w);
                 if (cA.a < 255)
                 {
                     return true;
                 }
 
-                Color32 cB = UnityUtils.AsColor32(t.c1.w);
+                Color32 cB = UnityUtils.AsColor32(line.c1.w);
                 if (cB.a < 255)
                 {
                     return true;

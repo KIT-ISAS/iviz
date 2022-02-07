@@ -246,18 +246,22 @@ namespace Iviz.Displays
         /// <param name="points">The list of positions and colors.</param>
         public void Set(ReadOnlySpan<PointWithColor> points)
         {
+            Set(MemoryMarshal.Cast<PointWithColor, float4>(points));
+        }
+        
+        void Set(ReadOnlySpan<float4> points)
+        {
             pointBuffer.EnsureCapacity(points.Length);
             pointBuffer.Clear();
             
-            for (int i = 0; i < points.Length; i++)
+            foreach (ref readonly var point in points)
             {
-                ref readonly var t = ref points[i];
-                if (t.f.IsInvalid3() || t.f.MaxAbsCoeff3() > MaxPositionMagnitude)
+                if (point.IsInvalid3() || point.MaxAbsCoeff3() > MaxPositionMagnitude)
                 {
                     continue;
                 }
 
-                pointBuffer.AddUnsafe(t.f);
+                pointBuffer.AddUnsafe(point);
             }
 
             UpdateBuffer();

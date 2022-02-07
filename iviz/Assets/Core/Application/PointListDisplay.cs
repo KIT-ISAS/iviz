@@ -242,15 +242,14 @@ namespace Iviz.Displays
             pointBuffer.EnsureCapacity(points.Length);
             pointBuffer.Clear();
 
-            for (int i = 0; i < points.Length; i++)
+            foreach (ref readonly var point in points)
             {
-                ref readonly var t = ref points[i];
-                if (t.IsInvalid3() || t.MaxAbsCoeff3() > MaxPositionMagnitude)
+                if (point.IsInvalid3() || point.MaxAbsCoeff3() > MaxPositionMagnitude)
                 {
                     continue;
                 }
 
-                pointBuffer.AddUnsafe(t);
+                pointBuffer.AddUnsafe(point);
             }
 
             isDirty = true;
