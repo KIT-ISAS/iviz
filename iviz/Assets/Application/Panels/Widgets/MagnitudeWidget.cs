@@ -1,40 +1,48 @@
 ﻿#nullable enable
 
+using System.Text;
 using Iviz.Common;
 using Iviz.Core;
+using Iviz.Tools;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
 using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class MarkerWidget : MonoBehaviour, IWidget
+    public interface IMagnitudeUpdater
     {
-        [SerializeField] Text? text;
+        public void UpdateDescription(StringBuilder str);
+    }
+    
+    public sealed class MagnitudeWidget : MonoBehaviour, IWidget
+    {
+        [SerializeField] TMP_Text? text;
         [SerializeField] Button? button;
-        IMarkerDialogListener? listener;
+        IMagnitudeUpdater? updater;
         
-        Text Text => text.AssertNotNull(nameof(text));
+        TMP_Text Text => text.AssertNotNull(nameof(text));
         Button Button => button.AssertNotNull(nameof(button));
-        
-        public IMarkerDialogListener? MarkerListener
+
+        public IMagnitudeUpdater? MagnitudeUpdater
         {
-            private get => listener;
             set
             {
-                if (listener == null && value != null)
+                if (updater == null && value != null)
                 {
-                    GameThread.EverySecond += UpdateStats;
+                    GameThread.EveryTenthOfASecond += UpdateMagnitude;
                 }
-                else if (listener != null && value == null)
+                else if (updater != null && value == null)
                 {
-                    GameThread.EverySecond -= UpdateStats;
-                }
-
-                listener = value;
+                    GameThread.EveryTenthOfASecond -= UpdateMagnitude;
+                }                
+                
+                updater = value;
                 if (value != null)
                 {
-                    UpdateStats();
+                    UpdateMagnitude();
                 }
             }
         }
@@ -46,20 +54,23 @@ namespace Iviz.App
 
         void OnClick()
         {
-            if (MarkerListener != null)
-            {
-                ModuleListPanel.Instance.ShowMarkerDialog(MarkerListener);
-            }
         }
 
-        void UpdateStats()
+        void UpdateMagnitude()
         {
-            Text.text = listener?.BriefDescription ?? "(No listener)";
+            if (updater == null)
+            {
+                return;
+            }
+
+            using var builder = BuilderPool.Rent();
+            updater.UpdateDescription(builder);
+            Text.SetText(builder);
         }
 
         public void ClearSubscribers()
         {
-            MarkerListener = null;
+            MagnitudeUpdater = null;
         }
     }
 }

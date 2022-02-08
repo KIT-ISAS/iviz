@@ -22,7 +22,6 @@ using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using EnumeratorUtils = Iviz.Tools.EnumeratorUtils;
 
 namespace Iviz.App
 {

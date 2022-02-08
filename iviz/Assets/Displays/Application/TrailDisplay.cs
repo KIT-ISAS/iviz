@@ -128,7 +128,7 @@ namespace Iviz.Displays
             {
                 Color32 colorB = colorA.WithAlpha((byte) (i * scale));
                 LineWithColor line = new(a, colorA, b, colorB);
-                if (LineDisplay.IsElementValid(line))
+                if (LineDisplay.IsElementValid(line.f))
                 {
                     lineBuffer.Add(line.f);
                 }
