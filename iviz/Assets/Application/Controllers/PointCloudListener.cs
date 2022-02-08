@@ -504,8 +504,6 @@ namespace Iviz.Controllers
 
         void GeneratePointBufferXYZ(PointCloud2 msg, int iOffset, int iType)
         {
-            const float maxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
-
             int rowStep = (int)msg.RowStep;
             int pointStep = (int)msg.PointStep;
             int height = (int)msg.Height;
@@ -557,47 +555,43 @@ namespace Iviz.Controllers
             pointBufferLength = dstOff;
 
             // ----------       
-            
+
             void ParseFloatAligned()
             {
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow.Cast<float4>();
-                    for (int u = 0; u < width; u++)
+                    var points = dataRow.Cast<float4>()[..width];
+                    foreach (ref readonly var point in points)
                     {
-                        ref readonly var data = ref dataOff[u];
-                        if (data.IsInvalid3() || data.MaxAbsCoeff3() > maxPositionMagnitude)
-                        {
-                            continue;
-                        }
-
-                        ref float4 f = ref dstBuffer[dstOff++];
-                        f.x = -data.y;
-                        f.y = data.z;
-                        f.z = data.x;
-                        f.w = data.w;
-                        //(f.x, f.y, f.z, f.w) = (-data.y, data.z, data.x, data.w);
+                        ref float4 f = ref dstBuffer[dstOff];
+                        if (IsInvalid(point.x)) continue;
+                        f.z = point.x;
+                        if (IsInvalid(point.y)) continue;
+                        f.x = -point.y;
+                        if (IsInvalid(point.z)) continue;
+                        f.y = point.z;
+                        f.w = point.w;
+                        dstOff++;
                     }
                 }
             }
-            
+
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void TryAdd(ReadOnlySpan<byte> span, float w)
             {
-                var data = span.Read<float3>();
-                if (data.IsInvalid() || data.MaxAbsCoeff() > maxPositionMagnitude)
-                {
-                    return;
-                }
-
-                ref float4 f = ref dstBuffer[dstOff++];
-                f.x = -data.y;
-                f.y = data.z;
-                f.z = data.x;
+                ref readonly var point = ref MemoryMarshal.Cast<byte, float3>(span)[0];
+                ref float4 f = ref dstBuffer[dstOff];
+                if (IsInvalid(point.x)) return;
+                f.z = point.x;
+                if (IsInvalid(point.y)) return;
+                f.x = -point.y;
+                if (IsInvalid(point.z)) return;
+                f.y = point.z;
                 f.w = w;
-            }            
-            
+                dstOff++;
+            }
+
             void ParseFloat()
             {
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
@@ -610,7 +604,7 @@ namespace Iviz.Controllers
                     }
                 }
             }
-            
+
             void ParseDouble()
             {
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
@@ -623,7 +617,7 @@ namespace Iviz.Controllers
                     }
                 }
             }
-            
+
             void ParseInt8()
             {
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
@@ -662,26 +656,26 @@ namespace Iviz.Controllers
                     }
                 }
             }
-            
+
             void ParseUint16Aligned()
             {
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow.Cast<PointWithUshort>();
-                    for (int u = 0; u < width; u++)
+                    var points = dataRow.Cast<PointWithUshort>()[..width];
+                    foreach (ref readonly var point in points)
                     {
-                        ref readonly var data = ref dataOff[u];
-                        if (data.f.IsInvalid() || data.f.MaxAbsCoeff() > maxPositionMagnitude)
-                        {
-                            continue;
-                        }
+                        ref float4 f = ref dstBuffer[dstOff];
 
-                        ref float4 f = ref dstBuffer[dstOff++];
-                        f.x = -data.f.y;
-                        f.y = data.f.z;
-                        f.z = data.f.x;
-                        f.w = data.w;
+                        if (IsInvalid(point.f.x)) return;
+                        f.z = point.f.x;
+                        if (IsInvalid(point.f.y)) return;
+                        f.x = -point.f.y;
+                        if (IsInvalid(point.f.z)) return;
+                        f.y = point.f.z;
+                        f.w = point.w;
+
+                        dstOff++;
                     }
                 }
             }
@@ -743,5 +737,11 @@ namespace Iviz.Controllers
             public readonly float3 f;
             public readonly ushort w;
         }
+        
+        const float MaxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsInvalid(float f) => f.IsInvalid() || Math.Abs(f) > MaxPositionMagnitude;
+
     }
 }

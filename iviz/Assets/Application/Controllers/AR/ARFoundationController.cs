@@ -566,11 +566,23 @@ namespace Iviz.Controllers
 
                 if (confidence != null)
                 {
-                    byte[] bytes = confidence.Bytes;
+                    void Multiply(Span<byte> bytes)
+                    {
+                        foreach (ref byte b in bytes)
+                        {
+                            b =  (byte)(b * 127);
+                        }
+                    }
+                    
+                    Multiply(confidence.Bytes);
+                    
+                    /*
+                    var bytes = confidence.Bytes;
                     for (int v = 0; v < confidence.Height * confidence.Width; v++)
                     {
                         bytes[v] = (byte)(bytes[v] * 127);
                     }
+                    */
 
                     DepthConfidenceSender.Publish(confidence.CreateImageMessage(frameId, depthSeq));
                 }

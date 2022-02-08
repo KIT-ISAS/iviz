@@ -1,0 +1,6 @@
+# Resets a module. What this entails depends on the specific module.
+
+string id		# Id of the module
+---
+bool success		# Whether the operation succeeded
+string message		# An error message if success is false

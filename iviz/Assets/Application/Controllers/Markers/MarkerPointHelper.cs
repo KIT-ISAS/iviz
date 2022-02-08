@@ -49,14 +49,14 @@ namespace Iviz.Controllers.Markers
             pointBuffer.EnsureCapacity(points.Length);
             pointBuffer.Clear();
 
-            for (int i = 0; i < points.Length; i++)
+            foreach (ref readonly var point in points.AsSpan())
             {
-                if (!PointListDisplay.IsElementValid(points[i]))
+                if (!PointListDisplay.IsElementValid(point))
                 {
                     continue;
                 }
                 
-                points[i].Ros2Unity(w, out var f);
+                point.Ros2Unity(w, out var f);
                 pointBuffer.AddUnsafe(f);
             }
         }

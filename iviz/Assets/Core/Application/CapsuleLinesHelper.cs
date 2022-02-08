@@ -67,7 +67,7 @@ namespace Iviz.Displays
 
             const float minMagnitude = 1e-5f;
 
-            foreach (var line in lineBuffer)
+            foreach (ref readonly var line in lineBuffer)
             {
                 //(a.x, a.y, a.z) = (line.c0.x, line.c0.y, line.c0.z);
                 //(b.x, b.y, b.z) = (line.c1.x, line.c1.y, line.c1.z);
