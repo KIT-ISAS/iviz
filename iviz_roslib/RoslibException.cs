@@ -124,7 +124,7 @@ public class RosServiceCallFailed : RoslibException
     public string ServerMessage { get; }
 
     public RosServiceCallFailed(string service, string message) : base(
-        $"Service call to '{service}' failed. Reason: {message}")
+        $"Server failed to execute call to '{service}'. Reason given: {(message.Length == 0 ? "(empty)" : message)}")
     {
         ServiceName = service;
         ServerMessage = message;
@@ -155,7 +155,7 @@ public class RosQueueOverflowException : RosQueueException
     {
     }
 }
-    
+
 public class RosMessageSizeOverflowException : RosException
 {
     public RosMessageSizeOverflowException() : base("Message size overflow")

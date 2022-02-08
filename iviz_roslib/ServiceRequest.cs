@@ -224,41 +224,40 @@ internal sealed class ServiceRequest<TService> where TService : IService
                     serviceMsg.Request = (IRequest)serviceMsg.Request.DeserializeFrom(readBuffer);
                 }
 
-                byte resultStatus;
-                string? errorMessage;
-                bool errorInResponse;
+                async ValueTask<string?> ProcessCallback()
+                {
+                    try
+                    {
+                        await callback(serviceMsg);
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogErrorFormat("{0}: Inner exception in service callback: {1}", this, e);
+                        return "Server callback function failed with an exception.";
+                    }
+                    
+                    try
+                    {
+                        serviceMsg.Response.RosValidate();
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.LogErrorFormat("{0}: Exception validating service callback response: {1}", this, e);
+                        return "Server callback returned an invalid response.";
+                    }
 
-                try
-                {
-                    await callback(serviceMsg);
-                    serviceMsg.Response.RosValidate();
-                    errorInResponse = false;
-                }
-                catch (Exception e)
-                {
-                    Logger.LogErrorFormat("{0}: Inner exception in service callback: {1}", this, e);
-                    errorInResponse = true;
+                    return null;
                 }
 
-                IResponse responseMsg = serviceMsg.Response;
-                if (errorInResponse)
-                {
-                    resultStatus = ErrorByte;
-                    errorMessage =
-                        "Callback function failed: it returned null, an invalid value, or an exception happened.";
-                }
-                else
-                {
-                    resultStatus = SuccessByte;
-                    errorMessage = null;
-                }
+                string? errorMessage = await ProcessCallback();
+                var responseMsg = serviceMsg.Response;
 
                 if (errorMessage == null)
                 {
                     int msgLength = responseMsg.RosMessageLength;
                     using var writeBuffer = new Rent<byte>(msgLength + 5);
 
-                    WriteHeader(writeBuffer, resultStatus, msgLength);
+                    WriteHeader(writeBuffer, SuccessByte, msgLength);
                     responseMsg.SerializeTo(writeBuffer[5..]);
 
                     await tcpClient.WriteChunkAsync(writeBuffer, runningTs.Token);
@@ -269,7 +268,7 @@ internal sealed class ServiceRequest<TService> where TService : IService
 
                     using (var headerBuffer = new Rent<byte>(5))
                     {
-                        WriteHeader(headerBuffer, resultStatus, errorMessageBytes.Length);
+                        WriteHeader(headerBuffer, ErrorByte, errorMessageBytes.Length);
                         await tcpClient.WriteChunkAsync(headerBuffer, runningTs.Token);
                     }
 

@@ -20,7 +20,7 @@ public static class StatusCode
 }
 
 /// <summary>
-/// Manages queries to the ROS master through XMLRPC.
+/// Manages queries to the ROS master through XML-RPC.
 /// </summary>
 public sealed class RosMasterClient : IDisposable
 {

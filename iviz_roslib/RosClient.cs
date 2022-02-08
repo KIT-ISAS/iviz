@@ -36,18 +36,20 @@ public sealed class RosClient : IRosClient
     readonly string namespacePrefix;
 
     RosNodeServer? listener;
-    
+    TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(3);
+
+
     public delegate void ShutdownActionCall(string callerId, string reason);
 
     /// <summary>
-    /// Handler of 'shutdown' XMLRPC calls from the slave API
+    /// Handler of 'shutdown' XML-RPC calls from the slave API
     /// </summary>
     public ShutdownActionCall? ShutdownAction { get; set; }
 
     public delegate void ParamUpdateActionCall(string callerId, string parameterKey, XmlRpcValue parameterValue);
 
     /// <summary>
-    /// Handler of 'paramUpdate' XMLRPC calls from the slave API
+    /// Handler of 'paramUpdate' XML-RPC calls from the slave API
     /// </summary>
     public ParamUpdateActionCall? ParamUpdateAction { get; set; }
 
@@ -57,7 +59,7 @@ public sealed class RosClient : IRosClient
     public string CallerId { get; }
 
     /// <summary>
-    /// Wrapper for XML-RPC calls to the master.
+    /// Wrapper that implements and manages XML-RPC queries to the master.
     /// </summary>
     public RosMasterClient RosMasterClient { get; private set; }
 
@@ -97,8 +99,6 @@ public sealed class RosClient : IRosClient
         }
     }
 
-    TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(3);
-
     /// <summary>
     /// Timeout in milliseconds for TCP-ROS communications (topics, services).
     /// </summary>
@@ -126,7 +126,6 @@ public sealed class RosClient : IRosClient
         }
     }
 
-
     /// <summary>
     /// Wrapper for XML-RPC calls to the master.
     /// </summary>
@@ -141,7 +140,6 @@ public sealed class RosClient : IRosClient
     /// URI of this node.
     /// </summary>
     public Uri CallerUri { get; private set; }
-
 
     RosClient(Uri? masterUri, string? callerId, Uri? callerUri, string? namespaceOverride)
     {
@@ -570,16 +568,16 @@ public sealed class RosClient : IRosClient
             return false;
         }
 
-        char c0 = name![0];
-        if (c0 != '/' && c0 != '~' && !IsAlpha(c0))
+        char c0 = name[0];
+        if (c0 is not '/' && c0 is not '~' && !IsAlpha(c0))
         {
             return false;
         }
 
-        for (int i = 1; i < name.Length; i++)
+        foreach (int i in 1..name.Length)
         {
             char c = name[i];
-            if (!IsAlpha(c) && !char.IsDigit(c) && c != '_' && c != '/')
+            if (!IsAlpha(c) && !char.IsDigit(c) && c is not '_' && c is not '/')
             {
                 return false;
             }
@@ -589,27 +587,27 @@ public sealed class RosClient : IRosClient
     }
 
     /// <summary>
-    /// Checks if the given name is a valid ROS resource name, and throws an exception with an error message if not
+    /// Checks if the given name is a valid ROS resource name, and throws an exception with an error message if not.
     /// </summary>  
-    public static void ValidateResourceName(string? name)
+    public static void ValidateResourceName([NotNull] string? name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
             throw new RosInvalidResourceName("Resource name is empty");
         }
 
-        char c0 = name![0];
-        if (!IsAlpha(c0) && c0 != '/' && c0 != '~')
+        char c0 = name[0];
+        if (!IsAlpha(c0) && c0 is not '/' && c0 is not '~')
         {
             throw new RosInvalidResourceName(
                 $"Resource name '{name}' is not valid. It must start with an alphanumeric character, " +
                 $"'/' or '~'. Current start is '{c0}'");
         }
 
-        for (int i = 1; i < name.Length; i++)
+        foreach (int i in 1..name.Length)
         {
             char c = name[i];
-            if (!IsAlpha(c) && !char.IsDigit(c) && c != '_' && c != '/')
+            if (!IsAlpha(c) && !char.IsDigit(c) && c is not '_' && c is not '/')
             {
                 throw new RosInvalidResourceName(
                     $"Resource name '{name}' is not valid. It must only contain alphanumeric characters, " +
