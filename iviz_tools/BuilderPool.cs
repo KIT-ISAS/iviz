@@ -36,7 +36,11 @@ public static class BuilderPool
         readonly StringBuilder builder;
 
         /// Returns the length of the enclosed string builder.
-        public int Length => builder.Length;
+        public int Length
+        {
+            get => builder.Length;
+            set => builder.Length = value;
+        }
 
         internal BuilderRent(int _)
         {
@@ -191,7 +195,7 @@ public static class BuilderPool
             builder.Append(d);
             return this;
         }
-            
+
         /// <summary>
         /// Calls <see cref="StringBuilder.Append(StringBuilder)"/>. 
         /// </summary>
@@ -200,7 +204,7 @@ public static class BuilderPool
             builder.Append(s);
             return this;
         }
-            
+
         /// <summary>
         /// Calls <see cref="StringBuilder.AppendLine()"/>. 
         /// </summary>
@@ -222,7 +226,7 @@ public static class BuilderPool
         {
             return builder.ToString();
         }
-            
+
         public static implicit operator StringBuilder(BuilderRent s)
         {
             return s.builder;
