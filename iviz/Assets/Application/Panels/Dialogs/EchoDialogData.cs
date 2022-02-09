@@ -280,7 +280,7 @@ namespace Iviz.App
 
         static Action<TMP_Text, StringBuilder, int, int>? setTextFn;
 
-        /// <summary> Retrieves private TMP_Text.SetText(StringBuilder, int, int) as delegate </summary>
+        /// <summary> Retrieves the private method TMP_Text.SetText(StringBuilder, int, int) as delegate </summary>
         static Action<TMP_Text, StringBuilder, int, int> SetText
         {
             get

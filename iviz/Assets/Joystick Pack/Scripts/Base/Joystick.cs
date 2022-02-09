@@ -7,13 +7,27 @@ namespace External
 {
     public class Joystick : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     {
+        [SerializeField] float handleRange = 1;
+        [SerializeField] float deadZone;
+        [SerializeField] AxisOptions axisOptions = AxisOptions.Both;
+        [SerializeField] bool snapX;
+        [SerializeField] bool snapY;
+
+        [SerializeField] protected RectTransform background;
+        [SerializeField] RectTransform handle;
+        [SerializeField] float maxStretch = 1;
+        RectTransform baseRect;
+        int? touchId;
+
+        Canvas canvas;
+        Camera cam;
+
+        Vector2 input = Vector2.zero;
+
         public float Horizontal => (snapX) ? SnapFloat(input.x, AxisOptions.Horizontal) : input.x;
-
         public float Vertical => (snapY) ? SnapFloat(input.y, AxisOptions.Vertical) : input.y;
+        public Vector2 Direction => new(Horizontal, Vertical);
 
-        public Vector2 Direction => new Vector2(Horizontal, Vertical);
-
-        public event Action PointerDown;
         public event Action<Vector2> Changed;
         public event Action PointerUp;
 
@@ -31,7 +45,7 @@ namespace External
 
         public AxisOptions AxisOptions
         {
-            get => AxisOptions;
+            get => axisOptions;
             set => axisOptions = value;
         }
 
@@ -46,23 +60,6 @@ namespace External
             get => snapY;
             set => snapY = value;
         }
-
-        [SerializeField] float handleRange = 1;
-        [SerializeField] float deadZone = 0;
-        [SerializeField] AxisOptions axisOptions = AxisOptions.Both;
-        [SerializeField] bool snapX = false;
-        [SerializeField] bool snapY = false;
-
-        [SerializeField] protected RectTransform background = null;
-        [SerializeField] RectTransform handle = null;
-        [SerializeField] float maxStretch = 1;
-        RectTransform baseRect = null;
-        int? touchId;
-
-        Canvas canvas;
-        Camera cam;
-
-        Vector2 input = Vector2.zero;
 
         protected virtual void Start()
         {
@@ -88,25 +85,27 @@ namespace External
             {
                 touchId = eventData.pointerId;
             }
-
-            PointerDown?.Invoke();
         }
 
         void OnDrag()
         {
-            Vector2 dragPosition = Settings.IsMobile ? Input.GetTouch(touchId.Value).position : (Vector2) Input.mousePosition;
-            
+            var dragPosition = Settings.IsMobile && touchId is { } validatedTouchId
+                ? Input.GetTouch(validatedTouchId).position
+                : (Vector2)Input.mousePosition;
+
             cam = null;
             if (canvas.renderMode == RenderMode.ScreenSpaceCamera)
+            {
                 cam = canvas.worldCamera;
+            }
 
-            Vector2 position = RectTransformUtility.WorldToScreenPoint(cam, background.position);
+            var position = RectTransformUtility.WorldToScreenPoint(cam, background.position);
             Vector2 radius = background.sizeDelta / 2;
             input = (dragPosition - position) / (radius * canvas.scaleFactor);
             FormatInput();
             HandleInput(input.magnitude, input.normalized, radius);
             handle.anchoredPosition = input * radius * handleRange;
-            
+
             Changed?.Invoke(Direction);
         }
 
@@ -115,7 +114,9 @@ namespace External
             if (magnitude > deadZone)
             {
                 if (magnitude > maxStretch)
+                {
                     input = normalised * maxStretch;
+                }
             }
             else
                 input = Vector2.zero;
@@ -176,7 +177,8 @@ namespace External
 
         protected Vector2 ScreenPointToAnchoredPosition(Vector2 screenPosition)
         {
-            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(baseRect, screenPosition, cam, out Vector2 localPoint))
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(baseRect, screenPosition, cam,
+                    out Vector2 localPoint))
             {
                 Vector2 pivotOffset = baseRect.pivot * baseRect.sizeDelta;
                 return localPoint - (background.anchorMax * baseRect.sizeDelta) + pivotOffset;

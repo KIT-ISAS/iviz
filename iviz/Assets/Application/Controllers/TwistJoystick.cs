@@ -61,12 +61,20 @@ namespace Iviz.Controllers
             Visible = false;
             
             // ReSharper disable once ConvertToLocalFunction
-            Action<Vector2> callChanged = _ => Changed?.Invoke();
+            Action<Vector2> onChanged = _ => Changed?.Invoke();
             
-            LeftJoystick.Changed += callChanged;
-            RightJoystick.Changed += callChanged;
-            MiddleLeftJoystick.Changed += callChanged;
-            MiddleRightJoystick.Changed += callChanged;
+            LeftJoystick.Changed += onChanged;
+            RightJoystick.Changed += onChanged;
+            MiddleLeftJoystick.Changed += onChanged;
+            MiddleRightJoystick.Changed += onChanged;
+
+            // ReSharper disable once ConvertToLocalFunction
+            Action onPointerUp = () => Changed?.Invoke();
+
+            LeftJoystick.PointerUp += onPointerUp;
+            RightJoystick.PointerUp += onPointerUp;
+            MiddleLeftJoystick.PointerUp += onPointerUp;
+            MiddleRightJoystick.PointerUp += onPointerUp;
         }
     }
 }

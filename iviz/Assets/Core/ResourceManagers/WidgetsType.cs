@@ -50,6 +50,7 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> ARMarkerWidget { get; }
         
         public ResourceKey<GameObject> TfPublisherWidget { get; }
+        public ResourceKey<GameObject> MagnitudeWidget { get; }
         
         public ResourceKey<GameObject> ImageCanvas { get; }
 
@@ -99,6 +100,7 @@ namespace Iviz.Resources
             ARMarkerWidget = Create(assetHolder.ARMarkers, nameof(assetHolder.ARMarkers));
 
             TfPublisherWidget = Create(assetHolder.TfPublisherWidget, nameof(assetHolder.TfPublisherWidget));
+            MagnitudeWidget = Create(assetHolder.TfPublisherWidget, nameof(assetHolder.MagnitudeWidget));
 
             CollapsibleWidget = Create(assetHolder.Collapsible, nameof(assetHolder.Collapsible));
             ImageCanvas =  Create(assetHolder.ImageCanvas, nameof(assetHolder.ImageCanvas));

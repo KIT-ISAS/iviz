@@ -152,6 +152,11 @@ namespace Iviz.App
         {
             return Resource.Widgets.TfPublisherWidget.Instantiate<TfPublisherWidget>(NonStatics.transform);
         }
+        
+        public MagnitudeWidget AddMagnitudeWidget()
+        {
+            return Resource.Widgets.MagnitudeWidget.Instantiate<MagnitudeWidget>(NonStatics.transform);
+        }
 
         public CollapsibleWidget AddCollapsibleWidget(string label)
         {

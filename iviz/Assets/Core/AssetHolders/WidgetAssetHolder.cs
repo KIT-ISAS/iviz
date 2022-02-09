@@ -51,6 +51,7 @@ namespace Iviz.Displays
         public GameObject ARMarkers = null;
 
         public GameObject TfPublisherWidget = null;
+        public GameObject MagnitudeWidget = null;
 
         public GameObject Collapsible = null;
         

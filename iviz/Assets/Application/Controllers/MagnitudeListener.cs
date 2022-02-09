@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using Iviz.App;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -17,7 +18,7 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
-    public sealed class MagnitudeListener : ListenerController
+    public sealed class MagnitudeListener : ListenerController, IMagnitudeUpdater
     {
         readonly FrameNode frameNode;
         readonly TrailDisplay trail;
@@ -30,6 +31,7 @@ namespace Iviz.Controllers
         Vector3 cachedDirection;
 
         public override TfFrame? Frame => frameNode.Parent;
+        public Magnitude? Magnitude { get; set; }
 
         public MagnitudeConfiguration Config
         {
@@ -207,13 +209,13 @@ namespace Iviz.Controllers
         {
             trail = ResourcePool.RentDisplay<TrailDisplay>();
             frameNode = new FrameNode("MagnitudeListener");
-            
+
             Config = config ?? new MagnitudeConfiguration
             {
                 Topic = topic,
                 Type = type
             };
-            
+
             trail.DataSource = () => frameNode.Transform.position;
 
             var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
@@ -330,7 +332,9 @@ namespace Iviz.Controllers
                 return;
             }
 
-            frameNode.Transform.localPosition = msg.Ros2Unity();
+            var position = msg.Ros2Unity();
+            frameNode.Transform.localPosition = position;
+            Magnitude = new Magnitude { name = "Point", position = msg };
         }
 
         void Handler(WrenchStamped msg)
@@ -350,18 +354,21 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var dir = msg.Force.Ros2Unity();
+            var direction = msg.Force.Ros2Unity();
+            var torque = msg.Torque.Ros2Unity();
+
             if (arrow != null)
             {
-                arrow.Set(Vector3.zero, dir * VectorScale);
+                arrow.Set(Vector3.zero, direction * VectorScale);
             }
 
             if (angleAxis != null)
             {
-                angleAxis.Set(msg.Torque.Ros2Unity());
+                angleAxis.Set(torque);
             }
 
-            cachedDirection = dir;
+            cachedDirection = direction;
+            Magnitude = new Magnitude { name = "Wrench", position = msg.Force, orientation = msg.Torque };
         }
 
         void Handler(TwistStamped msg)
@@ -379,10 +386,10 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var dir = linear.Ros2Unity();
+            var direction = linear.Ros2Unity();
             if (arrow != null)
             {
-                arrow.Set(Vector3.zero, dir * VectorScale);
+                arrow.Set(Vector3.zero, direction * VectorScale);
             }
 
             if (angleAxis != null)
@@ -390,7 +397,8 @@ namespace Iviz.Controllers
                 angleAxis.Set(angular.RosRpy2Unity());
             }
 
-            cachedDirection = dir;
+            cachedDirection = direction;
+            Magnitude = new Magnitude { name = "Twist", position = msg.Linear, orientation = msg.Angular };
         }
 
         void Handler(Odometry msg)
@@ -413,10 +421,10 @@ namespace Iviz.Controllers
 
             frameNode.Transform.SetLocalPose(msg.Pose.Pose.Ros2Unity());
 
-            var dir = linear.Ros2Unity();
+            var direction = linear.Ros2Unity();
             if (arrow != null)
             {
-                arrow.Set(Vector3.zero, dir * VectorScale);
+                arrow.Set(Vector3.zero, direction * VectorScale);
             }
 
             if (angleAxis != null)
@@ -424,7 +432,9 @@ namespace Iviz.Controllers
                 angleAxis.Set(angular.RosRpy2Unity());
             }
 
-            cachedDirection = dir;
+            cachedDirection = direction;
+            Magnitude = new Magnitude
+                { name = "Odometry", position = linear, orientation = angular, twist = msg.Twist.Twist };
         }
 
         public override void ResetController()
@@ -453,7 +463,7 @@ namespace Iviz.Controllers
             angleAxis.ReturnToPool();
             arrow.ReturnToPool();
             sphere.ReturnToPool(Resource.Displays.Sphere);
-            
+
             frameNode.Dispose();
             childNode?.Dispose();
         }

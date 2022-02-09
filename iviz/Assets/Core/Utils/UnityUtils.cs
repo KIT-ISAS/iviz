@@ -506,6 +506,10 @@ namespace Iviz.Core
             (x, y, z) = (v.x, v.y, v.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Deconstruct(this in Quaternion v, out float x, out float y, out float z, out float w) =>
+            (x, y, z, w) = (v.x, v.y, v.z, v.w);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in Bounds b, out Vector3 center, out Vector3 size) =>
             (center, size) = (b.center, b.size);
 

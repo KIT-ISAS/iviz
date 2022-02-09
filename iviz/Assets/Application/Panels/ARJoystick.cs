@@ -22,7 +22,6 @@ namespace Iviz.App
         [SerializeField] Joystick? joystickA;
 
         Button CloseButton => closeButton.AssertNotNull(nameof(closeButton));
-        Button PinDownButton => pinDownButton.AssertNotNull(nameof(pinDownButton));
         Button GlobalButton => globalButton.AssertNotNull(nameof(globalButton));
         Joystick JoystickX => joystickX.AssertNotNull(nameof(joystickX));
         Joystick JoystickY => joystickY.AssertNotNull(nameof(joystickY));
@@ -34,7 +33,6 @@ namespace Iviz.App
         public event Action<float>? ChangedAngle;
         public event Action? PointerUp;
         public event Action? Close;
-        public event Action? PinDown;
 
         public bool Visible
         {
@@ -47,7 +45,6 @@ namespace Iviz.App
             IsGlobal = true;
             GlobalButton.onClick.AddListener(OnButtonClick);
             CloseButton.onClick.AddListener(() => Close?.Invoke());
-            PinDownButton.onClick.AddListener(() => PinDown?.Invoke());
 
             JoystickX.Changed += OnChangedPosition;
             JoystickY.Changed += OnChangedPosition;
