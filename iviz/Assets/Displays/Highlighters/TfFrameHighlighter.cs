@@ -48,7 +48,7 @@ namespace Iviz.Displays.Highlighters
             float size = 0.25f * Math.Abs(distanceToCam);
             float clampedSize = Math.Max(size, 2);
 
-            float baseFrameSize = Controllers.TF.TfModule.Instance.FrameSize;
+            float baseFrameSize = TfModule.Instance.FrameSize;
             float frameSize = baseFrameSize * clampedSize;
             float labelSize = baseFrameSize * Math.Max(size * 0.375f / 2, 0.15f);
 
@@ -69,7 +69,7 @@ namespace Iviz.Displays.Highlighters
 
             using var description = BuilderPool.Rent();
             description.Append("<b>").Append(node.ParentId).Append("</b>\n");
-            RosUtils.FormatPose(Controllers.TF.TfModule.RelativeToFixedFrame(node.Transform.AsPose()), description,
+            RosUtils.FormatPose(TfModule.RelativeToFixedFrame(node.Transform.AsPose()), description,
                 RosUtils.PoseFormat.OnlyPosition);
             tooltip.SetCaption(description);
         }

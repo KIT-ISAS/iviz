@@ -109,12 +109,9 @@ namespace Iviz.Displays
             }
 
             objects[0].Transform.localPosition = Vector3.zero;
-            objects[4].Transform.localRotation =
-                new Quaternion(0, 0.707106769f, 0, 0.707106769f); // Quaternion.AngleAxis(90, Vector3.up);
-            objects[5].Transform.localRotation =
-                new Quaternion(0, 1, 0, 0); // Quaternion.AngleAxis(180, Vector3.up);
-            objects[6].Transform.localRotation =
-                new Quaternion(0, 0.707106769f, 0, -0.707106769f); // Quaternion.AngleAxis(90, Vector3.up);
+            objects[4].Transform.localRotation = Quaternions.Rotate90AroundY;
+            objects[5].Transform.localRotation = Quaternions.Rotate180AroundY;
+            objects[6].Transform.localRotation = Quaternions.Rotate270AroundY;
             return objects;
         }
 

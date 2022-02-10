@@ -501,7 +501,7 @@ namespace Iviz.Controllers.TF
             if (FlipZ)
             {
                 var (position, rotation) = FixedFrame.OriginWorldPose;
-                var rotateAroundForward = new Quaternion(0, 0, 1, 0); // 180 deg around forward axis
+                var rotateAroundForward = Quaternions.Rotate180AroundZ;
                 fixedFramePose.rotation = rotateAroundForward * rotation;
                 fixedFramePose.position = rotateAroundForward * position;
             }

@@ -504,7 +504,7 @@ namespace Iviz.Controllers
         {
             if (Visible && clickHitInfo.TryGetARRaycastResults(out var results))
             {
-                TriggerPulse(results[0].Position);
+                pulseManager.TriggerPulse(results[0].Position);
             }
         }
 
@@ -513,8 +513,8 @@ namespace Iviz.Controllers
             if (ColorSender == null
                 || DepthSender == null
                 || DepthConfidenceSender == null
-                || ColorInfoSender == null
-                || DepthInfoSender == null)
+                || colorInfoSender == null
+                || depthInfoSender == null)
             {
                 return;
             }
@@ -556,7 +556,7 @@ namespace Iviz.Controllers
                 if (color != null)
                 {
                     ColorSender.Publish(color.CreateImageMessage(frameId, colorSeq));
-                    ColorInfoSender.Publish(color.CreateCameraInfoMessage(frameId, colorSeq++));
+                    colorInfoSender.Publish(color.CreateCameraInfoMessage(frameId, colorSeq++));
                 }
 
                 if (depth != null)
@@ -566,31 +566,29 @@ namespace Iviz.Controllers
 
                 if (confidence != null)
                 {
-                    void Multiply(Span<byte> bytes)
+                    void Multiply(Span<byte> bytes) // local func to work with span because we're in async
                     {
-                        foreach (ref byte b in bytes)
+                        // reinterpret as long to process 8 bytes at once
+                        var longs = bytes.Cast<long>();
+                        // it would be 2x as fast using simd, but whatever
+                        foreach (ref long b in longs) 
                         {
-                            b =  (byte)(b * 127);
+                            // 8 independent bytes, values are either 0, 1, or 2
+                            // 0 -> 0
+                            // 1 -> 128
+                            // 2 -> 255
+                            b = b * 127 + 0x0101010101010101;
                         }
                     }
                     
                     Multiply(confidence.Bytes);
-                    
-                    /*
-                    var bytes = confidence.Bytes;
-                    for (int v = 0; v < confidence.Height * confidence.Width; v++)
-                    {
-                        bytes[v] = (byte)(bytes[v] * 127);
-                    }
-                    */
-
                     DepthConfidenceSender.Publish(confidence.CreateImageMessage(frameId, depthSeq));
                 }
 
                 Screenshot? anyDepth = depth ?? confidence;
                 if (anyDepth != null)
                 {
-                    DepthInfoSender.Publish(anyDepth.CreateCameraInfoMessage(frameId, depthSeq++));
+                    depthInfoSender.Publish(anyDepth.CreateCameraInfoMessage(frameId, depthSeq++));
                 }
 
                 var anyPose = (color ?? depth)?.CameraPose;

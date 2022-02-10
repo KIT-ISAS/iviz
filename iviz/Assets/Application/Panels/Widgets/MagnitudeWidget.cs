@@ -31,7 +31,7 @@ namespace Iviz.App
         TMP_Text Text => text.AssertNotNull(nameof(text));
         Button Button => button.AssertNotNull(nameof(button));
 
-        public IMagnitudeUpdater? MagnitudeUpdater
+        public IMagnitudeUpdater? Owner
         {
             set
             {
@@ -65,6 +65,7 @@ namespace Iviz.App
         {
             if (updater is not { Magnitude: { } magnitude })
             {
+                Text.text = "<b>[no message]</b>";
                 return;
             }
             
@@ -97,7 +98,7 @@ namespace Iviz.App
 
         public void ClearSubscribers()
         {
-            MagnitudeUpdater = null;
+            Owner = null;
         }
     }
 }

@@ -110,8 +110,7 @@ namespace Iviz.Displays.Highlighters
                 marker.Color = Resource.Colors.DraggableDefaultColor;
                 marker.Layer = LayerType.Clickable;
                 marker.EnableShadows = false;
-                marker.Transform.localRotation =
-                    new Quaternion(-0.707106769f, 0, 0, 0.707106769f); // Quaternion.AngleAxis(90, Vector3.left);
+                marker.Transform.localRotation = Quaternions.Rotate270AroundX;
             }
 
             draggable.StateChanged += () =>

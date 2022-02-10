@@ -158,8 +158,7 @@ namespace Iviz.Displays
                     0) * (cellSize / 2);
                 rosCenter.z += zOffset;
 
-                var rotation = new Quaternion(0, 0.707106769f, 0, 0.707106769f); // 90 deg around y
-                var offset = new Pose(rosCenter.Ros2Unity(), rotation);
+                var offset = new Pose(rosCenter.Ros2Unity(), Quaternions.Rotate90AroundY);
                 var newPose = pose.Multiply(offset);
                 mTransform.SetLocalPose(newPose);
                 mTransform.localScale = new Vector3(totalHeight, totalWidth, 1).Ros2Unity().Abs();

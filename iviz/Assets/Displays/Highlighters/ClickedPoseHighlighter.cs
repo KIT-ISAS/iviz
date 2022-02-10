@@ -36,7 +36,7 @@ namespace Iviz.Displays.Highlighters
             reticle.EmissiveColor = Color.white;
             reticle.Layer = LayerType.IgnoreRaycast;
 
-            var localPose = new Pose(0.002f * Vector3.up, Quaternion.AngleAxis(90, Vector3.left));
+            var localPose = new Pose(0.002f * Vector3.up, Quaternions.Rotate270AroundX);
             reticle.Transform.SetLocalPose(localPose);
             reticle.Transform.localScale = frameSize * Vector3.one;
 
@@ -54,7 +54,7 @@ namespace Iviz.Displays.Highlighters
             }
 
             using var description = BuilderPool.Rent();
-            RosUtils.FormatPose(Controllers.TF.TfModule.RelativeToFixedFrame(unityPose), description,
+            RosUtils.FormatPose(TfModule.RelativeToFixedFrame(unityPose), description,
                 RosUtils.PoseFormat.OnlyPosition, 2);
             tooltip.SetCaption(description);
         }

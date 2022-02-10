@@ -160,7 +160,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            (float camX, _, float camZ) = Controllers.TF.TfModule.RelativeToOrigin(Settings.MainCameraTransform.position);
+            (float camX, _, float camZ) = TfModule.RelativeToOrigin(Settings.MainCameraTransform.position);
             switch (Orientation)
             {
                 case GridOrientation.XY:
@@ -233,12 +233,12 @@ namespace Iviz.Displays
                 foreach (int _ in horizontals.Count..size)
                 {
                     var hResource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Square, transform);
-                    hResource.Transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
+                    hResource.Transform.localRotation = Quaternions.Rotate270AroundX;
                     hResource.Layer = LayerType.IgnoreRaycast;
                     horizontals.Add(hResource);
 
                     var vResource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Square, transform);
-                    vResource.Transform.localRotation = Quaternion.AngleAxis(-90, Vector3.right);
+                    vResource.Transform.localRotation = Quaternions.Rotate270AroundX;
                     vResource.Layer = LayerType.IgnoreRaycast;
                     verticals.Add(vResource);
                 }

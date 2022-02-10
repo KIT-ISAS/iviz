@@ -555,15 +555,12 @@ namespace Iviz.Displays
             var dstPtr = dst.Cast<Rgba>();
             for (int i = 0; i < srcPtr.Length; i++)
             {
-                var colorIn = srcPtr[i];
-
-                Rgba colorOut;
+                ref readonly var colorIn = ref srcPtr[i];
+                ref var colorOut = ref dstPtr[i];
                 colorOut.r = colorIn.r;
                 colorOut.g = colorIn.g;
                 colorOut.b = colorIn.b;
                 colorOut.a = 255;
-
-                dstPtr[i] = colorOut;
             }
         }
 
@@ -659,14 +656,14 @@ namespace Iviz.Displays
             }
 
             format = Texture.format;
-            int u = Mathf.Clamp((int)(rawUV.x * Texture.width), 0, Texture.width - 1);
-            int v = Mathf.Clamp((int)(rawUV.y * Texture.height), 0, Texture.height - 1);
+            int u = Math.Clamp((int)(rawUV.x * Texture.width), 0, Texture.width - 1);
+            int v = Math.Clamp((int)(rawUV.y * Texture.height), 0, Texture.height - 1);
             bool rbFlipped = Material.IsKeywordEnabled("FLIP_RB");
             uv = new Vector2Int(u, v);
 
             int offset = v * Texture.width + u;
             var span = Texture.GetRawTextureData<byte>().AsReadOnlySpan();
-            var maybeColor = format switch
+            var pickedColor = format switch
             {
                 TextureFormat.R8 => FromScalar(span[offset]),
                 TextureFormat.R16 => FromScalar(span.Cast<ushort>()[offset]),
@@ -678,10 +675,10 @@ namespace Iviz.Displays
                 _ => (Vector4?)null
             };
 
-            if (maybeColor is not { } validatedColor)
+            if (pickedColor is not { } validatedColor)
             {
                 color = default;
-                Debug.Log($"{this}: Unhandled format {format}");
+                RosLogger.Debug($"{this}: Unhandled format {format}");
                 return false;
             }
 

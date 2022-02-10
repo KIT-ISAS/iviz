@@ -39,7 +39,7 @@ namespace Iviz.Controllers.XR
         void LateUpdate()
         {
             float scale = Transform.lossyScale.x;
-            Frame.Transform.rotation = new Quaternion(0, 0.7071f, 0, 0.7071f);
+            Frame.Transform.rotation = Quaternions.Rotate90AroundY;
             Tooltip.Transform.position = Transform.position + new Vector3(0, 0.55f * scale, 0);
             using var description = BuilderPool.Rent();
             RosUtils.FormatPose(TfModule.RelativeToFixedFrame(Transform.AsPose()), description,

@@ -9,6 +9,7 @@ namespace Iviz.App
     {
         public FrameWidget Frame { get; private set; }
         //public ToggleWidget PreferUdp { get; private set; }
+        public MagnitudeWidget Magnitude { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
         public SliderWidgetWithScale Scale { get; private set; }
         public ToggleWidget ShowAxis { get; private set; }
@@ -24,6 +25,7 @@ namespace Iviz.App
             p.AddHeadTitleWidget("Magnitude");
             Listener = p.AddListener();
             Frame = p.AddFrame();
+            Magnitude = p.AddMagnitudeWidget();
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
             ShowAxis = p.AddToggle("Show Frame");

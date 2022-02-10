@@ -302,7 +302,7 @@ namespace Iviz.Core
             c.a = alpha;
             return c;
         }
-        
+
         public static Color Clamp(this in Color c)
         {
             Color q;
@@ -574,14 +574,14 @@ namespace Iviz.Core
                 ArrayPool<T>.Shared.Return(segment.Array);
             }
         }
-        
+
         /// <summary>
         /// Empty function. Used for debugging purposes as an overload for <see cref="TryReturn{T}(Memory{T})"/>,
         /// in case an iviz message is temporarily set to contain an array instead of a Memory.
         /// </summary>
         public static void TryReturn(this Array _)
         {
-        }        
+        }
 
         /// <summary>
         /// Convenience function to obtain spans from <see cref="Memory{T}"/> the same way as with arrays. 
@@ -729,7 +729,8 @@ namespace Iviz.Core
         }
 
         /// <inheritdoc cref="GetAllChildren(UnityEngine.Transform)"/>
-        public static IEnumerable<Transform> GetAllChildren(this GameObject transform) => GetAllChildren(transform.transform);
+        public static IEnumerable<Transform> GetAllChildren(this GameObject transform) =>
+            GetAllChildren(transform.transform);
 
         /// <summary>
         /// Retrieves all children without allocating an array with all results.
@@ -739,8 +740,8 @@ namespace Iviz.Core
         /// <returns></returns>
         public static IEnumerable<Transform> GetAllChildren(this Transform parent)
         {
-            return parent.childCount == 0 
-                ? new[] { parent } 
+            return parent.childCount == 0
+                ? new[] { parent }
                 : GetAllChildrenImpl(parent);
 
             static IEnumerable<Transform> GetAllChildrenImpl(Transform transform)
@@ -782,5 +783,16 @@ namespace Iviz.Core
 
         public WithIndexEnumerable(IEnumerable<T> a) => this.a = a;
         public Enumerator GetEnumerator() => new(a.GetEnumerator());
+    }
+
+    public static class Quaternions
+    {
+        public static readonly Quaternion Rotate90AroundX = new(0.707106769f, 0, 0, 0.707106769f);
+        public static readonly Quaternion Rotate180AroundX = new(1, 0, 0, 0);
+        public static readonly Quaternion Rotate270AroundX = new(-0.707106769f, 0, 0, 0.707106769f);
+        public static readonly Quaternion Rotate90AroundY = new(0, 0.707106769f, 0, 0.707106769f);
+        public static readonly Quaternion Rotate180AroundY = new(0, 1, 0, 0);
+        public static readonly Quaternion Rotate270AroundY = new(0, 0.707106769f, 0, -0.707106769f);
+        public static readonly Quaternion Rotate180AroundZ = new(0, 0, 1, 0);
     }
 }

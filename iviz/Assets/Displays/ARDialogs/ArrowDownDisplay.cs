@@ -76,7 +76,7 @@ namespace Iviz.App.ARDialogs
             }
 
             Transform.rotation = Quaternion.AngleAxis(currentAngle.Value, Vector3.up) 
-                                 * Quaternion.AngleAxis(-90, Vector3.left);
+                                 * Quaternions.Rotate270AroundX;
         }
 
         [NotNull]
@@ -84,7 +84,7 @@ namespace Iviz.App.ARDialogs
         {
             var vertices = sourceMesh.vertices;
             var normals = sourceMesh.normals;
-            var triangles = sourceMesh.triangles;
+            int[] triangles = sourceMesh.triangles;
             var colors = vertices.Select(
                     vertex => Color.Lerp(Color.white.WithAlpha(0), Color.white, vertex.z))
                 .ToArray();

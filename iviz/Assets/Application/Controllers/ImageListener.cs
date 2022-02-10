@@ -272,7 +272,7 @@ namespace Iviz.Controllers
                     break;
                 default:
                     descriptionOverride = msg.Format.Length == 0
-                        ? "[Unknown Format]"
+                        ? "[Unknown Format (empty)]"
                         : $"[Unknown Format '{msg.Format}']";
                     PostProcess();
                     break;

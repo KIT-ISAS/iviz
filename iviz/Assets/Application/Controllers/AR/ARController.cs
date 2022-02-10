@@ -69,6 +69,9 @@ namespace Iviz.Controllers
 
         readonly IPublishedFrame headFrame;
         protected readonly IPublishedFrame cameraFrame;
+        protected readonly Sender<CameraInfo>? colorInfoSender;
+        protected readonly Sender<CameraInfo>? depthInfoSender;
+        protected readonly PulseManager pulseManager;
 
         float? joyVelocityAngle;
         Vector3? joyVelocityPos;
@@ -79,8 +82,8 @@ namespace Iviz.Controllers
         public Sender<Image>? ColorSender { get; }
         public Sender<Image>? DepthSender { get; }
         public Sender<Image>? DepthConfidenceSender { get; }
-        protected Sender<CameraInfo>? ColorInfoSender { get; }
-        protected Sender<CameraInfo>? DepthInfoSender { get; }
+
+        public static bool IsPulseActive => Instance != null && Instance.pulseManager.HasPulse;
 
         public ARConfiguration Config
         {
@@ -236,15 +239,15 @@ namespace Iviz.Controllers
             ColorSender = new Sender<Image>("~xr/color/image_color");
             DepthSender = new Sender<Image>("~xr/depth/image");
             DepthConfidenceSender = new Sender<Image>("~xr/depth/image_confidence");
-            ColorInfoSender = new Sender<CameraInfo>("~xr/color/camera_info");
-            DepthInfoSender = new Sender<CameraInfo>("~xr/depth/camera_info");
+            colorInfoSender = new Sender<CameraInfo>("~xr/color/camera_info");
+            depthInfoSender = new Sender<CameraInfo>("~xr/depth/camera_info");
 
             headFrame = TfPublisher.Instance.GetOrCreate(HeadFrameId, isInternal: true);
             cameraFrame = TfPublisher.Instance.GetOrCreate(CameraFrameId, isInternal: true);
 
             detector.MarkerDetected += OnMarkerDetected;
 
-            pulseTokenSource?.Cancel();
+            pulseManager = new PulseManager();
         }
 
         protected static void RaiseARStateChanged()
@@ -283,9 +286,9 @@ namespace Iviz.Controllers
             else
             {
                 var arCameraPose = ARCamera.transform.AsPose();
-                Vector3 pivot = arCameraPose.Multiply(Vector3.forward);
+                var pivot = arCameraPose.Multiply(Vector3.forward);
 
-                Quaternion rotation = Quaternion.AngleAxis(newVelocityAngle, Vector3.up);
+                var rotation = Quaternion.AngleAxis(newVelocityAngle, Vector3.up);
                 var pose = new Pose(rotation * (-pivot) + pivot, rotation);
 
                 SetWorldPose(pose.Multiply(WorldPose), RootMover.ControlMarker);
@@ -466,10 +469,12 @@ namespace Iviz.Controllers
             detector.Dispose();
             MarkerExecutor.Dispose();
 
-            ColorInfoSender?.Dispose();
+            colorInfoSender?.Dispose();
             ColorSender?.Dispose();
             DepthSender?.Dispose();
             DepthConfidenceSender?.Dispose();
+
+            pulseManager.Dispose();
         }
 
         void IController.ResetController()
@@ -483,32 +488,39 @@ namespace Iviz.Controllers
             ARCameraViewChanged = null;
         }
 
-
-        static readonly int PulseCenter = Shader.PropertyToID("_PulseCenter");
-        static readonly int PulseTime = Shader.PropertyToID("_PulseTime");
-        static readonly int PulseDelta = Shader.PropertyToID("_PulseDelta");
-
-        static CancellationTokenSource? pulseTokenSource;
-        public static bool IsPulseActive => pulseTokenSource is { IsCancellationRequested: true };
-
-        protected static void TriggerPulse(in Vector3 start)
+        protected sealed class PulseManager
         {
-            pulseTokenSource?.Cancel();
-            pulseTokenSource = new CancellationTokenSource();
+            static readonly int PulseCenter = Shader.PropertyToID("_PulseCenter");
+            static readonly int PulseTime = Shader.PropertyToID("_PulseTime");
+            static readonly int PulseDelta = Shader.PropertyToID("_PulseDelta");
 
-            var material = Resource.Materials.LinePulse.Object;
-            material.SetVector(PulseCenter, start);
-            material.SetFloat(PulseDelta, 0.25f);
+            CancellationTokenSource? pulseTokenSource;
+            public bool HasPulse => pulseTokenSource is { IsCancellationRequested: false };
 
-            FAnimator.Spawn(pulseTokenSource.Token, 10,
-                static t =>
-                {
-                    float timeDiff = t * 10;
-                    var material = Resource.Materials.LinePulse.Object;
-                    material.SetFloat(PulseTime, (timeDiff - 0.5f));
-                },
-                static () => pulseTokenSource.Cancel()
-            );
+            public void TriggerPulse(in Vector3 start)
+            {
+                pulseTokenSource?.Cancel();
+                pulseTokenSource = new CancellationTokenSource();
+
+                var material = Resource.Materials.LinePulse.Object;
+                material.SetVector(PulseCenter, start);
+                material.SetFloat(PulseDelta, 0.25f);
+
+                FAnimator.Spawn(pulseTokenSource.Token, 10,
+                    t =>
+                    {
+                        float timeDiff = t * 10;
+                        var material = Resource.Materials.LinePulse.Object;
+                        material.SetFloat(PulseTime, (timeDiff - 0.5f));
+                    },
+                    () => pulseTokenSource.Cancel()
+                );
+            }
+
+            public void Dispose()
+            {
+                pulseTokenSource?.Cancel();
+            }
         }
     }
 }

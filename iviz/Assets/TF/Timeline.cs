@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Iviz.Core;
 using UnityEngine;
 
-namespace Iviz.Controllers
+namespace Iviz.Controllers.TF
 {
     public sealed class Timeline
     {

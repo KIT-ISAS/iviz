@@ -196,7 +196,7 @@ namespace Iviz.Controllers.XR
                 var newPalmCompass = ResourcePool.RentDisplay<PalmCompass>(palmTransform);
                 float baseScale = 0.125f / palmTransform.localScale.x;
                 newPalmCompass.Transform.localScale = Vector3.zero;
-                newPalmCompass.Transform.localRotation = new Quaternion(1, 0, 0, 0);
+                newPalmCompass.Transform.localRotation = Quaternions.Rotate180AroundX;
                 newPalmCompass.gameObject.SetActive(false);
                 palmCompass = newPalmCompass;
                 FAnimator.Spawn(default, 0.1f,

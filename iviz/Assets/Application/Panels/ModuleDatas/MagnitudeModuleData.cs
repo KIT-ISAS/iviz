@@ -40,6 +40,7 @@ namespace Iviz.App
             panel.ShowAngle.Value = listener.AngleVisible;
             panel.ShowVector.Value = listener.VectorVisible;
             panel.VectorColor.Value = listener.Color;
+            panel.Magnitude.Owner = listener;
             //panel.TrailTime.Value = listener.TrailTime;
             panel.Scale.Value = listener.Scale;
             panel.VectorScale.Value = listener.VectorScale;

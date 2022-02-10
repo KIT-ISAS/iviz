@@ -59,16 +59,14 @@ namespace Iviz.Displays.Highlighters
             node = new GameObject("[Line Wrapper]");
             node.transform.SetParentLocal(parent);
 
-            var baseRotationLeft =
-                new Quaternion(0, -0.707106769f, 0, 0.707106769f); //Quaternion.AngleAxis(-90, Vector3.up);
+            var baseRotationLeft = Quaternions.Rotate270AroundY;
             left = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Pyramid, node.transform);
             left.Transform.localRotation = baseRotationLeft;
             left.Color = Resource.Colors.DraggableDefaultColor;
             left.Layer = LayerType.Clickable;
             left.EnableShadows = false;
 
-            var baseRotationRight =
-                new Quaternion(0, 0.707106769f, 0, 0.707106769f); //Quaternion.AngleAxis(90, Vector3.up);
+            var baseRotationRight = Quaternions.Rotate90AroundY;
             right = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Pyramid, node.transform);
             right.Transform.localRotation = baseRotationRight;
             right.Color = Resource.Colors.DraggableDefaultColor;

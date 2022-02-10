@@ -48,7 +48,7 @@ namespace Iviz.App.ARDialogs
                 disc.Transform.position = Settings.MainCameraTransform.TransformPoint(discPosInCamera);
             }
 
-            disc.Transform.rotation = Quaternion.LookRotation(up) * Quaternion.AngleAxis(90, Vector3.right);
+            disc.Transform.rotation = Quaternion.LookRotation(up) * Quaternions.Rotate90AroundX;
             disc.Normal = localOrientation;
         }
         
