@@ -8,6 +8,17 @@ namespace Iviz.RemoteLib;
 /// <summary>
 /// Class that can be used to remotely control an instance of the iviz app.
 /// For this class to work, the app must be already running and connected to a ROS master.
+/// <example>
+/// This initializes an iviz controller:
+/// <code>
+/// string masterUri = "http://localhost:11311";
+/// string callerId = "my_ros_id";
+/// string callerUri = "http://localhost:7615";
+/// var client = new RosClient(masterUri, "my_ros_id", callerUri);
+/// string ivizId = "iviz_wineditor";
+/// var controller = new IvizController(client, ivizId);
+/// </code>
+/// </example>
 /// </summary>
 public sealed class IvizController
 {
@@ -20,12 +31,15 @@ public sealed class IvizController
     /// Creates a new iviz controller.
     /// </summary>
     /// <param name="client">An initialized ROS client.</param>
-    /// <param name="ivizId">The id of the iviz instance, as found in the 'My ROS ID' field. For example: iviz_wineditor.</param>
+    /// <param name="ivizId">
+    /// The id of the iviz instance, as found in the 'My ROS ID' field. For example: iviz_wineditor.
+    /// The starting '/' should be removed.
+    /// </param>
     public IvizController(RosClient client, string ivizId)
     {
         RosClient.ValidateResourceName(ivizId);
         this.client = client;
-        this.ivizId = ivizId;
+        this.ivizId = ivizId[0] == '/' ? ivizId[1..] : ivizId;
     }
 
     /// <summary>
