@@ -23,7 +23,16 @@ using Nito.AsyncEx;
 namespace Iviz.Roslib;
 
 /// <summary>
-/// Class that manages a client connection to a ROS master. 
+/// Class that manages a client connection to a ROS master.
+/// <example>
+/// This initializes a ROS master:
+/// <code>
+///     string masterUri = "http://localhost:11311";
+///     string callerId = "my_ros_id";
+///     string callerUri = "http://localhost:7615";
+///     var client = new RosClient(masterUri, callerId, callerUri);
+/// </code>
+/// </example>
 /// </summary>
 public sealed class RosClient : IRosClient
 {

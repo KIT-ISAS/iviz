@@ -8,6 +8,20 @@ namespace Iviz.Roslib;
 /// <summary>
 /// A helper class that wraps a subscriber. It employs a queue that stores messages
 /// in the background, and can be accessed without having to use a separate callback.
+/// <example>
+/// This initializes a ROS channel reader:
+/// <code>
+///     string masterUri = "http://localhost:11311";
+///     string callerId = "my_ros_id";
+///     string callerUri = "http://localhost:7615";
+///     var client = new RosClient(masterUri, callerId, callerUri);
+///     var reader = client.CreateReader&lt;T&gt;("/my_topic");
+///     foreach (T msg in reader.ReadAll()) // blocks
+///     {
+///          // process msg
+///     }
+/// </code>
+/// </example>
 /// </summary>
 /// <typeparam name="T">The message type</typeparam>
 public sealed class RosChannelReader<T> : BaseRosChannelReader<T>
@@ -22,6 +36,7 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T>
 
     /// <summary>
     /// Initializes the channel, and calls <see cref="Start"/> with the arguments.
+    /// A better alternative is to use the extension <code>client.CreateWriter&lt;T&gt;(topic)</code>
     /// </summary>
     /// <param name="client">A connected IRosClient</param>
     /// <param name="topic">The topic to listen to</param>
@@ -79,11 +94,12 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T>
 }
 
 /// <summary>
-/// A helper class that wraps a subscriber. It employs a queue that stores messages
+/// A helper class that wraps a generic subscriber. It employs a queue that stores messages
 /// in the background, and can be accessed without having to use a separate callback.
-/// Similar to <see cref="RosChannelReader{T}"/>, but it uses whatever message type the
-/// publisher offers in the connection. Note that if a publisher accidentally offers a wrong
-/// message type in the same topic, you will receive those messages too. 
+/// This is the generic version of <see cref="RosChannelReader{T}"/>, if you know the message type a priori,
+/// you should use that instead.
+/// This variant reconstructs the message type from the publisher handshake and should only
+/// be used if the message definition is unknown beforehand.
 /// </summary>
 public sealed class RosChannelReader : BaseRosChannelReader<IMessage>
 {
