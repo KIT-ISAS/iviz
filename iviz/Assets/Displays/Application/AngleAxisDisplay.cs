@@ -5,13 +5,14 @@ using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
     public sealed class AngleAxisDisplay : DisplayWrapper, ISupportsTint, IRecyclable
     {
-        readonly List<LineWithColor> lines = new();
+        readonly List<float4x2> lines = new();
 
         Color color;
         LineDisplay? resource;
@@ -29,13 +30,11 @@ namespace Iviz.Displays
                 color = value;
 
                 float colorAsFloat = UnityUtils.AsFloat(color);
-
                 var linesAsSpan = lines.AsSpan();
-                for (int i = 0; i < linesAsSpan.Length; i++)
+                foreach (ref var line in linesAsSpan)
                 {
-                    ref var line = ref linesAsSpan[i];
-                    line.f.c0.w = colorAsFloat;
-                    line.f.c1.w = colorAsFloat;
+                    line.c0.w = colorAsFloat;
+                    line.c1.w = colorAsFloat;
                 }
 
                 Resource.Set(linesAsSpan, color.a < 1);
@@ -44,8 +43,9 @@ namespace Iviz.Displays
 
         void Awake()
         {
-            Resource.ElementScale = 0.01f;
-            Color = Color.yellow;
+            Resource.ElementScale = 0.005f;
+            Resource.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
+            Color = Color.yellow.WithSaturation(0.75f);
             Layer = LayerType.IgnoreRaycast;
         }
 
@@ -59,10 +59,21 @@ namespace Iviz.Displays
             set => Resource.Tint = value;
         }
 
-        public void Set(Quaternion q, float scale = 0.3f)
+        public void Set(in Quaternion q, float scale = 0.3f)
         {
-            q.ToAngleAxis(out float angle, out Vector3 axis);
-            Set(angle * Mathf.Deg2Rad, axis, scale);
+            var axis = new Vector3(q.x, q.y, q.z);
+
+            float sin = axis.magnitude;
+            float cos = q.w;
+
+            if (sin.ApproximatelyZero())
+            {
+                Resource.Visible = false;
+                return;
+            }
+
+            float angle = Mathf.Atan2(sin, cos) * 2;
+            Set(angle, axis / sin, scale);
         }
 
         public void Set(in Vector3 rod, float scale = 0.3f)
@@ -70,67 +81,75 @@ namespace Iviz.Displays
             float angle = rod.Magnitude();
             if (angle.ApproximatelyZero())
             {
-                Set(0, Vector3.zero, 0);
-            }
-            else
-            {
-                Vector3 axis = rod / angle;
-                Set(angle, axis, scale);
-            }
-        }
-
-        void Set(float angle, Vector3 axis, float scale = 0.3f)
-        {
-            if (angle.ApproximatelyZero() || axis.ApproximatelyZero())
-            {
                 Resource.Visible = false;
                 return;
             }
 
-            Resource.Visible = true;
+            Vector3 axis = rod / angle;
+            Set(angle, axis, scale);
+        }
 
-            angle *= -1;
-
+        void Set(float angle, in Vector3 axis, float scale)
+        {
+            /*
             if (axis.y < 0)
             {
-                angle *= -1;
-                axis *= -1;
+                ValidatedSet(angle, -axis, scale);
             }
+            else
+            {
+                ValidatedSet(-angle, axis, scale);
+            }
+            */
+            ValidatedSet(-angle, axis, scale);
+        }
 
+        void ValidatedSet(float angle, in Vector3 axis, float scale)
+        {
+            Resource.Visible = true;
             lines.Clear();
 
-            Vector3 notX = Vector3.forward;
-            if (axis.Cross(notX).ApproximatelyZero())
-            {
-                notX = Vector3.right;
-            }
+            var notAxis = (Math.Abs(axis.z) - 1).ApproximatelyZero()
+                ? Vector3.right
+                : Vector3.forward;
 
-            Vector3 dirY = notX.Cross(axis).Normalized();
-            Vector3 dirX = axis.Cross(dirY).Normalized();
-            dirX *= scale;
-            dirY *= scale;
+            var dirY = notAxis.Cross(axis).Normalized() * scale;
+            var dirX = axis.Cross(dirY) * scale;
 
             int n = (int)(Math.Abs(angle) / (2 * Mathf.PI) * 32 + 1);
 
-            Vector3 v0 = dirX;
-            Vector3 v1 = Vector3.zero;
+            float4x2 v = new();
+            ref float4 v0 = ref v.c0;
+            ref float4 v1 = ref v.c1;
 
-            lines.Add(new LineWithColor(Vector3.zero, 1.2f * v0, Color));
+            float colorAsFloat = UnityUtils.AsFloat(color);
+
+            v0.w = colorAsFloat;
+            (v1.x, v1.y, v1.z) = 1.2f * dirX;
+            v1.w = colorAsFloat;
+
+            lines.Add(v);
 
             const float scaleFromAngle = 0.02f;
 
+            (v0.x, v0.y, v0.z) = dirX;
             foreach (int i in 1..(n + 1))
             {
                 float a = i / (float)n * angle;
-                float ax = Mathf.Cos(a);
-                float ay = Mathf.Sin(a);
-                v1 = ax * dirX + ay * dirY;
-                v1 *= 1 + a * scaleFromAngle;
-                lines.Add(new LineWithColor(v0, v1, Color));
+                float segmentScale = 1 + a * scaleFromAngle;
+                float ax = Mathf.Cos(a) * segmentScale;
+                float ay = Mathf.Sin(a) * segmentScale;
+                (v1.x, v1.y, v1.z) = ax * dirX + ay * dirY;
+                lines.Add(v);
                 v0 = v1;
             }
 
-            lines.Add(new LineWithColor(Vector3.zero, 1.2f * v1, Color));
+            (v0.x, v0.y, v0.z) = (0, 0, 0);
+            v1.x *= 1.2f;
+            v1.y *= 1.2f;
+            v1.z *= 1.2f;
+            lines.Add(v);
+
             Resource.Set(lines.AsReadOnlySpan(), Color.a < 1);
         }
 

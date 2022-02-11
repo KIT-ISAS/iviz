@@ -97,9 +97,8 @@ namespace Iviz.Displays
                     dirX = ab / Mathf.Sqrt(abMagnitudeSq);
                     var (x, y, z) = dirX;
                     dirY = (Math.Abs(z) - 1).ApproximatelyZero()
-                        ? new Vector3(-y, x, 0) / Mathf.Sqrt(x * x + y * y)
-                        : new Vector3(-z, 0, x) / Mathf.Sqrt(x * x + z * z);
-                    //dirZ = dirX.Cross(dirY).Normalized();
+                        ? new Vector3(-z, 0, x) / Mathf.Sqrt(x * x + z * z)
+                        : new Vector3(-y, x, 0) / Mathf.Sqrt(x * x + y * y);
                     dirZ = dirX.Cross(dirY);
                 }
 

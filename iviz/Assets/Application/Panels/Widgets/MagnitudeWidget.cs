@@ -72,24 +72,26 @@ namespace Iviz.App
             using var description = BuilderPool.Rent();
             if (magnitude.name != null)
             {
-                description.Append("<b>").Append(magnitude.name).Append("</b>").AppendLine();
+                description.Append("<b>- ").Append(magnitude.name).Append(" -</b>").AppendLine();
             }
 
-            Format(magnitude.position);
-
-            if (magnitude.orientation is { } orientation)
             {
-                Format(orientation);
-            }
-
-            void Format(in Msgs.GeometryMsgs.Vector3 value)
-            {
-                var (x, y, z) = value;
+                var (x, y, z) = magnitude.position;
                 const string format = "#,0.###";
                 string xStr = (x == 0) ? "0" : x.ToString(format, UnityUtils.Culture);
                 string yStr = (y == 0) ? "0" : y.ToString(format, UnityUtils.Culture);
                 string zStr = (z == 0) ? "0" : z.ToString(format, UnityUtils.Culture);
                 description.Append(xStr).Append(", ").Append(yStr).Append(", ").Append(zStr).AppendLine();
+            }
+
+            if (magnitude.orientation is { } orientation)
+            {
+                var (x, y, z) = orientation;
+                const string format = "#,0.###";
+                string xStr = (x == 0) ? "0" : x.ToString(format, UnityUtils.Culture);
+                string yStr = (y == 0) ? "0" : y.ToString(format, UnityUtils.Culture);
+                string zStr = (z == 0) ? "0" : z.ToString(format, UnityUtils.Culture);
+                description.Append("r: ").Append(xStr).Append(" p: ").Append(yStr).Append(" y: ").Append(zStr).AppendLine();
             }
 
             description.Length--;

@@ -290,7 +290,7 @@ namespace Iviz.Controllers
         static void RentAngleAxis(FrameNode node, out AngleAxisDisplay angleAxis)
         {
             angleAxis = ResourcePool.RentDisplay<AngleAxisDisplay>(node.Transform);
-            angleAxis.Color = Color.yellow;
+            angleAxis.Color = Color.yellow.WithSaturation(0.75f);
         }
 
         static void RentSphere(FrameNode node, Color color, out MeshMarkerDisplay sphere)
@@ -326,6 +326,8 @@ namespace Iviz.Controllers
 
         void Handler(Point msg)
         {
+            Magnitude = new Magnitude { name = "Point", position = msg };
+
             if (msg.IsInvalid())
             {
                 RosLogger.Debug($"{this}: Point contains invalid values. Ignoring.");
@@ -334,7 +336,6 @@ namespace Iviz.Controllers
 
             var position = msg.Ros2Unity();
             frameNode.Transform.localPosition = position;
-            Magnitude = new Magnitude { name = "Point", position = msg };
         }
 
         void Handler(WrenchStamped msg)
@@ -348,6 +349,8 @@ namespace Iviz.Controllers
 
         void Handler(Wrench msg)
         {
+            Magnitude = new Magnitude { name = "Wrench", position = msg.Force, orientation = msg.Torque };
+
             if (msg.Force.IsInvalid() || msg.Torque.IsInvalid())
             {
                 RosLogger.Debug($"{this}: Wrench contains invalid values. Ignoring.");
@@ -368,7 +371,6 @@ namespace Iviz.Controllers
             }
 
             cachedDirection = direction;
-            Magnitude = new Magnitude { name = "Wrench", position = msg.Force, orientation = msg.Torque };
         }
 
         void Handler(TwistStamped msg)
@@ -379,6 +381,8 @@ namespace Iviz.Controllers
 
         void Handler(Twist msg)
         {
+            Magnitude = new Magnitude { name = "Twist", position = msg.Linear, orientation = msg.Angular };
+
             var (linear, angular) = msg;
             if (angular.IsInvalid() || linear.IsInvalid())
             {
@@ -398,11 +402,15 @@ namespace Iviz.Controllers
             }
 
             cachedDirection = direction;
-            Magnitude = new Magnitude { name = "Twist", position = msg.Linear, orientation = msg.Angular };
         }
 
         void Handler(Odometry msg)
         {
+            var (linear, angular) = msg.Twist.Twist;
+
+            Magnitude = new Magnitude
+                { name = "Odometry", position = linear, orientation = angular, twist = msg.Twist.Twist };
+
             frameNode.AttachTo(msg.Header);
             childNode?.AttachTo(msg.ChildFrameId);
 
@@ -412,7 +420,6 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var (linear, angular) = msg.Twist.Twist;
             if (angular.IsInvalid() || linear.IsInvalid())
             {
                 RosLogger.Debug($"{this}: Odometry twist contains invalid values. Ignoring.");
@@ -433,8 +440,6 @@ namespace Iviz.Controllers
             }
 
             cachedDirection = direction;
-            Magnitude = new Magnitude
-                { name = "Odometry", position = linear, orientation = angular, twist = msg.Twist.Twist };
         }
 
         public override void ResetController()

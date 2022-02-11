@@ -104,7 +104,7 @@ namespace Iviz.Displays
             Set(MemoryMarshal.Cast<LineWithColor, float4x2>(lines), overrideNeedsAlpha);
         }
         
-        void Set(ReadOnlySpan<float4x2> lines, bool? overrideNeedsAlpha = null)
+        public void Set(ReadOnlySpan<float4x2> lines, bool? overrideNeedsAlpha = null)
         {
             lineBuffer.EnsureCapacity(lines.Length);
             lineBuffer.Clear();
@@ -121,16 +121,20 @@ namespace Iviz.Displays
         }        
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsElementValid(in float4x2 f) => AreValid(f.c0.x, f.c1.x)
-                                                            && AreValid(f.c0.y, f.c1.y)
-                                                            && AreValid(f.c0.z, f.c1.z);
+        public static bool IsElementValid(in float4x2 f)
+        {
+            if (f.c0.x.IsInvalid() || Math.Abs(f.c0.x) > MaxPositionMagnitude) return false;
+            if (f.c1.x.IsInvalid() || Math.Abs(f.c1.x) > MaxPositionMagnitude) return false;
+            bool lengthIsValid = Math.Abs(f.c0.x - f.c1.x) > MinLineLength;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool AreValid(float a, float b) => a.IsValid()
-                                                  && Math.Abs(a) < MaxPositionMagnitude
-                                                  && b.IsValid()
-                                                  && Math.Abs(b) < MaxPositionMagnitude
-                                                  && Math.Abs(b - a) > MinLineLength;
+            if (f.c0.y.IsInvalid() || Math.Abs(f.c0.y) > MaxPositionMagnitude) return false;
+            if (f.c1.y.IsInvalid() || Math.Abs(f.c1.y) > MaxPositionMagnitude) return false;
+            lengthIsValid = lengthIsValid || Math.Abs(f.c0.y - f.c1.y) > MinLineLength;
+
+            if (f.c0.z.IsInvalid() || Math.Abs(f.c0.z) > MaxPositionMagnitude) return false;
+            if (f.c1.z.IsInvalid() || Math.Abs(f.c1.z) > MaxPositionMagnitude) return false;
+            return lengthIsValid || Math.Abs(f.c0.z - f.c1.z) > MinLineLength;
+        }
 
         public void Reset()
         {
