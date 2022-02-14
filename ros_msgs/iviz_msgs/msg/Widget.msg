@@ -10,6 +10,7 @@ uint8 TYPE_TOOLTIP = 4
 uint8 TYPE_TARGETAREA = 5
 uint8 TYPE_POSITIONDISC = 6
 uint8 TYPE_POSITIONDISC3D = 7
+uint8 TYPE_BOUNDARYCHECK = 8
 
 std_msgs/Header header
 byte action
@@ -21,4 +22,4 @@ std_msgs/ColorRGBA secondary_color
 float64 scale
 float64 secondary_scale
 string caption
-
+BoundingBox[] bounding_boxes
