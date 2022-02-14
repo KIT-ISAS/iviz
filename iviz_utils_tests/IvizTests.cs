@@ -56,7 +56,7 @@ public class IvizTests
     {
         //var ivizController = new IvizController(client, IvizId);
         //ivizController.ResetModule("/tf");
-            
+
         var writer = client.CreateWriter<TFMessage>("/tf");
         writer.WaitForAnySubscriber();
         Thread.Sleep(100);
@@ -87,7 +87,6 @@ public class IvizTests
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/occupancy_grid");
 
-            
         writer.WaitForAnySubscriber();
         Thread.Sleep(100);
         uint s = 0;
@@ -106,7 +105,7 @@ public class IvizTests
                 Resolution = 0.05f,
                 Width = w
             },
-            Header = new Header(s++, time.Now(), ""), 
+            Header = new Header(s++, time.Now(), ""),
             Data = bytes
         };
 
@@ -116,13 +115,27 @@ public class IvizTests
             {
                 foreach (int u in ..w)
                 {
-                    bytes[v * w + u] = (sbyte) (MathF.Sin((i + u + v) / 50f) * 50 + 48);
+                    bytes[v * w + u] = (sbyte)(MathF.Sin((i + u + v) / 50f) * 50 + 48);
                 }
             }
-                
+
             writer.Write(msg);
             Thread.Sleep(5);
         }
+    }
+
+    [Test]
+    public void TestTf3()
+    {
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.UpdateModule("/tf", new TFConfiguration
+        {
+            FrameLabelsVisible = false,
+            Interactable = true
+        });
+
+        Assert.Throws<RemoteException>(() =>
+            ivizController.UpdateModule("/tf", new MarkerConfiguration()));
     }
 
     [Test]
@@ -132,19 +145,27 @@ public class IvizTests
 
         var ivizController = new IvizController(client, IvizId);
         ivizController.AddModuleFromTopic("/magnitude");
+        ivizController.UpdateModule("/magnitude", new MagnitudeConfiguration
+        {
+            VectorScale = 0.1f,
+            TrailVisible = true
+        });
 
         foreach (int i in ..2000)
         {
             var t = new Twist
             {
-                Angular = new Vector3(0, 0, i/10.0 * Math.PI / 180),
-                //Angular = float.NaN * Vector3.One,
-                Linear = Vector3.Zero
+                Angular = new Vector3(0, 0, i / 10.0 * Math.PI / 180),
+                Linear = Quaternion.AngleAxis(i / 2.0 * Math.PI / 180, Vector3.UnitZ) * ((Vector3.UnitX + Vector3.UnitZ) * i * 0.01)
             };
-        
+
+            ivizController.UpdateModule("/magnitude", new MagnitudeConfiguration
+            {
+                VectorColor = ColorRGBA.Blue
+            });
+
             writer.Write(t);
             Thread.Sleep(5);
         }
     }
-
 }
