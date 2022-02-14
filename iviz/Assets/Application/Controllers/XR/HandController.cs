@@ -143,25 +143,19 @@ namespace Iviz.Controllers.XR
 
             controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
 
-            Vector3 controllerForward;
-            if (LockedPosition is { } lockedPosition)
-            {
-                controllerForward = lockedPosition - controllerPosition;
-            }
-            else
-            {
-                controllerForward = controllerPosition - pivot;
-            }
+            var controllerForward = LockedPosition is { } lockedPosition
+                ? lockedPosition - controllerPosition
+                : controllerPosition - pivot;
 
             var controllerPose = new Pose(controllerPosition, Quaternion.LookRotation(controllerForward));
             (controllerState.position, controllerState.rotation) =
                 referenceTransform.InverseTransformPose(controllerPose);
-            
+
             HasCursor = Vector3.Dot(palmRotation * Vector3.up, cameraTransform.forward) < 0;
             cachedHandState.Cursor = HasCursor
                 ? new Ray(controllerPosition, controllerForward.normalized)
                 : null;
-            
+
             if (ButtonUp)
             {
                 LockedPosition = null;

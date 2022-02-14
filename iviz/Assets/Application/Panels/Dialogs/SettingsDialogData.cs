@@ -46,7 +46,7 @@ namespace Iviz.App
 
             panel.QualityInAr.Options = SettingsManager.QualityLevelsInAR;
             panel.QualityInAr.Index = (int) SettingsManager.QualityInAr;
-            panel.QualityInAr.Interactable = Settings.SupportsAR;
+            panel.QualityInAr.Interactable = Settings.SupportsMobileAR;
 
             panel.TargetFps.Options = TargetFpsOptions;
             panel.NetworkProcessing.Options = NetworkProcessingOptions;

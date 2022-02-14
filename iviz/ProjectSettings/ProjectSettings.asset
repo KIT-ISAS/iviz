@@ -188,6 +188,14 @@ PlayerSettings:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 2723228294017807837, guid: 94756eb992ad50b46859cab179a85143, type: 2}
+  - {fileID: 1682495346683887384, guid: 3a62d44fea27046dab86eb4a9323754b, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -900,11 +908,11 @@ PlayerSettings:
   m_MobileRenderingPath: 1
   metroPackageName: Template3D
   metroPackageVersion: 1.0.0.0
-  metroCertificatePath: 
+  metroCertificatePath: Assets\WSATestCertificate.pfx
   metroCertificatePassword: 
-  metroCertificateSubject: 
-  metroCertificateIssuer: 
-  metroCertificateNotAfter: 0000000000000000
+  metroCertificateSubject: edu.kit.isas
+  metroCertificateIssuer: edu.kit.isas
+  metroCertificateNotAfter: 001c53a7aa40d901
   metroApplicationDescription: Template_3D
   wsaImages: {}
   metroTileShortName: iviz

@@ -175,7 +175,8 @@ namespace Iviz.App
         void Awake()
         {
             // clear static stuff in case domain reloading is disabled
-            Settings.ResetXRInfo();
+            // this is only really needed in the editor
+            Settings.ClearResources();
             Resource.ClearResources();
             GuiWidgetListener.ClearResources();
             ARController.ClearResources();
@@ -218,6 +219,11 @@ namespace Iviz.App
 
         void Start()
         {
+            if (Settings.IsHololens)
+            {
+                XRUtils.SetupForHololens();
+            }
+            
             connectionManager = new RosManager();
             tfModule = new TfModule(id => new TfFrameDisplay(id));
 
