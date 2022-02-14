@@ -25,7 +25,6 @@ public sealed class IvizController
     readonly RosClient client;
     readonly string ivizId;
     readonly StringBuilder configStr = new(256);
-    readonly List<string> configFields = new(16);
 
     /// <summary>
     /// Creates a new iviz controller.
@@ -123,14 +122,13 @@ public sealed class IvizController
         }
 
         configStr.Clear();
-        configFields.Clear();
-        using (var processor = new ConfigurationSerializer(configStr, configFields))
+        using (var processor = new ConfigurationSerializer(configStr))
         {
             config.Serialize(processor);
         }
 
         var updateModuleResponse = client.CallService($"{ivizId}/update_module",
-            new UpdateModuleRequest(id, configFields.ToArray(), configStr.ToString()));
+            new UpdateModuleRequest(id, Array.Empty<string>(), configStr.ToString()));
 
         if (!updateModuleResponse.Success)
         {
@@ -151,14 +149,13 @@ public sealed class IvizController
         }
 
         configStr.Clear();
-        configFields.Clear();
-        using (var processor = new ConfigurationSerializer(configStr, configFields))
+        using (var processor = new ConfigurationSerializer(configStr))
         {
             processor.Serialize(value, "Visible");
         }
 
         var updateModuleResponse = client.CallService($"{ivizId}/update_module",
-            new UpdateModuleRequest(id, configFields.ToArray(), configStr.ToString()));
+            new UpdateModuleRequest(id, Array.Empty<string>(), configStr.ToString()));
 
         if (!updateModuleResponse.Success)
         {

@@ -12,7 +12,8 @@ public sealed class MagnitudeConfiguration : IConfiguration
     public bool? VectorVisible { get; set; }
     public float? Scale { get; set; }
     public float? VectorScale { get; set; }
-    public ColorRGBA? Color { get; set; }
+    public ColorRGBA? VectorColor { get; set; }
+    public ColorRGBA? AngleColor { get; set; }
     public float? TrailTime { get; set; }
 
     void IConfiguration.Serialize(in ConfigurationSerializer serializer)
@@ -25,7 +26,8 @@ public sealed class MagnitudeConfiguration : IConfiguration
         serializer.Serialize(VectorVisible);
         serializer.Serialize(Scale);
         serializer.Serialize(VectorScale);
-        serializer.Serialize(Color);
+        serializer.Serialize(VectorColor);
+        serializer.Serialize(AngleColor);
         serializer.Serialize(TrailTime);
     }
 }
