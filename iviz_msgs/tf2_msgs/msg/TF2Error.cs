@@ -20,7 +20,7 @@ namespace Iviz.Msgs.Tf2Msgs
         /// Constructor for empty message.
         public TF2Error()
         {
-            ErrorString = string.Empty;
+            ErrorString = "";
         }
         
         /// Explicit constructor.

@@ -12,7 +12,7 @@ namespace Iviz.Msgs.StdMsgs
         /// Constructor for empty message.
         public String()
         {
-            Data = string.Empty;
+            Data = "";
         }
         
         /// Explicit constructor.

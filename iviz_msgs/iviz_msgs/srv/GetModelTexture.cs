@@ -58,7 +58,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public GetModelTextureRequest()
         {
-            Uri = string.Empty;
+            Uri = "";
         }
         
         /// Explicit constructor.
@@ -103,7 +103,7 @@ namespace Iviz.Msgs.IvizMsgs
         public GetModelTextureResponse()
         {
             Image = new SensorMsgs.CompressedImage();
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

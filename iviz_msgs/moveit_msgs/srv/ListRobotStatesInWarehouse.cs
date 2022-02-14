@@ -59,8 +59,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public ListRobotStatesInWarehouseRequest()
         {
-            Regex = string.Empty;
-            Robot = string.Empty;
+            Regex = "";
+            Robot = "";
         }
         
         /// Explicit constructor.

@@ -42,7 +42,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor for empty message.
         public ImageMarker()
         {
-            Ns = string.Empty;
+            Ns = "";
             Points = System.Array.Empty<GeometryMsgs.Point>();
             OutlineColors = System.Array.Empty<StdMsgs.ColorRGBA>();
         }

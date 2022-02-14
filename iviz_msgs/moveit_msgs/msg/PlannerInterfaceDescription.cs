@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public PlannerInterfaceDescription()
         {
-            Name = string.Empty;
+            Name = "";
             PlannerIds = System.Array.Empty<string>();
         }
         

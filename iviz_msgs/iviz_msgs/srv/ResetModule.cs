@@ -60,7 +60,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public ResetModuleRequest()
         {
-            Id = string.Empty;
+            Id = "";
         }
         
         /// Explicit constructor.
@@ -105,7 +105,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public ResetModuleResponse()
         {
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

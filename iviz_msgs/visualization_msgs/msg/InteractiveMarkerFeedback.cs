@@ -44,9 +44,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor for empty message.
         public InteractiveMarkerFeedback()
         {
-            ClientId = string.Empty;
-            MarkerName = string.Empty;
-            ControlName = string.Empty;
+            ClientId = "";
+            MarkerName = "";
+            ControlName = "";
         }
         
         /// Explicit constructor.

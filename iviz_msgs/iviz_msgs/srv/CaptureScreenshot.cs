@@ -109,7 +109,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public CaptureScreenshotResponse()
         {
-            Message = string.Empty;
+            Message = "";
             Intrinsics = new double[9];
             Data = System.Array.Empty<byte>();
         }

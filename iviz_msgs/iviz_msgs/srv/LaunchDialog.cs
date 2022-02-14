@@ -103,7 +103,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public LaunchDialogResponse()
         {
-            Message = string.Empty;
+            Message = "";
             Feedback = new IvizMsgs.Feedback();
         }
         

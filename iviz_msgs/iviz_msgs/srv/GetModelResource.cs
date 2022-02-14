@@ -60,7 +60,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public GetModelResourceRequest()
         {
-            Uri = string.Empty;
+            Uri = "";
         }
         
         /// Explicit constructor.
@@ -108,7 +108,7 @@ namespace Iviz.Msgs.IvizMsgs
         public GetModelResourceResponse()
         {
             Model = new Model();
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

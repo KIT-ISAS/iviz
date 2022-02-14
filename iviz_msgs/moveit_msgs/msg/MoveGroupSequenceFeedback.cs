@@ -13,7 +13,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public MoveGroupSequenceFeedback()
         {
-            State = string.Empty;
+            State = "";
         }
         
         /// Explicit constructor.

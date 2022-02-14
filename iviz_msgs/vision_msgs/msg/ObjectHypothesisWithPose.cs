@@ -28,7 +28,7 @@ namespace Iviz.Msgs.VisionMsgs
         /// Constructor for empty message.
         public ObjectHypothesisWithPose()
         {
-            Id = string.Empty;
+            Id = "";
             Pose = new GeometryMsgs.PoseWithCovariance();
         }
         

@@ -18,7 +18,7 @@ namespace Iviz.Msgs.NavMsgs
         /// Constructor for empty message.
         public Odometry()
         {
-            ChildFrameId = string.Empty;
+            ChildFrameId = "";
             Pose = new GeometryMsgs.PoseWithCovariance();
             Twist = new GeometryMsgs.TwistWithCovariance();
         }

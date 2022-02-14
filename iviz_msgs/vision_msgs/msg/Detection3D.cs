@@ -35,7 +35,7 @@ namespace Iviz.Msgs.VisionMsgs
             Results = System.Array.Empty<ObjectHypothesisWithPose>();
             Bbox = new BoundingBox3D();
             SourceCloud = new SensorMsgs.PointCloud2();
-            TrackingId = string.Empty;
+            TrackingId = "";
         }
         
         /// Explicit constructor.

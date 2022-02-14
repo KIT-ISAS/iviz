@@ -17,9 +17,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public Model()
         {
-            Name = string.Empty;
-            Filename = string.Empty;
-            OrientationHint = string.Empty;
+            Name = "";
+            Filename = "";
+            OrientationHint = "";
             Meshes = System.Array.Empty<Mesh>();
             Materials = System.Array.Empty<Material>();
             Nodes = System.Array.Empty<Node>();

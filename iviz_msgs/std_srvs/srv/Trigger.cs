@@ -97,7 +97,7 @@ namespace Iviz.Msgs.StdSrvs
         /// Constructor for empty message.
         public TriggerResponse()
         {
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

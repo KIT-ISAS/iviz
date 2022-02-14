@@ -58,7 +58,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor for empty message.
         public TopicTypeRequest()
         {
-            Topic = string.Empty;
+            Topic = "";
         }
         
         /// Explicit constructor.
@@ -100,7 +100,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor for empty message.
         public TopicTypeResponse()
         {
-            Type = string.Empty;
+            Type = "";
         }
         
         /// Explicit constructor.

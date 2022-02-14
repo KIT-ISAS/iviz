@@ -21,9 +21,9 @@ namespace Iviz.Msgs.Tf2Msgs
         /// Constructor for empty message.
         public LookupTransformGoal()
         {
-            TargetFrame = string.Empty;
-            SourceFrame = string.Empty;
-            FixedFrame = string.Empty;
+            TargetFrame = "";
+            SourceFrame = "";
+            FixedFrame = "";
         }
         
         /// Explicit constructor.

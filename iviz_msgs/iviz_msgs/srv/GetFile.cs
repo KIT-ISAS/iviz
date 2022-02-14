@@ -60,7 +60,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public GetFileRequest()
         {
-            Uri = string.Empty;
+            Uri = "";
         }
         
         /// Explicit constructor.
@@ -108,7 +108,7 @@ namespace Iviz.Msgs.IvizMsgs
         public GetFileResponse()
         {
             Bytes = System.Array.Empty<byte>();
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

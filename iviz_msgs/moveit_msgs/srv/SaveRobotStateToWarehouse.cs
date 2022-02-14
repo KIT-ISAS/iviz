@@ -60,8 +60,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public SaveRobotStateToWarehouseRequest()
         {
-            Name = string.Empty;
-            Robot = string.Empty;
+            Name = "";
+            Robot = "";
             State = new MoveitMsgs.RobotState();
         }
         

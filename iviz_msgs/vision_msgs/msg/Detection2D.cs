@@ -33,7 +33,7 @@ namespace Iviz.Msgs.VisionMsgs
             Results = System.Array.Empty<ObjectHypothesisWithPose>();
             Bbox = new BoundingBox2D();
             SourceImg = new SensorMsgs.Image();
-            TrackingId = string.Empty;
+            TrackingId = "";
         }
         
         /// Explicit constructor.

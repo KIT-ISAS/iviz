@@ -84,8 +84,8 @@ namespace Iviz.Msgs.MoveitMsgs
         public GetCartesianPathRequest()
         {
             StartState = new RobotState();
-            GroupName = string.Empty;
-            LinkName = string.Empty;
+            GroupName = "";
+            LinkName = "";
             Waypoints = System.Array.Empty<GeometryMsgs.Pose>();
             PathConstraints = new Constraints();
         }

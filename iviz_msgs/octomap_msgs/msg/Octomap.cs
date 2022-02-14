@@ -21,7 +21,7 @@ namespace Iviz.Msgs.OctomapMsgs
         /// Constructor for empty message.
         public Octomap()
         {
-            Id = string.Empty;
+            Id = "";
             Data = System.Array.Empty<sbyte>();
         }
         

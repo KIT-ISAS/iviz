@@ -60,7 +60,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public GetSdfRequest()
         {
-            Uri = string.Empty;
+            Uri = "";
         }
         
         /// Explicit constructor.
@@ -108,7 +108,7 @@ namespace Iviz.Msgs.IvizMsgs
         public GetSdfResponse()
         {
             Scene = new Scene();
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

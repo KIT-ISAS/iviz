@@ -94,7 +94,7 @@ namespace Iviz.Msgs.Tf
         /// Constructor for empty message.
         public FrameGraphResponse()
         {
-            DotGraph = string.Empty;
+            DotGraph = "";
         }
         
         /// Explicit constructor.

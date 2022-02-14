@@ -74,8 +74,8 @@ namespace Iviz.Msgs.SensorMsgs
         {
             CellVoltage = System.Array.Empty<float>();
             CellTemperature = System.Array.Empty<float>();
-            Location = string.Empty;
-            SerialNumber = string.Empty;
+            Location = "";
+            SerialNumber = "";
         }
         
         /// Explicit constructor.

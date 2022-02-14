@@ -15,8 +15,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor for empty message.
         public KeyValue()
         {
-            Key = string.Empty;
-            Value = string.Empty;
+            Key = "";
+            Value = "";
         }
         
         /// Explicit constructor.

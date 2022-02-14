@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor for empty message.
         public MeshVertexColorsStamped()
         {
-            Uuid = string.Empty;
+            Uuid = "";
             MeshVertexColors = new MeshMsgs.MeshVertexColors();
         }
         

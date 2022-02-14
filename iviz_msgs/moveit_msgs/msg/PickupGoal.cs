@@ -48,14 +48,14 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public PickupGoal()
         {
-            TargetName = string.Empty;
-            GroupName = string.Empty;
-            EndEffector = string.Empty;
+            TargetName = "";
+            GroupName = "";
+            EndEffector = "";
             PossibleGrasps = System.Array.Empty<Grasp>();
-            SupportSurfaceName = string.Empty;
+            SupportSurfaceName = "";
             AttachedObjectTouchLinks = System.Array.Empty<string>();
             PathConstraints = new Constraints();
-            PlannerId = string.Empty;
+            PlannerId = "";
             AllowedTouchObjects = System.Array.Empty<string>();
             PlanningOptions = new PlanningOptions();
         }

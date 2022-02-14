@@ -32,7 +32,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor for empty message.
         public ChannelFloat32()
         {
-            Name = string.Empty;
+            Name = "";
             Values = System.Array.Empty<float>();
         }
         

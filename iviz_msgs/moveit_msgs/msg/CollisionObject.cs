@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public CollisionObject()
         {
-            Id = string.Empty;
+            Id = "";
             Type = new ObjectRecognitionMsgs.ObjectType();
             Primitives = System.Array.Empty<ShapeMsgs.SolidPrimitive>();
             PrimitivePoses = System.Array.Empty<GeometryMsgs.Pose>();

@@ -65,8 +65,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public SetPlannerParamsRequest()
         {
-            PlannerConfig = string.Empty;
-            Group = string.Empty;
+            PlannerConfig = "";
+            Group = "";
             Params = new PlannerParams();
         }
         

@@ -21,7 +21,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public PositionConstraint()
         {
-            LinkName = string.Empty;
+            LinkName = "";
             ConstraintRegion = new BoundingVolume();
         }
         

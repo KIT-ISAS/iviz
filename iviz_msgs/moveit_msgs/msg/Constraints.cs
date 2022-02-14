@@ -18,7 +18,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public Constraints()
         {
-            Name = string.Empty;
+            Name = "";
             JointConstraints = System.Array.Empty<JointConstraint>();
             PositionConstraints = System.Array.Empty<PositionConstraint>();
             OrientationConstraints = System.Array.Empty<OrientationConstraint>();

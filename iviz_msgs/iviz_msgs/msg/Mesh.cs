@@ -20,7 +20,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public Mesh()
         {
-            Name = string.Empty;
+            Name = "";
             Vertices = System.Array.Empty<Vector3f>();
             Normals = System.Array.Empty<Vector3f>();
             Tangents = System.Array.Empty<Vector3f>();

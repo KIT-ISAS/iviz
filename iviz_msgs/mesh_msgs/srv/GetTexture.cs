@@ -59,7 +59,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor for empty message.
         public GetTextureRequest()
         {
-            Uuid = string.Empty;
+            Uuid = "";
         }
         
         /// Explicit constructor.

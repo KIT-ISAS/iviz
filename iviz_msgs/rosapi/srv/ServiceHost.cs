@@ -58,7 +58,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor for empty message.
         public ServiceHostRequest()
         {
-            Service = string.Empty;
+            Service = "";
         }
         
         /// Explicit constructor.
@@ -100,7 +100,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor for empty message.
         public ServiceHostResponse()
         {
-            Host = string.Empty;
+            Host = "";
         }
         
         /// Explicit constructor.

@@ -13,8 +13,8 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor for empty message.
         public StrParameter()
         {
-            Name = string.Empty;
-            Value = string.Empty;
+            Name = "";
+            Value = "";
         }
         
         /// Explicit constructor.

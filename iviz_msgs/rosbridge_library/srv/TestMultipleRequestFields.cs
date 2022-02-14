@@ -61,7 +61,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor for empty message.
         public TestMultipleRequestFieldsRequest()
         {
-            @string = string.Empty;
+            @string = "";
         }
         
         /// Explicit constructor.

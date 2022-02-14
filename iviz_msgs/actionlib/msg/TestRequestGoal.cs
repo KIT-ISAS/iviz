@@ -30,7 +30,7 @@ namespace Iviz.Msgs.Actionlib
         /// Constructor for empty message.
         public TestRequestGoal()
         {
-            ResultText = string.Empty;
+            ResultText = "";
         }
         
         /// Explicit constructor.

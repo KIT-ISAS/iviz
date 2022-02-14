@@ -13,7 +13,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor for empty message.
         public BoolParameter()
         {
-            Name = string.Empty;
+            Name = "";
         }
         
         /// Explicit constructor.

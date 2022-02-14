@@ -22,11 +22,11 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public RobotConfiguration()
         {
-            SourceParameter = string.Empty;
-            SavedRobotName = string.Empty;
-            FramePrefix = string.Empty;
-            FrameSuffix = string.Empty;
-            Id = string.Empty;
+            SourceParameter = "";
+            SavedRobotName = "";
+            FramePrefix = "";
+            FrameSuffix = "";
+            Id = "";
         }
         
         /// Explicit constructor.

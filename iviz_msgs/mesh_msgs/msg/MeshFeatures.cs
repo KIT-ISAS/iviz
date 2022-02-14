@@ -13,7 +13,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor for empty message.
         public MeshFeatures()
         {
-            MapUuid = string.Empty;
+            MapUuid = "";
             Features = System.Array.Empty<MeshMsgs.Feature>();
         }
         

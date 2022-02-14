@@ -132,7 +132,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor for empty message.
         public CameraInfo()
         {
-            DistortionModel = string.Empty;
+            DistortionModel = "";
             D = System.Array.Empty<double>();
             K = new double[9];
             R = new double[9];

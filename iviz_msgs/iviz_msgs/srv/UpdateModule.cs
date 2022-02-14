@@ -64,9 +64,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public UpdateModuleRequest()
         {
-            Id = string.Empty;
+            Id = "";
             Fields = System.Array.Empty<string>();
-            Config = string.Empty;
+            Config = "";
         }
         
         /// Explicit constructor.
@@ -132,7 +132,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public UpdateModuleResponse()
         {
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

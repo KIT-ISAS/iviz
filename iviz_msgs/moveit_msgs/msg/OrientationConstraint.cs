@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public OrientationConstraint()
         {
-            LinkName = string.Empty;
+            LinkName = "";
         }
         
         /// Explicit constructor.

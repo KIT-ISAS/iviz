@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public ObjectColor()
         {
-            Id = string.Empty;
+            Id = "";
         }
         
         /// Explicit constructor.

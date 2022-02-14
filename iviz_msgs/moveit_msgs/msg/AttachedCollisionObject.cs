@@ -27,7 +27,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public AttachedCollisionObject()
         {
-            LinkName = string.Empty;
+            LinkName = "";
             Object = new CollisionObject();
             TouchLinks = System.Array.Empty<string>();
             DetachPosture = new TrajectoryMsgs.JointTrajectory();

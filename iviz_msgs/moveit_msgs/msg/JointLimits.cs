@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public JointLimits()
         {
-            JointName = string.Empty;
+            JointName = "";
         }
         
         /// Explicit constructor.

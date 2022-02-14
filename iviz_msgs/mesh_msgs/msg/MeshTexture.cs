@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor for empty message.
         public MeshTexture()
         {
-            Uuid = string.Empty;
+            Uuid = "";
             Image = new SensorMsgs.Image();
         }
         

@@ -60,7 +60,7 @@ namespace Iviz.Msgs.StdMsgs
         {
             b.Serialize(Seq);
             b.Serialize(Stamp);
-            b.Serialize(FrameId ?? string.Empty);
+            b.Serialize(FrameId ?? "");
         }
         
         public readonly void RosValidate()

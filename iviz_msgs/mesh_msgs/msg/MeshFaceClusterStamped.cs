@@ -19,7 +19,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor for empty message.
         public MeshFaceClusterStamped()
         {
-            Uuid = string.Empty;
+            Uuid = "";
             Cluster = new MeshFaceCluster();
         }
         

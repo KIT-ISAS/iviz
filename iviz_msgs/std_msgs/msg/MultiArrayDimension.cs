@@ -17,7 +17,7 @@ namespace Iviz.Msgs.StdMsgs
         /// Constructor for empty message.
         public MultiArrayDimension()
         {
-            Label = string.Empty;
+            Label = "";
         }
         
         /// Explicit constructor.

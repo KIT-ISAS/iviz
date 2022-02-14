@@ -58,7 +58,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor for empty message.
         public GetLabeledClustersRequest()
         {
-            Uuid = string.Empty;
+            Uuid = "";
         }
         
         /// Explicit constructor.

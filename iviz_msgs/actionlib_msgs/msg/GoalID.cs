@@ -19,7 +19,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         /// Constructor for empty message.
         public GoalID()
         {
-            Id = string.Empty;
+            Id = "";
         }
         
         /// Explicit constructor.

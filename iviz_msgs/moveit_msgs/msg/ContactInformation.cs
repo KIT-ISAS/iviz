@@ -32,8 +32,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public ContactInformation()
         {
-            ContactBody1 = string.Empty;
-            ContactBody2 = string.Empty;
+            ContactBody1 = "";
+            ContactBody2 = "";
         }
         
         /// Explicit constructor.

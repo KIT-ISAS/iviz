@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public LinkPadding()
         {
-            LinkName = string.Empty;
+            LinkName = "";
         }
         
         /// Explicit constructor.

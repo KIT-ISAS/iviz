@@ -20,8 +20,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public Scene()
         {
-            Name = string.Empty;
-            Filename = string.Empty;
+            Name = "";
+            Filename = "";
             Includes = System.Array.Empty<Include>();
             Lights = System.Array.Empty<Light>();
         }

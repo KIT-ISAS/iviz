@@ -15,7 +15,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public Node()
         {
-            Name = string.Empty;
+            Name = "";
             Transform = new Matrix4();
             Meshes = System.Array.Empty<int>();
         }

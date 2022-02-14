@@ -58,8 +58,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor for empty message.
         public MenuEntry()
         {
-            Title = string.Empty;
-            Command = string.Empty;
+            Title = "";
+            Command = "";
         }
         
         /// Explicit constructor.

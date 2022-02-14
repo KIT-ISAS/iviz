@@ -69,7 +69,7 @@ namespace Iviz.Msgs.GridMapMsgs
         /// Constructor for empty message.
         public GetGridMapRequest()
         {
-            FrameId = string.Empty;
+            FrameId = "";
             Layers = System.Array.Empty<string>();
         }
         

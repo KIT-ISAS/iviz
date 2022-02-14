@@ -16,7 +16,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshFaceCluster()
         {
             FaceIndices = System.Array.Empty<uint>();
-            Label = string.Empty;
+            Label = "";
         }
         
         /// Explicit constructor.

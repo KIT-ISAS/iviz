@@ -50,8 +50,8 @@ namespace Iviz.Msgs.MoveitMsgs
             GoalConstraints = System.Array.Empty<Constraints>();
             PathConstraints = new Constraints();
             TrajectoryConstraints = new TrajectoryConstraints();
-            PlannerId = string.Empty;
-            GroupName = string.Empty;
+            PlannerId = "";
+            GroupName = "";
         }
         
         /// Explicit constructor.

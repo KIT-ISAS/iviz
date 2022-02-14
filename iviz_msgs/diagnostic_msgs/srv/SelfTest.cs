@@ -96,7 +96,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor for empty message.
         public SelfTestResponse()
         {
-            Id = string.Empty;
+            Id = "";
             Status = System.Array.Empty<DiagnosticStatus>();
         }
         

@@ -49,7 +49,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public Texture()
         {
-            Path = string.Empty;
+            Path = "";
         }
         
         /// Explicit constructor.

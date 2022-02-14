@@ -58,7 +58,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor for empty message.
         public DeleteParamRequest()
         {
-            Name = string.Empty;
+            Name = "";
         }
         
         /// Explicit constructor.

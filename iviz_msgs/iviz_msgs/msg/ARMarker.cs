@@ -29,7 +29,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public ARMarker()
         {
-            Code = string.Empty;
+            Code = "";
             Corners = new GeometryMsgs.Vector3[4];
             CameraIntrinsic = new double[9];
         }

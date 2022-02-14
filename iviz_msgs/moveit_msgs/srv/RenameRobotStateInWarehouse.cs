@@ -60,9 +60,9 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public RenameRobotStateInWarehouseRequest()
         {
-            OldName = string.Empty;
-            NewName = string.Empty;
-            Robot = string.Empty;
+            OldName = "";
+            NewName = "";
+            Robot = "";
         }
         
         /// Explicit constructor.

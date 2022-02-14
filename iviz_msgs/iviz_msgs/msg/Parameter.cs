@@ -20,7 +20,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public Parameter()
         {
-            @string = string.Empty;
+            @string = "";
             Bytes = System.Array.Empty<byte>();
             Int32s = System.Array.Empty<int>();
             Float64s = System.Array.Empty<double>();

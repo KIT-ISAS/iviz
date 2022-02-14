@@ -59,8 +59,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public DeleteRobotStateFromWarehouseRequest()
         {
-            Name = string.Empty;
-            Robot = string.Empty;
+            Name = "";
+            Robot = "";
         }
         
         /// Explicit constructor.

@@ -94,7 +94,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor for empty message.
         public GetUUIDResponse()
         {
-            Uuid = string.Empty;
+            Uuid = "";
         }
         
         /// Explicit constructor.

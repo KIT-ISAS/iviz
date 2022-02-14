@@ -47,8 +47,8 @@ namespace Iviz.Msgs.VisionMsgs
         /// Constructor for empty message.
         public VisionInfo()
         {
-            Method = string.Empty;
-            DatabaseLocation = string.Empty;
+            Method = "";
+            DatabaseLocation = "";
         }
         
         /// Explicit constructor.

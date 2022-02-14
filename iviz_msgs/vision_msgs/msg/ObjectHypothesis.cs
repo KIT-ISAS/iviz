@@ -19,7 +19,7 @@ namespace Iviz.Msgs.VisionMsgs
         /// Constructor for empty message.
         public ObjectHypothesis()
         {
-            Id = string.Empty;
+            Id = "";
         }
         
         /// Explicit constructor.

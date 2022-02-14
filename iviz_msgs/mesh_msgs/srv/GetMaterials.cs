@@ -58,7 +58,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor for empty message.
         public GetMaterialsRequest()
         {
-            Uuid = string.Empty;
+            Uuid = "";
         }
         
         /// Explicit constructor.

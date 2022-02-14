@@ -101,7 +101,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor for empty message.
         public SendBytesResponse()
         {
-            Data = string.Empty;
+            Data = "";
         }
         
         /// Explicit constructor.

@@ -16,8 +16,8 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor for empty message.
         public Group()
         {
-            Name = string.Empty;
-            Type = string.Empty;
+            Name = "";
+            Type = "";
             Parameters = System.Array.Empty<ParamDescription>();
         }
         

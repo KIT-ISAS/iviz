@@ -29,7 +29,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor for empty message.
         public PointField()
         {
-            Name = string.Empty;
+            Name = "";
         }
         
         /// Explicit constructor.

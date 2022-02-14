@@ -23,7 +23,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public MotionPlanResponse()
         {
             TrajectoryStart = new RobotState();
-            GroupName = string.Empty;
+            GroupName = "";
             Trajectory = new RobotTrajectory();
             ErrorCode = new MoveItErrorCodes();
         }

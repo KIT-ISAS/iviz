@@ -61,8 +61,8 @@ namespace Iviz.Msgs.GridMapMsgs
         /// Constructor for empty message.
         public ProcessFileRequest()
         {
-            FilePath = string.Empty;
-            TopicName = string.Empty;
+            FilePath = "";
+            TopicName = "";
         }
         
         /// Explicit constructor.

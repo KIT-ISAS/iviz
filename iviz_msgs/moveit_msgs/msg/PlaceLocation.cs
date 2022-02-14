@@ -26,7 +26,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public PlaceLocation()
         {
-            Id = string.Empty;
+            Id = "";
             PostPlacePosture = new TrajectoryMsgs.JointTrajectory();
             PlacePose = new GeometryMsgs.PoseStamped();
             PrePlaceApproach = new GripperTranslation();

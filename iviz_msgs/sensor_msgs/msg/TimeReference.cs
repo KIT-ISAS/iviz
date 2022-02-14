@@ -19,7 +19,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor for empty message.
         public TimeReference()
         {
-            Source = string.Empty;
+            Source = "";
         }
         
         /// Explicit constructor.

@@ -41,12 +41,12 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public PlaceGoal()
         {
-            GroupName = string.Empty;
-            AttachedObjectName = string.Empty;
+            GroupName = "";
+            AttachedObjectName = "";
             PlaceLocations = System.Array.Empty<PlaceLocation>();
-            SupportSurfaceName = string.Empty;
+            SupportSurfaceName = "";
             PathConstraints = new Constraints();
-            PlannerId = string.Empty;
+            PlannerId = "";
             AllowedTouchObjects = System.Array.Empty<string>();
             PlanningOptions = new PlanningOptions();
         }

@@ -58,7 +58,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor for empty message.
         public PublishersRequest()
         {
-            Topic = string.Empty;
+            Topic = "";
         }
         
         /// Explicit constructor.

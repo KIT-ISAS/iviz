@@ -71,7 +71,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public GraspPlanningRequest()
         {
-            GroupName = string.Empty;
+            GroupName = "";
             Target = new CollisionObject();
             SupportSurfaces = System.Array.Empty<string>();
             CandidateGrasps = System.Array.Empty<Grasp>();

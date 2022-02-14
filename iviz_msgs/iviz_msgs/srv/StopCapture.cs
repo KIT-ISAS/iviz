@@ -95,7 +95,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public StopCaptureResponse()
         {
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

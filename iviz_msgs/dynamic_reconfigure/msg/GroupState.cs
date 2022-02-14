@@ -15,7 +15,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor for empty message.
         public GroupState()
         {
-            Name = string.Empty;
+            Name = "";
         }
         
         /// Explicit constructor.

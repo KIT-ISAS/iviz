@@ -96,7 +96,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public GetCaptureResolutionsResponse()
         {
-            Message = string.Empty;
+            Message = "";
             Resolutions = System.Array.Empty<Vector2i>();
         }
         

@@ -72,9 +72,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor for empty message.
         public InteractiveMarkerControl()
         {
-            Name = string.Empty;
+            Name = "";
             Markers = System.Array.Empty<Marker>();
-            Description = string.Empty;
+            Description = "";
         }
         
         /// Explicit constructor.

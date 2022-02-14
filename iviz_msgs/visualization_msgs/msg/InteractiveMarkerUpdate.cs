@@ -35,7 +35,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor for empty message.
         public InteractiveMarkerUpdate()
         {
-            ServerId = string.Empty;
+            ServerId = "";
             Markers = System.Array.Empty<InteractiveMarker>();
             Poses = System.Array.Empty<InteractiveMarkerPose>();
             Erases = System.Array.Empty<string>();

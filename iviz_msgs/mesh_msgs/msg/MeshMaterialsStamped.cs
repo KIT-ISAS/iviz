@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor for empty message.
         public MeshMaterialsStamped()
         {
-            Uuid = string.Empty;
+            Uuid = "";
             MeshMaterials = new MeshMsgs.MeshMaterials();
         }
         

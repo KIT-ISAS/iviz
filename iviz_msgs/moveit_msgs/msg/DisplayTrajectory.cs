@@ -19,7 +19,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public DisplayTrajectory()
         {
-            ModelId = string.Empty;
+            ModelId = "";
             Trajectory = System.Array.Empty<RobotTrajectory>();
             TrajectoryStart = new RobotState();
         }

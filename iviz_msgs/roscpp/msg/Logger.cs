@@ -13,8 +13,8 @@ namespace Iviz.Msgs.Roscpp
         /// Constructor for empty message.
         public Logger()
         {
-            Name = string.Empty;
-            Level = string.Empty;
+            Name = "";
+            Level = "";
         }
         
         /// Explicit constructor.

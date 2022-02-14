@@ -58,7 +58,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public SaveMapRequest()
         {
-            Filename = string.Empty;
+            Filename = "";
         }
         
         /// Explicit constructor.

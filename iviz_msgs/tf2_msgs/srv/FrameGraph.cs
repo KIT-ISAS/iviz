@@ -94,7 +94,7 @@ namespace Iviz.Msgs.Tf2Msgs
         /// Constructor for empty message.
         public FrameGraphResponse()
         {
-            FrameYaml = string.Empty;
+            FrameYaml = "";
         }
         
         /// Explicit constructor.

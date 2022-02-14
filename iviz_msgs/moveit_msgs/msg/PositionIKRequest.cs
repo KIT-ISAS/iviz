@@ -50,10 +50,10 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public PositionIKRequest()
         {
-            GroupName = string.Empty;
+            GroupName = "";
             RobotState = new MoveitMsgs.RobotState();
             Constraints = new Constraints();
-            IkLinkName = string.Empty;
+            IkLinkName = "";
             PoseStamped = new GeometryMsgs.PoseStamped();
             IkLinkNames = System.Array.Empty<string>();
             PoseStampedVector = System.Array.Empty<GeometryMsgs.PoseStamped>();

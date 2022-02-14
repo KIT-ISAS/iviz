@@ -16,8 +16,8 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor for empty message.
         public MeshVertexCostsStamped()
         {
-            Uuid = string.Empty;
-            Type = string.Empty;
+            Uuid = "";
+            Type = "";
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts();
         }
         

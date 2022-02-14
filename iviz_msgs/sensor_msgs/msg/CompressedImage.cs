@@ -25,7 +25,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor for empty message.
         public CompressedImage()
         {
-            Format = string.Empty;
+            Format = "";
             Data = System.Array.Empty<byte>();
         }
         

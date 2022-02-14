@@ -16,10 +16,10 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor for empty message.
         public ParamDescription()
         {
-            Name = string.Empty;
-            Type = string.Empty;
-            Description = string.Empty;
-            EditMethod = string.Empty;
+            Name = "";
+            Type = "";
+            Description = "";
+            EditMethod = "";
         }
         
         /// Explicit constructor.

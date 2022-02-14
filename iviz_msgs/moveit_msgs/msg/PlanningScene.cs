@@ -32,9 +32,9 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public PlanningScene()
         {
-            Name = string.Empty;
+            Name = "";
             RobotState = new RobotState();
-            RobotModelName = string.Empty;
+            RobotModelName = "";
             FixedFrameTransforms = System.Array.Empty<GeometryMsgs.TransformStamped>();
             AllowedCollisionMatrix = new AllowedCollisionMatrix();
             LinkPadding = System.Array.Empty<LinkPadding>();

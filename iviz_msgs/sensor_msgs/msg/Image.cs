@@ -41,7 +41,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor for empty message.
         public Image()
         {
-            Encoding = string.Empty;
+            Encoding = "";
             Data = System.Array.Empty<byte>();
         }
         

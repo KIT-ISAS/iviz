@@ -31,8 +31,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor for empty message.
         public InteractiveMarker()
         {
-            Name = string.Empty;
-            Description = string.Empty;
+            Name = "";
+            Description = "";
             MenuEntries = System.Array.Empty<MenuEntry>();
             Controls = System.Array.Empty<InteractiveMarkerControl>();
         }

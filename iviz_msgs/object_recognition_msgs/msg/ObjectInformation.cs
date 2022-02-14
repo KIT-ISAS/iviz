@@ -21,7 +21,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         /// Constructor for empty message.
         public ObjectInformation()
         {
-            Name = string.Empty;
+            Name = "";
             GroundTruthMesh = new ShapeMsgs.Mesh();
             GroundTruthPointCloud = new SensorMsgs.PointCloud2();
         }

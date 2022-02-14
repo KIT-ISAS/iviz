@@ -28,9 +28,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor for empty message.
         public DiagnosticStatus()
         {
-            Name = string.Empty;
-            Message = string.Empty;
-            HardwareId = string.Empty;
+            Name = "";
+            Message = "";
+            HardwareId = "";
             Values = System.Array.Empty<KeyValue>();
         }
         

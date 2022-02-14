@@ -110,7 +110,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public StartCaptureResponse()
         {
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

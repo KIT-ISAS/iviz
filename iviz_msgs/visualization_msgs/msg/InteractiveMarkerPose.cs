@@ -18,7 +18,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor for empty message.
         public InteractiveMarkerPose()
         {
-            Name = string.Empty;
+            Name = "";
         }
         
         /// Explicit constructor.

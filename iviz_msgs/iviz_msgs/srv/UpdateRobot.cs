@@ -61,7 +61,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public UpdateRobotRequest()
         {
-            Id = string.Empty;
+            Id = "";
             Configuration = new IvizMsgs.RobotConfiguration();
             ValidFields = System.Array.Empty<string>();
         }
@@ -131,7 +131,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public UpdateRobotResponse()
         {
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

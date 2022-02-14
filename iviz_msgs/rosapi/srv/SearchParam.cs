@@ -58,7 +58,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor for empty message.
         public SearchParamRequest()
         {
-            Name = string.Empty;
+            Name = "";
         }
         
         /// Explicit constructor.
@@ -100,7 +100,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor for empty message.
         public SearchParamResponse()
         {
-            GlobalName = string.Empty;
+            GlobalName = "";
         }
         
         /// Explicit constructor.

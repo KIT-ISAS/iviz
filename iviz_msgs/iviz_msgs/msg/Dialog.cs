@@ -73,9 +73,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public Dialog()
         {
-            Id = string.Empty;
-            Title = string.Empty;
-            Caption = string.Empty;
+            Id = "";
+            Title = "";
+            Caption = "";
             MenuEntries = System.Array.Empty<string>();
         }
         

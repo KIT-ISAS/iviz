@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public Grasp()
         {
-            Id = string.Empty;
+            Id = "";
             PreGraspPosture = new TrajectoryMsgs.JointTrajectory();
             GraspPosture = new TrajectoryMsgs.JointTrajectory();
             GraspPose = new GeometryMsgs.PoseStamped();

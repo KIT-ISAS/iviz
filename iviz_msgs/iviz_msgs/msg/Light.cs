@@ -23,7 +23,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public Light()
         {
-            Name = string.Empty;
+            Name = "";
         }
         
         /// Explicit constructor.

@@ -112,7 +112,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor for empty message.
         public SetCameraInfoResponse()
         {
-            StatusMessage = string.Empty;
+            StatusMessage = "";
         }
         
         /// Explicit constructor.

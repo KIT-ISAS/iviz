@@ -61,7 +61,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public GetStateValidityRequest()
         {
             RobotState = new RobotState();
-            GroupName = string.Empty;
+            GroupName = "";
             Constraints = new Constraints();
         }
         

@@ -60,7 +60,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public SetFixedFrameRequest()
         {
-            Id = string.Empty;
+            Id = "";
         }
         
         /// Explicit constructor.
@@ -105,7 +105,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public SetFixedFrameResponse()
         {
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

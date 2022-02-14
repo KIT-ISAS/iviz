@@ -88,10 +88,10 @@ namespace Iviz.Msgs.RosgraphMsgs
         {
             Header.RosSerialize(ref b);
             b.Serialize(Level);
-            b.Serialize(Name ?? string.Empty);
-            b.Serialize(Msg ?? string.Empty);
-            b.Serialize(File ?? string.Empty);
-            b.Serialize(Function ?? string.Empty);
+            b.Serialize(Name ?? "");
+            b.Serialize(Msg ?? "");
+            b.Serialize(File ?? "");
+            b.Serialize(Function ?? "");
             b.Serialize(Line);
             b.SerializeArray(Topics ?? System.Array.Empty<string>());
         }

@@ -13,7 +13,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         /// Constructor for empty message.
         public ConnectedClient()
         {
-            IpAddress = string.Empty;
+            IpAddress = "";
         }
         
         /// Explicit constructor.

@@ -105,7 +105,7 @@ namespace Iviz.Msgs.StdSrvs
         /// Constructor for empty message.
         public SetBoolResponse()
         {
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

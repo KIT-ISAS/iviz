@@ -19,10 +19,10 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public Include()
         {
-            Uri = string.Empty;
+            Uri = "";
             Pose = new Matrix4();
             Material = new Material();
-            Package = string.Empty;
+            Package = "";
         }
         
         /// Explicit constructor.

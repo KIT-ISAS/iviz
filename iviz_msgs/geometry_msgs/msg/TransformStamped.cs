@@ -56,7 +56,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public readonly void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
-            b.Serialize(ChildFrameId ?? string.Empty);
+            b.Serialize(ChildFrameId ?? "");
             b.Serialize(in Transform);
         }
         

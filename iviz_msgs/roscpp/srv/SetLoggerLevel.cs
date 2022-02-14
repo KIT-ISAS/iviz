@@ -59,8 +59,8 @@ namespace Iviz.Msgs.Roscpp
         /// Constructor for empty message.
         public SetLoggerLevelRequest()
         {
-            Logger = string.Empty;
-            Level = string.Empty;
+            Logger = "";
+            Level = "";
         }
         
         /// Explicit constructor.

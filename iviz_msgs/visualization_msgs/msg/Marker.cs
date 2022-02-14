@@ -59,11 +59,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor for empty message.
         public Marker()
         {
-            Ns = string.Empty;
+            Ns = "";
             Points = System.Array.Empty<GeometryMsgs.Point>();
             Colors = System.Array.Empty<StdMsgs.ColorRGBA>();
-            Text = string.Empty;
-            MeshResource = string.Empty;
+            Text = "";
+            MeshResource = "";
         }
         
         /// Explicit constructor.

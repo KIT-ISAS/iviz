@@ -36,9 +36,9 @@ namespace Iviz.Msgs.RosgraphMsgs
         /// Constructor for empty message.
         public TopicStatistics()
         {
-            Topic = string.Empty;
-            NodePub = string.Empty;
-            NodeSub = string.Empty;
+            Topic = "";
+            NodePub = "";
+            NodeSub = "";
         }
         
         /// Explicit constructor.

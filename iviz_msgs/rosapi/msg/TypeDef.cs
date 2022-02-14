@@ -18,7 +18,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor for empty message.
         public TypeDef()
         {
-            Type = string.Empty;
+            Type = "";
             Fieldnames = System.Array.Empty<string>();
             Fieldtypes = System.Array.Empty<string>();
             Fieldarraylen = System.Array.Empty<int>();

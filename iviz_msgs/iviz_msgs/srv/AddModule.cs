@@ -62,8 +62,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public AddModuleRequest()
         {
-            ModuleType = string.Empty;
-            Id = string.Empty;
+            ModuleType = "";
+            Id = "";
         }
         
         /// Explicit constructor.
@@ -114,8 +114,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public AddModuleResponse()
         {
-            Message = string.Empty;
-            Id = string.Empty;
+            Message = "";
+            Id = "";
         }
         
         /// Explicit constructor.

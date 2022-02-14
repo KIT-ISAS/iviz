@@ -23,7 +23,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor for empty message.
         public InteractiveMarkerInit()
         {
-            ServerId = string.Empty;
+            ServerId = "";
             Markers = System.Array.Empty<InteractiveMarker>();
         }
         

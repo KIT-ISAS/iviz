@@ -43,7 +43,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         public GoalStatus()
         {
             GoalId = new GoalID();
-            Text = string.Empty;
+            Text = "";
         }
         
         /// Explicit constructor.

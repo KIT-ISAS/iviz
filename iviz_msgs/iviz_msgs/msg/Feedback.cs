@@ -27,8 +27,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public Feedback()
         {
-            VizId = string.Empty;
-            Id = string.Empty;
+            VizId = "";
+            Id = "";
             Trajectory = new IvizMsgs.Trajectory();
         }
         

@@ -34,8 +34,8 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         /// Constructor for empty message.
         public ObjectType()
         {
-            Key = string.Empty;
-            Db = string.Empty;
+            Key = "";
+            Db = "";
         }
         
         /// Explicit constructor.

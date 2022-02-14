@@ -26,7 +26,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public MotionPlanDetailedResponse()
         {
             TrajectoryStart = new RobotState();
-            GroupName = string.Empty;
+            GroupName = "";
             Trajectory = System.Array.Empty<RobotTrajectory>();
             Description = System.Array.Empty<string>();
             ProcessingTime = System.Array.Empty<double>();

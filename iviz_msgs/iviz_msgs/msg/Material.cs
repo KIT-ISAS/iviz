@@ -24,7 +24,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor for empty message.
         public Material()
         {
-            Name = string.Empty;
+            Name = "";
             Textures = System.Array.Empty<Texture>();
         }
         

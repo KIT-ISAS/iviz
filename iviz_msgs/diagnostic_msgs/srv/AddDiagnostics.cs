@@ -73,7 +73,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor for empty message.
         public AddDiagnosticsRequest()
         {
-            LoadNamespace = string.Empty;
+            LoadNamespace = "";
         }
         
         /// Explicit constructor.
@@ -121,7 +121,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor for empty message.
         public AddDiagnosticsResponse()
         {
-            Message = string.Empty;
+            Message = "";
         }
         
         /// Explicit constructor.

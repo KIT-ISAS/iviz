@@ -19,7 +19,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public JointConstraint()
         {
-            JointName = string.Empty;
+            JointName = "";
         }
         
         /// Explicit constructor.

@@ -59,8 +59,8 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor for empty message.
         public SetParamRequest()
         {
-            Name = string.Empty;
-            Value = string.Empty;
+            Name = "";
+            Value = "";
         }
         
         /// Explicit constructor.

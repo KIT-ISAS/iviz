@@ -15,7 +15,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor for empty message.
         public LinkScale()
         {
-            LinkName = string.Empty;
+            LinkName = "";
         }
         
         /// Explicit constructor.
