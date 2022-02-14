@@ -36,7 +36,7 @@ namespace Iviz.Controllers
             {
                 config.Topic = value.Topic;
                 Visible = value.Visible;
-                Tint = value.Tint.ToUnityColor();
+                Tint = value.Tint.ToUnity();
             }
         }
 
@@ -52,7 +52,7 @@ namespace Iviz.Controllers
 
         public Color Tint
         {
-            get => config.Tint.ToUnityColor();
+            get => config.Tint.ToUnity();
             set
             {
                 config.Tint = value.ToRos();

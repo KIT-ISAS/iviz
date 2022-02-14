@@ -59,7 +59,7 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             var config = JsonConvert.DeserializeObject<OctomapConfiguration>(configAsJson);
 
@@ -74,7 +74,7 @@ namespace Iviz.App
                         listener.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
                         break;
                     case nameof(OctomapConfiguration.Tint):
-                        listener.Tint = config.Tint.ToUnityColor();
+                        listener.Tint = config.Tint.ToUnity();
                         break;
                     case nameof(OctomapConfiguration.MaxDepth):
                         listener.MaxDepth = config.MaxDepth;

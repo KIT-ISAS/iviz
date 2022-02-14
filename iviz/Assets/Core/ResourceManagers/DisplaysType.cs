@@ -62,6 +62,9 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> CanvasHolder { get; }
         public ResourceKey<GameObject> PalmCompass { get; }
 
+        public ResourceKey<GameObject> BoundaryCheck { get; }
+        public ResourceKey<GameObject> BoundaryLink { get; }
+
         public DisplaysType()
         {
             var assetHolder = Resource.Extras.AssetHolder;
@@ -120,6 +123,9 @@ namespace Iviz.Resources
             SelectionFrame = Create(appAssetHolder.SelectionFrame, nameof(appAssetHolder.SelectionFrame));
             CanvasHolder = Create(appAssetHolder.CanvasHolder, nameof(appAssetHolder.CanvasHolder));
             PalmCompass = Create(appAssetHolder.PalmCompass, nameof(appAssetHolder.PalmCompass));
+
+            BoundaryCheck = Create(appAssetHolder.BoundaryCheck, nameof(appAssetHolder.BoundaryCheck));
+            BoundaryLink = Create(appAssetHolder.BoundaryLink, nameof(appAssetHolder.BoundaryLink));
 
             resourceByType = CreateTypeDictionary(this);
 

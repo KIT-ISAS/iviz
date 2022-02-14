@@ -134,7 +134,7 @@ namespace Iviz.Controllers.Markers
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
 
-            float w0 = UnityUtils.AsFloat(color * lColors[0].ToUnityColor());
+            float w0 = UnityUtils.AsFloat(color * lColors[0].ToUnity());
             lPoints[0].Ros2Unity(w0, out c1);
 
             lineBuffer.EnsureCapacity(lPoints.Length - 1);
@@ -144,7 +144,7 @@ namespace Iviz.Controllers.Markers
             {
                 c0 = c1;
 
-                float w = UnityUtils.AsFloat(color * lColors[i].ToUnityColor());
+                float w = UnityUtils.AsFloat(color * lColors[i].ToUnity());
                 lPoints[i].Ros2Unity(w, out c1);
 
                 if (LineDisplay.IsElementValid(f))
@@ -243,9 +243,9 @@ namespace Iviz.Controllers.Markers
 
             for (int i = 0; i < lPoints.Length; i += 2)
             {
-                float w0 = UnityUtils.AsFloat(color * lColors[i + 0].ToUnityColor());
+                float w0 = UnityUtils.AsFloat(color * lColors[i + 0].ToUnity());
                 lPoints[i + 0].Ros2Unity(w0, out c0);
-                float w1 = UnityUtils.AsFloat(color * lColors[i + 1].ToUnityColor());
+                float w1 = UnityUtils.AsFloat(color * lColors[i + 1].ToUnity());
                 lPoints[i + 1].Ros2Unity(w1, out c1);
 
                 if (LineDisplay.IsElementValid(f))

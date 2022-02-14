@@ -42,7 +42,7 @@ namespace Iviz.App
             panel.CloseButton.Clicked += Close;
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             var config = JsonConvert.DeserializeObject<TfConfiguration>(configAsJson);
 

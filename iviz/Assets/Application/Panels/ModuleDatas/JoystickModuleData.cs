@@ -148,7 +148,7 @@ namespace Iviz.App
             static IEnumerable<BriefTopicInfo> GetTopicTypes() => RosManager.Connection.GetSystemTopicTypes();
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             var config = JsonConvert.DeserializeObject<JoystickConfiguration>(configAsJson);
 
@@ -175,7 +175,7 @@ namespace Iviz.App
                         controller.UseTwistStamped = config.UseTwistStamped;
                         break;
                     case nameof(JoystickConfiguration.MaxSpeed):
-                        controller.MaxSpeed = config.MaxSpeed;
+                        controller.MaxSpeed = config.MaxSpeed.ToUnity();
                         break;
                     case nameof(JoystickConfiguration.AttachToFrame):
                         controller.AttachToFrame = config.AttachToFrame;

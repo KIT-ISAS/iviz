@@ -84,7 +84,7 @@ namespace Iviz.Controllers
                 FlipMinMax = value.FlipMinMax;
                 ScaleZ = config.ScaleZ;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
-                Tint = value.Tint;
+                Tint = value.Tint.ToUnity();
                 CubesVisible = value.CubesVisible;
                 TextureVisible = value.TextureVisible;
             }
@@ -171,10 +171,10 @@ namespace Iviz.Controllers
 
         public Color Tint
         {
-            get => config.Tint;
+            get => config.Tint.ToUnity();
             set
             {
-                config.Tint = value;
+                config.Tint = value.ToRos();
                 foreach (var grid in gridTiles)
                 {
                     grid.Tint = value;

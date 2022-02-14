@@ -1,8 +1,7 @@
 #nullable enable
 
 using System.Runtime.Serialization;
-using Iviz.Core;
-using UnityEngine;
+using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.Common.Configurations
 {
@@ -13,7 +12,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public QualityType QualityInAr { get; set; } = QualityType.Ultra;
         [DataMember] public int NetworkFrameSkip { get; set; } = 1;
         [DataMember] public int TargetFps { get; set; } = -1;
-        [DataMember] public SerializableColor BackgroundColor { get; set; } = new Color(0.125f, 0.169f, 0.245f);
+        [DataMember] public ColorRGBA BackgroundColor { get; set; } = new(0.125f, 0.169f, 0.245f, 1);
         [DataMember] public int SunDirection { get; set; } = 0;
     }
 }

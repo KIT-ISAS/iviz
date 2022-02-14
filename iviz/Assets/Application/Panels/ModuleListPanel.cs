@@ -737,8 +737,8 @@ namespace Iviz.App
                     return false; // empty text
                 }
 
-                unityPose.position = config.AnchorPosition;
-                unityPose.rotation = config.AnchorOrientation;
+                unityPose.position = config.AnchorPosition.ToUnity();
+                unityPose.rotation = config.AnchorOrientation.ToUnity();
                 return true;
             }
             catch (Exception e) when
@@ -766,8 +766,8 @@ namespace Iviz.App
             var (position, rotation) = unityPose;
             var config = new XRStartConfiguration
             {
-                AnchorOrientation = rotation,
-                AnchorPosition = position
+                AnchorOrientation = rotation.ToRos(),
+                AnchorPosition = position.ToRos()
             };
 
             try

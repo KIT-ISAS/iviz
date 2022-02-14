@@ -12,7 +12,7 @@ namespace Iviz.Displays
     /// <summary>
     /// Implements the visualization of a <see cref="TfFrame"/>.
     /// </summary>
-    public sealed class TfFrameDisplay : TfFrame, IHighlightable
+    public sealed class TfFrameDisplay : TfFrame, IHighlightable, ITrailDataSource
     {
         const int TrailTimeWindowInMs = 5000;
 
@@ -215,11 +215,11 @@ namespace Iviz.Displays
                 }
 
                 Trail.Visible = value && Visible;
-                Trail.DataSource = value
-                    ? () => Transform.position
-                    : null;
+                Trail.DataSource = this;
             }
         }
+
+        public Vector3 TrailPosition => Transform.position;
 
         public TfFrameDisplay(string id) : base(id)
         {

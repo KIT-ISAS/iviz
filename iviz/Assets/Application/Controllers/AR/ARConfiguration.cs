@@ -4,6 +4,8 @@ using System;
 using System.Runtime.Serialization;
 using Iviz.Common;
 using Iviz.Common.Configurations;
+using Iviz.Core;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Roslib.Utils;
 
 namespace Iviz.Controllers
@@ -12,7 +14,7 @@ namespace Iviz.Controllers
     public sealed class ARConfiguration : JsonToString, IConfiguration
     {
         [IgnoreDataMember] public float WorldScale { get; set; } = 1.0f;
-        [IgnoreDataMember] public SerializableVector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset;
+        [IgnoreDataMember] public Vector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset.ToRos();
 
         [DataMember] public bool EnableQrDetection { get; set; } = true;
         [DataMember] public bool EnableArucoDetection { get; set; } = true;

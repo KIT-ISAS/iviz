@@ -17,7 +17,7 @@ namespace Iviz.App
         public Msgs.GeometryMsgs.Twist? twist;
     }
 
-    public interface IMagnitudeUpdater
+    public interface IMagnitudeDataSource
     {
         public Magnitude? Magnitude { get; }
     }
@@ -26,25 +26,25 @@ namespace Iviz.App
     {
         [SerializeField] TMP_Text? text;
         [SerializeField] Button? button;
-        IMagnitudeUpdater? updater;
+        IMagnitudeDataSource? dataSource;
 
         TMP_Text Text => text.AssertNotNull(nameof(text));
         Button Button => button.AssertNotNull(nameof(button));
 
-        public IMagnitudeUpdater? Owner
+        public IMagnitudeDataSource? Owner
         {
             set
             {
-                if (updater == null && value != null)
+                if (dataSource == null && value != null)
                 {
                     GameThread.EveryTenthOfASecond += UpdateMagnitude;
                 }
-                else if (updater != null && value == null)
+                else if (dataSource != null && value == null)
                 {
                     GameThread.EveryTenthOfASecond -= UpdateMagnitude;
                 }
 
-                updater = value;
+                dataSource = value;
                 if (value != null)
                 {
                     UpdateMagnitude();
@@ -63,7 +63,7 @@ namespace Iviz.App
 
         void UpdateMagnitude()
         {
-            if (updater is not { Magnitude: { } magnitude })
+            if (dataSource is not { Magnitude: { } magnitude })
             {
                 Text.text = "<b>[no message]</b>";
                 return;

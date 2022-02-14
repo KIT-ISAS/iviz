@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using Iviz.Msgs.GeometryMsgs;
 
 namespace Iviz.Common.Configurations
 {
@@ -20,6 +21,6 @@ namespace Iviz.Common.Configurations
         [DataMember] public float BillboardSize { get; set; } = 1.0f;
         [DataMember] public bool BillboardFollowCamera { get; set; }
         [DataMember] public bool UseIntrinsicScale { get; set; } = true;
-        [DataMember] public SerializableVector3 BillboardOffset { get; set; } = new(0, 0, 0.5f);
+        [DataMember] public Vector3 BillboardOffset { get; set; } = new(0, 0, 0.5f);
     }
 }

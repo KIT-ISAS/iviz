@@ -18,7 +18,7 @@ using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
-    public sealed class MagnitudeListener : ListenerController, IMagnitudeUpdater
+    public sealed class MagnitudeListener : ListenerController, IMagnitudeDataSource, ITrailDataSource
     {
         readonly FrameNode frameNode;
         readonly TrailDisplay trail;
@@ -47,7 +47,8 @@ namespace Iviz.Controllers
                 FrameVisible = value.FrameVisible;
                 VectorVisible = value.VectorVisible;
                 VectorScale = value.VectorScale;
-                Color = value.Color;
+                VectorColor = value.VectorColor.ToUnity();
+                AngleColor = value.AngleColor.ToUnity();
                 TrailTime = value.TrailTime;
                 PreferUdp = value.PreferUdp;
             }
@@ -142,12 +143,12 @@ namespace Iviz.Controllers
             }
         }
 
-        public Color Color
+        public Color VectorColor
         {
-            get => config.Color;
+            get => config.VectorColor.ToUnity();
             set
             {
-                config.Color = value;
+                config.VectorColor = value.ToRos();
                 trail.Color = value;
                 if (sphere != null)
                 {
@@ -161,6 +162,20 @@ namespace Iviz.Controllers
             }
         }
 
+        public Color AngleColor
+        {
+            get => config.AngleColor.ToUnity();
+            set
+            {
+                // Color.yellow.WithSaturation(0.75f)
+                config.AngleColor = value.ToRos();
+                if (angleAxis != null)
+                {
+                    angleAxis.Color = value;
+                }
+            }
+        }        
+        
         public float Scale
         {
             get => config.Scale;
@@ -205,6 +220,8 @@ namespace Iviz.Controllers
 
         public override IListener Listener { get; }
 
+        public Vector3 TrailPosition => frameNode.Transform.TransformPoint(cachedDirection * VectorScale);
+
         public MagnitudeListener(MagnitudeConfiguration? config, string topic, string type)
         {
             trail = ResourcePool.RentDisplay<TrailDisplay>();
@@ -216,7 +233,7 @@ namespace Iviz.Controllers
                 Type = type
             };
 
-            trail.DataSource = () => frameNode.Transform.position;
+            trail.DataSource = this;
 
             var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
             Listener = Config.Type switch
@@ -244,31 +261,28 @@ namespace Iviz.Controllers
                     break;
                 case PointStamped.RosMessageType:
                 case Point.RosMessageType:
-                    RentSphere(frameNode, Color, out sphere);
+                    RentSphere(frameNode, VectorColor, out sphere);
                     break;
                 case WrenchStamped.RosMessageType:
                 case Wrench.RosMessageType:
                     RentFrame(frameNode, out axisFrame);
-                    RentArrow(frameNode, Color, out arrow);
-                    RentAngleAxis(frameNode, out angleAxis);
-                    RentSphere(frameNode, Color, out sphere);
-                    trail.DataSource = TrailDataSource;
+                    RentArrow(frameNode, VectorColor, out arrow);
+                    RentAngleAxis(frameNode, AngleColor, out angleAxis);
+                    RentSphere(frameNode, VectorColor, out sphere);
                     break;
                 case TwistStamped.RosMessageType:
                 case Twist.RosMessageType:
                     RentFrame(frameNode, out axisFrame);
-                    RentArrow(frameNode, Color, out arrow);
-                    RentAngleAxis(frameNode, out angleAxis);
-                    RentSphere(frameNode, Color, out sphere);
-                    trail.DataSource = TrailDataSource;
+                    RentArrow(frameNode, VectorColor, out arrow);
+                    RentAngleAxis(frameNode, AngleColor, out angleAxis);
+                    RentSphere(frameNode, VectorColor, out sphere);
                     break;
                 case Odometry.RosMessageType:
                     RentFrame(frameNode, out axisFrame);
-                    RentSphere(frameNode, Color, out sphere);
+                    RentSphere(frameNode, VectorColor, out sphere);
                     childNode = new FrameNode($"{Config.Topic} | Child");
-                    RentArrow(childNode, Color, out arrow);
-                    RentAngleAxis(childNode, out angleAxis);
-                    trail.DataSource = TrailDataSource;
+                    RentArrow(childNode, VectorColor, out arrow);
+                    RentAngleAxis(childNode, AngleColor, out angleAxis);
                     break;
             }
         }
@@ -287,10 +301,10 @@ namespace Iviz.Controllers
             arrow.EnableShadows = false;
         }
 
-        static void RentAngleAxis(FrameNode node, out AngleAxisDisplay angleAxis)
+        static void RentAngleAxis(FrameNode node, Color color, out AngleAxisDisplay angleAxis)
         {
             angleAxis = ResourcePool.RentDisplay<AngleAxisDisplay>(node.Transform);
-            angleAxis.Color = Color.yellow.WithSaturation(0.75f);
+            angleAxis.Color = color;
         }
 
         static void RentSphere(FrameNode node, Color color, out MeshMarkerDisplay sphere)
@@ -343,9 +357,6 @@ namespace Iviz.Controllers
             frameNode.AttachTo(msg.Header);
             Handler(msg.Wrench);
         }
-
-        Vector3 TrailDataSource() =>
-            frameNode.Transform.TransformPoint(cachedDirection * VectorScale);
 
         void Handler(Wrench msg)
         {

@@ -1,12 +1,11 @@
 #nullable enable
 
 using Iviz.Core;
-using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Tools;
 using UnityEngine;
 
-namespace Iviz.App.ARDialogs
+namespace Iviz.Displays.XR
 {
     public sealed class LinkDisplay : MeshMarkerDisplay
     {

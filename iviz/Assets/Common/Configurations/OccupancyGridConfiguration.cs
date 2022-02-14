@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.Serialization;
-using Iviz.Core;
-using UnityEngine;
+using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.Common.Configurations
 {
@@ -18,6 +17,6 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool TextureVisible { get; set; } = true;
         [DataMember] public float ScaleZ { get; set; } = 0.5f;
         [DataMember] public bool RenderAsOcclusionOnly { get; set; } = false;
-        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
+        [DataMember] public ColorRGBA Tint { get; set; } = ColorRGBA.White;
     }
 }

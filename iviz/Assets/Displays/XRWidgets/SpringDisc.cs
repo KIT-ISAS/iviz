@@ -5,57 +5,59 @@ using System.Threading;
 using Iviz.Core;
 using UnityEngine;
 
-namespace Iviz.Displays.ARDialogs
+namespace Iviz.Displays.XR
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class SpringDisc3D : MonoBehaviour, IWidget, IWidgetWithColor, IWidgetCanBeMoved
+    public sealed class SpringDisc : MonoBehaviour, IWidget, IWidgetWithColor, IWidgetCanBeMoved
     {
         [SerializeField] MeshMarkerDisplay? anchor;
         [SerializeField] MeshMarkerDisplay? link;
         [SerializeField] XRScreenDraggable? draggable;
-        [SerializeField] MeshMarkerDisplay? disc;
+        [SerializeField] MeshMarkerDisplay? outerDisc;
+        [SerializeField] MeshMarkerDisplay? innerDisc;
         [SerializeField] MeshMarkerDisplay? glow;
         CancellationTokenSource? tokenSource;
-        
+
         MeshMarkerDisplay Anchor => anchor.AssertNotNull(nameof(anchor));
         MeshMarkerDisplay Link => link.AssertNotNull(nameof(link));
-        MeshMarkerDisplay Disc => disc.AssertNotNull(nameof(disc));
+        MeshMarkerDisplay OuterDisc => outerDisc.AssertNotNull(nameof(outerDisc));
+        MeshMarkerDisplay InnerDisc => innerDisc.AssertNotNull(nameof(innerDisc));
         MeshMarkerDisplay Glow => glow.AssertNotNull(nameof(glow));
         XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
-        
+
+        public event Action<Vector3>? Moved;
+
         Color color = new(0, 0.6f, 1f);
         Color secondaryColor = Color.white;
 
-        public event Action<Vector3>? Moved;
-        
         public Color Color
         {
             get => color;
             set
             {
                 color = value;
-                Disc.Color = value.WithValue(0.5f);
+                OuterDisc.Color = value.WithValue(0.5f);
                 Link.Color = value.WithAlpha(0.8f);
-                Link.EmissiveColor = value;
                 Glow.Color = value.WithAlpha(0.8f);
                 Glow.EmissiveColor = value;
             }
         }
-        
+
         public Color SecondaryColor
         {
             get => secondaryColor;
             set
             {
                 secondaryColor = value;
+                InnerDisc.Color = value;
                 Anchor.Color = value;
             }
-        }    
-        
+        }
+
         public bool Interactable
         {
             set => Draggable.enabled = value;
-        }        
+        }
 
         void Awake()
         {
@@ -66,13 +68,15 @@ namespace Iviz.Displays.ARDialogs
             Draggable.StartDragging += () =>
             {
                 tokenSource?.Cancel();
-                Disc.EmissiveColor = Color;
+                InnerDisc.EmissiveColor = SecondaryColor;
+                OuterDisc.EmissiveColor = Color;
                 Glow.Visible = true;
             };
             Draggable.Moved += () => OnDiscMoved(true);
             Draggable.EndDragging += () =>
             {
-                Disc.EmissiveColor = Color.black;
+                InnerDisc.EmissiveColor = Color.black;
+                OuterDisc.EmissiveColor = Color.black;
                 Glow.Visible = false;
 
                 Moved?.Invoke(Vector3.zero);
@@ -90,14 +94,14 @@ namespace Iviz.Displays.ARDialogs
 
             Draggable.StartDragging += () => tokenSource?.Cancel();
             Draggable.Damping = null;
-        }        
+        }
 
         void OnDiscMoved(bool raiseOnMoved)
         {
             var discPosition = Draggable.Transform.localPosition;
             float discDistance = discPosition.Magnitude();
-            
-            Link.Transform.localScale = new Vector3(0.2f, 0.2f, discDistance);
+
+            Link.Transform.localScale = new Vector3(0.2f, 0.002f, discDistance);
             Link.Transform.localPosition = discPosition / 2;
             Link.Transform.localRotation = discPosition.sqrMagnitude < 0.01f 
                 ? Quaternion.identity 
@@ -112,7 +116,7 @@ namespace Iviz.Displays.ARDialogs
         public void Suspend()
         {
             Moved = null;
-            Disc.Transform.localPosition = Vector3.zero;
+            OuterDisc.Transform.localPosition = Vector3.zero;
             OnDiscMoved(false);
             tokenSource?.Cancel();
         }

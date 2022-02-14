@@ -1,7 +1,7 @@
 ﻿#nullable enable
 
 using System.Runtime.Serialization;
-using Iviz.Common;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Roslib.Utils;
 
 namespace Iviz.App
@@ -9,7 +9,7 @@ namespace Iviz.App
     [DataContract]
     public sealed class XRStartConfiguration : JsonToString
     {
-        [DataMember] public SerializableVector3 AnchorPosition { get; set; }
-        [DataMember] public SerializableQuaternion AnchorOrientation { get; set; }
+        [DataMember] public Vector3 AnchorPosition { get; set; }
+        [DataMember] public Quaternion AnchorOrientation { get; set; }
     }
 }

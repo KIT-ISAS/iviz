@@ -88,7 +88,7 @@ namespace Iviz.App
             }
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             GridConfiguration config = JsonConvert.DeserializeObject<GridConfiguration>(configAsJson);
 
@@ -97,10 +97,10 @@ namespace Iviz.App
                 switch (field)
                 {
                     case nameof(GridConfiguration.GridColor):
-                        GridController.GridColor = config.GridColor;
+                        GridController.GridColor = config.GridColor.ToUnity();
                         break;
                     case nameof(GridConfiguration.InteriorColor):
-                        GridController.InteriorColor = config.InteriorColor;
+                        GridController.InteriorColor = config.InteriorColor.ToUnity();
                         break;
                     case nameof(GridConfiguration.InteriorVisible):
                         GridController.InteriorVisible = config.InteriorVisible;
@@ -118,7 +118,7 @@ namespace Iviz.App
                         GridController.Interactable = config.Interactable;
                         break;
                     case nameof(GridConfiguration.Offset):
-                        GridController.Offset = config.Offset;
+                        GridController.Offset = config.Offset.ToUnity();
                         break;
                     case nameof(IConfiguration.ModuleType):
                         break;

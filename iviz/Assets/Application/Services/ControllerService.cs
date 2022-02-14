@@ -17,7 +17,9 @@ using Iviz.Msgs.Roscpp;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using LaunchDialog = Iviz.Msgs.IvizCommonMsgs.LaunchDialog;
 using Logger = Iviz.Msgs.Roscpp.Logger;
@@ -125,14 +127,14 @@ namespace Iviz.Controllers
 
             if (string.IsNullOrWhiteSpace(moduleTypeStr))
             {
-                result.message = "EE Invalid module type";
+                result.message = "Invalid module type";
                 return result;
             }
 
             if (!ModuleTypeFromName.TryGetValue(moduleTypeStr, out var moduleType)
                 || moduleType == ModuleType.Invalid)
             {
-                result.message = "EE Invalid module type";
+                result.message = "Invalid module type";
                 return result;
             }
 
@@ -143,7 +145,7 @@ namespace Iviz.Controllers
                 or ModuleType.Joystick
                 or ModuleType.Robot))
             {
-                result.message = $"EE Cannot create module of that type, use {nameof(AddModuleFromTopic)} instead";
+                result.message = $"Cannot create module of that type, use {nameof(AddModuleFromTopic)} instead";
                 return result;
             }
 
@@ -153,7 +155,7 @@ namespace Iviz.Controllers
             {
                 if (moduleData.ModuleType != moduleType)
                 {
-                    result.message = "EE Another module of the same id already exists, " +
+                    result.message = "Another module of the same id already exists, " +
                                      $"but it has type {TryGetName(moduleData.ModuleType)}";
                 }
                 else
@@ -180,14 +182,14 @@ namespace Iviz.Controllers
                 }
                 catch (Exception e)
                 {
-                    result.message = $"EE An exception was raised: {e.Message}";
+                    result.message = $"An exception was raised: {e.Message}";
                 }
                 finally
                 {
                     signal.Release();
                 }
             });
-            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : ("", false, "EE Request timed out!");
+            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : ("", false, "Request timed out!");
         }
 
         static async ValueTask AddModuleFromTopicAsync(AddModuleFromTopic srv)
@@ -206,7 +208,7 @@ namespace Iviz.Controllers
             (string id, bool success, string? message) result = default;
             if (string.IsNullOrWhiteSpace(topic))
             {
-                result.message = "EE Invalid topic name";
+                result.message = "Invalid topic name";
                 return result;
             }
 
@@ -223,7 +225,7 @@ namespace Iviz.Controllers
 
             if (requestedId.Length != 0 && ModuleDatas.Any(module => module.Configuration.Id == requestedId))
             {
-                result.message = "EE There is already another module with that id";
+                result.message = "There is already another module with that id";
                 return result;
             }
 
@@ -238,12 +240,12 @@ namespace Iviz.Controllers
             string? type = GetCachedPublishedType() ?? await GetPublishedTypeFromServer();
             if (type == null)
             {
-                return ("", false, $"EE Failed to find topic '{topic}'");
+                return ("", false, $"Failed to find topic '{topic}'");
             }
 
             if (!Resource.ResourceByRosMessageType.TryGetValue(type, out ModuleType resource))
             {
-                return ("", false, $"EE Type '{type}' is unsupported");
+                return ("", false, $"Type '{type}' is unsupported");
             }
 
             using var signal = new SemaphoreSlim(0);
@@ -258,7 +260,7 @@ namespace Iviz.Controllers
                 }
                 catch (Exception e)
                 {
-                    result.message = $"EE An exception was raised: {e.Message}";
+                    result.message = $"An exception was raised: {e.Message}";
                     RosLogger.Error($"{nameof(ControllerService)}: Failed to create module for topic '{topic}'", e);
                 }
                 finally
@@ -267,7 +269,7 @@ namespace Iviz.Controllers
                 }
             });
 
-            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : ("", false, "EE Request timed out!");
+            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : ("", false, "Request timed out!");
         }
 
         static async ValueTask UpdateModuleAsync(UpdateModule srv)
@@ -284,13 +286,37 @@ namespace Iviz.Controllers
             (bool success, string? message) result = default;
             if (string.IsNullOrWhiteSpace(id))
             {
-                result.message = "EE Empty configuration id!";
+                result.message = "Empty configuration id!";
                 return result;
             }
 
             if (string.IsNullOrWhiteSpace(config))
             {
-                result.message = "EE Empty configuration text!";
+                result.message = "Empty configuration text!";
+                return result;
+            }
+
+            ModuleType moduleType;
+            string[] validatedFields;
+            try
+            {
+                var moduleInfo = JsonConvert.DeserializeObject<GenericModule>(config);
+                if (moduleInfo.ModuleType is not { } type)
+                {
+                    result.success = false;
+                    result.message = "JSON config does not contain a ModuleType field";
+                    return result;
+                }
+
+                moduleType = type;
+
+                validatedFields = fields.Length != 0 ? fields : GetFields(config);
+            }
+            catch (JsonException e)
+            {
+                result.success = false;
+                result.message = $"Error parsing JSON config: {e.Message}";
+                RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryUpdateModuleAsync)}", e);
                 return result;
             }
 
@@ -303,23 +329,31 @@ namespace Iviz.Controllers
                     if (module == null)
                     {
                         result.success = false;
-                        result.message = "EE There is no module with that id";
+                        result.message = $"There is no module with id '{id}'";
                         return;
                     }
 
-                    module.UpdateConfiguration(config, fields);
+                    if (module.ModuleType != moduleType)
+                    {
+                        result.success = false;
+                        result.message = $"Given ModuleType field '{ModuleNames[moduleType]}' does not match " +
+                                         $"existing type '{ModuleNames[module.ModuleType]}'";
+                        return;
+                    }
+
+                    module.UpdateConfiguration(config, validatedFields);
                     result.success = true;
                 }
                 catch (JsonException e)
                 {
                     result.success = false;
-                    result.message = $"EE Error parsing JSON config: {e.Message}";
+                    result.message = $"Error parsing JSON config: {e.Message}";
                     RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryUpdateModuleAsync)}", e);
                 }
                 catch (Exception e)
                 {
                     result.success = false;
-                    result.message = $"EE An exception was raised: {e.Message}";
+                    result.message = $"An exception was raised: {e.Message}";
                     RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryUpdateModuleAsync)}", e);
                 }
                 finally
@@ -327,7 +361,19 @@ namespace Iviz.Controllers
                     signal.Release();
                 }
             });
-            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : (false, "EE Request timed out!");
+            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : (false, "Request timed out!");
+        }
+
+        sealed class GenericModule
+        {
+            [UsedImplicitly] public ModuleType? ModuleType { get; set; }
+        }
+
+        static string[] GetFields(string json)
+        {
+            return JObject.Parse(json)
+                .Select((KeyValuePair<string, JToken?> pair) => pair.Key)
+                .ToArray();
         }
 
         static async ValueTask ResetModuleAsync(ResetModule srv)
@@ -342,7 +388,7 @@ namespace Iviz.Controllers
             (bool success, string? message) result = default;
             if (string.IsNullOrWhiteSpace(id))
             {
-                result.message = "EE Empty configuration id!";
+                result.message = "Empty configuration id!";
                 return result;
             }
 
@@ -355,7 +401,7 @@ namespace Iviz.Controllers
                     if (module == null)
                     {
                         result.success = false;
-                        result.message = "EE There is no module with that id";
+                        result.message = "There is no module with that id";
                         return;
                     }
 
@@ -365,7 +411,7 @@ namespace Iviz.Controllers
                 catch (Exception e)
                 {
                     result.success = false;
-                    result.message = $"EE An exception was raised: {e.Message}";
+                    result.message = $"An exception was raised: {e.Message}";
                     RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryResetModuleAsync)}", e);
                 }
                 finally
@@ -373,7 +419,7 @@ namespace Iviz.Controllers
                     signal.Release();
                 }
             });
-            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : (false, "EE Request timed out!");
+            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : (false, "Request timed out!");
         }
 
         static async ValueTask GetModulesAsync(GetModules srv)
@@ -418,7 +464,8 @@ namespace Iviz.Controllers
 
         static async ValueTask SetFixedFrameAsync(SetFixedFrame srv)
         {
-            (bool success, string? message) = await TrySetFixedFrameAsync(srv.Request.Id).AwaitAndLog(nameof(SetFixedFrameAsync));
+            (bool success, string? message) =
+                await TrySetFixedFrameAsync(srv.Request.Id).AwaitAndLog(nameof(SetFixedFrameAsync));
             srv.Response.Success = success;
             srv.Response.Message = message ?? "";
         }
@@ -715,7 +762,7 @@ namespace Iviz.Controllers
                     return AddRobotAsync(srv);
                 default:
                     srv.Response.Success = false;
-                    srv.Response.Message = "EE Unknown operation";
+                    srv.Response.Message = "Unknown operation";
                     return default;
             }
         }
@@ -726,7 +773,7 @@ namespace Iviz.Controllers
             if (id.Length == 0)
             {
                 srv.Response.Success = false;
-                srv.Response.Message = "EE Id field is empty";
+                srv.Response.Message = "Id field is empty";
                 return;
             }
 
@@ -741,7 +788,7 @@ namespace Iviz.Controllers
             if (moduleData.ModuleType != ModuleType.Robot)
             {
                 srv.Response.Success = false;
-                srv.Response.Message = "EE Another module of the same id already exists, " +
+                srv.Response.Message = "Another module of the same id already exists, " +
                                        $"but it has type {TryGetName(moduleData.ModuleType)}";
                 return;
             }
@@ -757,7 +804,7 @@ namespace Iviz.Controllers
                 catch (Exception e)
                 {
                     srv.Response.Success = false;
-                    srv.Response.Message = $"EE An exception was raised: {e.Message}";
+                    srv.Response.Message = $"An exception was raised: {e.Message}";
                 }
                 finally
                 {
@@ -767,7 +814,7 @@ namespace Iviz.Controllers
             if (!await signal.WaitAsync(DefaultTimeoutInMs))
             {
                 srv.Response.Success = false;
-                srv.Response.Message = "EE Request timed out!";
+                srv.Response.Message = "Request timed out!";
                 return;
             }
 
@@ -788,7 +835,7 @@ namespace Iviz.Controllers
                 if (moduleData != null && moduleData.ModuleType != ModuleType.Robot)
                 {
                     srv.Response.Success = false;
-                    srv.Response.Message = "EE Another module of the same id already exists, " +
+                    srv.Response.Message = "Another module of the same id already exists, " +
                                            $"but it has type {TryGetName(moduleData.ModuleType)}";
                     return;
                 }
@@ -814,7 +861,7 @@ namespace Iviz.Controllers
                 catch (Exception e)
                 {
                     srv.Response.Success = false;
-                    srv.Response.Message = $"EE An exception was raised: {e.Message}";
+                    srv.Response.Message = $"An exception was raised: {e.Message}";
                     RosLogger.Error($"{nameof(ControllerService)}: Failed to create robot", e);
                 }
                 finally
@@ -825,7 +872,7 @@ namespace Iviz.Controllers
             if (!await signal.WaitAsync(DefaultTimeoutInMs))
             {
                 srv.Response.Success = false;
-                srv.Response.Message = "EE Request timed out!";
+                srv.Response.Message = "Request timed out!";
                 return;
             }
 
@@ -917,7 +964,7 @@ namespace Iviz.Controllers
                 catch (Exception e)
                 {
                     srv.Response.Success = false;
-                    srv.Response.Message = $"EE An exception was raised: {e.Message}";
+                    srv.Response.Message = $"An exception was raised: {e.Message}";
                     TryRelease(signal);
                 }
             });

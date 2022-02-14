@@ -6,10 +6,10 @@ using Iviz.Core;
 using Iviz.Tools;
 using UnityEngine;
 
-namespace Iviz.Displays.ARDialogs
+namespace Iviz.Displays.XR
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class RotationDisc : MonoBehaviour, 
+    public sealed class RotationDisc : MonoBehaviour,
         IWidget, IWidgetWithColor, IWidgetWithScale, IWidgetCanBeRotated, IRecyclable
     {
         [SerializeField] CirclePlaneDraggable? planeCircle;
@@ -21,8 +21,13 @@ namespace Iviz.Displays.ARDialogs
         LineDisplay? lines;
 
         const int RingElements = 64;
+
         readonly LineWithColor[] lineBuffer = new LineWithColor[RingElements];
+
         float currentAngle;
+        Color color = new(0, 0.6f, 1f);
+        Color secondaryColor = Color.white;
+        CancellationTokenSource? tokenSource;
 
         MeshMarkerDisplay Glow => glow.AssertNotNull(nameof(glow));
         MeshMarkerDisplay Outer => outer.AssertNotNull(nameof(outer));
@@ -33,10 +38,6 @@ namespace Iviz.Displays.ARDialogs
         XRScreenDraggable Draggable => Settings.IsXR
             ? fixedCircle.AssertNotNull(nameof(fixedCircle))
             : planeCircle.AssertNotNull(nameof(planeCircle));
-
-        Color color = new(0, 0.6f, 1f);
-        Color secondaryColor = Color.white;
-        CancellationTokenSource? tokenSource;
 
         public Color Color
         {
@@ -60,6 +61,11 @@ namespace Iviz.Displays.ARDialogs
                 Outer.Color = value;
                 Lines.Tint = value;
             }
+        }
+
+        public float Scale
+        {
+            set { } // unused
         }
 
         public float SecondaryScale

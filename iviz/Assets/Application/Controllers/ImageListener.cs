@@ -81,7 +81,7 @@ namespace Iviz.Controllers
                 EnableBillboard = value.EnableBillboard;
                 BillboardSize = value.BillboardSize;
                 BillboardFollowsCamera = value.BillboardFollowCamera;
-                BillboardOffset = value.BillboardOffset;
+                BillboardOffset = value.BillboardOffset.ToUnity();
                 UseIntrinsicScale = value.UseIntrinsicScale;
             }
         }
@@ -188,10 +188,10 @@ namespace Iviz.Controllers
 
         public Vector3 BillboardOffset
         {
-            get => config.BillboardOffset;
+            get => config.BillboardOffset.ToUnity();
             set
             {
-                config.BillboardOffset = value;
+                config.BillboardOffset = value.ToRos();
                 billboard.Offset = value.Ros2Unity();
             }
         }

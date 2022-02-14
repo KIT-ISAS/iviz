@@ -65,7 +65,7 @@ namespace Iviz.App
             SetupPanel();
         }
 
-        public abstract void UpdateConfiguration(string configAsJson, IEnumerable<string> fields);
+        public abstract void UpdateConfiguration(string configAsJson, string[] fields);
 
         public abstract void AddToState(StateConfiguration config);
 

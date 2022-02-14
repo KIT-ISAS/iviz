@@ -46,7 +46,7 @@ namespace Iviz.Controllers
                 FlipMinMax = value.FlipMinMax;
                 Smoothness = value.Smoothness;
                 Metallic = value.Metallic;
-                Tint = value.Tint;
+                Tint = value.Tint.ToUnity();
             }
         }
 
@@ -100,10 +100,10 @@ namespace Iviz.Controllers
 
         public Color Tint
         {
-            get => config.Tint;
+            get => config.Tint.ToUnity();
             set
             {
-                config.Tint = value;
+                config.Tint = value.ToRos();
                 resource.Tint = value;
             }
         }

@@ -25,12 +25,12 @@ namespace Iviz.Controllers
             {
                 Orientation = value.Orientation;
                 Visible = value.Visible;
-                GridColor = value.GridColor;
-                InteriorColor = value.InteriorColor;
+                GridColor = value.GridColor.ToUnity();
+                InteriorColor = value.InteriorColor.ToUnity();
                 InteriorVisible = value.InteriorVisible;
                 FollowCamera = value.FollowCamera;
                 HideInARMode = value.HideInARMode;
-                Offset = value.Offset;
+                Offset = value.Offset.ToUnity();
                 Interactable = value.Interactable;
             }
         }
@@ -82,10 +82,10 @@ namespace Iviz.Controllers
 
         public Color GridColor
         {
-            get => config.GridColor;
+            get => config.GridColor.ToUnity();
             set
             {
-                config.GridColor = value;
+                config.GridColor = value.ToRos();
                 grid.GridColor = value;
                 UpdateMesh();
             }
@@ -93,10 +93,10 @@ namespace Iviz.Controllers
 
         public Color InteriorColor
         {
-            get => config.InteriorColor;
+            get => config.InteriorColor.ToUnity();
             set
             {
-                config.InteriorColor = value;
+                config.InteriorColor = value.ToRos();
                 grid.InteriorColor = value;
                 UpdateMesh();
             }
@@ -132,13 +132,13 @@ namespace Iviz.Controllers
                 Visible = Visible; // update
             }
         }
-
-        public Vector3 Offset
+        
+        public Vector3 Offset // in ROS coordinates
         {
-            get => config.Offset;
+            get => config.Offset.ToUnity();
             set
             {
-                config.Offset = value;
+                config.Offset = value.ToRos();
                 node.Transform.localPosition = value.Ros2Unity();
                 UpdateMesh();
             }

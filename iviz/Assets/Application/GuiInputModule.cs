@@ -309,10 +309,10 @@ namespace Iviz.App
 
         public Color BackgroundColor
         {
-            get => config.BackgroundColor;
+            get => config.BackgroundColor.ToUnity();
             set
             {
-                config.BackgroundColor = value.WithAlpha(1);
+                config.BackgroundColor = value.WithAlpha(1).ToRos();
 
                 Color colorToUse = Settings.IsHololens ? Color.black : value;
                 MainCamera.backgroundColor = colorToUse.WithAlpha(0);
@@ -341,7 +341,7 @@ namespace Iviz.App
             get => config;
             set
             {
-                BackgroundColor = value.BackgroundColor;
+                BackgroundColor = value.BackgroundColor.ToUnity();
                 SunDirection = value.SunDirection;
                 NetworkFrameSkip = value.NetworkFrameSkip;
                 QualityInAr = value.QualityInAr;

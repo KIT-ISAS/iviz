@@ -86,7 +86,20 @@ namespace Iviz.Core
             return q;
         }
 
-        public static Msgs.GeometryMsgs.Vector3 ToRosVector3(this in Vector3 p) => new(p.x, p.y, p.z);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static UnityEngine.Quaternion ToUnity(this in Quaternion p)
+        {
+            UnityEngine.Quaternion q;
+            q.x = (float)p.X;
+            q.y = (float)p.Y;
+            q.z = (float)p.Z;
+            q.w = (float)p.W;
+            return q;
+        }
+
+        public static Msgs.GeometryMsgs.Vector3 ToRos(this in Vector3 p) => new(p.x, p.y, p.z);
+
+        public static Quaternion ToRos(this in UnityEngine.Quaternion p) => new(p.x, p.y, p.z, p.w);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector3 Ros2Unity(this in Msgs.GeometryMsgs.Vector3 p)
@@ -198,7 +211,7 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color ToUnityColor(this in ColorRGBA c)
+        public static Color ToUnity(this in ColorRGBA c)
         {
             Color d;
             d.r = c.R;

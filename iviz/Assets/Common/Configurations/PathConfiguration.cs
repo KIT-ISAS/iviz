@@ -1,7 +1,6 @@
 using System;
 using System.Runtime.Serialization;
-using Iviz.Core;
-using UnityEngine;
+using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.Common.Configurations
 {
@@ -17,6 +16,6 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool FramesVisible { get; set; } = false;
         [DataMember] public float FrameSize { get; set; } = 0.125f;
         [DataMember] public bool LinesVisible { get; set; } = true;
-        [DataMember] public SerializableColor LineColor { get; set; } = Color.yellow;
+        [DataMember] public ColorRGBA LineColor { get; set; } = ColorRGBA.Yellow;
     }
 }

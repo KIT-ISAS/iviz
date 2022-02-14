@@ -1,6 +1,5 @@
 using System.Runtime.Serialization;
-using Iviz.Core;
-using UnityEngine;
+using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.Common.Configurations
 {
@@ -19,6 +18,6 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool FlipMinMax { get; set; }
         [DataMember] public float Smoothness { get; set; } = 0.5f;
         [DataMember] public float Metallic { get; set; } = 0.5f;
-        [DataMember] public SerializableColor Tint { get; set; } = Color.white;
+        [DataMember] public ColorRGBA Tint { get; set; } = ColorRGBA.White;
     }
 }

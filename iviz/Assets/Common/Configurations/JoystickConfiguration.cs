@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.Serialization;
-using UnityEngine;
+using Iviz.Msgs.GeometryMsgs;
 
 namespace Iviz.Common.Configurations
 {
@@ -20,7 +20,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public string TwistTopic { get; set; } = "";
         [DataMember] public bool PublishTwist { get; set; } = true;
         [DataMember] public bool UseTwistStamped { get; set; }
-        [DataMember] public SerializableVector3 MaxSpeed { get; set; } = Vector3.one * 0.25f;
+        [DataMember] public Vector3 MaxSpeed { get; set; } = Vector3.One * 0.25f;
         [DataMember] public string AttachToFrame { get; set; } = "";
         [DataMember] public bool XIsFront { get; set; } = true;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();

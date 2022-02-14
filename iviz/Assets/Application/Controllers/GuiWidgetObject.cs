@@ -4,7 +4,6 @@ using System;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Displays.ARDialogs;
 using Iviz.Displays.XR;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
@@ -18,7 +17,7 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         readonly ResourceKey<GameObject> resourceKey;
         readonly IDisplay display;
-        float scale = 1; 
+        float scale = 1;
 
         public string ParentId => node.Parent?.Id ?? TfModule.DefaultFrame.Id;
         public string Id { get; }
@@ -49,7 +48,7 @@ namespace Iviz.Controllers
             Id = msg.Id;
             ExpirationTime = DateTime.MaxValue;
             Type = (WidgetType)msg.Type;
-            
+
             var widget = ResourcePool.Rent(resourceKey, node.Transform).GetComponent<IWidget>();
 
             display = widget ?? throw new MissingAssetFieldException("Gui object does not have a widget!");
@@ -63,7 +62,7 @@ namespace Iviz.Controllers
             {
                 canBeRotated.Moved += angle => parent.OnWidgetRotated(this, angle);
             }
-            
+
             UpdateWidget(msg);
         }
 
@@ -85,18 +84,24 @@ namespace Iviz.Controllers
             {
                 if (msg.Color.A != 0)
                 {
-                    withColor.Color = msg.Color.ToUnityColor();
+                    withColor.Color = msg.Color.ToUnity();
                 }
 
                 if (msg.SecondaryColor.A != 0)
                 {
-                    withColor.SecondaryColor = msg.SecondaryColor.ToUnityColor();
+                    withColor.SecondaryColor = msg.SecondaryColor.ToUnity();
                 }
             }
 
-            if (msg.SecondaryScale != 0 && widget is IWidgetWithScale withScale)
+            if ((msg.Scale != 0 || msg.SecondaryScale != 0) && widget is IWidgetWithScale withScale)
             {
+                withScale.Scale = scale;
                 withScale.SecondaryScale = (float)msg.SecondaryScale;
+            }
+
+            if (msg.BoundingBoxes.Length != 0 && widget is IWidgetWithBoundaries withBoundaries)
+            {
+                withBoundaries.BoundingBoxes = msg.BoundingBoxes;
             }
 
             var transform = node.Transform;
@@ -125,7 +130,7 @@ namespace Iviz.Controllers
 
             if (msg.BackgroundColor.A != 0)
             {
-                dialog.Color = msg.BackgroundColor.ToUnityColor();
+                dialog.Color = msg.BackgroundColor.ToUnity();
             }
 
             if (dialog is IDialogWithTitle withTitle)

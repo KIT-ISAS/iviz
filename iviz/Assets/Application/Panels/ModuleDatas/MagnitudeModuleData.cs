@@ -28,7 +28,8 @@ namespace Iviz.App
             base(constructor.TryGetConfigurationTopic() ?? constructor.Topic)
         {
             panel = ModulePanelManager.GetPanelByResourceType<MagnitudeModulePanel>(ModuleType.Magnitude);
-            listener = new MagnitudeListener((MagnitudeConfiguration?)constructor.Configuration, Topic, constructor.Type);
+            listener = new MagnitudeListener((MagnitudeConfiguration?)constructor.Configuration, Topic,
+                constructor.Type);
             UpdateModuleButton();
         }
 
@@ -39,7 +40,7 @@ namespace Iviz.App
             panel.ShowAxis.Value = listener.FrameVisible;
             panel.ShowAngle.Value = listener.AngleVisible;
             panel.ShowVector.Value = listener.VectorVisible;
-            panel.VectorColor.Value = listener.Color;
+            panel.VectorColor.Value = listener.VectorColor;
             panel.Magnitude.Owner = listener;
             //panel.TrailTime.Value = listener.TrailTime;
             panel.Scale.Value = listener.Scale;
@@ -48,14 +49,14 @@ namespace Iviz.App
             //panel.PreferUdp.Value = listener.PreferUdp;
 
 
-            panel.ShowTrail.ValueChanged += f => { listener.TrailVisible = f; };
-            panel.ShowAngle.ValueChanged += f => { listener.AngleVisible = f; };
-            panel.VectorColor.ValueChanged += f => { listener.Color = f; };
+            panel.ShowTrail.ValueChanged += f => listener.TrailVisible = f;
+            panel.ShowAngle.ValueChanged += f => listener.AngleVisible = f;
+            panel.VectorColor.ValueChanged += f => listener.VectorColor = f;
             //panel.TrailTime.ValueChanged += f => { listener.TrailTime = f; };
-            panel.Scale.ValueChanged += f => { listener.Scale = f; };
-            panel.ShowAxis.ValueChanged += f => { listener.FrameVisible = f; };
-            panel.ShowVector.ValueChanged += f => { listener.VectorVisible = f; };
-            panel.VectorScale.ValueChanged += f => { listener.VectorScale = f; };
+            panel.Scale.ValueChanged += f => listener.Scale = f;
+            panel.ShowAxis.ValueChanged += f => listener.FrameVisible = f;
+            panel.ShowVector.ValueChanged += f => listener.VectorVisible = f;
+            panel.VectorScale.ValueChanged += f => listener.VectorScale = f;
             //panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
 
             switch (listener.Config.Type)
@@ -77,7 +78,7 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             var config = JsonConvert.DeserializeObject<MagnitudeConfiguration>(configAsJson);
 
@@ -85,6 +86,8 @@ namespace Iviz.App
             {
                 switch (field)
                 {
+                    case nameof(IConfiguration.ModuleType):
+                        break;
                     case nameof(MagnitudeConfiguration.Visible):
                         listener.Visible = config.Visible;
                         break;
@@ -106,8 +109,11 @@ namespace Iviz.App
                     case nameof(MagnitudeConfiguration.VectorScale):
                         listener.VectorScale = config.VectorScale;
                         break;
-                    case nameof(MagnitudeConfiguration.Color):
-                        listener.Color = config.Color;
+                    case nameof(MagnitudeConfiguration.VectorColor):
+                        listener.VectorColor = config.VectorColor.ToUnity();
+                        break;
+                    case nameof(MagnitudeConfiguration.AngleColor):
+                        listener.AngleColor = config.AngleColor.ToUnity();
                         break;
                     case nameof(MagnitudeConfiguration.TrailTime):
                         listener.TrailTime = config.TrailTime;

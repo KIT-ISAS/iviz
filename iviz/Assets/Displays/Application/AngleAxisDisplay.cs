@@ -114,7 +114,7 @@ namespace Iviz.Displays
                 : Vector3.forward;
 
             var dirY = notAxis.Cross(axis).Normalized() * scale;
-            var dirX = axis.Cross(dirY) * scale;
+            var dirX = axis.Cross(dirY);
 
             int n = (int)(Math.Abs(angle) / (2 * Mathf.PI) * 32 + 1);
 
@@ -123,11 +123,11 @@ namespace Iviz.Displays
             ref float4 v1 = ref v.c1;
 
             float colorAsFloat = UnityUtils.AsFloat(color);
-
             v0.w = colorAsFloat;
-            (v1.x, v1.y, v1.z) = 1.2f * dirX;
             v1.w = colorAsFloat;
 
+            (v1.x, v1.y, v1.z) = 1.2f * dirX;
+            
             lines.Add(v);
 
             const float scaleFromAngle = 0.02f;
@@ -141,10 +141,15 @@ namespace Iviz.Displays
                 float ay = Mathf.Sin(a) * segmentScale;
                 (v1.x, v1.y, v1.z) = ax * dirX + ay * dirY;
                 lines.Add(v);
-                v0 = v1;
+
+                v0.x = v1.x;
+                v0.y = v1.y;
+                v0.z = v1.z;
             }
 
-            (v0.x, v0.y, v0.z) = (0, 0, 0);
+            v0.x = 0;
+            v0.y = 0;
+            v0.z = 0;
             v1.x *= 1.2f;
             v1.y *= 1.2f;
             v1.z *= 1.2f;

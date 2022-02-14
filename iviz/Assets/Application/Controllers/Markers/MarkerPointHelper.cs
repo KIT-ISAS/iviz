@@ -32,7 +32,7 @@ namespace Iviz.Controllers.Markers
         {
             points = msg.Points;
             colors = msg.Colors;
-            color32 = msg.Color.ToUnityColor();
+            color32 = msg.Color.ToUnity();
 
             if (msg.Colors.Length == 0)
             {
@@ -92,7 +92,7 @@ namespace Iviz.Controllers.Markers
                     continue;
                 }
                 
-                float w = UnityUtils.AsFloat(color * colors[i].ToUnityColor());
+                float w = UnityUtils.AsFloat(color * colors[i].ToUnity());
                 points[i].Ros2Unity(w, out var f);
                 pointBuffer.AddUnsafe(f);
             }

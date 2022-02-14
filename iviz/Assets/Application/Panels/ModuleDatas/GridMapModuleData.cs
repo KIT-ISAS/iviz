@@ -62,8 +62,8 @@ namespace Iviz.App
             panel.Metallic.Value = listener.Metallic;
             panel.Smoothness.Value = listener.Smoothness;
             
-            panel.IntensityChannel.ValueChanged += (_, s) => { listener.IntensityChannel = s; };
-            panel.Colormap.ValueChanged += (i, _) => { listener.Colormap = (ColormapId) i; };
+            panel.IntensityChannel.ValueChanged += (_, s) => listener.IntensityChannel = s;
+            panel.Colormap.ValueChanged += (i, _) => listener.Colormap = (ColormapId) i;
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
             panel.ForceMinMax.ValueChanged += f =>
@@ -97,7 +97,7 @@ namespace Iviz.App
             panel.Description.Text = listener.Description;
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             var config = JsonConvert.DeserializeObject<GridMapConfiguration>(configAsJson);
 

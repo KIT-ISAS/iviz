@@ -99,7 +99,7 @@ namespace Iviz.App
             }
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             var config = JsonConvert.DeserializeObject<MarkerConfiguration>(configAsJson);
 
@@ -107,6 +107,8 @@ namespace Iviz.App
             {
                 switch (field)
                 {
+                    case nameof(IConfiguration.ModuleType):
+                        break;
                     case nameof(MarkerConfiguration.Visible):
                         listener.Visible = config.Visible;
                         break;
@@ -114,7 +116,7 @@ namespace Iviz.App
                         listener.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
                         break;
                     case nameof(MarkerConfiguration.Tint):
-                        listener.Tint = config.Tint.ToUnityColor();
+                        listener.Tint = config.Tint.ToUnity();
                         break;
                     case nameof(MarkerConfiguration.TriangleListFlipWinding):
                         listener.TriangleListFlipWinding = config.TriangleListFlipWinding;
@@ -130,8 +132,6 @@ namespace Iviz.App
                         break;
                     case nameof(MarkerConfiguration.VisibleMask):
                         listener.VisibleMask = config.VisibleMask;
-                        break;
-                    case nameof(MarkerConfiguration.ModuleType):
                         break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");

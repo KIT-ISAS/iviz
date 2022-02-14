@@ -9,6 +9,11 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
+    public interface ITrailDataSource
+    {
+        public Vector3 TrailPosition { get; }
+    }
+
     public sealed class TrailDisplay : DisplayWrapper, IRecyclable
     {
         const int MeasurementsPerSecond = 32;
@@ -16,16 +21,15 @@ namespace Iviz.Displays
         readonly Queue<(Vector3 A, Vector3 B)> measurements = new(5 * MeasurementsPerSecond);
         readonly Func<NativeList<float4x2>, bool?> lineSetterDelegate;
 
+        ITrailDataSource? dataSource;
         int timeWindowInMs = 5000;
-        float lastTick;
         int maxMeasurements = 160;
         Color color = UnityEngine.Color.red;
         Vector3? lastMeasurement;
         LineDisplay? resource;
-        
+
         LineDisplay Resource => resource != null ? resource : (resource = CreateLineResource(Transform));
         protected override IDisplay Display => Resource;
-        public Func<Vector3>? DataSource { get; set; }
 
         static LineDisplay CreateLineResource(Transform transform)
         {
@@ -34,7 +38,28 @@ namespace Iviz.Displays
             resource.ElementScale = 0.01f;
             return resource;
         }
-        
+
+        public ITrailDataSource? DataSource
+        {
+            set
+            {
+                if (dataSource == null && value != null)
+                {
+                    GameThread.EveryTenthOfASecond += UpdateMagnitude;
+                }
+                else if (dataSource != null && value == null)
+                {
+                    GameThread.EveryTenthOfASecond -= UpdateMagnitude;
+                }
+
+                dataSource = value;
+                if (value != null)
+                {
+                    UpdateMagnitude();
+                }
+            }
+        }
+
         public TrailDisplay()
         {
             lineSetterDelegate = LineSetter;
@@ -83,24 +108,17 @@ namespace Iviz.Displays
         {
             measurements.Clear();
             lastMeasurement = null;
+            Resource.Reset();
         }
 
-        void Update()
+        void UpdateMagnitude()
         {
-            if (DataSource == null)
+            if (dataSource == null)
             {
                 return;
             }
 
-            float tick = Time.time;
-            if (tick - lastTick < 0.1f)
-            {
-                return;
-            }
-
-            lastTick = tick;
-
-            var newMeasurement = DataSource();
+            var newMeasurement = dataSource.TrailPosition;
             if (lastMeasurement == null)
             {
                 lastMeasurement = newMeasurement;
@@ -114,23 +132,24 @@ namespace Iviz.Displays
             }
 
             lastMeasurement = newMeasurement;
-
             Resource.SetDirect(lineSetterDelegate, measurements.Count);
         }
 
         bool? LineSetter(NativeList<float4x2> lineBuffer)
         {
             int i = 1;
-            Color32 colorA = Color.WithAlpha(0);
+            var colorA = Color.WithAlpha(0);
             float scale = 255f / measurements.Count;
 
             foreach (var (a, b) in measurements)
             {
-                Color32 colorB = colorA.WithAlpha((byte) (i * scale));
-                LineWithColor line = new(a, colorA, b, colorB);
+                var colorB = colorA;
+                colorB.a = (byte)(i * scale);
+                
+                var line = new LineWithColor(a, colorA, b, colorB);
                 if (LineDisplay.IsElementValid(line.f))
                 {
-                    lineBuffer.Add(line.f);
+                    lineBuffer.AddUnsafe(line.f);
                 }
 
                 colorA = colorB;
@@ -139,15 +158,16 @@ namespace Iviz.Displays
 
             return true;
         }
-        
+
         public void SplitForRecycle()
         {
+            DataSource = null;
             resource.ReturnToPool();
-        }        
+        }
 
         public override void Suspend()
         {
-            measurements.Clear();
+            Reset();
             DataSource = null;
         }
     }

@@ -125,7 +125,7 @@ namespace Iviz.App
             config.Images.Add(listener.Config);
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             var config = JsonConvert.DeserializeObject<ImageConfiguration>(configAsJson);
 

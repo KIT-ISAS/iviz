@@ -81,7 +81,7 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             var config = JsonConvert.DeserializeObject<PathConfiguration>(configAsJson);
 
@@ -105,7 +105,7 @@ namespace Iviz.App
                         listener.LinesVisible = config.LinesVisible;
                         break;
                     case nameof(PathConfiguration.LineColor):
-                        listener.LineColor = config.LineColor;
+                        listener.LineColor = config.LineColor.ToUnity();
                         break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");

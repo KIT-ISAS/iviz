@@ -280,7 +280,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            meshTriangles.Color = msg.Color.Sanitize().ToUnityColor();
+            meshTriangles.Color = msg.Color.Sanitize().ToUnity();
             meshTriangles.FlipWinding = TriangleListFlipWinding;
 
             var srcPoints = msg.Points;
@@ -384,7 +384,7 @@ namespace Iviz.Controllers
         {
             var textResource = ValidateResource<TextMarkerDisplay>();
             textResource.Text = msg.Text;
-            textResource.Color = msg.Color.Sanitize().ToUnityColor();
+            textResource.Color = msg.Color.Sanitize().ToUnity();
             textResource.BillboardEnabled = true;
             textResource.ElementSize = (float)msg.Scale.Z;
         }
@@ -393,7 +393,7 @@ namespace Iviz.Controllers
         {
             if (resource is ISupportsColor hasColor)
             {
-                hasColor.Color = msg.Color.Sanitize().ToUnityColor();
+                hasColor.Color = msg.Color.Sanitize().ToUnity();
             }
 
             var newScale = msg.Scale.Ros2Unity().Abs();
@@ -403,7 +403,7 @@ namespace Iviz.Controllers
         void CreateArrow(Marker msg)
         {
             var arrowMarker = ValidateResource<ArrowDisplay>();
-            arrowMarker.Color = msg.Color.Sanitize().ToUnityColor();
+            arrowMarker.Color = msg.Color.Sanitize().ToUnity();
             switch (msg.Points.Length)
             {
                 case 0:

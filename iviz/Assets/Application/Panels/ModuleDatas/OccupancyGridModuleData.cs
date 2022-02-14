@@ -81,7 +81,7 @@ namespace Iviz.App
             panel.Description.Text = listener.Description;
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             var config = JsonConvert.DeserializeObject<OccupancyGridConfiguration>(configAsJson);
 
@@ -89,6 +89,8 @@ namespace Iviz.App
             {
                 switch (field)
                 {
+                    case nameof(IConfiguration.ModuleType):
+                        break;
                     case nameof(OccupancyGridConfiguration.Visible):
                         listener.Visible = config.Visible;
                         break;
@@ -105,9 +107,8 @@ namespace Iviz.App
                         listener.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
                         break;
                     case nameof(OccupancyGridConfiguration.Tint):
-                        listener.Tint = config.Tint;
+                        listener.Tint = config.Tint.ToUnity();
                         break;
-
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;

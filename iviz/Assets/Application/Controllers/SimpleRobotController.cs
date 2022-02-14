@@ -58,7 +58,7 @@ namespace Iviz.Controllers
                 FrameSuffix = value.FrameSuffix;
                 Visible = value.Visible;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
-                Tint = value.Tint.ToUnityColor();
+                Tint = value.Tint.ToUnity();
                 Smoothness = value.Smoothness;
                 Metallic = value.Metallic;
                 KeepMeshMaterials = value.KeepMeshMaterials;
@@ -154,7 +154,7 @@ namespace Iviz.Controllers
 
         public Color Tint
         {
-            get => config.Tint.ToUnityColor();
+            get => config.Tint.ToUnity();
             set
             {
                 config.Tint = value.ToRos();

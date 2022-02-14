@@ -36,7 +36,7 @@ namespace Iviz.Controllers
                 LineWidth = value.LineWidth;
                 FramesVisible = value.FramesVisible;
                 FrameSize = value.FrameSize;
-                LineColor = value.LineColor;
+                LineColor = value.LineColor.ToUnity();
                 LinesVisible = value.LinesVisible;
             }
         }
@@ -88,10 +88,10 @@ namespace Iviz.Controllers
 
         public Color LineColor
         {
-            get => config.LineColor;
+            get => config.LineColor.ToUnity();
             set
             {
-                config.LineColor = value;
+                config.LineColor = value.ToRos();
                 if (LinesVisible)
                 {
                     ProcessPoses();

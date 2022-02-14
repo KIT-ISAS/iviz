@@ -1,15 +1,16 @@
+#nullable enable
+
 using System.Collections.Generic;
 using Iviz.Core;
-using Iviz.Displays;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace Iviz.App.ARDialogs
+namespace Iviz.Displays.XR
 {
     public sealed class RingDisplay : MeshMarkerDisplay
     {
-        static Mesh baseMesh;
-        [NotNull] static Mesh BaseMesh => baseMesh != null ? baseMesh : (baseMesh = CreateMesh(0.85f, 1.0f));
+        static Mesh? baseMesh;
+        static Mesh BaseMesh => baseMesh != null ? baseMesh : (baseMesh = CreateMesh(0.85f, 1.0f));
 
         protected override void Awake()
         {
@@ -17,7 +18,6 @@ namespace Iviz.App.ARDialogs
             Mesh = BaseMesh;
         }
 
-        [NotNull]
         static Mesh CreateMesh(float r0, float r1)
         {
             var mesh = new Mesh();

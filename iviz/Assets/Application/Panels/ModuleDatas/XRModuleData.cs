@@ -51,7 +51,7 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             ResetPanel();
         }

@@ -41,7 +41,7 @@ namespace Iviz.Controllers
                 PublishJoy = value.PublishJoy;
                 TwistTopic = value.TwistTopic;
                 PublishTwist = value.PublishTwist;
-                MaxSpeed = value.MaxSpeed;
+                MaxSpeed = value.MaxSpeed.ToUnity();
                 AttachToFrame = value.AttachToFrame;
                 XIsFront = value.XIsFront;
                 Mode = value.Mode;
@@ -138,8 +138,8 @@ namespace Iviz.Controllers
 
         public Vector3 MaxSpeed
         {
-            get => config.MaxSpeed;
-            set => config.MaxSpeed = value.IsInvalid() ? Vector3.zero : value;
+            get => config.MaxSpeed.ToUnity();
+            set => config.MaxSpeed = value.IsInvalid() ? default : value.ToRos();
         }
 
         public JoystickMode Mode

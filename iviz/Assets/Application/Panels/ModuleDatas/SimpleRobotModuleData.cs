@@ -205,13 +205,13 @@ namespace Iviz.App
             UpdateModuleButton();
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             var config = JsonConvert.DeserializeObject<RobotConfiguration>(configAsJson);
             UpdateConfiguration(config, fields);
         }
 
-        public void UpdateConfiguration(RobotConfiguration config, IEnumerable<string> fields)
+        public void UpdateConfiguration(RobotConfiguration config, string[] fields)
         {
             bool hasRobotName = false;
             bool hasSourceParameter = false;
@@ -245,7 +245,7 @@ namespace Iviz.App
                         RobotController.RenderAsOcclusionOnly = config.RenderAsOcclusionOnly;
                         break;
                     case nameof(RobotConfiguration.Tint):
-                        RobotController.Tint = config.Tint.ToUnityColor();
+                        RobotController.Tint = config.Tint.ToUnity();
                         break;
                     case nameof(RobotConfiguration.Metallic):
                         RobotController.Metallic = config.Metallic;

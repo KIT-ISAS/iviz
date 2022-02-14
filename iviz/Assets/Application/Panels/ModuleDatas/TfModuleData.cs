@@ -90,7 +90,7 @@ namespace Iviz.App
             panel.Publisher.UpdateText();
         }
 
-        public override void UpdateConfiguration(string configAsJson, IEnumerable<string> fields)
+        public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             var config = JsonConvert.DeserializeObject<TfConfiguration>(configAsJson);
 
@@ -98,6 +98,8 @@ namespace Iviz.App
             {
                 switch (field)
                 {
+                    case nameof(IConfiguration.ModuleType):
+                        break;
                     case nameof(TfConfiguration.FrameSize):
                         listener.FrameSize = config.FrameSize;
                         break;
@@ -118,8 +120,6 @@ namespace Iviz.App
                         break;
                     case nameof(TfConfiguration.FlipZ):
                         listener.FlipZ = config.FlipZ;
-                        break;
-                    case nameof(IConfiguration.ModuleType):
                         break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");

@@ -111,8 +111,8 @@ namespace Iviz.Controllers
 
         protected Vector3 WorldPosition
         {
-            get => config.WorldOffset;
-            private set => config.WorldOffset = value;
+            get => config.WorldOffset.ToUnity();
+            private set => config.WorldOffset = value.ToRos();
         }
 
         protected float WorldAngle

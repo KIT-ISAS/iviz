@@ -43,7 +43,7 @@ namespace Iviz.Controllers
                 config.Type = value.Type;
                 config.Id = value.Id;
                 RenderAsOcclusionOnly = value.RenderAsOcclusionOnly;
-                Tint = value.Tint.ToUnityColor();
+                Tint = value.Tint.ToUnity();
                 Visible = value.Visible;
                 TriangleListFlipWinding = value.TriangleListFlipWinding;
                 PreferUdp = value.PreferUdp;
@@ -75,7 +75,7 @@ namespace Iviz.Controllers
 
         public Color Tint
         {
-            get => config.Tint.ToUnityColor();
+            get => config.Tint.ToUnity();
             set
             {
                 config.Tint = value.ToRos();

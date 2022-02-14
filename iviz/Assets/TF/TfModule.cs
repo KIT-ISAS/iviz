@@ -42,7 +42,7 @@ namespace Iviz.Controllers.TF
 
         TfFrame fixedFrame;
         Pose cachedFixedPose = Pose.identity;
-        
+
         bool keepAllFrames;
         bool visible;
         float frameSize;
@@ -58,7 +58,12 @@ namespace Iviz.Controllers.TF
 
         public static TfFrame RootFrame => Instance.rootFrame;
         public static TfFrame OriginFrame => Instance.originFrame;
-        public static Transform UnityFrameTransform => Instance.unityFrame.transform;
+
+        public static Transform UnityFrameTransform =>
+            instance != null
+                ? instance.unityFrame.transform
+                : GameObject.Find("TF").transform;
+
         public static TfFrame ListenersFrame => OriginFrame;
         public static TfFrame DefaultFrame => OriginFrame;
         public static TfFrame FixedFrame => Instance.fixedFrame;
@@ -174,7 +179,7 @@ namespace Iviz.Controllers.TF
                 {
                     return;
                 }
-                
+
                 FixedFrame.RemoveListener(fixedFrameListenerNode);
 
                 if (string.IsNullOrEmpty(value))
@@ -191,7 +196,7 @@ namespace Iviz.Controllers.TF
         }
 
         public int NumFrames => frames.Count;
-        
+
         public TfModule(Func<string, TfFrame> frameFactory)
         {
             instance = this;

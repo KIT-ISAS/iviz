@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.Serialization;
-using Iviz.Core;
+using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.Common.Configurations
 {
@@ -12,14 +12,15 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";
-        [DataMember] public bool TrailVisible { get; set; } = false;
+        [DataMember] public bool TrailVisible { get; set; }
         [DataMember] public bool AngleVisible { get; set; } = true;
         [DataMember] public bool FrameVisible { get; set; } = true;
         [DataMember] public float Scale { get; set; } = 1.0f;
         [DataMember] public bool PreferUdp { get; set; } = true;
         [DataMember] public bool VectorVisible { get; set; } = true;
         [DataMember] public float VectorScale { get; set; } = 1.0f;
-        [DataMember] public SerializableColor Color { get; set; } = UnityEngine.Color.red;
+        [DataMember] public ColorRGBA VectorColor { get; set; } = ColorRGBA.Red;
+        [DataMember] public ColorRGBA AngleColor { get; set; } = ColorRGBA.Yellow;
         [DataMember] public float TrailTime { get; set; } = 2.0f;
     }
 }
