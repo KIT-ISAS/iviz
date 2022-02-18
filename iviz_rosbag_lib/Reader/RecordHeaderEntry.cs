@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using Iviz.Msgs;
 using Iviz.Tools;
@@ -16,26 +18,46 @@ namespace Iviz.Rosbag.Reader
         readonly long nextStart;
         readonly long end;
 
+        /*
         public string FieldName
         {
             get
             {
-                using var name = new Rent<byte>((int) (valueStart - nameStart - 1));
+                using var name = new Rent<byte>((int)(valueStart - nameStart - 1));
                 reader.Seek(nameStart, SeekOrigin.Begin);
                 reader.Read(name.Array, 0, name.Length);
                 return Encoding.ASCII.GetString(name.Array, 0, name.Length);
             }
         }
+        */
 
+        /*
         Rent<byte> Value
         {
             get
             {
-                var value = new Rent<byte>((int) (nextStart - valueStart));
+                var value = new Rent<byte>((int)(nextStart - valueStart));
                 reader.Seek(valueStart, SeekOrigin.Begin);
                 reader.Read(value.Array, 0, value.Length);
                 return value;
             }
+        }
+        */
+
+        T ReadValue<T>() where T : unmanaged
+        {
+            Span<byte> span = stackalloc byte[Unsafe.SizeOf<T>()];
+            if (span.Length > (int)(nextStart - valueStart))
+            {
+                throw new IndexOutOfRangeException();
+            }
+
+            //var value = new Rent<byte>((int)(nextStart - valueStart));
+            reader.Seek(valueStart, SeekOrigin.Begin);
+            //reader.Read(value.Array, 0, value.Length);
+            reader.Read(span);
+            //return value;
+            return span.Read<T>();
         }
 
         public byte ValueAsByte
@@ -43,16 +65,22 @@ namespace Iviz.Rosbag.Reader
             get
             {
                 reader.Seek(valueStart, SeekOrigin.Begin);
-                return (byte) reader.ReadByte();
+                return (byte)reader.ReadByte();
             }
         }
 
+        public int ValueAsInt => ReadValue<int>();
+
+        public long ValueAsLong => ReadValue<long>();
+
+        public time ValueAsTime => ReadValue<time>();
+        /*
         public int ValueAsInt
         {
             get
             {
                 using var value = Value;
-                return value.ToInt();
+                return value.Read<int>();
             }
         }
 
@@ -61,29 +89,43 @@ namespace Iviz.Rosbag.Reader
             get
             {
                 using var value = Value;
-                return value[0] + (value[1] << 8) + (value[2] << 16) + (value[3] << 24) +
-                       ((long) (value[4] + (value[5] << 8) + (value[6] << 16) + (value[7] << 24)) << 32);
+                return value.Read<long>();
             }
         }
-        
+
         public time ValueAsTime
         {
             get
             {
                 using var value = Value;
-                return new time(
-                    (uint)(value[0] + (value[1] << 8) + (value[2] << 16) + (value[3] << 24)),
-                    (uint)(value[4] + (value[5] << 8) + (value[6] << 16) + (value[7] << 24))
-                    );
+                return value.Read<time>();
             }
-        }        
+        }
+        */
 
         public string ValueAsString
         {
             get
             {
-                using var value = Value;
-                return Encoding.ASCII.GetString(value.Array, 0, value.Length);
+                int msgSize = (int)(nextStart - valueStart);
+                Rent<byte> rent = default;
+                Span<byte> span = msgSize < 256
+                    ? stackalloc byte[msgSize]
+                    : (rent = new Rent<byte>(msgSize)).AsSpan();
+
+                try
+                {
+                    reader.Seek(valueStart, SeekOrigin.Begin);
+                    reader.Read(span);
+                    return Encoding.ASCII.GetString(span);
+                }
+                finally
+                {
+                    rent.Dispose();
+                }
+
+                //using var value = Value;
+                //return Encoding.ASCII.GetString(value.Array, 0, value.Length);
             }
         }
 
@@ -103,16 +145,21 @@ namespace Iviz.Rosbag.Reader
 
             reader.Seek(start, SeekOrigin.Begin);
 
-            int entrySize;
+            Span<byte> intBytes = stackalloc byte[4];
+            reader.Read(intBytes);
+            int entrySize = intBytes.Read<int>();
+
+            /*
             using (var intBytes = new Rent<byte>(4))
             {
                 reader.Read(intBytes.Array, 0, 4);
-                entrySize = intBytes.ToInt();
+                entrySize = intBytes.Read<int>();
             }
+            */
 
             nameStart = start + 4;
             nextStart = nameStart + entrySize;
-            
+
             long equalsPosition = nameStart;
             while (equalsPosition < nextStart)
             {
@@ -157,10 +204,10 @@ namespace Iviz.Rosbag.Reader
                     return false;
                 }
             }
-            
+
             return true;
         }
-        
+
         public bool ValueEquals(string value)
         {
             if (value.Length != nextStart - valueStart)
@@ -176,12 +223,12 @@ namespace Iviz.Rosbag.Reader
                     return false;
                 }
             }
-            
+
             return true;
-        }        
+        }
     }
 
-    public struct HeaderEntryEnumerator : IEnumerator<RecordHeaderEntry>
+    public struct HeaderEntryEnumerator
     {
         RecordHeaderEntry current;
 
@@ -189,29 +236,15 @@ namespace Iviz.Rosbag.Reader
 
         public bool MoveNext() => current.TryMoveNext(out current);
 
-        void IEnumerator.Reset() => throw new NotSupportedException();
-
         public RecordHeaderEntry Current => current;
-
-        RecordHeaderEntry IEnumerator<RecordHeaderEntry>.Current => current;
-
-        object IEnumerator.Current => current;
-
-        void IDisposable.Dispose()
-        {
-        }
     }
 
-    public readonly struct HeaderEntryEnumerable : IEnumerable<RecordHeaderEntry>
+    public readonly struct HeaderEntryEnumerable
     {
         readonly RecordHeaderEntry start;
 
         internal HeaderEntryEnumerable(RecordHeaderEntry start) => this.start = start;
 
         public HeaderEntryEnumerator GetEnumerator() => new(start);
-
-        IEnumerator<RecordHeaderEntry> IEnumerable<RecordHeaderEntry>.GetEnumerator() => GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

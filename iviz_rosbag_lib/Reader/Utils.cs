@@ -1,22 +1,23 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.InteropServices;
+using Iviz.Msgs;
+using Iviz.Rosbag.Reader;
 using Iviz.Tools;
 
 namespace Iviz.Rosbag
 {
     internal static class Utils
     {
-        static int ToInt(this byte[] intBytes)
-        {
-            return intBytes[0] + (intBytes[1] << 8) + (intBytes[2] << 16) + (intBytes[3] << 24);
-        }
+        public static T Read<T>(this Span<byte> intBytes) where T : unmanaged => 
+            MemoryMarshal.Read<T>(intBytes);
 
-        public static int ToInt(this Rent<byte> intBytes) => intBytes.Array.ToInt();
-
-        public static void WriteInt(this byte[] array, int value)
+        public static IEnumerable<T> SelectMessage<T>(this IEnumerable<MessageData> enumerable)
+            where T : IMessage, IDeserializable<T>, new()
         {
-            array[3] = (byte) (value >> 24);
-            array[0] = (byte) value;
-            array[1] = (byte) (value >> 8);
-            array[2] = (byte) (value >> 16);
+            var generator = new T();
+            return enumerable.Select(messageData => messageData.GetMessage(generator));
         }
     }
 }

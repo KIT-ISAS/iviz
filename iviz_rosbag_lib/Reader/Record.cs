@@ -37,8 +37,8 @@ namespace Iviz.Rosbag.Reader
         /// <summary>
         /// If this is a MessageData record, generates an object containing the corresponding fields.
         /// </summary>
-        public MessageData MessageData => OpCode == OpCode.MessageData
-            ? new MessageData(reader, dataStart, nextStart, ConnectionId, Time)
+        public MessageData GetMessageData(Connection connection) => OpCode == OpCode.MessageData
+            ? new MessageData(reader, dataStart, nextStart, Time, connection)
             : throw new InvalidOperationException("Operation only allowed in MessageData types");
 
         /// <summary>
@@ -74,32 +74,33 @@ namespace Iviz.Rosbag.Reader
         {
             this.reader = reader;
 
-            Console.WriteLine("** start " + start);
+            //Console.WriteLine("** start " + start);
 
-            using var intBytes = new Rent<byte>(4);
+            //using var intBytes = new Rent<byte>(4);
+            Span<byte> intBytes = stackalloc byte[4];
             reader.Seek(start, SeekOrigin.Begin);
-            reader.Read(intBytes.Array, 0, 4);
+            reader.Read(intBytes);
 
             //Console.WriteLine("** Start " + start);
 
             headerStart = start + 4;
-            int headerLength = intBytes.ToInt();
+            int headerLength = intBytes.Read<int>();
 
-            Console.WriteLine("** header_len " + headerLength);
+            //Console.WriteLine("** header_len " + headerLength);
 
             reader.Seek(headerStart + headerLength, SeekOrigin.Begin);
-            Console.WriteLine("** data_len pos " + reader.Position);
+            //Console.WriteLine("** data_len pos " + reader.Position);
 
-            reader.Read(intBytes.Array, 0, 4);
-            int dataLength = intBytes.ToInt();
+            reader.Read(intBytes);
+            int dataLength = intBytes.Read<int>();
 
-            Console.WriteLine("** data_len " + dataLength);
+            //Console.WriteLine("** data_len " + dataLength);
 
             dataStart = headerStart + headerLength + 4;
             nextStart = dataStart + dataLength;
 
             this.end = end;
-            Console.WriteLine("** end " + end);
+            //Console.WriteLine("** end " + end);
 
             OpCode = OpCode.Unknown;
             OpCode = TryGetHeaderEntry("op", out var entry)
@@ -137,7 +138,7 @@ namespace Iviz.Rosbag.Reader
         public override string ToString() => BuiltIns.ToJsonString(this);
     }
 
-    public struct RecordEnumerator : IEnumerator<Record>
+    public struct RecordEnumerator
     {
         Record current;
 
@@ -145,29 +146,15 @@ namespace Iviz.Rosbag.Reader
 
         public bool MoveNext() => current.TryMoveNext(out current);
 
-        void IEnumerator.Reset() => throw new NotSupportedException();
-
         public Record Current => current;
-
-        Record IEnumerator<Record>.Current => current;
-
-        object IEnumerator.Current => current;
-
-        void IDisposable.Dispose()
-        {
-        }
     }
 
-    public readonly struct RecordEnumerable : IEnumerable<Record>
+    public readonly struct RecordEnumerable
     {
         readonly Record start;
 
         internal RecordEnumerable(Record start) => this.start = start;
 
         public RecordEnumerator GetEnumerator() => new(start);
-
-        IEnumerator<Record> IEnumerable<Record>.GetEnumerator() => GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
