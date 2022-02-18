@@ -489,7 +489,7 @@ namespace Iviz.MsgsGen
                     {
                         if (variable.RosClassName == "string" && !variable.IsArray)
                         {
-                            lines.Add($"    {variable.CsFieldName} = string.Empty;");
+                            lines.Add($"    {variable.CsFieldName} = \"\";");
                         }
                         else if (variable.IsDynamicSizeArray)
                         {
@@ -592,9 +592,18 @@ namespace Iviz.MsgsGen
                         switch (variable.ArraySize)
                         {
                             case VariableElement.NotAnArray:
-                                lines.Add(variable.CsClassName == "string"
-                                    ? $"    {prefix}{variable.CsFieldName} = b.DeserializeString();"
-                                    : $"    {prefix}{variable.CsFieldName} = b.Deserialize<{variable.CsClassName}>();");
+                                if (variable.CsClassName == "string")
+                                {
+                                    lines.Add(variable.IgnoreHint 
+                                        ? $"    {prefix}{variable.CsFieldName} = b.SkipString();"
+                                        : $"    {prefix}{variable.CsFieldName} = b.DeserializeString();");
+                                }
+                                else
+                                {
+                                    lines.Add(
+                                        $"    {prefix}{variable.CsFieldName} = b.Deserialize<{variable.CsClassName}>();");
+                                }
+
                                 break;
                             case VariableElement.DynamicSizeArray:
                                 if (variable.CsClassName == "string")
@@ -768,7 +777,7 @@ namespace Iviz.MsgsGen
                         {
                             if (forceStruct && variable.RosClassName == "string")
                             {
-                                lines.Add($"    b.Serialize({variable.CsFieldName} ?? string.Empty);");
+                                lines.Add($"    b.Serialize({variable.CsFieldName} ?? \"\");");
                             }
                             else
                             {

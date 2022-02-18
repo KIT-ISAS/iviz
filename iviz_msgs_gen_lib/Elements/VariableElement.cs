@@ -128,7 +128,7 @@ namespace Iviz.MsgsGen
 
             ClassInfo = classInfo;
             RentHint = IsDynamicSizeArray && Comment == "[Rent]";
-            IgnoreHint = IsDynamicSizeArray && Comment == "[Ignore]";
+            IgnoreHint = Comment == "[Ignore]";
         }
 
         public override string ToString()
