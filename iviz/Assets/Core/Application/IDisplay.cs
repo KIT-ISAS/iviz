@@ -8,6 +8,7 @@ namespace Iviz.Displays
     /// <summary>
     /// Common interface for all displays.
     /// A display is a component in charge of preparing and showing raw visual data, such as meshes, lines, or point clouds.
+    /// Displays should not be spawned directly. Use <see cref="ResourcePool.Rent"/> instead. 
     /// </summary>
     public interface IDisplay
     {

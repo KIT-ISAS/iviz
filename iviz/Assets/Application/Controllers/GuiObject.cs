@@ -12,7 +12,7 @@ using UnityEngine;
 // ReSharper disable ConvertIfStatementToSwitchStatement
 namespace Iviz.Controllers
 {
-    internal sealed class GuiWidgetObject
+    internal sealed class GuiObject
     {
         readonly FrameNode node;
         readonly ResourceKey<GameObject> resourceKey;
@@ -40,8 +40,7 @@ namespace Iviz.Controllers
             }
         }
 
-
-        public GuiWidgetObject(GuiWidgetListener parent, Widget msg, ResourceKey<GameObject> resourceKey)
+        public GuiObject(GuiWidgetListener parent, Widget msg, ResourceKey<GameObject> resourceKey)
         {
             this.resourceKey = resourceKey;
             node = new FrameNode(msg.Id);
@@ -99,9 +98,9 @@ namespace Iviz.Controllers
                 withScale.SecondaryScale = (float)msg.SecondaryScale;
             }
 
-            if (msg.BoundingBoxes.Length != 0 && widget is IWidgetWithBoundaries withBoundaries)
+            if (msg.SecondaryBoundaries.Length != 0 && widget is IWidgetWithBoundaries withBoundaries)
             {
-                withBoundaries.BoundingBoxes = msg.BoundingBoxes;
+                withBoundaries.Set(new BoundingBoxStamped(msg.Header, msg.Boundary), msg.SecondaryBoundaries);
             }
 
             var transform = node.Transform;
@@ -109,7 +108,7 @@ namespace Iviz.Controllers
             transform.localScale = Vector3.one * scale;
         }
 
-        public GuiWidgetObject(GuiWidgetListener parent, Dialog msg, ResourceKey<GameObject> resourceKey)
+        public GuiObject(GuiWidgetListener parent, Dialog msg, ResourceKey<GameObject> resourceKey)
         {
             this.resourceKey = resourceKey;
             node = new FrameNode(msg.Id);
@@ -188,7 +187,7 @@ namespace Iviz.Controllers
             return v;
         }
 
-        GuiWidgetObject(GuiWidgetObject source)
+        GuiObject(GuiObject source)
         {
             node = source.node;
             resourceKey = source.resourceKey;
@@ -208,6 +207,6 @@ namespace Iviz.Controllers
             node.Dispose();
         }
 
-        public GuiWidgetObject AsExpired() => new(this);
+        public GuiObject AsExpired() => new(this);
     }
 }

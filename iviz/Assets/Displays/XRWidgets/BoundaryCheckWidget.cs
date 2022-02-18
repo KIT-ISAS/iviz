@@ -25,44 +25,31 @@ namespace Iviz.Displays.XR
             set { }
         }
 
-        public float Scale
-        {
-            set { }
-        }
-
         public float SecondaryScale
         {
             set => warningDistance = value;
         }
-
-        public IReadOnlyList<BoundingBox> BoundingBoxes
-        {
-            set => Set(value);
-        }
-
-        void Set(IReadOnlyList<BoundingBox> value)
+        
+        public void Set(BoundingBoxStamped baseBox, IReadOnlyList<BoundingBoxStamped> boxes)
         {
             Reset();
 
-            int count = value.Count;
-            if (count < 2)
+            int count = boxes.Count;
+            if (count == 0)
             {
                 throw new ArgumentException("Boxes size should be greater than 1");
             }
 
-            nodes = new FrameNode[count];
-            colliders = new BoxCollider[count];
-
+            nodes = new FrameNode[count + 1];
+            colliders = new BoxCollider[count + 1];
+            
+            Create(baseBox, out nodes[0], out colliders[0]);
             foreach (int i in ..count)
             {
-                nodes[i] = new FrameNode("BoundingBox");
-                nodes[i].AttachTo(value[i].Header);
-                nodes[i].Transform.SetLocalPose(value[i].Center.Ros2Unity());
-
-                colliders[i] = nodes[i].Transform.gameObject.AddComponent<BoxCollider>();
-                colliders[i].size = value[i].Size.Ros2Unity().Abs();
+                Create(boxes[i], out nodes[i + 1], out colliders[i + 1]);
             }
 
+            
             if (active)
             {
                 return;
@@ -70,6 +57,16 @@ namespace Iviz.Displays.XR
 
             active = true;
             GameThread.EveryTenthOfASecond += UpdateBounds;
+        }
+
+        static void Create(BoundingBoxStamped box, out FrameNode node, out BoxCollider collider)
+        {
+            node = new FrameNode("BoundingBox");
+            node.AttachTo(box.Header);
+            node.Transform.SetLocalPose(box.Boundary.Center.Ros2Unity());
+
+            collider = node.Transform.gameObject.AddComponent<BoxCollider>();
+            collider.size = box.Boundary.Size.Ros2Unity().Abs();
         }
 
         void Reset()

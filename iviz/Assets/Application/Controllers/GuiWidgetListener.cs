@@ -27,8 +27,8 @@ namespace Iviz.Controllers
 
 
         readonly GuiWidgetConfiguration config = new();
-        readonly Dictionary<string, GuiWidgetObject> widgets = new();
-        readonly Dictionary<string, GuiWidgetObject> dialogs = new();
+        readonly Dictionary<string, GuiObject> widgets = new();
+        readonly Dictionary<string, GuiObject> dialogs = new();
         uint feedbackSeq;
 
         public override TfFrame Frame => TfModule.FixedFrame;
@@ -188,7 +188,7 @@ namespace Iviz.Controllers
             }
 
 
-            var guiObject = new GuiWidgetObject(this, msg, resourceKey) { Interactable = Interactable };
+            var guiObject = new GuiObject(this, msg, resourceKey) { Interactable = Interactable };
             widgets[guiObject.Id] = guiObject;
         }
 
@@ -284,7 +284,7 @@ namespace Iviz.Controllers
                 existingGuiObject.Dispose();
             }
 
-            var guiObject = new GuiWidgetObject(this, msg, resourceKey);
+            var guiObject = new GuiObject(this, msg, resourceKey);
             dialogs[guiObject.Id] = guiObject;
         }
 
@@ -295,7 +295,7 @@ namespace Iviz.Controllers
             DestroyAll(widgets);
         }
 
-        static void DestroyAll(Dictionary<string, GuiWidgetObject> dict)
+        static void DestroyAll(Dictionary<string, GuiObject> dict)
         {
             foreach (var guiObject in dict.Values)
             {
@@ -309,7 +309,7 @@ namespace Iviz.Controllers
         {
             var now = GameThread.Now;
 
-            List<GuiWidgetObject>? deadObjects = null;
+            List<GuiObject>? deadObjects = null;
             foreach (var guiObject in dialogs.Values)
             {
                 if (guiObject.ExpirationTime > now)
@@ -317,7 +317,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                deadObjects ??= new List<GuiWidgetObject>();
+                deadObjects ??= new List<GuiObject>();
                 deadObjects.Add(guiObject);
             }
 
@@ -333,7 +333,7 @@ namespace Iviz.Controllers
             }
         }
 
-        internal void OnDialogButtonClicked(GuiWidgetObject dialog, int buttonId)
+        internal void OnDialogButtonClicked(GuiObject dialog, int buttonId)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -346,7 +346,7 @@ namespace Iviz.Controllers
             MarkAsExpired(dialog);
         }
 
-        internal void OnDialogMenuEntryClicked(GuiWidgetObject dialog, int buttonId)
+        internal void OnDialogMenuEntryClicked(GuiObject dialog, int buttonId)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -359,12 +359,12 @@ namespace Iviz.Controllers
             MarkAsExpired(dialog);
         }
 
-        void MarkAsExpired(GuiWidgetObject dialog)
+        void MarkAsExpired(GuiObject dialog)
         {
             dialogs[dialog.Id] = dialog.AsExpired();
         }
 
-        internal void OnDialogExpired(GuiWidgetObject dialog)
+        internal void OnDialogExpired(GuiObject dialog)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -375,7 +375,7 @@ namespace Iviz.Controllers
             });
         }
 
-        internal void OnWidgetRotated(GuiWidgetObject widget, float angleInRad)
+        internal void OnWidgetRotated(GuiObject widget, float angleInRad)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -387,7 +387,7 @@ namespace Iviz.Controllers
             });
         }
 
-        internal void OnWidgetMoved(GuiWidgetObject widget, in Vector3 direction)
+        internal void OnWidgetMoved(GuiObject widget, in Vector3 direction)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -399,7 +399,7 @@ namespace Iviz.Controllers
             });
         }
 
-        void OnTrajectoryDiscMoved(GuiWidgetObject widget, IReadOnlyList<Vector3> points, float periodInSec)
+        void OnTrajectoryDiscMoved(GuiObject widget, IReadOnlyList<Vector3> points, float periodInSec)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -419,7 +419,7 @@ namespace Iviz.Controllers
             });
         }
 
-        void OnTargetAreaMoved(GuiWidgetObject widget, in Vector2 scale, Vector3 position)
+        void OnTargetAreaMoved(GuiObject widget, in Vector2 scale, Vector3 position)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -432,7 +432,7 @@ namespace Iviz.Controllers
             });
         }
 
-        void OnTargetAreaCanceled(GuiWidgetObject widget)
+        void OnTargetAreaCanceled(GuiObject widget)
         {
             FeedbackSender?.Publish(new Feedback
             {

@@ -63,11 +63,6 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public float Scale
-        {
-            set { } // unused
-        }
-
         public float SecondaryScale
         {
             set => Disc.localScale = value * Vector3.one;

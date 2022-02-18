@@ -11,7 +11,7 @@ namespace Iviz.Displays.XR
     {
         bool Interactable { set; }
     }
-    
+
     public interface IWidgetWithColor : IWidget
     {
         Color Color { set; }
@@ -22,26 +22,29 @@ namespace Iviz.Displays.XR
     {
         string Caption { set; }
     }
-    
+
     public interface IWidgetWithScale : IWidget
     {
-        float Scale { set; }
+        float Scale
+        {
+            set { }
+        }
+
         float SecondaryScale { set; }
     }
 
     public interface IWidgetCanBeMoved : IWidget
     {
         event Action<Vector3>? Moved;
-    } 
-    
+    }
+
     public interface IWidgetCanBeRotated : IWidget
     {
         public event Action<float>? Moved;
-    } 
-    
+    }
+
     public interface IWidgetWithBoundaries : IWidget
     {
-        IReadOnlyList<BoundingBox> BoundingBoxes { set; }
+        public void Set(BoundingBoxStamped baseBox, IReadOnlyList<BoundingBoxStamped> boxes);
     }
-    
 }
