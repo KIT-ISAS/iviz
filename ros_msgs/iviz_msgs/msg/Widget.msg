@@ -22,4 +22,5 @@ std_msgs/ColorRGBA secondary_color
 float64 scale
 float64 secondary_scale
 string caption
-BoundingBox[] bounding_boxes
+BoundingBox boundary
+BoundingBoxStamped[] secondary_boundaries

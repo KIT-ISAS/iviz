@@ -13,8 +13,8 @@ Header header
 byte level
 string name # name of the node
 string msg # message 
-string file # file the message came from
-string function # function the message came from
+string file # [Ignore]
+string function # [Ignore]
 uint32 line # line the message came from
 #string[] topics # topic names that the node publishes
 string[] topics # [Ignore]
