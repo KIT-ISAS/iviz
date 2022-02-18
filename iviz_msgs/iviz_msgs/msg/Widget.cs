@@ -29,18 +29,20 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "scale")] public double Scale;
         [DataMember (Name = "secondary_scale")] public double SecondaryScale;
         [DataMember (Name = "caption")] public string Caption;
-        [DataMember (Name = "bounding_boxes")] public BoundingBox[] BoundingBoxes;
+        [DataMember (Name = "boundary")] public BoundingBox Boundary;
+        [DataMember (Name = "secondary_boundaries")] public BoundingBoxStamped[] SecondaryBoundaries;
     
         /// Constructor for empty message.
         public Widget()
         {
             Id = "";
             Caption = "";
-            BoundingBoxes = System.Array.Empty<BoundingBox>();
+            Boundary = new BoundingBox();
+            SecondaryBoundaries = System.Array.Empty<BoundingBoxStamped>();
         }
         
         /// Explicit constructor.
-        public Widget(in StdMsgs.Header Header, byte Action, string Id, byte Type, in GeometryMsgs.Pose Pose, in StdMsgs.ColorRGBA Color, in StdMsgs.ColorRGBA SecondaryColor, double Scale, double SecondaryScale, string Caption, BoundingBox[] BoundingBoxes)
+        public Widget(in StdMsgs.Header Header, byte Action, string Id, byte Type, in GeometryMsgs.Pose Pose, in StdMsgs.ColorRGBA Color, in StdMsgs.ColorRGBA SecondaryColor, double Scale, double SecondaryScale, string Caption, BoundingBox Boundary, BoundingBoxStamped[] SecondaryBoundaries)
         {
             this.Header = Header;
             this.Action = Action;
@@ -52,7 +54,8 @@ namespace Iviz.Msgs.IvizMsgs
             this.Scale = Scale;
             this.SecondaryScale = SecondaryScale;
             this.Caption = Caption;
-            this.BoundingBoxes = BoundingBoxes;
+            this.Boundary = Boundary;
+            this.SecondaryBoundaries = SecondaryBoundaries;
         }
         
         /// Constructor with buffer.
@@ -68,10 +71,11 @@ namespace Iviz.Msgs.IvizMsgs
             Scale = b.Deserialize<double>();
             SecondaryScale = b.Deserialize<double>();
             Caption = b.DeserializeString();
-            BoundingBoxes = b.DeserializeArray<BoundingBox>();
-            for (int i = 0; i < BoundingBoxes.Length; i++)
+            Boundary = new BoundingBox(ref b);
+            SecondaryBoundaries = b.DeserializeArray<BoundingBoxStamped>();
+            for (int i = 0; i < SecondaryBoundaries.Length; i++)
             {
-                BoundingBoxes[i] = new BoundingBox(ref b);
+                SecondaryBoundaries[i] = new BoundingBoxStamped(ref b);
             }
         }
         
@@ -91,29 +95,32 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Scale);
             b.Serialize(SecondaryScale);
             b.Serialize(Caption);
-            b.SerializeArray(BoundingBoxes);
+            Boundary.RosSerialize(ref b);
+            b.SerializeArray(SecondaryBoundaries);
         }
         
         public void RosValidate()
         {
             if (Id is null) throw new System.NullReferenceException(nameof(Id));
             if (Caption is null) throw new System.NullReferenceException(nameof(Caption));
-            if (BoundingBoxes is null) throw new System.NullReferenceException(nameof(BoundingBoxes));
-            for (int i = 0; i < BoundingBoxes.Length; i++)
+            if (Boundary is null) throw new System.NullReferenceException(nameof(Boundary));
+            Boundary.RosValidate();
+            if (SecondaryBoundaries is null) throw new System.NullReferenceException(nameof(SecondaryBoundaries));
+            for (int i = 0; i < SecondaryBoundaries.Length; i++)
             {
-                if (BoundingBoxes[i] is null) throw new System.NullReferenceException($"{nameof(BoundingBoxes)}[{i}]");
-                BoundingBoxes[i].RosValidate();
+                if (SecondaryBoundaries[i] is null) throw new System.NullReferenceException($"{nameof(SecondaryBoundaries)}[{i}]");
+                SecondaryBoundaries[i].RosValidate();
             }
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 118;
+                int size = 198;
                 size += Header.RosMessageLength;
                 size += BuiltIns.GetStringSize(Id);
                 size += BuiltIns.GetStringSize(Caption);
-                size += BuiltIns.GetArraySize(BoundingBoxes);
+                size += BuiltIns.GetArraySize(SecondaryBoundaries);
                 return size;
             }
         }
@@ -124,26 +131,27 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Widget";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "50349c7140fd26cc7ff97ad4814cb3f0";
+        [Preserve] public const string RosMd5Sum = "80b7738e5376e3779af4f631adfb2c57";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71V32/bNhB+119xQB6aDIm3Jl1bBOiDYnuptzR2ba9AMAwGLZ1lYhKpkpQd56/fR0qW" +
-                "7dVD97DEMGzyfnz87nh3rKRy7ynuTgfD+1nc69EH+imq9oXj/qfhlz7kr4/J47s7qC6jRjd9GPVn4+E0" +
-                "9ia9waS7hxd0k9F4cH/baF4f11z1AuSebjqOf+13p8PxQ+N5daAdDu+mgxHEbw7E8fi2j59+DM3P+5rR" +
-                "cDLYI/j233SByLt97c3w9/tePH7ofux3f4PyfRRZl84Km9kfP7JI2dAy/EXzjWMSiZNawcRIlZFMa6nb" +
-                "lBxlrAt2ZlP7jrRlKvGzg+vqXJvx7U1MiV8dU1hOtEoFQGqTRa6Fe/uGbCJy3u1aq1resElEGcjd6Eql" +
-                "ENzoxz/+pHmzm831I9so+vA/f6JPk9tr+kfOohOaOOE5poSkiFQ4QQuNXMpsyeYi5xXncBJFySkFrc+h" +
-                "7cBxupSW8M1YsRF5vqHKwshppK0oKiUT4VMuCz7wh6dUJKgUxsmkyoWBvTYI3ZsvjCjYo+Nr+WvFKmEa" +
-                "9K5ho5DOykkQ2gAhMSysz+agR6FOri69Q3QyXesLbDlDRbSHk1sK58nyY2nYep7CXuOMH+rgOsC+bu7L" +
-                "0mmQzbC1Z4RDQIFLnSzpFMxHG7fUCoBMK2GkmOfsgXHBOVBfeadXZ3vIKkArofQWvkbcnfFfYFWL62O6" +
-                "WOLOch+9rTIkEIal0SuZwnS+CSBJLlk5yuXcoAAj71UfGZ384nMMI3iFG8G/sFYnEheQ0lq65bZSw23M" +
-                "0D3PVI3ftiICjMmwvyTQF75PSC9Cg/qyWRhGGKVI+NxXmRenjV4GW+SFtJFb3w5FI41qaA2izxWiNCrg" +
-                "7uxeKkBQ2XYOasEJqWy4rZY/YkFrBMoH4bYz5bFdbdrV08vQ36VuG0N7Uaigg3wekve7r7u8Y74Uneg7" +
-                "EW1X62efhO1Ur8/EHDHtKmtX83YlnouRXMmnmtLeyxAdPm5HHq8ESf9G84UTp80VZs0Tv0x1NCceKw1a" +
-                "Bd1hUXT8iB+EoawVRnrBAkWP16P1hGMqDSd1I0/xHjFKB50vHaWaLSntu6kQfwGSMSG9tyhLgOGZMkLZ" +
-                "vC5GiOFyyp2sc07rJavayk+48B6FF0wmZGQm09rT12jrLKgJ7pzc4hITMs9rzvVhaGCAGF2X/lmHBgva" +
-                "6IrWPiAsTPNwappzyysMeKf1uX81G4gj0wJpsVZkvoWsQwl8t2/+BlMvTjZXCgAA";
+                "H4sIAAAAAAAAE71WW28aRxR+319xJD/Ermza2GkSWcrDGqhD6hgKNJJVVWjYPSyjLjObmVkw/vX9ZnZZ" +
+                "lpQqfaiNEMyeyzfnfraUyr2nuDsdDO9nca9HH+inqGwTx/3Pwy990F8fo8d3d2BdRjVv+jDqz8bDaexF" +
+                "eoNJt4UXeJPReHB/W3NeH+dc9QJkizcdx5/63elw/FBrXh1wh8O76WAE8psDcjy+7eOnH4Pzc5szGk4G" +
+                "LQPf/hsvGPKuzb0Z/n7fi8cP3Y/97q9gvo8i69LZymb2x48sUja0DH/RfOuYROKkVhAxUmUk04rqtgVH" +
+                "GesVO7OtdEfaMhX42cN1da7N+PYmpsSfjjEsJ1qlAiCVyCLXwr19QzYROe+fGqmKXluTiCIYd6NLlYJw" +
+                "ox9p7s+QbBMnTqwKTv/4swVUy0m2UfThf/5Enye31/RNVKMTgh3+zpQQNpEKJ2ihEW2ZLdlc5LzmHErB" +
+                "VApcH2XbgeJ0KS3hm7FiI/J8S6WFkNMI7GpVKpkInxS54gN9aEpFggphnEzKXBjIa4OoePGFESv26Pha" +
+                "/lqySpgGvWvIKMSpdBIGbYGQGBbWx3vQo1BJV5deITqZbvQFHjlDzTSXk1sK543lx8Kw9XYKe407fqic" +
+                "6wD7uk6EpdNAm+HRnhEugQlc6GRJp7B8tHVLrQDItEaqxDxnD4wSyIH6yiu9OmshqwCthNI7+Apxf8d/" +
+                "gVUNrvfpYomc5d57W2YIIAQLo9cyheh8G0CSXLJylMu58YXntaoro5NffIwhBK2QEfwLa3UikYCUNtIt" +
+                "d7UcsjFDfz1TNf6zWeFgTIZ9kmC+8J1EehFa2JfNwjDcKETC577KPDmt+TLIIi6kjdzpdigaaVRDIxD9" +
+                "VsJLowLuXu6lHIQpu85BLTghlQ3ZauyHL2iNYPKBu83UeWxO2+b09DLm70O386FJFCroIJ6Hxvunr/u4" +
+                "Y76sOtF3PNqdNs8+CZu5X92JOWKaU9ac5s1JPJdFci2fKpNaa+LYQksQZszuQ84XTpw2V5guT/wy9VDf" +
+                "eKwYaB14h2XQ8UN9EMawVhjiKxYoc+yLRhOKqTScVK07xQZiFAt6XTpKNVtS2vfPSvwFSMZM9NqiKACG" +
+                "xWSEsnlVfiBD5ZQ7WeecNktWlZSfaWEDhZ0lEzIyk2ml6auyURZUO3dObnGJmZjnlc3VZWhZgBhdFftZ" +
+                "hwYL2uqSNt4hHEy9KjXNubErjHSn9bnfkzXEkfmAsFgrMt801mFJf7dTnifVR4uxfmeJDl/Jjr7pRH8D" +
+                "Wd91FQILAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

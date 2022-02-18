@@ -28,9 +28,6 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int SizeOf<T>() where T : unmanaged => Unsafe.SizeOf<T>();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         readonly void ThrowIfOutOfRange(int off)
         {
             if (0 <= off && off <= ptr.Length)
@@ -80,7 +77,7 @@ namespace Iviz.Msgs
         public void Serialize<T>(T val) where T : unmanaged
         {
             MemoryMarshal.Write(ptr, ref val);
-            Advance(SizeOf<T>());
+            Advance(Unsafe.SizeOf<T>());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,7 +85,7 @@ namespace Iviz.Msgs
         {
             ref T valRef = ref Unsafe.AsRef(in val);
             MemoryMarshal.Write(ptr, ref valRef); // valRef is not written to!
-            Advance(SizeOf<T>());
+            Advance(Unsafe.SizeOf<T>());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -148,7 +145,7 @@ namespace Iviz.Msgs
 
         public void SerializeStructArray<T>(T[] val) where T : unmanaged
         {
-            int sizeOfT = SizeOf<T>();
+            int sizeOfT = Unsafe.SizeOf<T>();
             int size = val.Length * sizeOfT;
             ThrowIfOutOfRange(4 + size);
             
@@ -160,7 +157,7 @@ namespace Iviz.Msgs
         
         public void SerializeStructArray<T>(Memory<T> val) where T : unmanaged
         {
-            int sizeOfT = SizeOf<T>();
+            int sizeOfT = Unsafe.SizeOf<T>();
             int size = val.Length * sizeOfT;
             ThrowIfOutOfRange(4 + size);
             
@@ -174,7 +171,7 @@ namespace Iviz.Msgs
         {
             ThrowIfWrongSize(val, count);
 
-            int sizeOfT = SizeOf<T>();
+            int sizeOfT = Unsafe.SizeOf<T>();
             int size = count * sizeOfT;
 
             ThrowIfOutOfRange(size);
@@ -184,7 +181,7 @@ namespace Iviz.Msgs
 
         public void SerializeStructList<T>(List<T> val, int count = 0) where T : unmanaged
         {
-            int sizeOfT = SizeOf<T>();
+            int sizeOfT = Unsafe.SizeOf<T>();
             if (count == 0)
             {
                 ThrowIfOutOfRange(4 + val.Count * sizeOfT);

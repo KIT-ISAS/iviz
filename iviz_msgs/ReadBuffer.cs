@@ -28,9 +28,6 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int SizeOf<T>() where T : unmanaged => Unsafe.SizeOf<T>();
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         readonly void ThrowIfOutOfRange(int off)
         {
             if (0 <= off && off <= ptr.Length)
@@ -55,7 +52,7 @@ namespace Iviz.Msgs
             int count = ReadInt();
             if (count == 0)
             {
-                return string.Empty;
+                return "";
             }
 
             string val = BuiltIns.UTF8.GetString(ptr[..count]);
@@ -63,6 +60,14 @@ namespace Iviz.Msgs
             return val;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public string SkipString()
+        {
+            int count = ReadInt();
+            Advance(count);
+            return "";
+        }
+        
         public string[] DeserializeStringArray()
         {
             int count = ReadInt();
@@ -85,12 +90,9 @@ namespace Iviz.Msgs
         public string[] SkipStringArray()
         {
             int count = ReadInt();
-            ThrowIfOutOfRange(4 * count);
-
             for (int i = 0; i < count; i++)
             {
                 int innerCount = ReadInt();
-                ThrowIfOutOfRange(innerCount);
                 Advance(innerCount);
             }
 
@@ -121,7 +123,7 @@ namespace Iviz.Msgs
         public T Deserialize<T>() where T : unmanaged
         {
             T val = MemoryMarshal.Read<T>(ptr);
-            Advance(SizeOf<T>());
+            Advance(Unsafe.SizeOf<T>());
             return val;
         }
 
@@ -129,7 +131,7 @@ namespace Iviz.Msgs
         public void Deserialize<T>(out T t) where T : unmanaged
         {
             t = MemoryMarshal.Read<T>(ptr);
-            Advance(SizeOf<T>());
+            Advance(Unsafe.SizeOf<T>());
         }
 
         public T[] DeserializeStructArray<T>() where T : unmanaged
@@ -140,12 +142,12 @@ namespace Iviz.Msgs
 
         public T[] DeserializeStructArray<T>(int count) where T : unmanaged
         {
-            int sizeOfT = SizeOf<T>();
+            int sizeOfT = Unsafe.SizeOf<T>();
             int size = count * sizeOfT;
-            ThrowIfOutOfRange(size);
+            var src = ptr[..size];
 
             T[] val = new T[count];
-            ptr[..size].CopyTo(MemoryMarshal.AsBytes(val.AsSpan()));
+            src.CopyTo(MemoryMarshal.AsBytes(val.AsSpan()));
 
             Advance(size);
             return val;
@@ -159,13 +161,13 @@ namespace Iviz.Msgs
                 return Memory<T>.Empty;
             }
 
-            int sizeOfT = SizeOf<T>();
+            int sizeOfT = Unsafe.SizeOf<T>();
             int size = count * sizeOfT;
-            ThrowIfOutOfRange(size);
+            var src = ptr[..size];
 
             T[] rent = ArrayPool<T>.Shared.Rent(count);
             var val = new Memory<T>(rent)[..count];
-            ptr[..size].CopyTo(MemoryMarshal.AsBytes(val.Span));
+            src.CopyTo(MemoryMarshal.AsBytes(val.Span));
 
             Advance(size);
             return val;
@@ -174,7 +176,7 @@ namespace Iviz.Msgs
         public T[] SkipStructArray<T>() where T : unmanaged
         {
             int count = ReadInt();
-            int sizeOfT = SizeOf<T>();
+            int sizeOfT = Unsafe.SizeOf<T>();
             int size = count * sizeOfT;
             ThrowIfOutOfRange(size);
             Advance(size);
@@ -189,7 +191,7 @@ namespace Iviz.Msgs
 
         public void DeserializeStructList<T>(List<T> list, int count) where T : unmanaged
         {
-            ThrowIfOutOfRange(count * SizeOf<T>());
+            ThrowIfOutOfRange(count * Unsafe.SizeOf<T>());
             list.Clear();
             if (list.Capacity < count)
             {
@@ -262,7 +264,7 @@ namespace Iviz.Msgs
             return generator.RosDeserialize(ref b);
         }
         
-        public static T Deserialize<T>(T generator, ReadOnlySpan<byte> buffer)
+        public static T Deserialize<T>(in T generator, ReadOnlySpan<byte> buffer)
             where T : ISerializable, IDeserializable<T>
         {
             if (generator == null)
