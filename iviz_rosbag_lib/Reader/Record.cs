@@ -28,21 +28,26 @@ namespace Iviz.Rosbag.Reader
         public HeaderEntryEnumerable RecordHeaders => new(new RecordHeaderEntry(reader, headerStart, dataStart - 4));
 
         /// <summary>
-        /// If this is a Chunk record, generates an object containing the corresponding fields.
+        /// If this is a Chunk record, generates an wrapper containing the chunk info.
         /// </summary>
         public Chunk Chunk => OpCode == OpCode.Chunk
             ? new Chunk(reader, dataStart, nextStart, IsCompressed)
             : throw new InvalidOperationException("Operation only allowed in Chunk types");
 
         /// <summary>
-        /// If this is a MessageData record, generates an object containing the corresponding fields.
+        /// If this is a MessageData record, generates a wrapper containing the message.
         /// </summary>
-        public MessageData GetMessageData(Connection connection) => OpCode == OpCode.MessageData
+        public MessageData MessageData => GetMessageData(null);
+
+        /// <summary>
+        /// If this is a MessageData record, generates a wrapper containing the message and sets the connection info.
+        /// </summary>
+        public MessageData GetMessageData(Connection? connection) => OpCode == OpCode.MessageData
             ? new MessageData(reader, dataStart, nextStart, Time, connection)
             : throw new InvalidOperationException("Operation only allowed in MessageData types");
 
         /// <summary>
-        /// If this is a Connection record, generates an object containing the corresponding fields.
+        /// If this is a Connection record, generates a wrapper containing the connection info.
         /// </summary>
         public Connection Connection => OpCode == OpCode.Connection
             ? new Connection(reader, dataStart, nextStart, ConnectionId, Topic)
@@ -104,7 +109,7 @@ namespace Iviz.Rosbag.Reader
 
             OpCode = OpCode.Unknown;
             OpCode = TryGetHeaderEntry("op", out var entry)
-                ? (OpCode) entry.ValueAsByte
+                ? (OpCode)entry.ValueAsByte
                 : OpCode.Unknown;
         }
 
