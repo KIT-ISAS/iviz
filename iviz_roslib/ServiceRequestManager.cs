@@ -11,12 +11,12 @@ using Nito.AsyncEx;
 
 namespace Iviz.Roslib;
 
-internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T : IService
+internal sealed class ServiceRequestManager
 {
-    readonly Func<T, ValueTask> callback;
-    readonly HashSet<ServiceRequest<T>> requests = new();
+    readonly Func<IService, ValueTask> callback;
+    readonly HashSet<ServiceRequest> requests = new();
     readonly TcpListener listener;
-    readonly ServiceInfo<T> serviceInfo;
+    readonly ServiceInfo serviceInfo;
     readonly Task task;
 
     readonly CancellationTokenSource tokenSource = new();
@@ -24,7 +24,7 @@ internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T 
 
     bool disposed;
 
-    public ServiceRequestManager(ServiceInfo<T> serviceInfo, string host, Func<T, ValueTask> callback)
+    public ServiceRequestManager(ServiceInfo serviceInfo, string host, Func<IService, ValueTask> callback)
     {
         this.serviceInfo = serviceInfo;
         this.callback = callback;
@@ -32,7 +32,7 @@ internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T 
         listener = new TcpListener(IPAddress.IPv6Any, 0) { Server = { DualMode = true } };
         listener.Start();
 
-        IPEndPoint localEndpoint = (IPEndPoint)listener.LocalEndpoint;
+        var localEndpoint = (IPEndPoint)listener.LocalEndpoint;
         Uri = new Uri($"rosrpc://{host}:{localEndpoint.Port.ToString()}/");
 
         Logger.LogDebugFormat("{0}: Starting!", this);
@@ -64,7 +64,7 @@ internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T 
                     continue;
                 }
 
-                var sender = new ServiceRequest<T>(serviceInfo, client, new Endpoint(endPoint), callback);
+                var sender = new ServiceRequest(serviceInfo, client, new Endpoint(endPoint), callback);
                 requests.Add(sender);
 
                 await CleanupAsync(tokenSource.Token);
@@ -92,7 +92,7 @@ internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T 
                 this, request.Hostname);
             await request.StopAsync(token);
             requests.Remove(request);
-        });
+        }).ToArray();
         await tasks.WhenAll().AwaitNoThrow(this);
     }
 
@@ -129,6 +129,6 @@ internal sealed class ServiceRequestManager<T> : IServiceRequestManager where T 
 
     public override string ToString()
     {
-        return $"[ServiceRequestManager {Service} [{ServiceType}] at {Uri}]";
+        return $"[{nameof(ServiceRequestManager)} {Service} [{ServiceType}] at {Uri}]";
     }
 }

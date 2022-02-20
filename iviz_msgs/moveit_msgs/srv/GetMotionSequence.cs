@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new GetMotionSequenceResponse();
         }
         
-        IService IService.Create() => new GetMotionSequence();
-        
         IRequest IService.Request
         {
             get => Request;

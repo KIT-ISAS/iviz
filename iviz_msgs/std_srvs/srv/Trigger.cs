@@ -25,8 +25,6 @@ namespace Iviz.Msgs.StdSrvs
             Response = new TriggerResponse();
         }
         
-        IService IService.Create() => new Trigger();
-        
         IRequest IService.Request
         {
             get => Request;

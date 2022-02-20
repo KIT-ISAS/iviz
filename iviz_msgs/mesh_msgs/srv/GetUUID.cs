@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MeshMsgs
             Response = new GetUUIDResponse();
         }
         
-        IService IService.Create() => new GetUUID();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -25,8 +25,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Response = new TestNestedServiceResponse();
         }
         
-        IService IService.Create() => new TestNestedService();
-        
         IRequest IService.Request
         {
             get => Request;

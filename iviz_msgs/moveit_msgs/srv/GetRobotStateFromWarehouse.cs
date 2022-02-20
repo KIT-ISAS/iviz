@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new GetRobotStateFromWarehouseResponse();
         }
         
-        IService IService.Create() => new GetRobotStateFromWarehouse();
-        
         IRequest IService.Request
         {
             get => Request;

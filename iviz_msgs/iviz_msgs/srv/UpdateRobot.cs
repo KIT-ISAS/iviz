@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new UpdateRobotResponse();
         }
         
-        IService IService.Create() => new UpdateRobot();
-        
         IRequest IService.Request
         {
             get => Request;

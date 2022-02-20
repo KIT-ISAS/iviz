@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new GetStateValidityResponse();
         }
         
-        IService IService.Create() => new GetStateValidity();
-        
         IRequest IService.Request
         {
             get => Request;

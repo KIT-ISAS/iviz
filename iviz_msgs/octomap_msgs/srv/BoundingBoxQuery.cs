@@ -25,8 +25,6 @@ namespace Iviz.Msgs.OctomapMsgs
             Response = BoundingBoxQueryResponse.Singleton;
         }
         
-        IService IService.Create() => new BoundingBoxQuery();
-        
         IRequest IService.Request
         {
             get => Request;

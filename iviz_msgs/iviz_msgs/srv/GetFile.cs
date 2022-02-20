@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new GetFileResponse();
         }
         
-        IService IService.Create() => new GetFile();
-        
         IRequest IService.Request
         {
             get => Request;

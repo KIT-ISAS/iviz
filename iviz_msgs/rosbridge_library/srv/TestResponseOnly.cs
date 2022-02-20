@@ -25,8 +25,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Response = new TestResponseOnlyResponse();
         }
         
-        IService IService.Create() => new TestResponseOnly();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = RenameRobotStateInWarehouseResponse.Singleton;
         }
         
-        IService IService.Create() => new RenameRobotStateInWarehouse();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new ExecuteKnownTrajectoryResponse();
         }
         
-        IService IService.Create() => new ExecuteKnownTrajectory();
-        
         IRequest IService.Request
         {
             get => Request;

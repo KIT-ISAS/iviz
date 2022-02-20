@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new ChangeControlDimensionsResponse();
         }
         
-        IService IService.Create() => new ChangeControlDimensions();
-        
         IRequest IService.Request
         {
             get => Request;

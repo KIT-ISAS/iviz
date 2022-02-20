@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new LoadMapResponse();
         }
         
-        IService IService.Create() => new LoadMap();
-        
         IRequest IService.Request
         {
             get => Request;

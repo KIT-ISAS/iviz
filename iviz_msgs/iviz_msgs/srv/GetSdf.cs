@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new GetSdfResponse();
         }
         
-        IService IService.Create() => new GetSdf();
-        
         IRequest IService.Request
         {
             get => Request;

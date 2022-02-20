@@ -25,8 +25,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Response = new AddTwoIntsResponse();
         }
         
-        IService IService.Create() => new AddTwoInts();
-        
         IRequest IService.Request
         {
             get => Request;

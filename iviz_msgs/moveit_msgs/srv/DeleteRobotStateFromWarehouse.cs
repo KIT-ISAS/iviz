@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = DeleteRobotStateFromWarehouseResponse.Singleton;
         }
         
-        IService IService.Create() => new DeleteRobotStateFromWarehouse();
-        
         IRequest IService.Request
         {
             get => Request;

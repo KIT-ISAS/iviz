@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MeshMsgs
             Response = new GetVertexColorsResponse();
         }
         
-        IService IService.Create() => new GetVertexColors();
-        
         IRequest IService.Request
         {
             get => Request;

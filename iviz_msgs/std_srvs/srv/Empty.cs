@@ -25,8 +25,6 @@ namespace Iviz.Msgs.StdSrvs
             Response = EmptyResponse.Singleton;
         }
         
-        IService IService.Create() => new Empty();
-        
         IRequest IService.Request
         {
             get => Request;

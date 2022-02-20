@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MeshMsgs
             Response = new GetGeometryResponse();
         }
         
-        IService IService.Create() => new GetGeometry();
-        
         IRequest IService.Request
         {
             get => Request;

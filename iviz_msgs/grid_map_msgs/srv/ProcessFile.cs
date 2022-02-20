@@ -25,8 +25,6 @@ namespace Iviz.Msgs.GridMapMsgs
             Response = new ProcessFileResponse();
         }
         
-        IService IService.Create() => new ProcessFile();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new GetCartesianPathResponse();
         }
         
-        IService IService.Create() => new GetCartesianPath();
-        
         IRequest IService.Request
         {
             get => Request;

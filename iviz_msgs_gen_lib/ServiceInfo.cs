@@ -225,8 +225,6 @@ namespace Iviz.MsgsGen
                     : $"    Response = new {Name}Response();",
                 "}",
                 "",
-                $"IService IService.Create() => new {Name}();",
-                "",
                 "IRequest IService.Request",
                 "{",
                 "    get => Request;",

@@ -25,8 +25,6 @@ namespace Iviz.Msgs.Rosapi
             Response = new SearchParamResponse();
         }
         
-        IService IService.Create() => new SearchParam();
-        
         IRequest IService.Request
         {
             get => Request;

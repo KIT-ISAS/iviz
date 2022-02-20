@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new ChangeDriftDimensionsResponse();
         }
         
-        IService IService.Create() => new ChangeDriftDimensions();
-        
         IRequest IService.Request
         {
             get => Request;

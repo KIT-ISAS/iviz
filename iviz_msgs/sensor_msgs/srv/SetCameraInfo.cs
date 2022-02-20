@@ -25,8 +25,6 @@ namespace Iviz.Msgs.SensorMsgs
             Response = new SetCameraInfoResponse();
         }
         
-        IService IService.Create() => new SetCameraInfo();
-        
         IRequest IService.Request
         {
             get => Request;

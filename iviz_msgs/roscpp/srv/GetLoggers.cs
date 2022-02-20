@@ -25,8 +25,6 @@ namespace Iviz.Msgs.Roscpp
             Response = new GetLoggersResponse();
         }
         
-        IService IService.Create() => new GetLoggers();
-        
         IRequest IService.Request
         {
             get => Request;

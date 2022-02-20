@@ -25,8 +25,6 @@ namespace Iviz.Msgs.Rosapi
             Response = DeleteParamResponse.Singleton;
         }
         
-        IService IService.Create() => new DeleteParam();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MeshMsgs
             Response = new GetMaterialsResponse();
         }
         
-        IService IService.Create() => new GetMaterials();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -10,13 +10,13 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-internal sealed class ServiceCaller<T> : IServiceCaller where T : IService
+internal sealed class ServiceCaller : IDisposable
 {
     const int DefaultTimeoutInMs = 5000;
     const byte ErrorByte = 0;
 
     readonly bool requestNoDelay;
-    readonly ServiceInfo<T> serviceInfo;
+    readonly ServiceInfo serviceInfo;
     readonly TcpClient tcpClient;
 
     bool disposed;
@@ -25,7 +25,7 @@ internal sealed class ServiceCaller<T> : IServiceCaller where T : IService
     public string ServiceType => serviceInfo.Service;
     public Uri? RemoteUri { get; private set; }
 
-    public ServiceCaller(ServiceInfo<T> serviceInfo, bool requestNoDelay = true)
+    public ServiceCaller(ServiceInfo serviceInfo, bool requestNoDelay = true)
     {
         this.serviceInfo = serviceInfo;
         this.requestNoDelay = requestNoDelay;
@@ -123,21 +123,21 @@ internal sealed class ServiceCaller<T> : IServiceCaller where T : IService
         return readBuffer;
     }
 
-    public async ValueTask ExecuteAsync(T service, CancellationToken token)
+    public async ValueTask ExecuteAsync(IService service, CancellationToken token)
     {
         if (tcpClient == null)
         {
             throw new InvalidOperationException("Service caller has not been started!");
         }
 
-        if (service.Request == null)
+        if (service?.Request == null)
         {
             throw new NullReferenceException("Request cannot be null");
         }
 
         service.Request.RosValidate();
 
-        IRequest requestMsg = service.Request;
+        var requestMsg = service.Request;
         int msgLength = requestMsg.RosMessageLength;
 
         using var writeBuffer = new Rent<byte>(msgLength);
@@ -153,11 +153,10 @@ internal sealed class ServiceCaller<T> : IServiceCaller where T : IService
 
         if (statusByte == ErrorByte)
         {
-            throw new RosServiceCallFailed(serviceInfo.Service,
-                BuiltIns.UTF8.GetString(readBuffer.Array, 0, readBuffer.Length));
+            throw new RosServiceCallFailed(serviceInfo.Service, BuiltIns.UTF8.GetString(readBuffer));
         }
 
-        service.Response = (IResponse) service.Response.DeserializeFrom(readBuffer);
+        service.Response = (IResponse)service.Response.DeserializeFrom(readBuffer);
     }
 
     async ValueTask<byte> ReadOneByteAsync(CancellationToken token)

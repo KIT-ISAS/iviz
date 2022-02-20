@@ -25,8 +25,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
             Response = new AddDiagnosticsResponse();
         }
         
-        IService IService.Create() => new AddDiagnostics();
-        
         IRequest IService.Request
         {
             get => Request;
