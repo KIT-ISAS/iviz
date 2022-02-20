@@ -102,7 +102,7 @@ namespace Iviz.MsgsGen.Dynamic
                             Activator.CreateInstance(typeof(StructFixedArrayField<>).MakeGenericType(csType),
                                 element.ArraySize)
                     };
-                    field = (IField) (tmpField ?? throw new NullReferenceException());
+                    field = (IField)(tmpField ?? throw new NullReferenceException());
                 }
                 else if (allowAssemblyLookup &&
                          (csType = BuiltIns.TryGetTypeFromMessageName(FullRosName(rosType))) != null)
@@ -117,7 +117,7 @@ namespace Iviz.MsgsGen.Dynamic
                             Activator.CreateInstance(typeof(MessageFixedArrayField<>).MakeGenericType(csType),
                                 element.ArraySize)
                     };
-                    field = (IField) (tmpField ?? throw new NullReferenceException());
+                    field = (IField)(tmpField ?? throw new NullReferenceException());
                 }
                 else
                 {
@@ -224,10 +224,6 @@ namespace Iviz.MsgsGen.Dynamic
             return RosDeserialize(ref b);
         }
 
-        public void Dispose()
-        {
-        }
-
         public static bool IsDynamic<T>() => typeof(DynamicMessage) == typeof(T);
 
         public static bool IsGenericMessage<T>() => typeof(IMessage) == typeof(T);
@@ -255,7 +251,7 @@ namespace Iviz.MsgsGen.Dynamic
             }
 
             var msgDefinitionsWithHeader = dependencies
-                .Split(new[] {ClassInfo.DependencySeparator}, StringSplitOptions.RemoveEmptyEntries)
+                .Split(new[] { ClassInfo.DependencySeparator }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(def => def.Trim());
             var msgDefinitions = StripHeader(fullRosMsgName, msgDefinitionsWithHeader);
             var classInfos = msgDefinitions.Select(tuple => new ClassInfo("", tuple.Name, tuple.Definition));
@@ -282,13 +278,13 @@ namespace Iviz.MsgsGen.Dynamic
                 if (!isFirst)
                 {
                     int newLineIndex = msgDefinition.IndexOf('\n');
-                    if (newLineIndex < 5 || msgDefinition.Substring(0, 5) != "MSG: ")
+                    if (newLineIndex < 5 || msgDefinition[..5] != "MSG: ")
                     {
                         throw new MessageParseException("Expected message name in the first line");
                     }
 
                     string name = msgDefinition.Substring(5, newLineIndex - 5).Trim();
-                    yield return (name, msgDefinition.Substring(newLineIndex + 1));
+                    yield return (name, msgDefinition[(newLineIndex + 1)..]);
                 }
                 else
                 {
@@ -297,8 +293,9 @@ namespace Iviz.MsgsGen.Dynamic
                 }
             }
         }
-        
-        [Preserve] public static IField[][] AotFields => new[]
+
+        [Preserve]
+        public static IField[][] AotFields => new[]
         {
             CreateAotFields<Vector3>(),
             CreateAotFields<Point>(),
@@ -332,9 +329,9 @@ namespace Iviz.MsgsGen.Dynamic
         };
 
         static IField[] CreateAotFields<T>() where T : struct, IMessage, IDeserializable<T> => new IField[]
-            {new MessageField<T>(), new MessageArrayField<T>(), new MessageFixedArrayField<T>(0)};
+            { new MessageField<T>(), new MessageArrayField<T>(), new MessageFixedArrayField<T>(0) };
 
         static IField[] CreateAotStructFields<T>() where T : unmanaged => new IField[]
-            {new StructField<T>(), new StructArrayField<T>(), new StructFixedArrayField<T>(0)};
+            { new StructField<T>(), new StructArrayField<T>(), new StructFixedArrayField<T>(0) };
     }
 }
