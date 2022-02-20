@@ -179,15 +179,8 @@ namespace Iviz.Displays
 
         public void ProcessPng(byte[] data, Action onFinished)
         {
-            if (data == null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
-
-            if (onFinished == null)
-            {
-                throw new ArgumentNullException(nameof(onFinished));
-            }
+            ThrowHelper.ThrowIfNull(data, nameof(data));
+            ThrowHelper.ThrowIfNull(onFinished, nameof(onFinished));
 
             Task.Run(() =>
             {
@@ -249,15 +242,8 @@ namespace Iviz.Displays
 
         public void ProcessJpg(byte[] data, Action onFinished)
         {
-            if (data == null)
-            {
-                throw new ArgumentNullException(nameof(data));
-            }
-
-            if (onFinished == null)
-            {
-                throw new ArgumentNullException(nameof(onFinished));
-            }
+            ThrowHelper.ThrowIfNull(data, nameof(data));
+            ThrowHelper.ThrowIfNull(onFinished, nameof(onFinished));
 
             Task.Run(() =>
             {
@@ -353,10 +339,7 @@ namespace Iviz.Displays
 
         public void Set(int width, int height, string encoding, ReadOnlySpan<byte> data, bool generateMipmaps = false)
         {
-            if (encoding == null)
-            {
-                throw new ArgumentNullException(nameof(encoding));
-            }
+            ThrowHelper.ThrowIfNull(encoding, nameof(encoding));
 
             int size = width * height;
 

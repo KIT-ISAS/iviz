@@ -127,23 +127,12 @@ namespace Iviz.Displays
 
         public void Set(int newCellsX, int newCellsY, float width, float height, ReadOnlySpan<float> data)
         {
-            if (texture == null)
-            {
-                throw new NullReferenceException("Input texture has not been set!");
-            }
-
-            EnsureSize(newCellsX, newCellsY);
-
             Transform.localScale = new Vector3(width, height, scaleHeight).Ros2Unity().Abs();
             Transform.localPosition = new Vector3(-width / 2, -height / 2, 0).Ros2Unity();
 
-            texture.GetRawTextureData<float>().CopyFrom(data);
-            /*
-            NativeArray<float>.Copy(data, 0,
-                inputTexture.GetRawTextureData<float>().GetSubArray(0, length), 0, length);
-                */
-
-            texture.Apply();
+            var textureToUse = EnsureSize(newCellsX, newCellsY);
+            textureToUse.GetRawTextureData<float>().CopyFrom(data);
+            textureToUse.Apply();
 
             float min = float.MaxValue, max = float.MinValue;
             foreach (float val in data)
@@ -170,11 +159,11 @@ namespace Iviz.Displays
             }
         }
 
-        void EnsureSize(int newWidth, int newHeight)
+        Texture2D EnsureSize(int newWidth, int newHeight)
         {
-            if (newWidth == cellsX && newHeight == cellsY)
+            if (texture != null && newWidth == cellsX && newHeight == cellsY)
             {
-                return;
+                return texture;
             }
 
             if (mesh == null)
@@ -223,6 +212,7 @@ namespace Iviz.Displays
 
                 mesh.SetVertices(pointsArray);
                 mesh.SetIndices(indicesArray, MeshTopology.Quads, 0);
+                mesh.RecalculateNormals();
                 mesh.Optimize();
             }
 
@@ -244,6 +234,8 @@ namespace Iviz.Displays
                 transparentMaterial.SetTexture(PropInputTexture, texture);
                 transparentMaterial.SetVector(PropSquareCoeff, textureParams);
             }
+
+            return texture;
         }
 
         void OnDestroy()

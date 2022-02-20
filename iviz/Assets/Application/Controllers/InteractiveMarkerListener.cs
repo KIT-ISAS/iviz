@@ -95,10 +95,7 @@ namespace Iviz.Controllers
 
         public void GenerateLog(StringBuilder description)
         {
-            if (description == null)
-            {
-                throw new ArgumentNullException(nameof(description));
-            }
+            ThrowHelper.ThrowIfNull(description, nameof(description));
 
             const int maxToDisplay = 50;
 

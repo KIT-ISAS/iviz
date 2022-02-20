@@ -618,10 +618,7 @@ namespace Iviz.Displays
 
         public bool TryWriteJoint(string jointName, float value)
         {
-            if (jointName == null)
-            {
-                throw new ArgumentNullException(nameof(jointName));
-            }
+            ThrowHelper.ThrowIfNull(jointName, nameof(jointName));
 
             if (!joints.TryGetValue(jointName, out var joint))
             {

@@ -28,11 +28,6 @@ namespace Iviz.Ros
 
         public bool TrySetCallback<TU>(Func<TU, ValueTask> newCallback) where TU : IService
         {
-            if (newCallback == null)
-            {
-                throw new ArgumentNullException(nameof(newCallback));
-            }
-            
             if (newCallback is not Func<T, ValueTask> validatedCallback)
             {
                 return false;

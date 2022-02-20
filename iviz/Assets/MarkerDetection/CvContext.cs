@@ -89,10 +89,7 @@ namespace Iviz.MarkerDetection
 
         public void SetImageData(byte[] image, int bpp)
         {
-            if (image == null)
-            {
-                throw new ArgumentNullException(nameof(image));
-            }
+            ThrowHelper.ThrowIfNull(image, nameof(image));
 
             if (bpp != 3)
             {
@@ -234,10 +231,10 @@ namespace Iviz.MarkerDetection
 
             intrinsic.CopyTo(cameraFloats);
 
-            if (!Native.EstimatePnp(in inputFloats.GetPinnableReference(), inputFloats.Length,
-                    in outputFloats.GetPinnableReference(), outputFloats.Length,
-                    in cameraFloats.GetPinnableReference(), cameraFloats.Length,
-                    ref resultFloats.GetPinnableReference(), resultFloats.Length))
+            if (!Native.EstimatePnp(in MemoryMarshal.GetReference(inputFloats), inputFloats.Length,
+                    in MemoryMarshal.GetReference(outputFloats), outputFloats.Length,
+                    in MemoryMarshal.GetReference(cameraFloats), cameraFloats.Length,
+                    ref MemoryMarshal.GetReference(resultFloats), resultFloats.Length))
             {
                 throw new CvMarkerException();
             }

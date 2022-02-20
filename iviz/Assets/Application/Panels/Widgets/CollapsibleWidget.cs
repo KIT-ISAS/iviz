@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Iviz.Core;
 using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
@@ -24,11 +25,7 @@ namespace Iviz.App
             get => label.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-                
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 name = "CollapsibleWidget:" + value;
                 text = value;
                 UpdateText();

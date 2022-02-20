@@ -59,21 +59,13 @@ namespace Iviz.Resources
 
         public bool ContainsRobot(string robotName)
         {
-            if (robotName == null)
-            {
-                throw new ArgumentNullException(nameof(robotName));
-            }
-
+            ThrowHelper.ThrowIfNull(robotName, nameof(robotName));
             return robotDescriptions.ContainsKey(robotName);
         }
 
         public bool TryGetRobot(string robotName, [NotNullWhen(true)] out string? robotDescription)
         {
-            if (robotName == null)
-            {
-                throw new ArgumentNullException(nameof(robotName));
-            }
-
+            ThrowHelper.ThrowIfNull(robotName, nameof(robotName));
             return robotDescriptions.TryGetValue(robotName, out robotDescription);
         }
 
@@ -91,10 +83,7 @@ namespace Iviz.Resources
             [NotNullWhen(true)] out ResourceKey<T>? info)
             where T : UnityEngine.Object
         {
-            if (uriString is null)
-            {
-                throw new ArgumentNullException(nameof(uriString));
-            }
+            ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
 
             if (repository.TryGetValue(uriString, out var infoCandidate))
             {

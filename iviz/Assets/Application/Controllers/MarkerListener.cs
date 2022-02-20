@@ -283,10 +283,7 @@ namespace Iviz.Controllers
 
         public void GenerateLog(StringBuilder description)
         {
-            if (description == null)
-            {
-                throw new ArgumentNullException(nameof(description));
-            }
+            ThrowHelper.ThrowIfNull(description, nameof(description));
 
             foreach (var marker in markers.Values.Take(MaxMarkersInLog))
             {

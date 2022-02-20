@@ -19,7 +19,8 @@ namespace Iviz.App
 
         protected ListenerModuleData(string topic)
         {
-            Topic = topic ?? throw new ArgumentNullException(nameof(topic));
+            ThrowHelper.ThrowIfNull(topic, nameof(topic));
+            Topic = topic;
             ModuleListPanel.RegisterDisplayedTopic(Topic);
         }
         

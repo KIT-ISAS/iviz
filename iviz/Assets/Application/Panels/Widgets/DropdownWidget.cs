@@ -33,11 +33,7 @@ namespace Iviz.App
             get => Label.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-                
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 Label.text = value;
                 name = "Dropdown:" + value;
             }
@@ -48,11 +44,7 @@ namespace Iviz.App
             get => optionDatas[Index].text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-                
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 int index = optionDatas.FindIndex(data => data.text == value);
                 if (index == -1)
                 {

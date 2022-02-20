@@ -6,6 +6,7 @@
     public sealed class MarkerModulePanel : ListenerModulePanel
     {
         public TrashButtonWidget CloseButton { get; private set; }
+        public TrashButtonWidget ResetButton { get; private set; }
         public ColorPickerWidget Tint { get; private set; }
         public ToggleWidget TriangleListFlipWinding { get; private set; }
         public ToggleWidget ShowDescriptions { get; private set; }
@@ -24,7 +25,7 @@
             Listener = p.AddListener();
             //PreferUdp = p.AddToggle("Prefer UDP");
 
-            TriangleListFlipWinding = p.AddToggle("Flip Winding in Triangle Lists");
+            TriangleListFlipWinding = p.AddToggle("Clockwise Winding in Triangle Lists");
             ShowDescriptions = p.AddToggle("Show Descriptions");
             OcclusionOnlyMode = p.AddToggle("AR Occlusion Only Mode");
             Tint = p.AddColorPicker("Tint");
@@ -42,6 +43,7 @@
             
             CloseButton = p.AddTrashButton();
             HideButton = p.AddHideButton();
+            ResetButton = p.AddResetButton();
 
             Mask = p.AddDropdown("Visible Mask");
             Marker = p.AddMarker();

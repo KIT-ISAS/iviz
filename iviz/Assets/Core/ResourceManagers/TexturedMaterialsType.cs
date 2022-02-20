@@ -55,11 +55,7 @@ namespace Iviz.Resources
 
         public Material GetSimple(Texture? diffuse)
         {
-            if (diffuse == null)
-            {
-                throw new ArgumentNullException(nameof(diffuse));
-            }
-
+            ThrowHelper.ThrowIfNull(diffuse, nameof(diffuse));
             var key = new SimpleKey(diffuse, false);
             if (simpleMaterialsByTexture.TryGetValue(key, out var existingMaterial))
             {
@@ -115,11 +111,7 @@ namespace Iviz.Resources
 
         Material GetAlphaSimple(Texture? diffuse = null)
         {
-            if (diffuse == null)
-            {
-                throw new ArgumentNullException(nameof(diffuse));
-            }
-
+            ThrowHelper.ThrowIfNull(diffuse, nameof(diffuse));
             var key = new SimpleKey(diffuse, true);
             if (simpleMaterialsByTexture.TryGetValue(key, out var existingMaterial))
             {

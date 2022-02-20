@@ -19,7 +19,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool ShowDescriptions { get; set; }
         [DataMember] public ColorRGBA Tint { get; set; } = ColorRGBA.White;
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public bool PreferUdp { get; set; } = false;
+        [DataMember] public bool PreferUdp { get; set; }
         [DataMember] public ModuleType ModuleType => ModuleType.Marker;
         [DataMember] public float Smoothness { get; set; } = 0.5f;
         [DataMember] public float Metallic { get; set; } = 0.5f;

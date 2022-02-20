@@ -1,4 +1,5 @@
 ﻿using System;
+using Iviz.Core;
 using Iviz.Resources;
 using JetBrains.Annotations;
 using TMPro;
@@ -33,11 +34,7 @@ namespace Iviz.App
             get => label.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 name = "ColorPicker:" + value;
                 label.text = value;
             }

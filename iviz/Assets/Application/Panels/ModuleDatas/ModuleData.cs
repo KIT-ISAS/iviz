@@ -86,13 +86,9 @@ namespace Iviz.App
 
         public static ModuleData CreateFromResource(ModuleDataConstructor c)
         {
-            if (c is null)
+            return c?.ModuleType switch
             {
-                throw new ArgumentNullException(nameof(c));
-            }
-
-            return c.ModuleType switch
-            {
+                null => throw new ArgumentNullException(nameof(c)),
                 ModuleType.TF => new TfModuleData(c),
                 ModuleType.PointCloud => new PointCloudModuleData(c),
                 ModuleType.Grid => new GridModuleData(c),

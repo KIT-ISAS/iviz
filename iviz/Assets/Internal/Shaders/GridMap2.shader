@@ -4,6 +4,7 @@
     {
         _IntensityTex("Atlas Texture", 2D) = "defaulttexture" {}
         _SquareTex("Square Texture", 2D) = "defaulttexture" {}
+        _InputTex("Input Texture", 2D) = "defaulttexture" {}
     }
 
     SubShader
@@ -49,7 +50,7 @@
                 tex2D(_IntensityTex, IN.intensityUV) *
                 tex2D(_SquareTex, IN.squareTextureUV) *
                 _Tint;
-            o.Emission = o.Albedo;
+            //o.Emission = o.Albedo * 0;
             o.Metallic = _Metallic;
             o.Smoothness = _Smoothness;
         }

@@ -98,10 +98,7 @@ namespace Iviz.Core
 
         public static void Spawn(CancellationToken token, float durationInSec, Action<float> update, Action? dispose = null)
         {
-            if (update == null)
-            {
-                throw new ArgumentNullException(nameof(update));
-            }
+            ThrowHelper.ThrowIfNull(update, nameof(update));
 
             _ = new FAnimator(update, dispose, token, durationInSec); // won't be GC'd as long as it remains in EveryFrame
         }

@@ -79,43 +79,10 @@ namespace Iviz.Core
         {
             return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
         }
-
-        /*
-        static Bounds TransformBoundWithInverse(this in Bounds bounds, Transform transform)
-        {
-            var (x, y, z) = transform.localScale;
-            return TransformBound(bounds, transform.AsLocalPose().Inverse(),
-                new Vector3(1f / x, 1f / y, 1f / z));
-        }
-
         
-        public static Bounds? TransformBoundWithInverse(this in Bounds? bounds, Transform transform)
-        {
-            if (transform == null)
-            {
-                throw new ArgumentNullException(nameof(transform));
-            }
-
-            return bounds == null ? null : TransformBoundWithInverse(bounds.Value, transform);
-        }
-
-        public static Bounds? TransformBound(this in Bounds? bounds, Transform transform)
-        {
-            if (transform == null)
-            {
-                throw new ArgumentNullException(nameof(transform));
-            }
-
-            return bounds == null ? null : TransformBound(bounds.Value, transform);
-        }
-        */
-
         public static Bounds? CombineBounds(this IEnumerable<Bounds?> enumOfBounds)
         {
-            if (enumOfBounds == null)
-            {
-                throw new ArgumentNullException(nameof(enumOfBounds));
-            }
+            ThrowHelper.ThrowIfNull(enumOfBounds, nameof(enumOfBounds));
 
             Bounds? result = null;
             using var it = enumOfBounds.GetEnumerator();

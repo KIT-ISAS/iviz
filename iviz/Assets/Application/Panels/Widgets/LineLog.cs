@@ -37,10 +37,7 @@ namespace Iviz.App
 
         public void Add(string str)
         {
-            if (str == null)
-            {
-                throw new ArgumentNullException(nameof(str));
-            }
+            ThrowHelper.ThrowIfNull(str, nameof(str));
 
             if (str.IndexOf('\n') != -1)
             {

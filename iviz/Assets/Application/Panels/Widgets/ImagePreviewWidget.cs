@@ -1,4 +1,5 @@
 ﻿using System;
+using Iviz.Core;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.UI;
@@ -38,11 +39,7 @@ namespace Iviz.App
             get => label.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-                
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 name = "ImagePreview:" + value;
                 label.text = value;
             }

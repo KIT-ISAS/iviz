@@ -802,4 +802,26 @@ namespace Iviz.Core
         public static readonly Quaternion Rotate270AroundY = new(0, 0.707106769f, 0, -0.707106769f);
         public static readonly Quaternion Rotate180AroundZ = new(0, 0, 1, 0);
     }
+
+    public static class ThrowHelper
+    {
+        public static void ThrowIfNull([NotNull] UnityEngine.Object? t, string nameOfT)
+        {
+            if (t == null)
+            {
+                ThrowNull(nameOfT);
+            }
+        }
+
+        public static void ThrowIfNull([NotNull] object? t, string nameOfT)
+        {
+            if (t is null)
+            {
+                ThrowNull(nameOfT);
+            }
+        }
+        
+        [DoesNotReturn]
+        static void ThrowNull(string paramName) => throw new ArgumentNullException(paramName);        
+    }
 }

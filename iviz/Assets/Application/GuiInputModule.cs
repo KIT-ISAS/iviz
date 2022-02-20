@@ -359,6 +359,8 @@ namespace Iviz.App
         void OnDestroy()
         {
             instance = null;
+            TfListener.AfterProcessMessages -= ProcessPoseChanges;
+            GameThread.EveryFrame -= ProcessPointer;
         }
 
         void Start()
@@ -398,6 +400,12 @@ namespace Iviz.App
 
         void ProcessPoseChanges()
         {
+            if (this == null)
+            {
+                Debug.Log("ProcessPose when dead!");
+                return;
+            }
+            
             if (CameraViewOverride != null)
             {
                 Transform.SetPose(CameraViewOverride.AbsoluteUnityPose);
