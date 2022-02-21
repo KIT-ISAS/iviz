@@ -49,8 +49,8 @@ namespace Iviz.Rosbag.Reader
 
         void ValidateMagic()
         {
-            using var renter = new Rent<byte>(RosbagMagic.Length);
-            reader.Read(renter.Array, 0, RosbagMagic.Length);
+            Span<byte> renter = stackalloc byte[RosbagMagicLength];
+            reader.Read(renter);
 
             for (int i = 0; i < RosbagMagic.Length; i++)
             {
@@ -101,6 +101,7 @@ namespace Iviz.Rosbag.Reader
 
         /// <summary>
         /// Get all messages in the file, and associates them with their originating connection.
+        /// You can use <see cref="Utils.SelectMessage{T}"/> on the result to enumerate on the messages.
         /// </summary>
         /// <returns>An enumerable that iterates through the messages.</returns>
         public IEnumerable<MessageData> ReadAllMessages()

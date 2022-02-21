@@ -10,6 +10,9 @@ using Iviz.Tools;
 
 namespace Iviz.Rosbag.Reader
 {
+    /// <summary>
+    /// Record header entry. The enclosed type depends on the specification.
+    /// </summary>
     public readonly struct RecordHeaderEntry
     {
         readonly Stream reader;
@@ -18,36 +21,10 @@ namespace Iviz.Rosbag.Reader
         readonly long nextStart;
         readonly long end;
 
-        /*
-        public string FieldName
-        {
-            get
-            {
-                using var name = new Rent<byte>((int)(valueStart - nameStart - 1));
-                reader.Seek(nameStart, SeekOrigin.Begin);
-                reader.Read(name.Array, 0, name.Length);
-                return Encoding.ASCII.GetString(name.Array, 0, name.Length);
-            }
-        }
-        */
-
-        /*
-        Rent<byte> Value
-        {
-            get
-            {
-                var value = new Rent<byte>((int)(nextStart - valueStart));
-                reader.Seek(valueStart, SeekOrigin.Begin);
-                reader.Read(value.Array, 0, value.Length);
-                return value;
-            }
-        }
-        */
-
         T ReadValue<T>() where T : unmanaged
         {
             Span<byte> span = stackalloc byte[Unsafe.SizeOf<T>()];
-            if (span.Length > (int)(nextStart - valueStart))
+            if (span.Length > nextStart - valueStart)
             {
                 throw new IndexOutOfRangeException();
             }
@@ -64,6 +41,11 @@ namespace Iviz.Rosbag.Reader
         {
             get
             {
+                if (nextStart == valueStart)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+                
                 reader.Seek(valueStart, SeekOrigin.Begin);
                 return (byte)reader.ReadByte();
             }
@@ -74,41 +56,18 @@ namespace Iviz.Rosbag.Reader
         public long ValueAsLong => ReadValue<long>();
 
         public time ValueAsTime => ReadValue<time>();
-        /*
-        public int ValueAsInt
-        {
-            get
-            {
-                using var value = Value;
-                return value.Read<int>();
-            }
-        }
-
-        public long ValueAsLong
-        {
-            get
-            {
-                using var value = Value;
-                return value.Read<long>();
-            }
-        }
-
-        public time ValueAsTime
-        {
-            get
-            {
-                using var value = Value;
-                return value.Read<time>();
-            }
-        }
-        */
 
         public string ValueAsString
         {
             get
             {
+                if (nextStart == valueStart)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+                
                 int msgSize = (int)(nextStart - valueStart);
-                Rent<byte> rent = default;
+                var rent = Rent.Empty<byte>();
                 Span<byte> span = msgSize < 256
                     ? stackalloc byte[msgSize]
                     : (rent = new Rent<byte>(msgSize)).AsSpan();
@@ -123,9 +82,6 @@ namespace Iviz.Rosbag.Reader
                 {
                     rent.Dispose();
                 }
-
-                //using var value = Value;
-                //return Encoding.ASCII.GetString(value.Array, 0, value.Length);
             }
         }
 
@@ -189,7 +145,7 @@ namespace Iviz.Rosbag.Reader
             return false;
         }
 
-        public bool NameEquals(string name)
+        internal bool NameEquals(string name)
         {
             if (name.Length != valueStart - nameStart - 1)
             {
@@ -208,7 +164,7 @@ namespace Iviz.Rosbag.Reader
             return true;
         }
 
-        public bool ValueEquals(string value)
+        internal bool ValueEquals(string value)
         {
             if (value.Length != nextStart - valueStart)
             {

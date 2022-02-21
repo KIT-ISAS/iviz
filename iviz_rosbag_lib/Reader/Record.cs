@@ -35,7 +35,7 @@ namespace Iviz.Rosbag.Reader
             : throw new InvalidOperationException("Operation only allowed in Chunk types");
 
         /// <summary>
-        /// If this is a MessageData record, generates an object containing the corresponding fields.
+        /// If this is a MessageData record, generates a wrapper containing the message.
         /// </summary>
         public MessageData GetMessageData(Connection connection) => OpCode == OpCode.MessageData
             ? new MessageData(reader, dataStart, nextStart, Time, connection)

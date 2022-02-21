@@ -9,6 +9,10 @@ using ISerializable = Iviz.Msgs.ISerializable;
 
 namespace Iviz.Rosbag.Reader
 {
+    /// <summary>
+    /// Record structure that contains a ROS message.
+    /// You should use <see cref="Utils.SelectMessage{T}"/> to enumerate on the messages, instead of reading this directly.
+    /// </summary>
     [DataContract]
     public readonly struct MessageData
     {
@@ -19,12 +23,36 @@ namespace Iviz.Rosbag.Reader
         [DataMember] readonly long dataStart;
         [DataMember] readonly long dataEnd;
 
-        [DataMember] public time Time { get; }
-        [DataMember] public Connection Connection { get; }
-        
+        /// <summary>
+        /// Timestamp of the message.
+        /// </summary>
+        [DataMember]
+        public time Time { get; }
+
+        /// <summary>
+        /// Connection from which the message originated.
+        /// </summary>
+        [DataMember]
+        public Connection Connection { get; }
+
+        /// <summary>
+        /// ROS topic from which the message originated.
+        /// </summary>
         public string? Topic => Connection.Topic;
+
+        /// <summary>
+        /// ROS message type.
+        /// </summary>
         public string? Type => Connection.MessageType;
+
+        /// <summary>
+        /// The MD5 checksum of the ROS message type.
+        /// </summary>
         public string? Md5Sum => Connection.Md5Sum;
+
+        /// <summary>
+        /// The text definition of the ROS message type.
+        /// </summary>        
         public string? MessageDefinition => Connection?.MessageDefinition;
 
         internal MessageData(Stream reader, long dataStart, long dataEnd, time time, Connection connection)
@@ -39,7 +67,7 @@ namespace Iviz.Rosbag.Reader
         public T GetMessage<T>(in T generator) where T : IMessage, IDeserializable<T>, new()
         {
             int msgSize = (int)(dataEnd - dataStart);
-            Rent<byte> rent = default;
+            var rent = Rent.Empty<byte>();
             Span<byte> span = msgSize < 256
                 ? stackalloc byte[msgSize]
                 : (rent = new Rent<byte>(msgSize)).AsSpan();
@@ -55,7 +83,7 @@ namespace Iviz.Rosbag.Reader
                 rent.Dispose();
             }
         }
-        
+
         public T GetMessage<T>() where T : IMessage, IDeserializable<T>, new()
         {
             IDeserializable<T> generator;
@@ -70,7 +98,7 @@ namespace Iviz.Rosbag.Reader
             }
 
             int msgSize = (int)(dataEnd - dataStart);
-            Rent<byte> rent = default;
+            var rent = Rent.Empty<byte>();
             Span<byte> span = msgSize < 256
                 ? stackalloc byte[msgSize]
                 : (rent = new Rent<byte>(msgSize)).AsSpan();
@@ -85,7 +113,7 @@ namespace Iviz.Rosbag.Reader
             {
                 rent.Dispose();
             }
-        }        
+        }
 
         public IMessage GetMessage()
         {
@@ -116,7 +144,7 @@ namespace Iviz.Rosbag.Reader
             }
 
             int msgSize = (int)(dataEnd - dataStart);
-            Rent<byte> rent = default;
+            var rent = Rent.Empty<byte>();
             Span<byte> span = msgSize < 256
                 ? stackalloc byte[msgSize]
                 : (rent = new Rent<byte>(msgSize)).AsSpan();
