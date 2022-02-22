@@ -13,25 +13,32 @@ namespace Iviz.Rosbag.Reader
     public readonly struct Record
     {
         readonly Stream reader;
+        readonly long headerStart;
+        readonly int dataOffset;
+        readonly int nextOffset;
+
+        long DataStart => headerStart + dataOffset;
+        long NextStart => headerStart + nextOffset;
+        
+        //readonly long dataStart;
+        //readonly long nextStart;
 
         [DataMember] public OpCode OpCode { get; }
-
-        readonly long headerStart;
-        readonly long dataStart;
-        readonly long nextStart;
-        readonly long end;
-
 
         /// <summary>
         /// Gets all the headers of the record.
         /// </summary>
-        public HeaderEntryEnumerable RecordHeaders => new(new RecordHeaderEntry(reader, headerStart, dataStart - 4));
+        public HeaderEntryEnumerable RecordHeaders => new(new RecordHeaderEntry(reader, headerStart), DataStart - 4);
 
         /// <summary>
         /// If this is a Chunk record, generates an wrapper containing the chunk info.
         /// </summary>
         public Chunk Chunk => OpCode == OpCode.Chunk
-            ? new Chunk(reader, dataStart, nextStart, IsCompressed)
+            ? new Chunk(reader, DataStart, NextStart, IsCompressed)
+            : throw new InvalidOperationException("Operation only allowed in Chunk types");
+
+        public RecordEnumerable ChunkRecords => OpCode == OpCode.Chunk
+            ? new RecordEnumerable(new Record(reader, DataStart), NextStart)
             : throw new InvalidOperationException("Operation only allowed in Chunk types");
 
         /// <summary>
@@ -43,14 +50,14 @@ namespace Iviz.Rosbag.Reader
         /// If this is a MessageData record, generates a wrapper containing the message and sets the connection info.
         /// </summary>
         public MessageData GetMessageData(Connection? connection) => OpCode == OpCode.MessageData
-            ? new MessageData(reader, dataStart, nextStart, Time, connection)
+            ? new MessageData(reader, DataStart, NextStart, Time, connection)
             : throw new InvalidOperationException("Operation only allowed in MessageData types");
 
         /// <summary>
         /// If this is a Connection record, generates a wrapper containing the connection info.
         /// </summary>
         public Connection Connection => OpCode == OpCode.Connection
-            ? new Connection(reader, dataStart, nextStart, ConnectionId, Topic)
+            ? new Connection(reader, DataStart, NextStart, ConnectionId, Topic)
             : throw new InvalidOperationException("Operation only allowed in Connection types");
 
         bool IsCompressed => TryGetHeaderEntry("compression", out var entry) && entry.ValueEquals("bz2");
@@ -61,21 +68,16 @@ namespace Iviz.Rosbag.Reader
 
         string? Topic => TryGetHeaderEntry("topic", out var entry) ? entry.ValueAsString : null;
 
-        internal Record(Stream reader) : this(reader, RosbagFileReader.RosbagMagicLength, reader.Length)
-        {
-        }
-
-        internal Record(Stream reader, long start, long end)
+        internal Record(Stream reader, long start)
         {
             this.reader = reader;
-            headerStart = 0;
-            dataStart = 0;
-            nextStart = start;
-            this.end = end;
+            headerStart = start;
+            dataOffset = 0;
+            nextOffset = 0;
             OpCode = OpCode.Unknown;
         }
 
-        Record(long start, long end, Stream reader)
+        Record(long start, Stream reader)
         {
             this.reader = reader;
 
@@ -101,10 +103,11 @@ namespace Iviz.Rosbag.Reader
 
             //Console.WriteLine("** data_len " + dataLength);
 
-            dataStart = headerStart + headerLength + 4;
-            nextStart = dataStart + dataLength;
+            //dataStart = headerStart + headerLength + 4;
+            //nextStart = dataStart + dataLength;
+            dataOffset = headerLength + 4;
+            nextOffset = dataLength + dataOffset;
 
-            this.end = end;
             //Console.WriteLine("** end " + end);
 
             OpCode = OpCode.Unknown;
@@ -113,11 +116,12 @@ namespace Iviz.Rosbag.Reader
                 : OpCode.Unknown;
         }
 
-        internal bool TryMoveNext(out Record next)
+        internal bool TryMoveNext(long end, out Record next)
         {
+            long nextStart = NextStart;
             if (nextStart < end)
             {
-                next = new Record(nextStart, end, reader);
+                next = new Record(nextStart, reader);
                 return true;
             }
 
@@ -146,20 +150,25 @@ namespace Iviz.Rosbag.Reader
     public struct RecordEnumerator
     {
         Record current;
+        readonly long end;
 
-        internal RecordEnumerator(Record start) => current = start;
+        internal RecordEnumerator(in Record start, long end)
+        {
+            current = start;
+            this.end = end;
+        } 
 
-        public bool MoveNext() => current.TryMoveNext(out current);
+        public bool MoveNext() => current.TryMoveNext(end, out current);
 
         public Record Current => current;
     }
 
     public readonly struct RecordEnumerable
     {
-        readonly Record start;
+        readonly RecordEnumerator enumerator;
 
-        internal RecordEnumerable(Record start) => this.start = start;
+        internal RecordEnumerable(in Record start, long end) => enumerator = new RecordEnumerator(start, end);
 
-        public RecordEnumerator GetEnumerator() => new(start);
+        public RecordEnumerator GetEnumerator() => enumerator;
     }
 }

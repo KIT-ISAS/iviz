@@ -33,22 +33,22 @@ namespace Iviz.Rosbag.Reader
         /// Connection from which the message originated.
         /// </summary>
         [DataMember]
-        public Connection Connection { get; }
+        public Connection? Connection { get; }
 
         /// <summary>
         /// ROS topic from which the message originated.
         /// </summary>
-        public string? Topic => Connection.Topic;
+        public string? Topic => Connection?.Topic;
 
         /// <summary>
         /// ROS message type.
         /// </summary>
-        public string? Type => Connection.MessageType;
+        public string? Type => Connection?.MessageType;
 
         /// <summary>
         /// The MD5 checksum of the ROS message type.
         /// </summary>
-        public string? Md5Sum => Connection.Md5Sum;
+        public string? Md5Sum => Connection?.Md5Sum;
 
         /// <summary>
         /// The text definition of the ROS message type.

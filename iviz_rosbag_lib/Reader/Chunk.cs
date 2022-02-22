@@ -7,16 +7,16 @@ namespace Iviz.Rosbag.Reader
         readonly Stream reader;
         readonly long dataStart;
         readonly long dataEnd;
-        readonly bool isCompressed;
+        //readonly bool isCompressed;
 
-        public RecordEnumerable Records => new(new Record(reader, dataStart, dataEnd));
+        public RecordEnumerable Records => new(new Record(reader, dataStart), dataEnd);
 
         internal Chunk(Stream reader, long dataStart, long dataEnd, bool isCompressed)
         {
             this.reader = reader;
             this.dataStart = dataStart;
             this.dataEnd = dataEnd;
-            this.isCompressed = isCompressed;
+            //this.isCompressed = isCompressed;
         }
     }
 }

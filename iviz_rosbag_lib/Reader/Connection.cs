@@ -45,7 +45,7 @@ namespace Iviz.Rosbag.Reader
             ConnectionId = connectionId;
             Topic = topic;
 
-            headerEntries = new HeaderEntryEnumerable(new RecordHeaderEntry(reader, dataStart, dataEnd));
+            headerEntries = new HeaderEntryEnumerable(new RecordHeaderEntry(reader, dataStart), dataEnd);
 
             foreach (var entry in headerEntries)
             {
