@@ -11,6 +11,7 @@ string viz_id
 string id
 uint8 type
 int32 entry_id
+float64 angle
 geometry_msgs/Point position
 geometry_msgs/Quaternion orientation
 geometry_msgs/Vector3 scale
