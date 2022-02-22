@@ -25,8 +25,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Response = TestMultipleRequestFieldsResponse.Singleton;
         }
         
-        IService IService.Create() => new TestMultipleRequestFields();
-        
         IRequest IService.Request
         {
             get => Request;

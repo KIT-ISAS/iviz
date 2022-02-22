@@ -18,10 +18,7 @@ namespace Iviz.Core
         
         public MenuEntryList(MenuEntry[] menu)
         {
-            if (menu == null)
-            {
-                throw new ArgumentNullException(nameof(menu));
-            }
+            ThrowHelper.ThrowIfNull(menu, nameof(menu));
 
             root = new Entry();
 

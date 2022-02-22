@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MeshMsgs
             Response = new GetLabeledClustersResponse();
         }
         
-        IService IService.Create() => new GetLabeledClusters();
-        
         IRequest IService.Request
         {
             get => Request;

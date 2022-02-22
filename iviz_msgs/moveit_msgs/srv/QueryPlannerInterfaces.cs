@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new QueryPlannerInterfacesResponse();
         }
         
-        IService IService.Create() => new QueryPlannerInterfaces();
-        
         IRequest IService.Request
         {
             get => Request;

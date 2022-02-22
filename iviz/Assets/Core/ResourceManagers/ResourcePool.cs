@@ -54,17 +54,14 @@ namespace Iviz.Displays
         /// <returns>The rented object.</returns>
         public static GameObject Rent(ResourceKey<GameObject> resource, Transform? parent = null, bool enable = true)
         {
-            if (resource == null)
-            {
-                throw new ArgumentNullException(nameof(resource));
-            }
+            ThrowHelper.ThrowIfNull(resource, nameof(resource));
 
             if (instance != null)
             {
                 return instance.Get(resource, parent, enable);
             }
 
-            GameObject obj = resource.Instantiate(parent);
+            var obj = resource.Instantiate(parent);
             obj.SetActive(enable);
             return obj;
         }
@@ -81,11 +78,7 @@ namespace Iviz.Displays
         public static T Rent<T>(ResourceKey<GameObject> resource, Transform? parent = null, bool enable = true)
             where T : MonoBehaviour
         {
-            if (resource == null)
-            {
-                throw new ArgumentNullException(nameof(resource));
-            }
-
+            ThrowHelper.ThrowIfNull(resource, nameof(resource));
             return Rent(resource, parent, enable).GetComponent<T>();
         }
 
@@ -113,15 +106,8 @@ namespace Iviz.Displays
         /// <param name="gameObject">The object to return.</param>
         public static void Return(ResourceKey<GameObject> resource, GameObject gameObject)
         {
-            if (resource == null)
-            {
-                throw new ArgumentNullException(nameof(resource));
-            }
-
-            if (gameObject == null)
-            {
-                throw new ArgumentNullException(nameof(gameObject));
-            }
+            ThrowHelper.ThrowIfNull(resource, nameof(resource));
+            ThrowHelper.ThrowIfNull(gameObject, nameof(gameObject));
 
             if (instance == null)
             {
@@ -135,10 +121,7 @@ namespace Iviz.Displays
         
         internal static void ReturnDisplay(IDisplay display)
         {
-            if (display == null)
-            {
-                throw new ArgumentNullException(nameof(display));
-            }
+            ThrowHelper.ThrowIfNull(display, nameof(display));
 
             if (display is not MonoBehaviour behaviour)
             {
@@ -158,7 +141,7 @@ namespace Iviz.Displays
             float now = GameThread.GameTime;
             objectsToDestroy.Clear();
 
-            foreach (var (_, queue) in disposedObjectPool)
+            foreach (var queue in disposedObjectPool.Values)
             {
                 while (queue.Count != 0 && queue.Peek().expirationTime < now)
                 {
@@ -202,12 +185,6 @@ namespace Iviz.Displays
 
         void Add(ResourceKey<GameObject> resource, GameObject obj)
         {
-            if (obj == null)
-            {
-                Debug.LogWarning($"{this}: Attempted to return null or destroyed object of type '{resource}'");
-                return;
-            }
-
             if (CheckDuplicates)
             {
                 if (disposedObjectIds.Contains(obj.GetInstanceID()))

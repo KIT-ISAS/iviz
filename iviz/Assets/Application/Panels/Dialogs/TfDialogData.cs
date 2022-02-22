@@ -79,11 +79,7 @@ namespace Iviz.App
 
         public void Show(TfFrame frame)
         {
-            if (frame == null)
-            {
-                throw new ArgumentNullException(nameof(frame));
-            }
-
+            ThrowHelper.ThrowIfNull(frame, nameof(frame));
             Show();
             panel.TfLog.SelectedFrame = frame;
         }

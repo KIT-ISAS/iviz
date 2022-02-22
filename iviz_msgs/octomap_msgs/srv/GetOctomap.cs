@@ -25,8 +25,6 @@ namespace Iviz.Msgs.OctomapMsgs
             Response = new GetOctomapResponse();
         }
         
-        IService IService.Create() => new GetOctomap();
-        
         IRequest IService.Request
         {
             get => Request;

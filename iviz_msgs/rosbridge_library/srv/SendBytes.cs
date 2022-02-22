@@ -25,8 +25,6 @@ namespace Iviz.Msgs.RosbridgeLibrary
             Response = new SendBytesResponse();
         }
         
-        IService IService.Create() => new SendBytes();
-        
         IRequest IService.Request
         {
             get => Request;

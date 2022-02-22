@@ -25,8 +25,6 @@ namespace Iviz.Msgs.GridMapMsgs
             Response = SetGridMapResponse.Singleton;
         }
         
-        IService IService.Create() => new SetGridMap();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -40,8 +40,8 @@ public sealed class RosClient : IRosClient
 
     readonly ConcurrentDictionary<string, IRosSubscriber> subscribersByTopic = new();
     readonly ConcurrentDictionary<string, IRosPublisher> publishersByTopic = new();
-    readonly ConcurrentDictionary<string, IServiceCaller> subscribedServicesByName = new();
-    readonly ConcurrentDictionary<string, IServiceRequestManager> publishedServicesByName = new();
+    readonly ConcurrentDictionary<string, ServiceCaller> subscribedServicesByName = new();
+    readonly ConcurrentDictionary<string, ServiceRequestManager> publishedServicesByName = new();
     readonly string namespacePrefix;
 
     RosNodeServer? listener;
@@ -1608,7 +1608,7 @@ public sealed class RosClient : IRosClient
         var receivers = subscribedServicesByName.Values.ToArray();
         subscribedServicesByName.Clear();
 
-        foreach (IServiceCaller receiver in receivers)
+        foreach (var receiver in receivers)
         {
             receiver.Dispose();
         }
@@ -1782,16 +1782,16 @@ public sealed class RosClient : IRosClient
 
         if (persistent && subscribedServicesByName.TryGetValue(resolvedServiceName, out var existingReceiver))
         {
-            if (existingReceiver is not ServiceCaller<T> validatedReceiver)
+            if (service.RosType != existingReceiver.ServiceType)
             {
                 throw new RosInvalidMessageTypeException(
                     $"Existing connection of {resolvedServiceName} with service type {existingReceiver.ServiceType} " +
                     "does not match the new given type.");
             }
 
-            if (!validatedReceiver.IsAlive)
+            if (!existingReceiver.IsAlive)
             {
-                validatedReceiver.Dispose();
+                existingReceiver.Dispose();
                 subscribedServicesByName.TryRemove(resolvedServiceName, out _);
                 // continues below
             }
@@ -1800,30 +1800,31 @@ public sealed class RosClient : IRosClient
                 // is there a persistent connection? use it
                 try
                 {
-                    await validatedReceiver.ExecuteAsync(service, token);
+                    await existingReceiver.ExecuteAsync(service, token);
                     return service;
                 }
                 catch (Exception e)
                 {
-                    validatedReceiver.Dispose();
+                    existingReceiver.Dispose();
                     subscribedServicesByName.TryRemove(resolvedServiceName, out _);
-                    ThrowExceptionHelper(e, resolvedServiceName, validatedReceiver.RemoteUri);
-                    throw; // unreachable
+                    if (e is OperationCanceledException or RosServiceCallFailed) throw;
+                    throw new RoslibException($"Service call '{resolvedServiceName}' to " +
+                                              $"{existingReceiver.RemoteUri?.ToString() ?? "[unknown]"} failed", e);
                 }
             }
         }
 
         var response = await RosMasterClient.LookupServiceAsync(resolvedServiceName, token);
-        if (!response.IsValid)
+        if (!response.IsValid || response.ServiceUri == null)
         {
             throw new RosServiceNotFoundException(resolvedServiceName, response.StatusMessage);
         }
 
-        Uri serviceUri = response.ServiceUri!;
-        var serviceInfo = new ServiceInfo<T>(CallerId, resolvedServiceName);
+        var serviceUri = response.ServiceUri;
+        var serviceInfo = ServiceInfo.Instantiate<T>(CallerId, resolvedServiceName);
         if (persistent)
         {
-            var serviceCaller = new ServiceCaller<T>(serviceInfo);
+            var serviceCaller = new ServiceCaller(serviceInfo);
             try
             {
                 subscribedServicesByName.TryAdd(resolvedServiceName, serviceCaller);
@@ -1835,14 +1836,15 @@ public sealed class RosClient : IRosClient
             {
                 serviceCaller.Dispose();
                 subscribedServicesByName.TryRemove(resolvedServiceName, out _);
-                ThrowExceptionHelper(e, resolvedServiceName, serviceUri);
-                throw; // unreachable
+                if (e is OperationCanceledException or RosServiceCallFailed) throw;
+                throw new RoslibException($"Service call '{resolvedServiceName}' to " +
+                                          $"{serviceUri?.ToString() ?? "[unknown]"} failed", e);
             }
         }
 
         try
         {
-            using var serviceCaller = new ServiceCaller<T>(serviceInfo);
+            using var serviceCaller = new ServiceCaller(serviceInfo);
             await serviceCaller.StartAsync(serviceUri, persistent, token);
             await serviceCaller.ExecuteAsync(service, token);
             return service;
@@ -1853,24 +1855,14 @@ public sealed class RosClient : IRosClient
         }
     }
 
-    static void ThrowExceptionHelper(Exception e, string name, Uri? uri)
-    {
-        if (e is OperationCanceledException or RosServiceCallFailed)
-        {
-            ExceptionDispatchInfo.Capture(e).Throw();
-        }
-
-        throw new RoslibException($"Service call '{name}' to {uri?.ToString() ?? "[unknown]"} failed", e);
-    }
-
-    bool ServiceAlreadyAdvertised<T>(string serviceName) where T : IService
+    bool ServiceAlreadyAdvertised(string serviceName, string serviceType)
     {
         if (!publishedServicesByName.TryGetValue(serviceName, out var existingSender))
         {
             return false;
         }
 
-        if (existingSender is not ServiceRequestManager<T>)
+        if (existingSender.ServiceType != serviceType)
         {
             throw new RosInvalidMessageTypeException(
                 $"Existing advertised service type {existingSender.ServiceType} for {serviceName} does not match the given type.");
@@ -1927,14 +1919,16 @@ public sealed class RosClient : IRosClient
     {
         string resolvedServiceName = ResolveResourceName(serviceName);
 
-        if (ServiceAlreadyAdvertised<T>(resolvedServiceName))
+        var serviceInfo = ServiceInfo.Instantiate<T>(CallerId, resolvedServiceName, () => new T());
+
+        if (ServiceAlreadyAdvertised(resolvedServiceName, serviceInfo.Type))
         {
             return false;
         }
 
-        ServiceInfo<T> serviceInfo = new(CallerId, resolvedServiceName, new T());
+        ValueTask Callback(IService service) => callback((T)service);
 
-        var advertisedService = new ServiceRequestManager<T>(serviceInfo, CallerUri.Host, callback);
+        var advertisedService = new ServiceRequestManager(serviceInfo, CallerUri.Host, Callback);
 
         publishedServicesByName.TryAdd(resolvedServiceName, advertisedService);
 

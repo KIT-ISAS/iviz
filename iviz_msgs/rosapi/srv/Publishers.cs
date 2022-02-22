@@ -25,8 +25,6 @@ namespace Iviz.Msgs.Rosapi
             Response = new PublishersResponse();
         }
         
-        IService IService.Create() => new Publishers();
-        
         IRequest IService.Request
         {
             get => Request;

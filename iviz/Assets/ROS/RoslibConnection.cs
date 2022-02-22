@@ -529,11 +529,7 @@ namespace Iviz.Ros
 
         internal void Advertise<T>(Sender<T> advertiser) where T : IMessage
         {
-            if (advertiser == null)
-            {
-                throw new ArgumentNullException(nameof(advertiser));
-            }
-
+            ThrowHelper.ThrowIfNull(advertiser, nameof(advertiser));
             advertiser.Id = InvalidId;
             CancellationToken token = runningTs.Token;
             AddTask(async () =>
@@ -591,15 +587,8 @@ namespace Iviz.Ros
 
         public void AdvertiseService<T>(string service, Action<T> callback) where T : IService, new()
         {
-            if (service == null)
-            {
-                throw new ArgumentNullException(nameof(service));
-            }
-
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            ThrowHelper.ThrowIfNull(service, nameof(service));
+            ThrowHelper.ThrowIfNull(callback, nameof(callback));
 
             AdvertiseService(service, (T t) =>
             {
@@ -610,15 +599,8 @@ namespace Iviz.Ros
 
         public void AdvertiseService<T>(string service, Func<T, ValueTask> callback) where T : IService, new()
         {
-            if (service == null)
-            {
-                throw new ArgumentNullException(nameof(service));
-            }
-
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            ThrowHelper.ThrowIfNull(service, nameof(service));
+            ThrowHelper.ThrowIfNull(callback, nameof(callback));
 
             CancellationToken token = runningTs.Token;
             AddTask(async () =>
@@ -657,11 +639,7 @@ namespace Iviz.Ros
         public override async ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
             CancellationToken token)
         {
-            if (service == null)
-            {
-                throw new ArgumentNullException(nameof(service));
-            }
-
+            ThrowHelper.ThrowIfNull(service, nameof(service));
             if (srv == null)
             {
                 throw new ArgumentNullException(nameof(srv));
@@ -721,10 +699,7 @@ namespace Iviz.Ros
 
         internal void Subscribe<T>(Listener<T> listener) where T : IMessage, IDeserializable<T>, new()
         {
-            if (listener == null)
-            {
-                throw new ArgumentNullException(nameof(listener));
-            }
+            ThrowHelper.ThrowIfNull(listener, nameof(listener));
 
             var token = runningTs.Token;
             AddTask(async () =>
@@ -756,10 +731,7 @@ namespace Iviz.Ros
 
         internal void SetPause(IListener listener, bool value)
         {
-            if (listener == null)
-            {
-                throw new ArgumentNullException(nameof(listener));
-            }
+            ThrowHelper.ThrowIfNull(listener, nameof(listener));
 
             AddTask(() =>
             {
@@ -775,10 +747,7 @@ namespace Iviz.Ros
 
         internal void Unadvertise(ISender advertiser)
         {
-            if (advertiser == null)
-            {
-                throw new ArgumentNullException(nameof(advertiser));
-            }
+            ThrowHelper.ThrowIfNull(advertiser, nameof(advertiser));
 
             var token = runningTs.Token;
             AddTask(async () =>
@@ -820,10 +789,7 @@ namespace Iviz.Ros
 
         internal void Unsubscribe(IListener subscriber)
         {
-            if (subscriber == null)
-            {
-                throw new ArgumentNullException(nameof(subscriber));
-            }
+            ThrowHelper.ThrowIfNull(subscriber, nameof(subscriber));
 
             var token = runningTs.Token;
             AddTask(async () =>
@@ -860,10 +826,7 @@ namespace Iviz.Ros
 
         public void UnadvertiseService(string service)
         {
-            if (service == null)
-            {
-                throw new ArgumentNullException(nameof(service));
-            }
+            ThrowHelper.ThrowIfNull(service, nameof(service));
 
             var token = runningTs.Token;
             AddTask(async () =>
@@ -996,10 +959,7 @@ namespace Iviz.Ros
         public async ValueTask<(XmlRpcValue result, string? errorMsg)> GetParameterAsync(string parameter,
             int timeoutInMs, CancellationToken token = default)
         {
-            if (parameter == null)
-            {
-                throw new ArgumentNullException(nameof(parameter));
-            }
+            ThrowHelper.ThrowIfNull(parameter, nameof(parameter));
 
             if (token.IsCancellationRequested || runningTs.Token.IsCancellationRequested)
             {
@@ -1074,10 +1034,7 @@ namespace Iviz.Ros
 
         public (int active, int total) GetNumPublishers(string topic)
         {
-            if (topic == null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
+            ThrowHelper.ThrowIfNull(topic, nameof(topic));
 
             subscribersByTopic.TryGetValue(topic, out var subscribedTopic);
             var subscriber = subscribedTopic?.Subscriber;

@@ -35,11 +35,7 @@ namespace Iviz.App
             get => Input.Title;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 Input.Title = value;
             }
         }
@@ -49,11 +45,7 @@ namespace Iviz.App
             get => Input.Value;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 Input.Value = value;
             }
         }
@@ -63,11 +55,7 @@ namespace Iviz.App
             get => Input.PlaceholderText;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 Input.PlaceholderText = value;
             }
         }

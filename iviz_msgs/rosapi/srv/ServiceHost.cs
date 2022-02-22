@@ -25,8 +25,6 @@ namespace Iviz.Msgs.Rosapi
             Response = new ServiceHostResponse();
         }
         
-        IService IService.Create() => new ServiceHost();
-        
         IRequest IService.Request
         {
             get => Request;

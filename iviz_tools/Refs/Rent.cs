@@ -99,5 +99,5 @@ public readonly struct Rent<T> : IReadOnlyList<T>, IDisposable  where T : unmana
 
 public static class Rent
 {
-    public static Rent<T> Empty<T>() where T : unmanaged => new(0);
+    public static Rent<T> Empty<T>() where T : unmanaged => default;
 }

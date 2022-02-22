@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new LaunchDialogResponse();
         }
         
-        IService IService.Create() => new LaunchDialog();
-        
         IRequest IService.Request
         {
             get => Request;

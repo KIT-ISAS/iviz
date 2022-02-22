@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MeshMsgs
             Response = new GetVertexCostsResponse();
         }
         
-        IService IService.Create() => new GetVertexCosts();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new GraspPlanningResponse();
         }
         
-        IService IService.Create() => new GraspPlanning();
-        
         IRequest IService.Request
         {
             get => Request;

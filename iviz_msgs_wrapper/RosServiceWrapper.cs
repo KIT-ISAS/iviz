@@ -44,8 +44,6 @@ namespace Iviz.MsgsWrapper
         [DataMember]
         public TResponse Response { get; set; } = new();
 
-        IService IService.Create() => new T();
-
         [IgnoreDataMember]
         IRequest IService.Request
         {

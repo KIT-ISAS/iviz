@@ -26,11 +26,7 @@ namespace Iviz.App
             get => Label.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 Label.text = value;
                 name = "InputField:" + value;
             }
@@ -41,11 +37,7 @@ namespace Iviz.App
             get => Text.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 Text.text = value;
             }
         }
@@ -55,11 +47,7 @@ namespace Iviz.App
             get => Placeholder.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-                
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 Placeholder.text = value;
             }
         }

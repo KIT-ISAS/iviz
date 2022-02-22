@@ -250,10 +250,7 @@ namespace Iviz.Core
         /// <param name="action">Action to be run.</param>
         public static void Post(Action action)
         {
-            if (action is null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
+            ThrowHelper.ThrowIfNull(action, nameof(action));
 
             if (instance == null)
             {
@@ -280,10 +277,7 @@ namespace Iviz.Core
         /// <param name="action">Action to be run.</param>
         public static void PostInListenerQueue(Action action)
         {
-            if (action is null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
+            ThrowHelper.ThrowIfNull(action, nameof(action));
 
             if (instance == null)
             {
@@ -301,10 +295,7 @@ namespace Iviz.Core
         /// <exception cref="ArgumentNullException">If action is null.</exception>        
         public static void PostImmediate(Action action)
         {
-            if (action is null)
-            {
-                throw new ArgumentNullException(nameof(action));
-            }
+            ThrowHelper.ThrowIfNull(action, nameof(action));
 
             if (IsGameThread)
             {

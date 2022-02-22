@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new GetFramePoseResponse();
         }
         
-        IService IService.Create() => new GetFramePose();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -22,11 +22,7 @@ namespace Iviz.App
             get => Label.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-                
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 name = "Toggle:" + value;
                 Label.text = value;
             }

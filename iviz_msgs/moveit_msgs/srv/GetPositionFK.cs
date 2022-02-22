@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new GetPositionFKResponse();
         }
         
-        IService IService.Create() => new GetPositionFK();
-        
         IRequest IService.Request
         {
             get => Request;

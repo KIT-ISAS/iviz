@@ -68,7 +68,8 @@ namespace Iviz.Controllers.TF
 
         public FrameNode(string name, TfFrame? parent = null) : this()
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            ThrowHelper.ThrowIfNull(name, nameof(name));
+            Name = name;
             SetParent(parent is { IsAlive: true } ? parent : TfModule.DefaultFrame);
         }
 

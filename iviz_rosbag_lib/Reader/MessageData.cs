@@ -21,7 +21,7 @@ namespace Iviz.Rosbag.Reader
 
         readonly Stream reader;
         [DataMember] readonly long dataStart;
-        [DataMember] readonly long dataEnd;
+        [DataMember] readonly int dataSize;
 
         /// <summary>
         /// Timestamp of the message.
@@ -55,22 +55,28 @@ namespace Iviz.Rosbag.Reader
         /// </summary>        
         public string? MessageDefinition => Connection?.MessageDefinition;
 
-        internal MessageData(Stream reader, long dataStart, long dataEnd, time time, Connection connection)
+        internal MessageData(Stream reader, long dataStart, long dataEnd, time time, Connection? connection)
         {
             this.reader = reader;
             this.dataStart = dataStart;
-            this.dataEnd = dataEnd;
+            dataSize = (int)(dataEnd - dataStart);
             Time = time;
             Connection = connection;
         }
 
+        /// <summary>
+        /// Retrieves the enclosed message of type T. This is the preferred alternative, used automatically
+        /// by <see cref="Utils.SelectMessage{T}"/>.
+        /// </summary>
+        /// <param name="generator">Any instance of T, such as new T(). If the generator is a <see cref="DynamicMessage"/>, it must be already defined.</param>
+        /// <typeparam name="T">The message type.</typeparam>
+        /// <returns>The enclosed message.</returns>
         public T GetMessage<T>(in T generator) where T : IMessage, IDeserializable<T>, new()
         {
-            int msgSize = (int)(dataEnd - dataStart);
             var rent = Rent.Empty<byte>();
-            Span<byte> span = msgSize < 256
-                ? stackalloc byte[msgSize]
-                : (rent = new Rent<byte>(msgSize)).AsSpan();
+            Span<byte> span = dataSize < 256
+                ? stackalloc byte[dataSize]
+                : (rent = new Rent<byte>(dataSize)).AsSpan();
 
             try
             {
@@ -84,6 +90,11 @@ namespace Iviz.Rosbag.Reader
             }
         }
 
+        /// <summary>
+        /// Retrieves the enclosed message of type T. Uses a cache of generators.
+        /// </summary>
+        /// <typeparam name="T">The message type.</typeparam>
+        /// <returns>The enclosed message.</returns>
         public T GetMessage<T>() where T : IMessage, IDeserializable<T>, new()
         {
             IDeserializable<T> generator;
@@ -97,11 +108,10 @@ namespace Iviz.Rosbag.Reader
                 GeneratorsByClassType[typeof(T).Name] = (ISerializable)generator;
             }
 
-            int msgSize = (int)(dataEnd - dataStart);
             var rent = Rent.Empty<byte>();
-            Span<byte> span = msgSize < 256
-                ? stackalloc byte[msgSize]
-                : (rent = new Rent<byte>(msgSize)).AsSpan();
+            Span<byte> span = dataSize < 256
+                ? stackalloc byte[dataSize]
+                : (rent = new Rent<byte>(dataSize)).AsSpan();
 
             try
             {
@@ -115,6 +125,12 @@ namespace Iviz.Rosbag.Reader
             }
         }
 
+        /// <summary>
+        /// Retrieves the enclosed message of type T. Use this if you do not know the message type.
+        /// This will search for the ROS message type in the known messages, and if it does not exist,
+        /// will create a new <see cref="DynamicMessage"/>. 
+        /// </summary>
+        /// <returns>The enclosed message.</returns>
         public IMessage GetMessage()
         {
             string? type = Type;
@@ -125,7 +141,7 @@ namespace Iviz.Rosbag.Reader
 
             if (!GeneratorsByMessageType.TryGetValue(type, out ISerializable? generator))
             {
-                Type? msgType = BuiltIns.TryGetTypeFromMessageName(type);
+                var msgType = BuiltIns.TryGetTypeFromMessageName(type);
                 if (msgType != null)
                 {
                     generator = (IMessage?)Activator.CreateInstance(msgType) ??
@@ -143,11 +159,10 @@ namespace Iviz.Rosbag.Reader
                 GeneratorsByMessageType[type] = generator;
             }
 
-            int msgSize = (int)(dataEnd - dataStart);
             var rent = Rent.Empty<byte>();
-            Span<byte> span = msgSize < 256
-                ? stackalloc byte[msgSize]
-                : (rent = new Rent<byte>(msgSize)).AsSpan();
+            Span<byte> span = dataSize < 256
+                ? stackalloc byte[dataSize]
+                : (rent = new Rent<byte>(dataSize)).AsSpan();
 
             try
             {

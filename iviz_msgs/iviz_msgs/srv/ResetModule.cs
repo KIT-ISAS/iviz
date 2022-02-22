@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new ResetModuleResponse();
         }
         
-        IService IService.Create() => new ResetModule();
-        
         IRequest IService.Request
         {
             get => Request;

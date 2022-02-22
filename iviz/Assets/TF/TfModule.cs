@@ -434,10 +434,7 @@ namespace Iviz.Controllers.TF
 
         public static TfFrame GetOrCreateFrame(string frameId, FrameNode? listener = null)
         {
-            if (frameId is null)
-            {
-                throw new ArgumentNullException(nameof(frameId));
-            }
+            ThrowHelper.ThrowIfNull(frameId, nameof(frameId));
 
             if (frameId.Length == 0)
             {
@@ -488,11 +485,7 @@ namespace Iviz.Controllers.TF
 
         public void MarkAsDead(TfFrame frame)
         {
-            if (frame == null)
-            {
-                throw new ArgumentNullException(nameof(frame));
-            }
-
+            ThrowHelper.ThrowIfNull(frame, nameof(frame));
             frames.Remove(frame.Id);
             frame.Dispose();
         }

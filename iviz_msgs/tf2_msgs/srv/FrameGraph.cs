@@ -25,8 +25,6 @@ namespace Iviz.Msgs.Tf2Msgs
             Response = new FrameGraphResponse();
         }
         
-        IService IService.Create() => new FrameGraph();
-        
         IRequest IService.Request
         {
             get => Request;

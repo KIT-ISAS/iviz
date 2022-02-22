@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new SaveMapResponse();
         }
         
-        IService IService.Create() => new SaveMap();
-        
         IRequest IService.Request
         {
             get => Request;

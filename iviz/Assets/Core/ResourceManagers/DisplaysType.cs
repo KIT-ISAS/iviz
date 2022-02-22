@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using Iviz.Core;
 using Iviz.Displays;
 using UnityEngine;
 
@@ -172,11 +173,7 @@ namespace Iviz.Resources
 
         public bool TryGetResource(Type type, [NotNullWhen(true)] out ResourceKey<GameObject>? info)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
+            ThrowHelper.ThrowIfNull(type, nameof(type));
             return resourceByType.TryGetValue(type, out info) && info != null;
         }
     }

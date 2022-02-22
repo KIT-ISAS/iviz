@@ -66,7 +66,8 @@ namespace Iviz.App
 
         public void Show(IMarkerDialogListener newListener)
         {
-            listener = newListener ?? throw new ArgumentNullException(nameof(newListener));
+            ThrowHelper.ThrowIfNull(newListener, nameof(newListener));
+            listener = newListener;
             Show();
         }
     }

@@ -180,7 +180,8 @@ namespace Iviz.Controllers
 
         public async void SetAsync(Marker msg)
         {
-            lastMessage = msg ?? throw new ArgumentNullException(nameof(msg));
+            ThrowHelper.ThrowIfNull(msg, nameof(msg));
+            lastMessage = msg;
             ExpirationTime = msg.Lifetime == default
                 ? DateTime.MaxValue
                 : GameThread.Now + msg.Lifetime.ToTimeSpan();

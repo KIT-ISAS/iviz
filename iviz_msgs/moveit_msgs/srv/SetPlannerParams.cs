@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = SetPlannerParamsResponse.Singleton;
         }
         
-        IService IService.Create() => new SetPlannerParams();
-        
         IRequest IService.Request
         {
             get => Request;

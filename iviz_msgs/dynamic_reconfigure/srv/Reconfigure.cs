@@ -25,8 +25,6 @@ namespace Iviz.Msgs.DynamicReconfigure
             Response = new ReconfigureResponse();
         }
         
-        IService IService.Create() => new Reconfigure();
-        
         IRequest IService.Request
         {
             get => Request;

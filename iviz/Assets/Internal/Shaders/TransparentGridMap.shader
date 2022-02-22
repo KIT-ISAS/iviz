@@ -52,7 +52,7 @@
                 tex2D(_SquareTex, IN.squareTextureUV) *
                 _Tint;
             o.Alpha = _Tint.a;
-            o.Emission = o.Albedo;
+            //o.Emission = o.Albedo * 0.5;
             o.Metallic = _Metallic;
             o.Smoothness = _Smoothness;
         }

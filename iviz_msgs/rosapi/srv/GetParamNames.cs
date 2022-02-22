@@ -25,8 +25,6 @@ namespace Iviz.Msgs.Rosapi
             Response = new GetParamNamesResponse();
         }
         
-        IService IService.Create() => new GetParamNames();
-        
         IRequest IService.Request
         {
             get => Request;

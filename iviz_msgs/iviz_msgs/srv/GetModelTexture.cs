@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new GetModelTextureResponse();
         }
         
-        IService IService.Create() => new GetModelTexture();
-        
         IRequest IService.Request
         {
             get => Request;

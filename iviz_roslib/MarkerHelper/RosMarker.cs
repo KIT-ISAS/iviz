@@ -20,7 +20,7 @@ public sealed class RosMarker : IDisposable
 
     readonly string ns;
     readonly List<Marker> markers = new();
-    readonly RosChannelWriter<MarkerArray> publisher = new() {LatchingEnabled = true};
+    readonly RosChannelWriter<MarkerArray> publisher = new() { LatchingEnabled = true };
     bool disposed;
 
     public ReadOnlyCollection<Marker> Markers { get; }
@@ -146,7 +146,7 @@ public sealed class RosMarker : IDisposable
             Scale = width * Vector3.One,
             Color = color ?? ColorRGBA.White,
             FrameLocked = true,
-            Points = new[] {a, b}
+            Points = new[] { a, b }
         };
     }
 
@@ -398,7 +398,7 @@ public sealed class RosMarker : IDisposable
             Header = (0, frameId),
             Ns = ns ?? "",
             Id = id,
-            Type = (byte) meshType,
+            Type = (byte)meshType,
             Action = Marker.ADD,
             Pose = pose ?? Pose.Identity,
             Scale = scale ?? Vector3.One,
@@ -434,16 +434,16 @@ public sealed class RosMarker : IDisposable
         };
     }
 
-    public int CreateResource(string resource, Pose? pose = null, string frameId = "",
+    public int CreateResource(string resource, Pose? pose = null, Vector3? scale = null, string? frameId = "",
         int replaceId = -1)
     {
         int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateResource(resource, ns, id, pose, frameId);
+        markers[id] = CreateResource(resource, ns, id, pose, scale, frameId);
         return id;
     }
 
     public static Marker CreateResource(string resource, string ns = "", int id = 0, Pose? pose = null,
-        string frameId = "")
+        Vector3? scale = null, string frameId = "")
     {
         return new Marker
         {
@@ -453,7 +453,7 @@ public sealed class RosMarker : IDisposable
             Type = Marker.MESH_RESOURCE,
             Action = Marker.ADD,
             Pose = pose ?? Pose.Identity,
-            Scale = Vector3.One,
+            Scale = scale ?? Vector3.One,
             Color = ColorRGBA.White,
             MeshResource = resource,
             FrameLocked = true
@@ -591,7 +591,6 @@ public enum RosEventType
     MouseUp = InteractiveMarkerFeedback.MOUSE_UP
 }
 
-
 public class RosInteractiveMarker
 {
     public static InteractiveMarker Create(string name, Pose? pose = null, string description = "", float scale = 1,
@@ -615,7 +614,7 @@ public class RosInteractiveMarker
         {
             Name = name,
             Orientation = orientation ?? Quaternion.Identity,
-            InteractionMode = (byte) mode,
+            InteractionMode = (byte)mode,
             Markers = markers
         };
     }
@@ -661,7 +660,7 @@ public class RosInteractiveMarker
                         markers: controlMarker ?? RosMarker.CreateSphere())
                 },
             MenuEntries = entries.Select(entry => new Msgs.VisualizationMsgs.MenuEntry
-                {Id = entry.Id, ParentId = entry.ParentId, Title = entry.Title}).ToArray()
+                { Id = entry.Id, ParentId = entry.ParentId, Title = entry.Title }).ToArray()
         };
     }
 
@@ -700,7 +699,7 @@ public class RosInteractiveMarker
         {
             Type = InteractiveMarkerUpdate.UPDATE,
             Poses = args.Select(tuple => new InteractiveMarkerPose
-                    {Header = tuple.Parent, Name = tuple.Name, Pose = tuple.Pose})
+                    { Header = tuple.Parent, Name = tuple.Name, Pose = tuple.Pose })
                 .ToArray()
         };
     }

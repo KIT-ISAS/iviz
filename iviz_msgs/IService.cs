@@ -7,12 +7,6 @@
     public interface IService
     {
         /// <summary>
-        /// Create an empty service message.
-        /// </summary>
-        /// <returns>New service message</returns>
-        IService Create();
-
-        /// <summary>
         /// The request message.
         /// </summary>
         IRequest Request { get; set; }

@@ -275,11 +275,7 @@ namespace Iviz.Displays
 
         public void SetDirect(Action<NativeList<float4>> callback, int reserve)
         {
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
-
+            ThrowHelper.ThrowIfNull(callback, nameof(callback));
             pointBuffer.EnsureCapacity(reserve);
             pointBuffer.Clear();
 
@@ -297,7 +293,7 @@ namespace Iviz.Displays
             if (pointComputeBuffer == null || pointComputeBuffer.count < pointBuffer.Capacity)
             {
                 pointComputeBuffer?.Release();
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<float4>());
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Unsafe.SizeOf<float4>());
                 Properties.SetBuffer(PointsId, pointComputeBuffer);
             }
 
@@ -347,7 +343,7 @@ namespace Iviz.Displays
 
             if (pointBuffer.Capacity != 0)
             {
-                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<float4>());
+                pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Unsafe.SizeOf<float4>());
                 pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
                 Properties.SetBuffer(PointsId, pointComputeBuffer);
             }

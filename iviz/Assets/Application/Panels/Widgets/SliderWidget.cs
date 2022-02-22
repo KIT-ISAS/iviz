@@ -27,11 +27,7 @@ namespace Iviz.App
             get => Text.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 name = "Slider:" + value;
                 Text.text = value;
             }

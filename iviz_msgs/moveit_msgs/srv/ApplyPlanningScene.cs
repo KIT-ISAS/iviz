@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new ApplyPlanningSceneResponse();
         }
         
-        IService IService.Create() => new ApplyPlanningScene();
-        
         IRequest IService.Request
         {
             get => Request;

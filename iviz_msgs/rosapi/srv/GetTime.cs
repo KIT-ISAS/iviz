@@ -25,8 +25,6 @@ namespace Iviz.Msgs.Rosapi
             Response = new GetTimeResponse();
         }
         
-        IService IService.Create() => new GetTime();
-        
         IRequest IService.Request
         {
             get => Request;

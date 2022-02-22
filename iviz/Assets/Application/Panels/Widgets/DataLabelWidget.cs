@@ -22,7 +22,8 @@ namespace Iviz.App
             get => Label.text;
             set
             {
-                uint newHash = Crc32Calculator.Compute(value ?? throw new ArgumentNullException(nameof(value)));
+                ThrowHelper.ThrowIfNull(value, nameof(value));
+                uint newHash = Crc32Calculator.Compute(value);
                 if (newHash == textHash)
                 {
                     return;

@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new GetCaptureResolutionsResponse();
         }
         
-        IService IService.Create() => new GetCaptureResolutions();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -12,10 +12,7 @@ namespace Iviz.Displays
         public static void AddLineStipple(List<LineWithColor> lines, in Vector3 a, in Vector3 b, Color color,
             float stippleLength = 0.1f)
         {
-            if (lines == null)
-            {
-                throw new ArgumentNullException(nameof(lines));
-            }
+            ThrowHelper.ThrowIfNull(lines, nameof(lines));
 
             float remainingLength = (b - a).Magnitude();
             Vector3 direction = (b - a) / remainingLength;

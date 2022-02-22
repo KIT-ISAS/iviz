@@ -25,8 +25,6 @@ namespace Iviz.Msgs.NavMsgs
             Response = new GetMapResponse();
         }
         
-        IService IService.Create() => new GetMap();
-        
         IRequest IService.Request
         {
             get => Request;

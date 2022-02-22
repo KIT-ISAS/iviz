@@ -66,17 +66,15 @@ namespace Iviz.Controllers.TF
 
         protected TfFrame(string id)
         {
-            Id = id ?? throw new ArgumentNullException(nameof(id));
+            ThrowHelper.ThrowIfNull(id, nameof(id));
+            Id = id;
             Name = "{" + id + "}";
         }
 
         internal void AddListener(FrameNode frame)
         {
-            if (frame == null)
-            {
-                throw new ArgumentNullException(nameof(frame));
-            }
-
+            ThrowHelper.ThrowIfNull(frame, nameof(frame));
+            
             if (!frame.IsAlive)
             {
                 Debug.LogWarning($"{this}: Rejecting listener node '{frame}' that was already disposed.");
@@ -95,10 +93,7 @@ namespace Iviz.Controllers.TF
 
         public void RemoveListener(FrameNode frame)
         {
-            if (frame == null)
-            {
-                throw new ArgumentNullException(nameof(frame));
-            }
+            ThrowHelper.ThrowIfNull(frame, nameof(frame));
 
             if (HasNoListeners)
             {
@@ -121,7 +116,7 @@ namespace Iviz.Controllers.TF
             {
                 return;
             }
-            
+
             children.Remove(frame.Id);
         }
 

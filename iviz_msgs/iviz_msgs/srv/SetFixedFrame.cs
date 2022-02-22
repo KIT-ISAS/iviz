@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new SetFixedFrameResponse();
         }
         
-        IService IService.Create() => new SetFixedFrame();
-        
         IRequest IService.Request
         {
             get => Request;

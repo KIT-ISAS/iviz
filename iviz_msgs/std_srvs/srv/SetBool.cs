@@ -25,8 +25,6 @@ namespace Iviz.Msgs.StdSrvs
             Response = new SetBoolResponse();
         }
         
-        IService IService.Create() => new SetBool();
-        
         IRequest IService.Request
         {
             get => Request;

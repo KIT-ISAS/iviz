@@ -25,8 +25,6 @@ namespace Iviz.Msgs.GridMapMsgs
             Response = new GetGridMapInfoResponse();
         }
         
-        IService IService.Create() => new GetGridMapInfo();
-        
         IRequest IService.Request
         {
             get => Request;

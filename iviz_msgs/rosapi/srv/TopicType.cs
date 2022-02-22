@@ -25,8 +25,6 @@ namespace Iviz.Msgs.Rosapi
             Response = new TopicTypeResponse();
         }
         
-        IService IService.Create() => new TopicType();
-        
         IRequest IService.Request
         {
             get => Request;

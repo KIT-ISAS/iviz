@@ -21,11 +21,7 @@ namespace Iviz.App
             get => label.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-                
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 label.text = value;
                 name = "NumberInputField:" + value;
             }
@@ -47,11 +43,7 @@ namespace Iviz.App
             get => placeholder.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-                
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 placeholder.text = value;
             }
         }

@@ -524,10 +524,7 @@ namespace Iviz.App
 
         public async void SaveStateConfiguration(string file)
         {
-            if (file == null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
+            ThrowHelper.ThrowIfNull(file, nameof(file));
 
             var config = new StateConfiguration
             {
@@ -566,10 +563,7 @@ namespace Iviz.App
         
         public async void LoadStateConfiguration(string file, CancellationToken token = default)
         {
-            if (file == null)
-            {
-                throw new ArgumentNullException(nameof(file));
-            }
+            ThrowHelper.ThrowIfNull(file, nameof(file));
 
             RosLogger.Debug($"{this}: Reading config from {Settings.SavedFolder}/{file}");
             string text;
@@ -877,15 +871,8 @@ namespace Iviz.App
 
         public ModuleData CreateModuleForTopic(string topic, string type)
         {
-            if (topic == null)
-            {
-                throw new ArgumentNullException(nameof(topic));
-            }
-
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
+            ThrowHelper.ThrowIfNull(topic, nameof(topic));
+            ThrowHelper.ThrowIfNull(type, nameof(type));
 
             if (!Resource.ResourceByRosMessageType.TryGetValue(type, out var resource))
             {
@@ -897,10 +884,7 @@ namespace Iviz.App
 
         public void RemoveModule(ModuleData entry)
         {
-            if (entry == null)
-            {
-                throw new ArgumentNullException(nameof(entry));
-            }
+            ThrowHelper.ThrowIfNull(entry, nameof(entry));
 
             int index = moduleDatas.IndexOf(entry);
             if (index == -1)
@@ -952,10 +936,7 @@ namespace Iviz.App
 
         public void UpdateModuleButtonText(ModuleData entry, string content)
         {
-            if (entry == null)
-            {
-                throw new ArgumentNullException(nameof(entry));
-            }
+            ThrowHelper.ThrowIfNull(entry, nameof(entry));
 
             int index = moduleDatas.IndexOf(entry);
             if (index == -1)
@@ -968,7 +949,8 @@ namespace Iviz.App
 
         public void RegisterDisplayedTopic(string topic)
         {
-            topicsWithModule.Add(topic ?? throw new ArgumentNullException(nameof(topic)));
+            ThrowHelper.ThrowIfNull(topic, nameof(topic));
+            topicsWithModule.Add(topic);
         }
 
         public ImageDialogData CreateImageDialog(ImageDialogListener caller)
@@ -981,12 +963,14 @@ namespace Iviz.App
 
         public void DisposeImageDialog(ImageDialogData dialogData)
         {
-            imageDatas.Remove(dialogData ?? throw new ArgumentNullException(nameof(dialogData)));
+            ThrowHelper.ThrowIfNull(dialogData, nameof(dialogData));
+            imageDatas.Remove(dialogData);
         }
 
         public void ShowMarkerDialog(IMarkerDialogListener caller)
         {
-            Dialogs.MarkerData.Show(caller ?? throw new ArgumentNullException(nameof(caller)));
+            ThrowHelper.ThrowIfNull(caller, nameof(caller));
+            Dialogs.MarkerData.Show(caller);
         }
 
         public void ShowARMarkerDialog()
@@ -1020,11 +1004,7 @@ namespace Iviz.App
 
         public void ShowMenu(MenuEntryDescription[] menuEntries, Action<uint> callback)
         {
-            if (menuEntries == null)
-            {
-                throw new ArgumentNullException(nameof(menuEntries));
-            }
-
+            ThrowHelper.ThrowIfNull(menuEntries, nameof(menuEntries));
             if (menuDialog == null)
             {
                 throw new NullReferenceException("Menu dialog has not been set!");

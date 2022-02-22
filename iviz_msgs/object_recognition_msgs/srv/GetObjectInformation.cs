@@ -25,8 +25,6 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             Response = new GetObjectInformationResponse();
         }
         
-        IService IService.Create() => new GetObjectInformation();
-        
         IRequest IService.Request
         {
             get => Request;

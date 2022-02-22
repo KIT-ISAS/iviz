@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new GetModelResourceResponse();
         }
         
-        IService IService.Create() => new GetModelResource();
-        
         IRequest IService.Request
         {
             get => Request;

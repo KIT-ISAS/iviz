@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new StartCaptureResponse();
         }
         
-        IService IService.Create() => new StartCapture();
-        
         IRequest IService.Request
         {
             get => Request;

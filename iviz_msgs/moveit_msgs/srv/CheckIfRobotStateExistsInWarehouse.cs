@@ -25,8 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Response = new CheckIfRobotStateExistsInWarehouseResponse();
         }
         
-        IService IService.Create() => new CheckIfRobotStateExistsInWarehouse();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -69,6 +69,7 @@ namespace Iviz.App
                 panel.Mask.Options = GetMaskEntries();
                 panel.Mask.OverrideCaption("---");
             };
+            panel.ResetButton.Clicked += () => listener.ResetController();
             //panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
 
             HighlightAll();

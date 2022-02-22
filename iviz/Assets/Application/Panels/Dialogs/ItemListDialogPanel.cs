@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Tools;
@@ -68,15 +69,8 @@ namespace Iviz.App
                 [NotNull] ResourceKey<GameObject> buttonType,
                 [NotNull] Action<int, int> callback)
             {
-                if (parent == null)
-                {
-                    throw new ArgumentNullException(nameof(parent));
-                }
-
-                if (callback == null)
-                {
-                    throw new ArgumentNullException(nameof(callback));
-                }
+                ThrowHelper.ThrowIfNull(parent, nameof(parent));
+                ThrowHelper.ThrowIfNull(callback, nameof(callback));
 
                 if (index < 0)
                 {
@@ -147,11 +141,6 @@ namespace Iviz.App
 
         public void SetItems<T>([NotNull] T value) where T : IReadOnlyList<string>
         {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
             if (buttonHeight == 0)
             {
                 buttonHeight = BaseButtonHeight;

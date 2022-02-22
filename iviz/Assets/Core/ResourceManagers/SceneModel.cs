@@ -25,19 +25,12 @@ namespace Iviz.Displays
         public static async ValueTask<MeshMarkerHolderDisplay> CreateAsync(string uriString,
             Model msg, IExternalServiceProvider? provider, CancellationToken token)
         {
-            if (uriString is null)
-            {
-                throw new ArgumentNullException(nameof(uriString));
-            }
+            ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
+            ThrowHelper.ThrowIfNull(msg, nameof(msg));
 
             if (!Uri.IsWellFormedUriString(uriString, UriKind.Absolute))
             {
                 throw new ArgumentException($"Uri string '{uriString}' is not a valid URI!");
-            }
-
-            if (msg is null)
-            {
-                throw new ArgumentNullException(nameof(msg));
             }
 
             token.ThrowIfCancellationRequested();

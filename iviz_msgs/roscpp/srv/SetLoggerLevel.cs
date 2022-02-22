@@ -25,8 +25,6 @@ namespace Iviz.Msgs.Roscpp
             Response = SetLoggerLevelResponse.Singleton;
         }
         
-        IService IService.Create() => new SetLoggerLevel();
-        
         IRequest IService.Request
         {
             get => Request;

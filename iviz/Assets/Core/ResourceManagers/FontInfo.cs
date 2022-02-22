@@ -26,10 +26,7 @@ namespace Iviz.Resources
 
         public string Split(string str, int maxWidth, int maxLines = 2)
         {
-            if (str == null)
-            {
-                throw new ArgumentNullException(nameof(str));
-            }
+            ThrowHelper.ThrowIfNull(str, nameof(str));
 
             int usableWidth = maxWidth - dotWidth;
 

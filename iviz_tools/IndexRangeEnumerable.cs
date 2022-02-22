@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Iviz.Tools;
@@ -28,6 +26,8 @@ public struct IndexRangeEnumerator
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         // this assumes that Current is called only once per cycle
+        // putting the addition here instead of in MoveNext allows us
+        // to omit the -1 subtraction of the start in the constructor 
         get => index++;   
     }
 

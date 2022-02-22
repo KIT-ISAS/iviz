@@ -18,11 +18,7 @@ namespace Iviz.App
             get => Text.text;
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 Text.text = value;
                 name = $"HeadTitle:{value}";
             }

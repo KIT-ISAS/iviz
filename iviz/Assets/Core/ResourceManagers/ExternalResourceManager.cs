@@ -146,7 +146,8 @@ namespace Iviz.Displays
 
         public static string SanitizeFilename(string input)
         {
-            return Uri.EscapeDataString(input ?? throw new ArgumentNullException(nameof(input)));
+            ThrowHelper.ThrowIfNull(input , nameof(input));
+            return Uri.EscapeDataString(input);
         }
 
         #region RobotStuff
@@ -155,8 +156,8 @@ namespace Iviz.Displays
 
         public bool ContainsRobot(string robotName)
         {
-            return resourceFiles.RobotDescriptions.ContainsKey(robotName ??
-                                                               throw new ArgumentNullException(nameof(robotName)));
+            ThrowHelper.ThrowIfNull(robotName, nameof(robotName));
+            return resourceFiles.RobotDescriptions.ContainsKey(robotName);
         }
 
         public async ValueTask<(bool result, string robotDescription)> TryGetRobotAsync(string robotName,
@@ -256,10 +257,7 @@ namespace Iviz.Displays
         public async ValueTask<ResourceKey<GameObject>?> TryGetGameObjectAsync(string uriString,
             IExternalServiceProvider? provider, CancellationToken token = default)
         {
-            if (uriString is null)
-            {
-                throw new ArgumentNullException(nameof(uriString));
-            }
+            ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
 
             float currentTime = Time.time;
             if (temporaryBlacklist.TryGetValue(uriString, out float insertionTime))
@@ -443,10 +441,7 @@ namespace Iviz.Displays
         public async ValueTask<ResourceKey<Texture2D>?> TryGetTextureAsync(string uriString,
             IExternalServiceProvider? provider, CancellationToken token)
         {
-            if (uriString is null)
-            {
-                throw new ArgumentNullException(nameof(uriString));
-            }
+            ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
 
             float currentTime = Time.time;
             if (temporaryBlacklist.TryGetValue(uriString, out float insertionTime))

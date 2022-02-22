@@ -61,15 +61,12 @@ namespace Iviz.Controllers
             Transform arCameraTransform,
             AROcclusionManager occlusionManager)
         {
-            this.cameraManager = cameraManager != null
-                ? cameraManager
-                : throw new ArgumentNullException(nameof(cameraManager));
-            this.arCameraTransform = arCameraTransform != null
-                ? arCameraTransform
-                : throw new ArgumentNullException(nameof(arCameraTransform));
-            this.occlusionManager = occlusionManager != null
-                ? occlusionManager
-                : throw new ArgumentNullException(nameof(occlusionManager));
+            ThrowHelper.ThrowIfNull(cameraManager, nameof(cameraManager));
+            this.cameraManager = cameraManager;
+            ThrowHelper.ThrowIfNull(arCameraTransform, nameof(arCameraTransform));
+            this.arCameraTransform = arCameraTransform;
+            ThrowHelper.ThrowIfNull(occlusionManager, nameof(occlusionManager));
+            this.occlusionManager = occlusionManager;
         }
 
         public IEnumerable<(int width, int height)> GetResolutions()
@@ -292,11 +289,6 @@ namespace Iviz.Controllers
 
         static void MirrorX<T>(Span<byte> bytes, int width, int height) where T : unmanaged
         {
-            if (bytes == null)
-            {
-                throw new ArgumentNullException(nameof(bytes));
-            }
-
             if (width * height * Unsafe.SizeOf<T>() > bytes.Length)
             {
                 throw new ArgumentException("Sizes are not correct and might cause a buffer overflow!");

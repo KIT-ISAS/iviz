@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Resources;
 using Iviz.Tools;
@@ -86,10 +87,7 @@ namespace Iviz.App
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
 
-            if (content == null)
-            {
-                throw new ArgumentNullException(nameof(content));
-            }
+            ThrowHelper.ThrowIfNull(content, nameof(content));
 
             buttons[index].ButtonText = content;
             int lineBreaks = content.Count(x => x == '\n');

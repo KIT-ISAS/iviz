@@ -40,10 +40,7 @@ namespace Iviz.Displays
 
         public static void CreateCapsulesFromSegments(ReadOnlySpan<float4x2> lineBuffer, float scale, Mesh mesh)
         {
-            if (mesh == null)
-            {
-                throw new ArgumentNullException(nameof(mesh));
-            }
+            ThrowHelper.ThrowIfNull(mesh, nameof(mesh));
 
             if (lineBuffer.Length == 0)
             {

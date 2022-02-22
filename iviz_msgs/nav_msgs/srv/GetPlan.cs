@@ -25,8 +25,6 @@ namespace Iviz.Msgs.NavMsgs
             Response = new GetPlanResponse();
         }
         
-        IService IService.Create() => new GetPlan();
-        
         IRequest IService.Request
         {
             get => Request;

@@ -14,15 +14,14 @@ namespace Iviz.Roslib;
 /// <summary>
 /// Class in charge of responding to service request received by a server
 /// </summary>
-/// <typeparam name="TService">The service type</typeparam>
-internal sealed class ServiceRequest<TService> where TService : IService
+internal sealed class ServiceRequest
 {
     const byte ErrorByte = 0;
     const byte SuccessByte = 1;
 
-    readonly Func<TService, ValueTask> callback;
+    readonly Func<IService, ValueTask> callback;
     readonly Endpoint remoteEndPoint;
-    readonly ServiceInfo<TService> serviceInfo;
+    readonly ServiceInfo serviceInfo;
     readonly Task task;
     readonly TcpClient tcpClient;
 
@@ -32,8 +31,8 @@ internal sealed class ServiceRequest<TService> where TService : IService
 
     readonly CancellationTokenSource runningTs = new();
 
-    internal ServiceRequest(ServiceInfo<TService> serviceInfo, TcpClient tcpClient, Endpoint remoteEndPoint,
-        Func<TService, ValueTask> callback)
+    internal ServiceRequest(ServiceInfo serviceInfo, TcpClient tcpClient, Endpoint remoteEndPoint,
+        Func<IService, ValueTask> callback)
     {
         this.tcpClient = tcpClient;
         this.callback = callback;
@@ -217,10 +216,10 @@ internal sealed class ServiceRequest<TService> where TService : IService
         {
             try
             {
-                TService serviceMsg;
+                IService serviceMsg;
                 using (var readBuffer = await ReceivePacket(runningTs.Token))
                 {
-                    serviceMsg = (TService)serviceInfo.Generator.Create();
+                    serviceMsg = serviceInfo.Create();
                     serviceMsg.Request = (IRequest)serviceMsg.Request.DeserializeFrom(readBuffer);
                 }
 
@@ -290,9 +289,8 @@ internal sealed class ServiceRequest<TService> where TService : IService
         tcpClient.Close();
     }
 
-    static void WriteHeader(in Rent<byte> rent, byte status, int i)
+    static void WriteHeader(Span<byte> array, byte status, int i)
     {
-        byte[] array = rent.Array;
         array[4] = (byte)(i >> 0x18);
         array[0] = status;
         array[1] = (byte)i;
@@ -302,6 +300,6 @@ internal sealed class ServiceRequest<TService> where TService : IService
 
     public override string ToString()
     {
-        return $"[ServiceRequest {Hostname}:{Port.ToString()} '{Service}' >>'{remoteCallerId}']";
+        return $"[{nameof(ServiceRequest)} {Hostname}:{Port.ToString()} '{Service}' >>'{remoteCallerId}']";
     }
 }

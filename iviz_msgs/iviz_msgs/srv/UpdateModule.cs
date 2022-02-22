@@ -25,8 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Response = new UpdateModuleResponse();
         }
         
-        IService IService.Create() => new UpdateModule();
-        
         IRequest IService.Request
         {
             get => Request;

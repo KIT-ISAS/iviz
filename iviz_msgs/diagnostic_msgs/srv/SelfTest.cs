@@ -25,8 +25,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
             Response = new SelfTestResponse();
         }
         
-        IService IService.Create() => new SelfTest();
-        
         IRequest IService.Request
         {
             get => Request;
