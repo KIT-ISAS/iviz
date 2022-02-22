@@ -23,7 +23,7 @@ namespace Iviz.App
             HideButton = p.AddHideButton();
             ShowInterior = p.AddToggle("Show Interior").SetValue(true);
             FollowCamera = p.AddToggle("Follow Camera").SetValue(true);
-            Interactable = p.AddToggle("Enable Collider").SetValue(true);
+            Interactable = p.AddToggle("Interactable").SetValue(true);
             HideInARMode = p.AddToggle("Hide in AR Mode").SetValue(true);
             Offset = p.AddVector3Slider("Offset");
             ColorPicker = p.AddColorPicker("Grid Color").SetValue(Color.gray);

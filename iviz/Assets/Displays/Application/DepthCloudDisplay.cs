@@ -314,7 +314,7 @@ namespace Iviz.Displays
             var size = new Vector3(posMulX, 1, posMulY) * maxDepthForBounds;
             var center = new Vector3(0, maxDepthForBounds / 2, 0);
 
-            Collider.SetBounds(new Bounds(center, size));
+            Collider.SetLocalBounds(new Bounds(center, size));
         }
 
         public override void Suspend()

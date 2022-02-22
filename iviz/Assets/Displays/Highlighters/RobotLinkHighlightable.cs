@@ -17,7 +17,7 @@ namespace Iviz.Displays
             {
                 Bounds = value switch
                 {
-                    BoxCollider box => box.GetBounds(),
+                    BoxCollider box => box.GetLocalBounds(),
                     SphereCollider sphere => new Bounds(sphere.center, 2 * sphere.radius * Vector3.one),
                     MeshCollider mesh => mesh.sharedMesh is { } subMesh ? subMesh.bounds : null,
                     _ => null

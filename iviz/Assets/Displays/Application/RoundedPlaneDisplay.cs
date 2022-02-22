@@ -20,7 +20,7 @@ namespace Iviz.Displays
         Vector2 size;
         float radius;
 
-        public new Bounds Bounds => Collider.GetBounds();
+        public new Bounds Bounds => Collider.GetLocalBounds();
 
         public Vector2 Size
         {

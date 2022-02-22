@@ -91,11 +91,14 @@ namespace Iviz.Core
 
         public static bool IsXR =>
             TryReadXRInfo() && (isXR ?? throw new InvalidOperationException("Could not check if we are running in XR"));
+#endif
 
         public static void ClearResources()
         {
+#if !(UNITY_IOS || UNITY_ANDROID)
             isHololens = null;
             isXR = null;
+#endif
 
             mainCamera = null;
             mainCameraTransform = null;
@@ -110,8 +113,7 @@ namespace Iviz.Core
             ARCamera = null;
             ScreenCaptureManager = null;
         }
-#endif
-
+        
         /// <summary>
         /// Does this device support mobile AR?
         /// Note: The hololens is considered an XR device.

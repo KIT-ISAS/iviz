@@ -35,7 +35,7 @@ namespace Iviz.Displays.XR
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
         Transform IHasBounds.BoundsTransform => BoxCollider.transform;
         Bounds? IHasBounds.Bounds => Bounds;
-        Bounds Bounds => BoxCollider.GetBounds();
+        Bounds Bounds => BoxCollider.GetLocalBounds();
         MeshMarkerDisplay Cylinder => cylinder.AssertNotNull(nameof(cylinder));
         XRIconPlane IconObject => iconPlane.AssertNotNull(nameof(iconPlane));
 

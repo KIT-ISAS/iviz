@@ -227,7 +227,7 @@ namespace Iviz.Editor
             foreach (var resource in resources)
             {
                 BoxCollider collider = resource.GetComponent<BoxCollider>();
-                collider.SetBounds(resource.Bounds is { } bounds ? bounds : default);
+                collider.SetLocalBounds(resource.Bounds is { } bounds ? bounds : default);
                 collider.enabled = false;
 
                 //DestroyImmediate(resource);

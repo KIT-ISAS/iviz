@@ -504,13 +504,14 @@ namespace Iviz.Controllers
                 return;
             }
 
+            node.AttachTo(msg.Header);
+
             var newPose = msg.Pose.Ros2Unity();
             if (newPose == localPose)
             {
                 return;
             }
 
-            node.AttachTo(msg.Header);
             localPose = !newPose.IsUsable()
                 ? Pose.identity
                 : newPose;

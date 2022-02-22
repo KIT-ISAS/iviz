@@ -24,8 +24,7 @@ namespace Iviz.Controllers
 
         public static GuiWidgetListener DefaultHandler =>
             defaultHandler ??= new GuiWidgetListener(null, "~dialogs");
-
-
+        
         readonly GuiWidgetConfiguration config = new();
         readonly Dictionary<string, GuiObject> widgets = new();
         readonly Dictionary<string, GuiObject> dialogs = new();
@@ -383,6 +382,7 @@ namespace Iviz.Controllers
                 VizId = RosManager.MyId ?? "",
                 Id = widget.Id,
                 Type = (byte)FeedbackType.OrientationChanged,
+                Angle = angleInRad,
                 Orientation = Extensions.AngleAxis(angleInRad, default(VectorUnitZ))
             });
         }
@@ -464,7 +464,6 @@ namespace Iviz.Controllers
         }
     }
 
-
     public enum ActionType : byte
     {
         Add = Widget.ACTION_ADD,
@@ -496,239 +495,3 @@ namespace Iviz.Controllers
         TrajectoryChanged = Feedback.TYPE_TRAJECTORY_CHANGED,
     }
 }
-
-/*
-                 {
-                    if (dialogs.TryGetValue(msg.Id, out var oldDialog))
-                    {
-                        oldDialog.Object.Suspend();
-                        ResourcePool.Return(oldDialog.Info, oldDialog.Object.gameObject);
-                    }
-
-                    Info<GameObject> info;
-                    ARDialog dialog;
-
-                    switch (msg.Type)
-                    {
-                        case DialogType.Dialog:
-                            info = msg.Icon == IconType.None
-                                ? Resource.Displays.ARDialog
-                                : Resource.Displays.ARDialogIcon;
-                            dialog = ResourcePool.Rent<ARDialog>(info);
-                            dialog.SetButtonMode(msg.Buttons);
-                            if (msg.Icon != IconType.None)
-                            {
-                                dialog.SetIconMode(msg.Icon);
-                            }
-
-                            break;
-                        case DialogType.Short:
-                            info = Resource.Displays.ARDialogShort;
-                            dialog = ResourcePool.Rent<ARDialog>(info);
-                            break;
-                        case DialogType.Notice:
-                            info = Resource.Displays.ARDialogNotice;
-                            dialog = ResourcePool.Rent<ARDialog>(info);
-                            dialog.SetIconMode(msg.Icon);
-                            break;
-                        case DialogType.Button:
-                            info = Resource.Displays.ARButtonDialog;
-                            dialog = ResourcePool.Rent<ARDialog>(info);
-                            dialog.SetButtonMode(msg.Buttons);
-                            break;
-                        case DialogType.MenuMode:
-                            info = Resource.Displays.ARDialogMenu;
-                            dialog = ResourcePool.Rent<ARDialog>(info);
-                            dialog.MenuEntries = msg.MenuEntries;
-                            break;
-                        default:
-                            return;
-                    }
-
-                    dialog.Id = msg.Id;
-                    dialog.ButtonClicked += OnDialogButtonClicked;
-                    dialog.MenuEntryClicked += OnDialogMenuEntryClicked;
-                    dialog.Active = true;
-                    dialog.Caption = msg.Caption;
-                    dialog.CaptionAlignment = msg.CaptionAlignment;
-                    dialog.Title = msg.Title;
-                    dialog.Scale = (float)msg.Scale;
-                    dialog.BackgroundColor = msg.BackgroundColor.ToUnityColor();
-                    dialog.PivotFrameId = msg.Header.FrameId;
-                    dialog.PivotFrameOffset = msg.TfOffset.Ros2Unity();
-                    dialog.PivotDisplacement = AdjustDisplacement(msg.TfDisplacement);
-                    dialog.DialogDisplacement = AdjustDisplacement(msg.DialogDisplacement);
-                    dialog.Initialize();
-
-                    DateTime expirationTime = msg.Lifetime == default
-                        ? DateTime.MaxValue
-                        : GameThread.Now + msg.Lifetime.ToTimeSpan();
-
-                    dialogs[msg.Id] = new Data<ARDialog>(dialog, info, expirationTime);
-                    break;
-
- */
-
-/*
-void Handler(Dialog msg)
-{
-switch (msg.Action)
-{
-    case ActionType.Remove:
-    {
-        if (dialogs.TryGetValue(msg.Id, out var dialog))
-        {
-            dialog.Object.Suspend();
-            ResourcePool.Return(dialog.Info, dialog.Object.gameObject);
-            dialogs.Remove(msg.Id);
-        }
-
-        break;
-    }
-    case ActionType.RemoveAll:
-    {
-        DestroyAll(dialogs);
-        break;
-    }
-    case ActionType.Add:
-    {
-        if (dialogs.TryGetValue(msg.Id, out var oldDialog))
-        {
-            oldDialog.Object.Suspend();
-            ResourcePool.Return(oldDialog.Info, oldDialog.Object.gameObject);
-        }
-
-        Info<GameObject> info;
-        ARDialog dialog;
-
-        switch (msg.Type)
-        {
-            case DialogType.Dialog:
-                info = msg.Icon == IconType.None
-                    ? Resource.Displays.ARDialog
-                    : Resource.Displays.ARDialogIcon;
-                dialog = ResourcePool.Rent<ARDialog>(info);
-                dialog.SetButtonMode(msg.Buttons);
-                if (msg.Icon != IconType.None)
-                {
-                    dialog.SetIconMode(msg.Icon);
-                }
-
-                break;
-            case DialogType.Short:
-                info = Resource.Displays.ARDialogShort;
-                dialog = ResourcePool.Rent<ARDialog>(info);
-                break;
-            case DialogType.Notice:
-                info = Resource.Displays.ARDialogNotice;
-                dialog = ResourcePool.Rent<ARDialog>(info);
-                dialog.SetIconMode(msg.Icon);
-                break;
-            case DialogType.Button:
-                info = Resource.Displays.ARButtonDialog;
-                dialog = ResourcePool.Rent<ARDialog>(info);
-                dialog.SetButtonMode(msg.Buttons);
-                break;
-            case DialogType.MenuMode:
-                info = Resource.Displays.ARDialogMenu;
-                dialog = ResourcePool.Rent<ARDialog>(info);
-                dialog.MenuEntries = msg.MenuEntries;
-                break;
-            default:
-                return;
-        }
-
-        dialog.Id = msg.Id;
-        dialog.ButtonClicked += OnDialogButtonClicked;
-        dialog.MenuEntryClicked += OnDialogMenuEntryClicked;
-        dialog.Active = true;
-        dialog.Caption = msg.Caption;
-        dialog.CaptionAlignment = msg.CaptionAlignment;
-        dialog.Title = msg.Title;
-        dialog.Scale = (float)msg.Scale;
-        dialog.BackgroundColor = msg.BackgroundColor.ToUnityColor();
-        dialog.PivotFrameId = msg.Header.FrameId;
-        dialog.PivotFrameOffset = msg.TfOffset.Ros2Unity();
-        dialog.PivotDisplacement = AdjustDisplacement(msg.TfDisplacement);
-        dialog.DialogDisplacement = AdjustDisplacement(msg.DialogDisplacement);
-        dialog.Initialize();
-
-        DateTime expirationTime = msg.Lifetime == default
-            ? DateTime.MaxValue
-            : GameThread.Now + msg.Lifetime.ToTimeSpan();
-
-        dialogs[msg.Id] = new Data<ARDialog>(dialog, info, expirationTime);
-        break;
-    }
-    default:
-        RosLogger.Info($"{this}: Unknown action id {((int)msg.Action).ToString()}");
-        break;
-}
-}
-*/
-
-
-/*
-case ActionType.Add when widgets.TryGetValue(msg.Id, out var tooltipData):
-{
-switch (msg.Type)
-{
-case WidgetType.Tooltip when tooltipData.Object is Tooltip widget:
-widget.AttachTo(msg.Header.FrameId);
-widget.Transform.SetLocalPose(msg.Pose.Ros2Unity());
-widget.transform.localScale = (float) msg.Scale * Vector3.one;
-widget.Caption = msg.Caption;
-if (msg.MainColor.A != 0)
-{
-    widget.MainColor = msg.MainColor.ToUnityColor();
-}
-
-return;
-}
-
-goto case ActionType.Add;
-}
-*/
-
-
-/*
-switch ((WidgetType)msg.Type)
-{
-    case WidgetType.RotationDisc:
-        guiObject.As<RotationDisc>().Moved += angle => OnDiscRotated(guiObject, angle);
-        break;
-    case WidgetType.SpringDisc:
-        guiObject.As<SpringDisc>().Moved +=
-            direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
-        break;
-    case WidgetType.SpringDisc3D:
-        guiObject.As<SpringDisc3D>().Moved +=
-            direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
-        break;
-    case WidgetType.TrajectoryDisc:
-        guiObject.As<TrajectoryDisc>().Moved += (direction, period) =>
-            OnTrajectoryDiscMoved(guiObject, direction, period);
-        break;
-    case WidgetType.TargetArea:
-        var targetWidget = guiObject.As<TargetWidget>();
-        targetWidget.Moved += (scale, position) => OnTargetAreaMoved(guiObject, scale, position);
-        targetWidget.Cancelled += () => OnTargetAreaCanceled(guiObject);
-        break;
-    case WidgetType.PositionDisc3D:
-        guiObject.As<PositionDisc3D>().Moved +=
-            direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
-        break;
-    case WidgetType.PositionDisc:
-        guiObject.As<PositionDisc>().Moved +=
-            direction => OnDiscMoved(guiObject, direction * guiObject.Scale);
-        break;
-    case WidgetType.Tooltip:
-    {
-        info = Resource.Displays.Tooltip;
-        var tooltip = ResourcePool.RentDisplay<Tooltip>();
-        tooltip.Caption = msg.Caption;
-        //widget = tooltip;
-        break;
-    }
-}
-*/

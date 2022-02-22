@@ -14,6 +14,8 @@ namespace Iviz.Displays
     [RequireComponent(typeof(MeshRenderer))]
     public sealed class GridMapDisplay : MarkerDisplayWithColormap, ISupportsPbr, ISupportsShadows
     {
+        static float baseOffset = 0.001f + 5e-6f;
+        
         static readonly int PropInputTexture = Shader.PropertyToID("_InputTex");
         static readonly int PropSquareTexture = Shader.PropertyToID("_SquareTex");
         static readonly int PropSquareCoeff = Shader.PropertyToID("_SquareCoeff");
@@ -25,6 +27,8 @@ namespace Iviz.Displays
         [SerializeField] Material? transparentMaterial;
         [SerializeField] MeshRenderer? meshRenderer;
 
+        readonly float zOffset;
+        
         Texture2D? texture;
         Mesh? mesh;
         int cellsX;
@@ -100,6 +104,11 @@ namespace Iviz.Displays
             }
         }
 
+        public GridMapDisplay()
+        {
+            zOffset = (baseOffset += 1e-5f);            
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -128,7 +137,7 @@ namespace Iviz.Displays
         public void Set(int newCellsX, int newCellsY, float width, float height, ReadOnlySpan<float> data)
         {
             Transform.localScale = new Vector3(width, height, scaleHeight).Ros2Unity().Abs();
-            Transform.localPosition = new Vector3(-width / 2, -height / 2, 0).Ros2Unity();
+            Transform.localPosition = new Vector3(-width / 2, -height / 2, zOffset).Ros2Unity();
 
             var textureToUse = EnsureSize(newCellsX, newCellsY);
             textureToUse.GetRawTextureData<float>().CopyFrom(data);
@@ -184,11 +193,12 @@ namespace Iviz.Displays
                 Vector3[] points = pointsArray.Array;
                 float stepX = 1f / cellsX;
                 float stepY = 1f / cellsY;
-                for (int v = 0, off = 0; v <= cellsY; v++)
+                int off = 0;
+                foreach (int v in ..cellsY)
                 {
-                    for (int u = 0; u <= cellsX; u++, off++)
+                    foreach (int u in ..cellsX)
                     {
-                        points[off] = new Vector3(
+                        points[off++] = new Vector3(
                             u * stepX,
                             v * stepY,
                             0
@@ -197,16 +207,19 @@ namespace Iviz.Displays
                 }
 
                 int[] indices = indicesArray.Array;
-                for (int v = 0; v < cellsY; v++)
+                foreach (int v in ..cellsY)
                 {
                     int iOffset = v * cellsX * 4;
                     int pOffset = v * (cellsX + 1);
-                    for (int u = 0; u < cellsX; u++, iOffset += 4, pOffset++)
+                    foreach (int _ in ..cellsX)
                     {
                         indices[iOffset + 0] = pOffset + (cellsX + 1);
                         indices[iOffset + 1] = pOffset + (cellsX + 1) + 1;
                         indices[iOffset + 2] = pOffset + 1;
                         indices[iOffset + 3] = pOffset;
+                        
+                        iOffset += 4;
+                        pOffset++;
                     }
                 }
 

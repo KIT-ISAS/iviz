@@ -17,7 +17,7 @@ namespace Iviz.Displays
         Mesh? mesh;
 
         public bool FlipWinding { get; set; }
-        public override Bounds? Bounds => mesh != null && mesh.vertexCount != 0 ? Collider.GetBounds() : null;
+        public override Bounds? Bounds => mesh != null && mesh.vertexCount != 0 ? Collider.GetLocalBounds() : null;
         public event Action? BoundsChanged;
 
         public string MeshName
@@ -109,7 +109,7 @@ namespace Iviz.Displays
             }
 
             ownMesh.RecalculateNormals();
-            Collider.SetBounds(ownMesh.bounds);
+            Collider.SetLocalBounds(ownMesh.bounds);
             BoundsChanged?.Invoke();
         }
 
@@ -177,7 +177,7 @@ namespace Iviz.Displays
                 ownMesh.RecalculateTangents();
             }
 
-            Collider.SetBounds(ownMesh.bounds);
+            Collider.SetLocalBounds(ownMesh.bounds);
             BoundsChanged?.Invoke();
         }
 

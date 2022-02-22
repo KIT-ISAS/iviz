@@ -63,7 +63,7 @@ namespace Iviz.Displays
 
         void UpdateBounds()
         {
-            Collider.SetBounds(Arrow.Bounds is { } bounds 
+            Collider.SetLocalBounds(Arrow.Bounds is { } bounds 
                 ? bounds.TransformBound(Arrow.Transform) 
                 : default);
         }
