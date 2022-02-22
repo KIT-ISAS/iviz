@@ -64,8 +64,8 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (Key is null) throw new System.NullReferenceException(nameof(Key));
-            if (Db is null) throw new System.NullReferenceException(nameof(Db));
+            if (Key is null) BuiltIns.ThrowNullReference(nameof(Key));
+            if (Db is null) BuiltIns.ThrowNullReference(nameof(Db));
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Key) + BuiltIns.GetStringSize(Db);

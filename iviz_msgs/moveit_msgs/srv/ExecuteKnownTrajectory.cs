@@ -90,7 +90,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Trajectory is null) throw new System.NullReferenceException(nameof(Trajectory));
+            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
             Trajectory.RosValidate();
         }
     
@@ -134,7 +134,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ErrorCode is null) throw new System.NullReferenceException(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
             ErrorCode.RosValidate();
         }
     

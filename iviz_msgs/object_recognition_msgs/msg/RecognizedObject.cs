@@ -89,18 +89,18 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (Type is null) throw new System.NullReferenceException(nameof(Type));
+            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
             Type.RosValidate();
-            if (PointClouds is null) throw new System.NullReferenceException(nameof(PointClouds));
+            if (PointClouds is null) BuiltIns.ThrowNullReference(nameof(PointClouds));
             for (int i = 0; i < PointClouds.Length; i++)
             {
-                if (PointClouds[i] is null) throw new System.NullReferenceException($"{nameof(PointClouds)}[{i}]");
+                if (PointClouds[i] is null) BuiltIns.ThrowNullReference($"{nameof(PointClouds)}[{i}]");
                 PointClouds[i].RosValidate();
             }
-            if (BoundingMesh is null) throw new System.NullReferenceException(nameof(BoundingMesh));
+            if (BoundingMesh is null) BuiltIns.ThrowNullReference(nameof(BoundingMesh));
             BoundingMesh.RosValidate();
-            if (BoundingContours is null) throw new System.NullReferenceException(nameof(BoundingContours));
-            if (Pose is null) throw new System.NullReferenceException(nameof(Pose));
+            if (BoundingContours is null) BuiltIns.ThrowNullReference(nameof(BoundingContours));
+            if (Pose is null) BuiltIns.ThrowNullReference(nameof(Pose));
             Pose.RosValidate();
         }
     

@@ -89,8 +89,8 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (FilePath is null) throw new System.NullReferenceException(nameof(FilePath));
-            if (TopicName is null) throw new System.NullReferenceException(nameof(TopicName));
+            if (FilePath is null) BuiltIns.ThrowNullReference(nameof(FilePath));
+            if (TopicName is null) BuiltIns.ThrowNullReference(nameof(TopicName));
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(FilePath) + BuiltIns.GetStringSize(TopicName);

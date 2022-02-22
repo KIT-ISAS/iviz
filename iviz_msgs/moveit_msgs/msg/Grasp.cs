@@ -109,23 +109,23 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Id is null) throw new System.NullReferenceException(nameof(Id));
-            if (PreGraspPosture is null) throw new System.NullReferenceException(nameof(PreGraspPosture));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (PreGraspPosture is null) BuiltIns.ThrowNullReference(nameof(PreGraspPosture));
             PreGraspPosture.RosValidate();
-            if (GraspPosture is null) throw new System.NullReferenceException(nameof(GraspPosture));
+            if (GraspPosture is null) BuiltIns.ThrowNullReference(nameof(GraspPosture));
             GraspPosture.RosValidate();
-            if (GraspPose is null) throw new System.NullReferenceException(nameof(GraspPose));
+            if (GraspPose is null) BuiltIns.ThrowNullReference(nameof(GraspPose));
             GraspPose.RosValidate();
-            if (PreGraspApproach is null) throw new System.NullReferenceException(nameof(PreGraspApproach));
+            if (PreGraspApproach is null) BuiltIns.ThrowNullReference(nameof(PreGraspApproach));
             PreGraspApproach.RosValidate();
-            if (PostGraspRetreat is null) throw new System.NullReferenceException(nameof(PostGraspRetreat));
+            if (PostGraspRetreat is null) BuiltIns.ThrowNullReference(nameof(PostGraspRetreat));
             PostGraspRetreat.RosValidate();
-            if (PostPlaceRetreat is null) throw new System.NullReferenceException(nameof(PostPlaceRetreat));
+            if (PostPlaceRetreat is null) BuiltIns.ThrowNullReference(nameof(PostPlaceRetreat));
             PostPlaceRetreat.RosValidate();
-            if (AllowedTouchObjects is null) throw new System.NullReferenceException(nameof(AllowedTouchObjects));
+            if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects));
             for (int i = 0; i < AllowedTouchObjects.Length; i++)
             {
-                if (AllowedTouchObjects[i] is null) throw new System.NullReferenceException($"{nameof(AllowedTouchObjects)}[{i}]");
+                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AllowedTouchObjects)}[{i}]");
             }
         }
     

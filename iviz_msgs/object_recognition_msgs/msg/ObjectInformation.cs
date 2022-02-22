@@ -55,10 +55,10 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (GroundTruthMesh is null) throw new System.NullReferenceException(nameof(GroundTruthMesh));
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (GroundTruthMesh is null) BuiltIns.ThrowNullReference(nameof(GroundTruthMesh));
             GroundTruthMesh.RosValidate();
-            if (GroundTruthPointCloud is null) throw new System.NullReferenceException(nameof(GroundTruthPointCloud));
+            if (GroundTruthPointCloud is null) BuiltIns.ThrowNullReference(nameof(GroundTruthPointCloud));
             GroundTruthPointCloud.RosValidate();
         }
     

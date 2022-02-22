@@ -99,8 +99,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Ranges is null) throw new System.NullReferenceException(nameof(Ranges));
-            if (Intensities is null) throw new System.NullReferenceException(nameof(Intensities));
+            if (Ranges is null) BuiltIns.ThrowNullReference(nameof(Ranges));
+            if (Intensities is null) BuiltIns.ThrowNullReference(nameof(Intensities));
         }
     
         public int RosMessageLength

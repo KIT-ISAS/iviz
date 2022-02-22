@@ -54,7 +54,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (ConvexHull is null) throw new System.NullReferenceException(nameof(ConvexHull));
+            if (ConvexHull is null) BuiltIns.ThrowNullReference(nameof(ConvexHull));
         }
     
         public int RosMessageLength => 60 + Header.RosMessageLength + 24 * ConvexHull.Length;

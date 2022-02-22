@@ -68,32 +68,32 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Type is null) throw new System.NullReferenceException(nameof(Type));
-            if (Fieldnames is null) throw new System.NullReferenceException(nameof(Fieldnames));
+            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
+            if (Fieldnames is null) BuiltIns.ThrowNullReference(nameof(Fieldnames));
             for (int i = 0; i < Fieldnames.Length; i++)
             {
-                if (Fieldnames[i] is null) throw new System.NullReferenceException($"{nameof(Fieldnames)}[{i}]");
+                if (Fieldnames[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fieldnames)}[{i}]");
             }
-            if (Fieldtypes is null) throw new System.NullReferenceException(nameof(Fieldtypes));
+            if (Fieldtypes is null) BuiltIns.ThrowNullReference(nameof(Fieldtypes));
             for (int i = 0; i < Fieldtypes.Length; i++)
             {
-                if (Fieldtypes[i] is null) throw new System.NullReferenceException($"{nameof(Fieldtypes)}[{i}]");
+                if (Fieldtypes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fieldtypes)}[{i}]");
             }
-            if (Fieldarraylen is null) throw new System.NullReferenceException(nameof(Fieldarraylen));
-            if (Examples is null) throw new System.NullReferenceException(nameof(Examples));
+            if (Fieldarraylen is null) BuiltIns.ThrowNullReference(nameof(Fieldarraylen));
+            if (Examples is null) BuiltIns.ThrowNullReference(nameof(Examples));
             for (int i = 0; i < Examples.Length; i++)
             {
-                if (Examples[i] is null) throw new System.NullReferenceException($"{nameof(Examples)}[{i}]");
+                if (Examples[i] is null) BuiltIns.ThrowNullReference($"{nameof(Examples)}[{i}]");
             }
-            if (Constnames is null) throw new System.NullReferenceException(nameof(Constnames));
+            if (Constnames is null) BuiltIns.ThrowNullReference(nameof(Constnames));
             for (int i = 0; i < Constnames.Length; i++)
             {
-                if (Constnames[i] is null) throw new System.NullReferenceException($"{nameof(Constnames)}[{i}]");
+                if (Constnames[i] is null) BuiltIns.ThrowNullReference($"{nameof(Constnames)}[{i}]");
             }
-            if (Constvalues is null) throw new System.NullReferenceException(nameof(Constvalues));
+            if (Constvalues is null) BuiltIns.ThrowNullReference(nameof(Constvalues));
             for (int i = 0; i < Constvalues.Length; i++)
             {
-                if (Constvalues[i] is null) throw new System.NullReferenceException($"{nameof(Constvalues)}[{i}]");
+                if (Constvalues[i] is null) BuiltIns.ThrowNullReference($"{nameof(Constvalues)}[{i}]");
             }
         }
     

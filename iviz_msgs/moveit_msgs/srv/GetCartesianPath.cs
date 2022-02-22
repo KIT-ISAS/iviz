@@ -135,12 +135,12 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (StartState is null) throw new System.NullReferenceException(nameof(StartState));
+            if (StartState is null) BuiltIns.ThrowNullReference(nameof(StartState));
             StartState.RosValidate();
-            if (GroupName is null) throw new System.NullReferenceException(nameof(GroupName));
-            if (LinkName is null) throw new System.NullReferenceException(nameof(LinkName));
-            if (Waypoints is null) throw new System.NullReferenceException(nameof(Waypoints));
-            if (PathConstraints is null) throw new System.NullReferenceException(nameof(PathConstraints));
+            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
+            if (LinkName is null) BuiltIns.ThrowNullReference(nameof(LinkName));
+            if (Waypoints is null) BuiltIns.ThrowNullReference(nameof(Waypoints));
+            if (PathConstraints is null) BuiltIns.ThrowNullReference(nameof(PathConstraints));
             PathConstraints.RosValidate();
         }
     
@@ -214,11 +214,11 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (StartState is null) throw new System.NullReferenceException(nameof(StartState));
+            if (StartState is null) BuiltIns.ThrowNullReference(nameof(StartState));
             StartState.RosValidate();
-            if (Solution is null) throw new System.NullReferenceException(nameof(Solution));
+            if (Solution is null) BuiltIns.ThrowNullReference(nameof(Solution));
             Solution.RosValidate();
-            if (ErrorCode is null) throw new System.NullReferenceException(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
             ErrorCode.RosValidate();
         }
     

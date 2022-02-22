@@ -96,9 +96,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (ClientId is null) throw new System.NullReferenceException(nameof(ClientId));
-            if (MarkerName is null) throw new System.NullReferenceException(nameof(MarkerName));
-            if (ControlName is null) throw new System.NullReferenceException(nameof(ControlName));
+            if (ClientId is null) BuiltIns.ThrowNullReference(nameof(ClientId));
+            if (MarkerName is null) BuiltIns.ThrowNullReference(nameof(MarkerName));
+            if (ControlName is null) BuiltIns.ThrowNullReference(nameof(ControlName));
         }
     
         public int RosMessageLength

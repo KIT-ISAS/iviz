@@ -39,7 +39,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public void RosValidate()
         {
-            if (Sequence is null) throw new System.NullReferenceException(nameof(Sequence));
+            if (Sequence is null) BuiltIns.ThrowNullReference(nameof(Sequence));
         }
     
         public int RosMessageLength => 4 + 4 * Sequence.Length;

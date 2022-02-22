@@ -56,15 +56,15 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosValidate()
         {
-            if (JointNames is null) throw new System.NullReferenceException(nameof(JointNames));
+            if (JointNames is null) BuiltIns.ThrowNullReference(nameof(JointNames));
             for (int i = 0; i < JointNames.Length; i++)
             {
-                if (JointNames[i] is null) throw new System.NullReferenceException($"{nameof(JointNames)}[{i}]");
+                if (JointNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(JointNames)}[{i}]");
             }
-            if (Points is null) throw new System.NullReferenceException(nameof(Points));
+            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
             for (int i = 0; i < Points.Length; i++)
             {
-                if (Points[i] is null) throw new System.NullReferenceException($"{nameof(Points)}[{i}]");
+                if (Points[i] is null) BuiltIns.ThrowNullReference($"{nameof(Points)}[{i}]");
                 Points[i].RosValidate();
             }
         }

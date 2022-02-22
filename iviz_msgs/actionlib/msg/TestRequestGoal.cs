@@ -77,7 +77,7 @@ namespace Iviz.Msgs.Actionlib
         
         public void RosValidate()
         {
-            if (ResultText is null) throw new System.NullReferenceException(nameof(ResultText));
+            if (ResultText is null) BuiltIns.ThrowNullReference(nameof(ResultText));
         }
     
         public int RosMessageLength => 38 + BuiltIns.GetStringSize(ResultText);

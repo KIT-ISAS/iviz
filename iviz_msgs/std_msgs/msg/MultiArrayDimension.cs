@@ -49,7 +49,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Label is null) throw new System.NullReferenceException(nameof(Label));
+            if (Label is null) BuiltIns.ThrowNullReference(nameof(Label));
         }
     
         public int RosMessageLength => 12 + BuiltIns.GetStringSize(Label);

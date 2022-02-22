@@ -99,7 +99,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Path is null) throw new System.NullReferenceException(nameof(Path));
+            if (Path is null) BuiltIns.ThrowNullReference(nameof(Path));
         }
     
         public int RosMessageLength => 21 + BuiltIns.GetStringSize(Path);

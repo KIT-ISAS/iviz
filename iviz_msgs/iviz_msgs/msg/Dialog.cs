@@ -150,13 +150,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) throw new System.NullReferenceException(nameof(Id));
-            if (Title is null) throw new System.NullReferenceException(nameof(Title));
-            if (Caption is null) throw new System.NullReferenceException(nameof(Caption));
-            if (MenuEntries is null) throw new System.NullReferenceException(nameof(MenuEntries));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Title is null) BuiltIns.ThrowNullReference(nameof(Title));
+            if (Caption is null) BuiltIns.ThrowNullReference(nameof(Caption));
+            if (MenuEntries is null) BuiltIns.ThrowNullReference(nameof(MenuEntries));
             for (int i = 0; i < MenuEntries.Length; i++)
             {
-                if (MenuEntries[i] is null) throw new System.NullReferenceException($"{nameof(MenuEntries)}[{i}]");
+                if (MenuEntries[i] is null) BuiltIns.ThrowNullReference($"{nameof(MenuEntries)}[{i}]");
             }
         }
     

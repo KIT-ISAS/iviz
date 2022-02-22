@@ -73,13 +73,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (Message is null) throw new System.NullReferenceException(nameof(Message));
-            if (HardwareId is null) throw new System.NullReferenceException(nameof(HardwareId));
-            if (Values is null) throw new System.NullReferenceException(nameof(Values));
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (HardwareId is null) BuiltIns.ThrowNullReference(nameof(HardwareId));
+            if (Values is null) BuiltIns.ThrowNullReference(nameof(Values));
             for (int i = 0; i < Values.Length; i++)
             {
-                if (Values[i] is null) throw new System.NullReferenceException($"{nameof(Values)}[{i}]");
+                if (Values[i] is null) BuiltIns.ThrowNullReference($"{nameof(Values)}[{i}]");
                 Values[i].RosValidate();
             }
         }

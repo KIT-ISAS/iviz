@@ -57,17 +57,17 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Groups is null) throw new System.NullReferenceException(nameof(Groups));
+            if (Groups is null) BuiltIns.ThrowNullReference(nameof(Groups));
             for (int i = 0; i < Groups.Length; i++)
             {
-                if (Groups[i] is null) throw new System.NullReferenceException($"{nameof(Groups)}[{i}]");
+                if (Groups[i] is null) BuiltIns.ThrowNullReference($"{nameof(Groups)}[{i}]");
                 Groups[i].RosValidate();
             }
-            if (Max is null) throw new System.NullReferenceException(nameof(Max));
+            if (Max is null) BuiltIns.ThrowNullReference(nameof(Max));
             Max.RosValidate();
-            if (Min is null) throw new System.NullReferenceException(nameof(Min));
+            if (Min is null) BuiltIns.ThrowNullReference(nameof(Min));
             Min.RosValidate();
-            if (Dflt is null) throw new System.NullReferenceException(nameof(Dflt));
+            if (Dflt is null) BuiltIns.ThrowNullReference(nameof(Dflt));
             Dflt.RosValidate();
         }
     

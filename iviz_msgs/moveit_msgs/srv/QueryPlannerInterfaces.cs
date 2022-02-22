@@ -123,10 +123,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (PlannerInterfaces is null) throw new System.NullReferenceException(nameof(PlannerInterfaces));
+            if (PlannerInterfaces is null) BuiltIns.ThrowNullReference(nameof(PlannerInterfaces));
             for (int i = 0; i < PlannerInterfaces.Length; i++)
             {
-                if (PlannerInterfaces[i] is null) throw new System.NullReferenceException($"{nameof(PlannerInterfaces)}[{i}]");
+                if (PlannerInterfaces[i] is null) BuiltIns.ThrowNullReference($"{nameof(PlannerInterfaces)}[{i}]");
                 PlannerInterfaces[i].RosValidate();
             }
         }

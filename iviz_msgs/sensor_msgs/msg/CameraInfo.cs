@@ -193,15 +193,15 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (DistortionModel is null) throw new System.NullReferenceException(nameof(DistortionModel));
-            if (D is null) throw new System.NullReferenceException(nameof(D));
-            if (K is null) throw new System.NullReferenceException(nameof(K));
+            if (DistortionModel is null) BuiltIns.ThrowNullReference(nameof(DistortionModel));
+            if (D is null) BuiltIns.ThrowNullReference(nameof(D));
+            if (K is null) BuiltIns.ThrowNullReference(nameof(K));
             if (K.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(K), K.Length, 9);
-            if (R is null) throw new System.NullReferenceException(nameof(R));
+            if (R is null) BuiltIns.ThrowNullReference(nameof(R));
             if (R.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(R), R.Length, 9);
-            if (P is null) throw new System.NullReferenceException(nameof(P));
+            if (P is null) BuiltIns.ThrowNullReference(nameof(P));
             if (P.Length != 12) throw new RosInvalidSizeForFixedArrayException(nameof(P), P.Length, 12);
-            if (Roi is null) throw new System.NullReferenceException(nameof(Roi));
+            if (Roi is null) BuiltIns.ThrowNullReference(nameof(Roi));
             Roi.RosValidate();
         }
     

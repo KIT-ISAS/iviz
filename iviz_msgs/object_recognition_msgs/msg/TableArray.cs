@@ -47,10 +47,10 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (Tables is null) throw new System.NullReferenceException(nameof(Tables));
+            if (Tables is null) BuiltIns.ThrowNullReference(nameof(Tables));
             for (int i = 0; i < Tables.Length; i++)
             {
-                if (Tables[i] is null) throw new System.NullReferenceException($"{nameof(Tables)}[{i}]");
+                if (Tables[i] is null) BuiltIns.ThrowNullReference($"{nameof(Tables)}[{i}]");
                 Tables[i].RosValidate();
             }
         }

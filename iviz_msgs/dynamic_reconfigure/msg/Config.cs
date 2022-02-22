@@ -78,34 +78,34 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Bools is null) throw new System.NullReferenceException(nameof(Bools));
+            if (Bools is null) BuiltIns.ThrowNullReference(nameof(Bools));
             for (int i = 0; i < Bools.Length; i++)
             {
-                if (Bools[i] is null) throw new System.NullReferenceException($"{nameof(Bools)}[{i}]");
+                if (Bools[i] is null) BuiltIns.ThrowNullReference($"{nameof(Bools)}[{i}]");
                 Bools[i].RosValidate();
             }
-            if (Ints is null) throw new System.NullReferenceException(nameof(Ints));
+            if (Ints is null) BuiltIns.ThrowNullReference(nameof(Ints));
             for (int i = 0; i < Ints.Length; i++)
             {
-                if (Ints[i] is null) throw new System.NullReferenceException($"{nameof(Ints)}[{i}]");
+                if (Ints[i] is null) BuiltIns.ThrowNullReference($"{nameof(Ints)}[{i}]");
                 Ints[i].RosValidate();
             }
-            if (Strs is null) throw new System.NullReferenceException(nameof(Strs));
+            if (Strs is null) BuiltIns.ThrowNullReference(nameof(Strs));
             for (int i = 0; i < Strs.Length; i++)
             {
-                if (Strs[i] is null) throw new System.NullReferenceException($"{nameof(Strs)}[{i}]");
+                if (Strs[i] is null) BuiltIns.ThrowNullReference($"{nameof(Strs)}[{i}]");
                 Strs[i].RosValidate();
             }
-            if (Doubles is null) throw new System.NullReferenceException(nameof(Doubles));
+            if (Doubles is null) BuiltIns.ThrowNullReference(nameof(Doubles));
             for (int i = 0; i < Doubles.Length; i++)
             {
-                if (Doubles[i] is null) throw new System.NullReferenceException($"{nameof(Doubles)}[{i}]");
+                if (Doubles[i] is null) BuiltIns.ThrowNullReference($"{nameof(Doubles)}[{i}]");
                 Doubles[i].RosValidate();
             }
-            if (Groups is null) throw new System.NullReferenceException(nameof(Groups));
+            if (Groups is null) BuiltIns.ThrowNullReference(nameof(Groups));
             for (int i = 0; i < Groups.Length; i++)
             {
-                if (Groups[i] is null) throw new System.NullReferenceException($"{nameof(Groups)}[{i}]");
+                if (Groups[i] is null) BuiltIns.ThrowNullReference($"{nameof(Groups)}[{i}]");
                 Groups[i].RosValidate();
             }
         }

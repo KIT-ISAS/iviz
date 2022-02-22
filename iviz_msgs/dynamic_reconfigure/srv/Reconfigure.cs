@@ -82,7 +82,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Config is null) throw new System.NullReferenceException(nameof(Config));
+            if (Config is null) BuiltIns.ThrowNullReference(nameof(Config));
             Config.RosValidate();
         }
     
@@ -125,7 +125,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Config is null) throw new System.NullReferenceException(nameof(Config));
+            if (Config is null) BuiltIns.ThrowNullReference(nameof(Config));
             Config.RosValidate();
         }
     

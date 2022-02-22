@@ -49,10 +49,10 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Detections is null) throw new System.NullReferenceException(nameof(Detections));
+            if (Detections is null) BuiltIns.ThrowNullReference(nameof(Detections));
             for (int i = 0; i < Detections.Length; i++)
             {
-                if (Detections[i] is null) throw new System.NullReferenceException($"{nameof(Detections)}[{i}]");
+                if (Detections[i] is null) BuiltIns.ThrowNullReference($"{nameof(Detections)}[{i}]");
                 Detections[i].RosValidate();
             }
         }

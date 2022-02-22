@@ -111,30 +111,30 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Id is null) throw new System.NullReferenceException(nameof(Id));
-            if (Type is null) throw new System.NullReferenceException(nameof(Type));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
             Type.RosValidate();
-            if (Primitives is null) throw new System.NullReferenceException(nameof(Primitives));
+            if (Primitives is null) BuiltIns.ThrowNullReference(nameof(Primitives));
             for (int i = 0; i < Primitives.Length; i++)
             {
-                if (Primitives[i] is null) throw new System.NullReferenceException($"{nameof(Primitives)}[{i}]");
+                if (Primitives[i] is null) BuiltIns.ThrowNullReference($"{nameof(Primitives)}[{i}]");
                 Primitives[i].RosValidate();
             }
-            if (PrimitivePoses is null) throw new System.NullReferenceException(nameof(PrimitivePoses));
-            if (Meshes is null) throw new System.NullReferenceException(nameof(Meshes));
+            if (PrimitivePoses is null) BuiltIns.ThrowNullReference(nameof(PrimitivePoses));
+            if (Meshes is null) BuiltIns.ThrowNullReference(nameof(Meshes));
             for (int i = 0; i < Meshes.Length; i++)
             {
-                if (Meshes[i] is null) throw new System.NullReferenceException($"{nameof(Meshes)}[{i}]");
+                if (Meshes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Meshes)}[{i}]");
                 Meshes[i].RosValidate();
             }
-            if (MeshPoses is null) throw new System.NullReferenceException(nameof(MeshPoses));
-            if (Planes is null) throw new System.NullReferenceException(nameof(Planes));
+            if (MeshPoses is null) BuiltIns.ThrowNullReference(nameof(MeshPoses));
+            if (Planes is null) BuiltIns.ThrowNullReference(nameof(Planes));
             for (int i = 0; i < Planes.Length; i++)
             {
-                if (Planes[i] is null) throw new System.NullReferenceException($"{nameof(Planes)}[{i}]");
+                if (Planes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Planes)}[{i}]");
                 Planes[i].RosValidate();
             }
-            if (PlanePoses is null) throw new System.NullReferenceException(nameof(PlanePoses));
+            if (PlanePoses is null) BuiltIns.ThrowNullReference(nameof(PlanePoses));
         }
     
         public int RosMessageLength

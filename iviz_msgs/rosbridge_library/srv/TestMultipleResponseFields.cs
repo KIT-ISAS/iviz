@@ -130,7 +130,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (@string is null) throw new System.NullReferenceException(nameof(@string));
+            if (@string is null) BuiltIns.ThrowNullReference(nameof(@string));
         }
     
         public int RosMessageLength => 13 + BuiltIns.GetStringSize(@string);

@@ -54,12 +54,12 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Cloud is null) throw new System.NullReferenceException(nameof(Cloud));
+            if (Cloud is null) BuiltIns.ThrowNullReference(nameof(Cloud));
             Cloud.RosValidate();
-            if (Polygons is null) throw new System.NullReferenceException(nameof(Polygons));
+            if (Polygons is null) BuiltIns.ThrowNullReference(nameof(Polygons));
             for (int i = 0; i < Polygons.Length; i++)
             {
-                if (Polygons[i] is null) throw new System.NullReferenceException($"{nameof(Polygons)}[{i}]");
+                if (Polygons[i] is null) BuiltIns.ThrowNullReference($"{nameof(Polygons)}[{i}]");
                 Polygons[i].RosValidate();
             }
         }

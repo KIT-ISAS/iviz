@@ -84,7 +84,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Components is null) throw new System.NullReferenceException(nameof(Components));
+            if (Components is null) BuiltIns.ThrowNullReference(nameof(Components));
             Components.RosValidate();
         }
     
@@ -130,7 +130,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Scene is null) throw new System.NullReferenceException(nameof(Scene));
+            if (Scene is null) BuiltIns.ThrowNullReference(nameof(Scene));
             Scene.RosValidate();
         }
     

@@ -38,7 +38,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (Durations is null) throw new System.NullReferenceException(nameof(Durations));
+            if (Durations is null) BuiltIns.ThrowNullReference(nameof(Durations));
         }
     
         public int RosMessageLength => 4 + 8 * Durations.Length;

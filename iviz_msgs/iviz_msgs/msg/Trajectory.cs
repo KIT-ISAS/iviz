@@ -43,8 +43,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Poses is null) throw new System.NullReferenceException(nameof(Poses));
-            if (Timestamps is null) throw new System.NullReferenceException(nameof(Timestamps));
+            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
+            if (Timestamps is null) BuiltIns.ThrowNullReference(nameof(Timestamps));
         }
     
         public int RosMessageLength => 8 + 56 * Poses.Length + 8 * Timestamps.Length;

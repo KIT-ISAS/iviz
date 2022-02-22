@@ -57,10 +57,10 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (Type is null) throw new System.NullReferenceException(nameof(Type));
-            if (Description is null) throw new System.NullReferenceException(nameof(Description));
-            if (EditMethod is null) throw new System.NullReferenceException(nameof(EditMethod));
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
+            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
+            if (EditMethod is null) BuiltIns.ThrowNullReference(nameof(EditMethod));
         }
     
         public int RosMessageLength

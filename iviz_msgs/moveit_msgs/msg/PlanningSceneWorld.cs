@@ -49,13 +49,13 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (CollisionObjects is null) throw new System.NullReferenceException(nameof(CollisionObjects));
+            if (CollisionObjects is null) BuiltIns.ThrowNullReference(nameof(CollisionObjects));
             for (int i = 0; i < CollisionObjects.Length; i++)
             {
-                if (CollisionObjects[i] is null) throw new System.NullReferenceException($"{nameof(CollisionObjects)}[{i}]");
+                if (CollisionObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(CollisionObjects)}[{i}]");
                 CollisionObjects[i].RosValidate();
             }
-            if (Octomap is null) throw new System.NullReferenceException(nameof(Octomap));
+            if (Octomap is null) BuiltIns.ThrowNullReference(nameof(Octomap));
             Octomap.RosValidate();
         }
     

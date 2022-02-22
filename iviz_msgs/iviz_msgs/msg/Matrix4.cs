@@ -39,7 +39,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (M is null) throw new System.NullReferenceException(nameof(M));
+            if (M is null) BuiltIns.ThrowNullReference(nameof(M));
             if (M.Length != 16) throw new RosInvalidSizeForFixedArrayException(nameof(M), M.Length, 16);
         }
     

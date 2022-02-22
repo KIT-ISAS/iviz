@@ -66,23 +66,23 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Clusters is null) throw new System.NullReferenceException(nameof(Clusters));
+            if (Clusters is null) BuiltIns.ThrowNullReference(nameof(Clusters));
             for (int i = 0; i < Clusters.Length; i++)
             {
-                if (Clusters[i] is null) throw new System.NullReferenceException($"{nameof(Clusters)}[{i}]");
+                if (Clusters[i] is null) BuiltIns.ThrowNullReference($"{nameof(Clusters)}[{i}]");
                 Clusters[i].RosValidate();
             }
-            if (Materials is null) throw new System.NullReferenceException(nameof(Materials));
+            if (Materials is null) BuiltIns.ThrowNullReference(nameof(Materials));
             for (int i = 0; i < Materials.Length; i++)
             {
-                if (Materials[i] is null) throw new System.NullReferenceException($"{nameof(Materials)}[{i}]");
+                if (Materials[i] is null) BuiltIns.ThrowNullReference($"{nameof(Materials)}[{i}]");
                 Materials[i].RosValidate();
             }
-            if (ClusterMaterials is null) throw new System.NullReferenceException(nameof(ClusterMaterials));
-            if (VertexTexCoords is null) throw new System.NullReferenceException(nameof(VertexTexCoords));
+            if (ClusterMaterials is null) BuiltIns.ThrowNullReference(nameof(ClusterMaterials));
+            if (VertexTexCoords is null) BuiltIns.ThrowNullReference(nameof(VertexTexCoords));
             for (int i = 0; i < VertexTexCoords.Length; i++)
             {
-                if (VertexTexCoords[i] is null) throw new System.NullReferenceException($"{nameof(VertexTexCoords)}[{i}]");
+                if (VertexTexCoords[i] is null) BuiltIns.ThrowNullReference($"{nameof(VertexTexCoords)}[{i}]");
                 VertexTexCoords[i].RosValidate();
             }
         }

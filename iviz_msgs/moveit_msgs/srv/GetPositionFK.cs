@@ -96,12 +96,12 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (FkLinkNames is null) throw new System.NullReferenceException(nameof(FkLinkNames));
+            if (FkLinkNames is null) BuiltIns.ThrowNullReference(nameof(FkLinkNames));
             for (int i = 0; i < FkLinkNames.Length; i++)
             {
-                if (FkLinkNames[i] is null) throw new System.NullReferenceException($"{nameof(FkLinkNames)}[{i}]");
+                if (FkLinkNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(FkLinkNames)}[{i}]");
             }
-            if (RobotState is null) throw new System.NullReferenceException(nameof(RobotState));
+            if (RobotState is null) BuiltIns.ThrowNullReference(nameof(RobotState));
             RobotState.RosValidate();
         }
     
@@ -169,18 +169,18 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (PoseStamped is null) throw new System.NullReferenceException(nameof(PoseStamped));
+            if (PoseStamped is null) BuiltIns.ThrowNullReference(nameof(PoseStamped));
             for (int i = 0; i < PoseStamped.Length; i++)
             {
-                if (PoseStamped[i] is null) throw new System.NullReferenceException($"{nameof(PoseStamped)}[{i}]");
+                if (PoseStamped[i] is null) BuiltIns.ThrowNullReference($"{nameof(PoseStamped)}[{i}]");
                 PoseStamped[i].RosValidate();
             }
-            if (FkLinkNames is null) throw new System.NullReferenceException(nameof(FkLinkNames));
+            if (FkLinkNames is null) BuiltIns.ThrowNullReference(nameof(FkLinkNames));
             for (int i = 0; i < FkLinkNames.Length; i++)
             {
-                if (FkLinkNames[i] is null) throw new System.NullReferenceException($"{nameof(FkLinkNames)}[{i}]");
+                if (FkLinkNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(FkLinkNames)}[{i}]");
             }
-            if (ErrorCode is null) throw new System.NullReferenceException(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
             ErrorCode.RosValidate();
         }
     

@@ -82,11 +82,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (SourceParameter is null) throw new System.NullReferenceException(nameof(SourceParameter));
-            if (SavedRobotName is null) throw new System.NullReferenceException(nameof(SavedRobotName));
-            if (FramePrefix is null) throw new System.NullReferenceException(nameof(FramePrefix));
-            if (FrameSuffix is null) throw new System.NullReferenceException(nameof(FrameSuffix));
-            if (Id is null) throw new System.NullReferenceException(nameof(Id));
+            if (SourceParameter is null) BuiltIns.ThrowNullReference(nameof(SourceParameter));
+            if (SavedRobotName is null) BuiltIns.ThrowNullReference(nameof(SavedRobotName));
+            if (FramePrefix is null) BuiltIns.ThrowNullReference(nameof(FramePrefix));
+            if (FrameSuffix is null) BuiltIns.ThrowNullReference(nameof(FrameSuffix));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
         }
     
         public int RosMessageLength

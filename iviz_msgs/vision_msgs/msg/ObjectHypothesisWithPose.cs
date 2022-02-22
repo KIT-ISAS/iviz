@@ -61,8 +61,8 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Id is null) throw new System.NullReferenceException(nameof(Id));
-            if (Pose is null) throw new System.NullReferenceException(nameof(Pose));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Pose is null) BuiltIns.ThrowNullReference(nameof(Pose));
             Pose.RosValidate();
         }
     

@@ -59,11 +59,11 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Points is null) throw new System.NullReferenceException(nameof(Points));
-            if (Channels is null) throw new System.NullReferenceException(nameof(Channels));
+            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
+            if (Channels is null) BuiltIns.ThrowNullReference(nameof(Channels));
             for (int i = 0; i < Channels.Length; i++)
             {
-                if (Channels[i] is null) throw new System.NullReferenceException($"{nameof(Channels)}[{i}]");
+                if (Channels[i] is null) BuiltIns.ThrowNullReference($"{nameof(Channels)}[{i}]");
                 Channels[i].RosValidate();
             }
         }

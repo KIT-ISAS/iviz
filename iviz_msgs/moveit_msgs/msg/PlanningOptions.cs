@@ -87,7 +87,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (PlanningSceneDiff is null) throw new System.NullReferenceException(nameof(PlanningSceneDiff));
+            if (PlanningSceneDiff is null) BuiltIns.ThrowNullReference(nameof(PlanningSceneDiff));
             PlanningSceneDiff.RosValidate();
         }
     

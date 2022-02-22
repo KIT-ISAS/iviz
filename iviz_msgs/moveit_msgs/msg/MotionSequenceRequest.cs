@@ -44,10 +44,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Items is null) throw new System.NullReferenceException(nameof(Items));
+            if (Items is null) BuiltIns.ThrowNullReference(nameof(Items));
             for (int i = 0; i < Items.Length; i++)
             {
-                if (Items[i] is null) throw new System.NullReferenceException($"{nameof(Items)}[{i}]");
+                if (Items[i] is null) BuiltIns.ThrowNullReference($"{nameof(Items)}[{i}]");
                 Items[i].RosValidate();
             }
         }

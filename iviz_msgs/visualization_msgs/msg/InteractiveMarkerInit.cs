@@ -60,11 +60,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (ServerId is null) throw new System.NullReferenceException(nameof(ServerId));
-            if (Markers is null) throw new System.NullReferenceException(nameof(Markers));
+            if (ServerId is null) BuiltIns.ThrowNullReference(nameof(ServerId));
+            if (Markers is null) BuiltIns.ThrowNullReference(nameof(Markers));
             for (int i = 0; i < Markers.Length; i++)
             {
-                if (Markers[i] is null) throw new System.NullReferenceException($"{nameof(Markers)}[{i}]");
+                if (Markers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Markers)}[{i}]");
                 Markers[i].RosValidate();
             }
         }

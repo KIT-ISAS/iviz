@@ -42,7 +42,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (Transforms is null) throw new System.NullReferenceException(nameof(Transforms));
+            if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetArraySize(Transforms);

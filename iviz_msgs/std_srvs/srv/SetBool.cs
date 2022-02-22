@@ -132,7 +132,7 @@ namespace Iviz.Msgs.StdSrvs
         
         public void RosValidate()
         {
-            if (Message is null) throw new System.NullReferenceException(nameof(Message));
+            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
         }
     
         public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);

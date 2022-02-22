@@ -109,32 +109,32 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (RobotState is null) throw new System.NullReferenceException(nameof(RobotState));
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (RobotState is null) BuiltIns.ThrowNullReference(nameof(RobotState));
             RobotState.RosValidate();
-            if (RobotModelName is null) throw new System.NullReferenceException(nameof(RobotModelName));
-            if (FixedFrameTransforms is null) throw new System.NullReferenceException(nameof(FixedFrameTransforms));
-            if (AllowedCollisionMatrix is null) throw new System.NullReferenceException(nameof(AllowedCollisionMatrix));
+            if (RobotModelName is null) BuiltIns.ThrowNullReference(nameof(RobotModelName));
+            if (FixedFrameTransforms is null) BuiltIns.ThrowNullReference(nameof(FixedFrameTransforms));
+            if (AllowedCollisionMatrix is null) BuiltIns.ThrowNullReference(nameof(AllowedCollisionMatrix));
             AllowedCollisionMatrix.RosValidate();
-            if (LinkPadding is null) throw new System.NullReferenceException(nameof(LinkPadding));
+            if (LinkPadding is null) BuiltIns.ThrowNullReference(nameof(LinkPadding));
             for (int i = 0; i < LinkPadding.Length; i++)
             {
-                if (LinkPadding[i] is null) throw new System.NullReferenceException($"{nameof(LinkPadding)}[{i}]");
+                if (LinkPadding[i] is null) BuiltIns.ThrowNullReference($"{nameof(LinkPadding)}[{i}]");
                 LinkPadding[i].RosValidate();
             }
-            if (LinkScale is null) throw new System.NullReferenceException(nameof(LinkScale));
+            if (LinkScale is null) BuiltIns.ThrowNullReference(nameof(LinkScale));
             for (int i = 0; i < LinkScale.Length; i++)
             {
-                if (LinkScale[i] is null) throw new System.NullReferenceException($"{nameof(LinkScale)}[{i}]");
+                if (LinkScale[i] is null) BuiltIns.ThrowNullReference($"{nameof(LinkScale)}[{i}]");
                 LinkScale[i].RosValidate();
             }
-            if (ObjectColors is null) throw new System.NullReferenceException(nameof(ObjectColors));
+            if (ObjectColors is null) BuiltIns.ThrowNullReference(nameof(ObjectColors));
             for (int i = 0; i < ObjectColors.Length; i++)
             {
-                if (ObjectColors[i] is null) throw new System.NullReferenceException($"{nameof(ObjectColors)}[{i}]");
+                if (ObjectColors[i] is null) BuiltIns.ThrowNullReference($"{nameof(ObjectColors)}[{i}]");
                 ObjectColors[i].RosValidate();
             }
-            if (World is null) throw new System.NullReferenceException(nameof(World));
+            if (World is null) BuiltIns.ThrowNullReference(nameof(World));
             World.RosValidate();
         }
     

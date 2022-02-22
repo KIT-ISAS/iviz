@@ -131,11 +131,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Ns is null) throw new System.NullReferenceException(nameof(Ns));
-            if (Points is null) throw new System.NullReferenceException(nameof(Points));
-            if (Colors is null) throw new System.NullReferenceException(nameof(Colors));
-            if (Text is null) throw new System.NullReferenceException(nameof(Text));
-            if (MeshResource is null) throw new System.NullReferenceException(nameof(MeshResource));
+            if (Ns is null) BuiltIns.ThrowNullReference(nameof(Ns));
+            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
+            if (Colors is null) BuiltIns.ThrowNullReference(nameof(Colors));
+            if (Text is null) BuiltIns.ThrowNullReference(nameof(Text));
+            if (MeshResource is null) BuiltIns.ThrowNullReference(nameof(MeshResource));
         }
     
         public int RosMessageLength

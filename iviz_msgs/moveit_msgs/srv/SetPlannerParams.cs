@@ -100,9 +100,9 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (PlannerConfig is null) throw new System.NullReferenceException(nameof(PlannerConfig));
-            if (Group is null) throw new System.NullReferenceException(nameof(Group));
-            if (Params is null) throw new System.NullReferenceException(nameof(Params));
+            if (PlannerConfig is null) BuiltIns.ThrowNullReference(nameof(PlannerConfig));
+            if (Group is null) BuiltIns.ThrowNullReference(nameof(Group));
+            if (Params is null) BuiltIns.ThrowNullReference(nameof(Params));
             Params.RosValidate();
         }
     

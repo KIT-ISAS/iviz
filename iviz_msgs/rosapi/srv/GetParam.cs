@@ -87,8 +87,8 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (@default is null) throw new System.NullReferenceException(nameof(@default));
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (@default is null) BuiltIns.ThrowNullReference(nameof(@default));
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetStringSize(@default);
@@ -130,7 +130,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Value is null) throw new System.NullReferenceException(nameof(Value));
+            if (Value is null) BuiltIns.ThrowNullReference(nameof(Value));
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Value);
