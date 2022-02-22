@@ -104,7 +104,7 @@ namespace Iviz.Displays.XR
             var baseCollider = mainCollider;
             foreach (var otherCollider in colliders)
             {
-                float distance = baseCollider.DistanceTo(otherCollider, out _, out _);
+                float distance = BoundaryLinkDisplay.DistanceTo(baseCollider, otherCollider, out _, out _);
                 if (distance < warningDistance && !links.ContainsKey(otherCollider))
                 {
                     var link = ResourcePool.RentDisplay<BoundaryLinkDisplay>();

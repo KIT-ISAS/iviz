@@ -12,7 +12,7 @@ namespace Iviz.App
     {
         static readonly (string Caption, ModuleType Module)[] Modules =
         {
-            ("<b>AugmentedReality</b>\nManager for augmented reality", ModuleType.AugmentedReality),
+            ("<b>AugmentedReality</b>\nManager for augmented reality", ModuleType.AR),
             ("<b>Robot</b>\nRobot from the parameter server", ModuleType.Robot),
             ("<b>DepthCloud</b>\nPoint cloud generator for depth images", ModuleType.DepthCloud),
             ("<b>Joystick</b>\nOn-screen joystick", ModuleType.Joystick),
@@ -21,7 +21,7 @@ namespace Iviz.App
 
         static readonly ModuleType[] UniqueModules =
         {
-            ModuleType.AugmentedReality,
+            ModuleType.AR,
             ModuleType.Joystick
         };
 

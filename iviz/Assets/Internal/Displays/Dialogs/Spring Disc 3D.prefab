@@ -62,6 +62,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetTransform: {fileID: 3834849191676742097}
   rayCollider: {fileID: 2997211786952223757}
+  forwardScale: 2
 --- !u!1 &6693431961827736242
 GameObject:
   m_ObjectHideFlags: 0

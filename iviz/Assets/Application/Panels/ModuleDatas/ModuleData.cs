@@ -99,7 +99,7 @@ namespace Iviz.App
                 ModuleType.JointState => new JointStateModuleData(c),
                 ModuleType.DepthCloud => new DepthCloudModuleData(c),
                 ModuleType.LaserScan => new LaserScanModuleData(c),
-                ModuleType.AugmentedReality => new ARModuleData(c),
+                ModuleType.AR => new ARModuleData(c),
                 ModuleType.Magnitude => new MagnitudeModuleData(c),
                 ModuleType.OccupancyGrid => new OccupancyGridModuleData(c),
                 ModuleType.Joystick => new JoystickModuleData(c),

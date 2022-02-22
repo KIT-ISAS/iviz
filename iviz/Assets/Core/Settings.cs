@@ -186,6 +186,8 @@ namespace Iviz.Core
                 : settingsManager = FindMainCamera().GetComponent<ISettingsManager>()
                                     ?? throw new MissingAssetFieldException("Failed to find SettingsManager!");
 
+        public static bool HasDragHandler => inputModule != null;
+        
         public static IDragHandler DragHandler =>
             (UnityEngine.Object?)inputModule != null
                 ? inputModule

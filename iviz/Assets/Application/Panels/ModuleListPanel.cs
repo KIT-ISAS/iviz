@@ -420,7 +420,7 @@ namespace Iviz.App
         {
             if (ARController.Instance is not { } arController)
             {
-                CreateModule(ModuleType.AugmentedReality);
+                CreateModule(ModuleType.AR);
             }
             else
             {
@@ -592,6 +592,12 @@ namespace Iviz.App
 
             foreach (var config in stateConfig.CreateListOfEntries())
             {
+                if (config.ModuleType == ModuleType.XR && !Settings.IsXR 
+                    || config.ModuleType == ModuleType.AR && !Settings.IsMobile)
+                {
+                    continue;
+                }
+                
                 CreateModule(config.ModuleType, configuration: config);
             }
         }

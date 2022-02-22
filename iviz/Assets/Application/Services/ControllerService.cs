@@ -141,7 +141,7 @@ namespace Iviz.Controllers
             if (moduleType is not
                 (ModuleType.Grid
                 or ModuleType.DepthCloud
-                or ModuleType.AugmentedReality
+                or ModuleType.AR
                 or ModuleType.Joystick
                 or ModuleType.Robot))
             {

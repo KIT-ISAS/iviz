@@ -45,7 +45,7 @@ namespace Iviz.Displays.XR
         {
             startCollider = a;
             endCollider = b;
-            Transform.SetParentLocal(TfModule.UnityFrameTransform);
+            Transform.SetParentLocal(TfModule.RootFrame.Transform);
             
             Frame.Transform.parent = b.gameObject.transform;
             Frame.SetBounds(b.GetLocalBounds());
@@ -61,7 +61,7 @@ namespace Iviz.Displays.XR
                 return;
             }
 
-            float distance = startCollider.DistanceTo(endCollider, out var start, out var end);
+            float distance = DistanceTo(startCollider, endCollider, out var start, out var end);
             var mid = (start + end) / 2;
             
             if (distance > 0)
@@ -114,5 +114,17 @@ namespace Iviz.Displays.XR
             frame.ReturnToPool();
             line.ReturnToPool(Resource.Displays.Cube);
         }
+        
+        public static float DistanceTo(BoxCollider a, BoxCollider b, out Vector3 start, out Vector3 end)
+        {
+            end = b.ClosestPoint(a.bounds.center);
+            start = a.ClosestPoint(end);
+
+            end = TfModule.RootFrame.Transform.InverseTransformPoint(end);
+            start = TfModule.RootFrame.Transform.InverseTransformPoint(start);
+            
+            return Vector3.Distance(start, end);
+        }
+        
     }
 }

@@ -196,7 +196,7 @@ namespace Iviz.Displays
                 int off = 0;
                 foreach (int v in ..cellsY)
                 {
-                    foreach (int u in ..cellsX)
+                    foreach (int u in ..(cellsX + 1))
                     {
                         points[off++] = new Vector3(
                             u * stepX,

@@ -753,13 +753,6 @@ namespace Iviz.Core
                 }
             }
         }
-
-        public static float DistanceTo(this BoxCollider a, BoxCollider b, out Vector3 start, out Vector3 end)
-        {
-            end = b.ClosestPoint(a.bounds.center);
-            start = a.ClosestPoint(end);
-            return Vector3.Distance(start, end);
-        }
     }
 
     public readonly struct WithIndexEnumerable<T>

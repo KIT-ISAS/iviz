@@ -33,7 +33,7 @@ namespace Iviz.Controllers.XR
         public Sender<XRHandState> RightHandSender { get; } = new("~xr/right_hand");
 
         public const float NearDistance = 0.2f;
-        
+
         readonly GazeController gaze;
         readonly XRRayInteractor gazeInteractor;
         readonly HandController leftHand;
@@ -53,6 +53,8 @@ namespace Iviz.Controllers.XR
         readonly IPublishedFrame leftControllerFrame;
         readonly IPublishedFrame rightControllerFrame;
         readonly IPublishedFrame? gazeFrame;
+
+        readonly XRConfiguration config = new();
 
         ARAnchor? originAnchor;
 
@@ -80,10 +82,24 @@ namespace Iviz.Controllers.XR
 
         public static XRController? Instance { get; private set; }
 
-        public XRConfiguration Config { get; }
+
+        public XRConfiguration Config
+        {
+            get => config;
+            private set => WorldScale = value.WorldScale;
+        }
 
         public TfFrame Frame => headFrame.TfFrame;
 
+        public float WorldScale
+        {
+            get => config.WorldScale;
+            set
+            {
+                config.WorldScale = value;
+                TfModule.RootScale = value;
+            }
+        }
 
         public XRController(XRContents contents, XRConfiguration? configuration)
         {
@@ -333,8 +349,7 @@ namespace Iviz.Controllers.XR
 
         static readonly Func<Pose, Msgs.GeometryMsgs.Transform> ToTransform = pose =>
             TfModule.RelativeToFixedFrame(pose).Unity2RosTransform();
-
-
+        
         public void Dispose()
         {
             GameThread.EveryFrame -= Update;
