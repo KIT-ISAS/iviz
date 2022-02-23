@@ -24,7 +24,6 @@ namespace Iviz.Rosbag.Reader
 
         public string? Topic => Connection?.Topic;
         public string? Type => Connection?.MessageType;
-        public string? Md5Sum => Connection?.Md5Sum;
         public string? MessageDefinition => Connection?.MessageDefinition;
 
         internal MessageData(Stream reader, long dataStart, long dataEnd, time time, Connection? connection)

@@ -105,7 +105,10 @@ namespace Iviz.Rosbag.Reader
         /// <returns>An enumerable that iterates through the messages.</returns>
         public IEnumerable<MessageData> ReadAllMessages()
         {
-            var connections = new Dictionary<int, Connection>();
+            var connections = new Dictionary<int, Connection?>
+            {
+                [-1] = null // shouldn't happen unless bag is broken  
+            };
 
             foreach (var record in ReadAllRecords())
             {
