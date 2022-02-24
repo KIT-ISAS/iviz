@@ -22,7 +22,7 @@ internal sealed class ServiceCaller : IDisposable
     bool disposed;
 
     public bool IsAlive => tcpClient.Client.CheckIfAlive();
-    public string ServiceType => serviceInfo.Service;
+    public string ServiceType => serviceInfo.Type;
     public Uri? RemoteUri { get; private set; }
 
     public ServiceCaller(ServiceInfo serviceInfo, bool requestNoDelay = true)
