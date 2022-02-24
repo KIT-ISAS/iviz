@@ -22,7 +22,7 @@ namespace Iviz.Controllers.TF
 
         readonly Dictionary<string, TfPublishedFrame> frames = new();
         PublishedFramePanelData? panelData;
-        int secondCounter;
+        int secondsCounter;
 
         public int NumPublishedFrames => frames.Count;
 
@@ -48,25 +48,28 @@ namespace Iviz.Controllers.TF
 
         void OnEverySecond()
         {
-            if (secondCounter++ != PublishTimeInSec)
+            if (secondsCounter++ != PublishTimeInSec)
             {
                 return;
             }
 
-            secondCounter = 0;
-            PublishFramesWithoutUpdate();
+            secondsCounter = 0;
+            PublishFramesKeepAlive();
         }
 
-        void PublishFramesWithoutUpdate()
+        // send keep-alive message to keep other nodes from forgetting our frames
+        void PublishFramesKeepAlive()
         {
-            var framesToPublish = frames.Values
-                .Where(frame => (GameThread.Now - frame.lastUpdate).TotalSeconds >= PublishTimeInSec);
+            static bool HasNotBeenUpdatedRecently(TfPublishedFrame frame) =>
+                (GameThread.Now - frame.lastUpdate).TotalSeconds >= PublishTimeInSec;
+
+            var framesToPublish = frames.Values.Where(HasNotBeenUpdatedRecently);
             foreach (var frame in framesToPublish)
             {
-                if (!frame.isInternal)
-                {
-                    TfListener.Publish(frame.TfFrame);
-                }
+                //if (!frame.isInternal)
+                //{
+                TfListener.Publish(frame.tfFrame);
+                //}
             }
         }
 
@@ -82,7 +85,7 @@ namespace Iviz.Controllers.TF
 
             if (showPublisherPanel)
             {
-                panelData = new PublishedFramePanelData(newFrame.TfFrame);
+                panelData = new PublishedFramePanelData(newFrame.tfFrame);
                 panelData.ShowPanel();
             }
 
@@ -132,7 +135,7 @@ namespace Iviz.Controllers.TF
                 return;
             }
 
-            panelData = new PublishedFramePanelData(frame.TfFrame);
+            panelData = new PublishedFramePanelData(frame.tfFrame);
             panelData.ShowPanel();
         }
 
@@ -155,29 +158,11 @@ namespace Iviz.Controllers.TF
             readonly string id;
             readonly FrameNode frameNode;
             
-            public DateTime lastUpdate;
             public readonly bool isInternal;
-            public TfFrame TfFrame { get; private set; }
+            public DateTime lastUpdate;
+            public TfFrame tfFrame;
 
-            internal TfPublishedFrame(string id, bool isInternal)
-            {
-                this.id = id;
-                this.isInternal = isInternal;
-                frameNode = new FrameNode("TfPublisher");
-                frameNode.AttachTo(id);
-                TfFrame = frameNode.Parent ??
-                          throw new NullReferenceException("Newly created frame has null parent"); // shouldn't happen
-
-                if (isInternal)
-                {
-                    TfFrame.ForceInvisible();
-                }
-            }
-
-            public void Dispose()
-            {
-                frameNode.Dispose();
-            }
+            public TfFrame TfFrame => tfFrame;
 
             public Pose LocalPose
             {
@@ -191,16 +176,36 @@ namespace Iviz.Controllers.TF
                     lastUpdate = GameThread.Now;
                 }
             }
+            
+            internal TfPublishedFrame(string id, bool isInternal)
+            {
+                this.id = id;
+                this.isInternal = isInternal;
+                frameNode = new FrameNode("TfPublisher");
+                frameNode.AttachTo(id);
+                tfFrame = frameNode.Parent ??
+                          throw new NullReferenceException("Newly created frame has null parent"); // shouldn't happen
+
+                if (isInternal)
+                {
+                    TfFrame.ForceInvisible();
+                }
+            }
+
+            public void Dispose()
+            {
+                frameNode.Dispose();
+            }
 
             public void AttachToFixed()
             {
-                TfFrame.Parent = TfModule.FixedFrame;
+                tfFrame.Parent = TfModule.FixedFrame;
             }
 
             public void UpdateFrame()
             {
                 frameNode.AttachTo(id);
-                TfFrame = frameNode.Parent ??
+                tfFrame = frameNode.Parent ??
                           throw new NullReferenceException("Failed to set origin parent"); // shouldn't happen
             }
         }

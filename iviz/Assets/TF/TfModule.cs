@@ -259,13 +259,13 @@ namespace Iviz.Controllers.TF
 
             if (!CheckIfWithinThreshold(rosTransform.Translation))
             {
-                SetFailedThreshold(transform.ChildFrameId);
+                SetFailedForThreshold(transform.ChildFrameId);
                 return;
             }
 
             if (rosTransform.IsInvalid())
             {
-                SetFailedValid(transform.ChildFrameId);
+                SetFailedForInvalid(transform.ChildFrameId);
                 return;
             }
 
@@ -342,7 +342,7 @@ namespace Iviz.Controllers.TF
                    && Math.Abs(t.Z) < maxPoseMagnitude;
         }
 
-        void SetFailedThreshold(string childId)
+        void SetFailedForThreshold(string childId)
         {
             if (warningTimestamps.TryGetValue(childId, out float expirationTimestamp)
                 && expirationTimestamp >= GameThread.GameTime)
@@ -354,7 +354,7 @@ namespace Iviz.Controllers.TF
             warningTimestamps[childId] = GameThread.GameTime + WarningBlacklistTimeInSec;
         }
 
-        void SetFailedValid(string childId)
+        void SetFailedForInvalid(string childId)
         {
             if (warningTimestamps.TryGetValue(childId, out float timestamp)
                 && timestamp >= GameThread.GameTime)
