@@ -73,6 +73,7 @@ namespace Iviz.App
                 ResourcePool.Return(Resource.Widgets.DraggableDisplayButton, button.GameObject);
             }
 
+            buttons.Clear();
             contentObjectTransform.sizeDelta = new Vector2(0, 2 * YOffset);
         }        
 

@@ -76,7 +76,10 @@ namespace Iviz.Controllers
                     reflectionProbe.transform.localPosition = new Vector3(0, 0, -2);
                 }
 
-                reflectionProbe.RenderProbe();
+                if (reflectionProbe.isActiveAndEnabled)
+                {
+                    reflectionProbe.RenderProbe();
+                }
             }
         }
 
@@ -185,7 +188,10 @@ namespace Iviz.Controllers
             const float totalSize = numberOfGridCells * gridCellSize;
 
             reflectionProbe.size = new Vector3(totalSize * 2, 20f, totalSize * 2);
-            reflectionProbe.RenderProbe();
+            if (reflectionProbe.isActiveAndEnabled)
+            {
+                reflectionProbe.RenderProbe();
+            }
         }
 
         public void Dispose()

@@ -587,13 +587,34 @@ namespace Iviz.App
             RemoveAllModules();
 
             var stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
+            
+            // TF, AR and XR are treated specially
+            // TF cannot be destroyed, resetting AR and XR loses world info
 
             TfData.UpdateConfiguration(stateConfig.Tf);
+            
+            if (Settings.IsMobile && stateConfig.AR != null)
+            {
+                if (moduleDatas.TryGetFirst(module => module.ModuleType == ModuleType.AR, out var arModule))
+                {
+                    ((ARModuleData)arModule).UpdateConfiguration(stateConfig.AR);
+                }
+                else
+                {
+                    CreateModule(ModuleType.AR, configuration: stateConfig.AR);
+                }
+            }
+
+            if (Settings.IsXR
+                && moduleDatas.TryGetFirst(module => module.ModuleType == ModuleType.XR, out var xrModule)
+                && stateConfig.XR != null)
+            {
+                ((XRModuleData)xrModule).UpdateConfiguration(stateConfig.XR);
+            }
 
             foreach (var config in stateConfig.CreateListOfEntries())
             {
-                if (config.ModuleType == ModuleType.XR && !Settings.IsXR 
-                    || config.ModuleType == ModuleType.AR && !Settings.IsMobile)
+                if (config.ModuleType is ModuleType.TF or ModuleType.XR or ModuleType.AR)
                 {
                     continue;
                 }
@@ -926,6 +947,7 @@ namespace Iviz.App
             {
                 if (moduleData.ModuleType is ModuleType.TF or ModuleType.AR or ModuleType.XR)
                 {
+                    newModuleDatas.Add(moduleData);
                     continue;
                 }
                 
@@ -935,7 +957,6 @@ namespace Iviz.App
                 }
                 
                 moduleData.Dispose();
-                newModuleDatas.Add(moduleData);
             }
 
             moduleDatas.Clear();

@@ -934,6 +934,7 @@ namespace Iviz.Controllers
                         TryRelease(signal);
                     }
 
+                    /*
                     void TriggerMenu(int buttonId)
                     {
                         feedback.VizId = RosManager.MyId ?? "";
@@ -944,6 +945,7 @@ namespace Iviz.Controllers
 
                         TryRelease(signal);
                     }
+                    */
 
                     void OnExpired()
                     {

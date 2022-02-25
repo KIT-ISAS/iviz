@@ -88,7 +88,7 @@ namespace Iviz.Controllers
         public ARConfiguration Config
         {
             get => config;
-            protected set
+            set
             {
                 Visible = value.Visible;
                 WorldScale = value.WorldScale;

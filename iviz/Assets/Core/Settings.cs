@@ -18,8 +18,10 @@ namespace Iviz.Core
         /// </summary>
 #if !UNITY_EDITOR && (UNITY_IOS || UNITY_ANDROID || UNITY_WSA)
         public const bool IsMobile = true;
-#else
+#elif UNITY_WSA || UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
         public static bool IsMobile => IsHololens;
+#else
+        public const bool IsMobile = false;
 #endif
 
         public const bool IsStandalone =
@@ -52,14 +54,22 @@ namespace Iviz.Core
             false;
 #endif
 
-        public static bool IsLinux =>
-            Application.platform is RuntimePlatform.LinuxEditor or RuntimePlatform.LinuxPlayer;
+        public const bool IsLinux =
+#if UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX
+            true;
+#else
+            false;
+#endif
 
+#if UNITY_IOS || UNITY_ANDROID || UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
         /// <summary>
         /// Is this being run in a Hololens?
         /// </summary>
-#if UNITY_IOS || UNITY_ANDROID
         public const bool IsHololens = false;
+
+        /// <summary>
+        /// Is this being run on an XR platform? (VR or Hololens)
+        /// </summary>
         public const bool IsXR = false;
 #else
         static bool? isHololens;
@@ -85,10 +95,16 @@ namespace Iviz.Core
             return true;
         }
 
+        /// <summary>
+        /// Is this being run in a Hololens?
+        /// </summary>
         public static bool IsHololens =>
             TryReadXRInfo() && (isHololens ??
                                 throw new InvalidOperationException("Could not check if we are running in a Hololens"));
 
+        /// <summary>
+        /// Is this being run on an XR platform? (VR or Hololens)
+        /// </summary>
         public static bool IsXR =>
             TryReadXRInfo() && (isXR ?? throw new InvalidOperationException("Could not check if we are running in XR"));
 #endif
@@ -104,7 +120,7 @@ namespace Iviz.Core
             mainCameraTransform = null;
             settingsManager = null;
             inputModule = null;
-            
+
             supportsR16 = null;
             supportsRGB24 = null;
             supportsComputeBuffersHelper = null;
@@ -113,10 +129,9 @@ namespace Iviz.Core
             ARCamera = null;
             ScreenCaptureManager = null;
         }
-        
+
         /// <summary>
-        /// Does this device support mobile AR?
-        /// Note: The hololens is considered an XR device.
+        /// Does this device support mobile AR? (smartphone, tablet, not Hololens)
         /// </summary>
         public static bool SupportsMobileAR => IsPhone;
 
@@ -187,7 +202,7 @@ namespace Iviz.Core
                                     ?? throw new MissingAssetFieldException("Failed to find SettingsManager!");
 
         public static bool HasDragHandler => inputModule != null;
-        
+
         public static IDragHandler DragHandler =>
             (UnityEngine.Object?)inputModule != null
                 ? inputModule
