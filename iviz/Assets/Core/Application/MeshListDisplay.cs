@@ -318,7 +318,7 @@ namespace Iviz.Displays
         {
             if (Size == 0)
             {
-                Collider.SetBounds(default);
+                Collider.SetLocalBounds(default);
                 MeasuredIntensityBounds = Vector2.zero;
                 if (!OverrideIntensityBounds)
                 {

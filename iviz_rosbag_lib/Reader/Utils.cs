@@ -10,9 +10,10 @@ namespace Iviz.Rosbag
 {
     internal static class Utils
     {
-        public static T Read<T>(this Span<byte> intBytes) where T : unmanaged => 
-            MemoryMarshal.Read<T>(intBytes);
-
+        /// <summary>
+        /// LINQ-like function to retrieve the internal message of the <see cref="MessageData"/>. 
+        /// </summary>
+        /// <typeparam name="T">The message type</typeparam>
         public static IEnumerable<T> SelectMessage<T>(this IEnumerable<MessageData> enumerable)
             where T : IMessage, IDeserializable<T>, new()
         {

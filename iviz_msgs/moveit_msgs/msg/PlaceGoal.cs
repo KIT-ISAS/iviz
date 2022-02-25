@@ -108,24 +108,24 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (GroupName is null) throw new System.NullReferenceException(nameof(GroupName));
-            if (AttachedObjectName is null) throw new System.NullReferenceException(nameof(AttachedObjectName));
-            if (PlaceLocations is null) throw new System.NullReferenceException(nameof(PlaceLocations));
+            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
+            if (AttachedObjectName is null) BuiltIns.ThrowNullReference(nameof(AttachedObjectName));
+            if (PlaceLocations is null) BuiltIns.ThrowNullReference(nameof(PlaceLocations));
             for (int i = 0; i < PlaceLocations.Length; i++)
             {
-                if (PlaceLocations[i] is null) throw new System.NullReferenceException($"{nameof(PlaceLocations)}[{i}]");
+                if (PlaceLocations[i] is null) BuiltIns.ThrowNullReference($"{nameof(PlaceLocations)}[{i}]");
                 PlaceLocations[i].RosValidate();
             }
-            if (SupportSurfaceName is null) throw new System.NullReferenceException(nameof(SupportSurfaceName));
-            if (PathConstraints is null) throw new System.NullReferenceException(nameof(PathConstraints));
+            if (SupportSurfaceName is null) BuiltIns.ThrowNullReference(nameof(SupportSurfaceName));
+            if (PathConstraints is null) BuiltIns.ThrowNullReference(nameof(PathConstraints));
             PathConstraints.RosValidate();
-            if (PlannerId is null) throw new System.NullReferenceException(nameof(PlannerId));
-            if (AllowedTouchObjects is null) throw new System.NullReferenceException(nameof(AllowedTouchObjects));
+            if (PlannerId is null) BuiltIns.ThrowNullReference(nameof(PlannerId));
+            if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects));
             for (int i = 0; i < AllowedTouchObjects.Length; i++)
             {
-                if (AllowedTouchObjects[i] is null) throw new System.NullReferenceException($"{nameof(AllowedTouchObjects)}[{i}]");
+                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AllowedTouchObjects)}[{i}]");
             }
-            if (PlanningOptions is null) throw new System.NullReferenceException(nameof(PlanningOptions));
+            if (PlanningOptions is null) BuiltIns.ThrowNullReference(nameof(PlanningOptions));
             PlanningOptions.RosValidate();
         }
     

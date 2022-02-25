@@ -96,13 +96,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) throw new System.NullReferenceException(nameof(Id));
-            if (Fields is null) throw new System.NullReferenceException(nameof(Fields));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Fields is null) BuiltIns.ThrowNullReference(nameof(Fields));
             for (int i = 0; i < Fields.Length; i++)
             {
-                if (Fields[i] is null) throw new System.NullReferenceException($"{nameof(Fields)}[{i}]");
+                if (Fields[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fields)}[{i}]");
             }
-            if (Config is null) throw new System.NullReferenceException(nameof(Config));
+            if (Config is null) BuiltIns.ThrowNullReference(nameof(Config));
         }
     
         public int RosMessageLength
@@ -159,7 +159,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) throw new System.NullReferenceException(nameof(Message));
+            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
         }
     
         public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);

@@ -19,7 +19,7 @@ namespace Iviz.Common
         JointState,
         DepthCloud,
         LaserScan,
-        AugmentedReality,
+        AR,
         Magnitude,
         OccupancyGrid,
         Joystick,
@@ -30,6 +30,6 @@ namespace Iviz.Common
         GuiWidget,
         XR,
         Camera,
-        TFPublisher
+        TFPublisher,
     }
 }

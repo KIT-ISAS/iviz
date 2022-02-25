@@ -131,11 +131,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) throw new System.NullReferenceException(nameof(Message));
-            if (Resolutions is null) throw new System.NullReferenceException(nameof(Resolutions));
+            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Resolutions is null) BuiltIns.ThrowNullReference(nameof(Resolutions));
             for (int i = 0; i < Resolutions.Length; i++)
             {
-                if (Resolutions[i] is null) throw new System.NullReferenceException($"{nameof(Resolutions)}[{i}]");
+                if (Resolutions[i] is null) BuiltIns.ThrowNullReference($"{nameof(Resolutions)}[{i}]");
                 Resolutions[i].RosValidate();
             }
         }

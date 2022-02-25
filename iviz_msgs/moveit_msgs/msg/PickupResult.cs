@@ -71,22 +71,22 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ErrorCode is null) throw new System.NullReferenceException(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
             ErrorCode.RosValidate();
-            if (TrajectoryStart is null) throw new System.NullReferenceException(nameof(TrajectoryStart));
+            if (TrajectoryStart is null) BuiltIns.ThrowNullReference(nameof(TrajectoryStart));
             TrajectoryStart.RosValidate();
-            if (TrajectoryStages is null) throw new System.NullReferenceException(nameof(TrajectoryStages));
+            if (TrajectoryStages is null) BuiltIns.ThrowNullReference(nameof(TrajectoryStages));
             for (int i = 0; i < TrajectoryStages.Length; i++)
             {
-                if (TrajectoryStages[i] is null) throw new System.NullReferenceException($"{nameof(TrajectoryStages)}[{i}]");
+                if (TrajectoryStages[i] is null) BuiltIns.ThrowNullReference($"{nameof(TrajectoryStages)}[{i}]");
                 TrajectoryStages[i].RosValidate();
             }
-            if (TrajectoryDescriptions is null) throw new System.NullReferenceException(nameof(TrajectoryDescriptions));
+            if (TrajectoryDescriptions is null) BuiltIns.ThrowNullReference(nameof(TrajectoryDescriptions));
             for (int i = 0; i < TrajectoryDescriptions.Length; i++)
             {
-                if (TrajectoryDescriptions[i] is null) throw new System.NullReferenceException($"{nameof(TrajectoryDescriptions)}[{i}]");
+                if (TrajectoryDescriptions[i] is null) BuiltIns.ThrowNullReference($"{nameof(TrajectoryDescriptions)}[{i}]");
             }
-            if (Grasp is null) throw new System.NullReferenceException(nameof(Grasp));
+            if (Grasp is null) BuiltIns.ThrowNullReference(nameof(Grasp));
             Grasp.RosValidate();
         }
     

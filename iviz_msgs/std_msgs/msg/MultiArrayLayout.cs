@@ -70,10 +70,10 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Dim is null) throw new System.NullReferenceException(nameof(Dim));
+            if (Dim is null) BuiltIns.ThrowNullReference(nameof(Dim));
             for (int i = 0; i < Dim.Length; i++)
             {
-                if (Dim[i] is null) throw new System.NullReferenceException($"{nameof(Dim)}[{i}]");
+                if (Dim[i] is null) BuiltIns.ThrowNullReference($"{nameof(Dim)}[{i}]");
                 Dim[i].RosValidate();
             }
         }

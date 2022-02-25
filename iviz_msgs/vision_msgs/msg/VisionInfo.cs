@@ -83,8 +83,8 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Method is null) throw new System.NullReferenceException(nameof(Method));
-            if (DatabaseLocation is null) throw new System.NullReferenceException(nameof(DatabaseLocation));
+            if (Method is null) BuiltIns.ThrowNullReference(nameof(Method));
+            if (DatabaseLocation is null) BuiltIns.ThrowNullReference(nameof(DatabaseLocation));
         }
     
         public int RosMessageLength

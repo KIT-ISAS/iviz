@@ -32,7 +32,7 @@ namespace Iviz.Displays
         /// </summary>
         public BoxCollider Collider => boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
         
-        public virtual Bounds? Bounds => Collider.GetBounds();
+        public virtual Bounds? Bounds => Collider.GetLocalBounds();
 
         /// <summary>
         /// Gets or sets whether the object's <see cref="BoxCollider"/> should be enabled. 

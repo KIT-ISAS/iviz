@@ -39,7 +39,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (RecognizedObjects is null) throw new System.NullReferenceException(nameof(RecognizedObjects));
+            if (RecognizedObjects is null) BuiltIns.ThrowNullReference(nameof(RecognizedObjects));
             RecognizedObjects.RosValidate();
         }
     

@@ -82,7 +82,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Node is null) throw new System.NullReferenceException(nameof(Node));
+            if (Node is null) BuiltIns.ThrowNullReference(nameof(Node));
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Node);
@@ -134,20 +134,20 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Subscribing is null) throw new System.NullReferenceException(nameof(Subscribing));
+            if (Subscribing is null) BuiltIns.ThrowNullReference(nameof(Subscribing));
             for (int i = 0; i < Subscribing.Length; i++)
             {
-                if (Subscribing[i] is null) throw new System.NullReferenceException($"{nameof(Subscribing)}[{i}]");
+                if (Subscribing[i] is null) BuiltIns.ThrowNullReference($"{nameof(Subscribing)}[{i}]");
             }
-            if (Publishing is null) throw new System.NullReferenceException(nameof(Publishing));
+            if (Publishing is null) BuiltIns.ThrowNullReference(nameof(Publishing));
             for (int i = 0; i < Publishing.Length; i++)
             {
-                if (Publishing[i] is null) throw new System.NullReferenceException($"{nameof(Publishing)}[{i}]");
+                if (Publishing[i] is null) BuiltIns.ThrowNullReference($"{nameof(Publishing)}[{i}]");
             }
-            if (Services is null) throw new System.NullReferenceException(nameof(Services));
+            if (Services is null) BuiltIns.ThrowNullReference(nameof(Services));
             for (int i = 0; i < Services.Length; i++)
             {
-                if (Services[i] is null) throw new System.NullReferenceException($"{nameof(Services)}[{i}]");
+                if (Services[i] is null) BuiltIns.ThrowNullReference($"{nameof(Services)}[{i}]");
             }
         }
     

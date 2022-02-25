@@ -18,14 +18,14 @@ namespace Iviz.App
         readonly ARFoundationController controller;
         readonly ARModulePanel panel;
 
-        public override ModuleType ModuleType => ModuleType.AugmentedReality;
+        public override ModuleType ModuleType => ModuleType.AR;
         public override ModulePanel Panel => panel;
         public override IConfiguration Configuration => controller.Config;
         public override IController Controller => controller;
 
         public ARModuleData(ModuleDataConstructor constructor)
         {
-            panel = ModulePanelManager.GetPanelByResourceType<ARModulePanel>(ModuleType.AugmentedReality);
+            panel = ModulePanelManager.GetPanelByResourceType<ARModulePanel>(ModuleType.AR);
             controller = new ARFoundationController((ARConfiguration?)constructor.Configuration);
             UpdateModuleButton();
         }

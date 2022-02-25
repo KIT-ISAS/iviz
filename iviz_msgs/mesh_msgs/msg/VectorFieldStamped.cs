@@ -42,7 +42,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (VectorField is null) throw new System.NullReferenceException(nameof(VectorField));
+            if (VectorField is null) BuiltIns.ThrowNullReference(nameof(VectorField));
             VectorField.RosValidate();
         }
     

@@ -92,9 +92,9 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Status is null) throw new System.NullReferenceException(nameof(Status));
+            if (Status is null) BuiltIns.ThrowNullReference(nameof(Status));
             Status.RosValidate();
-            if (PositionCovariance is null) throw new System.NullReferenceException(nameof(PositionCovariance));
+            if (PositionCovariance is null) BuiltIns.ThrowNullReference(nameof(PositionCovariance));
             if (PositionCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(PositionCovariance), PositionCovariance.Length, 9);
         }
     

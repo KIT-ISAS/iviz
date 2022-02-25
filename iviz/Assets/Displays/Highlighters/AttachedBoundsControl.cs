@@ -128,7 +128,7 @@ namespace Iviz.Displays.Highlighters
                     frame.Visible = draggable.IsDragging || draggable.IsHovering;
                 }
 
-                collider.SetBounds(validBounds);
+                collider.SetLocalBounds(validBounds);
             }
             else
             {

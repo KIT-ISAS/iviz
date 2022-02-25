@@ -42,7 +42,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Inertia is null) throw new System.NullReferenceException(nameof(Inertia));
+            if (Inertia is null) BuiltIns.ThrowNullReference(nameof(Inertia));
             Inertia.RosValidate();
         }
     

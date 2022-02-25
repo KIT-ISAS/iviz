@@ -122,10 +122,10 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosValidate()
         {
-            if (Loggers is null) throw new System.NullReferenceException(nameof(Loggers));
+            if (Loggers is null) BuiltIns.ThrowNullReference(nameof(Loggers));
             for (int i = 0; i < Loggers.Length; i++)
             {
-                if (Loggers[i] is null) throw new System.NullReferenceException($"{nameof(Loggers)}[{i}]");
+                if (Loggers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Loggers)}[{i}]");
                 Loggers[i].RosValidate();
             }
         }

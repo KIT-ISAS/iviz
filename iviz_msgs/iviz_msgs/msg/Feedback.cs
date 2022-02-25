@@ -19,6 +19,7 @@ namespace Iviz.Msgs.IvizMsgs
         [DataMember (Name = "id")] public string Id;
         [DataMember (Name = "type")] public byte Type;
         [DataMember (Name = "entry_id")] public int EntryId;
+        [DataMember (Name = "angle")] public double Angle;
         [DataMember (Name = "position")] public GeometryMsgs.Point Position;
         [DataMember (Name = "orientation")] public GeometryMsgs.Quaternion Orientation;
         [DataMember (Name = "scale")] public GeometryMsgs.Vector3 Scale;
@@ -33,13 +34,14 @@ namespace Iviz.Msgs.IvizMsgs
         }
         
         /// Explicit constructor.
-        public Feedback(in StdMsgs.Header Header, string VizId, string Id, byte Type, int EntryId, in GeometryMsgs.Point Position, in GeometryMsgs.Quaternion Orientation, in GeometryMsgs.Vector3 Scale, IvizMsgs.Trajectory Trajectory)
+        public Feedback(in StdMsgs.Header Header, string VizId, string Id, byte Type, int EntryId, double Angle, in GeometryMsgs.Point Position, in GeometryMsgs.Quaternion Orientation, in GeometryMsgs.Vector3 Scale, IvizMsgs.Trajectory Trajectory)
         {
             this.Header = Header;
             this.VizId = VizId;
             this.Id = Id;
             this.Type = Type;
             this.EntryId = EntryId;
+            this.Angle = Angle;
             this.Position = Position;
             this.Orientation = Orientation;
             this.Scale = Scale;
@@ -54,6 +56,7 @@ namespace Iviz.Msgs.IvizMsgs
             Id = b.DeserializeString();
             Type = b.Deserialize<byte>();
             EntryId = b.Deserialize<int>();
+            Angle = b.Deserialize<double>();
             b.Deserialize(out Position);
             b.Deserialize(out Orientation);
             b.Deserialize(out Scale);
@@ -71,6 +74,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Serialize(Id);
             b.Serialize(Type);
             b.Serialize(EntryId);
+            b.Serialize(Angle);
             b.Serialize(in Position);
             b.Serialize(in Orientation);
             b.Serialize(in Scale);
@@ -79,16 +83,16 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (VizId is null) throw new System.NullReferenceException(nameof(VizId));
-            if (Id is null) throw new System.NullReferenceException(nameof(Id));
-            if (Trajectory is null) throw new System.NullReferenceException(nameof(Trajectory));
+            if (VizId is null) BuiltIns.ThrowNullReference(nameof(VizId));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
             Trajectory.RosValidate();
         }
     
         public int RosMessageLength
         {
             get {
-                int size = 93;
+                int size = 101;
                 size += Header.RosMessageLength;
                 size += BuiltIns.GetStringSize(VizId);
                 size += BuiltIns.GetStringSize(Id);
@@ -103,25 +107,25 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/Feedback";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "81c203474b59127ee99d69899254825c";
+        [Preserve] public const string RosMd5Sum = "beec894d41c35d3624bcb12f27355c75";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE71V32/bNhB+119xQB6aDI63JV1RBOiDl3it1zZxE3VYMQwGI50lbhKpkpRd96/fd5Qt" +
-                "26mH7mGpIcBH3t13v4+tNuE5pR+m49n49+nkdnxFL+iHpN1e//w+TW+uZ5dvJpevwftxl/d2fP1+fJ3e" +
-                "fujZZ7vs6c3dJJ2I8qvR9csIfb7Lv7mdQHv0QOTprsjd5ejNeIf50y4zvR39Or5Mb8R+L/EsSXzIZ7Uv" +
-                "/PevWOXsqIx/uHbaFLTQn2c635xAdYhh1XAC6vyM2AS3EpmCbc1CR7SpBZsa63XQ1jxgvmtVYGfAIOs0" +
-                "ENQBod84C9adk89UBWPiSbxPnforslYUejJJkhf/8y95e/fygh6kJzmiu6BMrlxO8FXlKiiaW6RNFyW7" +
-                "04oXXEFJ1Q3nFLmSKz+EYlpqT/gKNuxUVa2o9RAKljJb163RGbJCQde8pw9NbUhRo1zQWVspB3nrcm1E" +
-                "fO5UzYKOz/PHlk3GNLm6gIzxnLVBw6EVEDLHyksRJ1cUq4jaQSE5Spf2FEcuUPzeOIVSBXGWPzWOvfip" +
-                "/AVsfNcFNwQ2ksOwkns6jnczHP0JwQhc4MZmJR3D8+kqlCh0KJkWyml1X7EAo6oVUJ+I0pOTHWQToY0y" +
-                "dgPfIW5t/BdY0+NKTKclalZJ9L4tkEAINs4udA7R+1UEySppRKr0vVPoJ9HqTCZHv0iOIQStWBH8K+9t" +
-                "plGAnJY6lJsBidWQYXikbjwwY5vGQqqC0sbHYDZzR3YunRNnETmbO0ZQjco4mVdWhWdP6VNPrXrq87dx" +
-                "f7sFNjE4lmZDGZDgvdWw77ycPm5XCMavHiZfiWhDLb9NbOvldSgwWkTefkhDmd9JnDhrMK81K5QMq6HX" +
-                "hGKuHVQR8hCo7BiB84B0oNyyJ2OlF2r1NyAZ7S/aqmkApmRRGl91qcQ1VI55WAwHtCzZdFLSvnHZxPWk" +
-                "M3K60HmnKRnulRWtgxtQmJ+h/auq87kzhvYDiLNd4U6GNJnTyra0lIBAuPVWtHTPvV9xeoO1A1mJa4hD" +
-                "7wm2k1eFNIAP2MdfrfrjlPrQW/TF8+f5jz9lDtnHXYJDv1z9o71WXzqBRI62TaQ2S0Ec2+/AgbxCcp2v" +
-                "+d0Cwd7cHUT06YOX/V/e8uQfs+nJBS0JAAA=";
+                "H4sIAAAAAAAAE71V32/bNhB+119xQB6aDI63JV1RBOiDl3it1zZxE3VYMQzGRTpL3CRSJSm77l+/j5Qt" +
+                "26mH7mGpIcAk7+7j/fzYKu2fU/phOp6Nf59ObsdX9IJ+SNrt8c/v0/Tmenb5ZnL5GrIfd2Vvx9fvx9fp" +
+                "7YdefLYrnt7cTdJJMH41un4Zoc935Te3E1iPHqg83VW5uxy9Ge8If9oVprejX8eX6U24v9d4liTO57Pa" +
+                "Fe77V8K5WCrjH46t0gUt1OeZyjc7rDpEv2okwer8jER7uwo688qwf/aUWBeVJIWYWoIkYk8NlKkxTnll" +
+                "9APhu5a9WA0BGauAxweUfpPMG3tOLmOgq+BXPE8t/xVFK/L9MkmSF//zL3l79/KCHiQrOaI7zzpnmxN8" +
+                "5Zw909wgiaooxZ5WspAKRlw3klOUhsy5IQzTUjnCV4gWy1W1otZByRvKTF23WmXICnlVy549LJUmpoat" +
+                "V1lbsYW+sbnSQX1uuZaAjs/Jx1Z0JjS5uoCOdpK1XsGhFRAyK+xCSSdXFGuKSsIgOUqX5hRbKdAK/eXk" +
+                "S/bBWfnUWHHBT3YXuOO7LrghsJEcwS25o+N4NsPWnRAugQvSmKykY3g+XfkShfal0IKt4vtKAjCqWgH1" +
+                "STB6crKDrCO0Zm028B3i9o7/Aqt73BDTaYmaVSF61xZIIBQbaxYqh+r9KoJkVWhEqtS9ZfRTsOquTI5+" +
+                "CTmGEqxiRfDPzplMoQA5LZUvN+MSqxFG45G68cCMbRoLqfKstIvBbOaOzDx0TpxF5GxuBUE1nEk/u5/6" +
+                "1apfff427m9ZYBODldBsKAMSvEcN+86H3ccthWD86mHylYg2q+W3iW1NXocCo0WU7Yc0DPM7iRNnNOa1" +
+                "FkbJQA29JQxzZWGKkIdAFSsIXAakPOVGHGkTeqHmvwEpaP9gzU0DMA5EqV3VpRLHMDmWYTEc0LIU3WmF" +
+                "9o1kE+lJZWRVofLOMmS4N2ZaBzcgPz9D+1dV53N3GdoPINZ0hTsZ0mROK9PSMgSEhV2zoqF76f2K0+uN" +
+                "GQRKXEMcek/ATo6L0ADOg4+/WvXHKfWht+iL58/JH3+GORQXuQSbnlzdo71WXzqBRI62TcQbUgiO7Xfg" +
+                "ILxC4ThfyzsCAW/uDiL69MHL/i9vefIPf32EBTsJAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
     }

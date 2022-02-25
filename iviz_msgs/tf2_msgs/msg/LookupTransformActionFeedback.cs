@@ -47,9 +47,9 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (Status is null) throw new System.NullReferenceException(nameof(Status));
+            if (Status is null) BuiltIns.ThrowNullReference(nameof(Status));
             Status.RosValidate();
-            if (Feedback is null) throw new System.NullReferenceException(nameof(Feedback));
+            if (Feedback is null) BuiltIns.ThrowNullReference(nameof(Feedback));
             Feedback.RosValidate();
         }
     

@@ -106,9 +106,9 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (TargetPose is null) throw new System.NullReferenceException(nameof(TargetPose));
+            if (TargetPose is null) BuiltIns.ThrowNullReference(nameof(TargetPose));
             TargetPose.RosValidate();
-            if (SensorPose is null) throw new System.NullReferenceException(nameof(SensorPose));
+            if (SensorPose is null) BuiltIns.ThrowNullReference(nameof(SensorPose));
             SensorPose.RosValidate();
         }
     

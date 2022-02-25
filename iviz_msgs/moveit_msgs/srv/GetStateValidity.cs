@@ -92,10 +92,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (RobotState is null) throw new System.NullReferenceException(nameof(RobotState));
+            if (RobotState is null) BuiltIns.ThrowNullReference(nameof(RobotState));
             RobotState.RosValidate();
-            if (GroupName is null) throw new System.NullReferenceException(nameof(GroupName));
-            if (Constraints is null) throw new System.NullReferenceException(nameof(Constraints));
+            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
+            if (Constraints is null) BuiltIns.ThrowNullReference(nameof(Constraints));
             Constraints.RosValidate();
         }
     
@@ -173,22 +173,22 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Contacts is null) throw new System.NullReferenceException(nameof(Contacts));
+            if (Contacts is null) BuiltIns.ThrowNullReference(nameof(Contacts));
             for (int i = 0; i < Contacts.Length; i++)
             {
-                if (Contacts[i] is null) throw new System.NullReferenceException($"{nameof(Contacts)}[{i}]");
+                if (Contacts[i] is null) BuiltIns.ThrowNullReference($"{nameof(Contacts)}[{i}]");
                 Contacts[i].RosValidate();
             }
-            if (CostSources is null) throw new System.NullReferenceException(nameof(CostSources));
+            if (CostSources is null) BuiltIns.ThrowNullReference(nameof(CostSources));
             for (int i = 0; i < CostSources.Length; i++)
             {
-                if (CostSources[i] is null) throw new System.NullReferenceException($"{nameof(CostSources)}[{i}]");
+                if (CostSources[i] is null) BuiltIns.ThrowNullReference($"{nameof(CostSources)}[{i}]");
                 CostSources[i].RosValidate();
             }
-            if (ConstraintResult is null) throw new System.NullReferenceException(nameof(ConstraintResult));
+            if (ConstraintResult is null) BuiltIns.ThrowNullReference(nameof(ConstraintResult));
             for (int i = 0; i < ConstraintResult.Length; i++)
             {
-                if (ConstraintResult[i] is null) throw new System.NullReferenceException($"{nameof(ConstraintResult)}[{i}]");
+                if (ConstraintResult[i] is null) BuiltIns.ThrowNullReference($"{nameof(ConstraintResult)}[{i}]");
                 ConstraintResult[i].RosValidate();
             }
         }

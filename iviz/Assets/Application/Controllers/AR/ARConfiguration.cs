@@ -28,7 +28,7 @@ namespace Iviz.Controllers
         [IgnoreDataMember] public bool PinRootMarker { get; set; }
 
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
-        [DataMember] public ModuleType ModuleType => ModuleType.AugmentedReality;
+        [DataMember] public ModuleType ModuleType => ModuleType.AR;
         [DataMember] public bool Visible { get; set; } = true;
     }
 }

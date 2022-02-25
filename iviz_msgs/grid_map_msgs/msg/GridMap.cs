@@ -73,22 +73,22 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (Info is null) throw new System.NullReferenceException(nameof(Info));
+            if (Info is null) BuiltIns.ThrowNullReference(nameof(Info));
             Info.RosValidate();
-            if (Layers is null) throw new System.NullReferenceException(nameof(Layers));
+            if (Layers is null) BuiltIns.ThrowNullReference(nameof(Layers));
             for (int i = 0; i < Layers.Length; i++)
             {
-                if (Layers[i] is null) throw new System.NullReferenceException($"{nameof(Layers)}[{i}]");
+                if (Layers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Layers)}[{i}]");
             }
-            if (BasicLayers is null) throw new System.NullReferenceException(nameof(BasicLayers));
+            if (BasicLayers is null) BuiltIns.ThrowNullReference(nameof(BasicLayers));
             for (int i = 0; i < BasicLayers.Length; i++)
             {
-                if (BasicLayers[i] is null) throw new System.NullReferenceException($"{nameof(BasicLayers)}[{i}]");
+                if (BasicLayers[i] is null) BuiltIns.ThrowNullReference($"{nameof(BasicLayers)}[{i}]");
             }
-            if (Data is null) throw new System.NullReferenceException(nameof(Data));
+            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
             for (int i = 0; i < Data.Length; i++)
             {
-                if (Data[i] is null) throw new System.NullReferenceException($"{nameof(Data)}[{i}]");
+                if (Data[i] is null) BuiltIns.ThrowNullReference($"{nameof(Data)}[{i}]");
                 Data[i].RosValidate();
             }
         }

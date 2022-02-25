@@ -119,7 +119,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (Info is null) throw new System.NullReferenceException(nameof(Info));
+            if (Info is null) BuiltIns.ThrowNullReference(nameof(Info));
             Info.RosValidate();
         }
     

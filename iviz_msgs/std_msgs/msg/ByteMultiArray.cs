@@ -47,9 +47,9 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Layout is null) throw new System.NullReferenceException(nameof(Layout));
+            if (Layout is null) BuiltIns.ThrowNullReference(nameof(Layout));
             Layout.RosValidate();
-            if (Data is null) throw new System.NullReferenceException(nameof(Data));
+            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
         }
     
         public int RosMessageLength => 4 + Layout.RosMessageLength + Data.Length;

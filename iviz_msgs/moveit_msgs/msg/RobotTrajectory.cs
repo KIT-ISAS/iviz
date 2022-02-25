@@ -43,9 +43,9 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (JointTrajectory is null) throw new System.NullReferenceException(nameof(JointTrajectory));
+            if (JointTrajectory is null) BuiltIns.ThrowNullReference(nameof(JointTrajectory));
             JointTrajectory.RosValidate();
-            if (MultiDofJointTrajectory is null) throw new System.NullReferenceException(nameof(MultiDofJointTrajectory));
+            if (MultiDofJointTrajectory is null) BuiltIns.ThrowNullReference(nameof(MultiDofJointTrajectory));
             MultiDofJointTrajectory.RosValidate();
         }
     

@@ -13,6 +13,8 @@ namespace Iviz.Displays.XR
 {
     public sealed class BoundaryCheckWidget : MonoBehaviour, IWidgetWithBoundaries, IWidgetWithScale
     {
+        FrameNode? mainNode;
+        BoxCollider? mainCollider;
         FrameNode[] nodes = Array.Empty<FrameNode>();
         BoxCollider[] colliders = Array.Empty<BoxCollider>();
         bool active;
@@ -37,16 +39,17 @@ namespace Iviz.Displays.XR
             int count = boxes.Count;
             if (count == 0)
             {
-                throw new ArgumentException("Boxes size should be greater than 1");
+                throw new ArgumentException("Boxes are empty");
             }
 
-            nodes = new FrameNode[count + 1];
-            colliders = new BoxCollider[count + 1];
+            Create(baseBox, out mainNode, out mainCollider);
+
+            nodes = new FrameNode[count];
+            colliders = new BoxCollider[count];
             
-            Create(baseBox, out nodes[0], out colliders[0]);
             foreach (int i in ..count)
             {
-                Create(boxes[i], out nodes[i + 1], out colliders[i + 1]);
+                Create(boxes[i], out nodes[i], out colliders[i]);
             }
 
             
@@ -71,11 +74,12 @@ namespace Iviz.Displays.XR
 
         void Reset()
         {
+            mainNode?.Dispose();
             foreach (var node in nodes)
             {
                 node.Dispose();
             }
-
+            
             nodes = Array.Empty<FrameNode>();
             colliders = Array.Empty<BoxCollider>();
 
@@ -92,20 +96,25 @@ namespace Iviz.Displays.XR
 
         void UpdateBounds()
         {
-            var baseCollider = colliders[0];
-            foreach (var collider in colliders.Skip(1))
+            if (mainCollider == null)
             {
-                float distance = baseCollider.DistanceTo(collider, out _, out _);
-                if (distance < warningDistance && !links.ContainsKey(collider))
+                return;
+            }
+            
+            var baseCollider = mainCollider;
+            foreach (var otherCollider in colliders)
+            {
+                float distance = BoundaryLinkDisplay.DistanceTo(baseCollider, otherCollider, out _, out _);
+                if (distance < warningDistance && !links.ContainsKey(otherCollider))
                 {
                     var link = ResourcePool.RentDisplay<BoundaryLinkDisplay>();
-                    link.Set(baseCollider, collider);
-                    links[collider] = link;
+                    link.Set(baseCollider, otherCollider);
+                    links[otherCollider] = link;
                 }
-                else if (distance > warningDistance * 1.1f && links.TryGetValue(collider, out var link))
+                else if (distance > warningDistance * 1.1f && links.TryGetValue(otherCollider, out var link))
                 {
                     link.ReturnToPool();
-                    links.Remove(collider);
+                    links.Remove(otherCollider);
                 }
             }
         }

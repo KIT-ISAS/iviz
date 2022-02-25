@@ -33,7 +33,7 @@
             ShowFrameLabels = p.AddToggle("Show Frame Names");
             ConnectToParent = p.AddToggle("Connect Children to Parents");
             FlipZ = p.AddToggle("Make Z Axis Point Down");
-            Interactable = p.AddToggle("Enable Colliders");
+            Interactable = p.AddToggle("Frames Interactable");
             FrameSize = p.AddSlider("Frame Size").SetMinValue(0.01f).SetMaxValue(0.5f).SetNumberOfSteps(49);
             Publisher = p.AddTfPublisher();
             Sender = p.AddSender();

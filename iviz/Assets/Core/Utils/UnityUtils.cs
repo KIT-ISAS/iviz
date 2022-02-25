@@ -549,12 +549,6 @@ namespace Iviz.Core
             return new ReadOnlySpan<T>(list.ExtractArray(), 0, list.Count);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged
-        {
-            return MemoryMarshal.Read<T>(span);
-        }
-
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this T[] array, Range range)
         {
             return array.AsSpan(range);
@@ -632,10 +626,10 @@ namespace Iviz.Core
             return q;
         }
 
-        public static void SetBounds(this BoxCollider collider, in Bounds bounds) =>
+        public static void SetLocalBounds(this BoxCollider collider, in Bounds bounds) =>
             (collider.center, collider.size) = bounds;
 
-        public static Bounds GetBounds(this BoxCollider collider) => new(collider.center, collider.size);
+        public static Bounds GetLocalBounds(this BoxCollider collider) => new(collider.center, collider.size);
 
         public static float GetHorizontalFov(this Camera camera)
         {
@@ -758,13 +752,6 @@ namespace Iviz.Core
                     }
                 }
             }
-        }
-
-        public static float DistanceTo(this BoxCollider a, BoxCollider b, out Vector3 start, out Vector3 end)
-        {
-            end = b.ClosestPoint(a.bounds.center);
-            start = a.ClosestPoint(end);
-            return Vector3.Distance(start, end);
         }
     }
 

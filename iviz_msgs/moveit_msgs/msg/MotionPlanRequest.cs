@@ -111,22 +111,22 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (WorkspaceParameters is null) throw new System.NullReferenceException(nameof(WorkspaceParameters));
+            if (WorkspaceParameters is null) BuiltIns.ThrowNullReference(nameof(WorkspaceParameters));
             WorkspaceParameters.RosValidate();
-            if (StartState is null) throw new System.NullReferenceException(nameof(StartState));
+            if (StartState is null) BuiltIns.ThrowNullReference(nameof(StartState));
             StartState.RosValidate();
-            if (GoalConstraints is null) throw new System.NullReferenceException(nameof(GoalConstraints));
+            if (GoalConstraints is null) BuiltIns.ThrowNullReference(nameof(GoalConstraints));
             for (int i = 0; i < GoalConstraints.Length; i++)
             {
-                if (GoalConstraints[i] is null) throw new System.NullReferenceException($"{nameof(GoalConstraints)}[{i}]");
+                if (GoalConstraints[i] is null) BuiltIns.ThrowNullReference($"{nameof(GoalConstraints)}[{i}]");
                 GoalConstraints[i].RosValidate();
             }
-            if (PathConstraints is null) throw new System.NullReferenceException(nameof(PathConstraints));
+            if (PathConstraints is null) BuiltIns.ThrowNullReference(nameof(PathConstraints));
             PathConstraints.RosValidate();
-            if (TrajectoryConstraints is null) throw new System.NullReferenceException(nameof(TrajectoryConstraints));
+            if (TrajectoryConstraints is null) BuiltIns.ThrowNullReference(nameof(TrajectoryConstraints));
             TrajectoryConstraints.RosValidate();
-            if (PlannerId is null) throw new System.NullReferenceException(nameof(PlannerId));
-            if (GroupName is null) throw new System.NullReferenceException(nameof(GroupName));
+            if (PlannerId is null) BuiltIns.ThrowNullReference(nameof(PlannerId));
+            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
         }
     
         public int RosMessageLength

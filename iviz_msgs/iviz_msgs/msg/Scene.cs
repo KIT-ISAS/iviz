@@ -66,18 +66,18 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (Filename is null) throw new System.NullReferenceException(nameof(Filename));
-            if (Includes is null) throw new System.NullReferenceException(nameof(Includes));
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
+            if (Includes is null) BuiltIns.ThrowNullReference(nameof(Includes));
             for (int i = 0; i < Includes.Length; i++)
             {
-                if (Includes[i] is null) throw new System.NullReferenceException($"{nameof(Includes)}[{i}]");
+                if (Includes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Includes)}[{i}]");
                 Includes[i].RosValidate();
             }
-            if (Lights is null) throw new System.NullReferenceException(nameof(Lights));
+            if (Lights is null) BuiltIns.ThrowNullReference(nameof(Lights));
             for (int i = 0; i < Lights.Length; i++)
             {
-                if (Lights[i] is null) throw new System.NullReferenceException($"{nameof(Lights)}[{i}]");
+                if (Lights[i] is null) BuiltIns.ThrowNullReference($"{nameof(Lights)}[{i}]");
                 Lights[i].RosValidate();
             }
         }

@@ -90,8 +90,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Topic is null) throw new System.NullReferenceException(nameof(Topic));
-            if (Id is null) throw new System.NullReferenceException(nameof(Id));
+            if (Topic is null) BuiltIns.ThrowNullReference(nameof(Topic));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Topic) + BuiltIns.GetStringSize(Id);
@@ -145,8 +145,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) throw new System.NullReferenceException(nameof(Message));
-            if (Id is null) throw new System.NullReferenceException(nameof(Id));
+            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
         }
     
         public int RosMessageLength => 9 + BuiltIns.GetStringSize(Message) + BuiltIns.GetStringSize(Id);

@@ -42,10 +42,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Markers is null) throw new System.NullReferenceException(nameof(Markers));
+            if (Markers is null) BuiltIns.ThrowNullReference(nameof(Markers));
             for (int i = 0; i < Markers.Length; i++)
             {
-                if (Markers[i] is null) throw new System.NullReferenceException($"{nameof(Markers)}[{i}]");
+                if (Markers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Markers)}[{i}]");
                 Markers[i].RosValidate();
             }
         }

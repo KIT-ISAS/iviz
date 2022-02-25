@@ -48,10 +48,10 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public void RosValidate()
         {
-            if (StatusList is null) throw new System.NullReferenceException(nameof(StatusList));
+            if (StatusList is null) BuiltIns.ThrowNullReference(nameof(StatusList));
             for (int i = 0; i < StatusList.Length; i++)
             {
-                if (StatusList[i] is null) throw new System.NullReferenceException($"{nameof(StatusList)}[{i}]");
+                if (StatusList[i] is null) BuiltIns.ThrowNullReference($"{nameof(StatusList)}[{i}]");
                 StatusList[i].RosValidate();
             }
         }

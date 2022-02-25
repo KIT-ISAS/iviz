@@ -33,7 +33,7 @@ namespace Iviz.Displays
 
         public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
 
-        public Bounds? Bounds => children.Length == 0 ? null : Collider.GetBounds();
+        public Bounds? Bounds => children.Length == 0 ? null : Collider.GetLocalBounds();
 
         public int Layer
         {
@@ -144,7 +144,7 @@ namespace Iviz.Displays
         {
             var markerChildren = children.Select(resource =>
                 BoundsUtils.TransformBoundsUntil(resource.Bounds, resource.Transform, Transform));
-            Collider.SetBounds(markerChildren.CombineBounds() is { } rootBounds ? rootBounds : default);
+            Collider.SetLocalBounds(markerChildren.CombineBounds() is { } rootBounds ? rootBounds : default);
             BoundsChanged?.Invoke();
         }
 

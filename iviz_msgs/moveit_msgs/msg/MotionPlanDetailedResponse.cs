@@ -75,22 +75,22 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (TrajectoryStart is null) throw new System.NullReferenceException(nameof(TrajectoryStart));
+            if (TrajectoryStart is null) BuiltIns.ThrowNullReference(nameof(TrajectoryStart));
             TrajectoryStart.RosValidate();
-            if (GroupName is null) throw new System.NullReferenceException(nameof(GroupName));
-            if (Trajectory is null) throw new System.NullReferenceException(nameof(Trajectory));
+            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
+            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
             for (int i = 0; i < Trajectory.Length; i++)
             {
-                if (Trajectory[i] is null) throw new System.NullReferenceException($"{nameof(Trajectory)}[{i}]");
+                if (Trajectory[i] is null) BuiltIns.ThrowNullReference($"{nameof(Trajectory)}[{i}]");
                 Trajectory[i].RosValidate();
             }
-            if (Description is null) throw new System.NullReferenceException(nameof(Description));
+            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
             for (int i = 0; i < Description.Length; i++)
             {
-                if (Description[i] is null) throw new System.NullReferenceException($"{nameof(Description)}[{i}]");
+                if (Description[i] is null) BuiltIns.ThrowNullReference($"{nameof(Description)}[{i}]");
             }
-            if (ProcessingTime is null) throw new System.NullReferenceException(nameof(ProcessingTime));
-            if (ErrorCode is null) throw new System.NullReferenceException(nameof(ErrorCode));
+            if (ProcessingTime is null) BuiltIns.ThrowNullReference(nameof(ProcessingTime));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
             ErrorCode.RosValidate();
         }
     

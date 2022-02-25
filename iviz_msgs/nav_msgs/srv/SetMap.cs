@@ -88,9 +88,9 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Map is null) throw new System.NullReferenceException(nameof(Map));
+            if (Map is null) BuiltIns.ThrowNullReference(nameof(Map));
             Map.RosValidate();
-            if (InitialPose is null) throw new System.NullReferenceException(nameof(InitialPose));
+            if (InitialPose is null) BuiltIns.ThrowNullReference(nameof(InitialPose));
             InitialPose.RosValidate();
         }
     

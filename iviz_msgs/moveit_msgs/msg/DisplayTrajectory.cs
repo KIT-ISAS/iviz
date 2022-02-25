@@ -57,14 +57,14 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ModelId is null) throw new System.NullReferenceException(nameof(ModelId));
-            if (Trajectory is null) throw new System.NullReferenceException(nameof(Trajectory));
+            if (ModelId is null) BuiltIns.ThrowNullReference(nameof(ModelId));
+            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
             for (int i = 0; i < Trajectory.Length; i++)
             {
-                if (Trajectory[i] is null) throw new System.NullReferenceException($"{nameof(Trajectory)}[{i}]");
+                if (Trajectory[i] is null) BuiltIns.ThrowNullReference($"{nameof(Trajectory)}[{i}]");
                 Trajectory[i].RosValidate();
             }
-            if (TrajectoryStart is null) throw new System.NullReferenceException(nameof(TrajectoryStart));
+            if (TrajectoryStart is null) BuiltIns.ThrowNullReference(nameof(TrajectoryStart));
             TrajectoryStart.RosValidate();
         }
     

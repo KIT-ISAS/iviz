@@ -119,24 +119,24 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (GroupName is null) throw new System.NullReferenceException(nameof(GroupName));
-            if (Target is null) throw new System.NullReferenceException(nameof(Target));
+            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
+            if (Target is null) BuiltIns.ThrowNullReference(nameof(Target));
             Target.RosValidate();
-            if (SupportSurfaces is null) throw new System.NullReferenceException(nameof(SupportSurfaces));
+            if (SupportSurfaces is null) BuiltIns.ThrowNullReference(nameof(SupportSurfaces));
             for (int i = 0; i < SupportSurfaces.Length; i++)
             {
-                if (SupportSurfaces[i] is null) throw new System.NullReferenceException($"{nameof(SupportSurfaces)}[{i}]");
+                if (SupportSurfaces[i] is null) BuiltIns.ThrowNullReference($"{nameof(SupportSurfaces)}[{i}]");
             }
-            if (CandidateGrasps is null) throw new System.NullReferenceException(nameof(CandidateGrasps));
+            if (CandidateGrasps is null) BuiltIns.ThrowNullReference(nameof(CandidateGrasps));
             for (int i = 0; i < CandidateGrasps.Length; i++)
             {
-                if (CandidateGrasps[i] is null) throw new System.NullReferenceException($"{nameof(CandidateGrasps)}[{i}]");
+                if (CandidateGrasps[i] is null) BuiltIns.ThrowNullReference($"{nameof(CandidateGrasps)}[{i}]");
                 CandidateGrasps[i].RosValidate();
             }
-            if (MovableObstacles is null) throw new System.NullReferenceException(nameof(MovableObstacles));
+            if (MovableObstacles is null) BuiltIns.ThrowNullReference(nameof(MovableObstacles));
             for (int i = 0; i < MovableObstacles.Length; i++)
             {
-                if (MovableObstacles[i] is null) throw new System.NullReferenceException($"{nameof(MovableObstacles)}[{i}]");
+                if (MovableObstacles[i] is null) BuiltIns.ThrowNullReference($"{nameof(MovableObstacles)}[{i}]");
                 MovableObstacles[i].RosValidate();
             }
         }
@@ -202,13 +202,13 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Grasps is null) throw new System.NullReferenceException(nameof(Grasps));
+            if (Grasps is null) BuiltIns.ThrowNullReference(nameof(Grasps));
             for (int i = 0; i < Grasps.Length; i++)
             {
-                if (Grasps[i] is null) throw new System.NullReferenceException($"{nameof(Grasps)}[{i}]");
+                if (Grasps[i] is null) BuiltIns.ThrowNullReference($"{nameof(Grasps)}[{i}]");
                 Grasps[i].RosValidate();
             }
-            if (ErrorCode is null) throw new System.NullReferenceException(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
             ErrorCode.RosValidate();
         }
     

@@ -55,21 +55,21 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (JointNames is null) throw new System.NullReferenceException(nameof(JointNames));
+            if (JointNames is null) BuiltIns.ThrowNullReference(nameof(JointNames));
             for (int i = 0; i < JointNames.Length; i++)
             {
-                if (JointNames[i] is null) throw new System.NullReferenceException($"{nameof(JointNames)}[{i}]");
+                if (JointNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(JointNames)}[{i}]");
             }
-            if (Limits is null) throw new System.NullReferenceException(nameof(Limits));
+            if (Limits is null) BuiltIns.ThrowNullReference(nameof(Limits));
             for (int i = 0; i < Limits.Length; i++)
             {
-                if (Limits[i] is null) throw new System.NullReferenceException($"{nameof(Limits)}[{i}]");
+                if (Limits[i] is null) BuiltIns.ThrowNullReference($"{nameof(Limits)}[{i}]");
                 Limits[i].RosValidate();
             }
-            if (LinkNames is null) throw new System.NullReferenceException(nameof(LinkNames));
+            if (LinkNames is null) BuiltIns.ThrowNullReference(nameof(LinkNames));
             for (int i = 0; i < LinkNames.Length; i++)
             {
-                if (LinkNames[i] is null) throw new System.NullReferenceException($"{nameof(LinkNames)}[{i}]");
+                if (LinkNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(LinkNames)}[{i}]");
             }
         }
     

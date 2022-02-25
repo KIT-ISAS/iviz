@@ -42,10 +42,10 @@ namespace Iviz.Msgs.RosbridgeMsgs
         
         public void RosValidate()
         {
-            if (Clients is null) throw new System.NullReferenceException(nameof(Clients));
+            if (Clients is null) BuiltIns.ThrowNullReference(nameof(Clients));
             for (int i = 0; i < Clients.Length; i++)
             {
-                if (Clients[i] is null) throw new System.NullReferenceException($"{nameof(Clients)}[{i}]");
+                if (Clients[i] is null) BuiltIns.ThrowNullReference($"{nameof(Clients)}[{i}]");
                 Clients[i].RosValidate();
             }
         }

@@ -116,7 +116,7 @@ namespace Iviz.Displays
 
         protected void EndSelected()
         {
-            Settings.DragHandler.TryUnsetDraggedObject(this);
+            TryUnsetDraggedObject(this);
             PointerUp?.Invoke();
         }
 
@@ -146,7 +146,7 @@ namespace Iviz.Displays
 
         void OnDisable()
         {
-            Settings.DragHandler.TryUnsetDraggedObject(this);
+            TryUnsetDraggedObject(this);
             if (IsHovering || IsDragging)
             {
                 IsHovering = false;
@@ -164,6 +164,27 @@ namespace Iviz.Displays
             EndDragging = null;
             StateChanged = null;
         }
-    }
 
+        static void TryUnsetDraggedObject(IScreenDraggable draggable)
+        {
+#if UNITY_EDITOR
+            // this needs special handling because we may be shutting down
+            if (!Settings.HasDragHandler)
+            {
+                return;
+            }
+
+            try
+            {
+                Settings.DragHandler.TryUnsetDraggedObject(draggable);
+            }
+            catch (MissingAssetFieldException)
+            {
+                // do nothing! if no camera was found, we're shutting down the scene
+            }
+#else
+                Settings.DragHandler.TryUnsetDraggedObject(draggable);
+#endif
+        }
+    }
 }

@@ -75,25 +75,25 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (Filename is null) throw new System.NullReferenceException(nameof(Filename));
-            if (OrientationHint is null) throw new System.NullReferenceException(nameof(OrientationHint));
-            if (Meshes is null) throw new System.NullReferenceException(nameof(Meshes));
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
+            if (OrientationHint is null) BuiltIns.ThrowNullReference(nameof(OrientationHint));
+            if (Meshes is null) BuiltIns.ThrowNullReference(nameof(Meshes));
             for (int i = 0; i < Meshes.Length; i++)
             {
-                if (Meshes[i] is null) throw new System.NullReferenceException($"{nameof(Meshes)}[{i}]");
+                if (Meshes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Meshes)}[{i}]");
                 Meshes[i].RosValidate();
             }
-            if (Materials is null) throw new System.NullReferenceException(nameof(Materials));
+            if (Materials is null) BuiltIns.ThrowNullReference(nameof(Materials));
             for (int i = 0; i < Materials.Length; i++)
             {
-                if (Materials[i] is null) throw new System.NullReferenceException($"{nameof(Materials)}[{i}]");
+                if (Materials[i] is null) BuiltIns.ThrowNullReference($"{nameof(Materials)}[{i}]");
                 Materials[i].RosValidate();
             }
-            if (Nodes is null) throw new System.NullReferenceException(nameof(Nodes));
+            if (Nodes is null) BuiltIns.ThrowNullReference(nameof(Nodes));
             for (int i = 0; i < Nodes.Length; i++)
             {
-                if (Nodes[i] is null) throw new System.NullReferenceException($"{nameof(Nodes)}[{i}]");
+                if (Nodes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Nodes)}[{i}]");
                 Nodes[i].RosValidate();
             }
         }

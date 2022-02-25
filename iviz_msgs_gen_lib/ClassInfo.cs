@@ -863,7 +863,7 @@ namespace Iviz.MsgsGen
                     if (!forceStruct)
                     {
                         lines.Add(
-                            $"    if ({variable.CsFieldName} is null) throw new System.NullReferenceException(nameof({variable.CsFieldName}));");
+                            $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}));");
                         lines.Add(
                             $"    if ({variable.CsFieldName}.Length != {variable.ArraySize}) " +
                             $"throw new RosInvalidSizeForFixedArrayException(nameof({variable.CsFieldName}), " +
@@ -881,7 +881,7 @@ namespace Iviz.MsgsGen
                     if (!forceStruct && !variable.RentHint && (!variable.ClassIsStruct || variable.IsArray))
                     {
                         lines.Add(
-                            $"    if ({variable.CsFieldName} is null) throw new System.NullReferenceException(nameof({variable.CsFieldName}));");
+                            $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}));");
                     }
 
                     if (!variable.IsArray && !variable.ClassIsStruct && variable.RosClassName != "string")
@@ -909,7 +909,7 @@ namespace Iviz.MsgsGen
                         lines.Add($"{ind}    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
                         lines.Add($"{ind}    {{");
                         lines.Add(
-                            $"{ind}        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
+                            $"{ind}        if ({variable.CsFieldName}[i] is null) BuiltIns.ThrowNullReference($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
                         lines.Add($"{ind}    }}");
                     }
                     else if (!BuiltInTypes.Contains(variable.RosClassName) && !variable.ClassIsStruct)
@@ -917,7 +917,7 @@ namespace Iviz.MsgsGen
                         lines.Add($"{ind}    for (int i = 0; i < {variable.CsFieldName}.Length; i++)");
                         lines.Add($"{ind}    {{");
                         lines.Add(
-                            $"{ind}        if ({variable.CsFieldName}[i] is null) throw new System.NullReferenceException($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
+                            $"{ind}        if ({variable.CsFieldName}[i] is null) BuiltIns.ThrowNullReference($\"{{nameof({variable.CsFieldName})}}[{{i}}]\");");
                         lines.Add($"{ind}        {variable.CsFieldName}[i].RosValidate();");
                         lines.Add($"{ind}    }}");
                     }

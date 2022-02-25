@@ -91,11 +91,14 @@ namespace Iviz.Core
 
         public static bool IsXR =>
             TryReadXRInfo() && (isXR ?? throw new InvalidOperationException("Could not check if we are running in XR"));
+#endif
 
         public static void ClearResources()
         {
+#if !(UNITY_IOS || UNITY_ANDROID)
             isHololens = null;
             isXR = null;
+#endif
 
             mainCamera = null;
             mainCameraTransform = null;
@@ -110,8 +113,7 @@ namespace Iviz.Core
             ARCamera = null;
             ScreenCaptureManager = null;
         }
-#endif
-
+        
         /// <summary>
         /// Does this device support mobile AR?
         /// Note: The hololens is considered an XR device.
@@ -184,6 +186,8 @@ namespace Iviz.Core
                 : settingsManager = FindMainCamera().GetComponent<ISettingsManager>()
                                     ?? throw new MissingAssetFieldException("Failed to find SettingsManager!");
 
+        public static bool HasDragHandler => inputModule != null;
+        
         public static IDragHandler DragHandler =>
             (UnityEngine.Object?)inputModule != null
                 ? inputModule

@@ -57,7 +57,7 @@ namespace Iviz.App
                 ModuleType.JointState => o.AddComponent<JointStateModulePanel>(),
                 ModuleType.DepthCloud => o.AddComponent<DepthCloudModulePanel>(),
                 ModuleType.LaserScan => o.AddComponent<LaserScanModulePanel>(),
-                ModuleType.AugmentedReality => o.AddComponent<ARModulePanel>(),
+                ModuleType.AR => o.AddComponent<ARModulePanel>(),
                 ModuleType.Magnitude => o.AddComponent<MagnitudeModulePanel>(),
                 ModuleType.OccupancyGrid => o.AddComponent<OccupancyGridModulePanel>(),
                 ModuleType.Joystick => o.AddComponent<JoystickModulePanel>(),

@@ -44,11 +44,14 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.HideButton.State = controller.Visible;
+            panel.WorldScale.Value = controller.WorldScale; 
+            
             panel.GazeSender.Set(controller.GazeSender);
             panel.LeftSender.Set(controller.LeftHandSender);
             panel.RightSender.Set(controller.RightHandSender);
 
             panel.HideButton.Clicked += ToggleVisible;
+            panel.WorldScale.ValueChanged += f => controller.WorldScale = f;
         }
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)

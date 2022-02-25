@@ -102,7 +102,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             {
                 for (int i = 0; i < Topics.Length; i++)
                 {
-                    if (Topics[i] is null) throw new System.NullReferenceException($"{nameof(Topics)}[{i}]");
+                    if (Topics[i] is null) BuiltIns.ThrowNullReference($"{nameof(Topics)}[{i}]");
                 }
             }
         }

@@ -21,6 +21,7 @@ namespace Iviz.Controllers.XR
         public string Id { get; set; } = "";
         public ModuleType ModuleType => ModuleType.XR;
         public bool Visible { get; set; }
+        public float WorldScale { get; set; } = 1;
     }
 
     public sealed class XRContents : MonoBehaviour

@@ -93,10 +93,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Fields is null) throw new System.NullReferenceException(nameof(Fields));
+            if (Fields is null) BuiltIns.ThrowNullReference(nameof(Fields));
             for (int i = 0; i < Fields.Length; i++)
             {
-                if (Fields[i] is null) throw new System.NullReferenceException($"{nameof(Fields)}[{i}]");
+                if (Fields[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fields)}[{i}]");
                 Fields[i].RosValidate();
             }
         }

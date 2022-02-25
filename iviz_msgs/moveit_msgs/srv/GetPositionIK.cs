@@ -84,7 +84,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (IkRequest is null) throw new System.NullReferenceException(nameof(IkRequest));
+            if (IkRequest is null) BuiltIns.ThrowNullReference(nameof(IkRequest));
             IkRequest.RosValidate();
         }
     
@@ -134,9 +134,9 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Solution is null) throw new System.NullReferenceException(nameof(Solution));
+            if (Solution is null) BuiltIns.ThrowNullReference(nameof(Solution));
             Solution.RosValidate();
-            if (ErrorCode is null) throw new System.NullReferenceException(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
             ErrorCode.RosValidate();
         }
     

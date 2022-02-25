@@ -52,7 +52,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Direction is null) throw new System.NullReferenceException(nameof(Direction));
+            if (Direction is null) BuiltIns.ThrowNullReference(nameof(Direction));
             Direction.RosValidate();
         }
     

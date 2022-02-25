@@ -78,17 +78,17 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Results is null) throw new System.NullReferenceException(nameof(Results));
+            if (Results is null) BuiltIns.ThrowNullReference(nameof(Results));
             for (int i = 0; i < Results.Length; i++)
             {
-                if (Results[i] is null) throw new System.NullReferenceException($"{nameof(Results)}[{i}]");
+                if (Results[i] is null) BuiltIns.ThrowNullReference($"{nameof(Results)}[{i}]");
                 Results[i].RosValidate();
             }
-            if (Bbox is null) throw new System.NullReferenceException(nameof(Bbox));
+            if (Bbox is null) BuiltIns.ThrowNullReference(nameof(Bbox));
             Bbox.RosValidate();
-            if (SourceImg is null) throw new System.NullReferenceException(nameof(SourceImg));
+            if (SourceImg is null) BuiltIns.ThrowNullReference(nameof(SourceImg));
             SourceImg.RosValidate();
-            if (TrackingId is null) throw new System.NullReferenceException(nameof(TrackingId));
+            if (TrackingId is null) BuiltIns.ThrowNullReference(nameof(TrackingId));
         }
     
         public int RosMessageLength

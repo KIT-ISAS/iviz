@@ -85,11 +85,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (Textures is null) throw new System.NullReferenceException(nameof(Textures));
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Textures is null) BuiltIns.ThrowNullReference(nameof(Textures));
             for (int i = 0; i < Textures.Length; i++)
             {
-                if (Textures[i] is null) throw new System.NullReferenceException($"{nameof(Textures)}[{i}]");
+                if (Textures[i] is null) BuiltIns.ThrowNullReference($"{nameof(Textures)}[{i}]");
                 Textures[i].RosValidate();
             }
         }

@@ -118,7 +118,7 @@ namespace Iviz.Msgs.Tf
         
         public void RosValidate()
         {
-            if (DotGraph is null) throw new System.NullReferenceException(nameof(DotGraph));
+            if (DotGraph is null) BuiltIns.ThrowNullReference(nameof(DotGraph));
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(DotGraph);

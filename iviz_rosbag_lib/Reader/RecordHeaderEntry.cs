@@ -10,53 +10,26 @@ using Iviz.Tools;
 
 namespace Iviz.Rosbag.Reader
 {
+    /// <summary>
+    /// Record header entry. The enclosed type depends on the specification.
+    /// </summary>
     public readonly struct RecordHeaderEntry
     {
         readonly Stream reader;
-        readonly long nameStart;
         readonly long valueStart;
         readonly long nextStart;
-        readonly long end;
-
-        /*
-        public string FieldName
-        {
-            get
-            {
-                using var name = new Rent<byte>((int)(valueStart - nameStart - 1));
-                reader.Seek(nameStart, SeekOrigin.Begin);
-                reader.Read(name.Array, 0, name.Length);
-                return Encoding.ASCII.GetString(name.Array, 0, name.Length);
-            }
-        }
-        */
-
-        /*
-        Rent<byte> Value
-        {
-            get
-            {
-                var value = new Rent<byte>((int)(nextStart - valueStart));
-                reader.Seek(valueStart, SeekOrigin.Begin);
-                reader.Read(value.Array, 0, value.Length);
-                return value;
-            }
-        }
-        */
-
+        readonly int nameSize;
+        
         T ReadValue<T>() where T : unmanaged
         {
             Span<byte> span = stackalloc byte[Unsafe.SizeOf<T>()];
-            if (span.Length > (int)(nextStart - valueStart))
+            if (span.Length > nextStart - valueStart)
             {
                 throw new IndexOutOfRangeException();
             }
 
-            //var value = new Rent<byte>((int)(nextStart - valueStart));
             reader.Seek(valueStart, SeekOrigin.Begin);
-            //reader.Read(value.Array, 0, value.Length);
             reader.Read(span);
-            //return value;
             return span.Read<T>();
         }
 
@@ -64,6 +37,11 @@ namespace Iviz.Rosbag.Reader
         {
             get
             {
+                if (nextStart == valueStart)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+
                 reader.Seek(valueStart, SeekOrigin.Begin);
                 return (byte)reader.ReadByte();
             }
@@ -74,41 +52,18 @@ namespace Iviz.Rosbag.Reader
         public long ValueAsLong => ReadValue<long>();
 
         public time ValueAsTime => ReadValue<time>();
-        /*
-        public int ValueAsInt
-        {
-            get
-            {
-                using var value = Value;
-                return value.Read<int>();
-            }
-        }
-
-        public long ValueAsLong
-        {
-            get
-            {
-                using var value = Value;
-                return value.Read<long>();
-            }
-        }
-
-        public time ValueAsTime
-        {
-            get
-            {
-                using var value = Value;
-                return value.Read<time>();
-            }
-        }
-        */
 
         public string ValueAsString
         {
             get
             {
+                if (nextStart == valueStart)
+                {
+                    return "";
+                }
+
                 int msgSize = (int)(nextStart - valueStart);
-                Rent<byte> rent = default;
+                var rent = Rent.Empty<byte>();
                 Span<byte> span = msgSize < 256
                     ? stackalloc byte[msgSize]
                     : (rent = new Rent<byte>(msgSize)).AsSpan();
@@ -123,25 +78,20 @@ namespace Iviz.Rosbag.Reader
                 {
                     rent.Dispose();
                 }
-
-                //using var value = Value;
-                //return Encoding.ASCII.GetString(value.Array, 0, value.Length);
             }
         }
 
-        internal RecordHeaderEntry(Stream reader, long start, long end)
+        internal RecordHeaderEntry(Stream reader, long start)
         {
             this.reader = reader;
-            nameStart = 0;
+            nameSize = 0;
             valueStart = 0;
             nextStart = start;
-            this.end = end;
         }
 
-        RecordHeaderEntry(long start, long end, Stream reader)
+        RecordHeaderEntry(long start, Stream reader)
         {
             this.reader = reader;
-            this.end = end;
 
             reader.Seek(start, SeekOrigin.Begin);
 
@@ -149,15 +99,7 @@ namespace Iviz.Rosbag.Reader
             reader.Read(intBytes);
             int entrySize = intBytes.Read<int>();
 
-            /*
-            using (var intBytes = new Rent<byte>(4))
-            {
-                reader.Read(intBytes.Array, 0, 4);
-                entrySize = intBytes.Read<int>();
-            }
-            */
-
-            nameStart = start + 4;
+            long nameStart = start + 4;
             nextStart = nameStart + entrySize;
 
             long equalsPosition = nameStart;
@@ -166,6 +108,7 @@ namespace Iviz.Rosbag.Reader
                 if (reader.ReadByte() == '=')
                 {
                     valueStart = equalsPosition + 1;
+                    nameSize = (int)(valueStart - nameStart - 1);
                     //Console.WriteLine("  ** Start " + start + " valueSize " + (nextStart - valueStart) +  " next " + nextStart);
                     return;
                 }
@@ -175,13 +118,14 @@ namespace Iviz.Rosbag.Reader
 
             // if no '=' found
             valueStart = nextStart;
+            nameSize = (int)(valueStart - nameStart - 1);
         }
 
-        internal bool TryMoveNext(out RecordHeaderEntry next)
+        internal bool TryMoveNext(long end, out RecordHeaderEntry next)
         {
             if (nextStart < end)
             {
-                next = new RecordHeaderEntry(nextStart, end, reader);
+                next = new RecordHeaderEntry(nextStart, reader);
                 return true;
             }
 
@@ -189,14 +133,16 @@ namespace Iviz.Rosbag.Reader
             return false;
         }
 
-        public bool NameEquals(string name)
+        internal bool NameEquals(string name)
         {
-            if (name.Length != valueStart - nameStart - 1)
+            if (name.Length != nameSize)
             {
                 return false;
             }
 
+            long nameStart = valueStart - nameSize + 1;
             reader.Seek(nameStart, SeekOrigin.Begin);
+            
             foreach (char c in name)
             {
                 if (c != reader.ReadByte())
@@ -208,7 +154,7 @@ namespace Iviz.Rosbag.Reader
             return true;
         }
 
-        public bool ValueEquals(string value)
+        internal bool ValueEquals(string value)
         {
             if (value.Length != nextStart - valueStart)
             {
@@ -231,20 +177,26 @@ namespace Iviz.Rosbag.Reader
     public struct HeaderEntryEnumerator
     {
         RecordHeaderEntry current;
+        readonly long dataEnd;
 
-        internal HeaderEntryEnumerator(RecordHeaderEntry start) => current = start;
+        internal HeaderEntryEnumerator(in RecordHeaderEntry start, long dataEnd)
+        {
+            current = start;
+            this.dataEnd = dataEnd;
+        }
 
-        public bool MoveNext() => current.TryMoveNext(out current);
+        public bool MoveNext() => current.TryMoveNext(dataEnd, out current);
 
         public RecordHeaderEntry Current => current;
     }
 
     public readonly struct HeaderEntryEnumerable
     {
-        readonly RecordHeaderEntry start;
+        readonly HeaderEntryEnumerator enumerator;
 
-        internal HeaderEntryEnumerable(RecordHeaderEntry start) => this.start = start;
+        internal HeaderEntryEnumerable(in RecordHeaderEntry start, long dataEnd) =>
+            enumerator = new HeaderEntryEnumerator(start, dataEnd);
 
-        public HeaderEntryEnumerator GetEnumerator() => new(start);
+        public HeaderEntryEnumerator GetEnumerator() => enumerator;
     }
 }

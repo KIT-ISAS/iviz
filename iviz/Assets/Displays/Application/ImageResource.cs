@@ -33,7 +33,7 @@ namespace Iviz.Displays
         string IHasBounds.Caption => $"<b>{Title}</b>\n{(Texture != null ? Texture.Description : "(unset)")}";
 
         public string Title { get; set; } = "";
-        public Bounds? Bounds => Collider.GetBounds();
+        public Bounds? Bounds => Collider.GetLocalBounds();
         public Transform BoundsTransform => Billboard.transform;
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         

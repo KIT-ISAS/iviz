@@ -48,9 +48,9 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Accel is null) throw new System.NullReferenceException(nameof(Accel));
+            if (Accel is null) BuiltIns.ThrowNullReference(nameof(Accel));
             Accel.RosValidate();
-            if (Covariance is null) throw new System.NullReferenceException(nameof(Covariance));
+            if (Covariance is null) BuiltIns.ThrowNullReference(nameof(Covariance));
             if (Covariance.Length != 36) throw new RosInvalidSizeForFixedArrayException(nameof(Covariance), Covariance.Length, 36);
         }
     

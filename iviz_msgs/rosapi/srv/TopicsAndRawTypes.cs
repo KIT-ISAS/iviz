@@ -128,20 +128,20 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Topics is null) throw new System.NullReferenceException(nameof(Topics));
+            if (Topics is null) BuiltIns.ThrowNullReference(nameof(Topics));
             for (int i = 0; i < Topics.Length; i++)
             {
-                if (Topics[i] is null) throw new System.NullReferenceException($"{nameof(Topics)}[{i}]");
+                if (Topics[i] is null) BuiltIns.ThrowNullReference($"{nameof(Topics)}[{i}]");
             }
-            if (Types is null) throw new System.NullReferenceException(nameof(Types));
+            if (Types is null) BuiltIns.ThrowNullReference(nameof(Types));
             for (int i = 0; i < Types.Length; i++)
             {
-                if (Types[i] is null) throw new System.NullReferenceException($"{nameof(Types)}[{i}]");
+                if (Types[i] is null) BuiltIns.ThrowNullReference($"{nameof(Types)}[{i}]");
             }
-            if (TypedefsFullText is null) throw new System.NullReferenceException(nameof(TypedefsFullText));
+            if (TypedefsFullText is null) BuiltIns.ThrowNullReference(nameof(TypedefsFullText));
             for (int i = 0; i < TypedefsFullText.Length; i++)
             {
-                if (TypedefsFullText[i] is null) throw new System.NullReferenceException($"{nameof(TypedefsFullText)}[{i}]");
+                if (TypedefsFullText[i] is null) BuiltIns.ThrowNullReference($"{nameof(TypedefsFullText)}[{i}]");
             }
         }
     

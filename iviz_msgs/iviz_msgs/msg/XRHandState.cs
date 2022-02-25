@@ -70,11 +70,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Thumb is null) throw new System.NullReferenceException(nameof(Thumb));
-            if (Index is null) throw new System.NullReferenceException(nameof(Index));
-            if (Middle is null) throw new System.NullReferenceException(nameof(Middle));
-            if (Ring is null) throw new System.NullReferenceException(nameof(Ring));
-            if (Little is null) throw new System.NullReferenceException(nameof(Little));
+            if (Thumb is null) BuiltIns.ThrowNullReference(nameof(Thumb));
+            if (Index is null) BuiltIns.ThrowNullReference(nameof(Index));
+            if (Middle is null) BuiltIns.ThrowNullReference(nameof(Middle));
+            if (Ring is null) BuiltIns.ThrowNullReference(nameof(Ring));
+            if (Little is null) BuiltIns.ThrowNullReference(nameof(Little));
         }
     
         public int RosMessageLength

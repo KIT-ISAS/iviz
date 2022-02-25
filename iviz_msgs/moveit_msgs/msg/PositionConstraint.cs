@@ -60,8 +60,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (LinkName is null) throw new System.NullReferenceException(nameof(LinkName));
-            if (ConstraintRegion is null) throw new System.NullReferenceException(nameof(ConstraintRegion));
+            if (LinkName is null) BuiltIns.ThrowNullReference(nameof(LinkName));
+            if (ConstraintRegion is null) BuiltIns.ThrowNullReference(nameof(ConstraintRegion));
             ConstraintRegion.RosValidate();
         }
     

@@ -208,12 +208,6 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                /*
-                var allColliders = Robot.LinkObjects.Values.SelectMany(
-                    linkObject => linkObject
-                        .GetComponentsInChildren<Collider>(true)
-                        .Where(collider => collider.gameObject.layer == LayerType.Collider));
-                        */
                 var allColliders = Robot.LinkObjects.Values.SelectMany(
                     linkObject => linkObject.transform.GetAllChildren()
                         .WithComponent<Collider>()
@@ -424,6 +418,7 @@ namespace Iviz.Controllers
             {
                 robotLoadingTask = newRobot.StartAsync(RosManager.ServiceProvider, KeepMeshMaterials).AsTask();
                 await robotLoadingTask.AwaitNoThrow(this);
+                Interactable = Interactable;
                 RobotLinkHighlightable.ProcessRobot(newRobot.Name, newRobot.BaseLinkObject);
                 UpdateStartTaskStatus();
             }

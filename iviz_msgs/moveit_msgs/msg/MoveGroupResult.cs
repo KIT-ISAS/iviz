@@ -62,13 +62,13 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ErrorCode is null) throw new System.NullReferenceException(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
             ErrorCode.RosValidate();
-            if (TrajectoryStart is null) throw new System.NullReferenceException(nameof(TrajectoryStart));
+            if (TrajectoryStart is null) BuiltIns.ThrowNullReference(nameof(TrajectoryStart));
             TrajectoryStart.RosValidate();
-            if (PlannedTrajectory is null) throw new System.NullReferenceException(nameof(PlannedTrajectory));
+            if (PlannedTrajectory is null) BuiltIns.ThrowNullReference(nameof(PlannedTrajectory));
             PlannedTrajectory.RosValidate();
-            if (ExecutedTrajectory is null) throw new System.NullReferenceException(nameof(ExecutedTrajectory));
+            if (ExecutedTrajectory is null) BuiltIns.ThrowNullReference(nameof(ExecutedTrajectory));
             ExecutedTrajectory.RosValidate();
         }
     

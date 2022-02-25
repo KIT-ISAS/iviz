@@ -49,12 +49,12 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (State is null) throw new System.NullReferenceException(nameof(State));
+            if (State is null) BuiltIns.ThrowNullReference(nameof(State));
             State.RosValidate();
-            if (HighlightLinks is null) throw new System.NullReferenceException(nameof(HighlightLinks));
+            if (HighlightLinks is null) BuiltIns.ThrowNullReference(nameof(HighlightLinks));
             for (int i = 0; i < HighlightLinks.Length; i++)
             {
-                if (HighlightLinks[i] is null) throw new System.NullReferenceException($"{nameof(HighlightLinks)}[{i}]");
+                if (HighlightLinks[i] is null) BuiltIns.ThrowNullReference($"{nameof(HighlightLinks)}[{i}]");
                 HighlightLinks[i].RosValidate();
             }
         }

@@ -67,23 +67,23 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (EntryNames is null) throw new System.NullReferenceException(nameof(EntryNames));
+            if (EntryNames is null) BuiltIns.ThrowNullReference(nameof(EntryNames));
             for (int i = 0; i < EntryNames.Length; i++)
             {
-                if (EntryNames[i] is null) throw new System.NullReferenceException($"{nameof(EntryNames)}[{i}]");
+                if (EntryNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(EntryNames)}[{i}]");
             }
-            if (EntryValues is null) throw new System.NullReferenceException(nameof(EntryValues));
+            if (EntryValues is null) BuiltIns.ThrowNullReference(nameof(EntryValues));
             for (int i = 0; i < EntryValues.Length; i++)
             {
-                if (EntryValues[i] is null) throw new System.NullReferenceException($"{nameof(EntryValues)}[{i}]");
+                if (EntryValues[i] is null) BuiltIns.ThrowNullReference($"{nameof(EntryValues)}[{i}]");
                 EntryValues[i].RosValidate();
             }
-            if (DefaultEntryNames is null) throw new System.NullReferenceException(nameof(DefaultEntryNames));
+            if (DefaultEntryNames is null) BuiltIns.ThrowNullReference(nameof(DefaultEntryNames));
             for (int i = 0; i < DefaultEntryNames.Length; i++)
             {
-                if (DefaultEntryNames[i] is null) throw new System.NullReferenceException($"{nameof(DefaultEntryNames)}[{i}]");
+                if (DefaultEntryNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(DefaultEntryNames)}[{i}]");
             }
-            if (DefaultEntryValues is null) throw new System.NullReferenceException(nameof(DefaultEntryValues));
+            if (DefaultEntryValues is null) BuiltIns.ThrowNullReference(nameof(DefaultEntryValues));
         }
     
         public int RosMessageLength

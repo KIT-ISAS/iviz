@@ -49,11 +49,11 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ActionGoal is null) throw new System.NullReferenceException(nameof(ActionGoal));
+            if (ActionGoal is null) BuiltIns.ThrowNullReference(nameof(ActionGoal));
             ActionGoal.RosValidate();
-            if (ActionResult is null) throw new System.NullReferenceException(nameof(ActionResult));
+            if (ActionResult is null) BuiltIns.ThrowNullReference(nameof(ActionResult));
             ActionResult.RosValidate();
-            if (ActionFeedback is null) throw new System.NullReferenceException(nameof(ActionFeedback));
+            if (ActionFeedback is null) BuiltIns.ThrowNullReference(nameof(ActionFeedback));
             ActionFeedback.RosValidate();
         }
     

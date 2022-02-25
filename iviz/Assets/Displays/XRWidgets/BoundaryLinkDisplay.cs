@@ -13,6 +13,7 @@ namespace Iviz.Displays.XR
         [SerializeField] BoxCollider? startCollider; 
         [SerializeField] BoxCollider? endCollider;
         MeshMarkerDisplay? line;
+        SelectionFrame? frame;
         Tooltip? tooltip;
         Color color = Color.red;
 
@@ -23,12 +24,16 @@ namespace Iviz.Displays.XR
         MeshMarkerDisplay Line =>
             line != null ? line : line = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, Transform);
 
+        SelectionFrame Frame =>
+            frame != null ? frame : frame = ResourcePool.RentDisplay<SelectionFrame>(Transform);
+
         Tooltip Tooltip => tooltip != null ? tooltip : tooltip = ResourcePool.RentDisplay<Tooltip>(Transform);
 
         void Awake()
         {
             Color = color;
             Tooltip.Scale = 0.03f;
+            Frame.ColumnWidth = 0.02f;
             
             if (startCollider != null && endCollider != null)
             {
@@ -40,7 +45,11 @@ namespace Iviz.Displays.XR
         {
             startCollider = a;
             endCollider = b;
-            Transform.SetParentLocal(TfModule.UnityFrameTransform);
+            Transform.SetParentLocal(TfModule.RootFrame.Transform);
+            
+            Frame.Transform.parent = b.gameObject.transform;
+            Frame.SetBounds(b.GetLocalBounds());
+            
             GameThread.EveryFrame += UpdateLink;
             UpdateLink();
         }
@@ -52,12 +61,15 @@ namespace Iviz.Displays.XR
                 return;
             }
 
-            float distance = startCollider.DistanceTo(endCollider, out var start, out var end);
-
+            float distance = DistanceTo(startCollider, endCollider, out var start, out var end);
             var mid = (start + end) / 2;
-            Line.Transform.localPosition = mid;
-            Line.Transform.localRotation = Quaternion.LookRotation(end - start);
-            Line.Transform.localScale = new Vector3(0.02f, 0.02f, distance);
+            
+            if (distance > 0)
+            {
+                Line.Transform.localPosition = mid;
+                Line.Transform.localRotation = Quaternion.LookRotation(end - start);
+                Line.Transform.localScale = new Vector3(0.02f, 0.02f, distance);
+            }
 
             if (distance < 0.5f)
             {
@@ -74,6 +86,7 @@ namespace Iviz.Displays.XR
         {
             startCollider = null;
             endCollider = null;
+            Frame.Transform.parent = Transform;
             GameThread.EveryFrame -= UpdateLink;
         }
 
@@ -85,6 +98,8 @@ namespace Iviz.Displays.XR
                 Line.Color = value;
                 Line.EmissiveColor = value;
                 Tooltip.Color = (value / 2).WithAlpha(1);
+                Frame.Color = value;
+                Frame.EmissiveColor = value;
             }
         }
 
@@ -95,9 +110,21 @@ namespace Iviz.Displays.XR
 
         public void SplitForRecycle()
         {
-            line.ReturnToPool();
             tooltip.ReturnToPool();
+            frame.ReturnToPool();
             line.ReturnToPool(Resource.Displays.Cube);
         }
+        
+        public static float DistanceTo(BoxCollider a, BoxCollider b, out Vector3 start, out Vector3 end)
+        {
+            end = b.ClosestPoint(a.bounds.center);
+            start = a.ClosestPoint(end);
+
+            end = TfModule.RootFrame.Transform.InverseTransformPoint(end);
+            start = TfModule.RootFrame.Transform.InverseTransformPoint(start);
+            
+            return Vector3.Distance(start, end);
+        }
+        
     }
 }

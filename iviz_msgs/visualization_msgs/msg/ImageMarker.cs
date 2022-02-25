@@ -106,9 +106,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Ns is null) throw new System.NullReferenceException(nameof(Ns));
-            if (Points is null) throw new System.NullReferenceException(nameof(Points));
-            if (OutlineColors is null) throw new System.NullReferenceException(nameof(OutlineColors));
+            if (Ns is null) BuiltIns.ThrowNullReference(nameof(Ns));
+            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
+            if (OutlineColors is null) BuiltIns.ThrowNullReference(nameof(OutlineColors));
         }
     
         public int RosMessageLength

@@ -55,13 +55,13 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (Objects is null) throw new System.NullReferenceException(nameof(Objects));
+            if (Objects is null) BuiltIns.ThrowNullReference(nameof(Objects));
             for (int i = 0; i < Objects.Length; i++)
             {
-                if (Objects[i] is null) throw new System.NullReferenceException($"{nameof(Objects)}[{i}]");
+                if (Objects[i] is null) BuiltIns.ThrowNullReference($"{nameof(Objects)}[{i}]");
                 Objects[i].RosValidate();
             }
-            if (Cooccurrence is null) throw new System.NullReferenceException(nameof(Cooccurrence));
+            if (Cooccurrence is null) BuiltIns.ThrowNullReference(nameof(Cooccurrence));
         }
     
         public int RosMessageLength

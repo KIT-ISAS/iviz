@@ -87,8 +87,8 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosValidate()
         {
-            if (Logger is null) throw new System.NullReferenceException(nameof(Logger));
-            if (Level is null) throw new System.NullReferenceException(nameof(Level));
+            if (Logger is null) BuiltIns.ThrowNullReference(nameof(Logger));
+            if (Level is null) BuiltIns.ThrowNullReference(nameof(Level));
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Logger) + BuiltIns.GetStringSize(Level);

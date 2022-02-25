@@ -72,19 +72,19 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Id is null) throw new System.NullReferenceException(nameof(Id));
-            if (PostPlacePosture is null) throw new System.NullReferenceException(nameof(PostPlacePosture));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (PostPlacePosture is null) BuiltIns.ThrowNullReference(nameof(PostPlacePosture));
             PostPlacePosture.RosValidate();
-            if (PlacePose is null) throw new System.NullReferenceException(nameof(PlacePose));
+            if (PlacePose is null) BuiltIns.ThrowNullReference(nameof(PlacePose));
             PlacePose.RosValidate();
-            if (PrePlaceApproach is null) throw new System.NullReferenceException(nameof(PrePlaceApproach));
+            if (PrePlaceApproach is null) BuiltIns.ThrowNullReference(nameof(PrePlaceApproach));
             PrePlaceApproach.RosValidate();
-            if (PostPlaceRetreat is null) throw new System.NullReferenceException(nameof(PostPlaceRetreat));
+            if (PostPlaceRetreat is null) BuiltIns.ThrowNullReference(nameof(PostPlaceRetreat));
             PostPlaceRetreat.RosValidate();
-            if (AllowedTouchObjects is null) throw new System.NullReferenceException(nameof(AllowedTouchObjects));
+            if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects));
             for (int i = 0; i < AllowedTouchObjects.Length; i++)
             {
-                if (AllowedTouchObjects[i] is null) throw new System.NullReferenceException($"{nameof(AllowedTouchObjects)}[{i}]");
+                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AllowedTouchObjects)}[{i}]");
             }
         }
     

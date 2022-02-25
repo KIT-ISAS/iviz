@@ -101,14 +101,14 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) throw new System.NullReferenceException(nameof(Id));
-            if (Caption is null) throw new System.NullReferenceException(nameof(Caption));
-            if (Boundary is null) throw new System.NullReferenceException(nameof(Boundary));
+            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Caption is null) BuiltIns.ThrowNullReference(nameof(Caption));
+            if (Boundary is null) BuiltIns.ThrowNullReference(nameof(Boundary));
             Boundary.RosValidate();
-            if (SecondaryBoundaries is null) throw new System.NullReferenceException(nameof(SecondaryBoundaries));
+            if (SecondaryBoundaries is null) BuiltIns.ThrowNullReference(nameof(SecondaryBoundaries));
             for (int i = 0; i < SecondaryBoundaries.Length; i++)
             {
-                if (SecondaryBoundaries[i] is null) throw new System.NullReferenceException($"{nameof(SecondaryBoundaries)}[{i}]");
+                if (SecondaryBoundaries[i] is null) BuiltIns.ThrowNullReference($"{nameof(SecondaryBoundaries)}[{i}]");
                 SecondaryBoundaries[i].RosValidate();
             }
         }

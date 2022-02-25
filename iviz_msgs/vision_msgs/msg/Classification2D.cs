@@ -60,13 +60,13 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Results is null) throw new System.NullReferenceException(nameof(Results));
+            if (Results is null) BuiltIns.ThrowNullReference(nameof(Results));
             for (int i = 0; i < Results.Length; i++)
             {
-                if (Results[i] is null) throw new System.NullReferenceException($"{nameof(Results)}[{i}]");
+                if (Results[i] is null) BuiltIns.ThrowNullReference($"{nameof(Results)}[{i}]");
                 Results[i].RosValidate();
             }
-            if (SourceImg is null) throw new System.NullReferenceException(nameof(SourceImg));
+            if (SourceImg is null) BuiltIns.ThrowNullReference(nameof(SourceImg));
             SourceImg.RosValidate();
         }
     

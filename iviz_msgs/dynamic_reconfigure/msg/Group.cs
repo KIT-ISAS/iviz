@@ -60,12 +60,12 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (Type is null) throw new System.NullReferenceException(nameof(Type));
-            if (Parameters is null) throw new System.NullReferenceException(nameof(Parameters));
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
+            if (Parameters is null) BuiltIns.ThrowNullReference(nameof(Parameters));
             for (int i = 0; i < Parameters.Length; i++)
             {
-                if (Parameters[i] is null) throw new System.NullReferenceException($"{nameof(Parameters)}[{i}]");
+                if (Parameters[i] is null) BuiltIns.ThrowNullReference($"{nameof(Parameters)}[{i}]");
                 Parameters[i].RosValidate();
             }
         }

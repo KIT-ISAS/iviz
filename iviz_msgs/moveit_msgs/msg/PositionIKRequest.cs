@@ -113,23 +113,23 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (GroupName is null) throw new System.NullReferenceException(nameof(GroupName));
-            if (RobotState is null) throw new System.NullReferenceException(nameof(RobotState));
+            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
+            if (RobotState is null) BuiltIns.ThrowNullReference(nameof(RobotState));
             RobotState.RosValidate();
-            if (Constraints is null) throw new System.NullReferenceException(nameof(Constraints));
+            if (Constraints is null) BuiltIns.ThrowNullReference(nameof(Constraints));
             Constraints.RosValidate();
-            if (IkLinkName is null) throw new System.NullReferenceException(nameof(IkLinkName));
-            if (PoseStamped is null) throw new System.NullReferenceException(nameof(PoseStamped));
+            if (IkLinkName is null) BuiltIns.ThrowNullReference(nameof(IkLinkName));
+            if (PoseStamped is null) BuiltIns.ThrowNullReference(nameof(PoseStamped));
             PoseStamped.RosValidate();
-            if (IkLinkNames is null) throw new System.NullReferenceException(nameof(IkLinkNames));
+            if (IkLinkNames is null) BuiltIns.ThrowNullReference(nameof(IkLinkNames));
             for (int i = 0; i < IkLinkNames.Length; i++)
             {
-                if (IkLinkNames[i] is null) throw new System.NullReferenceException($"{nameof(IkLinkNames)}[{i}]");
+                if (IkLinkNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(IkLinkNames)}[{i}]");
             }
-            if (PoseStampedVector is null) throw new System.NullReferenceException(nameof(PoseStampedVector));
+            if (PoseStampedVector is null) BuiltIns.ThrowNullReference(nameof(PoseStampedVector));
             for (int i = 0; i < PoseStampedVector.Length; i++)
             {
-                if (PoseStampedVector[i] is null) throw new System.NullReferenceException($"{nameof(PoseStampedVector)}[{i}]");
+                if (PoseStampedVector[i] is null) BuiltIns.ThrowNullReference($"{nameof(PoseStampedVector)}[{i}]");
                 PoseStampedVector[i].RosValidate();
             }
         }

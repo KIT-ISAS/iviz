@@ -85,9 +85,9 @@ namespace Iviz.Msgs.StereoMsgs
         
         public void RosValidate()
         {
-            if (Image is null) throw new System.NullReferenceException(nameof(Image));
+            if (Image is null) BuiltIns.ThrowNullReference(nameof(Image));
             Image.RosValidate();
-            if (ValidWindow is null) throw new System.NullReferenceException(nameof(ValidWindow));
+            if (ValidWindow is null) BuiltIns.ThrowNullReference(nameof(ValidWindow));
             ValidWindow.RosValidate();
         }
     

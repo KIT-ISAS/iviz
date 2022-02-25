@@ -43,7 +43,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosServiceType = "iviz_msgs/LaunchDialog";
         
         /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "f302de5b2d6e80626488982575402b34";
+        [Preserve] public const string RosMd5Sum = "ec7ed08dc865a51d9dc5312b8351aa02";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Dialog is null) throw new System.NullReferenceException(nameof(Dialog));
+            if (Dialog is null) BuiltIns.ThrowNullReference(nameof(Dialog));
             Dialog.RosValidate();
         }
     
@@ -134,8 +134,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) throw new System.NullReferenceException(nameof(Message));
-            if (Feedback is null) throw new System.NullReferenceException(nameof(Feedback));
+            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Feedback is null) BuiltIns.ThrowNullReference(nameof(Feedback));
             Feedback.RosValidate();
         }
     

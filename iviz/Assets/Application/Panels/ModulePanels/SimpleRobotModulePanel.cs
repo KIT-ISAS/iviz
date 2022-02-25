@@ -31,7 +31,7 @@
             SourceParameter = p.AddInputFieldWithHints("Load From Source Parameter").SetPlaceholder("<none>");
             SavedRobotName = p.AddDropdown("Load From Saved");
             AttachToTf = p.AddToggle("Attach to TF Frames");
-            EnableColliders = p.AddToggle("Enable Colliders");
+            EnableColliders = p.AddToggle("Links Interactable");
             Tint = p.AddColorPicker("Tint");
             Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
             Metallic = p.AddSlider("Metallic").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);

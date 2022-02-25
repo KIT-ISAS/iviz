@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
@@ -321,6 +322,12 @@ namespace Iviz.Msgs
         public static int GetStringSize(string? s)
         {
             return s == null ? 0 : UTF8.GetByteCount(s);
+        }
+
+        [DoesNotReturn]
+        public static void ThrowNullReference(string name)
+        {
+            throw new NullReferenceException(name);
         }
     }
 }

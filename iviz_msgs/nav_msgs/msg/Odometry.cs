@@ -55,10 +55,10 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (ChildFrameId is null) throw new System.NullReferenceException(nameof(ChildFrameId));
-            if (Pose is null) throw new System.NullReferenceException(nameof(Pose));
+            if (ChildFrameId is null) BuiltIns.ThrowNullReference(nameof(ChildFrameId));
+            if (Pose is null) BuiltIns.ThrowNullReference(nameof(Pose));
             Pose.RosValidate();
-            if (Twist is null) throw new System.NullReferenceException(nameof(Twist));
+            if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
             Twist.RosValidate();
         }
     

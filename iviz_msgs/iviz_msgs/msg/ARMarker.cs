@@ -81,10 +81,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Code is null) throw new System.NullReferenceException(nameof(Code));
-            if (Corners is null) throw new System.NullReferenceException(nameof(Corners));
+            if (Code is null) BuiltIns.ThrowNullReference(nameof(Code));
+            if (Corners is null) BuiltIns.ThrowNullReference(nameof(Corners));
             if (Corners.Length != 4) throw new RosInvalidSizeForFixedArrayException(nameof(Corners), Corners.Length, 4);
-            if (CameraIntrinsic is null) throw new System.NullReferenceException(nameof(CameraIntrinsic));
+            if (CameraIntrinsic is null) BuiltIns.ThrowNullReference(nameof(CameraIntrinsic));
             if (CameraIntrinsic.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(CameraIntrinsic), CameraIntrinsic.Length, 9);
         }
     

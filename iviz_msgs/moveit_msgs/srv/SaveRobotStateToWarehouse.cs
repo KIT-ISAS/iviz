@@ -92,9 +92,9 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Name is null) throw new System.NullReferenceException(nameof(Name));
-            if (Robot is null) throw new System.NullReferenceException(nameof(Robot));
-            if (State is null) throw new System.NullReferenceException(nameof(State));
+            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Robot is null) BuiltIns.ThrowNullReference(nameof(Robot));
+            if (State is null) BuiltIns.ThrowNullReference(nameof(State));
             State.RosValidate();
         }
     

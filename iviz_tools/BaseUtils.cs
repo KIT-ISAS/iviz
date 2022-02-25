@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -196,6 +197,15 @@ public static class BaseUtils
         ownMd5Hash?.Dispose();
         return sBuilder.ToString();
     }
+
+    public static ref T GetReference<T>(this Span<T> span) where T : unmanaged => ref MemoryMarshal.GetReference(span);
+
+    public static ref readonly T GetReference<T>(this ReadOnlySpan<T> span) where T : unmanaged =>
+        ref MemoryMarshal.GetReference(span);
+
+    public static T Read<T>(this Span<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
+
+    public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
 }
 
 public sealed class ConcurrentSet<T> : IReadOnlyCollection<T> where T : notnull

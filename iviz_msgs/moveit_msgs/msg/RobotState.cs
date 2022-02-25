@@ -62,14 +62,14 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (JointState is null) throw new System.NullReferenceException(nameof(JointState));
+            if (JointState is null) BuiltIns.ThrowNullReference(nameof(JointState));
             JointState.RosValidate();
-            if (MultiDofJointState is null) throw new System.NullReferenceException(nameof(MultiDofJointState));
+            if (MultiDofJointState is null) BuiltIns.ThrowNullReference(nameof(MultiDofJointState));
             MultiDofJointState.RosValidate();
-            if (AttachedCollisionObjects is null) throw new System.NullReferenceException(nameof(AttachedCollisionObjects));
+            if (AttachedCollisionObjects is null) BuiltIns.ThrowNullReference(nameof(AttachedCollisionObjects));
             for (int i = 0; i < AttachedCollisionObjects.Length; i++)
             {
-                if (AttachedCollisionObjects[i] is null) throw new System.NullReferenceException($"{nameof(AttachedCollisionObjects)}[{i}]");
+                if (AttachedCollisionObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AttachedCollisionObjects)}[{i}]");
                 AttachedCollisionObjects[i].RosValidate();
             }
         }

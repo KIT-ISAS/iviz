@@ -12,7 +12,7 @@ namespace Iviz.App
         public FrameWidget Frame { get; private set; }
         public DataLabelWidget Description { get; private set; }
         public DropdownWidget Colormap { get; private set; }
-        public DropdownWidget IntensityChannel { get; private set; }
+        public InputFieldWithHintsWidget IntensityChannel { get; private set; }
         public TrashButtonWidget CloseButton { get; private set; }
 
         public ToggleWidget ForceMinMax { get; private set; }
@@ -32,7 +32,7 @@ namespace Iviz.App
             Listener = p.AddListener();
             Frame = p.AddFrame();
             Description = p.AddDataLabel("Min/Max").SetHasRichText(true).SetCentered();
-            IntensityChannel = p.AddDropdown("Intensity Channel");
+            IntensityChannel = p.AddInputFieldWithHints("Intensity Channel");
             Colormap = p.AddDropdown("Colormap")
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)ColormapId.hsv);

@@ -231,8 +231,10 @@ namespace Iviz.Ros
 
             foreach (int _ in ..messageCount) // copy a fixed amount, in case messages are still being added
             {
-                messageQueue.TryDequeue(out T t);
-                messageHelper.Add(t);
+                if (messageQueue.TryDequeue(out T t))
+                {
+                    messageHelper.Add(t);
+                }
             }
 
             int start = Math.Max(0, messageHelper.Count - MaxQueueSize); // should be 0 unless MaxQueueSize changed
