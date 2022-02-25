@@ -418,8 +418,6 @@ namespace Iviz.Controllers
             {
                 robotLoadingTask = newRobot.StartAsync(RosManager.ServiceProvider, KeepMeshMaterials).AsTask();
                 await robotLoadingTask.AwaitNoThrow(this);
-                Interactable = Interactable;
-                RobotLinkHighlightable.ProcessRobot(newRobot.Name, newRobot.BaseLinkObject);
                 UpdateStartTaskStatus();
             }
 
@@ -476,6 +474,12 @@ namespace Iviz.Controllers
                         Tint = Tint;
                         Smoothness = Smoothness;
                         Metallic = Metallic;
+                        Interactable = Interactable;
+                        if (Robot != null)
+                        {
+                            RobotLinkHighlightable.ProcessRobot(Robot.Name, Robot.BaseLinkObject);
+                        }
+
                         robotLoadingTask = null;
                         RobotFinishedLoading?.Invoke();
                         break;
