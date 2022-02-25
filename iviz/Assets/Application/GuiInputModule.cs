@@ -496,7 +496,7 @@ namespace Iviz.App
             QualityInView = QualityInView;
         }
 
-        public float XRDraggableNearDistance => XRController.NearDistance;
+        public float XRDraggableNearDistance => Settings.IsXR ? XRController.NearDistance : float.MaxValue;
 
         public void TryUnsetDraggedObject(IScreenDraggable draggable)
         {

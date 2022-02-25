@@ -1,6 +1,5 @@
 {
   "[KIT-H2T] Armar6": "armar6",
-  "[KIT-IPR] Gammabot": "mp_500",
   "[Franka Emika] Panda": "panda",
   "[Fraunhofer IOSB] BoB": "e1_oilquick_bucket_raedlinger",
   "[UR] UR16e": "ur",

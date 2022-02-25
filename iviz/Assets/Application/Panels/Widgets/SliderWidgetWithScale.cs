@@ -17,14 +17,20 @@ namespace Iviz.App
         [SerializeField] TMP_Text? valueText;
         [SerializeField] Button? left;
         [SerializeField] Button? right;
+        [SerializeField] Button? sign;
         [SerializeField] TMP_Text? scaleText;
+        [SerializeField] TMP_Text? signText;
+
+        bool isNegative;
 
         Slider Slider => slider.AssertNotNull(nameof(slider));
         TMP_Text Text => text.AssertNotNull(nameof(text));
         TMP_Text ValueText => valueText.AssertNotNull(nameof(valueText));
         TMP_Text ScaleText => scaleText.AssertNotNull(nameof(scaleText));
+        TMP_Text SignText => signText.AssertNotNull(nameof(signText));
         Button Left => left.AssertNotNull(nameof(left));
         Button Right => right.AssertNotNull(nameof(right));
+        Button Sign => sign.AssertNotNull(nameof(sign));
 
         public event Action<float>? ValueChanged;
 
@@ -43,51 +49,79 @@ namespace Iviz.App
 
         public float Value
         {
-            get => ValueInternal / 100 * scale;
+            get => ValueInternal / 100 * scale * (isNegative ? -1 : 1);
             set
             {
-                switch (value)
+                SignText.text = value < 0 ? "[-]" : "[+]";
+                isNegative = value < 0;
+
+                float absValue = Math.Abs(value);
+                if (absValue == 0)
+                {
+                    ValueInternal = 0;
+                    UpdatePower(0);
+                    UpdateLabel(0);
+                    OnValueChanged();
+                    return;
+                }
+
+                float threshold = 1e-4f;
+                for (int i = -4; i < 5; i++)
+                {
+                    if (absValue < threshold)
+                    {
+                        ValueInternal = absValue * 100 / scale;
+                        UpdatePower(i);
+                        UpdateLabel(value);
+                        OnValueChanged();
+                        break;
+                    }
+
+                    threshold *= 10;
+                }
+
+                /*
+                switch (absValue)
                 {
                     case 0:
                         ValueInternal = 0;
                         UpdatePower(0);
                         break;
                     case < 1e-3f:
-                        ValueInternal = value * (100 / 1e-3f);
+                        //ValueInternal = absValue * (100 / 1e-3f);
                         UpdatePower(-3);
                         break;
                     case < 1e-2f:
-                        ValueInternal = value * (100 / 1e-2f);
+                        //ValueInternal = absValue * (100 / 1e-2f);
                         UpdatePower(-2);
                         break;
                     case < 1e-1f:
-                        ValueInternal = value * (100 / 1e-1f);
+                        //ValueInternal = absValue * (100 / 1e-1f);
                         UpdatePower(-1);
                         break;
                     case <= 1:
-                        ValueInternal = value * (100 / 1e-0f);
+                        //ValueInternal = absValue * (100 / 1e-0f);
                         UpdatePower(0);
                         break;
                     case < 1e1f:
-                        ValueInternal = value * (100 * 1e-1f) ;
+                        //ValueInternal = absValue * (100 * 1e-1f) ;
                         UpdatePower(1);
                         break;
                     case < 1e2f:
-                        ValueInternal = value * (100 * 1e-2f);
+                        //ValueInternal = absValue * (100 * 1e-2f);
                         UpdatePower(2);
                         break;
                     case < 1e3f:
-                        ValueInternal = value * (100 * 1e-3f);
+                        //ValueInternal = absValue * (100 * 1e-3f);
                         UpdatePower(3);
                         break;
                     case < 1e4f:
-                        ValueInternal = value * (100 * 1e-4f);
+                        //ValueInternal = absValue * (100 * 1e-4f);
                         UpdatePower(4);
                         break;
                 }
+                */
 
-                ValueInternal = value * 100 / scale;
-                UpdateLabel(value);
             }
         }
 
@@ -114,9 +148,23 @@ namespace Iviz.App
         void Awake()
         {
             Slider.onValueChanged.AddListener(_ => OnValueChanged());
-            Left.onClick.AddListener(() => UpdatePower(power - 1));
-            Right.onClick.AddListener(() => UpdatePower(power + 1));
+            Left.onClick.AddListener(() => UpdatePowerNoChange(power - 1));
+            Right.onClick.AddListener(() => UpdatePowerNoChange(power + 1));
+            Sign.onClick.AddListener(() =>
+            {
+                isNegative = !isNegative;
+                SignText.text = isNegative ? "[-]" : "[+]";
+                UpdateValue();
+            });
             Value = 50;
+        }
+
+        void UpdatePowerNoChange(int newPower)
+        {
+            float currentValue = Value;
+            UpdatePower(newPower);
+            ValueInternal = Mathf.Abs(currentValue) * 100 / scale;
+            OnValueChanged();
         }
 
         void UpdatePower(int newPower)
@@ -130,12 +178,11 @@ namespace Iviz.App
 
             scale = Mathf.Pow(10, power);
             ScaleText.text = power <= 0 ? power.ToString() : "+" + power;
-            OnValueChanged();
         }
 
         void OnValueChanged()
         {
-            float v = ValueInternal / 100 * scale;
+            float v = Value;
             UpdateLabel(v);
             ValueChanged?.Invoke(v);
         }

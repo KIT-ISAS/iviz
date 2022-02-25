@@ -166,7 +166,7 @@ namespace Iviz.App
             set
             {
                 Connection.KeepReconnecting = value;
-                UpperCanvas.Status.enabled = value;
+                //UpperCanvas.Status.enabled = value;
             }
         }
 
@@ -215,7 +215,7 @@ namespace Iviz.App
         }
 
         static string MasterUriToString(Uri? uri) =>
-            uri is null || uri.AbsolutePath.Length == 0 ? "" : $"{uri.Host}:{uri.Port.ToString()}";
+            uri != null && uri.AbsolutePath.Length != 0 ? $"{uri.Host}:{uri.Port.ToString()}" : "";
 
         void Start()
         {
@@ -252,7 +252,7 @@ namespace Iviz.App
 
             ARController.ARStateChanged += OnARStateChanged;
 
-            BottomHideGuiButton.Visible = !Settings.IsXR;
+            BottomHideGuiButton.Visible = !Settings.IsMobile && !Settings.IsXR;
             MiddleHideGuiButton.gameObject.SetActive(Settings.IsMobile && !Settings.IsXR);
             UpdateLeftHideVisible();
 
@@ -584,7 +584,7 @@ namespace Iviz.App
                 return;
             }
             
-            RemoveAllModulesButFirst(); // delete all modules except TF (module 0)
+            RemoveAllModules();
 
             var stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
 
@@ -919,24 +919,33 @@ namespace Iviz.App
             Buttons.RemoveButton(index);
         }
         
-        void RemoveAllModulesButFirst()
+        void RemoveAllModules()
         {
-            // todo: make this consistent will all modules except AR
-            foreach (var moduleData in moduleDatas.Skip(1))
+            var newModuleDatas = new List<ModuleData>();
+            foreach (var moduleData in moduleDatas)
             {
+                if (moduleData.ModuleType is ModuleType.TF or ModuleType.AR or ModuleType.XR)
+                {
+                    continue;
+                }
+                
                 if (moduleData is ListenerModuleData listenerData)
                 {
                     topicsWithModule.Remove(listenerData.Topic);
                 }
                 
                 moduleData.Dispose();
+                newModuleDatas.Add(moduleData);
             }
 
-            var firstModuleData = TfData;
             moduleDatas.Clear();
-            moduleDatas.Add(firstModuleData);
+            moduleDatas.AddRange(newModuleDatas);
 
-            Buttons.RemoveAllButtonsButFirst();
+            Buttons.RemoveAllButtons();
+            foreach (var moduleData in moduleDatas)
+            {
+                Buttons.CreateButtonForModule(moduleData);
+            }
         }        
 
 

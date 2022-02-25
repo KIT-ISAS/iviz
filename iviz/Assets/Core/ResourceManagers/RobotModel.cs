@@ -38,6 +38,7 @@ namespace Iviz.Displays
         readonly List<(GameObject, ResourceKey<GameObject>)> objectResources = new();
         readonly Dictionary<MeshMarkerDisplay, Color> originalColors = new();
 
+        readonly GameObject baseLinkObject;
         readonly Robot robot;
         readonly CancellationTokenSource runningTs = new();
 
@@ -48,13 +49,16 @@ namespace Iviz.Displays
         bool enableShadows = true;
         bool visible = true;
         int numErrors;
+        bool disposed;
 
         public string Name { get; }
         public string? BaseLink { get; private set; }
-        public GameObject BaseLinkObject { get; }
+        public GameObject BaseLinkObject => !disposed ? baseLinkObject : throw new ObjectDisposedException("this");
         public string Description { get; }
         public IReadOnlyDictionary<string, string> LinkParents => linkParents;
-        public IReadOnlyDictionary<string, GameObject> LinkObjects => linkObjects;
+
+        public IReadOnlyDictionary<string, GameObject> LinkObjects =>
+            !disposed ? linkObjects : throw new ObjectDisposedException("this");
 
         public bool OcclusionOnly
         {
@@ -144,7 +148,7 @@ namespace Iviz.Displays
 
             Name = robot.Name;
             Description = robotDescription;
-            BaseLinkObject = new GameObject(Name);
+            baseLinkObject = new GameObject(Name);
         }
 
         /// <summary>Constructs a robot asynchronously.</summary>
@@ -161,6 +165,8 @@ namespace Iviz.Displays
                 return;
             }
 
+            runningTs.Token.ThrowIfCancellationRequested();
+
             var rootMaterials = new Dictionary<string, Material>();
             foreach (var material in robot.Materials)
             {
@@ -170,7 +176,7 @@ namespace Iviz.Displays
             foreach (var link in robot.Links)
             {
                 var linkObject = new GameObject("Link:" + link.Name);
-                linkObject.transform.parent = BaseLinkObject.transform;
+                linkObject.transform.SetParentLocal(baseLinkObject.transform);
                 linkObjects[link.Name ?? ""] = linkObject;
             }
 
@@ -178,6 +184,20 @@ namespace Iviz.Displays
             {
                 ProcessJoint(joint);
             }
+            
+            var keysWithoutParent = new HashSet<string>(linkObjects.Keys);
+            keysWithoutParent.RemoveWhere(linkParents.Keys.Contains);
+
+            BaseLink = keysWithoutParent.FirstOrDefault();
+            if (BaseLink != null)
+            {
+                linkObjects[BaseLink].transform.SetParent(baseLinkObject.transform, false);
+            }
+
+            HideChildlessLinks();
+            
+            runningTs.Token.ThrowIfCancellationRequested();
+            ApplyAnyValidConfiguration();
 
             try
             {
@@ -188,24 +208,15 @@ namespace Iviz.Displays
             catch (OperationCanceledException)
             {
                 RosLogger.Warn($"{this}: Robot building canceled.");
+                runningTs.Cancel();
                 throw;
             }
             catch (Exception e)
             {
                 RosLogger.Error($"{this}: Failed to construct '{Name}'", e);
+                runningTs.Cancel();
                 throw;
             }
-
-            var keysWithoutParent = new HashSet<string>(linkObjects.Keys);
-            keysWithoutParent.RemoveWhere(linkParents.Keys.Contains);
-
-            BaseLink = keysWithoutParent.FirstOrDefault();
-            if (BaseLink != null)
-            {
-                linkObjects[BaseLink].transform.SetParent(BaseLinkObject.transform, false);
-            }
-
-            HideChildlessLinks();
 
             Tint = tint;
             OcclusionOnly = occlusionOnly;
@@ -213,7 +224,6 @@ namespace Iviz.Displays
             Smoothness = smoothness;
             Metallic = metallic;
             EnableShadows = enableShadows;
-            ApplyAnyValidConfiguration();
 
             string errorStr = numErrors == 0 ? "" : $"There were {numErrors.ToString()} errors.";
             RosLogger.Info($"Finished constructing robot '{Name}' with {linkObjects.Count.ToString()} " +
@@ -282,7 +292,6 @@ namespace Iviz.Displays
             runningTs.Cancel();
         }
 
-
         IEnumerable<Task> ProcessLinkAsync(bool keepMeshMaterials,
             Link link,
             IReadOnlyDictionary<string, Material> rootMaterials,
@@ -293,6 +302,8 @@ namespace Iviz.Displays
             {
                 return Enumerable.Empty<Task>();
             }
+
+            token.ThrowIfCancellationRequested();
 
             var linkObject = linkObjects[link.Name ?? ""];
 
@@ -318,6 +329,8 @@ namespace Iviz.Displays
             IExternalServiceProvider? provider,
             CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             (string? name, var origin, var geometry) = collision;
 
             var collisionObject = new GameObject(name != null ? $"[Collision:{name}]" : "[Collision]");
@@ -355,7 +368,7 @@ namespace Iviz.Displays
                 foreach (var meshFilter in resourceObject.GetAllChildren().WithComponent<MeshFilter>())
                 {
                     var child = new GameObject("[Collider]");
-                    child.transform.parent = collisionObject.transform;
+                    child.transform.SetParentLocal(collisionObject.transform);
                     child.transform.SetLocalPose(meshFilter.transform.AsPose());
                     child.transform.localScale = meshFilter.transform.lossyScale;
                     child.layer = LayerType.Collider;
@@ -402,6 +415,8 @@ namespace Iviz.Displays
             IExternalServiceProvider? provider,
             CancellationToken token)
         {
+            token.ThrowIfCancellationRequested();
+
             var (name, origin, geometry, material) = visual;
             var (box, cylinder, sphere, mesh) = geometry;
 
@@ -559,25 +574,32 @@ namespace Iviz.Displays
         {
             foreach (var linkObject in linkParentObjects.Keys)
             {
-                linkObject.transform.parent = null;
+                linkObject.transform.SetParentLocal(null);
             }
 
             foreach (var (linkObject, parentObject) in linkParentObjects)
             {
                 var mTransform = linkObject.transform;
-                mTransform.parent = parentObject.transform;
+                mTransform.SetParentLocal(parentObject.transform);
                 mTransform.localPosition = Vector3.zero;
                 mTransform.localRotation = Quaternion.identity;
             }
 
             if (BaseLink != null)
             {
-                linkObjects[BaseLink].transform.SetParent(BaseLinkObject.transform, false);
+                linkObjects[BaseLink].transform.SetParentLocal(baseLinkObject.transform);
             }
         }
 
         public void Dispose()
         {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
+
             CancelTasks();
 
             ResetLinkParents();
@@ -598,7 +620,7 @@ namespace Iviz.Displays
                 ResourcePool.Return(resourceKey, gameObject);
             }
 
-            Object.Destroy(BaseLinkObject);
+            Object.Destroy(baseLinkObject);
         }
 
         public void ApplyAnyValidConfiguration()

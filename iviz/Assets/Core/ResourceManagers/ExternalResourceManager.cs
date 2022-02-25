@@ -258,6 +258,7 @@ namespace Iviz.Displays
             IExternalServiceProvider? provider, CancellationToken token = default)
         {
             ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
+            token.ThrowIfCancellationRequested();
 
             float currentTime = Time.time;
             if (temporaryBlacklist.TryGetValue(uriString, out float insertionTime))
