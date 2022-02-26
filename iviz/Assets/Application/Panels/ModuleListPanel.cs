@@ -166,7 +166,7 @@ namespace Iviz.App
             set
             {
                 Connection.KeepReconnecting = value;
-                UpperCanvas.Status.enabled = value;
+                //UpperCanvas.Status.enabled = value;
             }
         }
 
@@ -215,7 +215,7 @@ namespace Iviz.App
         }
 
         static string MasterUriToString(Uri? uri) =>
-            uri is null || uri.AbsolutePath.Length == 0 ? "" : $"{uri.Host}:{uri.Port.ToString()}";
+            uri != null && uri.AbsolutePath.Length != 0 ? $"{uri.Host}:{uri.Port.ToString()}" : "";
 
         void Start()
         {
@@ -252,7 +252,7 @@ namespace Iviz.App
 
             ARController.ARStateChanged += OnARStateChanged;
 
-            BottomHideGuiButton.Visible = !Settings.IsXR;
+            BottomHideGuiButton.Visible = !Settings.IsMobile && !Settings.IsXR;
             MiddleHideGuiButton.gameObject.SetActive(Settings.IsMobile && !Settings.IsXR);
             UpdateLeftHideVisible();
 
@@ -584,16 +584,37 @@ namespace Iviz.App
                 return;
             }
             
-            RemoveAllModulesButFirst(); // delete all modules except TF (module 0)
+            RemoveAllModules();
 
             var stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
+            
+            // TF, AR and XR are treated specially
+            // TF cannot be destroyed, resetting AR and XR loses world info
 
             TfData.UpdateConfiguration(stateConfig.Tf);
+            
+            if (Settings.IsMobile && stateConfig.AR != null)
+            {
+                if (moduleDatas.TryGetFirst(module => module.ModuleType == ModuleType.AR, out var arModule))
+                {
+                    ((ARModuleData)arModule).UpdateConfiguration(stateConfig.AR);
+                }
+                else
+                {
+                    CreateModule(ModuleType.AR, configuration: stateConfig.AR);
+                }
+            }
+
+            if (Settings.IsXR
+                && moduleDatas.TryGetFirst(module => module.ModuleType == ModuleType.XR, out var xrModule)
+                && stateConfig.XR != null)
+            {
+                ((XRModuleData)xrModule).UpdateConfiguration(stateConfig.XR);
+            }
 
             foreach (var config in stateConfig.CreateListOfEntries())
             {
-                if (config.ModuleType == ModuleType.XR && !Settings.IsXR 
-                    || config.ModuleType == ModuleType.AR && !Settings.IsMobile)
+                if (config.ModuleType is ModuleType.TF or ModuleType.XR or ModuleType.AR)
                 {
                     continue;
                 }
@@ -919,11 +940,17 @@ namespace Iviz.App
             Buttons.RemoveButton(index);
         }
         
-        void RemoveAllModulesButFirst()
+        void RemoveAllModules()
         {
-            // todo: make this consistent will all modules except AR
-            foreach (var moduleData in moduleDatas.Skip(1))
+            var newModuleDatas = new List<ModuleData>();
+            foreach (var moduleData in moduleDatas)
             {
+                if (moduleData.ModuleType is ModuleType.TF or ModuleType.AR or ModuleType.XR)
+                {
+                    newModuleDatas.Add(moduleData);
+                    continue;
+                }
+                
                 if (moduleData is ListenerModuleData listenerData)
                 {
                     topicsWithModule.Remove(listenerData.Topic);
@@ -932,11 +959,14 @@ namespace Iviz.App
                 moduleData.Dispose();
             }
 
-            var firstModuleData = TfData;
             moduleDatas.Clear();
-            moduleDatas.Add(firstModuleData);
+            moduleDatas.AddRange(newModuleDatas);
 
-            Buttons.RemoveAllButtonsButFirst();
+            Buttons.RemoveAllButtons();
+            foreach (var moduleData in moduleDatas)
+            {
+                Buttons.CreateButtonForModule(moduleData);
+            }
         }        
 
 

@@ -53,7 +53,12 @@ namespace Iviz.App
             panel.HideButton.Clicked += ToggleVisible;
             panel.WorldScale.ValueChanged += f => controller.WorldScale = f;
         }
-
+        
+        public void UpdateConfiguration(XRConfiguration configuration)
+        {
+            controller.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        }        
+        
         public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
             ResetPanel();

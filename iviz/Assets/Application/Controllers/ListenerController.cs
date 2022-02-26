@@ -28,7 +28,6 @@ namespace Iviz.Controllers
 
         public virtual void ResetController()
         {
-            Listener.Reset();
         }
 
         public abstract bool Visible { get; set; }

@@ -10,6 +10,7 @@ namespace Iviz.Controllers.XR
     /// </summary>
     public sealed class IndexController : XRBaseController
     {
+        /*
         protected override void UpdateTrackingInput(XRControllerState? controllerState)
         {
             base.UpdateTrackingInput(controllerState);
@@ -19,5 +20,6 @@ namespace Iviz.Controllers.XR
             controllerState.poseDataFlags |= PoseDataFlags.Position;
             //Pose = referenceTransform.TransformPose(new Pose(controllerState.position, controllerState.rotation));
         }
+        */
     }
 }

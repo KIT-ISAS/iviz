@@ -298,6 +298,12 @@ namespace Iviz.Controllers
             cellSize = (float)msg.Info.Resolution;
         }
 
+        public override void ResetController()
+        {
+            base.ResetController();
+            resource.Reset();
+        }
+
         public override void Dispose()
         {
             base.Dispose();

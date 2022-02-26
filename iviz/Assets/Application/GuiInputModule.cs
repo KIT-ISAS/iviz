@@ -35,7 +35,7 @@ namespace Iviz.App
             { "Very Low", "Low", "Medium", "High", "Very High", "Ultra" };
 
         static readonly string[] QualityInArOptions = { "Very Low", "Low", "Medium", "High", "Very High", "Ultra" };
-        
+
         /// Weights for keyboard movements. Forward is slower.
         static readonly Vector3 MoveDirectionWeight = new(1.5f, 1.5f, 1);
 
@@ -318,7 +318,10 @@ namespace Iviz.App
                 MainCamera.backgroundColor = colorToUse.WithAlpha(0);
 
                 RenderSettings.ambientSkyColor = value.WithAlpha(0);
-                RenderSettings.ambientEquatorColor = value.WithValue(0.5f).WithSaturation(0.3f).WithAlpha(0);
+
+                Color.RGBToHSV(value, out float h, out float s, out float v);
+                var equatorColor = Color.HSVToRGB(h, Math.Min(s, 0.3f), v * 0.5f);
+                RenderSettings.ambientEquatorColor = equatorColor;
             }
         }
 
@@ -405,7 +408,7 @@ namespace Iviz.App
                 Debug.Log("ProcessPose when dead!");
                 return;
             }
-            
+
             if (CameraViewOverride != null)
             {
                 Transform.SetPose(CameraViewOverride.AbsoluteUnityPose);
@@ -493,7 +496,7 @@ namespace Iviz.App
             QualityInView = QualityInView;
         }
 
-        public float XRDraggableNearDistance => XRController.NearDistance;
+        public float XRDraggableNearDistance => Settings.IsXR ? XRController.NearDistance : float.MaxValue;
 
         public void TryUnsetDraggedObject(IScreenDraggable draggable)
         {

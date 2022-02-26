@@ -753,6 +753,21 @@ namespace Iviz.Core
                 }
             }
         }
+
+        public static bool TryGetFirst<T>(this IEnumerable<T> ts, Predicate<T> p, [NotNullWhen(true)] out T? tp)
+        {
+            foreach (T t in ts)
+            {
+                if (p(t))
+                {
+                    tp = t!;
+                    return true;
+                }
+            }
+
+            tp = default;
+            return false;
+        } 
     }
 
     public readonly struct WithIndexEnumerable<T>

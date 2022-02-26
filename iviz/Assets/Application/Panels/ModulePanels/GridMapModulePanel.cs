@@ -6,7 +6,6 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="GridMapModuleData"/> 
     /// </summary>
-
     public sealed class GridMapModulePanel : ListenerModulePanel
     {
         public FrameWidget Frame { get; private set; }
@@ -16,8 +15,8 @@ namespace Iviz.App
         public TrashButtonWidget CloseButton { get; private set; }
 
         public ToggleWidget ForceMinMax { get; private set; }
-        public NumberInputFieldWidget MinIntensity { get; private set; }
-        public NumberInputFieldWidget MaxIntensity { get; private set; }
+        public SliderWidgetWithScale MinIntensity { get; private set; }
+        public SliderWidgetWithScale MaxIntensity { get; private set; }
         public ToggleWidget FlipMinMax { get; private set; }
         public ColorPickerWidget Tint { get; private set; }
         public SliderWidget Alpha { get; private set; }
@@ -37,9 +36,9 @@ namespace Iviz.App
                         .SetOptions(Resource.Colormaps.Names)
                         .SetIndex((int)ColormapId.hsv);
 
-            ForceMinMax = p.AddToggle("Colormap Force Min/Max");
-            MinIntensity = p.AddNumberInputField("Colormap Min");
-            MaxIntensity = p.AddNumberInputField("Colormap Max");
+            ForceMinMax = p.AddToggle("Colormap Override Min/Max");
+            MinIntensity = p.AddSliderWidgetWithScale("Colormap Min");
+            MaxIntensity = p.AddSliderWidgetWithScale("Colormap Max");
             FlipMinMax = p.AddToggle("Flip Min/Max");
 
             Tint = p.AddColorPicker("Tint");

@@ -161,7 +161,7 @@ namespace Iviz.Ros
             try
             {
                 const int rpcTimeoutInMs = 3000;
-                
+
                 //Tools.Logger.LogDebug = RosLogger.Debug;
                 Tools.Logger.LogError = RosLogger.Error;
                 Tools.Logger.Log = RosLogger.Info;
@@ -544,7 +544,7 @@ namespace Iviz.Ros
                 }
             });
         }
-        
+
         async ValueTask AdvertiseImpl<T>(Sender<T> advertiser, CancellationToken token) where T : IMessage
         {
             if (publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
@@ -640,10 +640,7 @@ namespace Iviz.Ros
             CancellationToken token)
         {
             ThrowHelper.ThrowIfNull(service, nameof(service));
-            if (srv == null)
-            {
-                throw new ArgumentNullException(nameof(srv));
-            }
+            ThrowHelper.ThrowIfNull(srv, nameof(srv));
 
             if (!Connected || runningTs.IsCancellationRequested)
             {
@@ -656,7 +653,9 @@ namespace Iviz.Ros
             tokenSource.CancelAfter(timeoutInMs);
             try
             {
-                await Client.CallServiceAsync(service, srv, true, tokenSource.Token);
+                // use Task.Run here because we may be calling from the unity thread
+                // if we have a lot of calls we may end up cpu-bound
+                await Task.Run(() => Client.CallServiceAsync(service, srv, true, tokenSource.Token), tokenSource.Token);
                 return true;
             }
             catch (OperationCanceledException e) when (!token.IsCancellationRequested &&

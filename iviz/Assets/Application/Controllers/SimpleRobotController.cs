@@ -39,7 +39,6 @@ namespace Iviz.Controllers
             {
                 if (robot != null)
                 {
-                    robot.CancelTasks();
                     robot.Dispose();
                     robotLoadingTask = null;
                 }
@@ -244,6 +243,36 @@ namespace Iviz.Controllers
                 return Robot.LinkObjects.Count == 0 ? "[Empty Robot]" : "[Empty Name]";
             }
         }
+        
+        public bool AttachedToTf
+        {
+            get => config.AttachedToTf;
+            set
+            {
+                config.AttachedToTf = value;
+
+                if (Robot is null)
+                {
+                    return;
+                }
+
+                try
+                {
+                    if (value)
+                    {
+                        AttachToTf();
+                    }
+                    else
+                    {
+                        DetachFromTf();
+                    }
+                }
+                catch (Exception e)
+                {
+                    RosLogger.Error($"{this}: Error while attaching to TF", e);
+                }
+            }
+        }        
 
         public event Action? Stopped;
 
@@ -262,29 +291,6 @@ namespace Iviz.Controllers
             }
 
             return Robot.TryWriteJoint(joint, value);
-        }
-
-        public bool AttachedToTf
-        {
-            get => config.AttachedToTf;
-            set
-            {
-                config.AttachedToTf = value;
-
-                if (Robot is null)
-                {
-                    return;
-                }
-
-                if (value)
-                {
-                    AttachToTf();
-                }
-                else
-                {
-                    DetachFromTf();
-                }
-            }
         }
 
         public void ProcessRobotSource(string? savedRobotName, string? sourceParameter)
@@ -412,6 +418,8 @@ namespace Iviz.Controllers
             }
 
             Robot = newRobot;
+            Robot.BaseLinkObject.transform.SetParentLocal(node.Transform);
+
             HelpText = "[Loading Robot...]";
 
             async void LoadRobotAsync()
@@ -531,7 +539,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            RobotObject.transform.SetParentLocal(TfModule.DefaultFrame.Transform);
+            RobotObject.transform.SetParentLocal(TfModule.RootFrame.Transform);
             foreach (var (link, linkObject) in Robot.LinkObjects)
             {
                 var frame = TfModule.GetOrCreateFrame(Decorate(link), node);

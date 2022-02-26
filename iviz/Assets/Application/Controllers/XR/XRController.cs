@@ -86,7 +86,7 @@ namespace Iviz.Controllers.XR
         public XRConfiguration Config
         {
             get => config;
-            private set => WorldScale = value.WorldScale;
+            set => WorldScale = value.WorldScale;
         }
 
         public TfFrame Frame => headFrame.TfFrame;

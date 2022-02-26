@@ -36,6 +36,7 @@ namespace Iviz.Displays
             Display.ColorZ = Resources.Resource.Colors.CameraOverlayAxisZ;
             Display.AxisLength = 0.001f;
             Display.Layer = gameObject.layer;
+            Display.Emissive = 0.4f;
             CheckSettings();
         }
 

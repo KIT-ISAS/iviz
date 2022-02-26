@@ -49,11 +49,6 @@ namespace Iviz.App
             ModuleListButtonText = ModuleListPanel.CreateButtonTextForModule(this, listener.Config.Topic);
         }
         
-        public void UpdateConfiguration(TfConfiguration configuration)
-        {
-            listener.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        }
-
         public override void SetupPanel()
         {
             panel.Frame.Owner = listener;
@@ -88,6 +83,11 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             panel.Publisher.UpdateText();
+        }
+
+        public void UpdateConfiguration(TfConfiguration configuration)
+        {
+            listener.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)

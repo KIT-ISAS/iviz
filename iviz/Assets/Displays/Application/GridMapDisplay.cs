@@ -279,9 +279,31 @@ namespace Iviz.Displays
             MeshRenderer.SetPropertyBlock(Properties);
         }
 
+        public void Reset()
+        {
+            if (texture == null)
+            {
+                return;
+            }
+            
+            texture.GetRawTextureData<float>().AsSpan().Fill(0);
+            texture.Apply();
+            
+            Collider.center = new Vector3(0.5f, 0.5f, 0).Ros2Unity();
+            Collider.size = new Vector3(1, 1, 0).Ros2Unity().Abs();
+
+            var span = Vector2.zero;;
+            MeasuredIntensityBounds = span;
+            if (!OverrideIntensityBounds)
+            {
+                IntensityBounds = span;
+            }
+        }
+
         public override void Suspend()
         {
             base.Suspend();
+            Reset();
             Tint = Color.white;
         }
 
