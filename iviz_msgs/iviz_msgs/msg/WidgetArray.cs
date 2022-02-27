@@ -73,7 +73,7 @@ namespace Iviz.Msgs.IvizMsgs
         [Preserve] public const string RosMessageType = "iviz_msgs/WidgetArray";
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "9c6e629280a808caf83dc9d9a478ba57";
+        [Preserve] public const string RosMd5Sum = "bb14b5a388ecaa282d1306ec8ad794da";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
@@ -99,10 +99,11 @@ namespace Iviz.Msgs.IvizMsgs
                 "GEpP0iSN8yYMMVxes86qc0oe1izJrfSumRozVclDIvmKR7knJtpUzpQUi0PbXnbzfm0455MhhQAihTIO" +
                 "bzrEXZKdyMiDXhAGsmgGQjf5kpdJWiVwEmSauIFoBnQiUJoIS5rSFfI7SRXaUMeqjoPHarSrRk/P/lqR" +
                 "v8k8y2uF7wW2Nhm4034NL39RmPjueFhozto154PaddDoAt/+5PQDz78rPM8bWs8bBe6kdifMxbY/dPDl" +
-                "2LVbYf7e403dGsGrn+kMkfd1bc+bjQc2LjE3Tv+zuQz9t/vE/tA/zBEkzxZfbad+edQfKfLmilZX3Aaa" +
-                "F4zqqbLK5QfXhJ6+TkDQE49koce6ddaE0/wgw3VhD1TY6WvDi/QkHR7Ulb3vKXlN45VKB63ZkE71WazF" +
-                "UaHnxla/iAnJS1+0rbwwSwPrS4azQCYGd2/3UgsElbLlIsqKok+YM63ij7XgAmEoN5b7iz7yIvT3oWs7" +
-                "NhrxbJLXTz/2cdfd+pedsRw9PP//Xmpl0FawIRaFUm+/3ab8ib0ow6JQrWYfai1v6x+WCCTz7RIAAA==";
+                "2LVbYf7e403dGsGrn+kMkfd1bc+bjQe2f1e7Hzbk/Run/9lcEv/bPWN/GTjMHSTVFl9tt4HyCnCkyJsu" +
+                "WmBxS2hePKqnyiqXH1wfevqaAUFPPJKFHuuWWhNO8wMO14g9UGGnrxMv0qt0eFBv9r7X5LWOVy0dtGaj" +
+                "OtVntBZHhZ4bW/2CJiQvfdHO8oItDawvGc4ImRjcvd1LLRBUylaMKCuK/mHOuoo/1oKLhaHcWO4v+suL" +
+                "0N+Hru04acSzSV4//djHXXfxX3bMcvTw/P+TqZVBW8GGWBRKvf3Wm/In9qIMi0K1mn2otbytfwC/wH7S" +
+                "BRMAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
     }
