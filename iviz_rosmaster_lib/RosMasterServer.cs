@@ -150,6 +150,8 @@ public sealed class RosMasterServer : IDisposable
 
         var startTask = TaskUtils.Run(() => listener.StartAsync(StartContext, true).AwaitNoThrow(this), Token);
 
+        await Task.Delay(100, Token);
+
         await TaskUtils.Run(() => ManageRosoutAggAsync(Token).AwaitNoThrow(this), Token);
 
         await listener.DisposeAsync();
@@ -183,8 +185,6 @@ public sealed class RosMasterServer : IDisposable
 
     async ValueTask ManageRosoutAggAsync(CancellationToken token)
     {
-        await Task.Delay(100, token);
-
         var ownUri = new Uri($"http://{MasterUri.Host}:0");
 
         Logger.LogDebug("** Starting Rosout routine...");
