@@ -8,6 +8,11 @@
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DebugSymbols>true</DebugSymbols>
+      <DebugType>full</DebugType>
+    </PropertyGroup>
+
     <ItemGroup>
         <ProjectReference Include="..\biggustave\biggustave.csproj" />
         <ProjectReference Include="..\iviz_model_service_lib\iviz_model_service_lib.csproj" />
