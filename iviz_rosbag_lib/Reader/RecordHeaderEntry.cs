@@ -17,13 +17,13 @@ namespace Iviz.Rosbag.Reader
     {
         readonly Stream reader;
         readonly long valueStart;
-        readonly long nextStart;
+        readonly int valueSize;
         readonly int nameSize;
-        
+
         T ReadValue<T>() where T : unmanaged
         {
             Span<byte> span = stackalloc byte[Unsafe.SizeOf<T>()];
-            if (span.Length > nextStart - valueStart)
+            if (span.Length > valueSize)
             {
                 throw new IndexOutOfRangeException();
             }
@@ -37,7 +37,7 @@ namespace Iviz.Rosbag.Reader
         {
             get
             {
-                if (nextStart == valueStart)
+                if (valueSize == 0)
                 {
                     throw new IndexOutOfRangeException();
                 }
@@ -57,12 +57,12 @@ namespace Iviz.Rosbag.Reader
         {
             get
             {
-                if (nextStart == valueStart)
+                if (valueSize == 0)
                 {
                     return "";
                 }
 
-                int msgSize = (int)(nextStart - valueStart);
+                int msgSize = valueSize;
                 var rent = Rent.Empty<byte>();
                 Span<byte> span = msgSize < 256
                     ? stackalloc byte[msgSize]
@@ -85,8 +85,8 @@ namespace Iviz.Rosbag.Reader
         {
             this.reader = reader;
             nameSize = 0;
-            valueStart = 0;
-            nextStart = start;
+            valueStart = start;
+            valueSize = 0;
         }
 
         RecordHeaderEntry(long start, Stream reader)
@@ -100,7 +100,7 @@ namespace Iviz.Rosbag.Reader
             int entrySize = intBytes.Read<int>();
 
             long nameStart = start + 4;
-            nextStart = nameStart + entrySize;
+            long nextStart = nameStart + entrySize;
 
             long equalsPosition = nameStart;
             while (equalsPosition < nextStart)
@@ -108,7 +108,8 @@ namespace Iviz.Rosbag.Reader
                 if (reader.ReadByte() == '=')
                 {
                     valueStart = equalsPosition + 1;
-                    nameSize = (int)(valueStart - nameStart - 1);
+                    valueSize = (int)(nextStart - valueStart);
+                    nameSize = (int)(equalsPosition - nameStart);
                     //Console.WriteLine("  ** Start " + start + " valueSize " + (nextStart - valueStart) +  " next " + nextStart);
                     return;
                 }
@@ -118,11 +119,13 @@ namespace Iviz.Rosbag.Reader
 
             // if no '=' found
             valueStart = nextStart;
+            valueSize = 0;
             nameSize = (int)(valueStart - nameStart - 1);
         }
 
         internal bool TryMoveNext(long end, out RecordHeaderEntry next)
         {
+            long nextStart = valueStart + valueSize;
             if (nextStart < end)
             {
                 next = new RecordHeaderEntry(nextStart, reader);
@@ -156,7 +159,7 @@ namespace Iviz.Rosbag.Reader
 
         internal bool ValueEquals(string value)
         {
-            if (value.Length != nextStart - valueStart)
+            if (value.Length != valueSize)
             {
                 return false;
             }

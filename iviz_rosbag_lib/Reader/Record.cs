@@ -1,11 +1,8 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using Iviz.Msgs;
 using Iviz.Tools;
-using Newtonsoft.Json;
 
 namespace Iviz.Rosbag.Reader
 {
@@ -20,9 +17,6 @@ namespace Iviz.Rosbag.Reader
         long DataStart => headerStart + dataOffset;
         long NextStart => headerStart + nextOffset;
         
-        //readonly long dataStart;
-        //readonly long nextStart;
-
         [DataMember] public OpCode OpCode { get; }
 
         /// <summary>
@@ -33,36 +27,31 @@ namespace Iviz.Rosbag.Reader
         /// <summary>
         /// If this is a Chunk record, generates an wrapper containing the chunk info.
         /// </summary>
-        public Chunk Chunk => OpCode == OpCode.Chunk
+        public Chunk? Chunk => OpCode == OpCode.Chunk
             ? new Chunk(reader, DataStart, NextStart, IsCompressed)
-            : throw new InvalidOperationException("Operation only allowed in Chunk types");
+            : null;
 
-        public RecordEnumerable ChunkRecords => OpCode == OpCode.Chunk
+        public RecordEnumerable? ChunkRecords => OpCode == OpCode.Chunk
             ? new RecordEnumerable(new Record(reader, DataStart), NextStart)
-            : throw new InvalidOperationException("Operation only allowed in Chunk types");
-
-        /// <summary>
-        /// If this is a MessageData record, generates a wrapper containing the message.
-        /// </summary>
-        public MessageData MessageData => GetMessageData(null);
+            : null;
 
         /// <summary>
         /// If this is a MessageData record, generates a wrapper containing the message and sets the connection info.
         /// </summary>
-        public MessageData GetMessageData(Connection? connection) => OpCode == OpCode.MessageData
+        public MessageData? GetMessageData(Connection? connection) => OpCode == OpCode.MessageData
             ? new MessageData(reader, DataStart, NextStart, Time, connection)
-            : throw new InvalidOperationException("Operation only allowed in MessageData types");
+            : null;
 
         /// <summary>
         /// If this is a Connection record, generates a wrapper containing the connection info.
         /// </summary>
-        public Connection Connection => OpCode == OpCode.Connection
+        public Connection? Connection => OpCode == OpCode.Connection
             ? new Connection(reader, DataStart, NextStart, ConnectionId, Topic)
-            : throw new InvalidOperationException("Operation only allowed in Connection types");
+            : null;
 
         bool IsCompressed => TryGetHeaderEntry("compression", out var entry) && entry.ValueEquals("bz2");
 
-        internal int ConnectionId => TryGetHeaderEntry("conn", out var entry) ? entry.ValueAsInt : -1;
+        internal int? ConnectionId => TryGetHeaderEntry("conn", out var entry) ? entry.ValueAsInt : null;
 
         time Time => TryGetHeaderEntry("time", out var entry) ? entry.ValueAsTime : default;
 

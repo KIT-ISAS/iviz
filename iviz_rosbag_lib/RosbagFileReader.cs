@@ -52,7 +52,7 @@ namespace Iviz.Rosbag.Reader
             Span<byte> renter = stackalloc byte[RosbagMagicLength];
             reader.Read(renter);
 
-            for (int i = 0; i < RosbagMagic.Length; i++)
+            foreach (int i in ..RosbagMagicLength)
             {
                 if (renter[i] != RosbagMagic[i])
                 {
@@ -85,11 +85,11 @@ namespace Iviz.Rosbag.Reader
         {
             foreach (var record in Records)
             {
-                if (record.OpCode == OpCode.Chunk)
+                if (record.OpCode == OpCode.Chunk && record.ChunkRecords is { } chunkRecords)
                 {
-                    foreach (var chunk in record.ChunkRecords)
+                    foreach (var chunkRecord in chunkRecords)
                     {
-                        yield return chunk;
+                        yield return chunkRecord;
                     }
                 }
                 else
@@ -106,10 +106,7 @@ namespace Iviz.Rosbag.Reader
         /// <returns>An enumerable that iterates through the messages.</returns>
         public IEnumerable<MessageData> ReadAllMessages()
         {
-            var connections = new Dictionary<int, Connection?>
-            {
-                [-1] = null // shouldn't happen unless bag is broken  
-            };
+            var connections = new Dictionary<int, Connection>();
 
             foreach (var record in ReadAllRecords())
             {
@@ -117,12 +114,21 @@ namespace Iviz.Rosbag.Reader
                 {
                     case OpCode.Connection:
                         var connection = record.Connection;
-                        connections[connection.ConnectionId] = connection;
+                        if (connection?.ConnectionId is { } id)
+                        {
+                            connections[id] = connection;
+                        }
+
                         break;
                     case OpCode.MessageData:
-                        if (connections.TryGetValue(record.ConnectionId, out var msgConnection))
+                        var msgConnection = record.ConnectionId is { } msgId &&
+                                            connections.TryGetValue(msgId, out var existingConnection)
+                            ? existingConnection
+                            : null;
+
+                        if (record.GetMessageData(msgConnection) is { } msgData)
                         {
-                            yield return record.GetMessageData(msgConnection);
+                            yield return msgData;
                         }
 
                         break;

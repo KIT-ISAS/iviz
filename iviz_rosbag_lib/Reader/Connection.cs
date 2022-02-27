@@ -9,8 +9,7 @@ namespace Iviz.Rosbag.Reader
     [DataContract]
     public sealed class Connection
     {
-        readonly HeaderEntryEnumerable headerEntries;
-        internal int ConnectionId { get; }
+        internal int? ConnectionId { get; }
 
         /// <summary>
         /// The ROS topic.
@@ -40,12 +39,12 @@ namespace Iviz.Rosbag.Reader
         [DataMember]
         public string? CallerId { get; }
 
-        internal Connection(Stream reader, long dataStart, long dataEnd, int connectionId, string? topic)
+        internal Connection(Stream reader, long dataStart, long dataEnd, int? connectionId, string? topic)
         {
             ConnectionId = connectionId;
             Topic = topic;
 
-            headerEntries = new HeaderEntryEnumerable(new RecordHeaderEntry(reader, dataStart), dataEnd);
+            var headerEntries = new HeaderEntryEnumerable(new RecordHeaderEntry(reader, dataStart), dataEnd);
 
             foreach (var entry in headerEntries)
             {
@@ -65,32 +64,11 @@ namespace Iviz.Rosbag.Reader
                 {
                     Topic = entry.ValueAsString;
                 }
-                else if (CallerId == null && entry.NameEquals("topic"))
+                else if (CallerId == null && entry.NameEquals("caller_id"))
                 {
                     CallerId = entry.ValueAsString;
                 }
             }
-        }
-
-        /// <summary>
-        /// Retrieves a header entry from the connection record.
-        /// </summary>
-        /// <param name="name">Name of the header entry.</param>
-        /// <param name="value">Value of the header entry.</param>
-        /// <returns>Whether a header entry with this name existed.</returns>
-        public bool TryGetHeaderEntry(string name, out RecordHeaderEntry value)
-        {
-            foreach (var entry in headerEntries)
-            {
-                if (entry.NameEquals(name))
-                {
-                    value = entry;
-                    return true;
-                }
-            }
-
-            value = default;
-            return false;
         }
     }
 }
