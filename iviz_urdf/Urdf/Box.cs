@@ -1,7 +1,6 @@
 using System.Runtime.Serialization;
 using System.Xml;
 using Iviz.Msgs;
-using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {

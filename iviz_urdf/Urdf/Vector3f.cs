@@ -4,7 +4,6 @@ using System.Runtime.Serialization;
 using System.Xml;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
-using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {

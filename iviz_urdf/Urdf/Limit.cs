@@ -1,7 +1,6 @@
 using System.Runtime.Serialization;
 using System.Xml;
 using Iviz.Msgs;
-using Newtonsoft.Json;
 
 namespace Iviz.Urdf
 {
@@ -39,6 +38,13 @@ namespace Iviz.Urdf
             Lower = Utils.ParseFloat(node.Attributes["lower"], 0);
             Upper = Utils.ParseFloat(node.Attributes["upper"], 0);
             Velocity = Utils.ParseFloat(node.Attributes["velocity"], 0);
+        }
+
+        public void Deconstruct(out float lower, out float upper, out float velocity)
+        {
+            lower = Lower;
+            upper = Upper;
+            velocity = Velocity;
         }
 
         public override string ToString() => BuiltIns.ToJsonString(this);
