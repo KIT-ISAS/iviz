@@ -10,7 +10,8 @@ uint8 TYPE_TOOLTIP = 4
 uint8 TYPE_TARGETAREA = 5
 uint8 TYPE_POSITIONDISC = 6
 uint8 TYPE_POSITIONDISC3D = 7
-uint8 TYPE_BOUNDARYCHECK = 8
+uint8 TYPE_BOUNDARY = 8
+uint8 TYPE_BOUNDARYCHECK = 9
 
 std_msgs/Header header
 byte action
