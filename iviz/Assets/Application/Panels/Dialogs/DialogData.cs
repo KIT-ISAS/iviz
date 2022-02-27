@@ -21,10 +21,9 @@ namespace Iviz.App
             get => detached;
             set
             {
-                detached = value;
-
                 if (Panel is DetachableDialogPanel detachablePanel)
                 {
+                    detached = value;
                     detachablePanel.Detached = value;
                 }
             }

@@ -7,6 +7,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
@@ -22,10 +23,8 @@ using Random = System.Random;
 
 namespace Iviz.Ros
 {
-    public sealed class RoslibConnection : RosConnection
+    public sealed class RoslibConnection : RosConnection, Iviz.Displays.IServiceProvider
     {
-        internal const int InvalidId = -1;
-
         static readonly IReadOnlyCollection<BriefTopicInfo> EmptyTopics = Array.Empty<BriefTopicInfo>();
         static readonly Random Random = new();
         static readonly IReadOnlyCollection<string> EmptyParameters = Array.Empty<string>();
@@ -42,6 +41,9 @@ namespace Iviz.Ros
         SystemState? cachedSystemState;
         RosClient? client;
         BagListener? bagListener;
+
+        float? modelServiceBlacklistTime;
+        readonly AsyncLock modelServiceLock = new();
 
         CancellationTokenSource runningTs = new();
 
@@ -253,13 +255,6 @@ namespace Iviz.Ros
                     case XmlRpcException _:
                     {
                         RosLogger.Internal("<b>Connection failed:</b>", e);
-                        if (RosManager.Server.IsActive && RosManager.Server.MasterUri == MasterUri)
-                        {
-                            RosLogger.Internal("Note: This appears to be a local ROS master. " +
-                                               "Make sure that <b>My Caller URI</b> is a reachable address and that " +
-                                               "you are in the right network. Then stop and restart the master.");
-                        }
-
                         break;
                     }
                     case OperationCanceledException _:
@@ -466,8 +461,9 @@ namespace Iviz.Ros
         {
             await RandomDelay(token);
             await topic.AdvertiseAsync(Connected ? Client : null, token);
-            topic.Id = publishers.Count;
-            publishers[topic.Id] = topic.Publisher;
+            int id = publishers.Count;
+            topic.Id = id;
+            publishers[id] = topic.Publisher;
         }
 
         async ValueTask ReSubscribe(ISubscribedTopic topic, CancellationToken token)
@@ -530,7 +526,7 @@ namespace Iviz.Ros
         internal void Advertise<T>(Sender<T> advertiser) where T : IMessage
         {
             ThrowHelper.ThrowIfNull(advertiser, nameof(advertiser));
-            advertiser.Id = InvalidId;
+            advertiser.Id = null;
             CancellationToken token = runningTs.Token;
             AddTask(async () =>
             {
@@ -554,12 +550,14 @@ namespace Iviz.Ros
                 return;
             }
 
+            RosLogger.Info($"{this}: Advertising <b>{advertiser.Topic}</b> [{BuiltIns.GetMessageType<T>()}].");
+
             var newAdvertisedTopic = new AdvertisedTopic<T>(advertiser.Topic);
 
-            int id;
+            int? id;
             if (Connected)
             {
-                id = publishers.Where(pair => pair.Value == null).TryGetFirst(out var freePair)
+                int newId = publishers.Where(pair => pair.Value == null).TryGetFirst(out var freePair)
                     ? freePair.Key
                     : publishers.Count;
 
@@ -571,12 +569,13 @@ namespace Iviz.Ros
                     return;
                 }
 
-                publishers[id] = publisher;
+                publishers[newId] = publisher;
+                id = newId;
             }
 
             else
             {
-                id = InvalidId;
+                id = null;
             }
 
             newAdvertisedTopic.Id = id;
@@ -626,7 +625,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Advertising service <b>{serviceName}</b><i>[{BuiltIns.GetServiceType<T>()}]</i>.");
+            RosLogger.Info($"{this}: Advertising service <b>{serviceName}</b> [{BuiltIns.GetServiceType<T>()}].");
 
             var newAdvertisedService = new AdvertisedService<T>(serviceName, callback);
             servicesByTopic.Add(serviceName, newAdvertisedService);
@@ -636,8 +635,31 @@ namespace Iviz.Ros
             }
         }
 
-        public override async ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
-            CancellationToken token)
+        public async ValueTask<bool> CallModelServiceAsync<T>(string service, T srv, int timeoutInMs,
+            CancellationToken token) where T : IService
+        {
+            using var myLock = await modelServiceLock.LockAsync();
+
+            float currentTime = GameThread.GameTime;
+            if (modelServiceBlacklistTime is { } blacklistTime && currentTime < blacklistTime)
+            {
+                return false;
+            }
+
+            modelServiceBlacklistTime = null;
+            try
+            {
+                return await CallServiceAsync(service, srv, timeoutInMs, token);
+            }
+            catch (RoslibException e)
+            {
+                modelServiceBlacklistTime = currentTime + 5;
+                throw new NoModelLoaderServiceException("Failed to reach the iviz model loader service", e);
+            }
+        }
+
+        public async ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
+            CancellationToken token) where T : IService
         {
             ThrowHelper.ThrowIfNull(service, nameof(service));
             ThrowHelper.ThrowIfNull(srv, nameof(srv));
@@ -653,9 +675,7 @@ namespace Iviz.Ros
             tokenSource.CancelAfter(timeoutInMs);
             try
             {
-                // use Task.Run here because we may be calling from the unity thread
-                // if we have a lot of calls we may end up cpu-bound
-                await Task.Run(() => Client.CallServiceAsync(service, srv, true, tokenSource.Token), tokenSource.Token);
+                await Client.CallServiceAsync(service, srv, true, tokenSource.Token);
                 return true;
             }
             catch (OperationCanceledException e) when (!token.IsCancellationRequested &&
@@ -667,7 +687,7 @@ namespace Iviz.Ros
 
         internal void Publish<T>(Sender<T> advertiser, in T msg) where T : IMessage
         {
-            if (advertiser.Id == InvalidId || runningTs.IsCancellationRequested)
+            if (advertiser.Id is not { } id || runningTs.IsCancellationRequested)
             {
                 return;
             }
@@ -684,7 +704,7 @@ namespace Iviz.Ros
 
             try
             {
-                if (publishers.TryGetValue(advertiser.Id, out var basePublisher)
+                if (publishers.TryGetValue(id, out var basePublisher)
                     && basePublisher is { NumSubscribers: > 0 } and IRosPublisher<T> publisher)
                 {
                     publisher.Publish(msg);
@@ -722,6 +742,8 @@ namespace Iviz.Ros
                 subscribedTopic.Add(listener);
                 return;
             }
+
+            RosLogger.Info($"{this}: Subscribing to <b>{listener.Topic}</b> [{BuiltIns.GetMessageType<T>()}].");
 
             var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic, listener.TransportHint);
             subscribersByTopic.Add(listener.Topic, newSubscribedTopic);
@@ -776,9 +798,9 @@ namespace Iviz.Ros
             }
 
             publishersByTopic.Remove(advertiser.Topic);
-            if (advertiser.Id != InvalidId)
+            if (advertiser.Id is { } id)
             {
-                publishers[advertiser.Id] = null;
+                publishers[id] = null;
             }
 
             return Connected
@@ -1042,8 +1064,8 @@ namespace Iviz.Ros
 
         internal int GetNumSubscribers(ISender sender)
         {
-            return sender.Id != InvalidId
-                   && publishers.TryGetValue(sender.Id, out var basePublisher)
+            return sender.Id is { } id
+                   && publishers.TryGetValue(id, out var basePublisher)
                    && basePublisher != null
                 ? basePublisher.NumSubscribers
                 : 0;

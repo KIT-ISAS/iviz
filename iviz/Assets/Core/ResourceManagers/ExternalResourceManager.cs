@@ -13,6 +13,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
+using Iviz.Roslib;
 using Iviz.Tools;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
@@ -54,7 +55,7 @@ namespace Iviz.Displays
         readonly Dictionary<string, ResourceKey<Texture2D>> loadedTextures = new();
         readonly Dictionary<string, ResourceKey<GameObject>> loadedScenes = new();
         readonly Dictionary<string, float> temporaryBlacklist = new();
-        readonly AsyncLock mutex = new();
+        readonly Dictionary<string, AsyncLock> modelLocks = new();
         readonly GameObject? node;
 
         CancellationTokenSource runningTs = new();
@@ -146,7 +147,7 @@ namespace Iviz.Displays
 
         public static string SanitizeFilename(string input)
         {
-            ThrowHelper.ThrowIfNull(input , nameof(input));
+            ThrowHelper.ThrowIfNull(input, nameof(input));
             return Uri.EscapeDataString(input);
         }
 
@@ -254,18 +255,22 @@ namespace Iviz.Displays
             return TryGetModel(uriString, out resource) || TryGetScene(uriString, out resource);
         }
 
-        public async ValueTask<ResourceKey<GameObject>?> TryGetGameObjectAsync(string uriString,
-            IExternalServiceProvider? provider, CancellationToken token = default)
+        public ValueTask<ResourceKey<GameObject>?> TryGetGameObjectAsync(string uriString,
+            IServiceProvider? provider, CancellationToken token = default)
         {
             ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
-            token.ThrowIfCancellationRequested();
+
+            if (TryGetGameObject(uriString, out var resource))
+            {
+                return new ValueTask<ResourceKey<GameObject>?>(resource);
+            }
 
             float currentTime = Time.time;
-            if (temporaryBlacklist.TryGetValue(uriString, out float insertionTime))
+            if (temporaryBlacklist.TryGetValue(uriString, out float blacklistTime))
             {
-                if (currentTime < insertionTime + BlacklistDurationInMs)
+                if (currentTime < blacklistTime)
                 {
-                    return null;
+                    return default;
                 }
 
                 temporaryBlacklist.Remove(uriString);
@@ -275,8 +280,16 @@ namespace Iviz.Displays
             {
                 RosLogger.Warn($"{this}:  Uri '{uriString}' is not a valid uri!");
                 temporaryBlacklist.Add(uriString, float.MaxValue);
-                return null;
+                return default;
             }
+
+            return GetGameObjectAsync(uriString, uri, provider, token);
+        }
+
+        async ValueTask<ResourceKey<GameObject>?> GetGameObjectAsync(string uriString, Uri uri,
+            IServiceProvider? provider, CancellationToken token)
+        {
+            token.ThrowIfCancellationRequested();
 
             string uriPath = Uri.UnescapeDataString(uri.AbsolutePath);
             string fileType = Path.GetExtension(uriPath).ToUpperInvariant();
@@ -284,51 +297,54 @@ namespace Iviz.Displays
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
             if (fileType is ".SDF" or ".WORLD")
             {
-                return await TryGetSceneAsync(uriString, provider, tokenSource.Token);
+                return await GetSceneAsync(uriString, provider, tokenSource.Token);
             }
 
-            using (await mutex.LockAsync(tokenSource.Token))
-            {
-                var resource = await TryGetModelAsync(uriString, provider, tokenSource.Token);
-                if (resource == null)
-                {
-                    temporaryBlacklist[uriString] = currentTime;
-                }
 
-                return resource;
+            // multiple displays may ask for the same resource at the same time
+            // we use a lock to let one pass and make the other wait
+            if (!modelLocks.TryGetValue(uriString, out var modelLock))
+            {
+                modelLock = new AsyncLock();
+                modelLocks[uriString] = modelLock;
+            }
+
+            try
+            {
+                using (await modelLock.LockAsync(tokenSource.Token))
+                {
+                    var newResource = await GetModelAsync(uriString, provider, tokenSource.Token);
+                    if (newResource == null)
+                    {
+                        temporaryBlacklist[uriString] = Time.time + BlacklistDurationInMs;
+                    }
+
+                    return newResource;
+                }
+            }
+            finally
+            {
+                modelLocks.Remove(uriString);
             }
         }
 
         bool TryGetModel(string uriString, [NotNullWhen(true)] out ResourceKey<GameObject>? resource)
         {
-            if (!loadedModels.TryGetValue(uriString, out var resourceCandidate))
-            {
-                resource = null;
-                return false;
-            }
-
-            if (resourceCandidate != null)
-            {
-                resource = resourceCandidate;
-                return true;
-            }
-
-            resource = null;
-            loadedModels.Remove(uriString);
-            return false;
+            return loadedModels.TryGetValue(uriString, out resource);
         }
 
-        async ValueTask<ResourceKey<GameObject>?> TryGetModelAsync(string uriString, IExternalServiceProvider? provider,
+        async ValueTask<ResourceKey<GameObject>?> GetModelAsync(string uriString, IServiceProvider? provider,
             CancellationToken token)
         {
-            if (loadedModels.TryGetValue(uriString, out ResourceKey<GameObject> resource))
-            {
-                return resource;
-            }
-
+            // we just passed a mutex, the quick paths may have become valid
             if (temporaryBlacklist.ContainsKey(uriString))
             {
                 return null;
+            }
+
+            if (TryGetGameObject(uriString, out var resource))
+            {
+                return resource;
             }
 
             if (resourceFiles.Models.TryGetValue(uriString, out string localPath))
@@ -345,44 +361,30 @@ namespace Iviz.Displays
 
             return provider == null
                 ? null
-                : await TryGetModelFromServerAsync(uriString, provider, token);
+                : await GetModelFromServerAsync(uriString, provider, token);
         }
 
-        async ValueTask<ResourceKey<GameObject>?> TryGetModelFromServerAsync(string uriString,
-            IExternalServiceProvider provider, CancellationToken token)
+        async ValueTask<ResourceKey<GameObject>?> GetModelFromServerAsync(string uriString,
+            IServiceProvider provider, CancellationToken token)
         {
-            var msg = new GetModelResource { Request = { Uri = uriString } };
-            try
-            {
-                bool hasClient = await provider.CallServiceAsync(ModelServiceName, msg, TimeoutInMs, token);
-                if (!hasClient)
-                {
-                    RosLogger.Debug($"{this}: Call to model service failed. Reason: Not connected.");
-                    return null;
-                }
+            token.ThrowIfCancellationRequested();
 
-                if (msg.Response.Success)
-                {
-                    return await ProcessModelResponseAsync(uriString, msg.Response, provider, token);
-                }
-            }
-            catch (OperationCanceledException)
+            var msg = new GetModelResource { Request = { Uri = uriString } };
+            bool hasService = await provider.CallModelServiceAsync(ModelServiceName, msg, TimeoutInMs, token);
+            if (!hasService)
             {
-                throw;
+                //RosLogger.Debug($"{this}: Call to model service failed.");
+                return null;
             }
-            catch (Exception)
+
+            if (msg.Response.Success)
             {
-                temporaryBlacklist[uriString] = Time.time;
-                throw;
+                return await ProcessModelResponseAsync(uriString, msg.Response, provider, token);
             }
 
             if (!string.IsNullOrWhiteSpace(msg.Response.Message))
             {
                 RosLogger.Error(string.Format(StrServiceFailedWithMessage, uriString, msg.Response.Message));
-            }
-            else
-            {
-                RosLogger.Debug(StrCallServiceFailed);
             }
 
             return null;
@@ -393,14 +395,9 @@ namespace Iviz.Displays
             return loadedScenes.TryGetValue(uriString, out resource);
         }
 
-        async ValueTask<ResourceKey<GameObject>?> TryGetSceneAsync(string uriString, IExternalServiceProvider? provider,
+        async ValueTask<ResourceKey<GameObject>?> GetSceneAsync(string uriString, IServiceProvider? provider,
             CancellationToken token)
         {
-            if (loadedScenes.TryGetValue(uriString, out ResourceKey<GameObject> resource))
-            {
-                return resource;
-            }
-
             if (resourceFiles.Scenes.TryGetValue(uriString, out string localPath))
             {
                 if (File.Exists($"{Settings.ResourcesPath}/{localPath}"))
@@ -415,14 +412,14 @@ namespace Iviz.Displays
 
             return provider == null
                 ? null
-                : await TryGetSceneFromServerAsync(uriString, provider, token);
+                : await GetSceneFromServerAsync(uriString, provider, token);
         }
 
-        async ValueTask<ResourceKey<GameObject>?> TryGetSceneFromServerAsync(string uriString,
-            IExternalServiceProvider provider, CancellationToken token)
+        async ValueTask<ResourceKey<GameObject>?> GetSceneFromServerAsync(string uriString,
+            IServiceProvider provider, CancellationToken token)
         {
             var msg = new GetSdf { Request = { Uri = uriString } };
-            if (await provider.CallServiceAsync(SceneServiceName, msg, TimeoutInMs, token) && msg.Response.Success)
+            if (await provider.CallModelServiceAsync(SceneServiceName, msg, TimeoutInMs, token) && msg.Response.Success)
             {
                 return await ProcessSceneResponseAsync(uriString, msg.Response, provider, token);
             }
@@ -439,28 +436,33 @@ namespace Iviz.Displays
             return null;
         }
 
-        public async ValueTask<ResourceKey<Texture2D>?> TryGetTextureAsync(string uriString,
-            IExternalServiceProvider? provider, CancellationToken token)
+        public ValueTask<ResourceKey<Texture2D>?> TryGetTextureAsync(string uriString, IServiceProvider? provider,
+            CancellationToken token)
         {
             ThrowHelper.ThrowIfNull(uriString, nameof(uriString));
 
-            float currentTime = Time.time;
-            if (temporaryBlacklist.TryGetValue(uriString, out float insertionTime))
+            if (loadedTextures.TryGetValue(uriString, out var existingTexture))
             {
-                if (currentTime < insertionTime + 30)
+                return new ValueTask<ResourceKey<Texture2D>?>(existingTexture);
+            }
+
+            float currentTime = Time.time;
+            if (temporaryBlacklist.TryGetValue(uriString, out float blacklistTime))
+            {
+                if (currentTime < blacklistTime)
                 {
-                    return null;
+                    return default;
                 }
 
                 temporaryBlacklist.Remove(uriString);
             }
 
-            if (loadedTextures.TryGetValue(uriString, out var resource))
-            {
-                return resource;
-            }
+            return GetTextureAsync(uriString, provider, token);
+        }
 
-
+        async ValueTask<ResourceKey<Texture2D>?> GetTextureAsync(string uriString, IServiceProvider? provider,
+            CancellationToken token)
+        {
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(runningTs.Token, token);
             if (resourceFiles.Textures.TryGetValue(uriString, out string localPath))
             {
@@ -476,14 +478,20 @@ namespace Iviz.Displays
 
             return provider == null
                 ? null
-                : await TryGetTextureFromServerAsync(uriString, provider, tokenSource.Token, currentTime);
+                : await GetTextureFromServerAsync(uriString, provider, tokenSource.Token);
         }
 
-        async ValueTask<ResourceKey<Texture2D>?> TryGetTextureFromServerAsync(string uriString,
-            IExternalServiceProvider provider, CancellationToken token, float currentTime)
+        async ValueTask<ResourceKey<Texture2D>?> GetTextureFromServerAsync(string uriString,
+            IServiceProvider provider, CancellationToken token)
         {
             var msg = new GetModelTexture { Request = { Uri = uriString } };
-            if (await provider.CallServiceAsync(TextureServiceName, msg, TimeoutInMs, token) && msg.Response.Success)
+            bool hasService = await provider.CallModelServiceAsync(TextureServiceName, msg, TimeoutInMs, token);
+            if (!hasService)
+            {
+                return null;
+            }
+
+            if (msg.Response.Success)
             {
                 return await ProcessTextureResponseAsync(uriString, msg.Response, token);
             }
@@ -492,16 +500,11 @@ namespace Iviz.Displays
             {
                 RosLogger.Error(string.Format(StrServiceFailedWithMessage, uriString, msg.Response.Message));
             }
-            else
-            {
-                RosLogger.Debug(StrCallServiceFailed);
-            }
 
-            temporaryBlacklist.Add(uriString, currentTime);
             return null;
         }
 
-        public ValueTask<Model?> TryGetModelFromFileAsync(string uriString, CancellationToken token = default)
+        public ValueTask<Model?> GetModelFromFileAsync(string uriString, CancellationToken token = default)
         {
             if (resourceFiles.Models.TryGetValue(uriString, out string localPath)
                 && File.Exists($"{Settings.ResourcesPath}/{localPath}"))
@@ -526,7 +529,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<GameObject>?> LoadLocalModelAsync(string uriString, string localPath,
-            IExternalServiceProvider? provider, CancellationToken token)
+            IServiceProvider? provider, CancellationToken token)
         {
             GameObject obj;
             try
@@ -579,7 +582,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<GameObject>?> LoadLocalSceneAsync(string uriString, string localPath,
-            IExternalServiceProvider? provider, CancellationToken token)
+            IServiceProvider? provider, CancellationToken token)
         {
             GameObject obj;
 
@@ -609,7 +612,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<GameObject>?> ProcessModelResponseAsync(string uriString,
-            GetModelResourceResponse msg, IExternalServiceProvider provider,
+            GetModelResourceResponse msg, IServiceProvider provider,
             CancellationToken token)
         {
             try
@@ -641,7 +644,8 @@ namespace Iviz.Displays
             }
         }
 
-        async ValueTask<ResourceKey<Texture2D>?> ProcessTextureResponseAsync(string uriString, GetModelTextureResponse msg,
+        async ValueTask<ResourceKey<Texture2D>?> ProcessTextureResponseAsync(string uriString,
+            GetModelTextureResponse msg,
             CancellationToken token)
         {
             try
@@ -672,7 +676,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<ResourceKey<GameObject>?> ProcessSceneResponseAsync(string uriString,
-            GetSdfResponse msg, IExternalServiceProvider? provider, CancellationToken token)
+            GetSdfResponse msg, IServiceProvider? provider, CancellationToken token)
         {
             try
             {
@@ -705,7 +709,7 @@ namespace Iviz.Displays
         }
 
         async ValueTask<GameObject> CreateModelObjectAsync(string uriString, Model msg,
-            IExternalServiceProvider? provider, CancellationToken token)
+            IServiceProvider? provider, CancellationToken token)
         {
             var model = (await SceneModel.CreateAsync(uriString, msg, provider, token)).gameObject;
             if (node != null)
@@ -723,7 +727,7 @@ namespace Iviz.Displays
             Spot
         }
 
-        async ValueTask<GameObject> CreateSceneNodeAsync(Scene scene, IExternalServiceProvider? provider,
+        async ValueTask<GameObject> CreateSceneNodeAsync(Scene scene, IServiceProvider? provider,
             CancellationToken token)
         {
             token.ThrowIfCancellationRequested();

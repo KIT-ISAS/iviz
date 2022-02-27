@@ -17,7 +17,7 @@ namespace Iviz.Displays
         [SerializeField] BoxCollider? boxCollider;
         [SerializeField] Transform? m_Transform;
         
-        protected BoxCollider Collider => boxCollider != null
+        public BoxCollider Collider => boxCollider != null
             ? boxCollider
             : boxCollider = GetComponent<BoxCollider>().AssertNotNull(nameof(boxCollider));
 

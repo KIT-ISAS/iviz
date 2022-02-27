@@ -25,11 +25,11 @@ namespace Iviz.Displays.XR
 
     public interface IWidgetWithScale : IWidget
     {
-        float Scale
-        {
-            set { }
-        }
+        float Scale { set; }
+    }
 
+    public interface IWidgetWithSecondaryScale : IWidget
+    {
         float SecondaryScale { set; }
     }
 
@@ -43,8 +43,13 @@ namespace Iviz.Displays.XR
         public event Action<float>? Moved;
     }
 
+    public interface IWidgetWithBoundary : IWidget
+    {
+        BoundingBoxStamped Boundary { set; }
+    }
+
     public interface IWidgetWithBoundaries : IWidget
     {
-        public void Set(BoundingBoxStamped baseBox, IReadOnlyList<BoundingBoxStamped> boxes);
+        void Set(BoundingBoxStamped baseBox, IReadOnlyList<BoundingBoxStamped> boxes);
     }
 }

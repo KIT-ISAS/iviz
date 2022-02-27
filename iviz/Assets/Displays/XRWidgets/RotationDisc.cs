@@ -10,7 +10,7 @@ namespace Iviz.Displays.XR
 {
     [RequireComponent(typeof(BoxCollider))]
     public sealed class RotationDisc : MonoBehaviour,
-        IWidget, IWidgetWithColor, IWidgetWithScale, IWidgetCanBeRotated, IRecyclable
+        IWidget, IWidgetWithColor, IWidgetWithSecondaryScale, IWidgetCanBeRotated, IRecyclable
     {
         [SerializeField] CirclePlaneDraggable? planeCircle;
         [SerializeField] CircleFixedDistanceDraggable? fixedCircle;

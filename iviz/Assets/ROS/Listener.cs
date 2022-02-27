@@ -64,9 +64,7 @@ namespace Iviz.Ros
             Topic = topic;
             Type = BuiltIns.GetMessageType(typeof(T));
             this.transportHint = transportHint;
-
-            RosLogger.Info($"{this}: Subscribing.");
-
+            
             GameThread.EverySecond += UpdateStats;
         }
 
@@ -142,7 +140,7 @@ namespace Iviz.Ros
                 GameThread.ListenersEveryFrame -= CallHandlerOnGameThread;
             }
 
-            RosLogger.Info($"{this}: Unsubscribing.");
+            //RosLogger.Info($"{this}: Unsubscribing.");
             Unsubscribe();
         }
 

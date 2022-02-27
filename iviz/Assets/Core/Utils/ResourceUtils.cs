@@ -59,5 +59,12 @@ namespace Iviz.Core
         public MissingAssetFieldException(string message) : base(message)
         {
         }
-    }    
+    }
+
+    public class NoModelLoaderServiceException : Exception
+    {
+        public NoModelLoaderServiceException(string message, Exception e) : base(message, e)
+        {
+        }
+    }
 }

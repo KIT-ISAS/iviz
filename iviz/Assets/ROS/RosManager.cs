@@ -3,6 +3,7 @@
 using System;
 using Iviz.Displays;
 using UnityEngine;
+using IServiceProvider = Iviz.Displays.IServiceProvider;
 
 namespace Iviz.Ros
 {
@@ -16,7 +17,7 @@ namespace Iviz.Ros
         static Exception NewDisposeException() =>
             new ObjectDisposedException("The ROS manager has already been disposed");
 
-        public static IExternalServiceProvider ServiceProvider => Connection;
+        public static IServiceProvider ServiceProvider => Connection;
         public static string? MyId => instance?.connection.MyId;
         public static bool IsConnected => instance?.connection.IsConnected ?? false;
         public static RoslibConnection Connection => instance?.connection ?? throw NewDisposeException();

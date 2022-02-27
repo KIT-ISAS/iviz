@@ -9,7 +9,7 @@ namespace Iviz.Ros
     internal interface IAdvertisedTopic
     {
         IRosPublisher? Publisher { get; }
-        int Id { get; set; }
+        int? Id { get; set; }
         int Count { get; }
         void Add(ISender subscriber);
         void Remove(ISender subscriber);

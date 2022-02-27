@@ -2124,6 +2124,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d14c7cb0e23584f58932ad32ab180992, type: 3}
+--- !u!224 &191304554505824124 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 1020661555268663533, guid: d14c7cb0e23584f58932ad32ab180992,
+    type: 3}
+  m_PrefabInstance: {fileID: 904581669394341777}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &7358244383954554675 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7678642262112964770, guid: d14c7cb0e23584f58932ad32ab180992,
@@ -2136,12 +2142,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ca4a56e25b049d7ade1a89d22f79286, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!224 &191304554505824124 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 1020661555268663533, guid: d14c7cb0e23584f58932ad32ab180992,
-    type: 3}
-  m_PrefabInstance: {fileID: 904581669394341777}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2144759619769588413
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2454,6 +2454,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Dialog Scaler Widget
+      objectReference: {fileID: 0}
+    - target: {fileID: 7013455299581148281, guid: d5b87317f645b4103a02fc4143b6650b,
+        type: 3}
+      propertyPath: minSize.x
+      value: -40
+      objectReference: {fileID: 0}
+    - target: {fileID: 7013455299581148281, guid: d5b87317f645b4103a02fc4143b6650b,
+        type: 3}
+      propertyPath: minSize.y
+      value: -420
       objectReference: {fileID: 0}
     - target: {fileID: 7382715443500159548, guid: d5b87317f645b4103a02fc4143b6650b,
         type: 3}

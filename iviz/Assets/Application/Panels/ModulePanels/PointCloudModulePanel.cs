@@ -31,7 +31,7 @@ namespace Iviz.App
             Listener = p.AddListener();
             Frame = p.AddFrame();
             NumPoints = p.AddDataLabel("Number of Points").SetHasRichText(true).SetCentered();
-            PointSize = p.AddSliderWidgetWithScale("Point Size");
+            PointSize = p.AddSliderWidgetWithScale("Point Size").EnableNegative(false);
             IntensityChannel = p.AddInputFieldWithHints("Intensity Channel")
                 .SetOptions(DefaultChannels);
 

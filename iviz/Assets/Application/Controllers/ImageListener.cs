@@ -274,7 +274,7 @@ namespace Iviz.Controllers
                     descriptionOverride = msg.Format.Length == 0
                         ? "[Unknown Format (empty)]"
                         : $"[Unknown Format '{msg.Format}']";
-                    PostProcess();
+                    GameThread.PostInListenerQueue(PostProcess);
                     break;
             }
 

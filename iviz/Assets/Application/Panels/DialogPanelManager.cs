@@ -173,8 +173,13 @@ namespace Iviz.App
                 return;
             }
 
+            if (newSelected is {Detached: true})
+            {
+                return;
+            }
+
             HideSelectedPanel();
-            if (newSelected is {Detached: false})
+            if (newSelected != null)
             {
                 ShowPanel(newSelected);
             }
@@ -192,6 +197,7 @@ namespace Iviz.App
                 RosLogger.Error($"{this}: Exception during SetupPanel: ", e);
             }
 
+            ((MonoBehaviour)selectedDialogData.Panel).transform.SetAsLastSibling();
             selectedDialogData.Panel.Active = true;
         }
 
@@ -245,9 +251,9 @@ namespace Iviz.App
             }
         }
 
-        public void DetachSelectedPanel()
+        public void DetachIfSelectedPanel(IDialogPanel panel)
         {
-            if (selectedDialogData == null)
+            if (selectedDialogData == null || selectedDialogData.Panel != panel)
             {
                 return;
             }

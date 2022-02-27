@@ -107,7 +107,6 @@ namespace Iviz.Displays
         /// <summary>
         /// Size of the instanced element (line, points, etc.).
         /// </summary>
-        /// <exception cref="ArgumentException">If the size is negative.</exception>
         public virtual float ElementScale
         {
             protected get => elementScale;
@@ -115,7 +114,7 @@ namespace Iviz.Displays
             {
                 if (value < 0)
                 {
-                    throw new ArgumentException($"Invalid elementScale {elementScale}", nameof(value));
+                    return;
                 }
 
                 elementScale = value;

@@ -1,12 +1,16 @@
 #nullable enable
 
 using System;
+using System.Drawing;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Color = UnityEngine.Color;
 
 namespace Iviz.Displays
 {
@@ -15,7 +19,7 @@ namespace Iviz.Displays
     public sealed class GridMapDisplay : MarkerDisplayWithColormap, ISupportsPbr, ISupportsShadows
     {
         static float baseOffset = 0.001f + 5e-6f;
-        
+
         static readonly int PropInputTexture = Shader.PropertyToID("_InputTex");
         static readonly int PropSquareTexture = Shader.PropertyToID("_SquareTex");
         static readonly int PropSquareCoeff = Shader.PropertyToID("_SquareCoeff");
@@ -28,7 +32,7 @@ namespace Iviz.Displays
         [SerializeField] MeshRenderer? meshRenderer;
 
         readonly float zOffset;
-        
+
         Texture2D? texture;
         Mesh? mesh;
         int cellsX;
@@ -56,7 +60,7 @@ namespace Iviz.Displays
                 UpdateMaterial();
             }
         }
-        
+
         public float Metallic
         {
             set
@@ -74,7 +78,7 @@ namespace Iviz.Displays
                 MeshRenderer.receiveShadows = value;
             }
         }
-        
+
         public override Color Tint
         {
             get => base.Tint;
@@ -106,7 +110,7 @@ namespace Iviz.Displays
 
         public GridMapDisplay()
         {
-            zOffset = (baseOffset += 1e-5f);            
+            zOffset = (baseOffset += 1e-5f);
         }
 
         protected override void Awake()
@@ -116,7 +120,7 @@ namespace Iviz.Displays
             Tint = Tint;
             Colormap = ColormapId.jet;
         }
-        
+
         void UpdateMaterial()
         {
             var material = MeshRenderer.sharedMaterial;
@@ -217,7 +221,7 @@ namespace Iviz.Displays
                         indices[iOffset + 1] = pOffset + (cellsX + 1) + 1;
                         indices[iOffset + 2] = pOffset + 1;
                         indices[iOffset + 3] = pOffset;
-                        
+
                         iOffset += 4;
                         pOffset++;
                     }
@@ -285,14 +289,15 @@ namespace Iviz.Displays
             {
                 return;
             }
-            
+
             texture.GetRawTextureData<float>().AsSpan().Fill(0);
             texture.Apply();
-            
+
             Collider.center = new Vector3(0.5f, 0.5f, 0).Ros2Unity();
             Collider.size = new Vector3(1, 1, 0).Ros2Unity().Abs();
 
-            var span = Vector2.zero;;
+            var span = Vector2.zero;
+            
             MeasuredIntensityBounds = span;
             if (!OverrideIntensityBounds)
             {

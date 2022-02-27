@@ -60,6 +60,13 @@ namespace Iviz.Core
 #else
             false;
 #endif
+        
+        public const bool IsMacOS =
+#if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+            true;
+#else
+            false;
+#endif        
 
 #if UNITY_IOS || UNITY_ANDROID || UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
         /// <summary>
@@ -111,7 +118,7 @@ namespace Iviz.Core
 
         public static void ClearResources()
         {
-#if !(UNITY_IOS || UNITY_ANDROID)
+#if !(UNITY_IOS || UNITY_ANDROID || UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX)
             isHololens = null;
             isXR = null;
 #endif

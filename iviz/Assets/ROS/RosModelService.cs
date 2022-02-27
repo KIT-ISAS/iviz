@@ -127,7 +127,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            var model = await Resources.Resource.External.TryGetModelFromFileAsync(msg.Request.Uri);
+            var model = await Resources.Resource.External.GetModelFromFileAsync(msg.Request.Uri);
             if (model != null)
             {
                 msg.Response.Success = true;

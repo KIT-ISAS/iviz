@@ -20,8 +20,8 @@ namespace Iviz.Ros
 
         public string Topic { get; }
         public string Type { get; }
-        int ISender.Id => Id;
-        internal int Id { get; set; }
+        int? ISender.Id => Id;
+        internal int? Id { get; set; }
         public RosSenderStats Stats { get; private set; }
         public int NumSubscribers { get; private set; }
 
@@ -35,7 +35,6 @@ namespace Iviz.Ros
             Topic = topic;
             Type = BuiltIns.GetMessageType(typeof(T));
 
-            RosLogger.Info($"Advertising <b>{topic}</b> <i>[{Type}]</i>.");
             GameThread.EverySecond += UpdateStats;
             Connection.Advertise(this);
         }

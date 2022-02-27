@@ -101,7 +101,7 @@ namespace Iviz.Resources
 
         public static ValueTask<ResourceKey<GameObject>?> GetGameObjectResourceAsync(
             string uriString,
-            IExternalServiceProvider? provider,
+            IServiceProvider? provider,
             CancellationToken token) =>
             Internal.TryGet(uriString, out ResourceKey<GameObject>? info)
                 ? new ValueTask<ResourceKey<GameObject>?>(info)
@@ -109,7 +109,7 @@ namespace Iviz.Resources
 
         internal static ValueTask<ResourceKey<Texture2D>?> GetTextureResourceAsync(
             string uriString,
-            IExternalServiceProvider? provider,
+            IServiceProvider? provider,
             CancellationToken token) =>
             Internal.TryGet(uriString, out ResourceKey<Texture2D>? info)
                 ? new ValueTask<ResourceKey<Texture2D>?>(info)

@@ -92,10 +92,19 @@ namespace Iviz.Controllers
                 }
             }
 
-            if ((msg.Scale != 0 || msg.SecondaryScale != 0) && widget is IWidgetWithScale withScale)
+            if (msg.Scale != 0 && widget is IWidgetWithScale withScale)
             {
                 withScale.Scale = scale;
-                withScale.SecondaryScale = (float)msg.SecondaryScale;
+            }
+
+            if (msg.SecondaryScale != 0 && widget is IWidgetWithSecondaryScale withSecondaryScale)
+            {
+                withSecondaryScale.SecondaryScale = (float)msg.SecondaryScale;
+            }
+
+            if (!msg.Boundary.Size.ApproximatelyZero() && widget is IWidgetWithBoundary withBoundary)
+            {
+                withBoundary.Boundary = new BoundingBoxStamped(msg.Header, msg.Boundary);
             }
 
             if (msg.SecondaryBoundaries.Length != 0 && widget is IWidgetWithBoundaries withBoundaries)

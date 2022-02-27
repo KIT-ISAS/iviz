@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Iviz.Displays.XR
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class SpringDisc : MonoBehaviour, IWidget, IWidgetWithColor, IWidgetCanBeMoved
+    public sealed class SpringDisc : MonoBehaviour, IWidgetWithColor, IWidgetCanBeMoved
     {
         [SerializeField] MeshMarkerDisplay? anchor;
         [SerializeField] MeshMarkerDisplay? link;

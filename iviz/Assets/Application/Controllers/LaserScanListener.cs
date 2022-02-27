@@ -138,6 +138,7 @@ namespace Iviz.Controllers
         public LaserScanListener(LaserScanConfiguration? config, string topic)
         {
             node = new FrameNode("LaserScanListener");
+            resource = ResourcePool.RentDisplay<RadialScanDisplay>(node.Transform);
 
             Config = config ?? new LaserScanConfiguration
             {
@@ -145,7 +146,6 @@ namespace Iviz.Controllers
             };
 
             Listener = new Listener<LaserScan>(Config.Topic, Handler, RosTransportHint.PreferUdp);
-            resource = ResourcePool.RentDisplay<RadialScanDisplay>(node.Transform);
         }
 
         void Handler(LaserScan msg)

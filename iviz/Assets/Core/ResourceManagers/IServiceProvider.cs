@@ -10,9 +10,9 @@ namespace Iviz.Displays
     /// Interface that provides a ROS service call. Implemented by RoslibConnection.
     /// This interface exists only to ensure that the Iviz.Core project does not need to have Iviz.Ros as reference.   
     /// </summary>
-    public interface IExternalServiceProvider
+    public interface IServiceProvider
     {
-        ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs, CancellationToken token)
+        ValueTask<bool> CallModelServiceAsync<T>(string service, T srv, int timeoutInMs, CancellationToken token)
             where T : IService;
     }
 }

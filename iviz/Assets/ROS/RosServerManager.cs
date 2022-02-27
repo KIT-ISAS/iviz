@@ -2,17 +2,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
+using Iviz.Roslib;
+using Iviz.Roslib.XmlRpc;
 using Iviz.RosMaster;
 using Iviz.Tools;
+using Iviz.XmlRpc;
 using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {
     public sealed class RosServerManager
     {
-        public const int DefaultPort = RosMasterServer.DefaultPort;
         const int DisposeTimeoutInMs = 2000;
 
         static readonly List<(string key, string value)> DefaultKeys = new()
@@ -26,16 +29,15 @@ namespace Iviz.Ros
         Task? serverTask;
 
         public bool IsActive => server != null;
-        public Uri? MasterUri => server?.MasterUri;
 
-        public bool Start(Uri masterUri, string masterId)
+        public ValueTask<bool> StartAsync(Uri masterUri, string masterId)
         {
-            return TryStart(
-                masterUri ?? throw new ArgumentNullException(nameof(masterUri)),
-                masterId ?? throw new ArgumentNullException(nameof(masterId)));
+            ThrowHelper.ThrowIfNull(masterUri, nameof(masterUri));
+            ThrowHelper.ThrowIfNull(masterId, nameof(masterId));
+            return TryStartAsync(masterUri, masterId);
         }
 
-        bool TryStart(Uri masterUri, string masterId)
+        async ValueTask<bool> TryStartAsync(Uri masterUri, string masterId)
         {
             if (server != null)
             {
@@ -44,35 +46,29 @@ namespace Iviz.Ros
                     return true;
                 }
 
-                Dispose();
+                await DisposeAsync();
                 // pass through
             }
 
-            try
-            {
-                server = new RosMasterServer(masterUri, masterId);
+            server = new RosMasterServer(masterUri, masterId);
 
-                foreach ((string key, string value) in DefaultKeys)
-                {
-                    server.AddKey(key, value);
-                }
-
-                // start in background
-                serverTask = TaskUtils.Run(async () =>
-                {
-                    var task = server.StartAsync();
-                    await Task.Delay(100);
-                    RosManager.Connection.TryOnceToConnect();
-                    await task.AwaitNoThrow(this);
-                });
-            }
-            catch (Exception e)
+            foreach ((string key, string value) in DefaultKeys)
             {
-                RosLogger.Internal("<b>Error:</b> Failed to start ROS master", e);
-                server = null;
+                server.AddKey(key, value);
             }
 
-            return server != null;
+            // start in background
+            serverTask = TaskUtils.Run(() => server.StartAsync().AwaitNoThrow(this));
+
+            await Task.Delay(200);
+
+            if (await PingMaster(server.MasterUri))
+            {
+                return true;
+            }
+
+            await DisposeAsync();
+            return false;
         }
 
         public void Dispose()
@@ -84,10 +80,10 @@ namespace Iviz.Ros
 
             RosLogger.Info($"{this}: Disposing!");
             server.Dispose();
-            
+
             // should return immediately, the waiting happened in server.Dispose()
             _ = serverTask.AwaitNoThrow(DisposeTimeoutInMs, this);
-            
+
             server = null;
         }
 
@@ -105,5 +101,23 @@ namespace Iviz.Ros
         }
 
         public override string ToString() => $"[{nameof(RosServerManager)}]";
+
+        static async ValueTask<bool> PingMaster(Uri masterUri)
+        {
+            using var tokenSource = new CancellationTokenSource(100);
+            var connection = new XmlRpcConnection("pingConnection", masterUri);
+            var callerUri = masterUri;
+            const string callerId = "iviz_ping";
+
+            try
+            {
+                await connection.MethodCallAsync(callerUri, "getUri", new XmlRpcArg[] { callerId }, tokenSource.Token);
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }

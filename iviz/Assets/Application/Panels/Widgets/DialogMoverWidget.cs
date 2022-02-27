@@ -1,3 +1,5 @@
+#nullable enable
+
 using Iviz.Core;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -9,37 +11,38 @@ namespace Iviz.App
 {
     public sealed class DialogMoverWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler
     {
-        [SerializeField] RectTransform targetTransform;
-        [FormerlySerializedAs("hideModuleList")] [SerializeField] bool dragCausesDetach = true;
-        bool isDragging;
-        
-        void Awake()
-        {
-            if (targetTransform == null)
-            {
-                targetTransform = (RectTransform)transform.parent;
-            }
-        }
+        [SerializeField] RectTransform? targetTransform;
+        [SerializeField] bool dragCausesDetach = true;
 
-        void IDragHandler.OnDrag([NotNull] PointerEventData eventData)
+        bool isDragging;
+
+        RectTransform TargetTransform => targetTransform != null
+            ? targetTransform
+            : (targetTransform = (RectTransform)transform.parent);
+
+        void IDragHandler.OnDrag(PointerEventData eventData)
         {
             if (!isDragging)
             {
                 if (dragCausesDetach)
                 {
-                    ModuleListPanel.Instance.DialogPanelManager.DetachSelectedPanel();
+                    ModuleListPanel.Instance.DialogPanelManager.DetachIfSelectedPanel(
+                        TargetTransform.GetComponent<DialogPanel>());
                     if (Settings.IsXR)
                     {
                         return;
                     }
                 }
+
                 isDragging = true;
+                TargetTransform.SetAsLastSibling();
             }
 
-            if (targetTransform != null)
-            {
-                targetTransform.anchoredPosition += eventData.delta / ModuleListPanel.CanvasScale;
-            }
+            TargetTransform.anchoredPosition += eventData.delta / ModuleListPanel.CanvasScale;
+
+            Debug.Log(TargetTransform.anchoredPosition);
+            Debug.Log(ModuleListPanel.CanvasSize);
+            Debug.Log("------");
         }
 
         void IWidget.ClearSubscribers()

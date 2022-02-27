@@ -206,6 +206,7 @@ namespace Iviz.Displays
             PointCloud.Suspend();
             Lines.Suspend();
             cache = Array.Empty<Vector2>();
+            cacheProperties = default;
         }
 
         public void SplitForRecycle()

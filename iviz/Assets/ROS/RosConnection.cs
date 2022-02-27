@@ -8,6 +8,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Tools;
+using IServiceProvider = Iviz.Displays.IServiceProvider;
 
 namespace Iviz.Ros
 {
@@ -15,7 +16,7 @@ namespace Iviz.Ros
     /// Partial implementation of a ROS connection. The rest is in <see cref="RoslibConnection"/>.
     /// Here we only handle initializing connections and task queues.
     /// </summary>
-    public abstract class RosConnection : IExternalServiceProvider
+    public abstract class RosConnection
     {
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
@@ -166,10 +167,6 @@ namespace Iviz.Ros
         }
         
         protected abstract ValueTask<bool> ConnectAsync();
-
-        public abstract ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
-            CancellationToken token)
-            where T : IService;
 
         public virtual void Disconnect()
         {

@@ -59,6 +59,8 @@ namespace Iviz.App
 
         public static float CanvasScale => Instance.RootCanvas.scaleFactor;
 
+        public static Rect CanvasSize => ((RectTransform)Instance.RootCanvas.transform).rect;
+
         [SerializeField] Button? middleHideGuiButton;
 
         [SerializeField] AnchorCanvasPanel? anchorCanvasPanel;
@@ -163,11 +165,8 @@ namespace Iviz.App
 
         bool KeepReconnecting
         {
-            set
-            {
-                Connection.KeepReconnecting = value;
-                //UpperCanvas.Status.enabled = value;
-            }
+            set => Connection.KeepReconnecting = value;
+            //UpperCanvas.Status.enabled = value;
         }
 
         public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
@@ -395,13 +394,15 @@ namespace Iviz.App
                 return;
             }
             
-            if (!Settings.IsLinux && Connection.MyUri.Host == Connection.MasterUri.Host)
-            {
-                connectionData.TryCreateMaster();
-            }
-
             RosLogger.Internal("Trying to connect to previous ROS server.");
-            Connection.TryOnceToConnect();
+            if ((Settings.IsMacOS || Settings.IsMobile) && Connection.MyUri.Host == Connection.MasterUri.Host)
+            {
+                connectionData.TryCreateMasterAsync(); // create master and connect
+            }
+            else
+            {
+                Connection.TryOnceToConnect();
+            }
         }
 
         public static void CallAfterInitialized(Action action)

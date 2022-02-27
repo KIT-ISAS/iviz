@@ -16,7 +16,7 @@ namespace Iviz.Ros
     {
         string Topic { get; }
         string Type { get; }
-        internal int Id { get; }
+        internal int? Id { get; }
         RosSenderStats Stats { get; }
         int NumSubscribers { get; }
         void Dispose();

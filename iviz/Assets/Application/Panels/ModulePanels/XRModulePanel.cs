@@ -14,7 +14,7 @@ namespace Iviz.App
             DataPanelWidgets p = GetComponent<DataPanelWidgets>();
             p.AddHeadTitleWidget("XR");
             HideButton = p.AddHideButton();
-            WorldScale = p.AddSliderWidgetWithScale("World Scale");
+            WorldScale = p.AddSliderWidgetWithScale("World Scale").EnableNegative(false);
             LeftSender = p.AddSender();
             RightSender = p.AddSender();
             GazeSender = p.AddSender();

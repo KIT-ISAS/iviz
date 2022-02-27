@@ -12,6 +12,9 @@ namespace Iviz.App
 {
     public sealed class SliderWidgetWithScale : MonoBehaviour, IWidget
     {
+        const int MinPower = -4;
+        const int MaxPower = 5;
+        
         [SerializeField] Slider? slider;
         [SerializeField] TMP_Text? text;
         [SerializeField] TMP_Text? valueText;
@@ -65,13 +68,13 @@ namespace Iviz.App
                     return;
                 }
 
-                float threshold = 1e-4f;
-                for (int i = -4; i < 5; i++)
+                float threshold = Mathf.Pow(10, MinPower);
+                for (int i = MinPower; i < MaxPower; i++)
                 {
                     if (absValue < threshold)
                     {
-                        ValueInternal = absValue * 100 / scale;
                         UpdatePower(i);
+                        ValueInternal = absValue * 100 / scale;
                         UpdateLabel(value);
                         OnValueChanged();
                         break;
@@ -79,49 +82,6 @@ namespace Iviz.App
 
                     threshold *= 10;
                 }
-
-                /*
-                switch (absValue)
-                {
-                    case 0:
-                        ValueInternal = 0;
-                        UpdatePower(0);
-                        break;
-                    case < 1e-3f:
-                        //ValueInternal = absValue * (100 / 1e-3f);
-                        UpdatePower(-3);
-                        break;
-                    case < 1e-2f:
-                        //ValueInternal = absValue * (100 / 1e-2f);
-                        UpdatePower(-2);
-                        break;
-                    case < 1e-1f:
-                        //ValueInternal = absValue * (100 / 1e-1f);
-                        UpdatePower(-1);
-                        break;
-                    case <= 1:
-                        //ValueInternal = absValue * (100 / 1e-0f);
-                        UpdatePower(0);
-                        break;
-                    case < 1e1f:
-                        //ValueInternal = absValue * (100 * 1e-1f) ;
-                        UpdatePower(1);
-                        break;
-                    case < 1e2f:
-                        //ValueInternal = absValue * (100 * 1e-2f);
-                        UpdatePower(2);
-                        break;
-                    case < 1e3f:
-                        //ValueInternal = absValue * (100 * 1e-3f);
-                        UpdatePower(3);
-                        break;
-                    case < 1e4f:
-                        //ValueInternal = absValue * (100 * 1e-4f);
-                        UpdatePower(4);
-                        break;
-                }
-                */
-
             }
         }
 
@@ -171,8 +131,8 @@ namespace Iviz.App
         {
             power = newPower switch
             {
-                < -3 => -3,
-                > 4 => 4,
+                < MinPower => MinPower,
+                > MaxPower => MaxPower,
                 _ => newPower
             };
 
@@ -224,6 +184,13 @@ namespace Iviz.App
         public SliderWidgetWithScale SubscribeValueChanged(Action<float> f)
         {
             ValueChanged += f;
+            return this;
+        }
+        
+        public SliderWidgetWithScale EnableNegative(bool f)
+        {
+            Sign.enabled = f;
+            SignText.enabled = f;
             return this;
         }
     }

@@ -157,7 +157,7 @@ namespace Iviz.Displays
         /// For external 3D models, whether to keep the materials instead
         /// of replacing them with the provided colors.
         /// </param>
-        public async ValueTask StartAsync(IExternalServiceProvider? provider, bool keepMeshMaterials = false)
+        public async ValueTask StartAsync(IServiceProvider? provider, bool keepMeshMaterials = false)
         {
             if (robot.Links.Count == 0 || robot.Joints.Count == 0)
             {
@@ -184,7 +184,7 @@ namespace Iviz.Displays
             {
                 ProcessJoint(joint);
             }
-            
+
             var keysWithoutParent = new HashSet<string>(linkObjects.Keys);
             keysWithoutParent.RemoveWhere(linkParents.Keys.Contains);
 
@@ -195,7 +195,7 @@ namespace Iviz.Displays
             }
 
             HideChildlessLinks();
-            
+
             runningTs.Token.ThrowIfCancellationRequested();
             ApplyAnyValidConfiguration();
 
@@ -295,7 +295,7 @@ namespace Iviz.Displays
         IEnumerable<Task> ProcessLinkAsync(bool keepMeshMaterials,
             Link link,
             IReadOnlyDictionary<string, Material> rootMaterials,
-            IExternalServiceProvider? provider,
+            IServiceProvider? provider,
             CancellationToken token)
         {
             if (link.Visuals.Count == 0 && link.Collisions.Count == 0)
@@ -326,7 +326,7 @@ namespace Iviz.Displays
         async ValueTask ProcessCollisionAsync(
             Urdf.Collision collision,
             GameObject linkObject,
-            IExternalServiceProvider? provider,
+            IServiceProvider? provider,
             CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
@@ -339,17 +339,16 @@ namespace Iviz.Displays
             collisionObject.layer = LayerType.Collider;
             collisionObject.tag = ColliderTag;
 
-            if (geometry.Mesh != null)
+            if (geometry.Mesh is var (meshUri, meshScale))
             {
-                string uri = geometry.Mesh.Filename;
                 ResourceKey<GameObject>? info;
                 try
                 {
-                    info = await Resource.GetGameObjectResourceAsync(geometry.Mesh.Filename, provider, token);
+                    info = await Resource.GetGameObjectResourceAsync(meshUri, provider, token);
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve '{uri}'", e);
+                    RosLogger.Error($"{this}: Failed to retrieve '{meshUri}'", e);
                     Object.Destroy(collisionObject);
                     numErrors++;
                     return;
@@ -357,7 +356,8 @@ namespace Iviz.Displays
 
                 if (info == null)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve '{uri}'");
+                    RosLogger.Error($"{this}: Failed to retrieve '{meshUri}'. Reason: Resource not in cache, " +
+                                    "and model loader not reachable.");
                     Object.Destroy(collisionObject);
                     numErrors++;
                     return;
@@ -378,9 +378,9 @@ namespace Iviz.Displays
                     collider.convex = true;
                 }
 
-                collisionObject.transform.localScale = geometry.Mesh.Scale.ToVector3().Abs();
+                collisionObject.transform.localScale = meshScale.ToVector3().Abs();
             }
-            else if (geometry.Cylinder != null)
+            else if (geometry.Cylinder is var (cylinderRadius, cylinderLength))
             {
                 var resourceObject = Resource.Displays.Cylinder.Object;
                 var collider = collisionObject.EnsureComponent<MeshCollider>();
@@ -388,19 +388,19 @@ namespace Iviz.Displays
                 collider.convex = true;
 
                 collisionObject.transform.localScale = new Vector3(
-                    geometry.Cylinder.Radius * 2,
-                    geometry.Cylinder.Length,
-                    geometry.Cylinder.Radius * 2);
+                    cylinderRadius * 2,
+                    cylinderLength,
+                    cylinderRadius * 2);
             }
-            else if (geometry.Box != null)
+            else if (geometry.Box is { } box)
             {
                 var collider = collisionObject.EnsureComponent<BoxCollider>();
-                collider.size = geometry.Box.Size.ToVector3().Abs();
+                collider.size = box.Size.ToVector3().Abs();
             }
-            else if (geometry.Sphere != null)
+            else if (geometry.Sphere is { } sphere)
             {
                 var collider = collisionObject.EnsureComponent<SphereCollider>();
-                collider.radius = geometry.Sphere.Radius;
+                collider.radius = sphere.Radius;
             }
             else
             {
@@ -412,7 +412,7 @@ namespace Iviz.Displays
             Visual visual,
             GameObject linkObject,
             IReadOnlyDictionary<string, Material> rootMaterials,
-            IExternalServiceProvider? provider,
+            IServiceProvider? provider,
             CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
@@ -433,34 +433,34 @@ namespace Iviz.Displays
             }
 
             GameObject resourceObject;
-            if (mesh != null)
+            if (mesh is var (meshUri, meshScale))
             {
-                string uri = mesh.Filename;
                 ResourceKey<GameObject>? info;
                 try
                 {
-                    info = await Resource.GetGameObjectResourceAsync(uri, provider, token);
+                    info = await Resource.GetGameObjectResourceAsync(meshUri, provider, token);
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve '{uri}'", e);
+                    RosLogger.Error($"{this}: Failed to retrieve '{meshUri}'", e);
                     numErrors++;
                     return;
                 }
 
                 if (info == null)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve '{uri}'");
+                    RosLogger.Error($"{this}: Failed to retrieve '{meshUri}'. Reason: Resource not in cache, " +
+                                    "and model loader not reachable.");
                     numErrors++;
                     return;
                 }
 
-                Rent(info, mesh.Scale.ToVector3().Abs());
+                Rent(info, meshScale.ToVector3().Abs());
             }
-            else if (cylinder != null)
+            else if (cylinder is var (cylinderRadius, cylinderLength))
             {
-                (float radius, float length) = cylinder;
-                Rent(Resource.Displays.Cylinder, new Vector3(radius * 2, length, radius * 2).Abs());
+                Rent(Resource.Displays.Cylinder,
+                    new Vector3(cylinderRadius * 2, cylinderLength, cylinderRadius * 2).Abs());
             }
             else if (box != null)
             {
@@ -627,13 +627,19 @@ namespace Iviz.Displays
         {
             foreach (var (key, joint) in joints)
             {
-                if (joint.Limit.Lower > 0)
+                if (joint.Type is not (Joint.JointType.Revolute or Joint.JointType.Prismatic))
                 {
-                    TryWriteJoint(key, joint.Limit.Lower);
+                    continue;
                 }
-                else if (joint.Limit.Upper < 0)
+
+                var (lower, upper, _) = joint.Limit;
+                if (lower > 0)
                 {
-                    TryWriteJoint(key, joint.Limit.Upper);
+                    TryWriteJoint(key, lower);
+                }
+                else if (upper < 0)
+                {
+                    TryWriteJoint(key, upper);
                 }
             }
         }
@@ -666,26 +672,6 @@ namespace Iviz.Displays
             jointObject.transform.SetLocalPose(validatedPose);
             return true;
         }
-
-        /*
-        public void WriteJoints(JointState state)
-        {
-            WriteJoints(state.Name.Zip(state.Position));
-        }
-
-        public void WriteJoints(IReadOnlyList<string> names, double[] positions)
-        {
-            WriteJoints(names.Zip(positions));
-        }
-
-        public void WriteJoints(IEnumerable<(string name, double position)> jointPositions)
-        {
-            foreach ((string name, double position) in jointPositions)
-            {
-                TryWriteJoint(name, (float)position);
-            }
-        }
-        */
 
         public override string ToString() => $"[Robot {Name}]";
     }

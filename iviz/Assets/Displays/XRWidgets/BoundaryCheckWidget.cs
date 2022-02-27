@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class BoundaryCheckWidget : MonoBehaviour, IWidgetWithBoundaries, IWidgetWithScale
+    public sealed class BoundaryCheckWidget : MonoBehaviour, IWidgetWithBoundaries, IWidgetWithSecondaryScale
     {
         FrameNode? mainNode;
         BoxCollider? mainCollider;
@@ -51,7 +51,6 @@ namespace Iviz.Displays.XR
             {
                 Create(boxes[i], out nodes[i], out colliders[i]);
             }
-
             
             if (active)
             {

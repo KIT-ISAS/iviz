@@ -20,7 +20,7 @@ namespace Iviz.Ros
         readonly string topic;
         string? publisherId;
         
-        int id = RoslibConnection.InvalidId;
+        int? id;
 
         public IRosPublisher? Publisher { get; private set; }
 
@@ -29,7 +29,7 @@ namespace Iviz.Ros
             this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
         }
 
-        public int Id
+        public int? Id
         {
             get => id;
             set
@@ -91,7 +91,7 @@ namespace Iviz.Ros
 
         public void Invalidate()
         {
-            Id = RoslibConnection.InvalidId;
+            Id = null;
             Publisher = null;
             publisherId = null;
         }
