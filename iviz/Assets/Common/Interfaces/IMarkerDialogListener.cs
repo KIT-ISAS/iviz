@@ -9,10 +9,11 @@ namespace Iviz.Common
     public interface IMarkerDialogListener
     {
         string Topic { get; }
-        void GenerateLog(StringBuilder description);
+        int NumEntriesForLog { get; }
+        void GenerateLog(StringBuilder description, int minIndex, int numEntries);
         string BriefDescription { get; }
-        void Reset();
+        void ResetController();
         bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds);
-        IEnumerable<IHasBounds> GetAllBounds();
+        //IEnumerable<IHasBounds> GetAllBounds();
     }
 }

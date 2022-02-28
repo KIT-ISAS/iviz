@@ -2,7 +2,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text;
+using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -17,14 +20,14 @@ using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
 namespace Iviz.Controllers
 {
-    public sealed class GuiWidgetListener : ListenerController
+    public sealed class GuiWidgetListener : ListenerController, IMarkerDialogListener
     {
         static GuiWidgetListener? defaultHandler;
         public static void DisposeDefaultHandler() => defaultHandler?.Dispose();
 
         public static GuiWidgetListener DefaultHandler =>
             defaultHandler ??= new GuiWidgetListener(null, "~dialogs");
-        
+
         readonly GuiWidgetConfiguration config = new();
         readonly Dictionary<string, GuiObject> widgets = new();
         readonly Dictionary<string, GuiObject> dialogs = new();
@@ -69,6 +72,39 @@ namespace Iviz.Controllers
                 {
                     widget.Interactable = value;
                 }
+            }
+        }
+
+        public string Topic => Config.Topic;
+
+        public int NumEntriesForLog => widgets.Count;
+
+        public string BriefDescription
+        {
+            get
+            {
+                if (widgets.Count == 0 && dialogs.Count == 0)
+                {
+                    return $"<b>No widgets or dialogs</b>\nNo errors";
+                }
+                
+                string widgetStr = widgets.Count switch
+                {
+                    0 => "<b>No widgets</b>",
+                    1 => "<b>1 widget</b>",
+                    _ => $"<b>{widgets.Count.ToString()} widgets</b>"
+                };
+
+                string dialogStr = dialogs.Count switch
+                {
+                    0 => "<b>No dialogs</b>",
+                    1 => "<b>1 dialog</b>",
+                    _ => $"<b>{dialogs.Count.ToString()} dialogs</b>"
+                };
+
+                const string errorStr = "No errors";
+
+                return $"{widgetStr}\n{dialogStr}\n{errorStr}";
             }
         }
 
@@ -160,9 +196,9 @@ namespace Iviz.Controllers
                     existingGuiObject.UpdateWidget(msg);
                     return;
                 }
-                
+
                 RosLogger.Info($"{this}: Widget '{msg.Id}' of type {existingGuiObject.Type} " +
-                                $"is being replaced with type {widgetType}");
+                               $"is being replaced with type {widgetType}");
                 existingGuiObject.Dispose();
                 // pass through
             }
@@ -195,7 +231,7 @@ namespace Iviz.Controllers
         {
             Handler(msg);
             return (ActionType)msg.Action == ActionType.Add
-                ? dialogs[msg.Id].As<IDialog>()
+                ? dialogs[msg.Id].AsDialog()
                 : null;
         }
 
@@ -441,6 +477,25 @@ namespace Iviz.Controllers
                 Type = (byte)FeedbackType.ButtonClick,
                 EntryId = -1,
             });
+        }
+
+        public void GenerateLog(StringBuilder description, int minIndex, int numEntries)
+        {
+            ThrowHelper.ThrowIfNull(description, nameof(description));
+
+            foreach (var widget in widgets.Values.Skip(minIndex).Take(numEntries))
+            {
+                widget.GenerateLog(description);
+                description.AppendLine();
+            }
+
+            description.AppendLine().AppendLine();
+        }
+        
+        public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
+        {
+            bounds = null;
+            return false;
         }
 
         static time SecsToTime(float time)

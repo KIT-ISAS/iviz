@@ -244,11 +244,12 @@ namespace Iviz.Displays
 
                 cacheProperties = (angleMin, angleIncrement, intensities.Length);
 
-                Vector2 xz = default;
                 foreach (int i in ..ranges.Length)
                 {
                     float a = angleMin + angleIncrement * i;
                     //(xz.x, _, xz.y) = ( Mathf.Cos(a),  Mathf.Sin(a), 0 ).Ros2Unity();
+
+                    Vector2 xz;
                     xz.x = -Mathf.Sin(a);
                     xz.y = Mathf.Cos(a);
                     cache[i] = xz;
@@ -261,7 +262,7 @@ namespace Iviz.Displays
             foreach (int i in ..ranges.Length)
             {
                 float range = ranges[i];
-                if (float.IsNaN(range) || range > rangeMax || range < rangeMin)
+                if (range.IsInvalid() || range > rangeMax || range < rangeMin)
                 {
                     continue;
                 }

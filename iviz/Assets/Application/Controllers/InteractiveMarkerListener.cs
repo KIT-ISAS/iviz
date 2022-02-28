@@ -1,6 +1,5 @@
 ﻿#nullable enable
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -93,24 +92,16 @@ namespace Iviz.Controllers
 
         public string Topic => config.Topic;
 
-        public void GenerateLog(StringBuilder description)
+        public int NumEntriesForLog => interactiveMarkers.Count;
+        
+        public void GenerateLog(StringBuilder description, int minIndex, int numEntries)
         {
             ThrowHelper.ThrowIfNull(description, nameof(description));
 
-            const int maxToDisplay = 50;
-
-            foreach (var interactiveMarker in interactiveMarkers.Values.Take(maxToDisplay))
+            foreach (var interactiveMarker in interactiveMarkers.Values.Skip(minIndex).Take(numEntries))
             {
                 interactiveMarker.GenerateLog(description);
                 description.AppendLine();
-            }
-
-            if (interactiveMarkers.Count > maxToDisplay)
-            {
-                description.Append("<i>... and ")
-                    .Append(interactiveMarkers.Count - maxToDisplay)
-                    .Append(" more.</i>")
-                    .AppendLine();
             }
 
             description.AppendLine().AppendLine();
@@ -124,7 +115,7 @@ namespace Iviz.Controllers
                 {
                     0 => "<b>No interactive markers</b>",
                     1 => "<b>1 interactive marker</b>",
-                    _ => $"<b>{interactiveMarkers.Values.Count.ToString()} interactive markers</b>"
+                    _ => $"<b>{interactiveMarkers.Count.ToString()} interactive markers</b>"
                 };
 
                 int totalErrors = 0, totalWarnings = 0;
@@ -187,12 +178,6 @@ namespace Iviz.Controllers
 
             Publisher = new Sender<InteractiveMarkerFeedback>(feedbackTopic);
             FullListener = new Listener<InteractiveMarkerInit>(fullTopic, HandlerUpdateFull);
-        }
-
-        public void Reset()
-        {
-            DestroyAllMarkers();
-            FullListener?.Subscribe();
         }
 
         public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)

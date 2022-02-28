@@ -30,7 +30,7 @@ namespace Iviz.App
 
             panel.Label.Text = $"<b>Topic:</b> {listener.Topic}";
             panel.Close.Clicked += Close;
-            panel.ResetAll += listener.Reset;
+            panel.ResetAll += listener.ResetController;
             panel.LinkClicked += markerId => HighlightMarker(listener, markerId);
 
             UpdatePanel();
@@ -57,9 +57,11 @@ namespace Iviz.App
             {
                 return;
             }
+            
+            const int maxToDisplay = 50;
 
             using var description = BuilderPool.Rent();
-            listener.GenerateLog(description);
+            listener.GenerateLog(description, 0, Math.Min(listener.NumEntriesForLog, maxToDisplay));
             panel.Text.SetText(description);
         }
 

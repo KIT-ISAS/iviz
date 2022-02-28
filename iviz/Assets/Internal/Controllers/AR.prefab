@@ -690,8 +690,24 @@ PrefabInstance:
       propertyPath: arCamera
       value: 
       objectReference: {fileID: 6019251948242916430}
+    - target: {fileID: 5596435619553090382, guid: 99feeeab7f2d0438dbf95744901ee262,
+        type: 3}
+      propertyPath: meshFilter
+      value: 
+      objectReference: {fileID: 749892901891460483}
+    - target: {fileID: 5596435619553090382, guid: 99feeeab7f2d0438dbf95744901ee262,
+        type: 3}
+      propertyPath: mainRenderer
+      value: 
+      objectReference: {fileID: 749892901891460480}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 99feeeab7f2d0438dbf95744901ee262, type: 3}
+--- !u!23 &749892901891460480 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5596435619553090379, guid: 99feeeab7f2d0438dbf95744901ee262,
+    type: 3}
+  m_PrefabInstance: {fileID: 5170887824540292811}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &749892901891460481 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5596435619553090378, guid: 99feeeab7f2d0438dbf95744901ee262,
@@ -714,6 +730,12 @@ BoxCollider:
 --- !u!4 &749892901891460482 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5596435619553090377, guid: 99feeeab7f2d0438dbf95744901ee262,
+    type: 3}
+  m_PrefabInstance: {fileID: 5170887824540292811}
+  m_PrefabAsset: {fileID: 0}
+--- !u!33 &749892901891460483 stripped
+MeshFilter:
+  m_CorrespondingSourceObject: {fileID: 5596435619553090376, guid: 99feeeab7f2d0438dbf95744901ee262,
     type: 3}
   m_PrefabInstance: {fileID: 5170887824540292811}
   m_PrefabAsset: {fileID: 0}

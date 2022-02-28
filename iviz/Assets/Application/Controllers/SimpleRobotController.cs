@@ -76,6 +76,12 @@ namespace Iviz.Controllers
             get => config.FramePrefix;
             set
             {
+                if (Robot == null)
+                {
+                    config.FramePrefix = value;
+                    return;
+                }
+
                 if (AttachedToTf)
                 {
                     AttachedToTf = false;
@@ -86,12 +92,7 @@ namespace Iviz.Controllers
                 {
                     config.FramePrefix = value;
                 }
-
-                if (Robot == null)
-                {
-                    return;
-                }
-
+                
                 node.AttachTo(Robot.BaseLink != null ? Decorate(Robot.BaseLink) : null);
             }
         }
@@ -101,6 +102,12 @@ namespace Iviz.Controllers
             get => config.FrameSuffix;
             set
             {
+                if (Robot == null)
+                {
+                    config.FrameSuffix = value;
+                    return;
+                }
+                
                 if (AttachedToTf)
                 {
                     AttachedToTf = false;
@@ -110,11 +117,6 @@ namespace Iviz.Controllers
                 else
                 {
                     config.FrameSuffix = value;
-                }
-
-                if (Robot == null)
-                {
-                    return;
                 }
 
                 node.AttachTo(Robot.BaseLink != null ? Decorate(Robot.BaseLink) : null);
@@ -157,7 +159,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Tint = value.ToRos();
-                if (Robot is null)
+                if (Robot == null)
                 {
                     return;
                 }
@@ -172,7 +174,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Metallic = value;
-                if (Robot is null)
+                if (Robot == null)
                 {
                     return;
                 }
@@ -187,7 +189,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Smoothness = value;
-                if (Robot is null)
+                if (Robot == null)
                 {
                     return;
                 }
@@ -202,7 +204,7 @@ namespace Iviz.Controllers
             set
             {
                 config.Interactable = value;
-                if (Robot is null)
+                if (Robot == null)
                 {
                     return;
                 }
@@ -251,7 +253,7 @@ namespace Iviz.Controllers
             {
                 config.AttachedToTf = value;
 
-                if (Robot is null)
+                if (Robot == null)
                 {
                     return;
                 }
@@ -501,7 +503,15 @@ namespace Iviz.Controllers
 
         string Decorate(string jointName)
         {
-            return $"{config.FramePrefix}{jointName}{config.FrameSuffix}";
+            string framePrefix = config.FramePrefix;
+            string frameSuffix = config.FrameSuffix;
+            
+            if (framePrefix.Length == 0 && frameSuffix.Length == 0)
+            {
+                return jointName;
+            }
+            
+            return $"{framePrefix}{jointName}{frameSuffix}";
         }
 
         void DetachFromTf()

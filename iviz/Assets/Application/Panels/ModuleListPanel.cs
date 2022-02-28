@@ -1080,7 +1080,7 @@ namespace Iviz.App
             frameCounter = 0;
 
             (long downB, long upB) = RosManager.CollectBandwidthReport();
-            BottomCanvas.Bandwidth.text = $"↓{FormatBandwidth(downB)} ↑{FormatBandwidth(upB)}";
+            BottomCanvas.Bandwidth.text = $"{FormatBandwidth(downB)} ^{FormatBandwidth(upB)}";
 
             var bagListener = Connection.BagListener;
             if (bagListener != null)

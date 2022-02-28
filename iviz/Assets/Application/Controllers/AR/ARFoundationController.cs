@@ -75,27 +75,28 @@ namespace Iviz.Controllers
             set
             {
                 base.OcclusionQuality = value;
+                var manager = ar.OcclusionManager;
                 switch (value)
                 {
                     case OcclusionQualityType.Off:
-                        ar.OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Disabled;
-                        ar.OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Disabled;
-                        ar.OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Disabled;
+                        manager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Disabled;
+                        manager.requestedHumanDepthMode = HumanSegmentationDepthMode.Disabled;
+                        manager.requestedHumanStencilMode = HumanSegmentationStencilMode.Disabled;
                         break;
                     case OcclusionQualityType.Fast:
-                        ar.OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Fastest;
-                        ar.OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Fastest;
-                        ar.OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Fastest;
+                        manager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Fastest;
+                        manager.requestedHumanDepthMode = HumanSegmentationDepthMode.Fastest;
+                        manager.requestedHumanStencilMode = HumanSegmentationStencilMode.Fastest;
                         break;
                     case OcclusionQualityType.Medium:
-                        ar.OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Medium;
-                        ar.OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Fastest;
-                        ar.OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Medium;
+                        manager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Medium;
+                        manager.requestedHumanDepthMode = HumanSegmentationDepthMode.Fastest;
+                        manager.requestedHumanStencilMode = HumanSegmentationStencilMode.Medium;
                         break;
                     case OcclusionQualityType.Best:
-                        ar.OcclusionManager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Best;
-                        ar.OcclusionManager.requestedHumanDepthMode = HumanSegmentationDepthMode.Best;
-                        ar.OcclusionManager.requestedHumanStencilMode = HumanSegmentationStencilMode.Best;
+                        manager.requestedEnvironmentDepthMode = EnvironmentDepthMode.Best;
+                        manager.requestedHumanDepthMode = HumanSegmentationDepthMode.Best;
+                        manager.requestedHumanStencilMode = HumanSegmentationStencilMode.Best;
                         break;
                 }
             }

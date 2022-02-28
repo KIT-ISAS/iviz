@@ -36,11 +36,22 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             panel.HideButton.State = listener.Visible;
-            panel.Frame.Owner = listener;
             panel.Listener.Listener = listener.Listener;
             panel.FeedbackSender.Set(listener.FeedbackSender);
+            panel.Marker.MarkerListener = listener;
+
             panel.CloseButton.Clicked += Close;
+            panel.HideButton.Clicked += ToggleVisible;
+            panel.ResetButton.Clicked += listener.ResetController;
+            
+            HighlightAll();
         }
+        
+        void HighlightAll()
+        {
+            const int maxHighlights = 50;
+            // NYI
+        }        
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)
         {
