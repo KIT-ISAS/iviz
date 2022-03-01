@@ -11,106 +11,12 @@ using Iviz.Msgs.VisualizationMsgs;
 
 namespace Iviz.Roslib.MarkerHelper;
 
-public sealed class RosMarker : IDisposable
-#if !NETSTANDARD2_0
-    , IAsyncDisposable
-#endif
+public static class RosMarkerHelper
 {
-    static readonly Marker InvalidMarker = new();
-
-    readonly string ns;
-    readonly List<Marker> markers = new();
-    readonly RosChannelWriter<MarkerArray> publisher = new() { LatchingEnabled = true };
-    bool disposed;
-
-    public ReadOnlyCollection<Marker> Markers { get; }
-
-    public string Topic => publisher.Topic;
-
-    public RosMarker(string ns)
-    {
-        this.ns = ns;
-        Markers = new ReadOnlyCollection<Marker>(markers);
-    }
-
-    public RosMarker(IRosClient client, string topic = "markers", string ns = "Marker") : this(ns)
-    {
-        Start(client, topic);
-    }
-
-    public override string ToString()
-    {
-        return $"[RosMarkerHelper ns={ns}]";
-    }
-
-    public void Start(IRosClient client, string topic = "markers")
-    {
-        publisher.Start(client, topic);
-    }
-
-    public ValueTask StartAsync(IRosClient client, string topic = "markers", CancellationToken token = default)
-    {
-        return publisher.StartAsync(client, topic, token);
-    }
-
-    public void Dispose()
-    {
-        if (disposed)
-        {
-            return;
-        }
-
-        disposed = true;
-        if (publisher.IsAlive)
-        {
-            Clear();
-            ApplyChanges();
-        }
-
-        publisher.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (disposed)
-        {
-            return;
-        }
-
-        disposed = true;
-        if (publisher.IsAlive)
-        {
-            Clear();
-            ApplyChanges();
-        }
-
-        await publisher.DisposeAsync();
-    }
-
-    int GetFreeId()
-    {
-        int index = markers.FindIndex(marker => marker == InvalidMarker);
-        if (index != -1)
-        {
-            return index;
-        }
-
-        markers.Add(InvalidMarker);
-        return markers.Count - 1;
-    }
-
-    public int CreateArrow(in Pose pose, in ColorRGBA color, in Vector3 scale, string frameId = "",
-        int replaceId = -1)
-    {
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateArrow(ns, id, pose, color, scale, frameId);
-        return id;
-    }
-
     public static Marker CreateArrow(string ns = "", int id = 0, Pose? pose = null, ColorRGBA? color = null,
         Vector3? scale = null, string frameId = "")
     {
-        return new()
+        return new Marker
         {
             Header = (0, frameId),
             Ns = ns,
@@ -124,18 +30,10 @@ public sealed class RosMarker : IDisposable
         };
     }
 
-    public int CreateArrow(in Point a, in Point b, float width = 1, ColorRGBA? color = null, string frameId = "",
-        int replaceId = -1)
-    {
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateArrow(ns, id, a, b, width, color, frameId);
-        return id;
-    }
-
     public static Marker CreateArrow(string ns = "", int id = 0, Point a = default, Point b = default,
         float width = 1, ColorRGBA? color = null, string frameId = "")
     {
-        return new()
+        return new Marker
         {
             Header = (0, frameId),
             Ns = ns,
@@ -150,18 +48,10 @@ public sealed class RosMarker : IDisposable
         };
     }
 
-    public int CreateCube(Pose? pose = null, ColorRGBA? color = null, Vector3? scale = null, string frameId = "",
-        int replaceId = -1)
-    {
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateCube(ns, id, pose, scale, color, frameId);
-        return id;
-    }
-
     public static Marker CreateCube(string ns = "", int id = 0, Pose? pose = null, Vector3? scale = null,
         ColorRGBA? color = null, string frameId = "")
     {
-        return new()
+        return new Marker
         {
             Header = (0, frameId),
             Ns = ns,
@@ -175,18 +65,10 @@ public sealed class RosMarker : IDisposable
         };
     }
 
-    public int CreateSphere(Pose? pose = null, ColorRGBA? color = null, Vector3? scale = null, string frameId = "",
-        int replaceId = -1)
-    {
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateSphere(ns, id, pose, scale, color, frameId);
-        return id;
-    }
-
     public static Marker CreateSphere(string ns = "", int id = 0, Pose? pose = null, Vector3? scale = null,
         ColorRGBA? color = null, string frameId = "")
     {
-        return new()
+        return new Marker
         {
             Header = (0, frameId),
             Ns = ns,
@@ -200,24 +82,10 @@ public sealed class RosMarker : IDisposable
         };
     }
 
-    public int CreateCylinder(in Point position, in ColorRGBA color, in Vector3 scale, string frameId = "",
-        int replaceId = -1)
-    {
-        return CreateCylinder(new Pose(position, Quaternion.Identity), color, scale, frameId, replaceId);
-    }
-
-    public int CreateCylinder(in Pose pose, in ColorRGBA color, in Vector3 scale, string frameId = "",
-        int replaceId = -1)
-    {
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateCylinder(ns, id, pose, scale, color, frameId);
-        return id;
-    }
-
     public static Marker CreateCylinder(string ns = "", int id = 0, Pose? pose = null, Vector3? scale = null,
         ColorRGBA? color = null, string frameId = "")
     {
-        return new()
+        return new Marker
         {
             Header = (0, frameId),
             Ns = ns,
@@ -231,20 +99,10 @@ public sealed class RosMarker : IDisposable
         };
     }
 
-    public int CreateTextViewFacing(string text, Point? position = null, ColorRGBA? color = null, double scale = 1,
-        string frameId = "",
-        int replaceId = -1)
-    {
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        Marker marker = CreateTextViewFacing(ns, id, text, position, color, scale, frameId);
-        markers[id] = marker;
-        return id;
-    }
-
     public static Marker CreateTextViewFacing(string ns = "", int id = 0, string text = "",
         Point? position = null, ColorRGBA? color = null, double scale = 1, string frameId = "")
     {
-        return new()
+        return new Marker
         {
             Header = (0, frameId),
             Ns = ns,
@@ -258,29 +116,6 @@ public sealed class RosMarker : IDisposable
             Text = text
         };
     }
-
-    public int CreateLines(Point[] lines, in Pose? pose = null, in ColorRGBA? color = null, double scale = 1,
-        string frameId = "",
-        int replaceId = -1)
-    {
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateLines(ns, id, lines, null, color, pose, scale, frameId);
-        return id;
-    }
-
-    public int CreateLines(Point[] lines, ColorRGBA[] colors, in Pose? pose = null, double scale = 1,
-        string frameId = "", int replaceId = -1)
-    {
-        if (colors == null)
-        {
-            throw new ArgumentNullException(nameof(colors));
-        }
-
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateLines(ns, id, lines, colors, ColorRGBA.White, pose, scale, frameId);
-        return id;
-    }
-
     public static Marker CreateLines(string ns = "", int id = 0, Point[]? lines = null, ColorRGBA[]? colors = null,
         in ColorRGBA? color = null,
         in Pose? pose = null, double width = 1, string frameId = "")
@@ -309,33 +144,6 @@ public sealed class RosMarker : IDisposable
             Colors = colors ?? Array.Empty<ColorRGBA>(),
             FrameLocked = true
         };
-    }
-
-    public int CreateLineStrip(Point[] lines, Pose? pose = null, ColorRGBA? color = null, double width = 1,
-        string frameId = "",
-        int replaceId = -1)
-    {
-        if (lines == null)
-        {
-            throw new ArgumentNullException(nameof(lines));
-        }
-
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateLineStrip(ns, id, lines, null, color, pose, width, frameId);
-        return id;
-    }
-
-    public int CreateLineStrip(Point[] lines, ColorRGBA[] colors, Pose? pose = null, double width = 1,
-        string frameId = "", int replaceId = -1)
-    {
-        if (colors == null)
-        {
-            throw new ArgumentNullException(nameof(colors));
-        }
-
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateLineStrip(ns, id, lines, colors, ColorRGBA.White, pose, width, frameId);
-        return id;
     }
 
     public static Marker CreateLineStrip(string ns = "", int id = 0, Point[]? lines = null,
@@ -368,20 +176,6 @@ public sealed class RosMarker : IDisposable
     {
         Cube = 6,
         Sphere = 7,
-    }
-
-    public int CreateMeshList(Point[] positions, MeshType meshType, ColorRGBA[]? colors = null,
-        ColorRGBA? color = null, Pose? pose = null,
-        Vector3? scale = null, string frameId = "", int replaceId = -1)
-    {
-        if (positions == null)
-        {
-            throw new ArgumentNullException(nameof(positions));
-        }
-
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateMeshList(ns, id, positions, colors, color, meshType, pose, scale, frameId);
-        return id;
     }
 
     public static Marker CreateMeshList(string ns = "", int id = 0, Point[]? positions = null,
@@ -433,13 +227,30 @@ public sealed class RosMarker : IDisposable
             FrameLocked = true
         };
     }
-
-    public int CreateResource(string resource, Pose? pose = null, Vector3? scale = null, string? frameId = "",
-        int replaceId = -1)
+    
+    public static Marker CreatePointList(string ns = "", int id = 0, Point[]? positions = null,
+        ColorRGBA[]? colors = null, ColorRGBA? color = null, Pose? pose = null,
+        float scale = 1, string frameId = "")
     {
-        int id = replaceId != -1 ? replaceId : GetFreeId();
-        markers[id] = CreateResource(resource, ns, id, pose, scale, frameId);
-        return id;
+        if (colors != null && positions != null && colors.Length != positions.Length)
+        {
+            throw new ArgumentException("Number of points and colors must be equal", nameof(colors));
+        }
+
+        return new Marker
+        {
+            Header = (0, frameId),
+            Ns = ns ?? "",
+            Id = id,
+            Type = Marker.POINTS,
+            Action = Marker.ADD,
+            Pose = pose ?? Pose.Identity,
+            Scale = Vector3.One.WithX(scale),
+            Color = color ?? ColorRGBA.White,
+            Points = positions ?? Array.Empty<Point>(),
+            Colors = colors ?? Array.Empty<ColorRGBA>(),
+            FrameLocked = true
+        };
     }
 
     public static Marker CreateResource(string resource, string ns = "", int id = 0, Pose? pose = null,
@@ -470,74 +281,14 @@ public sealed class RosMarker : IDisposable
             Action = Marker.DELETE,
         };
     }
-
-    public void Erase(int id)
+    
+    public static Marker CreateDeleteAll()
     {
-        if (id < 0 || id >= markers.Count)
+        return new Marker
         {
-            throw new ArgumentOutOfRangeException(nameof(id));
-        }
-
-        markers[id] = new Marker
-        {
-            Ns = ns,
-            Id = id,
-            Action = Marker.DELETE,
+            Header = (0, ""),
+            Action = Marker.DELETEALL,
         };
-    }
-
-    public void Clear()
-    {
-        for (int id = 0; id < markers.Count; id++)
-        {
-            if (markers[id] == InvalidMarker)
-            {
-                continue;
-            }
-
-            markers[id] = new Marker
-            {
-                Ns = ns,
-                Id = id,
-                Action = Marker.DELETE,
-            };
-        }
-    }
-
-    public void SetPose(int id, in Pose pose, Header header = default)
-    {
-        if (id < 0 || id >= markers.Count)
-        {
-            throw new ArgumentOutOfRangeException(nameof(id));
-        }
-
-        markers[id].Pose = pose;
-        markers[id].Header = header;
-    }
-
-    public int Size => markers.Count(marker => marker != InvalidMarker);
-
-    public void ApplyChanges()
-    {
-        if (!publisher.IsAlive)
-        {
-            throw new InvalidOperationException("Start has not been called!");
-        }
-
-        var array = new MarkerArray()
-        {
-            Markers = markers.Where(marker => marker != InvalidMarker).ToArray()
-        };
-
-        for (int id = 0; id < markers.Count; id++)
-        {
-            if (markers[id] != InvalidMarker && markers[id].Action == Marker.DELETE)
-            {
-                markers[id] = InvalidMarker;
-            }
-        }
-
-        publisher.Write(array);
     }
 }
 
@@ -591,12 +342,12 @@ public enum RosEventType
     MouseUp = InteractiveMarkerFeedback.MOUSE_UP
 }
 
-public class RosInteractiveMarker
+public class RosInteractiveMarkerHelper
 {
     public static InteractiveMarker Create(string name, Pose? pose = null, string description = "", float scale = 1,
         string frameId = "", params InteractiveMarkerControl[] controls)
     {
-        return new()
+        return new InteractiveMarker
         {
             Header = frameId,
             Name = name,
@@ -610,7 +361,7 @@ public class RosInteractiveMarker
     public static InteractiveMarkerControl CreateControl(string name = "", Quaternion? orientation = null,
         RosInteractionMode mode = RosInteractionMode.None, params Marker[] markers)
     {
-        return new()
+        return new InteractiveMarkerControl
         {
             Name = name,
             Orientation = orientation ?? Quaternion.Identity,
@@ -647,7 +398,7 @@ public class RosInteractiveMarker
     public static InteractiveMarker CreateMenu(string name = "", Pose? pose = null,
         float scale = 1, string frameId = "", Marker? controlMarker = null, params MenuEntry[] entries)
     {
-        return new()
+        return new InteractiveMarker
         {
             Header = frameId,
             Name = name,
@@ -657,7 +408,7 @@ public class RosInteractiveMarker
                 new[]
                 {
                     CreateControl(mode: RosInteractionMode.Menu,
-                        markers: controlMarker ?? RosMarker.CreateSphere())
+                        markers: controlMarker ?? RosMarkerHelper.CreateSphere())
                 },
             MenuEntries = entries.Select(entry => new Msgs.VisualizationMsgs.MenuEntry
                 { Id = entry.Id, ParentId = entry.ParentId, Title = entry.Title }).ToArray()
@@ -666,7 +417,7 @@ public class RosInteractiveMarker
 
     public static InteractiveMarkerUpdate CreateMarkerUpdate(params InteractiveMarker[] args)
     {
-        return new()
+        return new InteractiveMarkerUpdate
         {
             Type = InteractiveMarkerUpdate.UPDATE,
             Markers = args
@@ -695,7 +446,7 @@ public class RosInteractiveMarker
 
     public static InteractiveMarkerUpdate CreatePoseUpdate(params PoseUpdate[] args)
     {
-        return new()
+        return new InteractiveMarkerUpdate
         {
             Type = InteractiveMarkerUpdate.UPDATE,
             Poses = args.Select(tuple => new InteractiveMarkerPose
@@ -706,7 +457,7 @@ public class RosInteractiveMarker
 
     public static InteractiveMarkerInit CreateInit(params InteractiveMarker[] markers)
     {
-        return new()
+        return new InteractiveMarkerInit
         {
             Markers = markers
         };
