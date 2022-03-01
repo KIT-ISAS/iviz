@@ -116,6 +116,10 @@ namespace Iviz.App
                     {
                         builder.Append(receiver.RemoteId).Append("] @ ");
                     }
+                    else
+                    {
+                        builder.Append("unknown] @ ");
+                    }
 
                     builder.Append(receiver.RemoteUri.Host).Append(':').Append(receiver.RemoteUri.Port);
 
