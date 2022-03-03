@@ -30,33 +30,30 @@ namespace Iviz.App
             panel.CreateFrameClicked += () =>
             {
                 string frameName = ValidateFrameName(panel.FrameName.Value.Trim());
-                if (frameName.Length == 0)
+                if (frameName.Length == 0 || frameName == "/")
                 {
                     RosLogger.Error($"{this}: Cannot create frame with empty name.");
                     return;
                 }
 
-                if (frameName[0] == '/')
+                string validatedFrameName = frameName[0] != '/' ? frameName : frameName[1..];
+                if (!RosClient.IsValidResourceName(validatedFrameName))
                 {
-                    RosLogger.Info($"{this}: Created frame's name has a trailing slash '/'. " +
-                                   "This may cause problems.");
-                }
-                else if (!RosClient.IsValidResourceName(frameName))
-                {
-                    RosLogger.Info($"{this}: Created frame's name '{frameName}' is not a valid ROS resource name. " +
-                                   "This may cause problems.");
+                    RosLogger.Info(
+                        $"{this}: Created frame's name '{validatedFrameName}' is not a valid ROS resource name. " +
+                        "This may cause problems.");
                 }
 
                 var tfPublisher = TfPublisher.Instance;
-                if (tfPublisher.IsPublishing(frameName))
+                if (tfPublisher.IsPublishing(validatedFrameName))
                 {
-                    RosLogger.Info($"{this}: A frame with name '{frameName}' already exists.");
+                    RosLogger.Info($"{this}: A frame with name '{validatedFrameName}' already exists.");
                     return;
                 }
 
                 panel.FrameName.Value = "";
-                
-                var tfFrame = tfPublisher.GetOrCreate(frameName);
+
+                var tfFrame = tfPublisher.GetOrCreate(validatedFrameName);
                 panel.TfLog.SelectedFrame = tfFrame.TfFrame;
                 panel.TfLog.Flush();
             };
