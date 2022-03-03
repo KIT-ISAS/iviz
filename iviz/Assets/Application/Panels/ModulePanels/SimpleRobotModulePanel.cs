@@ -7,6 +7,7 @@
     public sealed class SimpleRobotModulePanel : ModulePanel
     {
         public TrashButtonWidget CloseButton { get; private set; }
+        public TrashButtonWidget ResetButton { get; private set; }
         public FrameWidget Frame { get; private set; }
         public DataLabelWidget HelpText { get; private set; }
         public InputFieldWithHintsWidget SourceParameter { get; private set; }
@@ -60,6 +61,7 @@
                 .FinishAttaching();
             
             CloseButton = p.AddTrashButton();
+            ResetButton = p.AddResetButton();
             HideButton = p.AddHideButton();
             p.UpdateSize();
             gameObject.SetActive(false);

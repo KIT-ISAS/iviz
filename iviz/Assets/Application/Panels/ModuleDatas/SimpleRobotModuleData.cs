@@ -174,6 +174,7 @@ namespace Iviz.App
 
             panel.Prefix.EndEdit += f => RobotController.FramePrefix = f;
             panel.Suffix.EndEdit += f => RobotController.FrameSuffix = f;
+            panel.ResetButton.Clicked += RobotController.ResetController;
 
             RobotController.UpdateStartTaskStatus();
             UpdateModuleButton();

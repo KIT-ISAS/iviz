@@ -88,7 +88,7 @@ namespace Iviz.App
             panel.Color.EndEdit += f =>
             {
                 controller.ColorTopic = f.Length == 0 || f[0] == NoneStr[0] ? "" : f;
-                panel.ColorPreview.SetMaterialDirty();
+                panel.ColorPreview.UpdateMaterial();
                 panel.ColorTopic.Listener = controller.ColorListener;
 
                 if (colorDialogData != null)

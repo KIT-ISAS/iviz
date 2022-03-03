@@ -686,7 +686,7 @@ namespace Iviz.Displays
             Texture = null;
             Material.SetTexture(MainTexID, Texture2D.whiteTexture);
             Material.DisableKeyword("USE_INTENSITY");
-            TextureChanged?.Invoke(Texture);
+            TextureChanged?.Invoke(null);
         }
 
         public void Dispose()
