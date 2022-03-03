@@ -202,13 +202,13 @@ internal sealed class RosNodeServer
     XmlRpcArg GetSubscriptions(XmlRpcValue[] _)
     {
         var subscriptions = client.GetSubscriptionsRpc();
-        return OkResponse(new XmlRpcArg(subscriptions.Select(info => (info.Topic, info.Type))));
+        return OkResponse(new XmlRpcArg(subscriptions.Select(info => (info.Topic, info.Type)).ToArray()));
     }
 
     XmlRpcArg GetPublications(XmlRpcValue[] _)
     {
         var publications = client.GetPublicationsRpc();
-        return OkResponse(new XmlRpcArg(publications.Select(info => (info.Topic, info.Type))));
+        return OkResponse(new XmlRpcArg(publications.Select(info => (info.Topic, info.Type)).ToArray()));
     }
 
     XmlRpcArg ParamUpdate(XmlRpcValue[] args)

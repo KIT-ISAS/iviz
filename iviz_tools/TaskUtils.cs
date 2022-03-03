@@ -106,7 +106,7 @@ public static class TaskUtils
             Task result = await (task, timeoutTask).WhenAny();
             if (result != task)
             {
-                Logger.LogErrorFormat<object>(GenericExceptionFormat, caller, new TimeoutException());
+                Logger.LogErrorFormat(GenericExceptionFormat, caller, new TimeoutException());
                 return;
             }
 
@@ -309,9 +309,15 @@ public static class TaskUtils
         }
     }
 
-    public static Task WhenAll<TA>(this SelectEnumerable<IReadOnlyList<TA>, TA, Task> ts)
+    public static Task WhenAll<TA, TB>(this SelectEnumerable<TB, TA, Task> ts) where TB : IReadOnlyList<TA>
     {
-        return Task.WhenAll(ts.ToArray());
+        if (ts.Count == 0)
+        {
+            return Task.CompletedTask;
+        }
+
+        ICollection<Task> boxedTs = ts;
+        return Task.WhenAll(boxedTs);
     }
 
     public static Task WhenAll(this (Task, Task) ts)

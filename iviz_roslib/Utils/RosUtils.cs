@@ -185,7 +185,7 @@ internal static class RosUtils
         {
             addressList = Dns.GetHostEntry(resolvedHostname).AddressList;
         }
-        catch (Exception)
+        catch
         {
             return null;
         }
@@ -204,7 +204,7 @@ internal static class RosUtils
                 .FirstOrDefault(info => CanAccessAddress(info, masterAddress))
                 ?.Address;
         }
-        catch (Exception)
+        catch
         {
             return null;
         }
@@ -221,7 +221,7 @@ internal static class RosUtils
                 .FirstOrDefault(t => t.infos.Any(info => CanAccessAddress(info, masterAddress)))
                 .@interface;
         }
-        catch (Exception)
+        catch 
         {
             return null;
         }
@@ -247,7 +247,7 @@ internal static class RosUtils
                 .Where(ip => ip.Address.AddressFamily == AddressFamily.InterNetwork)
                 .Select(info => info.Address.ToString());
         }
-        catch (Exception)
+        catch
         {
             return Enumerable.Empty<string>();
         }
@@ -271,7 +271,7 @@ internal static class RosUtils
             mtuCandidate =
                 @interface?.GetIPProperties()?.GetIPv4Properties()?.Mtu; // if v6 is active it will return same mtu
         }
-        catch (Exception)
+        catch
         {
             // this shouldn't throw at all! yet it does
             return null;

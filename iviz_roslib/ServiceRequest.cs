@@ -77,7 +77,7 @@ internal sealed class ServiceRequest
                 throw new IOException("Partner closed connection.");
             }
         }
-        catch (Exception)
+        catch
         {
             readBuffer.Dispose();
             throw;

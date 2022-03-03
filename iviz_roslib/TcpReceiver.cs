@@ -135,9 +135,6 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
             catch (OperationCanceledException)
             {
             }
-            catch (ObjectDisposedException)
-            {
-            }
         }
     }
 
