@@ -195,7 +195,7 @@ namespace Iviz.Displays
             }
         }
 
-        public async void AddRobotResourceAsync(string robotName, string robotDescription,
+        public async ValueTask AddRobotResourceAsync(string robotName, string robotDescription,
             CancellationToken token = default)
         {
             if (string.IsNullOrEmpty(robotName))
@@ -219,7 +219,7 @@ namespace Iviz.Displays
             await WriteResourceFileAsync(tokenSource.Token);
         }
 
-        public async void RemoveRobotResource(string robotName, CancellationToken token = default)
+        public async ValueTask RemoveRobotResourceAsync(string robotName, CancellationToken token = default)
         {
             if (string.IsNullOrEmpty(robotName))
             {

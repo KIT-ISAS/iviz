@@ -53,25 +53,21 @@ namespace Iviz.App
 
         public string Name
         {
-            get => GameObject.name;
             set => GameObject.name = value;
         }
 
         public bool Visible
         {
-            get => GameObject.activeSelf;
             set => GameObject.SetActive(value);
         }
         
         public string ButtonText
         {
-            get => ButtonLabel.text;
             set => ButtonLabel.text = value;
         }
 
         public float ButtonFontSize
         {
-            get => ButtonLabel.fontSize;
             set => ButtonLabel.fontSize = value;
         }
 

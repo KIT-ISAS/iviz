@@ -24,7 +24,7 @@ namespace Iviz.Resources
         /// <summary>
         /// Name of this resource.
         /// </summary>
-        public string Name => Object.name;
+        public string Name { get; }
 
         /// <summary>
         /// Constructs a unique identifier from an existing instance
@@ -40,6 +40,7 @@ namespace Iviz.Resources
             }
 
             Object = baseObject;
+            Name = baseObject.name;
             Id = Object.GetInstanceID();
         }
 

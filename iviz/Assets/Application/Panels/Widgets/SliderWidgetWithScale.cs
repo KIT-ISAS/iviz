@@ -99,9 +99,11 @@ namespace Iviz.App
                 Slider.interactable = value;
                 Left.interactable = value;
                 Right.interactable = value;
+                Sign.interactable = value;
                 Text.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
                 ValueText.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
                 ScaleText.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
+                SignText.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
             }
         }
 

@@ -20,6 +20,11 @@
         public SliderWidget Smoothness { get; private set; }
         public ToggleWidget OcclusionOnlyMode { get; private set; }
         public ToggleWidget Save { get; private set; }
+        
+        CollapsibleWidget Decorations { get; set; }
+        public InputFieldWidget Prefix { get; private set; }
+        public InputFieldWidget Suffix { get; private set; }
+
 
 
         void Awake()
@@ -45,6 +50,13 @@
                 .Attach(Alpha)
                 .Attach(Metallic)
                 .Attach(Smoothness)
+                .FinishAttaching();
+
+            Prefix = p.AddInputField("Add Link Prefix");
+            Suffix = p.AddInputField("Add Link Suffix");
+            Decorations = p.AddCollapsibleWidget("Prefixes and Suffixes")
+                .Attach(Prefix)
+                .Attach(Suffix)
                 .FinishAttaching();
             
             CloseButton = p.AddTrashButton();

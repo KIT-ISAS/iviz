@@ -22,7 +22,6 @@ namespace Iviz.Controllers
     {
         const int MaxMarkersTotal = 10000;
         const int MaxMarkersPerFrame = 100;
-        const int MaxMarkersInLog = 50;
 
         readonly MarkerConfiguration config = new();
 
@@ -281,29 +280,18 @@ namespace Iviz.Controllers
             GameThread.EveryFrame -= HandleAsync;
         }
 
-        public void GenerateLog(StringBuilder description)
+        public int NumEntriesForLog => markers.Count;
+        
+        public void GenerateLog(StringBuilder description, int minIndex, int numEntries)
         {
             ThrowHelper.ThrowIfNull(description, nameof(description));
 
-            foreach (var marker in markers.Values.Take(MaxMarkersInLog))
+            foreach (var marker in markers.Values.Skip(minIndex).Take(numEntries))
             {
                 marker.GenerateLog(description);
             }
 
-            if (markers.Count > MaxMarkersInLog)
-            {
-                description.Append("<i>... and ")
-                    .Append(markers.Count - MaxMarkersInLog)
-                    .Append(" more.</i>")
-                    .AppendLine();
-            }
-
             description.AppendLine().AppendLine();
-        }
-
-        public void Reset()
-        {
-            DisposeAllMarkers();
         }
 
         public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
@@ -314,7 +302,7 @@ namespace Iviz.Controllers
         
         public Dictionary<(string, int), MarkerObject>.ValueCollection GetAllBounds() => markers.Values;
         
-        IEnumerable<IHasBounds> IMarkerDialogListener.GetAllBounds() => GetAllBounds();
+        //IEnumerable<IHasBounds> IMarkerDialogListener.GetAllBounds() => GetAllBounds();
 
         public override void ResetController()
         {

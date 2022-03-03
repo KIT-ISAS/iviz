@@ -165,7 +165,7 @@ namespace Iviz.Controllers
             reflectionProbe.backgroundColor = Settings.MainCamera.backgroundColor;
             reflectionProbe.mode = ReflectionProbeMode.Realtime;
 
-            if (Settings.IsMobile)
+            if (Settings.IsHololens)
             {
                 reflectionProbe.enabled = false;
             }

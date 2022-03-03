@@ -27,7 +27,7 @@ namespace Iviz.TfHelpers
         public TfManager(IRosClient client) : this()
         {
             reader = client.CreateReader<TFMessage>("/tf");
-            writer = client.CreateWriter<TFMessage>("/tf", true);
+            writer = client.CreateWriter<TFMessage>("/tf");
         }
 
         void Update(in TransformStamped ts)
@@ -122,6 +122,11 @@ namespace Iviz.TfHelpers
 
         // --------------
 
+        public void WaitForAnySubscriber()
+        {
+            writer?.Publisher.WaitForAnySubscriber();
+        }
+        
         public void Publish(string frameId, string parentId) => Publish(frameId, parentId, Transform.Identity);
 
         public void Publish(string frameId, in Transform transform)
@@ -196,7 +201,9 @@ namespace Iviz.TfHelpers
                     new Header(seqId++, time.Now(), pair.Value.parent), pair.Key, pair.Value.transform))
                 .ToArray();
 
-            writer.Write(new TFMessage(transforms));
+            var msg = new TFMessage(transforms);
+            writer.Write(msg);
+            writer.Publisher.LatchedMessage = msg;
         }
 
         public void PublishInBackground(CancellationToken token = default)
@@ -205,7 +212,7 @@ namespace Iviz.TfHelpers
             {
                 while (true)
                 {
-                    await Task.Delay(5000, token);
+                    await Task.Delay(3000, token);
                     PublishOwn();
                 }
             }, token);

@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Text;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
@@ -205,15 +206,19 @@ namespace Iviz.Controllers
             ExpirationTime = DateTime.MinValue;
         }
 
-        public T As<T>() where T : IDisplay
+        public IDialog AsDialog()
         {
-            return (T)display;
+            return (IDialog)display;
         }
 
         public void Dispose()
         {
             display.ReturnToPool(resourceKey);
             node.Dispose();
+        }
+
+        public void GenerateLog(StringBuilder description)
+        {
         }
 
         public GuiObject AsExpired() => new(this);

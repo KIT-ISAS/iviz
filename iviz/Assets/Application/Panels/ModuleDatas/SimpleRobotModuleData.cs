@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers;
@@ -105,6 +106,9 @@ namespace Iviz.App
             panel.Metallic.Value = RobotController.Metallic;
             panel.Smoothness.Value = RobotController.Smoothness;
 
+            panel.Prefix.Value = RobotController.FramePrefix;
+            panel.Suffix.Value = RobotController.FrameSuffix;
+
             panel.Save.Value = IsRobotSaved;
             panel.Save.Interactable = !string.IsNullOrEmpty(RobotController.Robot?.Name);
 
@@ -147,22 +151,29 @@ namespace Iviz.App
             panel.Save.ValueChanged += f =>
             {
                 var robot = RobotController.Robot;
-                if (robot is null || string.IsNullOrEmpty(robot.Name) || string.IsNullOrEmpty(robot.Description))
+                if (string.IsNullOrEmpty(robot?.Name) || string.IsNullOrEmpty(robot.Description))
                 {
                     return;
                 }
 
                 if (f)
                 {
-                    Resource.External.AddRobotResourceAsync(robot.Name, robot.Description);
+                    async ValueTask AddRobotResourceAsync()
+                    {
+                        await Resource.External.AddRobotResourceAsync(robot.Name, robot.Description);
+                        panel.SavedRobotName.Options = GetSavedRobots();
+                    }
+                    
+                    _ = AddRobotResourceAsync();
                 }
                 else
                 {
-                    Resource.External.RemoveRobotResource(robot.Name);
+                    _ = Resource.External.RemoveRobotResourceAsync(robot.Name);
                 }
             };
 
-            RobotController.UpdateStartTaskStatus();
+            panel.Prefix.EndEdit += f => RobotController.FramePrefix = f;
+            panel.Suffix.EndEdit += f => RobotController.FrameSuffix = f;
 
             RobotController.UpdateStartTaskStatus();
             UpdateModuleButton();

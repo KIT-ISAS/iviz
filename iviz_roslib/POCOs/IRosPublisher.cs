@@ -122,7 +122,7 @@ public interface IRosPublisher : IDisposable
     /// Whether latching is enabled. When active, new subscribers will automatically receive a copy of the last message sent.
     /// </summary>
     public bool LatchingEnabled { get; set; }
-        
+    
     /// <summary>
     /// Whether to force TCP_NODELAY. Usually, it is the job of the subscriber to request this flag.
     /// When enabling this, the flag is always set regardless of the subscriber request.
@@ -141,6 +141,8 @@ public interface IRosPublisher : IDisposable
     
 public interface IRosPublisher<T> : IRosPublisher where T : IMessage
 {
+    public T LatchedMessage { set; }
+
     /// <summary>
     /// Publishes the given message into the topic. 
     /// </summary>

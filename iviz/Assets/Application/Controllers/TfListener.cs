@@ -138,7 +138,7 @@ namespace Iviz.Controllers
             instance = this;
 
             Publisher = new Sender<TFMessage>(TfModule.DefaultTopic);
-            Listener = new Listener<TFMessage>(TfModule.DefaultTopic, HandlerNonStatic, RosTransportHint.PreferUdp);
+            Listener = new Listener<TFMessage>(TfModule.DefaultTopic, HandlerNonStatic);
             ListenerStatic = new Listener<TFMessage>(TfModule.DefaultTopicStatic, HandlerStatic);
 
             Config = config ?? new TfConfiguration
