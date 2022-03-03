@@ -139,10 +139,13 @@ internal class ReceiverConnector
             status = ReceiverStatus.OutOfRetries;
             ErrorDescription = new ErrorMessage($"Giving up after {MaxConnectionRetries.ToString()} tries");
         }
+        else
+        {
+            status = ReceiverStatus.Dead;
+        }
 
         Logger.LogDebugFormat("{0}: Removing connection - {1}", this, ErrorDescription);
         udpClient?.Dispose();
-        status = ReceiverStatus.Dead;
     }
 
     async ValueTask<RequestTopicResponse?> RequestTopic()

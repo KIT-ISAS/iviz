@@ -273,11 +273,20 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         while (KeepRunning)
         {
             await senderQueue.WaitAsync(runningTs.Token);
+            if (senderQueue.Count == 0)
+            {
+                continue;
+            }
+
+            //Console.WriteLine("waiting");
 
             var queue = senderQueue.ReadAll(ref numDropped, ref bytesDropped);
 
+            //Console.WriteLine("pre: " + queue.Count);
+
             if (LoopbackReceiver != null)
             {
+                //Console.WriteLine("loopback");
                 senderQueue.DirectSendToLoopback(queue, LoopbackReceiver, ref numSent, ref bytesSent);
             }
             else
@@ -297,6 +306,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
             array[1] = (byte)(i >> 8);
             array[2] = (byte)(i >> 0x10);
         }
+        //Console.WriteLine("post: " + queue.Count);
 
         try
         {
@@ -316,6 +326,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
                 numSent++;
                 bytesSent += msgLength + 4;
                 msgSignal?.TrySetResult(null);
+
             }
         }
         catch (Exception e)

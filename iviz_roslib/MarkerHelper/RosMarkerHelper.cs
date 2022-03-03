@@ -159,7 +159,7 @@ public static class RosMarkerHelper
         return new Marker
         {
             Header = (0, frameId),
-            Ns = ns ?? "",
+            Ns = ns,
             Id = id,
             Type = Marker.LINE_STRIP,
             Action = Marker.ADD,
@@ -190,7 +190,7 @@ public static class RosMarkerHelper
         return new Marker
         {
             Header = (0, frameId),
-            Ns = ns ?? "",
+            Ns = ns,
             Id = id,
             Type = (byte)meshType,
             Action = Marker.ADD,
@@ -215,7 +215,7 @@ public static class RosMarkerHelper
         return new Marker
         {
             Header = (0, frameId),
-            Ns = ns ?? "",
+            Ns = ns,
             Id = id,
             Type = Marker.TRIANGLE_LIST,
             Action = Marker.ADD,
@@ -240,7 +240,7 @@ public static class RosMarkerHelper
         return new Marker
         {
             Header = (0, frameId),
-            Ns = ns ?? "",
+            Ns = ns,
             Id = id,
             Type = Marker.POINTS,
             Action = Marker.ADD,
@@ -259,7 +259,7 @@ public static class RosMarkerHelper
         return new Marker
         {
             Header = (0, frameId),
-            Ns = ns ?? "",
+            Ns = ns,
             Id = id,
             Type = Marker.MESH_RESOURCE,
             Action = Marker.ADD,
@@ -275,8 +275,7 @@ public static class RosMarkerHelper
     {
         return new Marker
         {
-            Header = (0, ""),
-            Ns = ns ?? "",
+            Ns = ns,
             Id = id,
             Action = Marker.DELETE,
         };
@@ -286,7 +285,6 @@ public static class RosMarkerHelper
     {
         return new Marker
         {
-            Header = (0, ""),
             Action = Marker.DELETEALL,
         };
     }
