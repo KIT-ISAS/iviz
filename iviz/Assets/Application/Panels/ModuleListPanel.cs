@@ -109,7 +109,7 @@ namespace Iviz.App
         DialogManager Dialogs => dialogs ??= new DialogManager();
         TfModuleData TfData => (TfModuleData)moduleDatas[0];
         Canvas RootCanvas => rootCanvas.AssertNotNull(nameof(rootCanvas));
-        
+
         ModuleListButtons Buttons =>
             buttons ??= new ModuleListButtons(contentObject.AssertNotNull(nameof(contentObject)));
 
@@ -222,7 +222,7 @@ namespace Iviz.App
             {
                 XRUtils.SetupForHololens();
             }
-            
+
             connectionManager = new RosManager();
             tfModule = new TfModule(id => new TfFrameDisplay(id));
 
@@ -393,7 +393,7 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             RosLogger.Internal("Trying to connect to previous ROS server.");
             if ((Settings.IsMacOS || Settings.IsMobile) && Connection.MyUri.Host == Connection.MasterUri.Host)
             {
@@ -527,14 +527,14 @@ namespace Iviz.App
         {
             ThrowHelper.ThrowIfNull(file, nameof(file));
 
-            var config = new StateConfiguration
-            {
-                Entries = moduleDatas.Select(moduleData => moduleData.Configuration.Id).ToList()
-            };
+            var config = new StateConfiguration();
+            
             foreach (var moduleData in moduleDatas)
             {
                 moduleData.AddToState(config);
             }
+
+            config.TfPublisher = TfPublisher.Instance.Configuration;
 
             try
             {
@@ -561,7 +561,7 @@ namespace Iviz.App
                 LoadStateConfiguration(defaultConfigFile);
             }
         }
-        
+
         public async void LoadStateConfiguration(string file, CancellationToken token = default)
         {
             ThrowHelper.ThrowIfNull(file, nameof(file));
@@ -584,16 +584,17 @@ namespace Iviz.App
                 RosLogger.Internal("Error loading state configuration", e);
                 return;
             }
-            
+
             RemoveAllModules();
 
             var stateConfig = JsonConvert.DeserializeObject<StateConfiguration>(text);
-            
+
             // TF, AR and XR are treated specially
             // TF cannot be destroyed, resetting AR and XR loses world info
 
             TfData.UpdateConfiguration(stateConfig.Tf);
-            
+            TfPublisher.Instance.UpdateConfiguration(stateConfig.TfPublisher);
+
             if (Settings.IsMobile && stateConfig.AR != null)
             {
                 if (moduleDatas.TryGetFirst(module => module.ModuleType == ModuleType.AR, out var arModule))
@@ -613,13 +614,12 @@ namespace Iviz.App
                 ((XRModuleData)xrModule).UpdateConfiguration(stateConfig.XR);
             }
 
-            foreach (var config in stateConfig.CreateListOfEntries())
+            var configs = stateConfig.CreateListOfEntries()
+                .Where(config => config.ModuleType is not
+                    (ModuleType.TF or ModuleType.XR or ModuleType.AR or ModuleType.TFPublisher));
+            
+            foreach (var config in configs)
             {
-                if (config.ModuleType is ModuleType.TF or ModuleType.XR or ModuleType.AR)
-                {
-                    continue;
-                }
-                
                 CreateModule(config.ModuleType, configuration: config);
             }
         }
@@ -940,7 +940,7 @@ namespace Iviz.App
             moduleDatas.RemoveAt(index);
             Buttons.RemoveButton(index);
         }
-        
+
         void RemoveAllModules()
         {
             var newModuleDatas = new List<ModuleData>();
@@ -951,12 +951,12 @@ namespace Iviz.App
                     newModuleDatas.Add(moduleData);
                     continue;
                 }
-                
+
                 if (moduleData is ListenerModuleData listenerData)
                 {
                     topicsWithModule.Remove(listenerData.Topic);
                 }
-                
+
                 moduleData.Dispose();
             }
 
@@ -968,8 +968,7 @@ namespace Iviz.App
             {
                 Buttons.CreateButtonForModule(moduleData);
             }
-        }        
-
+        }
 
         public void UpdateModuleButtonText(ModuleData entry, string content)
         {

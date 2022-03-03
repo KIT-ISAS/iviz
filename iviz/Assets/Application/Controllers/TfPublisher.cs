@@ -3,7 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Iviz.App;
+using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Ros;
@@ -26,12 +29,34 @@ namespace Iviz.Controllers.TF
 
         public int NumPublishedFrames => frames.Count;
 
+        public TfPublisherConfiguration Configuration =>
+            new()
+            {
+                Frames = frames.Values
+                    .Where(frame => !frame.isInternal)
+                    .Select(frame => frame.Configuration)
+                    .ToArray()
+            };
+
         public TfPublisher()
         {
             instance = this;
             GameThread.EverySecond += OnEverySecond;
             RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
         }
+
+        public void UpdateConfiguration(TfPublisherConfiguration config)
+        {
+            ResetNonInternal();
+                
+            foreach (var frameConfig in config.Frames)
+            {
+                var frame = GetOrCreate(frameConfig.Id);
+                frame.TfFrame.AttachTo(frameConfig.Parent);
+                frame.LocalPose = frameConfig.LocalPose.Ros2Unity();
+                frame.Scale = frameConfig.Scale;
+            }
+        } 
 
         void OnConnectionStateChanged(ConnectionState state)
         {
@@ -66,10 +91,7 @@ namespace Iviz.Controllers.TF
             var framesToPublish = frames.Values.Where(HasNotBeenUpdatedRecently);
             foreach (var frame in framesToPublish)
             {
-                //if (!frame.isInternal)
-                //{
                 TfListener.Publish(frame.tfFrame);
-                //}
             }
         }
 
@@ -152,12 +174,25 @@ namespace Iviz.Controllers.TF
         {
             return $"[{nameof(TfPublisher)}]";
         }
+        
+        void ResetNonInternal()
+        {
+            var toDelete = frames.Values
+                .Where(frame => !frame.isInternal)
+                .ToList();
+                
+            foreach (var frame in toDelete)
+            {
+                frame.Dispose();
+                frames.Remove(frame.id);
+            }                
+        }        
 
         sealed class TfPublishedFrame : IPublishedFrame
         {
-            readonly string id;
             readonly FrameNode frameNode;
-            
+
+            public readonly string id;
             public readonly bool isInternal;
             public DateTime lastUpdate;
             public TfFrame tfFrame;
@@ -166,6 +201,7 @@ namespace Iviz.Controllers.TF
 
             public Pose LocalPose
             {
+                get => tfFrame.Transform.AsLocalPose();
                 set
                 {
                     if (TfFrame.TrySetLocalPose(value))
@@ -176,7 +212,21 @@ namespace Iviz.Controllers.TF
                     lastUpdate = GameThread.Now;
                 }
             }
+
+            public float Scale
+            {
+                get => tfFrame.Transform.localScale.x;
+                set => tfFrame.Transform.localScale = value * Vector3.one;
+            }
             
+            public TfPublishedFrameConfiguration Configuration => new()
+            {
+                Id = tfFrame.Id,
+                Parent = tfFrame.ParentId ?? "",
+                LocalPose = LocalPose.Unity2RosPose(),
+                Scale = Scale
+            };
+
             internal TfPublishedFrame(string id, bool isInternal)
             {
                 this.id = id;
@@ -201,7 +251,7 @@ namespace Iviz.Controllers.TF
             {
                 tfFrame.Parent = TfModule.FixedFrame;
             }
-
+            
             public void UpdateFrame()
             {
                 frameNode.AttachTo(id);
@@ -214,17 +264,28 @@ namespace Iviz.Controllers.TF
     public interface IPublishedFrame
     {
         public Pose LocalPose { set; }
+        public float Scale { set; }
         public TfFrame TfFrame { get; }
         public void AttachToFixed();
     }
 
 
-    /*
-    public class TfPublisherConfiguration : IConfiguration
+    [DataContract]
+    public sealed class TfPublishedFrameConfiguration
     {
-        public string Id { get; set; } = "";
-        public ModuleType ModuleType => ModuleType.TFPublisher;
-        public bool Visible => true;
+        [DataMember] public string Id { get; set; } = "";
+        [DataMember] public string Parent { get; set; } = "";
+        [DataMember] public Msgs.GeometryMsgs.Pose LocalPose { get; set; }
+        [DataMember] public float Scale { get; set; } = 1;
     }
-    */
+
+    [DataContract]
+    public sealed class TfPublisherConfiguration : IConfiguration
+    {
+        [DataMember] public string Id { get; set; } = nameof(ModuleType.TFPublisher);
+        [DataMember] public ModuleType ModuleType => ModuleType.TFPublisher;
+
+        [DataMember]
+        public TfPublishedFrameConfiguration[] Frames { get; set; } = Array.Empty<TfPublishedFrameConfiguration>();
+    }
 }

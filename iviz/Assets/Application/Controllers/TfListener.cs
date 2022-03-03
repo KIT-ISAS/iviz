@@ -190,10 +190,8 @@ namespace Iviz.Controllers
 
         public void ResetController()
         {
-            //Listener.Reset();
-            //ListenerStatic.Reset();
-            //Publisher.Reset();
             Tf.Reset();
+            ListenerStatic.Reset();
         }
 
         void LateUpdate()

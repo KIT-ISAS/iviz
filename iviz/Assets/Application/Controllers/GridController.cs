@@ -154,7 +154,7 @@ namespace Iviz.Controllers
             grid.Layer = LayerType.Collider;
 
             node = new FrameNode("GridNode");
-            grid.transform.SetParentLocal(node.Transform);
+            grid.Transform.SetParentLocal(node.Transform);
 
             reflectionProbe = new GameObject().AddComponent<ReflectionProbe>();
             reflectionProbe.gameObject.name = "Grid Reflection Probe";

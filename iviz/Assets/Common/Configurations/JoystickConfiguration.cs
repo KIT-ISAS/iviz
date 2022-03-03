@@ -23,7 +23,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public Vector3 MaxSpeed { get; set; } = Vector3.One * 0.25f;
         [DataMember] public string AttachToFrame { get; set; } = "";
         [DataMember] public bool XIsFront { get; set; } = true;
-        [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
+        [DataMember] public string Id { get; set; } = nameof(ModuleType.Joystick);
         [DataMember] public JoystickMode Mode { get; set; } = JoystickMode.Two;
         [DataMember] public ModuleType ModuleType => ModuleType.Joystick;
         [DataMember] public bool Visible { get; set; } = true;

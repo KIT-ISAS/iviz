@@ -18,7 +18,7 @@ namespace Iviz.Controllers.XR
 {
     public sealed class XRConfiguration : IConfiguration
     {
-        public string Id { get; set; } = "";
+        public string Id { get; set; } = nameof(ModuleType.XR);
         public ModuleType ModuleType => ModuleType.XR;
         public bool Visible { get; set; }
         public float WorldScale { get; set; } = 1;

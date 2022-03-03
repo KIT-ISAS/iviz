@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using Iviz.Common.Configurations;
 using Iviz.Controllers;
+using Iviz.Controllers.TF;
 using Iviz.Controllers.XR;
 
 namespace Iviz.App
@@ -12,7 +13,6 @@ namespace Iviz.App
     [DataContract]
     public sealed class StateConfiguration
     {
-        [DataMember] public List<string> Entries { get; set; } = new();
         [DataMember] public TfConfiguration Tf { get; set; } = new();
         [DataMember] public List<GridConfiguration> Grids { get; set; } = new();
         [DataMember] public List<RobotConfiguration> SimpleRobots { get; set; } = new();
@@ -29,11 +29,11 @@ namespace Iviz.App
         [DataMember] public List<GridMapConfiguration> GridMaps { get; set; } = new();
         [DataMember] public List<OctomapConfiguration> Octomaps { get; set; } = new();
         [DataMember] public List<GuiWidgetConfiguration> Dialogs { get; set; } = new();
+        [DataMember] public TfPublisherConfiguration TfPublisher { get; set; } = new();
         [DataMember] public ARConfiguration? AR { get; set; }
         [DataMember] public JoystickConfiguration? Joystick { get; set; }
 
         [DataMember] public XRConfiguration? XR { get; set; }
-        //[DataMember] public TfPublisherConfiguration TfPublisher { get; set; } = new();
 
         public IEnumerable<IConfiguration> CreateListOfEntries() => new[]
         {
@@ -52,6 +52,7 @@ namespace Iviz.App
             GridMaps,
             Octomaps,
             Dialogs,
+            CreateSingleton(TfPublisher),
             CreateSingleton(AR),
             CreateSingleton(Joystick),
             CreateSingleton(XR),

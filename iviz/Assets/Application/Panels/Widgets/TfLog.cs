@@ -206,7 +206,7 @@ namespace Iviz.App
         {
             using (var description = BuilderPool.Rent())
             {
-                EntryHelper.Write(TfModule.OriginFrame, description);
+                EntryHelper.Write(TfModule.OriginFrame, selectedFrame, description);
 
                 description.AppendLine().AppendLine();
                 uint newHash = Crc32Calculator.Compute(description);
@@ -234,7 +234,7 @@ namespace Iviz.App
             {
                 foreach (var node in nodesHelper)
                 {
-                    EntryHelper.WriteSingle(node, description);
+                    EntryHelper.WriteSingle(node, selectedFrame, description);
                 }
 
                 description.AppendLine().AppendLine();
@@ -270,13 +270,10 @@ namespace Iviz.App
             {
                 string id = frame.Id;
                 description.Append("<b>[")
-                    .Append(id);
-                description.Append(id == TfModule.FixedFrameId
-                        ? "]</b>  <i>[Fixed]</i>"
-                        : TfPublisher.IsPublishing(id)
-                            ? "]</b>  <i>[Publ]</i>"
-                            : "]</b>")
-                    .AppendLine();
+                    .Append(id)
+                    .Append("]</b>");
+
+                description.Append(DecoratorFor(id)).AppendLine();
 
                 description.Append(
                         frame.Parent == null || frame.Parent == TfModule.OriginFrame
@@ -311,6 +308,15 @@ namespace Iviz.App
             textHash = newHash;
             TfName.SetText(description);
         }
+
+        static string DecoratorFor(string id) =>
+            (id == TfModule.FixedFrameId, TfPublisher.IsPublishing(id)) switch
+            {
+                (true, true) => " [fixed, own]",
+                (true, false) => " [fixed]",
+                (false, true) => " [own]",
+                _ => ""
+            };
 
         public void UpdateFrameButtons()
         {
@@ -419,7 +425,8 @@ namespace Iviz.App
         {
             const int MaxFramesToWrite = 1024;
 
-            static void Write(TfFrame frame, StringBuilder str, int level, bool withChildren, ref int written)
+            static void Write(TfFrame frame, StringBuilder str, TfFrame? selectedFrame, int level, bool withChildren,
+                ref int written)
             {
                 if (written >= MaxFramesToWrite)
                 {
@@ -440,32 +447,23 @@ namespace Iviz.App
 
                 str.Append("<link=").Append(frame.Id).Append("><b>");
 
-                /*
-                if (frame == selectedFrame)
+                bool isSelectedFrame = frame == selectedFrame;
+                if (isSelectedFrame)
                 {
                     str.Append("<color=blue>");
-                    AppendName(str);
-                    str.Append("</color>");
-                }
-                else */
-                if (TfPublisher.IsPublishing(frame.Id))
-                {
-                    str.Append("<color=#880000>");
-                    AppendName();
-                    str.Append("</color>");
-                }
-                else if (frame.Id == TfModule.FixedFrameId)
-                {
-                    str.Append("<color=#008800>");
-                    AppendName();
-                    str.Append("</color>");
-                }
-                else
-                {
-                    str.Append("<u>").Append(frame.Id).Append("</u>");
                 }
 
-                str.AppendLine("</b></link>");
+                str.Append("<u>")
+                    .Append(frame.Id)
+                    .Append("</u>")
+                    .Append("</b></link>")
+                    .Append(DecoratorFor(frame.Id))
+                    .AppendLine();
+                if (isSelectedFrame)
+                {
+                    str.Append("</color>");
+                }
+
 
                 if (!withChildren)
                 {
@@ -474,39 +472,25 @@ namespace Iviz.App
 
                 foreach (var child in frame.Children)
                 {
-                    Write(child, str, level + 1, true, ref written);
-                }
-
-                void AppendName()
-                {
-                    if (frame.TrailVisible)
-                    {
-                        str.Append("~");
-                    }
-
-                    str.Append("<u>").Append(frame.Id).Append("</u>");
-                    if (frame.TrailVisible)
-                    {
-                        str.Append("~");
-                    }
+                    Write(child, str, selectedFrame, level + 1, true, ref written);
                 }
             }
 
 
-            public static void Write(TfFrame frame, StringBuilder str)
+            public static void Write(TfFrame frame, TfFrame? selectedFrame, StringBuilder str)
             {
                 int written = 0;
 
                 foreach (var child in frame.Children)
                 {
-                    Write(child, str, 0, true, ref written);
+                    Write(child, str, selectedFrame, 0, true, ref written);
                 }
             }
 
-            public static void WriteSingle(TfFrame frame, StringBuilder str)
+            public static void WriteSingle(TfFrame frame, TfFrame? selectedFrame, StringBuilder str)
             {
                 int written = 0;
-                Write(frame, str, 0, false, ref written);
+                Write(frame, str, selectedFrame, 0, false, ref written);
             }
 
             public static void AddAllChildren(TfFrame frame, ICollection<TfFrame> nodes)

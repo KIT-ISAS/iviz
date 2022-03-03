@@ -54,6 +54,8 @@ namespace Iviz.App
                     return;
                 }
 
+                panel.FrameName.Value = "";
+                
                 var tfFrame = tfPublisher.GetOrCreate(frameName);
                 panel.TfLog.SelectedFrame = tfFrame.TfFrame;
                 panel.TfLog.Flush();
