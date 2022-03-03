@@ -210,7 +210,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
     async ValueTask ProcessHandshake(bool latching)
     {
         List<string> fields;
-        using (Rent<byte> readBuffer = await ReceivePacket())
+        using (var readBuffer = await ReceivePacket())
         {
             fields = RosUtils.ParseHeader(readBuffer);
         }
@@ -278,15 +278,10 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
                 continue;
             }
 
-            //Console.WriteLine("waiting");
-
             var queue = senderQueue.ReadAll(ref numDropped, ref bytesDropped);
-
-            //Console.WriteLine("pre: " + queue.Count);
 
             if (LoopbackReceiver != null)
             {
-                //Console.WriteLine("loopback");
                 senderQueue.DirectSendToLoopback(queue, LoopbackReceiver, ref numSent, ref bytesSent);
             }
             else
@@ -298,16 +293,6 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
 
     async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, ResizableRent writeBuffer)
     {
-        void WriteLengthToBuffer(int i)
-        {
-            byte[] array = writeBuffer.Array;
-            array[3] = (byte)(i >> 0x18);
-            array[0] = (byte)i;
-            array[1] = (byte)(i >> 8);
-            array[2] = (byte)(i >> 0x10);
-        }
-        //Console.WriteLine("post: " + queue.Count);
-
         try
         {
             foreach (var entry in queue)
@@ -319,7 +304,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
 
                 writeBuffer.EnsureCapacity(msgLength + 4);
 
-                WriteLengthToBuffer(msgLength);
+                writeBuffer[..4].Write(msgLength);
                 msg.SerializeTo(writeBuffer[4..]);
                 await TcpClient.WriteChunkAsync(writeBuffer.Array, msgLength + 4, runningTs.Token);
 

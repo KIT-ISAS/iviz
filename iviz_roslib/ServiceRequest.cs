@@ -289,13 +289,10 @@ internal sealed class ServiceRequest
         tcpClient.Close();
     }
 
-    static void WriteHeader(Span<byte> array, byte status, int i)
+    static void WriteHeader(Span<byte> array, byte status, int length)
     {
-        array[4] = (byte)(i >> 0x18);
         array[0] = status;
-        array[1] = (byte)i;
-        array[2] = (byte)(i >> 8);
-        array[3] = (byte)(i >> 0x10);
+        array[1..].Write(length);
     }
 
     public override string ToString()

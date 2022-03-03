@@ -181,6 +181,10 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         while (KeepRunning)
         {
             await senderQueue.WaitAsync(runningTs.Token);
+            if (senderQueue.Count == 0)
+            {
+                continue;
+            }
 
             var queue = senderQueue.ReadAll(ref numDropped, ref bytesDropped);
 
