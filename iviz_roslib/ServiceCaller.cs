@@ -114,7 +114,7 @@ internal sealed class ServiceCaller : IDisposable
                 throw new IOException("Partner closed connection");
             }
         }
-        catch (Exception)
+        catch
         {
             readBuffer.Dispose();
             throw;

@@ -267,7 +267,7 @@ public sealed class RosClient : IRosClient
         {
             EnsureCleanSlate();
         }
-        catch (Exception)
+        catch
         {
             Logger.LogDebugFormat("{0}: EnsureCleanState failed.", this);
             listener.Dispose();
@@ -345,7 +345,7 @@ public sealed class RosClient : IRosClient
         {
             await client.EnsureCleanSlateAsync(token);
         }
-        catch (Exception)
+        catch
         {
             Logger.LogDebugFormat("{0}: EnsureCleanState failed.", client);
             await client.listener.DisposeAsync();

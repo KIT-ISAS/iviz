@@ -240,7 +240,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
                     tasks[i] = localSenders[i].PublishAndWaitAsync(msg, token).AsTask();
                 }
 
-                return tasks.WhenAll().AsValueTask();
+                return new ValueTask(tasks.WhenAll());
         }
     }
 

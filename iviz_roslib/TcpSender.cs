@@ -115,7 +115,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
                 return readBuffer;
             }
         }
-        catch (Exception)
+        catch
         {
             readBuffer.Dispose();
             throw;

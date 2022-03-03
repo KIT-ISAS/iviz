@@ -177,8 +177,7 @@ internal sealed class ReceiverManager<T> where T : IMessage
             Logger.LogDebugFormat("{0}: Failed to retry connection for uri {1}: {2}", this, remoteUri, e);
         }
     }
-
-
+    
     public bool TryGetLoopbackReceiver(Endpoint endPoint, out ILoopbackReceiver<T>? receiver)
     {
         IProtocolReceiver? newReceiver =
