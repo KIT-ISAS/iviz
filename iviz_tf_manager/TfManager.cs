@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,6 +29,11 @@ namespace Iviz.TfHelpers
         {
             reader = client.CreateReader<TFMessage>("/tf");
             writer = client.CreateWriter<TFMessage>("/tf");
+        }
+
+        public TfManager(RosChannelWriter<TFMessage> writer) : this()
+        {
+            this.writer = writer;
         }
 
         void Update(in TransformStamped ts)
