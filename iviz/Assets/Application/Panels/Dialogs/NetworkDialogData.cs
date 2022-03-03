@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Linq;
 using System.Text;
 using Iviz.Core;
 using Iviz.Ros;
@@ -105,20 +106,21 @@ namespace Iviz.App
                     continue;
                 }
 
+                bool anyErrors = stat.Receivers.Any(receiver => receiver.ErrorDescription != null);
                 foreach (var receiver in stat.Receivers)
                 {
-                    builder.Append("  [");
+                    builder.Append("    <b>[");
                     if (receiver.RemoteUri == client.CallerUri)
                     {
-                        builder.Append("<i>Me</i>] @ ");
+                        builder.Append("<i>Me</i>]</b> @ ");
                     }
                     else if (receiver.RemoteId != null)
                     {
-                        builder.Append(receiver.RemoteId).Append("] @ ");
+                        builder.Append(receiver.RemoteId).Append("]</b> @ ");
                     }
                     else
                     {
-                        builder.Append("unknown] @ ");
+                        builder.Append("unknown]</b> @ ");
                     }
 
                     builder.Append(receiver.RemoteUri.Host).Append(':').Append(receiver.RemoteUri.Port);
@@ -137,7 +139,7 @@ namespace Iviz.App
                             builder.Append(" | ").AppendBandwidth(receiver.BytesReceived);
                             break;
                         case ReceiverStatus.ConnectingRpc:
-                            builder.Append(" (Connecting)");
+                            //builder.Append(" (Connecting)");
                             break;
                         case ReceiverStatus.ConnectingTcp:
                             builder.Append(" (Connecting to TCP listener)");
@@ -150,12 +152,19 @@ namespace Iviz.App
                             break;
                     }
 
-                    if (receiver.ErrorDescription != null)
+                    if (anyErrors)
                     {
-                        var (time, description) = receiver.ErrorDescription;
                         builder.AppendLine();
-                        builder.Append("    <color=#a52a2aff><b>[").Append(time.ToString("HH:mm:ss"))
-                            .Append("]</b> ").Append(description).Append("</color>");
+                        if (receiver.ErrorDescription != null)
+                        {
+                            var (time, description) = receiver.ErrorDescription;
+                            builder.Append("      <color=#a52a2aff>[").Append(time.ToString("HH:mm:ss"))
+                                .Append("] ").Append(description).Append("</color>");
+                        }
+                        else
+                        {
+                            builder.Append("      [Ok]");
+                        }
                     }
 
                     builder.AppendLine();
@@ -191,14 +200,18 @@ namespace Iviz.App
                 foreach (var sender in stat.Senders)
                 {
                     bool isAlive = sender.IsAlive;
-                    builder.Append("  ");
+                    builder.Append("    <b>[");
                     if (sender.RemoteId == client.CallerId)
                     {
-                        builder.Append("[<i>Me</i>] @ ");
+                        builder.Append("<i>Me</i>]</b> @ ");
+                    }
+                    else if (sender.RemoteId.Length != 0)
+                    {
+                        builder.Append(sender.RemoteId).Append("]</b> @ ");
                     }
                     else
                     {
-                        builder.Append("[").Append(sender.RemoteId).Append("] @ ");
+                        builder.Append("unknown]</b> @ ");
                     }
 
                     builder.Append(sender.RemoteEndpoint != default

@@ -246,7 +246,8 @@ namespace Iviz.Controllers
                 Id = topic
             };            
 
-            var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+            //var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+            const RosTransportHint rosTransportHint = RosTransportHint.PreferTcp;
 
             Listener = Config.Type switch
             {
@@ -456,7 +457,7 @@ namespace Iviz.Controllers
                     DisposeAllMarkers();
                     break;
                 default:
-                    RosLogger.Debug($"{this}: Unknown action {msg.Action.ToString()}");
+                    RosLogger.Info($"{this}: Unknown action {msg.Action.ToString()}");
                     break;
             }
         }

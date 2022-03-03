@@ -39,10 +39,6 @@ namespace Iviz.App
             }
 
             TargetTransform.anchoredPosition += eventData.delta / ModuleListPanel.CanvasScale;
-
-            Debug.Log(TargetTransform.anchoredPosition);
-            Debug.Log(ModuleListPanel.CanvasSize);
-            Debug.Log("------");
         }
 
         void IWidget.ClearSubscribers()

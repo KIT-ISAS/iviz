@@ -50,7 +50,7 @@ namespace Iviz.Displays.Highlighters
 
             float baseFrameSize = TfModule.Instance.FrameSize;
             float frameSize = baseFrameSize * clampedSize;
-            float labelSize = baseFrameSize * Math.Max(size * 0.375f / 2, 0.15f);
+            float labelSize = baseFrameSize * Math.Max(size * 0.375f / 2, 0.075f);
 
             float alpha = 1 - t * t;
             var color = Color.white.WithAlpha(alpha);
