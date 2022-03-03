@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Iviz.Tools;
 
-public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB> where TC : IReadOnlyList<TA>
+public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB>, ICollection<TB> where TC : IReadOnlyList<TA>
 {
     readonly TC a;
     readonly Func<TA, TB> f;
@@ -26,10 +26,18 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB> where TC
         }
     }
 
-    public SelectEnumerable(TC a, Func<TA, TB> f) => (this.a, this.f) = (a, f);
+    public int Count => a.Count;
+    public TB this[int index] => f(a[index]);
+    
+    public SelectEnumerable(TC a, Func<TA, TB> f)
+    {
+        this.a = a;
+        this.f = f;
+    }
+
     public Enumerator GetEnumerator() => new(a, f);
-    IEnumerator<TB> IEnumerable<TB>.GetEnumerator() => GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public void CopyTo(TB[] array, int arrayIndex) => CopyTo(array.AsSpan()[arrayIndex..]);
 
     public TB[] ToArray()
     {
@@ -39,11 +47,7 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB> where TC
         }
 
         TB[] array = new TB[a.Count];
-        foreach (int i in ..a.Count)
-        {
-            array[i] = f(a[i]);
-        }
-
+        CopyTo(array);
         return array;
     }
 
@@ -93,7 +97,11 @@ public readonly struct SelectEnumerable<TC, TA, TB> : IReadOnlyList<TB> where TC
     }
 
 
-    public int Count => a.Count;
-
-    public TB this[int index] => f(a[index]);
+    void ICollection<TB>.Add(TB item) => throw new NotSupportedException();
+    void ICollection<TB>.Clear() => throw new NotSupportedException();
+    bool ICollection<TB>.Contains(TB item) => throw new NotSupportedException();
+    bool ICollection<TB>.Remove(TB item) => throw new NotSupportedException();
+    IEnumerator<TB> IEnumerable<TB>.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    bool ICollection<TB>.IsReadOnly => true;
 }
