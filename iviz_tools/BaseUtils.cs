@@ -206,6 +206,12 @@ public static class BaseUtils
     public static T Read<T>(this Span<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
 
     public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
+
+    public static T Read<T>(this byte[] array) where T : unmanaged => MemoryMarshal.Read<T>(array);
+
+    public static void Write<T>(this Span<byte> span, T t) where T : unmanaged => MemoryMarshal.Write(span, ref t);
+ 
+    public static void Write<T>(this byte[] array, T t) where T : unmanaged => MemoryMarshal.Write(array, ref t);
 }
 
 public sealed class ConcurrentSet<T> : IReadOnlyCollection<T> where T : notnull
