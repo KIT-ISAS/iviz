@@ -98,17 +98,26 @@ namespace Iviz.TfHelpers
         {
             root = frame;
             transform = Transform.Identity;
-
-            while (frames.TryGetValue(root, out Frame ts) && ts.parent.Length > 0)
+            
+            while (frames.TryGetValue(root, out Frame ts))
             {
-                root = ts.parent;
                 transform = ts.transform * transform;
+
+                if (ts.parent.Length > 0)
+                {
+                    root = ts.parent;
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 
-        public void GetTransformToRoot(string fromFrame, out Transform transform)
+        public Transform GetTransformToRoot(string fromFrame)
         {
-            GetAbsoluteTransform(fromFrame, out transform, out _);
+            GetAbsoluteTransform(fromFrame, out var transform, out _);
+            return transform;
         }
 
         public bool TryGetTransformTo(string fromFrame, string toFrame, out Transform transform)
@@ -131,6 +140,11 @@ namespace Iviz.TfHelpers
         public void WaitForAnySubscriber()
         {
             writer?.Publisher.WaitForAnySubscriber();
+        }
+        
+        public void WaitForAnyPublisher()
+        {
+            reader?.Subscriber.WaitForAnyPublisher();
         }
         
         public void Publish(string frameId, string parentId) => Publish(frameId, parentId, Transform.Identity);
