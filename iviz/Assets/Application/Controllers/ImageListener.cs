@@ -28,6 +28,8 @@ namespace Iviz.Controllers
 
         public Material Material => imageTexture.Material;
 
+        public Vector2? MeasuredIntensityBounds => imageTexture.MeasuredIntensityBounds;
+        
         public string Description
         {
             get
@@ -37,7 +39,7 @@ namespace Iviz.Controllers
                     return descriptionOverride;
                 }
 
-                if (imageTexture.MeasuredIntensityBounds is not { } bounds)
+                if (MeasuredIntensityBounds is not { } bounds)
                 {
                     return imageTexture.Description;
                 }

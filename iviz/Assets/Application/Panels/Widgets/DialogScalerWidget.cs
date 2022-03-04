@@ -13,7 +13,7 @@ namespace Iviz.App
         [SerializeField] Vector2 minSize = DialogData.MinSize;
         public event Action? ScaleChanged;
 
-        RectTransform TargetTransform => targetTransform != null
+        public RectTransform TargetTransform => targetTransform != null
             ? targetTransform
             : (targetTransform = (RectTransform)transform.parent);
         

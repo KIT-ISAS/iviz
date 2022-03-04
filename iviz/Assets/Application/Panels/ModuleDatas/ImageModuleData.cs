@@ -77,6 +77,12 @@ namespace Iviz.App
             panel.ForceMinMax.ValueChanged += f =>
             {
                 listener.OverrideMinMax = f;
+                if (listener.MeasuredIntensityBounds is var (min, max))
+                {
+                    panel.Min.Value = min;
+                    panel.Max.Value = max;
+                }
+
                 panel.Min.Interactable = listener.IsMono && f;
                 panel.Max.Interactable = listener.IsMono && f;
             };
@@ -113,7 +119,7 @@ namespace Iviz.App
             panel.FlipMinMax.Interactable = listener.IsMono;
             panel.Description.Text = $"<b>{listener.Description}</b>";
         }
-        
+
         public override void UpdatePanelFast()
         {
             panel.PreviewWidget.UpdateMaterial();

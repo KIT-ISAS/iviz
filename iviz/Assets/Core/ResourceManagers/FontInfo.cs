@@ -27,6 +27,10 @@ namespace Iviz.Resources
         public string Split(string str, int maxWidth, int maxLines = 2)
         {
             ThrowHelper.ThrowIfNull(str, nameof(str));
+            if (str.Length == 0)
+            {
+                return "";
+            }
 
             int usableWidth = maxWidth - dotWidth;
 

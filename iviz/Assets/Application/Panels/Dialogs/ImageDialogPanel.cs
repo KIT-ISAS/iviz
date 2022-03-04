@@ -14,7 +14,8 @@ namespace Iviz.App
         [SerializeField] RawImage? previewImage;
         [SerializeField] TrashButtonWidget? closeButton;
         [SerializeField] ImageCursorHandler? cursorHandler;
-        
+
+        Vector2 startRect;
         Vector2Int imageSize;
 
         TMP_Text Text => text.AssertNotNull(nameof(text));
@@ -24,7 +25,9 @@ namespace Iviz.App
 
         public event Action? Closed;
         public event Action<Vector2>? Clicked;
-        
+
+        RectTransform Parent => (RectTransform)transform.parent;
+
         public string Title
         {
             get => Text.text;
@@ -47,11 +50,33 @@ namespace Iviz.App
                 {
                     return;
                 }
-                
+
                 imageSize = value;
                 AdjustSize();
+                
+                /*
+                var imageTransform = (RectTransform)PreviewImage.transform;
+                var parentTransform = ScalerWidget.TargetTransform;
+                var rrect = imageTransform.rect;
+                rrect.height = imageTransform.rect.height * imageTransform.localScale.y + Text.preferredHeight;
+                parentTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, rrect.height);
+                Debug.Log(imageTransform.rect.height);
+                Debug.Log(rrect.height);
+                Debug.Log(parentTransform.rect.height);
+                */
             }
         }
+        
+        void Awake()
+        {
+            startRect = Parent.sizeDelta;
+            
+            AdjustSize();
+
+            CloseButton.Clicked += () => Closed?.Invoke();
+            CursorHandler.Clicked += c => Clicked?.Invoke(c);
+            ScalerWidget.ScaleChanged += AdjustSize;
+        }        
 
         void AdjustSize()
         {
@@ -59,13 +84,10 @@ namespace Iviz.App
             float maxWidth = rect.width;
             float maxHeight = rect.height;
 
-            if (maxWidth == 0 || maxHeight == 0)
-            {
-                PreviewImage.transform.localScale = Vector3.one;
-                return;
-            }
-
-            if (imageSize.x == 0 || imageSize.y == 0)
+            if (maxWidth == 0
+                || maxHeight == 0
+                || imageSize.x == 0
+                || imageSize.y == 0)
             {
                 PreviewImage.transform.localScale = Vector3.one;
                 return;
@@ -82,26 +104,21 @@ namespace Iviz.App
                 : Vector3.one.WithX(scaledX / maxWidth);
         }
 
-        void Awake()
-        {
-            AdjustSize();
-
-            CloseButton.Clicked += () => Closed?.Invoke();
-            CursorHandler.Clicked += c => Clicked?.Invoke(c);
-            ScalerWidget.ScaleChanged += AdjustSize;
-        }
-        
         public void ToggleImageEnabled()
         {
             PreviewImage.enabled = false;
             PreviewImage.enabled = true;
-        }        
+        }
 
         public override void ClearSubscribers()
         {
             Closed = null;
             Clicked = null;
             Material = null;
+            
+            imageSize = default;
+
+            Parent.sizeDelta = startRect;
         }
     }
 }

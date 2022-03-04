@@ -399,19 +399,6 @@ namespace Iviz.Core
             return pose.position.MaxAbsCoeff() < maxPoseMagnitude;
         }
 
-        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T? t)
-        {
-            using var enumerator = enumerable.GetEnumerator();
-            if (enumerator.MoveNext())
-            {
-                t = enumerator.Current;
-                return true;
-            }
-
-            t = default;
-            return false;
-        }
-
         static Func<object, Array>? extractArrayFromListTypeFn;
 
         static Func<object, Array> ExtractArrayFromList
@@ -753,7 +740,20 @@ namespace Iviz.Core
                 }
             }
         }
+        
+        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T? t)
+        {
+            using var enumerator = enumerable.GetEnumerator();
+            if (enumerator.MoveNext())
+            {
+                t = enumerator.Current;
+                return true;
+            }
 
+            t = default;
+            return false;
+        }        
+        
         public static bool TryGetFirst<T>(this IEnumerable<T> ts, Predicate<T> p, [NotNullWhen(true)] out T? tp)
         {
             foreach (T t in ts)

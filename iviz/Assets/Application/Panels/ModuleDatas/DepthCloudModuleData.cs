@@ -140,6 +140,12 @@ namespace Iviz.App
             panel.ForceMinMax.ValueChanged += f =>
             {
                 controller.OverrideMinMax = f;
+                if (controller.MeasuredIntensityBounds is var (min, max))
+                {
+                    panel.Min.Value = min;
+                    panel.Max.Value = max;
+                }
+                
                 panel.Min.Interactable = f;
                 panel.Max.Interactable = f;
             };

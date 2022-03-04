@@ -528,7 +528,7 @@ namespace Iviz.App
             ThrowHelper.ThrowIfNull(file, nameof(file));
 
             var config = new StateConfiguration();
-            
+
             foreach (var moduleData in moduleDatas)
             {
                 moduleData.AddToState(config);
@@ -617,7 +617,7 @@ namespace Iviz.App
             var configs = stateConfig.CreateListOfEntries()
                 .Where(config => config.ModuleType is not
                     (ModuleType.TF or ModuleType.XR or ModuleType.AR or ModuleType.TFPublisher));
-            
+
             foreach (var config in configs)
             {
                 CreateModule(config.ModuleType, configuration: config);
@@ -1140,7 +1140,9 @@ namespace Iviz.App
             int lastSlash = type.LastIndexOf('/');
             string shortType = (lastSlash == -1) ? type : type[(lastSlash + 1)..];
             string clampedType = Resource.Font.Split(shortType, ModuleDataCaptionWidth);
-            string buttonText = $"{topicShort}\n<b>{clampedType}</b>";
+            string buttonText = topicShort.Length == 0
+                ? $"<b>{clampedType}</b>"
+                : $"{topicShort}\n<b>{clampedType}</b>";
 
             return moduleData.Controller.Visible ? buttonText : $"<color=grey>{buttonText}</color>";
         }

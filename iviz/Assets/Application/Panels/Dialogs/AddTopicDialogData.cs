@@ -7,6 +7,7 @@ using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Ros;
+using Iviz.Roslib;
 using Iviz.Tools;
 using UnityEngine;
 
@@ -44,14 +45,22 @@ namespace Iviz.App
             var newTopics = RosManager.Connection.GetSystemPublishedTopicTypes();
             foreach ((string topic, string msgType) in newTopics)
             {
+                if (!RosClient.IsValidResourceName(topic))
+                {
+                    RosLogger.Info($"{nameof(AddTopicDialogData)}: Ignoring topic '{topic}'. " +
+                                   $"Reason: Not a valid ROS identifier, may cause trouble later.");
+                    continue;
+                }
+
                 if (ModuleListPanel.Instance.DisplayedTopics.Contains(topic))
                 {
                     continue;
                 }
 
-                bool resourceFound =
-                    Resource.ResourceByRosMessageType.TryGetValue(msgType, out var resource);
-                result.Add(new TopicWithResource(topic, msgType, resourceFound ? resource : ModuleType.Invalid));
+                var resourceType = Resource.ResourceByRosMessageType.TryGetValue(msgType, out var moduleType)
+                    ? moduleType
+                    : ModuleType.Invalid;
+                result.Add(new TopicWithResource(topic, msgType, resourceType));
             }
         }
 

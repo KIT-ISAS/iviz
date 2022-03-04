@@ -87,6 +87,8 @@ namespace Iviz.Controllers
             }
         }
 
+        public Vector2? MeasuredIntensityBounds => depthImageTexture.MeasuredIntensityBounds;
+
         public float MinIntensity
         {
             get => config.MinIntensity;
@@ -180,7 +182,10 @@ namespace Iviz.Controllers
                 }
 
                 var topicInfos = RosManager.Connection.GetSystemPublishedTopicTypes();
-                string? type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == colorTopic)?.Type;
+                string? type =
+                    topicInfos.TryGetFirst(topicInfo => topicInfo.Topic == colorTopic, out var colorTopicInfo)
+                        ? colorTopicInfo.Type
+                        : null;
                 ColorListener = type switch
                 {
                     Image.RosMessageType => new Listener<Image>(colorTopic, ColorHandler),
@@ -224,7 +229,10 @@ namespace Iviz.Controllers
                 }
 
                 var topicInfos = RosManager.Connection.GetSystemPublishedTopicTypes();
-                string? type = topicInfos.FirstOrDefault(topicInfo => topicInfo.Topic == depthTopic)?.Type;
+                string? type =
+                    topicInfos.TryGetFirst(topicInfo => topicInfo.Topic == depthTopic, out var depthTopicInfo)
+                        ? depthTopicInfo.Type
+                        : null;
                 DepthListener = type switch
                 {
                     Image.RosMessageType => new Listener<Image>(depthTopic, DepthHandler),
@@ -433,9 +441,9 @@ namespace Iviz.Controllers
             {
                 RosLogger.Error($"{this}: Ignoring invalid intrinsic {intrinsic.ToString()}.");
                 return;
-                    
-            } 
-            projector.Intrinsic = intrinsic;            
+            }
+
+            projector.Intrinsic = intrinsic;
         }
 
         public bool TrySampleColor(in Vector2 rawUV, out Vector2Int uv, out TextureFormat format, out Vector4 color) =>

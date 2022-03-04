@@ -231,11 +231,15 @@ namespace Iviz.Controllers
 
             string? GetCachedPublishedType() =>
                 Connection.GetSystemPublishedTopicTypes(RequestType.CachedOnly)
-                    .FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
+                    .TryGetFirst(topicInfo => topicInfo.Topic == topic, out var topicType)
+                    ? topicType.Type
+                    : null;
 
             async ValueTask<string?> GetPublishedTypeFromServer() =>
                 (await Connection.GetSystemPublishedTopicTypesAsync(DefaultTimeoutInMs))
-                .FirstOrDefault(topicInfo => topicInfo.Topic == topic)?.Type;
+                .TryGetFirst(topicInfo => topicInfo.Topic == topic, out var topicType)
+                    ? topicType.Type
+                    : null;
 
             string? type = GetCachedPublishedType() ?? await GetPublishedTypeFromServer();
             if (type == null)

@@ -63,7 +63,7 @@ namespace Iviz.Displays
                 intrinsic = value;
                 if (DepthImage != null)
                 {
-                    UpdatePosValues(DepthImage.Texture);
+                    UpdateIntrinsicScaling(DepthImage.Texture);
                 }
             }
         }
@@ -242,7 +242,7 @@ namespace Iviz.Displays
             Material.SetTexture(PDepth, texture);
 
             UpdatePointComputeBuffers(texture);
-            UpdatePosValues(texture);
+            UpdateIntrinsicScaling(texture);
 
             if (depthImage?.Texture == null)
             {
@@ -289,7 +289,7 @@ namespace Iviz.Displays
             Material.SetBuffer(PPoints, pointComputeBuffer);
         }
 
-        void UpdatePosValues(Texture? texture)
+        void UpdateIntrinsicScaling(Texture? texture)
         {
             if (texture == null)
             {

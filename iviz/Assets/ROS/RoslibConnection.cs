@@ -7,7 +7,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
@@ -25,9 +24,10 @@ namespace Iviz.Ros
 {
     public sealed class RoslibConnection : RosConnection, Iviz.Displays.IServiceProvider
     {
-        static readonly IReadOnlyCollection<BriefTopicInfo> EmptyTopics = Array.Empty<BriefTopicInfo>();
+        static BriefTopicInfo[] EmptyTopics => Array.Empty<BriefTopicInfo>();
+        static string[] EmptyParameters => Array.Empty<string>();
+
         static readonly Random Random = new();
-        static readonly IReadOnlyCollection<string> EmptyParameters = Array.Empty<string>();
 
         readonly ConcurrentDictionary<int, IRosPublisher?> publishers = new();
         readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new();
@@ -35,9 +35,9 @@ namespace Iviz.Ros
         readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new();
         readonly List<(string hostname, string address)> hostAliases = new();
 
-        IReadOnlyCollection<string> cachedParameters = EmptyParameters;
-        IReadOnlyCollection<BriefTopicInfo> cachedPublishedTopics = EmptyTopics;
-        IReadOnlyCollection<BriefTopicInfo> cachedTopics = EmptyTopics;
+        string[] cachedParameters = EmptyParameters;
+        BriefTopicInfo[] cachedPublishedTopics = EmptyTopics;
+        BriefTopicInfo[] cachedTopics = EmptyTopics;
         SystemState? cachedSystemState;
         RosClient? client;
         BagListener? bagListener;
@@ -880,7 +880,7 @@ namespace Iviz.Ros
             servicesByTopic.Remove(serviceName);
         }
 
-        public IEnumerable<BriefTopicInfo> GetSystemPublishedTopicTypes(
+        public BriefTopicInfo[] GetSystemPublishedTopicTypes(
             RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedButRequestInBackground)
@@ -891,7 +891,7 @@ namespace Iviz.Ros
             return cachedPublishedTopics;
         }
 
-        public async ValueTask<IEnumerable<BriefTopicInfo>> GetSystemPublishedTopicTypesAsync(int timeoutInMs = 2000,
+        public async ValueTask<BriefTopicInfo[]> GetSystemPublishedTopicTypesAsync(int timeoutInMs = 2000,
             CancellationToken token = default)
         {
             if (!Connected || token.IsCancellationRequested || runningTs.Token.IsCancellationRequested)
@@ -917,7 +917,7 @@ namespace Iviz.Ros
             return cachedPublishedTopics;
         }
 
-        public IEnumerable<BriefTopicInfo> GetSystemTopicTypes(
+        public BriefTopicInfo[] GetSystemTopicTypes(
             RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedButRequestInBackground)
@@ -952,7 +952,7 @@ namespace Iviz.Ros
             }
         }
 
-        public IEnumerable<string> GetSystemParameterList(CancellationToken token = default)
+        public string[] GetSystemParameterList(CancellationToken token = default)
         {
             var internalToken = runningTs.Token;
             TaskUtils.Run(async () =>

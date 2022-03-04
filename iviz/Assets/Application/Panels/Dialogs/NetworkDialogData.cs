@@ -100,7 +100,7 @@ namespace Iviz.App
                         .Append(percentage).Append("%)</b>").AppendLine();
                 }
 
-                if (stat.Receivers.Count == 0)
+                if (stat.Receivers.Length == 0)
                 {
                     builder.Append("  (No publishers)").AppendLine().AppendLine();
                     continue;

@@ -261,8 +261,8 @@ namespace Iviz.App
             description.Append("<b>").Append(link).Append("</b>").AppendLine();
 
             description.Append("<color=#800000ff><b>Publishers:</b></color>").AppendLine();
-            var publishers = systemState.Publishers.FirstOrDefault(tuple => tuple.Topic == link);
-            if (publishers != null && publishers.Members.Count != 0)
+            if (systemState.Publishers.TryGetFirst(tuple => tuple.Topic == link, out var publishers)
+                && publishers.Members.Length != 0)
             {
                 foreach (string publisher in publishers.Members)
                 {
@@ -275,8 +275,8 @@ namespace Iviz.App
             }
 
             description.Append("<color=#000080ff><b>Subscribers:</b></color>").AppendLine();
-            var subscribers = systemState.Subscribers.FirstOrDefault(tuple => tuple.Topic == link);
-            if (subscribers != null && subscribers.Members.Count != 0)
+            if (systemState.Subscribers.TryGetFirst(tuple => tuple.Topic == link, out var subscribers)
+                && subscribers.Members.Length != 0)
             {
                 foreach (string subscriber in subscribers.Members)
                 {
@@ -316,8 +316,8 @@ namespace Iviz.App
             }
 
             description.Append("<color=#008000ff><b>Provider:</b></color>").AppendLine();
-            var providers = systemState.Services.FirstOrDefault(tuple => tuple.Topic == link);
-            if (providers != null && providers.Members.Count != 0)
+            if (systemState.Services.TryGetFirst(tuple => tuple.Topic == link, out var providers)
+                && providers.Members.Length != 0)
             {
                 foreach (string publisher in providers.Members)
                 {
