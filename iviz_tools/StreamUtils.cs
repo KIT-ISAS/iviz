@@ -98,16 +98,17 @@ public static class StreamUtils
 
         socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, OnComplete, tcs);
 
-        return tcs.Task.IsCompleted 
-            ? new ValueTask<int>(socket.EndReceive(tcs.Task.Result)) 
-            : DoReadChunkWithTokenAsync();
+        return tcs.Task.IsCompleted
+            ? new ValueTask<int>(socket.EndReceive(tcs.Task.Result))
+            : DoReadChunkWithTokenAsync(tcs, socket, token);
+    }
 
-        async ValueTask<int> DoReadChunkWithTokenAsync()
+    static async ValueTask<int> DoReadChunkWithTokenAsync(TaskCompletionSource<IAsyncResult> tcs, Socket socket,
+        CancellationToken token)
+    {
+        await using (token.Register(OnCanceled, tcs))
         {
-            await using (token.Register(OnCanceled, tcs))
-            {
-                return socket.EndReceive(await tcs.Task);
-            }
+            return socket.EndReceive(await tcs.Task);
         }
     }
 
@@ -140,17 +141,18 @@ public static class StreamUtils
         var tcs = new TaskCompletionSource<IAsyncResult>();
 
         socket.BeginSend(buffer, offset, toWrite, SocketFlags.None, OnComplete, tcs);
-        
-        return tcs.Task.IsCompleted 
-            ? new ValueTask<int>(socket.EndSend(tcs.Task.Result)) 
-            : DoWriteWithTokenAsync();
 
-        async ValueTask<int> DoWriteWithTokenAsync()
+        return tcs.Task.IsCompleted
+            ? new ValueTask<int>(socket.EndSend(tcs.Task.Result))
+            : DoWriteWithTokenAsync(tcs, socket, token);
+    }
+
+    static async ValueTask<int> DoWriteWithTokenAsync(TaskCompletionSource<IAsyncResult> tcs, Socket socket,
+        CancellationToken token)
+    {
+        await using (token.Register(OnCanceled, tcs))
         {
-            await using (token.Register(OnCanceled, tcs))
-            {
-                return socket.EndSend(await tcs.Task);
-            }
+            return socket.EndSend(await tcs.Task);
         }
     }
 
