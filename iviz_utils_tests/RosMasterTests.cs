@@ -201,7 +201,7 @@ namespace Iviz.UtilsTests
             await Task.Delay(1000);
             
             var state = subscriber.Subscriber.GetState();
-            Assert.True(state.Receivers.Count > 0);
+            Assert.True(state.Receivers.Length > 0);
             Assert.False(state.Receivers[0].IsAlive);
             Assert.NotNull(state.Receivers[0].ErrorDescription);
         }
