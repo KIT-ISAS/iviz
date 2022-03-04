@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -16,10 +17,7 @@ namespace Iviz.Roslib;
 /// Base class with common functionality for <see cref="RosChannelReader"/> and <see cref="RosChannelReader{T}"/>.
 /// </summary>
 /// <typeparam name="T">The ROS message type</typeparam>
-public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReader
-#if !NETSTANDARD2_0
-    , IAsyncEnumerable<T>
-#endif
+public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReader, IAsyncEnumerable<T>
     where T : IMessage
 {
     readonly ConcurrentQueue<T> backQueue = new();
@@ -258,13 +256,13 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
     /// <param name="t">The received message, or default if no message was available.</param>
     /// <returns>True if there was a message available.</returns>
     /// <exception cref="InvalidOperationException">Thrown if the queue has been disposed</exception>
-    public bool TryRead(out T t)
+    public bool TryRead([NotNullWhen(true)] out T? t)
     {
         ThrowIfNotStarted();
 
         if (backQueue.Count == 0)
         {
-            t = default!;
+            t = default;
             return false;
         }
 
@@ -328,7 +326,6 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
         }
     }
 
-#if !NETSTANDARD2_0
     /// <summary>
     /// Enumerates through the available messages, and 'awaits' while waiting for the next.
     /// It will only return either when the token has been canceled, or the channel has been disposed.
@@ -349,7 +346,6 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
     {
         return ReadAllAsync(token).GetAsyncEnumerator(token);
     }
-#endif
 
     IMessage IRosChannelReader.Read(CancellationToken token)
     {
@@ -363,17 +359,15 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
 
     IEnumerable<IMessage> IRosChannelReader.TryReadAll()
     {
-        return TryReadAll().Cast<IMessage>();
+        return (IEnumerable<IMessage>)TryReadAll();
     }
 
     IEnumerable<IMessage> IRosChannelReader.ReadAll(CancellationToken token)
     {
-        return ReadAll(token).Cast<IMessage>();
+        return (IEnumerable<IMessage>)ReadAll(token);
     }
 
-#if !NETSTANDARD2_0
-    async IAsyncEnumerable<IMessage> IRosChannelReader.ReadAllAsync(
-        [EnumeratorCancellation] CancellationToken token)
+    async IAsyncEnumerable<IMessage> IRosChannelReader.ReadAllAsync([EnumeratorCancellation] CancellationToken token)
     {
         ThrowIfNotStarted();
         while (true)
@@ -381,7 +375,6 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
             yield return await messageQueue.TakeAsync(token);
         }
     }
-#endif
 
     public override string ToString()
     {

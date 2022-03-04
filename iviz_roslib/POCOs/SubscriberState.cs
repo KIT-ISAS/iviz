@@ -60,36 +60,34 @@ public sealed class UninitializedReceiverState : SubscriberReceiverState
     }
 }
 
-    
 [DataContract]
 public sealed class SubscriberTopicState : JsonToString
 {
     [DataMember] public string Topic { get; }
     [DataMember] public string Type { get; }
-    [DataMember] public ReadOnlyCollection<string> SubscriberIds { get; }
-    [DataMember] public ReadOnlyCollection<SubscriberReceiverState> Receivers { get; }
+    [DataMember] public string[] SubscriberIds { get; }
+    [DataMember] public SubscriberReceiverState[] Receivers { get; }
 
-    internal SubscriberTopicState(string topic, string type, IList<string> topicIds,
-        IList<SubscriberReceiverState> receivers)
+    internal SubscriberTopicState(string topic, string type, string[] topicIds, SubscriberReceiverState[] receivers)
     {
         Topic = topic;
         Type = type;
-        SubscriberIds = topicIds.AsReadOnly();
-        Receivers = receivers.AsReadOnly();
+        SubscriberIds = topicIds;
+        Receivers = receivers;
     }
 
-    public void Deconstruct(out string topic, out string type, out ReadOnlyCollection<string> subscriberIds,
-        out ReadOnlyCollection<SubscriberReceiverState> receivers)
+    public void Deconstruct(out string topic, out string type, out string[] subscriberIds,
+        out SubscriberReceiverState[] receivers)
         => (topic, type, subscriberIds, receivers) = (Topic, Type, SubscriberIds, Receivers);
 }
 
 [DataContract]
 public sealed class SubscriberState
 {
-    [DataMember] public ReadOnlyCollection<SubscriberTopicState> Topics { get; }
+    [DataMember] public SubscriberTopicState[] Topics { get; }
 
-    internal SubscriberState(IList<SubscriberTopicState> topics)
+    internal SubscriberState(SubscriberTopicState[] topics)
     {
-        Topics = topics.AsReadOnly();
+        Topics = topics;
     }
 }

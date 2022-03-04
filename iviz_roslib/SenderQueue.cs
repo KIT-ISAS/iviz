@@ -74,9 +74,12 @@ internal sealed class SenderQueue<T> where T : IMessage
         }
     }
 
-    public Task WaitAsync(CancellationToken token)
+    public async ValueTask WaitAsync(CancellationToken token)
     {
-        return signal.WaitAsync(token);
+        while (messagesInQueue == 0)
+        {
+            await signal.WaitAsync(token);
+        }
     }
 
     public RangeEnumerable<Entry?> ReadAll(ref int numDropped, ref long bytesDropped)

@@ -7,5 +7,5 @@ namespace Iviz.Roslib.Utils;
 /// </summary>
 public abstract class JsonToString
 {
-    public override string ToString() => BuiltIns.ToJsonString(this);
+    public sealed override string ToString() => BuiltIns.ToJsonString(this);
 }

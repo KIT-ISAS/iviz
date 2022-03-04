@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Iviz.Msgs;
 using Iviz.Roslib.Utils;
 
 namespace Iviz.Roslib;
@@ -8,7 +9,7 @@ namespace Iviz.Roslib;
 /// Topic name and message type.
 /// </summary>
 [DataContract]
-public sealed class BriefTopicInfo : JsonToString, IComparable<BriefTopicInfo>
+public readonly struct BriefTopicInfo : IComparable<BriefTopicInfo>
 {
     /// <summary>
     /// Topic name
@@ -26,10 +27,9 @@ public sealed class BriefTopicInfo : JsonToString, IComparable<BriefTopicInfo>
         
     public override string ToString() => $"[Topic='{Topic}' Type='{Type}']";
 
-    public int CompareTo(BriefTopicInfo? other)
+    public int CompareTo(BriefTopicInfo other)
     {
-        if (ReferenceEquals(this, other)) return 0;
-        if (ReferenceEquals(null, other)) return 1;
         return (Topic, Type).CompareTo((other.Topic, other.Type));
     }
 }
+

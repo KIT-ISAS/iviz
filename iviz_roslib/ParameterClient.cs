@@ -78,23 +78,23 @@ public sealed class ParameterClient
         return (success, success ? response.ParameterValue : default);
     }
 
-    public ReadOnlyCollection<string> GetParameterNames()
+    public string[] GetParameterNames()
     {
         var response = GetParamNames();
         if (response.IsValid)
         {
-            return response.ParameterNameList!;
+            return response.ParameterNameList;
         }
 
         throw new RosRpcException("Failed to retrieve parameter names: " + response.StatusMessage);
     }
 
-    public async ValueTask<ReadOnlyCollection<string>> GetParameterNamesAsync(CancellationToken token = default)
+    public async ValueTask<string[]> GetParameterNamesAsync(CancellationToken token = default)
     {
         var response = await GetParamNamesAsync(token);
         if (response.IsValid)
         {
-            return response.ParameterNameList!;
+            return response.ParameterNameList;
         }
 
         throw new RosRpcException("Failed to retrieve parameter names: " + response.StatusMessage);
@@ -459,7 +459,7 @@ public sealed class ParameterClient
 
     internal sealed class GetParamNamesResponse : BaseResponse
     {
-        public ReadOnlyCollection<string>? ParameterNameList { get; }
+        public string[] ParameterNameList { get; } = Array.Empty<string>();
 
         internal GetParamNamesResponse(XmlRpcValue[]? a)
         {
@@ -486,7 +486,8 @@ public sealed class ParameterClient
                 return;
             }
 
-            List<string> nameList = new();
+            string[] nameList = new string[objNameList.Length];
+            int r = 0;
             foreach (var objName in objNameList)
             {
                 if (!objName.TryGetString(out string name))
@@ -495,10 +496,10 @@ public sealed class ParameterClient
                     return;
                 }
 
-                nameList.Add(name);
+                nameList[r++] = name;
             }
 
-            ParameterNameList = nameList.AsReadOnly();
+            ParameterNameList = nameList;
         }
     }
 }

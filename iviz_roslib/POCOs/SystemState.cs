@@ -6,13 +6,10 @@ namespace Iviz.Roslib;
 
 public sealed class SystemState : JsonToString
 {
-    public ReadOnlyCollection<TopicTuple> Publishers { get; }
-    public ReadOnlyCollection<TopicTuple> Subscribers { get; }
-    public ReadOnlyCollection<TopicTuple> Services { get; }
+    public TopicTuple[] Publishers { get; }
+    public TopicTuple[] Subscribers { get; }
+    public TopicTuple[] Services { get; }
 
-    internal SystemState(
-        ReadOnlyCollection<TopicTuple> publishers,
-        ReadOnlyCollection<TopicTuple> subscribers,
-        ReadOnlyCollection<TopicTuple> services) =>
+    internal SystemState(TopicTuple[] publishers, TopicTuple[] subscribers, TopicTuple[] services) =>
         (Publishers, Subscribers, Services) = (publishers, subscribers, services);
 }

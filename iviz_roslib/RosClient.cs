@@ -506,9 +506,9 @@ public sealed class RosClient : IRosClient
     /// </summary>
     /// <param name="usingPort">Port for the caller uri, or 0 for a random free port.</param>
     /// <returns>A list of possible caller uris.</returns>
-    public static ReadOnlyCollection<Uri> GetCallerUriCandidates(int usingPort = AnyPort)
+    public static Uri[] GetCallerUriCandidates(int usingPort = AnyPort)
     {
-        List<Uri> candidates = new();
+        var candidates = new List<Uri>();
         string? envHostname = EnvironmentCallerHostname;
         string portStr = usingPort.ToString();
 
@@ -524,7 +524,7 @@ public sealed class RosClient : IRosClient
 
         candidates.AddRange(uris);
 
-        return candidates.AsReadOnly();
+        return candidates.ToArray();
     }
 
     /// <summary>
@@ -565,8 +565,6 @@ public sealed class RosClient : IRosClient
     }
 
 
-    static bool IsAlpha(char c) => c is (>= 'a' and <= 'z') or (>= 'A' and <= 'Z');
-
     /// <summary>
     /// Checks if the given name is a valid ROS resource name
     /// </summary>  
@@ -578,7 +576,7 @@ public sealed class RosClient : IRosClient
         }
 
         char c0 = name[0];
-        if (c0 is not '/' && c0 is not '~' && !IsAlpha(c0))
+        if (c0 is not '/' && c0 is not '~' && !char.IsLetter(c0))
         {
             return false;
         }
@@ -586,7 +584,7 @@ public sealed class RosClient : IRosClient
         foreach (int i in 1..name.Length)
         {
             char c = name[i];
-            if (!IsAlpha(c) && !char.IsDigit(c) && c is not '_' && c is not '/')
+            if (!char.IsLetterOrDigit(c) && c is not '_' && c is not '/')
             {
                 return false;
             }
@@ -606,7 +604,7 @@ public sealed class RosClient : IRosClient
         }
 
         char c0 = name[0];
-        if (!IsAlpha(c0) && c0 is not '/' && c0 is not '~')
+        if (!char.IsLetter(c0) && c0 is not '/' && c0 is not '~')
         {
             throw new RosInvalidResourceName(
                 $"Resource name '{name}' is not valid. It must start with an alphanumeric character, " +
@@ -616,7 +614,7 @@ public sealed class RosClient : IRosClient
         foreach (int i in 1..name.Length)
         {
             char c = name[i];
-            if (!IsAlpha(c) && !char.IsDigit(c) && c is not '_' && c is not '/')
+            if (!char.IsLetterOrDigit(c) && c is not '_' && c is not '/')
             {
                 throw new RosInvalidResourceName(
                     $"Resource name '{name}' is not valid. It must only contain alphanumeric characters, " +
@@ -1402,7 +1400,7 @@ public sealed class RosClient : IRosClient
     /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
     /// </summary>
     /// <returns>List of topic names and message types.</returns>
-    public ReadOnlyCollection<BriefTopicInfo> GetSystemPublishedTopics()
+    public BriefTopicInfo[] GetSystemPublishedTopics()
     {
         var response = RosMasterClient.GetPublishedTopics();
         if (!response.IsValid)
@@ -1412,7 +1410,7 @@ public sealed class RosClient : IRosClient
 
         return response.Topics
             .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
-            .ToArray().AsReadOnly();
+            .ToArray();
     }
 
     /// <summary>
@@ -1420,7 +1418,7 @@ public sealed class RosClient : IRosClient
     /// Corresponds to the function 'getPublishedTopics' in the ROS Master API.
     /// </summary>
     /// <returns>List of topic names and message types.</returns>
-    public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemPublishedTopicsAsync(
+    public async ValueTask<BriefTopicInfo[]> GetSystemPublishedTopicsAsync(
         CancellationToken token = default)
     {
         var response = await RosMasterClient.GetPublishedTopicsAsync(token: token);
@@ -1431,7 +1429,7 @@ public sealed class RosClient : IRosClient
 
         return response.Topics
             .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
-            .ToArray().AsReadOnly();
+            .ToArray();
     }
 
     /// <summary>
@@ -1439,14 +1437,14 @@ public sealed class RosClient : IRosClient
     /// Corresponds to the function 'getTopicTypes' in the ROS Master API.
     /// </summary>
     /// <returns>List of topic names and message types.</returns>
-    public ReadOnlyCollection<BriefTopicInfo> GetSystemTopicTypes()
+    public BriefTopicInfo[] GetSystemTopicTypes()
     {
         var response = RosMasterClient.GetTopicTypes();
         if (response.IsValid)
         {
             return response.Topics
                 .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
-                .ToArray().AsReadOnly();
+                .ToArray();
         }
 
         throw new RosRpcException($"Failed to retrieve topics: {response.StatusMessage}");
@@ -1457,7 +1455,7 @@ public sealed class RosClient : IRosClient
     /// Corresponds to the function 'getTopicTypes' in the ROS Master API.
     /// </summary>
     /// <returns>List of topic names and message types.</returns>
-    public async ValueTask<ReadOnlyCollection<BriefTopicInfo>> GetSystemTopicTypesAsync(
+    public async ValueTask<BriefTopicInfo[]> GetSystemTopicTypesAsync(
         CancellationToken token = default)
     {
         var response = await RosMasterClient.GetTopicTypesAsync(token: token);
@@ -1468,14 +1466,14 @@ public sealed class RosClient : IRosClient
 
         return response.Topics
             .Select(tuple => new BriefTopicInfo(tuple.name, tuple.type))
-            .ToArray().AsReadOnly();
+            .ToArray();
     }
 
 
     /// <summary>
     /// Gets the topics published by this node.
     /// </summary>
-    public ReadOnlyCollection<BriefTopicInfo> SubscribedTopics => GetSubscriptionsRpc().AsReadOnly();
+    public BriefTopicInfo[] SubscribedTopics => GetSubscriptionsRpc();
 
     /// <summary>
     /// Asks the master for the nodes and topics in the system.
@@ -1512,7 +1510,7 @@ public sealed class RosClient : IRosClient
     /// <summary>
     /// Gets the topics published by this node.
     /// </summary>
-    public ReadOnlyCollection<BriefTopicInfo> PublishedTopics => GetPublicationsRpc().AsReadOnly();
+    public BriefTopicInfo[] PublishedTopics => GetPublicationsRpc();
 
     internal BriefTopicInfo[] GetSubscriptionsRpc()
     {
@@ -1641,7 +1639,7 @@ public sealed class RosClient : IRosClient
     public PublisherState GetPublisherStatistics() =>
         new(publishersByTopic.Values.Select(publisher => publisher.GetState()).ToArray());
 
-    internal IReadOnlyList<BusInfo> GetBusInfoRpc()
+    internal List<BusInfo> GetBusInfoRpc()
     {
         var busInfos = new List<BusInfo>();
 

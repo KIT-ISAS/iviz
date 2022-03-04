@@ -229,45 +229,49 @@ internal sealed class ReceiverManager<T> where T : IMessage
         await connectors.Select(connector => connector.DisposeAsync(token).AsTask()).WhenAll();
     }
 
-    public ReadOnlyCollection<SubscriberReceiverState> GetStates()
+    public SubscriberReceiverState[] GetStates()
     {
         var publisherUris = cachedPublisherUris;
         var receivers = new Dictionary<Uri, IProtocolReceiver>(receiversByUri);
         var connectors = new Dictionary<Uri, ReceiverConnector>(connectorsByUri);
 
-        var states = new List<SubscriberReceiverState>();
+        SubscriberReceiverState[] states = new SubscriberReceiverState[publisherUris.Count];
+        int r = 0;
+
+        void Add(SubscriberReceiverState state) => states[r++] = state;
+        
         foreach (Uri uri in publisherUris)
         {
             if (receivers.TryGetValue(uri, out var receiver))
             {
                 if (receiver.IsAlive)
                 {
-                    states.Add(receiver.State);
+                    Add(receiver.State);
                     continue;
                 }
 
                 if (connectors.TryGetValue(uri, out var connector) && connector.IsAlive)
                 {
-                    states.Add(connector.State);
+                    Add(connector.State);
                     continue;
                 }
 
-                states.Add(receiver.State);
+                Add(receiver.State);
                 continue;
             }
             else
             {
                 if (connectors.TryGetValue(uri, out var connector))
                 {
-                    states.Add(connector.State);
+                    Add(connector.State);
                     continue;
                 }
             }
 
-            states.Add(new UninitializedReceiverState(uri));
+            Add(new UninitializedReceiverState(uri));
         }
 
-        return states.AsReadOnly();
+        return states;
     }
 
     public override string ToString() => $"[ReceiverManager '{Topic}']";

@@ -9,10 +9,7 @@ namespace Iviz.Roslib;
 /// <summary>
 /// Generic interface for all ROS channel readers.
 /// </summary>
-public interface IRosChannelReader : IDisposable
-#if !NETSTANDARD2_0
-    , IAsyncDisposable
-#endif
+public interface IRosChannelReader : IDisposable, IAsyncDisposable
 {
     /// <summary>
     /// Waits until a message arrives.

@@ -273,10 +273,6 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         while (KeepRunning)
         {
             await senderQueue.WaitAsync(runningTs.Token);
-            if (senderQueue.Count == 0)
-            {
-                continue;
-            }
 
             var queue = senderQueue.ReadAll(ref numDropped, ref bytesDropped);
 

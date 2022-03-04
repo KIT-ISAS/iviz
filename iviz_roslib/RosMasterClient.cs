@@ -449,11 +449,11 @@ public abstract class BaseResponse : JsonToString
 
 public sealed class GetSystemStateResponse : BaseResponse
 {
-    static readonly ReadOnlyCollection<TopicTuple> Empty = Array.Empty<TopicTuple>().AsReadOnly();
+    static readonly TopicTuple[] Empty = Array.Empty<TopicTuple>();
 
-    public ReadOnlyCollection<TopicTuple> Publishers { get; } = Empty;
-    public ReadOnlyCollection<TopicTuple> Subscribers { get; } = Empty;
-    public ReadOnlyCollection<TopicTuple> Services { get; } = Empty;
+    public TopicTuple[] Publishers { get; } = Empty;
+    public TopicTuple[] Subscribers { get; } = Empty;
+    public TopicTuple[] Services { get; } = Empty;
 
     internal GetSystemStateResponse(XmlRpcValue[]? a)
     {
@@ -473,7 +473,7 @@ public sealed class GetSystemStateResponse : BaseResponse
         Services = CreateTuple(root[2]);
     }
 
-    ReadOnlyCollection<TopicTuple> CreateTuple(XmlRpcValue root)
+    TopicTuple[] CreateTuple(XmlRpcValue root)
     {
         if (!root.TryGetArray(out XmlRpcValue[] objTuples))
         {
@@ -481,7 +481,8 @@ public sealed class GetSystemStateResponse : BaseResponse
             return Empty;
         }
 
-        List<TopicTuple> result = new();
+        var result = new TopicTuple[objTuples.Length];
+        int r = 0;
         foreach (var objTuple in objTuples)
         {
             if (!objTuple.TryGetArray(out XmlRpcValue[] tuple) ||
@@ -505,11 +506,11 @@ public sealed class GetSystemStateResponse : BaseResponse
                 members[i] = member;
             }
 
-            result.Add(new TopicTuple(topic, members));
+            result[r++] = new TopicTuple(topic, members);
         }
 
-        result.Sort();
-        return result.AsReadOnly();
+        Array.Sort(result);
+        return result;
     }
 }
 
@@ -618,9 +619,9 @@ public sealed class LookupNodeResponse : BaseResponse
 
 public sealed class GetPublishedTopicsResponse : BaseResponse
 {
-    static readonly ReadOnlyCollection<(string, string)> Empty = Array.Empty<(string, string)>().AsReadOnly();
+    static readonly (string name, string type)[] Empty = Array.Empty<(string, string)>();
 
-    public ReadOnlyCollection<(string name, string type)> Topics { get; } = Empty;
+    public (string name, string type)[] Topics { get; } = Empty;
 
     internal GetPublishedTopicsResponse(XmlRpcValue[]? a)
     {
@@ -635,7 +636,8 @@ public sealed class GetPublishedTopicsResponse : BaseResponse
             return;
         }
 
-        List<(string, string)> topics = new();
+        var topics = new (string, string)[objTopics.Length];
+        int r = 0;
         foreach (var objTopic in objTopics)
         {
             if (!objTopic.TryGetArray(out XmlRpcValue[] topic) ||
@@ -647,19 +649,19 @@ public sealed class GetPublishedTopicsResponse : BaseResponse
                 return;
             }
 
-            topics.Add((topicName, topicType));
+            topics[r++] = (topicName, topicType);
         }
 
-        topics.Sort();
-        Topics = topics.AsReadOnly();
+        Array.Sort(topics);
+        Topics = topics;
     }
 }
 
 public sealed class RegisterSubscriberResponse : BaseResponse
 {
-    static readonly ReadOnlyCollection<Uri> Empty = Array.Empty<Uri>().AsReadOnly();
+    static readonly Uri[] Empty = Array.Empty<Uri>();
 
-    public ReadOnlyCollection<Uri> Publishers { get; } = Empty;
+    public Uri[] Publishers { get; } = Empty;
 
     internal RegisterSubscriberResponse(XmlRpcValue[]? a)
     {
@@ -674,7 +676,8 @@ public sealed class RegisterSubscriberResponse : BaseResponse
             return;
         }
 
-        List<Uri> publishers = new();
+        var publishers = new Uri[objUriStrings.Length];
+        int r = 0;
         foreach (var objUriStr in objUriStrings)
         {
             if (!objUriStr.TryGetString(out string uriStr) ||
@@ -685,10 +688,10 @@ public sealed class RegisterSubscriberResponse : BaseResponse
                 return;
             }
 
-            publishers.Add(publisher);
+            publishers[r++] = publisher;
         }
 
-        Publishers = publishers.AsReadOnly();
+        Publishers = publishers;
     }
 }
 
@@ -715,9 +718,9 @@ public sealed class UnregisterSubscriberResponse : BaseResponse
 
 public sealed class RegisterPublisherResponse : BaseResponse
 {
-    static readonly ReadOnlyCollection<string> Empty = Array.Empty<string>().AsReadOnly();
+    static readonly string[] Empty = Array.Empty<string>();
 
-    public ReadOnlyCollection<string> Subscribers { get; } = Empty;
+    public string[] Subscribers { get; } = Empty;
 
     internal RegisterPublisherResponse(XmlRpcValue[]? a)
     {
@@ -732,7 +735,8 @@ public sealed class RegisterPublisherResponse : BaseResponse
             return;
         }
 
-        List<string> subscribers = new();
+        string[] subscribers = new string[objSubscriberStrs.Length];
+        int r = 0;
         foreach (var objSubscriberStr in objSubscriberStrs)
         {
             if (!objSubscriberStr.TryGetString(out string subscriberStr))
@@ -741,10 +745,10 @@ public sealed class RegisterPublisherResponse : BaseResponse
                 return;
             }
 
-            subscribers.Add(subscriberStr);
+            subscribers[r++] = subscriberStr;
         }
 
-        Subscribers = subscribers.AsReadOnly();
+        Subscribers = subscribers;
     }
 }
 
