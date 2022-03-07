@@ -28,8 +28,8 @@ namespace Iviz.App
 
         void Awake()
         {
-            serverMode.InactiveText = "Master Off";
-            serverMode.ActiveText = "Master On";
+            serverMode.InactiveText = "Master\nOff";
+            serverMode.ActiveText = "Master\nOn";
             serverMode.State = RosManager.Server.IsActive;
         }
 

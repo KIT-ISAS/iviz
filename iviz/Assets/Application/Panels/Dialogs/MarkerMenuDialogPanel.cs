@@ -34,7 +34,8 @@ namespace Iviz.App
 
         public void Set(MenuEntryDescription[] menuEntries, Action<uint> newCallback)
         {
-            callback = newCallback ?? throw new ArgumentNullException(nameof(newCallback));
+            ThrowHelper.ThrowIfNull(newCallback, nameof(newCallback));
+            callback = newCallback;
             Entries = menuEntries;
             gameObject.SetActive(true);
         }

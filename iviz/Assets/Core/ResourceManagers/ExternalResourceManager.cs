@@ -164,10 +164,7 @@ namespace Iviz.Displays
         public async ValueTask<(bool result, string robotDescription)> TryGetRobotAsync(string robotName,
             CancellationToken token = default)
         {
-            if (string.IsNullOrEmpty(robotName))
-            {
-                throw new ArgumentException("Value cannot be null or empty.", nameof(robotName));
-            }
+            ThrowHelper.ThrowIfNullOrEmpty(robotName, nameof(robotName));
 
             if (!resourceFiles.RobotDescriptions.TryGetValue(robotName, out string localPath))
             {
@@ -198,15 +195,8 @@ namespace Iviz.Displays
         public async ValueTask AddRobotResourceAsync(string robotName, string robotDescription,
             CancellationToken token = default)
         {
-            if (string.IsNullOrEmpty(robotName))
-            {
-                throw new ArgumentException("Value cannot be null or empty.", nameof(robotName));
-            }
-
-            if (string.IsNullOrEmpty(robotDescription))
-            {
-                throw new ArgumentException("Value cannot be null or empty.", nameof(robotDescription));
-            }
+            ThrowHelper.ThrowIfNullOrEmpty(robotName, nameof(robotName));
+            ThrowHelper.ThrowIfNullOrEmpty(robotDescription, nameof(robotDescription));
 
             string localPath = SanitizeFilename(robotName);
 
@@ -221,10 +211,7 @@ namespace Iviz.Displays
 
         public async ValueTask RemoveRobotResourceAsync(string robotName, CancellationToken token = default)
         {
-            if (string.IsNullOrEmpty(robotName))
-            {
-                throw new ArgumentException("Value cannot be null or empty.", nameof(robotName));
-            }
+            ThrowHelper.ThrowIfNullOrEmpty(robotName, nameof(robotName));
 
             if (!resourceFiles.RobotDescriptions.TryGetValue(robotName, out string localPath))
             {

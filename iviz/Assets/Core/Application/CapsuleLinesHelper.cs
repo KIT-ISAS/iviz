@@ -170,7 +170,18 @@ namespace Iviz.Displays
                 }
             }
 
-            using var indices = new Rent<int>(16 * 3 * lineBuffer.Length);
+            int indicesSize = 16 * 3 * lineBuffer.Length;
+            mesh.Clear();
+            mesh.indexFormat = indicesSize <= UnityUtils.MeshUInt16Threshold
+                ? IndexFormat.UInt16
+                : IndexFormat.UInt32;
+
+            mesh.SetVertices(points);
+            mesh.SetColors(colors);
+            mesh.SetUVs(uvs);
+            
+            
+            using var indices = new Rent<int>(indicesSize);
             int[] iArray = indices.Array;
             int iOff = 0;
 
@@ -183,16 +194,7 @@ namespace Iviz.Displays
                 }
             }
 
-
-            mesh.Clear();
-            mesh.indexFormat = indices.Length <= UnityUtils.MeshUInt16Threshold
-                ? IndexFormat.UInt16
-                : IndexFormat.UInt32;
-
-            mesh.SetVertices(points);
             mesh.SetTriangles(indices);
-            mesh.SetColors(colors);
-            mesh.SetUVs(uvs);
         }
     }
 }

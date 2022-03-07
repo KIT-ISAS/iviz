@@ -13,7 +13,6 @@ using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Resources;
 using Iviz.Tools;
-using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Color32 = UnityEngine.Color32;
 using Object = UnityEngine.Object;

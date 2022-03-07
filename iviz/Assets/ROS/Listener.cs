@@ -56,15 +56,10 @@ namespace Iviz.Ros
 
         Listener(string topic, RosTransportHint transportHint)
         {
-            if (string.IsNullOrWhiteSpace(topic))
-            {
-                throw new ArgumentException("Invalid or empty topic name", nameof(topic));
-            }
-
+            ThrowHelper.ThrowIfNullOrEmpty(topic, nameof(topic));
             Topic = topic;
             Type = BuiltIns.GetMessageType(typeof(T));
             this.transportHint = transportHint;
-            
             GameThread.EverySecond += UpdateStats;
         }
 
@@ -78,7 +73,8 @@ namespace Iviz.Ros
         public Listener(string topic, Action<T> handler,
             RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
         {
-            handlerOnGameThread = handler ?? throw new ArgumentNullException(nameof(handler));
+            ThrowHelper.ThrowIfNull(handler, nameof(handler));
+            handlerOnGameThread = handler;
             GameThread.ListenersEveryFrame += CallHandlerOnGameThread;
             Connection.Subscribe(this);
             Subscribed = true;
@@ -100,7 +96,8 @@ namespace Iviz.Ros
         public Listener(string topic, Func<T, IRosReceiver, bool> handler,
             RosTransportHint transportHint = RosTransportHint.PreferTcp) : this(topic, transportHint)
         {
-            directHandler = handler ?? throw new ArgumentNullException(nameof(handler));
+            ThrowHelper.ThrowIfNull(handler, nameof(handler));
+            directHandler = handler;
             Connection.Subscribe(this);
             Subscribed = true;
         }
@@ -140,7 +137,6 @@ namespace Iviz.Ros
                 GameThread.ListenersEveryFrame -= CallHandlerOnGameThread;
             }
 
-            //RosLogger.Info($"{this}: Unsubscribing.");
             Unsubscribe();
         }
 

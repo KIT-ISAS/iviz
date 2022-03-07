@@ -71,11 +71,9 @@ namespace Iviz.Controllers
 
         public IEnumerable<(int width, int height)> GetResolutions()
         {
-            var configuration = cameraManager.subsystem.currentConfiguration;
-
-            return configuration == null
-                ? Array.Empty<(int width, int height)>()
-                : new[] { (configuration.Value.width, configuration.Value.height) };
+            return cameraManager.subsystem.currentConfiguration is { } configuration
+                ? new[] { (configuration.width, configuration.height) }
+                : Array.Empty<(int, int)>();
         }
 
         public ValueTask StartAsync(int width, int height, bool withHolograms) => default;
@@ -116,13 +114,15 @@ namespace Iviz.Controllers
                 {
                     if (token.IsCancellationRequested)
                     {
-                        task.TrySetCanceled();
+                        task.TrySetCanceled(token);
                         return;
                     }
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        RosLogger.Info($"{this}: Conversion request of color image failed with status {status}");
+                        task.TrySetException(
+                            new InvalidOperationException(
+                                $"Conversion request of color image failed with status {status}"));
                         return;
                     }
 
@@ -189,8 +189,9 @@ namespace Iviz.Controllers
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        RosLogger.Info($"{this}: Conversion request of depth image failed with status {status}");
-                        task.TrySetResult(null);
+                        task.TrySetException(
+                            new InvalidOperationException(
+                                $"Conversion request of color image failed with status {status}"));
                         return;
                     }
 
@@ -264,8 +265,9 @@ namespace Iviz.Controllers
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        RosLogger.Info($"{this}: Conversion request of confidence image failed with status {status}");
-                        task.TrySetResult(null);
+                        task.TrySetException(
+                            new InvalidOperationException(
+                                $"Conversion request of color image failed with status {status}"));
                         return;
                     }
 
@@ -289,15 +291,10 @@ namespace Iviz.Controllers
 
         static void MirrorX<T>(Span<byte> bytes, int width, int height) where T : unmanaged
         {
-            if (width * height * Unsafe.SizeOf<T>() > bytes.Length)
-            {
-                throw new ArgumentException("Sizes are not correct and might cause a buffer overflow!");
-            }
-
-            var ptr = bytes.Cast<T>();
+            var span = bytes.Cast<T>()[..(width * height)];
             foreach (int v in ..height)
             {
-                var row = ptr.Slice(v * width, width);
+                var row = span.Slice(v * width, width);
                 foreach (int u in ..(width / 2))
                 {
                     ref T l = ref row[u];

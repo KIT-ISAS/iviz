@@ -63,7 +63,7 @@ namespace Iviz.Displays
         {
             var axis = new Vector3(q.x, q.y, q.z);
 
-            float sin = axis.magnitude;
+            float sin = axis.Magnitude();
             float cos = q.w;
 
             if (sin.ApproximatelyZero())
@@ -91,16 +91,6 @@ namespace Iviz.Displays
 
         void Set(float angle, in Vector3 axis, float scale)
         {
-            /*
-            if (axis.y < 0)
-            {
-                ValidatedSet(angle, -axis, scale);
-            }
-            else
-            {
-                ValidatedSet(-angle, axis, scale);
-            }
-            */
             ValidatedSet(-angle, axis, scale);
         }
 

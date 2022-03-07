@@ -163,10 +163,10 @@ namespace Iviz.Controllers
                 }
 
                 triangleListFlipWinding = value;
-                if (resource is MeshTrianglesDisplay r)
+                if (resource is MeshTrianglesDisplay display)
                 {
                     previousHash = null;
-                    r.FlipWinding = value;
+                    display.FlipWinding = value;
                 }
             }
         }
@@ -208,7 +208,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (resource == null)
+            if (runningTs is { Token: { IsCancellationRequested: true } } || resource == null)
             {
                 return;
             }
@@ -437,8 +437,12 @@ namespace Iviz.Controllers
 
         async ValueTask UpdateResourceAsync(Marker msg)
         {
-            var newResourceKey = await GetRequestedResource(msg);
-            if (newResourceKey == resourceKey)
+            ProcessResource(msg, await GetRequestedResource(msg));
+        }
+
+        void ProcessResource(Marker msg, ResourceKey<GameObject>? newResourceKey)
+        {
+            if (newResourceKey != resourceKey)
             {
                 return;
             }
@@ -553,10 +557,8 @@ namespace Iviz.Controllers
 
             try
             {
-                var result = await Resource.GetGameObjectResourceAsync(meshResource,
-                    RosManager.ServiceProvider, runningTs.Token);
-                runningTs.Token.ThrowIfCancellationRequested();
-                return result;
+                return await Resource.GetGameObjectResourceAsync(meshResource, RosManager.ServiceProvider,
+                    runningTs.Token);
             }
             catch (Exception e) when (e is not OperationCanceledException)
             {
@@ -777,16 +779,13 @@ namespace Iviz.Controllers
                         AppendColorLog(msg.Color);
                         AppendScalarLog(msg.Scale.X);
 
-                        switch (sx)
+                        if (sx == 0)
                         {
-                            case 0:
-                                description.Append(WarnStr).Append("Scale value of 0").AppendLine();
-                                break;
-                            case float.NaN:
-                            case float.NegativeInfinity:
-                            case float.PositiveInfinity:
-                                description.Append(WarnStr).Append("Scale value of NaN or infinite").AppendLine();
-                                break;
+                            description.Append(WarnStr).Append("Scale value of 0").AppendLine();
+                        }
+                        else if (sx.IsInvalid())
+                        {
+                            description.Append(WarnStr).Append("Scale value of NaN or infinite").AppendLine();
                         }
 
                         break;

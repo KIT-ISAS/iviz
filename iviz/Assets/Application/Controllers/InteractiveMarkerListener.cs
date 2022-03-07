@@ -93,7 +93,7 @@ namespace Iviz.Controllers
         public string Topic => config.Topic;
 
         public int NumEntriesForLog => interactiveMarkers.Count;
-        
+
         public void GenerateLog(StringBuilder description, int minIndex, int numEntries)
         {
             ThrowHelper.ThrowIfNull(description, nameof(description));
@@ -148,7 +148,7 @@ namespace Iviz.Controllers
                 return $"{markerStr}\n{errorStr}, {warnStr}";
             }
         }
-        
+
         public override IListener Listener { get; }
 
         public InteractiveMarkerListener(InteractiveMarkerConfiguration? config, string topic)
@@ -159,7 +159,7 @@ namespace Iviz.Controllers
                 Topic = topic,
                 Id = topic
             };
-            
+
             Listener = new Listener<InteractiveMarkerUpdate>(Config.Topic, HandlerUpdate) { MaxQueueSize = 50 };
 
             string root;
@@ -182,8 +182,9 @@ namespace Iviz.Controllers
 
         public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
         {
-            bounds = GetAllBounds().FirstOrDefault(markerBounds => ((MarkerObject)markerBounds).UniqueNodeName == id);
-            return bounds != null;
+            return GetAllBounds().TryGetFirst(
+                markerBounds => ((MarkerObject)markerBounds).UniqueNodeName == id,
+                out bounds);
         }
 
         public IEnumerable<IHasBounds> GetAllBounds() =>

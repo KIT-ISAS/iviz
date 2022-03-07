@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Core;
@@ -42,11 +43,10 @@ namespace Iviz.App
 
             foreach (var module in UniqueModules)
             {
-                bool hasModule = ModuleListPanel.ModuleDatas.Any(moduleData => moduleData.ModuleType == module);
-                if (hasModule)
+                if (ModuleListPanel.ModuleDatas.Any(moduleData => moduleData.ModuleType == module)
+                    && Modules.Zip(itemList).TryGetFirst(tuple => tuple.First.Module == module, out var entry))
                 {
-                    var entry = Modules.Zip(itemList).FirstOrDefault(tuple => tuple.First.Module == module).Second;
-                    entry.Interactable = false;
+                    entry.Second.Interactable = false;
                 }
             }
         }

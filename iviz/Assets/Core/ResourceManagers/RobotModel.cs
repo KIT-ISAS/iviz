@@ -139,10 +139,7 @@ namespace Iviz.Displays
         /// <param name="robotDescription">URDF text.</param>
         public RobotModel(string robotDescription)
         {
-            if (string.IsNullOrEmpty(robotDescription))
-            {
-                throw new ArgumentException("Value cannot be null or empty.", nameof(robotDescription));
-            }
+            ThrowHelper.ThrowIfNullOrEmpty(robotDescription, nameof(robotDescription));
 
             robot = UrdfFile.CreateFromXml(robotDescription);
 
@@ -188,9 +185,9 @@ namespace Iviz.Displays
             var keysWithoutParent = new HashSet<string>(linkObjects.Keys);
             keysWithoutParent.RemoveWhere(linkParents.Keys.Contains);
 
-            BaseLink = keysWithoutParent.FirstOrDefault();
-            if (BaseLink != null)
+            if (keysWithoutParent.TryGetFirst(out string? baseLink))
             {
+                BaseLink = baseLink;
                 linkObjects[BaseLink].transform.SetParent(baseLinkObject.transform, false);
             }
 
@@ -198,11 +195,12 @@ namespace Iviz.Displays
 
             runningTs.Token.ThrowIfCancellationRequested();
             ApplyAnyValidConfiguration();
-
+            
+            var modelLoadingTasks = robot.Links.SelectMany(
+                link => ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, runningTs.Token));
+            
             try
             {
-                var modelLoadingTasks = robot.Links.SelectMany(
-                    link => ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, runningTs.Token));
                 await modelLoadingTasks.WhenAll();
             }
             catch (OperationCanceledException)
@@ -287,7 +285,7 @@ namespace Iviz.Displays
             } while (hasChanges);
         }
 
-        public void CancelTasks()
+        void CancelTasks()
         {
             runningTs.Cancel();
         }

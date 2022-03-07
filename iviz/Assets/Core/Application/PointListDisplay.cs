@@ -163,10 +163,8 @@ namespace Iviz.Displays
 
             ReadOnlySpan<float4> points = pointBuffer;
             using (var vertices = new Rent<Vector3>(points.Length))
-            using (var indices = new Rent<int>(points.Length))
             {
                 var vArray = vertices.Array;
-                int[] iArray = indices.Array;
 
                 if (UseColormap)
                 {
@@ -174,8 +172,6 @@ namespace Iviz.Displays
                     var uvsArray = uvs.Array;
                     for (int i = 0; i < points.Length; i++)
                     {
-                        iArray[i] = i;
-
                         ref readonly var p = ref points[i];
                         ref var v = ref vArray[i];
                         v.x = p.x;
@@ -186,28 +182,35 @@ namespace Iviz.Displays
 
                     mesh.SetVertices(vertices);
                     mesh.SetUVs(uvs);
-                    mesh.SetIndices(indices, MeshTopology.Points, 0);
                 }
                 else
                 {
                     using var colors = new Rent<Color32>(points.Length);
-                    var cArray = colors.Array;
+                    var cArray = MemoryMarshal.Cast<Color32, float>(colors.Array);
                     for (int i = 0; i < points.Length; i++)
                     {
-                        iArray[i] = i;
-
                         ref readonly var p = ref points[i];
                         ref var v = ref vArray[i];
                         v.x = p.x;
                         v.y = p.y;
                         v.z = p.z;
-                        cArray[i] = UnityUtils.AsColor32(p.w);
+                        cArray[i] = p.w;
                     }
 
                     mesh.SetVertices(vertices);
                     mesh.SetColors(colors);
-                    mesh.SetIndices(indices, MeshTopology.Points, 0);
                 }
+            }
+
+            using (var indices = new Rent<int>(points.Length))
+            {
+                Span<int> iArray = indices;
+                for (int i = 0; i < iArray.Length; i++)
+                {
+                    iArray[i] = i;
+                }
+
+                mesh.SetIndices(indices, MeshTopology.Points, 0);
             }
 
             isDirty = false;

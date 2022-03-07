@@ -76,6 +76,16 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool PreferUdp
+        {
+            get => config.PreferUdp;
+            set
+            {
+                config.PreferUdp = value;
+                Listener.TransportHint = value ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
+            }
+        }
+
         public bool ParentConnectorVisible
         {
             get => config.ParentConnectorVisible;
@@ -139,8 +149,8 @@ namespace Iviz.Controllers
             instance = this;
 
             Publisher = new Sender<TFMessage>(TfModule.DefaultTopic);
-            Listener = new Listener<TFMessage>(TfModule.DefaultTopic, HandlerNonStatic);
             ListenerStatic = new Listener<TFMessage>(TfModule.DefaultTopicStatic, HandlerStatic);
+            Listener = new Listener<TFMessage>(TfModule.DefaultTopic, HandlerNonStatic);
 
             Config = config ?? new TfConfiguration
             {

@@ -62,7 +62,6 @@ namespace Iviz.Displays
         /// </summary>
         public ResourceKey<GameObject>? MeshResource
         {
-            get => meshResource;
             set
             {
                 if (value == null)

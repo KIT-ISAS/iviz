@@ -572,34 +572,29 @@ namespace Iviz.Controllers
                         // reinterpret as long to process 8 bytes at once
                         var longs = bytes.Cast<long>();
                         // it would be 2x as fast using simd, but whatever
-                        foreach (ref long b in longs) 
+                        foreach (ref long b in longs)
                         {
                             // 8 independent bytes, values are either 0, 1, or 2
                             // 0 -> 0
                             // 1 -> 128
                             // 2 -> 255
-                            b = b * 127 + 0x0101010101010101;
+                            b = b * 127 + 0x0101010101010101L;
                         }
                     }
-                    
+
                     Multiply(confidence.Bytes);
                     DepthConfidenceSender.Publish(confidence.CreateImageMessage(frameId, depthSeq));
                 }
 
-                Screenshot? anyDepth = depth ?? confidence;
-                if (anyDepth != null)
+                if ((depth ?? confidence) is { } anyDepth)
                 {
                     depthInfoSender.Publish(anyDepth.CreateCameraInfoMessage(frameId, depthSeq++));
                 }
 
-                var anyPose = (color ?? depth)?.CameraPose;
-                if (anyPose == null)
+                if ((color ?? depth)?.CameraPose is { } anyPose)
                 {
-                    return;
+                    cameraFrame.LocalPose = TfModule.RelativeToFixedFrame(ARPoseToUnity(anyPose));
                 }
-
-                var absoluteArCameraPose = ARPoseToUnity(anyPose.Value);
-                cameraFrame.LocalPose = TfModule.RelativeToFixedFrame(absoluteArCameraPose);
             }
             catch (Exception e)
             {

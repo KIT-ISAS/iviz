@@ -187,13 +187,10 @@ namespace Iviz.Controllers.XR
                 case downButton:
                     var clickInfo =
                         new ClickHitInfo(new Ray(hololensInitManipulableFrame.transform.position, Vector3.down));
-                    if (clickInfo.TryGetRaycastResults(out var hits))
+                    if (clickInfo.TryGetRaycastResults(out var hits)
+                        && hits.TryGetFirst(hit => hit.GameObject.layer == LayerType.Collider, out var colliderHit))
                     {
-                        var colliderHit = hits.FirstOrDefault(hit => hit.GameObject.layer == LayerType.Collider);
-                        if (colliderHit != null)
-                        {
-                            hololensInitManipulableFrame.transform.position = colliderHit.Position;
-                        }
+                        hololensInitManipulableFrame.transform.position = colliderHit.Position;
                     }
 
                     break;
@@ -349,7 +346,7 @@ namespace Iviz.Controllers.XR
 
         static readonly Func<Pose, Msgs.GeometryMsgs.Transform> ToTransform = pose =>
             TfModule.RelativeToFixedFrame(pose).Unity2RosTransform();
-        
+
         public void Dispose()
         {
             GameThread.EveryFrame -= Update;

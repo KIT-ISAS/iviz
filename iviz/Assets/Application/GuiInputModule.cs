@@ -973,7 +973,7 @@ namespace Iviz.App
             }
             else if (hitResults.Length != 0)
             {
-                if (hitResults.Any(result => result.GameObject.layer is LayerType.Clickable))
+                if (hitResults.Any(result => result.GameObject.layer == LayerType.Clickable))
                 {
                     return;
                 }

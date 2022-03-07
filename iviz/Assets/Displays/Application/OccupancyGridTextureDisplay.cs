@@ -30,7 +30,7 @@ namespace Iviz.Displays
         bool newFlipMinMax;
 
         float cellSize;
-        OccupancyGridDisplay.Rect bounds;
+        RectInt bounds;
 
         CancellationTokenSource? tokenSource;
 
@@ -100,16 +100,15 @@ namespace Iviz.Displays
             return texture;
         }
 
-        public void Set(ReadOnlySpan<sbyte> values, float newCellSize, int numCellsX,
-            in OccupancyGridDisplay.Rect newBounds, Pose pose)
+        public void Set(ReadOnlySpan<sbyte> values, float newCellSize, int numCellsX, in RectInt newBounds, Pose pose)
         {
             IsProcessing = true;
 
             cellSize = newCellSize;
             bounds = newBounds;
 
-            int segmentWidth = bounds.Width;
-            int segmentHeight = bounds.Height;
+            int segmentWidth = newBounds.width;
+            int segmentHeight = newBounds.height;
 
             float totalWidth = segmentWidth * cellSize;
             float totalHeight = segmentHeight * cellSize;
@@ -120,7 +119,7 @@ namespace Iviz.Displays
                 buffer = new sbyte[totalTextureSize];
             }
 
-            (uint hash, int numValidValues) = Process(values, bounds, numCellsX, buffer);
+            (uint hash, int numValidValues) = Process(values, newBounds, numCellsX, buffer);
             NumValidValues = numValidValues;
 
             if (previousHash == null)
@@ -171,18 +170,18 @@ namespace Iviz.Displays
             });
         }
 
-        static (uint hash, int numValidValues) Process(ReadOnlySpan<sbyte> src, OccupancyGridDisplay.Rect bounds,
+        static (uint hash, int numValidValues) Process(ReadOnlySpan<sbyte> src, RectInt bounds,
             int pitch, Span<sbyte> dest)
         {
             uint hash = Crc32Calculator.DefaultSeed;
             int numValidValues = 0;
 
-            int rowSize = bounds.Width;
-            foreach (int v in ..bounds.Height)
+            int rowSize = bounds.width;
+            foreach (int v in ..bounds.height)
             {
-                int srcOffset = (v + bounds.yMin) * pitch + bounds.xMin;
+                int srcOffset = (v + bounds.y) * pitch + bounds.x;
                 int dstOffset = v * rowSize;
-
+ 
                 var srcSpan = src.Slice(srcOffset, rowSize);
                 var dstSpan = dest.Slice(dstOffset, rowSize);
 
@@ -412,8 +411,8 @@ namespace Iviz.Displays
 
         public void Highlight(in Vector3 hitPoint)
         {
-            int segmentWidth = bounds.Width;
-            int segmentHeight = bounds.Height;
+            int segmentWidth = bounds.width;
+            int segmentHeight = bounds.height;
 
             var (localX, localY, localZ) = Transform.InverseTransformPoint(hitPoint);
             int coordU = Mathf.Clamp((int)((0.5f - localX) * segmentWidth), 0, segmentWidth - 1);
@@ -434,8 +433,8 @@ namespace Iviz.Displays
                     RosUtils.PoseFormat.OnlyPosition, 2);
                 description.AppendLine();
                 description
-                    .Append("<b>u: </b>").Append(coordU + bounds.xMin)
-                    .Append(" <b>v: </b>").Append(coordV + bounds.yMin).AppendLine()
+                    .Append("<b>u: </b>").Append(coordU + bounds.x)
+                    .Append(" <b>v: </b>").Append(coordV + bounds.y).AppendLine()
                     .Append(value);
                 caption = description.ToString();
             }

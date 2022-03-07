@@ -1029,8 +1029,10 @@ namespace Iviz.App
 
         public void ShowARPanel()
         {
-            var arModuleData = ModuleDatas.FirstOrDefault(moduleData => moduleData is ARModuleData);
-            arModuleData?.ShowPanel();
+            if (ModuleDatas.TryGetFirst(moduleData => moduleData is ARModuleData, out var arModuleData))
+            {
+                arModuleData.ShowPanel();
+            }
         }
 
         public void ResetTfPanel()

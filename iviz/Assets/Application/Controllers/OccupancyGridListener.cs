@@ -28,14 +28,14 @@ namespace Iviz.Controllers
         readonly List<OccupancyGridTextureDisplay> textureTiles = new();
 
         OccupancyGridDisplay[] gridTiles = Array.Empty<OccupancyGridDisplay>();
-        
+
         int numCellsX;
         int numCellsY;
         float cellSize;
         bool isProcessing;
 
         public override TfFrame? Frame => cubeNode.Parent;
-        
+
         bool IsProcessing
         {
             get => isProcessing;
@@ -233,7 +233,7 @@ namespace Iviz.Controllers
             if (msg.Data.Length != msg.Info.Width * msg.Info.Height)
             {
                 RosLogger.Info($"{this}: Size {msg.Info.Width.ToString()}x{msg.Info.Height.ToString()} " +
-                                $"does not match data length {msg.Data.Length.ToString()}");
+                               $"does not match data length {msg.Data.Length.ToString()}");
                 msg.Data.TryReturn();
                 return;
             }
@@ -332,13 +332,13 @@ namespace Iviz.Controllers
                     grid.NumCellsY = numCellsY;
                     grid.CellSize = cellSize;
 
-                    var rect = new OccupancyGridDisplay.Rect
-                    (
-                        xMin: u * numCellsX / 4,
-                        xMax: (u + 1) * numCellsX / 4,
-                        yMin: v * numCellsY / 4,
-                        yMax: (v + 1) * numCellsY / 4
-                    );
+                    var rect = new RectInt
+                    {
+                        xMin = u * numCellsX / 4,
+                        xMax = (u + 1) * numCellsX / 4,
+                        yMin = v * numCellsY / 4,
+                        yMax = (v + 1) * numCellsY / 4
+                    };
 
                     tasks.Add(Task.Run(() =>
                     {
@@ -356,7 +356,7 @@ namespace Iviz.Controllers
 
 
             ScaleZ = ScaleZ;
-            return tasks; 
+            return tasks;
         }
 
         IEnumerable<Task> SetTextures(Memory<sbyte> data, Pose pose)
@@ -403,7 +403,13 @@ namespace Iviz.Controllers
                     int yMin = v * MaxTileSize;
                     int yMax = Math.Min(yMin + MaxTileSize, numCellsY);
 
-                    var rect = new OccupancyGridDisplay.Rect(xMin, xMax, yMin, yMax);
+                    var rect = new RectInt
+                    {
+                        xMin = xMin,
+                        xMax = xMax,
+                        yMin = yMin,
+                        yMax = yMax
+                    };
 
                     var texture = textureTiles[i++];
                     tasks.Add(Task.Run(() =>

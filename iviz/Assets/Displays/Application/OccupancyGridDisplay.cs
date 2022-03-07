@@ -132,22 +132,22 @@ namespace Iviz.Displays
             pointBuffer.Clear();
         }
 
-        public void SetOccupancy(ReadOnlySpan<sbyte> values, Rect? inBounds, Pose pose)
+        public void SetOccupancy(ReadOnlySpan<sbyte> values, RectInt? inBounds, Pose pose)
         {
             IsProcessing = true;
             
-            var bounds = inBounds ?? new Rect(0, numCellsX, 0, numCellsY);
+            var bounds = inBounds ?? new RectInt(0,  0, numCellsX, numCellsY);
 
             pointBuffer.Clear();
 
             float size = cellSize;
 
-            foreach (int v in bounds.yMin..bounds.yMax)
+            foreach (int v in bounds.y..bounds.yMax)
             {
                 var row = values[(v * numCellsX)..];
                 float y = -v * size;
 
-                foreach (int u in bounds.xMin..bounds.xMax)
+                foreach (int u in bounds.x..bounds.xMax)
                 {
                     sbyte val = row[u];
                     if (val <= 0)
@@ -181,25 +181,6 @@ namespace Iviz.Displays
         public void SplitForRecycle()
         {
             resource.ReturnToPool();
-        }
-
-        public readonly struct Rect
-        {
-            public readonly int xMin;
-            public readonly int xMax;
-            public readonly int yMin;
-            public readonly int yMax;
-
-            public int Width => xMax - xMin;
-            public int Height => yMax - yMin;
-
-            public Rect(int xMin, int xMax, int yMin, int yMax)
-            {
-                this.xMin = xMin;
-                this.xMax = xMax;
-                this.yMin = yMin;
-                this.yMax = yMax;
-            }
         }
     }
 }

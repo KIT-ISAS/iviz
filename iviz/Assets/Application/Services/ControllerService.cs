@@ -33,7 +33,7 @@ namespace Iviz.Controllers
         const int DefaultTimeoutInMs = 5000;
 
         static RoslibConnection Connection => RosManager.Connection;
-        static IEnumerable<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
+        static IReadOnlyCollection<ModuleData> ModuleDatas => ModuleListPanel.Instance.ModuleDatas;
 
         static readonly Dictionary<ModuleType, string> ModuleNames =
             typeof(ModuleType).GetEnumValues()
@@ -149,9 +149,8 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            ModuleData? moduleData;
-            if (requestedId.Length != 0 &&
-                (moduleData = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == requestedId)) != null)
+            if (requestedId.Length != 0
+                && ModuleDatas.TryGetFirst(data => data.Configuration.Id == requestedId, out var moduleData))
             {
                 if (moduleData.ModuleType != moduleType)
                 {
@@ -212,8 +211,9 @@ namespace Iviz.Controllers
                 return result;
             }
 
-            var data = ModuleDatas.OfType<ListenerModuleData>().FirstOrDefault(module => module.Topic == topic);
-            if (data != null)
+            if (ModuleDatas.TryGetFirst(
+                    module => module is ListenerModuleData listener && listener.Topic == topic,
+                    out var data))
             {
                 result.message = requestedId == data.Configuration.Id
                     ? "** Module already exists"
@@ -329,8 +329,7 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    var module = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
-                    if (module == null)
+                    if (!ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out var module))
                     {
                         result.success = false;
                         result.message = $"There is no module with id '{id}'";
@@ -401,8 +400,7 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    var module = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
-                    if (module == null)
+                    if (!ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out var module))
                     {
                         result.success = false;
                         result.message = "There is no module with that id";
@@ -781,8 +779,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            ModuleData? moduleData;
-            if ((moduleData = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id)) == null)
+            if (!ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out var moduleData))
             {
                 srv.Response.Success = true;
                 srv.Response.Message = $"WW There is no node with name '{id}'";
@@ -835,8 +832,8 @@ namespace Iviz.Controllers
             ModuleData? moduleData;
             if (id.Length != 0)
             {
-                moduleData = ModuleDatas.FirstOrDefault(data => data.Configuration.Id == id);
-                if (moduleData != null && moduleData.ModuleType != ModuleType.Robot)
+                if (ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out moduleData) 
+                    && moduleData.ModuleType != ModuleType.Robot)
                 {
                     srv.Response.Success = false;
                     srv.Response.Message = "Another module of the same id already exists, " +

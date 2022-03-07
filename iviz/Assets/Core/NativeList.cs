@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -24,21 +25,21 @@ namespace Iviz.Core
 
         public void EnsureCapacity(int value)
         {
-            if (value < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), "Capacity cannot be negative");
-            }
-            
             if (value <= Capacity)
             {
                 return;
+            }
+
+            if (value < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), "Capacity cannot be negative");
             }
 
             if (value > NativeList.MaxElements)
             {
                 throw new ArgumentOutOfRangeException(nameof(value), "Capacity exceeds maximal size");
             }
-            
+
             int newCapacity = Math.Max(Capacity, 16);
             while (newCapacity < value)
             {
@@ -53,6 +54,12 @@ namespace Iviz.Core
             }
 
             array = newArray;
+
+            if (array.Length < value)
+            {
+                // this post-condition ensures that the unsafes later won't crash (as long as we're single-threaded) 
+                throw new InvalidOperationException("Array enlargement failed. Something went wrong!");
+            }
         }
 
         public void Add(in T t)
@@ -62,7 +69,7 @@ namespace Iviz.Core
             UnsafeGet(length) = t;
             length = nextLength;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddUnsafe(in T t)
         {
@@ -88,24 +95,15 @@ namespace Iviz.Core
         public ref T this[int index]
         {
             [UsedImplicitly]
-            get
-            {
-                if (index >= length)
-                {
-                    throw new IndexOutOfRangeException();
-                }
-
-                return ref UnsafeGet(index);
-            }
+            get => ref AsSpan()[index];
         }
 
-        public unsafe Span<T> AsSpan() => new(array.GetUnsafePtr(), length);
+        public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref array.GetUnsafeRef(), length);
 
-        public unsafe ReadOnlySpan<T> AsReadOnlySpan() => new(array.GetUnsafeReadOnlyPtr(), length);
-        
+        ReadOnlySpan<T> AsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(ref array.GetUnsafeRef(), length);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        unsafe ref T UnsafeGet(int index) =>
-            ref *((T*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(array) + index);
+        ref T UnsafeGet(int index) => ref Unsafe.Add(ref array.GetUnsafeRef(), index);
 
         public void Clear()
         {
@@ -118,7 +116,7 @@ namespace Iviz.Core
             {
                 return;
             }
-            
+
             array.Dispose();
             array = new NativeArray<T>(16, Allocator.Persistent);
         }

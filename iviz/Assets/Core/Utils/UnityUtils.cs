@@ -6,19 +6,17 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Tools;
+using JetBrains.Annotations;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using Color32 = UnityEngine.Color32;
-using Mesh = UnityEngine.Mesh;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
 using Transform = UnityEngine.Transform;
@@ -511,9 +509,9 @@ namespace Iviz.Core
         public static void Deconstruct(this in Ray r, out Vector3 origin, out Vector3 direction) =>
             (origin, direction) = (r.origin, r.direction);
 
-        public static unsafe Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
+        public static Span<T> AsSpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
-            return new Span<T>(array.GetUnsafePtr(), array.Length);
+            return MemoryMarshal.CreateSpan(ref array.GetUnsafeRef(), array.Length);
         }
 
         public static Span<T> AsSpan<T>(this in NativeArray<T> array, int start, int length) where T : unmanaged
@@ -521,9 +519,9 @@ namespace Iviz.Core
             return array.AsSpan().Slice(start, length);
         }
 
-        public static unsafe ReadOnlySpan<T> AsReadOnlySpan<T>(this in NativeArray<T> array) where T : unmanaged
+        public static ReadOnlySpan<T> AsReadOnlySpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
-            return new ReadOnlySpan<T>(array.GetUnsafeReadOnlyPtr(), array.Length);
+            return MemoryMarshal.CreateReadOnlySpan(ref array.GetUnsafeRef(), array.Length);
         }
 
         public static Span<T> AsSpan<T>(this List<T> list) where T : unmanaged
@@ -568,18 +566,6 @@ namespace Iviz.Core
         /// Convenience function to obtain spans from <see cref="Memory{T}"/> the same way as with arrays. 
         /// </summary>
         public static Span<T> AsSpan<T>(this Memory<T> memory) where T : unmanaged => memory.Span;
-
-        /// Creates a temporary native array that lasts one frame.
-        /// It should not be disposed manually. It should not be used in Burst.
-        /// This is simply a wrapper for reading and writing to Unity objects such as meshes. 
-        public static unsafe NativeArray<T> CreateNativeArrayWrapper<T>(T* ptr, int length) where T : unmanaged
-        {
-            var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(ptr, length, Allocator.None);
-#if UNITY_EDITOR
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
-#endif
-            return array;
-        }
 
         public static void CopyFrom<T>(this NativeArray<T> dst, ReadOnlySpan<T> span) where T : unmanaged
         {
@@ -740,20 +726,19 @@ namespace Iviz.Core
                 }
             }
         }
-        
-        public static bool TryGetFirst<T>(this IEnumerable<T> enumerable, out T? t)
+
+        public static bool TryGetFirst<T>(this IEnumerable<T> ts, [NotNullWhen(true)] out T? tp)
         {
-            using var enumerator = enumerable.GetEnumerator();
-            if (enumerator.MoveNext())
+            foreach (T t in ts)
             {
-                t = enumerator.Current;
+                tp = t!;
                 return true;
             }
 
-            t = default;
+            tp = default;
             return false;
-        }        
-        
+        }
+
         public static bool TryGetFirst<T>(this IEnumerable<T> ts, Predicate<T> p, [NotNullWhen(true)] out T? tp)
         {
             foreach (T t in ts)
@@ -767,7 +752,23 @@ namespace Iviz.Core
 
             tp = default;
             return false;
-        } 
+        }
+
+        public static bool TryGetFirst<T>(this IReadOnlyList<T> ts, Predicate<T> p, [NotNullWhen(true)] out T? tp)
+        {
+            for (int i = 0; i < ts.Count; i++)
+            {
+                T t = ts[i];
+                if (p(t))
+                {
+                    tp = t!;
+                    return true;
+                }
+            }
+
+            tp = default;
+            return false;
+        }
     }
 
     public readonly struct WithIndexEnumerable<T>
@@ -807,7 +808,7 @@ namespace Iviz.Core
 
     public static class ThrowHelper
     {
-        public static void ThrowIfNull([NotNull] UnityEngine.Object? t, string nameOfT)
+        public static void ThrowIfNull([System.Diagnostics.CodeAnalysis.NotNull] UnityEngine.Object? t, string nameOfT)
         {
             if (t == null)
             {
@@ -815,15 +816,23 @@ namespace Iviz.Core
             }
         }
 
-        public static void ThrowIfNull([NotNull] object? t, string nameOfT)
+        public static void ThrowIfNull([System.Diagnostics.CodeAnalysis.NotNull] object? t, string nameOfT)
         {
             if (t is null)
             {
                 ThrowNull(nameOfT);
             }
         }
-        
+
+        public static void ThrowIfNullOrEmpty([System.Diagnostics.CodeAnalysis.NotNull] string? t, string nameOfT)
+        {
+            if (string.IsNullOrEmpty(t))
+            {
+                throw new ArgumentException("Argument '" + nameOfT + "' cannot be null or empty");
+            }
+        }
+
         [DoesNotReturn]
-        static void ThrowNull(string paramName) => throw new ArgumentNullException(paramName);        
+        static void ThrowNull(string paramName) => throw new ArgumentNullException(paramName);
     }
 }

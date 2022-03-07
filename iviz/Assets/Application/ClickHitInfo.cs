@@ -63,7 +63,6 @@ namespace Iviz.App
             }
 
             int numHits = Physics.RaycastNonAlloc(ray, RaycastHitsBuffer, 100, LayerType.RaycastLayerMask);
-
             Array.Sort(RaycastHitsBuffer, 0, numHits, RaycastComparer.Instance);
 
             cachedUnityHits = numHits == 0
@@ -71,9 +70,9 @@ namespace Iviz.App
                 : RaycastHitsBuffer.Take(numHits)
                     .Select(result => new ClickHitResult(result))
                     .ToArray();
+            
             hits = cachedUnityHits;
-
-            return cachedUnityHits.Length != 0;
+            return hits.Length != 0;
         }
     }
     

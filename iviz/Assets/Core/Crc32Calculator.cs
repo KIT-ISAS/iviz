@@ -46,18 +46,6 @@ namespace Iviz.Core
             return Compute(MemoryMarshal.AsBytes(span), startHash);
         }
 
-        static uint Compute(StringBuilder value, uint startHash = DefaultSeed)
-        {
-            uint hash = startHash;
-            for (int i = 0; i < value.Length; i++)
-            {
-                uint val = value[i]; // indexing is fast as long as there is only one chunk 
-                hash = (hash >> 8) ^ Table[val ^ hash & 0xff];
-            }
-
-            return hash;
-        }
-        
         public static uint Compute(in BuilderPool.BuilderRent value, uint startHash = DefaultSeed)
         {
             return value.Length == value.Chunk.Length 
@@ -80,13 +68,28 @@ namespace Iviz.Core
             return Compute(MemoryMarshal.AsBytes(array), startHash);
         }
 
+        static uint Compute(StringBuilder value, uint startHash = DefaultSeed)
+        {
+            // this function is called very rarely. see below the ReadOnlySpan<byte> overload for the most common path.
+            uint hash = startHash;
+            for (int i = 0; i < value.Length; i++)
+            {
+                uint val = value[i]; // indexing is fast as long as there is only one chunk 
+                uint index = (val ^ hash) & 0xff;
+                hash = (hash >> 8) ^ Table[index];
+            }
+
+            return hash;
+        }
+        
         static uint Compute(ReadOnlySpan<byte> array, uint startHash = DefaultSeed)
         {
             uint hash = startHash;
             foreach (byte b in array)
             {
                 uint val = b;
-                hash = (hash >> 8) ^ Table[val ^ hash & 0xff];
+                uint index = (val ^ hash) & 0xff;
+                hash = (hash >> 8) ^ Table[index];
             }
 
             return hash;

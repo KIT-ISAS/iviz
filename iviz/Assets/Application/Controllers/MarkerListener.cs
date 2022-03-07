@@ -53,7 +53,7 @@ namespace Iviz.Controllers
                     RosLogger.Error($"{this}: Invalid visibility array of size {value.VisibleMask.Length.ToString()}");
                     return;
                 }
-                
+
                 VisibleMask = value.VisibleMask;
             }
         }
@@ -95,7 +95,7 @@ namespace Iviz.Controllers
 
                 foreach (var marker in markers.Values)
                 {
-                    marker.Visible = value && config.VisibleMask[(int) marker.MarkerType];
+                    marker.Visible = value && config.VisibleMask[(int)marker.MarkerType];
                 }
             }
         }
@@ -113,7 +113,7 @@ namespace Iviz.Controllers
                 }
             }
         }
-        
+
         public float Smoothness
         {
             get => config.Smoothness;
@@ -126,7 +126,7 @@ namespace Iviz.Controllers
                     marker.Smoothness = value;
                 }
             }
-        }        
+        }
 
         public float Metallic
         {
@@ -147,7 +147,7 @@ namespace Iviz.Controllers
             get => config.PreferUdp;
             set => config.PreferUdp = value;
         }
-        
+
         public bool ShowDescriptions
         {
             get => config.ShowDescriptions;
@@ -157,10 +157,10 @@ namespace Iviz.Controllers
                 foreach (var marker in markers.Values)
                 {
                     marker.ShowDescription = value;
-                }                
+                }
             }
-        }        
-        
+        }
+
         public string BriefDescription
         {
             get
@@ -202,11 +202,11 @@ namespace Iviz.Controllers
                 return $"{markerStr}\n{errorStr}, {warnStr}";
             }
         }
-        
-        public string Topic => config.Topic;        
-        
+
+        public string Topic => config.Topic;
+
         public override IListener Listener { get; }
-        
+
 
         public IReadOnlyList<bool> VisibleMask
         {
@@ -218,7 +218,7 @@ namespace Iviz.Controllers
                     RosLogger.Error($"{this}: Invalid visibility array of size {value.Count.ToString()}");
                     return;
                 }
-                
+
                 foreach (int i in ..value.Count)
                 {
                     config.VisibleMask[i] = value[i];
@@ -231,20 +231,20 @@ namespace Iviz.Controllers
 
                 foreach (var marker in markers.Values)
                 {
-                    int type = (int) marker.MarkerType;
+                    int type = (int)marker.MarkerType;
                     marker.Visible = config.VisibleMask[type];
                 }
             }
         }
-        
+
         public MarkerListener(MarkerConfiguration? config, string topic, string type)
-        {        
+        {
             Config = config ?? new MarkerConfiguration
             {
                 Topic = topic,
                 Type = type,
                 Id = topic
-            };            
+            };
 
             //var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
             const RosTransportHint rosTransportHint = RosTransportHint.PreferTcp;
@@ -259,7 +259,7 @@ namespace Iviz.Controllers
             GameThread.EverySecond += CheckDeadMarkers;
             GameThread.EveryFrame += HandleAsync;
         }
-        
+
         void CheckDeadMarkers()
         {
             var deadEntries = markers
@@ -282,7 +282,7 @@ namespace Iviz.Controllers
         }
 
         public int NumEntriesForLog => markers.Count;
-        
+
         public void GenerateLog(StringBuilder description, int minIndex, int numEntries)
         {
             ThrowHelper.ThrowIfNull(description, nameof(description));
@@ -297,13 +297,10 @@ namespace Iviz.Controllers
 
         public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
         {
-            bounds = markers.Values.FirstOrDefault(marker => marker.UniqueNodeName == id);
-            return bounds != null;
+            return markers.Values.TryGetFirst(hasBounds => ((MarkerObject)hasBounds).UniqueNodeName == id, out bounds);
         }
-        
+
         public Dictionary<(string, int), MarkerObject>.ValueCollection GetAllBounds() => markers.Values;
-        
-        //IEnumerable<IHasBounds> IMarkerDialogListener.GetAllBounds() => GetAllBounds();
 
         public override void ResetController()
         {
@@ -329,7 +326,7 @@ namespace Iviz.Controllers
                 {
                     return false;
                 }
-                
+
                 foreach (var marker in msg.Markers)
                 {
                     newMarkerBuffer[IdFromMessage(marker)] = marker;
@@ -347,7 +344,7 @@ namespace Iviz.Controllers
                 {
                     return false;
                 }
-                
+
                 newMarkerBuffer[IdFromMessage(marker)] = marker;
             }
 
@@ -357,13 +354,13 @@ namespace Iviz.Controllers
         public void ToggleVisibleMask(int i)
         {
             bool value = !config.VisibleMask[i];
-            var markerType = (MarkerType) i;
+            var markerType = (MarkerType)i;
             var markersToUpdate = markers.Values.Where(marker => marker.MarkerType == markerType);
             foreach (var marker in markersToUpdate)
             {
                 marker.Visible = value;
             }
-            
+
             config.VisibleMask[i] = value;
         }
 
@@ -398,7 +395,7 @@ namespace Iviz.Controllers
                         ids[i] = key;
                         newMarkers[i] = value;
                     }
-                    
+
                     foreach (var id in ids)
                     {
                         newMarkerBuffer.Remove(id);
@@ -435,7 +432,8 @@ namespace Iviz.Controllers
 
                     if (msg.Type >= config.VisibleMask.Length)
                     {
-                        RosLogger.Debug($"{this}: Unknown type {msg.Type.ToString()}.  Rejecting marker update {id.ToString()}.");
+                        RosLogger.Debug(
+                            $"{this}: Unknown type {msg.Type.ToString()}.  Rejecting marker update {id.ToString()}.");
                         break;
                     }
 
@@ -481,6 +479,5 @@ namespace Iviz.Controllers
             markers[id] = marker;
             return marker;
         }
-
     }
 }

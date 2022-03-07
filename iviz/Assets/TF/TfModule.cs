@@ -200,7 +200,9 @@ namespace Iviz.Controllers.TF
         public TfModule(Func<string, TfFrame> frameFactory)
         {
             instance = this;
-            this.frameFactory = frameFactory ?? throw new ArgumentNullException(nameof(frameFactory));
+            
+            ThrowHelper.ThrowIfNull(frameFactory, nameof(frameFactory));
+            this.frameFactory = frameFactory;
 
             try
             {
@@ -400,7 +402,8 @@ namespace Iviz.Controllers.TF
 
         public static bool TryGetFrame(string id, [NotNullWhen(true)] out TfFrame? frame)
         {
-            return Instance.TryGetFrameImpl(id ?? throw new ArgumentNullException(nameof(id)), out frame);
+            ThrowHelper.ThrowIfNull(id, nameof(id));
+            return Instance.TryGetFrameImpl(id, out frame);
         }
 
         public static string ResolveFrameId(string frameId)
