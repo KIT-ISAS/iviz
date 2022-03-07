@@ -223,32 +223,7 @@ internal sealed class ServiceRequest
                     serviceMsg.Request = (IRequest)serviceMsg.Request.DeserializeFrom(readBuffer);
                 }
 
-                async ValueTask<string?> ProcessCallback()
-                {
-                    try
-                    {
-                        await callback(serviceMsg);
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogErrorFormat("{0}: Inner exception in service callback: {1}", this, e);
-                        return "Server callback function failed with an exception.";
-                    }
-                    
-                    try
-                    {
-                        serviceMsg.Response.RosValidate();
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.LogErrorFormat("{0}: Exception validating service callback response: {1}", this, e);
-                        return "Server callback returned an invalid response.";
-                    }
-
-                    return null;
-                }
-
-                string? errorMessage = await ProcessCallback();
+                string? errorMessage = await ProcessCallback(serviceMsg);
                 var responseMsg = serviceMsg.Response;
 
                 if (errorMessage == null)
@@ -288,6 +263,31 @@ internal sealed class ServiceRequest
 
         tcpClient.Close();
     }
+    
+    async ValueTask<string?> ProcessCallback(IService serviceMsg)
+    {
+        try
+        {
+            await callback(serviceMsg);
+        }
+        catch (Exception e)
+        {
+            Logger.LogErrorFormat("{0}: Inner exception in service callback: {1}", this, e);
+            return "Server callback function failed with an exception.";
+        }
+                    
+        try
+        {
+            serviceMsg.Response.RosValidate();
+        }
+        catch (Exception e)
+        {
+            Logger.LogErrorFormat("{0}: Exception validating service callback response: {1}", this, e);
+            return "Server callback returned an invalid response.";
+        }
+
+        return null;
+    }    
 
     static void WriteHeader(Span<byte> array, byte status, int length)
     {

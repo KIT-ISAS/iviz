@@ -173,12 +173,13 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
 
     async ValueTask<int> ReceivePacket(TcpClient client, ResizableRent readBuffer)
     {
-        if (!await client.ReadChunkAsync(readBuffer.Array, 4, runningTs.Token))
+        byte[] array = readBuffer.Array;
+        if (!await client.ReadChunkAsync(array, 4, runningTs.Token))
         {
             return -1;
         }
 
-        int length = BitConverter.ToInt32(readBuffer.Array, 0);
+        int length = array.Read<int>();
         if (length == 0)
         {
             return 0;
