@@ -54,22 +54,6 @@ namespace Iviz.Msgs.MoveitMsgs
             GroupName = "";
         }
         
-        /// Explicit constructor.
-        public MotionPlanRequest(WorkspaceParameters WorkspaceParameters, RobotState StartState, Constraints[] GoalConstraints, Constraints PathConstraints, TrajectoryConstraints TrajectoryConstraints, string PlannerId, string GroupName, int NumPlanningAttempts, double AllowedPlanningTime, double MaxVelocityScalingFactor, double MaxAccelerationScalingFactor)
-        {
-            this.WorkspaceParameters = WorkspaceParameters;
-            this.StartState = StartState;
-            this.GoalConstraints = GoalConstraints;
-            this.PathConstraints = PathConstraints;
-            this.TrajectoryConstraints = TrajectoryConstraints;
-            this.PlannerId = PlannerId;
-            this.GroupName = GroupName;
-            this.NumPlanningAttempts = NumPlanningAttempts;
-            this.AllowedPlanningTime = AllowedPlanningTime;
-            this.MaxVelocityScalingFactor = MaxVelocityScalingFactor;
-            this.MaxAccelerationScalingFactor = MaxAccelerationScalingFactor;
-        }
-        
         /// Constructor with buffer.
         public MotionPlanRequest(ref ReadBuffer b)
         {

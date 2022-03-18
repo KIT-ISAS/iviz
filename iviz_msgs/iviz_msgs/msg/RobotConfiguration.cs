@@ -29,22 +29,6 @@ namespace Iviz.Msgs.IvizMsgs
             Id = "";
         }
         
-        /// Explicit constructor.
-        public RobotConfiguration(string SourceParameter, string SavedRobotName, string FramePrefix, string FrameSuffix, bool AttachedToTf, bool RenderAsOcclusionOnly, in StdMsgs.ColorRGBA Tint, float Metallic, float Smoothness, string Id, bool Visible)
-        {
-            this.SourceParameter = SourceParameter;
-            this.SavedRobotName = SavedRobotName;
-            this.FramePrefix = FramePrefix;
-            this.FrameSuffix = FrameSuffix;
-            this.AttachedToTf = AttachedToTf;
-            this.RenderAsOcclusionOnly = RenderAsOcclusionOnly;
-            this.Tint = Tint;
-            this.Metallic = Metallic;
-            this.Smoothness = Smoothness;
-            this.Id = Id;
-            this.Visible = Visible;
-        }
-        
         /// Constructor with buffer.
         public RobotConfiguration(ref ReadBuffer b)
         {

@@ -59,21 +59,6 @@ namespace Iviz.Msgs.MoveitMsgs
             AllowedTouchObjects = System.Array.Empty<string>();
         }
         
-        /// Explicit constructor.
-        public Grasp(string Id, TrajectoryMsgs.JointTrajectory PreGraspPosture, TrajectoryMsgs.JointTrajectory GraspPosture, GeometryMsgs.PoseStamped GraspPose, double GraspQuality, GripperTranslation PreGraspApproach, GripperTranslation PostGraspRetreat, GripperTranslation PostPlaceRetreat, float MaxContactForce, string[] AllowedTouchObjects)
-        {
-            this.Id = Id;
-            this.PreGraspPosture = PreGraspPosture;
-            this.GraspPosture = GraspPosture;
-            this.GraspPose = GraspPose;
-            this.GraspQuality = GraspQuality;
-            this.PreGraspApproach = PreGraspApproach;
-            this.PostGraspRetreat = PostGraspRetreat;
-            this.PostPlaceRetreat = PostPlaceRetreat;
-            this.MaxContactForce = MaxContactForce;
-            this.AllowedTouchObjects = AllowedTouchObjects;
-        }
-        
         /// Constructor with buffer.
         public Grasp(ref ReadBuffer b)
         {

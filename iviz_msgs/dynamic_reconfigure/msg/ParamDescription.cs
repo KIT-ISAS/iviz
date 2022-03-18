@@ -22,16 +22,6 @@ namespace Iviz.Msgs.DynamicReconfigure
             EditMethod = "";
         }
         
-        /// Explicit constructor.
-        public ParamDescription(string Name, string Type, uint Level, string Description, string EditMethod)
-        {
-            this.Name = Name;
-            this.Type = Type;
-            this.Level = Level;
-            this.Description = Description;
-            this.EditMethod = EditMethod;
-        }
-        
         /// Constructor with buffer.
         public ParamDescription(ref ReadBuffer b)
         {

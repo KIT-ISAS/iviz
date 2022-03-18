@@ -45,18 +45,6 @@ namespace Iviz.Msgs.SensorMsgs
             Data = System.Array.Empty<byte>();
         }
         
-        /// Explicit constructor.
-        public Image(in StdMsgs.Header Header, uint Height, uint Width, string Encoding, byte IsBigendian, uint Step, byte[] Data)
-        {
-            this.Header = Header;
-            this.Height = Height;
-            this.Width = Width;
-            this.Encoding = Encoding;
-            this.IsBigendian = IsBigendian;
-            this.Step = Step;
-            this.Data = Data;
-        }
-        
         /// Constructor with buffer.
         public Image(ref ReadBuffer b)
         {

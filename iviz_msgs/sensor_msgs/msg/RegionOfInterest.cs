@@ -34,16 +34,6 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
         
-        /// Explicit constructor.
-        public RegionOfInterest(uint XOffset, uint YOffset, uint Height, uint Width, bool DoRectify)
-        {
-            this.XOffset = XOffset;
-            this.YOffset = YOffset;
-            this.Height = Height;
-            this.Width = Width;
-            this.DoRectify = DoRectify;
-        }
-        
         /// Constructor with buffer.
         public RegionOfInterest(ref ReadBuffer b)
         {

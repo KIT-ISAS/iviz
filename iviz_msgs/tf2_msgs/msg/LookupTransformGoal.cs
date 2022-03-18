@@ -26,18 +26,6 @@ namespace Iviz.Msgs.Tf2Msgs
             FixedFrame = "";
         }
         
-        /// Explicit constructor.
-        public LookupTransformGoal(string TargetFrame, string SourceFrame, time SourceTime, duration Timeout, time TargetTime, string FixedFrame, bool Advanced)
-        {
-            this.TargetFrame = TargetFrame;
-            this.SourceFrame = SourceFrame;
-            this.SourceTime = SourceTime;
-            this.Timeout = Timeout;
-            this.TargetTime = TargetTime;
-            this.FixedFrame = FixedFrame;
-            this.Advanced = Advanced;
-        }
-        
         /// Constructor with buffer.
         public LookupTransformGoal(ref ReadBuffer b)
         {

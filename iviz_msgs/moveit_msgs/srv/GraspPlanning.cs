@@ -76,16 +76,6 @@ namespace Iviz.Msgs.MoveitMsgs
             MovableObstacles = System.Array.Empty<CollisionObject>();
         }
         
-        /// Explicit constructor.
-        public GraspPlanningRequest(string GroupName, CollisionObject Target, string[] SupportSurfaces, Grasp[] CandidateGrasps, CollisionObject[] MovableObstacles)
-        {
-            this.GroupName = GroupName;
-            this.Target = Target;
-            this.SupportSurfaces = SupportSurfaces;
-            this.CandidateGrasps = CandidateGrasps;
-            this.MovableObstacles = MovableObstacles;
-        }
-        
         /// Constructor with buffer.
         public GraspPlanningRequest(ref ReadBuffer b)
         {

@@ -36,19 +36,6 @@ namespace Iviz.Msgs.MoveitMsgs
             ContactBody2 = "";
         }
         
-        /// Explicit constructor.
-        public ContactInformation(in StdMsgs.Header Header, in GeometryMsgs.Point Position, in GeometryMsgs.Vector3 Normal, double Depth, string ContactBody1, uint BodyType1, string ContactBody2, uint BodyType2)
-        {
-            this.Header = Header;
-            this.Position = Position;
-            this.Normal = Normal;
-            this.Depth = Depth;
-            this.ContactBody1 = ContactBody1;
-            this.BodyType1 = BodyType1;
-            this.ContactBody2 = ContactBody2;
-            this.BodyType2 = BodyType2;
-        }
-        
         /// Constructor with buffer.
         public ContactInformation(ref ReadBuffer b)
         {

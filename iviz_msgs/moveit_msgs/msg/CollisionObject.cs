@@ -49,21 +49,6 @@ namespace Iviz.Msgs.MoveitMsgs
             PlanePoses = System.Array.Empty<GeometryMsgs.Pose>();
         }
         
-        /// Explicit constructor.
-        public CollisionObject(in StdMsgs.Header Header, string Id, ObjectRecognitionMsgs.ObjectType Type, ShapeMsgs.SolidPrimitive[] Primitives, GeometryMsgs.Pose[] PrimitivePoses, ShapeMsgs.Mesh[] Meshes, GeometryMsgs.Pose[] MeshPoses, ShapeMsgs.Plane[] Planes, GeometryMsgs.Pose[] PlanePoses, byte Operation)
-        {
-            this.Header = Header;
-            this.Id = Id;
-            this.Type = Type;
-            this.Primitives = Primitives;
-            this.PrimitivePoses = PrimitivePoses;
-            this.Meshes = Meshes;
-            this.MeshPoses = MeshPoses;
-            this.Planes = Planes;
-            this.PlanePoses = PlanePoses;
-            this.Operation = Operation;
-        }
-        
         /// Constructor with buffer.
         public CollisionObject(ref ReadBuffer b)
         {

@@ -23,16 +23,6 @@ namespace Iviz.Msgs.DynamicReconfigure
             Groups = System.Array.Empty<GroupState>();
         }
         
-        /// Explicit constructor.
-        public Config(BoolParameter[] Bools, IntParameter[] Ints, StrParameter[] Strs, DoubleParameter[] Doubles, GroupState[] Groups)
-        {
-            this.Bools = Bools;
-            this.Ints = Ints;
-            this.Strs = Strs;
-            this.Doubles = Doubles;
-            this.Groups = Groups;
-        }
-        
         /// Constructor with buffer.
         public Config(ref ReadBuffer b)
         {

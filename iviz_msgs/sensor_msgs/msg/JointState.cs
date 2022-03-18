@@ -40,16 +40,6 @@ namespace Iviz.Msgs.SensorMsgs
             Effort = System.Array.Empty<double>();
         }
         
-        /// Explicit constructor.
-        public JointState(in StdMsgs.Header Header, string[] Name, double[] Position, double[] Velocity, double[] Effort)
-        {
-            this.Header = Header;
-            this.Name = Name;
-            this.Position = Position;
-            this.Velocity = Velocity;
-            this.Effort = Effort;
-        }
-        
         /// Constructor with buffer.
         public JointState(ref ReadBuffer b)
         {

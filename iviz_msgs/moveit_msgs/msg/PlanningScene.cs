@@ -43,21 +43,6 @@ namespace Iviz.Msgs.MoveitMsgs
             World = new PlanningSceneWorld();
         }
         
-        /// Explicit constructor.
-        public PlanningScene(string Name, RobotState RobotState, string RobotModelName, GeometryMsgs.TransformStamped[] FixedFrameTransforms, AllowedCollisionMatrix AllowedCollisionMatrix, LinkPadding[] LinkPadding, LinkScale[] LinkScale, ObjectColor[] ObjectColors, PlanningSceneWorld World, bool IsDiff)
-        {
-            this.Name = Name;
-            this.RobotState = RobotState;
-            this.RobotModelName = RobotModelName;
-            this.FixedFrameTransforms = FixedFrameTransforms;
-            this.AllowedCollisionMatrix = AllowedCollisionMatrix;
-            this.LinkPadding = LinkPadding;
-            this.LinkScale = LinkScale;
-            this.ObjectColors = ObjectColors;
-            this.World = World;
-            this.IsDiff = IsDiff;
-        }
-        
         /// Constructor with buffer.
         public PlanningScene(ref ReadBuffer b)
         {

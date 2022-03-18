@@ -36,17 +36,6 @@ namespace Iviz.Msgs.VisionMsgs
             TrackingId = "";
         }
         
-        /// Explicit constructor.
-        public Detection2D(in StdMsgs.Header Header, ObjectHypothesisWithPose[] Results, BoundingBox2D Bbox, SensorMsgs.Image SourceImg, bool IsTracking, string TrackingId)
-        {
-            this.Header = Header;
-            this.Results = Results;
-            this.Bbox = Bbox;
-            this.SourceImg = SourceImg;
-            this.IsTracking = IsTracking;
-            this.TrackingId = TrackingId;
-        }
-        
         /// Constructor with buffer.
         public Detection2D(ref ReadBuffer b)
         {

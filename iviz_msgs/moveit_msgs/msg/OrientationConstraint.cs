@@ -26,18 +26,6 @@ namespace Iviz.Msgs.MoveitMsgs
             LinkName = "";
         }
         
-        /// Explicit constructor.
-        public OrientationConstraint(in StdMsgs.Header Header, in GeometryMsgs.Quaternion Orientation, string LinkName, double AbsoluteXAxisTolerance, double AbsoluteYAxisTolerance, double AbsoluteZAxisTolerance, double Weight)
-        {
-            this.Header = Header;
-            this.Orientation = Orientation;
-            this.LinkName = LinkName;
-            this.AbsoluteXAxisTolerance = AbsoluteXAxisTolerance;
-            this.AbsoluteYAxisTolerance = AbsoluteYAxisTolerance;
-            this.AbsoluteZAxisTolerance = AbsoluteZAxisTolerance;
-            this.Weight = Weight;
-        }
-        
         /// Constructor with buffer.
         public OrientationConstraint(ref ReadBuffer b)
         {

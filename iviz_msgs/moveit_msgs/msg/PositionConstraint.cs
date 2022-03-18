@@ -25,16 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             ConstraintRegion = new BoundingVolume();
         }
         
-        /// Explicit constructor.
-        public PositionConstraint(in StdMsgs.Header Header, string LinkName, in GeometryMsgs.Vector3 TargetPointOffset, BoundingVolume ConstraintRegion, double Weight)
-        {
-            this.Header = Header;
-            this.LinkName = LinkName;
-            this.TargetPointOffset = TargetPointOffset;
-            this.ConstraintRegion = ConstraintRegion;
-            this.Weight = Weight;
-        }
-        
         /// Constructor with buffer.
         public PositionConstraint(ref ReadBuffer b)
         {

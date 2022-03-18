@@ -22,16 +22,6 @@ namespace Iviz.Msgs.MoveitMsgs
             JointName = "";
         }
         
-        /// Explicit constructor.
-        public JointConstraint(string JointName, double Position, double ToleranceAbove, double ToleranceBelow, double Weight)
-        {
-            this.JointName = JointName;
-            this.Position = Position;
-            this.ToleranceAbove = ToleranceAbove;
-            this.ToleranceBelow = ToleranceBelow;
-            this.Weight = Weight;
-        }
-        
         /// Constructor with buffer.
         public JointConstraint(ref ReadBuffer b)
         {

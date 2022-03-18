@@ -140,22 +140,6 @@ namespace Iviz.Msgs.SensorMsgs
             Roi = new RegionOfInterest();
         }
         
-        /// Explicit constructor.
-        public CameraInfo(in StdMsgs.Header Header, uint Height, uint Width, string DistortionModel, double[] D, double[] K, double[] R, double[] P, uint BinningX, uint BinningY, RegionOfInterest Roi)
-        {
-            this.Header = Header;
-            this.Height = Height;
-            this.Width = Width;
-            this.DistortionModel = DistortionModel;
-            this.D = D;
-            this.K = K;
-            this.R = R;
-            this.P = P;
-            this.BinningX = BinningX;
-            this.BinningY = BinningY;
-            this.Roi = Roi;
-        }
-        
         /// Constructor with buffer.
         public CameraInfo(ref ReadBuffer b)
         {

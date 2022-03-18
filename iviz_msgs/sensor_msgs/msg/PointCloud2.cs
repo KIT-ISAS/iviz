@@ -42,20 +42,6 @@ namespace Iviz.Msgs.SensorMsgs
             Data = System.Array.Empty<byte>();
         }
         
-        /// Explicit constructor.
-        public PointCloud2(in StdMsgs.Header Header, uint Height, uint Width, PointField[] Fields, bool IsBigendian, uint PointStep, uint RowStep, byte[] Data, bool IsDense)
-        {
-            this.Header = Header;
-            this.Height = Height;
-            this.Width = Width;
-            this.Fields = Fields;
-            this.IsBigendian = IsBigendian;
-            this.PointStep = PointStep;
-            this.RowStep = RowStep;
-            this.Data = Data;
-            this.IsDense = IsDense;
-        }
-        
         /// Constructor with buffer.
         public PointCloud2(ref ReadBuffer b)
         {

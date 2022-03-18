@@ -25,16 +25,6 @@ namespace Iviz.Msgs.TrajectoryMsgs
             Effort = System.Array.Empty<double>();
         }
         
-        /// Explicit constructor.
-        public JointTrajectoryPoint(double[] Positions, double[] Velocities, double[] Accelerations, double[] Effort, duration TimeFromStart)
-        {
-            this.Positions = Positions;
-            this.Velocities = Velocities;
-            this.Accelerations = Accelerations;
-            this.Effort = Effort;
-            this.TimeFromStart = TimeFromStart;
-        }
-        
         /// Constructor with buffer.
         public JointTrajectoryPoint(ref ReadBuffer b)
         {

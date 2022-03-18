@@ -41,23 +41,17 @@ namespace Iviz.Msgs.SensorMsgs
             Wrench = System.Array.Empty<GeometryMsgs.Wrench>();
         }
         
-        /// Explicit constructor.
-        public MultiDOFJointState(in StdMsgs.Header Header, string[] JointNames, GeometryMsgs.Transform[] Transforms, GeometryMsgs.Twist[] Twist, GeometryMsgs.Wrench[] Wrench)
-        {
-            this.Header = Header;
-            this.JointNames = JointNames;
-            this.Transforms = Transforms;
-            this.Twist = Twist;
-            this.Wrench = Wrench;
-        }
-        
         /// Constructor with buffer.
         public MultiDOFJointState(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             JointNames = b.DeserializeStringArray();
             Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Twist = b.DeserializeStructArray<GeometryMsgs.Twist>();
+            Twist = b.DeserializeArray<GeometryMsgs.Twist>();
+            for (int i = 0; i < Twist.Length; i++)
+            {
+                Twist[i] = new GeometryMsgs.Twist(ref b);
+            }
             Wrench = b.DeserializeArray<GeometryMsgs.Wrench>();
             for (int i = 0; i < Wrench.Length; i++)
             {
@@ -74,7 +68,7 @@ namespace Iviz.Msgs.SensorMsgs
             Header.RosSerialize(ref b);
             b.SerializeArray(JointNames);
             b.SerializeStructArray(Transforms);
-            b.SerializeStructArray(Twist);
+            b.SerializeArray(Twist);
             b.SerializeArray(Wrench);
         }
         
@@ -87,6 +81,11 @@ namespace Iviz.Msgs.SensorMsgs
             }
             if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
             if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
+            for (int i = 0; i < Twist.Length; i++)
+            {
+                if (Twist[i] is null) BuiltIns.ThrowNullReference($"{nameof(Twist)}[{i}]");
+                Twist[i].RosValidate();
+            }
             if (Wrench is null) BuiltIns.ThrowNullReference(nameof(Wrench));
             for (int i = 0; i < Wrench.Length; i++)
             {

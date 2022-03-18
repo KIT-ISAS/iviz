@@ -18,11 +18,12 @@ namespace Iviz.Msgs.GeometryMsgs
         /// Constructor for empty message.
         public TwistWithCovariance()
         {
+            Twist = new Twist();
             Covariance = new double[36];
         }
         
         /// Explicit constructor.
-        public TwistWithCovariance(in Twist Twist, double[] Covariance)
+        public TwistWithCovariance(Twist Twist, double[] Covariance)
         {
             this.Twist = Twist;
             this.Covariance = Covariance;
@@ -31,7 +32,7 @@ namespace Iviz.Msgs.GeometryMsgs
         /// Constructor with buffer.
         public TwistWithCovariance(ref ReadBuffer b)
         {
-            b.Deserialize(out Twist);
+            Twist = new Twist(ref b);
             Covariance = b.DeserializeStructArray<double>(36);
         }
         
@@ -41,12 +42,14 @@ namespace Iviz.Msgs.GeometryMsgs
     
         public void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(in Twist);
+            Twist.RosSerialize(ref b);
             b.SerializeStructArray(Covariance, 36);
         }
         
         public void RosValidate()
         {
+            if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
+            Twist.RosValidate();
             if (Covariance is null) BuiltIns.ThrowNullReference(nameof(Covariance));
             if (Covariance.Length != 36) throw new RosInvalidSizeForFixedArrayException(nameof(Covariance), Covariance.Length, 36);
         }

@@ -27,19 +27,6 @@ namespace Iviz.Msgs.GeometryMsgs
         {
         }
         
-        /// Explicit constructor.
-        public Inertia(double M, in GeometryMsgs.Vector3 Com, double Ixx, double Ixy, double Ixz, double Iyy, double Iyz, double Izz)
-        {
-            this.M = M;
-            this.Com = Com;
-            this.Ixx = Ixx;
-            this.Ixy = Ixy;
-            this.Ixz = Ixz;
-            this.Iyy = Iyy;
-            this.Iyz = Iyz;
-            this.Izz = Izz;
-        }
-        
         /// Constructor with buffer.
         public Inertia(ref ReadBuffer b)
         {

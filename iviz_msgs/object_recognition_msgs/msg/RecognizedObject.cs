@@ -44,18 +44,6 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             Pose = new GeometryMsgs.PoseWithCovarianceStamped();
         }
         
-        /// Explicit constructor.
-        public RecognizedObject(in StdMsgs.Header Header, ObjectRecognitionMsgs.ObjectType Type, float Confidence, SensorMsgs.PointCloud2[] PointClouds, ShapeMsgs.Mesh BoundingMesh, GeometryMsgs.Point[] BoundingContours, GeometryMsgs.PoseWithCovarianceStamped Pose)
-        {
-            this.Header = Header;
-            this.Type = Type;
-            this.Confidence = Confidence;
-            this.PointClouds = PointClouds;
-            this.BoundingMesh = BoundingMesh;
-            this.BoundingContours = BoundingContours;
-            this.Pose = Pose;
-        }
-        
         /// Constructor with buffer.
         public RecognizedObject(ref ReadBuffer b)
         {

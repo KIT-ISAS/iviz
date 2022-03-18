@@ -30,20 +30,6 @@ namespace Iviz.Msgs.IvizMsgs
             Faces = System.Array.Empty<Triangle>();
         }
         
-        /// Explicit constructor.
-        public Mesh(string Name, Vector3f[] Vertices, Vector3f[] Normals, Vector3f[] Tangents, Vector3f[] BiTangents, TexCoords[] TexCoords, ColorChannel[] ColorChannels, Triangle[] Faces, uint MaterialIndex)
-        {
-            this.Name = Name;
-            this.Vertices = Vertices;
-            this.Normals = Normals;
-            this.Tangents = Tangents;
-            this.BiTangents = BiTangents;
-            this.TexCoords = TexCoords;
-            this.ColorChannels = ColorChannels;
-            this.Faces = Faces;
-            this.MaterialIndex = MaterialIndex;
-        }
-        
         /// Constructor with buffer.
         public Mesh(ref ReadBuffer b)
         {

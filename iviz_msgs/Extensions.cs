@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
@@ -132,12 +133,13 @@ namespace Iviz.Msgs
 
         public static Quaternion Normalize(Quaternion q)
         {
-            double norm = System.Math.Sqrt(q.X * q.X + q.Y * q.Y + q.Z * q.Z + q.W * q.W);
-            if (norm == 0)
+            double normSq = q.X * q.X + q.Y * q.Y + q.Z * q.Z + q.W * q.W;
+            if (normSq < 1e-8 || Math.Abs(1 - normSq) < 1e-8)
             {
                 return q;
             }
 
+            double norm = System.Math.Sqrt(normSq);
             q.X /= norm;
             q.Y /= norm;
             q.Z /= norm;
@@ -271,10 +273,10 @@ namespace Iviz.Msgs
         public static void Deconstruct(this in Quaternion q, out double X, out double Y, out double Z, out double W) =>
             (X, Y, Z, W) = (q.X, q.Y, q.Z, q.W);
 
-        public static Twist WithLinear(this in Twist p, Vector3 v) => new(v, p.Angular);
-        public static Twist WithAngular(this in Twist p, Vector3 v) => new(p.Linear, v);
+        public static Twist WithLinear(this Twist p, Vector3 v) => new(v, p.Angular);
+        public static Twist WithAngular(this Twist p, Vector3 v) => new(p.Linear, v);
 
-        public static void Deconstruct(this in Twist t, out Vector3 Linear, out Vector3 Angular)
+        public static void Deconstruct(this Twist t, out Vector3 Linear, out Vector3 Angular)
         {
             Linear = t.Linear;
             Angular = t.Angular;

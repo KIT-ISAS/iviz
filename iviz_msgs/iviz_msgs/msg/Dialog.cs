@@ -79,28 +79,6 @@ namespace Iviz.Msgs.IvizMsgs
             MenuEntries = System.Array.Empty<string>();
         }
         
-        /// Explicit constructor.
-        public Dialog(in StdMsgs.Header Header, byte Action, string Id, duration Lifetime, double Scale, byte Type, byte Buttons, byte Icon, in StdMsgs.ColorRGBA BackgroundColor, string Title, string Caption, ushort CaptionAlignment, string[] MenuEntries, byte BindingType, in GeometryMsgs.Vector3 TfOffset, in GeometryMsgs.Vector3 DialogDisplacement, in GeometryMsgs.Vector3 TfDisplacement)
-        {
-            this.Header = Header;
-            this.Action = Action;
-            this.Id = Id;
-            this.Lifetime = Lifetime;
-            this.Scale = Scale;
-            this.Type = Type;
-            this.Buttons = Buttons;
-            this.Icon = Icon;
-            this.BackgroundColor = BackgroundColor;
-            this.Title = Title;
-            this.Caption = Caption;
-            this.CaptionAlignment = CaptionAlignment;
-            this.MenuEntries = MenuEntries;
-            this.BindingType = BindingType;
-            this.TfOffset = TfOffset;
-            this.DialogDisplacement = DialogDisplacement;
-            this.TfDisplacement = TfDisplacement;
-        }
-        
         /// Constructor with buffer.
         public Dialog(ref ReadBuffer b)
         {

@@ -34,16 +34,6 @@ namespace Iviz.Msgs.DiagnosticMsgs
             Values = System.Array.Empty<KeyValue>();
         }
         
-        /// Explicit constructor.
-        public DiagnosticStatus(byte Level, string Name, string Message, string HardwareId, KeyValue[] Values)
-        {
-            this.Level = Level;
-            this.Name = Name;
-            this.Message = Message;
-            this.HardwareId = HardwareId;
-            this.Values = Values;
-        }
-        
         /// Constructor with buffer.
         public DiagnosticStatus(ref ReadBuffer b)
         {

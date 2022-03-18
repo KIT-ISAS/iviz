@@ -34,20 +34,6 @@ namespace Iviz.Msgs.IvizMsgs
             CameraIntrinsic = new double[9];
         }
         
-        /// Explicit constructor.
-        public ARMarker(in StdMsgs.Header Header, byte Type, string Code, GeometryMsgs.Vector3[] Corners, double[] CameraIntrinsic, in GeometryMsgs.Pose CameraPose, bool HasReliablePose, double MarkerSizeInMm, in GeometryMsgs.Pose PoseRelativeToCamera)
-        {
-            this.Header = Header;
-            this.Type = Type;
-            this.Code = Code;
-            this.Corners = Corners;
-            this.CameraIntrinsic = CameraIntrinsic;
-            this.CameraPose = CameraPose;
-            this.HasReliablePose = HasReliablePose;
-            this.MarkerSizeInMm = MarkerSizeInMm;
-            this.PoseRelativeToCamera = PoseRelativeToCamera;
-        }
-        
         /// Constructor with buffer.
         public ARMarker(ref ReadBuffer b)
         {

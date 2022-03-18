@@ -52,17 +52,6 @@ namespace Iviz.Msgs.SensorMsgs
         {
         }
         
-        /// Explicit constructor.
-        public Range(in StdMsgs.Header Header, byte RadiationType, float FieldOfView, float MinRange, float MaxRange, float Range_)
-        {
-            this.Header = Header;
-            this.RadiationType = RadiationType;
-            this.FieldOfView = FieldOfView;
-            this.MinRange = MinRange;
-            this.MaxRange = MaxRange;
-            this.Range_ = Range_;
-        }
-        
         /// Constructor with buffer.
         public Range(ref ReadBuffer b)
         {

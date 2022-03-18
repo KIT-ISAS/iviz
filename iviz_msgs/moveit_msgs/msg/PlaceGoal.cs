@@ -51,22 +51,6 @@ namespace Iviz.Msgs.MoveitMsgs
             PlanningOptions = new PlanningOptions();
         }
         
-        /// Explicit constructor.
-        public PlaceGoal(string GroupName, string AttachedObjectName, PlaceLocation[] PlaceLocations, bool PlaceEef, string SupportSurfaceName, bool AllowGripperSupportCollision, Constraints PathConstraints, string PlannerId, string[] AllowedTouchObjects, double AllowedPlanningTime, PlanningOptions PlanningOptions)
-        {
-            this.GroupName = GroupName;
-            this.AttachedObjectName = AttachedObjectName;
-            this.PlaceLocations = PlaceLocations;
-            this.PlaceEef = PlaceEef;
-            this.SupportSurfaceName = SupportSurfaceName;
-            this.AllowGripperSupportCollision = AllowGripperSupportCollision;
-            this.PathConstraints = PathConstraints;
-            this.PlannerId = PlannerId;
-            this.AllowedTouchObjects = AllowedTouchObjects;
-            this.AllowedPlanningTime = AllowedPlanningTime;
-            this.PlanningOptions = PlanningOptions;
-        }
-        
         /// Constructor with buffer.
         public PlaceGoal(ref ReadBuffer b)
         {

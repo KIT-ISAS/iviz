@@ -31,19 +31,6 @@ namespace Iviz.Msgs.MoveitMsgs
             JointName = "";
         }
         
-        /// Explicit constructor.
-        public JointLimits(string JointName, bool HasPositionLimits, double MinPosition, double MaxPosition, bool HasVelocityLimits, double MaxVelocity, bool HasAccelerationLimits, double MaxAcceleration)
-        {
-            this.JointName = JointName;
-            this.HasPositionLimits = HasPositionLimits;
-            this.MinPosition = MinPosition;
-            this.MaxPosition = MaxPosition;
-            this.HasVelocityLimits = HasVelocityLimits;
-            this.MaxVelocity = MaxVelocity;
-            this.HasAccelerationLimits = HasAccelerationLimits;
-            this.MaxAcceleration = MaxAcceleration;
-        }
-        
         /// Constructor with buffer.
         public JointLimits(ref ReadBuffer b)
         {

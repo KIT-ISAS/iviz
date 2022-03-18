@@ -174,7 +174,7 @@ namespace Iviz.Msgs
             string dependenciesBase64 = GetDependenciesBase64(type);
             byte[] inputBytes = Convert.FromBase64String(dependenciesBase64);
 
-            using var outputBytes = new Rent<byte>(32);
+            Span<byte> outputBytes = stackalloc byte[32];
             using var inputStream = new MemoryStream(inputBytes);
             using var gZipStream = new GZipStream(inputStream, CompressionMode.Decompress);
             using var str = BuilderPool.Rent();
@@ -182,8 +182,8 @@ namespace Iviz.Msgs
             int read;
             do
             {
-                read = gZipStream.Read(outputBytes.Array, 0, outputBytes.Length);
-                str.Append(UTF8.GetString(outputBytes.Array, 0, read));
+                read = gZipStream.Read(outputBytes);
+                str.Append(UTF8.GetString(outputBytes[..read]));
             } while (read != 0);
 
             return str.ToString();

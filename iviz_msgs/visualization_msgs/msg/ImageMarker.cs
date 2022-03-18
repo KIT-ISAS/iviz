@@ -47,24 +47,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             OutlineColors = System.Array.Empty<StdMsgs.ColorRGBA>();
         }
         
-        /// Explicit constructor.
-        public ImageMarker(in StdMsgs.Header Header, string Ns, int Id, int Type, int Action, in GeometryMsgs.Point Position, float Scale, in StdMsgs.ColorRGBA OutlineColor, byte Filled, in StdMsgs.ColorRGBA FillColor, duration Lifetime, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] OutlineColors)
-        {
-            this.Header = Header;
-            this.Ns = Ns;
-            this.Id = Id;
-            this.Type = Type;
-            this.Action = Action;
-            this.Position = Position;
-            this.Scale = Scale;
-            this.OutlineColor = OutlineColor;
-            this.Filled = Filled;
-            this.FillColor = FillColor;
-            this.Lifetime = Lifetime;
-            this.Points = Points;
-            this.OutlineColors = OutlineColors;
-        }
-        
         /// Constructor with buffer.
         public ImageMarker(ref ReadBuffer b)
         {

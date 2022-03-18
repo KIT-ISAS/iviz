@@ -67,17 +67,6 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
         
-        /// Explicit constructor.
-        public ChangeControlDimensionsRequest(bool ControlXTranslation, bool ControlYTranslation, bool ControlZTranslation, bool ControlXRotation, bool ControlYRotation, bool ControlZRotation)
-        {
-            this.ControlXTranslation = ControlXTranslation;
-            this.ControlYTranslation = ControlYTranslation;
-            this.ControlZTranslation = ControlZTranslation;
-            this.ControlXRotation = ControlXRotation;
-            this.ControlYRotation = ControlYRotation;
-            this.ControlZRotation = ControlZRotation;
-        }
-        
         /// Constructor with buffer.
         public ChangeControlDimensionsRequest(ref ReadBuffer b)
         {

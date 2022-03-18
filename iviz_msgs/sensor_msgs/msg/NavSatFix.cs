@@ -51,18 +51,6 @@ namespace Iviz.Msgs.SensorMsgs
             PositionCovariance = new double[9];
         }
         
-        /// Explicit constructor.
-        public NavSatFix(in StdMsgs.Header Header, NavSatStatus Status, double Latitude, double Longitude, double Altitude, double[] PositionCovariance, byte PositionCovarianceType)
-        {
-            this.Header = Header;
-            this.Status = Status;
-            this.Latitude = Latitude;
-            this.Longitude = Longitude;
-            this.Altitude = Altitude;
-            this.PositionCovariance = PositionCovariance;
-            this.PositionCovarianceType = PositionCovarianceType;
-        }
-        
         /// Constructor with buffer.
         public NavSatFix(ref ReadBuffer b)
         {

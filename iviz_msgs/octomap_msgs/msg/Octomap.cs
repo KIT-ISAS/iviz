@@ -25,16 +25,6 @@ namespace Iviz.Msgs.OctomapMsgs
             Data = System.Array.Empty<sbyte>();
         }
         
-        /// Explicit constructor.
-        public Octomap(in StdMsgs.Header Header, bool Binary, string Id, double Resolution, sbyte[] Data)
-        {
-            this.Header = Header;
-            this.Binary = Binary;
-            this.Id = Id;
-            this.Resolution = Resolution;
-            this.Data = Data;
-        }
-        
         /// Constructor with buffer.
         public Octomap(ref ReadBuffer b)
         {

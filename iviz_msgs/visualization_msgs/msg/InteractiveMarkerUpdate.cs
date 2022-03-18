@@ -41,17 +41,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             Erases = System.Array.Empty<string>();
         }
         
-        /// Explicit constructor.
-        public InteractiveMarkerUpdate(string ServerId, ulong SeqNum, byte Type, InteractiveMarker[] Markers, InteractiveMarkerPose[] Poses, string[] Erases)
-        {
-            this.ServerId = ServerId;
-            this.SeqNum = SeqNum;
-            this.Type = Type;
-            this.Markers = Markers;
-            this.Poses = Poses;
-            this.Erases = Erases;
-        }
-        
         /// Constructor with buffer.
         public InteractiveMarkerUpdate(ref ReadBuffer b)
         {

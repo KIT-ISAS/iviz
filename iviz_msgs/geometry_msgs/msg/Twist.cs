@@ -1,19 +1,21 @@
 /* This file was created automatically, do not edit! */
 
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
     [Preserve, DataContract (Name = RosMessageType)]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Twist : IMessage, IDeserializable<Twist>, System.IEquatable<Twist>
+    public sealed class Twist : IDeserializable<Twist>, IMessage
     {
         // This expresses velocity in free space broken into its linear and angular parts.
         [DataMember (Name = "linear")] public Vector3 Linear;
         [DataMember (Name = "angular")] public Vector3 Angular;
     
+        /// Constructor for empty message.
+        public Twist()
+        {
+        }
+        
         /// Explicit constructor.
         public Twist(in Vector3 Linear, in Vector3 Angular)
         {
@@ -22,37 +24,32 @@ namespace Iviz.Msgs.GeometryMsgs
         }
         
         /// Constructor with buffer.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Twist(ref ReadBuffer b)
         {
-            b.Deserialize(out this);
+            b.Deserialize(out Linear);
+            b.Deserialize(out Angular);
         }
         
-        readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Twist(ref b);
+        ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Twist(ref b);
         
-        public readonly Twist RosDeserialize(ref ReadBuffer b) => new Twist(ref b);
-        
-        public readonly override int GetHashCode() => (Linear, Angular).GetHashCode();
-        public readonly override bool Equals(object? o) => o is Twist s && Equals(s);
-        public readonly bool Equals(Twist o) => (Linear, Angular) == (o.Linear, o.Angular);
-        public static bool operator==(in Twist a, in Twist b) => a.Equals(b);
-        public static bool operator!=(in Twist a, in Twist b) => !a.Equals(b);
+        public Twist RosDeserialize(ref ReadBuffer b) => new Twist(ref b);
     
-        public readonly void RosSerialize(ref WriteBuffer b)
+        public void RosSerialize(ref WriteBuffer b)
         {
-            b.Serialize(in this);
+            b.Serialize(in Linear);
+            b.Serialize(in Angular);
         }
         
-        public readonly void RosValidate()
+        public void RosValidate()
         {
         }
     
         /// <summary> Constant size of this message. </summary> 
         [Preserve] public const int RosFixedMessageLength = 48;
         
-        public readonly int RosMessageLength => RosFixedMessageLength;
+        public int RosMessageLength => RosFixedMessageLength;
     
-        public readonly string RosType => RosMessageType;
+        public string RosType => RosMessageType;
     
         /// <summary> Full ROS name of this message. </summary>
         [Preserve] public const string RosMessageType = "geometry_msgs/Twist";

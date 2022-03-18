@@ -25,16 +25,6 @@ namespace Iviz.Msgs.NavMsgs
         {
         }
         
-        /// Explicit constructor.
-        public MapMetaData(time MapLoadTime, float Resolution, uint Width, uint Height, in GeometryMsgs.Pose Origin)
-        {
-            this.MapLoadTime = MapLoadTime;
-            this.Resolution = Resolution;
-            this.Width = Width;
-            this.Height = Height;
-            this.Origin = Origin;
-        }
-        
         /// Constructor with buffer.
         public MapMetaData(ref ReadBuffer b)
         {

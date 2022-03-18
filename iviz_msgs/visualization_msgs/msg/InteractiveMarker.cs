@@ -37,18 +37,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             Controls = System.Array.Empty<InteractiveMarkerControl>();
         }
         
-        /// Explicit constructor.
-        public InteractiveMarker(in StdMsgs.Header Header, in GeometryMsgs.Pose Pose, string Name, string Description, float Scale, MenuEntry[] MenuEntries, InteractiveMarkerControl[] Controls)
-        {
-            this.Header = Header;
-            this.Pose = Pose;
-            this.Name = Name;
-            this.Description = Description;
-            this.Scale = Scale;
-            this.MenuEntries = MenuEntries;
-            this.Controls = Controls;
-        }
-        
         /// Constructor with buffer.
         public InteractiveMarker(ref ReadBuffer b)
         {

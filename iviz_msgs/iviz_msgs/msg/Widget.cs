@@ -42,23 +42,6 @@ namespace Iviz.Msgs.IvizMsgs
             SecondaryBoundaries = System.Array.Empty<BoundingBoxStamped>();
         }
         
-        /// Explicit constructor.
-        public Widget(in StdMsgs.Header Header, byte Action, string Id, byte Type, in GeometryMsgs.Pose Pose, in StdMsgs.ColorRGBA Color, in StdMsgs.ColorRGBA SecondaryColor, double Scale, double SecondaryScale, string Caption, BoundingBox Boundary, BoundingBoxStamped[] SecondaryBoundaries)
-        {
-            this.Header = Header;
-            this.Action = Action;
-            this.Id = Id;
-            this.Type = Type;
-            this.Pose = Pose;
-            this.Color = Color;
-            this.SecondaryColor = SecondaryColor;
-            this.Scale = Scale;
-            this.SecondaryScale = SecondaryScale;
-            this.Caption = Caption;
-            this.Boundary = Boundary;
-            this.SecondaryBoundaries = SecondaryBoundaries;
-        }
-        
         /// Constructor with buffer.
         public Widget(ref ReadBuffer b)
         {

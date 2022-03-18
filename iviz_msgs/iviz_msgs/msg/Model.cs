@@ -25,17 +25,6 @@ namespace Iviz.Msgs.IvizMsgs
             Nodes = System.Array.Empty<Node>();
         }
         
-        /// Explicit constructor.
-        public Model(string Name, string Filename, string OrientationHint, Mesh[] Meshes, Material[] Materials, Node[] Nodes)
-        {
-            this.Name = Name;
-            this.Filename = Filename;
-            this.OrientationHint = OrientationHint;
-            this.Meshes = Meshes;
-            this.Materials = Materials;
-            this.Nodes = Nodes;
-        }
-        
         /// Constructor with buffer.
         public Model(ref ReadBuffer b)
         {

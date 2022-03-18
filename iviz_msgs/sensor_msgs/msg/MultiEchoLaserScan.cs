@@ -51,21 +51,6 @@ namespace Iviz.Msgs.SensorMsgs
             Intensities = System.Array.Empty<LaserEcho>();
         }
         
-        /// Explicit constructor.
-        public MultiEchoLaserScan(in StdMsgs.Header Header, float AngleMin, float AngleMax, float AngleIncrement, float TimeIncrement, float ScanTime, float RangeMin, float RangeMax, LaserEcho[] Ranges, LaserEcho[] Intensities)
-        {
-            this.Header = Header;
-            this.AngleMin = AngleMin;
-            this.AngleMax = AngleMax;
-            this.AngleIncrement = AngleIncrement;
-            this.TimeIncrement = TimeIncrement;
-            this.ScanTime = ScanTime;
-            this.RangeMin = RangeMin;
-            this.RangeMax = RangeMax;
-            this.Ranges = Ranges;
-            this.Intensities = Intensities;
-        }
-        
         /// Constructor with buffer.
         public MultiEchoLaserScan(ref ReadBuffer b)
         {

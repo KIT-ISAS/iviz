@@ -62,16 +62,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             Command = "";
         }
         
-        /// Explicit constructor.
-        public MenuEntry(uint Id, uint ParentId, string Title, string Command, byte CommandType)
-        {
-            this.Id = Id;
-            this.ParentId = ParentId;
-            this.Title = Title;
-            this.Command = Command;
-            this.CommandType = CommandType;
-        }
-        
         /// Constructor with buffer.
         public MenuEntry(ref ReadBuffer b)
         {

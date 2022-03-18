@@ -30,7 +30,8 @@ namespace Iviz.Msgs
         int RosMessageLength { get; }
 
         /// <summary>
-        /// Checks if this message is valid. If not, throws an exception.
+        /// Checks if this message is valid (no null pointers, fixed arrays have the right size, and so on).
+        /// If not, throws an exception.
         /// </summary>
         void RosValidate();
 

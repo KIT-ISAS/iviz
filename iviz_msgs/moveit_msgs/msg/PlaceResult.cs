@@ -29,17 +29,6 @@ namespace Iviz.Msgs.MoveitMsgs
             PlaceLocation = new PlaceLocation();
         }
         
-        /// Explicit constructor.
-        public PlaceResult(MoveItErrorCodes ErrorCode, RobotState TrajectoryStart, RobotTrajectory[] TrajectoryStages, string[] TrajectoryDescriptions, PlaceLocation PlaceLocation, double PlanningTime)
-        {
-            this.ErrorCode = ErrorCode;
-            this.TrajectoryStart = TrajectoryStart;
-            this.TrajectoryStages = TrajectoryStages;
-            this.TrajectoryDescriptions = TrajectoryDescriptions;
-            this.PlaceLocation = PlaceLocation;
-            this.PlanningTime = PlanningTime;
-        }
-        
         /// Constructor with buffer.
         public PlaceResult(ref ReadBuffer b)
         {

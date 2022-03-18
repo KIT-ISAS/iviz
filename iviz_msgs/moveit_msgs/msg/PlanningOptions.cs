@@ -43,19 +43,6 @@ namespace Iviz.Msgs.MoveitMsgs
             PlanningSceneDiff = new PlanningScene();
         }
         
-        /// Explicit constructor.
-        public PlanningOptions(PlanningScene PlanningSceneDiff, bool PlanOnly, bool LookAround, int LookAroundAttempts, double MaxSafeExecutionCost, bool Replan, int ReplanAttempts, double ReplanDelay)
-        {
-            this.PlanningSceneDiff = PlanningSceneDiff;
-            this.PlanOnly = PlanOnly;
-            this.LookAround = LookAround;
-            this.LookAroundAttempts = LookAroundAttempts;
-            this.MaxSafeExecutionCost = MaxSafeExecutionCost;
-            this.Replan = Replan;
-            this.ReplanAttempts = ReplanAttempts;
-            this.ReplanDelay = ReplanDelay;
-        }
-        
         /// Constructor with buffer.
         public PlanningOptions(ref ReadBuffer b)
         {

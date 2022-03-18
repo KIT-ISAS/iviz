@@ -1,6 +1,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -67,7 +68,7 @@ namespace Iviz.Msgs
             Advance(count);
             return "";
         }
-        
+
         public string[] DeserializeStringArray()
         {
             int count = ReadInt();
@@ -112,7 +113,7 @@ namespace Iviz.Msgs
             {
                 list.Capacity = count;
             }
-            
+
             for (int i = 0; i < list.Count; i++)
             {
                 list[i] = DeserializeString();
@@ -146,7 +147,12 @@ namespace Iviz.Msgs
             int size = count * sizeOfT;
             var src = ptr[..size];
 
+#if NET5_0_OR_GREATER
+            T[] val = GC.AllocateUninitializedArray<T>(count);
+#else
             T[] val = new T[count];
+#endif
+
             src.CopyTo(MemoryMarshal.AsBytes(val.AsSpan()));
 
             Advance(size);
@@ -172,7 +178,7 @@ namespace Iviz.Msgs
             Advance(size);
             return val;
         }
-        
+
         public T[] SkipStructArray<T>() where T : unmanaged
         {
             int count = ReadInt();
@@ -180,7 +186,7 @@ namespace Iviz.Msgs
             int size = count * sizeOfT;
             ThrowIfOutOfRange(size);
             Advance(size);
-            return Array.Empty<T>();            
+            return Array.Empty<T>();
         }
 
         public void DeserializeStructList<T>(List<T> list) where T : unmanaged
@@ -207,15 +213,20 @@ namespace Iviz.Msgs
         public T[] DeserializeArray<T>() where T : IMessage, new()
         {
             int count = ReadInt();
-            if (count > 1024 * 1024 * 1024)
+            if (count == 0)
             {
-                throw new BufferException("Implausible message requested more than 1TB elements.");
+                return Array.Empty<T>();
             }
 
-            return count == 0 ? Array.Empty<T>() : new T[count];
-            // entry deserializations happen outside
+            if (count <= 1024 * 1024 * 1024)
+            {
+                return new T[count];
+                // entry deserializations happen outside
+            }
+
+            throw new BufferException("Implausible message requested more than 1TB elements.");
         }
-        
+
         /// <summary>
         /// Deserializes a message of the given type from the buffer array.  
         /// </summary>
@@ -230,11 +241,6 @@ namespace Iviz.Msgs
         /// <returns>The deserialized message.</returns>
         public static ISerializable Deserialize(ISerializable generator, ReadOnlySpan<byte> buffer)
         {
-            if (generator == null)
-            {
-                throw new ArgumentNullException(nameof(generator));
-            }
-
             var b = new ReadBuffer(buffer);
             return generator.RosDeserializeBase(ref b);
         }
@@ -255,23 +261,13 @@ namespace Iviz.Msgs
         public static T Deserialize<T>(IDeserializable<T> generator, ReadOnlySpan<byte> buffer)
             where T : ISerializable
         {
-            if (generator == null)
-            {
-                throw new ArgumentNullException(nameof(generator));
-            }
-
             var b = new ReadBuffer(buffer);
             return generator.RosDeserialize(ref b);
         }
-        
+
         public static T Deserialize<T>(in T generator, ReadOnlySpan<byte> buffer)
             where T : ISerializable, IDeserializable<T>
         {
-            if (generator == null)
-            {
-                throw new ArgumentNullException(nameof(generator));
-            }
-
             var b = new ReadBuffer(buffer);
             return generator.RosDeserialize(ref b);
         }
