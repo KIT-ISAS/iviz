@@ -27,13 +27,13 @@ public static class BuilderPool
     public readonly struct BuilderRent : IDisposable
     {
         static readonly ConcurrentBag<(StringBuilder builder, ReadOnlyMemory<char> chunk)> Pool = new();
+
+        readonly StringBuilder builder;
         readonly ReadOnlyMemory<char> chunk;
 
         public ReadOnlyMemory<char> Chunk => chunk.Length >= builder.Length
             ? chunk[..builder.Length]
             : chunk;
-
-        readonly StringBuilder builder;
 
         /// Returns the length of the enclosed string builder.
         public int Length

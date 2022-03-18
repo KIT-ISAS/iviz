@@ -136,7 +136,6 @@ internal sealed class RosNodeServer
 
     static XmlRpcArg GetBusStats(XmlRpcValue[] _)
     {
-        Logger.Log("Was called: getBusStats");
         return ErrorResponse("Not implemented yet");
     }
 

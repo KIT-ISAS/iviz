@@ -1,209 +1,171 @@
 using System;
+using JetBrains.Annotations;
 
 namespace Iviz.Tools;
+
 
 /// <summary>
 /// Class that processes logging information.
 /// </summary>
 public static class Logger
 {
-    /// <summary>
-    /// Shorthand for a logging function that does nothing.  
-    /// </summary>
-    public static readonly Action<object> None = _ => { };
+    public static Action<string>? LogDebugCallback { private get; set; }
 
-    /// <summary>
-    /// Callback function when a log message of level 'debug' is produced. 
-    /// </summary>
-    public static Action<object> LogDebug { get; set; } = None;
-
-    public static void LogDebugFormat<TT>(string format, TT? arg1)
+    public static void LogDebug(string arg1)
     {
-        if (LogDebug != None)
-        {
-            LogDebug(string.Format(format, arg1));
-        }
+        LogDebugCallback?.Invoke(arg1);
+    }
+    
+    [StringFormatMethod("format")]
+    public static void LogDebugFormat(string format, object? arg1)
+    {
+        LogDebugCallback?.Invoke(string.Format(format, arg1));
     }
 
+    [StringFormatMethod("format")]
     public static void LogDebugFormat(string format, Exception? arg1)
     {
-        if (LogDebug != None)
-        {
-            LogDebug(string.Format(format, ExceptionToString(arg1)));
-        }
+        LogDebugCallback?.Invoke(string.Format(format, ExceptionToString(arg1)));
     }
 
+    [StringFormatMethod("format")]
     public static void LogDebugFormat<TT, TU>(string format, TT? arg1, TU? arg2)
     {
-        if (LogDebug != None)
-        {
-            LogDebug(string.Format(format, arg1, arg2));
-        }
+        LogDebugCallback?.Invoke(string.Format(format, arg1, arg2));
     }
 
+    [StringFormatMethod("format")]
     public static void LogDebugFormat<TT>(string format, TT? arg1, Exception? arg2)
     {
-        if (LogDebug != None)
-        {
-            LogDebug(string.Format(format, arg1, ExceptionToString(arg2)));
-        }
+        LogDebugCallback?.Invoke(string.Format(format, arg1, ExceptionToString(arg2)));
     }
 
+    [StringFormatMethod("format")]
     public static void LogDebugFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
     {
-        if (LogDebug != None)
-        {
-            LogDebug(string.Format(format, arg1, arg2, arg3));
-        }
+        LogDebugCallback?.Invoke(string.Format(format, arg1, arg2, arg3));
     }
 
+    [StringFormatMethod("format")]
     public static void LogDebugFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
     {
-        if (LogDebug != None)
-        {
-            LogDebug(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
-        }
+        LogDebugCallback?.Invoke(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
     }
 
+    [StringFormatMethod("format")]
     public static void LogDebugFormat<TT, TU, TV, TW>(string format, TT? arg1, TU? arg2, TV? arg3, TW? arg4)
     {
-        if (LogDebug != None)
-        {
-            LogDebug(string.Format(format, arg1, arg2, arg3, arg4));
-        }
+        LogDebugCallback?.Invoke(string.Format(format, arg1, arg2, arg3, arg4));
     }
 
+    [StringFormatMethod("format")]
     public static void LogDebugFormat(string format, params object?[] objs)
     {
-        if (LogDebug != None)
-        {
-            LogDebug(string.Format(format, objs));
-        }
+        LogDebugCallback?.Invoke(string.Format(format, objs));
     }
 
     /// <summary>
     /// Callback function when a log message of level 'default' is produced. 
     /// </summary>
-    public static Action<object> Log { get; set; } = None;
+    public static Action<string>? LogCallback { private get; set; }
 
-    public static void LogFormat<TT>(string format, TT? arg1)
+    public static void Log(string arg1)
     {
-        if (Log != None)
-        {
-            Log(string.Format(format, arg1));
-        }
+        LogCallback?.Invoke(arg1);
+    }
+    
+    [StringFormatMethod("format")]
+    public static void LogFormat(string format, object? arg1)
+    {
+        LogCallback?.Invoke(string.Format(format, arg1));
     }
 
+    [StringFormatMethod("format")]
     public static void LogFormat(string format, Exception? arg1)
     {
-        if (Log != None)
-        {
-            Log(string.Format(format, ExceptionToString(arg1)));
-        }
+        LogCallback?.Invoke(string.Format(format, ExceptionToString(arg1)));
     }
 
+    [StringFormatMethod("format")]
     public static void LogFormat<TT, TU>(string format, TT? arg1, TU? arg2)
     {
-        if (Log != None)
-        {
-            Log(string.Format(format, arg1, arg2));
-        }
+        LogCallback?.Invoke(string.Format(format, arg1, arg2));
     }
 
+    [StringFormatMethod("format")]
     public static void LogFormat<TT>(string format, TT? arg1, Exception? arg2)
     {
-        if (Log != None)
-        {
-            Log(string.Format(format, arg1, ExceptionToString(arg2)));
-        }
+        LogCallback?.Invoke(string.Format(format, arg1, ExceptionToString(arg2)));
     }
 
+    [StringFormatMethod("format")]
     public static void LogFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
     {
-        if (Log != None)
-        {
-            Log(string.Format(format, arg1, arg2, arg3));
-        }
+        LogCallback?.Invoke(string.Format(format, arg1, arg2, arg3));
     }
 
+    [StringFormatMethod("format")]
     public static void LogFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
     {
-        if (Log != None)
-        {
-            Log(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
-        }
+        LogCallback?.Invoke(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
     }
 
+    [StringFormatMethod("format")]
     public static void LogFormat(string format, params object?[] objs)
     {
-        if (Log != None)
-        {
-            Log(string.Format(format, objs));
-        }
+        LogCallback?.Invoke(string.Format(format, objs));
     }
 
     /// <summary>
     /// Callback function when a log message of level 'error' is produced. 
     /// </summary>
-    public static Action<object> LogError { get; set; } = None;
+    public static Action<string>? LogErrorCallback { private get; set; }
 
-    public static void LogErrorFormat<TT>(string format, TT? arg1)
+    public static void LogError(string arg1)
     {
-        if (LogError != None)
-        {
-            LogError(string.Format(format, arg1));
-        }
+        LogErrorCallback?.Invoke(arg1);
     }
 
+    [StringFormatMethod("format")]
+    public static void LogErrorFormat(string format, object? arg1)
+    {
+        LogErrorCallback?.Invoke(string.Format(format, arg1));
+    }
+
+    [StringFormatMethod("format")]
     public static void LogErrorFormat(string format, Exception? arg1)
     {
-        if (LogError != None)
-        {
-            LogError(string.Format(format, ExceptionToString(arg1)));
-        }
+        LogErrorCallback?.Invoke(string.Format(format, ExceptionToString(arg1)));
     }
 
+    [StringFormatMethod("format")]
     public static void LogErrorFormat<TT>(string format, TT? arg1, Exception? arg2)
     {
-        if (LogError != None)
-        {
-            LogError(string.Format(format, arg1, ExceptionToString(arg2)));
-        }
+        LogErrorCallback?.Invoke(string.Format(format, arg1, ExceptionToString(arg2)));
     }
 
-    /*
+    [StringFormatMethod("format")]
     public static void LogErrorFormat<TT, TU>(string format, TT? arg1, TU? arg2)
     {
-        if (LogError != None)
-        {
-            LogError(string.Format(format, arg1, arg2));
-        }
+        LogErrorCallback?.Invoke(string.Format(format, arg1, arg2));
     }
-    */
 
-
+    [StringFormatMethod("format")]
     public static void LogErrorFormat<TT, TU, TV>(string format, TT? arg1, TU? arg2, TV? arg3)
     {
-        if (LogError != None)
-        {
-            LogError(string.Format(format, arg1, arg2, arg3));
-        }
+        LogErrorCallback?.Invoke(string.Format(format, arg1, arg2, arg3));
     }
 
+    [StringFormatMethod("format")]
     public static void LogErrorFormat<TT, TU>(string format, TT? arg1, TU? arg2, Exception? arg3)
     {
-        if (LogError != None)
-        {
-            LogError(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
-        }
+        LogErrorCallback?.Invoke(string.Format(format, arg1, arg2, ExceptionToString(arg3)));
     }
 
+    [StringFormatMethod("format")]
     public static void LogErrorFormat(string format, params object?[] objs)
     {
-        if (LogError != None)
-        {
-            LogError(string.Format(format, objs));
-        }
+        LogErrorCallback?.Invoke(string.Format(format, objs));
     }
 
     /// <summary>
@@ -211,9 +173,9 @@ public static class Logger
     /// </summary>
     public static void SuppressAll()
     {
-        LogDebug = None;
-        Log = None;
-        LogError = None;
+        LogDebugCallback = null;
+        LogCallback = null;
+        LogErrorCallback = null;
     }
 
     public static string ExceptionToString(Exception? e)

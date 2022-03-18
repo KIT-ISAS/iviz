@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Iviz.Tools;
 
-public readonly struct ZipEnumerable<TA, TB> : IReadOnlyList<(TA First, TB Second)>
+public readonly struct ZipEnumerable<TA, TB> : IReadOnlyList<(TA First, TB Second)>, ICollection<(TA First, TB Second)>
 {
     readonly IReadOnlyList<TA> a;
     readonly IReadOnlyList<TB> b;
@@ -35,6 +35,7 @@ public readonly struct ZipEnumerable<TA, TB> : IReadOnlyList<(TA First, TB Secon
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public int Count => Math.Min(a.Count, b.Count);
+    public bool IsReadOnly => true;
 
     public (TA First, TB Second) this[int index] => (a[index], b[index]);
 
@@ -58,4 +59,13 @@ public readonly struct ZipEnumerable<TA, TB> : IReadOnlyList<(TA First, TB Secon
 
     public SelectEnumerable<ZipEnumerable<TA, TB>, (TA, TB), TC> Select<TC>(Func<TA, TB, TC> f) =>
         new(this, ((TA first, TB second) pair) => f(pair.first, pair.second));
+
+    void ICollection<(TA First, TB Second)>.Add((TA First, TB Second) item) => throw new NotImplementedException();
+    void ICollection<(TA First, TB Second)>.Clear() => throw new NotImplementedException();
+    bool ICollection<(TA First, TB Second)>.Contains((TA First, TB Second) item) => throw new NotImplementedException();
+
+    void ICollection<(TA First, TB Second)>.CopyTo((TA First, TB Second)[] array, int arrayIndex) =>
+        throw new NotImplementedException();
+
+    bool ICollection<(TA First, TB Second)>.Remove((TA First, TB Second) item) => throw new NotImplementedException();
 }

@@ -34,8 +34,8 @@ namespace Iviz.RosMaster
                 masterUri = uri;
             }
             
-            Logger.Log = Console.WriteLine;
-            Logger.LogError = Console.Error.WriteLine;
+            Logger.LogCallback = Console.WriteLine;
+            Logger.LogErrorCallback = Console.Error.WriteLine;
 
             try
             {

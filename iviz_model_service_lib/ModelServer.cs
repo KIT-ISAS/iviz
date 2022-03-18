@@ -8,835 +8,834 @@ using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Tools;
 
-namespace Iviz.ModelService
+namespace Iviz.ModelService;
+
+public sealed class ModelServer : IDisposable
 {
-    public sealed class ModelServer : IDisposable
+    public const string ModelServiceName = "/iviz/get_model_resource";
+    public const string TextureServiceName = "/iviz/get_model_texture";
+    public const string FileServiceName = "/iviz/get_file";
+    public const string SdfServiceName = "/iviz/get_sdf";
+
+    readonly bool verbose;
+    readonly AssimpContext importer = new();
+    readonly Dictionary<string, List<string>> packagePaths = new();
+
+    public int NumPackages => packagePaths.Count;
+    public bool IsFileSchemaEnabled { get; set; }
+
+    static void LogError(string msg)
     {
-        public const string ModelServiceName = "/iviz/get_model_resource";
-        public const string TextureServiceName = "/iviz/get_model_texture";
-        public const string FileServiceName = "/iviz/get_file";
-        public const string SdfServiceName = "/iviz/get_sdf";
+        Logger.LogError(msg);
+        Console.Error.WriteLine("EE " + msg);
+    }
 
-        readonly bool verbose;
-        readonly AssimpContext importer = new();
-        readonly Dictionary<string, List<string>> packagePaths = new();
+    static void Log(string msg)
+    {
+        Logger.Log(msg);
+        Console.WriteLine("** " + msg);
+    }
 
-        public int NumPackages => packagePaths.Count;
-        public bool IsFileSchemaEnabled { get; set; }
+    static void LogUp(Uri uri)
+    {
+        Console.WriteLine(">> " + uri);
+    }
 
-        static void LogError(string msg)
+    public ModelServer(string additionalPaths = null, bool enableFileSchema = false, bool verbose = false)
+    {
+        this.verbose = verbose;
+        string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
+        if (packagePath is null && additionalPaths is null)
         {
-            Logger.LogError(msg);
-            Console.Error.WriteLine("EE " + msg);
+            LogError("Cannot retrieve environment variable ROS_PACKAGE_PATH, or any other source of packages");
         }
-
-        static void Log(string msg)
+        else
         {
-            Logger.Log(msg);
-            Console.WriteLine("** " + msg);
-        }
+            var paths = new List<string>();
 
-        static void LogUp(Uri uri)
-        {
-            Console.WriteLine(">> " + uri);
-        }
-
-        public ModelServer(string additionalPaths = null, bool enableFileSchema = false, bool verbose = false)
-        {
-            this.verbose = verbose;
-            string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
-            if (packagePath is null && additionalPaths is null)
+            if (verbose)
             {
-                LogError("Cannot retrieve environment variable ROS_PACKAGE_PATH, or any other source of packages");
+                Log("Adding the following package paths:");
             }
-            else
-            {
-                var paths = new List<string>();
 
+            if (packagePath != null)
+            {
+                string[] newPaths = packagePath.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
                 if (verbose)
                 {
-                    Log("Adding the following package paths:");
+                    foreach (string path in newPaths)
+                    {
+                        Log("    " + path);
+                    }
                 }
 
-                if (packagePath != null)
-                {
-                    string[] newPaths = packagePath.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (verbose)
-                    {
-                        foreach (string path in newPaths)
-                        {
-                            Log("    " + path);
-                        }
-                    }
+                paths.AddRange(newPaths);
+            }
 
-                    paths.AddRange(newPaths);
-                }
-
-                if (additionalPaths != null)
-                {
-                    if (verbose)
-                    {
-                        Log("Adding additional package paths:");
-                    }
-
-                    string[] newPaths = additionalPaths.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-                    if (verbose)
-                    {
-                        foreach (string path in newPaths)
-                        {
-                            Log("    " + path);
-                        }
-                    }
-
-                    paths.AddRange(newPaths);
-                }
-
+            if (additionalPaths != null)
+            {
                 if (verbose)
                 {
-                    Log("** Resolving subfolders:");
+                    Log("Adding additional package paths:");
                 }
 
-                foreach (string path in paths)
+                string[] newPaths = additionalPaths.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                if (verbose)
                 {
-                    string pathNormalized = path.Trim();
-                    if (!Directory.Exists(pathNormalized))
+                    foreach (string path in newPaths)
                     {
-                        continue;
+                        Log("    " + path);
                     }
-
-                    string folderName = new DirectoryInfo(pathNormalized).Name;
-                    CheckPath(folderName, pathNormalized);
                 }
-            }
 
-            if (packagePaths.Count == 0)
-            {
-                LogError("No package paths were found. Try setting the ROS_PACKAGE_PATH environment variable, " +
-                         "or creating a ros_package_path file.");
-            }
-
-            IsFileSchemaEnabled = enableFileSchema;
-        }
-
-        void CheckPath(string folderName, string path)
-        {
-            if (File.Exists(path + "/package.xml"))
-            {
-                AddPath(folderName, path);
-                return;
-            }
-
-            foreach (string subFolderPath in Directory.GetDirectories(path))
-            {
-                string subFolder = Path.GetFileName(subFolderPath);
-                CheckPath(subFolder, subFolderPath);
-            }
-        }
-
-        void AddPath(string package, string path)
-        {
-            if (!packagePaths.TryGetValue(package, out List<string> paths))
-            {
-                paths = new List<string>();
-                packagePaths[package] = paths;
+                paths.AddRange(newPaths);
             }
 
             if (verbose)
             {
-                Log("    " + path);
-            }
-            
-            paths.Add(path);
-        }
-
-        string ResolvePath(Uri uri)
-        {
-            return ResolvePath(uri, out _);
-        }
-
-        string ResolvePath(Uri uri, out string outPackagePath)
-        {
-            string package = uri.Host;
-            if (!packagePaths.TryGetValue(package, out List<string> paths))
-            {
-                LogError($"Failed to resolve uri '{uri}'. Reason: Package '{package}' not found.");
-
-                outPackagePath = null;
-                return null;
+                Log("** Resolving subfolders:");
             }
 
-            string subPath = Uri.UnescapeDataString(uri.AbsolutePath);
-
-            foreach (string packagePath in paths)
+            foreach (string path in paths)
             {
-                string path = packagePath + "/" + subPath;
-
-                if (!File.Exists(path))
+                string pathNormalized = path.Trim();
+                if (!Directory.Exists(pathNormalized))
                 {
-                    LogError($"Failed to resolve uri '{uri}'. Reason: File '{path}' does not exist.");
                     continue;
                 }
 
-                if (Path.GetFullPath(path).StartsWith(packagePath, false, BuiltIns.Culture))
-                {
-                    outPackagePath = packagePath;
-                    return path;
-                }
-
-                LogError($"Failed to resolve uri '{uri}'. Reason: Resolution requires path traversal.");
-
-                outPackagePath = null;
-                return null;
+                string folderName = new DirectoryInfo(pathNormalized).Name;
+                CheckPath(folderName, pathNormalized);
             }
+        }
 
-            LogError($"Failed to resolve uri '{uri}'.");
+        if (packagePaths.Count == 0)
+        {
+            LogError("No package paths were found. Try setting the ROS_PACKAGE_PATH environment variable, " +
+                     "or creating a ros_package_path file.");
+        }
+
+        IsFileSchemaEnabled = enableFileSchema;
+    }
+
+    void CheckPath(string folderName, string path)
+    {
+        if (File.Exists(path + "/package.xml"))
+        {
+            AddPath(folderName, path);
+            return;
+        }
+
+        foreach (string subFolderPath in Directory.GetDirectories(path))
+        {
+            string subFolder = Path.GetFileName(subFolderPath);
+            CheckPath(subFolder, subFolderPath);
+        }
+    }
+
+    void AddPath(string package, string path)
+    {
+        if (!packagePaths.TryGetValue(package, out List<string> paths))
+        {
+            paths = new List<string>();
+            packagePaths[package] = paths;
+        }
+
+        if (verbose)
+        {
+            Log("    " + path);
+        }
+
+        paths.Add(path);
+    }
+
+    string ResolvePath(Uri uri)
+    {
+        return ResolvePath(uri, out _);
+    }
+
+    string ResolvePath(Uri uri, out string outPackagePath)
+    {
+        string package = uri.Host;
+        if (!packagePaths.TryGetValue(package, out List<string> paths))
+        {
+            LogError($"Failed to resolve uri '{uri}'. Reason: Package '{package}' not found.");
+
             outPackagePath = null;
             return null;
         }
 
-        public void ModelCallback(GetModelResource msg)
+        string subPath = Uri.UnescapeDataString(uri.AbsolutePath);
+
+        foreach (string packagePath in paths)
         {
-            if (msg == null)
+            string path = packagePath + "/" + subPath;
+
+            if (!File.Exists(path))
             {
-                throw new ArgumentNullException(nameof(msg));
+                LogError($"Failed to resolve uri '{uri}'. Reason: File '{path}' does not exist.");
+                continue;
             }
 
-            bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
-            if (!success)
+            if (Path.GetFullPath(path).StartsWith(packagePath, false, BuiltIns.Culture))
             {
-                msg.Response.Success = false;
-                msg.Response.Message = "Failed to parse uri from requested string";
-                LogError($"Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
-                return;
+                outPackagePath = packagePath;
+                return path;
             }
 
-            string modelPath;
-            switch (uri.Scheme)
-            {
-                case "package":
-                {
-                    modelPath = ResolvePath(uri);
-                    if (modelPath is null)
-                    {
-                        msg.Response.Success = false;
-                        msg.Response.Message = "Failed to find resource path";
-                        return;
-                    }
+            LogError($"Failed to resolve uri '{uri}'. Reason: Resolution requires path traversal.");
 
-                    break;
-                }
-                case "file" when !IsFileSchemaEnabled:
-                    msg.Response.Success = false;
-                    msg.Response.Message = "File schema is disabled";
-                    LogError($"Failed to resolve uri '{uri}'. Reason: File scheme is disabled.");
-                    return;
-                case "file":
-                {
-                    modelPath = Uri.UnescapeDataString(uri.AbsolutePath);
-                    if (!File.Exists(modelPath))
-                    {
-                        msg.Response.Success = false;
-                        msg.Response.Message = $"File '{modelPath}' does not exist";
-                        LogError($"Failed to resolve uri '{uri}'. Reason: File '{modelPath}' does not exist.");
-                        return;
-                    }
-
-                    break;
-                }
-                default:
-                    msg.Response.Success = false;
-                    msg.Response.Message = "Only 'package' or 'file' scheme is supported";
-                    LogError($"Failed to resolve uri '{uri}'. Reason: Unknown scheme '{uri.Scheme}'.");
-                    return;
-            }
-
-            Model model;
-            try
-            {
-                model = LoadModel(modelPath);
-                model.Filename = uri.ToString();
-            }
-            catch (XmlException e)
-            {
-                LogError($"Failed to access uri '{uri}'. Reason: XML error while reading '{modelPath}'. {e.Message}");
-                msg.Response.Success = false;
-                msg.Response.Message = "Failed to load model";
-                return;
-            }
-            catch (AssimpException e)
-            {
-                LogError($"Failed to access uri '{uri}'. Reason: Failed to read path '{modelPath}'. {e.Message}");
-
-                msg.Response.Success = false;
-                msg.Response.Message = "Failed to load model";
-                return;
-            }
-
-            msg.Response.Success = true;
-            msg.Response.Message = "";
-            msg.Response.Model = model;
-
-            LogUp(uri);
+            outPackagePath = null;
+            return null;
         }
 
-        public void TextureCallback(GetModelTexture msg)
+        LogError($"Failed to resolve uri '{uri}'.");
+        outPackagePath = null;
+        return null;
+    }
+
+    public void ModelCallback(GetModelResource msg)
+    {
+        if (msg == null)
         {
-            if (msg == null)
-            {
-                throw new ArgumentNullException(nameof(msg));
-            }
+            throw new ArgumentNullException(nameof(msg));
+        }
 
-            // TODO: force conversion to either png or jpg
+        bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
+        if (!success)
+        {
+            msg.Response.Success = false;
+            msg.Response.Message = "Failed to parse uri from requested string";
+            LogError($"Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
+            return;
+        }
 
-            bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
-            if (!success)
+        string modelPath;
+        switch (uri.Scheme)
+        {
+            case "package":
             {
-                msg.Response.Success = false;
-                msg.Response.Message = "Failed to parse uri from requested string";
-                LogError($"Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
-                return;
-            }
-
-            string texturePath;
-            switch (uri.Scheme)
-            {
-                case "package":
+                modelPath = ResolvePath(uri);
+                if (modelPath is null)
                 {
-                    texturePath = ResolvePath(uri);
-                    if (string.IsNullOrWhiteSpace(texturePath))
-                    {
-                        msg.Response.Success = false;
-                        msg.Response.Message = "Failed to find resource path";
-                        return;
-                    }
-
-                    break;
-                }
-                case "file" when !IsFileSchemaEnabled:
                     msg.Response.Success = false;
-                    msg.Response.Message = "File schema is disabled";
-                    LogError($"Failed to resolve uri '{uri}'. Reason: File scheme is disabled.");
+                    msg.Response.Message = "Failed to find resource path";
                     return;
-                case "file":
-                {
-                    texturePath = Uri.UnescapeDataString(uri.AbsolutePath);
-                    if (!File.Exists(texturePath))
-                    {
-                        msg.Response.Success = false;
-                        msg.Response.Message = $"File '{texturePath}' does not exist";
-                        LogError($"Failed to resolve uri '{uri}'. Reason: File '{texturePath}' does not exist.");
-                        return;
-                    }
-
-                    break;
                 }
-                default:
-                    msg.Response.Success = false;
-                    msg.Response.Message = "Only 'package' or 'file' scheme is supported";
-                    LogError($"Failed to resolve uri '{uri}'. Reason: Unknown scheme '{uri.Scheme}'.");
-                    return;
-            }
 
-            byte[] data;
-
-            try
-            {
-                data = File.ReadAllBytes(texturePath);
+                break;
             }
-            catch (IOException e)
-            {
-                LogError($"Failed to resolve uri '{uri}'. Reason: Failed to read path '{texturePath}'. {e.Message}");
+            case "file" when !IsFileSchemaEnabled:
                 msg.Response.Success = false;
-                msg.Response.Message = e.Message;
+                msg.Response.Message = "File schema is disabled";
+                LogError($"Failed to resolve uri '{uri}'. Reason: File scheme is disabled.");
                 return;
+            case "file":
+            {
+                modelPath = Uri.UnescapeDataString(uri.AbsolutePath);
+                if (!File.Exists(modelPath))
+                {
+                    msg.Response.Success = false;
+                    msg.Response.Message = $"File '{modelPath}' does not exist";
+                    LogError($"Failed to resolve uri '{uri}'. Reason: File '{modelPath}' does not exist.");
+                    return;
+                }
+
+                break;
+            }
+            default:
+                msg.Response.Success = false;
+                msg.Response.Message = "Only 'package' or 'file' scheme is supported";
+                LogError($"Failed to resolve uri '{uri}'. Reason: Unknown scheme '{uri.Scheme}'.");
+                return;
+        }
+
+        Model model;
+        try
+        {
+            model = LoadModel(modelPath);
+            model.Filename = uri.ToString();
+        }
+        catch (XmlException e)
+        {
+            LogError($"Failed to access uri '{uri}'. Reason: XML error while reading '{modelPath}'. {e.Message}");
+            msg.Response.Success = false;
+            msg.Response.Message = "Failed to load model";
+            return;
+        }
+        catch (AssimpException e)
+        {
+            LogError($"Failed to access uri '{uri}'. Reason: Failed to read path '{modelPath}'. {e.Message}");
+
+            msg.Response.Success = false;
+            msg.Response.Message = "Failed to load model";
+            return;
+        }
+
+        msg.Response.Success = true;
+        msg.Response.Message = "";
+        msg.Response.Model = model;
+
+        LogUp(uri);
+    }
+
+    public void TextureCallback(GetModelTexture msg)
+    {
+        if (msg == null)
+        {
+            throw new ArgumentNullException(nameof(msg));
+        }
+
+        // TODO: force conversion to either png or jpg
+
+        bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
+        if (!success)
+        {
+            msg.Response.Success = false;
+            msg.Response.Message = "Failed to parse uri from requested string";
+            LogError($"Failed to resolve uri '{msg.Request.Uri}'. Reason: Invalid uri.");
+            return;
+        }
+
+        string texturePath;
+        switch (uri.Scheme)
+        {
+            case "package":
+            {
+                texturePath = ResolvePath(uri);
+                if (string.IsNullOrWhiteSpace(texturePath))
+                {
+                    msg.Response.Success = false;
+                    msg.Response.Message = "Failed to find resource path";
+                    return;
+                }
+
+                break;
+            }
+            case "file" when !IsFileSchemaEnabled:
+                msg.Response.Success = false;
+                msg.Response.Message = "File schema is disabled";
+                LogError($"Failed to resolve uri '{uri}'. Reason: File scheme is disabled.");
+                return;
+            case "file":
+            {
+                texturePath = Uri.UnescapeDataString(uri.AbsolutePath);
+                if (!File.Exists(texturePath))
+                {
+                    msg.Response.Success = false;
+                    msg.Response.Message = $"File '{texturePath}' does not exist";
+                    LogError($"Failed to resolve uri '{uri}'. Reason: File '{texturePath}' does not exist.");
+                    return;
+                }
+
+                break;
+            }
+            default:
+                msg.Response.Success = false;
+                msg.Response.Message = "Only 'package' or 'file' scheme is supported";
+                LogError($"Failed to resolve uri '{uri}'. Reason: Unknown scheme '{uri.Scheme}'.");
+                return;
+        }
+
+        byte[] data;
+
+        try
+        {
+            data = File.ReadAllBytes(texturePath);
+        }
+        catch (IOException e)
+        {
+            LogError($"Failed to resolve uri '{uri}'. Reason: Failed to read path '{texturePath}'. {e.Message}");
+            msg.Response.Success = false;
+            msg.Response.Message = e.Message;
+            return;
+        }
+
+        msg.Response.Success = true;
+        msg.Response.Message = "";
+        msg.Response.Image = new CompressedImage
+        {
+            Format = Path.GetExtension(texturePath).Replace(".", ""),
+            Data = data
+        };
+
+        LogUp(uri);
+    }
+
+    Model LoadModel(string fileName)
+    {
+        string orientationHint = "";
+        if (fileName.EndsWith(".DAE", true, BuiltIns.Culture))
+        {
+            var doc = new XmlDocument();
+            doc.Load(fileName);
+            var nodeList = doc.GetElementsByTagName("up_axis");
+            if (nodeList.Count != 0 && nodeList[0] != null)
+            {
+                orientationHint = nodeList[0].InnerText ?? "";
+            }
+        }
+
+        var scene = importer.ImportFile(fileName,
+            PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
+        var msg = new Model
+        {
+            Meshes = new Msgs.IvizMsgs.Mesh[scene.Meshes.Count],
+            OrientationHint = orientationHint
+        };
+
+        List<Triangle> faces = new List<Triangle>();
+        for (int i = 0; i < scene.MeshCount; i++)
+        {
+            Assimp.Mesh srcMesh = scene.Meshes[i];
+
+            faces.Clear();
+            for (int j = 0; j < srcMesh.FaceCount; j++)
+            {
+                Face face = srcMesh.Faces[j];
+                switch (face.IndexCount)
+                {
+                    case 3:
+                        faces.Add(new Triangle(
+                            (uint)face.Indices[0],
+                            (uint)face.Indices[1],
+                            (uint)face.Indices[2]
+                        ));
+                        break;
+                    case 4:
+                        faces.Add(new Triangle(
+                            (uint)face.Indices[0],
+                            (uint)face.Indices[1],
+                            (uint)face.Indices[2]
+                        ));
+                        faces.Add(new Triangle(
+                            (uint)face.Indices[0],
+                            (uint)face.Indices[2],
+                            (uint)face.Indices[3]
+                        ));
+                        break;
+                    default:
+                        Logger.LogDebugFormat("{0}: Got mesh face with {1} vertices!", this, face.IndexCount);
+                        break;
+                }
             }
 
-            msg.Response.Success = true;
-            msg.Response.Message = "";
-            msg.Response.Image = new CompressedImage
+            Func<Vector3D, Vector3f> toVector3 = ToVector3;
+            var dstMesh = new Msgs.IvizMsgs.Mesh
             {
-                Format = Path.GetExtension(texturePath).Replace(".", ""),
-                Data = data
+                Name = srcMesh.Name ?? "[mesh]",
+                Vertices = srcMesh.Vertices.Select(toVector3).ToArray(),
+                Normals = srcMesh.Normals.Select(toVector3).ToArray(),
+                Tangents = srcMesh.Tangents.Select(toVector3).ToArray(),
+                BiTangents = srcMesh.BiTangents.Select(toVector3).ToArray(),
+                TexCoords = srcMesh.TextureCoordinateChannels.Select(ToTexCoords).ToArray(),
+                ColorChannels = srcMesh.VertexColorChannels.Select(ToColorChannel).ToArray(),
+                Faces = faces.ToArray(),
+                MaterialIndex = (uint)srcMesh.MaterialIndex,
             };
 
-            LogUp(uri);
+            msg.Meshes[i] = dstMesh;
         }
 
-        Model LoadModel(string fileName)
+        msg.Materials = new Msgs.IvizMsgs.Material[scene.MaterialCount];
+
+        for (int i = 0; i < scene.MaterialCount; i++)
         {
-            string orientationHint = "";
-            if (fileName.EndsWith(".DAE", true, BuiltIns.Culture))
+            Assimp.Material srcMaterial = scene.Materials[i];
+            msg.Materials[i] = new Msgs.IvizMsgs.Material
             {
-                var doc = new XmlDocument();
-                doc.Load(fileName);
-                var nodeList = doc.GetElementsByTagName("up_axis");
-                if (nodeList.Count != 0 && nodeList[0] != null)
-                {
-                    orientationHint = nodeList[0].InnerText ?? "";
-                }
-            }
-
-            var scene = importer.ImportFile(fileName,
-                PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
-            Model msg = new()
-            {
-                Meshes = new Msgs.IvizMsgs.Mesh[scene.Meshes.Count],
-                OrientationHint = orientationHint
-            };
-
-            List<Triangle> faces = new List<Triangle>();
-            for (int i = 0; i < scene.MeshCount; i++)
-            {
-                Assimp.Mesh srcMesh = scene.Meshes[i];
-
-                faces.Clear();
-                for (int j = 0; j < srcMesh.FaceCount; j++)
-                {
-                    Face face = srcMesh.Faces[j];
-                    switch (face.IndexCount)
-                    {
-                        case 3:
-                            faces.Add(new Triangle(
-                                (uint)face.Indices[0],
-                                (uint)face.Indices[1],
-                                (uint)face.Indices[2]
-                            ));
-                            break;
-                        case 4:
-                            faces.Add(new Triangle(
-                                (uint)face.Indices[0],
-                                (uint)face.Indices[1],
-                                (uint)face.Indices[2]
-                            ));
-                            faces.Add(new Triangle(
-                                (uint)face.Indices[0],
-                                (uint)face.Indices[2],
-                                (uint)face.Indices[3]
-                            ));
-                            break;
-                        default:
-                            Logger.LogDebug("ModelService: Got mesh face with " + face.IndexCount + " vertices!");
-                            break;
-                    }
-                }
-
-                Func<Vector3D, Vector3f> toVector3 = ToVector3;
-                var dstMesh = new Msgs.IvizMsgs.Mesh()
-                {
-                    Name = srcMesh.Name ?? "[mesh]",
-                    Vertices = srcMesh.Vertices.Select(toVector3).ToArray(),
-                    Normals = srcMesh.Normals.Select(toVector3).ToArray(),
-                    Tangents = srcMesh.Tangents.Select(toVector3).ToArray(),
-                    BiTangents = srcMesh.BiTangents.Select(toVector3).ToArray(),
-                    TexCoords = srcMesh.TextureCoordinateChannels.Select(ToTexCoords).ToArray(),
-                    ColorChannels = srcMesh.VertexColorChannels.Select(ToColorChannel).ToArray(),
-                    Faces = faces.ToArray(),
-                    MaterialIndex = (uint)srcMesh.MaterialIndex,
-                };
-
-                msg.Meshes[i] = dstMesh;
-            }
-
-            msg.Materials = new Msgs.IvizMsgs.Material[scene.MaterialCount];
-
-            for (int i = 0; i < scene.MaterialCount; i++)
-            {
-                Assimp.Material srcMaterial = scene.Materials[i];
-                msg.Materials[i] = new Msgs.IvizMsgs.Material
-                {
-                    Name = srcMaterial.Name ?? "[material]",
-                    Ambient = ToColor(srcMaterial.ColorAmbient),
-                    Diffuse = ToColor(srcMaterial.ColorDiffuse),
-                    Emissive = ToColor(srcMaterial.ColorEmissive),
-                    Opacity = srcMaterial.Opacity,
-                    BumpScaling = srcMaterial.BumpScaling,
-                    Shininess = srcMaterial.Shininess,
-                    ShininessStrength = srcMaterial.ShininessStrength,
-                    Reflectivity = srcMaterial.Reflectivity,
-                    BlendMode = (byte)srcMaterial.BlendMode,
-                    Textures = srcMaterial.GetAllMaterialTextures().Select(ToTexture).ToArray()
-                };
-            }
-
-            List<Msgs.IvizMsgs.Node> nodes = new List<Msgs.IvizMsgs.Node>();
-            ProcessNode(scene.RootNode, nodes, new Dictionary<Assimp.Node, int>());
-
-            msg.Nodes = nodes.ToArray();
-
-            return msg;
-        }
-
-        static void ProcessNode(Assimp.Node node, List<Msgs.IvizMsgs.Node> nodes, Dictionary<Assimp.Node, int> ids)
-        {
-            if (node.Children.Count == 0 && node.MeshIndices.Count == 0)
-            {
-                return;
-            }
-
-            ids[node] = ids.Count;
-            int parentId = node.Parent is null ? -1 : ids[node.Parent];
-
-            nodes.Add(new Msgs.IvizMsgs.Node(
-                node.Name,
-                parentId,
-                ToMatrix(node.Transform),
-                node.MeshIndices.ToArray()
-            ));
-
-            foreach (var child in node.Children)
-            {
-                ProcessNode(child, nodes, ids);
-            }
-        }
-
-        static Vector3f ToVector3(Vector3D v) => new(v.X, v.Y, v.Z);
-
-        static Vector3f ToVector3(Sdf.Vector3d v) => new((float)v.X, (float)v.Y, (float)v.Z);
-
-        static Vector3f ToVector3UV(Vector3D v) => new(v.X, 1 - v.Y, v.Z);
-
-        static Color32 ToColor(Color4D color)
-        {
-            int r = (int)(Math.Max(Math.Min(color.R, 1), 0) * 255);
-            int g = (int)(Math.Max(Math.Min(color.G, 1), 0) * 255);
-            int b = (int)(Math.Max(Math.Min(color.B, 1), 0) * 255);
-            int a = (int)(Math.Max(Math.Min(color.A, 1), 0) * 255);
-            return new Color32((byte)r, (byte)g, (byte)b, (byte)a);
-        }
-
-        static ColorChannel ToColorChannel(List<Color4D> colorChannel) => new(colorChannel.Select(ToColor).ToArray());
-
-        static TexCoords ToTexCoords(List<Vector3D> texCoords) => new(texCoords.Select(ToVector3UV).ToArray());
-
-        static Texture ToTexture(TextureSlot texture)
-        {
-            return new()
-            {
-                Path = texture.FilePath,
-                Index = texture.TextureIndex,
-                BlendFactor = texture.BlendFactor,
-                Mapping = (byte)texture.Mapping,
-                Operation = (byte)texture.Operation,
-                Type = (byte)texture.TextureType,
-                UvIndex = texture.UVIndex,
-                WrapModeU = (byte)texture.WrapModeU,
-                WrapModeV = (byte)texture.WrapModeV
+                Name = srcMaterial.Name ?? "[material]",
+                Ambient = ToColor(srcMaterial.ColorAmbient),
+                Diffuse = ToColor(srcMaterial.ColorDiffuse),
+                Emissive = ToColor(srcMaterial.ColorEmissive),
+                Opacity = srcMaterial.Opacity,
+                BumpScaling = srcMaterial.BumpScaling,
+                Shininess = srcMaterial.Shininess,
+                ShininessStrength = srcMaterial.ShininessStrength,
+                Reflectivity = srcMaterial.Reflectivity,
+                BlendMode = (byte)srcMaterial.BlendMode,
+                Textures = srcMaterial.GetAllMaterialTextures().Select(ToTexture).ToArray()
             };
         }
 
-        static Matrix4 ToMatrix(in Matrix4x4 v)
+        var nodes = new List<Msgs.IvizMsgs.Node>();
+        ProcessNode(scene.RootNode, nodes, new Dictionary<Assimp.Node, int>());
+
+        msg.Nodes = nodes.ToArray();
+
+        return msg;
+    }
+
+    static void ProcessNode(Assimp.Node node, List<Msgs.IvizMsgs.Node> nodes, Dictionary<Assimp.Node, int> ids)
+    {
+        if (node.Children.Count == 0 && node.MeshIndices.Count == 0)
         {
-            return new(new[]
+            return;
+        }
+
+        ids[node] = ids.Count;
+        int parentId = node.Parent is null ? -1 : ids[node.Parent];
+
+        nodes.Add(new Msgs.IvizMsgs.Node(
+            node.Name,
+            parentId,
+            ToMatrix(node.Transform),
+            node.MeshIndices.ToArray()
+        ));
+
+        foreach (var child in node.Children)
+        {
+            ProcessNode(child, nodes, ids);
+        }
+    }
+
+    static Vector3f ToVector3(Vector3D v) => new(v.X, v.Y, v.Z);
+
+    static Vector3f ToVector3(Sdf.Vector3d v) => new((float)v.X, (float)v.Y, (float)v.Z);
+
+    static Vector3f ToVector3UV(Vector3D v) => new(v.X, 1 - v.Y, v.Z);
+
+    static Color32 ToColor(Color4D color)
+    {
+        int r = (int)(Math.Max(Math.Min(color.R, 1), 0) * 255);
+        int g = (int)(Math.Max(Math.Min(color.G, 1), 0) * 255);
+        int b = (int)(Math.Max(Math.Min(color.B, 1), 0) * 255);
+        int a = (int)(Math.Max(Math.Min(color.A, 1), 0) * 255);
+        return new Color32((byte)r, (byte)g, (byte)b, (byte)a);
+    }
+
+    static ColorChannel ToColorChannel(List<Color4D> colorChannel) => new(colorChannel.Select(ToColor).ToArray());
+
+    static TexCoords ToTexCoords(List<Vector3D> texCoords) => new(texCoords.Select(ToVector3UV).ToArray());
+
+    static Texture ToTexture(TextureSlot texture)
+    {
+        return new Texture
+        {
+            Path = texture.FilePath,
+            Index = texture.TextureIndex,
+            BlendFactor = texture.BlendFactor,
+            Mapping = (byte)texture.Mapping,
+            Operation = (byte)texture.Operation,
+            Type = (byte)texture.TextureType,
+            UvIndex = texture.UVIndex,
+            WrapModeU = (byte)texture.WrapModeU,
+            WrapModeV = (byte)texture.WrapModeV
+        };
+    }
+
+    static Matrix4 ToMatrix(in Matrix4x4 v)
+    {
+        return new(new[]
+        {
+            v.A1, v.B1, v.C1, v.D1,
+            v.A2, v.B2, v.C2, v.D2,
+            v.A3, v.B3, v.C3, v.D3,
+            v.A4, v.B4, v.C4, v.D4,
+        });
+    }
+
+    public void FileCallback(GetFile msg)
+    {
+        if (msg == null)
+        {
+            throw new ArgumentNullException(nameof(msg));
+        }
+
+        bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
+        if (!success)
+        {
+            msg.Response.Message = "Failed to parse uri from requested string";
+            return;
+        }
+
+        string filePath = ResolvePath(uri);
+        if (string.IsNullOrWhiteSpace(filePath))
+        {
+            msg.Response.Message = "Failed to find resource path";
+            return;
+        }
+
+        byte[] data;
+        try
+        {
+            data = File.ReadAllBytes(filePath);
+        }
+        catch (IOException e)
+        {
+            LogError("Failed to read '" + filePath + "'. Reason: " + e.Message);
+            msg.Response.Message = e.Message;
+            return;
+        }
+
+        msg.Response.Success = true;
+        msg.Response.Message = "";
+        msg.Response.Bytes = data;
+
+        LogUp(uri);
+    }
+
+    public void SdfCallback(GetSdf msg)
+    {
+        if (msg == null)
+        {
+            throw new ArgumentNullException(nameof(msg));
+        }
+
+        bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
+        if (!success)
+        {
+            msg.Response.Message = "Failed to parse uri from requested string";
+            return;
+        }
+
+        if (uri.Scheme != "package")
+        {
+            msg.Response.Message = "Only 'package' scheme is supported";
+            return;
+        }
+
+        string modelPath = ResolvePath(uri, out string packagePath);
+        if (string.IsNullOrWhiteSpace(modelPath))
+        {
+            LogError("Failed to find resource path for '" + modelPath + "'");
+            msg.Response.Message = "Failed to find resource path";
+            return;
+        }
+
+        string data;
+        try
+        {
+            data = File.ReadAllText(modelPath);
+        }
+        catch (IOException e)
+        {
+            LogError("Failed to read '" + modelPath + "'. Reason: " + e.Message);
+            msg.Response.Message = e.Message;
+            return;
+        }
+
+        Dictionary<string, string> modelPaths = Sdf.SdfFile.CreateModelPaths(packagePath);
+
+        Sdf.SdfFile file;
+        try
+        {
+            var srcFile = Sdf.SdfFile.CreateFromXml(data);
+            file = srcFile.ResolveIncludes(modelPaths);
+        }
+        catch (Exception e) when (e is IOException or XmlException or Sdf.MalformedSdfException)
+        {
+            LogError("Failed to parse '" + modelPath + "'. Reason: " + e.Message);
+            msg.Response.Message = e.Message;
+            return;
+        }
+
+        List<Include> includes = new List<Include>();
+        ResolveIncludes(file, includes);
+
+        msg.Response.Success = true;
+        msg.Response.Scene = new Msgs.IvizMsgs.Scene
+        {
+            Name = file.Worlds.Count != 0 && file.Worlds[0].Name != null ? file.Worlds[0].Name : "sdf",
+            Filename = uri.ToString(),
+            Includes = includes.ToArray(),
+            Lights = file.Lights.Select(ToLight).ToArray()
+        };
+
+        LogUp(uri);
+    }
+
+    static Msgs.IvizMsgs.Light ToLight(Sdf.Light light)
+    {
+        return new(
+            light.Name ?? "",
+            (byte)light.Type,
+            light.CastShadows,
+            ToColor(light.Diffuse),
+            0,
+            ToVector3(light.Pose.Position),
+            ToVector3(light.Direction),
+            (float)light.Spot.InnerAngle,
+            (float)light.Spot.OuterAngle);
+    }
+
+    static void ResolveIncludes(Sdf.SdfFile file, ICollection<Include> includes)
+    {
+        if (file.Worlds.Count != 0)
+        {
+            ResolveIncludes(file.Worlds[0], includes);
+            return;
+        }
+
+        foreach (Sdf.Model model in file.Models)
+        {
+            ResolveIncludes(model, includes, Matrix4x4.Identity);
+        }
+    }
+
+    static void ResolveIncludes(Sdf.World world, ICollection<Include> includes)
+    {
+        foreach (Sdf.Model model in world.Models)
+        {
+            ResolveIncludes(model, includes, Matrix4x4.Identity);
+        }
+    }
+
+    static void ResolveIncludes(Sdf.Model model, ICollection<Include> includes, in Matrix4x4 inPose)
+    {
+        if (model.IsInvalid)
+        {
+            return;
+        }
+
+        Matrix4x4 pose = Multiply(inPose, Multiply(ToPose(model.IncludePose), ToPose(model.Pose)));
+
+        foreach (Sdf.Link link in model.Links)
+        {
+            Matrix4x4 linkPose = Multiply(pose, ToPose(link.Pose));
+            foreach (Sdf.Visual visual in link.Visuals)
             {
-                v.A1, v.B1, v.C1, v.D1,
-                v.A2, v.B2, v.C2, v.D2,
-                v.A3, v.B3, v.C3, v.D3,
-                v.A4, v.B4, v.C4, v.D4,
+                ResolveIncludes(visual, includes, linkPose);
+            }
+        }
+
+        foreach (Sdf.Model innerModel in model.Models)
+        {
+            ResolveIncludes(innerModel, includes, pose);
+        }
+    }
+
+    static void ResolveIncludes(Sdf.Visual visual, ICollection<Include> includes, in Matrix4x4 inPose)
+    {
+        if (visual.Geometry.Empty != null)
+        {
+            return;
+        }
+
+        Matrix4x4 pose = Multiply(inPose, ToPose(visual.Pose));
+
+        Msgs.IvizMsgs.Material includeMaterial;
+        if (visual.Material != null)
+        {
+            includeMaterial = new Msgs.IvizMsgs.Material
+            {
+                Name = visual.Name + "_material",
+                Diffuse = ToColor(visual.Material.Diffuse),
+                Emissive = ToColor(visual.Material.Emissive),
+            };
+        }
+        else
+        {
+            includeMaterial = new Msgs.IvizMsgs.Material();
+        }
+
+        if (visual.Geometry.Box != null)
+        {
+            Vector3D diag = new(
+                (float)visual.Geometry.Box.Scale.X,
+                (float)visual.Geometry.Box.Scale.Y,
+                (float)visual.Geometry.Box.Scale.Z
+            );
+            pose = Multiply(pose, Matrix4x4.FromScaling(diag));
+
+            includes.Add(new Include
+            {
+                Uri = "package://iviz_internal/cube",
+                Pose = ToMatrix(pose),
+                Material = includeMaterial
             });
         }
-
-        public void FileCallback(GetFile msg)
+        else if (visual.Geometry.Cylinder != null)
         {
-            if (msg == null)
-            {
-                throw new ArgumentNullException(nameof(msg));
-            }
-
-            bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
-            if (!success)
-            {
-                msg.Response.Message = "Failed to parse uri from requested string";
-                return;
-            }
-
-            string filePath = ResolvePath(uri);
-            if (string.IsNullOrWhiteSpace(filePath))
-            {
-                msg.Response.Message = "Failed to find resource path";
-                return;
-            }
-
-            byte[] data;
-            try
-            {
-                data = File.ReadAllBytes(filePath);
-            }
-            catch (IOException e)
-            {
-                LogError("Failed to read '" + filePath + "'. Reason: " + e.Message);
-                msg.Response.Message = e.Message;
-                return;
-            }
-
-            msg.Response.Success = true;
-            msg.Response.Message = "";
-            msg.Response.Bytes = data;
-
-            LogUp(uri);
-        }
-
-        public void SdfCallback(GetSdf msg)
-        {
-            if (msg == null)
-            {
-                throw new ArgumentNullException(nameof(msg));
-            }
-
-            bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
-            if (!success)
-            {
-                msg.Response.Message = "Failed to parse uri from requested string";
-                return;
-            }
-
-            if (uri.Scheme != "package")
-            {
-                msg.Response.Message = "Only 'package' scheme is supported";
-                return;
-            }
-
-            string modelPath = ResolvePath(uri, out string packagePath);
-            if (string.IsNullOrWhiteSpace(modelPath))
-            {
-                LogError("Failed to find resource path for '" + modelPath + "'");
-                msg.Response.Message = "Failed to find resource path";
-                return;
-            }
-
-            string data;
-            try
-            {
-                data = File.ReadAllText(modelPath);
-            }
-            catch (IOException e)
-            {
-                LogError("Failed to read '" + modelPath + "'. Reason: " + e.Message);
-                msg.Response.Message = e.Message;
-                return;
-            }
-
-            Dictionary<string, string> modelPaths = Sdf.SdfFile.CreateModelPaths(packagePath);
-
-            Sdf.SdfFile file;
-            try
-            {
-                var srcFile = Sdf.SdfFile.CreateFromXml(data);
-                file = srcFile.ResolveIncludes(modelPaths);
-            }
-            catch (Exception e) when (e is IOException or XmlException or Sdf.MalformedSdfException)
-            {
-                LogError("Failed to parse '" + modelPath + "'. Reason: " + e.Message);
-                msg.Response.Message = e.Message;
-                return;
-            }
-
-            List<Include> includes = new List<Include>();
-            ResolveIncludes(file, includes);
-
-            msg.Response.Success = true;
-            msg.Response.Scene = new Msgs.IvizMsgs.Scene
-            {
-                Name = file.Worlds.Count != 0 && file.Worlds[0].Name != null ? file.Worlds[0].Name : "sdf",
-                Filename = uri.ToString(),
-                Includes = includes.ToArray(),
-                Lights = file.Lights.Select(ToLight).ToArray()
-            };
-
-            LogUp(uri);
-        }
-
-        static Msgs.IvizMsgs.Light ToLight(Sdf.Light light)
-        {
-            return new(
-                light.Name ?? "",
-                (byte)light.Type,
-                light.CastShadows,
-                ToColor(light.Diffuse),
-                0,
-                ToVector3(light.Pose.Position),
-                ToVector3(light.Direction),
-                (float)light.Spot.InnerAngle,
-                (float)light.Spot.OuterAngle);
-        }
-
-        static void ResolveIncludes(Sdf.SdfFile file, ICollection<Include> includes)
-        {
-            if (file.Worlds.Count != 0)
-            {
-                ResolveIncludes(file.Worlds[0], includes);
-                return;
-            }
-
-            foreach (Sdf.Model model in file.Models)
-            {
-                ResolveIncludes(model, includes, Matrix4x4.Identity);
-            }
-        }
-
-        static void ResolveIncludes(Sdf.World world, ICollection<Include> includes)
-        {
-            foreach (Sdf.Model model in world.Models)
-            {
-                ResolveIncludes(model, includes, Matrix4x4.Identity);
-            }
-        }
-
-        static void ResolveIncludes(Sdf.Model model, ICollection<Include> includes, in Matrix4x4 inPose)
-        {
-            if (model.IsInvalid)
-            {
-                return;
-            }
-
-            Matrix4x4 pose = Multiply(inPose, Multiply(ToPose(model.IncludePose), ToPose(model.Pose)));
-
-            foreach (Sdf.Link link in model.Links)
-            {
-                Matrix4x4 linkPose = Multiply(pose, ToPose(link.Pose));
-                foreach (Sdf.Visual visual in link.Visuals)
-                {
-                    ResolveIncludes(visual, includes, linkPose);
-                }
-            }
-
-            foreach (Sdf.Model innerModel in model.Models)
-            {
-                ResolveIncludes(innerModel, includes, pose);
-            }
-        }
-
-        static void ResolveIncludes(Sdf.Visual visual, ICollection<Include> includes, in Matrix4x4 inPose)
-        {
-            if (visual.Geometry.Empty != null)
-            {
-                return;
-            }
-
-            Matrix4x4 pose = Multiply(inPose, ToPose(visual.Pose));
-
-            Msgs.IvizMsgs.Material includeMaterial;
-            if (visual.Material != null)
-            {
-                includeMaterial = new Msgs.IvizMsgs.Material
-                {
-                    Name = visual.Name + "_material",
-                    Diffuse = ToColor(visual.Material.Diffuse),
-                    Emissive = ToColor(visual.Material.Emissive),
-                };
-            }
-            else
-            {
-                includeMaterial = new Msgs.IvizMsgs.Material();
-            }
-
-            if (visual.Geometry.Box != null)
-            {
-                Vector3D diag = new(
-                    (float)visual.Geometry.Box.Scale.X,
-                    (float)visual.Geometry.Box.Scale.Y,
-                    (float)visual.Geometry.Box.Scale.Z
-                );
-                pose = Multiply(pose, Matrix4x4.FromScaling(diag));
-
-                includes.Add(new Include
-                {
-                    Uri = "package://iviz_internal/cube",
-                    Pose = ToMatrix(pose),
-                    Material = includeMaterial
-                });
-            }
-            else if (visual.Geometry.Cylinder != null)
-            {
-                Vector3D diag = new(
-                    (float)visual.Geometry.Cylinder.Radius,
-                    (float)visual.Geometry.Cylinder.Radius,
-                    (float)visual.Geometry.Cylinder.Length
-                );
-                pose = Multiply(pose, Matrix4x4.FromScaling(diag));
-
-                includes.Add(new Include
-                {
-                    Uri = "package://iviz_internal/cylinder",
-                    Pose = ToMatrix(pose),
-                    Material = includeMaterial
-                });
-            }
-            else if (visual.Geometry.Sphere != null)
-            {
-                Vector3D diag = new((float)visual.Geometry.Sphere.Radius);
-                pose = Multiply(pose, Matrix4x4.FromScaling(diag));
-
-                includes.Add(new Include
-                {
-                    Uri = "package://iviz_internal/cylinder",
-                    Pose = ToMatrix(pose),
-                });
-            }
-            else if (visual.Geometry.Mesh != null)
-            {
-                Vector3D diag = new(
-                    (float)visual.Geometry.Mesh.Scale.X,
-                    (float)visual.Geometry.Mesh.Scale.Y,
-                    (float)visual.Geometry.Mesh.Scale.Z
-                );
-                pose = Multiply(pose, Matrix4x4.FromScaling(diag));
-
-                includes.Add(new Include
-                {
-                    Uri = visual.Geometry.Mesh.Uri.Value,
-                    Pose = ToMatrix(pose),
-                    Material = includeMaterial
-                });
-            }
-        }
-
-        static Matrix4x4 ToPose(Sdf.Pose pose)
-        {
-            if (pose is null)
-            {
-                return Matrix4x4.Identity;
-            }
-
-            Matrix4x4 result = Matrix4x4.FromEulerAnglesXYZ(
-                (float)-pose.Orientation.X,
-                (float)-pose.Orientation.Y,
-                (float)-pose.Orientation.Z
+            Vector3D diag = new(
+                (float)visual.Geometry.Cylinder.Radius,
+                (float)visual.Geometry.Cylinder.Radius,
+                (float)visual.Geometry.Cylinder.Length
             );
+            pose = Multiply(pose, Matrix4x4.FromScaling(diag));
 
-            result.A4 = (float)pose.Position.X;
-            result.B4 = (float)pose.Position.Y;
-            result.C4 = (float)pose.Position.Z;
-
-            return result;
-        }
-
-        static Matrix4x4 Multiply(in Matrix4x4 a, in Matrix4x4 b)
-        {
-            return b * a; // assimp inverts natural order of multiplication!
-        }
-
-
-        static Color32 ToColor(Sdf.Color color)
-        {
-            int r = (int)(Math.Max(Math.Min(color.R, 1), 0) * 255);
-            int g = (int)(Math.Max(Math.Min(color.G, 1), 0) * 255);
-            int b = (int)(Math.Max(Math.Min(color.B, 1), 0) * 255);
-
-            int a = (int)(Math.Max(Math.Min(color.A, 1), 0) * 255);
-            return new Color32((byte)r, (byte)g, (byte)b, (byte)a);
-        }
-
-        bool disposed;
-
-        public void Dispose()
-        {
-            if (disposed)
+            includes.Add(new Include
             {
-                return;
-            }
-
-            disposed = true;
-            importer.Dispose();
+                Uri = "package://iviz_internal/cylinder",
+                Pose = ToMatrix(pose),
+                Material = includeMaterial
+            });
         }
+        else if (visual.Geometry.Sphere != null)
+        {
+            Vector3D diag = new((float)visual.Geometry.Sphere.Radius);
+            pose = Multiply(pose, Matrix4x4.FromScaling(diag));
+
+            includes.Add(new Include
+            {
+                Uri = "package://iviz_internal/cylinder",
+                Pose = ToMatrix(pose),
+            });
+        }
+        else if (visual.Geometry.Mesh != null)
+        {
+            Vector3D diag = new(
+                (float)visual.Geometry.Mesh.Scale.X,
+                (float)visual.Geometry.Mesh.Scale.Y,
+                (float)visual.Geometry.Mesh.Scale.Z
+            );
+            pose = Multiply(pose, Matrix4x4.FromScaling(diag));
+
+            includes.Add(new Include
+            {
+                Uri = visual.Geometry.Mesh.Uri.Value,
+                Pose = ToMatrix(pose),
+                Material = includeMaterial
+            });
+        }
+    }
+
+    static Matrix4x4 ToPose(Sdf.Pose pose)
+    {
+        if (pose is null)
+        {
+            return Matrix4x4.Identity;
+        }
+
+        Matrix4x4 result = Matrix4x4.FromEulerAnglesXYZ(
+            (float)-pose.Orientation.X,
+            (float)-pose.Orientation.Y,
+            (float)-pose.Orientation.Z
+        );
+
+        result.A4 = (float)pose.Position.X;
+        result.B4 = (float)pose.Position.Y;
+        result.C4 = (float)pose.Position.Z;
+
+        return result;
+    }
+
+    static Matrix4x4 Multiply(in Matrix4x4 a, in Matrix4x4 b)
+    {
+        return b * a; // assimp inverts natural order of multiplication!
+    }
+
+
+    static Color32 ToColor(Sdf.Color color)
+    {
+        int r = (int)(Math.Max(Math.Min(color.R, 1), 0) * 255);
+        int g = (int)(Math.Max(Math.Min(color.G, 1), 0) * 255);
+        int b = (int)(Math.Max(Math.Min(color.B, 1), 0) * 255);
+
+        int a = (int)(Math.Max(Math.Min(color.A, 1), 0) * 255);
+        return new Color32((byte)r, (byte)g, (byte)b, (byte)a);
+    }
+
+    bool disposed;
+
+    public void Dispose()
+    {
+        if (disposed)
+        {
+            return;
+        }
+
+        disposed = true;
+        importer.Dispose();
     }
 }

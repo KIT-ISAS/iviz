@@ -182,8 +182,7 @@ public static class StreamUtils
         }
     }
 
-    public static async ValueTask WriteHeaderAsync(this TcpClient client, string[] contents,
-        CancellationToken token)
+    public static async ValueTask WriteHeaderAsync(this TcpClient client, string[] contents, CancellationToken token)
     {
         int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
 
@@ -211,7 +210,7 @@ public static class StreamUtils
         {
             using var bytes = entry.AsRent();
             writer.Write(bytes.Length);
-            writer.Write(bytes.Array, 0, bytes.Length);
+            writer.Write(bytes);
         }
     }
 

@@ -7,6 +7,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.ActionlibMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Tools;
+using String = System.String;
 
 namespace Iviz.Roslib.Actionlib;
 
@@ -44,11 +45,10 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
 
     RosChannelWriter<GoalID> CancelPublisher =>
         cancelPublisher ?? throw new InvalidOperationException("Start has not been called!");
-        
+
     MergedChannelReader ChannelReader =>
         mergedReader ?? throw new InvalidOperationException("Start has not been called!");
 
-        
 
     public RosActionClient()
     {
@@ -67,7 +67,6 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
             RosActionClientState oldState = state;
             state = value;
             StateChanged?.Invoke(oldState, state);
-            Logger.LogDebug($"{this}: {oldState} -> {state}");
         }
     }
 
@@ -147,8 +146,8 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
     public void Start(RosClient client, string newActionName)
     {
         ValidateStart(client, newActionName);
-        goalPublisher = new RosChannelWriter<TAGoal>(client, $"/{actionName}/goal") {LatchingEnabled = true};
-        cancelPublisher = new RosChannelWriter<GoalID>(client, $"/{actionName}/cancel") {LatchingEnabled = true};
+        goalPublisher = new RosChannelWriter<TAGoal>(client, $"/{actionName}/goal") { LatchingEnabled = true };
+        cancelPublisher = new RosChannelWriter<GoalID>(client, $"/{actionName}/cancel") { LatchingEnabled = true };
         feedbackSubscriber = new RosChannelReader<TAFeedback>(client, $"/{actionName}/feedback");
         resultSubscriber = new RosChannelReader<TAResult>(client, $"/{actionName}/result");
         mergedReader = new MergedChannelReader(feedbackSubscriber, resultSubscriber);
@@ -230,7 +229,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
             case RosActionClientState.Done:
                 break;
             default:
-                Logger.Log($"RosActionClient: No transition for state {State} with input {status}");
+                Logger.LogFormat("{0}: No transition for state {1} with input {2}", this, State, status);
                 break;
         }
     }
@@ -245,7 +244,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
         time now = time.Now();
         goalId = new GoalID
         {
-            Id = $"{callerId}#{now.ToDateTime()}",
+            Id = $"{callerId}#{now.ToDateTime().ToString()}",
             Stamp = now
         };
 
@@ -255,7 +254,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
             GoalId = goalId
         };
 
-        IActionGoal<TGoal> actionTGoal = (IActionGoal<TGoal>) actionGoal;
+        IActionGoal<TGoal> actionTGoal = (IActionGoal<TGoal>)actionGoal;
         actionTGoal.Goal = goal;
 
         GoalPublisher.Write(actionGoal);
@@ -320,7 +319,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
         {
             return;
         }
-            
+
         using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, runningTs.Token);
         GoalPublisher.Publisher.WaitForAnySubscriber(linkedSource.Token);
     }
@@ -375,7 +374,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
                         continue;
                     }
 
-                    ProcessGoalStatus((RosGoalStatus) actionFeedback.Status.Status);
+                    ProcessGoalStatus((RosGoalStatus)actionFeedback.Status.Status);
                     yield return (actionFeedback, null);
                     break;
                 case TAResult actionResult:
@@ -384,7 +383,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
                         continue;
                     }
 
-                    ProcessGoalStatus((RosGoalStatus) actionResult.Status.Status);
+                    ProcessGoalStatus((RosGoalStatus)actionResult.Status.Status);
                     yield return (null, actionResult);
 
                     State = RosActionClientState.Done;
@@ -416,7 +415,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
                         continue;
                     }
 
-                    ProcessGoalStatus((RosGoalStatus) actionFeedback.Status.Status);
+                    ProcessGoalStatus((RosGoalStatus)actionFeedback.Status.Status);
                     yield return (actionFeedback, null);
                     break;
                 case TAResult actionResult:
@@ -425,7 +424,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
                         continue;
                     }
 
-                    ProcessGoalStatus((RosGoalStatus) actionResult.Status.Status);
+                    ProcessGoalStatus((RosGoalStatus)actionResult.Status.Status);
                     yield return (null, actionResult);
 
                     State = RosActionClientState.Done;
@@ -481,6 +480,6 @@ public static class RosActionClient
     public static RosGoalStatus GetStatus<TActionResult>(this TActionResult result)
         where TActionResult : class, IActionResult
     {
-        return (RosGoalStatus) result.Status.Status;
+        return (RosGoalStatus)result.Status.Status;
     }
 }

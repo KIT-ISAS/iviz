@@ -525,7 +525,8 @@ public sealed class RosMasterServer : IDisposable
                 pair => ((XmlRpcArg)pair.Key, new XmlRpcArg(pair.Value.Select(tuple => tuple.Key))))
             .ToArray();
         var providers = serviceProviders.Select(
-            pair => ((XmlRpcArg)pair.Key, new XmlRpcArg(new[] { pair.Value.Id }))).ToArray();
+                pair => ((XmlRpcArg)pair.Key, new XmlRpcArg(new[] { pair.Value.Id })))
+            .ToArray();
 
         return OkResponse(((XmlRpcArg)publishers, (XmlRpcArg)subscribers, (XmlRpcArg)providers));
     }

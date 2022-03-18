@@ -97,16 +97,16 @@ internal sealed class ServiceRequest
 
         if (!values.TryGetValue("callerid", out string? receivedId))
         {
-            return
-                $"error=Expected callerid '{remoteCallerId}' but partner provided '{receivedId}', closing connection";
+            return $"error=Expected callerid '{remoteCallerId}' but partner provided " +
+                   $"'{receivedId}', closing connection";
         }
 
         remoteCallerId = receivedId;
 
         if (!values.TryGetValue("service", out string? receivedService) || receivedService != serviceInfo.Service)
         {
-            return
-                $"error=Expected service '{serviceInfo.Service}' but partner provided '{receivedService}', closing connection";
+            return $"error=Expected service '{serviceInfo.Service}' but partner provided " +
+                   $"'{receivedService}', closing connection";
         }
 
         if (!values.TryGetValue("md5sum", out string? receivedMd5Sum) || receivedMd5Sum != serviceInfo.Md5Sum)
@@ -117,8 +117,8 @@ internal sealed class ServiceRequest
             }
             else
             {
-                return
-                    $"error=Expected md5 '{serviceInfo.Md5Sum}' but partner provided '{receivedMd5Sum}', closing connection";
+                return $"error=Expected md5 '{serviceInfo.Md5Sum}' but partner provided " +
+                       $"'{receivedMd5Sum}', closing connection";
             }
         }
 
@@ -130,8 +130,8 @@ internal sealed class ServiceRequest
             }
             else
             {
-                return
-                    $"error=Expected type '{serviceInfo.Type}' but received instead '{receivedType}', closing connection";
+                return $"error=Expected type '{serviceInfo.Type}' but received instead " +
+                       $"'{receivedType}', closing connection";
             }
         }
 
@@ -200,10 +200,10 @@ internal sealed class ServiceRequest
                     break;
                 case IOException:
                 case SocketException:
-                    Logger.LogDebugFormat("{0}: Error in ServiceRequestAsync: {1}", this, e);
+                    Logger.LogDebugFormat("{0}: Error in StartSession: {1}", this, e);
                     break;
                 default:
-                    Logger.LogErrorFormat("{0}: Error in ServiceRequestAsync: {1}", this, e);
+                    Logger.LogErrorFormat("{0}: Error in StartSession: {1}", this, e);
                     break;
             }
 

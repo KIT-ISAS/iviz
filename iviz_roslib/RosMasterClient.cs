@@ -579,7 +579,7 @@ public sealed class GetUriResponse : BaseResponse
         }
         else
         {
-            Logger.Log($"{this}: Failed to parse GetUriResponse uri: {value.ToString()}");
+            Logger.LogFormat("{0}: Failed to parse GetUriResponse uri: {1}", this, value.ToString());
             MarkError();
             Uri = null;
         }
@@ -610,7 +610,7 @@ public sealed class LookupNodeResponse : BaseResponse
         }
         else
         {
-            Logger.Log($"{this}: Failed to parse LookupNodeResponse uri: {uriStr}");
+            Logger.LogFormat("{0}: Failed to parse LookupNodeResponse uri: {1}", this, uriStr);
             MarkError();
             Uri = null;
         }
@@ -683,7 +683,7 @@ public sealed class RegisterSubscriberResponse : BaseResponse
             if (!objUriStr.TryGetString(out string uriStr) ||
                 !Uri.TryCreate(uriStr, UriKind.Absolute, out Uri? publisher))
             {
-                Logger.Log($"{this}: Invalid uri '{objUriStr.ToString()}'");
+                Logger.LogFormat("{0}: Invalid uri '{1}'", this, objUriStr.ToString());
                 MarkError();
                 return;
             }
