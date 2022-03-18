@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Tools;
@@ -18,46 +19,30 @@ namespace Iviz.Rosbag.Writer
             bytes.Dispose();
         }
 
+        void Write<T>(T value) where T : unmanaged
+        {
+            bytes.AsSpan()[p..].Write(value);
+            p += Unsafe.SizeOf<T>();
+        }
+
         public void Write(int value)
         {
-            byte[] array = bytes.Array;
-            array[p++] = (byte) value;
-            array[p++] = (byte) (value >> 8);
-            array[p++] = (byte) (value >> 16);
-            array[p++] = (byte) (value >> 24);
+            Write<int>(value);
         }
 
-        public void Write(uint value)
+        public void Write(in time value)
         {
-            byte[] array = bytes.Array;
-            array[p++] = (byte) value;
-            array[p++] = (byte) (value >> 8);
-            array[p++] = (byte) (value >> 16);
-            array[p++] = (byte) (value >> 24);
-        }
-
-        public void Write(in time time)
-        {
-            Write(time.Secs);
-            Write(time.Nsecs);
+            Write<time>(value);
         }
 
         public void Write(OpCode value)
         {
-            Write((byte) value);
+            Write((byte)value);
         }
 
         public void Write(long value)
         {
-            byte[] array = bytes.Array;
-            array[p++] = (byte) value;
-            array[p++] = (byte) (value >> 8);
-            array[p++] = (byte) (value >> 16);
-            array[p++] = (byte) (value >> 24);
-            array[p++] = (byte) (value >> 32);
-            array[p++] = (byte) (value >> 40);
-            array[p++] = (byte) (value >> 48);
-            array[p++] = (byte) (value >> 56);
+            Write<long>(value);
         }
 
         public void Write(string value)
@@ -79,25 +64,18 @@ namespace Iviz.Rosbag.Writer
 
         public void Write(char value)
         {
-            byte[] array = bytes.Array;
-            array[p++] = (byte) value;
-        }
-
-        public void Write(byte value)
-        {
-            byte[] array = bytes.Array;
-            array[p++] = value;
+            Write((byte)value);
         }
 
         public readonly Stream WriteTo(Stream stream)
         {
-            stream.Write(bytes.Array, 0, bytes.Length);
+            stream.Write(bytes);
             return stream;
         }
 
-        public readonly Task WriteToAsync(Stream stream)
+        public readonly ValueTask WriteToAsync(Stream stream)
         {
-            return stream.WriteAsync(bytes.Array, 0, bytes.Length);
+            return stream.WriteAsync(bytes);
         }
     }
 }

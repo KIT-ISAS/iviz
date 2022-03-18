@@ -135,7 +135,7 @@ namespace Iviz.Rosbag.Writer
             padding.AsSpan().Fill(0x20);
 
             writer.WriteValue(dataLength)
-                .WriteValue(padding);
+                .Write(padding);
         }
 
         async ValueTask WriteHeaderRecordAsync(int numConnections, int numChunks, long connectionIndexPosition)
@@ -158,7 +158,7 @@ namespace Iviz.Rosbag.Writer
             padding.AsSpan().Fill(0x20);
 
             await writer.WriteValueAsync(dataLength);
-            await writer.WriteValueAsync(padding);
+            await writer.WriteAsync(padding);
         }
 
         void WriteConnectionRecord(int connectionId, string topicName, IReadOnlyCollection<string> headerData)
@@ -227,7 +227,7 @@ namespace Iviz.Rosbag.Writer
             message.SerializeTo(bytes);
 
             writer.WriteValue(dataLength)
-                .WriteValue(bytes);
+                .Write(bytes);
         }
 
         async ValueTask WriteMessageRecordAsync(int connectionId, time timestamp, IMessage message)
@@ -249,7 +249,7 @@ namespace Iviz.Rosbag.Writer
             message.SerializeTo(bytes);
 
             await writer.WriteValueAsync(dataLength);
-            await writer.WriteValueAsync(bytes);
+            await writer.WriteAsync(bytes);
         }
 
         void WritePartialChunkRecord(int sizeInBytes)
@@ -352,8 +352,6 @@ namespace Iviz.Rosbag.Writer
 
         void WriteChunkInfoRecord(ChunkInfoRecord record)
         {
-            //Console.WriteLine("** Chunk start " + writer.Position);
-
             var op = new OpCodeHeaderEntry(OpCode.ChunkInfo);
             var ver = new IntHeaderEntry("ver", 1);
             var chunkPos = new LongHeaderEntry("chunk_pos", record.ChunkPos);
