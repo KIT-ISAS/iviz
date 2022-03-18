@@ -254,39 +254,39 @@ namespace Iviz.MsgsGen
         {
             StringBuilder str = new StringBuilder(200);
 
-            str.AppendNLine("using System.Runtime.Serialization;");
+            str.AppendNewLine("using System.Runtime.Serialization;");
 
-            str.AppendNLine("");
-            str.AppendNLine($"namespace Iviz.Msgs.{CsPackage}");
-            str.AppendNLine("{");
-            str.AppendNLine($"    [DataContract (Name = RosServiceType)]");
-            str.AppendNLine($"    public sealed class {Name} : IService");
-            str.AppendNLine("    {");
+            str.AppendNewLine("");
+            str.AppendNewLine($"namespace Iviz.Msgs.{CsPackage}");
+            str.AppendNewLine("{");
+            str.AppendNewLine($"    [DataContract (Name = RosServiceType)]");
+            str.AppendNewLine($"    public sealed class {Name} : IService");
+            str.AppendNewLine("    {");
 
             IEnumerable<string> mainClassLines = CreateServiceContent();
             foreach (string entry in mainClassLines)
             {
-                str.Append("        ").AppendNLine(entry);
+                str.Append("        ").AppendNewLine(entry);
             }
 
-            str.AppendNLine("    }");
-            str.AppendNLine();
+            str.AppendNewLine("    }");
+            str.AppendNewLine();
 
             IEnumerable<string> linesReq = CreateClassContent(elementsReq, variablesReq, Name, fixedSizeReq, true);
             foreach (string entry in linesReq)
             {
-                str.Append("    ").AppendNLine(entry);
+                str.Append("    ").AppendNewLine(entry);
             }
 
-            str.AppendNLine();
+            str.AppendNewLine();
 
             IEnumerable<string> linesResp = CreateClassContent(elementsResp, variablesResp, Name, fixedSizeResp, false);
             foreach (string entry in linesResp)
             {
-                str.Append("    ").AppendNLine(entry);
+                str.Append("    ").AppendNewLine(entry);
             }
 
-            str.AppendNLine("}");
+            str.AppendNewLine("}");
 
             return str.ToString();
         }

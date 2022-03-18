@@ -32,7 +32,7 @@ namespace Iviz.MsgsGen
 
         static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
 
-        static readonly Dictionary<string, int> BuiltInsSizes = new Dictionary<string, int>
+        static readonly Dictionary<string, int> BuiltInsSizes = new()
         {
             { "bool", 1 },
             { "int8", 1 },
@@ -51,7 +51,7 @@ namespace Iviz.MsgsGen
             { "byte", 1 }
         };
 
-        static readonly HashSet<string> BuiltInTypes = new HashSet<string>
+        static readonly HashSet<string> BuiltInTypes = new()
         {
             "bool",
             "int8",
@@ -70,31 +70,8 @@ namespace Iviz.MsgsGen
             "byte",
             "string"
         };
-
-        static readonly HashSet<string> BlittableStructs = new HashSet<string>
-        {
-            "geometry_msgs/Vector3",
-            "geometry_msgs/Point",
-            "geometry_msgs/Point32",
-            "geometry_msgs/Quaternion",
-            "geometry_msgs/Pose",
-            "geometry_msgs/Transform",
-            "geometry_msgs/Twist",
-            "std_msgs/ColorRGBA",
-            "iviz_msgs/Color32",
-            "iviz_msgs/Vector2f",
-            "iviz_msgs/Vector3f",
-            "iviz_msgs/Triangle",
-        };
-
-        static readonly HashSet<string> ForceStructs = new HashSet<string>
-        {
-            "std_msgs/Header",
-            "geometry_msgs/TransformStamped",
-            "rosgraph_msgs/Log"
-        };
-
-        static readonly UTF8Encoding Utf8 = new UTF8Encoding(false);
+        
+        static readonly UTF8Encoding Utf8 = new(false);
 
         readonly ActionMessageType actionMessageType;
         readonly string? actionRoot;
@@ -151,7 +128,7 @@ namespace Iviz.MsgsGen
             }
 
             string resolvedName = v.RosClassName.Contains("/") ? $"{rosPackage}/{v.RosClassName}" : v.RosClassName;
-            return BlittableStructs.Contains(resolvedName);
+            return StructMessages.BlittableStructs.Contains(resolvedName);
         }
 
         /// <summary>
@@ -261,12 +238,12 @@ namespace Iviz.MsgsGen
 
         internal static bool IsClassForceStruct(string f)
         {
-            return BlittableStructs.Contains(f) || ForceStructs.Contains(f);
+            return StructMessages.BlittableStructs.Contains(f) || StructMessages.ForceStructs.Contains(f);
         }
 
         internal static bool IsClassBlittable(string f)
         {
-            return BlittableStructs.Contains(f);
+            return StructMessages.BlittableStructs.Contains(f);
         }
 
         internal static bool IsBuiltinType(string f)
@@ -530,7 +507,7 @@ namespace Iviz.MsgsGen
                 lines.Add("");
             }
 
-            if (variables.Any())
+            if ((forceStruct || structIsBlittable || variables.Count <= 4) && variables.Count != 0)
             {
                 lines.Add("/// Explicit constructor.");
 
@@ -938,27 +915,27 @@ namespace Iviz.MsgsGen
         {
             var str = new StringBuilder(200);
 
-            str.AppendNLine("/* This file was created automatically, do not edit! */");
-            str.AppendNLine();
+            str.AppendNewLine("/* This file was created automatically, do not edit! */");
+            str.AppendNewLine();
 
             if (ForceStruct)
             {
-                str.AppendNLine("using System.Runtime.InteropServices;");
-                str.AppendNLine("using System.Runtime.CompilerServices;");
+                str.AppendNewLine("using System.Runtime.InteropServices;");
+                str.AppendNewLine("using System.Runtime.CompilerServices;");
             }
 
-            str.AppendNLine("using System.Runtime.Serialization;");
-            str.AppendNLine();
+            str.AppendNewLine("using System.Runtime.Serialization;");
+            str.AppendNewLine();
 
-            str.AppendNLine($"namespace Iviz.Msgs.{CsPackage}");
-            str.AppendNLine("{");
+            str.AppendNewLine($"namespace Iviz.Msgs.{CsPackage}");
+            str.AppendNewLine("{");
 
             foreach (string entry in CreateClassContent())
             {
-                str.Append("    ").AppendNLine(entry);
+                str.Append("    ").AppendNewLine(entry);
             }
 
-            str.AppendNLine("}");
+            str.AppendNewLine("}");
 
             return str.ToString();
         }
@@ -1162,13 +1139,13 @@ namespace Iviz.MsgsGen
 
             var builder = new StringBuilder(100);
 
-            builder.AppendNLine(fullMessageText);
+            builder.AppendNewLine(fullMessageText);
 
             foreach (ClassInfo classInfo in dependencies)
             {
-                builder.AppendNLine(DependencySeparator);
-                builder.AppendNLine($"MSG: {classInfo.RosPackage}/{classInfo.Name}");
-                builder.AppendNLine(classInfo.fullMessageText);
+                builder.AppendNewLine(DependencySeparator);
+                builder.AppendNewLine($"MSG: {classInfo.RosPackage}/{classInfo.Name}");
+                builder.AppendNewLine(classInfo.fullMessageText);
             }
 
             return builder.ToString().Replace("\r", "");
@@ -1200,12 +1177,12 @@ namespace Iviz.MsgsGen
             }
             catch (MessageDependencyException e)
             {
-                throw new MessageGenException($"Failed to generate md5 field for message {FullRosName}", e);
+                throw new MessageDependencyException($"Failed to generate md5 field for message {FullRosName}", e);
             }
 
-            if (md5Variables.Any(md5String => md5String == null))
+            if (md5Variables.Any((string? md5String) => md5String == null))
             {
-                return ""; // shouldn't happen, exception thrown earlier
+                return ""; // shouldn't happen, or exception would have been thrown earlier
             }
 
             str.Append(string.Join("\n", md5Variables));
@@ -1223,13 +1200,13 @@ namespace Iviz.MsgsGen
 
     static class StringBuilderUtils
     {
-        public static StringBuilder AppendNLine(this StringBuilder str, string s)
+        public static StringBuilder AppendNewLine(this StringBuilder str, string s)
         {
             str.Append(s).Append('\n');
             return str;
         }
 
-        public static StringBuilder AppendNLine(this StringBuilder str)
+        public static StringBuilder AppendNewLine(this StringBuilder str)
         {
             str.Append('\n');
             return str;

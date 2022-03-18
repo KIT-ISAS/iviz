@@ -4,15 +4,15 @@ namespace Iviz.MsgsGen
 {
     public class MessageGenException : Exception
     {
-        public MessageGenException()
+        protected MessageGenException()
         {
         }
 
-        public MessageGenException(string message) : base(message)
+        protected MessageGenException(string message) : base(message)
         {
         }
 
-        public MessageGenException(string message, Exception innerException) : base(message, innerException)
+        protected MessageGenException(string message, Exception innerException) : base(message, innerException)
         {
         }
     }
