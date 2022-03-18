@@ -110,7 +110,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
         var readBuffer = new Rent<byte>(length);
         try
         {
-            if (await TcpClient.ReadChunkAsync(readBuffer.Array, length, runningTs.Token))
+            if (await TcpClient.ReadChunkAsync(readBuffer, runningTs.Token))
             {
                 return readBuffer;
             }
@@ -302,6 +302,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
 
                 writeBuffer[..4].Write(msgLength);
                 msg.SerializeTo(writeBuffer[4..]);
+                
                 await TcpClient.WriteChunkAsync(writeBuffer.Array, msgLength + 4, runningTs.Token);
 
                 numSent++;

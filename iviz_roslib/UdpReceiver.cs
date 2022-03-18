@@ -197,7 +197,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
 
         while (KeepRunning)
         {
-            int received = await UdpClient.ReadChunkAsync(readBuffer.Array, runningTs.Token);
+            int received = await UdpClient.ReadChunkAsync(readBuffer, runningTs.Token);
             if (received > MaxPacketSize)
             {
                 throw new RosConnectionException("Udp socket received " + received +
@@ -254,8 +254,10 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
                     if (blockNr == expectedBlockNr && msgId == expectedMsgId)
                     {
                         int payload = received - UdpRosParams.HeaderLength;
-                        Buffer.BlockCopy(readBuffer.Array, UdpRosParams.HeaderLength,
-                            resizableBuffer.Array, offset, payload);
+                        readBuffer.Slice(UdpRosParams.HeaderLength, payload)
+                            .CopyTo(resizableBuffer.Slice(offset, payload));
+                        //Buffer.BlockCopy(readBuffer.Array, UdpRosParams.HeaderLength,
+                        //    resizableBuffer.Array, offset, payload);
                         offset += payload;
                         expectedBlockNr++;
                     }

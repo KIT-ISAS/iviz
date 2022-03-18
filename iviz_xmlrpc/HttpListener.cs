@@ -76,9 +76,10 @@ namespace Iviz.XmlRpc
             }
 
             Logger.LogDebugFormat("{0}: Disposing listener...", this);
-            using (TcpClient client = new(AddressFamily.InterNetworkV6)
-                {Client = {DualMode = true, NoDelay = true}})
+            try
             {
+                using TcpClient client = new(AddressFamily.InterNetworkV6)
+                    { Client = { DualMode = true, NoDelay = true } };
                 if (sync)
                 {
                     client.Connect(IPAddress.Loopback, LocalPort);
@@ -87,6 +88,10 @@ namespace Iviz.XmlRpc
                 {
                     await client.ConnectAsync(IPAddress.Loopback, LocalPort);
                 }
+            }
+            catch (Exception)
+            {
+                Logger.LogDebugFormat("{0}: Listener threw while disposing", this);
             }
 
             listener.Stop();
@@ -113,6 +118,8 @@ namespace Iviz.XmlRpc
                 throw new ArgumentNullException(nameof(handler));
             }
 
+            var token = runningTs.Token;
+            
             started = true;
             while (KeepRunning)
                 try
@@ -129,16 +136,16 @@ namespace Iviz.XmlRpc
                     async Task CreateContextTask()
                     {
                         using var context = new HttpListenerContext(client);
-                        await handler(context, runningTs.Token);
+                        await handler(context, token);
                     }
 
                     if (runInBackground)
                     {
-                        AddToBackgroundTasks(TaskUtils.Run(CreateContextTask, runningTs.Token));
+                        AddToBackgroundTasks(TaskUtils.Run(CreateContextTask, token));
                     }
                     else
                     {
-                        await CreateContextTask().AwaitNoThrow(2000, this);
+                        await CreateContextTask().AwaitNoThrow(2000, this, default);
                     }
                 }
                 catch (Exception e)
@@ -195,7 +202,7 @@ namespace Iviz.XmlRpc
 
         public override string ToString()
         {
-            return $"[HttpListener :{LocalPort}]";
+            return $"[HttpListener :{LocalPort.ToString()}]";
         }
     }
 }

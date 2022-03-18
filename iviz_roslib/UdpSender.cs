@@ -171,10 +171,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
         }
 
         using var writeBuffer = new Rent<byte>(MaxPacketSize);
-        for (int i = 0; i < UdpRosParams.HeaderLength; i++)
-        {
-            writeBuffer[i] = 0;
-        }
+        writeBuffer[..UdpRosParams.HeaderLength].Fill(0);
 
         _ = TaskUtils.Run(KeepAliveMessages);
 
@@ -198,9 +195,9 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
     async ValueTask SendWithSocketAsync(RangeEnumerable<SenderQueue<T>.Entry?> queue, Rent<byte> writeBuffer)
     {
         const int udpPlusSizeHeaders = UdpRosParams.HeaderLength + 4;
-        byte[] array = writeBuffer.Array;
+        //byte[] array = writeBuffer.Array;
 
-        using var resizableBuffer = new ResizableRent();
+        using var messageBuffer = new ResizableRent();
 
         try
         {
@@ -208,31 +205,33 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             {
                 if (e is not var (msg, msgLength, msgSignal))
                 {
-                    WriteKeepAlive();
+                    WriteKeepAlive(writeBuffer);
                     await WriteChunkAsync(udpPlusSizeHeaders);
                     continue;
                 }
 
                 if (msgLength + udpPlusSizeHeaders <= MaxPacketSize)
                 {
-                    WriteUnfragmented(msgLength);
+                    WriteUnfragmented(writeBuffer, msgLength);
                     msg.SerializeTo(writeBuffer[udpPlusSizeHeaders..]);
                     await WriteChunkAsync(msgLength + udpPlusSizeHeaders);
                 }
                 else
                 {
-                    resizableBuffer.EnsureCapacity(msgLength);
-                    msg.SerializeTo(resizableBuffer);
+                    messageBuffer.EnsureCapacity(msgLength);
+                    msg.SerializeTo(messageBuffer);
 
                     int maxPayloadSize = MaxPacketSize - UdpRosParams.HeaderLength;
                     int totalBlocks = (4 + msgLength + maxPayloadSize - 1) / maxPayloadSize;
                     int offset = 0;
 
                     {
-                        WriteFragmentedFirst(totalBlocks, msgLength);
+                        WriteFragmentedFirst(writeBuffer, totalBlocks, msgLength);
                         int firstPayloadSize = maxPayloadSize - 4; // the first packet includes the message length
-                        Buffer.BlockCopy(resizableBuffer.Array, offset,
-                            array, udpPlusSizeHeaders, firstPayloadSize);
+                        messageBuffer.Slice(offset, firstPayloadSize)
+                            .CopyTo(writeBuffer.Slice(udpPlusSizeHeaders, firstPayloadSize));
+                        //Buffer.BlockCopy(resizableBuffer.Array, offset,
+                        //    array, udpPlusSizeHeaders, firstPayloadSize);
                         await WriteChunkAsync(MaxPacketSize);
                         offset += firstPayloadSize;
                     }
@@ -240,11 +239,13 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
                     int blockNr = 1;
                     while (offset != msgLength)
                     {
-                        WriteFragmentedN(blockNr++);
+                        WriteFragmentedN(writeBuffer, blockNr++);
                         int currentPayloadSize = Math.Min(msgLength - offset, maxPayloadSize);
-                        Buffer.BlockCopy(resizableBuffer.Array, offset,
-                            array, UdpRosParams.HeaderLength,
-                            currentPayloadSize);
+                        messageBuffer.Slice(offset, currentPayloadSize)
+                            .CopyTo(writeBuffer.Slice(UdpRosParams.HeaderLength, currentPayloadSize));
+                        //Buffer.BlockCopy(resizableBuffer.Array, offset,
+                        //    array, UdpRosParams.HeaderLength,
+                        //    currentPayloadSize);
                         await WriteChunkAsync(UdpRosParams.HeaderLength + currentPayloadSize);
                         offset += currentPayloadSize;
                     }
@@ -261,72 +262,71 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
             throw;
         }
 
+        ValueTask<int> WriteChunkAsync(int toWrite) => UdpClient.WriteChunkAsync(writeBuffer, toWrite, runningTs.Token);
+    }
 
-        void WriteKeepAlive()
-        {
-            // 4 bytes connection id (here always 0)
-            // 1 byte op code (2 - keepalive)
-            array[4] = UdpRosParams.OpCodePing;
-            // 1 byte msgId
-            array[5] = ++msgId;
-            // 2 bytes block id (0, first datagram)
-            // 4 bytes message length
-            array[8] = 0;
-            array[9] = 0;
-            array[10] = 0;
-            array[11] = 0;
-            // total 12
-        }
+    void WriteKeepAlive(Span<byte> array)
+    {
+        // 4 bytes connection id (here always 0)
+        // 1 byte op code (2 - keepalive)
+        array[4] = UdpRosParams.OpCodePing;
+        // 1 byte msgId
+        array[5] = ++msgId;
+        // 2 bytes block id (0, first datagram)
+        // 4 bytes message length
+        array[8] = 0;
+        array[9] = 0;
+        array[10] = 0;
+        array[11] = 0;
+        // total 12
+    }
 
-        void WriteUnfragmented(int msgLength)
-        {
-            // 4 bytes connection id (here always 0)
-            // 1 byte op code (0 - first datagram)
-            array[4] = UdpRosParams.OpCodeData0;
-            // 1 byte msgId
-            array[5] = ++msgId;
-            // 2 bytes block id (0, unfragmented)
-            // 4 bytes message length
-            array[8] = (byte)msgLength;
-            array[9] = (byte)(msgLength >> 8);
-            array[10] = (byte)(msgLength >> 0x10);
-            array[11] = (byte)(msgLength >> 0x18);
-            // total 12
-        }
+    void WriteUnfragmented(Span<byte> array, int msgLength)
+    {
+        // 4 bytes connection id (here always 0)
+        // 1 byte op code (0 - first datagram)
+        array[4] = UdpRosParams.OpCodeData0;
+        // 1 byte msgId
+        array[5] = ++msgId;
+        // 2 bytes block id (0, unfragmented)
+        // 4 bytes message length
+        array[8] = (byte)msgLength;
+        array[9] = (byte)(msgLength >> 8);
+        array[10] = (byte)(msgLength >> 0x10);
+        array[11] = (byte)(msgLength >> 0x18);
+        // total 12
+    }
 
-        void WriteFragmentedFirst(int totalBlocks, int msgLength)
-        {
-            // 4 bytes connection id (here always 0)
-            // 1 byte op code (0 - first datagram)
-            array[4] = UdpRosParams.OpCodeData0;
-            // 1 byte msgId
-            array[5] = ++msgId;
-            // 2 bytes block id (total blocks)
-            array[6] = (byte)totalBlocks;
-            array[7] = (byte)(totalBlocks >> 8);
-            // 4 bytes message length
-            array[8] = (byte)msgLength;
-            array[9] = (byte)(msgLength >> 8);
-            array[10] = (byte)(msgLength >> 0x10);
-            array[11] = (byte)(msgLength >> 0x18);
-            // total 12
-        }
+    void WriteFragmentedFirst(Span<byte> array, int totalBlocks, int msgLength)
+    {
+        // 4 bytes connection id (here always 0)
+        // 1 byte op code (0 - first datagram)
+        array[4] = UdpRosParams.OpCodeData0;
+        // 1 byte msgId
+        array[5] = ++msgId;
+        // 2 bytes block id (total blocks)
+        array[6] = (byte)totalBlocks;
+        array[7] = (byte)(totalBlocks >> 8);
+        // 4 bytes message length
+        array[8] = (byte)msgLength;
+        array[9] = (byte)(msgLength >> 8);
+        array[10] = (byte)(msgLength >> 0x10);
+        array[11] = (byte)(msgLength >> 0x18);
+        // total 12
+    }
 
-        void WriteFragmentedN(int blockNr)
-        {
-            // 4 bytes connection id (here always 0)
-            // 1 byte op code (0 - first datagram)
-            array[4] = UdpRosParams.OpCodeDataN;
-            // 1 byte msgId
-            array[5] = msgId;
-            // 2 bytes block id (total blocks)
-            array[6] = (byte)blockNr;
-            array[7] = (byte)(blockNr >> 8);
-            // message length ignored here! it was written in the first datagram
-            // total 8
-        }
-
-        ValueTask<int> WriteChunkAsync(int toWrite) => UdpClient.WriteChunkAsync(array, 0, toWrite, runningTs.Token);
+    void WriteFragmentedN(Span<byte> array, int blockNr)
+    {
+        // 4 bytes connection id (here always 0)
+        // 1 byte op code (0 - first datagram)
+        array[4] = UdpRosParams.OpCodeDataN;
+        // 1 byte msgId
+        array[5] = msgId;
+        // 2 bytes block id (total blocks)
+        array[6] = (byte)blockNr;
+        array[7] = (byte)(blockNr >> 8);
+        // message length ignored here! it was written in the first datagram
+        // total 8
     }
 
     async Task KeepAliveMessages()

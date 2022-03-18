@@ -72,7 +72,7 @@ internal sealed class ServiceRequest
         var readBuffer = new Rent<byte>(length);
         try
         {
-            if (!await tcpClient.ReadChunkAsync(readBuffer.Array, length, token))
+            if (!await tcpClient.ReadChunkAsync(readBuffer, token))
             {
                 throw new IOException("Partner closed connection.");
             }

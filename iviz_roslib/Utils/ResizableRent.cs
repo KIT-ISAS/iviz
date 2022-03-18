@@ -20,7 +20,8 @@ internal sealed class ResizableRent : IDisposable
     public Span<byte> AsSpan() => buffer;
     public ReadOnlySpan<byte> AsReadOnlySpan() => buffer;
     public Span<byte> this[Range range] => buffer.AsSpan(range);
-        
+    public Span<byte> Slice(int start, int count) => AsSpan().Slice(start, count);
+
     public ResizableRent()
     {
         buffer = Pool.Rent(16);
