@@ -145,7 +145,7 @@ namespace Iviz.ModelService
             {
                 Log("    " + path);
             }
-            
+
             paths.Add(path);
         }
 
@@ -378,7 +378,7 @@ namespace Iviz.ModelService
 
             var scene = importer.ImportFile(fileName,
                 PostProcessPreset.TargetRealTimeMaximumQuality | PostProcessPreset.ConvertToLeftHanded);
-            Model msg = new()
+            var msg = new Model
             {
                 Meshes = new Msgs.IvizMsgs.Mesh[scene.Meshes.Count],
                 OrientationHint = orientationHint
@@ -647,16 +647,18 @@ namespace Iviz.ModelService
 
         static Msgs.IvizMsgs.Light ToLight(Sdf.Light light)
         {
-            return new(
-                light.Name ?? "",
-                (byte)light.Type,
-                light.CastShadows,
-                ToColor(light.Diffuse),
-                0,
-                ToVector3(light.Pose.Position),
-                ToVector3(light.Direction),
-                (float)light.Spot.InnerAngle,
-                (float)light.Spot.OuterAngle);
+            return new Msgs.IvizMsgs.Light
+            {
+                Name = light.Name ?? "",
+                Type = (byte)light.Type,
+                CastShadows = light.CastShadows,
+                Diffuse = ToColor(light.Diffuse),
+                Range = 0,
+                Position = ToVector3(light.Pose.Position),
+                Direction = ToVector3(light.Direction),
+                InnerAngle = (float)light.Spot.InnerAngle,
+                OuterAngle = (float)light.Spot.OuterAngle
+            };
         }
 
         static void ResolveIncludes(Sdf.SdfFile file, ICollection<Include> includes)
