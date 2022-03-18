@@ -63,7 +63,7 @@ namespace Iviz.App
 
             panel.AutoFocus.ValueChanged += f => controller.EnableAutoFocus = f;
 
-            panel.ARMarkers.Description = controller.MarkerExecutor.Description;
+            //panel.ARMarkers.Description = controller.MarkerExecutor.Description;
             panel.MarkerSender.Set(controller.MarkerSender);
             panel.PublishFrequency.ValueChanged += (f, _) => controller.PublicationFrequency = (PublicationFrequency)f;
             panel.ColorSender.Set(controller.ColorSender);
@@ -77,7 +77,7 @@ namespace Iviz.App
         public override void UpdatePanel()
         {
             panel.Description.Text = controller.Description;
-            panel.ARMarkers.Description = controller.MarkerExecutor.Description;
+            //panel.ARMarkers.Description = controller.MarkerExecutor.Description;
         }
         
         public void UpdateConfiguration(ARConfiguration configuration)

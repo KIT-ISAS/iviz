@@ -397,7 +397,7 @@ namespace Iviz.App
             RosLogger.Internal("Trying to connect to previous ROS server.");
             if ((Settings.IsMacOS || Settings.IsMobile) && Connection.MyUri.Host == Connection.MasterUri.Host)
             {
-                connectionData.TryCreateMasterAsync(); // create master and connect
+                _ = connectionData.TryCreateMasterAsync(); // create master and connect
             }
             else
             {
@@ -443,18 +443,28 @@ namespace Iviz.App
         {
             if (Connection.BagListener != null)
             {
-                Connection.BagListener = null;
-                UpperCanvas.RecordBagImage.color = Color.black;
-                UpperCanvas.RecordBagText.text = "Rec Bag";
+                ShutdownRosbag();
             }
             else
             {
-                string filename = $"iviz-{GameThread.Now:yyyy-MM-dd-HH-mm-ss}.bag";
-                Directory.CreateDirectory(Settings.BagsFolder);
-                Connection.BagListener = new BagListener($"{Settings.BagsFolder}/{filename}");
-                UpperCanvas.RecordBagImage.color = Color.red;
-                UpperCanvas.RecordBagText.text = "0 MB";
+                StartRosbag();
             }
+        }
+
+        public void ShutdownRosbag()
+        {
+            Connection.BagListener = null;
+            UpperCanvas.RecordBagImage.color = Color.black;
+            UpperCanvas.RecordBagText.text = "Rec Bag";
+        }
+
+        void StartRosbag()
+        {
+            string filename = $"iviz-{GameThread.Now:yyyy-MM-dd-HH-mm-ss}.bag";
+            Directory.CreateDirectory(Settings.BagsFolder);
+            Connection.BagListener = new BagListener($"{Settings.BagsFolder}/{filename}");
+            UpperCanvas.RecordBagImage.color = Color.red;
+            UpperCanvas.RecordBagText.text = "0 MB";
         }
 
         void OnConnectionStateChanged(ConnectionState state)
@@ -465,6 +475,7 @@ namespace Iviz.App
                 Connection.MyUri == null ||
                 Connection.MyId == null)
             {
+                UpperCanvas.Status.enabled = true;
                 UpperCanvas.Status.sprite = UpperCanvas.QuestionSprite;
                 return;
             }
@@ -473,6 +484,7 @@ namespace Iviz.App
             {
                 case ConnectionState.Connected:
                     GameThread.EveryTenthOfASecond -= RotateSprite;
+                    UpperCanvas.Status.enabled = true;
                     UpperCanvas.Status.sprite = UpperCanvas.ConnectedSprite;
                     UpperCanvas.TopPanel.color = RosManager.Server.IsActive
                         ? Resource.Colors.ConnectionPanelOwnMaster
@@ -481,12 +493,12 @@ namespace Iviz.App
                     break;
                 case ConnectionState.Disconnected:
                     GameThread.EveryTenthOfASecond -= RotateSprite;
-                    UpperCanvas.Status.sprite = UpperCanvas.DisconnectedSprite;
+                    UpperCanvas.Status.enabled = false;
                     UpperCanvas.TopPanel.color = Resource.Colors.ConnectionPanelDisconnected;
                     break;
                 case ConnectionState.Connecting:
+                    UpperCanvas.Status.enabled = true;
                     UpperCanvas.Status.sprite = UpperCanvas.ConnectingSprite;
-
                     GameThread.EveryTenthOfASecond += RotateSprite;
                     break;
             }
@@ -1063,21 +1075,24 @@ namespace Iviz.App
             );
 
             var currentCamera = Settings.MainCameraTransform;
-            var cameraPose = TfModule.RelativeToFixedFrame(currentCamera.AsPose());
+            var cameraPose = TfModule.RelativeToFixedFrame(currentCamera);
             RosUtils.FormatPose(cameraPose, description,
                 TfModule.Instance.FlipZ ? RosUtils.PoseFormat.All : RosUtils.PoseFormat.AllWithoutRoll);
-            BottomCanvas.CameraText.SetText(description);
+            BottomCanvas.CameraText.SetTextRent(description);
         }
 
         void UpdateFpsStats()
         {
 #if UNITY_EDITOR
             long memBytesKb = GC.GetTotalMemory(false) / (1024 * 1024);
-            BottomCanvas.Time.text = $"M: {memBytesKb.ToString()}M";
+            BottomCanvas.Time.text = $"{memBytesKb.ToString()}M";
 #else
-            BottomCanvas.Time.text = GameThread.Now.ToString("HH:mm:ss");
+            BottomCanvas.Time.text = GameThread.Now.ToString("HH:mm");
 #endif
-            BottomCanvas.Fps.text = $"{frameCounter.ToString()} FPS";
+            BottomCanvas.Fps.text =
+                frameCounter < 100
+                    ? $"{frameCounter.ToString()} FPS"
+                    : frameCounter.ToString();
             frameCounter = 0;
 
             (long downB, long upB) = RosManager.CollectBandwidthReport();
@@ -1119,6 +1134,21 @@ namespace Iviz.App
         void UpdateFpsCounter()
         {
             frameCounter++;
+        }
+
+        async void OnApplicationPause(bool pauseStatus)
+        {
+            // app unpausing needs to be handled carefully because in mobile,
+            // getting suspended sends us to the background and kills all connections
+            
+            if (!RosManager.HasInstance)
+            {
+                // not a real unpausing, just initializing. out!
+                return;
+            }
+
+            // try to recover!
+            await Dialogs.ConnectionData.TryResetConnectionsAsync();
         }
 
         public override string ToString() => $"[{nameof(ModuleListPanel)}]";

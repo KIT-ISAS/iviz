@@ -100,21 +100,27 @@ namespace Iviz.Displays
                 {
                     var meshTangents = mesh.Tangents;
                     using var tangents = new Rent<Vector4>(meshTangents.Length);
-                    var v = new Vector4(0, 0, 0, -1);
-                    for (int i = 0; i < meshTangents.Length; i++)
+
+                    void CopyTangents()
                     {
-                        (v.x, v.y, v.z) = meshTangents[i];
-                        tangents.Array[i] = v;
+                        var tangentsArray = tangents.AsSpan();
+                        var v = new Vector4(0, 0, 0, -1);
+                        for (int i = 0; i < meshTangents.Length; i++)
+                        {
+                            (v.x, v.y, v.z) = meshTangents[i];
+                            tangentsArray[i] = v;
+                        }
                     }
 
+                    CopyTangents();
                     SetMesh(tangents);
                 }
                 else
                 {
-                    SetMesh(Rent.Empty<Vector4>());
+                    SetMesh(ReadOnlySpan<Vector4>.Empty);
                 }
 
-                void SetMesh(Rent<Vector4> tangents)
+                void SetMesh(ReadOnlySpan<Vector4> tangents)
                 {
                     try
                     {

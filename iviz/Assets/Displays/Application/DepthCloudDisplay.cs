@@ -98,7 +98,7 @@ namespace Iviz.Displays
             {
                 if (depthImage != null)
                 {
-                    depthImage.TextureChanged -= UpdatePointComputeBuffers;
+                    depthImage.TextureChanged -= UpdateDepthTexture;
                 }
 
                 depthImage = value;

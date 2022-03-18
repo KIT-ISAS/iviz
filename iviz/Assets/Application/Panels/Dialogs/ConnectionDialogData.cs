@@ -168,39 +168,30 @@ namespace Iviz.App
             {
                 if (!RosManager.Server.IsActive)
                 {
-                    TryCreateMasterAsync();
+                    _ = TryCreateMasterAsync();
                 }
                 else
                 {
-                    if (RosManager.IsConnected)
-                    {
-                        // this is a bit of a hack, but the roslib module will complain
-                        // hard if we just yank the master away and it cannot unregister its stuff
-                        RosManager.Connection.KeepReconnecting = false; // do not retry
-                        RosManager.Connection.Disconnect();
-                        DisposeMasterAsync();
-                    }
-                    else
-                    {
-                        // if we're not connected then we don't need to worry
-                        DisposeMaster();
-                    }
+                    _ = TryDisposeMasterAsync();
                 }
             };
         }
-        
-        async void DisposeMasterAsync()
-        {
-            // wait 200 ms for roslib to disconnect gracefully and hope the user
-            // does not click to create a new master until we're finished 
-            await Task.Delay(200);
-            await RosManager.Server.DisposeAsync();
-            OnMasterDisconnected();
-        }
 
-        void DisposeMaster()
+        async Task TryDisposeMasterAsync()
         {
-            RosManager.Server.Dispose();
+            if (RosManager.IsConnected)
+            {
+                // this is a bit of a hack, but the roslib module will complain
+                // hard if we just yank the master away and it cannot unregister its stuff
+                RosManager.Connection.KeepReconnecting = false; // do not retry
+                RosManager.Connection.Disconnect();
+                
+                // wait 200 ms for roslib to disconnect gracefully and hope the user
+                // does not click to create a new master until we're finished 
+                await Task.Delay(200);
+            }
+
+            await RosManager.Server.DisposeAsync();
             OnMasterDisconnected();
         }
 
@@ -212,7 +203,7 @@ namespace Iviz.App
             MasterActiveChanged?.Invoke(false);
         }
 
-        public async void TryCreateMasterAsync()
+        public async Task TryCreateMasterAsync()
         {
             const string defaultPort = "11311";
             string ownHost = MyUri?.Host ?? RosClient.TryGetCallerUri().Host;
@@ -241,6 +232,44 @@ namespace Iviz.App
             MasterActiveChanged?.Invoke(true);
 
             RosManager.Connection.TryOnceToConnect();
+        }
+
+        public async Task TryResetConnectionsAsync()
+        {
+            // make sure we're not recording, this can get messy
+            if (RosManager.Connection.BagListener != null)
+            {
+                RosLogger.Internal("Unsuspend detected. Closing rosbag!");
+                ModuleListPanel.Instance.ShutdownRosbag();
+            }
+
+            if (!RosManager.IsConnected)
+            {
+                return;
+            }
+
+            // this is difficult to handle, because every connection
+            // died in the background while the app was paused.
+            // now we woke up, everything is dead, and we will get a hundred errors
+            RosLogger.Internal("Unsuspend detected. Stopping all connections!");
+
+            RosManager.Connection.KeepReconnecting = false; // do not try to reconnect (yet)
+            RosManager.Connection.Disconnect();
+
+            if (!RosManager.Server.IsActive)
+            {
+                // no own ROS master? wait a bit and reconnect
+                await Task.Delay(300);
+                RosManager.Connection.TryOnceToConnect();
+                return;
+            }
+
+            // try to gracefully restart the ROS master without
+            // having iviz freak out and start vomiting exceptions
+
+            await TryDisposeMasterAsync();
+            await Task.Delay(300);
+            await TryCreateMasterAsync();
         }
     }
 }

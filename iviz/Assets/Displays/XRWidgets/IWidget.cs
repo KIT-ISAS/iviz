@@ -45,7 +45,7 @@ namespace Iviz.Displays.XR
 
     public interface IWidgetWithBoundary : IWidget
     {
-        BoundingBoxStamped Boundary { set; }
+        BoundingBox Boundary { set; }
     }
 
     public interface IWidgetWithBoundaries : IWidget

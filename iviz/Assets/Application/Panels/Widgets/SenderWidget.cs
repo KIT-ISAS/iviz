@@ -94,7 +94,7 @@ namespace Iviz.App
 
             description.Append("/s</b>");
 
-            Text.SetText(description);
+            Text.SetTextRent(description);
 
             Panel.color = Resource.Colors.EnabledSender;
         }

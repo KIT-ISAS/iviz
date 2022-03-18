@@ -334,6 +334,24 @@ namespace Iviz.Ros
                                    "Maybe /rosout hasn't seen us yet. " +
                                    "But it also may be that outside nodes cannot connect to us, for example due to a firewall.");
             }
+            else
+            {
+                return;
+            }
+            
+            try
+            {
+                await Task.Delay(5000, token);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            
+            if (RosManager.Logger.Sender.NumSubscribers != 0)
+            {
+                RosLogger.Internal("Never mind, /rosout just saw us.");
+            }
         }
 
         static async Task WatchdogTask(
@@ -493,6 +511,11 @@ namespace Iviz.Ros
 
         async ValueTask DisconnectImpl()
         {
+            if (!Connected)
+            {
+                return;
+            }
+            
             foreach (var entry in publishersByTopic.Values)
             {
                 entry.Invalidate();
@@ -636,7 +659,7 @@ namespace Iviz.Ros
         }
 
         public async ValueTask<bool> CallModelServiceAsync<T>(string service, T srv, int timeoutInMs,
-            CancellationToken token) where T : IService
+            CancellationToken token) where T : class, IService
         {
             using var myLock = await modelServiceLock.LockAsync();
 
@@ -658,8 +681,8 @@ namespace Iviz.Ros
             }
         }
 
-        public async ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
-            CancellationToken token) where T : IService
+        async ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
+            CancellationToken token) where T : class, IService
         {
             ThrowHelper.ThrowIfNull(service, nameof(service));
             ThrowHelper.ThrowIfNull(srv, nameof(srv));

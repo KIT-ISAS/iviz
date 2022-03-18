@@ -65,7 +65,7 @@ namespace Iviz.App
                 }
 
                 textHash = newHash;
-                Text.SetText(description);
+                Text.SetTextRent(description);
 
                 //UpdateStats();
             }

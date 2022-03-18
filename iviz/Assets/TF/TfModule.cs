@@ -485,7 +485,6 @@ namespace Iviz.Controllers.TF
             return frames.TryGetValue(id, out t);
         }
 
-
         public void MarkAsDead(TfFrame frame)
         {
             ThrowHelper.ThrowIfNull(frame, nameof(frame));
@@ -548,6 +547,9 @@ namespace Iviz.Controllers.TF
             p.rotation = originFrame.rotation.Inverse() * rotation;
             return p;
         }
+
+        public static Pose RelativeToFixedFrame(Transform unityTransform) =>
+            RelativeToFixedFrame(unityTransform.AsPose());
 
         public static Pose RelativeToFixedFrame(in Pose absoluteUnityPose)
         {

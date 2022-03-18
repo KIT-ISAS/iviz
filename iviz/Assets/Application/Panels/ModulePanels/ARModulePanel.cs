@@ -16,7 +16,7 @@
 
         public ToggleWidget AutoFocus { get; private set; }
 
-        public ARMarkerWidget ARMarkers { get; private set; }
+        //public ARMarkerWidget ARMarkers { get; private set; }
         public DropdownWidget PublishFrequency { get; private set; }
 
         public SenderWidget MarkerSender { get; private set; }
@@ -45,7 +45,8 @@
                 "10 FPS",
                 "15 FPS",
                 "20 FPS",
-                "30 FPS"
+                "30 FPS",
+                "Max FPS"
             };
             
             OcclusionQuality = p.AddDropdown("Occlusion Quality");
@@ -57,7 +58,7 @@
                 "Best",
             };
 
-            ARMarkers = p.AddARMarker();
+            //ARMarkers = p.AddARMarker();
             MarkerSender = p.AddSender();
             ColorSender = p.AddSender();
             DepthSender = p.AddSender();

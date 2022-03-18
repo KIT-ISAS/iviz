@@ -376,6 +376,7 @@ namespace Iviz.Controllers
                 PublicationFrequency.Fps15 => 15,
                 PublicationFrequency.Fps20 => 20,
                 PublicationFrequency.Fps30 => 30,
+                PublicationFrequency.FpsMax => float.MaxValue,
                 _ => 0
             };
 
@@ -593,7 +594,10 @@ namespace Iviz.Controllers
 
                 if ((color ?? depth)?.CameraPose is { } anyPose)
                 {
-                    cameraFrame.LocalPose = TfModule.RelativeToFixedFrame(ARPoseToUnity(anyPose));
+                    cameraFrame.LocalPose = TfModule.RelativeToFixedFrame(ARPoseToUnity(anyPose))
+                        .Unity2RosPose()
+                        .ToCameraFrame()
+                        .Ros2Unity();
                 }
             }
             catch (Exception e)

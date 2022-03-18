@@ -215,6 +215,11 @@ namespace Iviz.Ros
 
         void CallHandlerOnGameThread()
         {
+            if (!Subscribed)
+            {
+                return;
+            }
+            
             int messageCount = messageQueue.Count;
             if (messageCount == 0 || handlerOnGameThread == null)
             {

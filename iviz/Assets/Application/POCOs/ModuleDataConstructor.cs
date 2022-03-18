@@ -4,6 +4,7 @@ using System;
 using System.Runtime.Serialization;
 using Iviz.Common;
 using Iviz.Common.Configurations;
+using Iviz.Core;
 using Iviz.Roslib.Utils;
 
 namespace Iviz.App
@@ -21,9 +22,12 @@ namespace Iviz.App
 
         public ModuleDataConstructor(ModuleType moduleType, string topic, string type, IConfiguration? configuration)
         {
+            ThrowHelper.ThrowIfNull(topic, nameof(topic));
+            ThrowHelper.ThrowIfNull(type, nameof(type));
+            
             ModuleType = moduleType;
-            Topic = topic ?? throw new ArgumentNullException(nameof(topic));
-            Type = type ?? throw new ArgumentNullException(nameof(type));
+            Topic = topic;
+            Type = type;
             Configuration = configuration;
         }
     }

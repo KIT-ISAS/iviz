@@ -95,7 +95,7 @@ namespace Iviz.App
             }
 
             description.Length--;
-            Text.SetText(description);
+            Text.SetTextRent(description);
         }
 
         public void ClearSubscribers()

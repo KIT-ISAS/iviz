@@ -58,9 +58,9 @@ namespace Iviz.Displays
             int cOff = 0;
             int uvOff = 0;
 
-            var pArray = points.Array;
-            var cArray = colors.Array;
-            var uArray = uvs.Array;
+            var pArray = points.AsSpan();
+            var cArray = colors.AsSpan();
+            var uArray = uvs.AsSpan();
 
             const float minMagnitude = 1e-5f;
 
@@ -182,7 +182,7 @@ namespace Iviz.Displays
             
             
             using var indices = new Rent<int>(indicesSize);
-            int[] iArray = indices.Array;
+            var iArray = indices.AsSpan();
             int iOff = 0;
 
             foreach (int i in ..lineBuffer.Length)

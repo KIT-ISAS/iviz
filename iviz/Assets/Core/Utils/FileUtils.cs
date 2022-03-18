@@ -47,7 +47,7 @@ namespace Iviz.Core
         public static async ValueTask<string> ReadAllTextAsync(string filePath, CancellationToken token)
         {
             using var bytes = await ReadAllBytesAsync(filePath, token);
-            return BuiltIns.UTF8.GetString(bytes.Array, 0, bytes.Length);
+            return BuiltIns.UTF8.GetString(bytes);
         }
     }
 }

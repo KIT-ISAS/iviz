@@ -120,17 +120,13 @@ namespace Iviz.Controllers
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        task.TrySetException(
-                            new InvalidOperationException(
-                                $"Conversion request of color image failed with status {status}"));
+                        task.TrySetException(InvalidScreenshotException(status));
                         return;
                     }
 
-                    byte[] bytes = new byte[array.Length];
-                    NativeArray<byte>.Copy(array, bytes, array.Length);
-
-                    var screenshot = new Screenshot(ScreenshotFormat.Rgb, GameThread.TimeNow, width, height,
-                        Intrinsic.Scale(0.5f), pose, bytes);
+                    var screenshot = new Screenshot(ScreenshotFormat.Rgb,
+                        GameThread.TimeNow, width, height,
+                        Intrinsic.Scale(0.5f), pose, array.ToArray());
                     lastColor = screenshot;
                     task.TrySetResult(screenshot);
                 });
@@ -175,7 +171,7 @@ namespace Iviz.Controllers
             int width = image.width;
             int height = image.height;
             var pose = arCameraTransform.AsPose();
-            int? colorWidth = cameraManager.subsystem.currentConfiguration?.width;
+            int colorWidth = cameraManager.subsystem.currentConfiguration?.width ?? width;
 
             using (image)
             {
@@ -189,23 +185,27 @@ namespace Iviz.Controllers
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        task.TrySetException(
-                            new InvalidOperationException(
-                                $"Conversion request of color image failed with status {status}"));
+                        task.TrySetException(InvalidScreenshotException(status));
                         return;
                     }
 
-                    byte[] bytes = new byte[array.Length];
-                    NativeArray<byte>.Copy(array, bytes, array.Length);
-
-                    float scale = colorWidth == null ? 1 : width / (float)colorWidth.Value;
-                    var screenshot = new Screenshot(ScreenshotFormat.Float, GameThread.TimeNow, width, height,
-                        Intrinsic.Scale(scale), pose, bytes);
+                    float scale = width / (float)colorWidth;
+                    var screenshot = new Screenshot(ScreenshotFormat.Float,
+                        GameThread.TimeNow, width, height,
+                        Intrinsic.Scale(scale), pose, array.ToArray());
+                    
                     Task.Run(() =>
                     {
-                        MirrorX<float>(screenshot.Bytes, screenshot.Width, screenshot.Height);
-                        lastDepth = screenshot;
-                        task.TrySetResult(screenshot);
+                        try
+                        {
+                            MirrorX<float>(screenshot);
+                            lastDepth = screenshot;
+                            task.TrySetResult(screenshot);
+                        }
+                        catch (Exception e)
+                        {
+                            task.TrySetException(e);
+                        }
                     }, token);
                 });
             }
@@ -251,7 +251,7 @@ namespace Iviz.Controllers
             int height = image.height;
             var pose = arCameraTransform.AsPose();
 
-            int? colorWidth = cameraManager.subsystem.currentConfiguration?.width;
+            int colorWidth = cameraManager.subsystem.currentConfiguration?.width ?? width;
 
             using (image)
             {
@@ -265,23 +265,27 @@ namespace Iviz.Controllers
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        task.TrySetException(
-                            new InvalidOperationException(
-                                $"Conversion request of color image failed with status {status}"));
+                        task.TrySetException(InvalidScreenshotException(status));
                         return;
                     }
 
-                    byte[] bytes = new byte[array.Length];
-                    NativeArray<byte>.Copy(array, bytes, array.Length);
-
-                    float scale = colorWidth == null ? 1 : width / (float)colorWidth.Value;
-                    var screenshot = new Screenshot(ScreenshotFormat.Mono8, GameThread.TimeNow, width, height,
-                        Intrinsic.Scale(scale), pose, bytes);
+                    float scale = width / (float)colorWidth;
+                    var screenshot = new Screenshot(ScreenshotFormat.Mono8, 
+                        GameThread.TimeNow, width, height,
+                        Intrinsic.Scale(scale), pose, array.ToArray());
+                    
                     Task.Run(() =>
                     {
-                        MirrorX<byte>(screenshot.Bytes, screenshot.Width, screenshot.Height);
-                        lastConfidence = screenshot;
-                        task.TrySetResult(screenshot);
+                        try
+                        {
+                            MirrorX<byte>(screenshot);
+                            lastConfidence = screenshot;
+                            task.TrySetResult(screenshot);
+                        }
+                        catch (Exception e)
+                        {
+                            task.TrySetException(e);
+                        }
                     }, token);
                 });
             }
@@ -289,16 +293,24 @@ namespace Iviz.Controllers
             return task.Task.AsValueTask();
         }
 
-        static void MirrorX<T>(Span<byte> bytes, int width, int height) where T : unmanaged
+        static Exception InvalidScreenshotException(XRCpuImage.AsyncConversionStatus status) =>
+            new InvalidOperationException(
+                $"Conversion request of color image failed with status {status}");
+
+        static void MirrorX<T>(Screenshot screenshot) where T : unmanaged
         {
+            Span<byte> bytes = screenshot.Bytes;
+            int width = screenshot.Width;
+            int height = screenshot.Height;
             var span = bytes.Cast<T>()[..(width * height)];
+
             foreach (int v in ..height)
             {
                 var row = span.Slice(v * width, width);
                 foreach (int u in ..(width / 2))
                 {
                     ref T l = ref row[u];
-                    ref T r = ref row[^u];
+                    ref T r = ref row[^(1 + u)];
                     (l, r) = (r, l);
                 }
             }

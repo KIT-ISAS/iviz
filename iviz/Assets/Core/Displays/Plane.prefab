@@ -103,13 +103,8 @@ MonoBehaviour:
   bumpTexture: {fileID: 0}
   emissiveColor: {r: 0, g: 0, b: 0, a: 1}
   color: {r: 1, g: 1, b: 1, a: 1}
-  tint: {r: 1, g: 1, b: 1, a: 1}
-  occlusionOnly: 0
-  smoothness: 0.5
-  metallic: 0.5
-  mainRenderer: {fileID: 0}
-  meshFilter: {fileID: 0}
-  autoSelectMaterial: 1
+  mainRenderer: {fileID: 404951896843075168}
+  meshFilter: {fileID: 2484398007276227242}
 --- !u!65 &5214606922459341031
 BoxCollider:
   m_ObjectHideFlags: 0

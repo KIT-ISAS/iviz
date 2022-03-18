@@ -1,9 +1,6 @@
 #nullable enable
 
 using System;
-using System.Drawing;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
@@ -194,7 +191,7 @@ namespace Iviz.Displays
             using (var pointsArray = new Rent<Vector3>(verticesSize))
             using (var indicesArray = new Rent<int>(indexSize * 4))
             {
-                Vector3[] points = pointsArray.Array;
+                var points = pointsArray.AsSpan();
                 float stepX = 1f / cellsX;
                 float stepY = 1f / cellsY;
                 int off = 0;
@@ -210,7 +207,7 @@ namespace Iviz.Displays
                     }
                 }
 
-                int[] indices = indicesArray.Array;
+                var indices = indicesArray.AsSpan();
                 foreach (int v in ..cellsY)
                 {
                     int iOffset = v * cellsX * 4;

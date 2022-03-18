@@ -20,6 +20,7 @@ namespace Iviz.Ros
         public static IServiceProvider ServiceProvider => Connection;
         public static string? MyId => instance?.connection.MyId;
         public static bool IsConnected => instance?.connection.IsConnected ?? false;
+        public static bool HasInstance => instance != null;
         public static RoslibConnection Connection => instance?.connection ?? throw NewDisposeException();
         public static RosLoggerManager Logger => instance?.logger ?? throw NewDisposeException();
         public static RosServerManager Server => instance?.server ?? throw NewDisposeException();
@@ -39,7 +40,7 @@ namespace Iviz.Ros
             connection = new RoslibConnection();
             logger = new RosLoggerManager();
             server = new RosServerManager();
-            modelService = new RosModelService();            
+            modelService = new RosModelService();
         }
 
         public void Dispose()

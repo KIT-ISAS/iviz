@@ -506,7 +506,7 @@ namespace Iviz.Displays
         {
             using var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
             if (buffer.Length < Md5SumLength ||
-                BuiltIns.UTF8.GetString(buffer.Array, 0, Md5SumLength) != Model.RosMd5Sum)
+                BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != Model.RosMd5Sum)
             {
                 RosLogger.Warn($"{this}: Resource {uriString} is out of date");
                 return null;
@@ -577,7 +577,7 @@ namespace Iviz.Displays
             {
                 using var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
                 if (buffer.Length < Md5SumLength ||
-                    BuiltIns.UTF8.GetString(buffer.Array, 0, Md5SumLength) != Scene.RosMd5Sum)
+                    BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != Scene.RosMd5Sum)
                 {
                     RosLogger.Warn($"{this}: Resource {uriString} is out of date");
                     return null;

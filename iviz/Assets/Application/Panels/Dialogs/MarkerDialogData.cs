@@ -62,7 +62,7 @@ namespace Iviz.App
 
             using var description = BuilderPool.Rent();
             listener.GenerateLog(description, 0, Math.Min(listener.NumEntriesForLog, maxToDisplay));
-            panel.Text.SetText(description);
+            panel.Text.SetTextRent(description);
         }
 
 

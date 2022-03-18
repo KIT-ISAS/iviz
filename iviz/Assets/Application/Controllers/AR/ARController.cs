@@ -40,6 +40,7 @@ namespace Iviz.Controllers
         Fps15,
         Fps20,
         Fps30,
+        FpsMax
     }
 
     public abstract class ARController : IController, IHasFrame
@@ -395,7 +396,7 @@ namespace Iviz.Controllers
         protected virtual void Update()
         {
             var absoluteArCameraPose = ARPoseToUnity(ARCamera.transform.AsPose());
-            headFrame.LocalPose = TfModule.RelativeToFixedFrame(absoluteArCameraPose);
+            headFrame.LocalPose = TfModule.RelativeToFixedFrame(absoluteArCameraPose).ToCameraFrame();
         }
 
         void OnMarkerDetected(Screenshot screenshot, IMarkerCorners[] markers)
@@ -426,7 +427,7 @@ namespace Iviz.Controllers
             {
                 var key = ((ARMarkerType)marker.Type, marker.Code);
                 if (activeMarkerHighlighters.TryGetValue(key, out float existingExpirationTime)
-                    && Time.time < existingExpirationTime)
+                    && GameThread.GameTime < existingExpirationTime)
                 {
                     continue;
                 }
@@ -434,7 +435,7 @@ namespace Iviz.Controllers
                 ARMarkerHighlighter.Highlight(marker);
 
                 const float markerLifetimeInSec = 5;
-                float expirationTime = Time.time + markerLifetimeInSec;
+                float expirationTime = GameThread.GameTime + markerLifetimeInSec;
                 activeMarkerHighlighters[key] = expirationTime;
             }
         }
@@ -507,7 +508,7 @@ namespace Iviz.Controllers
                 material.SetFloat(PulseDelta, 0.25f);
 
                 FAnimator.Spawn(pulseTokenSource.Token, 10,
-                    t =>
+                    static t =>
                     {
                         float timeDiff = t * 10;
                         var material = Resource.Materials.LinePulse.Object;

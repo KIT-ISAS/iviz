@@ -43,7 +43,7 @@ namespace Iviz.App
             }
 
             textHash = newHash;
-            Label.SetText(builder);
+            Label.SetTextRent(builder);
         }
 
         public bool Interactable

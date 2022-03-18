@@ -99,6 +99,7 @@ namespace Iviz.Displays
                 axis.gameObject.layer = LayerType.TfAxis;
                 axis.name = "[Axis]";
                 axis.Highlightable = this;
+                FrameSize = FrameSize;
                 return axis;
             }
         }

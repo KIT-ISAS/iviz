@@ -121,7 +121,7 @@ namespace Iviz.App
                 .Append(" Hz | ")
                 .AppendBandwidth(listener.Stats.BytesPerSecond);
 
-            dialog.BottomText.SetText(description);
+            dialog.BottomText.SetTextRent(description);
         }
 
 
@@ -305,7 +305,7 @@ namespace Iviz.App
                 }
             }
 
-            dialog.Text.SetText(description);
+            dialog.Text.SetTextRent(description);
             queueIsDirty = false;
         }
     }
