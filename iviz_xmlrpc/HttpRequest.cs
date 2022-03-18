@@ -68,8 +68,6 @@ namespace Iviz.XmlRpc
             str.Append("Content-Length: ").Append(outputStream.Position).Append("\r\n");
             str.Append("Content-Type: text/xml; charset=utf-8\r\n");
             str.Append("\r\n");
-            
-            //Logger.Log(">> Header " + str);
 
             return (str.AsRent(), dstBytes.Resize((int)outputStream.Position));
         }

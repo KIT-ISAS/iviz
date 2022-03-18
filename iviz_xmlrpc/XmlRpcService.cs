@@ -109,7 +109,7 @@ namespace Iviz.XmlRpc
 
                         if (entryName is null || entryValue.IsEmpty)
                         {
-                            Logger.Log("XmlRpc.Service: Invalid struct entry");
+                            Logger.Log($"{nameof(XmlRpcService)}: Invalid struct entry");
                             continue;
                         }
 
