@@ -548,16 +548,17 @@ namespace Iviz.Core
         /// <typeparam name="T"></typeparam>
         public static void TryReturn<T>(this Memory<T> memory) where T : unmanaged
         {
-            if (memory.Length != 0
-                && MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
+            if (memory.Length == 0 || !MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
             {
-                try
-                {
-                    ArrayPool<T>.Shared.Return(segment.Array);
-                }
-                catch (ArgumentException)
-                {
-                }
+                return;
+            }
+
+            try
+            {
+                ArrayPool<T>.Shared.Return(segment.Array);
+            }
+            catch (ArgumentException)
+            {
             }
         }
 
@@ -776,7 +777,7 @@ namespace Iviz.Core
             tp = default;
             return false;
         }
-        
+
         public static void SetTextRent(this TMP_Text text, in BuilderPool.BuilderRent rent)
         {
             SetTextRent(text, rent, 0, rent.Length);
@@ -790,7 +791,7 @@ namespace Iviz.Core
                 RosLogger.Debug($"{nameof(UnityUtils)}: Failed to retrieve array from StringBuilder memory chunk!");
                 return;
             }
-            
+
             text.SetCharArray(segment.Array, start, count);
         }
     }

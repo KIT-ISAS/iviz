@@ -69,7 +69,7 @@ namespace Iviz.Controllers.TF
         public static TfFrame FixedFrame => Instance.fixedFrame;
         public static IEnumerable<string> FrameNames => Instance.frames.Keys;
 
-        public event Action? ResetFrames;
+        public static event Action? ResetFrames;
 
         public static float RootScale
         {

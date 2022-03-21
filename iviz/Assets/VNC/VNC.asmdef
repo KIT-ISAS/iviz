@@ -2,11 +2,12 @@
     "name": "VNC",
     "rootNamespace": "",
     "references": [
-        "GUID:31a80e3fb3ac64b8385cd739784d42de"
+        "GUID:31a80e3fb3ac64b8385cd739784d42de",
+        "GUID:75469ad4d38634e559750d17036d5f7c"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": true,
+    "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,

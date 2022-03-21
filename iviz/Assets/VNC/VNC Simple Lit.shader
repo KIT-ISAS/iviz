@@ -24,7 +24,7 @@ Shader "iviz/Vnc Simple Lit"
         void surf(Input IN, inout SurfaceOutput o)
         {
             float2 tex = IN.uv_MainTex; 
-            fixed4 c = tex2D(_MainTex, float2(tex.x, 1 - tex.y));
+            fixed4 c = tex2D(_MainTex, float2(tex.x, 1-tex.y)).bgra;
             o.Emission = c;
         }
         ENDCG

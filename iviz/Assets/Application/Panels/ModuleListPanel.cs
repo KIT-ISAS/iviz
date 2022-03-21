@@ -38,23 +38,24 @@ namespace Iviz.App
 
         static event Action? InitFinished;
 
-        public static ModuleListPanel Instance
+        public static ModuleListPanel Instance => TryGetInstance() ??
+                                                  throw new MissingAssetFieldException(
+                                                      "Module list panel has not been set!");
+
+        public static ModuleListPanel? TryGetInstance()
         {
-            get
+            if (instance != null)
             {
-                if (instance != null)
-                {
-                    return instance;
-                }
-
-                if (GameObject.Find("ModuleList Panel") is { } instanceObject
-                    && instanceObject.GetComponent<ModuleListPanel>() is { } newInstance)
-                {
-                    return instance = newInstance;
-                }
-
-                throw new MissingAssetFieldException("Module list panel has not been set!");
+                return instance;
             }
+
+            if (GameObject.Find("ModuleList Panel") is { } instanceObject
+                && instanceObject.GetComponent<ModuleListPanel>() is { } newInstance)
+            {
+                return (instance = newInstance);
+            }
+
+            return null;
         }
 
         public static float CanvasScale => Instance.RootCanvas.scaleFactor;
@@ -163,10 +164,9 @@ namespace Iviz.App
             set => UnlockButton.gameObject.SetActive(value);
         }
 
-        bool KeepReconnecting
+        static bool KeepReconnecting
         {
             set => Connection.KeepReconnecting = value;
-            //UpperCanvas.Status.enabled = value;
         }
 
         public int NumMastersInCache => Dialogs.ConnectionData.LastMasterUris.Count;
@@ -1140,7 +1140,7 @@ namespace Iviz.App
         {
             // app unpausing needs to be handled carefully because in mobile,
             // getting suspended sends us to the background and kills all connections
-            
+
             if (!RosManager.HasInstance)
             {
                 // not a real unpausing, just initializing. out!

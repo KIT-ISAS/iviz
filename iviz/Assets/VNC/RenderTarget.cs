@@ -1,152 +1,68 @@
 #nullable enable
 
 using System;
+using System.Buffers;
 using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using Iviz.Core;
 using MarcusW.VncClient;
 using MarcusW.VncClient.Rendering;
+using UnityEngine;
+using Screen = MarcusW.VncClient.Screen;
 
 namespace VNC
 {
-    internal sealed class RenderTarget : IRenderTarget, IDisposable
+    internal sealed class RenderTarget : IRenderTarget
     {
-        readonly RenderBuffer renderBuffer;
-        bool disposed;
+        readonly VncClient parent; 
+        FrameBufferReference? cachedFrameBufferReference;
 
-        public event Action<IFramebufferReference>? FrameArrived; // event runs in game thread
-
-        public RenderTarget()
+        public RenderTarget(VncClient parent)
         {
-            renderBuffer = new RenderBuffer(this);
+            this.parent = parent;
         }
-
+        
         public IFramebufferReference GrabFramebufferReference(Size size, IImmutableSet<Screen> layout)
         {
-            if (disposed)
+            if (cachedFrameBufferReference != null && cachedFrameBufferReference.Size == size)
             {
-                throw new ObjectDisposedException(nameof(RenderTarget));
+                return cachedFrameBufferReference;
             }
 
-            renderBuffer.EnsureSize(size);
-            return renderBuffer.Reference;
+            cachedFrameBufferReference = new FrameBufferReference(parent, size);
+            return cachedFrameBufferReference;
         }
 
-        public void Dispose()
-        {
-            if (disposed)
-            {
-                return;
-            }
-
-            disposed = true;
-            ReleaseUnmanagedResources();
-            GC.SuppressFinalize(this);
-        }
-
-        void ReleaseUnmanagedResources()
-        {
-            renderBuffer.Dispose();
-        }
-
-        ~RenderTarget()
-        {
-            ReleaseUnmanagedResources();
-        }
-
-        sealed class RenderBuffer
-        {
-            readonly RenderTarget parent;
-            IntPtr address;
-            Size size;
-            bool disposed;
-            FrameBufferReference cachedReference;
-
-            public FrameBufferReference Reference =>
-                !disposed ? cachedReference : throw new ObjectDisposedException(nameof(RenderBuffer));
-
-            public RenderBuffer(RenderTarget parent)
-            {
-                this.parent = parent;
-                cachedReference = new FrameBufferReference(parent, IntPtr.Zero, default);
-            }
-
-            public void EnsureSize(in Size newSize)
-            {
-                if (size == newSize)
-                {
-                    return;
-                }
-
-                if (disposed)
-                {
-                    throw new ObjectDisposedException(nameof(RenderBuffer));
-                }
-
-                if (address != IntPtr.Zero)
-                {
-                    // dispose in GameThread to avoid race conditions with texture management
-                    GameThread.Post(() => Marshal.FreeHGlobal(address));
-                }
-
-                size = newSize;
-                address = size != default
-                    ? Marshal.AllocHGlobal(size.Width * size.Height * 4)
-                    : IntPtr.Zero;
-                cachedReference = new FrameBufferReference(parent, address, size);
-            }
-
-
-            public void Dispose()
-            {
-                if (disposed)
-                {
-                    return;
-                }
-
-                disposed = true;
-                if (address != IntPtr.Zero)
-                {
-                    // dispose in GameThread to avoid race conditions with texture management
-                    GameThread.Post(() => Marshal.FreeHGlobal(address));
-                }
-            }
-        }
-
-        /// <inheritdoc cref="IFramebufferReference"/>
         sealed class FrameBufferReference : IFramebufferReference
         {
-            static readonly PixelFormat RgbaFormat = new("Plain RGBA", 32, 32,
-                true, true, true,
-                255, 255, 255, 255,
-                24, 16, 8, 0);
+            readonly Action frameArrived;
+            readonly byte[] buffer;
 
-            readonly RenderTarget parent;
-
-            public IntPtr Address { get; }
+            public Span<byte> Address => buffer;
             public Size Size { get; }
             public double HorizontalDpi => 200;
             public double VerticalDpi => 200;
-            public PixelFormat Format => RgbaFormat;
+            public PixelFormat Format => PixelFormat.BgraCompatiblePixelFormat;
 
-            internal FrameBufferReference(RenderTarget parent, IntPtr address, Size size)
+            public FrameBufferReference(VncClient parent, Size size)
             {
-                this.parent = parent;
-                Address = address;
+                int requested = size.Width * size.Height * 4;
+                frameArrived = () => parent.OnFrameArrived(this);
+                buffer = new byte[requested];
                 Size = size;
             }
 
-            /// <summary>
-            /// Dispose is actually called when the frame finishes rendering.
-            /// It should not dispose the underlying resources.
-            /// </summary>
+            public void NotifyUsedFormat(PixelFormat format)
+            {
+                if (!Format.IsBinaryCompatibleTo(format))
+                {
+                    Debug.Log("FrameBufferReference: Using inefficient format!");
+                }
+            }
+
             public void Dispose()
             {
-                GameThread.Post(() =>
-                {
-                    // run in GameThread to avoid race conditions
-                    parent.FrameArrived?.Invoke(this);
-                });
+                GameThread.Post(frameArrived);
             }
         }
     }

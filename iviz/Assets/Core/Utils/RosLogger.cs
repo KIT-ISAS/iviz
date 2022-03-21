@@ -109,6 +109,11 @@ namespace Iviz.Core
 
         static void PublishExternal(string? msg, LogLevel level)
         {
+            if (LogExternal == null)
+            {
+                return;
+            }
+
             Interlocked.Increment(ref publishedThisSec);
             if (publishedThisSec == MaxPublishedPerSecond)
             {
@@ -123,7 +128,7 @@ namespace Iviz.Core
                 return;
             }
 
-            LogExternal?.Invoke(new LogMessage(level, msg ?? NullMessage));
+            LogExternal(new LogMessage(level, msg ?? NullMessage));
             
             switch (level)
             {
@@ -143,6 +148,11 @@ namespace Iviz.Core
 
         static void PublishExternal(object? msg, LogLevel level, Exception? e)
         {
+            if (LogExternal == null)
+            {
+                return;
+            }
+            
             Interlocked.Increment(ref publishedThisSec);
             if (publishedThisSec == MaxPublishedPerSecond)
             {
@@ -185,7 +195,7 @@ namespace Iviz.Core
                 message = description.ToString();
             }
 
-            LogExternal?.Invoke(new LogMessage(level, message));
+            LogExternal(new LogMessage(level, message));
 
             if (!Settings.IsStandalone)
             {

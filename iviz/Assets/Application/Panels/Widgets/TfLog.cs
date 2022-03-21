@@ -137,14 +137,14 @@ namespace Iviz.App
                 UpdateFrameText();
             };
 
-            TfModule.Instance.ResetFrames += OnResetFrames;
+            TfModule.ResetFrames += OnResetFrames;
         }
 
         void OnDestroy()
         {
             if (TfModule.HasInstance)
             {
-                TfModule.Instance.ResetFrames -= OnResetFrames;
+                TfModule.ResetFrames -= OnResetFrames;
             }
         }
 

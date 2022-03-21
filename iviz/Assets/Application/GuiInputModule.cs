@@ -145,7 +145,10 @@ namespace Iviz.App
                     LookAt(value.Transform);
                 }
 
-                ModuleListPanel.Instance.UnlockButtonVisible = value != null;
+                if (ModuleListPanel.TryGetInstance() is { } moduleListPanel)
+                {
+                    moduleListPanel.UnlockButtonVisible = value != null;
+                }
             }
         }
 
@@ -160,7 +163,10 @@ namespace Iviz.App
                     OrbitCenterOverride = null;
                 }
 
-                ModuleListPanel.Instance.UnlockButtonVisible = value != null;
+                if (ModuleListPanel.TryGetInstance() is { } moduleListPanel)
+                {
+                    moduleListPanel.UnlockButtonVisible = value != null;
+                }
             }
         }
 
@@ -356,7 +362,6 @@ namespace Iviz.App
         void Awake()
         {
             EnhancedTouchSupport.Enable();
-            Leash.Color = Color.white.WithAlpha(0.75f);
         }
 
         void OnDestroy()
@@ -364,6 +369,7 @@ namespace Iviz.App
             instance = null;
             TfListener.AfterProcessMessages -= ProcessPoseChanges;
             GameThread.EveryFrame -= ProcessPointer;
+            TfModule.ResetFrames -= OnResetFrames;
         }
 
         void Start()
@@ -378,22 +384,25 @@ namespace Iviz.App
                 Settings.VirtualCamera = MainCamera;
             }
 
-            if (!Settings.SupportsComputeBuffers)
-            {
-                RosLogger.Info("Platform does not support compute shaders. Point cloud rendering may look weird.");
-            }
-
             mainLight = GameObject.Find("MainLight")?.GetComponent<Light>();
-
+            
+            Leash.Color = Color.white.WithAlpha(0.75f);
+            
             Config = new SettingsConfiguration();
-
-            ModuleListPanel.Instance.UnlockButton.onClick.AddListener(DisableCameraLock);
-
+            
             StartOrbiting();
 
-            TfListener.AfterProcessMessages += ProcessPoseChanges;
-
-            ModuleListPanel.CallAfterInitialized(() => TfModule.Instance.ResetFrames += OnResetFrames);
+            if (ModuleListPanel.TryGetInstance() is { } moduleListPanel)
+            {
+                TfListener.AfterProcessMessages += ProcessPoseChanges;
+                moduleListPanel.UnlockButton.onClick.AddListener(DisableCameraLock);
+            }
+            else
+            {
+                GameThread.EveryFrame += ProcessPoseChanges;
+            }
+            
+            TfModule.ResetFrames += OnResetFrames;
         }
 
         void LateUpdate()
@@ -403,9 +412,8 @@ namespace Iviz.App
 
         void ProcessPoseChanges()
         {
-            if (this == null)
+            if (!this)
             {
-                Debug.Log("ProcessPose when dead!");
                 return;
             }
 

@@ -21,7 +21,7 @@ using Position = MarcusW.VncClient.Position;
 
 namespace VNC
 {
-    public class VncExample : MonoBehaviour, IPointerMoveHandler, IPointerUpHandler, IPointerDownHandler,
+    public class VncClient : MonoBehaviour, IPointerMoveHandler, IPointerUpHandler, IPointerDownHandler,
         IPointerExitHandler
     {
         Transform? mTransform;
@@ -35,6 +35,7 @@ namespace VNC
         Size? size;
 
         readonly bool[] mouseButtonStates = new bool[3];
+        Position lastPosition;
         KeySymbol? lastSymbol;
 
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
@@ -67,9 +68,9 @@ namespace VNC
 
         async Task StartAsync(CancellationToken token)
         {
-            var vncClient = new VncClient(NullLoggerFactory.Instance);
+            var vncClient = new MarcusW.VncClient.VncClient(NullLoggerFactory.Instance);
 
-            var renderTarget = new RenderTarget(OnFrameArrived);
+            var renderTarget = new RenderTarget(this);
 
             // Configure the connect parameters
             var parameters = new ConnectParameters
@@ -80,7 +81,9 @@ namespace VNC
                     Port = 5901
                 },
                 AuthenticationHandler = new AuthenticationHandler(),
-                InitialRenderTarget = renderTarget
+                InitialRenderTarget = renderTarget,
+                JpegQualityLevel = 90,
+                JpegSubsamplingLevel = JpegSubsamplingLevel.ChrominanceSubsampling16X,
             };
 
             // Start a new connection and save the returned connection object
@@ -107,7 +110,7 @@ namespace VNC
             await rfbConnection.CloseAsync();
         }
 
-        void OnFrameArrived(IFramebufferReference frame)
+        public void OnFrameArrived(IFramebufferReference frame)
         {
             try
             {
@@ -141,7 +144,7 @@ namespace VNC
                 Transform.localScale = new Vector3((float)frame.Size.Width / frame.Size.Height, 1, 1);
             }
 
-            texture.GetRawTextureData<byte>().CopyFrom(frame.Address.Span);
+            texture.GetRawTextureData<byte>().CopyFrom(frame.Address);
             texture.Apply();
         }
 
@@ -191,6 +194,7 @@ namespace VNC
             var (posX, posY) = ((int)(screenX + 0.5f), (int)(screenY + 0.5f));
 
             position = new Position(posX, posY);
+            lastPosition = position;
             return true;
         }
 
@@ -214,7 +218,26 @@ namespace VNC
 
         void Update()
         {
+            ProcessMouseWheel();
             ProcessKeyboard();
+        }
+
+        void ProcessMouseWheel()
+        {
+            var (mouseDeltaX, mouseDeltaY) = Input.mouseScrollDelta;
+            if (mouseDeltaX != 0)
+            {
+                Enqueue(new PointerEventMessage(lastPosition,
+                    mouseDeltaX > 0 ? MouseButtons.WheelRight : MouseButtons.WheelLeft));
+                Enqueue(new PointerEventMessage(lastPosition, MouseButtons.None));
+            }
+
+            if (mouseDeltaY != 0)
+            {
+                Enqueue(new PointerEventMessage(lastPosition,
+                    mouseDeltaY > 0 ? MouseButtons.WheelDown : MouseButtons.WheelUp));
+                Enqueue(new PointerEventMessage(lastPosition, MouseButtons.None));
+            }
         }
 
         static readonly (Key Key, KeySymbol Symbol)[] Map =
@@ -241,7 +264,7 @@ namespace VNC
             var keyboard = Keyboard.current;
             foreach (var (key, symbol) in Map)
             {
-                CheckKey(keyboard[key], symbol);
+                CheckKey(key, symbol);
             }
 
             bool hasModifier = keyboard[Key.LeftCtrl].isPressed
@@ -268,18 +291,19 @@ namespace VNC
 
             for (int i = (int)Key.A; i <= (int)Key.Z; i++)
             {
-                CheckKey(keyboard[(Key)i], KeySymbol.a + (i - (int)Key.A));
+                CheckKey((Key)i, KeySymbol.a + (i - (int)Key.A));
             }
 
-            CheckKey(keyboard[Key.Digit0], KeySymbol.KP_0);
+            CheckKey(Key.Digit0, KeySymbol.KP_0);
             for (int i = (int)Key.Digit1; i <= (int)Key.Digit9; i++)
             {
-                CheckKey(keyboard[(Key)i], KeySymbol.KP_1 + (i - (int)Key.Digit1));
+                CheckKey((Key)i, KeySymbol.KP_1 + (i - (int)Key.Digit1));
             }
         }
 
-        void CheckKey(ButtonControl control, KeySymbol keySymbol)
+        void CheckKey(Key key, KeySymbol keySymbol)
         {
+            var control = Keyboard.current[key];
             if (control.wasReleasedThisFrame)
                 Enqueue(new KeyEventMessage(false, keySymbol));
             if (control.wasPressedThisFrame)

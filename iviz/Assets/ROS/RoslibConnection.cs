@@ -165,8 +165,8 @@ namespace Iviz.Ros
                 const int rpcTimeoutInMs = 3000;
 
                 //Tools.Logger.LogDebug = RosLogger.Debug;
-                Tools.Logger.LogError = RosLogger.Error;
-                Tools.Logger.Log = RosLogger.Info;
+                Tools.Logger.LogErrorCallback = RosLogger.Error;
+                Tools.Logger.LogCallback = RosLogger.Info;
 
                 RosLogger.Internal("Connecting...");
 

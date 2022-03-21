@@ -222,7 +222,6 @@ namespace Iviz.Core
                                                          !IsHololens &&
                                                          SystemInfo.supportsComputeShaders &&
                                                          SystemInfo.maxComputeBufferInputsVertex > 0).Value;
-
         public static bool SupportsR16 => supportsR16 ??
                                           (supportsR16 = SystemInfo.SupportsTextureFormat(TextureFormat.R16)).Value;
 

@@ -14,7 +14,7 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class ResourcePool : MonoBehaviour
     {
-        const bool CheckDuplicates = false;
+        static readonly bool CheckDuplicates = false;
         const int TimeToDestroyInSec = 60;
 
         static ResourcePool? instance;
