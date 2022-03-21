@@ -71,17 +71,6 @@ namespace Iviz.Msgs.GridMapMsgs
             Layers = System.Array.Empty<string>();
         }
         
-        /// Explicit constructor.
-        public GetGridMapRequest(string FrameId, double PositionX, double PositionY, double LengthX, double LengthY, string[] Layers)
-        {
-            this.FrameId = FrameId;
-            this.PositionX = PositionX;
-            this.PositionY = PositionY;
-            this.LengthX = LengthX;
-            this.LengthY = LengthY;
-            this.Layers = Layers;
-        }
-        
         /// Constructor with buffer.
         public GetGridMapRequest(ref ReadBuffer b)
         {

@@ -48,6 +48,7 @@ namespace Iviz.Displays
         public GameObject Tooltip;
         public GameObject TargetArea;
 
+        public GameObject Boundary;
         public GameObject BoundaryLink;
         public GameObject BoundaryCheck;
 

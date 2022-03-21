@@ -59,21 +59,6 @@ namespace Iviz.Msgs.MoveitMsgs
             PoseStampedVector = System.Array.Empty<GeometryMsgs.PoseStamped>();
         }
         
-        /// Explicit constructor.
-        public PositionIKRequest(string GroupName, MoveitMsgs.RobotState RobotState, Constraints Constraints, bool AvoidCollisions, string IkLinkName, GeometryMsgs.PoseStamped PoseStamped, string[] IkLinkNames, GeometryMsgs.PoseStamped[] PoseStampedVector, duration Timeout, int Attempts)
-        {
-            this.GroupName = GroupName;
-            this.RobotState = RobotState;
-            this.Constraints = Constraints;
-            this.AvoidCollisions = AvoidCollisions;
-            this.IkLinkName = IkLinkName;
-            this.PoseStamped = PoseStamped;
-            this.IkLinkNames = IkLinkNames;
-            this.PoseStampedVector = PoseStampedVector;
-            this.Timeout = Timeout;
-            this.Attempts = Attempts;
-        }
-        
         /// Constructor with buffer.
         public PositionIKRequest(ref ReadBuffer b)
         {

@@ -13,6 +13,7 @@ using Iviz.Ros;
 using Iviz.Roslib;
 using Iviz.Tools;
 using UnityEngine;
+using Pose = UnityEngine.Pose;
 
 namespace Iviz.Controllers
 {
@@ -118,6 +119,7 @@ namespace Iviz.Controllers
 
         string FixedFrameId
         {
+            get => TfModule.FixedFrameId;
             set
             {
                 config.FixedFrameId = value;
@@ -217,11 +219,20 @@ namespace Iviz.Controllers
 
         void PublishFrame(TfFrame frame)
         {
-            string parentFrameId = frame.Parent is { } parentFrame && parentFrame != TfModule.OriginFrame
-                ? parentFrame.Id
-                : "";
             string childFrameId = frame.Id;
-            var localPose = frame.Transform.AsLocalPose();
+            string parentFrameId;
+            Pose localPose;
+
+            if (frame.Parent is { } parentFrame && parentFrame != TfModule.OriginFrame)
+            {
+                parentFrameId = parentFrame.Id;
+                localPose = frame.Transform.AsLocalPose();
+            }
+            else
+            {
+                parentFrameId = FixedFrameId;
+                localPose = TfModule.RelativeToFixedFrame(frame.Transform);
+            }
 
             if (localPose.position.IsInvalid() || localPose.rotation.IsInvalid())
             {

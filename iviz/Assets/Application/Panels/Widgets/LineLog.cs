@@ -74,7 +74,7 @@ namespace Iviz.App
                 }
             }
 
-            Text.SetText(description);
+            Text.SetTextRent(description);
         }
 
         public void ClearSubscribers()

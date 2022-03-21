@@ -93,7 +93,7 @@ namespace Iviz.Displays
             }
 
             prevTextHash = hash;
-            Text.SetText(str);
+            Text.SetTextRent(str);
             UpdateSize();
         }
 

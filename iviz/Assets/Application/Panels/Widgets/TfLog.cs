@@ -216,7 +216,7 @@ namespace Iviz.App
                 }
 
                 descriptionHash = newHash;
-                TfText.SetText(description);
+                TfText.SetTextRent(description);
             }
 
             RectTransform cTransform = ContentTransform;
@@ -245,7 +245,7 @@ namespace Iviz.App
                 }
 
                 descriptionHash = newHash;
-                TfText.SetText(description);
+                TfText.SetTextRent(description);
             }
 
             var cTransform = ContentTransform;
@@ -306,7 +306,7 @@ namespace Iviz.App
             }
 
             textHash = newHash;
-            TfName.SetText(description);
+            TfName.SetTextRent(description);
         }
 
         static string DecoratorFor(string id) =>

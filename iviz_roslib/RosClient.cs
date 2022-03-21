@@ -28,9 +28,9 @@ namespace Iviz.Roslib;
 /// This initializes a ROS master:
 /// <code>
 ///     string masterUri = "http://localhost:11311";
-///     string callerId = "my_ros_id";
-///     string callerUri = "http://localhost:7615";
-///     var client = new RosClient(masterUri, callerId, callerUri);
+///     string ownId = "my_ros_id";
+///     string ownUri = "http://localhost:7615";
+///     var client = new RosClient(masterUri, ownId, ownUri);
 /// </code>
 /// </example>
 /// </summary>
@@ -46,8 +46,8 @@ public sealed class RosClient : IRosClient
 
     RosNodeServer? listener;
     TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(3);
-
-
+    TimeSpan rpcNodeTimeout = TimeSpan.FromSeconds(3);
+    
     public delegate void ShutdownActionCall(string callerId, string reason);
 
     /// <summary>
@@ -63,7 +63,7 @@ public sealed class RosClient : IRosClient
     public ParamUpdateActionCall? ParamUpdateAction { get; set; }
 
     /// <summary>
-    /// ID of this node.
+    /// Own ID of this node.
     /// </summary>
     public string CallerId { get; }
 
@@ -88,8 +88,6 @@ public sealed class RosClient : IRosClient
             RosMasterClient.TimeoutInMs = (int)value.TotalMilliseconds;
         }
     }
-
-    TimeSpan rpcNodeTimeout = TimeSpan.FromSeconds(3);
 
     /// <summary>
     /// Timeout in milliseconds for XML-RPC communications with another node.
@@ -146,11 +144,11 @@ public sealed class RosClient : IRosClient
     public Uri MasterUri => RosMasterClient.MasterUri;
 
     /// <summary>
-    /// URI of this node.
+    /// Own URI of this node.
     /// </summary>
     public Uri CallerUri { get; private set; }
 
-    RosClient(Uri? masterUri, string? callerId, Uri? callerUri, string? namespaceOverride)
+    RosClient(Uri? masterUri, string? ownId, Uri? ownUri, string? namespaceOverride)
     {
         masterUri ??= EnvironmentMasterUri;
 
@@ -165,35 +163,35 @@ public sealed class RosClient : IRosClient
             throw new ArgumentException("URI scheme must be http", nameof(masterUri));
         }
 
-        callerUri ??= TryGetCallerUriFor(masterUri) ?? TryGetCallerUri();
+        ownUri ??= TryGetCallerUriFor(masterUri) ?? TryGetCallerUri();
 
-        if (callerUri.Scheme != "http")
+        if (ownUri.Scheme != "http")
         {
-            throw new ArgumentException("URI scheme must be http", nameof(callerUri));
+            throw new ArgumentException("URI scheme must be http", nameof(ownUri));
         }
 
-        if (string.IsNullOrWhiteSpace(callerId))
+        if (string.IsNullOrWhiteSpace(ownId))
         {
-            callerId = CreateCallerId();
+            ownId = CreateCallerId();
         }
 
         string? ns = namespaceOverride ?? EnvironmentRosNamespace;
         namespacePrefix = ns == null ? "/" : $"/{ns}/";
 
-        if (callerId![0] != '/')
+        if (ownId![0] != '/')
         {
-            callerId = $"{namespacePrefix}{callerId}";
+            ownId = $"{namespacePrefix}{ownId}";
         }
 
-        if (callerId[0] == '~')
+        if (ownId[0] == '~')
         {
             throw new RosInvalidResourceName("ROS node names may not start with a '~'");
         }
 
-        ValidateResourceName(callerId);
+        ValidateResourceName(ownId);
 
-        CallerId = callerId;
-        CallerUri = callerUri;
+        CallerId = ownId;
+        CallerUri = ownUri;
 
         RosMasterClient = new RosMasterClient(masterUri, CallerId, CallerUri, 3);
         Parameters = new ParameterClient(RosMasterClient);
@@ -206,20 +204,20 @@ public sealed class RosClient : IRosClient
     /// <param name="masterUri">
     /// URI to the master node. Example: new Uri("http://localhost:11311").
     /// </param>
-    /// <param name="callerId">
+    /// <param name="ownId">
     /// The ROS name of this node.
     /// This is your identity in the network, and must be unique. Example: /my_new_node
     /// Leave empty to generate one automatically.
     /// </param>
-    /// <param name="callerUri">
+    /// <param name="ownUri">
     /// URI of this node.
     /// Other clients will use this address to connect to this node.
     /// Leave empty to generate one automatically. </param>
     /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
     /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
-    public RosClient(Uri? masterUri = null, string? callerId = null, Uri? callerUri = null,
+    public RosClient(Uri? masterUri = null, string? ownId = null, Uri? ownUri = null,
         bool ensureCleanSlate = true, string? namespaceOverride = null) :
-        this(masterUri, callerId, callerUri, namespaceOverride)
+        this(masterUri, ownId, ownUri, namespaceOverride)
     {
         try
         {
@@ -239,7 +237,7 @@ public sealed class RosClient : IRosClient
         }
         catch (SocketException e)
         {
-            throw new RosUriBindingException($"Failed to bind to local URI '{callerUri}'", e);
+            throw new RosUriBindingException($"Failed to bind to local URI '{ownUri}'", e);
         }
 
         // Start the XmlRpc server.
@@ -281,12 +279,12 @@ public sealed class RosClient : IRosClient
     /// <param name="masterUri">
     /// URI to the master node. Example: new Uri("http://localhost:11311").
     /// </param>
-    /// <param name="callerId">
+    /// <param name="ownId">
     /// The ROS name of this node.
     /// This is your identity in the network, and must be unique. Example: /my_new_node
     /// Leave empty to generate one automatically.
     /// </param>
-    /// <param name="callerUri">
+    /// <param name="ownUri">
     /// URI of this node. 
     /// Other clients will use this address to connect to this node.
     /// Leave empty to generate one automatically.
@@ -294,11 +292,11 @@ public sealed class RosClient : IRosClient
     /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
     /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
     /// <param name="token">An optional cancellation token.</param>        
-    public static async ValueTask<RosClient> CreateAsync(Uri? masterUri = null, string? callerId = null,
-        Uri? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null,
+    public static async ValueTask<RosClient> CreateAsync(Uri? masterUri = null, string? ownId = null,
+        Uri? ownUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null,
         CancellationToken token = default)
     {
-        RosClient client = new(masterUri, callerId, callerUri, namespaceOverride);
+        RosClient client = new(masterUri, ownId, ownUri, namespaceOverride);
 
         try
         {
@@ -318,7 +316,7 @@ public sealed class RosClient : IRosClient
         }
         catch (SocketException e)
         {
-            throw new RosUriBindingException($"Failed to bind to local URI '{callerUri}'", e);
+            throw new RosUriBindingException($"Failed to bind to local URI '{ownUri}'", e);
         }
 
         client.listener.Start();
@@ -329,7 +327,7 @@ public sealed class RosClient : IRosClient
             client.CallerUri =
                 new Uri($"http://{client.CallerUri.Host}:{client.listener.ListenerPort.ToString()}{absolutePath}");
 
-            // caller uri has changed;
+            // own uri has changed;
             client.RosMasterClient = new RosMasterClient(client.MasterUri, client.CallerId, client.CallerUri);
             client.Parameters = new ParameterClient(client.RosMasterClient);
         }
@@ -362,7 +360,7 @@ public sealed class RosClient : IRosClient
     /// <param name="masterUri">
     /// URI to the master node. Example: new Uri("http://localhost:11311").
     /// </param>
-    /// <param name="callerId">
+    /// <param name="ownId">
     /// The ROS name of this node.
     /// This is your identity in the network, and must be unique. Example: /my_new_node
     /// Leave empty to generate one automatically.
@@ -373,9 +371,9 @@ public sealed class RosClient : IRosClient
     /// Leave empty to generate one automatically. </param>
     /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
     /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
-    public static RosClient Create(Uri? masterUri = null, string? callerId = null,
+    public static RosClient Create(Uri? masterUri = null, string? ownId = null,
         Uri? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
-        new RosClient(masterUri, callerId, callerUri, ensureCleanSlate, namespaceOverride);
+        new RosClient(masterUri, ownId, callerUri, ensureCleanSlate, namespaceOverride);
 
     /// <summary>
     /// Constructs and connects a ROS client.
@@ -383,30 +381,30 @@ public sealed class RosClient : IRosClient
     /// <param name="masterUri">
     /// URI to the master node. Example: http://localhost:11311.
     /// </param>
-    /// <param name="callerId">
+    /// <param name="ownId">
     /// The ROS name of this node.
     /// This is your identity in the network, and must be unique. Example: /my_new_node
     /// Leave empty to generate one automatically.
     /// </param>
-    /// <param name="callerUri">
+    /// <param name="ownUri">
     /// URI of this node.
     /// Other clients will use this address to connect to this node.
     /// Leave empty to generate one automatically. </param>
     /// <param name="ensureCleanSlate">Checks if masterUri has any previous subscriptions or advertisements, and unregisters them.</param>
     /// <param name="namespaceOverride">Set this to override ROS_NAMESPACE.</param>
     public RosClient(string? masterUri,
-        string? callerId = null,
-        string? callerUri = null,
+        string? ownId = null,
+        string? ownUri = null,
         bool ensureCleanSlate = true,
         string? namespaceOverride = null) :
-        this(TryToCreateUri(masterUri, true), callerId, TryToCreateUri(callerUri, false), ensureCleanSlate,
+        this(TryToCreateUri(masterUri, true), ownId, TryToCreateUri(ownUri, false), ensureCleanSlate,
             namespaceOverride)
     {
     }
 
-    public static RosClient Create(string? masterUri, string? callerId = null,
-        string? callerUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
-        new RosClient(masterUri, callerId, callerUri, ensureCleanSlate, namespaceOverride);
+    public static RosClient Create(string? masterUri, string? ownId = null,
+        string? ownUri = null, bool ensureCleanSlate = true, string? namespaceOverride = null) =>
+        new RosClient(masterUri, ownId, ownUri, ensureCleanSlate, namespaceOverride);
 
     static Uri? TryToCreateUri(string? uri, bool isMaster)
     {
@@ -688,13 +686,18 @@ public sealed class RosClient : IRosClient
     public async ValueTask CheckOwnUriAsync(CancellationToken token = default)
     {
         GetPidResponse response;
+        var ownUri = CallerUri;
+        
         try
         {
-            response = await CreateNodeClient(CallerUri).GetPidAsync(token);
+            response = await CreateNodeClient(ownUri).GetPidAsync(token);
         }
         catch (Exception e)
         {
-            throw new RosUnreachableUriException($"The given own uri '{CallerUri}' is not reachable.", e);
+            throw new RosUnreachableUriException(
+                $"The hostname '{ownUri.Host}' in the own uri is not reachable. " +
+                "Make sure that your address is correct and your node is in " +
+                "the correct network.", e);
         }
 
         if (!response.IsValid)
@@ -704,7 +707,8 @@ public sealed class RosClient : IRosClient
         else if (response.Pid != ConnectionUtils.GetProcessId())
         {
             throw new RosUnreachableUriException(
-                $"The given own uri '{CallerUri}' appears to belong to another node.");
+                $"The given own uri '{ownUri}' appears to belong to another " +
+                $"ROS node in the network.");
         }
     }
 

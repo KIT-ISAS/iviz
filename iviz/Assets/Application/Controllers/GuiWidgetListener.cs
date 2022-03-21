@@ -212,6 +212,7 @@ namespace Iviz.Controllers
                 WidgetType.TargetArea => Resource.Displays.TargetArea,
                 WidgetType.PositionDisc3D => Resource.Displays.PositionDisc3D,
                 WidgetType.PositionDisc => Resource.Displays.PositionDisc,
+                WidgetType.Boundary => Resource.Displays.Boundary,
                 WidgetType.BoundaryCheck => Resource.Displays.BoundaryCheck,
                 _ => null
             };
@@ -536,6 +537,7 @@ namespace Iviz.Controllers
         TargetArea = Widget.TYPE_TARGETAREA,
         PositionDisc = Widget.TYPE_POSITIONDISC,
         PositionDisc3D = Widget.TYPE_POSITIONDISC3D,
+        Boundary = Widget.TYPE_BOUNDARY,
         BoundaryCheck = Widget.TYPE_BOUNDARYCHECK,
     }
 

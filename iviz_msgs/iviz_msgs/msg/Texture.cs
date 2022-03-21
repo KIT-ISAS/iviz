@@ -52,20 +52,6 @@ namespace Iviz.Msgs.IvizMsgs
             Path = "";
         }
         
-        /// Explicit constructor.
-        public Texture(string Path, int Index, byte Type, byte Mapping, int UvIndex, float BlendFactor, byte Operation, byte WrapModeU, byte WrapModeV)
-        {
-            this.Path = Path;
-            this.Index = Index;
-            this.Type = Type;
-            this.Mapping = Mapping;
-            this.UvIndex = UvIndex;
-            this.BlendFactor = BlendFactor;
-            this.Operation = Operation;
-            this.WrapModeU = WrapModeU;
-            this.WrapModeV = WrapModeV;
-        }
-        
         /// Constructor with buffer.
         public Texture(ref ReadBuffer b)
         {

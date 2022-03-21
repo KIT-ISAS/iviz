@@ -24,6 +24,9 @@ public readonly struct Rent<T> : IDisposable  where T : unmanaged
 
     public Span<T> AsSpan() => new(Array, 0, Length);
     public ReadOnlySpan<T> AsReadOnlySpan() => new(Array, 0, Length);
+    public Span<T> Slice(int start, int count) => AsSpan().Slice(start, count);
+    public ReadOnlyMemory<T> AsReadOnlyMemory() => new(Array, 0, Length);
+    public Memory<T> AsMemory() => new(Array, 0, Length);
 
     public Rent(int length)
     {
@@ -90,9 +93,14 @@ public readonly struct Rent<T> : IDisposable  where T : unmanaged
     {
         return rent.AsReadOnlySpan();
     }
+    
+    public static implicit operator ReadOnlyMemory<T>(Rent<T> rent)
+    {
+        return rent.AsReadOnlyMemory();
+    }
 }
 
 public static class Rent
 {
-    public static Rent<T> Empty<T>() where T : unmanaged => default;
+    public static Rent<T> Empty<T>() where T : unmanaged => new(0);
 }

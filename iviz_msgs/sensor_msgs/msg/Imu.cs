@@ -39,18 +39,6 @@ namespace Iviz.Msgs.SensorMsgs
             LinearAccelerationCovariance = new double[9];
         }
         
-        /// Explicit constructor.
-        public Imu(in StdMsgs.Header Header, in GeometryMsgs.Quaternion Orientation, double[] OrientationCovariance, in GeometryMsgs.Vector3 AngularVelocity, double[] AngularVelocityCovariance, in GeometryMsgs.Vector3 LinearAcceleration, double[] LinearAccelerationCovariance)
-        {
-            this.Header = Header;
-            this.Orientation = Orientation;
-            this.OrientationCovariance = OrientationCovariance;
-            this.AngularVelocity = AngularVelocity;
-            this.AngularVelocityCovariance = AngularVelocityCovariance;
-            this.LinearAcceleration = LinearAcceleration;
-            this.LinearAccelerationCovariance = LinearAccelerationCovariance;
-        }
-        
         /// Constructor with buffer.
         public Imu(ref ReadBuffer b)
         {

@@ -27,18 +27,6 @@ namespace Iviz.Msgs.Rosapi
             Constvalues = System.Array.Empty<string>();
         }
         
-        /// Explicit constructor.
-        public TypeDef(string Type, string[] Fieldnames, string[] Fieldtypes, int[] Fieldarraylen, string[] Examples, string[] Constnames, string[] Constvalues)
-        {
-            this.Type = Type;
-            this.Fieldnames = Fieldnames;
-            this.Fieldtypes = Fieldtypes;
-            this.Fieldarraylen = Fieldarraylen;
-            this.Examples = Examples;
-            this.Constnames = Constnames;
-            this.Constvalues = Constvalues;
-        }
-        
         /// Constructor with buffer.
         public TypeDef(ref ReadBuffer b)
         {

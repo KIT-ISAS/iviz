@@ -48,7 +48,7 @@ namespace Iviz.App
 
             description.AppendLine().AppendLine();
 
-            panel.Text.SetText(description);
+            panel.Text.SetTextRent(description);
         }
 
         static void GenerateReport(StringBuilder builder, RosClient? client)
@@ -139,7 +139,7 @@ namespace Iviz.App
                             builder.Append(" | ").AppendBandwidth(receiver.BytesReceived);
                             break;
                         case ReceiverStatus.ConnectingRpc:
-                            //builder.Append(" (Connecting)");
+                            // no special message, clear from context
                             break;
                         case ReceiverStatus.ConnectingTcp:
                             builder.Append(" (Connecting to TCP listener)");

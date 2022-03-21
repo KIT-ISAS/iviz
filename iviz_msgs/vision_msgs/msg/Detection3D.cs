@@ -38,17 +38,6 @@ namespace Iviz.Msgs.VisionMsgs
             TrackingId = "";
         }
         
-        /// Explicit constructor.
-        public Detection3D(in StdMsgs.Header Header, ObjectHypothesisWithPose[] Results, BoundingBox3D Bbox, SensorMsgs.PointCloud2 SourceCloud, bool IsTracking, string TrackingId)
-        {
-            this.Header = Header;
-            this.Results = Results;
-            this.Bbox = Bbox;
-            this.SourceCloud = SourceCloud;
-            this.IsTracking = IsTracking;
-            this.TrackingId = TrackingId;
-        }
-        
         /// Constructor with buffer.
         public Detection3D(ref ReadBuffer b)
         {

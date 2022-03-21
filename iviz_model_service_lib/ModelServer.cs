@@ -141,13 +141,13 @@ public sealed class ModelServer : IDisposable
             packagePaths[package] = paths;
         }
 
-        if (verbose)
-        {
-            Log("    " + path);
-        }
+            if (verbose)
+            {
+                Log("    " + path);
+            }
 
-        paths.Add(path);
-    }
+            paths.Add(path);
+        }
 
     string ResolvePath(Uri uri)
     {
@@ -645,19 +645,21 @@ public sealed class ModelServer : IDisposable
         LogUp(uri);
     }
 
-    static Msgs.IvizMsgs.Light ToLight(Sdf.Light light)
-    {
-        return new(
-            light.Name ?? "",
-            (byte)light.Type,
-            light.CastShadows,
-            ToColor(light.Diffuse),
-            0,
-            ToVector3(light.Pose.Position),
-            ToVector3(light.Direction),
-            (float)light.Spot.InnerAngle,
-            (float)light.Spot.OuterAngle);
-    }
+        static Msgs.IvizMsgs.Light ToLight(Sdf.Light light)
+        {
+            return new Msgs.IvizMsgs.Light
+            {
+                Name = light.Name ?? "",
+                Type = (byte)light.Type,
+                CastShadows = light.CastShadows,
+                Diffuse = ToColor(light.Diffuse),
+                Range = 0,
+                Position = ToVector3(light.Pose.Position),
+                Direction = ToVector3(light.Direction),
+                InnerAngle = (float)light.Spot.InnerAngle,
+                OuterAngle = (float)light.Spot.OuterAngle
+            };
+        }
 
     static void ResolveIncludes(Sdf.SdfFile file, ICollection<Include> includes)
     {

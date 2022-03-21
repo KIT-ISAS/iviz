@@ -112,20 +112,6 @@ namespace Iviz.Msgs.IvizMsgs
             Data = System.Array.Empty<byte>();
         }
         
-        /// Explicit constructor.
-        public CaptureScreenshotResponse(bool Success, string Message, in StdMsgs.Header Header, int Width, int Height, int Bpp, double[] Intrinsics, in GeometryMsgs.Pose Pose, byte[] Data)
-        {
-            this.Success = Success;
-            this.Message = Message;
-            this.Header = Header;
-            this.Width = Width;
-            this.Height = Height;
-            this.Bpp = Bpp;
-            this.Intrinsics = Intrinsics;
-            this.Pose = Pose;
-            this.Data = Data;
-        }
-        
         /// Constructor with buffer.
         public CaptureScreenshotResponse(ref ReadBuffer b)
         {

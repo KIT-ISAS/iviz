@@ -33,19 +33,6 @@ namespace Iviz.Msgs.Actionlib
             ResultText = "";
         }
         
-        /// Explicit constructor.
-        public TestRequestGoal(int TerminateStatus, bool IgnoreCancel, string ResultText, int TheResult, bool IsSimpleClient, duration DelayAccept, duration DelayTerminate, duration PauseStatus)
-        {
-            this.TerminateStatus = TerminateStatus;
-            this.IgnoreCancel = IgnoreCancel;
-            this.ResultText = ResultText;
-            this.TheResult = TheResult;
-            this.IsSimpleClient = IsSimpleClient;
-            this.DelayAccept = DelayAccept;
-            this.DelayTerminate = DelayTerminate;
-            this.PauseStatus = PauseStatus;
-        }
-        
         /// Constructor with buffer.
         public TestRequestGoal(ref ReadBuffer b)
         {

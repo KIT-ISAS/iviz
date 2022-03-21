@@ -68,12 +68,7 @@ namespace Iviz.Controllers
 
         public void UpdateWidget(Widget msg)
         {
-            /*
-            if (widget is IWidgetWithCaption withCaption && msg.Caption.Length != 0)
-            {
-                withCaption.Caption = msg.Caption;
-            }
-            */
+            
             node.AttachTo(msg.Header.FrameId);
 
             scale = msg.Scale == 0 ? 1f : (float)msg.Scale;
@@ -105,12 +100,17 @@ namespace Iviz.Controllers
 
             if (!msg.Boundary.Size.ApproximatelyZero() && widget is IWidgetWithBoundary withBoundary)
             {
-                withBoundary.Boundary = new BoundingBoxStamped(msg.Header, msg.Boundary);
+                withBoundary.Boundary = msg.Boundary;
             }
 
             if (msg.SecondaryBoundaries.Length != 0 && widget is IWidgetWithBoundaries withBoundaries)
             {
                 withBoundaries.Set(new BoundingBoxStamped(msg.Header, msg.Boundary), msg.SecondaryBoundaries);
+            }
+            
+            if (widget is IWidgetWithCaption withCaption)
+            {
+                withCaption.Caption = msg.Caption;
             }
 
             var transform = node.Transform;

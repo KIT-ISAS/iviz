@@ -281,6 +281,13 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
         }
     }
 
+    public void Clear()
+    {
+        while (TryRead(out _))
+        {
+        }
+    }
+
 
     /// <summary>
     /// Enumerates through the available messages, and blocks while waiting for the next.

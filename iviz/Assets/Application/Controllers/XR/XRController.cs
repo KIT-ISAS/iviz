@@ -233,7 +233,7 @@ namespace Iviz.Controllers.XR
             UpdateHandSender(leftHand, LeftHandSender, ref leftHandSeqNr, ref leftHandActive);
             UpdateHandSender(rightHand, RightHandSender, ref rightHandSeqNr, ref rightHandActive);
 
-            headFrame.LocalPose = TfModule.RelativeToFixedFrame(Settings.MainCameraTransform.AsPose());
+            headFrame.LocalPose = TfModule.RelativeToFixedFrame(Settings.MainCameraTransform);
 
             if (gaze.isActiveAndEnabled && gazeFrame != null)
             {

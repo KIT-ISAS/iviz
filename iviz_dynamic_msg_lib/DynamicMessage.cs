@@ -303,7 +303,6 @@ namespace Iviz.MsgsGen.Dynamic
             CreateAotFields<Quaternion>(),
             CreateAotFields<Pose>(),
             CreateAotFields<Transform>(),
-            CreateAotFields<Twist>(),
             CreateAotFields<ColorRGBA>(),
             CreateAotFields<Msgs.IvizMsgs.Color32>(),
             CreateAotFields<Msgs.IvizMsgs.Vector3f>(),

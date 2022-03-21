@@ -27,20 +27,6 @@ namespace Iviz.Msgs.IvizMsgs
             Strings = System.Array.Empty<string>();
         }
         
-        /// Explicit constructor.
-        public Parameter(byte Type, bool @bool, int Int32, double Float64, string @string, byte[] Bytes, int[] Int32s, double[] Float64s, string[] Strings)
-        {
-            this.Type = Type;
-            this.@bool = @bool;
-            this.Int32 = Int32;
-            this.Float64 = Float64;
-            this.@string = @string;
-            this.Bytes = Bytes;
-            this.Int32s = Int32s;
-            this.Float64s = Float64s;
-            this.Strings = Strings;
-        }
-        
         /// Constructor with buffer.
         public Parameter(ref ReadBuffer b)
         {

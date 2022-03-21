@@ -78,27 +78,6 @@ namespace Iviz.Msgs.SensorMsgs
             SerialNumber = "";
         }
         
-        /// Explicit constructor.
-        public BatteryState(in StdMsgs.Header Header, float Voltage, float Temperature, float Current, float Charge, float Capacity, float DesignCapacity, float Percentage, byte PowerSupplyStatus, byte PowerSupplyHealth, byte PowerSupplyTechnology, bool Present, float[] CellVoltage, float[] CellTemperature, string Location, string SerialNumber)
-        {
-            this.Header = Header;
-            this.Voltage = Voltage;
-            this.Temperature = Temperature;
-            this.Current = Current;
-            this.Charge = Charge;
-            this.Capacity = Capacity;
-            this.DesignCapacity = DesignCapacity;
-            this.Percentage = Percentage;
-            this.PowerSupplyStatus = PowerSupplyStatus;
-            this.PowerSupplyHealth = PowerSupplyHealth;
-            this.PowerSupplyTechnology = PowerSupplyTechnology;
-            this.Present = Present;
-            this.CellVoltage = CellVoltage;
-            this.CellTemperature = CellTemperature;
-            this.Location = Location;
-            this.SerialNumber = SerialNumber;
-        }
-        
         /// Constructor with buffer.
         public BatteryState(ref ReadBuffer b)
         {

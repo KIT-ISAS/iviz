@@ -22,7 +22,7 @@ namespace Iviz.Displays.XR
         Vector3? currentPosition;
         float scale = 1;
 
-        FrameNode Node => node ??= FrameNode.Instantiate("Dialog Node");
+        FrameNode Node => node ??= new FrameNode("Dialog Node");
         XRDialogConnector Connector => connector.AssertNotNull(nameof(connector));
         MeshMarkerDisplay Background => background.AssertNotNull(nameof(background));
         Vector3 baseDisplacement;

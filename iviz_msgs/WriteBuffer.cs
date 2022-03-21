@@ -225,17 +225,12 @@ namespace Iviz.Msgs
         /// <returns>The number of bytes written.</returns>
         internal static uint Serialize<T>(in T message, Span<byte> dest) where T : ISerializable
         {
-            if (message is null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
             var b = new WriteBuffer(dest);
-            int oldLength = b.ptr.Length;
-
             message.RosSerialize(ref b);
-            int newLength = b.ptr.Length;
 
+            int oldLength = dest.Length;
+            int newLength = b.ptr.Length;
+            
             return (uint)(oldLength - newLength);
         }        
     }

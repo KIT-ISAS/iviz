@@ -33,21 +33,6 @@ namespace Iviz.Msgs.IvizMsgs
             Trajectory = new IvizMsgs.Trajectory();
         }
         
-        /// Explicit constructor.
-        public Feedback(in StdMsgs.Header Header, string VizId, string Id, byte Type, int EntryId, double Angle, in GeometryMsgs.Point Position, in GeometryMsgs.Quaternion Orientation, in GeometryMsgs.Vector3 Scale, IvizMsgs.Trajectory Trajectory)
-        {
-            this.Header = Header;
-            this.VizId = VizId;
-            this.Id = Id;
-            this.Type = Type;
-            this.EntryId = EntryId;
-            this.Angle = Angle;
-            this.Position = Position;
-            this.Orientation = Orientation;
-            this.Scale = Scale;
-            this.Trajectory = Trajectory;
-        }
-        
         /// Constructor with buffer.
         public Feedback(ref ReadBuffer b)
         {

@@ -109,7 +109,7 @@ internal sealed class ServiceCaller : IDisposable
         var readBuffer = new Rent<byte>(length);
         try
         {
-            if (!await tcpClient.ReadChunkAsync(readBuffer.Array, length, token))
+            if (!await tcpClient.ReadChunkAsync(readBuffer, token))
             {
                 throw new IOException("Partner closed connection");
             }
@@ -142,10 +142,10 @@ internal sealed class ServiceCaller : IDisposable
 
         using var writeBuffer = new Rent<byte>(msgLength);
 
-        uint sendLength = requestMsg.SerializeTo(writeBuffer);
+        requestMsg.SerializeTo(writeBuffer);
 
-        await tcpClient.WriteChunkAsync(BitConverter.GetBytes(sendLength), 4, token);
-        await tcpClient.WriteChunkAsync(writeBuffer.Array, (int)sendLength, token);
+        await tcpClient.WriteChunkAsync(BitConverter.GetBytes(msgLength), 4, token);
+        await tcpClient.WriteChunkAsync(writeBuffer, token);
 
         byte statusByte = await ReadOneByteAsync(token);
 

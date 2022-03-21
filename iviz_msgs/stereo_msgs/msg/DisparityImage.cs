@@ -41,19 +41,6 @@ namespace Iviz.Msgs.StereoMsgs
             ValidWindow = new SensorMsgs.RegionOfInterest();
         }
         
-        /// Explicit constructor.
-        public DisparityImage(in StdMsgs.Header Header, SensorMsgs.Image Image, float F, float T, SensorMsgs.RegionOfInterest ValidWindow, float MinDisparity, float MaxDisparity, float DeltaD)
-        {
-            this.Header = Header;
-            this.Image = Image;
-            this.F = F;
-            this.T = T;
-            this.ValidWindow = ValidWindow;
-            this.MinDisparity = MinDisparity;
-            this.MaxDisparity = MaxDisparity;
-            this.DeltaD = DeltaD;
-        }
-        
         /// Constructor with buffer.
         public DisparityImage(ref ReadBuffer b)
         {

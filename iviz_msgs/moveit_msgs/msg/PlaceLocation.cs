@@ -34,17 +34,6 @@ namespace Iviz.Msgs.MoveitMsgs
             AllowedTouchObjects = System.Array.Empty<string>();
         }
         
-        /// Explicit constructor.
-        public PlaceLocation(string Id, TrajectoryMsgs.JointTrajectory PostPlacePosture, GeometryMsgs.PoseStamped PlacePose, GripperTranslation PrePlaceApproach, GripperTranslation PostPlaceRetreat, string[] AllowedTouchObjects)
-        {
-            this.Id = Id;
-            this.PostPlacePosture = PostPlacePosture;
-            this.PlacePose = PlacePose;
-            this.PrePlaceApproach = PrePlaceApproach;
-            this.PostPlaceRetreat = PostPlaceRetreat;
-            this.AllowedTouchObjects = AllowedTouchObjects;
-        }
-        
         /// Constructor with buffer.
         public PlaceLocation(ref ReadBuffer b)
         {

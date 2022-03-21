@@ -1510,6 +1510,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: -12.969971
       objectReference: {fileID: 0}
+    - target: {fileID: 9047866823016282429, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_overflowMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9047866823016282429, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_enableWordWrapping
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 915e1318acad4b24995b16b667eb1f64, type: 3}
 --- !u!224 &1971379015272591301 stripped

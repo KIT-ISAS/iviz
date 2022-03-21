@@ -23,16 +23,6 @@ namespace Iviz.Msgs.GridMapMsgs
         {
         }
         
-        /// Explicit constructor.
-        public GridMapInfo(in StdMsgs.Header Header, double Resolution, double LengthX, double LengthY, in GeometryMsgs.Pose Pose)
-        {
-            this.Header = Header;
-            this.Resolution = Resolution;
-            this.LengthX = LengthX;
-            this.LengthY = LengthY;
-            this.Pose = Pose;
-        }
-        
         /// Constructor with buffer.
         public GridMapInfo(ref ReadBuffer b)
         {

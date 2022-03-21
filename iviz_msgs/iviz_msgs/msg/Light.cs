@@ -26,20 +26,6 @@ namespace Iviz.Msgs.IvizMsgs
             Name = "";
         }
         
-        /// Explicit constructor.
-        public Light(string Name, byte Type, bool CastShadows, in Color32 Diffuse, float Range, in Vector3f Position, in Vector3f Direction, float InnerAngle, float OuterAngle)
-        {
-            this.Name = Name;
-            this.Type = Type;
-            this.CastShadows = CastShadows;
-            this.Diffuse = Diffuse;
-            this.Range = Range;
-            this.Position = Position;
-            this.Direction = Direction;
-            this.InnerAngle = InnerAngle;
-            this.OuterAngle = OuterAngle;
-        }
-        
         /// Constructor with buffer.
         public Light(ref ReadBuffer b)
         {

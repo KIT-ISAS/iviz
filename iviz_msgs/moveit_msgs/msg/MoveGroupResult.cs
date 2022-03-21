@@ -27,16 +27,6 @@ namespace Iviz.Msgs.MoveitMsgs
             ExecutedTrajectory = new MoveitMsgs.RobotTrajectory();
         }
         
-        /// Explicit constructor.
-        public MoveGroupResult(MoveItErrorCodes ErrorCode, MoveitMsgs.RobotState TrajectoryStart, MoveitMsgs.RobotTrajectory PlannedTrajectory, MoveitMsgs.RobotTrajectory ExecutedTrajectory, double PlanningTime)
-        {
-            this.ErrorCode = ErrorCode;
-            this.TrajectoryStart = TrajectoryStart;
-            this.PlannedTrajectory = PlannedTrajectory;
-            this.ExecutedTrajectory = ExecutedTrajectory;
-            this.PlanningTime = PlanningTime;
-        }
-        
         /// Constructor with buffer.
         public MoveGroupResult(ref ReadBuffer b)
         {

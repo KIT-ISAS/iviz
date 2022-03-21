@@ -64,7 +64,7 @@ namespace Iviz.Displays
             EnsureOwnMesh(0).Clear();
         }
 
-        public void Set(in Rent<Vector3> points, ReadOnlySpan<Color> colors = default)
+        public void Set(ReadOnlySpan<Vector3> points, ReadOnlySpan<Color> colors = default)
         {
             if (points.Length % 3 != 0)
             {
@@ -87,7 +87,7 @@ namespace Iviz.Displays
 
             using (var triangles = new Rent<int>(points.Length))
             {
-                int[] tArray = triangles.Array;
+                var tArray = triangles.AsSpan();
                 if (FlipWinding)
                 {
                     for (int i = 0; i < triangles.Length; i += 3)

@@ -88,20 +88,6 @@ namespace Iviz.Msgs.MoveitMsgs
             PathConstraints = new Constraints();
         }
         
-        /// Explicit constructor.
-        public GetCartesianPathRequest(in StdMsgs.Header Header, RobotState StartState, string GroupName, string LinkName, GeometryMsgs.Pose[] Waypoints, double MaxStep, double JumpThreshold, bool AvoidCollisions, Constraints PathConstraints)
-        {
-            this.Header = Header;
-            this.StartState = StartState;
-            this.GroupName = GroupName;
-            this.LinkName = LinkName;
-            this.Waypoints = Waypoints;
-            this.MaxStep = MaxStep;
-            this.JumpThreshold = JumpThreshold;
-            this.AvoidCollisions = AvoidCollisions;
-            this.PathConstraints = PathConstraints;
-        }
-        
         /// Constructor with buffer.
         public GetCartesianPathRequest(ref ReadBuffer b)
         {

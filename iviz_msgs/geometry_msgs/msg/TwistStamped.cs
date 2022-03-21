@@ -14,10 +14,11 @@ namespace Iviz.Msgs.GeometryMsgs
         /// Constructor for empty message.
         public TwistStamped()
         {
+            Twist = new Twist();
         }
         
         /// Explicit constructor.
-        public TwistStamped(in StdMsgs.Header Header, in Twist Twist)
+        public TwistStamped(in StdMsgs.Header Header, Twist Twist)
         {
             this.Header = Header;
             this.Twist = Twist;
@@ -27,7 +28,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public TwistStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            b.Deserialize(out Twist);
+            Twist = new Twist(ref b);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TwistStamped(ref b);
@@ -37,11 +38,13 @@ namespace Iviz.Msgs.GeometryMsgs
         public void RosSerialize(ref WriteBuffer b)
         {
             Header.RosSerialize(ref b);
-            b.Serialize(in Twist);
+            Twist.RosSerialize(ref b);
         }
         
         public void RosValidate()
         {
+            if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
+            Twist.RosValidate();
         }
     
         public int RosMessageLength => 48 + Header.RosMessageLength;

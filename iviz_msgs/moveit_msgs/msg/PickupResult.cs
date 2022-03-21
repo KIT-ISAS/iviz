@@ -29,17 +29,6 @@ namespace Iviz.Msgs.MoveitMsgs
             Grasp = new Grasp();
         }
         
-        /// Explicit constructor.
-        public PickupResult(MoveItErrorCodes ErrorCode, RobotState TrajectoryStart, RobotTrajectory[] TrajectoryStages, string[] TrajectoryDescriptions, Grasp Grasp, double PlanningTime)
-        {
-            this.ErrorCode = ErrorCode;
-            this.TrajectoryStart = TrajectoryStart;
-            this.TrajectoryStages = TrajectoryStages;
-            this.TrajectoryDescriptions = TrajectoryDescriptions;
-            this.Grasp = Grasp;
-            this.PlanningTime = PlanningTime;
-        }
-        
         /// Constructor with buffer.
         public PickupResult(ref ReadBuffer b)
         {

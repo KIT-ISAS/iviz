@@ -35,21 +35,22 @@ namespace Iviz.Common
             new()
             {
                 Header = (seqId, Timestamp, cameraFrameId),
-                Width = (uint)Width,
                 Height = (uint)Height,
+                Width = (uint)Width,
                 K = Intrinsic.ToArray(),
             };
 
         public Image CreateImageMessage(string cameraFrameId, uint seqId) =>
-            new(
-                (seqId, Timestamp, cameraFrameId),
-                (uint)Height,
-                (uint)Width,
-                EncodingFromFormat(Format),
-                0,
-                (uint)(Bpp * Width),
-                Bytes
-            );
+            new()
+            {
+                Header = (seqId, Timestamp, cameraFrameId),
+                Height = (uint)Height,
+                Width = (uint)Width,
+                Encoding = EncodingFromFormat(Format),
+                IsBigendian = 0,
+                Step = (uint)(Bpp * Width),
+                Data = Bytes
+            };
 
         static string EncodingFromFormat(ScreenshotFormat format)
         {
@@ -60,7 +61,7 @@ namespace Iviz.Common
                 ScreenshotFormat.Mono8 => "mono8",
                 ScreenshotFormat.Mono16 => "mono16",
                 ScreenshotFormat.Float => "32FC",
-                _ => throw new ArgumentException()
+                _ => ""
             };
         }
 
@@ -73,7 +74,7 @@ namespace Iviz.Common
                 ScreenshotFormat.Rgb => 3,
                 ScreenshotFormat.Float => 4,
                 ScreenshotFormat.Bgra => 4,
-                _ => throw new ArgumentException()
+                _ => 0
             };
         }
 

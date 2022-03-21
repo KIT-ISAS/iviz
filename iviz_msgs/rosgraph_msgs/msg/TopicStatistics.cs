@@ -41,25 +41,6 @@ namespace Iviz.Msgs.RosgraphMsgs
             NodeSub = "";
         }
         
-        /// Explicit constructor.
-        public TopicStatistics(string Topic, string NodePub, string NodeSub, time WindowStart, time WindowStop, int DeliveredMsgs, int DroppedMsgs, int Traffic, duration PeriodMean, duration PeriodStddev, duration PeriodMax, duration StampAgeMean, duration StampAgeStddev, duration StampAgeMax)
-        {
-            this.Topic = Topic;
-            this.NodePub = NodePub;
-            this.NodeSub = NodeSub;
-            this.WindowStart = WindowStart;
-            this.WindowStop = WindowStop;
-            this.DeliveredMsgs = DeliveredMsgs;
-            this.DroppedMsgs = DroppedMsgs;
-            this.Traffic = Traffic;
-            this.PeriodMean = PeriodMean;
-            this.PeriodStddev = PeriodStddev;
-            this.PeriodMax = PeriodMax;
-            this.StampAgeMean = StampAgeMean;
-            this.StampAgeStddev = StampAgeStddev;
-            this.StampAgeMax = StampAgeMax;
-        }
-        
         /// Constructor with buffer.
         public TopicStatistics(ref ReadBuffer b)
         {

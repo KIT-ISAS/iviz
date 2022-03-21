@@ -28,16 +28,6 @@ namespace Iviz.Msgs.MoveitMsgs
             ErrorCode = new MoveItErrorCodes();
         }
         
-        /// Explicit constructor.
-        public MotionPlanResponse(RobotState TrajectoryStart, string GroupName, RobotTrajectory Trajectory, double PlanningTime, MoveItErrorCodes ErrorCode)
-        {
-            this.TrajectoryStart = TrajectoryStart;
-            this.GroupName = GroupName;
-            this.Trajectory = Trajectory;
-            this.PlanningTime = PlanningTime;
-            this.ErrorCode = ErrorCode;
-        }
-        
         /// Constructor with buffer.
         public MotionPlanResponse(ref ReadBuffer b)
         {

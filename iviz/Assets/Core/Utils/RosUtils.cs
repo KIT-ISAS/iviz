@@ -20,14 +20,14 @@ namespace Iviz.Core
 {
     public static class RosUtils
     {
-        //static readonly Quaternion XFrontToZFront = new(0.5, -0.5, 0.5, -0.5);
+        static readonly Quaternion XFrontToZFront = new(0.5, -0.5, 0.5, -0.5);
 
         /// Make camera point to +Z instead of +X
         public static Pose ToCameraFrame(this in Pose p)
         {
             Pose q;
             q.Position = p.Position;
-            q.Orientation = p.Orientation * /*XFrontToZFront*/ new Quaternion(0.5, -0.5, 0.5, -0.5);
+            q.Orientation = p.Orientation * XFrontToZFront;
             return q;
         }
 
@@ -36,6 +36,15 @@ namespace Iviz.Core
             Pose q;
             q.Position = pose.Position;
             q.Orientation = pose.Orientation * /*XFrontToZFront.Inverse*/ new Quaternion(-0.5, 0.5, -0.5, -0.5);
+            return q;
+        }
+        
+        public static UnityEngine.Pose ToCameraFrame(this in UnityEngine.Pose p)
+        {
+            UnityEngine.Pose q;
+            q.position = p.position;
+            p.rotation.Unity2Ros(out var rosOrientation);
+            (rosOrientation * XFrontToZFront).Ros2Unity(out q.rotation);
             return q;
         }
 

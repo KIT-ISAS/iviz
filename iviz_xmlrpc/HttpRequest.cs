@@ -39,8 +39,8 @@ namespace Iviz.XmlRpc
             str.Append("POST ").Append(Uri.UnescapeDataString(remoteUri.AbsolutePath)).Append(" ");
             str.Append(keepAlive ? "HTTP/1.1\r\n" : "HTTP/1.0\r\n");
             str.Append("User-Agent: iviz XML-RPC\r\n");
-            str.Append($"Host: ").Append(callerUri.Host).Append("\r\n");
-            str.Append($"Content-Length: ").Append(msgLength).Append("\r\n");
+            str.Append("Host: ").Append(callerUri.Host).Append("\r\n");
+            str.Append("Content-Length: ").Append(msgLength).Append("\r\n");
             str.Append("Accept-Encoding: gzip\r\n");
             str.Append("Content-Type: text/xml; charset=utf-8\r\n");
             str.Append("\r\n");
@@ -55,7 +55,7 @@ namespace Iviz.XmlRpc
             using var outputStream = new MemoryStream(dstBytes.Array);
             using (var compressionStream = new GZipStream(outputStream, CompressionMode.Compress, true))
             {
-                compressionStream.Write(srcBytes.Array, 0, srcBytes.Length);
+                compressionStream.Write(srcBytes);
             }
 
             using var str = BuilderPool.Rent();
@@ -209,7 +209,7 @@ namespace Iviz.XmlRpc
             }
 
             using var content = new Rent<byte>(contentLength);
-            if (!await client.ReadChunkAsync(content.Array, content.Length, token))
+            if (!await client.ReadChunkAsync(content, token))
             {
                 throw new IOException("Partner closed connection");
             }
@@ -223,7 +223,7 @@ namespace Iviz.XmlRpc
             }
             else
             {
-                result = Defaults.UTF8.GetString(content.Array, 0, content.Length);
+                result = Defaults.UTF8.GetString(content);
             }
 
             return (result, headerLength + contentLength, connectionClose);
@@ -241,7 +241,7 @@ namespace Iviz.XmlRpc
                 using var decompressionStream = new GZipStream(inputStream, CompressionMode.Decompress);
 
                 decompressionStream.CopyTo(outputStream);
-                return Defaults.UTF8.GetString(outputBytes.Array, 0, (int)outputStream.Position);
+                return Defaults.UTF8.GetString(outputBytes[..(int)outputStream.Position]);
             }
             catch (NotSupportedException)
             {

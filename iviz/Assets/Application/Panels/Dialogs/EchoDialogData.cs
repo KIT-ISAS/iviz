@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using Iviz.Core;
 using Iviz.Msgs;
@@ -171,7 +172,7 @@ namespace Iviz.App
                 using (var description = BuilderPool.Rent())
                 {
                     listener.WriteDescriptionTo(description);
-                    dialog.Publishers.SetText(description);
+                    dialog.Publishers.SetTextRent(description);
                 }
 
                 dialog.Messages.text = $"{listener.Stats.MessagesPerSecond.ToString()} msg/s";
@@ -206,13 +207,14 @@ namespace Iviz.App
 
             if (description.Length > MaxMessages * MaxMessageLength)
             {
-                SetText(dialog.Text, description,
-                    description.Length - MaxMessages * MaxMessageLength,
-                    MaxMessages * MaxMessageLength);
+                const int count = MaxMessages * MaxMessageLength;
+                int start = description.Length - count;
+
+                dialog.Text.SetTextRent(description, start, count);
             }
             else
             {
-                dialog.Text.SetText(description);
+                dialog.Text.SetTextRent(description);
             }
 
             queueIsDirty = false;
@@ -236,7 +238,7 @@ namespace Iviz.App
             }
         }
 
-        sealed class TopicEntry : IComparable<TopicEntry>, IEquatable<TopicEntry>
+        sealed class TopicEntry : IComparable<TopicEntry>
         {
             public static readonly TopicEntry Empty = new();
             public string Topic { get; }
@@ -259,7 +261,7 @@ namespace Iviz.App
                 CsType = csType;
 
                 int lastSlash = RosMsgType.LastIndexOf('/');
-                string shortType = (lastSlash == -1) ? RosMsgType : RosMsgType.Substring(lastSlash + 1);
+                string shortType = (lastSlash == -1) ? RosMsgType : RosMsgType[(lastSlash + 1)..];
                 Description = $"{topic} <color=grey>[{shortType}]</color>";
             }
 
@@ -268,39 +270,6 @@ namespace Iviz.App
                 return ReferenceEquals(this, other)
                     ? 0
                     : string.Compare(Topic, other.Topic, StringComparison.Ordinal);
-            }
-
-            public bool Equals(TopicEntry? other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
-                return Topic == other.Topic;
-            }
-        }
-
-        static Action<TMP_Text, StringBuilder, int, int>? setTextFn;
-
-        /// <summary> Retrieves the private method TMP_Text.SetText(StringBuilder, int, int) as delegate </summary>
-        static Action<TMP_Text, StringBuilder, int, int> SetText
-        {
-            get
-            {
-                if (setTextFn != null)
-                {
-                    return setTextFn;
-                }
-
-                var methodInfo = typeof(TMP_Text).GetMethod(nameof(TMP_Text.SetText),
-                    BindingFlags.Instance | BindingFlags.NonPublic,
-                    null, new[] { typeof(StringBuilder), typeof(int), typeof(int) }, null);
-                if (methodInfo == null)
-                {
-                    throw new NullReferenceException("Missing SetText in TMP_Text!"); // can't really happen
-                }
-
-                setTextFn = (Action<TMP_Text, StringBuilder, int, int>)methodInfo.CreateDelegate(
-                    typeof(Action<TMP_Text, StringBuilder, int, int>));
-                return setTextFn;
             }
         }
     }

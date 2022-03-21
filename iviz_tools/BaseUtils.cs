@@ -117,18 +117,19 @@ public static class BaseUtils
 
         if (mainChunk.Length >= str.Length)
         {
-            size = Defaults.UTF8.GetBytes(mainChunk[..str.Length].Span, bytes.Array);
+            size = Defaults.UTF8.GetBytes(mainChunk[..str.Length].Span, bytes);
         }
         else
         {
             // slow path
             using var chars = new Rent<char>(str.Length);
+            var array = chars.AsSpan();
             for (int i = 0; i < str.Length; i++)
             {
-                chars.Array[i] = str[i];
+                array[i] = str[i];
             }
 
-            size = Defaults.UTF8.GetBytes(chars.Array, 0, chars.Length, bytes.Array, 0);
+            size = Defaults.UTF8.GetBytes(chars, bytes);
         }
 
         return bytes.Resize(size);

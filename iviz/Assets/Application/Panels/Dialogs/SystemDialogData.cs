@@ -222,7 +222,7 @@ namespace Iviz.App
             }
 
             descriptionHash = newHash;
-            panel.TextTop.SetText(description);
+            panel.TextTop.SetTextRent(description);
         }
 
         void LinkClicked(string link)
@@ -288,7 +288,7 @@ namespace Iviz.App
                 description.Append("  (none)").AppendLine();
             }
 
-            panel.TextBottom.SetText(description);
+            panel.TextBottom.SetTextRent(description);
         }
 
         void UpdateServicesLink(string link)
@@ -329,7 +329,7 @@ namespace Iviz.App
                 description.Append("  (none)").AppendLine();
             }
 
-            panel.TextBottom.SetText(description);
+            panel.TextBottom.SetTextRent(description);
 
             async void GetServiceInfo(string service, CancellationToken token)
             {
@@ -393,7 +393,7 @@ namespace Iviz.App
                 GetParamValue(link, tokenSource.Token);
             }
 
-            panel.TextBottom.SetText(description);
+            panel.TextBottom.SetTextRent(description);
             //panel.TextBottom.UpdateVertexData();
 
             async void GetParamValue(string param, CancellationToken token)
@@ -481,7 +481,7 @@ namespace Iviz.App
                 description.Append("  (none)").AppendLine();
             }
 
-            panel.TextBottom.SetText(description);
+            panel.TextBottom.SetTextRent(description);
 
 
             async void GetNodeInfo(string node, CancellationToken token)

@@ -16,12 +16,12 @@ internal static class RosUtils
     public const string ProtocolUdpRosName = "UDPROS";
 
     internal static List<string> ParseHeader(in Rent<byte> readBuffer) =>
-        ParseHeader(readBuffer.Array, readBuffer.Length);
+        ParseHeader(readBuffer, readBuffer.Length);
 
     internal static List<string> ParseHeader(byte[] readBuffer) =>
         ParseHeader(readBuffer, readBuffer.Length);
 
-    internal static List<string> ParseHeader(byte[] readBuffer, int toRead)
+    internal static List<string> ParseHeader(Span<byte> readBuffer, int toRead)
     {
         const int maxEntrySize = 1024 * 1024;
         int numRead = 0;
@@ -29,7 +29,7 @@ internal static class RosUtils
         List<string> contents = new();
         while (numRead < toRead)
         {
-            int length = BitConverter.ToInt32(readBuffer, numRead);
+            int length = readBuffer[numRead..].Read<int>();
             if (length is < 0 or > maxEntrySize)
             {
                 throw new RosInvalidHeaderException($"Invalid packet size {length}");
@@ -46,7 +46,7 @@ internal static class RosUtils
             string entry;
             try
             {
-                entry = BuiltIns.UTF8.GetString(readBuffer, numRead, length);
+                entry = BuiltIns.UTF8.GetString(readBuffer.Slice(numRead, length));
             }
             catch (Exception e)
             {

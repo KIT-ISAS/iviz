@@ -66,26 +66,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             MeshResource = "";
         }
         
-        /// Explicit constructor.
-        public Marker(in StdMsgs.Header Header, string Ns, int Id, int Type, int Action, in GeometryMsgs.Pose Pose, in GeometryMsgs.Vector3 Scale, in StdMsgs.ColorRGBA Color, duration Lifetime, bool FrameLocked, GeometryMsgs.Point[] Points, StdMsgs.ColorRGBA[] Colors, string Text, string MeshResource, bool MeshUseEmbeddedMaterials)
-        {
-            this.Header = Header;
-            this.Ns = Ns;
-            this.Id = Id;
-            this.Type = Type;
-            this.Action = Action;
-            this.Pose = Pose;
-            this.Scale = Scale;
-            this.Color = Color;
-            this.Lifetime = Lifetime;
-            this.FrameLocked = FrameLocked;
-            this.Points = Points;
-            this.Colors = Colors;
-            this.Text = Text;
-            this.MeshResource = MeshResource;
-            this.MeshUseEmbeddedMaterials = MeshUseEmbeddedMaterials;
-        }
-        
         /// Constructor with buffer.
         public Marker(ref ReadBuffer b)
         {

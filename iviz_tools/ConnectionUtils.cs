@@ -57,7 +57,8 @@ public static class ConnectionUtils
 
         if (timeoutInMs == -1)
         {
-            await using (token.Register(OnCanceled, tcs))
+            // ReSharper disable once UseAwaitUsing
+            using (token.Register(OnCanceled, tcs))
             {
                 socket.EndConnect(await tcs.Task);
                 return;
@@ -66,8 +67,10 @@ public static class ConnectionUtils
 
         using var timeoutTs = new CancellationTokenSource(timeoutInMs);
 
-        await using (token.Register(OnCanceled, tcs))
-        await using (timeoutTs.Token.Register(OnTimeout, tcs))
+        // ReSharper disable once UseAwaitUsing
+        using (token.Register(OnCanceled, tcs)) 
+        // ReSharper disable once UseAwaitUsing
+        using (timeoutTs.Token.Register(OnTimeout, tcs))
         {
             socket.EndConnect(await tcs.Task);
         }

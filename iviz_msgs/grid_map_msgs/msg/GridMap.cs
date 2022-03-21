@@ -31,17 +31,6 @@ namespace Iviz.Msgs.GridMapMsgs
             Data = System.Array.Empty<StdMsgs.Float32MultiArray>();
         }
         
-        /// Explicit constructor.
-        public GridMap(GridMapInfo Info, string[] Layers, string[] BasicLayers, StdMsgs.Float32MultiArray[] Data, ushort OuterStartIndex, ushort InnerStartIndex)
-        {
-            this.Info = Info;
-            this.Layers = Layers;
-            this.BasicLayers = BasicLayers;
-            this.Data = Data;
-            this.OuterStartIndex = OuterStartIndex;
-            this.InnerStartIndex = InnerStartIndex;
-        }
-        
         /// Constructor with buffer.
         public GridMap(ref ReadBuffer b)
         {

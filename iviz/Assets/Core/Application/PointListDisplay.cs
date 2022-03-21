@@ -164,12 +164,12 @@ namespace Iviz.Displays
             ReadOnlySpan<float4> points = pointBuffer;
             using (var vertices = new Rent<Vector3>(points.Length))
             {
-                var vArray = vertices.Array;
+                var vArray = vertices.AsSpan();
 
                 if (UseColormap)
                 {
                     using var uvs = new Rent<Vector2>(points.Length);
-                    var uvsArray = uvs.Array;
+                    var uvsArray = uvs.AsSpan();
                     for (int i = 0; i < points.Length; i++)
                     {
                         ref readonly var p = ref points[i];
@@ -186,7 +186,7 @@ namespace Iviz.Displays
                 else
                 {
                     using var colors = new Rent<Color32>(points.Length);
-                    var cArray = MemoryMarshal.Cast<Color32, float>(colors.Array);
+                    var cArray = MemoryMarshal.Cast<Color32, float>(colors);
                     for (int i = 0; i < points.Length; i++)
                     {
                         ref readonly var p = ref points[i];
@@ -204,7 +204,7 @@ namespace Iviz.Displays
 
             using (var indices = new Rent<int>(points.Length))
             {
-                Span<int> iArray = indices;
+                var iArray = indices.AsSpan();
                 for (int i = 0; i < iArray.Length; i++)
                 {
                     iArray[i] = i;

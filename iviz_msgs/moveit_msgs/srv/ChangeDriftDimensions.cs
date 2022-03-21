@@ -71,18 +71,6 @@ namespace Iviz.Msgs.MoveitMsgs
         {
         }
         
-        /// Explicit constructor.
-        public ChangeDriftDimensionsRequest(bool DriftXTranslation, bool DriftYTranslation, bool DriftZTranslation, bool DriftXRotation, bool DriftYRotation, bool DriftZRotation, in GeometryMsgs.Transform TransformJogFrameToDriftFrame)
-        {
-            this.DriftXTranslation = DriftXTranslation;
-            this.DriftYTranslation = DriftYTranslation;
-            this.DriftZTranslation = DriftZTranslation;
-            this.DriftXRotation = DriftXRotation;
-            this.DriftYRotation = DriftYRotation;
-            this.DriftZRotation = DriftZRotation;
-            this.TransformJogFrameToDriftFrame = TransformJogFrameToDriftFrame;
-        }
-        
         /// Constructor with buffer.
         public ChangeDriftDimensionsRequest(ref ReadBuffer b)
         {

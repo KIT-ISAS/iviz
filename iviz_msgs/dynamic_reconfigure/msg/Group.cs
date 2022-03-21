@@ -21,16 +21,6 @@ namespace Iviz.Msgs.DynamicReconfigure
             Parameters = System.Array.Empty<ParamDescription>();
         }
         
-        /// Explicit constructor.
-        public Group(string Name, string Type, ParamDescription[] Parameters, int Parent, int Id)
-        {
-            this.Name = Name;
-            this.Type = Type;
-            this.Parameters = Parameters;
-            this.Parent = Parent;
-            this.Id = Id;
-        }
-        
         /// Constructor with buffer.
         public Group(ref ReadBuffer b)
         {

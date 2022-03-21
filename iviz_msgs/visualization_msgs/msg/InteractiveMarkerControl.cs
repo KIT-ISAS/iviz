@@ -77,19 +77,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             Description = "";
         }
         
-        /// Explicit constructor.
-        public InteractiveMarkerControl(string Name, in GeometryMsgs.Quaternion Orientation, byte OrientationMode, byte InteractionMode, bool AlwaysVisible, Marker[] Markers, bool IndependentMarkerOrientation, string Description)
-        {
-            this.Name = Name;
-            this.Orientation = Orientation;
-            this.OrientationMode = OrientationMode;
-            this.InteractionMode = InteractionMode;
-            this.AlwaysVisible = AlwaysVisible;
-            this.Markers = Markers;
-            this.IndependentMarkerOrientation = IndependentMarkerOrientation;
-            this.Description = Description;
-        }
-        
         /// Constructor with buffer.
         public InteractiveMarkerControl(ref ReadBuffer b)
         {

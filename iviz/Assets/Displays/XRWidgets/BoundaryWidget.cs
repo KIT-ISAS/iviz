@@ -9,18 +9,19 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class BoundaryWidget : MonoBehaviour, IWidgetWithCaption, IWidgetWithColor, IWidgetWithBoundary, IRecyclable
+    public sealed class BoundaryWidget : MonoBehaviour, IWidgetWithCaption, IWidgetWithColor, 
+        IWidgetWithBoundary, IWidgetWithSecondaryScale, IRecyclable
     {
-        FrameNode? node;
         SelectionFrame? frame;
         Tooltip? tooltip;
         Transform? mTransform;
+        Bounds bounds;
 
-        FrameNode Node => node ??= new FrameNode("FrameNode");
-        SelectionFrame Frame  => frame != null ? frame : (frame = ResourcePool.RentDisplay<SelectionFrame>());
-        
+        SelectionFrame Frame =>
+            frame != null ? frame : (frame = ResourcePool.RentDisplay<SelectionFrame>(Transform));
+
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
-        
+
         public bool Interactable
         {
             set => Frame.Collider.enabled = value;
@@ -33,15 +34,17 @@ namespace Iviz.Displays.XR
                 if (value.Length == 0)
                 {
                     tooltip.ReturnToPool();
+                    tooltip = null;
                 }
                 else
                 {
                     if (tooltip == null)
                     {
-                        tooltip = ResourcePool.RentDisplay<Tooltip>(Node.Transform);
+                        tooltip = ResourcePool.RentDisplay<Tooltip>(Transform);
                         tooltip.CaptionColor = Color.white;
                         tooltip.Color = Resource.Colors.TooltipBackground;
                         tooltip.Scale = 0.25f;
+                        Update();
                     }
 
                     tooltip.Caption = value;
@@ -59,21 +62,37 @@ namespace Iviz.Displays.XR
             set => Frame.EmissiveColor = value;
         }
 
-        public BoundingBoxStamped Boundary
+        public float SecondaryScale
+        {
+            set => Frame.ColumnWidth = value;
+        }
+
+        public BoundingBox Boundary
         {
             set
             {
-                Node.AttachTo(value.Header);
-                Node.Transform.SetLocalPose(value.Boundary.Center.Ros2Unity());
-                Frame.Size = value.Boundary.Size.Ros2Unity().Abs();
+                Transform.SetLocalPose(value.Center.Ros2Unity());
+                
+                var size = value.Size.Ros2Unity().Abs();
+                Frame.Size = size;
+                bounds.size = size;
             }
         }
 
-        void Awake()
+        void Update()
         {
-            Transform.SetParentLocal(Node.Transform);
-        }
+            if (tooltip == null)
+            {
+                return;
+            }
 
+            var worldBounds = bounds.TransformBound(Transform.AsPose(), Transform.lossyScale);
+            float labelSize = Tooltip.GetRecommendedSize(Transform.position);
+            tooltip.Scale = labelSize;
+            tooltip.Transform.position = worldBounds.center +
+                                         2f * (worldBounds.size.y * 0.3f + labelSize) * Vector3.up;
+        }        
+        
         public void Suspend()
         {
             Caption = "";
@@ -83,12 +102,6 @@ namespace Iviz.Displays.XR
         {
             frame.ReturnToPool();
             tooltip.ReturnToPool();
-        }
-
-        void OnDestroy()
-        {
-            Transform.SetParentLocal(null);
-            node?.Dispose();
         }
     }
 }

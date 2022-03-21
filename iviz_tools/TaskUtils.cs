@@ -62,11 +62,8 @@ public static class TaskUtils
 
         var timeout = new TaskCompletionSource<object?>();
 
-#if !NETSTANDARD2_0
-        await using (tokenSource.Token.Register(SetResult, timeout))
-#else
-            using (tokenSource.Token.Register(SetResult, timeout))
-#endif
+        // ReSharper disable once UseAwaitUsing
+        using (tokenSource.Token.Register(SetResult, timeout))
         {
             Task result = await (task, timeout.Task).WhenAny();
             return result == task;
@@ -97,11 +94,8 @@ public static class TaskUtils
         var timeout = new TaskCompletionSource<object?>();
         var timeoutTask = timeout.Task;
 
-#if !NETSTANDARD2_0
-        await using (tokenSource.Token.Register(SetResult, timeout))
-#else
-            using (tokenSource.Token.Register(SetResult, timeout))
-#endif
+        // ReSharper disable once UseAwaitUsing
+        using (tokenSource.Token.Register(SetResult, timeout))
         {
             Task result = await (task, timeoutTask).WhenAny();
             if (result != task)

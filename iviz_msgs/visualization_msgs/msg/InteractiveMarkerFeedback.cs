@@ -49,20 +49,6 @@ namespace Iviz.Msgs.VisualizationMsgs
             ControlName = "";
         }
         
-        /// Explicit constructor.
-        public InteractiveMarkerFeedback(in StdMsgs.Header Header, string ClientId, string MarkerName, string ControlName, byte EventType, in GeometryMsgs.Pose Pose, uint MenuEntryId, in GeometryMsgs.Point MousePoint, bool MousePointValid)
-        {
-            this.Header = Header;
-            this.ClientId = ClientId;
-            this.MarkerName = MarkerName;
-            this.ControlName = ControlName;
-            this.EventType = EventType;
-            this.Pose = Pose;
-            this.MenuEntryId = MenuEntryId;
-            this.MousePoint = MousePoint;
-            this.MousePointValid = MousePointValid;
-        }
-        
         /// Constructor with buffer.
         public InteractiveMarkerFeedback(ref ReadBuffer b)
         {

@@ -35,20 +35,6 @@ namespace Iviz.Msgs.MeshMsgs
             Clusters = System.Array.Empty<MeshMsgs.MeshFaceCluster>();
         }
         
-        /// Explicit constructor.
-        public TriangleMesh(TriangleIndices[] Triangles, GeometryMsgs.Point[] Vertices, GeometryMsgs.Point[] VertexNormals, StdMsgs.ColorRGBA[] VertexColors, StdMsgs.ColorRGBA[] TriangleColors, GeometryMsgs.Point[] VertexTextureCoords, MeshMsgs.MeshMaterial[] FaceMaterials, SensorMsgs.Image[] Textures, MeshMsgs.MeshFaceCluster[] Clusters)
-        {
-            this.Triangles = Triangles;
-            this.Vertices = Vertices;
-            this.VertexNormals = VertexNormals;
-            this.VertexColors = VertexColors;
-            this.TriangleColors = TriangleColors;
-            this.VertexTextureCoords = VertexTextureCoords;
-            this.FaceMaterials = FaceMaterials;
-            this.Textures = Textures;
-            this.Clusters = Clusters;
-        }
-        
         /// Constructor with buffer.
         public TriangleMesh(ref ReadBuffer b)
         {

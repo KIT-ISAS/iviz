@@ -25,16 +25,6 @@ namespace Iviz.Msgs.MoveitMsgs
             VisibilityConstraints = System.Array.Empty<VisibilityConstraint>();
         }
         
-        /// Explicit constructor.
-        public Constraints(string Name, JointConstraint[] JointConstraints, PositionConstraint[] PositionConstraints, OrientationConstraint[] OrientationConstraints, VisibilityConstraint[] VisibilityConstraints)
-        {
-            this.Name = Name;
-            this.JointConstraints = JointConstraints;
-            this.PositionConstraints = PositionConstraints;
-            this.OrientationConstraints = OrientationConstraints;
-            this.VisibilityConstraints = VisibilityConstraints;
-        }
-        
         /// Constructor with buffer.
         public Constraints(ref ReadBuffer b)
         {

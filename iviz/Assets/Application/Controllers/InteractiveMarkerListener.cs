@@ -194,7 +194,7 @@ namespace Iviz.Controllers
         {
             base.Dispose();
 
-            foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
+            foreach (var markerObject in interactiveMarkers.Values)
             {
                 markerObject.Dispose();
             }
@@ -219,19 +219,19 @@ namespace Iviz.Controllers
             {
                 if (msg.Poses.Length != 0 || msg.Erases.Length != 0 || msg.Markers.Length != 0)
                 {
-                    RosLogger.Info(
-                        $"{this}: A keep-alive message with non-empty payload was sent. The payload will be ignored.");
+                    RosLogger.Info($"{this}: A keep-alive message with non-empty payload was sent. " +
+                                   $"The payload will be ignored.");
                 }
 
                 return;
             }
 
-            foreach (InteractiveMarker marker in msg.Markers)
+            foreach (var marker in msg.Markers)
             {
                 CreateInteractiveMarker(marker);
             }
 
-            foreach (InteractiveMarkerPose pose in msg.Poses)
+            foreach (var pose in msg.Poses)
             {
                 UpdateInteractiveMarkerPose(pose);
             }
@@ -297,19 +297,19 @@ namespace Iviz.Controllers
             in Pose relativeControlPose, in Vector3? position,
             MouseEventType eventType)
         {
-            var msg = new InteractiveMarkerFeedback(
-                TfListener.CreateHeader(feedSeq++, frameId ?? ""),
-                RosManager.MyId ?? "",
-                interactiveMarkerId,
-                controlId,
-                (byte)eventType,
-                relativeControlPose.Unity2RosPose(),
-                0,
-                position?.Unity2RosPoint() ?? Point.Zero,
-                position != null
-            );
+            var msg = new InteractiveMarkerFeedback
+            {
+                Header = TfListener.CreateHeader(feedSeq++, frameId ?? ""),
+                ClientId = RosManager.MyId ?? "",
+                MarkerName = interactiveMarkerId,
+                ControlName = controlId,
+                EventType = (byte)eventType,
+                Pose = relativeControlPose.Unity2RosPose(),
+                MousePoint = position?.Unity2RosPoint() ?? Point.Zero,
+                MousePointValid = position != null
+            };
             Publisher?.Publish(msg);
-            RosLogger.Debug($"{this}: ButtonFeedback Marker:{interactiveMarkerId} Type:{eventType}");
+            RosLogger.Debug($"{this}: {nameof(OnControlMouseEvent)} Marker:{interactiveMarkerId} Type:{eventType}");
         }
 
         internal void OnControlMoved(
@@ -317,17 +317,14 @@ namespace Iviz.Controllers
             string? frameId, in Pose relativeControlPose)
         {
             var msg = new InteractiveMarkerFeedback
-            (
-                TfListener.CreateHeader(feedSeq++, frameId ?? ""),
-                RosManager.MyId ?? "",
-                interactiveMarkerId,
-                controlId,
-                InteractiveMarkerFeedback.POSE_UPDATE,
-                relativeControlPose.Unity2RosPose(),
-                0,
-                Point.Zero,
-                false
-            );
+            {
+                Header = TfListener.CreateHeader(feedSeq++, frameId ?? ""),
+                ClientId = RosManager.MyId ?? "",
+                MarkerName = interactiveMarkerId,
+                ControlName = controlId,
+                EventType = InteractiveMarkerFeedback.POSE_UPDATE,
+                Pose = relativeControlPose.Unity2RosPose(),
+            };
             Publisher?.Publish(msg);
         }
 
@@ -336,19 +333,17 @@ namespace Iviz.Controllers
             uint menuEntryId, in Pose relativeControlPose)
         {
             var msg = new InteractiveMarkerFeedback
-            (
-                TfListener.CreateHeader(feedSeq++, frameId ?? ""),
-                RosManager.MyId ?? "",
-                interactiveMarkerId,
-                "",
-                InteractiveMarkerFeedback.MENU_SELECT,
-                relativeControlPose.Unity2RosPose(),
-                menuEntryId,
-                Point.Zero,
-                false
-            );
+            {
+                Header = TfListener.CreateHeader(feedSeq++, frameId ?? ""),
+                ClientId = RosManager.MyId ?? "",
+                MarkerName = interactiveMarkerId,
+                EventType = InteractiveMarkerFeedback.MENU_SELECT,
+                Pose = relativeControlPose.Unity2RosPose(),
+                MenuEntryId = menuEntryId
+            };
             Publisher?.Publish(msg);
-            RosLogger.Debug($"{this}: MenuFeedback Marker:{interactiveMarkerId} Entry:{menuEntryId.ToString()}");
+            RosLogger.Debug($"{this}: {nameof(OnControlMenuSelect)} " +
+                            $"Marker:{interactiveMarkerId} Entry:{menuEntryId.ToString()}");
         }
 
         void DestroyAllMarkers()

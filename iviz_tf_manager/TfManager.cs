@@ -10,6 +10,7 @@ using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
 using Iviz.Roslib;
+using Iviz.Tools;
 
 namespace Iviz.TfHelpers
 {
@@ -75,7 +76,7 @@ namespace Iviz.TfHelpers
                 throw new NullReferenceException("Reader not set!");
             }
 
-            Task.Run(async () => await UpdateAllAsync(token), token);
+            TaskUtils.Run(() => UpdateAllAsync(token).AsTask(), token);
         }
 
         public async ValueTask UpdateAllAsync(CancellationToken token = default)
@@ -118,6 +119,11 @@ namespace Iviz.TfHelpers
         {
             GetAbsoluteTransform(fromFrame, out var transform, out _);
             return transform;
+        }
+
+        public Transform GetLocalTransform(string fromFrame)
+        {
+            return frames.TryGetValue(fromFrame, out Frame ts) ? ts.transform : Transform.Identity;
         }
 
         public bool TryGetTransformTo(string fromFrame, string toFrame, out Transform transform)
@@ -228,7 +234,7 @@ namespace Iviz.TfHelpers
 
         public void PublishInBackground(CancellationToken token = default)
         {
-            Task.Run(async () =>
+            TaskUtils.Run(async () =>
             {
                 while (true)
                 {

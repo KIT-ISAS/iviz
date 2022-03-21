@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Iviz.Tools;
@@ -20,38 +21,19 @@ namespace Iviz.Rosbag.Writer
         public static ValueTask WriteValueAsync(this Stream stream, in TimeHeaderEntry value) => value.WriteAsync(stream);
 
 
-        public static Stream WriteValue(this Stream stream, in Rent<byte> value)
-        {
-            stream.Write(value.Array, 0, value.Length);
-            return stream;
-        }
-
-        public static Task WriteValueAsync(this Stream stream, Rent<byte> value)
-        {
-            return stream.WriteAsync(value.Array, 0, value.Length);
-        }
-
         public static Stream WriteValue(this Stream stream, int value)
         {
-            using var bytes = new Rent<byte>(4);
-            byte[] array = bytes.Array;
-            array[3] = (byte) (value >> 24);
-            array[0] = (byte) value;
-            array[1] = (byte) (value >> 8);
-            array[2] = (byte) (value >> 16);
-            stream.Write(array, 0, 4);
+            Span<byte> bytes = stackalloc byte[4];
+            bytes.Write(value);
+            stream.Write(bytes);
             return stream;
         }
 
         public static async ValueTask WriteValueAsync(this Stream stream, int value)
         {
             using var bytes = new Rent<byte>(4);
-            byte[] array = bytes.Array;
-            array[3] = (byte) (value >> 24);
-            array[0] = (byte) value;
-            array[1] = (byte) (value >> 8);
-            array[2] = (byte) (value >> 16);
-            await stream.WriteAsync(array, 0, 4);
+            bytes.AsSpan().Write(value);
+            await stream.WriteAsync(bytes);
         }
 
         public static Stream WriteValue(this Stream stream, uint value) => stream.WriteValue((int) value);
@@ -67,7 +49,7 @@ namespace Iviz.Rosbag.Writer
                 array[i] = (byte) value[i];
             }
 
-            stream.WriteValue(bytes);
+            stream.Write(bytes);
             return stream;
         }
 
@@ -80,20 +62,20 @@ namespace Iviz.Rosbag.Writer
                 array[i] = (byte) value[i];
             }
 
-            await stream.WriteValueAsync(bytes);
+            await stream.WriteAsync(bytes);
         }
 
         public static Stream WriteValueUtf8(this Stream stream, string value)
         {
             using var bytes = value.AsRent();
-            stream.WriteValue(bytes);
+            stream.Write(bytes);
             return stream;
         }
 
         public static async ValueTask WriteValueUtf8Async(this Stream stream, string value)
         {
             using var bytes = value.AsRent();
-            await stream.WriteValueAsync(bytes);
+            await stream.WriteAsync(bytes);
         }
     }
 }

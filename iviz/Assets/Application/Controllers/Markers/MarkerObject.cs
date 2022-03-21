@@ -286,7 +286,7 @@ namespace Iviz.Controllers
 
             var srcPoints = msg.Points;
             using var points = new Rent<Vector3>(srcPoints.Length);
-            var pArray = points.Array;
+            var pArray = points.AsSpan();
             for (int i = 0; i < srcPoints.Length; i++)
             {
                 srcPoints[i].Ros2Unity(out pArray[i]);
@@ -442,7 +442,7 @@ namespace Iviz.Controllers
 
         void ProcessResource(Marker msg, ResourceKey<GameObject>? newResourceKey)
         {
-            if (newResourceKey != resourceKey)
+            if (newResourceKey == resourceKey)
             {
                 return;
             }
@@ -453,7 +453,7 @@ namespace Iviz.Controllers
             {
                 if (msg.Type() != MarkerType.MeshResource)
                 {
-                    RosLogger.Warn($"MarkerObject: Marker type '{msg.Type.ToString()}' has no resource assigned!");
+                    RosLogger.Warn($"{this}: Marker type '{msg.Type.ToString()}' has no resource assigned!");
                 }
 
                 BoundsChanged?.Invoke();
@@ -631,7 +631,7 @@ namespace Iviz.Controllers
             BoundsChanged?.Invoke();
         }
 
-        public override string ToString() => $"[MarkerObject {node.Name}]";
+        public override string ToString() => $"[{nameof(MarkerObject)} {node.Name}]";
 
         public void GenerateLog(StringBuilder description)
         {
@@ -745,12 +745,11 @@ namespace Iviz.Controllers
 
                 if (msg.Type() != MarkerType.MeshResource)
                 {
-                    description.Append(ErrorStr).AppendLine("Unknown marker type ").Append(msg.Type).AppendLine();
+                    description.Append(ErrorStr).Append("Unknown marker type ").Append(msg.Type).AppendLine();
                 }
                 else
                 {
-                    description.Append(WarnStr)
-                        .Append("Unknown mesh resource '").Append(msg.MeshResource).Append("'")
+                    description.Append(WarnStr).Append("Unknown mesh resource '").Append(msg.MeshResource).Append("'")
                         .AppendLine();
                 }
             }

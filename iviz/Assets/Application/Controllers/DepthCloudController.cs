@@ -307,7 +307,7 @@ namespace Iviz.Controllers
             {
                 try
                 {
-                    if (!node.IsAlive)
+                    if (!node.IsAlive || DepthListener == null)
                     {
                         return; // stopped!
                     }
@@ -339,15 +339,21 @@ namespace Iviz.Controllers
 
             void PostProcess()
             {
-                if (!node.IsAlive)
+                try
                 {
-                    return; // stopped!
-                }
+                    if (!node.IsAlive)
+                    {
+                        return; // stopped!
+                    }
 
-                node.AttachTo(msg.Header);
-                msg.Data.TryReturn();
-                DepthIsProcessing = false;
-                UpdateIntensityBounds();
+                    node.AttachTo(msg.Header);
+                    UpdateIntensityBounds();
+                }
+                finally
+                {
+                    msg.Data.TryReturn();
+                    DepthIsProcessing = false;
+                }
             }
 
             switch (msg.Format.ToUpperInvariant())
@@ -389,6 +395,11 @@ namespace Iviz.Controllers
             {
                 try
                 {
+                    if (ColorListener == null)
+                    {
+                        return;
+                    }
+                    
                     colorImageTexture.Set((int)msg.Width, (int)msg.Height, msg.Encoding, msg.Data.AsSpan());
                 }
                 finally

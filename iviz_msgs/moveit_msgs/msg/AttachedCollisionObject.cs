@@ -33,16 +33,6 @@ namespace Iviz.Msgs.MoveitMsgs
             DetachPosture = new TrajectoryMsgs.JointTrajectory();
         }
         
-        /// Explicit constructor.
-        public AttachedCollisionObject(string LinkName, CollisionObject Object, string[] TouchLinks, TrajectoryMsgs.JointTrajectory DetachPosture, double Weight)
-        {
-            this.LinkName = LinkName;
-            this.Object = Object;
-            this.TouchLinks = TouchLinks;
-            this.DetachPosture = DetachPosture;
-            this.Weight = Weight;
-        }
-        
         /// Constructor with buffer.
         public AttachedCollisionObject(ref ReadBuffer b)
         {

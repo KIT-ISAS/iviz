@@ -200,14 +200,14 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         return length;
     }
 
-    async ValueTask<int> ReceiveAndIgnore(TcpClient client, byte[] tmpBuffer)
+    async ValueTask<int> ReceiveAndIgnore(TcpClient client, byte[] readBuffer)
     {
-        if (!await client.ReadChunkAsync(tmpBuffer, 4, runningTs.Token))
+        if (!await client.ReadChunkAsync(readBuffer, 4, runningTs.Token))
         {
             return -1;
         }
 
-        int length = BitConverter.ToInt32(tmpBuffer, 0);
+        int length = readBuffer.AsSpan().Read<int>();
         if (length == 0)
         {
             return 0;
@@ -248,7 +248,7 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
             throw new IOException("Connection closed during handshake");
         }
 
-        List<string> responseHeader = RosUtils.ParseHeader(readBuffer.Array, receivedLength);
+        List<string> responseHeader = RosUtils.ParseHeader(readBuffer, receivedLength);
         var dictionary = RosUtils.CreateHeaderDictionary(responseHeader);
 
         if (dictionary.TryGetValue("callerid", out string? remoteCallerId))

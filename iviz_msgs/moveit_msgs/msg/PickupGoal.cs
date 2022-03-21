@@ -60,24 +60,6 @@ namespace Iviz.Msgs.MoveitMsgs
             PlanningOptions = new PlanningOptions();
         }
         
-        /// Explicit constructor.
-        public PickupGoal(string TargetName, string GroupName, string EndEffector, Grasp[] PossibleGrasps, string SupportSurfaceName, bool AllowGripperSupportCollision, string[] AttachedObjectTouchLinks, bool MinimizeObjectDistance, Constraints PathConstraints, string PlannerId, string[] AllowedTouchObjects, double AllowedPlanningTime, PlanningOptions PlanningOptions)
-        {
-            this.TargetName = TargetName;
-            this.GroupName = GroupName;
-            this.EndEffector = EndEffector;
-            this.PossibleGrasps = PossibleGrasps;
-            this.SupportSurfaceName = SupportSurfaceName;
-            this.AllowGripperSupportCollision = AllowGripperSupportCollision;
-            this.AttachedObjectTouchLinks = AttachedObjectTouchLinks;
-            this.MinimizeObjectDistance = MinimizeObjectDistance;
-            this.PathConstraints = PathConstraints;
-            this.PlannerId = PlannerId;
-            this.AllowedTouchObjects = AllowedTouchObjects;
-            this.AllowedPlanningTime = AllowedPlanningTime;
-            this.PlanningOptions = PlanningOptions;
-        }
-        
         /// Constructor with buffer.
         public PickupGoal(ref ReadBuffer b)
         {

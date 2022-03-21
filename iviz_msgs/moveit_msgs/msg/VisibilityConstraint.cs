@@ -62,19 +62,6 @@ namespace Iviz.Msgs.MoveitMsgs
             SensorPose = new GeometryMsgs.PoseStamped();
         }
         
-        /// Explicit constructor.
-        public VisibilityConstraint(double TargetRadius, GeometryMsgs.PoseStamped TargetPose, int ConeSides, GeometryMsgs.PoseStamped SensorPose, double MaxViewAngle, double MaxRangeAngle, byte SensorViewDirection, double Weight)
-        {
-            this.TargetRadius = TargetRadius;
-            this.TargetPose = TargetPose;
-            this.ConeSides = ConeSides;
-            this.SensorPose = SensorPose;
-            this.MaxViewAngle = MaxViewAngle;
-            this.MaxRangeAngle = MaxRangeAngle;
-            this.SensorViewDirection = SensorViewDirection;
-            this.Weight = Weight;
-        }
-        
         /// Constructor with buffer.
         public VisibilityConstraint(ref ReadBuffer b)
         {

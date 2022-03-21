@@ -28,22 +28,6 @@ namespace Iviz.Msgs.IvizMsgs
             Textures = System.Array.Empty<Texture>();
         }
         
-        /// Explicit constructor.
-        public Material(string Name, in Color32 Ambient, in Color32 Diffuse, in Color32 Emissive, float Opacity, float BumpScaling, float Shininess, float ShininessStrength, float Reflectivity, byte BlendMode, Texture[] Textures)
-        {
-            this.Name = Name;
-            this.Ambient = Ambient;
-            this.Diffuse = Diffuse;
-            this.Emissive = Emissive;
-            this.Opacity = Opacity;
-            this.BumpScaling = BumpScaling;
-            this.Shininess = Shininess;
-            this.ShininessStrength = ShininessStrength;
-            this.Reflectivity = Reflectivity;
-            this.BlendMode = BlendMode;
-            this.Textures = Textures;
-        }
-        
         /// Constructor with buffer.
         public Material(ref ReadBuffer b)
         {

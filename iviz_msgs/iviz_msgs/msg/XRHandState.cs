@@ -26,19 +26,6 @@ namespace Iviz.Msgs.IvizMsgs
             Little = System.Array.Empty<GeometryMsgs.Transform>();
         }
         
-        /// Explicit constructor.
-        public XRHandState(bool IsValid, in StdMsgs.Header Header, in GeometryMsgs.Transform Palm, GeometryMsgs.Transform[] Thumb, GeometryMsgs.Transform[] Index, GeometryMsgs.Transform[] Middle, GeometryMsgs.Transform[] Ring, GeometryMsgs.Transform[] Little)
-        {
-            this.IsValid = IsValid;
-            this.Header = Header;
-            this.Palm = Palm;
-            this.Thumb = Thumb;
-            this.Index = Index;
-            this.Middle = Middle;
-            this.Ring = Ring;
-            this.Little = Little;
-        }
-        
         /// Constructor with buffer.
         public XRHandState(ref ReadBuffer b)
         {

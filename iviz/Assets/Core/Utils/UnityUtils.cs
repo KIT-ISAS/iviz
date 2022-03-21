@@ -13,6 +13,7 @@ using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Tools;
 using JetBrains.Annotations;
+using TMPro;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -550,7 +551,13 @@ namespace Iviz.Core
             if (memory.Length != 0
                 && MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
             {
-                ArrayPool<T>.Shared.Return(segment.Array);
+                try
+                {
+                    ArrayPool<T>.Shared.Return(segment.Array);
+                }
+                catch (ArgumentException)
+                {
+                }
             }
         }
 
@@ -769,6 +776,23 @@ namespace Iviz.Core
             tp = default;
             return false;
         }
+        
+        public static void SetTextRent(this TMP_Text text, in BuilderPool.BuilderRent rent)
+        {
+            SetTextRent(text, rent, 0, rent.Length);
+        }
+
+        public static void SetTextRent(this TMP_Text text, in BuilderPool.BuilderRent rent, int start, int count)
+        {
+            if (!MemoryMarshal.TryGetArray(rent.Chunk, out ArraySegment<char> segment))
+            {
+                // shouldn't happen
+                RosLogger.Debug($"{nameof(UnityUtils)}: Failed to retrieve array from StringBuilder memory chunk!");
+                return;
+            }
+            
+            text.SetCharArray(segment.Array, start, count);
+        }
     }
 
     public readonly struct WithIndexEnumerable<T>
@@ -804,35 +828,5 @@ namespace Iviz.Core
         public static readonly Quaternion Rotate180AroundY = new(0, 1, 0, 0);
         public static readonly Quaternion Rotate270AroundY = new(0, 0.707106769f, 0, -0.707106769f);
         public static readonly Quaternion Rotate180AroundZ = new(0, 0, 1, 0);
-    }
-
-    public static class ThrowHelper
-    {
-        public static void ThrowIfNull([System.Diagnostics.CodeAnalysis.NotNull] UnityEngine.Object? t, string nameOfT)
-        {
-            if (t == null)
-            {
-                ThrowNull(nameOfT);
-            }
-        }
-
-        public static void ThrowIfNull([System.Diagnostics.CodeAnalysis.NotNull] object? t, string nameOfT)
-        {
-            if (t is null)
-            {
-                ThrowNull(nameOfT);
-            }
-        }
-
-        public static void ThrowIfNullOrEmpty([System.Diagnostics.CodeAnalysis.NotNull] string? t, string nameOfT)
-        {
-            if (string.IsNullOrEmpty(t))
-            {
-                throw new ArgumentException("Argument '" + nameOfT + "' cannot be null or empty");
-            }
-        }
-
-        [DoesNotReturn]
-        static void ThrowNull(string paramName) => throw new ArgumentNullException(paramName);
     }
 }

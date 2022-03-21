@@ -63,6 +63,7 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> CanvasHolder { get; }
         public ResourceKey<GameObject> PalmCompass { get; }
 
+        public ResourceKey<GameObject> Boundary { get; }
         public ResourceKey<GameObject> BoundaryCheck { get; }
         public ResourceKey<GameObject> BoundaryLink { get; }
 
@@ -125,6 +126,7 @@ namespace Iviz.Resources
             CanvasHolder = Create(appAssetHolder.CanvasHolder, nameof(appAssetHolder.CanvasHolder));
             PalmCompass = Create(appAssetHolder.PalmCompass, nameof(appAssetHolder.PalmCompass));
 
+            Boundary = Create(appAssetHolder.Boundary, nameof(appAssetHolder.Boundary));
             BoundaryCheck = Create(appAssetHolder.BoundaryCheck, nameof(appAssetHolder.BoundaryCheck));
             BoundaryLink = Create(appAssetHolder.BoundaryLink, nameof(appAssetHolder.BoundaryLink));
 
@@ -147,7 +149,7 @@ namespace Iviz.Resources
                 var info = (ResourceKey<GameObject>?)property.GetValue(o);
                 if (info == null)
                 {
-                    Debug.LogError("DisplaysType: Property " + property.Name + " has not been set!");
+                    Debug.LogError($"{nameof(DisplaysType)}: Property {property.Name} has not been set!");
                     continue;
                 }
 
