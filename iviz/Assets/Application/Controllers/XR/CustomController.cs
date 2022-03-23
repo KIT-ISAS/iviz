@@ -28,6 +28,7 @@ namespace Iviz.Controllers.XR
         public bool ButtonUp { get; protected set; }
         public bool ButtonDown { get; protected set; }
         public Vector3? LockedPosition { get; set; }
+        public bool IsNearInteraction { get; set; }
 
         protected bool TryGetDevice(out InputDevice outDevice)
         {

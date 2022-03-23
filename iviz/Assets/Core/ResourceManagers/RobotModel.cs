@@ -613,8 +613,11 @@ namespace Iviz.Displays
 
             foreach (var (gameObject, resourceKey) in objectResources)
             {
-                var display = gameObject.GetComponent<IDisplay>();
-                display?.Suspend();
+                if (gameObject.TryGetComponent(out IDisplay display))
+                {
+                    display.Suspend();
+                }
+
                 ResourcePool.Return(resourceKey, gameObject);
             }
 

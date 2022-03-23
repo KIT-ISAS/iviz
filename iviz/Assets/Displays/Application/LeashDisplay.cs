@@ -32,21 +32,22 @@ namespace Iviz.Displays
             Lines.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
         }
 
-        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal, float offset)
+        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal, float offset, bool reticleVisible = true)
         {
-            Set(pointerRay, target + normal * offset, normal);
-
+            Set(pointerRay, target + normal * offset, normal, reticleVisible);
         }
 
-        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal)
+        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal, bool reticleVisible = true)
         {
-            Reticle.Visible = true;
-            Reticle.Transform.SetPositionAndRotation(target, Quaternion.LookRotation(normal));
+            Reticle.Visible = reticleVisible;
 
-            float scale = 0.03f * Vector3.Distance(target, Settings.MainCameraTransform.position);
-            Reticle.Transform.localScale = scale * Vector3.one;
-            Reticle.Color = ReticleColor;
-            //Reticle.EmissiveColor = ReticleEmissiveColor;
+            if (reticleVisible)
+            {
+                float scale = 0.03f * Vector3.Distance(target, Settings.MainCameraTransform.position);
+                Reticle.Transform.localScale = scale * Vector3.one;
+                Reticle.Transform.SetPositionAndRotation(target, Quaternion.LookRotation(normal));
+                Reticle.Color = ReticleColor;
+            }
 
             BuildLeash(pointerRay, target);
         }

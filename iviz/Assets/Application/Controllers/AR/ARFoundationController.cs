@@ -203,8 +203,8 @@ namespace Iviz.Controllers
         {
             Instance = this;
 
-            ar = Object.Instantiate(Resource.Extras.AppAssetHolder.ARPrefab).GetComponent<ARContents>();
-            if (ar == null)
+            var arObject = Object.Instantiate(Resource.Extras.AppAssetHolder.ARPrefab);
+            if (!arObject.TryGetComponent(out ar))
             {
                 throw new MissingAssetFieldException("AR object does not have contents");
             }

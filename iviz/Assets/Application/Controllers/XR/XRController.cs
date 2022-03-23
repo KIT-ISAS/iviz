@@ -32,7 +32,7 @@ namespace Iviz.Controllers.XR
         public Sender<XRHandState> LeftHandSender { get; } = new("~xr/left_hand");
         public Sender<XRHandState> RightHandSender { get; } = new("~xr/right_hand");
 
-        public const float NearDistance = 0.2f;
+        public const float NearDistance = 0.05f;
 
         readonly GazeController gaze;
         readonly XRRayInteractor gazeInteractor;
@@ -114,10 +114,10 @@ namespace Iviz.Controllers.XR
 
             Config = configuration ?? new XRConfiguration();
 
-            leftPaddle.gameObject.SetActive(!Settings.IsHololens);
-            rightPaddle.gameObject.SetActive(!Settings.IsHololens);
-            leftHand.gameObject.SetActive(Settings.IsHololens);
-            rightHand.gameObject.SetActive(Settings.IsHololens);
+            //leftPaddle.gameObject.SetActive(!Settings.IsHololens);
+            //rightPaddle.gameObject.SetActive(!Settings.IsHololens);
+            //leftHand.gameObject.SetActive(Settings.IsHololens);
+            //rightHand.gameObject.SetActive(Settings.IsHololens);
 
             headFrame = TfPublisher.Instance.GetOrCreate(HeadFrameId, isInternal: true);
             leftControllerFrame = TfPublisher.Instance.GetOrCreate(LeftControllerFrameId, isInternal: true);

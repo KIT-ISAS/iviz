@@ -12,6 +12,7 @@ namespace Iviz.Controllers.XR
     {
         [SerializeField] HandType handType;
         [SerializeField] float triggerAxisThreshold = 0.1f;
+        [SerializeField] Vector3 centerOffset = new Vector3(0, 0, 0.1f);
         
         public Pose? Pose { get; private set; }
 
@@ -40,7 +41,8 @@ namespace Iviz.Controllers.XR
                 return;
             }
 
-            controllerState.poseDataFlags = PoseDataFlags.NoData;
+            controllerState.inputTrackingState = InputTrackingState.None;
+            //controllerState.poseDataFlags = PoseDataFlags.NoData;
 
             if (!TryGetDevice(out var device)
                 || !device.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracking) 
@@ -51,15 +53,19 @@ namespace Iviz.Controllers.XR
 
             if (device.TryGetFeatureValue(CommonUsages.deviceRotation, out controllerState.rotation))
             {
-                controllerState.poseDataFlags |= PoseDataFlags.Rotation;
+                //controllerState.poseDataFlags |= PoseDataFlags.Rotation;
+                controllerState.inputTrackingState = InputTrackingState.Rotation;
             }
 
             if (device.TryGetFeatureValue(CommonUsages.devicePosition, out controllerState.position))
             {
-                controllerState.poseDataFlags |= PoseDataFlags.Position;
+                //controllerState.poseDataFlags |= PoseDataFlags.Position;
+                controllerState.position += controllerState.rotation * centerOffset;
+                controllerState.inputTrackingState |= InputTrackingState.Position;
             }
 
-            if (controllerState.poseDataFlags != (PoseDataFlags.Position | PoseDataFlags.Rotation))
+            //if (controllerState.poseDataFlags != (PoseDataFlags.Position | PoseDataFlags.Rotation))
+            if (controllerState.inputTrackingState != (InputTrackingState.Position | InputTrackingState.Rotation))
             {
                 return;
             }
@@ -87,8 +93,8 @@ namespace Iviz.Controllers.XR
             }
 
             controllerState.ResetFrameDependentStates();
-            controllerState.selectInteractionState.SetFrameState(ButtonState);
-            controllerState.uiPressInteractionState.SetFrameState(ButtonState);
+            controllerState.selectInteractionState.SetFrameState(ButtonState || IsNearInteraction);
+            controllerState.uiPressInteractionState.SetFrameState(ButtonState || IsNearInteraction);
         }
     }
 }

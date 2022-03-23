@@ -49,6 +49,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetTransform: {fileID: 4340412021783892171}
   rayCollider: {fileID: 866070338}
+  forwardScale: -1
 --- !u!114 &4340412021693849407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -67,6 +68,9 @@ MonoBehaviour:
   m_InteractionLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  m_InteractionLayers:
+    m_Bits: 4294967295
+  m_SelectMode: 0
   m_CustomReticle: {fileID: 0}
   m_FirstHoverEntered:
     m_PersistentCalls:
@@ -78,6 +82,12 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_HoverExited:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FirstSelectEntered:
+    m_PersistentCalls:
+      m_Calls: []
+  m_LastSelectExited:
     m_PersistentCalls:
       m_Calls: []
   m_SelectEntered:
@@ -183,6 +193,7 @@ MonoBehaviour:
   draggable: {fileID: 4340412021067335221}
   label: {fileID: 4340412022777234071}
   followsCamera: 0
+  canvasSize: {x: 800, y: 600}
 --- !u!1 &4340412022777234069
 GameObject:
   m_ObjectHideFlags: 0

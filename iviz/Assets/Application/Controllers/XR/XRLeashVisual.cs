@@ -31,12 +31,12 @@ namespace Iviz.Controllers.XR
 
         void OnSelectEntered(SelectEnterEventArgs args)
         {
-            if (args.interactable == null)
+            if (args.interactableObject is not XRBaseInteractable interactable)
             {
                 return;
             }
 
-            draggable = args.interactable.GetComponent<ScreenDraggable>();
+            interactable.TryGetComponent(out draggable);
         }
 
         void OnSelectExited(SelectExitEventArgs args)
@@ -57,18 +57,22 @@ namespace Iviz.Controllers.XR
                 return;
             }
 
-            var transformRay = new Ray(Transform.position, Transform.forward);
+            var currentPosition = Transform.position;
+            var currentForward = Transform.forward;
+            var offsetOrigin = currentPosition + currentForward * XRController.NearDistance;
+            var transformRay = new Ray(offsetOrigin, currentForward);
+
             if (draggable != null && draggable.ReferencePoint is { } referencePoint)
             {
                 Leash.Color = Color.cyan;
-                Leash.ReticleColor = Vector3.Distance(transformRay.origin, referencePoint) < XRController.NearDistance
-                    ? Color.blue
-                    : Color.white;
+                Leash.ReticleColor = Color.white;
                 Leash.ReticleEmissiveColor = Color.black;
                 Leash.Width = interactingWidth;
+                Controller.IsNearInteraction = (currentPosition - referencePoint).magnitude < XRController.NearDistance;
+
                 if (draggable.ReferenceNormal is { } referenceNormal)
                 {
-                    Leash.Set(transformRay, referencePoint, referenceNormal);
+                    Leash.Set(transformRay, referencePoint, referenceNormal, !Controller.IsNearInteraction);
                 }
                 else
                 {
@@ -80,6 +84,8 @@ namespace Iviz.Controllers.XR
 
             bool hitExists = TryGetHitInfo(out var hitPosition, out var hitNormal, out bool isUIHitClosest);
 
+            Controller.IsNearInteraction = (currentPosition - hitPosition).magnitude < XRController.NearDistance;
+
             if (Controller.ButtonUp && !isUIHitClosest)
             {
                 GuiInputModule.TriggerEnvironmentClick(new ClickHitInfo(transformRay));
@@ -88,18 +94,17 @@ namespace Iviz.Controllers.XR
             if (hitExists)
             {
                 Leash.Color = Color.white;
-                Leash.ReticleColor = Vector3.Distance(transformRay.origin, hitPosition) < XRController.NearDistance
-                    ? Color.blue
-                    : Color.white;
+                Leash.ReticleColor = Color.white;
                 Leash.ReticleEmissiveColor = isUIHitClosest ? Color.white : Color.black;
                 Leash.Width = hoveringWidth;
-                Leash.Set(transformRay, hitPosition, hitNormal, isUIHitClosest ? 0.005f : 0.001f);
+                Leash.Set(transformRay, hitPosition, hitNormal, isUIHitClosest ? 0.005f : 0.001f,
+                    !Controller.IsNearInteraction);
 
                 if (isUIHitClosest && Controller.ButtonDown && Controller is HandController handController)
                 {
                     handController.LockedPosition = hitPosition;
                 }
-                
+
                 return;
             }
 
@@ -110,7 +115,7 @@ namespace Iviz.Controllers.XR
 
         bool TryGetHitInfo(out Vector3 position, out Vector3 normal, out bool isUIHitClosest)
         {
-            if (!Interactor.TryGetCurrentRaycast(out var raycastHit, out _, 
+            if (!Interactor.TryGetCurrentRaycast(out var raycastHit, out _,
                     out var raycastResult, out _, out isUIHitClosest))
             {
                 position = default;

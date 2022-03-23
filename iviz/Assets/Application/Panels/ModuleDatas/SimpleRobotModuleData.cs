@@ -151,7 +151,7 @@ namespace Iviz.App
             panel.Save.ValueChanged += f =>
             {
                 var robot = RobotController.Robot;
-                if (string.IsNullOrEmpty(robot?.Name) || string.IsNullOrEmpty(robot.Description))
+                if (robot?.Name is null or "" || robot.Description is null or "")
                 {
                     return;
                 }

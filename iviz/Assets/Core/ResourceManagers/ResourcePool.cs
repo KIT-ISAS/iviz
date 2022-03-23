@@ -14,7 +14,7 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class ResourcePool : MonoBehaviour
     {
-        static readonly bool CheckDuplicates = false;
+        const bool CheckDuplicates = !Settings.IsStandalone;
         const int TimeToDestroyInSec = 60;
 
         static ResourcePool? instance;
@@ -22,11 +22,13 @@ namespace Iviz.Displays
         readonly HashSet<int> disposedObjectIds = new();
         readonly Dictionary<int, Queue<ObjectWithExpirationTime>> disposedObjectPool = new();
 
+        readonly List<IRecyclable> recyclableBuffer = new();
+
         /// <summary>
         /// Transform of the node where disposed objects are stored.
         /// </summary>
-        public static Transform? Transform => instance != null ? instance.transform : null; 
-        
+        public static Transform? Transform => instance != null ? instance.transform : null;
+
         void Awake()
         {
             instance = this;
@@ -42,7 +44,7 @@ namespace Iviz.Displays
         public static void ClearResources()
         {
             instance = null;
-        } 
+        }
 
         /// <summary>
         /// Rents an object of the given resource type. If no object of the type exists in the pool, a new one
@@ -79,7 +81,14 @@ namespace Iviz.Displays
             where T : MonoBehaviour
         {
             ThrowHelper.ThrowIfNull(resource, nameof(resource));
-            return Rent(resource, parent, enable).GetComponent<T>();
+            var rentedObject = Rent(resource, parent, enable);
+            if (rentedObject.TryGetComponent<T>(out var result))
+            {
+                return result;
+            }
+
+            Return(resource, rentedObject);
+            throw new ResourceNotFoundException($"Cannot find component of type '{typeof(T).Name}' in rented object");
         }
 
         /// <summary>
@@ -93,7 +102,7 @@ namespace Iviz.Displays
         {
             if (!Resource.Displays.TryGetResource(typeof(T), out var info))
             {
-                throw new ResourceNotFoundException("Cannot find unique display type for type " + typeof(T).Name);
+                throw new ResourceNotFoundException($"Cannot find unique display type for type '{typeof(T).Name}'");
             }
 
             return Rent<T>(info, parent);
@@ -118,14 +127,16 @@ namespace Iviz.Displays
                 instance.Add(resource, gameObject);
             }
         }
-        
+
         internal static void ReturnDisplay(IDisplay display)
         {
             ThrowHelper.ThrowIfNull(display, nameof(display));
 
             if (display is not MonoBehaviour behaviour)
             {
-                throw new ArgumentException("Argument must be an object that inherits from MonoBehavior");
+                throw new ArgumentException(
+                    $"Argument to {nameof(ReturnDisplay)} be an object that inherits from MonoBehavior",
+                    nameof(display));
             }
 
             if (!Resource.Displays.TryGetResource(display.GetType(), out var info))
@@ -151,12 +162,13 @@ namespace Iviz.Displays
 
             foreach (var deadObject in objectsToDestroy)
             {
-                var recyclables = deadObject.GetComponents<IRecyclable>();
-                foreach (var recyclable in recyclables)
+                deadObject.GetComponents(recyclableBuffer);
+                foreach (var recyclable in recyclableBuffer)
                 {
                     recyclable.SplitForRecycle();
                 }
 
+                recyclableBuffer.Clear();
                 Destroy(deadObject);
             }
         }

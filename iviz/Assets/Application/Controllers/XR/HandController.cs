@@ -104,7 +104,8 @@ namespace Iviz.Controllers.XR
                 return;
             }
 
-            controllerState.poseDataFlags = PoseDataFlags.NoData;
+            controllerState.inputTrackingState = InputTrackingState.None;
+            //controllerState.poseDataFlags = PoseDataFlags.NoData;
 
             if (!TryGetDevice(out var device) || !device.TryGetFeatureValue(HandData, out var hand))
             {
@@ -141,7 +142,8 @@ namespace Iviz.Controllers.XR
                 ((handType == HandType.Left ? palmOffset : -palmOffset) * Vector3.right);
             var pivot = cameraTransform.TransformPoint(shoulderToCamera);
 
-            controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
+            //controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
+            controllerState.inputTrackingState = InputTrackingState.Position | InputTrackingState.Rotation; 
 
             var controllerForward = LockedPosition is { } lockedPosition
                 ? lockedPosition - controllerPosition

@@ -462,8 +462,7 @@ namespace Iviz.Controllers
 
             var resourceGameObject = ResourcePool.Rent(resourceKey, Transform);
 
-            resource = resourceGameObject.GetComponent<IDisplay>();
-            if (resource != null)
+            if (resourceGameObject.TryGetComponent(out resource))
             {
                 Tint = Tint;
                 Smoothness = Smoothness;
