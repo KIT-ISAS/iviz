@@ -25,7 +25,7 @@ namespace Iviz.App
             var oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, YCloseButton);
             o.SetActive(true);
-            return o.GetComponent<TrashButtonWidget>();
+            return o.AssertHasComponent<TrashButtonWidget>(nameof(o));
         }
 
         public ToggleButtonWidget AddHideButton()
@@ -34,7 +34,7 @@ namespace Iviz.App
             var oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, YCloseButton);
             o.SetActive(true);
-            return o.GetComponent<ToggleButtonWidget>();
+            return o.AssertHasComponent<ToggleButtonWidget>(nameof(o));
         }
         
         public TrashButtonWidget AddCloseButton()
@@ -43,7 +43,7 @@ namespace Iviz.App
             var oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, YCloseButton);
             o.SetActive(true);
-            return o.GetComponent<TrashButtonWidget>();
+            return o.AssertHasComponent<TrashButtonWidget>(nameof(o));
         }
 
         public TrashButtonWidget AddResetButton()
@@ -52,7 +52,7 @@ namespace Iviz.App
             var oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, YCloseButton);
             o.SetActive(true);
-            return o.GetComponent<TrashButtonWidget>();
+            return o.AssertHasComponent<TrashButtonWidget>(nameof(o));
         }
 
         public HeadTitleWidget AddHeadTitleWidget(string label)

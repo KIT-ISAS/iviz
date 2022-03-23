@@ -21,17 +21,19 @@ namespace Iviz.Displays
         /// Retrieves the bounds of the object's <see cref="BoxCollider"/> in absolute coordinates.
         /// </summary>
         protected Bounds WorldBounds => Collider.bounds;
-        
+
         /// <summary>
         /// Retrieves the cached transform of the object.
         /// </summary>
         public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
-        
+
         /// <summary>
         /// Retrieves the <see cref="BoxCollider"/> of the object.
         /// </summary>
-        public BoxCollider Collider => boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
-        
+        public BoxCollider Collider => boxCollider != null
+            ? boxCollider
+            : (boxCollider = gameObject.AssertHasComponent<BoxCollider>(nameof(gameObject)));
+
         public virtual Bounds? Bounds => Collider.GetLocalBounds();
 
         /// <summary>

@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using Iviz.Core;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -10,6 +12,7 @@ namespace Iviz.App
     {
         void OnApplicationQuit()
         {
+            Settings.IsShuttingDown = true;
             ModuleListPanel.Instance.Dispose();
         }
     }

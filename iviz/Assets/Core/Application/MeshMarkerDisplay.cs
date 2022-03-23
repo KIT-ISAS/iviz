@@ -32,9 +32,13 @@ namespace Iviz.Displays
         Material? textureMaterial;
         Material? textureMaterialAlpha;
 
-        MeshRenderer MainRenderer => mainRenderer != null ? mainRenderer : mainRenderer = GetComponent<MeshRenderer>();
+        MeshRenderer MainRenderer => mainRenderer != null
+            ? mainRenderer
+            : mainRenderer = this.AssertHasComponent<MeshRenderer>(nameof(gameObject));
 
-        MeshFilter MeshFilter => meshFilter != null ? meshFilter : meshFilter = GetComponent<MeshFilter>();
+        MeshFilter MeshFilter => meshFilter != null
+            ? meshFilter
+            : meshFilter = this.AssertHasComponent<MeshFilter>(nameof(gameObject));
 
         public Texture2D? DiffuseTexture
         {

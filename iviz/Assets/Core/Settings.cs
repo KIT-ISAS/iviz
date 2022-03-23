@@ -185,7 +185,7 @@ namespace Iviz.Core
         {
             get => mainCamera != null
                 ? mainCamera
-                : mainCamera = FindMainCamera().GetComponent<Camera>().AssertNotNull(nameof(mainCamera));
+                : mainCamera = FindMainCamera().AssertHasComponent<Camera>(nameof(mainCamera));
 
             set
             {
@@ -229,6 +229,12 @@ namespace Iviz.Core
                                             (supportsRGB24 = SystemInfo.SupportsTextureFormat(TextureFormat.RGB24))
                                             .Value;
 
+        /// <summary>
+        /// Set when the app is being closed.
+        /// This prevents some disposal operations that depend on objects that may have been already destroyed.
+        /// </summary>
+        public static bool IsShuttingDown { get; set; }
+        
         static Settings()
         {
             AotHelper.EnsureType<StringEnumConverter>();

@@ -23,7 +23,7 @@ namespace Iviz.Displays
             
             manager = ARController.Instance.AnchorManager;
             manager.anchorsChanged += OnAnchorsChanged;
-            Anchor = GetComponent<ARAnchor>();
+            Anchor = this.AssertHasComponent<ARAnchor>(nameof(gameObject));
         }
 
         void OnAnchorsChanged(ARAnchorsChangedEventArgs args)

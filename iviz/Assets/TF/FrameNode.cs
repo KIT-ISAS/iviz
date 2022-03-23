@@ -40,6 +40,13 @@ namespace Iviz.Controllers.TF
             parent = value;
             parent?.AddListener(this);
 
+#if UNITY_EDITOR
+            if (Settings.IsShuttingDown)
+            {
+                return;
+            }
+#endif
+            
             Transform.SetParentLocal(value?.Transform);
         }
 

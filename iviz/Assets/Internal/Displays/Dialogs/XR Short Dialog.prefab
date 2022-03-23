@@ -440,7 +440,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6258707198505295089
 Transform:
   m_ObjectHideFlags: 0
@@ -511,8 +511,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _transform: {fileID: 9024825353754890542}
+  backgroundSize: {x: 0.86, y: 0.5}
   socketPosition: {x: 0, y: -0.3, z: 0}
-  background: {fileID: 6014099797948075304}
   backgroundColor: {r: 0, g: 0.2, b: 0.5, a: 1}
   connector: {fileID: 586438443107256636}
   title: {fileID: 1008052830234413160}
@@ -817,18 +817,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 586438443610386723}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &6014099797948075304 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 6581216246697966603, guid: c3b1afd1b19444c57b708ecc2b861ad8,
-    type: 3}
-  m_PrefabInstance: {fileID: 586438443610386723}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 91e53ae859eaa2a449bf829338ecce5a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &586438444070166889
 PrefabInstance:
   m_ObjectHideFlags: 0

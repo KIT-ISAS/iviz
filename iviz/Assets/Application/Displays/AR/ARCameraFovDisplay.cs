@@ -44,7 +44,7 @@ namespace Iviz.Displays
         {
             if (!isSetup)
             {
-                var manager = ArCamera.GetComponent<ARCameraManager>();
+                var manager = ArCamera.AssertHasComponent<ARCameraManager>(nameof(ArCamera));
                 if (manager.TryGetIntrinsics(out var intrinsics))
                 {
                     // may take a few frames

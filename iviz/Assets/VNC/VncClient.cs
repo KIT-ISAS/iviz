@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Tools;
 using MarcusW.VncClient;
+using MarcusW.VncClient.Protocol;
 using MarcusW.VncClient.Protocol.Implementation.MessageTypes.Outgoing;
 using MarcusW.VncClient.Protocol.Implementation.Native;
 using MarcusW.VncClient.Protocol.Implementation.Services.Transports;
+using MarcusW.VncClient.Protocol.SecurityTypes;
 using MarcusW.VncClient.Rendering;
 using Microsoft.Extensions.Logging.Abstractions;
 using UnityEngine;
@@ -56,6 +58,15 @@ namespace VNC
                 {
                     await StartAsync(tokenSource.Token);
                 }
+                catch (HandshakeFailedNoCommonSecurityException e)
+                {
+                    Debug.Log("Theirs: " + string.Join(", ", e.RemoteSecurityTypeIds));
+                    Debug.Log("Mine: " + string.Join(", ", e.LocalSecurityTypes));
+                }
+                catch (HandshakeFailedAuthenticationException e)
+                {
+                    Debug.Log("Authentication failed: " + (e.Reason ?? "Wrong credentials"));
+                }
                 catch (OperationCanceledException)
                 {
                 }
@@ -77,8 +88,10 @@ namespace VNC
             {
                 TransportParameters = new TcpTransportParameters
                 {
-                    Host = "192.168.0.17",
-                    Port = 5901
+                    //Host = "192.168.0.17",
+                    //Port = 5901
+                    Host = "141.3.59.5",
+                    Port = 5902
                 },
                 AuthenticationHandler = new AuthenticationHandler(),
                 InitialRenderTarget = renderTarget,

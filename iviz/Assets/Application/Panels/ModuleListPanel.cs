@@ -360,7 +360,7 @@ namespace Iviz.App
 
             if (menuObject != null)
             {
-                menuDialog = menuObject.GetComponent<IMenuDialogContents>();
+                menuDialog = menuObject.AssertHasComponent<IMenuDialogContents>(nameof(menuObject));
                 menuObject.SetActive(false);
             }
             else

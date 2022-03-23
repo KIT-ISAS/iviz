@@ -211,10 +211,10 @@ namespace Iviz.Controllers
 
             Settings.ARCamera = ar.Camera;
 
-            canvas = GameObject.Find("Canvas").GetComponent<Canvas>().AssertNotNull(nameof(canvas));
-            virtualCamera = Settings.FindMainCamera().GetComponent<Camera>();
+            canvas = GameObject.Find("Canvas").AssertHasComponent<Canvas>(nameof(canvas));
+            virtualCamera = Settings.FindMainCamera().AssertHasComponent<Camera>(nameof(virtualCamera));
 
-            MeshManager = ar.Camera.gameObject.GetComponent<ARMeshManager>();
+            MeshManager = ar.Camera.gameObject.AssertHasComponent<ARMeshManager>(nameof(MeshManager));
 
             lastAnchorMoved = Time.time;
 
@@ -393,7 +393,7 @@ namespace Iviz.Controllers
         {
             try
             {
-                var anchor = ar.AnchorManager.AddAnchor(WorldPose).GetComponent<ARAnchorResource>();
+                var anchor = ar.AnchorManager.AddAnchor(WorldPose).AssertHasComponent<ARAnchorResource>(nameof(ar.AnchorManager));
                 anchor.Moved += OnWorldAnchorMoved;
                 worldAnchor = anchor;
             }

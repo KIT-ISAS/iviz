@@ -169,22 +169,13 @@ namespace Iviz.Displays
         {
 #if UNITY_EDITOR
             // this needs special handling because we may be shutting down
-            if (!Settings.HasDragHandler)
+            if (Settings.IsShuttingDown)
             {
                 return;
             }
-
-            try
-            {
-                Settings.DragHandler.TryUnsetDraggedObject(draggable);
-            }
-            catch (MissingAssetFieldException)
-            {
-                // do nothing! if no camera was found, we're shutting down the scene
-            }
-#else
-                Settings.DragHandler.TryUnsetDraggedObject(draggable);
 #endif
+
+            Settings.DragHandler.TryUnsetDraggedObject(draggable);
         }
     }
 }
