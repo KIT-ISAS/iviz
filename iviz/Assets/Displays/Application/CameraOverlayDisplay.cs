@@ -24,8 +24,7 @@ namespace Iviz.Displays
 
         Camera GrandparentCamera => grandparentCamera != null
             ? grandparentCamera
-            : grandparentCamera = ParentCamera.transform.parent.GetComponent<Camera>()
-                .AssertNotNull(nameof(grandparentCamera));
+            : grandparentCamera = ParentCamera.transform.parent.AssertHasComponent<Camera>(nameof(grandparentCamera));
 
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 

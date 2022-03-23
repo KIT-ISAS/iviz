@@ -104,7 +104,7 @@ namespace Iviz.Controllers.XR
         public XRController(XRContents contents, XRConfiguration? configuration)
         {
             gaze = contents.Gaze;
-            gazeInteractor = gaze.GetComponent<XRRayInteractor>().AssertNotNull(nameof(gazeInteractor));
+            gazeInteractor = gaze.AssertHasComponent<XRRayInteractor>(nameof(gazeInteractor));
             leftHand = contents.LeftHand;
             rightHand = contents.RightHand;
             leftPaddle = contents.LeftPaddle;

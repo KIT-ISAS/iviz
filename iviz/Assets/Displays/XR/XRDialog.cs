@@ -11,8 +11,8 @@ namespace Iviz.Displays.XR
     public abstract class XRDialog : MonoBehaviour, IDialog
     {
         [SerializeField] Transform? _transform;
+        [SerializeField] Vector2 backgroundSize = new Vector2(1, 1);
         [SerializeField] Vector3 socketPosition = Vector3.zero;
-        [SerializeField] MeshMarkerDisplay? background;
         [SerializeField] Color backgroundColor = Resource.Colors.DefaultBackgroundColor;
         [SerializeField] XRDialogConnector? connector;
 
@@ -22,9 +22,29 @@ namespace Iviz.Displays.XR
         Vector3? currentPosition;
         float scale = 1;
 
+        ISupportsColor? backgroundObject;
+
         FrameNode Node => node ??= new FrameNode("Dialog Node");
         XRDialogConnector Connector => connector.AssertNotNull(nameof(connector));
-        MeshMarkerDisplay Background => background.AssertNotNull(nameof(background));
+
+        protected ISupportsColor Background
+        {
+            get
+            {
+                if (backgroundObject != null)
+                {
+                    return backgroundObject;
+                }
+                
+                var display = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Transform);
+                display.Size = backgroundSize;
+                display.Radius = 0.05f; 
+                backgroundObject = display;
+                return backgroundObject;
+            }
+        }
+
+
         Vector3 baseDisplacement;
 
         public event Action? Expired;
@@ -58,7 +78,7 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public string PivotFrameId
+        public string? PivotFrameId
         {
             set
             {
@@ -104,6 +124,7 @@ namespace Iviz.Displays.XR
         {
             Color = backgroundColor;
             Scale = scale;
+            PivotFrameId = pivotFrameId;
         }
 
         void Update()
@@ -176,7 +197,7 @@ namespace Iviz.Displays.XR
 
             return TfModule.OriginFrame.Transform.rotation.Inverse() * absoluteRotation;
         }
-        
+
         internal static void SetupButtons(XRButton button1, XRButton button2, XRButton button3, XRButtonSetup value)
         {
             button1.Visible = false;
@@ -225,6 +246,6 @@ namespace Iviz.Displays.XR
                     button3.Caption = "Cancel";
                     break;
             }
-        }        
+        }
     }
 }

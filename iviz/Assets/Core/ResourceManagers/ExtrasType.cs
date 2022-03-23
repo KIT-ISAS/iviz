@@ -13,11 +13,11 @@ namespace Iviz.Resources
         public ExtrasType()
         {
             AssetHolder = UnityEngine.Resources.Load<GameObject>("Asset Holder")
-                .GetComponent<AssetHolder>().AssertNotNull(nameof(AssetHolder));
+                .AssertHasComponent<AssetHolder>(nameof(AssetHolder));
             AppAssetHolder = UnityEngine.Resources.Load<GameObject>("App Asset Holder")
-                .GetComponent<AppAssetHolder>().AssertNotNull(nameof(AppAssetHolder));
+                .AssertHasComponent<AppAssetHolder>(nameof(AppAssetHolder));
             WidgetAssetHolder = UnityEngine.Resources.Load<GameObject>("Widget Asset Holder")
-                .GetComponent<WidgetAssetHolder>().AssertNotNull(nameof(WidgetAssetHolder));
+                .AssertHasComponent<WidgetAssetHolder>(nameof(WidgetAssetHolder));
         }
     }
 }

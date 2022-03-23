@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 using Iviz.Core;
 using Iviz.Tools;
 using MarcusW.VncClient;
+using MarcusW.VncClient.Protocol.Implementation.Services.Communication;
 using MarcusW.VncClient.Rendering;
 using Unity.IL2CPP.CompilerServices;
 using UnityEngine;
@@ -46,7 +47,7 @@ namespace VNC
 
             public Span<byte> Address => buffer;
             public Size Size => new(width, height);
-            public PixelFormat Format => PixelFormat.BgraCompatiblePixelFormat;
+            public PixelFormat Format => TurboJpegDecoder.RgbaCompatiblePixelFormat;
 
             public FrameBufferReference(VncClient parent, Size size)
             {
@@ -76,6 +77,66 @@ namespace VNC
                 }
             }
 
+            void SetPixels4(in Rectangle rectangle, ReadOnlySpan<byte> src)
+            {
+                var dst = StartSpan(rectangle);
+                int pitch = width * BytesPerPixel;
+                int srcPitch = rectangle.Size.Width * BytesPerPixel;
+                int srcHeight = rectangle.Size.Height;
+
+                if (srcPitch == pitch)
+                {
+                    src.CopyTo(dst);
+                }
+                else
+                {
+                    for (int y = srcHeight; y > 1; y--)
+                    {
+                        src[..srcPitch].CopyTo(dst);
+                        src = src[srcPitch..];
+                        dst = dst[pitch..];
+                    }
+                    
+                    src[..srcPitch].CopyTo(dst);
+                }
+            }
+
+            void SetPixels3(in Rectangle rectangle, ReadOnlySpan<byte> src)
+            {
+                var dst = StartSpan(rectangle);
+                int dstWidth = width;
+                int srcWidth = rectangle.Size.Width;
+                int srcHeight = rectangle.Size.Height;
+
+                var dst4 = dst.Cast<Rgba>();
+                var src3 = src.Cast<Rgb>();
+
+                for (int y = srcHeight; y > 0; y--)
+                {
+                    // paranoid slicing to ensure we don't overflow
+                    var dstRow = dst4[..srcWidth];
+                    ref var dstPtr = ref dstRow[0];
+
+                    var srcRow = src3[..srcWidth];
+                    ref var srcPtr = ref Unsafe.AsRef(in srcRow[0]); // it's ok, we don't write here
+
+                    for (int x = srcWidth; x > 0; x--)
+                    {
+                        dstPtr.rgb = srcPtr;
+
+                        // this is messy, but il2cpp can't optimize bounds checking away if it happens in a span
+                        srcPtr = ref Unsafe.Add(ref srcPtr, 1);
+                        dstPtr = ref Unsafe.Add(ref dstPtr, 1);
+                    }
+
+                    if (y > 1)
+                    {
+                        src3 = src3[srcWidth..];
+                        dst4 = dst4[dstWidth..];
+                    }
+                }
+            }
+
             public void FillPixels(in Rectangle rectangle, ReadOnlySpan<byte> singlePixel, in PixelFormat pixelFormat,
                 int numPixels)
             {
@@ -83,8 +144,9 @@ namespace VNC
                 {
                     if (pixelFormat.IsBinaryCompatibleTo(PixelFormat.RfbRgb888))
                     {
-                        var rgb = singlePixel.Read<Rgb>();
-                        FillPixelsSolid(rectangle, rgb);
+                        Rgba rgba = default;
+                        rgba.rgb = singlePixel.Read<Rgb>();
+                        FillPixelsSolid(rectangle, rgba);
                     }
                     else if (pixelFormat.IsBinaryCompatibleTo(Format))
                     {
@@ -97,7 +159,25 @@ namespace VNC
                     Debug.Log(e);
                 }
             }
+            
+            void FillPixelsSolid(in Rectangle rectangle, Rgba targetPixel)
+            {
+                var dst = StartSpan(rectangle);
+                int dstWidth = width;
+                int srcWidth = rectangle.Size.Width;
+                int srcHeight = rectangle.Size.Height;
 
+                var dst4 = dst.Cast<Rgba>();
+                
+                for (int y = srcHeight; y > 1; y--)
+                {
+                    dst4[..srcWidth].Fill(targetPixel);
+                    dst4 = dst4[dstWidth..];
+                }
+
+                dst4[..srcWidth].Fill(targetPixel);
+            }
+            
             public void SetPixelsPalette(in Rectangle rectangle, ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette,
                 in PixelFormat pixelFormat)
             {
@@ -117,117 +197,59 @@ namespace VNC
             void SetPixelsPalette3(in Rectangle rectangle, ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
             {
                 var dst = StartSpan(rectangle);
-                int pitch = width * BytesPerPixel;
-                int rectangleWidth = rectangle.Size.Width;
-                int rectangleHeight = rectangle.Size.Height;
+                int dstWidth = width;
+                int srcWidth = rectangle.Size.Width;
+                int srcHeight = rectangle.Size.Height;
                 var palette3 = palette.Cast<Rgb>();
 
-                for (int y = rectangleHeight; y > 0; y--)
+                var dst4 = dst.Cast<Rgba>();
+
+                for (int y = srcHeight; y > 0; y--)
                 {
-                    var dst4 = dst.Cast<Rgba>();
-                    for (int x = 0; x < rectangleWidth; x++)
+                    // paranoid slicing to ensure we don't overflow
+                    var dstRow = dst4[..srcWidth];
+                    ref var dstPtr = ref dstRow[0];
+                    
+                    var indicesRow = indices[..srcWidth];
+                    ref byte indicesPtr = ref Unsafe.AsRef(in indicesRow[0]); // it's ok, we don't write here
+
+                    for (int x = srcWidth; x > 0; x--)
                     {
-                        var rgb = palette3[indices[x]];
-                        ref var dstPtr = ref dst4[x];
-                        dstPtr.r = rgb.b;
-                        dstPtr.g = rgb.g;
-                        dstPtr.b = rgb.r;
+                        var rgb = palette3[indicesPtr]; // do not use pointer for palette here, this may throw
+                        dstPtr.rgb = rgb;
+
+                        dstPtr = ref Unsafe.Add(ref dstPtr, 1);
+                        indicesPtr = ref Unsafe.Add(ref indicesPtr, 1);
                     }
 
-                    indices = indices[rectangleWidth..];
-                    dst = dst[pitch..];
+                    if (y > 1)
+                    {
+                        indices = indices[srcWidth..];
+                        dst4 = dst4[dstWidth..];
+                    }
                 }
             }
 
 
             Span<byte> StartSpan(in Rectangle rectangle) =>
                 buffer.AsSpan((rectangle.Position.Y * width + rectangle.Position.X) * BytesPerPixel);
-
-            void FillPixelsSolid<T>(in Rectangle rectangle, T targetPixel) where T : unmanaged
-            {
-                var dst = StartSpan(rectangle);
-                int pitch = width * BytesPerPixel;
-                int rectanglePitch = rectangle.Size.Width * BytesPerPixel;
-                int rectangleHeight = rectangle.Size.Height;
-
-                for (int y = rectangleHeight; y > 0; y--)
-                {
-                    dst[..rectanglePitch].Cast<T>().Fill(targetPixel);
-                    dst = dst[pitch..];
-                }
-            }
-
-            void SetPixels4(in Rectangle rectangle, ReadOnlySpan<byte> src)
-            {
-                var dst = StartSpan(rectangle);
-                int pitch = width * BytesPerPixel;
-                int rectanglePitch = rectangle.Size.Width * BytesPerPixel;
-                int rectangleHeight = rectangle.Size.Height;
-
-                if (rectanglePitch == pitch)
-                {
-                    src.CopyTo(dst);
-                }
-                else
-                {
-                    for (int y = rectangleHeight; y > 0; y--)
-                    {
-                        src[..rectanglePitch].CopyTo(dst);
-                        src = src[rectanglePitch..];
-                        dst = dst[pitch..];
-                    }
-                }
-            }
-
-            void SetPixels3(in Rectangle rectangle, ReadOnlySpan<byte> src)
-            {
-                var dst = StartSpan(rectangle);
-                int pitch = width * BytesPerPixel;
-                int rectangleWidth = rectangle.Size.Width;
-                int rectangleHeight = rectangle.Size.Height;
-
-                var src3 = src.Cast<Rgb>();
-
-                for (int y = rectangleHeight; y > 0; y--)
-                {
-                    // paranoid slicing to ensure we don't overflow
-                    var dstRow = dst.Cast<Rgba>()[..rectangleWidth]; 
-                    var srcRow = src3[..rectangleWidth];
-                    
-                    ref var srcPtr = ref Unsafe.AsRef(in src3[0]); // it's ok, we don't write here
-                    ref var dstPtr = ref dstRow[0];
-
-                    for (int x = rectangleWidth; x > 0; x--)
-                    {
-                        dstPtr.r = srcPtr.b;
-                        dstPtr.g = srcPtr.g;
-                        dstPtr.b = srcPtr.r;
-
-                        // this is messy, but il2cpp can't optimize bounds checking away if it happens in a span
-                        srcPtr = Unsafe.Add(ref srcPtr, 1);
-                        dstPtr = Unsafe.Add(ref dstPtr, 1);
-                    }
-
-                    src3 = src3[rectangleWidth..];
-                    dst = dst[pitch..];
-                }
-            }
-
+            
             public void Dispose()
             {
                 GameThread.Post(frameArrived);
             }
-            
+
             [StructLayout(LayoutKind.Sequential)]
             struct Rgba
             {
-                public byte r, g, b, a;
+                public Rgb rgb;
+                readonly byte a;
             }
 
-            [StructLayout(LayoutKind.Sequential)]        
+            [StructLayout(LayoutKind.Sequential)]
             readonly struct Rgb
             {
-                public readonly byte r, g, b;
+                readonly byte r, g, b;
             }
         }
     }

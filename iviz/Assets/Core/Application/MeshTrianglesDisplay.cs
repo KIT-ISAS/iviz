@@ -55,7 +55,7 @@ namespace Iviz.Displays
 
 
             mesh = newMesh;
-            GetComponent<MeshFilter>().sharedMesh = newMesh;
+            gameObject.AssertHasComponent<MeshFilter>(nameof(gameObject)).sharedMesh = newMesh;
             return newMesh;
         }
 

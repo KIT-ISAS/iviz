@@ -69,10 +69,10 @@ namespace Iviz.Displays
                     throw new ArgumentNullException(nameof(value));
                 }
 
-                var meshContainer = value.Object.GetComponent<MeshMarkerDisplay>();
+                var meshContainer = value.Object.AssertHasComponent<MeshMarkerDisplay>(nameof(value.Object));
 
                 Mesh tmpMesh;
-                if (meshContainer == null || (tmpMesh = meshContainer.Mesh) == null)
+                if ((tmpMesh = meshContainer.Mesh) == null)
                 {
                     throw new ArgumentException("Object does not contain a mesh!");
                 }

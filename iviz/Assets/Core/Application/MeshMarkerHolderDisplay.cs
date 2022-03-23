@@ -19,7 +19,7 @@ namespace Iviz.Displays
         
         public BoxCollider Collider => boxCollider != null
             ? boxCollider
-            : boxCollider = GetComponent<BoxCollider>().AssertNotNull(nameof(boxCollider));
+            : boxCollider = gameObject.AssertHasComponent<BoxCollider>(nameof(boxCollider));
 
         public IReadOnlyList<MeshMarkerDisplay> Children
         {

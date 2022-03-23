@@ -285,6 +285,34 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T AssertHasComponent<T>(this Component? o, string name,
+            [CallerFilePath] string? caller = null,
+            [CallerLineNumber] int lineNumber = 0) =>
+            AssertHasComponent<T>(o != null ? o.gameObject : null, name, caller, lineNumber);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static T AssertHasComponent<T>(this GameObject? o, string name,
+            [CallerFilePath] string? caller = null,
+            [CallerLineNumber] int lineNumber = 0)
+        {
+            if (o == null)
+            {
+                throw new MissingAssetFieldException(
+                    $"Asset '{name}' has not been set!\n" +
+                    $"At: {caller} line {lineNumber}");
+            }
+
+            if (!o.TryGetComponent(out T t))
+            {
+                throw new MissingAssetFieldException(
+                    $"Asset '{name}' has does not have a component of type '{typeof(T).Name}!\n" +
+                    $"At: {caller} line {lineNumber}");
+            }
+            
+            return t;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color WithAlpha(this in Color c, float alpha)
         {
             Color q;

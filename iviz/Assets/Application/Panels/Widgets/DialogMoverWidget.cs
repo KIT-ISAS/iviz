@@ -25,7 +25,7 @@ namespace Iviz.App
                 if (dragCausesDetach)
                 {
                     ModuleListPanel.Instance.DialogPanelManager.DetachIfSelectedPanel(
-                        TargetTransform.GetComponent<DialogPanel>());
+                        TargetTransform.AssertHasComponent<DialogPanel>(nameof(TargetTransform)));
                     if (Settings.IsXR)
                     {
                         return;
