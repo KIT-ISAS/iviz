@@ -11,6 +11,7 @@ namespace Iviz.Displays
     {
         [SerializeField] MeshMarkerDisplay? reticle;
         LineDisplay? lines;
+        float baseReticleScale = 1;
 
         LineDisplay Lines => lines != null ? lines : (lines = ResourcePool.RentDisplay<LineDisplay>(transform));
         MeshMarkerDisplay Reticle => reticle.AssertNotNull(nameof(reticle));
@@ -20,6 +21,11 @@ namespace Iviz.Displays
         public Color Color { get; set; } = Color.white;
         public Color ReticleColor { get; set; } = Color.white;
         public Color ReticleEmissiveColor { get; set; } = Color.white;
+
+        public float ReticleScale
+        {
+            set => baseReticleScale = value;
+        }
 
         public float Width
         {
@@ -44,9 +50,10 @@ namespace Iviz.Displays
             if (reticleVisible)
             {
                 float scale = 0.03f * Vector3.Distance(target, Settings.MainCameraTransform.position);
-                Reticle.Transform.localScale = scale * Vector3.one;
+                Reticle.Transform.localScale = baseReticleScale * scale * Vector3.one;
                 Reticle.Transform.SetPositionAndRotation(target, Quaternion.LookRotation(normal));
                 Reticle.Color = ReticleColor;
+                Reticle.EmissiveColor = ReticleEmissiveColor;
             }
 
             BuildLeash(pointerRay, target);

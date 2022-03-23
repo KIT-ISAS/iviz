@@ -18,12 +18,12 @@ namespace VNC
 {
     internal sealed class RenderTarget : IRenderTarget
     {
-        readonly VncClient parent;
+        readonly Action<IFramebufferReference> callback;
         FrameBufferReference? cachedFrameBufferReference;
 
-        public RenderTarget(VncClient parent)
+        public RenderTarget(Action<IFramebufferReference> callback)
         {
-            this.parent = parent;
+            this.callback = callback;
         }
 
         public IFramebufferReference GrabFramebufferReference(Size size, IImmutableSet<Screen> layout)
@@ -33,13 +33,13 @@ namespace VNC
                 return cachedFrameBufferReference;
             }
 
-            cachedFrameBufferReference = new FrameBufferReference(parent, size);
+            cachedFrameBufferReference = new FrameBufferReference(callback, size);
             return cachedFrameBufferReference;
         }
 
         sealed class FrameBufferReference : IFramebufferReference
         {
-            readonly Action frameArrived;
+            readonly Action onFrameArrived;
             readonly byte[] buffer;
             readonly int width;
             readonly int height;
@@ -49,13 +49,13 @@ namespace VNC
             public Size Size => new(width, height);
             public PixelFormat Format => TurboJpegDecoder.RgbaCompatiblePixelFormat;
 
-            public FrameBufferReference(VncClient parent, Size size)
+            public FrameBufferReference(Action<IFramebufferReference> callback, Size size)
             {
                 width = size.Width;
                 height = size.Height;
                 int requested = width * height * 4;
                 buffer = new byte[requested];
-                frameArrived = () => parent.OnFrameArrived(this);
+                onFrameArrived = () => callback(this);
             }
 
             public void SetPixels(in Rectangle rectangle, ReadOnlySpan<byte> pixelData, in PixelFormat pixelFormat)
@@ -236,7 +236,7 @@ namespace VNC
             
             public void Dispose()
             {
-                GameThread.Post(frameArrived);
+                GameThread.Post(onFrameArrived);
             }
 
             [StructLayout(LayoutKind.Sequential)]

@@ -19,6 +19,7 @@ namespace Iviz.Displays
 
         [SerializeField] Transform? childTransform;
         [SerializeField] Bounds bounds;
+        [SerializeField] bool showHandles = true;
 
         readonly List<WrapperBoundsControl> wrappers = new();
         IBoundsControl? control;
@@ -140,6 +141,7 @@ namespace Iviz.Displays
                 wrapper.StartDragging += () => OnStartDragging(wrapper);
                 wrapper.EndDragging += OnEndDragging;
                 wrapper.Bounds = bounds;
+                wrapper.Interactable = showHandles;
             }
         }
 
@@ -170,7 +172,7 @@ namespace Iviz.Displays
 
             foreach (var wrapper in wrappers)
             {
-                wrapper.Interactable = true;
+                wrapper.Interactable = showHandles;
             }
 
             EndDragging?.Invoke();

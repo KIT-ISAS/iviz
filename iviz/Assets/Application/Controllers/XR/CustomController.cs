@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System.Collections.Generic;
+using Iviz.Core.XR;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
@@ -11,7 +12,7 @@ namespace Iviz.Controllers.XR
     /// A simplified version of <see cref="XRContents"/> for devices that do not have a <see cref="XRNode"/>.
     /// Instead we just wait for a device that "looks like" what we need.  
     /// </summary>
-    public abstract class CustomController : XRBaseController
+    public abstract class CustomController : XRBaseController, IXRController
     {
         readonly List<InputFeatureUsage> cachedUsages = new();
         InputDevice? device;
@@ -27,14 +28,14 @@ namespace Iviz.Controllers.XR
         public bool ButtonState { get; protected set; }
         public bool ButtonUp { get; protected set; }
         public bool ButtonDown { get; protected set; }
-        public Vector3? LockedPosition { get; set; }
-        public bool IsNearInteraction { get; set; }
+        public Vector3? LockedPosition { get; internal set; }
+        public bool IsNearInteraction { get; internal set; }
 
         protected bool TryGetDevice(out InputDevice outDevice)
         {
-            if (device != null)
+            if (device is { } deviceValue)
             {
-                outDevice = device.Value;
+                outDevice = deviceValue;
                 return true;
             }
 

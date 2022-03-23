@@ -1,10 +1,8 @@
 #nullable enable
 
-using System;
-using Iviz.Core;
 using UnityEngine;
 
-namespace Iviz.Controllers.XR
+namespace Iviz.Core.XR
 {
     public sealed class XRStatusInfo : MonoBehaviour
     {
@@ -13,5 +11,16 @@ namespace Iviz.Controllers.XR
 
         public bool IsXREnabled => isXREnabled;
         public bool IsHololens => isHololens;
+        
+        void Awake()
+        {
+            Settings.IsShuttingDown = false;
+        }
+        
+        void OnApplicationQuit()
+        {
+            Settings.IsShuttingDown = true;
+        }
+        
     }
 }

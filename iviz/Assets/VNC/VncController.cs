@@ -13,10 +13,5 @@ namespace VNC
         {
             tfModule = new TfModule(id => new TfFrameDisplay(id));            
         }
-        
-        void OnApplicationQuit()
-        {
-            Settings.IsShuttingDown = true;
-        }
     }
 }

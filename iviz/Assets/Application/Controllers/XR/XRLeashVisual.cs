@@ -13,6 +13,7 @@ namespace Iviz.Controllers.XR
         [SerializeField] XRRayInteractor? interactor;
         [SerializeField] CustomController? controller;
         [SerializeField] float noHitLength = 1.6f;
+        [SerializeField] float reticleScale = 1;
 
         Transform? mTransform;
         LeashDisplay? leash;
@@ -25,6 +26,7 @@ namespace Iviz.Controllers.XR
 
         void Awake()
         {
+            Leash.ReticleScale = reticleScale;
             Interactor.selectEntered.AddListener(OnSelectEntered);
             Interactor.selectExited.AddListener(OnSelectExited);
         }
@@ -66,7 +68,7 @@ namespace Iviz.Controllers.XR
             {
                 Leash.Color = Color.cyan;
                 Leash.ReticleColor = Color.white;
-                Leash.ReticleEmissiveColor = Color.black;
+                Leash.ReticleEmissiveColor = Color.white;
                 Leash.Width = interactingWidth;
                 Controller.IsNearInteraction = (currentPosition - referencePoint).magnitude < XRController.NearDistance;
 
@@ -95,7 +97,6 @@ namespace Iviz.Controllers.XR
             {
                 Leash.Color = Color.white;
                 Leash.ReticleColor = Color.white;
-                Leash.ReticleEmissiveColor = isUIHitClosest ? Color.white : Color.black;
                 Leash.Width = hoveringWidth;
                 Leash.Set(transformRay, hitPosition, hitNormal, isUIHitClosest ? 0.005f : 0.001f,
                     !Controller.IsNearInteraction);

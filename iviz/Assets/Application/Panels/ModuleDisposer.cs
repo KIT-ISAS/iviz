@@ -12,7 +12,6 @@ namespace Iviz.App
     {
         void OnApplicationQuit()
         {
-            Settings.IsShuttingDown = true;
             ModuleListPanel.Instance.Dispose();
         }
     }
