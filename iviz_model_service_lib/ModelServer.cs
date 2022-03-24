@@ -141,13 +141,13 @@ public sealed class ModelServer : IDisposable
             packagePaths[package] = paths;
         }
 
-            if (verbose)
-            {
-                Log("    " + path);
-            }
-
-            paths.Add(path);
+        if (verbose)
+        {
+            Log("    " + path);
         }
+
+        paths.Add(path);
+    }
 
     string ResolvePath(Uri uri)
     {
@@ -384,7 +384,7 @@ public sealed class ModelServer : IDisposable
             OrientationHint = orientationHint
         };
 
-        List<Triangle> faces = new List<Triangle>();
+        var faces = new List<Triangle>();
         for (int i = 0; i < scene.MeshCount; i++)
         {
             Assimp.Mesh srcMesh = scene.Meshes[i];
@@ -420,14 +420,13 @@ public sealed class ModelServer : IDisposable
                 }
             }
 
-            Func<Vector3D, Vector3f> toVector3 = ToVector3;
             var dstMesh = new Msgs.IvizMsgs.Mesh
             {
                 Name = srcMesh.Name ?? "[mesh]",
-                Vertices = srcMesh.Vertices.Select(toVector3).ToArray(),
-                Normals = srcMesh.Normals.Select(toVector3).ToArray(),
-                Tangents = srcMesh.Tangents.Select(toVector3).ToArray(),
-                BiTangents = srcMesh.BiTangents.Select(toVector3).ToArray(),
+                Vertices = srcMesh.Vertices.Select(ToVector3).ToArray(),
+                Normals = srcMesh.Normals.Select(ToVector3).ToArray(),
+                Tangents = srcMesh.Tangents.Select(ToVector3).ToArray(),
+                BiTangents = srcMesh.BiTangents.Select(ToVector3).ToArray(),
                 TexCoords = srcMesh.TextureCoordinateChannels.Select(ToTexCoords).ToArray(),
                 ColorChannels = srcMesh.VertexColorChannels.Select(ToColorChannel).ToArray(),
                 Faces = faces.ToArray(),
@@ -526,7 +525,7 @@ public sealed class ModelServer : IDisposable
 
     static Matrix4 ToMatrix(in Matrix4x4 v)
     {
-        return new(new[]
+        return new Matrix4(new[]
         {
             v.A1, v.B1, v.C1, v.D1,
             v.A2, v.B2, v.C2, v.D2,
@@ -645,21 +644,21 @@ public sealed class ModelServer : IDisposable
         LogUp(uri);
     }
 
-        static Msgs.IvizMsgs.Light ToLight(Sdf.Light light)
+    static Msgs.IvizMsgs.Light ToLight(Sdf.Light light)
+    {
+        return new Msgs.IvizMsgs.Light
         {
-            return new Msgs.IvizMsgs.Light
-            {
-                Name = light.Name ?? "",
-                Type = (byte)light.Type,
-                CastShadows = light.CastShadows,
-                Diffuse = ToColor(light.Diffuse),
-                Range = 0,
-                Position = ToVector3(light.Pose.Position),
-                Direction = ToVector3(light.Direction),
-                InnerAngle = (float)light.Spot.InnerAngle,
-                OuterAngle = (float)light.Spot.OuterAngle
-            };
-        }
+            Name = light.Name ?? "",
+            Type = (byte)light.Type,
+            CastShadows = light.CastShadows,
+            Diffuse = ToColor(light.Diffuse),
+            Range = 0,
+            Position = ToVector3(light.Pose.Position),
+            Direction = ToVector3(light.Direction),
+            InnerAngle = (float)light.Spot.InnerAngle,
+            OuterAngle = (float)light.Spot.OuterAngle
+        };
+    }
 
     static void ResolveIncludes(Sdf.SdfFile file, ICollection<Include> includes)
     {

@@ -1,5 +1,7 @@
 #nullable enable
 
+#if false
+
 using System;
 using System.Buffers;
 using System.Collections.Immutable;
@@ -44,6 +46,10 @@ namespace VNC
             readonly int width;
             readonly int height;
             const int BytesPerPixel = 4;
+
+            public void CopyFrom(in Rectangle rectangle, in Rectangle srcRectangle)
+            {
+            }
 
             public Span<byte> Address => buffer;
             public Size Size => new(width, height);
@@ -137,8 +143,7 @@ namespace VNC
                 }
             }
 
-            public void FillPixels(in Rectangle rectangle, ReadOnlySpan<byte> singlePixel, in PixelFormat pixelFormat,
-                int numPixels)
+            public void FillPixels(in Rectangle rectangle, ReadOnlySpan<byte> singlePixel, in PixelFormat pixelFormat)
             {
                 try
                 {
@@ -254,3 +259,5 @@ namespace VNC
         }
     }
 }
+
+#endif

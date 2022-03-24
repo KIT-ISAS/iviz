@@ -1,22 +1,44 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=_002FUsers_002Fakzeac_002FDocuments_002Fiviz_002Fassimpnet_002FAssimpNet_002Fbin_002FRelease_002Fnetstandard1_002E3_002FAssimpNet_002Edll/@EntryIndexedValue">True</s:Boolean>
+	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ASocket_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2021_002E2_003Fresharper_002Dhost_003FSourcesCache_003Fd3525442f0c2430f8599c032103e0deb8f000_003F1E_003FSocket_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/PredefinedNamingRules/=PrivateConstants/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="" Suffix="" Style="AaBb_AaBb" /&gt;</s:String>
-	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">/usr/local/share/dotnet/sdk/5.0.100/MSBuild.dll</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=22058d1f_002D34dd_002D408f_002Da4b0_002Df4f1557942e6/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from &amp;lt;iviz_utils_tests&amp;gt; #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;Project Location="/Users/akzeac/Documents/iviz/iviz_utils_tests" Presentation="&amp;lt;iviz_utils_tests&amp;gt;" /&gt;
+	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">/usr/local/share/dotnet/sdk/6.0.100/MSBuild.dll</s:String>
+	<s:Int64 x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsbuildVersion/@EntryValue">1114112</s:Int64>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=289aa647_002D5e74_002D4287_002D96d2_002D3cbb7b0f8886/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestTf" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMagnitude&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=49abbe6a_002D280d_002D44d6_002Da5f2_002D9e680fc766e6/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from &amp;lt;iviz_utils_tests&amp;gt;" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;Project Location="/Users/akzeac/Documents/iviz/iviz_utils_tests" Presentation="&amp;lt;iviz_utils_tests&amp;gt;" /&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=c19efdf8_002D9b7c_002D4544_002D9db1_002D35f8f67ab4e8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestTf2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;TestAncestor&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf2&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestOccupancyGrid&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMagnitude&lt;/TestId&gt;
+    &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf3&lt;/TestId&gt;
+  &lt;/TestAncestor&gt;
+&lt;/SessionState&gt;</s:String>
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e3adf1f9_002D6f13_002D431e_002Da944_002Db6b703a80cb5/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestChannelsAsync" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+  &lt;Or&gt;
+    &lt;TestAncestor&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net5.0::Iviz.UtilsTests.NetworkTests.TestChannelsAsync&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net5.0::Iviz.UtilsTests.NetworkTests.TestRosClientGetTopics&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestAddModule&lt;/TestId&gt;
+      &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf&lt;/TestId&gt;
+    &lt;/TestAncestor&gt;
+    &lt;ProjectFile&gt;D426E606-432C-4314-B451-285C6AEA44F2/f:MessageTests.cs&lt;/ProjectFile&gt;
+  &lt;/Or&gt;
 &lt;/SessionState&gt;</s:String>
 	
 	
 	
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=9f86938b_002Dff8d_002D4919_002Dbc7a_002Df4bf808527cc/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="All tests from &amp;lt;iviz_utils_tests&amp;gt; #4" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;Project Location="/Users/akzeac/Documents/iviz/iviz_utils_tests" Presentation="&amp;lt;iviz_utils_tests&amp;gt;" /&gt;
-&lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=abb68c64_002D432d_002D4441_002D9029_002Dee13c4e9916c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="All tests from &amp;lt;iviz_utils_tests&amp;gt; #2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
-  &lt;Project Location="/Users/akzeac/Documents/iviz/iviz_utils_tests" Presentation="&amp;lt;iviz_utils_tests&amp;gt;" /&gt;
-&lt;/SessionState&gt;</s:String>
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	

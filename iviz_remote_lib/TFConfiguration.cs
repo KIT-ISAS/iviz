@@ -23,3 +23,4 @@ public sealed class TFConfiguration : IConfiguration
         s.Serialize(FlipZ);
     }
 }
+

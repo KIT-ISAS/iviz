@@ -52,24 +52,6 @@ public static class EnumeratorUtils
         return new SelectEnumerable<TA[], TA, TB>(a, f);
     }
 
-    public static void AddRange<TC, TA, TB>(this List<TB> list, in SelectEnumerable<TC, TA, TB> tb)
-        where TC : IReadOnlyList<TA>
-    {
-        list.Capacity = list.Count + tb.Count;
-        foreach (TB b in tb)
-        {
-            list.Add(b);
-        }
-    }
-
-    public static void CopyFrom<TT, TU>(this Span<TT> span, TU list) where TU : IReadOnlyList<TT>
-    {
-        foreach (int i in ..span.Length)
-        {
-            span[i] = list[i];
-        }
-    }
-
     public static RangeEnumerable<TA> Take<TA>(this IReadOnlyList<TA> a, int count) => new(a, 0, count);
 
     public static RangeEnumerable<TA> Skip<TA>(this IReadOnlyList<TA> a, int start) => new(a, start, a.Count);

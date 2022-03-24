@@ -547,6 +547,11 @@ namespace Iviz.Core
         {
             return array.AsSpan().Slice(start, length);
         }
+        
+        public static unsafe Span<byte> CreateSpan(this IntPtr ptr, int length)
+        {
+            return new Span<byte>(ptr.ToPointer(), length);
+        }
 
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this in NativeArray<T> array) where T : unmanaged
         {
@@ -821,6 +826,21 @@ namespace Iviz.Core
             }
 
             text.SetCharArray(segment.Array, start, count);
+        }
+        
+        public static int ClosestPow2(int value)
+        {
+            int p = 8;
+            while (true)
+            {
+                int np = 2 * p;
+                if (np > value)
+                {
+                    return np;
+                }
+
+                p = np;
+            }
         }
     }
 

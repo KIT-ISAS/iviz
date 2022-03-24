@@ -42,7 +42,7 @@ public sealed class IvizController
     }
 
     /// <summary>
-    /// Creates a module that listens to the given topic, or returns the name of the module already listening to it.
+    /// Tells iviz to create a module that listens to the given topic, or returns the name of the module already listening to it.
     /// Note that only one module can listen to a given topic at the same time.
     /// </summary>
     /// <param name="topic">The topic to listen to.</param>
@@ -79,7 +79,7 @@ public sealed class IvizController
     }
 
     /// <summary>
-    /// Adds a module of type <see cref="AddModuleType"/>. Some module types such as <see cref="AddModuleType.AugmentedReality"/>
+    /// Tells iviz to add a module of type <see cref="AddModuleType"/>. Some module types such as <see cref="AddModuleType.AugmentedReality"/>
     /// are unique, while others such as <see cref="AddModuleType.Robot"/> can be instanced multiple times.
     /// If a module type is unique and it already exists, the id of the existing module will be returned.
     /// Note that if the module should listen to a given ROS topic, <see cref="AddModuleFromTopic"/> must be used instead.

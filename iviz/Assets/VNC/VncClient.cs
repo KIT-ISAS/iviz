@@ -4,11 +4,14 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Tools;
 using MarcusW.VncClient;
+using MarcusW.VncClient.Protocol;
 using MarcusW.VncClient.Protocol.Implementation.MessageTypes.Outgoing;
 using MarcusW.VncClient.Protocol.Implementation.Services.Transports;
 using MarcusW.VncClient.Rendering;
 using Microsoft.Extensions.Logging.Abstractions;
+using UnityEngine;
 
 namespace VNC
 {
@@ -17,22 +20,50 @@ namespace VNC
         readonly SemaphoreSlim signal = new(0);
         readonly ConcurrentQueue<EventMessage> messages = new();
         readonly CancellationTokenSource tokenSource = new();
+
+        public void Start(VncScreen screen)
+        {
+            TaskUtils.Run(async () =>
+            {
+                try
+                {
+                    await StartAsync(screen);
+                }
+                catch (HandshakeFailedNoCommonSecurityException e)
+                {
+                    Debug.Log("Theirs: " + string.Join(", ", e.RemoteSecurityTypeIds));
+                    Debug.Log("Mine: " + string.Join(", ", e.LocalSecurityTypes));
+                }
+                catch (HandshakeFailedAuthenticationException e)
+                {
+                    Debug.Log("Authentication failed: " + (e.Reason ?? "Wrong credentials"));
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception e)
+                {
+                    Debug.LogWarning(e);
+                }
+            });            
+        }
         
-        public async Task StartAsync(Action<IFramebufferReference> onFrameArrived)
+        async Task StartAsync(VncScreen screen)
         {
             var vncClient = new MarcusW.VncClient.VncClient(NullLoggerFactory.Instance);
 
-            var renderTarget = new RenderTarget(onFrameArrived);
+            //var renderTarget = new RenderTarget(onFrameArrived);
+            var renderTarget = new DeferredRenderTarget(screen);
 
             // Configure the connect parameters
             var parameters = new ConnectParameters
             {
                 TransportParameters = new TcpTransportParameters
                 {
-                    //Host = "192.168.0.17",
-                    //Port = 5901
-                    Host = "141.3.59.5",
-                    Port = 5902
+                    Host = "192.168.0.17",
+                    Port = 5901
+                    //Host = "141.3.59.5",
+                    //Port = 5902
                 },
                 AuthenticationHandler = new AuthenticationHandler(),
                 InitialRenderTarget = renderTarget,

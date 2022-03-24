@@ -1,8 +1,7 @@
 #nullable enable
 
 using System;
-using System.Collections.Concurrent;
-using System.Threading;
+using System.Collections.Generic;
 using Iviz.Core;
 using Iviz.Core.XR;
 using Iviz.Tools;
@@ -10,7 +9,6 @@ using MarcusW.VncClient;
 using MarcusW.VncClient.Protocol;
 using MarcusW.VncClient.Protocol.Implementation.MessageTypes.Outgoing;
 using MarcusW.VncClient.Protocol.Implementation.Native;
-using MarcusW.VncClient.Rendering;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -20,7 +18,7 @@ using Position = MarcusW.VncClient.Position;
 namespace VNC
 {
     public class VncScreen : MonoBehaviour, IPointerMoveHandler, IPointerUpHandler, IPointerDownHandler,
-        IPointerExitHandler
+        IPointerExitHandler, IRenderTargetCallback
     {
         Transform? mTransform;
         [SerializeField] Material? material;
@@ -28,6 +26,8 @@ namespace VNC
         [SerializeField] XRSimpleInteractable? interactable;
         [SerializeField] BoxCollider? boxCollider;
 
+        readonly Dictionary<(int, int), Texture2D> cachedTextures = new();
+        
         readonly VncClient client = new();
         Texture2D? texture;
         Size? size;
@@ -41,7 +41,7 @@ namespace VNC
 
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
-        
+
         void Awake()
         {
             TurboJpeg.IsAvailable = true;
@@ -57,34 +57,12 @@ namespace VNC
                 interactable.hoverEntered.AddListener(OnHoverEnter);
                 interactable.hoverExited.AddListener(OnHoverExit);
             }
-            
-            TaskUtils.Run(async () =>
-            {
-                try
-                {
-                    await client.StartAsync(OnFrameArrived);
-                }
-                catch (HandshakeFailedNoCommonSecurityException e)
-                {
-                    Debug.Log("Theirs: " + string.Join(", ", e.RemoteSecurityTypeIds));
-                    Debug.Log("Mine: " + string.Join(", ", e.LocalSecurityTypes));
-                }
-                catch (HandshakeFailedAuthenticationException e)
-                {
-                    Debug.Log("Authentication failed: " + (e.Reason ?? "Wrong credentials"));
-                }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception e)
-                {
-                    Debug.LogWarning(e);
-                }
-            });
+
+            client.Start(this);
         }
 
-
-        public void OnFrameArrived(IFramebufferReference frame)
+        /*
+        void OnFrameArrived(IFramebufferReference frame)
         {
             try
             {
@@ -96,7 +74,7 @@ namespace VNC
             }
         }
 
-        void ProcessFrame(IFramebufferReference frame)
+        public void ProcessFrame(IFramebufferReference frame)
         {
             if (material == null)
             {
@@ -119,8 +97,81 @@ namespace VNC
             }
 
             texture.GetRawTextureData<byte>().CopyFrom(frame.Address);
-            texture.Apply();
+            texture.Apply(false, true);
         }
+        */
+
+        Texture2D GetFromTextureCache(int width, int height)
+        {
+            Texture2D frameTexture;
+            if (cachedTextures.TryGetValue((width, height), out var candidateTexture))
+            {
+                frameTexture = candidateTexture;
+            }
+            else
+            {
+                frameTexture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+                cachedTextures[(width, height)] = frameTexture;
+            }
+
+            return frameTexture;
+        }
+
+        public void ProcessFrame(IRenderFrame frame, in Rectangle rectangle, Size maxSize)
+        {
+            if (material == null)
+            {
+                return;
+            }
+
+            if (size != maxSize && texture != null)
+            {
+                Destroy(texture);
+                texture = null;
+            }
+
+            if (texture == null)
+            {
+                texture = new Texture2D(maxSize.Width, maxSize.Height, TextureFormat.RGBA32, false);
+                material.mainTexture = texture;
+
+                size = maxSize;
+                Transform.localScale = new Vector3((float)maxSize.Width / maxSize.Height, 1, 1);
+            }
+
+            // unity doesn't allow partial updates of a texture
+            // so we upload to a smaller texture and then copy it to the big one
+            
+            int powWidth = frame.Size.Width;
+            int powHeight = UnityUtils.ClosestPow2(rectangle.Size.Height);
+
+            var frameTexture = GetFromTextureCache(powWidth, powHeight);
+            frameTexture.GetRawTextureData<byte>().CopyFrom(frame.Address);
+            frameTexture.Apply();
+
+            Graphics.CopyTexture(frameTexture, 0, 0, 0, 0, rectangle.Size.Width, rectangle.Size.Height,
+                texture, 0, 0, rectangle.Position.X, rectangle.Position.Y);
+        }
+        
+        public void CopyFrame(in Rectangle dstRectangle, in Rectangle srcRectangle)
+        {
+            int powWidth = UnityUtils.ClosestPow2(srcRectangle.Size.Width);
+            int powHeight = UnityUtils.ClosestPow2(srcRectangle.Size.Height);
+
+            var frameTexture = GetFromTextureCache(powWidth, powHeight);
+
+            // unity won't allow CopyTexture from different parts of the same texture
+            // so we go the slow way of copying it to another texture, and then back
+            
+            Graphics.CopyTexture(texture, 0, 0, srcRectangle.Position.X, srcRectangle.Position.Y,
+                srcRectangle.Size.Width, srcRectangle.Size.Height,
+                frameTexture, 0, 0, 0, 0);
+
+            Graphics.CopyTexture(frameTexture, 0, 0, 0, 0,
+                srcRectangle.Size.Width, srcRectangle.Size.Height,
+                texture, 0, 0, dstRectangle.Position.X, dstRectangle.Position.Y);
+        }
+
 
         void OnDestroy()
         {
@@ -151,7 +202,7 @@ namespace VNC
                 client.Enqueue(new PointerEventMessage(localPosition, GetButtons()));
             }
         }
-        
+
         bool TryGetPosition(PointerEventData eventData, out Position position)
         {
             if (!eventData.pointerCurrentRaycast.isValid)
@@ -170,7 +221,7 @@ namespace VNC
             {
                 return;
             }
-            
+
             interactorTransform = args.interactorObject.transform;
             interactorController = interactorTransform.AssertHasComponent<IXRController>(nameof(interactorTransform));
             GameThread.EveryFrame += TriggerPointerMove;
@@ -182,22 +233,22 @@ namespace VNC
             {
                 return;
             }
-            
+
             interactorTransform = null;
             interactorController = null;
             GameThread.EveryFrame -= TriggerPointerMove;
         }
-        
+
         void TriggerPointerMove()
         {
             if (interactorTransform == null)
             {
                 return;
             }
-            
-            var ray = new Ray(interactorTransform.position, interactorTransform.forward); 
+
+            var ray = new Ray(interactorTransform.position, interactorTransform.forward);
             ProcessXRPointer(ray);
-        }        
+        }
 
         void ProcessXRPointer(in Ray ray)
         {
@@ -217,7 +268,7 @@ namespace VNC
             bool currentButtonDown = interactorController.ButtonState || interactorController.IsNearInteraction;
             return currentButtonDown ? MouseButtons.Left : MouseButtons.None;
         }
-        
+
         bool TryGetPosition(in Ray ray, out Position position)
         {
             if (!BoxCollider.Raycast(ray, out var hitInfo, 10))
