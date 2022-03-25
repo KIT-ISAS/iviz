@@ -23,9 +23,7 @@ namespace Iviz.Displays
         BoxCollider BoxCollider => boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
         TMP_Text Text => text.AssertNotNull(nameof(text));
 
-        public RoundedPlaneDisplay Background =>
-            background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Transform);
-
+        public RoundedPlaneDisplay Background => ResourcePool.RentChecked(ref background, Transform);
         public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         public float Scale

@@ -10,7 +10,7 @@ namespace Iviz.Displays.XR
 {
     public class BoundaryLinkDisplay : MonoBehaviour, IDisplay, ISupportsColor, IRecyclable
     {
-        [SerializeField] BoxCollider? startCollider; 
+        [SerializeField] BoxCollider? startCollider;
         [SerializeField] BoxCollider? endCollider;
         MeshMarkerDisplay? line;
         SelectionFrame? frame;
@@ -20,36 +20,31 @@ namespace Iviz.Displays.XR
         Transform? mTransform;
 
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
-
-        MeshMarkerDisplay Line =>
-            line != null ? line : line = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, Transform);
-
-        SelectionFrame Frame =>
-            frame != null ? frame : frame = ResourcePool.RentDisplay<SelectionFrame>(Transform);
-
-        Tooltip Tooltip => tooltip != null ? tooltip : tooltip = ResourcePool.RentDisplay<Tooltip>(Transform);
+        MeshMarkerDisplay Line => ResourcePool.RentChecked(ref line, Resource.Displays.Cube, Transform);
+        SelectionFrame Frame => ResourcePool.RentChecked(ref frame, Transform);
+        Tooltip Tooltip => ResourcePool.RentChecked(ref tooltip, Transform);
 
         void Awake()
         {
             Color = color;
             Tooltip.Scale = 0.03f;
             Frame.ColumnWidth = 0.02f;
-            
+
             if (startCollider != null && endCollider != null)
             {
                 Set(startCollider, endCollider);
             }
         }
-        
+
         public void Set(BoxCollider a, BoxCollider b)
         {
             startCollider = a;
             endCollider = b;
             Transform.SetParentLocal(TfModule.RootFrame.Transform);
-            
+
             Frame.Transform.parent = b.gameObject.transform;
             Frame.SetBounds(b.GetLocalBounds());
-            
+
             GameThread.EveryFrame += UpdateLink;
             UpdateLink();
         }
@@ -63,7 +58,7 @@ namespace Iviz.Displays.XR
 
             float distance = DistanceTo(startCollider, endCollider, out var start, out var end);
             var mid = (start + end) / 2;
-            
+
             if (distance > 0)
             {
                 Line.Transform.localPosition = mid;
@@ -76,7 +71,7 @@ namespace Iviz.Displays.XR
                 Tooltip.Visible = false;
                 return;
             }
-            
+
             Tooltip.Visible = true;
             Tooltip.Transform.localPosition = mid + (Settings.MainCameraTransform.position - mid).normalized * 0.25f;
             Tooltip.Caption = distance.ToString("#,0.###", UnityUtils.Culture);
@@ -114,7 +109,7 @@ namespace Iviz.Displays.XR
             frame.ReturnToPool();
             line.ReturnToPool(Resource.Displays.Cube);
         }
-        
+
         public static float DistanceTo(BoxCollider a, BoxCollider b, out Vector3 start, out Vector3 end)
         {
             end = b.ClosestPoint(a.bounds.center);
@@ -122,9 +117,8 @@ namespace Iviz.Displays.XR
 
             end = TfModule.RootFrame.Transform.InverseTransformPoint(end);
             start = TfModule.RootFrame.Transform.InverseTransformPoint(start);
-            
+
             return Vector3.Distance(start, end);
         }
-        
     }
 }

@@ -33,7 +33,7 @@ namespace Iviz.Displays.XR
         MeshMarkerDisplay Outer => outer.AssertNotNull(nameof(outer));
         MeshMarkerDisplay Ring => ring.AssertNotNull(nameof(ring));
         Transform Disc => disc.AssertNotNull(nameof(disc));
-        LineDisplay Lines => lines != null ? lines : (lines = ResourcePool.RentDisplay<LineDisplay>(transform));
+        LineDisplay Lines => ResourcePool.RentChecked(ref lines, transform);
 
         XRScreenDraggable Draggable => Settings.IsXR
             ? fixedCircle.AssertNotNull(nameof(fixedCircle))

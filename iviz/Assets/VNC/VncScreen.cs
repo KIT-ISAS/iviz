@@ -2,53 +2,59 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+using Iviz.Common;
 using Iviz.Core;
 using Iviz.Core.XR;
 using Iviz.Tools;
+using Iviz.Urdf;
 using MarcusW.VncClient;
-using MarcusW.VncClient.Protocol;
 using MarcusW.VncClient.Protocol.Implementation.MessageTypes.Outgoing;
 using MarcusW.VncClient.Protocol.Implementation.Native;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
+using Material = UnityEngine.Material;
 using Position = MarcusW.VncClient.Position;
 
 namespace VNC
 {
-    public class VncScreen : MonoBehaviour, IPointerMoveHandler, IPointerUpHandler, IPointerDownHandler,
-        IPointerExitHandler, IRenderTargetCallback
+    public class VncScreen : MonoBehaviour, IPointerMoveHandler, IPointerUpHandler, IPointerDownHandler, ISupportsDynamicBounds
     {
         Transform? mTransform;
         [SerializeField] Material? material;
         [SerializeField] MeshRenderer? mainRenderer;
         [SerializeField] XRSimpleInteractable? interactable;
         [SerializeField] BoxCollider? boxCollider;
+        [SerializeField] VncController? controller;
 
         readonly Dictionary<(int, int), Texture2D> cachedTextures = new();
-        
-        readonly VncClient client = new();
+        readonly bool[] mouseButtonStates = new bool[3];
+        readonly Dictionary<Key, float> keyPressDown = new();
+        readonly Dictionary<Key, CancellationTokenSource> keyRepeatTokens = new();
+
         Texture2D? texture;
         Size? size;
 
-        readonly bool[] mouseButtonStates = new bool[3];
         Position lastPosition;
         KeySymbol? lastSymbol;
 
         Transform? interactorTransform;
         IXRController? interactorController;
 
+        VncController Controller => controller.AssertNotNull(nameof(controller));
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
+        VncClient Client => Controller.Client;
+
+        public event Action? BoundsChanged;
 
         void Awake()
         {
             TurboJpeg.IsAvailable = true;
-        }
-
-        void Start()
-        {
             material = Instantiate(material);
             mainRenderer!.sharedMaterial = material;
 
@@ -57,31 +63,16 @@ namespace VNC
                 interactable.hoverEntered.AddListener(OnHoverEnter);
                 interactable.hoverExited.AddListener(OnHoverExit);
             }
-
-            client.Start(this);
         }
 
-        /*
-        void OnFrameArrived(IFramebufferReference frame)
-        {
-            try
-            {
-                ProcessFrame(frame);
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{this}: Exception in {nameof(OnFrameArrived)}", e);
-            }
-        }
-
-        public void ProcessFrame(IFramebufferReference frame)
+        Texture2D EnsureTextureSize(Size newSize)
         {
             if (material == null)
             {
-                return;
+                throw new NullReferenceException("Material has not been set!");
             }
 
-            if (texture != null && size != frame.Size)
+            if (size != newSize && texture != null)
             {
                 Destroy(texture);
                 texture = null;
@@ -89,17 +80,16 @@ namespace VNC
 
             if (texture == null)
             {
-                texture = new Texture2D(frame.Size.Width, frame.Size.Height, TextureFormat.RGBA32, false);
+                texture = new Texture2D(newSize.Width, newSize.Height, TextureFormat.RGBA32, false);
                 material.mainTexture = texture;
 
-                size = frame.Size;
-                Transform.localScale = new Vector3((float)frame.Size.Width / frame.Size.Height, 1, 1);
+                size = newSize;
+                Transform.localScale = new Vector3((float)newSize.Width / newSize.Height, 1, 1);
+                BoundsChanged?.Invoke();
             }
 
-            texture.GetRawTextureData<byte>().CopyFrom(frame.Address);
-            texture.Apply(false, true);
+            return texture;
         }
-        */
 
         Texture2D GetFromTextureCache(int width, int height)
         {
@@ -117,52 +107,34 @@ namespace VNC
             return frameTexture;
         }
 
-        public void ProcessFrame(IRenderFrame frame, in Rectangle rectangle, Size maxSize)
+        public void ProcessFrame(in FrameRectangle frame, in Rectangle rectangle, Size maxSize)
         {
-            if (material == null)
-            {
-                return;
-            }
-
-            if (size != maxSize && texture != null)
-            {
-                Destroy(texture);
-                texture = null;
-            }
-
-            if (texture == null)
-            {
-                texture = new Texture2D(maxSize.Width, maxSize.Height, TextureFormat.RGBA32, false);
-                material.mainTexture = texture;
-
-                size = maxSize;
-                Transform.localScale = new Vector3((float)maxSize.Width / maxSize.Height, 1, 1);
-            }
-
             // unity doesn't allow partial updates of a texture
             // so we upload to a smaller texture and then copy it to the big one
-            
-            int powWidth = frame.Size.Width;
-            int powHeight = UnityUtils.ClosestPow2(rectangle.Size.Height);
 
-            var frameTexture = GetFromTextureCache(powWidth, powHeight);
-            frameTexture.GetRawTextureData<byte>().CopyFrom(frame.Address);
+            int potWidth = frame.Width; // already a pot
+            int potHeight = UnityUtils.ClosestPot(rectangle.Size.Height);
+
+            var dstTexture = EnsureTextureSize(maxSize);
+
+            var frameTexture = GetFromTextureCache(potWidth, potHeight);
+            frameTexture.CopyFrom(frame.Address);
             frameTexture.Apply();
 
             Graphics.CopyTexture(frameTexture, 0, 0, 0, 0, rectangle.Size.Width, rectangle.Size.Height,
-                texture, 0, 0, rectangle.Position.X, rectangle.Position.Y);
+                dstTexture, 0, 0, rectangle.Position.X, rectangle.Position.Y);
         }
-        
+
         public void CopyFrame(in Rectangle dstRectangle, in Rectangle srcRectangle)
         {
-            int powWidth = UnityUtils.ClosestPow2(srcRectangle.Size.Width);
-            int powHeight = UnityUtils.ClosestPow2(srcRectangle.Size.Height);
+            int potWidth = UnityUtils.ClosestPot(srcRectangle.Size.Width);
+            int potHeight = UnityUtils.ClosestPot(srcRectangle.Size.Height);
 
-            var frameTexture = GetFromTextureCache(powWidth, powHeight);
+            var frameTexture = GetFromTextureCache(potWidth, potHeight);
 
             // unity won't allow CopyTexture from different parts of the same texture
             // so we go the slow way of copying it to another texture, and then back
-            
+
             Graphics.CopyTexture(texture, 0, 0, srcRectangle.Position.X, srcRectangle.Position.Y,
                 srcRectangle.Size.Width, srcRectangle.Size.Height,
                 frameTexture, 0, 0, 0, 0);
@@ -172,10 +144,26 @@ namespace VNC
                 texture, 0, 0, dstRectangle.Position.X, dstRectangle.Position.Y);
         }
 
+        public Span<byte> GetTextureSpan(Size requestedSize)
+        {
+            var dstTexture = EnsureTextureSize(requestedSize);
+            return dstTexture.GetRawTextureData<byte>().AsSpan();
+        }
+
+        public void UpdateFrame()
+        {
+            if (texture != null)
+            {
+                texture.Apply();
+            }
+        }
 
         void OnDestroy()
         {
-            client.Dispose();
+            foreach (var token in keyRepeatTokens.Values)
+            {
+                token.Cancel();
+            }
         }
 
         public void OnPointerMove(PointerEventData eventData)
@@ -199,7 +187,7 @@ namespace VNC
         {
             if (TryGetPosition(eventData, out var localPosition))
             {
-                client.Enqueue(new PointerEventMessage(localPosition, GetButtons()));
+                Client.Enqueue(new PointerEventMessage(localPosition, GetButtons()));
             }
         }
 
@@ -254,7 +242,7 @@ namespace VNC
         {
             if (TryGetPosition(ray, out var localPosition))
             {
-                client.Enqueue(new PointerEventMessage(localPosition, GetXRButtons()));
+                Client.Enqueue(new PointerEventMessage(localPosition, GetXRButtons()));
             }
         }
 
@@ -311,11 +299,6 @@ namespace VNC
             return buttons;
         }
 
-        public void OnPointerExit(PointerEventData eventData)
-        {
-            mouseButtonStates.AsSpan().Fill(false);
-        }
-
         void Update()
         {
             ProcessMouseWheel();
@@ -327,16 +310,16 @@ namespace VNC
             var (mouseDeltaX, mouseDeltaY) = Input.mouseScrollDelta;
             if (mouseDeltaX != 0)
             {
-                client.Enqueue(new PointerEventMessage(lastPosition,
+                Client.Enqueue(new PointerEventMessage(lastPosition,
                     mouseDeltaX > 0 ? MouseButtons.WheelRight : MouseButtons.WheelLeft));
-                client.Enqueue(new PointerEventMessage(lastPosition, MouseButtons.None));
+                Client.Enqueue(new PointerEventMessage(lastPosition, MouseButtons.None));
             }
 
             if (mouseDeltaY != 0)
             {
-                client.Enqueue(new PointerEventMessage(lastPosition,
+                Client.Enqueue(new PointerEventMessage(lastPosition,
                     mouseDeltaY > 0 ? MouseButtons.WheelDown : MouseButtons.WheelUp));
-                client.Enqueue(new PointerEventMessage(lastPosition, MouseButtons.None));
+                Client.Enqueue(new PointerEventMessage(lastPosition, MouseButtons.None));
             }
         }
 
@@ -364,7 +347,7 @@ namespace VNC
             var keyboard = Keyboard.current;
             foreach (var (key, symbol) in Map)
             {
-                CheckKey(key, symbol);
+                CheckKeyWithRepeat(key, symbol);
             }
 
             bool hasModifier = keyboard[Key.LeftCtrl].isPressed
@@ -377,12 +360,12 @@ namespace VNC
                 if (Input.inputString.Length != 0)
                 {
                     var keySymbol = (KeySymbol)Input.inputString[0];
-                    client.Enqueue(new KeyEventMessage(true, keySymbol));
+                    Client.Enqueue(new KeyEventMessage(true, keySymbol));
                     lastSymbol = keySymbol;
                 }
                 else if (lastSymbol is { } symbol)
                 {
-                    client.Enqueue(new KeyEventMessage(false, symbol));
+                    Client.Enqueue(new KeyEventMessage(false, symbol));
                     lastSymbol = null;
                 }
 
@@ -405,9 +388,63 @@ namespace VNC
         {
             var control = Keyboard.current[key];
             if (control.wasReleasedThisFrame)
-                client.Enqueue(new KeyEventMessage(false, keySymbol));
+            {
+                Client.Enqueue(new KeyEventMessage(false, keySymbol));
+            }
+
             if (control.wasPressedThisFrame)
-                client.Enqueue(new KeyEventMessage(true, keySymbol));
+            {
+                Client.Enqueue(new KeyEventMessage(true, keySymbol));
+            }
+        }
+
+        void CheckKeyWithRepeat(Key key, KeySymbol keySymbol)
+        {
+            const float timePressedToRepeatInSec = 0.5f;
+
+            var control = Keyboard.current[key];
+            if (control.wasReleasedThisFrame)
+            {
+                Client.Enqueue(new KeyEventMessage(false, keySymbol));
+                keyPressDown.Remove(key);
+                if (keyRepeatTokens.TryGetValue(key, out var tokenSource))
+                {
+                    tokenSource.Cancel();
+                    keyRepeatTokens.Remove(key);
+                }
+            }
+
+            if (control.wasPressedThisFrame)
+            {
+                Client.Enqueue(new KeyEventMessage(true, keySymbol));
+                keyPressDown[key] = Time.time;
+            }
+
+            if (keyPressDown.TryGetValue(key, out float time)
+                && Time.time > time + timePressedToRepeatInSec
+                && !keyRepeatTokens.ContainsKey(key))
+            {
+                LaunchKeyRepeatTask(key, keySymbol);
+            }
+        }
+
+        void LaunchKeyRepeatTask(Key key, KeySymbol keySymbol)
+        {
+            const int keyRepeatPeriodInMs = 50;
+
+            var tokenSource = new CancellationTokenSource();
+            keyRepeatTokens[key] = tokenSource;
+
+            var token = tokenSource.Token;
+            TaskUtils.Run(async () =>
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    Client.Enqueue(new KeyEventMessage(true, keySymbol));
+                    Client.Enqueue(new KeyEventMessage(false, keySymbol));
+                    await Task.Delay(keyRepeatPeriodInMs, token).AwaitNoThrow(this);
+                }
+            }, token);
         }
     }
 }

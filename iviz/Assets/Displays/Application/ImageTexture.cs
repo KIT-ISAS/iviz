@@ -498,7 +498,7 @@ namespace Iviz.Displays
 
             if (!alreadyCopied)
             {
-                texture.GetRawTextureData<byte>().CopyFrom(data);
+                texture.CopyFrom(data);
             }
 
             texture.Apply(generateMipmaps);

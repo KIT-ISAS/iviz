@@ -148,8 +148,8 @@ namespace Iviz.Displays
         {
             var mesh = MeshFilter.sharedMesh;
             var topology = mesh.GetTopology(0);
-            int[] mIndices = indices.ExtractArray();
-            var mVertices = vertices.ExtractArray();
+            var mIndices = indices.AsSpan();
+            var mVertices = vertices.AsSpan();
 
             int count = indices.Count;
             lineBuffer.Resize(count);

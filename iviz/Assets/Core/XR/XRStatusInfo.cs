@@ -11,16 +11,17 @@ namespace Iviz.Core.XR
 
         public bool IsXREnabled => isXREnabled;
         public bool IsHololens => isHololens;
-        
+
+#if UNITY_EDITOR
         void Awake()
         {
             Settings.IsShuttingDown = false;
         }
-        
+
         void OnApplicationQuit()
         {
             Settings.IsShuttingDown = true;
         }
-        
+#endif
     }
 }

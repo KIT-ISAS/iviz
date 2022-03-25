@@ -115,7 +115,7 @@ namespace Iviz.Displays
 
         public Mesh Mesh
         {
-            get => MeshFilter.sharedMesh;
+            get => MeshFilter.sharedMesh.AssertNotNull(nameof(Mesh));
             set => MeshFilter.sharedMesh = value != null ? value : throw new NullReferenceException("Mesh is null");
         }
 

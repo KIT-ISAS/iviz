@@ -15,13 +15,13 @@ namespace VNC
             ISecurityType securityType, IAuthenticationInputRequest<TInput> request)
             where TInput : class, IAuthenticationInput
         {
-            if (typeof(TInput) == typeof(PasswordAuthenticationInput))
+            if (request is IAuthenticationInputRequest<PasswordAuthenticationInput>)
             {
-                string password = "abcdabcd"; // Retrieve the password somehow
-                //string password = "kinect360"; // Retrieve the password somehow
+                //string password = "abcdabcd"; // Retrieve the password somehow
+                string password = "kinect360"; // Retrieve the password somehow
 
-                var result = (TInput)(IAuthenticationInput) new PasswordAuthenticationInput(password);
-                return Task.FromResult(result);
+                var result = new PasswordAuthenticationInput(password) as TInput;
+                return Task.FromResult(result!);
             }            
             
             var exception = new InvalidOperationException(

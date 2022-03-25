@@ -29,12 +29,7 @@ namespace Iviz.Displays.XR
         float cameraZ = 1.5f;
 
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
-
-        RoundedPlaneDisplay Background =>
-            background != null
-                ? background
-                : (background = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Holder));
-
+        RoundedPlaneDisplay Background => ResourcePool.RentChecked(ref background, Holder);
         FixedDistanceDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         Transform Holder => Draggable.Transform;
         TMP_Text Label => label.AssertNotNull(nameof(label));

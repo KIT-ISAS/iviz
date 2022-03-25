@@ -85,7 +85,7 @@ namespace Iviz.Displays.Highlighters
                     frame.Visible = true;
                     frame.EmissiveColor = draggable.IsDragging
                         ? Resource.Colors.DraggableSelectedEmissive
-                        : Color.black;
+                        : Resource.Colors.DraggableHoverEmissive;
                     frame.ColumnWidth = draggable.IsDragging ? 0.01f : 0.005f;
                     frame.Color = draggable.IsDragging
                         ? Resource.Colors.DraggableSelectedColor

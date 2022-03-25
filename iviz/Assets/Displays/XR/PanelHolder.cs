@@ -2,6 +2,7 @@
 
 using System;
 using System.Threading;
+using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
 using TMPro;
@@ -15,6 +16,7 @@ namespace Iviz.Displays.XR
 
         [SerializeField] BoxCollider? panelCollider;
         [SerializeField] BoxCollider? boxCollider;
+        [SerializeField] MeshMarkerDisplay? back;
         [SerializeField] FixedDistanceDraggable? draggable;
         [SerializeField] TMP_Text? label;
         [SerializeField] float gapSize = 0.03f;
@@ -27,13 +29,9 @@ namespace Iviz.Displays.XR
 
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
         BoxCollider PanelCollider => panelCollider.AssertNotNull(nameof(panelCollider));
-
-        RoundedPlaneDisplay Background =>
-            background != null
-                ? background
-                : (background = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Holder));
-
+        RoundedPlaneDisplay Background => ResourcePool.RentChecked(ref background, Holder);
         FixedDistanceDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
+        MeshMarkerDisplay Back => back.AssertNotNull(nameof(back));
         Transform Holder => Draggable.Transform;
         TMP_Text Label => label.AssertNotNull(nameof(label));
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
@@ -50,6 +48,8 @@ namespace Iviz.Displays.XR
             Background.Size = new Vector2(sizeX, HeaderHeight);
             BoxCollider.size = new Vector3(sizeX, HeaderHeight, 0.005f);
             PanelCollider.transform.localPosition = (sizeY + HeaderHeight + gapSize) / 2 * Vector3.up;
+            Back.Transform.localScale = new Vector3(sizeX, sizeY, 1);
+            Back.Transform.localPosition = new Vector3(0, (sizeY + HeaderHeight + gapSize) / 2, 0.01f);
         }
 
         public bool FollowsCamera
@@ -66,6 +66,12 @@ namespace Iviz.Displays.XR
         void Awake()
         {
             UpdateSize();
+
+            if (PanelCollider.TryGetComponent<ISupportsDynamicBounds>(out var bounds))
+            {
+                bounds.BoundsChanged += UpdateSize;
+            }
+            
             Background.Radius = 0.01f;
             Background.Color = Resource.Colors.TooltipBackground;
             Background.EnableShadows = false;

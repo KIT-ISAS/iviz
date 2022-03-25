@@ -17,8 +17,7 @@ namespace Iviz.Displays
         Color color;
         LineDisplay? resource;
 
-        LineDisplay Resource =>
-            resource != null ? resource : (resource = ResourcePool.RentDisplay<LineDisplay>(Transform));
+        LineDisplay Resource => ResourcePool.RentChecked(ref resource, Transform);
 
         protected override IDisplay Display => Resource;
 

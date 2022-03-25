@@ -19,9 +19,7 @@ namespace Iviz.Displays
         bool arActive;
 
         GameObject ArCamera => arCamera.AssertNotNull(nameof(arCamera));
-
-        LineDisplay Resource =>
-            resource != null ? resource : (resource = ResourcePool.RentDisplay<LineDisplay>(Transform));
+        LineDisplay Resource => ResourcePool.RentChecked(ref resource, Transform);
 
         Transform ArCameraTransform =>
             arCameraTransform != null ? arCameraTransform : (arCameraTransform = ArCamera.transform);

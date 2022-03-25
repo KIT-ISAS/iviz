@@ -9,14 +9,17 @@ using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Tools;
+using Iviz.Urdf;
 using JetBrains.Annotations;
 using TMPro;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using Color = UnityEngine.Color;
 using Color32 = UnityEngine.Color32;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
@@ -308,7 +311,7 @@ namespace Iviz.Core
                     $"Asset '{name}' has does not have a component of type '{typeof(T).Name}!\n" +
                     $"At: {caller} line {lineNumber}");
             }
-            
+
             return t;
         }
 
@@ -452,7 +455,7 @@ namespace Iviz.Core
             }
         }
 
-        public static T[] ExtractArray<T>(this List<T> list) => (T[])ExtractArrayFromList(list);
+        static T[] ExtractArray<T>(this List<T> list) => (T[])ExtractArrayFromList(list);
 
         public static void PlaneIntersection(in Ray plane, in Ray ray, out Vector3 intersection, out float scaleRay)
         {
@@ -547,10 +550,12 @@ namespace Iviz.Core
         {
             return array.AsSpan().Slice(start, length);
         }
-        
-        public static unsafe Span<byte> CreateSpan(this IntPtr ptr, int length)
+
+        public static Span<byte> CreateSpan(this IntPtr ptr, int length)
         {
-            return new Span<byte>(ptr.ToPointer(), length);
+            ref byte nullPtr = ref MemoryMarshal.GetReference(default(Span<byte>));
+            ref byte refPtr = ref Unsafe.Add(ref nullPtr, ptr);
+            return MemoryMarshal.CreateSpan(ref refPtr, length);
         }
 
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this in NativeArray<T> array) where T : unmanaged
@@ -608,9 +613,32 @@ namespace Iviz.Core
         /// </summary>
         public static Span<T> AsSpan<T>(this Memory<T> memory) where T : unmanaged => memory.Span;
 
-        public static void CopyFrom<T>(this NativeArray<T> dst, ReadOnlySpan<T> span) where T : unmanaged
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void CopyFrom<T>(this Texture2D dst, ReadOnlySpan<T> srcSpan) where T : unmanaged
         {
-            span.CopyTo(dst.AsSpan());
+            var srcBytes = MemoryMarshal.AsBytes(srcSpan);
+            var dstBytes = dst.GetRawTextureData<byte>().AsSpan();
+            Unsafe.CopyBlock(
+                ref MemoryMarshal.GetReference(dstBytes),
+                ref MemoryMarshal.GetReference(srcBytes),
+                (uint)srcBytes.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void BlockCopyTo<T>(this ReadOnlySpan<T> src, Span<T> dst) where T : unmanaged
+        {
+            var srcBytes = MemoryMarshal.AsBytes(src);
+            var dstBytes = MemoryMarshal.AsBytes(dst);
+            Unsafe.CopyBlock(
+                ref MemoryMarshal.GetReference(dstBytes),
+                ref MemoryMarshal.GetReference(srcBytes),
+                (uint)srcBytes.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void BlockCopyTo<T>(this Span<T> src, Span<T> dst) where T : unmanaged
+        {
+            BlockCopyTo((ReadOnlySpan<T>)src, dst);
         }
 
         public static ReadOnlySpan<T> Cast<T>(this ReadOnlySpan<byte> src) where T : unmanaged
@@ -827,19 +855,21 @@ namespace Iviz.Core
 
             text.SetCharArray(segment.Array, start, count);
         }
-        
-        public static int ClosestPow2(int value)
+
+        /// <summary>
+        /// Smallest power of 2 that is greater or equal. 
+        /// </summary>
+        public static int ClosestPot(int value)
         {
-            int p = 8;
+            int p = value >= 256 ? 256 : 16;
             while (true)
             {
-                int np = 2 * p;
-                if (np > value)
+                if (p >= value)
                 {
-                    return np;
+                    return p;
                 }
 
-                p = np;
+                p *= 2;
             }
         }
     }
@@ -877,5 +907,13 @@ namespace Iviz.Core
         public static readonly Quaternion Rotate180AroundY = new(0, 1, 0, 0);
         public static readonly Quaternion Rotate270AroundY = new(0, 0.707106769f, 0, -0.707106769f);
         public static readonly Quaternion Rotate180AroundZ = new(0, 0, 1, 0);
+    }
+
+    public class TaskCompletionSource
+    {
+        readonly TaskCompletionSource<object?> ts = new();
+        public Task Task => ts.Task;
+        public void TrySetException(Exception e) => ts.TrySetException(e);
+        public void TrySetResult() => ts.TrySetResult(null);
     }
 }

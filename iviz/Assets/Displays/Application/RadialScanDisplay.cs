@@ -36,13 +36,8 @@ namespace Iviz.Displays
         bool visible = true;
         int layer;
 
-        LineDisplay Lines => lines != null
-            ? lines
-            : (lines = ResourcePool.RentDisplay<LineDisplay>(transform));
-
-        PointListDisplay PointCloud => pointCloud != null
-            ? pointCloud
-            : (pointCloud = ResourcePool.RentDisplay<PointListDisplay>(transform));
+        LineDisplay Lines => ResourcePool.RentChecked(ref lines, transform);
+        PointListDisplay PointCloud => ResourcePool.RentChecked(ref pointCloud, transform);
 
         public int Size
         {

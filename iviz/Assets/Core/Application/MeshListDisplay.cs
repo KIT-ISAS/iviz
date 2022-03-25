@@ -44,11 +44,7 @@ namespace Iviz.Displays
             get => mesh != null ? mesh : throw new NullReferenceException("Mesh has not been set!");
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value), "Cannot set a null mesh!");
-                }
-
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 mesh = value;
 
                 argsBuffer[0] = mesh.GetIndexCount(0);
@@ -64,21 +60,12 @@ namespace Iviz.Displays
         {
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
+                ThrowHelper.ThrowIfNull(value, nameof(value));
 
                 var meshContainer = value.Object.AssertHasComponent<MeshMarkerDisplay>(nameof(value.Object));
 
-                Mesh tmpMesh;
-                if ((tmpMesh = meshContainer.Mesh) == null)
-                {
-                    throw new ArgumentException("Object does not contain a mesh!");
-                }
-
+                Mesh = meshContainer.Mesh;
                 meshResource = value;
-                Mesh = tmpMesh;
             }
         }
 
@@ -247,12 +234,12 @@ namespace Iviz.Displays
         {
             Set(MemoryMarshal.Cast<PointWithColor, float4>(points));
         }
-        
+
         void Set(ReadOnlySpan<float4> points)
         {
             pointBuffer.EnsureCapacity(points.Length);
             pointBuffer.Clear();
-            
+
             foreach (ref readonly var point in points)
             {
                 if (point.IsInvalid3() || point.MaxAbsCoeff3() > MaxPositionMagnitude)

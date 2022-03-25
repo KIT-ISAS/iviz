@@ -92,7 +92,7 @@ namespace Iviz.App
         LeashDisplay? leash;
         Transform? mTransform;
 
-        LeashDisplay Leash => leash != null ? leash : (leash = ResourcePool.RentDisplay<LeashDisplay>());
+        LeashDisplay Leash => ResourcePool.RentChecked(ref leash);
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         bool IsLookAtAnimationRunning => lookAtTokenSource is { IsCancellationRequested: false };
         Quaternion OrbitRotation => Quaternion.Euler(CameraPitch, CameraYaw, CameraRoll);
@@ -388,7 +388,7 @@ namespace Iviz.App
             
             Leash.Color = Color.white.WithAlpha(0.75f);
             
-            Config = new SettingsConfiguration();
+            Config = Config;
             
             StartOrbiting();
 

@@ -22,8 +22,7 @@ namespace Iviz.Displays
         readonly List<float4> pointBuffer = new();
         MeshListDisplay? resource;
 
-        MeshListDisplay Resource =>
-            resource != null ? resource : (resource = ResourcePool.RentDisplay<MeshListDisplay>(transform));
+        MeshListDisplay Resource => ResourcePool.RentChecked(ref resource, Transform);
 
         protected override IDisplay Display => Resource;
 

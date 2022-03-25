@@ -146,13 +146,17 @@ namespace Iviz.Displays
 
         void OnDisable()
         {
-            TryUnsetDraggedObject(this);
-            if (IsHovering || IsDragging)
+            GameThread.Post(() =>
             {
-                IsHovering = false;
-                IsDragging = false;
-                StateChanged?.Invoke();
-            }
+                // do this on the next frame or unity will complain about moving children while disabling
+                TryUnsetDraggedObject(this);
+                if (IsHovering || IsDragging)
+                {
+                    IsHovering = false;
+                    IsDragging = false;
+                    StateChanged?.Invoke();
+                }
+            });
         }
 
         public void ClearSubscribers()
@@ -167,13 +171,11 @@ namespace Iviz.Displays
 
         static void TryUnsetDraggedObject(IScreenDraggable draggable)
         {
-#if UNITY_EDITOR
             // this needs special handling because we may be shutting down
             if (Settings.IsShuttingDown)
             {
                 return;
             }
-#endif
 
             Settings.DragHandler.TryUnsetDraggedObject(draggable);
         }

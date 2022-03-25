@@ -13,7 +13,7 @@ namespace Iviz.Displays
         LineDisplay? lines;
         float baseReticleScale = 1;
 
-        LineDisplay Lines => lines != null ? lines : (lines = ResourcePool.RentDisplay<LineDisplay>(transform));
+        LineDisplay Lines => ResourcePool.RentChecked(ref lines, Transform);
         MeshMarkerDisplay Reticle => reticle.AssertNotNull(nameof(reticle));
 
         protected override IDisplay Display => Lines;
@@ -38,7 +38,8 @@ namespace Iviz.Displays
             Lines.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
         }
 
-        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal, float offset, bool reticleVisible = true)
+        public void Set(in Ray pointerRay, in Vector3 target, in Vector3 normal, float offset,
+            bool reticleVisible = true)
         {
             Set(pointerRay, target + normal * offset, normal, reticleVisible);
         }
@@ -90,7 +91,7 @@ namespace Iviz.Displays
                     start + dirScale * tangent,
                     target + dirScale * tangentReflected,
                     target);
-                
+
                 var line = new float4x2();
 
                 ref var c0 = ref f.c0;

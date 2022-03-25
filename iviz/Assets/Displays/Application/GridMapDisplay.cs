@@ -141,7 +141,7 @@ namespace Iviz.Displays
             Transform.localPosition = new Vector3(-width / 2, -height / 2, zOffset).Ros2Unity();
 
             var textureToUse = EnsureSize(newCellsX, newCellsY);
-            textureToUse.GetRawTextureData<float>().CopyFrom(data);
+            textureToUse.CopyFrom(data);
             textureToUse.Apply();
 
             float min = float.MaxValue, max = float.MinValue;

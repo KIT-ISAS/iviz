@@ -24,13 +24,10 @@ namespace Iviz.Displays.XR
 
         Color backgroundColor = Resource.Colors.TooltipBackground;
         Color color = new(0.47f, 0.68f, 1);
-        Material? material;
         StaticBoundsControl? boundsControl;
         RoundedPlaneDisplay? background;
 
-        RoundedPlaneDisplay Background =>
-            background != null ? background : background = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Transform);
-
+        RoundedPlaneDisplay Background => ResourcePool.RentChecked(ref background, Transform);
         TMP_Text Text => text.AssertNotNull(nameof(text));
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
         Transform IHasBounds.BoundsTransform => BoxCollider.transform;

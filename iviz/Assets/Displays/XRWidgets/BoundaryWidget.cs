@@ -17,10 +17,8 @@ namespace Iviz.Displays.XR
         Transform? mTransform;
         Bounds bounds;
 
-        SelectionFrame Frame =>
-            frame != null ? frame : (frame = ResourcePool.RentDisplay<SelectionFrame>(Transform));
-
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        SelectionFrame Frame => ResourcePool.RentChecked(ref frame, Transform);
+        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         public bool Interactable
         {

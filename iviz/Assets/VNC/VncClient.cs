@@ -2,8 +2,10 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Core;
 using Iviz.Tools;
 using MarcusW.VncClient;
 using MarcusW.VncClient.Protocol;
@@ -12,6 +14,7 @@ using MarcusW.VncClient.Protocol.Implementation.Services.Transports;
 using MarcusW.VncClient.Rendering;
 using Microsoft.Extensions.Logging.Abstractions;
 using UnityEngine;
+using Screen = UnityEngine.Device.Screen;
 
 namespace VNC
 {
@@ -21,34 +24,28 @@ namespace VNC
         readonly ConcurrentQueue<EventMessage> messages = new();
         readonly CancellationTokenSource tokenSource = new();
 
-        public void Start(VncScreen screen)
+        public event Action<ConnectionState>? ConnectionStateChanged;
+
+        public Task StartAsync(VncScreen screen)
         {
+            var startSignal = new TaskCompletionSource();
+
             TaskUtils.Run(async () =>
             {
                 try
                 {
-                    await StartAsync(screen);
-                }
-                catch (HandshakeFailedNoCommonSecurityException e)
-                {
-                    Debug.Log("Theirs: " + string.Join(", ", e.RemoteSecurityTypeIds));
-                    Debug.Log("Mine: " + string.Join(", ", e.LocalSecurityTypes));
-                }
-                catch (HandshakeFailedAuthenticationException e)
-                {
-                    Debug.Log("Authentication failed: " + (e.Reason ?? "Wrong credentials"));
-                }
-                catch (OperationCanceledException)
-                {
+                    await DoStartAsync(screen, startSignal);
                 }
                 catch (Exception e)
                 {
-                    Debug.LogWarning(e);
+                    startSignal.TrySetException(e);
                 }
-            });            
+            });
+
+            return startSignal.Task;
         }
-        
-        async Task StartAsync(VncScreen screen)
+
+        async Task DoStartAsync(VncScreen screen, TaskCompletionSource startSignal)
         {
             var vncClient = new MarcusW.VncClient.VncClient(NullLoggerFactory.Instance);
 
@@ -60,21 +57,32 @@ namespace VNC
             {
                 TransportParameters = new TcpTransportParameters
                 {
-                    Host = "192.168.0.17",
-                    Port = 5901
-                    //Host = "141.3.59.5",
-                    //Port = 5902
+                    //Host = "192.168.0.17",
+                    //Port = 5903
+                    Host = "141.3.59.5",
+                    Port = 5902
                 },
                 AuthenticationHandler = new AuthenticationHandler(),
                 InitialRenderTarget = renderTarget,
-                JpegQualityLevel = 90,
-                JpegSubsamplingLevel = JpegSubsamplingLevel.ChrominanceSubsampling16X,
+                //JpegQualityLevel = 90,
+                //JpegSubsamplingLevel = JpegSubsamplingLevel.ChrominanceSubsampling16X,
             };
 
             var token = tokenSource.Token;
-            
+
             // Start a new connection and save the returned connection object
             using var rfbConnection = await vncClient.ConnectAsync(parameters, token);
+            rfbConnection.PropertyChanged += (obj, args) =>
+            {
+                var connection = (RfbConnection)obj;
+                Debug.Log(args.PropertyName);
+                if (args.PropertyName == nameof(connection.ConnectionState))
+                {
+                    GameThread.Post(() => ConnectionStateChanged?.Invoke(connection.ConnectionState));
+                }
+            };
+
+            startSignal.TrySetResult();
 
             while (!token.IsCancellationRequested)
             {
@@ -96,7 +104,7 @@ namespace VNC
 
             await rfbConnection.CloseAsync();
         }
-        
+
         void Enqueue(in EventMessage msg)
         {
             messages.Enqueue(msg);
@@ -126,6 +134,29 @@ namespace VNC
 
             public EventMessage(PointerEventMessage msg) : this() => (type, pointerEventMessage) = (Type.Pointer, msg);
             public EventMessage(KeyEventMessage msg) : this() => (type, keyEventMessage) = (Type.Key, msg);
+        }
+
+        sealed class DeferredRenderTarget : IRenderTarget
+        {
+            readonly VncScreen screen;
+            DeferredFrameBuffer? cachedFrameBuffer;
+
+            public DeferredRenderTarget(VncScreen screen)
+            {
+                this.screen = screen;
+            }
+
+            public IFramebufferReference GrabFramebufferReference(Size size,
+                IImmutableSet<MarcusW.VncClient.Screen> layout)
+            {
+                if (cachedFrameBuffer != null && cachedFrameBuffer.Size == size)
+                {
+                    return cachedFrameBuffer;
+                }
+
+                cachedFrameBuffer = new DeferredFrameBuffer(screen, size);
+                return cachedFrameBuffer;
+            }
         }
     }
 }

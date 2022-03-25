@@ -22,7 +22,7 @@ namespace Iviz.Controllers.XR
         Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
         CustomController Controller => controller.AssertNotNull(nameof(controller));
         XRRayInteractor Interactor => interactor.AssertNotNull(nameof(interactor));
-        LeashDisplay Leash => leash != null ? leash : (leash = ResourcePool.RentDisplay<LeashDisplay>());
+        LeashDisplay Leash => ResourcePool.RentChecked(ref leash);
 
         void Awake()
         {

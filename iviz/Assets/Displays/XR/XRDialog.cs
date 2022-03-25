@@ -15,6 +15,7 @@ namespace Iviz.Displays.XR
         [SerializeField] Vector3 socketPosition = Vector3.zero;
         [SerializeField] Color backgroundColor = Resource.Colors.DefaultBackgroundColor;
         [SerializeField] XRDialogConnector? connector;
+        [SerializeField] GameObject? background;
 
         FrameNode? node;
         string? pivotFrameId;
@@ -27,7 +28,7 @@ namespace Iviz.Displays.XR
         FrameNode Node => node ??= new FrameNode("Dialog Node");
         XRDialogConnector Connector => connector.AssertNotNull(nameof(connector));
 
-        protected ISupportsColor Background
+        ISupportsColor Background
         {
             get
             {
@@ -35,10 +36,16 @@ namespace Iviz.Displays.XR
                 {
                     return backgroundObject;
                 }
-                
+
+                if (background != null && background.TryGetComponent<ISupportsColor>(out var newBackgroundObject))
+                {
+                    backgroundObject = newBackgroundObject;
+                    return backgroundObject;
+                }
+
                 var display = ResourcePool.RentDisplay<RoundedPlaneDisplay>(Transform);
                 display.Size = backgroundSize;
-                display.Radius = 0.05f; 
+                display.Radius = 0.05f;
                 backgroundObject = display;
                 return backgroundObject;
             }
@@ -122,7 +129,11 @@ namespace Iviz.Displays.XR
 
         protected virtual void Awake()
         {
-            Color = backgroundColor;
+            if (backgroundColor.a != 0)
+            {
+                Color = backgroundColor;
+            }
+
             Scale = scale;
             PivotFrameId = pivotFrameId;
         }
@@ -135,7 +146,8 @@ namespace Iviz.Displays.XR
 
         void UpdateRotation()
         {
-            var targetRotation = Quaternion.LookRotation(Transform.position - Settings.MainCameraTransform.position);
+            var direction = Transform.position - Settings.MainCameraTransform.position;
+            var targetRotation = Quaternion.LookRotation(direction.ApproximatelyZero() ? Vector3.forward : direction);
             if (resetOrientation)
             {
                 Transform.rotation = targetRotation;
@@ -209,12 +221,12 @@ namespace Iviz.Displays.XR
                 case XRButtonSetup.Ok:
                     button1.Visible = true;
                     button1.Icon = XRIcon.Ok;
-                    button1.Caption = "Ok";
+                    button1.Caption = "OK";
                     break;
                 case XRButtonSetup.Forward:
                     button1.Visible = true;
                     button1.Icon = XRIcon.Forward;
-                    button1.Caption = "Ok";
+                    button1.Caption = "OK";
                     break;
                 case XRButtonSetup.Backward:
                     button1.Visible = true;
@@ -240,7 +252,7 @@ namespace Iviz.Displays.XR
                 case XRButtonSetup.OkCancel:
                     button2.Visible = true;
                     button2.Icon = XRIcon.Ok;
-                    button2.Caption = "Ok";
+                    button2.Caption = "OK";
                     button3.Visible = true;
                     button3.Icon = XRIcon.Cross;
                     button3.Caption = "Cancel";

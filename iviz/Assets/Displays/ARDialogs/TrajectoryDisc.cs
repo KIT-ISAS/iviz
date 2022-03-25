@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.XR;
@@ -20,7 +21,7 @@ namespace Iviz.App.ARDialogs
         readonly NativeList<LineWithColor> lineBuffer = new();
 
         [CanBeNull] LineDisplay lines;
-        [NotNull] LineDisplay Lines => (lines != null) ? lines : lines = ResourcePool.RentDisplay<LineDisplay>();
+        [NotNull] LineDisplay Lines => ResourcePool.RentChecked(ref lines, TfModule.RootFrame.Transform);
 
         public event Action<Vector3[], float> Moved;
 

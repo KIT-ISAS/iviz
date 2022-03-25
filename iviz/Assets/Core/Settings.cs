@@ -2,7 +2,6 @@
 
 using System;
 using Iviz.Common;
-using Iviz.Core.XR;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Utilities;
 using UnityEngine;
@@ -60,13 +59,13 @@ namespace Iviz.Core
 #else
             false;
 #endif
-        
+
         public const bool IsMacOS =
 #if UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
             true;
 #else
             false;
-#endif        
+#endif
 
 #if UNITY_IOS || UNITY_ANDROID || UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
         /// <summary>
@@ -222,6 +221,7 @@ namespace Iviz.Core
                                                          !IsHololens &&
                                                          SystemInfo.supportsComputeShaders &&
                                                          SystemInfo.maxComputeBufferInputsVertex > 0).Value;
+
         public static bool SupportsR16 => supportsR16 ??
                                           (supportsR16 = SystemInfo.SupportsTextureFormat(TextureFormat.R16)).Value;
 
@@ -233,8 +233,12 @@ namespace Iviz.Core
         /// Set when the app is being closed.
         /// This prevents some disposal operations that depend on objects that may have been already destroyed.
         /// </summary>
+#if UNITY_EDITOR
         public static bool IsShuttingDown { get; set; }
-        
+#else
+        public const bool IsShuttingDown = false;
+#endif
+
         static Settings()
         {
             AotHelper.EnsureType<StringEnumConverter>();

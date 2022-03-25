@@ -109,6 +109,25 @@ namespace Iviz.Displays
         }
 
         /// <summary>
+        /// Rents an object of the given display type, but only if the argument is empty.
+        /// The rented object will be stored in the argument.
+        /// </summary>
+        /// <param name="t">The argument to check. The rented object will be written here.</param>
+        /// <param name="parent">Parent transform to attach the rented object.</param>
+        /// <typeparam name="T">The display type.</typeparam>
+        /// <returns>The rented object.</returns>
+        public static T RentChecked<T>(ref T? t, Transform? parent = null) where T : MonoBehaviour, IDisplay
+        {
+            return t != null ? t : (t = RentDisplay<T>(parent));
+        }
+
+        public static T RentChecked<T>(ref T? t, ResourceKey<GameObject> resource, Transform? parent = null)
+            where T : MonoBehaviour, IDisplay
+        {
+            return t != null ? t : (t = Rent<T>(resource, parent));
+        }
+
+        /// <summary>
         /// Returns a rented object to the pool. 
         /// </summary>
         /// <param name="resource">The resource identifier.</param>
