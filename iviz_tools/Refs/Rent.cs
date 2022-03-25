@@ -84,20 +84,9 @@ public readonly struct Rent<T> : IDisposable  where T : unmanaged
     public Span<T> this[Range range] => AsSpan()[range];
     public Rent<T> Resize(int newLength) => new(Array, newLength);
 
-    public static implicit operator Span<T>(Rent<T> rent)
-    {
-        return rent.AsSpan();
-    }
-        
-    public static implicit operator ReadOnlySpan<T>(Rent<T> rent)
-    {
-        return rent.AsReadOnlySpan();
-    }
-    
-    public static implicit operator ReadOnlyMemory<T>(Rent<T> rent)
-    {
-        return rent.AsReadOnlyMemory();
-    }
+    public static implicit operator Span<T>(Rent<T> rent) => rent.AsSpan();
+    public static implicit operator ReadOnlySpan<T>(Rent<T> rent) => rent.AsReadOnlySpan();
+    public static implicit operator ReadOnlyMemory<T>(Rent<T> rent) => rent.AsReadOnlyMemory();
 }
 
 public static class Rent

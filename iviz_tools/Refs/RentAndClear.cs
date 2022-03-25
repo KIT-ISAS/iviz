@@ -19,6 +19,9 @@ public readonly struct RentAndClear<T> : IDisposable
     public readonly int Length;
     public readonly T?[] Array;
         
+    public Span<T?> AsSpan() => new(Array, 0, Length);
+    public ReadOnlySpan<T?> AsReadOnlySpan() => new(Array, 0, Length);
+    
     public RentAndClear(int count)
     {
         switch (count)
@@ -79,4 +82,7 @@ public readonly struct RentAndClear<T> : IDisposable
             Array[index] = value;
         }
     }
+    
+    public static implicit operator Span<T?>(RentAndClear<T?> rent) => rent.AsSpan();
+    public static implicit operator ReadOnlySpan<T?>(RentAndClear<T?> rent) => rent.AsReadOnlySpan();    
 }
