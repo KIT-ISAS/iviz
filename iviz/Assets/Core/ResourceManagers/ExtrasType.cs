@@ -9,6 +9,7 @@ namespace Iviz.Resources
         public AssetHolder AssetHolder { get; }
         public AppAssetHolder AppAssetHolder { get; }
         public WidgetAssetHolder WidgetAssetHolder { get; }
+        public AudioAssetHolder AudioAssetHolder { get; }
 
         public ExtrasType()
         {
@@ -18,6 +19,8 @@ namespace Iviz.Resources
                 .AssertHasComponent<AppAssetHolder>(nameof(AppAssetHolder));
             WidgetAssetHolder = UnityEngine.Resources.Load<GameObject>("Widget Asset Holder")
                 .AssertHasComponent<WidgetAssetHolder>(nameof(WidgetAssetHolder));
+            AudioAssetHolder = UnityEngine.Resources.Load<GameObject>("Audio Asset Holder")
+                .AssertHasComponent<AudioAssetHolder>(nameof(AudioAssetHolder));
         }
     }
 }

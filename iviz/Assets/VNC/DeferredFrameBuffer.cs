@@ -20,9 +20,6 @@ namespace VNC
         readonly int width;
         readonly int height;
 
-        bool useFrameSkip;
-        bool frameSkip;
-
         public Size Size => new(width, height);
         public PixelFormat Format => TurboJpegDecoder.RgbaCompatiblePixelFormat;
 
@@ -31,47 +28,74 @@ namespace VNC
             this.screen = screen;
             width = size.Width;
             height = size.Height;
-            //GameThread.EveryFrame += Update;
         }
 
         public void SetPixels(in Rectangle rectangle, ReadOnlySpan<byte> pixelData, in PixelFormat pixelFormat)
         {
-            var frame = new FrameRectangle(rectangle.Size);
-            frame.SetPixels(pixelData, pixelFormat);
-            Enqueue(new QueueEntry(frame, rectangle));
+            try
+            {
+                var frame = new FrameRectangle(rectangle.Size);
+                frame.SetPixels(pixelData, pixelFormat);
+                Enqueue(new QueueEntry(frame, rectangle));
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
         }
 
         public void FillPixels(in Rectangle rectangle, ReadOnlySpan<byte> singlePixel, in PixelFormat pixelFormat)
         {
-            Rgba color;
-            if (pixelFormat.IsBinaryCompatibleTo(PixelFormat.RfbRgb888))
+            try
             {
-                color = default;
-                color.rgb = singlePixel.Read<Rgb>();
+                Rgba color;
+                if (pixelFormat.IsBinaryCompatibleTo(PixelFormat.RfbRgb888))
+                {
+                    color = default;
+                    color.rgb = singlePixel.Read<Rgb>();
+                }
+                else if (pixelFormat.IsBinaryCompatibleTo(TurboJpegDecoder.RgbaCompatiblePixelFormat))
+                {
+                    color = singlePixel.Read<Rgba>();
+                }
+                else
+                {
+                    return;
+                }
+
+                Enqueue(new QueueEntry(rectangle, color));
             }
-            else if (pixelFormat.IsBinaryCompatibleTo(TurboJpegDecoder.RgbaCompatiblePixelFormat))
+            catch (Exception e)
             {
-                color = singlePixel.Read<Rgba>();
+                Debug.Log(e);
             }
-            else
-            {
-                return;
-            }            
-            
-            Enqueue(new QueueEntry(rectangle, color));
         }
 
         public void SetPixelsPalette(in Rectangle rectangle, ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette,
             in PixelFormat pixelFormat)
         {
-            var frame = new FrameRectangle(rectangle.Size);
-            frame.SetPixelsPalette(indices, palette, pixelFormat);
-            Enqueue(new QueueEntry(frame, rectangle));
+            try
+            {
+                var frame = new FrameRectangle(rectangle.Size);
+                frame.SetPixelsPalette(indices, palette, pixelFormat);
+                Enqueue(new QueueEntry(frame, rectangle));
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
         }
 
         public void CopyFrom(in Rectangle rectangle, in Rectangle srcRectangle)
         {
-            Enqueue(new QueueEntry(rectangle, srcRectangle));
+            try
+            {
+                Enqueue(new QueueEntry(rectangle, srcRectangle));
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+            }
         }
 
         void Enqueue(in QueueEntry entry)
@@ -89,7 +113,11 @@ namespace VNC
         public void Dispose()
         {
             int count = frames.Count;
-
+            if (count == 0)
+            {
+                return;
+            }
+            
             var framesBuffer = new RentAndClear<QueueEntry>(count);
             lock (frames)
             {
@@ -109,9 +137,11 @@ namespace VNC
                     }
                 }
 
-                screen.UpdateFrame();
+                screen.UpdateFrame(Size);
             });
         }
+
+        Span<byte> GetTextureSpan() => screen.GetTextureSpan(Size);
 
         void ProcessFrame(in QueueEntry queueEntry)
         {
@@ -137,10 +167,10 @@ namespace VNC
             int textureWidth = Size.Width;
             int srcPitch = frame.Width * 4;
             int dstPitch = textureWidth * 4;
-            
+
             var src = frame.Address;
             int dstOffset = (position.Y * textureWidth + position.X) * 4;
-            var dst = screen.GetTextureSpan(Size)[dstOffset..];
+            var dst = GetTextureSpan()[dstOffset..];
 
             if (frame.Width == textureWidth)
             {
@@ -165,11 +195,12 @@ namespace VNC
             int rowLength = rectangle.Size.Width;
 
             int dstOffset = rectangle.Position.Y * dstPitch + rectangle.Position.X;
-            var dst = screen.GetTextureSpan(Size).Cast<Rgba>()[dstOffset..];
+            var dst = GetTextureSpan().Cast<Rgba>()[dstOffset..];
 
             if (rowLength == dstPitch)
             {
-                dst[..(rectangle.Size.Height * rowLength)].Fill(color);
+                int sizeToFill = rectangle.Size.Height * rowLength;
+                dst[..sizeToFill].Fill(color);
             }
             else
             {
@@ -190,7 +221,7 @@ namespace VNC
             int rectHeight = srcRectangle.Size.Height;
             int rectWidth = srcRectangle.Size.Width;
             int rowLength = rectWidth * 4;
-            var span = screen.GetTextureSpan(Size);
+            var span = GetTextureSpan();
             var srcSpan = span[(srcRectangle.Position.Y * pitch + srcRectangle.Position.X * 4)..];
             var dstSpan = span[(dstRectangle.Position.Y * pitch + dstRectangle.Position.X * 4)..];
 
@@ -220,6 +251,17 @@ namespace VNC
                 {
                     srcSpan.Slice(offset, rowLength).CopyTo(dstSpan.Slice(offset, rowLength));
                     offset += pitch;
+                }
+            }
+        }
+
+        public void DisposeAllFrames()
+        {
+            lock (frames)
+            {
+                while (frames.TryDequeue(out var frame))
+                {
+                    frame.Dispose();
                 }
             }
         }

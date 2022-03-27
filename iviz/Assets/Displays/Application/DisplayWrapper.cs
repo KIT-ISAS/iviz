@@ -1,5 +1,6 @@
 #nullable enable
 
+using Iviz.Core;
 using UnityEngine;
 
 namespace Iviz.Displays
@@ -9,7 +10,7 @@ namespace Iviz.Displays
         Transform? mTransform;
 
         protected abstract IDisplay Display { get; }
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
         public Bounds? Bounds => Display.Bounds;
 
         public int Layer

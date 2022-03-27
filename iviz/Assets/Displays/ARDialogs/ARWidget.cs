@@ -16,9 +16,6 @@ namespace Iviz.App.ARDialogs
 
         [SerializeField, CanBeNull] BoxCollider boxCollider = null;
 
-        protected BoxCollider BoxCollider =>
-            boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
-
         FrameNode node;
         [NotNull] FrameNode Node => (node != null) ? node : node = FrameNode.Instantiate("Widget Node");
         [NotNull] public TfFrame ParentFrame => Node.Parent ?? TfModule.DefaultFrame;

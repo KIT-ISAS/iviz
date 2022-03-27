@@ -20,7 +20,7 @@ namespace Iviz.App
         [SerializeField] Image image;
 
         [SerializeField] Button button;
-        Button Button => button == null ? (button = GetComponent<Button>()) : button;
+        Button Button => this.EnsureHasComponent(ref button, nameof(button));
 
         [SerializeField] Text text;
         [SerializeField] string enabledText;

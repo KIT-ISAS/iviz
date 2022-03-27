@@ -5,7 +5,6 @@ using System.Buffers;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Core;
-using Iviz.Tools;
 using MarcusW.VncClient;
 using MarcusW.VncClient.Protocol.Implementation.Services.Communication;
 using UnityEngine;
@@ -14,7 +13,8 @@ namespace VNC
 {
     public readonly struct FrameRectangle : IDisposable
     {
-        const int BytesPerPixel = 4;
+        static readonly Rgba[] PaletteBuffer = new Rgba[256];
+
         readonly byte[] buffer;
         readonly int fullSize;
 
@@ -23,12 +23,12 @@ namespace VNC
         public int Width { get; }
         public int Height { get; }
         public ReadOnlySpan<byte> Address => BufferSpan();
-        
+
         public FrameRectangle(Size size)
         {
             Width = size.Width;
             Height = size.Height;
-            fullSize = Width * Height * BytesPerPixel;
+            fullSize = Width * Height * 4;
             buffer = ArrayPool<byte>.Shared.Rent(fullSize);
         }
 
@@ -63,17 +63,37 @@ namespace VNC
 
         void SetPixels3(ReadOnlySpan<byte> src)
         {
-            var dst4 = BufferSpan().Cast<Rgba>();
-            var src3 = src.Cast<Rgb>();
+            SetPixels3N(BufferSpan().Cast<Rgba>(), src.Cast<Rgb>());
+        }
 
+        static void SetPixels3N(Span<Rgba> dst4, ReadOnlySpan<Rgb> src3)
+        {
+            int sizeToWrite = src3.Length;
+            
+            dst4 = dst4[..sizeToWrite]; // ensure dst is big enough
+            
             ref var dstPtr = ref MemoryMarshal.GetReference(dst4);
             ref var srcPtr = ref MemoryMarshal.GetReference(src3);
 
-            for (int x = dst4.Length; x > 0; x--)
+            while (sizeToWrite > 8)
             {
                 dstPtr.rgb = srcPtr;
+                Unsafe.Add(ref dstPtr, 1).rgb = Unsafe.Add(ref srcPtr, 1);
+                Unsafe.Add(ref dstPtr, 2).rgb = Unsafe.Add(ref srcPtr, 2);
+                Unsafe.Add(ref dstPtr, 3).rgb = Unsafe.Add(ref srcPtr, 3);
+                Unsafe.Add(ref dstPtr, 4).rgb = Unsafe.Add(ref srcPtr, 4);
+                Unsafe.Add(ref dstPtr, 5).rgb = Unsafe.Add(ref srcPtr, 5);
+                Unsafe.Add(ref dstPtr, 6).rgb = Unsafe.Add(ref srcPtr, 6);
+                Unsafe.Add(ref dstPtr, 7).rgb = Unsafe.Add(ref srcPtr, 7);
 
-                // this is messy, but il2cpp can't optimize bounds checking away if it happens in a span
+                sizeToWrite -= 8;
+                srcPtr = ref Unsafe.Add(ref srcPtr, 8);
+                dstPtr = ref Unsafe.Add(ref dstPtr, 8);
+            }
+
+            for (int x = sizeToWrite; x > 0; x--)
+            {
+                dstPtr.rgb = srcPtr;
                 srcPtr = ref Unsafe.Add(ref srcPtr, 1);
                 dstPtr = ref Unsafe.Add(ref dstPtr, 1);
             }
@@ -100,39 +120,25 @@ namespace VNC
 
         void SetPixelsPalette3(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
-            if (palette.Length > 256 * 3)
-            {
-                // this shouldn't happen
-                return;
-            }
-
             var srcPalette3 = palette.Cast<Rgb>();
-            Span<Rgba> dstPalette4 = stackalloc Rgba[256]; // size 1024
+            var dstPalette4 = PaletteBuffer.AsSpan();
 
-            for (int i = 0; i < srcPalette3.Length; i++)
-            {
-                dstPalette4[i].rgb = srcPalette3[i];
-            }
+            SetPixels3N(dstPalette4, srcPalette3);
 
             SetPixelsPalette(indices, dstPalette4);
         }
 
         void SetPixelsPalette4(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
-            if (palette.Length > 256 * 4)
-            {
-                // this shouldn't happen
-                return;
-            }
-
             var srcPalette4 = palette.Cast<Rgba>();
+
             if (srcPalette4.Length == 256)
             {
                 SetPixelsPalette(indices, srcPalette4);
             }
             else
             {
-                Span<Rgba> dstPalette4 = stackalloc Rgba[256]; // size 1024
+                var dstPalette4 = PaletteBuffer.AsSpan();
                 srcPalette4.CopyTo(dstPalette4);
                 SetPixelsPalette(indices, dstPalette4);
             }
@@ -140,22 +146,43 @@ namespace VNC
 
         void SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<Rgba> palette)
         {
-            var dst4 = BufferSpan().Cast<Rgba>();
-            ref Rgba palettePtr = ref MemoryMarshal.GetReference(palette);
-            ref byte indicesPtr = ref MemoryMarshal.GetReference(indices);
+            SetPixelsPaletteN(BufferSpan(), indices, palette);
+        }
+
+        static void SetPixelsPaletteN(ReadOnlySpan<byte> dst, ReadOnlySpan<byte> indices, ReadOnlySpan<Rgba> palette)
+        {
+            var dst4 = dst.Cast<Rgba>();
+            int sizeToWrite = dst4.Length;
+
+            ref Rgba palettePtr = ref MemoryMarshal.GetReference(palette); // palette is size 256
+            ref byte indicesPtr = ref MemoryMarshal.GetReference(indices[..sizeToWrite]); // ensure it's equal to dst4 
             ref var dstPtr = ref MemoryMarshal.GetReference(dst4);
 
-            for (int x = dst4.Length; x > 0; x--)
+            while (sizeToWrite > 8)
             {
-                // avoid bounds checking, palette is big enough that this will never fail
                 dstPtr = Unsafe.Add(ref palettePtr, indicesPtr);
-                
+                Unsafe.Add(ref dstPtr, 1) = Unsafe.Add(ref palettePtr, Unsafe.Add(ref indicesPtr, 1));
+                Unsafe.Add(ref dstPtr, 2) = Unsafe.Add(ref palettePtr, Unsafe.Add(ref indicesPtr, 2));
+                Unsafe.Add(ref dstPtr, 3) = Unsafe.Add(ref palettePtr, Unsafe.Add(ref indicesPtr, 3));
+                Unsafe.Add(ref dstPtr, 4) = Unsafe.Add(ref palettePtr, Unsafe.Add(ref indicesPtr, 4));
+                Unsafe.Add(ref dstPtr, 5) = Unsafe.Add(ref palettePtr, Unsafe.Add(ref indicesPtr, 5));
+                Unsafe.Add(ref dstPtr, 6) = Unsafe.Add(ref palettePtr, Unsafe.Add(ref indicesPtr, 6));
+                Unsafe.Add(ref dstPtr, 7) = Unsafe.Add(ref palettePtr, Unsafe.Add(ref indicesPtr, 7));
+
+                sizeToWrite -= 8;
+                dstPtr = ref Unsafe.Add(ref dstPtr, 8);
+                indicesPtr = ref Unsafe.Add(ref indicesPtr, 8);
+            }
+
+            for (int x = sizeToWrite; x > 0; x--)
+            {
+                dstPtr = Unsafe.Add(ref palettePtr, indicesPtr); // *dstPtr = *(palettePtr + *indicesPtr);
                 dstPtr = ref Unsafe.Add(ref dstPtr, 1);
                 indicesPtr = ref Unsafe.Add(ref indicesPtr, 1);
             }
         }
     }
-    
+
     [StructLayout(LayoutKind.Sequential)]
     internal struct Rgba
     {
@@ -167,5 +194,5 @@ namespace VNC
     internal readonly struct Rgb
     {
         readonly byte r, g, b;
-    }    
+    }
 }

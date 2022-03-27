@@ -36,7 +36,7 @@ namespace Iviz.Displays
                     return trail;
                 }
 
-                trail = ResourcePool.RentDisplay<TrailDisplay>(TfModule.UnityFrameTransform);
+                trail = ResourcePool.RentDisplay<TrailDisplay>(TfModule.UnityTransform);
                 trail.TimeWindowInMs = TrailTimeWindowInMs;
                 trail.Color = Color.yellow;
                 trail.name = $"[Trail:{Id}]";
@@ -237,7 +237,7 @@ namespace Iviz.Displays
             {
                 if (parentConnector != null)
                 {
-                    ParentConnector.B = TfModule.OriginFrame.Transform;
+                    ParentConnector.B = TfModule.OriginTransform;
                 }
             }
             else

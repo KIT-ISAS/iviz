@@ -35,7 +35,7 @@ namespace Iviz.Displays
         public string Title { get; set; } = "";
         public Bounds? Bounds => Collider.GetLocalBounds();
         public Transform BoundsTransform => Billboard.transform;
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
         
         public event Action? BoundsChanged;
 

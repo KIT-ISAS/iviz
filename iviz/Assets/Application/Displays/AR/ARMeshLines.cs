@@ -24,7 +24,7 @@ namespace Iviz.Displays
         MeshFilter? meshFilter;
         LineDisplay? resource;
 
-        MeshFilter MeshFilter => meshFilter != null ? meshFilter : (meshFilter = GetComponent<MeshFilter>());
+        MeshFilter MeshFilter => this.EnsureHasComponent(ref meshFilter, nameof(meshFilter));
 
         LineDisplay Resource
         {

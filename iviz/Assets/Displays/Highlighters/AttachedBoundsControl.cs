@@ -17,6 +17,7 @@ namespace Iviz.Displays.Highlighters
         IHasBounds? source;
         ScreenDraggable? draggable;
 
+        public float FrameColumnWidth { get; set; } = 0.005f;
         public event Action? PointerDown;
         public event Action? PointerUp;
         public event Action? Moved;
@@ -86,7 +87,7 @@ namespace Iviz.Displays.Highlighters
                     frame.EmissiveColor = draggable.IsDragging
                         ? Resource.Colors.DraggableSelectedEmissive
                         : Resource.Colors.DraggableHoverEmissive;
-                    frame.ColumnWidth = draggable.IsDragging ? 0.01f : 0.005f;
+                    frame.ColumnWidth = draggable.IsDragging ? 2 * FrameColumnWidth : FrameColumnWidth;
                     frame.Color = draggable.IsDragging
                         ? Resource.Colors.DraggableSelectedColor
                         : Resource.Colors.DraggableHoverColor;

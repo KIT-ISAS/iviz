@@ -44,7 +44,7 @@ namespace Iviz.Displays
         public event Action? EndDragging;
         public event Action? StateChanged;
 
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
 
         protected Vector3? ReferencePointLocal { get; private set; }
 

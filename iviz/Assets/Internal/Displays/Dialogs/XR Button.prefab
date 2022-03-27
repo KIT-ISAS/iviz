@@ -270,6 +270,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   caption: 
   icon: 0
+  backgroundVisible: 1
   text: {fileID: 7889427846013267737}
   m_Transform: {fileID: 7364131420513646205}
   boxCollider: {fileID: 1105819323540503948}

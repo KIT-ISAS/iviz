@@ -135,7 +135,7 @@ namespace Iviz.Controllers
             dialog.PivotFrameId = msg.Header.FrameId;
             dialog.PivotFrameOffset = msg.TfOffset.Ros2Unity();
             dialog.PivotDisplacement = AdjustDisplacement(msg.TfDisplacement);
-            dialog.DialogDisplacement = AdjustDisplacement(msg.DialogDisplacement);
+            dialog.LocalDisplacement = AdjustDisplacement(msg.DialogDisplacement);
 
             if (msg.BackgroundColor.A != 0)
             {
@@ -169,7 +169,7 @@ namespace Iviz.Controllers
 
             if (dialog is IDialogHasButtonSetup hasButtonSetup)
             {
-                hasButtonSetup.ButtonSetup = (XRButtonSetup)msg.Buttons;
+                hasButtonSetup.ButtonSetup = (ButtonSetup)msg.Buttons;
             }
 
             dialog.Expired += () => parent.OnDialogExpired(this);

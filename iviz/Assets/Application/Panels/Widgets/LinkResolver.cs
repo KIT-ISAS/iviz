@@ -12,7 +12,7 @@ namespace Iviz.App
     {
         [SerializeField] TMP_Text? text;
 
-        TMP_Text Text => text != null ? text : text = GetComponent<TMP_Text>();
+        TMP_Text Text => this.EnsureHasComponent(ref text, nameof(text));
 
         public event Action<string>? LinkClicked;
         public event Action<string>? LinkDoubleClicked;

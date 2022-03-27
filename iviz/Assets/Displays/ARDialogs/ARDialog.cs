@@ -152,7 +152,7 @@ namespace Iviz.App.ARDialogs
         public Vector3 PivotFrameOffset { get; set; }
         public Vector3 PivotDisplacement { get; set; }
 
-        public void SetButtonMode(XRButtonSetup value)
+        public void SetButtonMode(ButtonSetup value)
         {
             if (button1 == null)
             {
@@ -173,22 +173,22 @@ namespace Iviz.App.ARDialogs
 
             switch (value)
             {
-                case XRButtonSetup.Ok:
+                case ButtonSetup.Ok:
                     button1.Visible = true;
                     button1.Icon = XRIcon.Ok;
                     button1.Caption = "Ok";
                     break;
-                case XRButtonSetup.Forward:
+                case ButtonSetup.Forward:
                     button1.Visible = true;
                     button1.Icon = XRIcon.Forward;
                     button1.Caption = "Ok";
                     break;
-                case XRButtonSetup.Backward:
+                case ButtonSetup.Backward:
                     button1.Visible = true;
                     button1.Icon = XRIcon.Backward;
                     button1.Caption = "Back";
                     break;
-                case XRButtonSetup.YesNo:
+                case ButtonSetup.YesNo:
                     if (button2 == null || button3 == null)
                     {
                         break;
@@ -201,7 +201,7 @@ namespace Iviz.App.ARDialogs
                     button3.Icon = XRIcon.Cross;
                     button3.Caption = "No";
                     break;
-                case XRButtonSetup.ForwardBackward:
+                case ButtonSetup.ForwardBackward:
                     if (button2 == null || button3 == null)
                     {
                         break;
@@ -214,7 +214,7 @@ namespace Iviz.App.ARDialogs
                     button3.Icon = XRIcon.Forward;
                     button3.Caption = "Forward";
                     break;
-                case XRButtonSetup.OkCancel:
+                case ButtonSetup.OkCancel:
                     if (button2 == null || button3 == null)
                     {
                         break;
@@ -451,7 +451,7 @@ namespace Iviz.App.ARDialogs
             var cameraLocalRotation = GetFlatCameraRotation(frameLocalPosition);
 
             var targetLocalPosition = frameLocalPosition + cameraLocalRotation * DialogDisplacement + BaseDisplacement;
-            var targetAbsolutePosition = TfModule.OriginFrame.Transform.TransformPoint(targetLocalPosition);
+            var targetAbsolutePosition = TfModule.OriginTransform.TransformPoint(targetLocalPosition);
 
             if (currentPosition == null)
             {
@@ -473,17 +473,17 @@ namespace Iviz.App.ARDialogs
 
         static Quaternion GetFlatCameraRotation(in Vector3 localPosition)
         {
-            var absolutePosition = TfModule.OriginFrame.Transform.TransformPoint(localPosition);
+            var absolutePosition = TfModule.OriginTransform.TransformPoint(localPosition);
             (float x, _, float z) = absolutePosition - Settings.MainCameraTransform.position;
             float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
             var absoluteRotation = Quaternion.AngleAxis(targetAngle, Vector3.up);
 
-            return TfModule.OriginFrame.Transform.rotation.Inverse() * absoluteRotation;
+            return TfModule.OriginTransform.rotation.Inverse() * absoluteRotation;
         }
 
         public void Initialize()
         {
-            Transform.SetParentLocal(TfModule.OriginFrame.Transform);
+            Transform.SetParentLocal(TfModule.OriginTransform);
 
             connector.Visible = true;
             resetOrientation = true;

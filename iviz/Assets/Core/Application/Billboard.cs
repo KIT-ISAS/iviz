@@ -8,7 +8,7 @@ namespace Iviz.Displays
     public sealed class Billboard : MonoBehaviour
     {
         Transform? mTransform;
-        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        Transform Transform => this.EnsureHasTransform(ref mTransform);
 
         [SerializeField] Vector3 offset;
         [SerializeField] bool keepHorizontal;

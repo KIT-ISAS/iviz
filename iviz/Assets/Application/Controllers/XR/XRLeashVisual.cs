@@ -19,7 +19,7 @@ namespace Iviz.Controllers.XR
         LeashDisplay? leash;
         ScreenDraggable? draggable;
 
-        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        Transform Transform => this.EnsureHasTransform(ref mTransform);
         CustomController Controller => controller.AssertNotNull(nameof(controller));
         XRRayInteractor Interactor => interactor.AssertNotNull(nameof(interactor));
         LeashDisplay Leash => ResourcePool.RentChecked(ref leash);

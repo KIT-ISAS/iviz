@@ -19,11 +19,12 @@ namespace Iviz.Displays.XR
 
         FrameNode? node;
         string? pivotFrameId;
-        bool resetOrientation;
+        bool resetOrientation = true;
         Vector3? currentPosition;
         float scale = 1;
 
         ISupportsColor? backgroundObject;
+        Vector3 baseDisplacement;
 
         FrameNode Node => node ??= new FrameNode("Dialog Node");
         XRDialogConnector Connector => connector.AssertNotNull(nameof(connector));
@@ -51,14 +52,14 @@ namespace Iviz.Displays.XR
             }
         }
 
-
-        Vector3 baseDisplacement;
-
         public event Action? Expired;
 
-        public Vector3 DialogDisplacement { get; set; }
+        public BindingType BindingType { get; set; }
+        public Vector3 LocalDisplacement { get; set; }
         public Vector3 PivotFrameOffset { get; set; }
         public Vector3 PivotDisplacement { get; set; }
+
+        public float PositionDamping { get; set; } = 0.05f;
 
         public float Scale
         {
@@ -115,15 +116,20 @@ namespace Iviz.Displays.XR
                 var framePosition = TfModule.RelativeToOrigin(Node.Transform.position) + PivotFrameOffset;
                 return PivotDisplacement.MaxAbsCoeff() == 0
                     ? framePosition
-                    : framePosition + GetFlatCameraRotation(framePosition) * PivotDisplacement;
+                    : framePosition + GetFlatCameraRotationRelativeTo(framePosition) * PivotDisplacement;
             }
         }
 
         public void Initialize()
         {
-            Transform.SetParentLocal(TfModule.OriginFrame.Transform);
-            Connector.Visible = true;
+            if (BindingType == BindingType.Tf)
+            {
+                Transform.SetParentLocal(TfModule.OriginTransform);
+                Connector.Visible = true;
+            }
+
             resetOrientation = true;
+            currentPosition = null;
             Update();
         }
 
@@ -161,31 +167,55 @@ namespace Iviz.Displays.XR
 
         void UpdatePosition()
         {
-            if (pivotFrameId == null)
+            Quaternion localCameraRotation;
+            Vector3 localTargetPosition;
+
+            switch (BindingType)
             {
-                return;
+                case BindingType.None:
+                case BindingType.Tf when pivotFrameId == null:
+                    return;
+                case BindingType.Tf:
+                {
+                    var absolutePivotPosition = Node.Transform.position;
+                    var localFramePosition = TfModule.RelativeToOrigin(absolutePivotPosition) + PivotFrameOffset;
+                    localCameraRotation = GetFlatCameraRotationRelativeTo(localFramePosition);
+                    localTargetPosition =
+                        localFramePosition + localCameraRotation * LocalDisplacement + baseDisplacement;
+                    break;
+                }
+                case BindingType.User:
+                {
+                    var absolutePivotPosition = Settings.MainCameraTransform.position;
+                    var localFramePosition = TfModule.RelativeToOrigin(absolutePivotPosition) + PivotFrameOffset;
+
+                    var absoluteCameraForward = Settings.MainCameraTransform.TransformPoint(Vector3.forward);
+                    var localCameraForward = TfModule.RelativeToOrigin(absoluteCameraForward);
+                    localCameraRotation = GetFlatCameraRotationRelativeTo(localCameraForward);
+                    localTargetPosition = localFramePosition + localCameraRotation * LocalDisplacement;
+                    break;
+                }
+                default:
+                    return;
             }
 
-            var frameLocalPosition = TfModule.RelativeToOrigin(Node.Transform.position) + PivotFrameOffset;
-            var cameraLocalRotation = GetFlatCameraRotation(frameLocalPosition);
 
-            var targetLocalPosition = frameLocalPosition + cameraLocalRotation * DialogDisplacement + baseDisplacement;
-            var targetAbsolutePosition = TfModule.OriginFrame.Transform.TransformPoint(targetLocalPosition);
+            var absoluteTargetPosition = TfModule.OriginTransform.TransformPoint(localTargetPosition);
 
             Vector3 nextAbsolutePosition;
             if (currentPosition is not { } position)
             {
-                nextAbsolutePosition = targetAbsolutePosition;
+                nextAbsolutePosition = absoluteTargetPosition;
             }
             else
             {
-                var deltaPosition = targetAbsolutePosition - Transform.position;
+                var deltaPosition = absoluteTargetPosition - Transform.position;
                 if (deltaPosition.MaxAbsCoeff() < 0.001f)
                 {
                     return;
                 }
 
-                nextAbsolutePosition = position + deltaPosition * 0.05f;
+                nextAbsolutePosition = position + deltaPosition * PositionDamping;
             }
 
             currentPosition = nextAbsolutePosition;
@@ -194,23 +224,38 @@ namespace Iviz.Displays.XR
 
         public virtual void Suspend()
         {
-            Connector.Visible = false;
+            LocalDisplacement = Vector3.zero;
+            PivotDisplacement = Vector3.zero;
+            PivotFrameOffset = Vector3.zero;
+            
             currentPosition = null;
+            resetOrientation = true;
+            
+            Connector.Visible = false;
             Expired?.Invoke();
             Expired = null;
         }
 
-        static Quaternion GetFlatCameraRotation(in Vector3 localPosition)
+        static Quaternion GetFlatCameraRotationRelativeTo(in Vector3 localPosition)
         {
+            var originTransform = TfModule.OriginTransform;
+            var absolutePosition = originTransform.TransformPoint(localPosition);
+            var direction = absolutePosition - Settings.MainCameraTransform.position;
+            var absoluteRotation =
+                Quaternion.LookRotation((direction.ApproximatelyZero() ? Vector3.forward : direction).WithY(0));
+            return originTransform.rotation.Inverse() * absoluteRotation;
+
+            /*
             var absolutePosition = TfModule.OriginFrame.Transform.TransformPoint(localPosition);
             (float x, _, float z) = absolutePosition - Settings.MainCameraTransform.position;
             float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
             var absoluteRotation = Quaternion.AngleAxis(targetAngle, Vector3.up);
 
             return TfModule.OriginFrame.Transform.rotation.Inverse() * absoluteRotation;
+             */
         }
 
-        internal static void SetupButtons(XRButton button1, XRButton button2, XRButton button3, XRButtonSetup value)
+        protected static void SetupButtons(XRButton button1, XRButton button2, XRButton button3, ButtonSetup value)
         {
             button1.Visible = false;
             button2.Visible = false;
@@ -218,22 +263,22 @@ namespace Iviz.Displays.XR
 
             switch (value)
             {
-                case XRButtonSetup.Ok:
+                case ButtonSetup.Ok:
                     button1.Visible = true;
                     button1.Icon = XRIcon.Ok;
                     button1.Caption = "OK";
                     break;
-                case XRButtonSetup.Forward:
+                case ButtonSetup.Forward:
                     button1.Visible = true;
                     button1.Icon = XRIcon.Forward;
                     button1.Caption = "OK";
                     break;
-                case XRButtonSetup.Backward:
+                case ButtonSetup.Backward:
                     button1.Visible = true;
                     button1.Icon = XRIcon.Backward;
                     button1.Caption = "Back";
                     break;
-                case XRButtonSetup.YesNo:
+                case ButtonSetup.YesNo:
                     button2.Visible = true;
                     button2.Icon = XRIcon.Ok;
                     button2.Caption = "Yes";
@@ -241,7 +286,7 @@ namespace Iviz.Displays.XR
                     button3.Icon = XRIcon.Cross;
                     button3.Caption = "No";
                     break;
-                case XRButtonSetup.ForwardBackward:
+                case ButtonSetup.ForwardBackward:
                     button2.Visible = true;
                     button2.Icon = XRIcon.Backward;
                     button2.Caption = "Back";
@@ -249,7 +294,7 @@ namespace Iviz.Displays.XR
                     button3.Icon = XRIcon.Forward;
                     button3.Caption = "Forward";
                     break;
-                case XRButtonSetup.OkCancel:
+                case ButtonSetup.OkCancel:
                     button2.Visible = true;
                     button2.Icon = XRIcon.Ok;
                     button2.Caption = "OK";

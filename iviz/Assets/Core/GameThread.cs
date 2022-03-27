@@ -16,11 +16,17 @@ namespace Iviz.Core
     public class GameThread : MonoBehaviour
     {
         static GameThread? instance;
+
+        static GameThread Instance =>
+            instance != null
+                ? instance
+                : instance = GameObject.Find("Game Thread").AssertHasComponent<GameThread>(nameof(Instance));
+
         static int networkFrameSkip = 1;
         static string? nowFormatted;
-        
+
         static bool IsGameThread => instance != null && Thread.CurrentThread == instance.gameThread;
-        
+
         /// <summary>
         /// How many frames <see cref="ListenersEveryFrame"/> should skip.
         /// A value of 1 means no skips, a value of 2 means every second frame, and so on.
@@ -252,12 +258,12 @@ namespace Iviz.Core
         {
             ThrowHelper.ThrowIfNull(action, nameof(action));
 
-            if (instance == null)
+            if (Settings.IsShuttingDown)
             {
                 return;
             }
 
-            instance.actionsQueue.Enqueue(action);
+            Instance.actionsQueue.Enqueue(action);
         }
 
         /// <summary>
@@ -279,12 +285,12 @@ namespace Iviz.Core
         {
             ThrowHelper.ThrowIfNull(action, nameof(action));
 
-            if (instance == null)
+            if (Settings.IsShuttingDown)
             {
                 return;
             }
 
-            instance.listenerQueue.Enqueue(action);
+            Instance.listenerQueue.Enqueue(action);
         }
 
         /// <summary>
@@ -302,11 +308,13 @@ namespace Iviz.Core
                 action();
                 return;
             }
-
-            if (instance != null)
+            
+            if (Settings.IsShuttingDown)
             {
-                instance.actionsQueue.Enqueue(action);
-            }
+                return;
+            }            
+
+            Instance.actionsQueue.Enqueue(action);
         }
     }
 }

@@ -274,7 +274,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (msg.Buttons > (byte)XRButtonSetup.Backward)
+            if (msg.Buttons > (byte)ButtonSetup.Backward)
             {
                 RosLogger.Info($"{this}: Dialog '{msg.Id}' has unknown button setup id {msg.Action.ToString()}");
                 return;

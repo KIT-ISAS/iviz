@@ -40,7 +40,7 @@ namespace Iviz.Displays.XR
             set => CaptionObject.alignment = (TextAlignmentOptions)value;
         }
 
-        public XRButtonSetup ButtonSetup
+        public ButtonSetup ButtonSetup
         {
             set => SetupButtons(Button1, Button2, Button3, value);
         }
@@ -60,9 +60,9 @@ namespace Iviz.Displays.XR
         {
             base.Suspend();
             Clicked = null;
-            Button1.ResetHighlights();
-            Button2.ResetHighlights();
-            Button3.ResetHighlights();
+            //Button1.ResetHighlights();
+            //Button2.ResetHighlights();
+            //Button3.ResetHighlights();
         }
     }
 }

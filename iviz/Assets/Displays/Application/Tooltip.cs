@@ -20,11 +20,11 @@ namespace Iviz.Displays
         uint? prevTextHash;
         Transform? mTransform;
 
-        BoxCollider BoxCollider => boxCollider != null ? boxCollider : (boxCollider = GetComponent<BoxCollider>());
+        BoxCollider BoxCollider => this.EnsureHasComponent(ref boxCollider, nameof(boxCollider));
         TMP_Text Text => text.AssertNotNull(nameof(text));
 
         public RoundedPlaneDisplay Background => ResourcePool.RentChecked(ref background, Transform);
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
 
         public float Scale
         {

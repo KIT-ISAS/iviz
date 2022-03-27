@@ -93,7 +93,7 @@ namespace Iviz.App
         Transform? mTransform;
 
         LeashDisplay Leash => ResourcePool.RentChecked(ref leash);
-        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        Transform Transform => this.EnsureHasTransform(ref mTransform);
         bool IsLookAtAnimationRunning => lookAtTokenSource is { IsCancellationRequested: false };
         Quaternion OrbitRotation => Quaternion.Euler(CameraPitch, CameraYaw, CameraRoll);
 

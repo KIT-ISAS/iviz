@@ -19,7 +19,7 @@ namespace Iviz.Displays.XR
 
         Transform? mTransform;
 
-        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        Transform Transform => this.EnsureHasTransform(ref mTransform);
         MeshMarkerDisplay Line => ResourcePool.RentChecked(ref line, Resource.Displays.Cube, Transform);
         SelectionFrame Frame => ResourcePool.RentChecked(ref frame, Transform);
         Tooltip Tooltip => ResourcePool.RentChecked(ref tooltip, Transform);

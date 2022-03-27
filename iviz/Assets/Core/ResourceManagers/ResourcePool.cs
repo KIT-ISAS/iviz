@@ -18,6 +18,12 @@ namespace Iviz.Displays
         const int TimeToDestroyInSec = 60;
 
         static ResourcePool? instance;
+
+        static ResourcePool Instance =>
+            instance != null
+                ? instance
+                : instance = GameObject.Find("Resource Pool").AssertHasComponent<ResourcePool>(nameof(Instance));
+
         readonly List<GameObject> objectsToDestroy = new();
         readonly HashSet<int> disposedObjectIds = new();
         readonly Dictionary<int, Queue<ObjectWithExpirationTime>> disposedObjectPool = new();
@@ -27,7 +33,7 @@ namespace Iviz.Displays
         /// <summary>
         /// Transform of the node where disposed objects are stored.
         /// </summary>
-        public static Transform? Transform => instance != null ? instance.transform : null;
+        public static Transform Transform => Instance.transform;
 
         void Awake()
         {
@@ -57,15 +63,7 @@ namespace Iviz.Displays
         public static GameObject Rent(ResourceKey<GameObject> resource, Transform? parent = null, bool enable = true)
         {
             ThrowHelper.ThrowIfNull(resource, nameof(resource));
-
-            if (instance != null)
-            {
-                return instance.Get(resource, parent, enable);
-            }
-
-            var obj = resource.Instantiate(parent);
-            obj.SetActive(enable);
-            return obj;
+            return Instance.Get(resource, parent, enable);
         }
 
         /// <summary>
@@ -136,15 +134,7 @@ namespace Iviz.Displays
         {
             ThrowHelper.ThrowIfNull(resource, nameof(resource));
             ThrowHelper.ThrowIfNull(gameObject, nameof(gameObject));
-
-            if (instance == null)
-            {
-                Destroy(gameObject);
-            }
-            else
-            {
-                instance.Add(resource, gameObject);
-            }
+            Instance.Add(resource, gameObject);
         }
 
         internal static void ReturnDisplay(IDisplay display)

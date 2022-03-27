@@ -31,7 +31,7 @@ namespace Iviz.Displays
             }
         }
 
-        public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
+        public Transform Transform => this.EnsureHasTransform(ref m_Transform);
 
         public Bounds? Bounds => children.Length == 0 ? null : Collider.GetLocalBounds();
 

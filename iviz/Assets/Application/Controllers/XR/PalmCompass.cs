@@ -14,16 +14,16 @@ namespace Iviz.Controllers.XR
         [SerializeField] MeshMarkerDisplay? ring;
         AxisFrameDisplay? frame;
         Tooltip? tooltip;
-
         Transform? mTransform;
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
 
         MeshMarkerDisplay Ring => ring.AssertNotNull(nameof(ring));
+        Tooltip Tooltip => tooltip != null ? tooltip : (tooltip = ResourcePool.RentDisplay<Tooltip>(Transform));
 
         AxisFrameDisplay Frame =>
             frame != null ? frame : (frame = ResourcePool.RentDisplay<AxisFrameDisplay>(Transform));
 
-        Tooltip Tooltip => tooltip != null ? tooltip : (tooltip = ResourcePool.RentDisplay<Tooltip>(Transform));
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
+
 
         void Awake()
         {

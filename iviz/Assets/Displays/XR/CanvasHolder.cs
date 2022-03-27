@@ -34,7 +34,7 @@ namespace Iviz.Displays.XR
         Transform Holder => Draggable.Transform;
         TMP_Text Label => label.AssertNotNull(nameof(label));
 
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
 
         public string Title
         {

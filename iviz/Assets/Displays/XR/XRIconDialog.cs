@@ -40,7 +40,7 @@ namespace Iviz.Displays.XR
             set => IconObject.Icon = value;
         }
         
-        public XRButtonSetup ButtonSetup
+        public ButtonSetup ButtonSetup
         {
             set => SetupButtons(
                 button1.AssertNotNull(nameof(button1)),

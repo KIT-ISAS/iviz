@@ -11,7 +11,7 @@ namespace Iviz.Displays.XR
         event Action? Expired;
         float Scale { set; }
         Color Color { set; }
-        Vector3 DialogDisplacement { set; }
+        Vector3 LocalDisplacement { set; }
         Vector3 PivotFrameOffset { set; }
         Vector3 PivotDisplacement { set; }
         string PivotFrameId { set; }
@@ -40,7 +40,7 @@ namespace Iviz.Displays.XR
     
     public interface IDialogHasButtonSetup
     {
-        XRButtonSetup ButtonSetup { set; }
+        ButtonSetup ButtonSetup { set; }
     }  
     
     public interface IDialogCanBeClicked
@@ -49,7 +49,7 @@ namespace Iviz.Displays.XR
     }  
     
     [Flags]
-    public enum CaptionAlignmentType : ushort
+    public enum CaptionAlignmentType
     {
         Default = 0x0,
         
@@ -65,7 +65,7 @@ namespace Iviz.Displays.XR
         Bottom = 0x400,
     } 
     
-    public enum XRButtonSetup : byte
+    public enum ButtonSetup
     {
         Ok = Dialog.BUTTONS_OK,
         YesNo = Dialog.BUTTONS_YESNO,
@@ -75,7 +75,7 @@ namespace Iviz.Displays.XR
         Backward = Dialog.BUTTONS_BACKWARD,
     }
     
-    public enum IconType : byte
+    public enum IconType
     {
         None,
         Info,
@@ -86,7 +86,7 @@ namespace Iviz.Displays.XR
         Question,
     }    
     
-    public enum DialogType : byte
+    public enum DialogType
     {
         Plain = Dialog.TYPE_PLAIN,
         Short = Dialog.TYPE_SHORT,
@@ -94,5 +94,12 @@ namespace Iviz.Displays.XR
         Menu = Dialog.TYPE_MENU,
         Button = Dialog.TYPE_BUTTON,
         Icon = Dialog.TYPE_ICON
+    }
+    
+    public enum BindingType
+    {
+        None,
+        Tf,
+        User
     }
 }

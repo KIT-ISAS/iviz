@@ -27,7 +27,7 @@ namespace Iviz.Displays
         void Start()
         {
             Color = Color.yellow;
-            Transform.SetParentLocal(TfModule.OriginFrame.Transform);
+            Transform.SetParentLocal(TfModule.OriginTransform);
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
             gameObject.SetActive(ARController.Instance is not { Visible: true });
         }

@@ -34,7 +34,7 @@ namespace Iviz.Displays.XR
         {
             base.Suspend();
             Clicked = null;
-            Button.ResetHighlights();
+            //Button.ResetHighlights();
         }
     }
 }

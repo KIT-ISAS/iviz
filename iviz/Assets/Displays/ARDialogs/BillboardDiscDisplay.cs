@@ -12,7 +12,7 @@ namespace Iviz.App.ARDialogs
         float? distanceConstraint;
         
         Transform mTransform;
-        [NotNull] Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        [NotNull] Transform Transform => this.EnsureHasTransform(ref mTransform);
         
         public event Action PointerDown;
         public event Action PointerUp;

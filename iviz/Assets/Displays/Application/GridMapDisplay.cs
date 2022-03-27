@@ -287,7 +287,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            texture.GetRawTextureData<float>().AsSpan().Fill(0);
+            texture.AsSpan().Fill(0);
             texture.Apply();
 
             Collider.center = new Vector3(0.5f, 0.5f, 0).Ros2Unity();

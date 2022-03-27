@@ -24,6 +24,25 @@ namespace VNC
 {
     public class VncScreen : MonoBehaviour, IPointerMoveHandler, IPointerUpHandler, IPointerDownHandler, ISupportsDynamicBounds
     {
+        static readonly (Key Key, KeySymbol Symbol)[] KeyMap =
+        {
+            (Key.LeftAlt, KeySymbol.Alt_L),
+            (Key.RightAlt, KeySymbol.Alt_R),
+            (Key.LeftCtrl, KeySymbol.Control_L),
+            (Key.RightCtrl, KeySymbol.Control_R),
+            (Key.LeftCommand, KeySymbol.Meta_L),
+            (Key.RightCommand, KeySymbol.Meta_R),
+            (Key.Backspace, KeySymbol.BackSpace),
+            (Key.Delete, KeySymbol.Delete),
+            (Key.Enter, KeySymbol.Return),
+            (Key.Tab, KeySymbol.Tab),
+            (Key.Escape, KeySymbol.Escape),
+            (Key.DownArrow, KeySymbol.Down),
+            (Key.UpArrow, KeySymbol.Up),
+            (Key.LeftArrow, KeySymbol.Left),
+            (Key.RightArrow, KeySymbol.Right),
+        };
+
         Transform? mTransform;
         [SerializeField] Material? material;
         [SerializeField] MeshRenderer? mainRenderer;
@@ -31,7 +50,6 @@ namespace VNC
         [SerializeField] BoxCollider? boxCollider;
         [SerializeField] VncController? controller;
 
-        readonly Dictionary<(int, int), Texture2D> cachedTextures = new();
         readonly bool[] mouseButtonStates = new bool[3];
         readonly Dictionary<Key, float> keyPressDown = new();
         readonly Dictionary<Key, CancellationTokenSource> keyRepeatTokens = new();
@@ -46,15 +64,19 @@ namespace VNC
         IXRController? interactorController;
 
         VncController Controller => controller.AssertNotNull(nameof(controller));
-        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        Transform Transform => this.EnsureHasTransform(ref mTransform);
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
         VncClient Client => Controller.Client;
-
+        
         public event Action? BoundsChanged;
 
-        void Awake()
+        public VncScreen()
         {
             TurboJpeg.IsAvailable = true;
+        }
+        
+        void Awake()
+        {
             material = Instantiate(material);
             mainRenderer!.sharedMaterial = material;
 
@@ -72,25 +94,28 @@ namespace VNC
                 throw new NullReferenceException("Material has not been set!");
             }
 
-            if (size != newSize && texture != null)
+            if (texture != null)
             {
+                if (size == newSize)
+                {
+                    return texture;
+                }
+                
                 Destroy(texture);
-                texture = null;
             }
+            
+            texture = new Texture2D(newSize.Width, newSize.Height, TextureFormat.RGBA32, false);
+            material.mainTexture = texture;
 
-            if (texture == null)
-            {
-                texture = new Texture2D(newSize.Width, newSize.Height, TextureFormat.RGBA32, false);
-                material.mainTexture = texture;
-
-                size = newSize;
-                Transform.localScale = new Vector3((float)newSize.Width / newSize.Height, 1, 1);
-                BoundsChanged?.Invoke();
-            }
+            size = newSize;
+            
+            Transform.localScale = new Vector3((float)newSize.Width / newSize.Height, 1, 1);
+            BoundsChanged?.Invoke();
 
             return texture;
         }
 
+        /*
         Texture2D GetFromTextureCache(int width, int height)
         {
             Texture2D frameTexture;
@@ -143,27 +168,27 @@ namespace VNC
                 srcRectangle.Size.Width, srcRectangle.Size.Height,
                 texture, 0, 0, dstRectangle.Position.X, dstRectangle.Position.Y);
         }
+        */
 
         public Span<byte> GetTextureSpan(Size requestedSize)
         {
-            var dstTexture = EnsureTextureSize(requestedSize);
-            return dstTexture.GetRawTextureData<byte>().AsSpan();
+            return EnsureTextureSize(requestedSize).AsSpan();
         }
 
-        public void UpdateFrame()
+        public void UpdateFrame(Size requestedSize)
         {
-            if (texture != null)
-            {
-                texture.Apply();
-            }
+            EnsureTextureSize(requestedSize).Apply();
         }
 
-        void OnDestroy()
+        void OnDisable()
         {
             foreach (var token in keyRepeatTokens.Values)
             {
                 token.Cancel();
             }
+            
+            keyRepeatTokens.Clear();
+            keyPressDown.Clear();
         }
 
         public void OnPointerMove(PointerEventData eventData)
@@ -322,30 +347,11 @@ namespace VNC
                 Client.Enqueue(new PointerEventMessage(lastPosition, MouseButtons.None));
             }
         }
-
-        static readonly (Key Key, KeySymbol Symbol)[] Map =
-        {
-            (Key.LeftAlt, KeySymbol.Alt_L),
-            (Key.RightAlt, KeySymbol.Alt_R),
-            (Key.LeftCtrl, KeySymbol.Control_L),
-            (Key.RightCtrl, KeySymbol.Control_R),
-            (Key.LeftCommand, KeySymbol.Meta_L),
-            (Key.RightCommand, KeySymbol.Meta_R),
-            (Key.Backspace, KeySymbol.BackSpace),
-            (Key.Delete, KeySymbol.Delete),
-            (Key.Enter, KeySymbol.Return),
-            (Key.Tab, KeySymbol.Tab),
-            (Key.Escape, KeySymbol.Escape),
-            (Key.DownArrow, KeySymbol.Down),
-            (Key.UpArrow, KeySymbol.Up),
-            (Key.LeftArrow, KeySymbol.Left),
-            (Key.RightArrow, KeySymbol.Right),
-        };
-
+        
         void ProcessKeyboard()
         {
             var keyboard = Keyboard.current;
-            foreach (var (key, symbol) in Map)
+            foreach (var (key, symbol) in KeyMap)
             {
                 CheckKeyWithRepeat(key, symbol);
             }

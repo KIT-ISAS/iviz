@@ -34,7 +34,7 @@ namespace Iviz.Displays.XR
         MeshMarkerDisplay Back => back.AssertNotNull(nameof(back));
         Transform Holder => Draggable.Transform;
         TMP_Text Label => label.AssertNotNull(nameof(label));
-        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
 
         public string Title
         {
@@ -107,7 +107,7 @@ namespace Iviz.Displays.XR
 
         void Start()
         {
-            MoveToFront();
+            RotateToFront();
         }
 
         void OnStartDragging()
@@ -126,93 +126,40 @@ namespace Iviz.Displays.XR
             tokenSource?.Cancel();
             tokenSource = new CancellationTokenSource();
 
-            var start = Quaternion.Euler(0, transform.rotation.eulerAngles.y, 0);
+            var start = Quaternion.Euler(0, Transform.rotation.eulerAngles.y, 0);
             FAnimator.Spawn(tokenSource.Token, 0.25f,
-                t => transform.rotation = Quaternion.Lerp(start, CalculateOrientationToCamera(), t));
+                t => Transform.rotation = Quaternion.Lerp(start, CalculateOrientationToCamera(), t));
         }
 
-        public void MoveToFront()
+        public void RotateToFront()
         {
-            transform.rotation = CalculateOrientationToCamera();
+            Transform.rotation = CalculateOrientationToCamera();
         }
 
         Quaternion CalculateOrientationToCamera()
         {
-            return Quaternion.LookRotation((transform.position - Settings.MainCameraTransform.position).WithY(0));
+            return Quaternion.LookRotation((Transform.position - Settings.MainCameraTransform.position).WithY(0));
         }
 
         void Update()
         {
             const float damping = 0.05f;
 
-            var mainCameraPose = new Pose(
-                Settings.MainCameraTransform.position,
-                Quaternion.Euler(0, Settings.MainCameraTransform.eulerAngles.y, 0)
-            );
-
             var currentPose = Transform.AsPose();
-            var (targetPosition, targetRotation) = ClampTargetPose(currentPose, mainCameraPose);
+            var (targetPosition, targetRotation) = ClampTargetPose(currentPose);
 
             Transform.SetPositionAndRotation(
                 Vector3.Lerp(currentPose.position, targetPosition, damping),
                 Quaternion.Lerp(currentPose.rotation, targetRotation, damping * 0.5f));
         }
 
-        /*
-        Pose ClampTargetPose(in Pose currentPose, in Pose mainCameraPose)
-        {
-            const float minX = -0.5f;
-            const float maxX = 0.5f;
-            const float minY = -0.4f;
-            const float maxY = 0f;
-            const float minZ = 1.0f;
-            const float maxZ = 2.0f;
-            const float angleThreshold = 15;
-
-            var (currentPositionLocal, currentRotationLocal) = mainCameraPose.InverseMultiply(currentPose);
-            var targetPositionLocal = Clamp(currentPositionLocal);
-
-            if (!isDragging)
-            {
-                targetPositionLocal.z = cameraZ;
-            }
-
-            float currentAngleLocal = UnityUtils.RegularizeAngle(currentRotationLocal.eulerAngles.y);
-
-            var targetRotationLocal = Math.Abs(currentAngleLocal) < angleThreshold
-                ? currentRotationLocal
-                : Quaternion.identity;
-
-            return mainCameraPose.Multiply(new Pose(targetPositionLocal, targetRotationLocal));
-
-            static Vector3 Clamp(in Vector3 value) => new(
-                Math.Clamp(value.x, minX, maxX),
-                Math.Clamp(value.y, minY, maxY),
-                Math.Clamp(value.z, minZ, maxZ)
-            );
-        }
-        */
-
-        Pose ClampTargetPose(in Pose currentPose, in Pose mainCameraPose)
+        Pose ClampTargetPose(in Pose currentPose)
         {
             if (!isDragging)
             {
                 return currentPose;
             }
 
-            /*
-            const float angleThreshold = 15;
-
-            var currentRotationLocal = mainCameraPose.rotation.Inverse() * currentPose.rotation;
-
-            float currentAngleLocal = UnityUtils.RegularizeAngle(currentRotationLocal.eulerAngles.y);
-
-            var targetRotationLocal = Math.Abs(currentAngleLocal) < angleThreshold
-                ? currentRotationLocal
-                : Quaternion.identity;
-
-            return new Pose(currentPose.position, mainCameraPose.rotation * targetRotationLocal);
-            */
             return new Pose(currentPose.position, CalculateOrientationToCamera());
         }
 

@@ -144,6 +144,7 @@ namespace Iviz.Core
         static string? persistentDataPath;
         static string? savedFolder;
         static string? bagsFolder;
+        static string? vncFolder;
         static string? simpleConfigurationPath;
         static string? xrStartConfigurationPath;
         static string? resourcesPath;
@@ -162,6 +163,7 @@ namespace Iviz.Core
         static string PersistentDataPath => persistentDataPath ??= Application.persistentDataPath;
         public static string SavedFolder => savedFolder ??= PersistentDataPath + "/saved";
         public static string BagsFolder => bagsFolder ??= PersistentDataPath + "/bags";
+        public static string VncFolder => vncFolder ??= PersistentDataPath + "/vnc";
 
         public static string SimpleConfigurationPath =>
             simpleConfigurationPath ??= $"{PersistentDataPath}/connection.json";

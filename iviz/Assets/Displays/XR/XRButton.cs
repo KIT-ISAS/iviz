@@ -36,7 +36,7 @@ namespace Iviz.Displays.XR
         MeshMarkerDisplay Cylinder => cylinder.AssertNotNull(nameof(cylinder));
         XRIconPlane IconObject => iconPlane.AssertNotNull(nameof(iconPlane));
 
-        public Transform Transform => m_Transform != null ? m_Transform : (m_Transform = transform);
+        public Transform Transform => this.EnsureHasTransform(ref m_Transform);
         public event Action? BoundsChanged;
         public event Action? Clicked;
 
@@ -100,7 +100,7 @@ namespace Iviz.Displays.XR
             IconObject.Color = Color.white;
             IconObject.EmissiveColor = Color.white.WithValue(0.5f);
 
-            boundsControl = new StaticBoundsControl(this);
+            boundsControl = new StaticBoundsControl(this) { FrameColumnWidth = 0.01f };
             boundsControl.PointerUp += OnClick;
 
             boundsControl.StartDragging += () =>
@@ -128,7 +128,7 @@ namespace Iviz.Displays.XR
 
         void OnClick()
         {
-            //GuiInputModule.PlayClickAudio(Transform.position);
+            Resource.Audio.PlayAt(Transform.position, AudioClipType.Click);
             Clicked?.Invoke();
         }
 
@@ -138,18 +138,26 @@ namespace Iviz.Displays.XR
             background.ReturnToPool();
         }
 
+        /*
         public void ResetHighlights()
         {
             Cylinder.EmissiveColor = Color.black;
             IconObject.EmissiveColor = Color.white.WithValue(0.5f);
             boundsControl?.Reset();
         }
+        */
+        public void OnDisable()
+        {
+            Cylinder.EmissiveColor = Color.black;
+            IconObject.EmissiveColor = Color.white.WithValue(0.5f);
+            GameThread.Post(() => boundsControl?.Reset()); // may cause issues with re-parenting while disabled
+        }
 
         public void Suspend()
         {
             BoundsChanged = null;
             Clicked = null;
-            ResetHighlights();
+            //ResetHighlights();
         }
     }
 }

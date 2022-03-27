@@ -31,6 +31,7 @@ namespace Iviz.Resources
         static DisplaysType? displays;
         static ExtrasType? controllers;
         static WidgetsType? widgets;
+        static AudioType? audio;
         static TexturedMaterialsType? texturedMaterials;
         static FontInfo? fontInfo;
         static InternalResourceManager? internals;
@@ -78,6 +79,7 @@ namespace Iviz.Resources
         public static DisplaysType Displays => displays ??= new DisplaysType();
         public static ExtrasType Extras => controllers ??= new ExtrasType();
         public static WidgetsType Widgets => widgets ??= new WidgetsType();
+        public static AudioType Audio => audio ??= new AudioType();
 
         public static TexturedMaterialsType TexturedMaterials => texturedMaterials ??= new TexturedMaterialsType();
         public static FontInfo Font => fontInfo ??= new FontInfo();

@@ -10,23 +10,33 @@ namespace VNC
 {
     public sealed class AuthenticationHandler : IAuthenticationHandler
     {
+        readonly VncController controller;
+        
+        public AuthenticationHandler(VncController controller)
+        {
+            this.controller = controller;
+        }
+        
         /// <inheritdoc />
-        public Task<TInput> ProvideAuthenticationInputAsync<TInput>(RfbConnection connection,
+        public async Task<TInput> ProvideAuthenticationInputAsync<TInput>(RfbConnection connection,
             ISecurityType securityType, IAuthenticationInputRequest<TInput> request)
             where TInput : class, IAuthenticationInput
         {
-            if (request is IAuthenticationInputRequest<PasswordAuthenticationInput>)
+            if (request is not IAuthenticationInputRequest<PasswordAuthenticationInput>)
             {
-                //string password = "abcdabcd"; // Retrieve the password somehow
-                string password = "kinect360"; // Retrieve the password somehow
+                throw new InvalidOperationException("The authentication input request is not supported " +
+                                                    "by this authentication handler.");
+            }
 
-                var result = new PasswordAuthenticationInput(password) as TInput;
-                return Task.FromResult(result!);
-            }            
-            
-            var exception = new InvalidOperationException(
-                "The authentication input request is not supported by this authentication handler.");
-            return Task.FromException<TInput>(exception);
+            string password = await controller.RequestPasswordAsync();
+            if (new PasswordAuthenticationInput(password) is not TInput input)
+            {
+                // should not happen!
+                throw new InvalidOperationException("Internal error: Authentication type does not match");
+            }
+
+            return input;
+
         }
     }
 }

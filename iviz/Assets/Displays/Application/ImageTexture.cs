@@ -419,7 +419,7 @@ namespace Iviz.Displays
                     if (!Settings.SupportsRGB24)
                     {
                         texture = EnsureSize(width, height, TextureFormat.RGBA32);
-                        CopyRgb24ToRgba32(data, texture.GetRawTextureData<byte>().AsSpan());
+                        CopyRgb24ToRgba32(data, texture.AsSpan());
                         alreadyCopied = true;
                     }
                     else
@@ -448,7 +448,7 @@ namespace Iviz.Displays
                     if (!Settings.SupportsR16)
                     {
                         texture = EnsureSize(width, height, TextureFormat.R8);
-                        CopyR16ToR8(data, texture.GetRawTextureData<byte>().AsSpan());
+                        CopyR16ToR8(data, texture.AsSpan());
                         alreadyCopied = true;
                     }
                     else

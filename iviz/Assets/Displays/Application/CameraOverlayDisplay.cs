@@ -26,7 +26,7 @@ namespace Iviz.Displays
             ? grandparentCamera
             : grandparentCamera = ParentCamera.transform.parent.AssertHasComponent<Camera>(nameof(grandparentCamera));
 
-        Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        Transform Transform => this.EnsureHasTransform(ref mTransform);
 
         void Start()
         {
@@ -74,7 +74,7 @@ namespace Iviz.Displays
             CheckSettings();
 
             var baseTransform = Quaternions.Rotate90AroundY;
-            Transform.rotation = TfModule.OriginFrame.Transform.rotation * baseTransform;
+            Transform.rotation = TfModule.OriginTransform.rotation * baseTransform;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Iviz.App
         Vector2 originalOffsetMax;
 
         protected DialogScalerWidget ScalerWidget => scalerWidget.AssertNotNull(nameof(scalerWidget));
-        Image PanelImage => panelImage != null ? panelImage : (panelImage = GetComponent<Image>());
+        Image PanelImage => this.EnsureHasComponent(ref panelImage, nameof(panelImage));
 
         public bool Detached
         {

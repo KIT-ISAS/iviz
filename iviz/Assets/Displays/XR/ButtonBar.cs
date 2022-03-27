@@ -19,7 +19,7 @@ namespace Iviz.Displays.XR
         CancellationTokenSource? tokenSource;
 
         Transform? mTransform;
-        public Transform Transform => mTransform != null ? mTransform : (mTransform = transform);
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
         public float? Damping { get; set; } = 0.1f;
         public event Action<int>? Clicked;
         

@@ -58,8 +58,9 @@ namespace Iviz.Controllers.TF
 
         public static TfFrame RootFrame => Instance.rootFrame;
         public static TfFrame OriginFrame => Instance.originFrame;
+        public static Transform OriginTransform => Instance.originFrame.Transform;
 
-        public static Transform UnityFrameTransform =>
+        public static Transform UnityTransform =>
             instance != null
                 ? instance.unityFrame.transform
                 : GameObject.Find("TF").transform;
@@ -516,7 +517,7 @@ namespace Iviz.Controllers.TF
             }
 
             cachedFixedPose = fixedFramePose;
-            OriginFrame.Transform.SetLocalPose(fixedFramePose.Inverse());
+            OriginTransform.SetLocalPose(fixedFramePose.Inverse());
         }
 
         void LateUpdate()
@@ -535,11 +536,11 @@ namespace Iviz.Controllers.TF
         }
 
         public static Vector3 RelativeToOrigin(in Vector3 absoluteUnityPosition) =>
-            OriginFrame.Transform.InverseTransformPoint(absoluteUnityPosition);
+            OriginTransform.InverseTransformPoint(absoluteUnityPosition);
 
         public static Pose RelativeToOrigin(in Pose absoluteUnityPose)
         {
-            var originFrame = OriginFrame.Transform;
+            var originFrame = OriginTransform;
             var (position, rotation) = absoluteUnityPose;
 
             Pose p;
