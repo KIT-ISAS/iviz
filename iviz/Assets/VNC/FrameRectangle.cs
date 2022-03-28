@@ -70,7 +70,7 @@ namespace VNC
         {
             int sizeToWrite = src3.Length;
             
-            dst4 = dst4[..sizeToWrite]; // ensure dst is big enough
+            dst4 = dst4[..sizeToWrite]; // ensure dst4 is big enough
             
             ref var dstPtr = ref MemoryMarshal.GetReference(dst4);
             ref var srcPtr = ref MemoryMarshal.GetReference(src3);
@@ -93,9 +93,9 @@ namespace VNC
 
             for (int x = sizeToWrite; x > 0; x--)
             {
-                dstPtr.rgb = srcPtr;
-                srcPtr = ref Unsafe.Add(ref srcPtr, 1);
-                dstPtr = ref Unsafe.Add(ref dstPtr, 1);
+                dstPtr.rgb = srcPtr; // dstPtr->rgb = *srcPtr;
+                srcPtr = ref Unsafe.Add(ref srcPtr, 1); // srcPtr++;
+                dstPtr = ref Unsafe.Add(ref dstPtr, 1); // dstPtr++;
             }
         }
 
@@ -177,8 +177,8 @@ namespace VNC
             for (int x = sizeToWrite; x > 0; x--)
             {
                 dstPtr = Unsafe.Add(ref palettePtr, indicesPtr); // *dstPtr = *(palettePtr + *indicesPtr);
-                dstPtr = ref Unsafe.Add(ref dstPtr, 1);
-                indicesPtr = ref Unsafe.Add(ref indicesPtr, 1);
+                dstPtr = ref Unsafe.Add(ref dstPtr, 1); // dstPtr++;
+                indicesPtr = ref Unsafe.Add(ref indicesPtr, 1); // indicesPtr++;
             }
         }
     }

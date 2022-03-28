@@ -36,6 +36,7 @@ namespace VNC
         string lastHostname = "";
         string lastPort = "5900";
         string lastPassword = "";
+        bool hasConfirmedPassword;
 
         readonly CancellationTokenSource tokenSource = new();
         CancellationToken Token => tokenSource.Token;
@@ -86,6 +87,8 @@ namespace VNC
             
             while (!Token.IsCancellationRequested)
             {
+                hasConfirmedPassword = false;
+                
                 if (!await TryToConnect())
                 {
                     continue;
@@ -100,7 +103,6 @@ namespace VNC
                     await ProcessConnectionChange(connectionState);
                 }
             }
-            // ReSharper disable once FunctionNeverReturns
         }
 
         async Task<bool> TryToConnect()
@@ -311,6 +313,11 @@ namespace VNC
 
         public Task<string> RequestPasswordAsync()
         {
+            if (hasConfirmedPassword)
+            {
+                return Task.FromResult(lastPassword);
+            }
+            
             var ts = new TaskCompletionSource<string>();
             GameThread.Post(async () => ts.SetResult(await DoRequestPasswordAsync()));
             return ts.Task;
@@ -330,6 +337,7 @@ namespace VNC
                     continue;
                 }
 
+                hasConfirmedPassword = true;
                 return password;
             }
         }

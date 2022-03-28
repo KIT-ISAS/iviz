@@ -174,8 +174,14 @@ namespace Iviz.Core
                 lastTickRunTime = GameTime;
             }
 
-            while (actionsQueue.TryDequeue(out Action action))
+            int actionsCount = actionsQueue.Count; // avoid processing new entries
+            foreach (int _ in ..actionsCount)
             {
+                if (!actionsQueue.TryDequeue(out Action action))
+                {
+                    break;
+                }
+
                 try
                 {
                     action();
@@ -221,7 +227,7 @@ namespace Iviz.Core
             frameCounter = 0;
         }
 
-        public override string ToString() => "[GameThread]";
+        public override string ToString() => $"[{nameof(GameThread)}]";
 
         void LateUpdate()
         {
@@ -308,11 +314,11 @@ namespace Iviz.Core
                 action();
                 return;
             }
-            
+
             if (Settings.IsShuttingDown)
             {
                 return;
-            }            
+            }
 
             Instance.actionsQueue.Enqueue(action);
         }
