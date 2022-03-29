@@ -152,7 +152,13 @@ namespace Iviz.Displays.XR
 
         void UpdateRotation()
         {
-            var direction = Transform.position - Settings.MainCameraTransform.position;
+            var cameraPosition = Settings.MainCameraTransform.position;
+            if (cameraPosition.ApproximatelyZero())
+            {
+                // not initialized yet
+                return;
+            }
+            var direction = Transform.position - cameraPosition;
             var targetRotation = Quaternion.LookRotation(direction.ApproximatelyZero() ? Vector3.forward : direction);
             if (resetOrientation)
             {
@@ -167,8 +173,7 @@ namespace Iviz.Displays.XR
 
         void UpdatePosition()
         {
-            Quaternion localCameraRotation;
-            Vector3 localTargetPosition;
+            Vector3 absoluteTargetPosition;
 
             switch (BindingType)
             {
@@ -179,28 +184,28 @@ namespace Iviz.Displays.XR
                 {
                     var absolutePivotPosition = Node.Transform.position;
                     var localFramePosition = TfModule.RelativeToOrigin(absolutePivotPosition) + PivotFrameOffset;
-                    localCameraRotation = GetFlatCameraRotationRelativeTo(localFramePosition);
-                    localTargetPosition =
+                    var localCameraRotation = GetFlatCameraRotationRelativeTo(localFramePosition);
+                    var localTargetPosition =
                         localFramePosition + localCameraRotation * LocalDisplacement + baseDisplacement;
+                    absoluteTargetPosition = TfModule.OriginTransform.TransformPoint(localTargetPosition);
                     break;
                 }
                 case BindingType.User:
                 {
-                    var absolutePivotPosition = Settings.MainCameraTransform.position;
-                    var localFramePosition = TfModule.RelativeToOrigin(absolutePivotPosition) + PivotFrameOffset;
-
-                    var absoluteCameraForward = Settings.MainCameraTransform.TransformPoint(Vector3.forward);
-                    var localCameraForward = TfModule.RelativeToOrigin(absoluteCameraForward);
-                    localCameraRotation = GetFlatCameraRotationRelativeTo(localCameraForward);
-                    localTargetPosition = localFramePosition + localCameraRotation * LocalDisplacement;
+                    var cameraForward = Settings.MainCameraTransform.forward;
+                    if ((cameraForward - Vector3.forward).ApproximatelyZero())
+                    {
+                        // not initialized yet
+                        return;
+                    }
+                    var absoluteRotation = Quaternion.LookRotation(cameraForward.WithY(0));
+                    var absolutePose = new Pose(Settings.MainCameraTransform.position, absoluteRotation);
+                    absoluteTargetPosition = absolutePose.Multiply(LocalDisplacement) + PivotFrameOffset;
                     break;
                 }
                 default:
                     return;
             }
-
-
-            var absoluteTargetPosition = TfModule.OriginTransform.TransformPoint(localTargetPosition);
 
             Vector3 nextAbsolutePosition;
             if (currentPosition is not { } position)

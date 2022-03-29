@@ -47,6 +47,9 @@ namespace Iviz.Displays.XR
         {
             base.Awake();
 
+            HostnameObject.onSubmit.AddListener(_ => PortObject.Select());
+            PortObject.onSubmit.AddListener(_ => Clicked?.Invoke(0));
+            
             // button 1 only appears alone
             Button1.Clicked += () => Clicked?.Invoke(0);
             

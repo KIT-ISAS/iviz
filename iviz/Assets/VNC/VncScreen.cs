@@ -22,7 +22,8 @@ using Position = MarcusW.VncClient.Position;
 
 namespace VNC
 {
-    public class VncScreen : MonoBehaviour, IPointerMoveHandler, IPointerUpHandler, IPointerDownHandler, ISupportsDynamicBounds
+    public class VncScreen : MonoBehaviour, IPointerMoveHandler, IPointerUpHandler, IPointerDownHandler,
+        ISupportsDynamicBounds
     {
         static readonly (Key Key, KeySymbol Symbol)[] KeyMap =
         {
@@ -41,6 +42,8 @@ namespace VNC
             (Key.UpArrow, KeySymbol.Up),
             (Key.LeftArrow, KeySymbol.Left),
             (Key.RightArrow, KeySymbol.Right),
+            (Key.Home, KeySymbol.Home),
+            (Key.End, KeySymbol.End),
         };
 
         Transform? mTransform;
@@ -67,14 +70,14 @@ namespace VNC
         Transform Transform => this.EnsureHasTransform(ref mTransform);
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
         VncClient Client => Controller.Client;
-        
+
         public event Action? BoundsChanged;
 
         public VncScreen()
         {
             TurboJpeg.IsAvailable = true;
         }
-        
+
         void Awake()
         {
             material = Instantiate(material);
@@ -85,6 +88,8 @@ namespace VNC
                 interactable.hoverEntered.AddListener(OnHoverEnter);
                 interactable.hoverExited.AddListener(OnHoverExit);
             }
+            
+            Cursor.lockState = CursorLockMode.Confined;
         }
 
         Texture2D EnsureTextureSize(Size newSize)
@@ -100,85 +105,26 @@ namespace VNC
                 {
                     return texture;
                 }
-                
+
                 Destroy(texture);
             }
-            
+
             texture = new Texture2D(newSize.Width, newSize.Height, TextureFormat.RGBA32, false);
             material.mainTexture = texture;
 
             size = newSize;
-            
-            Transform.localScale = new Vector3((float)newSize.Width / newSize.Height, 1, 1);
+
+            float currentScaleY = Transform.localScale.y;
+            float scaleRatio = (float)newSize.Width / newSize.Height;
+            Transform.localScale = new Vector3(currentScaleY * scaleRatio, currentScaleY, 1);
             BoundsChanged?.Invoke();
 
             return texture;
         }
 
-        /*
-        Texture2D GetFromTextureCache(int width, int height)
-        {
-            Texture2D frameTexture;
-            if (cachedTextures.TryGetValue((width, height), out var candidateTexture))
-            {
-                frameTexture = candidateTexture;
-            }
-            else
-            {
-                frameTexture = new Texture2D(width, height, TextureFormat.RGBA32, false);
-                cachedTextures[(width, height)] = frameTexture;
-            }
+        public Span<byte> GetTextureSpan(Size requestedSize) => EnsureTextureSize(requestedSize).AsSpan();
 
-            return frameTexture;
-        }
-
-        public void ProcessFrame(in FrameRectangle frame, in Rectangle rectangle, Size maxSize)
-        {
-            // unity doesn't allow partial updates of a texture
-            // so we upload to a smaller texture and then copy it to the big one
-
-            int potWidth = frame.Width; // already a pot
-            int potHeight = UnityUtils.ClosestPot(rectangle.Size.Height);
-
-            var dstTexture = EnsureTextureSize(maxSize);
-
-            var frameTexture = GetFromTextureCache(potWidth, potHeight);
-            frameTexture.CopyFrom(frame.Address);
-            frameTexture.Apply();
-
-            Graphics.CopyTexture(frameTexture, 0, 0, 0, 0, rectangle.Size.Width, rectangle.Size.Height,
-                dstTexture, 0, 0, rectangle.Position.X, rectangle.Position.Y);
-        }
-
-        public void CopyFrame(in Rectangle dstRectangle, in Rectangle srcRectangle)
-        {
-            int potWidth = UnityUtils.ClosestPot(srcRectangle.Size.Width);
-            int potHeight = UnityUtils.ClosestPot(srcRectangle.Size.Height);
-
-            var frameTexture = GetFromTextureCache(potWidth, potHeight);
-
-            // unity won't allow CopyTexture from different parts of the same texture
-            // so we go the slow way of copying it to another texture, and then back
-
-            Graphics.CopyTexture(texture, 0, 0, srcRectangle.Position.X, srcRectangle.Position.Y,
-                srcRectangle.Size.Width, srcRectangle.Size.Height,
-                frameTexture, 0, 0, 0, 0);
-
-            Graphics.CopyTexture(frameTexture, 0, 0, 0, 0,
-                srcRectangle.Size.Width, srcRectangle.Size.Height,
-                texture, 0, 0, dstRectangle.Position.X, dstRectangle.Position.Y);
-        }
-        */
-
-        public Span<byte> GetTextureSpan(Size requestedSize)
-        {
-            return EnsureTextureSize(requestedSize).AsSpan();
-        }
-
-        public void UpdateFrame(Size requestedSize)
-        {
-            EnsureTextureSize(requestedSize).Apply();
-        }
+        public void UpdateFrame(Size requestedSize) => EnsureTextureSize(requestedSize).Apply();
 
         void OnDisable()
         {
@@ -186,7 +132,7 @@ namespace VNC
             {
                 token.Cancel();
             }
-            
+
             keyRepeatTokens.Clear();
             keyPressDown.Clear();
         }
@@ -328,6 +274,31 @@ namespace VNC
         {
             ProcessMouseWheel();
             ProcessKeyboard();
+
+
+            lastPosition = new Position(
+                (int)Mouse.current.position.x.ReadValue(),
+                768 - (int)Mouse.current.position.y.ReadValue()
+                );
+
+            mouseButtonStates[0] = Mouse.current.leftButton.isPressed;
+            mouseButtonStates[1] = Mouse.current.rightButton.isPressed;
+            mouseButtonStates[2] = Mouse.current.middleButton.isPressed;
+            
+            var buttons = MouseButtons.None;
+            if (mouseButtonStates[0]) buttons |= MouseButtons.Left;
+            if (mouseButtonStates[1]) buttons |= MouseButtons.Right;
+            if (mouseButtonStates[2]) buttons |= MouseButtons.Middle;
+            
+            Client.Enqueue(new PointerEventMessage(lastPosition, buttons));
+
+            float mouseDeltaY = Mouse.current.scroll.y.ReadValue();
+            if (mouseDeltaY != 0)
+            {
+                Client.Enqueue(new PointerEventMessage(lastPosition,
+                    mouseDeltaY > 0 ? MouseButtons.WheelDown : MouseButtons.WheelUp));
+                Client.Enqueue(new PointerEventMessage(lastPosition, MouseButtons.None));
+            }
         }
 
         void ProcessMouseWheel()
@@ -347,7 +318,7 @@ namespace VNC
                 Client.Enqueue(new PointerEventMessage(lastPosition, MouseButtons.None));
             }
         }
-        
+
         void ProcessKeyboard()
         {
             var keyboard = Keyboard.current;

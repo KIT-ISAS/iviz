@@ -1,4 +1,6 @@
-﻿namespace Iviz.Core.XR
+﻿using UnityEngine;
+
+namespace Iviz.Core.XR
 {
     public interface IXRController
     {
@@ -8,5 +10,8 @@
         bool ButtonUp { get; }
         bool ButtonDown { get; }
         bool IsNearInteraction { get; }
+        
+        public Vector2? PrimaryAxisMove { get; set; }
+        public bool? PrimaryAxisDown { get; set; }
     }
 }

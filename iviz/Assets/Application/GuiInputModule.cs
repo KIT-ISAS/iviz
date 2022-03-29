@@ -390,6 +390,13 @@ namespace Iviz.App
             
             Config = Config;
             
+            TfModule.ResetFrames += OnResetFrames;
+
+            if (Settings.IsXR)
+            {
+                return;
+            }
+            
             StartOrbiting();
 
             if (ModuleListPanel.TryGetInstance() is { } moduleListPanel)
@@ -402,7 +409,6 @@ namespace Iviz.App
                 GameThread.EveryFrame += ProcessPoseChanges;
             }
             
-            TfModule.ResetFrames += OnResetFrames;
         }
 
         void LateUpdate()

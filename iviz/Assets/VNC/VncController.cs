@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Core.XR;
 using Iviz.Displays;
 using Iviz.Displays.XR;
 using Iviz.Msgs;
@@ -21,6 +22,8 @@ using MarcusW.VncClient.Protocol.SecurityTypes;
 using Newtonsoft.Json;
 using Nito.AsyncEx;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using Color = UnityEngine.Color;
 
 namespace VNC
 {
@@ -31,6 +34,13 @@ namespace VNC
         [SerializeField] VncPasswordDialog? passwordDialog;
         [SerializeField] VncScreen? screen;
         [SerializeField] PanelHolder? panelHolder;
+
+        [SerializeField] GameObject? leftController;
+        [SerializeField] GameObject? rightController;
+
+        IXRController? leftControllerComp;
+        IXRController? rightControllerComp;
+        
         TfModule? tfModule;
 
         string lastHostname = "";
@@ -48,6 +58,11 @@ namespace VNC
         public VncClient Client { get; }
         public VncScreen Screen => screen.AssertNotNull(nameof(screen));
 
+        public IXRController LeftController =>
+            leftController.EnsureHasComponent(ref leftControllerComp, nameof(leftController));
+
+        public IXRController RightController =>
+            rightController.EnsureHasComponent(ref rightControllerComp, nameof(rightController));
 
         public VncController()
         {
@@ -64,6 +79,7 @@ namespace VNC
 #endif
 
             tfModule = new TfModule(id => new TfFrameDisplay(id));
+            Settings.SettingsManager.BackgroundColor = Color.black;
 
             foreach (var dialog in new XRDialog[] {PlainDialog, ConnectionDialog, PasswordDialog})
             {
@@ -464,5 +480,6 @@ namespace VNC
             [DataMember] public int Port { get; set; } = 5090;
             [DataMember] public string Password { get; set; } = "";
         }
+
     }
 }

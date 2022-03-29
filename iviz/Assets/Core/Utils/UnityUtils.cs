@@ -318,6 +318,11 @@ namespace Iviz.Core
             [CallerLineNumber] int lineNumber = 0) =>
             t ??= o.AssertHasComponent<T>(name, caller, lineNumber);
 
+        public static T EnsureHasComponent<T>(this GameObject? o, ref T? t, string name,
+            [CallerFilePath] string? caller = null,
+            [CallerLineNumber] int lineNumber = 0) =>
+            t ??= o.AssertHasComponent<T>(name, caller, lineNumber);
+
         public static Transform EnsureHasTransform(this Component o, ref Transform? t) => t ??= o.transform;
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

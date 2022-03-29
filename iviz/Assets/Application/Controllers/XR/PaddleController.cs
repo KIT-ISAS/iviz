@@ -15,7 +15,7 @@ namespace Iviz.Controllers.XR
         [SerializeField] Vector3 centerOffset = new Vector3(0, 0, 0.1f);
         
         public Pose? Pose { get; private set; }
-
+        
         public PaddleController()
         {
             HasCursor = true;
@@ -81,6 +81,8 @@ namespace Iviz.Controllers.XR
                 ButtonState = newButtonState;
             }
 
+            //PrimaryAxisMove = device.TryGetFeatureValue(CommonUsages.primary2DAxis, out var axis) ? axis : null;
+            //PrimaryAxisDown = device.TryGetFeatureValue(CommonUsages.primary2DAxisClick, out bool click) ? click : null;
         }
 
         /// <inheritdoc />
