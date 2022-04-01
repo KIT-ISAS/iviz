@@ -150,146 +150,16 @@ namespace VNC
             {
                 using (frame)
                 {
-                    CopyFrame(frame, queueEntry.rectangle.Position);
+                    frame.CopyTo(GetTextureSpan(), width, queueEntry.rectangle.Position);
                 }
             }
             else if (queueEntry.color is { } color)
             {
-                FillRectangle(queueEntry.rectangle, color);
+                FrameRectangle.FillRectangle(GetTextureSpan(), width, queueEntry.rectangle, color);
             }
             else
             {
-                CopyRectangle(queueEntry.rectangle, queueEntry.srcRectangle);
-            }
-        }
-
-        void CopyFrame(in FrameRectangle frame, in Position position)
-        {
-            int textureWidth = Size.Width;
-            int srcPitch = frame.Width * 4;
-            int dstPitch = textureWidth * 4;
-
-            var src = frame.Address;
-            int dstOffset = (position.Y * textureWidth + position.X) * 4;
-            var dst = GetTextureSpan()[dstOffset..];
-
-            if (frame.Width == textureWidth)
-            {
-                src.BlockCopyTo(dst);
-            }
-            else
-            {
-                for (int y = frame.Height - 1; y > 0; y--)
-                {
-                    src[..srcPitch].BlockCopyTo(dst);
-                    dst = dst[dstPitch..];
-                    src = src[srcPitch..];
-                }
-
-                src[..srcPitch].BlockCopyTo(dst);
-            }
-        }
-
-        void FillRectangle(in Rectangle rectangle, Rgba rgba)
-        {
-            uint color = Unsafe.As<Rgba, uint>(ref rgba);
-            if (rgba.rgb.IsGray)
-            {
-                // use memset if possible
-                FillRectangle1(rectangle, (byte)(color & 0xff));
-            }
-            else
-            {
-                FillRectangle4(rectangle, color);
-            }
-        }
-
-        void FillRectangle1(in Rectangle rectangle, byte c)
-        {
-            int dstPitch = Size.Width * 4;
-            int rowLength = rectangle.Size.Width * 4;
-            int dstOffset = rectangle.Position.Y * dstPitch + rectangle.Position.X * 4;
-
-            var dst = GetTextureSpan().Cast<byte>()[dstOffset..];
-            if (rowLength == dstPitch)
-            {
-                int sizeToFill = rectangle.Size.Height * rowLength;
-                dst[..sizeToFill].Fill(c);
-            }
-            else
-            {
-                int offset = 0;
-                for (int y = rectangle.Size.Height; y > 0; y--)
-                {
-                    dst.Slice(offset, rowLength).Fill(c);
-                    offset += dstPitch;
-                }
-            }
-        }
-
-        void FillRectangle4(in Rectangle rectangle, uint color)
-        {
-            int dstPitch = Size.Width;
-            int rowLength = rectangle.Size.Width;
-
-            int dstOffset = rectangle.Position.Y * dstPitch + rectangle.Position.X;
-
-            var dst = GetTextureSpan().Cast<uint>()[dstOffset..];
-            if (rowLength == dstPitch)
-            {
-                int sizeToFill = rectangle.Size.Height * rowLength;
-                dst[..sizeToFill].Fill(color);
-            }
-            else
-            {
-                int offset = 0;
-                for (int y = rectangle.Size.Height; y > 0; y--)
-                {
-                    dst.Slice(offset, rowLength).Fill(color);
-                    offset += dstPitch;
-                }
-            }
-        }
-
-        void CopyRectangle(in Rectangle dstRectangle, in Rectangle srcRectangle)
-        {
-            int textureWidth = Size.Width;
-
-            int pitch = textureWidth * 4;
-            int rectHeight = srcRectangle.Size.Height;
-            int rectWidth = srcRectangle.Size.Width;
-            int rowLength = rectWidth * 4;
-            var span = GetTextureSpan();
-            var srcSpan = span[(srcRectangle.Position.Y * pitch + srcRectangle.Position.X * 4)..];
-            var dstSpan = span[(dstRectangle.Position.Y * pitch + dstRectangle.Position.X * 4)..];
-
-            if (srcRectangle.Position.Y > dstRectangle.Position.Y)
-            {
-                int offset = 0;
-                for (int y = rectHeight; y > 0; y--)
-                {
-                    srcSpan.Slice(offset, rowLength).BlockCopyTo(dstSpan.Slice(offset, rowLength));
-                    offset += pitch;
-                }
-            }
-            else if (srcRectangle.Position.Y < dstRectangle.Position.Y)
-            {
-                int offset = pitch * (rectHeight - 1);
-                for (int y = rectHeight; y > 0; y--)
-                {
-                    srcSpan.Slice(offset, rowLength).BlockCopyTo(dstSpan.Slice(offset, rowLength));
-                    offset -= pitch;
-                }
-            }
-            else
-            {
-                // use CopyTo (memmove checks) instead of BlockCopyTo (memcpy assumptions)
-                int offset = 0;
-                for (int y = rectHeight; y > 0; y--)
-                {
-                    srcSpan.Slice(offset, rowLength).CopyTo(dstSpan.Slice(offset, rowLength));
-                    offset += pitch;
-                }
+                FrameRectangle.CopyRectangle(GetTextureSpan(), width, queueEntry.rectangle, queueEntry.srcRectangle);
             }
         }
 
