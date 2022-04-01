@@ -13,7 +13,7 @@ namespace VNC
 {
     public readonly struct FrameRectangle : IDisposable
     {
-        static readonly Rgba[] PaletteBuffer = new Rgba[256];
+        static readonly uint[] PaletteBuffer = new uint[256];
 
         readonly byte[] buffer;
         readonly int fullSize;
@@ -63,33 +63,53 @@ namespace VNC
 
         void SetPixels3(ReadOnlySpan<byte> src)
         {
-            SetPixels3N(BufferSpan().Cast<Rgba>(), src.Cast<Rgb>());
+            SetPixels3N(BufferSpan().Cast<uint>(), src.Cast<Rgb>());
         }
 
-        static void SetPixels3N(Span<Rgba> dst4, ReadOnlySpan<Rgb> src3)
+        static void SetPixels3N(Span<uint> dst4, ReadOnlySpan<Rgb> src3)
         {
             int sizeToWrite = src3.Length;
-            
-            dst4 = dst4[..sizeToWrite]; // ensure dst4 is big enough
-            
-            ref var dstPtr = ref MemoryMarshal.GetReference(dst4);
-            ref var srcPtr = ref MemoryMarshal.GetReference(src3);
+
+            var srcI4 = MemoryMarshal.Cast<Rgb, uint>(src3);
+            dst4 = dst4[..sizeToWrite]; // assert dst4 size is same as src3
+
+            ref uint dstIPtr = ref MemoryMarshal.GetReference(dst4[..sizeToWrite]);
+            ref uint srcIPtr = ref MemoryMarshal.GetReference(srcI4);
 
             while (sizeToWrite > 8)
             {
-                dstPtr.rgb = srcPtr;
-                Unsafe.Add(ref dstPtr, 1).rgb = Unsafe.Add(ref srcPtr, 1);
-                Unsafe.Add(ref dstPtr, 2).rgb = Unsafe.Add(ref srcPtr, 2);
-                Unsafe.Add(ref dstPtr, 3).rgb = Unsafe.Add(ref srcPtr, 3);
-                Unsafe.Add(ref dstPtr, 4).rgb = Unsafe.Add(ref srcPtr, 4);
-                Unsafe.Add(ref dstPtr, 5).rgb = Unsafe.Add(ref srcPtr, 5);
-                Unsafe.Add(ref dstPtr, 6).rgb = Unsafe.Add(ref srcPtr, 6);
-                Unsafe.Add(ref dstPtr, 7).rgb = Unsafe.Add(ref srcPtr, 7);
+                // stolen from https://stackoverflow.com/questions/2973708/fast-24-bit-array-32-bit-array-conversion
+
+                uint sa = srcIPtr;
+                dstIPtr = sa;
+
+                uint sb = Unsafe.Add(ref srcIPtr, 1);
+                Unsafe.Add(ref dstIPtr, 1) = (sa >> 24) | (sb << 8);
+
+                uint sc = Unsafe.Add(ref srcIPtr, 2);
+                Unsafe.Add(ref dstIPtr, 2) = (sb >> 16) | (sc << 16);
+                Unsafe.Add(ref dstIPtr, 3) = sc >> 8;
+
+                // but twice!
+
+                uint sd = Unsafe.Add(ref srcIPtr, 3);
+                Unsafe.Add(ref dstIPtr, 4) = sd;
+
+                uint se = Unsafe.Add(ref srcIPtr, 4);
+                Unsafe.Add(ref dstIPtr, 5) = (sd >> 24) | (se << 8);
+
+                uint sf = Unsafe.Add(ref srcIPtr, 5);
+                Unsafe.Add(ref dstIPtr, 6) = (se >> 16) | (sf << 16);
+                Unsafe.Add(ref dstIPtr, 7) = sf >> 8;
+
 
                 sizeToWrite -= 8;
-                srcPtr = ref Unsafe.Add(ref srcPtr, 8);
-                dstPtr = ref Unsafe.Add(ref dstPtr, 8);
+                srcIPtr = ref Unsafe.Add(ref srcIPtr, 6);
+                dstIPtr = ref Unsafe.Add(ref dstIPtr, 8);
             }
+
+            ref var srcPtr = ref Unsafe.As<uint, Rgb>(ref srcIPtr);
+            ref var dstPtr = ref Unsafe.As<uint, Rgba>(ref dstIPtr);
 
             for (int x = sizeToWrite; x > 0; x--)
             {
@@ -121,16 +141,13 @@ namespace VNC
         void SetPixelsPalette3(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
             var srcPalette3 = palette.Cast<Rgb>();
-            var dstPalette4 = PaletteBuffer.AsSpan();
-
-            SetPixels3N(dstPalette4, srcPalette3);
-
-            SetPixelsPalette(indices, dstPalette4);
+            SetPixels3N(PaletteBuffer, srcPalette3);
+            SetPixelsPalette(indices, PaletteBuffer);
         }
 
         void SetPixelsPalette4(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
-            var srcPalette4 = palette.Cast<Rgba>();
+            var srcPalette4 = palette.Cast<uint>();
 
             if (srcPalette4.Length == 256)
             {
@@ -138,29 +155,30 @@ namespace VNC
             }
             else
             {
-                var dstPalette4 = PaletteBuffer.AsSpan();
-                srcPalette4.CopyTo(dstPalette4);
-                SetPixelsPalette(indices, dstPalette4);
+                srcPalette4.CopyTo(PaletteBuffer);
+                SetPixelsPalette(indices, PaletteBuffer);
             }
         }
 
-        void SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<Rgba> palette)
+        void SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<uint> palette)
         {
             SetPixelsPaletteN(BufferSpan(), indices, palette);
         }
 
-        static void SetPixelsPaletteN(ReadOnlySpan<byte> dst, ReadOnlySpan<byte> indices, ReadOnlySpan<Rgba> palette)
+        static void SetPixelsPaletteN(ReadOnlySpan<byte> dst, ReadOnlySpan<byte> indices, ReadOnlySpan<uint> palette)
         {
-            var dst4 = dst.Cast<Rgba>();
+            var dst4 = dst.Cast<uint>();
             int sizeToWrite = dst4.Length;
 
-            ref Rgba palettePtr = ref MemoryMarshal.GetReference(palette); // palette is size 256
-            ref byte indicesPtr = ref MemoryMarshal.GetReference(indices[..sizeToWrite]); // ensure it's equal to dst4 
-            ref var dstPtr = ref MemoryMarshal.GetReference(dst4);
+            indices = indices[..sizeToWrite]; // assert indices size is same as dst4 
+
+            ref uint palettePtr = ref MemoryMarshal.GetReference(palette); // palette is size 256
+            ref byte indicesPtr = ref MemoryMarshal.GetReference(indices[..sizeToWrite]);
+            ref uint dstPtr = ref MemoryMarshal.GetReference(dst4);
 
             while (sizeToWrite > 8)
             {
-                dstPtr = Unsafe.Add(ref palettePtr, indicesPtr);
+                dstPtr = Unsafe.Add(ref palettePtr, indicesPtr); // *dstPtr = *(palettePtr + *indicesPtr);
                 Unsafe.Add(ref dstPtr, 1) = Unsafe.Add(ref palettePtr, Unsafe.Add(ref indicesPtr, 1));
                 Unsafe.Add(ref dstPtr, 2) = Unsafe.Add(ref palettePtr, Unsafe.Add(ref indicesPtr, 2));
                 Unsafe.Add(ref dstPtr, 3) = Unsafe.Add(ref palettePtr, Unsafe.Add(ref indicesPtr, 3));
@@ -177,8 +195,8 @@ namespace VNC
             for (int x = sizeToWrite; x > 0; x--)
             {
                 dstPtr = Unsafe.Add(ref palettePtr, indicesPtr); // *dstPtr = *(palettePtr + *indicesPtr);
-                dstPtr = ref Unsafe.Add(ref dstPtr, 1); // dstPtr++;
-                indicesPtr = ref Unsafe.Add(ref indicesPtr, 1); // indicesPtr++;
+                dstPtr = ref Unsafe.Add(ref dstPtr, 1);
+                indicesPtr = ref Unsafe.Add(ref indicesPtr, 1);
             }
         }
     }
@@ -194,5 +212,6 @@ namespace VNC
     internal readonly struct Rgb
     {
         readonly byte r, g, b;
+        public bool IsGray => r == g && g == b;
     }
 }

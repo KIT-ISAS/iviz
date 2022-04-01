@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Iviz.Core;
 using Iviz.Tools;
 using MarcusW.VncClient;
@@ -117,7 +118,7 @@ namespace VNC
             {
                 return;
             }
-            
+
             var framesBuffer = new RentAndClear<QueueEntry>(count);
             lock (frames)
             {
@@ -149,12 +150,12 @@ namespace VNC
             {
                 using (frame)
                 {
-                    ProcessFrame(frame, queueEntry.rectangle.Position);
+                    CopyFrame(frame, queueEntry.rectangle.Position);
                 }
             }
             else if (queueEntry.color is { } color)
             {
-                ProcessFrame(queueEntry.rectangle, color);
+                FillRectangle(queueEntry.rectangle, color);
             }
             else
             {
@@ -162,7 +163,7 @@ namespace VNC
             }
         }
 
-        void ProcessFrame(in FrameRectangle frame, in Position position)
+        void CopyFrame(in FrameRectangle frame, in Position position)
         {
             int textureWidth = Size.Width;
             int srcPitch = frame.Width * 4;
@@ -189,14 +190,51 @@ namespace VNC
             }
         }
 
-        void ProcessFrame(in Rectangle rectangle, Rgba color)
+        void FillRectangle(in Rectangle rectangle, Rgba rgba)
+        {
+            uint color = Unsafe.As<Rgba, uint>(ref rgba);
+            if (rgba.rgb.IsGray)
+            {
+                // use memset if possible
+                FillRectangle1(rectangle, (byte)(color & 0xff));
+            }
+            else
+            {
+                FillRectangle4(rectangle, color);
+            }
+        }
+
+        void FillRectangle1(in Rectangle rectangle, byte c)
+        {
+            int dstPitch = Size.Width * 4;
+            int rowLength = rectangle.Size.Width * 4;
+            int dstOffset = rectangle.Position.Y * dstPitch + rectangle.Position.X * 4;
+
+            var dst = GetTextureSpan().Cast<byte>()[dstOffset..];
+            if (rowLength == dstPitch)
+            {
+                int sizeToFill = rectangle.Size.Height * rowLength;
+                dst[..sizeToFill].Fill(c);
+            }
+            else
+            {
+                int offset = 0;
+                for (int y = rectangle.Size.Height; y > 0; y--)
+                {
+                    dst.Slice(offset, rowLength).Fill(c);
+                    offset += dstPitch;
+                }
+            }
+        }
+
+        void FillRectangle4(in Rectangle rectangle, uint color)
         {
             int dstPitch = Size.Width;
             int rowLength = rectangle.Size.Width;
 
             int dstOffset = rectangle.Position.Y * dstPitch + rectangle.Position.X;
-            var dst = GetTextureSpan().Cast<Rgba>()[dstOffset..];
 
+            var dst = GetTextureSpan().Cast<uint>()[dstOffset..];
             if (rowLength == dstPitch)
             {
                 int sizeToFill = rectangle.Size.Height * rowLength;

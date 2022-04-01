@@ -58,7 +58,6 @@ namespace VNC
         readonly Dictionary<Key, CancellationTokenSource> keyRepeatTokens = new();
 
         Texture2D? texture;
-        Size? size;
 
         Position lastPosition;
         KeySymbol? lastSymbol;
@@ -66,6 +65,7 @@ namespace VNC
         Transform? interactorTransform;
         IXRController? interactorController;
 
+        Size? Size => texture != null ? new Size(texture.width, texture.height) : null;
         VncController Controller => controller.AssertNotNull(nameof(controller));
         Transform Transform => this.EnsureHasTransform(ref mTransform);
         BoxCollider BoxCollider => boxCollider.AssertNotNull(nameof(boxCollider));
@@ -94,14 +94,9 @@ namespace VNC
 
         Texture2D EnsureTextureSize(Size newSize)
         {
-            if (material == null)
-            {
-                throw new NullReferenceException("Material has not been set!");
-            }
-
             if (texture != null)
             {
-                if (size == newSize)
+                if (Size == newSize)
                 {
                     return texture;
                 }
@@ -109,10 +104,17 @@ namespace VNC
                 Destroy(texture);
             }
 
-            texture = new Texture2D(newSize.Width, newSize.Height, TextureFormat.RGBA32, false);
-            material.mainTexture = texture;
+            if (material == null)
+            {
+                throw new NullReferenceException("Material has not been set!");
+            }
 
-            size = newSize;
+            texture = new Texture2D(newSize.Width, newSize.Height, TextureFormat.RGBA32, true)
+            {
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Trilinear
+            };
+            material.mainTexture = texture;
 
             float currentScaleY = Transform.localScale.y;
             float scaleRatio = (float)newSize.Width / newSize.Height;
@@ -242,7 +244,7 @@ namespace VNC
 
         bool TryGetPosition(Vector3 worldPosition, out Position position)
         {
-            if (size is not { } currentSize)
+            if (Size is not { } currentSize)
             {
                 position = default;
                 return false;
@@ -275,7 +277,7 @@ namespace VNC
             ProcessMouseWheel();
             ProcessKeyboard();
 
-
+            /*
             lastPosition = new Position(
                 (int)Mouse.current.position.x.ReadValue(),
                 768 - (int)Mouse.current.position.y.ReadValue()
@@ -299,6 +301,7 @@ namespace VNC
                     mouseDeltaY > 0 ? MouseButtons.WheelDown : MouseButtons.WheelUp));
                 Client.Enqueue(new PointerEventMessage(lastPosition, MouseButtons.None));
             }
+            */
         }
 
         void ProcessMouseWheel()
