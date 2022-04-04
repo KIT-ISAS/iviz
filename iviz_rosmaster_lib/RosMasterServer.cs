@@ -135,7 +135,7 @@ public sealed class RosMasterServer : IDisposable
         return masterServer;
     }
 
-    public async ValueTask StartAsync()
+    public async ValueTask StartAsync(TaskCompletionSource? initCompletedSignal = null)
     {
         if (backgroundTask != null)
         {
@@ -152,7 +152,7 @@ public sealed class RosMasterServer : IDisposable
 
         await Task.Delay(100, Token);
 
-        await TaskUtils.Run(() => ManageRosoutAggAsync(Token).AwaitNoThrow(this), Token);
+        await TaskUtils.Run(() => ManageRosoutAggAsync(initCompletedSignal, Token).AwaitNoThrow(this), Token);
 
         await listener.DisposeAsync();
         await startTask;
@@ -183,7 +183,7 @@ public sealed class RosMasterServer : IDisposable
         }
     }
 
-    async ValueTask ManageRosoutAggAsync(CancellationToken token)
+    async ValueTask ManageRosoutAggAsync(TaskCompletionSource? signal, CancellationToken token)
     {
         var ownUri = new Uri($"http://{MasterUri.Host}:0");
 
@@ -196,13 +196,16 @@ public sealed class RosMasterServer : IDisposable
             await using var writer = await client.CreateWriterAsync<Log>("/rosout_agg", true, token);
 
             Logger.LogDebug("** Rosout running!");
-            while (!token.IsCancellationRequested)
+            signal?.TrySetResult();
+
+            await foreach (var logMsg in reader.ReadAllAsync(token))
             {
-                writer.Write(await reader.ReadAsync(token));
+                writer.Write(logMsg);
             }
         }
         catch (RosConnectionException e)
         {
+            signal?.TrySetException(e);
             Logger.LogErrorFormat("{0}: Failed to start the rosout_agg node. " +
                                   "Our own uri is not reachable! {1}", this, e);
         }
