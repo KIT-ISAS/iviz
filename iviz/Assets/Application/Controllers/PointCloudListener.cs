@@ -578,16 +578,16 @@ namespace Iviz.Controllers
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void TryAdd(ReadOnlySpan<byte> span, float w)
+            void TryAdd(ref byte dataPtr, float w)
             {
-                ref readonly var point = ref MemoryMarshal.Cast<byte, float3>(span)[0];
+                ref readonly var pointPtr = ref Unsafe.As<byte, float3>(ref dataPtr);
                 ref float4 f = ref dstBuffer[dstOff];
-                if (IsInvalid(point.x)) return;
-                f.z = point.x;
-                if (IsInvalid(point.y)) return;
-                f.x = -point.y;
-                if (IsInvalid(point.z)) return;
-                f.y = point.z;
+                if (IsInvalid(pointPtr.x)) return;
+                f.z = pointPtr.x;
+                if (IsInvalid(pointPtr.y)) return;
+                f.x = -pointPtr.y;
+                if (IsInvalid(pointPtr.z)) return;
+                f.y = pointPtr.z;
                 f.w = w;
                 dstOff++;
             }
@@ -597,10 +597,13 @@ namespace Iviz.Controllers
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref MemoryMarshal.GetReference(dataOff);
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset..].Read<float>());
+                        float value = Unsafe.As<byte, float>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
                     }
                 }
             }
@@ -610,10 +613,13 @@ namespace Iviz.Controllers
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref MemoryMarshal.GetReference(dataOff);
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, (float)dataOff[iOffset..].Read<double>());
+                        double value = Unsafe.As<byte, double>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        TryAdd(ref dataPtr, (float)value);
+                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
                     }
                 }
             }
@@ -623,10 +629,13 @@ namespace Iviz.Controllers
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref MemoryMarshal.GetReference(dataOff);
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, (sbyte)dataOff[iOffset]);
+                        sbyte value = (sbyte)dataPtr;
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
                     }
                 }
             }
@@ -636,10 +645,13 @@ namespace Iviz.Controllers
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref MemoryMarshal.GetReference(dataOff);
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset]);
+                        byte value = dataPtr;
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
                     }
                 }
             }
@@ -649,10 +661,13 @@ namespace Iviz.Controllers
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref MemoryMarshal.GetReference(dataOff);
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset..].Read<short>());
+                        short value = Unsafe.As<byte, short>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
                     }
                 }
             }
@@ -667,11 +682,11 @@ namespace Iviz.Controllers
                     {
                         ref float4 f = ref dstBuffer[dstOff];
 
-                        if (IsInvalid(point.f.x)) return;
+                        if (IsInvalid(point.f.x)) continue;
                         f.z = point.f.x;
-                        if (IsInvalid(point.f.y)) return;
+                        if (IsInvalid(point.f.y)) continue;
                         f.x = -point.f.y;
-                        if (IsInvalid(point.f.z)) return;
+                        if (IsInvalid(point.f.z)) continue;
                         f.y = point.f.z;
                         f.w = point.w;
 
@@ -685,10 +700,13 @@ namespace Iviz.Controllers
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref MemoryMarshal.GetReference(dataOff);
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset..].Read<ushort>());
+                        ushort value = Unsafe.As<byte, ushort>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
                     }
                 }
             }
@@ -698,10 +716,13 @@ namespace Iviz.Controllers
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref MemoryMarshal.GetReference(dataOff);
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset..].Read<int>());
+                        int value = Unsafe.As<byte, int>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
                     }
                 }
             }
@@ -711,10 +732,13 @@ namespace Iviz.Controllers
                 ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref MemoryMarshal.GetReference(dataOff);
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset..].Read<uint>());
+                        uint value = Unsafe.As<byte, uint>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
                     }
                 }
             }
@@ -737,11 +761,10 @@ namespace Iviz.Controllers
             public readonly float3 f;
             public readonly ushort w;
         }
-        
-        const float MaxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsInvalid(float f) => f.IsInvalid() || Math.Abs(f) > MaxPositionMagnitude;
 
+        const float MaxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsInvalid(float f) => !float.IsFinite(f) || Math.Abs(f) > MaxPositionMagnitude;
     }
 }

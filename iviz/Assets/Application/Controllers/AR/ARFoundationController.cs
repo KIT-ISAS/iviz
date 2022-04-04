@@ -124,7 +124,7 @@ namespace Iviz.Controllers
                 else
                 {
                     RenderSettings.ambientMode = AmbientMode.Trilight;
-                    Settings.SettingsManager.BackgroundColor = Settings.SettingsManager.BackgroundColor;
+                    GuiInputModule.Instance.BackgroundColor = GuiInputModule.Instance.BackgroundColor;
                 }
 
                 RaiseARCameraViewChanged(value);

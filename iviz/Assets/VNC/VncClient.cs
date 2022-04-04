@@ -30,7 +30,7 @@ namespace VNC
 
         public Task StartAsync(VncController controller)
         {
-            var startSignal = new TaskCompletionSource();
+            var startSignal = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
             TaskUtils.Run(async () =>
             {
@@ -53,7 +53,7 @@ namespace VNC
 
             var vncClient = new MarcusW.VncClient.VncClient(NullLoggerFactory.Instance);
 
-            var renderTarget = new RenderTarget(controller.Screen);
+            using var renderTarget = new RenderTarget(controller.Screen);
 
             // Configure the connect parameters
             var parameters = new ConnectParameters
@@ -151,7 +151,7 @@ namespace VNC
             public EventMessage(KeyEventMessage msg) : this() => (type, keyEventMessage) = (Type.Key, msg);
         }
 
-        sealed class RenderTarget : IRenderTarget
+        sealed class RenderTarget : IRenderTarget, IDisposable
         {
             readonly VncScreen screen;
             DeferredFrameBuffer? cachedFrameBuffer;
@@ -171,6 +171,12 @@ namespace VNC
                 cachedFrameBuffer?.DisposeAllFrames();
                 cachedFrameBuffer = new DeferredFrameBuffer(screen, size);
                 return cachedFrameBuffer;
+            }
+
+            public void Dispose()
+            {
+                cachedFrameBuffer?.DisposeAllFrames();
+                cachedFrameBuffer = null;
             }
         }
     }

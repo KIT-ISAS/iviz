@@ -99,6 +99,7 @@ namespace Iviz.App
         IMenuDialogContents? menuDialog;
         CameraPanelData? cameraPanelData;
 
+        CameraPanelData CameraPanelData => cameraPanelData ??= new CameraPanelData();
         UpperCanvasPanel UpperCanvas => upperCanvasPanel.AssertNotNull(nameof(upperCanvasPanel));
         BottomCanvasPanel BottomCanvas => bottomCanvasPanel.AssertNotNull(nameof(bottomCanvasPanel));
         AnchorToggleButton BottomHideGuiButton => AnchorCanvasPanel.BottomHideGui;
@@ -180,6 +181,8 @@ namespace Iviz.App
             GuiWidgetListener.ClearResources();
             ARController.ClearResources();
             ResourcePool.ClearResources();
+
+            Settings.SettingsManager = new SettingsManager();
         }
 
         public void Dispose()
@@ -225,6 +228,7 @@ namespace Iviz.App
 
             connectionManager = new RosManager();
             tfModule = new TfModule(id => new TfFrameDisplay(id));
+            cameraPanelData = new CameraPanelData();
 
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
@@ -344,8 +348,7 @@ namespace Iviz.App
 
             BottomCanvas.CameraButtonClicked += () =>
             {
-                cameraPanelData ??= new CameraPanelData();
-                cameraPanelData.ToggleShowPanel();
+                CameraPanelData.ToggleShowPanel();
             };
 
             connectionData.MasterActiveChanged += _ => Connection.Disconnect();
@@ -547,6 +550,7 @@ namespace Iviz.App
             }
 
             config.TfPublisher = TfPublisher.Instance.Configuration;
+            config.Camera = CameraPanelData.Configuration;
 
             try
             {
@@ -606,6 +610,7 @@ namespace Iviz.App
 
             TfData.UpdateConfiguration(stateConfig.Tf);
             TfPublisher.Instance.UpdateConfiguration(stateConfig.TfPublisher);
+            CameraPanelData.UpdateConfiguration(stateConfig.Camera);
 
             if (Settings.IsMobile && stateConfig.AR != null)
             {

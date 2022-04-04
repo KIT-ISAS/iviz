@@ -1,16 +1,17 @@
-﻿namespace Iviz.App
+﻿
+namespace Iviz.App
 {
     public sealed class CameraPanel : ModulePanel
     {
         public TrashButtonWidget CloseButton { get; private set; }
         public FrameWidget Frame { get; private set; }
         public SliderWidget Fov { get; private set; }
-        public SliderWidget Roll { get; private set; }
-        public SliderWidget Pitch { get; private set; }
-        public SliderWidget Yaw { get; private set; }
-        public Vector3SliderWidget Position { get; private set; }
-        
-        public Vector3Widget InputPosition { get; private set; }
+        public Vector3MultiWidget RollPitchYaw { get; private set; }
+        public Vector3MultiWidget Position { get; private set; }
+        public ColorPickerWidget BackgroundColor { get; private set; }
+        public SliderWidget SunDirectionX { get; private set; }
+        public SliderWidget SunDirectionY { get; private set; }
+        public ToggleWidget EnableShadows { get; private set; }
 
         void Awake()
         {
@@ -20,15 +21,13 @@
             HideButton = p.AddHideButton();
             CloseButton = p.AddCloseButton();
             Fov = p.AddSlider("Field of View").SetMinValue(30).SetMaxValue(170).SetIntegerOnly(true);
-            Roll = p.AddSlider("Roll").SetMinValue(-179).SetMaxValue(180).SetIntegerOnly(true);
-            Pitch = p.AddSlider("Pitch").SetMinValue(-89).SetMaxValue(89).SetIntegerOnly(true);
-            Yaw = p.AddSlider("Yaw").SetMinValue(-179).SetMaxValue(180).SetIntegerOnly(true);
-            Position = p.AddVector3Slider("Position From Fixed");
-            
-            InputPosition = p.AddVector3("Position");
-            p.AddCollapsibleWidget("Explicit Position")
-                .Attach(InputPosition)
-                .FinishAttaching();
+            RollPitchYaw = p.AddVector3Multi("Roll, Pitch, Yaw").SetRange(10);
+            Position = p.AddVector3Multi("Position From Fixed");
+
+            BackgroundColor = p.AddColorPicker("Background Color");
+            SunDirectionX = p.AddSlider("Sun Direction X").SetMinValue(-80).SetMaxValue(80).SetIntegerOnly(true);
+            SunDirectionY = p.AddSlider("Sun Direction Y").SetMinValue(-180).SetMaxValue(179).SetIntegerOnly(true);
+            EnableShadows = p.AddToggle("Enable Shadows");
             
             p.UpdateSize();
             gameObject.SetActive(false);

@@ -49,8 +49,8 @@ namespace Iviz.Displays
             ? material
             : (material = Resource.Materials.DepthCloud.Instantiate());
 
-        Texture2D Atlas => atlas.AssertNotNull(nameof(atlas)); 
-        
+        Texture2D Atlas => atlas.AssertNotNull(nameof(atlas));
+
         public Intrinsic? Intrinsic
         {
             set
@@ -163,6 +163,7 @@ namespace Iviz.Displays
                 Material.SetTexture(PColor, Atlas);
                 Material.SetFloat(AtlasRowId,
                     (ColormapsType.AtlasSize - 0.5f - (float)value) / ColormapsType.AtlasSize);
+                Material.DisableKeyword("USE_COLOR_GRAY");
                 Material.EnableKeyword("USE_INTENSITY");
             }
         }
@@ -229,11 +230,20 @@ namespace Iviz.Displays
 
             if (texture == null)
             {
+                Material.DisableKeyword("USE_COLOR_GRAY");
                 Material.EnableKeyword("USE_INTENSITY");
             }
             else
             {
                 Material.DisableKeyword("USE_INTENSITY");
+                if (texture.format is TextureFormat.R8 or TextureFormat.R16 or TextureFormat.RFloat)
+                {
+                    Material.EnableKeyword("USE_COLOR_GRAY");
+                }
+                else
+                {
+                    Material.DisableKeyword("USE_COLOR_GRAY");
+                }
             }
         }
 

@@ -10,6 +10,7 @@ namespace Iviz.App
     public sealed class DialogMoverWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler
     {
         [SerializeField] RectTransform? targetTransform;
+        [SerializeField] RectTransform? layerTransform;
         [SerializeField] bool dragCausesDetach = true;
 
         bool isDragging;
@@ -17,6 +18,10 @@ namespace Iviz.App
         RectTransform TargetTransform => targetTransform != null
             ? targetTransform
             : (targetTransform = (RectTransform)transform.parent);
+
+        RectTransform LayerTransform => layerTransform != null
+            ? layerTransform
+            : (layerTransform = TargetTransform);
 
         void IDragHandler.OnDrag(PointerEventData eventData)
         {
@@ -33,7 +38,7 @@ namespace Iviz.App
                 }
 
                 isDragging = true;
-                TargetTransform.SetAsLastSibling();
+                LayerTransform.SetAsLastSibling();
             }
 
             TargetTransform.anchoredPosition += eventData.delta / ModuleListPanel.CanvasScale;

@@ -103,6 +103,12 @@ namespace Iviz.App
                 .SetLabel(label);
         }
 
+        public Vector3MultiWidget AddVector3Multi(string label)
+        {
+            return Resource.Widgets.Vector3Multi.Instantiate<Vector3MultiWidget>(NonStatics.transform)
+                .SetLabel(label);
+        }
+
         public DropdownWidget AddDropdown(string label)
         {
             return Resource.Widgets.Dropdown.Instantiate<DropdownWidget>(NonStatics.transform).SetLabel(label);

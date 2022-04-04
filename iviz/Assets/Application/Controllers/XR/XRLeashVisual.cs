@@ -90,7 +90,7 @@ namespace Iviz.Controllers.XR
 
             if (Controller.ButtonUp && !isUIHitClosest)
             {
-                GuiInputModule.TriggerEnvironmentClick(new ClickHitInfo(transformRay));
+                GuiInputModule.TriggerEnvironmentClick(new ClickHitInfo(transformRay), false);
             }
 
             if (hitExists)

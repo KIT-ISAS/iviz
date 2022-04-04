@@ -1,5 +1,8 @@
+#nullable enable
+
 using System;
 using Iviz.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,47 +10,50 @@ namespace Iviz.App
 {
     public class SettingsDialogPanel : DialogPanel
     {
-        [SerializeField] TrashButtonWidget close;
+        [SerializeField] TrashButtonWidget? close;
 
-        [SerializeField] DropdownWidget qualityInView;
-        [SerializeField] DropdownWidget qualityInAr;
-        [SerializeField] DropdownWidget targetFps;
-        [SerializeField] DropdownWidget networkProcessing;
+        [SerializeField] DropdownWidget? qualityInView;
+        [SerializeField] DropdownWidget? qualityInAr;
+        [SerializeField] DropdownWidget? targetFps;
+        [SerializeField] DropdownWidget? networkProcessing;
 
-        [SerializeField] ColorPickerWidget backgroundColor;
-        [SerializeField] SliderWidget sunDirection;
+        //[SerializeField] ColorPickerWidget? backgroundColor;
+        //[SerializeField] SliderWidget? sunDirection;
 
-        [SerializeField] Button clearModelCache;
-        [SerializeField] Button clearSavedFiles;
-        [SerializeField] Button clearHostHistory;
-        [SerializeField] DropdownWidget modelService;
+        [SerializeField] Button? clearModelCache;
+        [SerializeField] Button? clearSavedFiles;
+        [SerializeField] Button? clearHostHistory;
+        [SerializeField] DropdownWidget? modelService;
 
-        [SerializeField] Text modelCacheLabel;
-        [SerializeField] Text savedFilesLabel;
-        [SerializeField] Text hostHistoryLabel;
+        [SerializeField] TMP_Text? modelCacheLabel;
+        [SerializeField] TMP_Text? savedFilesLabel;
+        [SerializeField] TMP_Text? hostHistoryLabel;
 
 
-        public TrashButtonWidget Close => close;
-        public DropdownWidget QualityInView => qualityInView;
-        public DropdownWidget QualityInAr => qualityInAr;
-        public DropdownWidget TargetFps => targetFps;
-        public DropdownWidget NetworkProcessing => networkProcessing;
-        public ColorPickerWidget BackgroundColor => backgroundColor;
-        public SliderWidget SunDirection => sunDirection;
-        public DropdownWidget ModelService => modelService;
-        public Text ModelCacheLabel => modelCacheLabel;
-        public Text SavedFilesLabel => savedFilesLabel;
-        public Text HostHistoryLabel => hostHistoryLabel;
+        Button ClearModelCache => clearModelCache.AssertNotNull(nameof(clearModelCache));
+        Button ClearSavedFiles => clearSavedFiles.AssertNotNull(nameof(clearSavedFiles));
+        Button ClearHostHistory => clearHostHistory.AssertNotNull(nameof(clearHostHistory));
+        public TrashButtonWidget Close => close.AssertNotNull(nameof(close));
+        public DropdownWidget QualityInView => qualityInView.AssertNotNull(nameof(qualityInView));
+        public DropdownWidget QualityInAr => qualityInAr.AssertNotNull(nameof(qualityInAr));
+        public DropdownWidget TargetFps => targetFps.AssertNotNull(nameof(targetFps));
+        public DropdownWidget NetworkProcessing => networkProcessing.AssertNotNull(nameof(networkProcessing));
+        //public ColorPickerWidget BackgroundColor => backgroundColor.AssertNotNull(nameof(backgroundColor));
+        //public SliderWidget SunDirection => sunDirection.AssertNotNull(nameof(sunDirection));
+        public DropdownWidget ModelService => modelService.AssertNotNull(nameof(modelService));
+        public TMP_Text ModelCacheLabel => modelCacheLabel.AssertNotNull(nameof(modelCacheLabel));
+        public TMP_Text SavedFilesLabel => savedFilesLabel.AssertNotNull(nameof(savedFilesLabel));
+        public TMP_Text HostHistoryLabel => hostHistoryLabel.AssertNotNull(nameof(hostHistoryLabel));
 
-        public event Action ClearModelCacheClicked;
-        public event Action ClearSavedFilesClicked;
-        public event Action ClearHostHistoryClicked;
+        public event Action? ClearModelCacheClicked;
+        public event Action? ClearSavedFilesClicked;
+        public event Action? ClearHostHistoryClicked;
         
         void Awake()
         {
-            clearModelCache.onClick.AddListener(() => ClearModelCacheClicked?.Invoke());
-            clearSavedFiles.onClick.AddListener(() => ClearSavedFilesClicked?.Invoke());
-            clearHostHistory.onClick.AddListener(() => ClearHostHistoryClicked?.Invoke());
+            ClearModelCache.onClick.AddListener(() => ClearModelCacheClicked?.Invoke());
+            ClearSavedFiles.onClick.AddListener(() => ClearSavedFilesClicked?.Invoke());
+            ClearHostHistory.onClick.AddListener(() => ClearHostHistoryClicked?.Invoke());
 
             if (Settings.IsMobile)
             {
@@ -57,14 +63,14 @@ namespace Iviz.App
 
         public override void ClearSubscribers()
         {
-            qualityInView.ClearSubscribers();
-            qualityInAr.ClearSubscribers();
-            targetFps.ClearSubscribers();
-            networkProcessing.ClearSubscribers();
-            backgroundColor.ClearSubscribers();
-            close.ClearSubscribers();
-            sunDirection.ClearSubscribers();
-            modelService.ClearSubscribers();
+            QualityInView.ClearSubscribers();
+            QualityInAr.ClearSubscribers();
+            TargetFps.ClearSubscribers();
+            NetworkProcessing.ClearSubscribers();
+            //BackgroundColor.ClearSubscribers();
+            Close.ClearSubscribers();
+            //SunDirection.ClearSubscribers();
+            ModelService.ClearSubscribers();
 
             ClearHostHistoryClicked = null;
             ClearModelCacheClicked = null;

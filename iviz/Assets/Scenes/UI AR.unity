@@ -2473,6 +2473,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetTransform: {fileID: 112340564}
+  layerTransform: {fileID: 0}
   dragCausesDetach: 0
 --- !u!114 &298450687
 MonoBehaviour:
@@ -4679,7 +4680,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.9019608, g: 0.9019608, b: 1, a: 0.29803923}
+  m_Color: {r: 0.63, g: 0.63, b: 0.7, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -12814,7 +12815,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1659761}
   m_Direction: 0
   m_Value: 1
-  m_Size: 0.99999964
+  m_Size: 0.9999997
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -13897,7 +13898,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.099, g: 0.156, b: 0.234, a: 0.392}
+  m_Color: {r: 0.099, g: 0.156, b: 0.234, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -19144,7 +19145,7 @@ GameObject:
   - component: {fileID: 2125563147}
   - component: {fileID: 2125563148}
   m_Layer: 0
-  m_Name: Trash Can
+  m_Name: Resource Pool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -20002,7 +20003,7 @@ PrefabInstance:
     - target: {fileID: 7353725378491947398, guid: e475c79fb57464d17b80d6da40983540,
         type: 3}
       propertyPath: m_Color.a
-      value: 0.5019608
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7353725378633659163, guid: e475c79fb57464d17b80d6da40983540,
         type: 3}

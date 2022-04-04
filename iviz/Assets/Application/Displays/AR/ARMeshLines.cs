@@ -71,7 +71,7 @@ namespace Iviz.Displays
             }
             else
             {
-                RosLogger.Warn("ARMeshLines: No mesh manager found!");
+                RosLogger.Warn($"{nameof(ARMeshLines)}: No mesh manager found!");
             }
 
             ARController.ARCameraViewChanged += OnARCameraViewChanged;
@@ -161,16 +161,14 @@ namespace Iviz.Displays
                     for (int i = 0; i < count; i += 3)
                     {
                         int ia = mIndices[i];
-                        ref var a = ref mVertices[ia];
+                        ref readonly var a = ref mVertices[ia];
 
                         int ib = mIndices[i + 1];
-                        ref var b = ref mVertices[ib];
-
+                        ref readonly var b = ref mVertices[ib];
                         Write(ref lines[i], a, b);
 
                         int ic = mIndices[i + 2];
-                        ref var c = ref mVertices[ic];
-
+                        ref readonly var c = ref mVertices[ic];
                         Write(ref lines[i + 1], b, c);
                         Write(ref lines[i + 2], c, a);
                     }
@@ -180,43 +178,42 @@ namespace Iviz.Displays
                     for (int i = 0; i < count; i += 4)
                     {
                         int ia = mIndices[i];
-                        ref var a = ref mVertices[ia];
+                        ref readonly var a = ref mVertices[ia];
 
                         int ib = mIndices[i + 1];
-                        ref var b = ref mVertices[ib];
+                        ref readonly var b = ref mVertices[ib];
+                        Write(ref lines[i], a, b);
 
                         int ic = mIndices[i + 2];
-                        ref var c = ref mVertices[ic];
+                        ref readonly var c = ref mVertices[ic];
+                        Write(ref lines[i + 1], b, c);
 
                         int id = mIndices[i + 3];
-                        ref var d = ref mVertices[id];
-
-                        Write(ref lines[i], a, b);
-                        Write(ref lines[i + 1], b, c);
+                        ref readonly var d = ref mVertices[id];
                         Write(ref lines[i + 2], c, d);
                         Write(ref lines[i + 3], d, a);
                     }
 
                     break;
                 default:
-                    RosLogger.Debug("MeshToLinesHelper: Unknown topology " + topology);
+                    RosLogger.Debug($"{nameof(ARMeshLines)}: Unknown topology " + topology);
                     break;
             }
 
             return false;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static void Write(ref float4x2 f, in Vector3 a, in Vector3 b)
-            {
-                f.c0.x = a.x;
-                f.c0.y = a.y;
-                f.c0.z = a.z;
-
-                f.c1.x = b.x;
-                f.c1.y = b.y;
-                f.c1.z = b.z;
-            }
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void Write(ref float4x2 f, in Vector3 a, in Vector3 b)
+        {
+            f.c0.x = a.x;
+            f.c0.y = a.y;
+            f.c0.z = a.z;
+
+            f.c1.x = b.x;
+            f.c1.y = b.y;
+            f.c1.z = b.z;
+        }        
 
         public override void Suspend()
         {

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class Vector3Widget : MonoBehaviour, IWidget
+    public sealed class Vector3Widget : MonoBehaviour, IVector3Widget
     {
         [SerializeField] InputFieldWidget inputX;
         [SerializeField] InputFieldWidget inputY;
@@ -17,14 +17,11 @@ namespace Iviz.App
         [SerializeField] Image panel;
         bool disableUpdates;
 
-        [NotNull]
         public string Label
         {
-            get => label.text;
             set
             {
                 ThrowHelper.ThrowIfNull(value, nameof(value));
-                name = "ColorPicker:" + value;
                 label.text = value;
             }
         }
@@ -48,7 +45,6 @@ namespace Iviz.App
 
         public bool Interactable
         {
-            get => inputX.Interactable;
             set
             {
                 inputX.Interactable = value;
@@ -59,6 +55,11 @@ namespace Iviz.App
             }
         }
 
+        public bool Visible
+        {
+            set => gameObject.SetActive(value);
+        }
+        
         public event Action<Vector3> ValueChanged;
         public event Action<Vector3> EndEdit;
 

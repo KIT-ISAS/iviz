@@ -37,43 +37,17 @@ namespace Iviz.App
             UpdateHints();
             UpdatePanelPose();
 
-            panel.Roll.ValueChanged += f =>
+            panel.RollPitchYaw.ValueChanged += f =>
             {
-                Frame.Transform.localRotation = GetLocalRosRpy().WithX(f * Mathf.Deg2Rad).RosRpy2Unity();
+                Frame.Transform.localRotation = (f * Mathf.Deg2Rad).RosRpy2Unity();
                 TfListener.Publish(Frame);
-                UpdateBottom();
-            };
-            panel.Pitch.ValueChanged += f =>
-            {
-                Frame.Transform.localRotation = GetLocalRosRpy().WithY(f * Mathf.Deg2Rad).RosRpy2Unity();
-                TfListener.Publish(Frame);
-                UpdateBottom();
-            };
-            panel.Yaw.ValueChanged += f =>
-            {
-                Frame.Transform.localRotation = GetLocalRosRpy().WithZ(f * Mathf.Deg2Rad).RosRpy2Unity();
-                TfListener.Publish(Frame);
-                UpdateBottom();
+                UpdatePanelPose();
             };
             panel.Position.ValueChanged += f =>
             {
                 Frame.Transform.localPosition = f.Ros2Unity();
                 TfListener.Publish(Frame);
-                UpdateBottom();
-            };
-            
-            panel.InputRpy.EndEdit += f =>
-            {
-                Frame.Transform.localRotation = (f * Mathf.Deg2Rad).RosRpy2Unity();
-                TfListener.Publish(Frame);
-                UpdateTop();
-            };
-
-            panel.InputPosition.EndEdit += f =>
-            {
-                Frame.Transform.localPosition = f.Ros2Unity();
-                TfListener.Publish(Frame);
-                UpdateTop();
+                UpdatePanelPose();
             };
             
             panel.CloseButton.Clicked += Close;
@@ -110,29 +84,12 @@ namespace Iviz.App
             panel.ParentId.Hints = TfModule.FrameNames.Prepend(TfModule.OriginFrameId);
         }
 
-        void UpdateTop()
+        void UpdatePanelPose()
         {
-            var (roll, pitch, yaw) = UnityUtils.RegularizeRpy(GetLocalRosRpy() * Mathf.Rad2Deg);
-            panel.Roll.Value = roll;
-            panel.Pitch.Value = pitch;
-            panel.Yaw.Value = yaw;
+            panel.RollPitchYaw.Value = UnityUtils.RegularizeRpy(GetLocalRosRpy() * Mathf.Rad2Deg);
 
             var position = Frame.Transform.localPosition.Unity2Ros();
             panel.Position.Value = position;
-        }
-
-        void UpdateBottom()
-        {
-            var rpy = UnityUtils.RegularizeRpy(GetLocalRosRpy() * Mathf.Rad2Deg);
-            var position = Frame.Transform.localPosition.Unity2Ros();
-            panel.InputRpy.Value = rpy;
-            panel.InputPosition.Value = position;
-        }
-
-        void UpdatePanelPose()
-        {
-            UpdateTop();
-            UpdateBottom();
         }
 
         void Close()

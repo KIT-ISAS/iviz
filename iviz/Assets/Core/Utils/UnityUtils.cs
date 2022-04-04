@@ -811,12 +811,4 @@ namespace Iviz.Core
         public static readonly Quaternion Rotate270AroundY = new(0, 0.707106769f, 0, -0.707106769f);
         public static readonly Quaternion Rotate180AroundZ = new(0, 0, 1, 0);
     }
-
-    public class TaskCompletionSource
-    {
-        readonly TaskCompletionSource<object?> ts = new();
-        public Task Task => ts.Task;
-        public void TrySetException(Exception e) => ts.TrySetException(e);
-        public void TrySetResult() => ts.TrySetResult(null);
-    }
 }

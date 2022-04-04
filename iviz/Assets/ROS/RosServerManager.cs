@@ -11,6 +11,7 @@ using Iviz.RosMaster;
 using Iviz.Tools;
 using Iviz.XmlRpc;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Iviz.Ros
 {
@@ -57,10 +58,13 @@ namespace Iviz.Ros
                 server.AddKey(key, value);
             }
 
-            // start in background
-            serverTask = TaskUtils.Run(() => server.StartAsync().AwaitNoThrow(this));
+            var initCompletedSignal = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
-            await Task.Delay(200);
+            // start in background
+            serverTask = TaskUtils.Run(() => server.StartAsync(initCompletedSignal).AwaitNoThrow(this));
+
+            await initCompletedSignal.Task;
+            await Task.Delay(100);
 
             if (await PingMaster(server.MasterUri))
             {
@@ -104,7 +108,7 @@ namespace Iviz.Ros
 
         static async ValueTask<bool> PingMaster(Uri masterUri)
         {
-            using var tokenSource = new CancellationTokenSource(100);
+            using var tokenSource = new CancellationTokenSource(200);
             var connection = new XmlRpcConnection("pingConnection", masterUri);
             var callerUri = masterUri;
             const string callerId = "iviz_ping";
@@ -114,8 +118,9 @@ namespace Iviz.Ros
                 await connection.MethodCallAsync(callerUri, "getUri", new XmlRpcArg[] { callerId }, tokenSource.Token);
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Debug.LogError(e);
                 return false;
             }
         }

@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using Iviz.App;
 using Iviz.Common;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
@@ -136,6 +137,16 @@ namespace Iviz.Controllers
             }
         }
         
+        public bool DarkMode
+        {
+            get => config.DarkMode;
+            set
+            {
+                config.DarkMode = value;
+                grid.DarkMode = value;
+            }
+        }
+        
         public Vector3 Offset // in ROS coordinates
         {
             get => config.Offset.ToUnity();
@@ -207,7 +218,7 @@ namespace Iviz.Controllers
 
         public void OnSettingsChanged()
         {
-            reflectionProbe.backgroundColor = Settings.SettingsManager.BackgroundColor;
+            reflectionProbe.backgroundColor = GuiInputModule.Instance.BackgroundColor;
         }
     }
 }

@@ -59,8 +59,9 @@ namespace Iviz.App
             panel.FollowCamera.Value = GridController.FollowCamera;
             panel.HideInARMode.Value = GridController.HideInARMode;
             panel.Interactable.Value = GridController.Interactable;
+            panel.DarkMode.Value = GridController.DarkMode;
 
-            panel.ColorPicker.ValueChanged += f => UpdateColor();
+            panel.ColorPicker.ValueChanged += _ => UpdateColor();
             panel.ShowInterior.ValueChanged += f =>
             {
                 GridController.InteriorVisible = f;
@@ -72,6 +73,7 @@ namespace Iviz.App
             panel.FollowCamera.ValueChanged += f => GridController.FollowCamera = f;
             panel.HideInARMode.ValueChanged += f => GridController.HideInARMode = f;
             panel.Interactable.ValueChanged += f => GridController.Interactable = f;
+            panel.DarkMode.ValueChanged += f => GridController.DarkMode = f;
         }
 
         void UpdateColor()
@@ -96,9 +98,6 @@ namespace Iviz.App
             {
                 switch (field)
                 {
-                    case nameof(GridConfiguration.GridColor):
-                        GridController.GridColor = config.GridColor.ToUnity();
-                        break;
                     case nameof(GridConfiguration.InteriorColor):
                         GridController.InteriorColor = config.InteriorColor.ToUnity();
                         break;

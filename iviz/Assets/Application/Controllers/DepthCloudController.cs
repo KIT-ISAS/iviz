@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -281,7 +282,10 @@ namespace Iviz.Controllers
         public DepthCloudController(DepthCloudConfiguration? config)
         {
             depthImageTexture = new ImageTexture();
-            colorImageTexture = new ImageTexture();
+            colorImageTexture = new ImageTexture { Colormap = ColormapId.gray };
+            
+            colorImageTexture.OverrideIntensityBounds = true;
+            colorImageTexture.NormalizedIntensityBounds = new Vector2(0, 1);
 
             node = new FrameNode("DepthCloud");
             node.Transform.localRotation = new Quaternion(0, 0.7071f, 0.7071f, 0);
@@ -290,7 +294,6 @@ namespace Iviz.Controllers
             projector.DepthImage = depthImageTexture;
             projector.ColorImage = colorImageTexture;
             Config = config ?? new DepthCloudConfiguration();
-            colorImageTexture.Colormap = ColormapId.bone;
         }
 
         bool DepthHandler(Image msg)

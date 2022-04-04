@@ -234,7 +234,7 @@ namespace Iviz.Controllers
             ARJoystick.Close += ModuleListPanel.Instance.ARSidePanel.ToggleARJoystick;
             GameThread.EveryFrame += Update;
 
-            GuiInputModule.Instance.UpdateQualityLevel();
+            Settings.SettingsManager.UpdateQualityLevel();
 
             MarkerSender = new Sender<ARMarkerArray>("~xr/markers");
             ColorSender = new Sender<Image>("~xr/color/image_color");
@@ -464,7 +464,7 @@ namespace Iviz.Controllers
             ShowARJoystick = false;
             Instance = null;
 
-            GuiInputModule.Instance.UpdateQualityLevel();
+            Settings.SettingsManager.UpdateQualityLevel();
 
             MarkerSender?.Dispose();
             detector.Dispose();

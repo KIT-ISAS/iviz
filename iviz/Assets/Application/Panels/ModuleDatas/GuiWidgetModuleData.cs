@@ -49,7 +49,7 @@ namespace Iviz.App
         
         void HighlightAll()
         {
-            const int maxHighlights = 50;
+            //const int maxHighlights = 50;
             // NYI
         }        
 

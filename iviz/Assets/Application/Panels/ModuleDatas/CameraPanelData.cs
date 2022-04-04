@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using Iviz.Common;
+using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -14,7 +15,9 @@ namespace Iviz.App
     public sealed class CameraPanelData : ModulePanelData
     {
         readonly CameraPanel panel;
+        readonly CameraController controller = new();
         public override ModulePanel Panel => panel;
+        public CameraConfiguration Configuration => controller.Configuration;
 
         public CameraPanelData()
         {
@@ -32,21 +35,26 @@ namespace Iviz.App
             var virtualCamera = Settings.VirtualCamera;
 
             panel.Frame.Owner = guiInputModule;
-            panel.Fov.Value = Settings.MainCamera.GetHorizontalFov();
+            panel.Fov.Value = controller.CameraFieldOfView;
+            panel.BackgroundColor.Value = controller.BackgroundColor;
+            panel.SunDirectionX.Value = controller.SunDirectionX;
+            panel.SunDirectionY.Value = controller.SunDirectionY;
+            panel.EnableShadows.Value = controller.EnableShadows;
 
             UpdatePose();
 
-            panel.Roll.ValueChanged += f => guiInputModule.CameraRoll = f;
-            panel.Pitch.ValueChanged += f => guiInputModule.CameraPitch = f;
-            panel.Yaw.ValueChanged += f => guiInputModule.CameraYaw = f;
+            panel.RollPitchYaw.ValueChanged += f => guiInputModule.CameraRpy = f;
 
             if (virtualCamera != null)
             {
                 panel.Position.ValueChanged += f => guiInputModule.CameraPosition = TransformFixed(f);
-                panel.InputPosition.ValueChanged += f => guiInputModule.CameraPosition = TransformFixed(f);
             }
 
-            panel.Fov.ValueChanged += f => guiInputModule.CameraFieldOfView = f;
+            panel.Fov.ValueChanged += f => controller.CameraFieldOfView = f;
+            panel.SunDirectionX.ValueChanged += f => controller.SunDirectionX = f;
+            panel.SunDirectionY.ValueChanged += f => controller.SunDirectionY = f;
+            panel.BackgroundColor.ValueChanged += f => controller.BackgroundColor = f;
+            panel.EnableShadows.ValueChanged += f => controller.EnableShadows = f;
         }
 
         void OnARViewChanged(bool _) => CheckInteractable();
@@ -55,11 +63,8 @@ namespace Iviz.App
         {
             bool interactable = Settings.VirtualCamera != null && Settings.MainCamera == Settings.VirtualCamera;
             panel.Fov.Interactable = interactable;
-            panel.Roll.Interactable = interactable;
-            panel.Pitch.Interactable = interactable;
-            panel.Yaw.Interactable = interactable;
+            panel.RollPitchYaw.Interactable = interactable;
             panel.Position.Interactable = interactable;
-            panel.InputPosition.Interactable = interactable;
 
             panel.Fov.Value = Settings.MainCamera.GetHorizontalFov();
         }
@@ -87,7 +92,7 @@ namespace Iviz.App
                 rosCameraRpy = Vector3.zero;
             }
 
-            (panel.Roll.Value, panel.Pitch.Value, panel.Yaw.Value) = rosCameraRpy;
+            panel.RollPitchYaw.Value = rosCameraRpy;
 
             Vector3 rosCameraPosition;
             if (Settings.MainCamera == Settings.VirtualCamera)
@@ -104,7 +109,11 @@ namespace Iviz.App
             }
 
             panel.Position.Value = rosCameraPosition;
-            panel.InputPosition.Value = rosCameraPosition;
+        }
+
+        public void UpdateConfiguration(CameraConfiguration config)
+        {
+            controller.Configuration = config;
         }
 
         static Vector3 TransformFixed(in Vector3 f) =>
@@ -116,6 +125,86 @@ namespace Iviz.App
         public void Dispose()
         {
             ARController.ARCameraViewChanged -= OnARViewChanged;
+        }
+
+        
+        sealed class CameraController
+        {
+            readonly CameraConfiguration config = new();
+            static GuiInputModule GuiInputModule => GuiInputModule.Instance;
+
+            public CameraConfiguration Configuration
+            {
+                get => config;
+                set
+                {
+                    SunDirectionX = value.SunDirectionX;
+                    SunDirectionY = value.SunDirectionY;
+                    EnableShadows = value.EnableShadows;
+                    CameraFieldOfView = value.CameraFieldOfView;
+                    BackgroundColor = value.BackgroundColor.ToUnity();
+                }
+            } 
+
+            public float SunDirectionX
+            {
+                get => Configuration.SunDirectionX;
+                set
+                {
+                    Configuration.SunDirectionX = value;
+                    GuiInputModule.SunDirectionX = value;
+                }
+            }
+
+            public float SunDirectionY
+            {
+                get => Configuration.SunDirectionY;
+                set
+                {
+                    Configuration.SunDirectionY = value;
+                    GuiInputModule.SunDirectionY = value;
+                }
+            }
+
+            public bool EnableShadows
+            {
+                get => Configuration.EnableShadows;
+                set
+                {
+                    Configuration.EnableShadows = value;
+                    GuiInputModule.EnableShadows = value;
+                }
+            }
+
+            public float CameraFieldOfView
+            {
+                get => Configuration.CameraFieldOfView;
+                set
+                {
+                    Configuration.CameraFieldOfView = value;
+                    GuiInputModule.CameraFieldOfView = value;
+                }
+            }
+
+            public Color BackgroundColor
+            {
+                get => Configuration.BackgroundColor.ToUnity();
+                set
+                {
+                    Configuration.BackgroundColor = value.ToRos();
+                    GuiInputModule.BackgroundColor = value;
+                }
+            }
+
+            public CameraController()
+            {
+                if (!Settings.IsXR)
+                {
+                    Settings.VirtualCamera = Settings.MainCamera;
+                }
+                
+                Configuration = Configuration;
+            }
         }
     }
 }

@@ -54,7 +54,7 @@ Canvas:
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
-  m_OverrideSorting: 1
+  m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_AdditionalShaderChannelsFlag: 25
@@ -214,6 +214,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3763200323141947387, guid: 58cec7ec8b3884c04b28fc0882ce59d3,
+        type: 3}
+      propertyPath: layerTransform
+      value: 
+      objectReference: {fileID: 5695383382360246555}
+    - target: {fileID: 3763200323141947387, guid: 58cec7ec8b3884c04b28fc0882ce59d3,
+        type: 3}
+      propertyPath: targetTransform
+      value: 
+      objectReference: {fileID: 8179573665342329807}
     - target: {fileID: 3966192128062068574, guid: 58cec7ec8b3884c04b28fc0882ce59d3,
         type: 3}
       propertyPath: minSize.x

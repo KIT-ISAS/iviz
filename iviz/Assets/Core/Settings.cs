@@ -204,11 +204,11 @@ namespace Iviz.Core
         public static Camera? VirtualCamera { get; set; }
         public static Camera? ARCamera { get; set; }
 
-        public static ISettingsManager SettingsManager =>
-            (UnityEngine.Object?)settingsManager != null
-                ? settingsManager
-                : settingsManager = FindMainCamera().GetComponent<ISettingsManager>()
-                                    ?? throw new MissingAssetFieldException("Failed to find SettingsManager!");
+        public static ISettingsManager SettingsManager
+        {
+            get => settingsManager ?? throw new NullReferenceException("No settings manager!");
+            set => settingsManager = value;
+        }
 
         public static bool HasDragHandler => inputModule != null;
 

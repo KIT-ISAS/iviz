@@ -50,11 +50,11 @@ namespace Iviz.App
 
             panel.TargetFps.Options = TargetFpsOptions;
             panel.NetworkProcessing.Options = NetworkProcessingOptions;
-            panel.SunDirection.SetMinValue(-60).SetMaxValue(60).SetIntegerOnly(true);
+            //panel.SunDirection.SetMinValue(-60).SetMaxValue(60).SetIntegerOnly(true);
 
-            panel.BackgroundColor.Value = SettingsManager.BackgroundColor.WithAlpha(1);
+            //panel.BackgroundColor.Value = SettingsManager.BackgroundColor.WithAlpha(1);
 
-            panel.SunDirection.Value = SettingsManager.SunDirection;
+            //spanel.SunDirection.Value = SettingsManager.SunDirection;
 
             panel.TargetFps.Index = SettingsManager.TargetFps switch
             {
@@ -91,11 +91,13 @@ namespace Iviz.App
                 ModuleListPanel.UpdateSettings();
             };
 
+            /*
             panel.BackgroundColor.ValueChanged += c =>
             {
                 SettingsManager.BackgroundColor = c;
                 ModuleListPanel.UpdateSettings();
             };
+            */
 
             panel.TargetFps.ValueChanged += (i, _) =>
             {
@@ -124,11 +126,13 @@ namespace Iviz.App
                 ModuleListPanel.UpdateSettings();
             };
 
+            /*
             panel.SunDirection.ValueChanged += f =>
             {
                 SettingsManager.SunDirection = (int) f;
                 ModuleListPanel.UpdateSettings();
             };
+            */
 
             panel.Close.Clicked += Close;
 

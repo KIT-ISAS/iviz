@@ -12,7 +12,7 @@ namespace Iviz.App
         public ToggleWidget ShowBillboard { get; private set; }
         public ToggleWidget BillboardFollowsCamera { get; private set; }
         public SliderWidget BillboardSize { get; private set; }
-        public Vector3SliderWidget BillboardOffset { get; private set; }
+        public Vector3MultiWidget BillboardOffset { get; private set; }
         public ToggleWidget UseIntrinsicScale { get; private set; }
         public ImagePreviewWidget PreviewWidget { get; private set; }
         public DataLabelWidget Description { get; private set; }
@@ -52,7 +52,7 @@ namespace Iviz.App
             UseIntrinsicScale = p.AddToggle("Use Intrinsic For Billboard Scale");
             BillboardSize = p.AddSlider("Billboard Size").SetMinValue(0.1f).SetMaxValue(10);
             BillboardFollowsCamera = p.AddToggle("Billboard Points To You");
-            BillboardOffset = p.AddVector3Slider("Billboard Offset");
+            BillboardOffset = p.AddVector3Multi("Billboard Offset");
 
             p.AddCollapsibleWidget("Billboard")
                 .Attach(ShowBillboard)

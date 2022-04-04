@@ -18,7 +18,7 @@ Shader "iviz/DepthCloud"
 
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma multi_compile _ USE_INTENSITY
+			#pragma multi_compile _ USE_INTENSITY USE_COLOR_GRAY
 			
 			float4 _Pos_ST;
 
@@ -104,7 +104,12 @@ Shader "iviz/DepthCloud"
 
 			fixed4 frag(v2f i) : SV_Target
 			{
+#ifdef USE_COLOR_GRAY
+				fixed f = tex2D(_ColorTexture, i.uv).r;
+				return fixed4(f,f,f,1);
+#else
 				return tex2D(_ColorTexture, i.uv);
+#endif
 			}
 
 			ENDCG

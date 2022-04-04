@@ -19,7 +19,7 @@ namespace Iviz.Resources
         /// <summary>
         /// Returns the instance id of the resource.
         /// </summary>
-        public int Id { get; }
+        public int Id => Object.GetHashCode();
 
         /// <summary>
         /// Name of this resource.
@@ -36,12 +36,11 @@ namespace Iviz.Resources
             if (baseObject == null)
             {
                 throw new ArgumentNullException(nameof(baseObject),
-                    $"Resource key was not set for asset '{objectName}'");
+                    $"Resource key was not set for asset '{objectName ?? "unnamed"}'");
             }
 
             Object = baseObject;
             Name = baseObject.name;
-            Id = Object.GetInstanceID();
         }
 
         public override string ToString() => Object.ToString();
@@ -62,7 +61,7 @@ namespace Iviz.Resources
 
         public static bool operator !=(ResourceKey<T>? a, ResourceKey<T>? b) => !(a == b);
 
-        public override int GetHashCode() => Id.GetHashCode();
+        public override int GetHashCode() => Id;
     }
 
     public static class ResourceKey
