@@ -44,7 +44,7 @@ public static class ConnectionUtils
             ? newHostname
             : hostname;
 
-        var tcs = new TaskCompletionSource<IAsyncResult>();
+        var tcs = new TaskCompletionSource<IAsyncResult>(TaskCreationOptions.RunContinuationsAsynchronously);
         var socket = client.Client;
 
         socket.BeginConnect(resolvedHostname, port, OnComplete, tcs);
@@ -99,7 +99,7 @@ public static class ConnectionUtils
 
     /// <summary>
     /// Checks if socket is connected and can transmit data.
-    /// <seealso href="https://stackoverflow.com/questions/2661764/how-to-check-if-a-socket-is-connected-disconnected-in-c">See here for more info</seealso>
+    /// Taken from https://stackoverflow.com/questions/2661764/how-to-check-if-a-socket-is-connected-disconnected-in-c".
     /// </summary>
     public static bool CheckIfAlive(this Socket? socket) =>
         socket is { Connected: true } && !(socket.Poll(1, SelectMode.SelectRead) && socket.Available == 0);

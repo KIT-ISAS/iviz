@@ -98,7 +98,7 @@ public static class StreamUtils
     static ValueTask<int> DoReadSubChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
         CancellationToken token)
     {
-        var tcs = new TaskCompletionSource<IAsyncResult>();
+        var tcs = new TaskCompletionSource<IAsyncResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, OnComplete, tcs);
 
@@ -143,7 +143,7 @@ public static class StreamUtils
     static ValueTask<int> DoWriteChunkAsync(Socket socket, byte[] buffer, int offset, int toWrite,
         CancellationToken token)
     {
-        var tcs = new TaskCompletionSource<IAsyncResult>();
+        var tcs = new TaskCompletionSource<IAsyncResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 
         socket.BeginSend(buffer, offset, toWrite, SocketFlags.None, OnComplete, tcs);
 
@@ -250,3 +250,14 @@ public static class StreamUtils
         return terminatorIndex != -1 ? message[..terminatorIndex] : message;
     }
 }
+
+#if NETSTANDARD2_1
+public class TaskCompletionSource
+{
+    readonly TaskCompletionSource<object?> ts;
+    public Task Task => ts.Task;
+    public TaskCompletionSource(TaskCreationOptions options) => ts = new TaskCompletionSource<object?>(options);
+    public void TrySetException(Exception e) => ts.TrySetException(e);
+    public void TrySetResult() => ts.TrySetResult(null);
+}
+#endif

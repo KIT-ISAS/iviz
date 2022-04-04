@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Tools;
 
-using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<object?>;
-
 namespace Iviz.Roslib;
 
 internal sealed class SenderQueue<T> where T : IMessage
@@ -57,7 +55,7 @@ internal sealed class SenderQueue<T> where T : IMessage
             return default;
         }
             
-        var msgSignal = new TaskCompletionSource();
+        var msgSignal = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         messageQueue.Enqueue(new Entry(message, msgSignal));
         signal.Release();
             
@@ -216,7 +214,7 @@ internal sealed class SenderQueue<T> where T : IMessage
 
                 numSent++;
                 bytesSent += msgLength + 4;
-                msgSignal?.TrySetResult(null);
+                msgSignal?.TrySetResult();
             }
         }
         catch (Exception e)

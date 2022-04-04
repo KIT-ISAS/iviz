@@ -253,7 +253,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 
                 numSent++;
                 bytesSent += msgLength + udpPlusSizeHeaders;
-                msgSignal?.TrySetResult(null);
+                msgSignal?.TrySetResult();
             }
         }
         catch (Exception e)

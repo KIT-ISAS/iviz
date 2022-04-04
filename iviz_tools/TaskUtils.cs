@@ -31,7 +31,7 @@ public static class TaskUtils
         return Task.Run(task, token);
     }
 
-    static readonly Action<object?> SetResult = o => ((TaskCompletionSource<object?>)o!).TrySetResult(null);
+    static readonly Action<object?> SetResult = o => ((TaskCompletionSource)o!).TrySetResult();
 
     /// <summary>
     /// Waits for the task to complete.
@@ -60,7 +60,7 @@ public static class TaskUtils
             : CancellationTokenSource.CreateLinkedTokenSource(token);
         tokenSource.CancelAfter(timeoutInMs);
 
-        var timeout = new TaskCompletionSource<object?>();
+        var timeout = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
         // ReSharper disable once UseAwaitUsing
         using (tokenSource.Token.Register(SetResult, timeout))
@@ -91,7 +91,7 @@ public static class TaskUtils
             : CancellationTokenSource.CreateLinkedTokenSource(token);
         tokenSource.CancelAfter(timeoutInMs);
 
-        var timeout = new TaskCompletionSource<object?>();
+        var timeout = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var timeoutTask = timeout.Task;
 
         // ReSharper disable once UseAwaitUsing

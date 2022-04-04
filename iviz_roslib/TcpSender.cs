@@ -307,7 +307,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
 
                 numSent++;
                 bytesSent += msgLength + 4;
-                msgSignal?.TrySetResult(null);
+                msgSignal?.TrySetResult();
 
             }
         }
