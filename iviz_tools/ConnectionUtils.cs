@@ -44,7 +44,7 @@ public static class ConnectionUtils
             ? newHostname
             : hostname;
 
-        var tcs = new TaskCompletionSource<IAsyncResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var tcs = TaskUtils.CreateCompletionSource<IAsyncResult>();
         var socket = client.Client;
 
         socket.BeginConnect(resolvedHostname, port, OnComplete, tcs);

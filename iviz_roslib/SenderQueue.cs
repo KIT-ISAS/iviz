@@ -54,8 +54,8 @@ internal sealed class SenderQueue<T> where T : IMessage
             numDropped++;
             return default;
         }
-            
-        var msgSignal = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        var msgSignal = TaskUtils.CreateCompletionSource();
         messageQueue.Enqueue(new Entry(message, msgSignal));
         signal.Release();
             

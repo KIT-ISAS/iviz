@@ -60,7 +60,7 @@ public static class TaskUtils
             : CancellationTokenSource.CreateLinkedTokenSource(token);
         tokenSource.CancelAfter(timeoutInMs);
 
-        var timeout = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var timeout = CreateCompletionSource();
 
         // ReSharper disable once UseAwaitUsing
         using (tokenSource.Token.Register(SetResult, timeout))
@@ -91,7 +91,7 @@ public static class TaskUtils
             : CancellationTokenSource.CreateLinkedTokenSource(token);
         tokenSource.CancelAfter(timeoutInMs);
 
-        var timeout = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var timeout = CreateCompletionSource();
         var timeoutTask = timeout.Task;
 
         // ReSharper disable once UseAwaitUsing
@@ -331,11 +331,35 @@ public static class TaskUtils
                 ? new ValueTask<Task>(t2)
                 : Task.WhenAny(t1, t2).AsValueTask();
     }
+
+    /// <summary>
+    /// Creates a <see cref="TaskCompletionSource"/> and sets its creation options to
+    /// <see cref="TaskContinuationOptions.RunContinuationsAsynchronously"/>.
+    /// </summary>
+    public static TaskCompletionSource CreateCompletionSource() =>
+        new(TaskCreationOptions.RunContinuationsAsynchronously);
+    
+    /// <summary>
+    /// Creates a <see cref="TaskCompletionSource{T}"/> and sets its creation options to
+    /// <see cref="TaskContinuationOptions.RunContinuationsAsynchronously"/>.
+    /// </summary>
+    public static TaskCompletionSource<T> CreateCompletionSource<T>() =>
+        new(TaskCreationOptions.RunContinuationsAsynchronously);
 }
 
 public static class ValueTask2
 {
     public static ValueTask<T> FromResult<T>(T t) => new(t);
     public static ValueTask<T> AsValueTask<T>(this Task<T> t) => new(t);
-    public static ValueTask AsValueTask(this Task t) => new(t);
 }
+
+#if NETSTANDARD2_1
+public class TaskCompletionSource
+{
+    readonly TaskCompletionSource<object?> ts;
+    public Task Task => ts.Task;
+    public TaskCompletionSource(TaskCreationOptions options) => ts = new TaskCompletionSource<object?>(options);
+    public void TrySetException(Exception e) => ts.TrySetException(e);
+    public void TrySetResult() => ts.TrySetResult(null);
+}
+#endif

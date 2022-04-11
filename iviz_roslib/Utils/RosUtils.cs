@@ -119,7 +119,7 @@ internal static class RosUtils
         byte[] addressBBytes = addressB.GetAddressBytes();
         byte[] subnetMaskBytes = info.Address.AddressFamily == AddressFamily.InterNetwork
             ? info.IPv4Mask.GetAddressBytes()
-            : GtSubnetMaskFromV6PrefixLength(info.PrefixLength);
+            : GetSubnetMaskFromV6PrefixLength(info.PrefixLength);
 
         foreach (int i in ..addressABytes.Length)
         {
@@ -132,7 +132,7 @@ internal static class RosUtils
         return true;
     }
 
-    static byte[] GtSubnetMaskFromV6PrefixLength(int prefixLength)
+    static byte[] GetSubnetMaskFromV6PrefixLength(int prefixLength)
     {
         int prefixLeft = prefixLength;
         byte[] maskBytes = new byte[16];
