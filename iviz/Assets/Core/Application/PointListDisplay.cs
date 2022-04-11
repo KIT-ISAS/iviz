@@ -229,10 +229,10 @@ namespace Iviz.Displays
             pointBuffer.Dispose();
         }
 
-        public override string ToString() => "[PointListResource '" + gameObject.name + "']";
+        public override string ToString() => $"[{nameof(PointListDisplay)}]";
 
         /// <summary>
-        ///     Sets the list of points.
+        ///     Copies the list of points directly without checking.
         /// </summary>
         /// <param name="points">The list of points.</param>
         public void Set(ReadOnlySpan<PointWithColor> points)
@@ -240,30 +240,12 @@ namespace Iviz.Displays
             Set(MemoryMarshal.Cast<PointWithColor, float4>(points));
         }
 
-        public void Set(ReadOnlySpan<float4> points)
-        {
-            pointBuffer.EnsureCapacity(points.Length);
-            pointBuffer.Clear();
-
-            foreach (ref readonly var point in points)
-            {
-                if (point.IsInvalid3() || point.MaxAbsCoeff3() > MaxPositionMagnitude)
-                {
-                    continue;
-                }
-
-                pointBuffer.AddUnsafe(point);
-            }
-
-            isDirty = true;
-        }
-
 
         /// <summary>
         ///     Copies the list of points directly without checking.
         /// </summary>
         /// <param name="points">A native list with the points.</param>
-        public void SetDirect(ReadOnlySpan<float4> points)
+        public void Set(ReadOnlySpan<float4> points)
         {
             pointBuffer.Clear();
             pointBuffer.AddRange(points);
@@ -276,7 +258,7 @@ namespace Iviz.Displays
             return !(t.IsInvalid() || t.MaxAbsCoeff() > MaxPositionMagnitude);
         }
 
-        public void SetDirect(Action<NativeList<float4>> callback, int reserve)
+        public void Set(Action<NativeList<float4>> callback, int reserve)
         {
             ThrowHelper.ThrowIfNull(callback, nameof(callback));
             pointBuffer.EnsureCapacity(reserve);

@@ -395,25 +395,24 @@ namespace Iviz.App
 
             panel.TextBottom.SetTextRent(description);
             //panel.TextBottom.UpdateVertexData();
-
-            async void GetParamValue(string param, CancellationToken token)
-            {
-                if (!RosManager.IsConnected)
-                {
-                    return;
-                }
-
-                try
-                {
-                    (paramValue, _) = await RosManager.Connection.GetParameterAsync(param, 5000, token);
-                    GameThread.Post(() => UpdateParametersLink(link));
-                }
-                catch (OperationCanceledException)
-                {
-                }
-            }
         }
 
+        async void GetParamValue(string param, CancellationToken token)
+        {
+            if (!RosManager.IsConnected)
+            {
+                return;
+            }
+
+            try
+            {
+                (paramValue, _) = await RosManager.Connection.GetParameterAsync(param, 5000, token);
+                GameThread.Post(() => UpdateParametersLink(param));
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
 
         void UpdateNodesLink(string link)
         {

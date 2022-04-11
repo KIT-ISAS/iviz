@@ -1,3 +1,7 @@
+#nullable enable
+
+using Iviz.Core;
+using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
 
@@ -12,17 +16,10 @@ namespace Iviz.Displays
         {
             set
             {
-                base.Layer = value;
-                SetLayer(transform, value);
-            }
-        }
-
-        static void SetLayer([NotNull] Transform transform, int layer)
-        {
-            transform.gameObject.layer = layer;
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                SetLayer(transform.GetChild(i), layer);
+                foreach (var child in transform.GetAllChildren()) // includes 'this'
+                {
+                    child.gameObject.layer = value;
+                }
             }
         }
     }

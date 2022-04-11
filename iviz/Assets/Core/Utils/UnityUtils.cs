@@ -680,7 +680,7 @@ namespace Iviz.Core
         public static IEnumerable<Transform> GetAllChildren(this Transform parent)
         {
             return parent.childCount == 0
-                ? new[] { parent }
+                ? new[] { parent } // ok, we allocate here
                 : GetAllChildrenImpl(parent);
 
             static IEnumerable<Transform> GetAllChildrenImpl(Transform transform)
@@ -728,7 +728,7 @@ namespace Iviz.Core
 
         public static bool TryGetFirst<T>(this IReadOnlyList<T> ts, Predicate<T> p, [NotNullWhen(true)] out T? tp)
         {
-            for (int i = 0; i < ts.Count; i++)
+            foreach (int i in ..ts.Count)
             {
                 T t = ts[i];
                 if (p(t))

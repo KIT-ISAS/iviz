@@ -106,7 +106,7 @@ namespace Iviz.Controllers
             int width = image.width / 2;
             int height = image.height / 2;
             var pose = arCameraTransform.AsPose();
-            var task = new TaskCompletionSource<Screenshot?>();
+            var ts = TaskUtils.CreateCompletionSource<Screenshot?>();
 
             using (image)
             {
@@ -114,13 +114,13 @@ namespace Iviz.Controllers
                 {
                     if (token.IsCancellationRequested)
                     {
-                        task.TrySetCanceled(token);
+                        ts.TrySetCanceled(token);
                         return;
                     }
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        task.TrySetException(InvalidScreenshotException(status));
+                        ts.TrySetException(InvalidScreenshotException(status));
                         return;
                     }
 
@@ -128,11 +128,11 @@ namespace Iviz.Controllers
                         GameThread.TimeNow, width, height,
                         Intrinsic.Scale(0.5f), pose, array.ToArray());
                     lastColor = screenshot;
-                    task.TrySetResult(screenshot);
+                    ts.TrySetResult(screenshot);
                 });
             }
 
-            return task.Task.AsValueTask();
+            return ts.Task.AsValueTask();
         }
 
         public ValueTask<Screenshot?> CaptureDepthAsync(
@@ -167,7 +167,7 @@ namespace Iviz.Controllers
                 transformation = XRCpuImage.Transformation.MirrorY
             };
 
-            var task = new TaskCompletionSource<Screenshot?>();
+            var ts = TaskUtils.CreateCompletionSource<Screenshot?>();
             int width = image.width;
             int height = image.height;
             var pose = arCameraTransform.AsPose();
@@ -179,13 +179,13 @@ namespace Iviz.Controllers
                 {
                     if (token.IsCancellationRequested)
                     {
-                        task.TrySetCanceled(token);
+                        ts.TrySetCanceled(token);
                         return;
                     }
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        task.TrySetException(InvalidScreenshotException(status));
+                        ts.TrySetException(InvalidScreenshotException(status));
                         return;
                     }
 
@@ -200,17 +200,17 @@ namespace Iviz.Controllers
                         {
                             MirrorX<float>(screenshot);
                             lastDepth = screenshot;
-                            task.TrySetResult(screenshot);
+                            ts.TrySetResult(screenshot);
                         }
                         catch (Exception e)
                         {
-                            task.TrySetException(e);
+                            ts.TrySetException(e);
                         }
                     }, token);
                 });
             }
 
-            return task.Task.AsValueTask();
+            return ts.Task.AsValueTask();
         }
 
         public ValueTask<Screenshot?> CaptureDepthConfidenceAsync(
@@ -246,7 +246,7 @@ namespace Iviz.Controllers
             };
 
 
-            var task = new TaskCompletionSource<Screenshot?>();
+            var ts = TaskUtils.CreateCompletionSource<Screenshot?>();
             int width = image.width;
             int height = image.height;
             var pose = arCameraTransform.AsPose();
@@ -259,13 +259,13 @@ namespace Iviz.Controllers
                 {
                     if (token.IsCancellationRequested)
                     {
-                        task.TrySetCanceled();
+                        ts.TrySetCanceled();
                         return;
                     }
 
                     if (status != XRCpuImage.AsyncConversionStatus.Ready)
                     {
-                        task.TrySetException(InvalidScreenshotException(status));
+                        ts.TrySetException(InvalidScreenshotException(status));
                         return;
                     }
 
@@ -280,17 +280,17 @@ namespace Iviz.Controllers
                         {
                             MirrorX<byte>(screenshot);
                             lastConfidence = screenshot;
-                            task.TrySetResult(screenshot);
+                            ts.TrySetResult(screenshot);
                         }
                         catch (Exception e)
                         {
-                            task.TrySetException(e);
+                            ts.TrySetException(e);
                         }
                     }, token);
                 });
             }
 
-            return task.Task.AsValueTask();
+            return ts.Task.AsValueTask();
         }
 
         static Exception InvalidScreenshotException(XRCpuImage.AsyncConversionStatus status) =>

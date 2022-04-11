@@ -235,24 +235,6 @@ namespace Iviz.Displays
             Set(MemoryMarshal.Cast<PointWithColor, float4>(points));
         }
 
-        void Set(ReadOnlySpan<float4> points)
-        {
-            pointBuffer.EnsureCapacity(points.Length);
-            pointBuffer.Clear();
-
-            foreach (ref readonly var point in points)
-            {
-                if (point.IsInvalid3() || point.MaxAbsCoeff3() > MaxPositionMagnitude)
-                {
-                    continue;
-                }
-
-                pointBuffer.AddUnsafe(point);
-            }
-
-            UpdateBuffer();
-        }
-
         public void Reset()
         {
             pointBuffer.Clear();
@@ -263,14 +245,14 @@ namespace Iviz.Displays
         /// Copies the array directly without checking.
         /// </summary>
         /// <param name="points">A native array with the positions and colors.</param>        
-        public void SetDirect(ReadOnlySpan<float4> points)
+        public void Set(ReadOnlySpan<float4> points)
         {
             pointBuffer.Clear();
             pointBuffer.AddRange(points);
             UpdateBuffer();
         }
 
-        public void SetDirect(Action<NativeList<float4>> callback, int reserve = 0)
+        public void Set(Action<NativeList<float4>> callback, int reserve = 0)
         {
             if (callback == null)
             {
@@ -357,6 +339,8 @@ namespace Iviz.Displays
         protected override void UpdateProperties()
         {
         }
+
+        public override string ToString() => $"[{nameof(MeshListDisplay)}]";
 
         protected override void Rebuild()
         {

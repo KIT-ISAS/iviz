@@ -316,7 +316,7 @@ namespace Iviz.Controllers
             }
 
             var setterCallback = PointHelper.GetPointSetter(msg);
-            pointList.SetDirect(setterCallback, msg.Points.Length);
+            pointList.Set(setterCallback, msg.Points.Length);
             pointList.UseColormap = false;
         }
 
@@ -378,7 +378,7 @@ namespace Iviz.Controllers
             }
 
             var setterCallback = PointHelper.GetPointSetter(msg);
-            meshList.SetDirect(setterCallback, msg.Points.Length);
+            meshList.Set(setterCallback, msg.Points.Length);
         }
 
         void CreateTextResource(Marker msg)

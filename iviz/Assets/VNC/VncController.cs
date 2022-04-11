@@ -226,14 +226,7 @@ namespace VNC
             return Task.FromResult(true);
         }
 
-        public Task<(string, int)> RequestServerAsync()
-        {
-            var ts = new TaskCompletionSource<(string, int)>();
-            GameThread.Post(async () => ts.SetResult(await DoRequestServerAsync()));
-            return ts.Task;
-        }
-
-        async Task<(string, int)> DoRequestServerAsync()
+        public async ValueTask<(string, int)> RequestServerAsync()
         {
             while (true)
             {
@@ -288,7 +281,7 @@ namespace VNC
 
             FAnimator.Spawn(Token, 0.1f, t => PlainDialog.Scale = Mathf.Sqrt(t) * 0.45f);
 
-            var ts = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var ts = TaskUtils.CreateCompletionSource();
 
             void OnClicked(int _)
             {
@@ -310,7 +303,7 @@ namespace VNC
 
             //FAnimator.Spawn(Token, 0.1f, t => ConnectionDialog.Scale = t * 0.45f);
 
-            var ts = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var ts = TaskUtils.CreateCompletionSource();
 
             void OnClicked(int _)
             {
@@ -330,17 +323,12 @@ namespace VNC
 
         public Task<string> RequestPasswordAsync()
         {
-            if (hasConfirmedPassword)
-            {
-                return Task.FromResult(lastPassword);
-            }
-
-            var ts = new TaskCompletionSource<string>();
-            GameThread.Post(async () => ts.SetResult(await DoRequestPasswordAsync()));
-            return ts.Task;
+            return hasConfirmedPassword 
+                ? Task.FromResult(lastPassword) 
+                : GameThread.PostAsync(DoRequestPasswordAsync);
         }
 
-        async Task<string> DoRequestPasswordAsync()
+        async ValueTask<string> DoRequestPasswordAsync()
         {
             while (true)
             {
@@ -367,7 +355,7 @@ namespace VNC
 
             FAnimator.Spawn(Token, 0.1f, t => ConnectionDialog.Scale = t * 0.45f);
 
-            var ts = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var ts = TaskUtils.CreateCompletionSource();
 
             void OnClicked(int _)
             {
@@ -467,7 +455,7 @@ namespace VNC
             }
         }
 
-        void SetBackgroundColor(Color value)
+        static void SetBackgroundColor(Color value)
         {
             Color colorToUse = Settings.IsHololens ? Color.black : value;
             Settings.MainCamera.backgroundColor = colorToUse.WithAlpha(0);

@@ -103,22 +103,13 @@ namespace Iviz.Displays
         {
             Set(MemoryMarshal.Cast<LineWithColor, float4x2>(lines), overrideNeedsAlpha);
         }
-        
+
         public void Set(ReadOnlySpan<float4x2> lines, bool? overrideNeedsAlpha = null)
         {
-            lineBuffer.EnsureCapacity(lines.Length);
             lineBuffer.Clear();
-            
-            foreach (ref readonly var line in lines)
-            {
-                if (IsElementValid(line))
-                {
-                    lineBuffer.AddUnsafe(line);
-                }
-            }
-
+            lineBuffer.AddRange(lines);
             UpdateLines(overrideNeedsAlpha);
-        }        
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsElementValid(in float4x2 f)
@@ -403,6 +394,8 @@ namespace Iviz.Displays
             Colormap = Colormap;
             Tint = Tint;
         }
+        
+        public override string ToString() => $"[{nameof(LineDisplay)}]";
 
         public override void Suspend()
         {

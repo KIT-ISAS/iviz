@@ -2,7 +2,9 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
@@ -12,6 +14,7 @@ using MarcusW.VncClient.Protocol.Implementation.MessageTypes.Outgoing;
 using MarcusW.VncClient.Protocol.Implementation.Services.Transports;
 using MarcusW.VncClient.Rendering;
 using Microsoft.Extensions.Logging.Abstractions;
+using Nito.AsyncEx;
 
 namespace VNC
 {
@@ -30,7 +33,7 @@ namespace VNC
 
         public Task StartAsync(VncController controller)
         {
-            var startSignal = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var startSignal = TaskUtils.CreateCompletionSource();
 
             TaskUtils.Run(async () =>
             {
@@ -49,7 +52,7 @@ namespace VNC
 
         async Task DoStartAsync(VncController controller, TaskCompletionSource startSignal)
         {
-            var (hostname, port) = await controller.RequestServerAsync();
+            var (hostname, port) = await GameThread.PostAsync(controller.RequestServerAsync);
 
             var vncClient = new MarcusW.VncClient.VncClient(NullLoggerFactory.Instance);
 

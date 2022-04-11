@@ -574,7 +574,7 @@ namespace Iviz.App
             string defaultConfigFile = $"{Settings.SavedFolder}/{defaultConfigPrefix}{LoadConfigDialogData.Suffix}";
             if (File.Exists(defaultConfigFile))
             {
-                LoadStateConfiguration(defaultConfigFile);
+                LoadStateConfiguration($"{defaultConfigPrefix}{LoadConfigDialogData.Suffix}");
             }
         }
 

@@ -83,7 +83,7 @@ namespace Iviz.Controllers
                 config.MaxDepth = value;
                 if (lastMsg != null)
                 {
-                    resource.SetDirect(setterFunction);
+                    resource.Set(setterFunction);
                     resource.IntensityBounds = WhiteBounds;
                 }
             }
@@ -116,7 +116,7 @@ namespace Iviz.Controllers
         {
             node.AttachTo(msg.Header);
             lastMsg = msg;
-            resource.SetDirect(setterFunction);
+            resource.Set(setterFunction);
             resource.IntensityBounds = WhiteBounds;
         }
 

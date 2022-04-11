@@ -58,7 +58,7 @@ namespace Iviz.Ros
                 server.AddKey(key, value);
             }
 
-            var initCompletedSignal = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var initCompletedSignal = TaskUtils.CreateCompletionSource();
 
             // start in background
             serverTask = TaskUtils.Run(() => server.StartAsync(initCompletedSignal).AwaitNoThrow(this));

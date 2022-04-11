@@ -253,7 +253,7 @@ namespace Iviz.Displays
 
             pointBuffer.Clear();
             bool useIntensity = UseIntensityNotRange && intensities.Length != 0;
-            var mCache = cache;
+            var mCache = cache.AsSpan(0, ranges.Length);
             foreach (int i in ..ranges.Length)
             {
                 float range = ranges[i];
@@ -302,20 +302,14 @@ namespace Iviz.Displays
             {
                 pA = points[i];
                 pB = points[i + 1];
-                if ((pB - pA).MaxAbsCoeff3() < maxLineDistance)
-                {
-                    lineBuffer.Add(line);
-                }
+                lineBuffer.Add(line);
             }
 
             if (points.Length != 0)
             {
                 pA = points[^1];
                 pB = points[0];
-                if ((pB - pA).MaxAbsCoeff3() < maxLineDistance)
-                {
-                    lineBuffer.Add(line);
-                }
+                lineBuffer.Add(line);
             }
 
             Lines.Set(lineBuffer.AsReadOnlySpan(), false);

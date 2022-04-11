@@ -223,28 +223,10 @@ namespace Iviz.MarkerDetection
             return cvContext;
         }
 
-        async ValueTask<Screenshot?> CaptureScreenshotAsync()
+        Task<Screenshot?> CaptureScreenshotAsync()
         {
-            Screenshot? screenshot = null;
-            GameThread.Post(async () =>
-            {
-                var screenCaptureManager = Settings.ScreenCaptureManager;
-                if (screenCaptureManager == null)
-                {
-                    return;
-                }
-
-                try
-                {
-                    screenshot = await screenCaptureManager.CaptureColorAsync(250, Token).AwaitNoThrow(this);
-                }
-                finally
-                {
-                    signal.Release();
-                }
-            });
-            await signal.WaitAsync(Token);
-            return screenshot;
+            return GameThread.PostAsync(() =>
+                Settings.ScreenCaptureManager?.CaptureColorAsync(250, Token) ?? new ValueTask<Screenshot?>());
         }
 
         void RaiseOnMarkerDetected(Screenshot screenshot, IMarkerCorners[] detectedMarkers)

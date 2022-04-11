@@ -33,6 +33,7 @@ namespace Iviz.Controllers
                 HideInARMode = value.HideInARMode;
                 Offset = value.Offset.ToUnity();
                 Interactable = value.Interactable;
+                DarkMode = value.DarkMode;
             }
         }
 
