@@ -256,19 +256,19 @@ namespace Iviz.Controllers
                 return;
             }
 
-            var messages = new TransformStamped[count];
-            foreach (int i in ..count)
+            var transforms = new TransformStamped[count];
+            foreach (ref var transform in transforms.AsSpan())
             {
-                outgoingMessages.TryTake(out messages[i]);
+                outgoingMessages.TryTake(out transform);
             }
 
             if (RosManager.IsConnected)
             {
-                Publisher.Publish(new TFMessage(messages));
+                Publisher.Publish(new TFMessage(transforms));
             }
             else
             {
-                incomingMessages.Enqueue((messages, false));
+                incomingMessages.Enqueue((transforms, false));
             }
         }
 

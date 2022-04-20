@@ -53,13 +53,13 @@ namespace Iviz.App.ARDialogs
             else
             {
                 float alternativeAngle = targetAngle - 360;
-                float closestAngle = Math.Abs(alternativeAngle - currentAngle.Value) <
-                                     Math.Abs(targetAngle - currentAngle.Value)
+                float closestAngle = Mathf.Abs(alternativeAngle - currentAngle.Value) <
+                                     Mathf.Abs(targetAngle - currentAngle.Value)
                     ? alternativeAngle
                     : targetAngle;
 
                 float deltaAngle = closestAngle - currentAngle.Value;
-                if (Math.Abs(deltaAngle) < 1)
+                if (Mathf.Abs(deltaAngle) < 1)
                 {
                     return;
                 }

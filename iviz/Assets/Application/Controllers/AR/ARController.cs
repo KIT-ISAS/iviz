@@ -59,7 +59,7 @@ namespace Iviz.Controllers
         static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
         static ARJoystick ARJoystick => ModuleListPanel.Instance.ARJoystick;
 
-        public static readonly Vector3 DefaultWorldOffset = new(0.5f, 0, -0.2f);
+        public static Vector3 DefaultWorldOffset => new(0.5f, 0, -0.2f);
         public static bool IsActive => Instance != null;
         public static ARFoundationController? Instance { get; protected set; }
         public static bool IsXRVisible => Settings.IsHololens || Instance is { Visible: true };
@@ -269,7 +269,7 @@ namespace Iviz.Controllers
             {
                 newVelocityAngle = 0;
             }
-            else if (Math.Sign(velocityAngle) != 0 && Math.Sign(velocityAngle) != Math.Sign(dA))
+            else if (Mathf.Sign(velocityAngle) != 0 && Mathf.Sign(velocityAngle) - Mathf.Sign(dA) != 0)
             {
                 newVelocityAngle = 0;
             }

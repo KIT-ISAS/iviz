@@ -11,8 +11,8 @@ namespace Iviz.Core
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref T GetUnsafeRef<T>(this NativeArray<T> array) where T : unmanaged =>
-            ref Unsafe.AsRef<T>(NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(array));
-        
+            ref *(T*)NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks(array);
+
         /// <summary>
         /// Creates a temporary native array that lasts one frame.
         /// It should not be disposed manually. It should not be used in Burst.
@@ -27,6 +27,6 @@ namespace Iviz.Core
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
 #endif
             return array;
-        }        
+        }
     }
 }

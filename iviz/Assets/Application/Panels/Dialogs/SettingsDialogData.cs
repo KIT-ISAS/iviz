@@ -26,9 +26,7 @@ namespace Iviz.App
         readonly SettingsDialogPanel panel;
         public override IDialogPanel Panel => panel;
 
-        static ISettingsManager SettingsManager => Settings.SettingsManager ??
-                                                   throw new InvalidOperationException(
-                                                       "Settings Dialog used without a SettingsManager!");
+        static ISettingsManager SettingsManager => Settings.SettingsManager;
 
         public SettingsDialogData(SettingsConfiguration? config = null)
         {

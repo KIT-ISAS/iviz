@@ -340,9 +340,7 @@ namespace Iviz.Controllers.TF
         {
             // unity cannot deal with very large floats, so we have to limit translation sizes
             const int maxPoseMagnitude = 10000;
-            return Math.Abs(t.X) < maxPoseMagnitude
-                   && Math.Abs(t.Y) < maxPoseMagnitude
-                   && Math.Abs(t.Z) < maxPoseMagnitude;
+            return t.MaxAbsCoeff() < maxPoseMagnitude;
         }
 
         void SetFailedForThreshold(string childId)

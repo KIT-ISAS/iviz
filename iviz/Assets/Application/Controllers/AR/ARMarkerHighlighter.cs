@@ -75,10 +75,10 @@ namespace Iviz.Controllers
             foreach (var (cornerX, cornerY, _) in corners)
             {
                 var (x, y, _) = intrinsic.Unproject(cornerX, cornerY) * cameraZ;
-                minX = Math.Min(x, minX);
-                minY = Math.Min(y, minY);
-                maxX = Math.Max(x, maxX);
-                maxY = Math.Max(y, maxY);
+                minX = Mathf.Min(x, minX);
+                minY = Mathf.Min(y, minY);
+                maxX = Mathf.Max(x, maxX);
+                maxY = Mathf.Max(y, maxY);
             }
 
             var center = new UnityEngine.Vector3((maxX + minX) / 2, (maxY + minY) / 2, cameraZ);

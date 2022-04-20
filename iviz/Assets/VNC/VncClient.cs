@@ -10,11 +10,14 @@ using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Tools;
 using MarcusW.VncClient;
+using MarcusW.VncClient.Protocol.EncodingTypes;
+using MarcusW.VncClient.Protocol.Implementation;
 using MarcusW.VncClient.Protocol.Implementation.MessageTypes.Outgoing;
 using MarcusW.VncClient.Protocol.Implementation.Services.Transports;
 using MarcusW.VncClient.Rendering;
 using Microsoft.Extensions.Logging.Abstractions;
 using Nito.AsyncEx;
+using VNC.Extensions;
 
 namespace VNC
 {
@@ -50,11 +53,20 @@ namespace VNC
             return startSignal.Task;
         }
 
+        static readonly IEnumerable<IEncodingType> OwnEncodingTypes = new[] { new CursorWithAlphaEncodingType() };
+
         async Task DoStartAsync(VncController controller, TaskCompletionSource startSignal)
         {
             var (hostname, port) = await GameThread.PostAsync(controller.RequestServerAsync);
+            
+            var rfbProtocolImplementation = new DefaultImplementation(
+                DefaultImplementation.GetDefaultSecurityTypes,
+                DefaultImplementation.GetDefaultMessageTypes,
+                context =>
+                    DefaultImplementation.GetDefaultEncodingTypes(context).Concat(OwnEncodingTypes)
+            );
 
-            var vncClient = new MarcusW.VncClient.VncClient(NullLoggerFactory.Instance);
+            var vncClient = new MarcusW.VncClient.VncClient(NullLoggerFactory.Instance, rfbProtocolImplementation);
 
             using var renderTarget = new RenderTarget(controller.Screen);
 
@@ -68,7 +80,7 @@ namespace VNC
                 },
                 AuthenticationHandler = new AuthenticationHandler(controller),
                 InitialRenderTarget = renderTarget,
-                ConnectTimeout = TimeSpan.FromSeconds(3)
+                ConnectTimeout = TimeSpan.FromSeconds(3),
             };
 
             var token = tokenSource.Token;
@@ -164,7 +176,7 @@ namespace VNC
                 this.screen = screen;
             }
 
-            public IFramebufferReference GrabFramebufferReference(Size size, IImmutableSet<Screen> layout)
+            public IFramebufferReference GrabFramebufferReference(Size size, IImmutableSet<Screen> _)
             {
                 if (cachedFrameBuffer != null && cachedFrameBuffer.Size == size)
                 {

@@ -13,7 +13,9 @@ namespace Iviz.Displays
 {
     internal static class CapsuleLinesHelper
     {
-        static readonly int[] CapsuleIndices =
+        static int[]? capsuleIndices;
+
+        static int[] CapsuleIndices => capsuleIndices ??= new[]
         {
             0, 1, 2,
             0, 2, 3,
@@ -93,7 +95,7 @@ namespace Iviz.Displays
                 {
                     dirX = ab / Mathf.Sqrt(abMagnitudeSq);
                     var (x, y, z) = dirX;
-                    dirY = (Math.Abs(z) - 1).ApproximatelyZero()
+                    dirY = (Mathf.Abs(z) - 1).ApproximatelyZero()
                         ? new Vector3(-z, 0, x) / Mathf.Sqrt(x * x + z * z)
                         : new Vector3(-y, x, 0) / Mathf.Sqrt(x * x + y * y);
                     dirZ = dirX.Cross(dirY);
@@ -179,8 +181,8 @@ namespace Iviz.Displays
             mesh.SetVertices(points);
             mesh.SetColors(colors);
             mesh.SetUVs(uvs);
-            
-            
+
+
             using var indices = new Rent<int>(indicesSize);
             var iArray = indices.AsSpan();
             int iOff = 0;

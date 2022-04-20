@@ -133,7 +133,7 @@ namespace Iviz.Displays
         public static float GetRecommendedSize(in Vector3 unityPosition)
         {
             float distanceToCam = Vector3.Distance(Settings.MainCameraTransform.position, unityPosition);
-            float size = 0.2f * Math.Max(distanceToCam, 0);
+            float size = 0.2f * Mathf.Max(distanceToCam, 0);
             float baseFrameSize = TfModule.Instance.FrameSize;
             float labelSize = baseFrameSize * size * (1.2f * 0.375f / 2);
             return labelSize;

@@ -13,21 +13,20 @@ namespace VNC
 {
     internal readonly struct FrameRectangle : IDisposable
     {
-        static readonly uint[] PaletteBuffer = new uint[256];
-
+        static uint[]? paletteBytes;
+        static Span<uint> PaletteBuffer => (paletteBytes ??= new uint[256]);
+        
         readonly byte[] buffer;
-        readonly int fullSize;
         readonly int width;
         readonly int height;
 
-        Span<byte> BufferSpan() => buffer.AsSpan(0, fullSize);
+        Span<byte> BufferSpan() => buffer.AsSpan(0, width * height * 4);
 
         public FrameRectangle(Size size)
         {
             width = size.Width;
             height = size.Height;
-            fullSize = width * height * 4;
-            buffer = ArrayPool<byte>.Shared.Rent(fullSize);
+            buffer = ArrayPool<byte>.Shared.Rent(width * height * 4);
         }
 
         public void Dispose()
@@ -35,23 +34,34 @@ namespace VNC
             ArrayPool<byte>.Shared.Return(buffer);
         }
 
-        public void SetPixels(ReadOnlySpan<byte> pixelData, in PixelFormat pixelFormat)
+        public bool SetPixels(ReadOnlySpan<byte> pixelData, in PixelFormat pixelFormat)
         {
             try
             {
                 if (pixelFormat.IsBinaryCompatibleTo(TurboJpegDecoder.RgbaCompatiblePixelFormat))
                 {
                     SetPixels4(pixelData);
+                    return true;
                 }
-                else if (pixelFormat.IsBinaryCompatibleTo(PixelFormat.RfbRgb888))
+
+                if (pixelFormat.IsBinaryCompatibleTo(SupportedFormats.RfbRgb888))
                 {
                     SetPixels3(pixelData);
+                    return true;
+                }
+                
+                if (pixelFormat.IsBinaryCompatibleTo(SupportedFormats.RfbRgb565))
+                {
+                    SetPixels2(pixelData);
+                    return true;
                 }
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                RosLogger.Error($"{nameof(FrameRectangle)}: Error in {nameof(SetPixels)}", e);
             }
+            
+            return false;
         }
 
         void SetPixels4(ReadOnlySpan<byte> src)
@@ -64,15 +74,19 @@ namespace VNC
             SetPixels3N(BufferSpan().Cast<uint>(), src.Cast<Rgb>());
         }
 
+        void SetPixels2(ReadOnlySpan<byte> src)
+        {
+            SetPixels2N(BufferSpan().Cast<uint>(), src.Cast<ushort>());
+        }
+
         static void SetPixels3N(Span<uint> dst4, ReadOnlySpan<Rgb> src3)
         {
             int sizeToWrite = src3.Length;
 
             var srcI4 = MemoryMarshal.Cast<Rgb, uint>(src3);
-            dst4 = dst4[..sizeToWrite]; // assert dst4 size is same as src3
 
-            ref uint dstIPtr = ref MemoryMarshal.GetReference(dst4[..sizeToWrite]);
-            ref uint srcIPtr = ref MemoryMarshal.GetReference(srcI4);
+            ref uint dstIPtr = ref dst4[..sizeToWrite].GetReference(); 
+            ref uint srcIPtr = ref srcI4.GetReference();
 
             while (sizeToWrite > 8)
             {
@@ -116,31 +130,82 @@ namespace VNC
                 dstPtr = ref Unsafe.Add(ref dstPtr, 1); // dstPtr++;
             }
         }
+        
+        static void SetPixels2N(Span<uint> dst4, ReadOnlySpan<ushort> src2)
+        {
+            int sizeToWrite = src2.Length;
+            ref int dstPtr = ref Unsafe.As<uint, int>(ref dst4[..sizeToWrite].GetReference());
+            ref ushort srcPtr = ref src2.GetReference();
 
-        public void SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette, in PixelFormat pixelFormat)
+            for (int x = sizeToWrite; x > 0; x--)
+            {
+                // stolen from https://stackoverflow.com/questions/2442576/how-does-one-convert-16-bit-rgb565-to-24-bit-rgb888
+                
+                int rgb565 = srcPtr;
+                srcPtr = ref Unsafe.Add(ref srcPtr, 1); // srcPtr++;
+                
+                int r5 = (rgb565 & 0xf800) >> 11;
+                int r8 = (r5 * 527 + 23) >> 6;
+                int rgba = r8;
+
+                int g6 = (rgb565 & 0x07e0) >> 5;
+                int g8 = (g6 * 259 + 33) >> 6;
+                rgba |= g8 << 8;
+
+                int b5 = rgb565 & 0x001f;
+                int b8 = (b5 * 527 + 23) >> 6;
+                rgba |= b8 << 16;
+
+                dstPtr = rgba;
+                dstPtr = ref Unsafe.Add(ref dstPtr, 1); // dstPtr++;
+            }
+        }
+
+        public static int Convert565To888(int rgb565)
+        {
+            int r5 = (rgb565 & 0xf800) >> 11;
+            int r8 = (r5 * 527 + 23) >> 6;
+            int rgba = r8;
+
+            int g6 = (rgb565 & 0x07e0) >> 5;
+            int g8 = (g6 * 259 + 33) >> 6;
+            rgba |= g8 << 8;
+
+            int b5 = rgb565 & 0x001f;
+            int b8 = (b5 * 527 + 23) >> 6;
+            rgba |= b8 << 16;
+                    
+            return rgba;            
+        }
+
+        public bool SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette, in PixelFormat pixelFormat)
         {
             try
             {
-                if (pixelFormat.IsBinaryCompatibleTo(PixelFormat.RfbRgb888))
+                if (pixelFormat.IsBinaryCompatibleTo(SupportedFormats.RfbRgb888))
                 {
                     SetPixelsPalette3(indices, palette);
+                    return true;
                 }
-                else if (pixelFormat.IsBinaryCompatibleTo(TurboJpegDecoder.RgbaCompatiblePixelFormat))
+
+                if (pixelFormat.IsBinaryCompatibleTo(TurboJpegDecoder.RgbaCompatiblePixelFormat))
                 {
                     SetPixelsPalette4(indices, palette);
+                    return true;
+                }
+                
+                if (pixelFormat.IsBinaryCompatibleTo(SupportedFormats.RfbRgb565))
+                {
+                    SetPixelsPalette2(indices, palette);
+                    return true;
                 }
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                RosLogger.Error($"{nameof(FrameRectangle)}: Error in {nameof(SetPixelsPalette)}", e);
             }
-        }
-
-        void SetPixelsPalette3(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
-        {
-            var srcPalette3 = palette.Cast<Rgb>();
-            SetPixels3N(PaletteBuffer, srcPalette3);
-            SetPixelsPalette(indices, PaletteBuffer);
+            
+            return false;
         }
 
         void SetPixelsPalette4(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
@@ -157,6 +222,20 @@ namespace VNC
                 SetPixelsPalette(indices, PaletteBuffer);
             }
         }
+        
+        void SetPixelsPalette3(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
+        {
+            var srcPalette3 = palette.Cast<Rgb>();
+            SetPixels3N(PaletteBuffer, srcPalette3);
+            SetPixelsPalette(indices, PaletteBuffer);
+        }        
+        
+        void SetPixelsPalette2(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
+        {
+            var srcPalette2 = palette.Cast<ushort>();
+            SetPixels2N(PaletteBuffer, srcPalette2);
+            SetPixelsPalette(indices, PaletteBuffer);
+        }        
 
         void SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<uint> palette)
         {
@@ -168,11 +247,9 @@ namespace VNC
             var dst4 = dst.Cast<uint>();
             int sizeToWrite = dst4.Length;
 
-            indices = indices[..sizeToWrite]; // assert indices size is same as dst4 
-
-            ref uint palettePtr = ref MemoryMarshal.GetReference(palette); // palette is size 256
-            ref byte indicesPtr = ref MemoryMarshal.GetReference(indices[..sizeToWrite]);
-            ref uint dstPtr = ref MemoryMarshal.GetReference(dst4);
+            ref uint palettePtr = ref palette.GetReference(); // palette is size 256
+            ref byte indicesPtr = ref indices[..sizeToWrite].GetReference(); // assert indices size is same as dst4
+            ref uint dstPtr = ref dst4.GetReference();
 
             while (sizeToWrite > 8)
             {
@@ -197,7 +274,7 @@ namespace VNC
                 indicesPtr = ref Unsafe.Add(ref indicesPtr, 1);
             }
         }
-
+        
         public void CopyTo(Span<byte> textureSpan, int textureWidth, in Position position)
         {
             int srcPitch = width * 4;
@@ -213,14 +290,14 @@ namespace VNC
             }
             else
             {
-                for (int y = height - 1; y > 0; y--)
+                for (int y = height - 1; y > 0; y--) // skip the last one
                 {
                     src[..srcPitch].BlockCopyTo(dst);
                     dst = dst[dstPitch..];
                     src = src[srcPitch..];
                 }
 
-                src[..srcPitch].BlockCopyTo(dst);
+                src[..srcPitch].BlockCopyTo(dst); // and process it here, otherwise spans will throw
             }
         }
 
@@ -229,7 +306,7 @@ namespace VNC
             uint color = Unsafe.As<Rgba, uint>(ref rgba);
             if (rgba.rgb.IsGray)
             {
-                // use memset if possible
+                // fill with byte uses memset
                 FillRectangle1(textureSpan, textureWidth, rectangle, (byte)(color & 0xff));
             }
             else
@@ -340,4 +417,6 @@ namespace VNC
         readonly byte r, g, b;
         public bool IsGray => r == g && g == b;
     }
+    
+    
 }

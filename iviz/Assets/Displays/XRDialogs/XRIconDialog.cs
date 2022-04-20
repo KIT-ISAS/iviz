@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Iviz.Displays.XR
 {
     public sealed class XRIconDialog : XRDialog, 
-        IDialogWithTitle, IDialogWithCaption, IDialogWithAlignment, IDialogWithIcon, IDialogHasButtonSetup
+        IDialogWithTitle, IDialogWithCaption, IDialogWithAlignment, IDialogWithIcon, IDialogWithButtonSetup
     {
         [SerializeField] TMP_Text? title;
         [SerializeField] TMP_Text? caption;

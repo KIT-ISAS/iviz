@@ -219,7 +219,7 @@ namespace Iviz.App
 
         protected void TrimPanelSize(int maxSizeInEntries)
         {
-            int entriesCount = Math.Min(itemEntries.Count, maxSizeInEntries);
+            int entriesCount = Mathf.Min(itemEntries.Count, maxSizeInEntries);
             float sizeDelta = 2 * yOffset + entriesCount * (buttonHeight + yOffset);
 
             var t = (RectTransform)transform;

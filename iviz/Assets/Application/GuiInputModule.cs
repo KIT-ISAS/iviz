@@ -31,7 +31,7 @@ namespace Iviz.App
         const float LookAtAnimationTime = 0.3f;
 
         /// Weights for keyboard movements. Forward is slower.
-        static readonly Vector3 MoveDirectionWeight = new(1.5f, 1.5f, 1);
+        static Vector3 MoveDirectionWeight => new(1.5f, 1.5f, 1);
 
         static GuiInputModule? instance;
         static uint tapSeq;
@@ -292,7 +292,7 @@ namespace Iviz.App
                 RenderSettings.ambientSkyColor = value.WithAlpha(0);
 
                 Color.RGBToHSV(value, out float h, out float s, out float v);
-                var equatorColor = Color.HSVToRGB(h, Math.Min(s, 0.3f), v * 0.5f);
+                var equatorColor = Color.HSVToRGB(h, Mathf.Min(s, 0.3f), v * 0.5f);
                 RenderSettings.ambientEquatorColor = equatorColor;
             }
         }
@@ -322,6 +322,8 @@ namespace Iviz.App
             {
                 QualitySettings.vSyncCount = 0;
             }
+
+            Settings.DragHandler = this;
 
             BackgroundColor = BackgroundColor;
 
@@ -444,18 +446,12 @@ namespace Iviz.App
 
         public void TryUnsetDraggedObject(IScreenDraggable draggable)
         {
-            // do not fetch Instance here, we may be in the middle of shutting down the scene
-            if (instance == null)
+            if (DraggedObject != draggable)
             {
                 return;
             }
 
-            if (instance.DraggedObject != draggable)
-            {
-                return;
-            }
-
-            instance.DraggedObject = null;
+            DraggedObject = null;
         }
 
         public void TrySetDraggedObject(IScreenDraggable draggable)
@@ -588,7 +584,7 @@ namespace Iviz.App
         void StartOrbiting()
         {
             var diff = orbitCenter - Transform.localPosition;
-            orbitRadius = Math.Min(5, diff.magnitude);
+            orbitRadius = Mathf.Min(5, diff.magnitude);
 
             var (diffX, diffY, diffZ) = diff;
             cameraYaw = Mathf.Atan2(diffX, diffZ) * Mathf.Rad2Deg;
@@ -636,7 +632,7 @@ namespace Iviz.App
 
             if (Keyboard.current[Key.W].isPressed)
             {
-                orbitRadius = Math.Max(0, orbitRadius - orbitRadiusAdvance);
+                orbitRadius = Mathf.Max(0, orbitRadius - orbitRadiusAdvance);
             }
             else if (Keyboard.current[Key.S].isPressed)
             {
@@ -755,7 +751,7 @@ namespace Iviz.App
             if (baseInput.x == 0)
             {
                 accel.x *= BrakeCoeff;
-                if (Math.Abs(accel.x) < minAccelToStop)
+                if (Mathf.Abs(accel.x) < minAccelToStop)
                 {
                     accel.x = 0;
                 }
@@ -764,7 +760,7 @@ namespace Iviz.App
             if (baseInput.y == 0)
             {
                 accel.y *= BrakeCoeff;
-                if (Math.Abs(accel.y) < minAccelToStop)
+                if (Mathf.Abs(accel.y) < minAccelToStop)
                 {
                     accel.y = 0;
                 }
@@ -773,7 +769,7 @@ namespace Iviz.App
             if (baseInput.z == 0)
             {
                 accel.z *= BrakeCoeff;
-                if (Math.Abs(accel.z) < minAccelToStop)
+                if (Mathf.Abs(accel.z) < minAccelToStop)
                 {
                     accel.z = 0;
                 }

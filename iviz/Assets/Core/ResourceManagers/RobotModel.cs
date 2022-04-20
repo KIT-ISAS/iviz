@@ -468,7 +468,7 @@ namespace Iviz.Displays
             }
             else if (sphere != null)
             {
-                Rent(Resource.Displays.Sphere, Math.Abs(sphere.Radius) * Vector3.one);
+                Rent(Resource.Displays.Sphere, Mathf.Abs(sphere.Radius) * Vector3.one);
             }
             else
             {

@@ -37,8 +37,6 @@ namespace Iviz.Displays
         const float MinLineLength = 1E-06f;
         const float MaxPositionMagnitude = 1e3f;
 
-        static readonly int LinesID = Shader.PropertyToID("_Lines");
-        static readonly int ScaleID = Shader.PropertyToID("_Scale");
 
         readonly NativeList<float4x2> lineBuffer = new();
 
@@ -114,17 +112,17 @@ namespace Iviz.Displays
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsElementValid(in float4x2 f)
         {
-            if (f.c0.x.IsInvalid() || Math.Abs(f.c0.x) > MaxPositionMagnitude) return false;
-            if (f.c1.x.IsInvalid() || Math.Abs(f.c1.x) > MaxPositionMagnitude) return false;
-            bool lengthIsValid = Math.Abs(f.c0.x - f.c1.x) > MinLineLength;
+            if (f.c0.x.IsInvalid() || Mathf.Abs(f.c0.x) > MaxPositionMagnitude) return false;
+            if (f.c1.x.IsInvalid() || Mathf.Abs(f.c1.x) > MaxPositionMagnitude) return false;
+            bool lengthIsValid = Mathf.Abs(f.c0.x - f.c1.x) > MinLineLength;
 
-            if (f.c0.y.IsInvalid() || Math.Abs(f.c0.y) > MaxPositionMagnitude) return false;
-            if (f.c1.y.IsInvalid() || Math.Abs(f.c1.y) > MaxPositionMagnitude) return false;
-            lengthIsValid = lengthIsValid || Math.Abs(f.c0.y - f.c1.y) > MinLineLength;
+            if (f.c0.y.IsInvalid() || Mathf.Abs(f.c0.y) > MaxPositionMagnitude) return false;
+            if (f.c1.y.IsInvalid() || Mathf.Abs(f.c1.y) > MaxPositionMagnitude) return false;
+            lengthIsValid = lengthIsValid || Mathf.Abs(f.c0.y - f.c1.y) > MinLineLength;
 
-            if (f.c0.z.IsInvalid() || Math.Abs(f.c0.z) > MaxPositionMagnitude) return false;
-            if (f.c1.z.IsInvalid() || Math.Abs(f.c1.z) > MaxPositionMagnitude) return false;
-            return lengthIsValid || Math.Abs(f.c0.z - f.c1.z) > MinLineLength;
+            if (f.c0.z.IsInvalid() || Mathf.Abs(f.c0.z) > MaxPositionMagnitude) return false;
+            if (f.c1.z.IsInvalid() || Mathf.Abs(f.c1.z) > MaxPositionMagnitude) return false;
+            return lengthIsValid || Mathf.Abs(f.c0.z - f.c1.z) > MinLineLength;
         }
 
         public void Reset()
@@ -243,7 +241,7 @@ namespace Iviz.Displays
 
             UpdateTransform();
 
-            Properties.SetFloat(ScaleID, ElementScale);
+            Properties.SetFloat(ShaderIds.ScaleId, ElementScale);
 
             var worldBounds = Collider.bounds;
 
@@ -269,7 +267,7 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
-                Properties.SetBuffer(LinesID, (ComputeBuffer?)null);
+                Properties.SetBuffer(ShaderIds.LinesId, (ComputeBuffer?)null);
             }
 
             Destroy(Mesh);
@@ -292,7 +290,7 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer?.Release();
                 lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Unsafe.SizeOf<float4x2>());
-                Properties.SetBuffer(LinesID, lineComputeBuffer);
+                Properties.SetBuffer(ShaderIds.LinesId, lineComputeBuffer);
             }
 
             lineComputeBuffer.SetData(lineBuffer.AsArray(), 0, 0, Size);
@@ -380,14 +378,14 @@ namespace Iviz.Displays
             {
                 lineComputeBuffer.Release();
                 lineComputeBuffer = null;
-                Properties.SetBuffer(LinesID, (ComputeBuffer?)null);
+                Properties.SetBuffer(ShaderIds.LinesId, (ComputeBuffer?)null);
             }
 
             if (lineBuffer.Capacity != 0)
             {
                 lineComputeBuffer = new ComputeBuffer(lineBuffer.Capacity, Unsafe.SizeOf<float4x2>());
                 lineComputeBuffer.SetData(lineBuffer.AsArray(), 0, 0, Size);
-                Properties.SetBuffer(LinesID, lineComputeBuffer);
+                Properties.SetBuffer(ShaderIds.LinesId, lineComputeBuffer);
             }
 
             IntensityBounds = IntensityBounds;
@@ -409,7 +407,7 @@ namespace Iviz.Displays
 
             lineComputeBuffer?.Release();
             lineComputeBuffer = null;
-            Properties.SetBuffer(LinesID, (ComputeBuffer?)null);
+            Properties.SetBuffer(ShaderIds.LinesId, (ComputeBuffer?)null);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Iviz.Displays
     [StructLayout(LayoutKind.Sequential)]
     public struct LineWithColor
     {
-        static readonly float WhiteBits = UnityUtils.AsFloat(Color.white);
+        static float WhiteBits => UnityUtils.AsFloat(Color.white);
 
         public float4x2 f;
 

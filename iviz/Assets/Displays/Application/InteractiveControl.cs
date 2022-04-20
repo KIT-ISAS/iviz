@@ -479,10 +479,10 @@ namespace Iviz.Displays
                     case InteractionModeType.MovePlaneYz:
                     case InteractionModeType.RotateAxisX:
                     case InteractionModeType.MovePlaneYzRotateAxisX:
-                        holderScale = Math.Max(newBounds.size.x, newBounds.size.y);
+                        holderScale = Mathf.Max(newBounds.size.x, newBounds.size.y);
                         break;
                     default:
-                        holderScale = Math.Max(newBounds.size.x, Math.Max(newBounds.size.y, newBounds.size.z));
+                        holderScale = Mathf.Max(newBounds.size.x, Math.Max(newBounds.size.y, newBounds.size.z));
                         break;
                 }
 
@@ -492,7 +492,7 @@ namespace Iviz.Displays
                 holderCollider.size = newBounds.size / (2 * holderScale);
 
 
-                float maxScale = Math.Max(newBounds.size.x, Math.Max(newBounds.size.y, newBounds.size.z));
+                float maxScale = Mathf.Max(newBounds.size.x, Mathf.Max(newBounds.size.y, newBounds.size.z));
                 float absoluteScaleY = transform.lossyScale.y;
                 menuObject.transform.localScale = 0.5f * Vector3.one;
                 menuObject.GetComponent<Billboard>().Offset =

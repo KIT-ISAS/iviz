@@ -126,7 +126,7 @@ namespace Iviz.Core
             mainCamera = null;
             mainCameraTransform = null;
             settingsManager = null;
-            inputModule = null;
+            dragHandler = null;
 
             supportsR16 = null;
             supportsRGB24 = null;
@@ -155,7 +155,7 @@ namespace Iviz.Core
         static Camera? mainCamera;
         static Transform? mainCameraTransform;
         static ISettingsManager? settingsManager;
-        static IDragHandler? inputModule;
+        static IDragHandler? dragHandler;
 
         static bool? supportsComputeBuffersHelper;
         static bool? supportsR16;
@@ -210,12 +210,13 @@ namespace Iviz.Core
             set => settingsManager = value;
         }
 
-        public static bool HasDragHandler => inputModule != null;
+        public static bool HasDragHandler => dragHandler != null;
 
-        public static IDragHandler DragHandler =>
-            (UnityEngine.Object?)inputModule != null
-                ? inputModule
-                : inputModule = (IDragHandler)SettingsManager;
+        public static IDragHandler DragHandler
+        {
+            get => dragHandler ?? throw new NullReferenceException("No drag handler!");
+            set => dragHandler = value;
+        }
 
         public static IScreenCaptureManager? ScreenCaptureManager { get; set; }
 

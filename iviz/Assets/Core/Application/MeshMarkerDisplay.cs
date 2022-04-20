@@ -16,8 +16,6 @@ namespace Iviz.Displays
     public class MeshMarkerDisplay : MarkerDisplay,
         ISupportsColor, ISupportsTint, ISupportsAROcclusion, ISupportsPbr, ISupportsShadows
     {
-        static readonly int MainTex = Shader.PropertyToID("_MainTex");
-
         [SerializeField] Texture2D? diffuseTexture;
         [SerializeField] Texture2D? bumpTexture;
         [SerializeField] Color emissiveColor = Color.black;
@@ -124,7 +122,7 @@ namespace Iviz.Displays
             var sharedMaterial = MainRenderer.sharedMaterial;
             if (diffuseTexture == null
                 && sharedMaterial != null
-                && sharedMaterial.HasProperty(MainTex)
+                && sharedMaterial.HasProperty(ShaderIds.MainTexId)
                 && sharedMaterial.mainTexture != null)
             {
                 diffuseTexture = (Texture2D)sharedMaterial.mainTexture;

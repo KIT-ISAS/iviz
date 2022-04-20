@@ -147,15 +147,18 @@ namespace Iviz.Ros
         void Callback(in T msg, IRosReceiver receiver)
         {
             var cache = listeners;
-            foreach (var listener in cache)
+            using (msg)
             {
-                try
+                foreach (var listener in cache)
                 {
-                    listener.EnqueueMessage(in msg, receiver);
-                }
-                catch (Exception e)
-                {
-                    RosLogger.Error($"{this}: Error in callback", e);
+                    try
+                    {
+                        listener.EnqueueMessage(in msg, receiver);
+                    }
+                    catch (Exception e)
+                    {
+                        RosLogger.Error($"{this}: Error in callback", e);
+                    }
                 }
             }
         }

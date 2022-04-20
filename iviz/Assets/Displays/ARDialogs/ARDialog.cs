@@ -14,6 +14,7 @@ using Material = UnityEngine.Material;
 
 namespace Iviz.App.ARDialogs
 {
+    [Obsolete]
     public sealed class ARDialog : MarkerDisplay, IRecyclable
     {
         const float PopupDuration = 0.1f;
@@ -306,7 +307,7 @@ namespace Iviz.App.ARDialogs
             {
                 menuPage = value;
                 int offset = menuPage * menuButtons.Length;
-                int numActives = Math.Min(menuEntries.Length - offset, menuButtons.Length);
+                int numActives = Mathf.Min(menuEntries.Length - offset, menuButtons.Length);
                 for (int i = 0; i < numActives; i++)
                 {
                     menuButtons[i].Caption = menuEntries[i + offset];

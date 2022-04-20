@@ -624,7 +624,6 @@ namespace Iviz.Controllers
                 }
             }
             */
-
         }
 
         static async ValueTask GetFramePoseAsync(GetFramePose srv)
@@ -1018,7 +1017,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (Math.Abs(srv.Request.Dialog.Scale) < 1e-8)
+            if (Mathf.Abs((float)srv.Request.Dialog.Scale) < 1e-8)
             {
                 srv.Response.Success = false;
                 srv.Response.Message = "Cannot launch dialog with scale 0";

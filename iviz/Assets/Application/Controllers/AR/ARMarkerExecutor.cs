@@ -232,10 +232,10 @@ namespace Iviz.Controllers
 
                 float averageSize = (sizes[0] + sizes[1] + sizes[2] + sizes[3]) / 4;
                 float distanceThreshold = averageSize * distanceMultiplier;
-                if (Math.Abs(sizes[0] - averageSize) > distanceThreshold ||
-                    Math.Abs(sizes[1] - averageSize) > distanceThreshold ||
-                    Math.Abs(sizes[2] - averageSize) > distanceThreshold ||
-                    Math.Abs(sizes[3] - averageSize) > distanceThreshold)
+                if (Mathf.Abs(sizes[0] - averageSize) > distanceThreshold ||
+                    Mathf.Abs(sizes[1] - averageSize) > distanceThreshold ||
+                    Mathf.Abs(sizes[2] - averageSize) > distanceThreshold ||
+                    Mathf.Abs(sizes[3] - averageSize) > distanceThreshold)
                 {
                     continue;
                 }

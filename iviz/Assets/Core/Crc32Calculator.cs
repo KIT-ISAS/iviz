@@ -13,7 +13,8 @@ namespace Iviz.Core
         const uint DefaultPolynomial = 0xedb88320u;
         public const uint DefaultSeed = 0xffffffffu;
 
-        static readonly uint[] Table = InitializeTable();
+        static uint[]? table; 
+        static uint[] Table => table ??= InitializeTable();
 
         static uint[] InitializeTable()
         {
@@ -38,7 +39,7 @@ namespace Iviz.Core
 
             return createTable;
         }
-
+        
         public static uint Compute<T>(in T value, uint startHash = DefaultSeed) where T : unmanaged
         {
             ref T valueRef = ref Unsafe.AsRef(value);
@@ -72,11 +73,12 @@ namespace Iviz.Core
         {
             // this function is called very rarely. see below the ReadOnlySpan<byte> overload for the most common path.
             uint hash = startHash;
+            uint[] mTable = Table;
             for (int i = 0; i < value.Length; i++)
             {
                 uint val = value[i]; // indexing is fast as long as there is only one chunk 
                 uint index = (val ^ hash) & 0xff;
-                hash = (hash >> 8) ^ Table[index];
+                hash = (hash >> 8) ^ mTable[index];
             }
 
             return hash;
@@ -85,11 +87,12 @@ namespace Iviz.Core
         static uint Compute(ReadOnlySpan<byte> array, uint startHash = DefaultSeed)
         {
             uint hash = startHash;
+            uint[] mTable = Table;
             foreach (byte b in array)
             {
                 uint val = b;
                 uint index = (val ^ hash) & 0xff;
-                hash = (hash >> 8) ^ Table[index];
+                hash = (hash >> 8) ^ mTable[index];
             }
 
             return hash;

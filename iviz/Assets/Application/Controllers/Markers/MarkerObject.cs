@@ -299,7 +299,7 @@ namespace Iviz.Controllers
         void CreatePoints(Marker msg)
         {
             var pointList = ValidateResource<PointListDisplay>();
-            pointList.ElementScale = Math.Abs((float)msg.Scale.X);
+            pointList.ElementScale = Mathf.Abs((float)msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || msg.Color.A.ApproximatelyZero()
@@ -323,7 +323,7 @@ namespace Iviz.Controllers
         void CreateLine(Marker msg, bool isStrip)
         {
             var lineResource = ValidateResource<LineDisplay>();
-            float elementScale = Math.Abs((float)msg.Scale.X);
+            float elementScale = Mathf.Abs((float)msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || elementScale.ApproximatelyZero()
@@ -421,7 +421,7 @@ namespace Iviz.Controllers
                 }
                 case 2:
                 {
-                    float sx = Math.Abs((float)msg.Scale.X);
+                    float sx = Mathf.Abs((float)msg.Scale.X);
                     if (sx.IsInvalid() || sx.ApproximatelyZero())
                     {
                         arrowMarker.Visible = false;
@@ -773,7 +773,7 @@ namespace Iviz.Controllers
 
                         break;
                     case 2:
-                        float sx = Math.Abs((float)msg.Scale.X);
+                        float sx = Mathf.Abs((float)msg.Scale.X);
                         AppendColorLog(msg.Color);
                         AppendScalarLog(msg.Scale.X);
 
@@ -861,7 +861,7 @@ namespace Iviz.Controllers
 
             void CreateLineLog()
             {
-                float elementScale = Math.Abs((float)msg.Scale.X);
+                float elementScale = Mathf.Abs((float)msg.Scale.X);
 
                 AppendColorLog(msg.Color);
                 AppendScalarLog(elementScale);

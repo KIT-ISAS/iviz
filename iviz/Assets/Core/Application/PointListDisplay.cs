@@ -23,10 +23,7 @@ namespace Iviz.Displays
     public sealed class PointListDisplay : MarkerDisplayWithColormap, ISupportsDynamicBounds
     {
         public const float MaxPositionMagnitude = 1e3f;
-
-        static readonly int PointsId = Shader.PropertyToID("_Points");
-        static readonly int ScaleId = Shader.PropertyToID("_Scale");
-
+        
         readonly NativeList<float4> pointBuffer = new();
 
         bool isDirty;
@@ -107,7 +104,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            Properties.SetFloat(ScaleId, ElementScale * transform.lossyScale.x);
+            Properties.SetFloat(ShaderIds.ScaleId, ElementScale * transform.lossyScale.x);
 
             if (Settings.SupportsComputeBuffers)
             {
@@ -223,7 +220,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, (ComputeBuffer?)null);
+                Properties.SetBuffer(ShaderIds.PointsId, (ComputeBuffer?)null);
             }
 
             pointBuffer.Dispose();
@@ -279,7 +276,7 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer?.Release();
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Unsafe.SizeOf<float4>());
-                Properties.SetBuffer(PointsId, pointComputeBuffer);
+                Properties.SetBuffer(ShaderIds.PointsId, pointComputeBuffer);
             }
 
             pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
@@ -323,14 +320,14 @@ namespace Iviz.Displays
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsId, (ComputeBuffer?)null);
+                Properties.SetBuffer(ShaderIds.PointsId, (ComputeBuffer?)null);
             }
 
             if (pointBuffer.Capacity != 0)
             {
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Unsafe.SizeOf<float4>());
                 pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
-                Properties.SetBuffer(PointsId, pointComputeBuffer);
+                Properties.SetBuffer(ShaderIds.PointsId, pointComputeBuffer);
             }
 
             IntensityBounds = IntensityBounds;
@@ -346,7 +343,7 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
-            Properties.SetBuffer(PointsId, (ComputeBuffer?)null);
+            Properties.SetBuffer(ShaderIds.PointsId, (ComputeBuffer?)null);
             BoundsChanged = null;
         }
 

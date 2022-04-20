@@ -275,7 +275,7 @@ namespace Iviz.Controllers
         bool IsSamePose(in Pose b)
         {
             return Vector3.Distance(WorldPosition, b.position) < 0.001f &&
-                   Math.Abs(WorldAngle - AngleFromPose(b)) < 0.1f;
+                   Mathf.Abs(WorldAngle - AngleFromPose(b)) < 0.1f;
         }
 
         void OnWorldPoseChanged(RootMover mover)

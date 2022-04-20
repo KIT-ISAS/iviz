@@ -12815,7 +12815,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1659761}
   m_Direction: 0
   m_Value: 1
-  m_Size: 0.9999997
+  m_Size: 0.9999996
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -15664,6 +15664,75 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1725367136}
   m_CullTransparentMesh: 0
+--- !u!1001 &1733978540
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 9024825353754890542, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9024825353754890542, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9024825353754890542, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.003
+      objectReference: {fileID: 0}
+    - target: {fileID: 9024825353754890542, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9024825353754890542, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9024825353754890542, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9024825353754890542, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9024825353754890542, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9024825353754890542, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9024825353754890542, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9024825353754890542, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9024825353754890543, guid: 596955ea6035442359b73ae4ea9a32f7,
+        type: 3}
+      propertyPath: m_Name
+      value: AR Dialog Menu
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 596955ea6035442359b73ae4ea9a32f7, type: 3}
 --- !u!1 &1735693748
 GameObject:
   m_ObjectHideFlags: 0

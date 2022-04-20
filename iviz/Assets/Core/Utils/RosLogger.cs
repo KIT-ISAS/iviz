@@ -111,6 +111,7 @@ namespace Iviz.Core
         {
             if (LogExternal == null)
             {
+                PublishLocal();
                 return;
             }
 
@@ -129,20 +130,24 @@ namespace Iviz.Core
             }
 
             LogExternal(new LogMessage(level, msg ?? NullMessage));
-            
-            switch (level)
+            PublishLocal();
+
+            void PublishLocal()
             {
-                case LogLevel.Debug:
-                case LogLevel.Info:
-                    UnityEngine.Debug.Log(msg);
-                    break;
-                case LogLevel.Warn:
-                case LogLevel.Error:
-                    UnityEngine.Debug.LogWarning(msg);
-                    break;
-                case LogLevel.Fatal:
-                    UnityEngine.Debug.LogError(msg);
-                    break;
+                switch (level)
+                {
+                    case LogLevel.Debug:
+                    case LogLevel.Info:
+                        UnityEngine.Debug.Log(msg);
+                        break;
+                    case LogLevel.Warn:
+                    case LogLevel.Error:
+                        UnityEngine.Debug.LogWarning(msg);
+                        break;
+                    case LogLevel.Fatal:
+                        UnityEngine.Debug.LogError(msg);
+                        break;
+                }
             }
         }
 
@@ -150,6 +155,7 @@ namespace Iviz.Core
         {
             if (LogExternal == null)
             {
+                PublishLocal();
                 return;
             }
             
@@ -196,27 +202,31 @@ namespace Iviz.Core
             }
 
             LogExternal(new LogMessage(level, message));
+            PublishLocal();
 
-            if (!Settings.IsStandalone)
+            void PublishLocal()
             {
-                if (level == LogLevel.Debug)
+                if (!Settings.IsStandalone)
                 {
-                    UnityEngine.Debug.Log((string?)msg + "\n" + e);
+                    if (level == LogLevel.Debug)
+                    {
+                        UnityEngine.Debug.Log((string?)msg + "\n" + e);
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.LogWarning((string?)msg + "\n" + e);
+                    }
                 }
                 else
                 {
-                    UnityEngine.Debug.LogWarning((string?)msg + "\n" + e);
-                }
-            }
-            else
-            {
-                if (level == LogLevel.Debug)
-                {
-                    UnityEngine.Debug.Log(message);
-                }
-                else
-                {
-                    UnityEngine.Debug.LogWarning(message);
+                    if (level == LogLevel.Debug)
+                    {
+                        UnityEngine.Debug.Log(message);
+                    }
+                    else
+                    {
+                        UnityEngine.Debug.LogWarning(message);
+                    }
                 }
             }
         }

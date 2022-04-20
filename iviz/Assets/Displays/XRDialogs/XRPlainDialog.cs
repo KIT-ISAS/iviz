@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Iviz.Displays.XR
 {
     public sealed class XRPlainDialog : XRDialog,
-        IDialogWithTitle, IDialogWithCaption, IDialogWithAlignment, IDialogHasButtonSetup, IDialogCanBeClicked
+        IDialogWithTitle, IDialogWithCaption, IDialogWithAlignment, IDialogWithButtonSetup, IDialogCanBeClicked
     {
         [SerializeField] TMP_Text? title;
         [SerializeField] TMP_Text? caption;

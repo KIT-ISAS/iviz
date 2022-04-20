@@ -68,14 +68,11 @@ namespace Iviz.Controllers
 
         public void UpdateWidget(Widget msg)
         {
-            
             node.AttachTo(msg.Header.FrameId);
 
             scale = msg.Scale == 0 ? 1f : (float)msg.Scale;
 
-            var widget = (IWidget)display;
-
-            if (widget is IWidgetWithColor withColor)
+            if (display is IWidgetWithColor withColor)
             {
                 if (msg.Color.A != 0)
                 {
@@ -88,27 +85,27 @@ namespace Iviz.Controllers
                 }
             }
 
-            if (msg.Scale != 0 && widget is IWidgetWithScale withScale)
+            if (msg.Scale != 0 && display is IWidgetWithScale withScale)
             {
                 withScale.Scale = scale;
             }
 
-            if (msg.SecondaryScale != 0 && widget is IWidgetWithSecondaryScale withSecondaryScale)
+            if (msg.SecondaryScale != 0 && display is IWidgetWithSecondaryScale withSecondaryScale)
             {
                 withSecondaryScale.SecondaryScale = (float)msg.SecondaryScale;
             }
 
-            if (!msg.Boundary.Size.ApproximatelyZero() && widget is IWidgetWithBoundary withBoundary)
+            if (!msg.Boundary.Size.ApproximatelyZero() && display is IWidgetWithBoundary withBoundary)
             {
                 withBoundary.Boundary = msg.Boundary;
             }
 
-            if (msg.SecondaryBoundaries.Length != 0 && widget is IWidgetWithBoundaries withBoundaries)
+            if (msg.SecondaryBoundaries.Length != 0 && display is IWidgetWithBoundaries withBoundaries)
             {
                 withBoundaries.Set(new BoundingBoxStamped(msg.Header, msg.Boundary), msg.SecondaryBoundaries);
             }
             
-            if (widget is IWidgetWithCaption withCaption)
+            if (display is IWidgetWithCaption withCaption)
             {
                 withCaption.Caption = msg.Caption;
             }
@@ -167,17 +164,22 @@ namespace Iviz.Controllers
                 withIcon.Icon = (XRIcon)msg.Icon;
             }
 
-            if (dialog is IDialogHasButtonSetup hasButtonSetup)
+            if (dialog is IDialogWithButtonSetup withButtonSetup)
             {
-                hasButtonSetup.ButtonSetup = (ButtonSetup)msg.Buttons;
+                withButtonSetup.ButtonSetup = (ButtonSetup)msg.Buttons;
             }
 
-            dialog.Expired += () => parent.OnDialogExpired(this);
+            if (dialog is IDialogWithEntries withEntries)
+            {
+                withEntries.Entries = msg.MenuEntries;
+            }
 
             if (dialog is IDialogCanBeClicked canBeClicked)
             {
                 canBeClicked.Clicked += index => parent.OnDialogButtonClicked(this, index);
             }
+            
+            dialog.Expired += () => parent.OnDialogExpired(this);
 
             dialog.Initialize();
 

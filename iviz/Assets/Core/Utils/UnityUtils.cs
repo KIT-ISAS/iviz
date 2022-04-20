@@ -33,7 +33,7 @@ namespace Iviz.Core
         /// </summary>
         public const int MeshUInt16Threshold = ushort.MaxValue;
 
-        public static readonly CultureInfo Culture = BuiltIns.Culture;
+        public static CultureInfo Culture => BuiltIns.Culture;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MagnitudeSq(this in Vector3 v)
@@ -48,26 +48,26 @@ namespace Iviz.Core
         public static float MaxAbsCoeff3(this in float4 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double MaxAbsCoeff(this in Point p) => MaxAbsCoeff(p.X, p.Y, p.Z);
+        public static float MaxAbsCoeff(this in Point p) => MaxAbsCoeff(p.X, p.Y, p.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double MaxAbsCoeff(this in Msgs.GeometryMsgs.Vector3 p) => MaxAbsCoeff(p.X, p.Y, p.Z);
+        public static float MaxAbsCoeff(this in Msgs.GeometryMsgs.Vector3 p) => MaxAbsCoeff(p.X, p.Y, p.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in Vector3 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float MaxAbsCoeff(float x, float y, float z) =>
-            Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+            Mathf.Max(Mathf.Max(Mathf.Abs(x), Mathf.Abs(y)), Mathf.Abs(z));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static double MaxAbsCoeff(double x, double y, double z) =>
-            Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+        static float MaxAbsCoeff(double x, double y, double z) =>
+            Mathf.Max(Mathf.Max(Mathf.Abs((float)x), Mathf.Abs((float)y)), Mathf.Abs((float)z));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in Vector4 p)
         {
-            return Math.Max(Math.Max(Math.Max(Math.Abs(p.x), Math.Abs(p.y)), Math.Abs(p.z)), Math.Abs(p.w));
+            return Mathf.Max(Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z)), Mathf.Abs(p.w));
         }
 
         public static Vector3 InvCoeff(this Vector3 p)
@@ -116,17 +116,17 @@ namespace Iviz.Core
         public static Vector3 Abs(this Vector3 p)
         {
             Vector3 q;
-            q.x = Math.Abs(p.x);
-            q.y = Math.Abs(p.y);
-            q.z = Math.Abs(p.z);
+            q.x = Mathf.Abs(p.x);
+            q.y = Mathf.Abs(p.y);
+            q.z = Mathf.Abs(p.z);
             return q;
         }
 
         public static Vector2 Abs(this Vector2 p)
         {
             Vector2 q;
-            q.x = Math.Abs(p.x);
-            q.y = Math.Abs(p.y);
+            q.x = Mathf.Abs(p.x);
+            q.y = Mathf.Abs(p.y);
             return q;
         }
 
@@ -273,7 +273,7 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T AssertNotNull<T>(this T? o, string name,
             [CallerFilePath] string? caller = null,
-            [CallerLineNumber] int lineNumber = 0) where T : UnityEngine.Object
+            [CallerLineNumber] int lineNumber = 0) where T : class
         {
 #if UNITY_EDITOR
             return o != null
@@ -306,7 +306,7 @@ namespace Iviz.Core
 
             return t;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T AssertHasComponent<T>(this Component? o, string name,
             [CallerFilePath] string? caller = null,
@@ -324,7 +324,7 @@ namespace Iviz.Core
             t ??= o.AssertHasComponent<T>(name, caller, lineNumber);
 
         public static Transform EnsureHasTransform(this Component o, ref Transform? t) => t ??= o.transform;
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color WithAlpha(this in Color c, float alpha)
         {
@@ -529,30 +529,23 @@ namespace Iviz.Core
         /// </summary>
         /// <param name="memory"></param>
         /// <typeparam name="T"></typeparam>
-        public static void TryReturn<T>(this Memory<T> memory) where T : unmanaged
+        public static void TryReturn<T>(this SharedRent<T> memory) where T : unmanaged
         {
-            if (memory.Length == 0 || !MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
-            {
-                return;
-            }
-
-            try
-            {
-                ArrayPool<T>.Shared.Return(segment.Array);
-            }
-            catch (ArgumentException)
-            {
-            }
+            memory.Dispose();
         }
 
         /// <summary>
-        /// Empty function. Used for debugging purposes as an overload for <see cref="TryReturn{T}(Memory{T})"/>,
+        /// Empty function. Used for debugging purposes as an overload for <see cref="TryReturn{T}(SharedRent{T})"/>,
         /// in case an iviz message is temporarily set to contain an array instead of a Memory.
         /// </summary>
-        public static void TryReturn(this Array _)
+        public static void TryReturn(this Array? _)
         {
         }
 
+        public static Array? Share(this Array _)
+        {
+            return null;
+        }
 
         public static float RegularizeAngle(float angleInDeg) =>
             angleInDeg switch
@@ -600,7 +593,7 @@ namespace Iviz.Core
         /// Float representation from the bits of a Color32.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float AsFloat(Color32 f) => Unsafe.As<Color32, float>(ref f);
+        public static float AsFloat(Color32 f) =>  Unsafe.As<Color32, float>(ref f);
 
         public static Vector3 Forward(this in Quaternion rotation)
         {
@@ -628,10 +621,10 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ApproximatelyZero(this float f) => Math.Abs(f) < 8 * float.Epsilon;
+        public static bool ApproximatelyZero(this float f) => Mathf.Abs(f) < 8 * float.Epsilon;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ApproximatelyZero(this double f) => Math.Abs(f) < 8 * double.Epsilon;
+        public static bool ApproximatelyZero(this double f) => Mathf.Abs((float)f) < 8 * double.Epsilon;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyZero(this in Vector3 f) => f.MaxAbsCoeff() < 8 * float.Epsilon;
@@ -799,16 +792,5 @@ namespace Iviz.Core
 
         public WithIndexEnumerable(IEnumerable<T> a) => this.a = a;
         public Enumerator GetEnumerator() => new(a.GetEnumerator());
-    }
-
-    public static class Quaternions
-    {
-        public static readonly Quaternion Rotate90AroundX = new(0.707106769f, 0, 0, 0.707106769f);
-        public static readonly Quaternion Rotate180AroundX = new(1, 0, 0, 0);
-        public static readonly Quaternion Rotate270AroundX = new(-0.707106769f, 0, 0, 0.707106769f);
-        public static readonly Quaternion Rotate90AroundY = new(0, 0.707106769f, 0, 0.707106769f);
-        public static readonly Quaternion Rotate180AroundY = new(0, 1, 0, 0);
-        public static readonly Quaternion Rotate270AroundY = new(0, 0.707106769f, 0, -0.707106769f);
-        public static readonly Quaternion Rotate180AroundZ = new(0, 0, 1, 0);
     }
 }

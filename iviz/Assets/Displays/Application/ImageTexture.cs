@@ -639,8 +639,8 @@ namespace Iviz.Displays
             }
 
             format = Texture.format;
-            int u = Math.Clamp((int)(rawUV.x * Texture.width), 0, Texture.width - 1);
-            int v = Math.Clamp((int)(rawUV.y * Texture.height), 0, Texture.height - 1);
+            int u = Mathf.Clamp((int)(rawUV.x * Texture.width), 0, Texture.width - 1);
+            int v = Mathf.Clamp((int)(rawUV.y * Texture.height), 0, Texture.height - 1);
             bool rbFlipped = Material.IsKeywordEnabled("FLIP_RB");
             uv = new Vector2Int(u, v);
 

@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using Iviz.Msgs.IvizMsgs;
 using UnityEngine;
 
@@ -38,7 +39,7 @@ namespace Iviz.Displays.XR
         XRIcon Icon { set; }
     }    
     
-    public interface IDialogHasButtonSetup
+    public interface IDialogWithButtonSetup
     {
         ButtonSetup ButtonSetup { set; }
     }  
@@ -47,6 +48,11 @@ namespace Iviz.Displays.XR
     {
         event Action<int>? Clicked;
     }  
+    public interface IDialogWithEntries
+    {
+        IEnumerable<string> Entries { set; }
+    }
+    
     
     [Flags]
     public enum CaptionAlignmentType

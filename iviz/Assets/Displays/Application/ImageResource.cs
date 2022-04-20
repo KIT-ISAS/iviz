@@ -133,7 +133,7 @@ namespace Iviz.Displays
                 && !billboardEnabled
                 && Texture is { Width: not 0 })
             {
-                float perspectiveScale = Math.Abs(offset.y) / Texture.Width;
+                float perspectiveScale = Mathf.Abs(offset.y) / Texture.Width;
                 billboardTransform.localScale = baseScale * (mIntrinsic.Fx * perspectiveScale);
                 var intrinsicOffset = new Vector3(
                     mIntrinsic.Cx - Texture.Width / 2f,

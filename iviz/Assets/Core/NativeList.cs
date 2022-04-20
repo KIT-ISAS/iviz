@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
 
 namespace Iviz.Core
 {
@@ -40,7 +41,7 @@ namespace Iviz.Core
                 throw new ArgumentOutOfRangeException(nameof(value), "Capacity exceeds maximal size");
             }
 
-            int newCapacity = Math.Max(Capacity, 16);
+            int newCapacity = Mathf.Max(Capacity, 16);
             while (newCapacity < value)
             {
                 newCapacity *= 2;

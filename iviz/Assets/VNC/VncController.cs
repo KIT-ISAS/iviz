@@ -10,6 +10,7 @@ using System.Runtime.Serialization;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.XR;
@@ -78,7 +79,7 @@ namespace VNC
             Iviz.Resources.Resource.ClearResources();
             ResourcePool.ClearResources();
 #endif
-
+            
             tfModule = new TfModule(id => new TfFrameDisplay(id));
             SetBackgroundColor(Color.black);
 
@@ -134,7 +135,7 @@ namespace VNC
                 await LaunchPlainDialog(
                     "Error",
                     "<b>Authentication failed!</b>\n" +
-                    "Make sure that the server supports the \"VNC\" authentication type.");
+                    "Make sure that the server supports the \"VncAuth\" authentication type.");
             }
             catch (HandshakeFailedAuthenticationException e) when (e.Result == SecurityResult.FailedTooManyAttempts)
             {
@@ -152,7 +153,7 @@ namespace VNC
             }
             catch (SocketException e)
             {
-                //Debug.Log(e.SocketErrorCode);
+                Debug.Log(e);
                 string message = e.SocketErrorCode switch
                 {
                     SocketError.ConnectionRefused =>

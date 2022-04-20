@@ -18,7 +18,8 @@ namespace Iviz.Controllers.TF
     /// </summary>
     public abstract class TfFrame : FrameNode
     {
-        static readonly SortedDictionary<string, TfFrame> Empty = new();
+        static SortedDictionary<string, TfFrame>? empty;
+        static SortedDictionary<string, TfFrame> Empty => empty ??= new SortedDictionary<string, TfFrame>();
 
         SortedDictionary<string, TfFrame>? children;
         List<FrameNode>? listeners;

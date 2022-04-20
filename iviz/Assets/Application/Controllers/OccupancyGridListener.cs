@@ -226,7 +226,6 @@ namespace Iviz.Controllers
         {
             if (IsProcessing)
             {
-                msg.Data.TryReturn();
                 return;
             }
 
@@ -234,14 +233,12 @@ namespace Iviz.Controllers
             {
                 RosLogger.Info($"{this}: Size {msg.Info.Width.ToString()}x{msg.Info.Height.ToString()} " +
                                $"does not match data length {msg.Data.Length.ToString()}");
-                msg.Data.TryReturn();
                 return;
             }
 
             if (float.IsNaN(msg.Info.Resolution))
             {
                 RosLogger.Info($"{this}: NaN in header!");
-                msg.Data.TryReturn();
                 return;
             }
 
@@ -251,7 +248,6 @@ namespace Iviz.Controllers
             if (msg.Info.Origin.IsInvalid())
             {
                 RosLogger.Info($"{this}: NaN in origin!");
-                msg.Data.TryReturn();
                 return;
             }
 
@@ -297,7 +293,6 @@ namespace Iviz.Controllers
             async void AwaitAndReset()
             {
                 await tasks.WhenAll().AwaitNoThrow(this);
-                msg.Data.TryReturn();
                 IsProcessing = false;
             }
         }
@@ -399,9 +394,9 @@ namespace Iviz.Controllers
                 foreach (int u in ..tileSizeX)
                 {
                     int xMin = u * MaxTileSize;
-                    int xMax = Math.Min(xMin + MaxTileSize, numCellsX);
+                    int xMax = Mathf.Min(xMin + MaxTileSize, numCellsX);
                     int yMin = v * MaxTileSize;
-                    int yMax = Math.Min(yMin + MaxTileSize, numCellsY);
+                    int yMax = Mathf.Min(yMin + MaxTileSize, numCellsY);
 
                     var rect = new RectInt
                     {

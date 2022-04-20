@@ -6,9 +6,9 @@ namespace Iviz.App
 {
     public abstract class DialogData
     {
-        static readonly Vector2 DefaultAnchoredPosition = new Vector2(0, -40);
-        static readonly Vector2 DefaultSize = new Vector2(0, -90);
-        public static readonly Vector2 MinSize = new Vector2(-120, -450);
+        static Vector2 DefaultAnchoredPosition => new(0, -40);
+        static Vector2 DefaultSize => new(0, -90);
+        public static Vector2 MinSize => new(-120, -450);
 
         protected static ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
         protected static DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
