@@ -42,8 +42,8 @@ namespace Iviz.Msgs.GridMapMsgs
             {
                 Data[i] = new StdMsgs.Float32MultiArray(ref b);
             }
-            OuterStartIndex = b.Deserialize<ushort>();
-            InnerStartIndex = b.Deserialize<ushort>();
+            b.Deserialize(out OuterStartIndex);
+            b.Deserialize(out InnerStartIndex);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GridMap(ref b);

@@ -23,7 +23,7 @@ namespace Iviz.Msgs.StdMsgs
         /// Constructor with buffer.
         public Int64(ref ReadBuffer b)
         {
-            Data = b.Deserialize<long>();
+            b.Deserialize(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Int64(ref b);

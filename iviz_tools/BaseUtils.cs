@@ -13,7 +13,7 @@ namespace Iviz.Tools;
 
 public static class BaseUtils
 {
-    public static readonly Random Random = new();
+    public static Random Random => Defaults.Random;
 
     public const string GenericExceptionFormat = "{0}: {1}";
 
@@ -198,11 +198,6 @@ public static class BaseUtils
         ownMd5Hash?.Dispose();
         return sBuilder.ToString();
     }
-
-    public static ref T GetReference<T>(this Span<T> span) where T : unmanaged => ref MemoryMarshal.GetReference(span);
-
-    public static ref readonly T GetReference<T>(this ReadOnlySpan<T> span) where T : unmanaged =>
-        ref MemoryMarshal.GetReference(span);
 
     public static T Read<T>(this Span<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
 

@@ -30,14 +30,14 @@ namespace Iviz.Msgs.IvizMsgs
         public Light(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
-            Type = b.Deserialize<byte>();
-            CastShadows = b.Deserialize<bool>();
+            b.Deserialize(out Type);
+            b.Deserialize(out CastShadows);
             b.Deserialize(out Diffuse);
-            Range = b.Deserialize<float>();
+            b.Deserialize(out Range);
             b.Deserialize(out Position);
             b.Deserialize(out Direction);
-            InnerAngle = b.Deserialize<float>();
-            OuterAngle = b.Deserialize<float>();
+            b.Deserialize(out InnerAngle);
+            b.Deserialize(out OuterAngle);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Light(ref b);

@@ -58,7 +58,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         public GoalStatus(ref ReadBuffer b)
         {
             GoalId = new GoalID(ref b);
-            Status = b.Deserialize<byte>();
+            b.Deserialize(out Status);
             Text = b.DeserializeString();
         }
         

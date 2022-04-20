@@ -25,8 +25,8 @@ namespace Iviz.Msgs.Actionlib
         /// Constructor with buffer.
         public TwoIntsGoal(ref ReadBuffer b)
         {
-            A = b.Deserialize<long>();
-            B = b.Deserialize<long>();
+            b.Deserialize(out A);
+            b.Deserialize(out B);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TwoIntsGoal(ref b);

@@ -75,7 +75,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public ExecuteKnownTrajectoryRequest(ref ReadBuffer b)
         {
             Trajectory = new RobotTrajectory(ref b);
-            WaitForExecution = b.Deserialize<bool>();
+            b.Deserialize(out WaitForExecution);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ExecuteKnownTrajectoryRequest(ref b);

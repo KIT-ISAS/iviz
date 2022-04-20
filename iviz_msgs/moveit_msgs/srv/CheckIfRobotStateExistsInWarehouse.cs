@@ -115,7 +115,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public CheckIfRobotStateExistsInWarehouseResponse(ref ReadBuffer b)
         {
-            Exists = b.Deserialize<bool>();
+            b.Deserialize(out Exists);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CheckIfRobotStateExistsInWarehouseResponse(ref b);

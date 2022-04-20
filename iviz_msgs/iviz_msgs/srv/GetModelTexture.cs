@@ -115,7 +115,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetModelTextureResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Image = new SensorMsgs.CompressedImage(ref b);
             Message = b.DeserializeString();
         }

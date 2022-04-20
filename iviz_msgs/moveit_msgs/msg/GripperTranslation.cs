@@ -35,8 +35,8 @@ namespace Iviz.Msgs.MoveitMsgs
         public GripperTranslation(ref ReadBuffer b)
         {
             Direction = new GeometryMsgs.Vector3Stamped(ref b);
-            DesiredDistance = b.Deserialize<float>();
-            MinDistance = b.Deserialize<float>();
+            b.Deserialize(out DesiredDistance);
+            b.Deserialize(out MinDistance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GripperTranslation(ref b);

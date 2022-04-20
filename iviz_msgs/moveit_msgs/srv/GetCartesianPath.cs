@@ -96,9 +96,9 @@ namespace Iviz.Msgs.MoveitMsgs
             GroupName = b.DeserializeString();
             LinkName = b.DeserializeString();
             Waypoints = b.DeserializeStructArray<GeometryMsgs.Pose>();
-            MaxStep = b.Deserialize<double>();
-            JumpThreshold = b.Deserialize<double>();
-            AvoidCollisions = b.Deserialize<bool>();
+            b.Deserialize(out MaxStep);
+            b.Deserialize(out JumpThreshold);
+            b.Deserialize(out AvoidCollisions);
             PathConstraints = new Constraints(ref b);
         }
         
@@ -182,7 +182,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             StartState = new RobotState(ref b);
             Solution = new RobotTrajectory(ref b);
-            Fraction = b.Deserialize<double>();
+            b.Deserialize(out Fraction);
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         

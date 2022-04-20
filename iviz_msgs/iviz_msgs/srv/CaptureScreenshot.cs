@@ -67,7 +67,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public CaptureScreenshotRequest(ref ReadBuffer b)
         {
-            Compress = b.Deserialize<bool>();
+            b.Deserialize(out Compress);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotRequest(ref b);
@@ -115,12 +115,12 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public CaptureScreenshotResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Message = b.DeserializeString();
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Width = b.Deserialize<int>();
-            Height = b.Deserialize<int>();
-            Bpp = b.Deserialize<int>();
+            b.Deserialize(out Width);
+            b.Deserialize(out Height);
+            b.Deserialize(out Bpp);
             Intrinsics = b.DeserializeStructArray<double>(9);
             b.Deserialize(out Pose);
             Data = b.DeserializeStructArray<byte>();

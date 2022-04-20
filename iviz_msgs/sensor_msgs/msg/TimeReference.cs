@@ -34,7 +34,7 @@ namespace Iviz.Msgs.SensorMsgs
         public TimeReference(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            TimeRef = b.Deserialize<time>();
+            b.Deserialize(out TimeRef);
             Source = b.DeserializeString();
         }
         

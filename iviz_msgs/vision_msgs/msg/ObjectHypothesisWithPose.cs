@@ -44,7 +44,7 @@ namespace Iviz.Msgs.VisionMsgs
         public ObjectHypothesisWithPose(ref ReadBuffer b)
         {
             Id = b.DeserializeString();
-            Score = b.Deserialize<double>();
+            b.Deserialize(out Score);
             Pose = new GeometryMsgs.PoseWithCovariance(ref b);
         }
         

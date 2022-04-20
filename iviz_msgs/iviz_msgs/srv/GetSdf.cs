@@ -120,7 +120,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetSdfResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Scene = new Scene(ref b);
             Message = b.DeserializeString();
         }

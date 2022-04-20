@@ -83,19 +83,19 @@ namespace Iviz.Msgs.IvizMsgs
         public Dialog(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Action = b.Deserialize<byte>();
+            b.Deserialize(out Action);
             Id = b.DeserializeString();
-            Lifetime = b.Deserialize<duration>();
-            Scale = b.Deserialize<double>();
-            Type = b.Deserialize<byte>();
-            Buttons = b.Deserialize<byte>();
-            Icon = b.Deserialize<byte>();
+            b.Deserialize(out Lifetime);
+            b.Deserialize(out Scale);
+            b.Deserialize(out Type);
+            b.Deserialize(out Buttons);
+            b.Deserialize(out Icon);
             b.Deserialize(out BackgroundColor);
             Title = b.DeserializeString();
             Caption = b.DeserializeString();
-            CaptionAlignment = b.Deserialize<ushort>();
+            b.Deserialize(out CaptionAlignment);
             MenuEntries = b.DeserializeStringArray();
-            BindingType = b.Deserialize<byte>();
+            b.Deserialize(out BindingType);
             b.Deserialize(out TfOffset);
             b.Deserialize(out DialogDisplacement);
             b.Deserialize(out TfDisplacement);

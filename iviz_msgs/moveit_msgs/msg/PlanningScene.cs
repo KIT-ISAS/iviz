@@ -71,7 +71,7 @@ namespace Iviz.Msgs.MoveitMsgs
                 ObjectColors[i] = new ObjectColor(ref b);
             }
             World = new PlanningSceneWorld(ref b);
-            IsDiff = b.Deserialize<bool>();
+            b.Deserialize(out IsDiff);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PlanningScene(ref b);

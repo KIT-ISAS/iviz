@@ -35,9 +35,9 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor with buffer.
         public JoyFeedback(ref ReadBuffer b)
         {
-            Type = b.Deserialize<byte>();
-            Id = b.Deserialize<byte>();
-            Intensity = b.Deserialize<float>();
+            b.Deserialize(out Type);
+            b.Deserialize(out Id);
+            b.Deserialize(out Intensity);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JoyFeedback(ref b);

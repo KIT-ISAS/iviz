@@ -65,12 +65,12 @@ namespace Iviz.Msgs.RosgraphMsgs
         public static void Deserialize(ref ReadBuffer b, out Log h)
         {
             StdMsgs.Header.Deserialize(ref b, out h.Header);
-            h.Level = b.Deserialize<byte>();
+            b.Deserialize(out h.Level);
             h.Name = b.DeserializeString();
             h.Msg = b.DeserializeString();
             h.File = b.SkipString();
             h.Function = b.SkipString();
-            h.Line = b.Deserialize<uint>();
+            b.Deserialize(out h.Line);
             h.Topics = b.SkipStringArray();
         }
         

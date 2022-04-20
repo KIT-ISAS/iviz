@@ -45,7 +45,7 @@ namespace Iviz.Msgs.MoveitMsgs
             {
                 AttachedCollisionObjects[i] = new AttachedCollisionObject(ref b);
             }
-            IsDiff = b.Deserialize<bool>();
+            b.Deserialize(out IsDiff);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RobotState(ref b);

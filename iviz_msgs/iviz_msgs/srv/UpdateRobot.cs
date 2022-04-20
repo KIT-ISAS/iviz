@@ -76,7 +76,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public UpdateRobotRequest(ref ReadBuffer b)
         {
-            Operation = b.Deserialize<int>();
+            b.Deserialize(out Operation);
             Id = b.DeserializeString();
             Configuration = new IvizMsgs.RobotConfiguration(ref b);
             ValidFields = b.DeserializeStringArray();
@@ -142,7 +142,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public UpdateRobotResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Message = b.DeserializeString();
         }
         

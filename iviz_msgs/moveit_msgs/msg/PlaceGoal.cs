@@ -61,13 +61,13 @@ namespace Iviz.Msgs.MoveitMsgs
             {
                 PlaceLocations[i] = new PlaceLocation(ref b);
             }
-            PlaceEef = b.Deserialize<bool>();
+            b.Deserialize(out PlaceEef);
             SupportSurfaceName = b.DeserializeString();
-            AllowGripperSupportCollision = b.Deserialize<bool>();
+            b.Deserialize(out AllowGripperSupportCollision);
             PathConstraints = new Constraints(ref b);
             PlannerId = b.DeserializeString();
             AllowedTouchObjects = b.DeserializeStringArray();
-            AllowedPlanningTime = b.Deserialize<double>();
+            b.Deserialize(out AllowedPlanningTime);
             PlanningOptions = new PlanningOptions(ref b);
         }
         

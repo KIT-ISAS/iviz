@@ -25,8 +25,8 @@ namespace Iviz.Msgs.Actionlib
         /// Constructor with buffer.
         public TestRequestResult(ref ReadBuffer b)
         {
-            TheResult = b.Deserialize<int>();
-            IsSimpleServer = b.Deserialize<bool>();
+            b.Deserialize(out TheResult);
+            b.Deserialize(out IsSimpleServer);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestRequestResult(ref b);

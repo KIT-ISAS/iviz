@@ -131,7 +131,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public SaveRobotStateToWarehouseResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SaveRobotStateToWarehouseResponse(ref b);

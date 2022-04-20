@@ -66,7 +66,7 @@ namespace Iviz.Msgs.VisionMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             Method = b.DeserializeString();
             DatabaseLocation = b.DeserializeString();
-            DatabaseVersion = b.Deserialize<int>();
+            b.Deserialize(out DatabaseVersion);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new VisionInfo(ref b);

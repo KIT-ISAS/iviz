@@ -45,8 +45,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         public InteractiveMarkerUpdate(ref ReadBuffer b)
         {
             ServerId = b.DeserializeString();
-            SeqNum = b.Deserialize<ulong>();
-            Type = b.Deserialize<byte>();
+            b.Deserialize(out SeqNum);
+            b.Deserialize(out Type);
             Markers = b.DeserializeArray<InteractiveMarker>();
             for (int i = 0; i < Markers.Length; i++)
             {

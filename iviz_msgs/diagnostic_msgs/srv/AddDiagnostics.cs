@@ -132,7 +132,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor with buffer.
         public AddDiagnosticsResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Message = b.DeserializeString();
         }
         

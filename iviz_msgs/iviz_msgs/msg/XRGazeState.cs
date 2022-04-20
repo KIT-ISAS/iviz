@@ -27,7 +27,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public XRGazeState(ref ReadBuffer b)
         {
-            IsValid = b.Deserialize<bool>();
+            b.Deserialize(out IsValid);
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Transform);
         }

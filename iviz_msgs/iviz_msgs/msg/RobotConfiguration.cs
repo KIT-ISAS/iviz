@@ -36,13 +36,13 @@ namespace Iviz.Msgs.IvizMsgs
             SavedRobotName = b.DeserializeString();
             FramePrefix = b.DeserializeString();
             FrameSuffix = b.DeserializeString();
-            AttachedToTf = b.Deserialize<bool>();
-            RenderAsOcclusionOnly = b.Deserialize<bool>();
+            b.Deserialize(out AttachedToTf);
+            b.Deserialize(out RenderAsOcclusionOnly);
             b.Deserialize(out Tint);
-            Metallic = b.Deserialize<float>();
-            Smoothness = b.Deserialize<float>();
+            b.Deserialize(out Metallic);
+            b.Deserialize(out Smoothness);
             Id = b.DeserializeString();
-            Visible = b.Deserialize<bool>();
+            b.Deserialize(out Visible);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RobotConfiguration(ref b);

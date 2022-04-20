@@ -47,9 +47,9 @@ namespace Iviz.Msgs
 
     public static class BuiltIns
     {
-        public static readonly UTF8Encoding UTF8 = Defaults.UTF8;
+        public static UTF8Encoding UTF8 => Defaults.UTF8;
 
-        public static readonly CultureInfo Culture = Defaults.Culture;
+        public static CultureInfo Culture => Defaults.Culture;
 
         public const string EmptyMd5Sum = "d41d8cd98f00b204e9800998ecf8427e";
 
@@ -331,3 +331,34 @@ namespace Iviz.Msgs
         }
     }
 }
+
+#if NETSTANDARD2_1
+namespace System.Runtime.CompilerServices
+{
+    /// <summary>
+    /// Used to indicate to the compiler that the <c>.locals init</c>
+    /// flag should not be set in method headers.
+    /// </summary>
+    /// <remarks>
+    /// This attribute is unsafe because it may reveal uninitialized memory to
+    /// the application in certain instances (e.g., reading from uninitialized
+    /// stackalloc'd memory). If applied to a method directly, the attribute
+    /// applies to that method and all nested functions (lambdas, local
+    /// functions) below it. If applied to a type or module, it applies to all
+    /// methods nested inside. This attribute is intentionally not permitted on
+    /// assemblies. Use at the module level instead to apply to multiple type
+    /// declarations.
+    /// </remarks>
+    [AttributeUsage(AttributeTargets.Module
+                    | AttributeTargets.Class
+                    | AttributeTargets.Struct
+                    | AttributeTargets.Interface
+                    | AttributeTargets.Constructor
+                    | AttributeTargets.Method
+                    | AttributeTargets.Property
+                    | AttributeTargets.Event, Inherited = false)]
+    public sealed class SkipLocalsInitAttribute : Attribute
+    {
+    }
+}
+#endif

@@ -109,7 +109,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public LoadMapResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LoadMapResponse(ref b);

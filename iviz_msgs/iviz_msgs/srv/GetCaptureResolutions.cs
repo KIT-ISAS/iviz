@@ -109,7 +109,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetCaptureResolutionsResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Message = b.DeserializeString();
             Resolutions = b.DeserializeArray<Vector2i>();
             for (int i = 0; i < Resolutions.Length; i++)

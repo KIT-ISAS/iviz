@@ -56,11 +56,11 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Status = new NavSatStatus(ref b);
-            Latitude = b.Deserialize<double>();
-            Longitude = b.Deserialize<double>();
-            Altitude = b.Deserialize<double>();
+            b.Deserialize(out Latitude);
+            b.Deserialize(out Longitude);
+            b.Deserialize(out Altitude);
             PositionCovariance = b.DeserializeStructArray<double>(9);
-            PositionCovarianceType = b.Deserialize<byte>();
+            b.Deserialize(out PositionCovarianceType);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new NavSatFix(ref b);

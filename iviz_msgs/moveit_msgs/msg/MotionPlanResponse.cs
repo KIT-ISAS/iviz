@@ -34,7 +34,7 @@ namespace Iviz.Msgs.MoveitMsgs
             TrajectoryStart = new RobotState(ref b);
             GroupName = b.DeserializeString();
             Trajectory = new RobotTrajectory(ref b);
-            PlanningTime = b.Deserialize<double>();
+            b.Deserialize(out PlanningTime);
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         

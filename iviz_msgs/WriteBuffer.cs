@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Iviz.Tools;
 
 namespace Iviz.Msgs
 {
@@ -155,14 +156,14 @@ namespace Iviz.Msgs
             Advance(size);
         }
         
-        public void SerializeStructArray<T>(Memory<T> val) where T : unmanaged
+        public void SerializeStructArray<T>(SharedRent<T> val) where T : unmanaged
         {
             int sizeOfT = Unsafe.SizeOf<T>();
             int size = val.Length * sizeOfT;
             ThrowIfOutOfRange(4 + size);
             
             WriteInt(val.Length);
-            MemoryMarshal.AsBytes(val.Span).CopyTo(ptr);
+            MemoryMarshal.AsBytes(val.AsSpan()).CopyTo(ptr);
             
             Advance(size);
         }

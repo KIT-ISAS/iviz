@@ -46,14 +46,14 @@ namespace Iviz.Msgs.IvizMsgs
         public Widget(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Action = b.Deserialize<byte>();
+            b.Deserialize(out Action);
             Id = b.DeserializeString();
-            Type = b.Deserialize<byte>();
+            b.Deserialize(out Type);
             b.Deserialize(out Pose);
             b.Deserialize(out Color);
             b.Deserialize(out SecondaryColor);
-            Scale = b.Deserialize<double>();
-            SecondaryScale = b.Deserialize<double>();
+            b.Deserialize(out Scale);
+            b.Deserialize(out SecondaryScale);
             Caption = b.DeserializeString();
             Boundary = new BoundingBox(ref b);
             SecondaryBoundaries = b.DeserializeArray<BoundingBoxStamped>();

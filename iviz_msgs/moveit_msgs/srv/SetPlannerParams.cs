@@ -83,7 +83,7 @@ namespace Iviz.Msgs.MoveitMsgs
             PlannerConfig = b.DeserializeString();
             Group = b.DeserializeString();
             Params = new PlannerParams(ref b);
-            Replace = b.Deserialize<bool>();
+            b.Deserialize(out Replace);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetPlannerParamsRequest(ref b);

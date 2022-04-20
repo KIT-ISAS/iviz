@@ -30,10 +30,10 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Parameter(ref ReadBuffer b)
         {
-            Type = b.Deserialize<byte>();
-            @bool = b.Deserialize<bool>();
-            Int32 = b.Deserialize<int>();
-            Float64 = b.Deserialize<double>();
+            b.Deserialize(out Type);
+            b.Deserialize(out @bool);
+            b.Deserialize(out Int32);
+            b.Deserialize(out Float64);
             @string = b.DeserializeString();
             Bytes = b.DeserializeStructArray<byte>();
             Int32s = b.DeserializeStructArray<int>();

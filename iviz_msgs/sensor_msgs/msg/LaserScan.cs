@@ -53,13 +53,13 @@ namespace Iviz.Msgs.SensorMsgs
         public LaserScan(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            AngleMin = b.Deserialize<float>();
-            AngleMax = b.Deserialize<float>();
-            AngleIncrement = b.Deserialize<float>();
-            TimeIncrement = b.Deserialize<float>();
-            ScanTime = b.Deserialize<float>();
-            RangeMin = b.Deserialize<float>();
-            RangeMax = b.Deserialize<float>();
+            b.Deserialize(out AngleMin);
+            b.Deserialize(out AngleMax);
+            b.Deserialize(out AngleIncrement);
+            b.Deserialize(out TimeIncrement);
+            b.Deserialize(out ScanTime);
+            b.Deserialize(out RangeMin);
+            b.Deserialize(out RangeMax);
             Ranges = b.DeserializeStructArray<float>();
             Intensities = b.DeserializeStructArray<float>();
         }

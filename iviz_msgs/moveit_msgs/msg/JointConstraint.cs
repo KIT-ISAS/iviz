@@ -26,10 +26,10 @@ namespace Iviz.Msgs.MoveitMsgs
         public JointConstraint(ref ReadBuffer b)
         {
             JointName = b.DeserializeString();
-            Position = b.Deserialize<double>();
-            ToleranceAbove = b.Deserialize<double>();
-            ToleranceBelow = b.Deserialize<double>();
-            Weight = b.Deserialize<double>();
+            b.Deserialize(out Position);
+            b.Deserialize(out ToleranceAbove);
+            b.Deserialize(out ToleranceBelow);
+            b.Deserialize(out Weight);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JointConstraint(ref b);

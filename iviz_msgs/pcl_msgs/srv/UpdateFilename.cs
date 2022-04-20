@@ -109,7 +109,7 @@ namespace Iviz.Msgs.PclMsgs
         /// Constructor with buffer.
         public UpdateFilenameResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameResponse(ref b);

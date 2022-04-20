@@ -120,7 +120,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetModelResourceResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Model = new Model(ref b);
             Message = b.DeserializeString();
         }

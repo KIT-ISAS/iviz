@@ -23,7 +23,7 @@ namespace Iviz.Msgs.StdMsgs
         /// Constructor with buffer.
         public Float32(ref ReadBuffer b)
         {
-            Data = b.Deserialize<float>();
+            b.Deserialize(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Float32(ref b);

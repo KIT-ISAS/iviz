@@ -31,9 +31,9 @@ namespace Iviz.Msgs.DynamicReconfigure
         public GroupState(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
-            State = b.Deserialize<bool>();
-            Id = b.Deserialize<int>();
-            Parent = b.Deserialize<int>();
+            b.Deserialize(out State);
+            b.Deserialize(out Id);
+            b.Deserialize(out Parent);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GroupState(ref b);

@@ -118,7 +118,7 @@ namespace Iviz.Msgs.NavMsgs
         /// Constructor with buffer.
         public SetMapResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetMapResponse(ref b);

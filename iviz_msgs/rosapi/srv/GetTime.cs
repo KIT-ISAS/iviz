@@ -103,7 +103,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public GetTimeResponse(ref ReadBuffer b)
         {
-            Time = b.Deserialize<time>();
+            b.Deserialize(out Time);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetTimeResponse(ref b);

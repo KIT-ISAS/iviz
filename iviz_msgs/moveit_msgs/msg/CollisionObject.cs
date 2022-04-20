@@ -73,7 +73,7 @@ namespace Iviz.Msgs.MoveitMsgs
                 Planes[i] = new ShapeMsgs.Plane(ref b);
             }
             PlanePoses = b.DeserializeStructArray<GeometryMsgs.Pose>();
-            Operation = b.Deserialize<byte>();
+            b.Deserialize(out Operation);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CollisionObject(ref b);

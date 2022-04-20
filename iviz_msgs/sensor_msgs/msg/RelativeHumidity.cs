@@ -37,8 +37,8 @@ namespace Iviz.Msgs.SensorMsgs
         public RelativeHumidity(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            RelativeHumidity_ = b.Deserialize<double>();
-            Variance = b.Deserialize<double>();
+            b.Deserialize(out RelativeHumidity_);
+            b.Deserialize(out Variance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RelativeHumidity(ref b);

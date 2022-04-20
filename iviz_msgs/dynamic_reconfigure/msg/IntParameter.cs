@@ -27,7 +27,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         public IntParameter(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
-            Value = b.Deserialize<int>();
+            b.Deserialize(out Value);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new IntParameter(ref b);

@@ -32,7 +32,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         /// Constructor with buffer.
         public GoalID(ref ReadBuffer b)
         {
-            Stamp = b.Deserialize<time>();
+            b.Deserialize(out Stamp);
             Id = b.DeserializeString();
         }
         
@@ -69,6 +69,7 @@ namespace Iviz.Msgs.ActionlibMsgs
                 "sQw9OMoi8e/Am0Cnu91Dt8Gh9q7mZOhF3DUF9bPKOlwh/AJcvpWYTwEAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
         /// Custom iviz code
         public bool Equals(GoalID? other) => ReferenceEquals(this, other) || (other != null && Stamp == other.Stamp && Id == other.Id);
         public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is GoalID other && Equals(other);

@@ -141,7 +141,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public GetStateValidityResponse(ref ReadBuffer b)
         {
-            Valid = b.Deserialize<bool>();
+            b.Deserialize(out Valid);
             Contacts = b.DeserializeArray<ContactInformation>();
             for (int i = 0; i < Contacts.Length; i++)
             {

@@ -43,7 +43,7 @@ namespace Iviz.Msgs.MoveitMsgs
             {
                 PlannedTrajectories[i] = new RobotTrajectory(ref b);
             }
-            PlanningTime = b.Deserialize<double>();
+            b.Deserialize(out PlanningTime);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MotionSequenceResponse(ref b);

@@ -32,8 +32,8 @@ namespace Iviz.Msgs.NavMsgs
         public GridCells(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            CellWidth = b.Deserialize<float>();
-            CellHeight = b.Deserialize<float>();
+            b.Deserialize(out CellWidth);
+            b.Deserialize(out CellHeight);
             Cells = b.DeserializeStructArray<GeometryMsgs.Point>();
         }
         

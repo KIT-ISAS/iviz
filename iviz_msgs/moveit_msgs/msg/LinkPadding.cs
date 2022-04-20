@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public LinkPadding(ref ReadBuffer b)
         {
             LinkName = b.DeserializeString();
-            Padding = b.Deserialize<double>();
+            b.Deserialize(out Padding);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LinkPadding(ref b);

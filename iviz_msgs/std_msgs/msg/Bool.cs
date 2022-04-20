@@ -23,7 +23,7 @@ namespace Iviz.Msgs.StdMsgs
         /// Constructor with buffer.
         public Bool(ref ReadBuffer b)
         {
-            Data = b.Deserialize<bool>();
+            b.Deserialize(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Bool(ref b);

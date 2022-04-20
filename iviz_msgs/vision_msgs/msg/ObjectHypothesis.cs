@@ -33,7 +33,7 @@ namespace Iviz.Msgs.VisionMsgs
         public ObjectHypothesis(ref ReadBuffer b)
         {
             Id = b.DeserializeString();
-            Score = b.Deserialize<double>();
+            b.Deserialize(out Score);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ObjectHypothesis(ref b);

@@ -123,7 +123,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor with buffer.
         public SetCameraInfoResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             StatusMessage = b.DeserializeString();
         }
         

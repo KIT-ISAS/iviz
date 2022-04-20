@@ -46,7 +46,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             {
                 Accelerations[i] = new GeometryMsgs.Twist(ref b);
             }
-            TimeFromStart = b.Deserialize<duration>();
+            b.Deserialize(out TimeFromStart);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiDOFJointTrajectoryPoint(ref b);

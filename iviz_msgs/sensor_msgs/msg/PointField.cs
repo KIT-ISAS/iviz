@@ -45,9 +45,9 @@ namespace Iviz.Msgs.SensorMsgs
         public PointField(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
-            Offset = b.Deserialize<uint>();
-            Datatype = b.Deserialize<byte>();
-            Count = b.Deserialize<uint>();
+            b.Deserialize(out Offset);
+            b.Deserialize(out Datatype);
+            b.Deserialize(out Count);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PointField(ref b);

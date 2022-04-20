@@ -49,7 +49,7 @@ namespace Iviz.Msgs.IvizMsgs
                 ColorChannels[i] = new ColorChannel(ref b);
             }
             Faces = b.DeserializeStructArray<Triangle>();
-            MaterialIndex = b.Deserialize<uint>();
+            b.Deserialize(out MaterialIndex);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Mesh(ref b);

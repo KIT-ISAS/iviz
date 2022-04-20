@@ -38,7 +38,7 @@ namespace Iviz.Msgs.MeshMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             Uuid = b.DeserializeString();
             Cluster = new MeshFaceCluster(ref b);
-            @override = b.Deserialize<bool>();
+            b.Deserialize(out @override);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshFaceClusterStamped(ref b);

@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public LinkScale(ref ReadBuffer b)
         {
             LinkName = b.DeserializeString();
-            Scale = b.Deserialize<double>();
+            b.Deserialize(out Scale);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LinkScale(ref b);

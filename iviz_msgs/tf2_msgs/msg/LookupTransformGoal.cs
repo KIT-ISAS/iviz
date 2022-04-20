@@ -31,11 +31,11 @@ namespace Iviz.Msgs.Tf2Msgs
         {
             TargetFrame = b.DeserializeString();
             SourceFrame = b.DeserializeString();
-            SourceTime = b.Deserialize<time>();
-            Timeout = b.Deserialize<duration>();
-            TargetTime = b.Deserialize<time>();
+            b.Deserialize(out SourceTime);
+            b.Deserialize(out Timeout);
+            b.Deserialize(out TargetTime);
             FixedFrame = b.DeserializeString();
-            Advanced = b.Deserialize<bool>();
+            b.Deserialize(out Advanced);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformGoal(ref b);

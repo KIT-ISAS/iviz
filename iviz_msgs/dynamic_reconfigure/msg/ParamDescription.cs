@@ -27,7 +27,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         {
             Name = b.DeserializeString();
             Type = b.DeserializeString();
-            Level = b.Deserialize<uint>();
+            b.Deserialize(out Level);
             Description = b.DeserializeString();
             EditMethod = b.DeserializeString();
         }

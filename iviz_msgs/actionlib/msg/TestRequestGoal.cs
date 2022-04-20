@@ -36,14 +36,14 @@ namespace Iviz.Msgs.Actionlib
         /// Constructor with buffer.
         public TestRequestGoal(ref ReadBuffer b)
         {
-            TerminateStatus = b.Deserialize<int>();
-            IgnoreCancel = b.Deserialize<bool>();
+            b.Deserialize(out TerminateStatus);
+            b.Deserialize(out IgnoreCancel);
             ResultText = b.DeserializeString();
-            TheResult = b.Deserialize<int>();
-            IsSimpleClient = b.Deserialize<bool>();
-            DelayAccept = b.Deserialize<duration>();
-            DelayTerminate = b.Deserialize<duration>();
-            PauseStatus = b.Deserialize<duration>();
+            b.Deserialize(out TheResult);
+            b.Deserialize(out IsSimpleClient);
+            b.Deserialize(out DelayAccept);
+            b.Deserialize(out DelayTerminate);
+            b.Deserialize(out PauseStatus);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestRequestGoal(ref b);

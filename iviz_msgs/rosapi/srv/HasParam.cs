@@ -109,7 +109,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public HasParamResponse(ref ReadBuffer b)
         {
-            Exists = b.Deserialize<bool>();
+            b.Deserialize(out Exists);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new HasParamResponse(ref b);

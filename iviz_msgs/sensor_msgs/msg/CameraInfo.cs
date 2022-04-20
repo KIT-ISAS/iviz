@@ -144,15 +144,15 @@ namespace Iviz.Msgs.SensorMsgs
         public CameraInfo(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Height = b.Deserialize<uint>();
-            Width = b.Deserialize<uint>();
+            b.Deserialize(out Height);
+            b.Deserialize(out Width);
             DistortionModel = b.DeserializeString();
             D = b.DeserializeStructArray<double>();
             K = b.DeserializeStructArray<double>(9);
             R = b.DeserializeStructArray<double>(9);
             P = b.DeserializeStructArray<double>(12);
-            BinningX = b.Deserialize<uint>();
-            BinningY = b.Deserialize<uint>();
+            b.Deserialize(out BinningX);
+            b.Deserialize(out BinningY);
             Roi = new RegionOfInterest(ref b);
         }
         

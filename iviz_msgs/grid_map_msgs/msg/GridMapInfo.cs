@@ -27,9 +27,9 @@ namespace Iviz.Msgs.GridMapMsgs
         public GridMapInfo(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Resolution = b.Deserialize<double>();
-            LengthX = b.Deserialize<double>();
-            LengthY = b.Deserialize<double>();
+            b.Deserialize(out Resolution);
+            b.Deserialize(out LengthX);
+            b.Deserialize(out LengthY);
             b.Deserialize(out Pose);
         }
         

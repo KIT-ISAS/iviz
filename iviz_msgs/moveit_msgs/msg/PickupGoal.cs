@@ -72,13 +72,13 @@ namespace Iviz.Msgs.MoveitMsgs
                 PossibleGrasps[i] = new Grasp(ref b);
             }
             SupportSurfaceName = b.DeserializeString();
-            AllowGripperSupportCollision = b.Deserialize<bool>();
+            b.Deserialize(out AllowGripperSupportCollision);
             AttachedObjectTouchLinks = b.DeserializeStringArray();
-            MinimizeObjectDistance = b.Deserialize<bool>();
+            b.Deserialize(out MinimizeObjectDistance);
             PathConstraints = new Constraints(ref b);
             PlannerId = b.DeserializeString();
             AllowedTouchObjects = b.DeserializeStringArray();
-            AllowedPlanningTime = b.Deserialize<double>();
+            b.Deserialize(out AllowedPlanningTime);
             PlanningOptions = new PlanningOptions(ref b);
         }
         

@@ -30,8 +30,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public ConstraintEvalResult(ref ReadBuffer b)
         {
-            Result = b.Deserialize<bool>();
-            Distance = b.Deserialize<double>();
+            b.Deserialize(out Result);
+            b.Deserialize(out Distance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ConstraintEvalResult(ref b);

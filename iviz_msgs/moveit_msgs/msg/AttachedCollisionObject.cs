@@ -40,7 +40,7 @@ namespace Iviz.Msgs.MoveitMsgs
             Object = new CollisionObject(ref b);
             TouchLinks = b.DeserializeStringArray();
             DetachPosture = new TrajectoryMsgs.JointTrajectory(ref b);
-            Weight = b.Deserialize<double>();
+            b.Deserialize(out Weight);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AttachedCollisionObject(ref b);

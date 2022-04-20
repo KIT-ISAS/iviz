@@ -53,7 +53,7 @@ namespace Iviz.MsgsGen.Dynamic
 
         public void RosDeserializeInPlace(ref ReadBuffer b)
         {
-            uint count = b.Deserialize<uint>();
+            b.Deserialize(out uint count);
             if (count == 0)
             {
                 Value = Array.Empty<DynamicMessage>();

@@ -35,13 +35,13 @@ namespace Iviz.Msgs.MoveitMsgs
         public JointLimits(ref ReadBuffer b)
         {
             JointName = b.DeserializeString();
-            HasPositionLimits = b.Deserialize<bool>();
-            MinPosition = b.Deserialize<double>();
-            MaxPosition = b.Deserialize<double>();
-            HasVelocityLimits = b.Deserialize<bool>();
-            MaxVelocity = b.Deserialize<double>();
-            HasAccelerationLimits = b.Deserialize<bool>();
-            MaxAcceleration = b.Deserialize<double>();
+            b.Deserialize(out HasPositionLimits);
+            b.Deserialize(out MinPosition);
+            b.Deserialize(out MaxPosition);
+            b.Deserialize(out HasVelocityLimits);
+            b.Deserialize(out MaxVelocity);
+            b.Deserialize(out HasAccelerationLimits);
+            b.Deserialize(out MaxAcceleration);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JointLimits(ref b);

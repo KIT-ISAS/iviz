@@ -37,8 +37,8 @@ namespace Iviz.Msgs.VisionMsgs
         public BoundingBox2D(ref ReadBuffer b)
         {
             Center = new GeometryMsgs.Pose2D(ref b);
-            SizeX = b.Deserialize<double>();
-            SizeY = b.Deserialize<double>();
+            b.Deserialize(out SizeX);
+            b.Deserialize(out SizeY);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new BoundingBox2D(ref b);

@@ -68,10 +68,10 @@ namespace Iviz.Msgs.MoveitMsgs
             TrajectoryConstraints = new TrajectoryConstraints(ref b);
             PlannerId = b.DeserializeString();
             GroupName = b.DeserializeString();
-            NumPlanningAttempts = b.Deserialize<int>();
-            AllowedPlanningTime = b.Deserialize<double>();
-            MaxVelocityScalingFactor = b.Deserialize<double>();
-            MaxAccelerationScalingFactor = b.Deserialize<double>();
+            b.Deserialize(out NumPlanningAttempts);
+            b.Deserialize(out AllowedPlanningTime);
+            b.Deserialize(out MaxVelocityScalingFactor);
+            b.Deserialize(out MaxAccelerationScalingFactor);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MotionPlanRequest(ref b);

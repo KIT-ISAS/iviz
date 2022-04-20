@@ -35,12 +35,12 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out Ambient);
             b.Deserialize(out Diffuse);
             b.Deserialize(out Emissive);
-            Opacity = b.Deserialize<float>();
-            BumpScaling = b.Deserialize<float>();
-            Shininess = b.Deserialize<float>();
-            ShininessStrength = b.Deserialize<float>();
-            Reflectivity = b.Deserialize<float>();
-            BlendMode = b.Deserialize<byte>();
+            b.Deserialize(out Opacity);
+            b.Deserialize(out BumpScaling);
+            b.Deserialize(out Shininess);
+            b.Deserialize(out ShininessStrength);
+            b.Deserialize(out Reflectivity);
+            b.Deserialize(out BlendMode);
             Textures = b.DeserializeArray<Texture>();
             for (int i = 0; i < Textures.Length; i++)
             {

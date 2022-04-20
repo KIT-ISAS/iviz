@@ -27,7 +27,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         public ConnectedClient(ref ReadBuffer b)
         {
             IpAddress = b.DeserializeString();
-            ConnectionTime = b.Deserialize<time>();
+            b.Deserialize(out ConnectionTime);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ConnectedClient(ref b);

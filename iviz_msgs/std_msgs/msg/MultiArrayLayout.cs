@@ -55,7 +55,7 @@ namespace Iviz.Msgs.StdMsgs
             {
                 Dim[i] = new MultiArrayDimension(ref b);
             }
-            DataOffset = b.Deserialize<uint>();
+            b.Deserialize(out DataOffset);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiArrayLayout(ref b);

@@ -120,7 +120,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetFileResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Bytes = b.DeserializeStructArray<byte>();
             Message = b.DeserializeString();
         }

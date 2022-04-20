@@ -80,7 +80,7 @@ namespace Iviz.Msgs.NavMsgs
         {
             Start = new GeometryMsgs.PoseStamped(ref b);
             Goal = new GeometryMsgs.PoseStamped(ref b);
-            Tolerance = b.Deserialize<float>();
+            b.Deserialize(out Tolerance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPlanRequest(ref b);

@@ -110,10 +110,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public TestMultipleResponseFieldsResponse(ref ReadBuffer b)
         {
-            @int = b.Deserialize<int>();
-            @float = b.Deserialize<float>();
+            b.Deserialize(out @int);
+            b.Deserialize(out @float);
             @string = b.DeserializeString();
-            @bool = b.Deserialize<bool>();
+            b.Deserialize(out @bool);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestMultipleResponseFieldsResponse(ref b);

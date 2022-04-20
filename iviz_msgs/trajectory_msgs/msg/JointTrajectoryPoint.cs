@@ -32,7 +32,7 @@ namespace Iviz.Msgs.TrajectoryMsgs
             Velocities = b.DeserializeStructArray<double>();
             Accelerations = b.DeserializeStructArray<double>();
             Effort = b.DeserializeStructArray<double>();
-            TimeFromStart = b.Deserialize<duration>();
+            b.Deserialize(out TimeFromStart);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JointTrajectoryPoint(ref b);

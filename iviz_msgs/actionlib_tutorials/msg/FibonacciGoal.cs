@@ -24,7 +24,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         /// Constructor with buffer.
         public FibonacciGoal(ref ReadBuffer b)
         {
-            Order = b.Deserialize<int>();
+            b.Deserialize(out Order);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FibonacciGoal(ref b);

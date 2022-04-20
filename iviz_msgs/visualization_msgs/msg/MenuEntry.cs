@@ -65,11 +65,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor with buffer.
         public MenuEntry(ref ReadBuffer b)
         {
-            Id = b.Deserialize<uint>();
-            ParentId = b.Deserialize<uint>();
+            b.Deserialize(out Id);
+            b.Deserialize(out ParentId);
             Title = b.DeserializeString();
             Command = b.DeserializeString();
-            CommandType = b.Deserialize<byte>();
+            b.Deserialize(out CommandType);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MenuEntry(ref b);

@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshTexture(ref ReadBuffer b)
         {
             Uuid = b.DeserializeString();
-            TextureIndex = b.Deserialize<uint>();
+            b.Deserialize(out TextureIndex);
             Image = new SensorMsgs.Image(ref b);
         }
         
@@ -65,23 +65,27 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7VVTW8bNxC9768YQIfYiSUH7SUwUKRF07Q6BCiQ3IpCGC1Hu2y55Jof+siv7yOplaza" +
-                "TnJoF7LkJTlvPt6b4Yw+SOjppxi9Xqco+TVwJ03Agu0oJa2apG38/juKso/Jy0pbJfsmiA3Or4bQhdvl" +
-                "ABPS+btpfviPn+bDx1/v6JG7Zkafeh1oqAFT62xkbQOxpWRbN4weO6KOYc3o6vUNvb4mmHCk6Ma5kU2E" +
-                "mbfiyW2mc03zm7DCUl9/js+MjstRw2PkYaTQu2QUrYW4vU866KidLftnOHrqOWFtPA+op3oA5caoWzZ1" +
-                "K+O0+PX8HJDzutM2n6sGj4FasbEm+GWkV/vJeHTgGxWi2AsBv48EF/nlizm9OlwCKLez32b4+dIQfy67" +
-                "Hw3bUoKvIizrmVM5e/EgxarL1SPSz6UMS7txz8FNkuIQXKs5QkQ7HftzHFlsG6Pb+BxCPrmWnrfa+ay4" +
-                "hJbZaCuqmZqpl1LYs0kFrss3AIBIdbghm4Z1pc+7XZisd1ohnkfWZflJ49aZNNjQlK4RMtJBGls2SQJt" +
-                "EKOgY1RueEblQNpGG4jJt7cFeDVth0U7jk0p+MEl2nEVCvrBKvZKf0bRyMqOjuMD0AMjnb9ALMy8C/MU" +
-                "xIcfjQ4xLIJLvhUc6mRhJRbK0Ogq97AMrA2N3o0ulMAK7hTIopkm1CnyqRS/TAtIe9R7MYHmc2p7tlYM" +
-                "uGWLzRt0Djqw/BcQ9tNEZib5b0E5vBsKqTnuDFydh1wqbVuTlNw+nFD/rlpfeX8DVlZr3SFFjRQrcwHA" +
-                "+FIcmU57byemQ5TxIqD3yZisBXBoO4gAEawPUao03vzxZwV6YMBtTCAbPHi9L7s15ez5qsC/LNq6/t9G" +
-                "d1S1KnXqQQcfj3oBG5FLvFmDPaQvHmN5C57KiEXjld14GCUspomPD6qEHjbmQCmPeEgQA39IFhMPd9hp" +
-                "RE/2sESZmEb2GIrJsMd5CEDbfLwMiIyOT5D7BNqElu/ucpcHaVPUCOiQefbCRYvLd3TiR+6b2aedm+NV" +
-                "uov74diGJPvpKuJwBx8va3ILYOd7DV5UYQJrK7yGa9CTQ5DRtT1dIfLfD7F3dZJu2Wtem8IexrsB6ots" +
-                "9OL6AbIt0Jatm+Ar4tnHt8DaE27OaY4GUiZnH1LHZaqhObda4ej6UEBao3HZoEfWnv2hKTdhcdnM3pfb" +
-                "6Sz0fAtfTtepn6dx3TT/AOsDVU+cCAAA";
+                "H4sIAAAAAAAAE7VVy24bNxTd8ysuoEXsxJKDdhMYKJogr2oRoGiyCwKBM7yaYcshx3zoka/vIamRrNhO" +
+                "s2gGsuQhec99nHsPZ/SBQ0+vYvS6SZHza5Adi4AF21FKWomkbfz1F4q8i8nzSlvFOxHYBudXQ+jC9XKA" +
+                "Cen8LcRv//MjPnx8f0P33IkZfep1oKEGTK2zUWobSFpKtnXD6LHD6hDWjC6eX9HzS4KJjBTdODe8jjDz" +
+                "lj259XROiD9YKiz19efwzOiwHDU8RjmMFHqXjKKGSba3SQcdtbNl/wRHDz1HrLWXA+qp7kC5MepWmrqV" +
+                "cVr8evkYkPO60zafqwb3gVq2sSb4faRnu8l4dOAbFaLYMwG/jwQX+eW7OT3bnwMot7U/Zvj13BB/Lrsf" +
+                "jbSlBP+JsKxnjuXs2YMUq85XD0ivSxmWdu0eg5taSobgWi0jmmirY3+KIzfb2ug2PoaQTzbcy412Pndc" +
+                "wsistWUlpmHquRT2ZFKB6/IVANCkOlyRTUNT6fNuGybrrVaI5551WX7QuHUmDTaIMjVMhju0xkaaxIHW" +
+                "iJExMSoPvETlQNpaGzSTb68L8GraDot2HEUp+N4l2sraKJgHq6RX+iuKRpa3dJAPQA8S6fwNYmHmXZin" +
+                "wD68NDrEsAgu+ZZxqOOF5Vgow6CrPMM8SG1o9G50oQRWcKdAFmJSqGPkUyneTgtIe9Q7NoHmc2p7aS0b" +
+                "cCstNq8wOZjA8l9A2A8TmZmU/zDK4d1QSM1xZ+DqPORSaduapPj6rkJ9W7W+8v4CrKwa3SFFjRQrcwHA" +
+                "+FIySjru/T4xHSKPZwG9S8bkXgCHtkMTIIJmH7m2xovPXyrQHYPPf0EBvkCjYgLnoMPrXTlUM88BXBQv" +
+                "T0uLXf40BY+qFqeKH9rh46FtQEqUJezcij0mgD3UeQO6itJi/spu3I8cFpPw44NiYZSN2VPKSo9OhO4P" +
+                "yUL4cJUdlXqyhyWqJWmUHtqYjPQ4jz7QNh8vOpHR8Ql8m8Ae0/LNTR72wG2KGgHtM92eZWnJ5Rs60sS3" +
+                "YvZp6+Z45e7smjhMI/FuupFkuIGPpzW5BbDz9QYvqjCBtRVewyXoySHw6NqeLhD5n/vYuyqoG+m1bExh" +
+                "DypvgPokGz25vINsC7SV1k3wFfHk40dg7RE35zTHHCmTsw+pk0XcMKMbrXC02ReQ1mh0HEal8dLvRbkQ" +
+                "i0sxe1cuqVO/58v4XGSnsZ5UW4h/AUvlkUajCAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public void Dispose()
+        {
+        }
     }
 }

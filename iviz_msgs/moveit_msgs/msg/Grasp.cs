@@ -66,11 +66,11 @@ namespace Iviz.Msgs.MoveitMsgs
             PreGraspPosture = new TrajectoryMsgs.JointTrajectory(ref b);
             GraspPosture = new TrajectoryMsgs.JointTrajectory(ref b);
             GraspPose = new GeometryMsgs.PoseStamped(ref b);
-            GraspQuality = b.Deserialize<double>();
+            b.Deserialize(out GraspQuality);
             PreGraspApproach = new GripperTranslation(ref b);
             PostGraspRetreat = new GripperTranslation(ref b);
             PostPlaceRetreat = new GripperTranslation(ref b);
-            MaxContactForce = b.Deserialize<float>();
+            b.Deserialize(out MaxContactForce);
             AllowedTouchObjects = b.DeserializeStringArray();
         }
         

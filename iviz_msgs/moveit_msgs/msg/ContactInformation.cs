@@ -42,11 +42,11 @@ namespace Iviz.Msgs.MoveitMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Position);
             b.Deserialize(out Normal);
-            Depth = b.Deserialize<double>();
+            b.Deserialize(out Depth);
             ContactBody1 = b.DeserializeString();
-            BodyType1 = b.Deserialize<uint>();
+            b.Deserialize(out BodyType1);
             ContactBody2 = b.DeserializeString();
-            BodyType2 = b.Deserialize<uint>();
+            b.Deserialize(out BodyType2);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ContactInformation(ref b);

@@ -41,7 +41,7 @@ namespace Iviz.Msgs.MoveitMsgs
             }
             TrajectoryDescriptions = b.DeserializeStringArray();
             PlaceLocation = new PlaceLocation(ref b);
-            PlanningTime = b.Deserialize<double>();
+            b.Deserialize(out PlanningTime);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PlaceResult(ref b);

@@ -56,11 +56,11 @@ namespace Iviz.Msgs.VisualizationMsgs
             ClientId = b.DeserializeString();
             MarkerName = b.DeserializeString();
             ControlName = b.DeserializeString();
-            EventType = b.Deserialize<byte>();
+            b.Deserialize(out EventType);
             b.Deserialize(out Pose);
-            MenuEntryId = b.Deserialize<uint>();
+            b.Deserialize(out MenuEntryId);
             b.Deserialize(out MousePoint);
-            MousePointValid = b.Deserialize<bool>();
+            b.Deserialize(out MousePointValid);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerFeedback(ref b);

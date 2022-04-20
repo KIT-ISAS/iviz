@@ -65,7 +65,7 @@ namespace Iviz.Msgs.MoveitMsgs
             GroupName = b.DeserializeString();
             RobotState = new MoveitMsgs.RobotState(ref b);
             Constraints = new Constraints(ref b);
-            AvoidCollisions = b.Deserialize<bool>();
+            b.Deserialize(out AvoidCollisions);
             IkLinkName = b.DeserializeString();
             PoseStamped = new GeometryMsgs.PoseStamped(ref b);
             IkLinkNames = b.DeserializeStringArray();
@@ -74,8 +74,8 @@ namespace Iviz.Msgs.MoveitMsgs
             {
                 PoseStampedVector[i] = new GeometryMsgs.PoseStamped(ref b);
             }
-            Timeout = b.Deserialize<duration>();
-            Attempts = b.Deserialize<int>();
+            b.Deserialize(out Timeout);
+            b.Deserialize(out Attempts);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PositionIKRequest(ref b);

@@ -82,15 +82,15 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             Name = b.DeserializeString();
             b.Deserialize(out Orientation);
-            OrientationMode = b.Deserialize<byte>();
-            InteractionMode = b.Deserialize<byte>();
-            AlwaysVisible = b.Deserialize<bool>();
+            b.Deserialize(out OrientationMode);
+            b.Deserialize(out InteractionMode);
+            b.Deserialize(out AlwaysVisible);
             Markers = b.DeserializeArray<Marker>();
             for (int i = 0; i < Markers.Length; i++)
             {
                 Markers[i] = new Marker(ref b);
             }
-            IndependentMarkerOrientation = b.Deserialize<bool>();
+            b.Deserialize(out IndependentMarkerOrientation);
             Description = b.DeserializeString();
         }
         

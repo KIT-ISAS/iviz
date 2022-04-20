@@ -32,7 +32,7 @@ namespace Iviz.Msgs.MoveitMsgs
             LinkName = b.DeserializeString();
             b.Deserialize(out TargetPointOffset);
             ConstraintRegion = new BoundingVolume(ref b);
-            Weight = b.Deserialize<double>();
+            b.Deserialize(out Weight);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PositionConstraint(ref b);

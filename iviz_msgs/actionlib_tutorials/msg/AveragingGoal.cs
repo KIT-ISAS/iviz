@@ -26,8 +26,8 @@ namespace Iviz.Msgs.ActionlibTutorials
         /// Constructor with buffer.
         public AveragingGoal(ref ReadBuffer b)
         {
-            Edges = b.Deserialize<int>();
-            Radius = b.Deserialize<float>();
+            b.Deserialize(out Edges);
+            b.Deserialize(out Radius);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AveragingGoal(ref b);

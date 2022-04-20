@@ -68,7 +68,7 @@ namespace Iviz.Msgs.StdSrvs
         /// Constructor with buffer.
         public SetBoolRequest(ref ReadBuffer b)
         {
-            Data = b.Deserialize<bool>();
+            b.Deserialize(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetBoolRequest(ref b);
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.StdSrvs
         /// Constructor with buffer.
         public SetBoolResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Message = b.DeserializeString();
         }
         

@@ -56,14 +56,14 @@ namespace Iviz.Msgs.IvizMsgs
         public Texture(ref ReadBuffer b)
         {
             Path = b.DeserializeString();
-            Index = b.Deserialize<int>();
-            Type = b.Deserialize<byte>();
-            Mapping = b.Deserialize<byte>();
-            UvIndex = b.Deserialize<int>();
-            BlendFactor = b.Deserialize<float>();
-            Operation = b.Deserialize<byte>();
-            WrapModeU = b.Deserialize<byte>();
-            WrapModeV = b.Deserialize<byte>();
+            b.Deserialize(out Index);
+            b.Deserialize(out Type);
+            b.Deserialize(out Mapping);
+            b.Deserialize(out UvIndex);
+            b.Deserialize(out BlendFactor);
+            b.Deserialize(out Operation);
+            b.Deserialize(out WrapModeU);
+            b.Deserialize(out WrapModeV);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Texture(ref b);

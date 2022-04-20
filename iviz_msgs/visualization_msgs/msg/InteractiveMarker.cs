@@ -44,7 +44,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Pose);
             Name = b.DeserializeString();
             Description = b.DeserializeString();
-            Scale = b.Deserialize<float>();
+            b.Deserialize(out Scale);
             MenuEntries = b.DeserializeArray<MenuEntry>();
             for (int i = 0; i < MenuEntries.Length; i++)
             {

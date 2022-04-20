@@ -47,7 +47,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public PlanningSceneComponents(ref ReadBuffer b)
         {
-            Components = b.Deserialize<uint>();
+            b.Deserialize(out Components);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PlanningSceneComponents(ref b);

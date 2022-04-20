@@ -66,12 +66,13 @@ namespace Iviz.Msgs.IvizMsgs
                 "H4sIAAAAAAAAE0vLyU8sMTZSqOBKg7Iq4awqLi4A6Ofahh8AAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
         /// Custom iviz code
-        public static readonly Vector3f Zero;
-        public static readonly Vector3f One = new(1, 1, 1);
-        public static readonly Vector3f UnitX = new(1, 0, 0);
-        public static readonly Vector3f UnitY = new(0, 1, 0);
-        public static readonly Vector3f UnitZ = new(0, 0, 1);
+        public static Vector3f Zero => new();
+        public static Vector3f One => new(1, 1, 1);
+        public static Vector3f UnitX => new(1, 0, 0);
+        public static Vector3f UnitY => new(0, 1, 0);
+        public static Vector3f UnitZ => new(0, 0, 1);
         public static implicit operator GeometryMsgs.Point(in Vector3f p) => new(p.X, p.Y, p.Z);
         public static implicit operator GeometryMsgs.Vector3(in Vector3f p) => new(p.X, p.Y, p.Z);
         public static Vector3f operator +(in Vector3f v, in Vector3f w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);

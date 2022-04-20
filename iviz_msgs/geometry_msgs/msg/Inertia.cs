@@ -30,14 +30,14 @@ namespace Iviz.Msgs.GeometryMsgs
         /// Constructor with buffer.
         public Inertia(ref ReadBuffer b)
         {
-            M = b.Deserialize<double>();
+            b.Deserialize(out M);
             b.Deserialize(out Com);
-            Ixx = b.Deserialize<double>();
-            Ixy = b.Deserialize<double>();
-            Ixz = b.Deserialize<double>();
-            Iyy = b.Deserialize<double>();
-            Iyz = b.Deserialize<double>();
-            Izz = b.Deserialize<double>();
+            b.Deserialize(out Ixx);
+            b.Deserialize(out Ixy);
+            b.Deserialize(out Ixz);
+            b.Deserialize(out Iyy);
+            b.Deserialize(out Iyz);
+            b.Deserialize(out Izz);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Inertia(ref b);

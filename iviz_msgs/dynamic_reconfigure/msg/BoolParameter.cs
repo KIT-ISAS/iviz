@@ -27,7 +27,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         public BoolParameter(ref ReadBuffer b)
         {
             Name = b.DeserializeString();
-            Value = b.Deserialize<bool>();
+            b.Deserialize(out Value);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new BoolParameter(ref b);

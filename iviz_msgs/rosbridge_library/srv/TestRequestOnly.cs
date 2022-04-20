@@ -67,7 +67,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public TestRequestOnlyRequest(ref ReadBuffer b)
         {
-            Data = b.Deserialize<int>();
+            b.Deserialize(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestRequestOnlyRequest(ref b);

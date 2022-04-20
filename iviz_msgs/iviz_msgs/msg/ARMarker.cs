@@ -38,13 +38,13 @@ namespace Iviz.Msgs.IvizMsgs
         public ARMarker(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Type = b.Deserialize<byte>();
+            b.Deserialize(out Type);
             Code = b.DeserializeString();
             Corners = b.DeserializeStructArray<GeometryMsgs.Vector3>(4);
             CameraIntrinsic = b.DeserializeStructArray<double>(9);
             b.Deserialize(out CameraPose);
-            HasReliablePose = b.Deserialize<bool>();
-            MarkerSizeInMm = b.Deserialize<double>();
+            b.Deserialize(out HasReliablePose);
+            b.Deserialize(out MarkerSizeInMm);
             b.Deserialize(out PoseRelativeToCamera);
         }
         

@@ -71,7 +71,7 @@ namespace Iviz.Msgs.MeshMsgs
         public GetTextureRequest(ref ReadBuffer b)
         {
             Uuid = b.DeserializeString();
-            TextureIndex = b.Deserialize<uint>();
+            b.Deserialize(out TextureIndex);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetTextureRequest(ref b);

@@ -75,10 +75,10 @@ namespace Iviz.Msgs.GridMapMsgs
         public GetGridMapRequest(ref ReadBuffer b)
         {
             FrameId = b.DeserializeString();
-            PositionX = b.Deserialize<double>();
-            PositionY = b.Deserialize<double>();
-            LengthX = b.Deserialize<double>();
-            LengthY = b.Deserialize<double>();
+            b.Deserialize(out PositionX);
+            b.Deserialize(out PositionY);
+            b.Deserialize(out LengthX);
+            b.Deserialize(out LengthY);
             Layers = b.DeserializeStringArray();
         }
         

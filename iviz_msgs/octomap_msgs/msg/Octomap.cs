@@ -29,9 +29,9 @@ namespace Iviz.Msgs.OctomapMsgs
         public Octomap(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Binary = b.Deserialize<bool>();
+            b.Deserialize(out Binary);
             Id = b.DeserializeString();
-            Resolution = b.Deserialize<double>();
+            b.Deserialize(out Resolution);
             Data = b.DeserializeStructArray<sbyte>();
         }
         

@@ -67,7 +67,7 @@ internal sealed class SenderQueue<T> where T : IMessage
     static async ValueTask WaitForSignal(TaskCompletionSource msgSignal, CancellationToken token)
     {
         // ReSharper disable once UseAwaitUsing
-        using (token.Register(StreamUtils.OnCanceled, msgSignal))
+        using (token.Register(StreamHelpers.OnCanceled, msgSignal))
         {
             await msgSignal.Task;
         }

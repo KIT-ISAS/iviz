@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public CostSource(ref ReadBuffer b)
         {
-            CostDensity = b.Deserialize<double>();
+            b.Deserialize(out CostDensity);
             b.Deserialize(out AabbMin);
             b.Deserialize(out AabbMax);
         }

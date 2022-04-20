@@ -51,7 +51,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public MoveItErrorCodes(ref ReadBuffer b)
         {
-            Val = b.Deserialize<int>();
+            b.Deserialize(out Val);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MoveItErrorCodes(ref b);

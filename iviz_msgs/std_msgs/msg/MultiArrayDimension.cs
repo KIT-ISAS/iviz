@@ -32,8 +32,8 @@ namespace Iviz.Msgs.StdMsgs
         public MultiArrayDimension(ref ReadBuffer b)
         {
             Label = b.DeserializeString();
-            Size = b.Deserialize<uint>();
-            Stride = b.Deserialize<uint>();
+            b.Deserialize(out Size);
+            b.Deserialize(out Stride);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiArrayDimension(ref b);

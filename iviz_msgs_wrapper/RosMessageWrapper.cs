@@ -61,5 +61,9 @@ namespace Iviz.MsgsWrapper
         {
             return this.ToJsonString();
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

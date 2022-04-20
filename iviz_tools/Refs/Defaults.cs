@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.Text;
 
@@ -8,4 +9,6 @@ public static class Defaults
     public static readonly UTF8Encoding UTF8 = new(false);
 
     public static readonly CultureInfo Culture = CultureInfo.InvariantCulture;
+    
+    public static readonly Random Random = new();    
 }

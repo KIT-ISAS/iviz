@@ -127,7 +127,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public AddModuleResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Message = b.DeserializeString();
             Id = b.DeserializeString();
         }

@@ -106,7 +106,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public StopCaptureResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Message = b.DeserializeString();
         }
         

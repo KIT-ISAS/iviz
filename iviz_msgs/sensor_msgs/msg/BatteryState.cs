@@ -82,17 +82,17 @@ namespace Iviz.Msgs.SensorMsgs
         public BatteryState(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Voltage = b.Deserialize<float>();
-            Temperature = b.Deserialize<float>();
-            Current = b.Deserialize<float>();
-            Charge = b.Deserialize<float>();
-            Capacity = b.Deserialize<float>();
-            DesignCapacity = b.Deserialize<float>();
-            Percentage = b.Deserialize<float>();
-            PowerSupplyStatus = b.Deserialize<byte>();
-            PowerSupplyHealth = b.Deserialize<byte>();
-            PowerSupplyTechnology = b.Deserialize<byte>();
-            Present = b.Deserialize<bool>();
+            b.Deserialize(out Voltage);
+            b.Deserialize(out Temperature);
+            b.Deserialize(out Current);
+            b.Deserialize(out Charge);
+            b.Deserialize(out Capacity);
+            b.Deserialize(out DesignCapacity);
+            b.Deserialize(out Percentage);
+            b.Deserialize(out PowerSupplyStatus);
+            b.Deserialize(out PowerSupplyHealth);
+            b.Deserialize(out PowerSupplyTechnology);
+            b.Deserialize(out Present);
             CellVoltage = b.DeserializeStructArray<float>();
             CellTemperature = b.DeserializeStructArray<float>();
             Location = b.DeserializeString();

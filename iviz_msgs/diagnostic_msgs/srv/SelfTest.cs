@@ -110,7 +110,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public SelfTestResponse(ref ReadBuffer b)
         {
             Id = b.DeserializeString();
-            Passed = b.Deserialize<byte>();
+            b.Deserialize(out Passed);
             Status = b.DeserializeArray<DiagnosticStatus>();
             for (int i = 0; i < Status.Length; i++)
             {

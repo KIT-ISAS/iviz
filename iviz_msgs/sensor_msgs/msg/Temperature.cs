@@ -33,8 +33,8 @@ namespace Iviz.Msgs.SensorMsgs
         public Temperature(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Temperature_ = b.Deserialize<double>();
-            Variance = b.Deserialize<double>();
+            b.Deserialize(out Temperature_);
+            b.Deserialize(out Variance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Temperature(ref b);

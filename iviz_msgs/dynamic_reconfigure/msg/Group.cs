@@ -31,8 +31,8 @@ namespace Iviz.Msgs.DynamicReconfigure
             {
                 Parameters[i] = new ParamDescription(ref b);
             }
-            Parent = b.Deserialize<int>();
-            Id = b.Deserialize<int>();
+            b.Deserialize(out Parent);
+            b.Deserialize(out Id);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Group(ref b);

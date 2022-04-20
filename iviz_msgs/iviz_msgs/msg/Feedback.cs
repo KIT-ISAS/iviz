@@ -39,9 +39,9 @@ namespace Iviz.Msgs.IvizMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             VizId = b.DeserializeString();
             Id = b.DeserializeString();
-            Type = b.Deserialize<byte>();
-            EntryId = b.Deserialize<int>();
-            Angle = b.Deserialize<double>();
+            b.Deserialize(out Type);
+            b.Deserialize(out EntryId);
+            b.Deserialize(out Angle);
             b.Deserialize(out Position);
             b.Deserialize(out Orientation);
             b.Deserialize(out Scale);

@@ -37,7 +37,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor with buffer.
         public DiagnosticStatus(ref ReadBuffer b)
         {
-            Level = b.Deserialize<byte>();
+            b.Deserialize(out Level);
             Name = b.DeserializeString();
             Message = b.DeserializeString();
             HardwareId = b.DeserializeString();

@@ -68,12 +68,13 @@ namespace Iviz.Msgs.GeometryMsgs
                 "YA6dIsjBTUiv4Dp23EvP0kv0AQQdt/JVAAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
         /// Custom iviz code
-        public static readonly Point Zero;
-        public static readonly Point One = new(1, 1, 1);
-        public static readonly Point UnitX = new(1, 0, 0);
-        public static readonly Point UnitY = new(0, 1, 0);
-        public static readonly Point UnitZ = new(0, 0, 1);
+        public static Point Zero => new();
+        public static Point One => new(1, 1, 1);
+        public static Point UnitX => new(1, 0, 0);
+        public static Point UnitY => new(0, 1, 0);
+        public static Point UnitZ => new(0, 0, 1);
         public static implicit operator Vector3(in Point p) => new(p.X, p.Y, p.Z);
         public static Point operator +(in Point v, in Vector3 w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);
         public static Point operator -(in Point v, in Vector3 w) => new(v.X - w.X, v.Y - w.Y, v.Z - w.Z);

@@ -26,8 +26,8 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public MeshVertexTexCoords(ref ReadBuffer b)
         {
-            U = b.Deserialize<float>();
-            V = b.Deserialize<float>();
+            b.Deserialize(out U);
+            b.Deserialize(out V);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexTexCoords(ref b);

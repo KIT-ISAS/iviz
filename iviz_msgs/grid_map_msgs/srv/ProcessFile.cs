@@ -118,7 +118,7 @@ namespace Iviz.Msgs.GridMapMsgs
         /// Constructor with buffer.
         public ProcessFileResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileResponse(ref b);

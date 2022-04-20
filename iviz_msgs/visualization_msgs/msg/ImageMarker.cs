@@ -52,15 +52,15 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Ns = b.DeserializeString();
-            Id = b.Deserialize<int>();
-            Type = b.Deserialize<int>();
-            Action = b.Deserialize<int>();
+            b.Deserialize(out Id);
+            b.Deserialize(out Type);
+            b.Deserialize(out Action);
             b.Deserialize(out Position);
-            Scale = b.Deserialize<float>();
+            b.Deserialize(out Scale);
             b.Deserialize(out OutlineColor);
-            Filled = b.Deserialize<byte>();
+            b.Deserialize(out Filled);
             b.Deserialize(out FillColor);
-            Lifetime = b.Deserialize<duration>();
+            b.Deserialize(out Lifetime);
             Points = b.DeserializeStructArray<GeometryMsgs.Point>();
             OutlineColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
         }

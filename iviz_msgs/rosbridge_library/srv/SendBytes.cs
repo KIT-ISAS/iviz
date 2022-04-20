@@ -67,7 +67,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public SendBytesRequest(ref ReadBuffer b)
         {
-            Count = b.Deserialize<long>();
+            b.Deserialize(out Count);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SendBytesRequest(ref b);
