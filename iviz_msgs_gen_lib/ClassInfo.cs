@@ -70,7 +70,7 @@ namespace Iviz.MsgsGen
             "byte",
             "string"
         };
-        
+
         static readonly UTF8Encoding Utf8 = new(false);
 
         readonly ActionMessageType actionMessageType;
@@ -80,6 +80,8 @@ namespace Iviz.MsgsGen
         readonly VariableElement[] variables;
         string? md5;
         string? md5File;
+
+        bool? requiresDispose;
 
         public int FixedSize { get; internal set; } = UninitializedSize;
         public bool HasFixedSize => FixedSize != UnknownSizeAtCompileTime && FixedSize != UninitializedSize;
@@ -470,7 +472,16 @@ namespace Iviz.MsgsGen
                         }
                         else if (variable.IsDynamicSizeArray)
                         {
-                            lines.Add($"    {variable.CsFieldName} = System.Array.Empty<{variable.CsClassName}>();");
+                            if (variable.RentHint)
+                            {
+                                lines.Add(
+                                    $"    {variable.CsFieldName} = Tools.SharedRent<{variable.CsClassName}>.Empty;");
+                            }
+                            else
+                            {
+                                lines.Add(
+                                    $"    {variable.CsFieldName} = System.Array.Empty<{variable.CsClassName}>();");
+                            }
                         }
                         else if (variable.IsArray)
                         {
@@ -571,14 +582,16 @@ namespace Iviz.MsgsGen
                             case VariableElement.NotAnArray:
                                 if (variable.CsClassName == "string")
                                 {
-                                    lines.Add(variable.IgnoreHint 
+                                    lines.Add(variable.IgnoreHint
                                         ? $"    {prefix}{variable.CsFieldName} = b.SkipString();"
                                         : $"    {prefix}{variable.CsFieldName} = b.DeserializeString();");
                                 }
                                 else
                                 {
-                                    lines.Add(
-                                        $"    {prefix}{variable.CsFieldName} = b.Deserialize<{variable.CsClassName}>();");
+                                    lines.Add($"    b.Deserialize(out {prefix}{variable.CsFieldName});");
+                                
+                                    //lines.Add(
+                                    //    $"    {prefix}{variable.CsFieldName} = b.Deserialize<{variable.CsClassName}>();");
                                 }
 
                                 break;
@@ -855,7 +868,7 @@ namespace Iviz.MsgsGen
                 }
                 else
                 {
-                    if (!forceStruct && !variable.RentHint && (!variable.ClassIsStruct || variable.IsArray))
+                    if (!forceStruct && (!variable.ClassIsStruct || variable.IsArray))
                     {
                         lines.Add(
                             $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}));");
@@ -1105,8 +1118,30 @@ namespace Iviz.MsgsGen
 
             lines.Add("    public override string ToString() => Extensions.ToString(this);");
 
+            if (RequiresDispose)
+            {
+                lines.Add("");
+                lines.Add("    public void Dispose()");
+                lines.Add("    {");
+                foreach (var variable in elements.OfType<VariableElement>().Where(ElementRequiresDispose))
+                {
+                    if (variable.IsArray && variable.ClassInfo is { RequiresDispose: true })
+                    {
+                        lines.Add($"        foreach (var e in {variable.CsFieldName}) e.Dispose();");
+                    }
+
+                    if (variable.RentHint)
+                    {
+                        lines.Add($"        {variable.CsFieldName}.Dispose();");
+                    }
+                }
+
+                lines.Add("    }");
+            }
+
             if (Additions.Contents.TryGetValue($"{RosPackage}/{Name}", out var extraLines))
             {
+                lines.Add("");
                 lines.Add("    /// Custom iviz code");
                 foreach (string entry in extraLines)
                 {
@@ -1118,6 +1153,15 @@ namespace Iviz.MsgsGen
 
             return lines;
         }
+
+        static bool ElementRequiresDispose(IElement element) =>
+            element is VariableElement variableElement
+            && (variableElement.RentHint || variableElement.ClassInfo is { RequiresDispose: true });
+
+        bool RequiresDispose =>
+            requiresDispose is { } result
+                ? result
+                : (requiresDispose = elements.Any(ElementRequiresDispose)).Value;
 
         void AddDependencies(ICollection<ClassInfo> dependencies)
         {
