@@ -47,9 +47,9 @@ namespace Iviz.Msgs.TurtleActionlib
         
         public void RosValidate()
         {
-            if (GoalId is null) BuiltIns.ThrowNullReference(nameof(GoalId));
+            if (GoalId is null) BuiltIns.ThrowNullReference();
             GoalId.RosValidate();
-            if (Goal is null) BuiltIns.ThrowNullReference(nameof(Goal));
+            if (Goal is null) BuiltIns.ThrowNullReference();
             Goal.RosValidate();
         }
     

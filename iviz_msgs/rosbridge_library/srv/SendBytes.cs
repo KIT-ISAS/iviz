@@ -125,7 +125,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Data);

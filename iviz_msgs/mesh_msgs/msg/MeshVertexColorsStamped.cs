@@ -48,8 +48,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
-            if (MeshVertexColors is null) BuiltIns.ThrowNullReference(nameof(MeshVertexColors));
+            if (Uuid is null) BuiltIns.ThrowNullReference();
+            if (MeshVertexColors is null) BuiltIns.ThrowNullReference();
             MeshVertexColors.RosValidate();
         }
     

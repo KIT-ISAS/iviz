@@ -111,11 +111,13 @@ namespace Iviz.Msgs
             return Array.Empty<string>();
         }
 
+        /*
         public void DeserializeStringList(List<string> list)
         {
             int count = ReadInt();
             DeserializeStringArray(list, count);
         }
+        */
 
         public void DeserializeStringArray(List<string> list, int count)
         {
@@ -129,14 +131,6 @@ namespace Iviz.Msgs
             {
                 list[i] = DeserializeString();
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T Deserialize<T>() where T : unmanaged
-        {
-            T val = MemoryMarshal.Read<T>(ptr.Slice(offset));
-            Advance(Unsafe.SizeOf<T>());
-            return val;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -365,6 +359,7 @@ namespace Iviz.Msgs
             return Array.Empty<T>();
         }
 
+        /*
         public void DeserializeStructList<T>(List<T> list) where T : unmanaged
         {
             int count = ReadInt();
@@ -382,9 +377,11 @@ namespace Iviz.Msgs
 
             for (int i = 0; i < count; i++)
             {
-                list.Add(Deserialize<T>());
+                Deserialize(out T t);
+                list.Add(t);
             }
         }
+        */
 
         public T[] DeserializeArray<T>() where T : IMessage, new()
         {

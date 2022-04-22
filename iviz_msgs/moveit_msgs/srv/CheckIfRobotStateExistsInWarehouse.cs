@@ -87,8 +87,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Robot is null) BuiltIns.ThrowNullReference(nameof(Robot));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Robot is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetStringSize(Robot);

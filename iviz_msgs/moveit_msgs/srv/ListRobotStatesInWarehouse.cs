@@ -87,8 +87,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Regex is null) BuiltIns.ThrowNullReference(nameof(Regex));
-            if (Robot is null) BuiltIns.ThrowNullReference(nameof(Robot));
+            if (Regex is null) BuiltIns.ThrowNullReference();
+            if (Robot is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Regex) + BuiltIns.GetStringSize(Robot);
@@ -130,7 +130,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (States is null) BuiltIns.ThrowNullReference(nameof(States));
+            if (States is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < States.Length; i++)
             {
                 if (States[i] is null) BuiltIns.ThrowNullReference($"{nameof(States)}[{i}]");

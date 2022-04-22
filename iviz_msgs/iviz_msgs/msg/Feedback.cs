@@ -68,9 +68,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (VizId is null) BuiltIns.ThrowNullReference(nameof(VizId));
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
+            if (VizId is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (Trajectory is null) BuiltIns.ThrowNullReference();
             Trajectory.RosValidate();
         }
     

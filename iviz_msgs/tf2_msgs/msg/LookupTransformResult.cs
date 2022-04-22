@@ -42,7 +42,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (Error is null) BuiltIns.ThrowNullReference(nameof(Error));
+            if (Error is null) BuiltIns.ThrowNullReference();
             Error.RosValidate();
         }
     

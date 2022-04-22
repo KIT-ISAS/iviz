@@ -145,10 +145,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (Intrinsics is null) BuiltIns.ThrowNullReference(nameof(Intrinsics));
+            if (Message is null) BuiltIns.ThrowNullReference();
+            if (Intrinsics is null) BuiltIns.ThrowNullReference();
             if (Intrinsics.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(Intrinsics), Intrinsics.Length, 9);
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

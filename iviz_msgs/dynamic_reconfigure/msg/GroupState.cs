@@ -50,7 +50,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Name is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 13 + BuiltIns.GetStringSize(Name);

@@ -13,6 +13,9 @@ public readonly struct time : IEquatable<time>, IComparable<time>
     /// </summary>
     public static TimeSpan GlobalTimeOffset { get; set; }
 
+    static DateTime? unixEpoch;
+    static DateTime UnixEpoch => (unixEpoch ??= new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
+
     [DataMember(Name = "secs")] public readonly uint Secs;
     [DataMember(Name = "nsecs")] public readonly uint Nsecs;
 
@@ -27,7 +30,7 @@ public readonly struct time : IEquatable<time>, IComparable<time>
     /// </summary>
     public time(in DateTime time)
     {
-        TimeSpan diff = time.ToUniversalTime() - TimeConstants.UnixEpoch;
+        TimeSpan diff = time.ToUniversalTime() - UnixEpoch;
         Secs = (uint)diff.TotalSeconds;
         Nsecs = (uint)(diff.Ticks % 10000000) * 100;
     }
@@ -39,7 +42,7 @@ public readonly struct time : IEquatable<time>, IComparable<time>
 
     public DateTime ToDateTime()
     {
-        return (TimeConstants.UnixEpoch + ToTimeSpan()).ToLocalTime();
+        return (UnixEpoch + ToTimeSpan()).ToLocalTime();
     }
 
     public TimeSpan ToTimeSpan()
@@ -107,9 +110,4 @@ public readonly struct time : IEquatable<time>, IComparable<time>
     {
         return $"{{\"secs\":{Secs.ToString()},\"nsecs\":{Nsecs.ToString()}}}";
     }
-}
-    
-internal static class TimeConstants
-{
-    public static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 }

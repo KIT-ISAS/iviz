@@ -50,13 +50,13 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public void RosValidate()
         {
-            if (Triangles is null) BuiltIns.ThrowNullReference(nameof(Triangles));
+            if (Triangles is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Triangles.Length; i++)
             {
                 if (Triangles[i] is null) BuiltIns.ThrowNullReference($"{nameof(Triangles)}[{i}]");
                 Triangles[i].RosValidate();
             }
-            if (Vertices is null) BuiltIns.ThrowNullReference(nameof(Vertices));
+            if (Vertices is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + 12 * Triangles.Length + 24 * Vertices.Length;

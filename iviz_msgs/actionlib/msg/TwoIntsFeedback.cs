@@ -22,7 +22,8 @@ namespace Iviz.Msgs.Actionlib
         
         public TwoIntsFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly TwoIntsFeedback Singleton = new TwoIntsFeedback();
+        static TwoIntsFeedback? singleton;
+        public static TwoIntsFeedback Singleton => singleton ??= new TwoIntsFeedback();
     
         public void RosSerialize(ref WriteBuffer b)
         {

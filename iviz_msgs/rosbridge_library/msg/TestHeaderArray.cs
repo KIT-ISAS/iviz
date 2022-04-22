@@ -42,7 +42,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (Header is null) BuiltIns.ThrowNullReference(nameof(Header));
+            if (Header is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetArraySize(Header);

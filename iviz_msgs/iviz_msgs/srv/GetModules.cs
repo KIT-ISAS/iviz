@@ -67,7 +67,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetModulesRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetModulesRequest Singleton = new GetModulesRequest();
+        static GetModulesRequest? singleton;
+        public static GetModulesRequest Singleton => singleton ??= new GetModulesRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -120,7 +121,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Configs is null) BuiltIns.ThrowNullReference(nameof(Configs));
+            if (Configs is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Configs.Length; i++)
             {
                 if (Configs[i] is null) BuiltIns.ThrowNullReference($"{nameof(Configs)}[{i}]");

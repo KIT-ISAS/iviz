@@ -85,11 +85,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Caption is null) BuiltIns.ThrowNullReference(nameof(Caption));
-            if (Boundary is null) BuiltIns.ThrowNullReference(nameof(Boundary));
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (Caption is null) BuiltIns.ThrowNullReference();
+            if (Boundary is null) BuiltIns.ThrowNullReference();
             Boundary.RosValidate();
-            if (SecondaryBoundaries is null) BuiltIns.ThrowNullReference(nameof(SecondaryBoundaries));
+            if (SecondaryBoundaries is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < SecondaryBoundaries.Length; i++)
             {
                 if (SecondaryBoundaries[i] is null) BuiltIns.ThrowNullReference($"{nameof(SecondaryBoundaries)}[{i}]");

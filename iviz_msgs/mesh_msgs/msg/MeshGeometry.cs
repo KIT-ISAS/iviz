@@ -53,9 +53,9 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Vertices is null) BuiltIns.ThrowNullReference(nameof(Vertices));
-            if (VertexNormals is null) BuiltIns.ThrowNullReference(nameof(VertexNormals));
-            if (Faces is null) BuiltIns.ThrowNullReference(nameof(Faces));
+            if (Vertices is null) BuiltIns.ThrowNullReference();
+            if (VertexNormals is null) BuiltIns.ThrowNullReference();
+            if (Faces is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Faces.Length; i++)
             {
                 if (Faces[i] is null) BuiltIns.ThrowNullReference($"{nameof(Faces)}[{i}]");

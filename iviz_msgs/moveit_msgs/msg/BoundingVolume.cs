@@ -66,20 +66,20 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Primitives is null) BuiltIns.ThrowNullReference(nameof(Primitives));
+            if (Primitives is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Primitives.Length; i++)
             {
                 if (Primitives[i] is null) BuiltIns.ThrowNullReference($"{nameof(Primitives)}[{i}]");
                 Primitives[i].RosValidate();
             }
-            if (PrimitivePoses is null) BuiltIns.ThrowNullReference(nameof(PrimitivePoses));
-            if (Meshes is null) BuiltIns.ThrowNullReference(nameof(Meshes));
+            if (PrimitivePoses is null) BuiltIns.ThrowNullReference();
+            if (Meshes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Meshes.Length; i++)
             {
                 if (Meshes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Meshes)}[{i}]");
                 Meshes[i].RosValidate();
             }
-            if (MeshPoses is null) BuiltIns.ThrowNullReference(nameof(MeshPoses));
+            if (MeshPoses is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

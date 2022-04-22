@@ -68,31 +68,31 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Bools is null) BuiltIns.ThrowNullReference(nameof(Bools));
+            if (Bools is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Bools.Length; i++)
             {
                 if (Bools[i] is null) BuiltIns.ThrowNullReference($"{nameof(Bools)}[{i}]");
                 Bools[i].RosValidate();
             }
-            if (Ints is null) BuiltIns.ThrowNullReference(nameof(Ints));
+            if (Ints is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Ints.Length; i++)
             {
                 if (Ints[i] is null) BuiltIns.ThrowNullReference($"{nameof(Ints)}[{i}]");
                 Ints[i].RosValidate();
             }
-            if (Strs is null) BuiltIns.ThrowNullReference(nameof(Strs));
+            if (Strs is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Strs.Length; i++)
             {
                 if (Strs[i] is null) BuiltIns.ThrowNullReference($"{nameof(Strs)}[{i}]");
                 Strs[i].RosValidate();
             }
-            if (Doubles is null) BuiltIns.ThrowNullReference(nameof(Doubles));
+            if (Doubles is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Doubles.Length; i++)
             {
                 if (Doubles[i] is null) BuiltIns.ThrowNullReference($"{nameof(Doubles)}[{i}]");
                 Doubles[i].RosValidate();
             }
-            if (Groups is null) BuiltIns.ThrowNullReference(nameof(Groups));
+            if (Groups is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Groups.Length; i++)
             {
                 if (Groups[i] is null) BuiltIns.ThrowNullReference($"{nameof(Groups)}[{i}]");

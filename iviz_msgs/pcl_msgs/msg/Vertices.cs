@@ -39,7 +39,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Vertices_ is null) BuiltIns.ThrowNullReference(nameof(Vertices_));
+            if (Vertices_ is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + 4 * Vertices_.Length;

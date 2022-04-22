@@ -51,13 +51,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Dialogs is null) BuiltIns.ThrowNullReference(nameof(Dialogs));
+            if (Dialogs is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Dialogs.Length; i++)
             {
                 if (Dialogs[i] is null) BuiltIns.ThrowNullReference($"{nameof(Dialogs)}[{i}]");
                 Dialogs[i].RosValidate();
             }
-            if (Widgets is null) BuiltIns.ThrowNullReference(nameof(Widgets));
+            if (Widgets is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Widgets.Length; i++)
             {
                 if (Widgets[i] is null) BuiltIns.ThrowNullReference($"{nameof(Widgets)}[{i}]");

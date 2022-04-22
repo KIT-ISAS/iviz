@@ -45,9 +45,9 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Request is null) BuiltIns.ThrowNullReference(nameof(Request));
+            if (Request is null) BuiltIns.ThrowNullReference();
             Request.RosValidate();
-            if (PlanningOptions is null) BuiltIns.ThrowNullReference(nameof(PlanningOptions));
+            if (PlanningOptions is null) BuiltIns.ThrowNullReference();
             PlanningOptions.RosValidate();
         }
     

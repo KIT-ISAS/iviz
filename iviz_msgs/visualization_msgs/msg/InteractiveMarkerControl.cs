@@ -112,14 +112,14 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Markers is null) BuiltIns.ThrowNullReference(nameof(Markers));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Markers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Markers.Length; i++)
             {
                 if (Markers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Markers)}[{i}]");
                 Markers[i].RosValidate();
             }
-            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
+            if (Description is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

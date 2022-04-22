@@ -84,7 +84,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Frames is null) BuiltIns.ThrowNullReference(nameof(Frames));
+            if (Frames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Frames.Length; i++)
             {
                 if (Frames[i] is null) BuiltIns.ThrowNullReference($"{nameof(Frames)}[{i}]");
@@ -137,8 +137,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (IsValid is null) BuiltIns.ThrowNullReference(nameof(IsValid));
-            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
+            if (IsValid is null) BuiltIns.ThrowNullReference();
+            if (Poses is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + IsValid.Length + 56 * Poses.Length;

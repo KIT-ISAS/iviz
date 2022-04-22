@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (State is null) BuiltIns.ThrowNullReference(nameof(State));
+            if (State is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(State);

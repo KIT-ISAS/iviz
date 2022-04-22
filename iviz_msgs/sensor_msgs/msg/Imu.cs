@@ -68,11 +68,11 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (OrientationCovariance is null) BuiltIns.ThrowNullReference(nameof(OrientationCovariance));
+            if (OrientationCovariance is null) BuiltIns.ThrowNullReference();
             if (OrientationCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(OrientationCovariance), OrientationCovariance.Length, 9);
-            if (AngularVelocityCovariance is null) BuiltIns.ThrowNullReference(nameof(AngularVelocityCovariance));
+            if (AngularVelocityCovariance is null) BuiltIns.ThrowNullReference();
             if (AngularVelocityCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(AngularVelocityCovariance), AngularVelocityCovariance.Length, 9);
-            if (LinearAccelerationCovariance is null) BuiltIns.ThrowNullReference(nameof(LinearAccelerationCovariance));
+            if (LinearAccelerationCovariance is null) BuiltIns.ThrowNullReference();
             if (LinearAccelerationCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(LinearAccelerationCovariance), LinearAccelerationCovariance.Length, 9);
         }
     

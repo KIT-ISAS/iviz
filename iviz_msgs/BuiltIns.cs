@@ -329,6 +329,12 @@ namespace Iviz.Msgs
         {
             throw new NullReferenceException(name);
         }
+        
+        [DoesNotReturn]
+        public static void ThrowNullReference()
+        {
+            throw new NullReferenceException("Validation failed. A field was not set.");
+        }
     }
 }
 

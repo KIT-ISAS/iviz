@@ -71,24 +71,24 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Vertices is null) BuiltIns.ThrowNullReference(nameof(Vertices));
-            if (Normals is null) BuiltIns.ThrowNullReference(nameof(Normals));
-            if (Tangents is null) BuiltIns.ThrowNullReference(nameof(Tangents));
-            if (BiTangents is null) BuiltIns.ThrowNullReference(nameof(BiTangents));
-            if (TexCoords is null) BuiltIns.ThrowNullReference(nameof(TexCoords));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Vertices is null) BuiltIns.ThrowNullReference();
+            if (Normals is null) BuiltIns.ThrowNullReference();
+            if (Tangents is null) BuiltIns.ThrowNullReference();
+            if (BiTangents is null) BuiltIns.ThrowNullReference();
+            if (TexCoords is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < TexCoords.Length; i++)
             {
                 if (TexCoords[i] is null) BuiltIns.ThrowNullReference($"{nameof(TexCoords)}[{i}]");
                 TexCoords[i].RosValidate();
             }
-            if (ColorChannels is null) BuiltIns.ThrowNullReference(nameof(ColorChannels));
+            if (ColorChannels is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < ColorChannels.Length; i++)
             {
                 if (ColorChannels[i] is null) BuiltIns.ThrowNullReference($"{nameof(ColorChannels)}[{i}]");
                 ColorChannels[i].RosValidate();
             }
-            if (Faces is null) BuiltIns.ThrowNullReference(nameof(Faces));
+            if (Faces is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

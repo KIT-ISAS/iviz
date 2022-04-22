@@ -47,7 +47,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (Tables is null) BuiltIns.ThrowNullReference(nameof(Tables));
+            if (Tables is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Tables.Length; i++)
             {
                 if (Tables[i] is null) BuiltIns.ThrowNullReference($"{nameof(Tables)}[{i}]");

@@ -46,7 +46,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Boxes is null) BuiltIns.ThrowNullReference(nameof(Boxes));
+            if (Boxes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Boxes.Length; i++)
             {
                 if (Boxes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Boxes)}[{i}]");

@@ -83,7 +83,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (Map is null) BuiltIns.ThrowNullReference(nameof(Map));
+            if (Map is null) BuiltIns.ThrowNullReference();
             Map.RosValidate();
         }
     
@@ -110,7 +110,8 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public SetGridMapResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly SetGridMapResponse Singleton = new SetGridMapResponse();
+        static SetGridMapResponse? singleton;
+        public static SetGridMapResponse Singleton => singleton ??= new SetGridMapResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

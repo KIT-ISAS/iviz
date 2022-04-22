@@ -56,29 +56,29 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
-            if (Fieldnames is null) BuiltIns.ThrowNullReference(nameof(Fieldnames));
+            if (Type is null) BuiltIns.ThrowNullReference();
+            if (Fieldnames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Fieldnames.Length; i++)
             {
                 if (Fieldnames[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fieldnames)}[{i}]");
             }
-            if (Fieldtypes is null) BuiltIns.ThrowNullReference(nameof(Fieldtypes));
+            if (Fieldtypes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Fieldtypes.Length; i++)
             {
                 if (Fieldtypes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fieldtypes)}[{i}]");
             }
-            if (Fieldarraylen is null) BuiltIns.ThrowNullReference(nameof(Fieldarraylen));
-            if (Examples is null) BuiltIns.ThrowNullReference(nameof(Examples));
+            if (Fieldarraylen is null) BuiltIns.ThrowNullReference();
+            if (Examples is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Examples.Length; i++)
             {
                 if (Examples[i] is null) BuiltIns.ThrowNullReference($"{nameof(Examples)}[{i}]");
             }
-            if (Constnames is null) BuiltIns.ThrowNullReference(nameof(Constnames));
+            if (Constnames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Constnames.Length; i++)
             {
                 if (Constnames[i] is null) BuiltIns.ThrowNullReference($"{nameof(Constnames)}[{i}]");
             }
-            if (Constvalues is null) BuiltIns.ThrowNullReference(nameof(Constvalues));
+            if (Constvalues is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Constvalues.Length; i++)
             {
                 if (Constvalues[i] is null) BuiltIns.ThrowNullReference($"{nameof(Constvalues)}[{i}]");

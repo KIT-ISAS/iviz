@@ -74,19 +74,19 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (JointNames is null) BuiltIns.ThrowNullReference(nameof(JointNames));
+            if (JointNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < JointNames.Length; i++)
             {
                 if (JointNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(JointNames)}[{i}]");
             }
-            if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
-            if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
+            if (Transforms is null) BuiltIns.ThrowNullReference();
+            if (Twist is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Twist.Length; i++)
             {
                 if (Twist[i] is null) BuiltIns.ThrowNullReference($"{nameof(Twist)}[{i}]");
                 Twist[i].RosValidate();
             }
-            if (Wrench is null) BuiltIns.ThrowNullReference(nameof(Wrench));
+            if (Wrench is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Wrench.Length; i++)
             {
                 if (Wrench[i] is null) BuiltIns.ThrowNullReference($"{nameof(Wrench)}[{i}]");

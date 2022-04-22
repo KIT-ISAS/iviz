@@ -66,7 +66,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public QueryPlannerInterfacesRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly QueryPlannerInterfacesRequest Singleton = new QueryPlannerInterfacesRequest();
+        static QueryPlannerInterfacesRequest? singleton;
+        public static QueryPlannerInterfacesRequest Singleton => singleton ??= new QueryPlannerInterfacesRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -123,7 +124,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (PlannerInterfaces is null) BuiltIns.ThrowNullReference(nameof(PlannerInterfaces));
+            if (PlannerInterfaces is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PlannerInterfaces.Length; i++)
             {
                 if (PlannerInterfaces[i] is null) BuiltIns.ThrowNullReference($"{nameof(PlannerInterfaces)}[{i}]");

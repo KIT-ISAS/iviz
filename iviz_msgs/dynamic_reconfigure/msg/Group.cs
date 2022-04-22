@@ -50,9 +50,9 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
-            if (Parameters is null) BuiltIns.ThrowNullReference(nameof(Parameters));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Type is null) BuiltIns.ThrowNullReference();
+            if (Parameters is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Parameters.Length; i++)
             {
                 if (Parameters[i] is null) BuiltIns.ThrowNullReference($"{nameof(Parameters)}[{i}]");

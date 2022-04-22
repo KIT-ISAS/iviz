@@ -100,9 +100,9 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (PlannerConfig is null) BuiltIns.ThrowNullReference(nameof(PlannerConfig));
-            if (Group is null) BuiltIns.ThrowNullReference(nameof(Group));
-            if (Params is null) BuiltIns.ThrowNullReference(nameof(Params));
+            if (PlannerConfig is null) BuiltIns.ThrowNullReference();
+            if (Group is null) BuiltIns.ThrowNullReference();
+            if (Params is null) BuiltIns.ThrowNullReference();
             Params.RosValidate();
         }
     
@@ -138,7 +138,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public SetPlannerParamsResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly SetPlannerParamsResponse Singleton = new SetPlannerParamsResponse();
+        static SetPlannerParamsResponse? singleton;
+        public static SetPlannerParamsResponse Singleton => singleton ??= new SetPlannerParamsResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

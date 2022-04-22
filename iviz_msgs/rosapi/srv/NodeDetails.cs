@@ -82,7 +82,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Node is null) BuiltIns.ThrowNullReference(nameof(Node));
+            if (Node is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Node);
@@ -134,17 +134,17 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Subscribing is null) BuiltIns.ThrowNullReference(nameof(Subscribing));
+            if (Subscribing is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Subscribing.Length; i++)
             {
                 if (Subscribing[i] is null) BuiltIns.ThrowNullReference($"{nameof(Subscribing)}[{i}]");
             }
-            if (Publishing is null) BuiltIns.ThrowNullReference(nameof(Publishing));
+            if (Publishing is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Publishing.Length; i++)
             {
                 if (Publishing[i] is null) BuiltIns.ThrowNullReference($"{nameof(Publishing)}[{i}]");
             }
-            if (Services is null) BuiltIns.ThrowNullReference(nameof(Services));
+            if (Services is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Services.Length; i++)
             {
                 if (Services[i] is null) BuiltIns.ThrowNullReference($"{nameof(Services)}[{i}]");

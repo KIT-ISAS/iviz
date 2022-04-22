@@ -58,15 +58,15 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (LinkName is null) BuiltIns.ThrowNullReference(nameof(LinkName));
-            if (Object is null) BuiltIns.ThrowNullReference(nameof(Object));
+            if (LinkName is null) BuiltIns.ThrowNullReference();
+            if (Object is null) BuiltIns.ThrowNullReference();
             Object.RosValidate();
-            if (TouchLinks is null) BuiltIns.ThrowNullReference(nameof(TouchLinks));
+            if (TouchLinks is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < TouchLinks.Length; i++)
             {
                 if (TouchLinks[i] is null) BuiltIns.ThrowNullReference($"{nameof(TouchLinks)}[{i}]");
             }
-            if (DetachPosture is null) BuiltIns.ThrowNullReference(nameof(DetachPosture));
+            if (DetachPosture is null) BuiltIns.ThrowNullReference();
             DetachPosture.RosValidate();
         }
     

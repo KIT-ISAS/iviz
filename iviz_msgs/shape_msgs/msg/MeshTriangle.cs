@@ -39,7 +39,7 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public void RosValidate()
         {
-            if (VertexIndices is null) BuiltIns.ThrowNullReference(nameof(VertexIndices));
+            if (VertexIndices is null) BuiltIns.ThrowNullReference();
             if (VertexIndices.Length != 3) throw new RosInvalidSizeForFixedArrayException(nameof(VertexIndices), VertexIndices.Length, 3);
         }
     

@@ -54,9 +54,9 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Cloud is null) BuiltIns.ThrowNullReference(nameof(Cloud));
+            if (Cloud is null) BuiltIns.ThrowNullReference();
             Cloud.RosValidate();
-            if (Polygons is null) BuiltIns.ThrowNullReference(nameof(Polygons));
+            if (Polygons is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Polygons.Length; i++)
             {
                 if (Polygons[i] is null) BuiltIns.ThrowNullReference($"{nameof(Polygons)}[{i}]");

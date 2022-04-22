@@ -84,7 +84,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Uri is null) BuiltIns.ThrowNullReference(nameof(Uri));
+            if (Uri is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uri);
@@ -138,9 +138,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Scene is null) BuiltIns.ThrowNullReference(nameof(Scene));
+            if (Scene is null) BuiltIns.ThrowNullReference();
             Scene.RosValidate();
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Message is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + Scene.RosMessageLength + BuiltIns.GetStringSize(Message);

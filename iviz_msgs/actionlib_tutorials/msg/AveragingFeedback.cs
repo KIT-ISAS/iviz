@@ -23,7 +23,8 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public AveragingFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly AveragingFeedback Singleton = new AveragingFeedback();
+        static AveragingFeedback? singleton;
+        public static AveragingFeedback Singleton => singleton ??= new AveragingFeedback();
     
         public void RosSerialize(ref WriteBuffer b)
         {

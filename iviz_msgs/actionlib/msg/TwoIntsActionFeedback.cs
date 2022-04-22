@@ -47,9 +47,9 @@ namespace Iviz.Msgs.Actionlib
         
         public void RosValidate()
         {
-            if (Status is null) BuiltIns.ThrowNullReference(nameof(Status));
+            if (Status is null) BuiltIns.ThrowNullReference();
             Status.RosValidate();
-            if (Feedback is null) BuiltIns.ThrowNullReference(nameof(Feedback));
+            if (Feedback is null) BuiltIns.ThrowNullReference();
             Feedback.RosValidate();
         }
     

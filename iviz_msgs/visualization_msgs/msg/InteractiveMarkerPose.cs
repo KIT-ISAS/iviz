@@ -50,7 +50,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Name is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 60 + Header.RosMessageLength + BuiltIns.GetStringSize(Name);

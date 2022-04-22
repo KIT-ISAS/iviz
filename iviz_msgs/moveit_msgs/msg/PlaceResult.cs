@@ -60,22 +60,22 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference();
             ErrorCode.RosValidate();
-            if (TrajectoryStart is null) BuiltIns.ThrowNullReference(nameof(TrajectoryStart));
+            if (TrajectoryStart is null) BuiltIns.ThrowNullReference();
             TrajectoryStart.RosValidate();
-            if (TrajectoryStages is null) BuiltIns.ThrowNullReference(nameof(TrajectoryStages));
+            if (TrajectoryStages is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < TrajectoryStages.Length; i++)
             {
                 if (TrajectoryStages[i] is null) BuiltIns.ThrowNullReference($"{nameof(TrajectoryStages)}[{i}]");
                 TrajectoryStages[i].RosValidate();
             }
-            if (TrajectoryDescriptions is null) BuiltIns.ThrowNullReference(nameof(TrajectoryDescriptions));
+            if (TrajectoryDescriptions is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < TrajectoryDescriptions.Length; i++)
             {
                 if (TrajectoryDescriptions[i] is null) BuiltIns.ThrowNullReference($"{nameof(TrajectoryDescriptions)}[{i}]");
             }
-            if (PlaceLocation is null) BuiltIns.ThrowNullReference(nameof(PlaceLocation));
+            if (PlaceLocation is null) BuiltIns.ThrowNullReference();
             PlaceLocation.RosValidate();
         }
     

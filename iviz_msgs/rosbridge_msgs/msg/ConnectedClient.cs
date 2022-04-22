@@ -42,7 +42,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         
         public void RosValidate()
         {
-            if (IpAddress is null) BuiltIns.ThrowNullReference(nameof(IpAddress));
+            if (IpAddress is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 12 + BuiltIns.GetStringSize(IpAddress);

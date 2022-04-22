@@ -49,9 +49,9 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (State is null) BuiltIns.ThrowNullReference(nameof(State));
+            if (State is null) BuiltIns.ThrowNullReference();
             State.RosValidate();
-            if (HighlightLinks is null) BuiltIns.ThrowNullReference(nameof(HighlightLinks));
+            if (HighlightLinks is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < HighlightLinks.Length; i++)
             {
                 if (HighlightLinks[i] is null) BuiltIns.ThrowNullReference($"{nameof(HighlightLinks)}[{i}]");

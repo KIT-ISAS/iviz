@@ -58,8 +58,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Format is null) BuiltIns.ThrowNullReference(nameof(Format));
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Format is null) BuiltIns.ThrowNullReference();
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

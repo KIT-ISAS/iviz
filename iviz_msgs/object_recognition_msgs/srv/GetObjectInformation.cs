@@ -84,7 +84,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
+            if (Type is null) BuiltIns.ThrowNullReference();
             Type.RosValidate();
         }
     
@@ -128,7 +128,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (Information is null) BuiltIns.ThrowNullReference(nameof(Information));
+            if (Information is null) BuiltIns.ThrowNullReference();
             Information.RosValidate();
         }
     

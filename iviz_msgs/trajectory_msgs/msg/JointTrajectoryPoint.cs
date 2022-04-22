@@ -50,10 +50,10 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosValidate()
         {
-            if (Positions is null) BuiltIns.ThrowNullReference(nameof(Positions));
-            if (Velocities is null) BuiltIns.ThrowNullReference(nameof(Velocities));
-            if (Accelerations is null) BuiltIns.ThrowNullReference(nameof(Accelerations));
-            if (Effort is null) BuiltIns.ThrowNullReference(nameof(Effort));
+            if (Positions is null) BuiltIns.ThrowNullReference();
+            if (Velocities is null) BuiltIns.ThrowNullReference();
+            if (Accelerations is null) BuiltIns.ThrowNullReference();
+            if (Effort is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

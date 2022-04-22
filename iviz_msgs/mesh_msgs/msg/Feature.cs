@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Descriptor is null) BuiltIns.ThrowNullReference(nameof(Descriptor));
+            if (Descriptor is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Descriptor.Length; i++)
             {
                 if (Descriptor[i] is null) BuiltIns.ThrowNullReference($"{nameof(Descriptor)}[{i}]");

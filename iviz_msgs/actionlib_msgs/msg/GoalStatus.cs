@@ -75,9 +75,9 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public void RosValidate()
         {
-            if (GoalId is null) BuiltIns.ThrowNullReference(nameof(GoalId));
+            if (GoalId is null) BuiltIns.ThrowNullReference();
             GoalId.RosValidate();
-            if (Text is null) BuiltIns.ThrowNullReference(nameof(Text));
+            if (Text is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + GoalId.RosMessageLength + BuiltIns.GetStringSize(Text);

@@ -51,17 +51,17 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Keys is null) BuiltIns.ThrowNullReference(nameof(Keys));
+            if (Keys is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Keys.Length; i++)
             {
                 if (Keys[i] is null) BuiltIns.ThrowNullReference($"{nameof(Keys)}[{i}]");
             }
-            if (Values is null) BuiltIns.ThrowNullReference(nameof(Values));
+            if (Values is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Values.Length; i++)
             {
                 if (Values[i] is null) BuiltIns.ThrowNullReference($"{nameof(Values)}[{i}]");
             }
-            if (Descriptions is null) BuiltIns.ThrowNullReference(nameof(Descriptions));
+            if (Descriptions is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Descriptions.Length; i++)
             {
                 if (Descriptions[i] is null) BuiltIns.ThrowNullReference($"{nameof(Descriptions)}[{i}]");

@@ -94,13 +94,13 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Ranges is null) BuiltIns.ThrowNullReference(nameof(Ranges));
+            if (Ranges is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Ranges.Length; i++)
             {
                 if (Ranges[i] is null) BuiltIns.ThrowNullReference($"{nameof(Ranges)}[{i}]");
                 Ranges[i].RosValidate();
             }
-            if (Intensities is null) BuiltIns.ThrowNullReference(nameof(Intensities));
+            if (Intensities is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Intensities.Length; i++)
             {
                 if (Intensities[i] is null) BuiltIns.ThrowNullReference($"{nameof(Intensities)}[{i}]");

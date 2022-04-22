@@ -66,7 +66,8 @@ namespace Iviz.Msgs.Rosapi
         
         public NodesRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly NodesRequest Singleton = new NodesRequest();
+        static NodesRequest? singleton;
+        public static NodesRequest Singleton => singleton ??= new NodesRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -118,7 +119,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Nodes_ is null) BuiltIns.ThrowNullReference(nameof(Nodes_));
+            if (Nodes_ is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Nodes_.Length; i++)
             {
                 if (Nodes_[i] is null) BuiltIns.ThrowNullReference($"{nameof(Nodes_)}[{i}]");

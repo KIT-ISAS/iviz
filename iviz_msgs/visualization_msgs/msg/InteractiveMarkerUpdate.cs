@@ -76,20 +76,20 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (ServerId is null) BuiltIns.ThrowNullReference(nameof(ServerId));
-            if (Markers is null) BuiltIns.ThrowNullReference(nameof(Markers));
+            if (ServerId is null) BuiltIns.ThrowNullReference();
+            if (Markers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Markers.Length; i++)
             {
                 if (Markers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Markers)}[{i}]");
                 Markers[i].RosValidate();
             }
-            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
+            if (Poses is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Poses.Length; i++)
             {
                 if (Poses[i] is null) BuiltIns.ThrowNullReference($"{nameof(Poses)}[{i}]");
                 Poses[i].RosValidate();
             }
-            if (Erases is null) BuiltIns.ThrowNullReference(nameof(Erases));
+            if (Erases is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Erases.Length; i++)
             {
                 if (Erases[i] is null) BuiltIns.ThrowNullReference($"{nameof(Erases)}[{i}]");

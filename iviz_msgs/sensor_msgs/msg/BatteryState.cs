@@ -125,10 +125,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (CellVoltage is null) BuiltIns.ThrowNullReference(nameof(CellVoltage));
-            if (CellTemperature is null) BuiltIns.ThrowNullReference(nameof(CellTemperature));
-            if (Location is null) BuiltIns.ThrowNullReference(nameof(Location));
-            if (SerialNumber is null) BuiltIns.ThrowNullReference(nameof(SerialNumber));
+            if (CellVoltage is null) BuiltIns.ThrowNullReference();
+            if (CellTemperature is null) BuiltIns.ThrowNullReference();
+            if (Location is null) BuiltIns.ThrowNullReference();
+            if (SerialNumber is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

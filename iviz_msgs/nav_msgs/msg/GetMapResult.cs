@@ -38,7 +38,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Map is null) BuiltIns.ThrowNullReference(nameof(Map));
+            if (Map is null) BuiltIns.ThrowNullReference();
             Map.RosValidate();
         }
     

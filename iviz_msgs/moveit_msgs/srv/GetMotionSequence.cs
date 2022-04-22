@@ -83,7 +83,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Request is null) BuiltIns.ThrowNullReference(nameof(Request));
+            if (Request is null) BuiltIns.ThrowNullReference();
             Request.RosValidate();
         }
     
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Response is null) BuiltIns.ThrowNullReference(nameof(Response));
+            if (Response is null) BuiltIns.ThrowNullReference();
             Response.RosValidate();
         }
     

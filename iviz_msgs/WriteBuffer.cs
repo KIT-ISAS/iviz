@@ -126,6 +126,7 @@ namespace Iviz.Msgs
             }
         }
 
+        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SerializeArray(List<string> val, int count = 0)
         {
@@ -143,6 +144,7 @@ namespace Iviz.Msgs
                 Serialize(str);
             }
         }
+        */
 
         public void SerializeStructArray<T>(T[] val) where T : unmanaged
         {
@@ -180,6 +182,7 @@ namespace Iviz.Msgs
             Advance(size);
         }
 
+        /*
         public void SerializeStructList<T>(List<T> val, int count = 0) where T : unmanaged
         {
             int sizeOfT = Unsafe.SizeOf<T>();
@@ -199,6 +202,7 @@ namespace Iviz.Msgs
                 Serialize(v);
             }
         }
+        */
 
         public void SerializeArray<T>(T[] val) where T : IMessage
         {

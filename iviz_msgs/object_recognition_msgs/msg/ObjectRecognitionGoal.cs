@@ -43,7 +43,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (FilterLimits is null) BuiltIns.ThrowNullReference(nameof(FilterLimits));
+            if (FilterLimits is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + 4 * FilterLimits.Length;

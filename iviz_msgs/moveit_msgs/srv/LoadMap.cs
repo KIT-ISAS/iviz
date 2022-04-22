@@ -82,7 +82,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
+            if (Filename is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Filename);

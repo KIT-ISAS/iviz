@@ -87,8 +87,8 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosValidate()
         {
-            if (Logger is null) BuiltIns.ThrowNullReference(nameof(Logger));
-            if (Level is null) BuiltIns.ThrowNullReference(nameof(Level));
+            if (Logger is null) BuiltIns.ThrowNullReference();
+            if (Level is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Logger) + BuiltIns.GetStringSize(Level);
@@ -114,7 +114,8 @@ namespace Iviz.Msgs.Roscpp
         
         public SetLoggerLevelResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly SetLoggerLevelResponse Singleton = new SetLoggerLevelResponse();
+        static SetLoggerLevelResponse? singleton;
+        public static SetLoggerLevelResponse Singleton => singleton ??= new SetLoggerLevelResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

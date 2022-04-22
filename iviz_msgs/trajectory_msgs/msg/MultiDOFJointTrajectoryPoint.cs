@@ -63,14 +63,14 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosValidate()
         {
-            if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
-            if (Velocities is null) BuiltIns.ThrowNullReference(nameof(Velocities));
+            if (Transforms is null) BuiltIns.ThrowNullReference();
+            if (Velocities is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Velocities.Length; i++)
             {
                 if (Velocities[i] is null) BuiltIns.ThrowNullReference($"{nameof(Velocities)}[{i}]");
                 Velocities[i].RosValidate();
             }
-            if (Accelerations is null) BuiltIns.ThrowNullReference(nameof(Accelerations));
+            if (Accelerations is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Accelerations.Length; i++)
             {
                 if (Accelerations[i] is null) BuiltIns.ThrowNullReference($"{nameof(Accelerations)}[{i}]");

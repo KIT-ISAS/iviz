@@ -60,11 +60,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (@string is null) BuiltIns.ThrowNullReference(nameof(@string));
-            if (Bytes is null) BuiltIns.ThrowNullReference(nameof(Bytes));
-            if (Int32s is null) BuiltIns.ThrowNullReference(nameof(Int32s));
-            if (Float64s is null) BuiltIns.ThrowNullReference(nameof(Float64s));
-            if (Strings is null) BuiltIns.ThrowNullReference(nameof(Strings));
+            if (@string is null) BuiltIns.ThrowNullReference();
+            if (Bytes is null) BuiltIns.ThrowNullReference();
+            if (Int32s is null) BuiltIns.ThrowNullReference();
+            if (Float64s is null) BuiltIns.ThrowNullReference();
+            if (Strings is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Strings.Length; i++)
             {
                 if (Strings[i] is null) BuiltIns.ThrowNullReference($"{nameof(Strings)}[{i}]");

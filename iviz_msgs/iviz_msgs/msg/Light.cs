@@ -59,7 +59,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Name is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 46 + BuiltIns.GetStringSize(Name);

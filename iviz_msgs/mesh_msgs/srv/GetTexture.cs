@@ -86,7 +86,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
+            if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Uuid);
@@ -128,7 +128,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Texture is null) BuiltIns.ThrowNullReference(nameof(Texture));
+            if (Texture is null) BuiltIns.ThrowNullReference();
             Texture.RosValidate();
         }
     

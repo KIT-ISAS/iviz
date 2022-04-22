@@ -66,7 +66,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public StopCaptureRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly StopCaptureRequest Singleton = new StopCaptureRequest();
+        static StopCaptureRequest? singleton;
+        public static StopCaptureRequest Singleton => singleton ??= new StopCaptureRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -122,7 +123,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Message is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);

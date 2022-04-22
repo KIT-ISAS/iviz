@@ -49,11 +49,11 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (ActionGoal is null) BuiltIns.ThrowNullReference(nameof(ActionGoal));
+            if (ActionGoal is null) BuiltIns.ThrowNullReference();
             ActionGoal.RosValidate();
-            if (ActionResult is null) BuiltIns.ThrowNullReference(nameof(ActionResult));
+            if (ActionResult is null) BuiltIns.ThrowNullReference();
             ActionResult.RosValidate();
-            if (ActionFeedback is null) BuiltIns.ThrowNullReference(nameof(ActionFeedback));
+            if (ActionFeedback is null) BuiltIns.ThrowNullReference();
             ActionFeedback.RosValidate();
         }
     

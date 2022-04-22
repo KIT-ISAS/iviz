@@ -67,8 +67,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ContactBody1 is null) BuiltIns.ThrowNullReference(nameof(ContactBody1));
-            if (ContactBody2 is null) BuiltIns.ThrowNullReference(nameof(ContactBody2));
+            if (ContactBody1 is null) BuiltIns.ThrowNullReference();
+            if (ContactBody2 is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

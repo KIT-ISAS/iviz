@@ -94,7 +94,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (@string is null) BuiltIns.ThrowNullReference(nameof(@string));
+            if (@string is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 13 + BuiltIns.GetStringSize(@string);
@@ -120,7 +120,8 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public TestMultipleRequestFieldsResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly TestMultipleRequestFieldsResponse Singleton = new TestMultipleRequestFieldsResponse();
+        static TestMultipleRequestFieldsResponse? singleton;
+        public static TestMultipleRequestFieldsResponse Singleton => singleton ??= new TestMultipleRequestFieldsResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

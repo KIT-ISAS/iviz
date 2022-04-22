@@ -45,8 +45,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Key is null) BuiltIns.ThrowNullReference(nameof(Key));
-            if (Value is null) BuiltIns.ThrowNullReference(nameof(Value));
+            if (Key is null) BuiltIns.ThrowNullReference();
+            if (Value is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Key) + BuiltIns.GetStringSize(Value);

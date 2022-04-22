@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Costs is null) BuiltIns.ThrowNullReference(nameof(Costs));
+            if (Costs is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + 4 * Costs.Length;

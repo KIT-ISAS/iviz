@@ -87,8 +87,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Title is null) BuiltIns.ThrowNullReference(nameof(Title));
-            if (Command is null) BuiltIns.ThrowNullReference(nameof(Command));
+            if (Title is null) BuiltIns.ThrowNullReference();
+            if (Command is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 17 + BuiltIns.GetStringSize(Title) + BuiltIns.GetStringSize(Command);

@@ -42,7 +42,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Indices is null) BuiltIns.ThrowNullReference(nameof(Indices));
+            if (Indices is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + 4 * Indices.Length;

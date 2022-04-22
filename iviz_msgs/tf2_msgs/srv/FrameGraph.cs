@@ -66,7 +66,8 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public FrameGraphRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly FrameGraphRequest Singleton = new FrameGraphRequest();
+        static FrameGraphRequest? singleton;
+        public static FrameGraphRequest Singleton => singleton ??= new FrameGraphRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -118,7 +119,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (FrameYaml is null) BuiltIns.ThrowNullReference(nameof(FrameYaml));
+            if (FrameYaml is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(FrameYaml);

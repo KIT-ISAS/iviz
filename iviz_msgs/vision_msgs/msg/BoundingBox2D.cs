@@ -54,7 +54,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Center is null) BuiltIns.ThrowNullReference(nameof(Center));
+            if (Center is null) BuiltIns.ThrowNullReference();
             Center.RosValidate();
         }
     

@@ -109,21 +109,21 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
-            if (Target is null) BuiltIns.ThrowNullReference(nameof(Target));
+            if (GroupName is null) BuiltIns.ThrowNullReference();
+            if (Target is null) BuiltIns.ThrowNullReference();
             Target.RosValidate();
-            if (SupportSurfaces is null) BuiltIns.ThrowNullReference(nameof(SupportSurfaces));
+            if (SupportSurfaces is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < SupportSurfaces.Length; i++)
             {
                 if (SupportSurfaces[i] is null) BuiltIns.ThrowNullReference($"{nameof(SupportSurfaces)}[{i}]");
             }
-            if (CandidateGrasps is null) BuiltIns.ThrowNullReference(nameof(CandidateGrasps));
+            if (CandidateGrasps is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < CandidateGrasps.Length; i++)
             {
                 if (CandidateGrasps[i] is null) BuiltIns.ThrowNullReference($"{nameof(CandidateGrasps)}[{i}]");
                 CandidateGrasps[i].RosValidate();
             }
-            if (MovableObstacles is null) BuiltIns.ThrowNullReference(nameof(MovableObstacles));
+            if (MovableObstacles is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < MovableObstacles.Length; i++)
             {
                 if (MovableObstacles[i] is null) BuiltIns.ThrowNullReference($"{nameof(MovableObstacles)}[{i}]");
@@ -192,13 +192,13 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Grasps is null) BuiltIns.ThrowNullReference(nameof(Grasps));
+            if (Grasps is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Grasps.Length; i++)
             {
                 if (Grasps[i] is null) BuiltIns.ThrowNullReference($"{nameof(Grasps)}[{i}]");
                 Grasps[i].RosValidate();
             }
-            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference();
             ErrorCode.RosValidate();
         }
     

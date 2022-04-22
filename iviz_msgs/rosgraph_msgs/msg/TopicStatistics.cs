@@ -84,9 +84,9 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public void RosValidate()
         {
-            if (Topic is null) BuiltIns.ThrowNullReference(nameof(Topic));
-            if (NodePub is null) BuiltIns.ThrowNullReference(nameof(NodePub));
-            if (NodeSub is null) BuiltIns.ThrowNullReference(nameof(NodeSub));
+            if (Topic is null) BuiltIns.ThrowNullReference();
+            if (NodePub is null) BuiltIns.ThrowNullReference();
+            if (NodeSub is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

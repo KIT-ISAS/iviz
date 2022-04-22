@@ -62,19 +62,19 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (Info is null) BuiltIns.ThrowNullReference(nameof(Info));
+            if (Info is null) BuiltIns.ThrowNullReference();
             Info.RosValidate();
-            if (Layers is null) BuiltIns.ThrowNullReference(nameof(Layers));
+            if (Layers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Layers.Length; i++)
             {
                 if (Layers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Layers)}[{i}]");
             }
-            if (BasicLayers is null) BuiltIns.ThrowNullReference(nameof(BasicLayers));
+            if (BasicLayers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < BasicLayers.Length; i++)
             {
                 if (BasicLayers[i] is null) BuiltIns.ThrowNullReference($"{nameof(BasicLayers)}[{i}]");
             }
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Data is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Data.Length; i++)
             {
                 if (Data[i] is null) BuiltIns.ThrowNullReference($"{nameof(Data)}[{i}]");

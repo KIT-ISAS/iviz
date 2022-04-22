@@ -92,10 +92,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (RobotState is null) BuiltIns.ThrowNullReference(nameof(RobotState));
+            if (RobotState is null) BuiltIns.ThrowNullReference();
             RobotState.RosValidate();
-            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
-            if (Constraints is null) BuiltIns.ThrowNullReference(nameof(Constraints));
+            if (GroupName is null) BuiltIns.ThrowNullReference();
+            if (Constraints is null) BuiltIns.ThrowNullReference();
             Constraints.RosValidate();
         }
     
@@ -173,19 +173,19 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Contacts is null) BuiltIns.ThrowNullReference(nameof(Contacts));
+            if (Contacts is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Contacts.Length; i++)
             {
                 if (Contacts[i] is null) BuiltIns.ThrowNullReference($"{nameof(Contacts)}[{i}]");
                 Contacts[i].RosValidate();
             }
-            if (CostSources is null) BuiltIns.ThrowNullReference(nameof(CostSources));
+            if (CostSources is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < CostSources.Length; i++)
             {
                 if (CostSources[i] is null) BuiltIns.ThrowNullReference($"{nameof(CostSources)}[{i}]");
                 CostSources[i].RosValidate();
             }
-            if (ConstraintResult is null) BuiltIns.ThrowNullReference(nameof(ConstraintResult));
+            if (ConstraintResult is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < ConstraintResult.Length; i++)
             {
                 if (ConstraintResult[i] is null) BuiltIns.ThrowNullReference($"{nameof(ConstraintResult)}[{i}]");

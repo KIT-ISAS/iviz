@@ -45,8 +45,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (FaceIndices is null) BuiltIns.ThrowNullReference(nameof(FaceIndices));
-            if (Label is null) BuiltIns.ThrowNullReference(nameof(Label));
+            if (FaceIndices is null) BuiltIns.ThrowNullReference();
+            if (Label is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + 4 * FaceIndices.Length + BuiltIns.GetStringSize(Label);

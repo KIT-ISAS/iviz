@@ -82,7 +82,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Name is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Name);
@@ -108,7 +108,8 @@ namespace Iviz.Msgs.Rosapi
         
         public DeleteParamResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly DeleteParamResponse Singleton = new DeleteParamResponse();
+        static DeleteParamResponse? singleton;
+        public static DeleteParamResponse Singleton => singleton ??= new DeleteParamResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

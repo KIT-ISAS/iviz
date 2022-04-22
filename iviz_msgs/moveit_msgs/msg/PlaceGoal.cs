@@ -92,24 +92,24 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
-            if (AttachedObjectName is null) BuiltIns.ThrowNullReference(nameof(AttachedObjectName));
-            if (PlaceLocations is null) BuiltIns.ThrowNullReference(nameof(PlaceLocations));
+            if (GroupName is null) BuiltIns.ThrowNullReference();
+            if (AttachedObjectName is null) BuiltIns.ThrowNullReference();
+            if (PlaceLocations is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PlaceLocations.Length; i++)
             {
                 if (PlaceLocations[i] is null) BuiltIns.ThrowNullReference($"{nameof(PlaceLocations)}[{i}]");
                 PlaceLocations[i].RosValidate();
             }
-            if (SupportSurfaceName is null) BuiltIns.ThrowNullReference(nameof(SupportSurfaceName));
-            if (PathConstraints is null) BuiltIns.ThrowNullReference(nameof(PathConstraints));
+            if (SupportSurfaceName is null) BuiltIns.ThrowNullReference();
+            if (PathConstraints is null) BuiltIns.ThrowNullReference();
             PathConstraints.RosValidate();
-            if (PlannerId is null) BuiltIns.ThrowNullReference(nameof(PlannerId));
-            if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects));
+            if (PlannerId is null) BuiltIns.ThrowNullReference();
+            if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < AllowedTouchObjects.Length; i++)
             {
                 if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AllowedTouchObjects)}[{i}]");
             }
-            if (PlanningOptions is null) BuiltIns.ThrowNullReference(nameof(PlanningOptions));
+            if (PlanningOptions is null) BuiltIns.ThrowNullReference();
             PlanningOptions.RosValidate();
         }
     

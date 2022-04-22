@@ -116,7 +116,8 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public BoundingBoxQueryResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly BoundingBoxQueryResponse Singleton = new BoundingBoxQueryResponse();
+        static BoundingBoxQueryResponse? singleton;
+        public static BoundingBoxQueryResponse Singleton => singleton ??= new BoundingBoxQueryResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

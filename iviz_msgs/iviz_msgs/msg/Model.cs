@@ -64,22 +64,22 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
-            if (OrientationHint is null) BuiltIns.ThrowNullReference(nameof(OrientationHint));
-            if (Meshes is null) BuiltIns.ThrowNullReference(nameof(Meshes));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Filename is null) BuiltIns.ThrowNullReference();
+            if (OrientationHint is null) BuiltIns.ThrowNullReference();
+            if (Meshes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Meshes.Length; i++)
             {
                 if (Meshes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Meshes)}[{i}]");
                 Meshes[i].RosValidate();
             }
-            if (Materials is null) BuiltIns.ThrowNullReference(nameof(Materials));
+            if (Materials is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Materials.Length; i++)
             {
                 if (Materials[i] is null) BuiltIns.ThrowNullReference($"{nameof(Materials)}[{i}]");
                 Materials[i].RosValidate();
             }
-            if (Nodes is null) BuiltIns.ThrowNullReference(nameof(Nodes));
+            if (Nodes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Nodes.Length; i++)
             {
                 if (Nodes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Nodes)}[{i}]");

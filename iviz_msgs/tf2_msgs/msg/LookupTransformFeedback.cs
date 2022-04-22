@@ -21,7 +21,8 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public LookupTransformFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly LookupTransformFeedback Singleton = new LookupTransformFeedback();
+        static LookupTransformFeedback? singleton;
+        public static LookupTransformFeedback Singleton => singleton ??= new LookupTransformFeedback();
     
         public void RosSerialize(ref WriteBuffer b)
         {

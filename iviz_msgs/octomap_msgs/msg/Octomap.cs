@@ -50,8 +50,8 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

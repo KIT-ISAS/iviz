@@ -47,7 +47,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
+            if (Poses is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Poses.Length; i++)
             {
                 if (Poses[i] is null) BuiltIns.ThrowNullReference($"{nameof(Poses)}[{i}]");

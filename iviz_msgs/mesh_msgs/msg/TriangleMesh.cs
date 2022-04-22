@@ -84,30 +84,30 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Triangles is null) BuiltIns.ThrowNullReference(nameof(Triangles));
+            if (Triangles is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Triangles.Length; i++)
             {
                 if (Triangles[i] is null) BuiltIns.ThrowNullReference($"{nameof(Triangles)}[{i}]");
                 Triangles[i].RosValidate();
             }
-            if (Vertices is null) BuiltIns.ThrowNullReference(nameof(Vertices));
-            if (VertexNormals is null) BuiltIns.ThrowNullReference(nameof(VertexNormals));
-            if (VertexColors is null) BuiltIns.ThrowNullReference(nameof(VertexColors));
-            if (TriangleColors is null) BuiltIns.ThrowNullReference(nameof(TriangleColors));
-            if (VertexTextureCoords is null) BuiltIns.ThrowNullReference(nameof(VertexTextureCoords));
-            if (FaceMaterials is null) BuiltIns.ThrowNullReference(nameof(FaceMaterials));
+            if (Vertices is null) BuiltIns.ThrowNullReference();
+            if (VertexNormals is null) BuiltIns.ThrowNullReference();
+            if (VertexColors is null) BuiltIns.ThrowNullReference();
+            if (TriangleColors is null) BuiltIns.ThrowNullReference();
+            if (VertexTextureCoords is null) BuiltIns.ThrowNullReference();
+            if (FaceMaterials is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < FaceMaterials.Length; i++)
             {
                 if (FaceMaterials[i] is null) BuiltIns.ThrowNullReference($"{nameof(FaceMaterials)}[{i}]");
                 FaceMaterials[i].RosValidate();
             }
-            if (Textures is null) BuiltIns.ThrowNullReference(nameof(Textures));
+            if (Textures is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Textures.Length; i++)
             {
                 if (Textures[i] is null) BuiltIns.ThrowNullReference($"{nameof(Textures)}[{i}]");
                 Textures[i].RosValidate();
             }
-            if (Clusters is null) BuiltIns.ThrowNullReference(nameof(Clusters));
+            if (Clusters is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Clusters.Length; i++)
             {
                 if (Clusters[i] is null) BuiltIns.ThrowNullReference($"{nameof(Clusters)}[{i}]");

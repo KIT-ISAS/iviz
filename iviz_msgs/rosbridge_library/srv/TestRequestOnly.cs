@@ -109,7 +109,8 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public TestRequestOnlyResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly TestRequestOnlyResponse Singleton = new TestRequestOnlyResponse();
+        static TestRequestOnlyResponse? singleton;
+        public static TestRequestOnlyResponse Singleton => singleton ??= new TestRequestOnlyResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

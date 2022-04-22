@@ -42,7 +42,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Markers is null) BuiltIns.ThrowNullReference(nameof(Markers));
+            if (Markers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Markers.Length; i++)
             {
                 if (Markers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Markers)}[{i}]");

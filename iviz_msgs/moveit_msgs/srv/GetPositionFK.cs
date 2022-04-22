@@ -96,12 +96,12 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (FkLinkNames is null) BuiltIns.ThrowNullReference(nameof(FkLinkNames));
+            if (FkLinkNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < FkLinkNames.Length; i++)
             {
                 if (FkLinkNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(FkLinkNames)}[{i}]");
             }
-            if (RobotState is null) BuiltIns.ThrowNullReference(nameof(RobotState));
+            if (RobotState is null) BuiltIns.ThrowNullReference();
             RobotState.RosValidate();
         }
     
@@ -169,18 +169,18 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (PoseStamped is null) BuiltIns.ThrowNullReference(nameof(PoseStamped));
+            if (PoseStamped is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PoseStamped.Length; i++)
             {
                 if (PoseStamped[i] is null) BuiltIns.ThrowNullReference($"{nameof(PoseStamped)}[{i}]");
                 PoseStamped[i].RosValidate();
             }
-            if (FkLinkNames is null) BuiltIns.ThrowNullReference(nameof(FkLinkNames));
+            if (FkLinkNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < FkLinkNames.Length; i++)
             {
                 if (FkLinkNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(FkLinkNames)}[{i}]");
             }
-            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference();
             ErrorCode.RosValidate();
         }
     

@@ -53,12 +53,12 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (TrajectoryStart is null) BuiltIns.ThrowNullReference(nameof(TrajectoryStart));
+            if (TrajectoryStart is null) BuiltIns.ThrowNullReference();
             TrajectoryStart.RosValidate();
-            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
-            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
+            if (GroupName is null) BuiltIns.ThrowNullReference();
+            if (Trajectory is null) BuiltIns.ThrowNullReference();
             Trajectory.RosValidate();
-            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference();
             ErrorCode.RosValidate();
         }
     

@@ -66,7 +66,8 @@ namespace Iviz.Msgs.Rosapi
         
         public TopicsRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly TopicsRequest Singleton = new TopicsRequest();
+        static TopicsRequest? singleton;
+        public static TopicsRequest Singleton => singleton ??= new TopicsRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -123,12 +124,12 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Topics_ is null) BuiltIns.ThrowNullReference(nameof(Topics_));
+            if (Topics_ is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Topics_.Length; i++)
             {
                 if (Topics_[i] is null) BuiltIns.ThrowNullReference($"{nameof(Topics_)}[{i}]");
             }
-            if (Types is null) BuiltIns.ThrowNullReference(nameof(Types));
+            if (Types is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Types.Length; i++)
             {
                 if (Types[i] is null) BuiltIns.ThrowNullReference($"{nameof(Types)}[{i}]");

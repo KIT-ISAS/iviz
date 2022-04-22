@@ -96,30 +96,30 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (Type is null) BuiltIns.ThrowNullReference();
             Type.RosValidate();
-            if (Primitives is null) BuiltIns.ThrowNullReference(nameof(Primitives));
+            if (Primitives is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Primitives.Length; i++)
             {
                 if (Primitives[i] is null) BuiltIns.ThrowNullReference($"{nameof(Primitives)}[{i}]");
                 Primitives[i].RosValidate();
             }
-            if (PrimitivePoses is null) BuiltIns.ThrowNullReference(nameof(PrimitivePoses));
-            if (Meshes is null) BuiltIns.ThrowNullReference(nameof(Meshes));
+            if (PrimitivePoses is null) BuiltIns.ThrowNullReference();
+            if (Meshes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Meshes.Length; i++)
             {
                 if (Meshes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Meshes)}[{i}]");
                 Meshes[i].RosValidate();
             }
-            if (MeshPoses is null) BuiltIns.ThrowNullReference(nameof(MeshPoses));
-            if (Planes is null) BuiltIns.ThrowNullReference(nameof(Planes));
+            if (MeshPoses is null) BuiltIns.ThrowNullReference();
+            if (Planes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Planes.Length; i++)
             {
                 if (Planes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Planes)}[{i}]");
                 Planes[i].RosValidate();
             }
-            if (PlanePoses is null) BuiltIns.ThrowNullReference(nameof(PlanePoses));
+            if (PlanePoses is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

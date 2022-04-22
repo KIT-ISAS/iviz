@@ -43,7 +43,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
+            if (Poses is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + 56 * Poses.Length;

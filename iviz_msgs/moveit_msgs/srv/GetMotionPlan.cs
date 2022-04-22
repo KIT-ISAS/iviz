@@ -84,7 +84,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (MotionPlanRequest is null) BuiltIns.ThrowNullReference(nameof(MotionPlanRequest));
+            if (MotionPlanRequest is null) BuiltIns.ThrowNullReference();
             MotionPlanRequest.RosValidate();
         }
     
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (MotionPlanResponse is null) BuiltIns.ThrowNullReference(nameof(MotionPlanResponse));
+            if (MotionPlanResponse is null) BuiltIns.ThrowNullReference();
             MotionPlanResponse.RosValidate();
         }
     

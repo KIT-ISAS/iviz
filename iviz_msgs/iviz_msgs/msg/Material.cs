@@ -69,8 +69,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Textures is null) BuiltIns.ThrowNullReference(nameof(Textures));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Textures is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Textures.Length; i++)
             {
                 if (Textures[i] is null) BuiltIns.ThrowNullReference($"{nameof(Textures)}[{i}]");

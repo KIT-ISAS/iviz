@@ -66,7 +66,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetCaptureResolutionsRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetCaptureResolutionsRequest Singleton = new GetCaptureResolutionsRequest();
+        static GetCaptureResolutionsRequest? singleton;
+        public static GetCaptureResolutionsRequest Singleton => singleton ??= new GetCaptureResolutionsRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -131,8 +132,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (Resolutions is null) BuiltIns.ThrowNullReference(nameof(Resolutions));
+            if (Message is null) BuiltIns.ThrowNullReference();
+            if (Resolutions is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Resolutions.Length; i++)
             {
                 if (Resolutions[i] is null) BuiltIns.ThrowNullReference($"{nameof(Resolutions)}[{i}]");

@@ -52,9 +52,9 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Info is null) BuiltIns.ThrowNullReference(nameof(Info));
+            if (Info is null) BuiltIns.ThrowNullReference();
             Info.RosValidate();
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 80 + Header.RosMessageLength + Data.Length;

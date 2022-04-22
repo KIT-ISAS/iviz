@@ -98,20 +98,20 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
-            if (RobotState is null) BuiltIns.ThrowNullReference(nameof(RobotState));
+            if (GroupName is null) BuiltIns.ThrowNullReference();
+            if (RobotState is null) BuiltIns.ThrowNullReference();
             RobotState.RosValidate();
-            if (Constraints is null) BuiltIns.ThrowNullReference(nameof(Constraints));
+            if (Constraints is null) BuiltIns.ThrowNullReference();
             Constraints.RosValidate();
-            if (IkLinkName is null) BuiltIns.ThrowNullReference(nameof(IkLinkName));
-            if (PoseStamped is null) BuiltIns.ThrowNullReference(nameof(PoseStamped));
+            if (IkLinkName is null) BuiltIns.ThrowNullReference();
+            if (PoseStamped is null) BuiltIns.ThrowNullReference();
             PoseStamped.RosValidate();
-            if (IkLinkNames is null) BuiltIns.ThrowNullReference(nameof(IkLinkNames));
+            if (IkLinkNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < IkLinkNames.Length; i++)
             {
                 if (IkLinkNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(IkLinkNames)}[{i}]");
             }
-            if (PoseStampedVector is null) BuiltIns.ThrowNullReference(nameof(PoseStampedVector));
+            if (PoseStampedVector is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PoseStampedVector.Length; i++)
             {
                 if (PoseStampedVector[i] is null) BuiltIns.ThrowNullReference($"{nameof(PoseStampedVector)}[{i}]");

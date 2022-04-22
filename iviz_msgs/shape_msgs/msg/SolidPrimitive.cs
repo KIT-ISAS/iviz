@@ -70,7 +70,7 @@ namespace Iviz.Msgs.ShapeMsgs
         
         public void RosValidate()
         {
-            if (Dimensions is null) BuiltIns.ThrowNullReference(nameof(Dimensions));
+            if (Dimensions is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + 8 * Dimensions.Length;

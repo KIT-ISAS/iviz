@@ -67,23 +67,23 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (EntryNames is null) BuiltIns.ThrowNullReference(nameof(EntryNames));
+            if (EntryNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < EntryNames.Length; i++)
             {
                 if (EntryNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(EntryNames)}[{i}]");
             }
-            if (EntryValues is null) BuiltIns.ThrowNullReference(nameof(EntryValues));
+            if (EntryValues is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < EntryValues.Length; i++)
             {
                 if (EntryValues[i] is null) BuiltIns.ThrowNullReference($"{nameof(EntryValues)}[{i}]");
                 EntryValues[i].RosValidate();
             }
-            if (DefaultEntryNames is null) BuiltIns.ThrowNullReference(nameof(DefaultEntryNames));
+            if (DefaultEntryNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < DefaultEntryNames.Length; i++)
             {
                 if (DefaultEntryNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(DefaultEntryNames)}[{i}]");
             }
-            if (DefaultEntryValues is null) BuiltIns.ThrowNullReference(nameof(DefaultEntryValues));
+            if (DefaultEntryValues is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

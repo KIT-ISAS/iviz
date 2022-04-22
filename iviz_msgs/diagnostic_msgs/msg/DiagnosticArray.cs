@@ -49,7 +49,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Status is null) BuiltIns.ThrowNullReference(nameof(Status));
+            if (Status is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Status.Length; i++)
             {
                 if (Status[i] is null) BuiltIns.ThrowNullReference($"{nameof(Status)}[{i}]");

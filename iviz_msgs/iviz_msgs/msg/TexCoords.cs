@@ -38,7 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Coords is null) BuiltIns.ThrowNullReference(nameof(Coords));
+            if (Coords is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + 12 * Coords.Length;

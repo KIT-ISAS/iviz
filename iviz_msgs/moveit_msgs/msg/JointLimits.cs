@@ -62,7 +62,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (JointName is null) BuiltIns.ThrowNullReference(nameof(JointName));
+            if (JointName is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 39 + BuiltIns.GetStringSize(JointName);

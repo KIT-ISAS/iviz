@@ -23,7 +23,8 @@ namespace Iviz.Msgs.NavMsgs
         
         public GetMapFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetMapFeedback Singleton = new GetMapFeedback();
+        static GetMapFeedback? singleton;
+        public static GetMapFeedback Singleton => singleton ??= new GetMapFeedback();
     
         public void RosSerialize(ref WriteBuffer b)
         {
