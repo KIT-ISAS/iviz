@@ -183,6 +183,7 @@ namespace Iviz.Displays
             mesh.SetUVs(uvs);
 
 
+            int[] cIndices = CapsuleIndices;
             using var indices = new Rent<int>(indicesSize);
             var iArray = indices.AsSpan();
             int iOff = 0;
@@ -190,7 +191,7 @@ namespace Iviz.Displays
             foreach (int i in ..lineBuffer.Length)
             {
                 int baseOff = i * 10;
-                foreach (int index in CapsuleIndices)
+                foreach (int index in cIndices)
                 {
                     iArray[iOff++] = baseOff + index;
                 }

@@ -281,12 +281,45 @@ namespace Iviz.Core
         /// <param name="action">Action to be run.</param>
         public static void Post(Func<ValueTask> action) => Post(() => { action(); });
 
+        public static Task PostAsync(Func<ValueTask> action)
+        {
+            ThrowHelper.ThrowIfNull(action, nameof(action));
+            var ts = TaskUtils.CreateCompletionSource();
+            Post(() => TrySetAsync(ts, action()));
+            return ts.Task;
+            
+            static async ValueTask TrySetAsync(TaskCompletionSource ts, ValueTask task)
+            {
+                try
+                {
+                    await task;
+                    ts.TrySetResult();
+                }
+                catch (Exception e)
+                {
+                    ts.TrySetException(e);
+                }
+            }  
+        }
+
         public static Task<T> PostAsync<T>(Func<ValueTask<T>> action)
         {
             ThrowHelper.ThrowIfNull(action, nameof(action));
             var ts = TaskUtils.CreateCompletionSource<T>();
             Post(() => TrySetAsync(ts, action()));
             return ts.Task;
+            
+            static async ValueTask TrySetAsync(TaskCompletionSource<T> ts, ValueTask<T> task)
+            {
+                try
+                {
+                    ts.TrySetResult(await task);
+                }
+                catch (Exception e)
+                {
+                    ts.TrySetException(e);
+                }
+            }       
         }
 
         public static Task PostAsync(Action action)
@@ -295,37 +328,21 @@ namespace Iviz.Core
             var ts = TaskUtils.CreateCompletionSource();
             Post(() => TrySet(ts, action));
             return ts.Task;
+            
+            static void TrySet(TaskCompletionSource ts, Action action)
+            {
+                try
+                {
+                    action();
+                    ts.TrySetResult();
+                }
+                catch (Exception e)
+                {
+                    ts.TrySetException(e);
+                }
+            }          
         }
 
-        static async ValueTask TrySetAsync<T>(TaskCompletionSource<T> ts, ValueTask<T> task)
-        {
-            try
-            {
-                ts.TrySetResult(await task);
-            }
-            catch (OperationCanceledException e)
-            {
-                ts.TrySetCanceled(e.CancellationToken);
-            }
-            catch (Exception e)
-            {
-                ts.TrySetException(e);
-            }
-        }       
-        
-        static void TrySet(TaskCompletionSource ts, Action action)
-        {
-            try
-            {
-                action();
-                ts.TrySetResult();
-            }
-            catch (Exception e)
-            {
-                ts.TrySetException(e);
-            }
-        }          
-        
         /// <summary>
         /// Puts this async action in a queue to be run on the main thread.
         /// The listener queue may have less priority than <see cref="Post(System.Action)"/>

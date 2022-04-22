@@ -1024,80 +1024,74 @@ namespace Iviz.Controllers
                 return;
             }
 
-            Feedback feedback = new();
-            using SemaphoreSlim signal = new(0);
-            GameThread.Post(() =>
+            var feedback = new Feedback();
+            try
             {
-                try
+                await GameThread.PostAsync(() =>
                 {
                     RosLogger.Info($"{nameof(ControllerService)}: Creating dialog");
 
                     bool overrideExpired = false;
-                    string id = srv.Request.Dialog.Id;
+                    string dialogId = srv.Request.Dialog.Id;
                     var dialog = GuiWidgetListener.DefaultHandler.AddDialog(srv.Request.Dialog);
+                    var ts = TaskUtils.CreateCompletionSource();
+
                     if (dialog == null)
                     {
-                        TryRelease(signal);
-                        return;
+                        return new ValueTask();
                     }
 
+                    // note: no if/else, dialog can be both!
                     if (dialog is IDialogCanBeClicked canBeClicked)
                     {
-                        canBeClicked.Clicked += TriggerButton;
+                        canBeClicked.Clicked += entryId => TriggerButton(entryId, false);
                     }
 
-                    //dialog.MenuEntryClicked += TriggerMenu;
+                    if (dialog is IDialogCanBeMenuClicked canBeMenuClicked)
+                    {
+                        canBeMenuClicked.MenuClicked += entryId => TriggerButton(entryId, false);
+                    }
+
                     dialog.Expired += OnExpired;
 
-                    void TriggerButton(int buttonId)
+                    void TriggerButton(int buttonId, bool isMenuClick)
                     {
+                        var feedbackType = isMenuClick
+                            ? FeedbackType.MenuEntryClick
+                            : FeedbackType.ButtonClick;
+
                         feedback.VizId = RosManager.MyId ?? "";
-                        feedback.Id = id;
-                        feedback.Type = (byte)FeedbackType.ButtonClick;
+                        feedback.Id = dialogId;
+                        feedback.Type = (byte)feedbackType;
                         feedback.EntryId = buttonId;
                         overrideExpired = true;
 
-                        TryRelease(signal);
+                        ts.TrySetResult();
                     }
-
-                    /*
-                    void TriggerMenu(int buttonId)
-                    {
-                        feedback.VizId = RosManager.MyId ?? "";
-                        feedback.Id = id;
-                        feedback.Type = (byte)FeedbackType.MenuEntryClick;
-                        feedback.EntryId = buttonId;
-                        overrideExpired = true;
-
-                        TryRelease(signal);
-                    }
-                    */
 
                     void OnExpired()
                     {
-                        // ReSharper disable once AccessToModifiedClosure
                         if (overrideExpired)
                         {
                             return;
                         }
 
                         feedback.VizId = RosManager.MyId ?? "";
-                        feedback.Id = id;
+                        feedback.Id = dialogId;
                         feedback.Type = (byte)FeedbackType.Expired;
                         feedback.EntryId = 0;
 
-                        TryRelease(signal);
+                        ts.TrySetResult();
                     }
-                }
-                catch (Exception e)
-                {
-                    srv.Response.Success = false;
-                    srv.Response.Message = $"An exception was raised: {e.Message}";
-                    TryRelease(signal);
-                }
-            });
 
-            await signal.WaitAsync();
+                    return new ValueTask(ts.Task);
+                });
+            }
+            catch (Exception e)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = $"An exception was raised: {e.Message}";
+            }
 
             if (string.IsNullOrEmpty(srv.Response.Message))
             {

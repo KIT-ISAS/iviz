@@ -79,6 +79,16 @@ namespace Iviz.Core
             BlockCopyTo((ReadOnlySpan<byte>)src, dst);
         }
 
+        public static ReadOnlySpan<T> Cast<T>(this ReadOnlySpan<byte> src) where T : unmanaged
+        {
+            return MemoryMarshal.Cast<byte, T>(src);
+        }
+
+        public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged
+        {
+            return MemoryMarshal.Cast<byte, T>(src);
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref byte GetReference(this Span<byte> span) => ref span[0];
 
@@ -89,25 +99,36 @@ namespace Iviz.Core
         public static unsafe ref byte GetReference(this ReadOnlySpan<byte> span) => ref *(byte*)span[0];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref sbyte GetReference(this ReadOnlySpan<sbyte> span) => ref *(sbyte*)span[0];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref uint GetReference(this ReadOnlySpan<uint> span) => ref *(uint*)span[0];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref ushort GetReference(this ReadOnlySpan<ushort> span) => ref *(ushort*)span[0];
 
-        public static ref readonly T GetReference<T>(this ReadOnlySpan<T> span)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref char GetReference(this ReadOnlySpan<char> span)
+        {
+            fixed (char* ptr = &span[0]) return ref *ptr;
+        }
+
+        public static ref T GetReference<T>(this ReadOnlySpan<T> span)
         {
             return ref MemoryMarshal.GetReference(span);
         }
 
-        public static ReadOnlySpan<T> Cast<T>(this ReadOnlySpan<byte> src) where T : unmanaged
-        {
-            return MemoryMarshal.Cast<byte, T>(src);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref byte Plus(this ref byte ptr, int i) => ref Unsafe.Add(ref ptr, i);
 
-        public static Span<T> Cast<T>(this Span<byte> src) where T : unmanaged
-        {
-            return MemoryMarshal.Cast<byte, T>(src);
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref ushort Plus(this ref ushort ptr, int i) => ref Unsafe.Add(ref ptr, i);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref uint Plus(this ref uint ptr, int i) => ref Unsafe.Add(ref ptr, i);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref int Plus(this ref int ptr, int i) => ref Unsafe.Add(ref ptr, i);
 
         static Func<object, Array>? extractArrayFromListTypeFn;
 

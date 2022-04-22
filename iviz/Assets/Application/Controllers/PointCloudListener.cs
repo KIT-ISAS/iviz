@@ -606,9 +606,9 @@ namespace Iviz.Controllers
                     ref byte dataPtr = ref dataOff.GetReference();
                     for (int u = width; u > 0; u--)
                     {
-                        float value = Unsafe.As<byte, float>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        float value = Unsafe.As<byte, float>(ref dataPtr.Plus(iOffset));
                         TryAdd(ref dataPtr, value);
-                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
@@ -622,9 +622,9 @@ namespace Iviz.Controllers
                     ref byte dataPtr = ref dataOff.GetReference();
                     for (int u = width; u > 0; u--)
                     {
-                        double value = Unsafe.As<byte, double>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        double value = Unsafe.As<byte, double>(ref dataPtr.Plus(iOffset));
                         TryAdd(ref dataPtr, (float)value);
-                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
@@ -640,7 +640,7 @@ namespace Iviz.Controllers
                     {
                         sbyte value = (sbyte)dataPtr;
                         TryAdd(ref dataPtr, value);
-                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
@@ -656,7 +656,7 @@ namespace Iviz.Controllers
                     {
                         byte value = dataPtr;
                         TryAdd(ref dataPtr, value);
-                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
@@ -670,9 +670,9 @@ namespace Iviz.Controllers
                     ref byte dataPtr = ref dataOff.GetReference();
                     for (int u = width; u > 0; u--)
                     {
-                        short value = Unsafe.As<byte, short>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        short value = Unsafe.As<byte, short>(ref dataPtr.Plus(iOffset));
                         TryAdd(ref dataPtr, value);
-                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
@@ -707,9 +707,9 @@ namespace Iviz.Controllers
                     ref byte dataPtr = ref dataOff.GetReference();
                     for (int u = width; u > 0; u--)
                     {
-                        ushort value = Unsafe.As<byte, ushort>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        ushort value = Unsafe.As<byte, ushort>(ref dataPtr.Plus(iOffset));
                         TryAdd(ref dataPtr, value);
-                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
@@ -723,9 +723,9 @@ namespace Iviz.Controllers
                     ref byte dataPtr = ref dataOff.GetReference();
                     for (int u = width; u > 0; u--)
                     {
-                        int value = Unsafe.As<byte, int>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        int value = Unsafe.As<byte, int>( ref dataPtr.Plus(iOffset));
                         TryAdd(ref dataPtr, value);
-                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
@@ -739,9 +739,9 @@ namespace Iviz.Controllers
                     ref byte dataPtr = ref dataOff.GetReference();
                     for (int u = width; u > 0; u--)
                     {
-                        uint value = Unsafe.As<byte, uint>(ref Unsafe.Add(ref dataPtr, iOffset));
+                        uint value = Unsafe.As<byte, uint>(ref dataPtr.Plus(iOffset));
                         TryAdd(ref dataPtr, value);
-                        dataPtr = ref Unsafe.Add(ref dataPtr, pointStep);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }

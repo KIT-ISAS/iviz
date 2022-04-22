@@ -178,7 +178,12 @@ namespace Iviz.Controllers
             {
                 canBeClicked.Clicked += index => parent.OnDialogButtonClicked(this, index);
             }
-            
+
+            if (dialog is IDialogCanBeMenuClicked canBeMenuClicked)
+            {
+                canBeMenuClicked.MenuClicked += index => parent.OnDialogMenuEntryClicked(this, index);
+            }
+
             dialog.Expired += () => parent.OnDialogExpired(this);
 
             dialog.Initialize();

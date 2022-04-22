@@ -48,12 +48,17 @@ namespace Iviz.Displays.XR
     {
         event Action<int>? Clicked;
     }  
+    
     public interface IDialogWithEntries
     {
         IEnumerable<string> Entries { set; }
     }
     
-    
+    public interface IDialogCanBeMenuClicked
+    {
+        event Action<int>? MenuClicked;
+    }
+
     [Flags]
     public enum CaptionAlignmentType
     {
