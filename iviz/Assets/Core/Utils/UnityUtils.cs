@@ -34,13 +34,7 @@ namespace Iviz.Core
         public const int MeshUInt16Threshold = ushort.MaxValue;
 
         public static CultureInfo Culture => BuiltIns.Culture;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float MagnitudeSq(this in Vector3 v)
-        {
-            return v.x * v.x + v.y * v.y + v.z * v.z;
-        }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in float3 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
@@ -70,15 +64,6 @@ namespace Iviz.Core
             return Mathf.Max(Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z)), Mathf.Abs(p.w));
         }
 
-        public static Vector3 InvCoeff(this Vector3 p)
-        {
-            Vector3 q;
-            q.x = 1f / p.x;
-            q.y = 1f / p.y;
-            q.z = 1f / p.z;
-            return q;
-        }
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Vector4 ToVector(this in Quaternion p)
         {
@@ -88,7 +73,7 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Magnitude(this in Vector3 v)
         {
-            return Mathf.Sqrt(v.MagnitudeSq());
+            return Mathf.Sqrt(v.sqrMagnitude);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

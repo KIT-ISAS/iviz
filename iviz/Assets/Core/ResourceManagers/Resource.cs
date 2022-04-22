@@ -26,6 +26,7 @@ namespace Iviz.Resources
     /// </summary>
     public static class Resource
     {
+        static ColorSchema? colors;
         static MaterialsType? materials;
         static ColormapsType? colormaps;
         static DisplaysType? displays;
@@ -37,11 +38,13 @@ namespace Iviz.Resources
         static InternalResourceManager? internals;
         static ExternalResourceManager? externals;
 
+        static ReadOnlyDictionary<string, ModuleType>? resourceByRosMessageType;
+
         /// <summary>
         /// Dictionary that describes which module handles which ROS message type.
         /// </summary>
-        public static ReadOnlyDictionary<string, ModuleType> ResourceByRosMessageType { get; }
-            = new Dictionary<string, ModuleType>
+        public static ReadOnlyDictionary<string, ModuleType> ResourceByRosMessageType =>
+         resourceByRosMessageType ??= new Dictionary<string, ModuleType>
             {
                 { PointCloud2.RosMessageType, ModuleType.PointCloud },
                 { Image.RosMessageType, ModuleType.Image },
@@ -72,8 +75,7 @@ namespace Iviz.Resources
                 { WidgetArray.RosMessageType, ModuleType.GuiWidget },
             }.AsReadOnly();
 
-        public static readonly ColorSchema Colors = new();
-
+        public static  ColorSchema Colors => colors ??= new ColorSchema();
         public static MaterialsType Materials => materials ??= new MaterialsType();
         public static ColormapsType Colormaps => colormaps ??= new ColormapsType();
         public static DisplaysType Displays => displays ??= new DisplaysType();

@@ -85,7 +85,7 @@ namespace Iviz.App
         float cameraPitch = 45;
         float cameraRoll;
 
-        Color backgroundColor = new(0.125f, 0.169f, 0.245f, 1);
+        Color backgroundColor = new(0.145f, 0.168f, 0.207f, 1);
         float sunDirectionX;
         float sunDirectionY;
 
@@ -584,7 +584,7 @@ namespace Iviz.App
         void StartOrbiting()
         {
             var diff = orbitCenter - Transform.localPosition;
-            orbitRadius = Mathf.Min(5, diff.magnitude);
+            orbitRadius = Mathf.Min(5, diff.Magnitude());
 
             var (diffX, diffY, diffZ) = diff;
             cameraYaw = Mathf.Atan2(diffX, diffZ) * Mathf.Rad2Deg;
@@ -818,7 +818,7 @@ namespace Iviz.App
 
             if (!Settings.IsPhone)
             {
-                float distanceToFrame = (Transform.localPosition - targetPosition).magnitude;
+                float distanceToFrame = (Transform.localPosition - targetPosition).Magnitude();
                 float zoomRadius = Mathf.Clamp(distanceToFrame, minDistanceLookAt, maxDistanceLookAt);
                 return targetPosition - Transform.localRotation.Forward() * zoomRadius;
             }

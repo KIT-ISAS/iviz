@@ -44,30 +44,60 @@ namespace Iviz.Displays
         {
             ThrowHelper.ThrowIfNull(mesh, nameof(mesh));
 
-            if (lineBuffer.Length == 0)
+            int bufferLength = lineBuffer.Length;
+            if (bufferLength == 0)
             {
                 mesh.Clear();
                 return;
             }
 
-            float halfScale = scale * 0.5f;
-            int length = 10 * lineBuffer.Length;
+            int length = 10 * bufferLength;
+            var points = new Rent<Vector3>(length);
+            var colors = new Rent<Color32>(length);
+            var uvs = new Rent<Vector2>(length);
 
-            using var points = new Rent<Vector3>(length);
-            using var colors = new Rent<Color32>(length);
-            using var uvs = new Rent<Vector2>(length);
+            int indicesSize = 16 * 3 * bufferLength;
+            mesh.Clear();
+            mesh.indexFormat = indicesSize <= UnityUtils.MeshUInt16Threshold
+                ? IndexFormat.UInt16
+                : IndexFormat.UInt32;
+
+            var indices = new Rent<int>(indicesSize);
+
+            try
+            {
+                CreateCapsulesFromSegments(ref lineBuffer.GetReference(), bufferLength, scale,
+                    points.Array, colors.Array, uvs.Array, indices.Array);
+
+                mesh.SetVertices(points);
+                mesh.SetColors(colors);
+                mesh.SetUVs(uvs);
+                mesh.SetTriangles(indices);
+            }
+            finally
+            {
+                points.Dispose();
+                colors.Dispose();
+                uvs.Dispose();
+                indices.Dispose();
+            }
+        }
+
+        static void CreateCapsulesFromSegments(ref float4x2 linePtr, int numSegments, float scale,
+            Vector3[] pArray, Color32[] cArray, Vector2[] uArray, int[] indicesArray)
+        {
+            float halfScale = scale * 0.5f;
+
             int pOff = 0;
             int cOff = 0;
             int uvOff = 0;
 
-            var pArray = points.AsSpan();
-            var cArray = colors.AsSpan();
-            var uArray = uvs.AsSpan();
-
             const float minMagnitude = 1e-5f;
 
-            foreach (ref readonly var line in lineBuffer)
+            foreach (int segment in ..numSegments)
             {
+                ref readonly var line = ref linePtr.Plus(segment);
+
                 //(a.x, a.y, a.z) = (line.c0.x, line.c0.y, line.c0.z);
                 //(b.x, b.y, b.z) = (line.c1.x, line.c1.y, line.c1.z);
 
@@ -84,12 +114,12 @@ namespace Iviz.Displays
                 Vector3 ab = b - a;
                 Vector3 dirX, dirY, dirZ;
 
-                float abMagnitudeSq = ab.MagnitudeSq();
+                float abMagnitudeSq = ab.sqrMagnitude;
                 if (abMagnitudeSq < minMagnitude * minMagnitude)
                 {
-                    dirX = Vector3.zero;
-                    dirY = Vector3.zero;
-                    dirZ = Vector3.zero;
+                    dirX.x = dirX.y = dirX.z = 0;
+                    dirY.x = dirY.y = dirY.z = 0;
+                    dirZ.x = dirZ.y = dirZ.z = 0;
                 }
                 else
                 {
@@ -101,6 +131,7 @@ namespace Iviz.Displays
                     dirZ = dirX.Cross(dirY);
                 }
 
+                /*
                 var halfDirX = halfScale * dirX;
                 var halfSumYz = halfScale * (dirY + dirZ);
                 var halfDiffYz = halfScale * (dirY - dirZ);
@@ -116,6 +147,30 @@ namespace Iviz.Displays
                 pArray[pOff++] = b - halfSumYz;
                 pArray[pOff++] = b - halfDiffYz;
                 pArray[pOff++] = b + halfDirX;
+                */
+
+                {
+                    ref var pPtr = ref pArray[pOff];
+
+                    var halfDirX = halfScale * dirX;
+                    var halfSumYz = halfScale * (dirY + dirZ);
+                    var halfDiffYz = halfScale * (dirY - dirZ);
+
+                    pPtr = a - halfDirX;
+                    pPtr.Plus(9) = b + halfDirX;
+
+                    pPtr.Plus(1) = a + halfSumYz;
+                    pPtr.Plus(3) = a - halfSumYz;
+                    pPtr.Plus(5) = b + halfSumYz;
+                    pPtr.Plus(9) = b - halfSumYz;
+
+                    pPtr.Plus(2) = a + halfDiffYz;
+                    pPtr.Plus(4) = a - halfDiffYz;
+                    pPtr.Plus(6) = b + halfDiffYz;
+                    pPtr.Plus(8) = b - halfDiffYz;
+
+                    pOff += 10;
+                }
 
 
                 /*
@@ -125,6 +180,7 @@ namespace Iviz.Displays
                     uvs[uvOff++] = uv0;
                 }
                 */
+                /*
                 {
                     var ca = UnityUtils.AsColor32(line.c0.w);
                     cArray[cOff++] = ca;
@@ -140,6 +196,27 @@ namespace Iviz.Displays
                     cArray[cOff++] = cb;
                     cArray[cOff++] = cb;
                 }
+                */
+
+                {
+                    ref var cPtr = ref cArray[cOff];
+
+                    var ca = UnityUtils.AsColor32(line.c0.w);
+                    cPtr = ca;
+                    cPtr.Plus(1) = ca;
+                    cPtr.Plus(2) = ca;
+                    cPtr.Plus(3) = ca;
+                    cPtr.Plus(4) = ca;
+
+                    var cb = UnityUtils.AsColor32(line.c1.w);
+                    cPtr.Plus(5) = cb;
+                    cPtr.Plus(6) = cb;
+                    cPtr.Plus(7) = cb;
+                    cPtr.Plus(8) = cb;
+                    cPtr.Plus(9) = cb;
+
+                    cOff += 10;
+                }
 
                 /*
                 for (int i = 5; i < 10; i++)
@@ -149,6 +226,7 @@ namespace Iviz.Displays
                 }
                 */
 
+                /*
                 {
                     Vector2 uv0;
                     uv0.x = line.c0.w;
@@ -170,24 +248,39 @@ namespace Iviz.Displays
                     uArray[uvOff++] = uv1;
                     uArray[uvOff++] = uv1;
                 }
+                */
+                {
+                    ref var uvPtr = ref uArray[uvOff];
+
+                    Vector2 uv0;
+                    uv0.x = line.c0.w;
+                    uv0.y = 0;
+
+                    uvPtr = uv0;
+                    uvPtr.Plus(1) = uv0;
+                    uvPtr.Plus(2) = uv0;
+                    uvPtr.Plus(3) = uv0;
+                    uvPtr.Plus(4) = uv0;
+
+                    Vector2 uv1;
+                    uv1.x = line.c1.w;
+                    uv1.y = 0;
+
+                    uvPtr.Plus(5) = uv1;
+                    uvPtr.Plus(6) = uv1;
+                    uvPtr.Plus(7) = uv1;
+                    uvPtr.Plus(8) = uv1;
+                    uvPtr.Plus(9) = uv1;
+
+                    uvOff += 10;
+                }
             }
 
-            int indicesSize = 16 * 3 * lineBuffer.Length;
-            mesh.Clear();
-            mesh.indexFormat = indicesSize <= UnityUtils.MeshUInt16Threshold
-                ? IndexFormat.UInt16
-                : IndexFormat.UInt32;
-
-            mesh.SetVertices(points);
-            mesh.SetColors(colors);
-            mesh.SetUVs(uvs);
-
-
-            int[] cIndices = CapsuleIndices;
-            using var indices = new Rent<int>(indicesSize);
-            var iArray = indices.AsSpan();
+            ref int capsulePtr = ref CapsuleIndices[0];
+            ref int iPtr = ref indicesArray[0];
             int iOff = 0;
 
+            /*
             foreach (int i in ..lineBuffer.Length)
             {
                 int baseOff = i * 10;
@@ -196,8 +289,16 @@ namespace Iviz.Displays
                     iArray[iOff++] = baseOff + index;
                 }
             }
+            */
 
-            mesh.SetTriangles(indices);
+            foreach (int segment in ..numSegments)
+            {
+                int vertexOff = segment * 10;
+                foreach (int capsuleIndex in ..48)
+                {
+                    iPtr.Plus(iOff++) = vertexOff + capsulePtr.Plus(capsuleIndex);
+                }
+            }
         }
     }
 }

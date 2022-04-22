@@ -309,7 +309,7 @@ namespace Iviz.Displays
             Vector3 meshScale = ElementScale * ElementScale3;
             if (UseIntensityForScaleY)
             {
-                meshScale.y *= Math.Max(Math.Abs(span.x), Math.Abs(span.y));
+                meshScale.y *= Mathf.Max(Mathf.Abs(span.x), Mathf.Abs(span.y));
             }
 
             var baseMeshBounds = Mesh.bounds;

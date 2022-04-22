@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Core
@@ -108,6 +109,12 @@ namespace Iviz.Core
         public static unsafe ref ushort GetReference(this ReadOnlySpan<ushort> span) => ref *(ushort*)span[0];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe ref float4x2 GetReference(this ReadOnlySpan<float4x2> span) 
+        {
+            fixed (float4x2* ptr = &span[0]) return ref *ptr;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe ref char GetReference(this ReadOnlySpan<char> span)
         {
             fixed (char* ptr = &span[0]) return ref *ptr;
@@ -129,6 +136,18 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref int Plus(this ref int ptr, int i) => ref Unsafe.Add(ref ptr, i);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref Vector2 Plus(this ref Vector2 ptr, int i) => ref Unsafe.Add(ref ptr, i);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref Vector3 Plus(this ref Vector3 ptr, int i) => ref Unsafe.Add(ref ptr, i);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref Color32 Plus(this ref Color32 ptr, int i) => ref Unsafe.Add(ref ptr, i);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref float4x2 Plus(this ref float4x2 ptr, int i) => ref Unsafe.Add(ref ptr, i);
 
         static Func<object, Array>? extractArrayFromListTypeFn;
 

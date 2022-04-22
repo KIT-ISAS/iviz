@@ -14,6 +14,6 @@ namespace Iviz.Common.Configurations
         [DataMember] public float SunDirectionY { get; set; }
         [DataMember] public bool EnableShadows { get; set; } = true;
         [DataMember] public float CameraFieldOfView { get; set; } = 90;
-        [DataMember] public ColorRGBA BackgroundColor { get; set; } = new(0.125f, 0.169f, 0.245f, 1);
+        [DataMember] public ColorRGBA BackgroundColor { get; set; } = new(0.145f, 0.168f, 0.207f, 1);
     }
 }

@@ -72,6 +72,7 @@ namespace Iviz.Controllers
             {
                 Configuration.BackgroundColor = value.ToRos();
                 GuiInputModule.BackgroundColor = value;
+                ModuleListPanel.Instance.UpdateSettings();
             }
         }
 

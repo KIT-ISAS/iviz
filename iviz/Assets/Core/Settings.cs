@@ -242,11 +242,6 @@ namespace Iviz.Core
 #else
         public const bool IsShuttingDown = false;
 #endif
-
-        static Settings()
-        {
-            AotHelper.EnsureType<StringEnumConverter>();
-        }
     }
 
     public interface IDragHandler

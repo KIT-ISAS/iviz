@@ -70,7 +70,7 @@ namespace Iviz.Controllers.XR
                 Leash.ReticleColor = Color.white;
                 Leash.ReticleEmissiveColor = Color.white;
                 Leash.Width = interactingWidth;
-                Controller.IsNearInteraction = (currentPosition - referencePoint).magnitude < XRController.NearDistance;
+                Controller.IsNearInteraction = (currentPosition - referencePoint).Magnitude() < XRController.NearDistance;
 
                 if (draggable.ReferenceNormal is { } referenceNormal)
                 {
@@ -86,7 +86,7 @@ namespace Iviz.Controllers.XR
 
             bool hitExists = TryGetHitInfo(out var hitPosition, out var hitNormal, out bool isUIHitClosest);
 
-            Controller.IsNearInteraction = (currentPosition - hitPosition).magnitude < XRController.NearDistance;
+            Controller.IsNearInteraction = (currentPosition - hitPosition).Magnitude() < XRController.NearDistance;
 
             if (Controller.ButtonUp && !isUIHitClosest)
             {
