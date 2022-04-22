@@ -16,7 +16,7 @@ namespace Iviz.UtilsTests
     [Category("RosMaster")]
     public class RosMasterTests
     {
-        static readonly Uri CallerUri = new Uri("http://localhost:7613");
+        static readonly Uri CallerUri = new Uri("http://localhost:7699");
         static readonly Uri MasterUri = new Uri("http://localhost:11312");
         const string CallerId = "/iviz_util_tests";
         RosMasterServer rosMasterServer;
@@ -32,7 +32,6 @@ namespace Iviz.UtilsTests
         [Test]
         public async Task TestXmlRpcGetUriAsync()
         {
-
             var args = new XmlRpcArg[] {CallerId};
 
             using var source = new CancellationTokenSource();

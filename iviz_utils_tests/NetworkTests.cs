@@ -18,8 +18,8 @@ namespace Iviz.UtilsTests
 
         static readonly Uri OtherCallerUri = new Uri("http://localhost:7614");
 
-        //static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
-        static readonly Uri MasterUri = new Uri("http://192.168.0.220:11311");
+        static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
+        //static readonly Uri MasterUri = new Uri("http://192.168.0.220:11311");
         const string CallerId = "/iviz_util_tests";
 
         [SetUp]
