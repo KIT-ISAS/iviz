@@ -11,7 +11,8 @@ namespace Iviz.Ntp
 {
     public sealed class NtpQuery
     {
-        static readonly DateTime EpochTime = new(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        static DateTime? epochTime;
+        static DateTime EpochTime => epochTime ??= new DateTime(1900, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public static async ValueTask<TimeSpan> GetNetworkTimeOffsetAsync(string ntpServer,
             CancellationToken token = default)

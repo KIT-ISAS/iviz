@@ -31,8 +31,6 @@ public static class TaskUtils
         return Task.Run(task, token);
     }
 
-    static readonly Action<object?> SetResult = o => ((TaskCompletionSource)o!).TrySetResult();
-
     /// <summary>
     /// Waits for the task to complete.
     /// Only use this if the async function that generated the task does not support a cancellation token.
@@ -63,7 +61,7 @@ public static class TaskUtils
         var timeout = CreateCompletionSource();
 
         // ReSharper disable once UseAwaitUsing
-        using (tokenSource.Token.Register(SetResult, timeout))
+        using (tokenSource.Token.Register(CallbackHelpers.SetResult, timeout))
         {
             Task result = await (task, timeout.Task).WhenAny();
             return result == task;
@@ -95,7 +93,7 @@ public static class TaskUtils
         var timeoutTask = timeout.Task;
 
         // ReSharper disable once UseAwaitUsing
-        using (tokenSource.Token.Register(SetResult, timeout))
+        using (tokenSource.Token.Register(CallbackHelpers.SetResult, timeout))
         {
             Task result = await (task, timeoutTask).WhenAny();
             if (result != task)

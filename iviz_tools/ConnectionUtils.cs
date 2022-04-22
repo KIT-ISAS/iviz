@@ -16,15 +16,6 @@ public static class ConnectionUtils
     /// </summary>
     public static Dictionary<string, string> GlobalResolver { get; } = new(StringComparer.OrdinalIgnoreCase);
 
-    static readonly AsyncCallback OnComplete =
-        result => ((TaskCompletionSource<IAsyncResult>)result.AsyncState!).TrySetResult(result);
-
-    static readonly Action<object?> OnCanceled = tcs =>
-        ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetCanceled();
-
-    static readonly Action<object?> OnTimeout = tcs =>
-        ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetException(new TimeoutException());
-
     /// <summary>
     /// Convenience function to connect a <see cref="TcpClient"/> to the given address,
     /// while taking into account timeouts and cancellation tokens.
@@ -47,7 +38,7 @@ public static class ConnectionUtils
         var tcs = TaskUtils.CreateCompletionSource<IAsyncResult>();
         var socket = client.Client;
 
-        socket.BeginConnect(resolvedHostname, port, OnComplete, tcs);
+        socket.BeginConnect(resolvedHostname, port, CallbackHelpers.OnComplete, tcs);
 
         if (tcs.Task.IsCompleted)
         {
@@ -58,7 +49,7 @@ public static class ConnectionUtils
         if (timeoutInMs == -1)
         {
             // ReSharper disable once UseAwaitUsing
-            using (token.Register(OnCanceled, tcs))
+            using (token.Register(CallbackHelpers.OnCanceled, tcs))
             {
                 socket.EndConnect(await tcs.Task);
                 return;
@@ -68,9 +59,9 @@ public static class ConnectionUtils
         using var timeoutTs = new CancellationTokenSource(timeoutInMs);
 
         // ReSharper disable once UseAwaitUsing
-        using (token.Register(OnCanceled, tcs)) 
+        using (token.Register(CallbackHelpers.OnCanceled, tcs)) 
         // ReSharper disable once UseAwaitUsing
-        using (timeoutTs.Token.Register(OnTimeout, tcs))
+        using (timeoutTs.Token.Register(CallbackHelpers.OnTimeout, tcs))
         {
             socket.EndConnect(await tcs.Task);
         }

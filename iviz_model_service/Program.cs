@@ -112,7 +112,7 @@ namespace Iviz.ModelService
 
         static Task WaitForCancel()
         {
-            var tc = new TaskCompletionSource();
+            var tc = TaskUtils.CreateCompletionSource();
             Console.CancelKeyPress += (_, __) => tc.SetResult();
             return tc.Task;
         }

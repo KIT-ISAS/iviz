@@ -45,9 +45,9 @@ public sealed class RosMasterServer : IDisposable
         public const int Success = 1;
     }
 
-    static readonly XmlRpcArg DefaultOkResponse = OkResponse(0);
-    static readonly XmlRpcArg FailResponse = new(StatusCode.Failure, "Request failed", 0);
-
+    static XmlRpcArg DefaultOkResponse => OkResponse(0);
+    static XmlRpcArg FailResponse => new(StatusCode.Failure, "Request failed", 0);
+    
     static XmlRpcArg OkResponse(XmlRpcArg arg) => new(StatusCode.Success, "", arg);
     static XmlRpcArg ErrorResponse(string msg) => new(StatusCode.Error, msg, 0);
 

@@ -26,7 +26,10 @@ public static class BuilderPool
     /// </summary>
     public readonly struct BuilderRent : IDisposable
     {
-        static readonly ConcurrentBag<(StringBuilder builder, ReadOnlyMemory<char> chunk)> Pool = new();
+        static ConcurrentBag<(StringBuilder builder, ReadOnlyMemory<char> chunk)>? pool;
+
+        static ConcurrentBag<(StringBuilder builder, ReadOnlyMemory<char> chunk)> Pool =>
+            pool ??= new ConcurrentBag<(StringBuilder builder, ReadOnlyMemory<char> chunk)>();
 
         readonly StringBuilder builder;
         readonly ReadOnlyMemory<char> chunk;

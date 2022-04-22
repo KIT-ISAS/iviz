@@ -738,7 +738,8 @@ namespace Iviz.MsgsGen
             if (!variables.Any())
             {
                 lines.Add("");
-                lines.Add($"public static readonly {name} Singleton = new {name}();");
+                lines.Add($"static {name}? singleton;");
+                lines.Add($"public static {name} Singleton => singleton ??= new {name}();");
             }
 
             return lines;
@@ -853,7 +854,7 @@ namespace Iviz.MsgsGen
                     if (!forceStruct)
                     {
                         lines.Add(
-                            $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}));");
+                            $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference();");
                         lines.Add(
                             $"    if ({variable.CsFieldName}.Length != {variable.ArraySize}) " +
                             $"throw new RosInvalidSizeForFixedArrayException(nameof({variable.CsFieldName}), " +
@@ -871,7 +872,7 @@ namespace Iviz.MsgsGen
                     if (!forceStruct && (!variable.ClassIsStruct || variable.IsArray))
                     {
                         lines.Add(
-                            $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference(nameof({variable.CsFieldName}));");
+                            $"    if ({variable.CsFieldName} is null) BuiltIns.ThrowNullReference();");
                     }
 
                     if (!variable.IsArray && !variable.ClassIsStruct && variable.RosClassName != "string")

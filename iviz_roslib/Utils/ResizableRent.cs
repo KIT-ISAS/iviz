@@ -10,7 +10,7 @@ namespace Iviz.Roslib.Utils;
 /// </summary>
 internal sealed class ResizableRent : IDisposable
 {
-    static readonly ArrayPool<byte> Pool = ArrayPool<byte>.Shared;
+    static ArrayPool<byte> Pool => ArrayPool<byte>.Shared;
 
     bool disposed;
     byte[] buffer;

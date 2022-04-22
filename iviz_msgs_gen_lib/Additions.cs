@@ -116,6 +116,7 @@ namespace Iviz.MsgsGen
                 "public static Vector3f UnitZ => new(0, 0, 1);",
                 "public static implicit operator GeometryMsgs.Point(in Vector3f p) => new(p.X, p.Y, p.Z);",
                 "public static implicit operator GeometryMsgs.Vector3(in Vector3f p) => new(p.X, p.Y, p.Z);",
+                "public static implicit operator Vector3f(in GeometryMsgs.Vector3 p) => new((float)p.X, (float)p.Y, (float)p.Z);",
                 "public static Vector3f operator +(in Vector3f v, in Vector3f w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);",
                 "public static Vector3f operator -(in Vector3f v, in Vector3f w) => new(v.X - w.X, v.Y - w.Y, v.Z - w.Z);",
                 "public static Vector3f operator *(float f, in Vector3f v) => new(f * v.X, f * v.Y, f * v.Z);",

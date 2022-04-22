@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
@@ -7,6 +9,10 @@ using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Tools;
+using Include = Iviz.Msgs.IvizMsgs.Include;
+using Model = Iviz.Msgs.IvizMsgs.Model;
+using Texture = Iviz.Msgs.IvizMsgs.Texture;
+using Uri = System.Uri;
 
 namespace Iviz.ModelService;
 
@@ -41,13 +47,13 @@ public sealed class ModelServer : IDisposable
         Console.WriteLine(">> " + uri);
     }
 
-    public ModelServer(string additionalPaths = null, bool enableFileSchema = false, bool verbose = false)
+    public ModelServer(string? additionalPaths = null, bool enableFileSchema = false, bool verbose = false)
     {
         this.verbose = verbose;
-        string packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
+        string? packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
         if (packagePath is null && additionalPaths is null)
         {
-            LogError("Cannot retrieve environment variable ROS_PACKAGE_PATH, or any other source of packages");
+            LogError("Cannot retrieve environment variable ROS_PACKAGE_PATH, or any other source of packages.");
         }
         else
         {
@@ -149,12 +155,12 @@ public sealed class ModelServer : IDisposable
         paths.Add(path);
     }
 
-    string ResolvePath(Uri uri)
+    string? ResolvePath(Uri uri)
     {
         return ResolvePath(uri, out _);
     }
 
-    string ResolvePath(Uri uri, out string outPackagePath)
+    string? ResolvePath(Uri uri, out string? outPackagePath)
     {
         string package = uri.Host;
         if (!packagePaths.TryGetValue(package, out List<string> paths))
@@ -210,7 +216,7 @@ public sealed class ModelServer : IDisposable
             return;
         }
 
-        string modelPath;
+        string? modelPath;
         switch (uri.Scheme)
         {
             case "package":
@@ -297,7 +303,7 @@ public sealed class ModelServer : IDisposable
             return;
         }
 
-        string texturePath;
+        string? texturePath;
         switch (uri.Scheme)
         {
             case "package":
@@ -548,7 +554,7 @@ public sealed class ModelServer : IDisposable
             return;
         }
 
-        string filePath = ResolvePath(uri);
+        string? filePath = ResolvePath(uri);
         if (string.IsNullOrWhiteSpace(filePath))
         {
             msg.Response.Message = "Failed to find resource path";
@@ -594,8 +600,8 @@ public sealed class ModelServer : IDisposable
             return;
         }
 
-        string modelPath = ResolvePath(uri, out string packagePath);
-        if (string.IsNullOrWhiteSpace(modelPath))
+        string? modelPath = ResolvePath(uri, out string? packagePath);
+        if (string.IsNullOrWhiteSpace(modelPath) || string.IsNullOrWhiteSpace(packagePath))
         {
             LogError("Failed to find resource path for '" + modelPath + "'");
             msg.Response.Message = "Failed to find resource path";
@@ -635,7 +641,7 @@ public sealed class ModelServer : IDisposable
         msg.Response.Success = true;
         msg.Response.Scene = new Msgs.IvizMsgs.Scene
         {
-            Name = file.Worlds.Count != 0 && file.Worlds[0].Name != null ? file.Worlds[0].Name : "sdf",
+            Name = file.Worlds.Count != 0 && file.Worlds[0].Name is { } worldName ? worldName : "sdf",
             Filename = uri.ToString(),
             Includes = includes.ToArray(),
             Lights = file.Lights.Select(ToLight).ToArray()
@@ -689,7 +695,7 @@ public sealed class ModelServer : IDisposable
             return;
         }
 
-        Matrix4x4 pose = Multiply(inPose, Multiply(ToPose(model.IncludePose), ToPose(model.Pose)));
+        var pose = Multiply(inPose, Multiply(ToPose(model.IncludePose), ToPose(model.Pose)));
 
         foreach (Sdf.Link link in model.Links)
         {
@@ -791,7 +797,7 @@ public sealed class ModelServer : IDisposable
         }
     }
 
-    static Matrix4x4 ToPose(Sdf.Pose pose)
+    static Matrix4x4 ToPose(Sdf.Pose? pose)
     {
         if (pose is null)
         {
