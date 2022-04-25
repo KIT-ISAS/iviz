@@ -19,9 +19,10 @@ namespace Iviz.Rosbag.Writer
             bytes.Dispose();
         }
 
-        void Write<T>(T value) where T : unmanaged
+        void Write<T>(T t)
         {
-            bytes.AsSpan()[p..].Write(value);
+            ref byte dstPtr = ref bytes.Array[p];
+            Unsafe.WriteUnaligned(ref dstPtr, t);
             p += Unsafe.SizeOf<T>();
         }
 
