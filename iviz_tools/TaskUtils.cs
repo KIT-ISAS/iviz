@@ -323,11 +323,8 @@ public static class TaskUtils
     public static ValueTask<Task> WhenAny(this (Task t1, Task t2) ts)
     {
         var (t1, t2) = ts;
-        return t1.IsCompleted
-            ? new ValueTask<Task>(t1)
-            : t2.IsCompleted
-                ? new ValueTask<Task>(t2)
-                : Task.WhenAny(t1, t2).AsValueTask();
+        return (t1.IsCompleted ? t1 :
+            t2.IsCompleted ? t2 : Task.WhenAny(t1, t2)).AsTaskResult();
     }
 
     /// <summary>
@@ -336,7 +333,7 @@ public static class TaskUtils
     /// </summary>
     public static TaskCompletionSource CreateCompletionSource() =>
         new(TaskCreationOptions.RunContinuationsAsynchronously);
-    
+
     /// <summary>
     /// Creates a <see cref="TaskCompletionSource{T}"/> and sets its creation options to
     /// <see cref="TaskContinuationOptions.RunContinuationsAsynchronously"/>.
@@ -345,13 +342,35 @@ public static class TaskUtils
         new(TaskCreationOptions.RunContinuationsAsynchronously);
 }
 
-public static class ValueTask2
+public static class ValueTaskUtils
 {
-    public static ValueTask<T> FromResult<T>(T t) => new(t);
+    /// <summary>
+    /// Creates a completed <see cref="ValueTask{T}"/> that returns the given value.
+    /// </summary>
+    public static ValueTask<T> AsTaskResult<T>(this T t) => new(t);
+
+    /// <summary>
+    /// Creates a completed <see cref="ValueTask{T}"/> that returns the given value as a T?.
+    /// Same as <see cref="AsTaskResult{T}"/> but keeps the compiler from complaining. 
+    /// </summary>
+    public static ValueTask<T?> AsTaskResultMaybeNull<T>(this T t) => new(t);
+
+    /// <summary>
+    /// Creates a <see cref="ValueTask{T}"/> that wraps the given task.
+    /// </summary>
     public static ValueTask<T> AsValueTask<T>(this Task<T> t) => new(t);
+
+    /// <summary>
+    /// Creates a <see cref="ValueTask"/> that wraps the given task.
+    /// </summary>
+    public static ValueTask AsValueTask(this Task t) => new(t);
 }
 
 #if NETSTANDARD2_1
+/// <summary>
+/// Same as <see cref="TaskCompletionSource{T}"/> but without generics.
+/// Used only in Net Standard 2.1 where the class did not exist yet.
+/// </summary>
 public class TaskCompletionSource
 {
     readonly TaskCompletionSource<object?> ts;
@@ -359,5 +378,6 @@ public class TaskCompletionSource
     public TaskCompletionSource(TaskCreationOptions options) => ts = new TaskCompletionSource<object?>(options);
     public void TrySetException(Exception e) => ts.TrySetException(e);
     public void TrySetResult() => ts.TrySetResult(null);
+    public void TrySetCanceled() => ts.TrySetCanceled();
 }
 #endif

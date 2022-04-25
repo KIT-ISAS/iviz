@@ -11,13 +11,11 @@ namespace Iviz.Tools;
 
 public static class StreamUtils
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ValueTask<bool> ReadChunkAsync(this TcpClient client, Rent<byte> buffer, CancellationToken token)
     {
         return ReadChunkAsync(client, buffer.Array, buffer.Length, token);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static ValueTask<bool> ReadChunkAsync(this TcpClient client, byte[] buffer, int toRead,
         CancellationToken token)
     {
@@ -28,7 +26,7 @@ public static class StreamUtils
         }
 
         int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
-        return new ValueTask<bool>(received == toRead);
+        return (received == toRead).AsTaskResult();
     }
 
     static async ValueTask<bool> DoReadChunkAsync(Socket socket, byte[] buffer, int toRead, CancellationToken token)
@@ -74,15 +72,12 @@ public static class StreamUtils
             return await ReadChunkAsync(client, buffer.Array, remaining, token);
         }
     }
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
     public static ValueTask<int> ReadChunkAsync(this UdpClient udpClient, Rent<byte> buffer, CancellationToken token)
     {
         return ReadSubChunkAsync(udpClient.Client, buffer.Array, 0, buffer.Length, token);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static ValueTask<int> ReadSubChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
         CancellationToken token)
     {
@@ -92,7 +87,7 @@ public static class StreamUtils
         }
 
         int received = socket.Receive(buffer, offset, toRead, SocketFlags.None);
-        return new ValueTask<int>(received);
+        return received.AsTaskResult();
     }
 
     static ValueTask<int> DoReadSubChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
@@ -103,7 +98,7 @@ public static class StreamUtils
         socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, CallbackHelpers.OnComplete, tcs);
 
         return tcs.Task.IsCompleted
-            ? new ValueTask<int>(socket.EndReceive(tcs.Task.Result))
+            ? socket.EndReceive(tcs.Task.Result).AsTaskResult()
             : DoReadSubChunkWithTokenAsync(tcs, socket, token);
     }
 
@@ -148,7 +143,7 @@ public static class StreamUtils
         socket.BeginSend(buffer, offset, toWrite, SocketFlags.None, CallbackHelpers.OnComplete, tcs);
 
         return tcs.Task.IsCompleted
-            ? new ValueTask<int>(socket.EndSend(tcs.Task.Result))
+            ? socket.EndSend(tcs.Task.Result).AsTaskResult()
             : DoWriteWithTokenAsync(tcs, socket, token);
     }
 
