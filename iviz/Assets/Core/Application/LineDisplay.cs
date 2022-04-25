@@ -170,14 +170,30 @@ namespace Iviz.Displays
 
         bool CheckIfAlphaNeeded()
         {
-            if (lineBuffer.Length == 0)
+            int bufferLength = lineBuffer.Length;
+            if (bufferLength == 0)
             {
                 return false;
             }
 
-            ReadOnlySpan<float4x2> lines = lineBuffer;
-            foreach (ref readonly var line in lines)
+            ref float4x2 linesPtr = ref lineBuffer.GetReference();
+            for (int i = 0; i < bufferLength; i++)
             {
+                uint cA = Unsafe.As<float, uint>(ref linesPtr.c0.w);
+                if (cA >> 24 < 255)
+                {
+                    return true;
+                }
+
+                uint cB = Unsafe.As<float, uint>(ref linesPtr.c1.w);
+                if (cB >> 24 < 255)
+                {
+                    return true;
+                }
+
+                linesPtr = ref linesPtr.Plus(1);
+
+                /*
                 Color32 cA = UnityUtils.AsColor32(line.c0.w);
                 if (cA.a < 255)
                 {
@@ -189,6 +205,7 @@ namespace Iviz.Displays
                 {
                     return true;
                 }
+                */
             }
 
             return false;

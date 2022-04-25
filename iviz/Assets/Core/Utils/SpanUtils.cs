@@ -6,8 +6,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Collections;
-using Unity.Mathematics;
 using UnityEngine;
+using Iviz.Tools;
 
 namespace Iviz.Core
 {
@@ -39,13 +39,13 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Span<T> AsSpan<T>(this List<T> list) where T : unmanaged
         {
-            return new Span<T>(list.ExtractArray(), 0, list.Count);
+            return new Span<T>(ExtractArray(list), 0, list.Count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ReadOnlySpan<T> AsReadOnlySpan<T>(this List<T> list) where T : unmanaged
         {
-            return new ReadOnlySpan<T>(list.ExtractArray(), 0, list.Count);
+            return new ReadOnlySpan<T>(ExtractArray(list), 0, list.Count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,7 +77,10 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void BlockCopyTo(this Span<byte> src, Span<byte> dst)
         {
-            BlockCopyTo((ReadOnlySpan<byte>)src, dst);
+            Unsafe.CopyBlock(
+                ref src.GetReference(),
+                ref dst.GetReference(),
+                (uint)src.Length);
         }
 
         public static ReadOnlySpan<T> Cast<T>(this ReadOnlySpan<byte> src) where T : unmanaged
@@ -89,65 +92,6 @@ namespace Iviz.Core
         {
             return MemoryMarshal.Cast<byte, T>(src);
         }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref byte GetReference(this Span<byte> span) => ref span[0];
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref uint GetReference(this Span<uint> span) => ref span[0];
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref byte GetReference(this ReadOnlySpan<byte> span) => ref *(byte*)span[0];
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref sbyte GetReference(this ReadOnlySpan<sbyte> span) => ref *(sbyte*)span[0];
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref uint GetReference(this ReadOnlySpan<uint> span) => ref *(uint*)span[0];
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref ushort GetReference(this ReadOnlySpan<ushort> span) => ref *(ushort*)span[0];
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref float4x2 GetReference(this ReadOnlySpan<float4x2> span) 
-        {
-            fixed (float4x2* ptr = &span[0]) return ref *ptr;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe ref char GetReference(this ReadOnlySpan<char> span)
-        {
-            fixed (char* ptr = &span[0]) return ref *ptr;
-        }
-
-        public static ref T GetReference<T>(this ReadOnlySpan<T> span)
-        {
-            return ref MemoryMarshal.GetReference(span);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref byte Plus(this ref byte ptr, int i) => ref Unsafe.Add(ref ptr, i);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref ushort Plus(this ref ushort ptr, int i) => ref Unsafe.Add(ref ptr, i);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref uint Plus(this ref uint ptr, int i) => ref Unsafe.Add(ref ptr, i);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref int Plus(this ref int ptr, int i) => ref Unsafe.Add(ref ptr, i);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref Vector2 Plus(this ref Vector2 ptr, int i) => ref Unsafe.Add(ref ptr, i);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref Vector3 Plus(this ref Vector3 ptr, int i) => ref Unsafe.Add(ref ptr, i);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref Color32 Plus(this ref Color32 ptr, int i) => ref Unsafe.Add(ref ptr, i);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ref float4x2 Plus(this ref float4x2 ptr, int i) => ref Unsafe.Add(ref ptr, i);
 
         static Func<object, Array>? extractArrayFromListTypeFn;
 
@@ -175,6 +119,6 @@ namespace Iviz.Core
             }
         }
 
-        static T[] ExtractArray<T>(this List<T> list) => (T[])ExtractArrayFromList(list);
+        static T[] ExtractArray<T>(List<T> list) => (T[])ExtractArrayFromList(list);
     }
 }

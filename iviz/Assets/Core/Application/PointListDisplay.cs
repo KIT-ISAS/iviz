@@ -158,23 +158,29 @@ namespace Iviz.Displays
                 return;
             }
 
-            ReadOnlySpan<float4> points = pointBuffer;
-            using (var vertices = new Rent<Vector3>(points.Length))
+            int pointsLength = pointBuffer.Length;
+            
+            using (var vertices = new Rent<Vector3>(pointsLength))
             {
-                var vArray = vertices.AsSpan();
+                ref float4 pPtr = ref pointBuffer.GetReference();
+                ref Vector3 vPtr = ref vertices.Array[0];
 
                 if (UseColormap)
                 {
-                    using var uvs = new Rent<Vector2>(points.Length);
-                    var uvsArray = uvs.AsSpan();
-                    for (int i = 0; i < points.Length; i++)
+                    using var uvs = new Rent<Vector2>(pointsLength);
+                    ref Vector2 uvsPtr = ref uvs.Array[0];
+                    for (int i = 0; i < pointsLength; i++)
                     {
-                        ref readonly var p = ref points[i];
-                        ref var v = ref vArray[i];
-                        v.x = p.x;
-                        v.y = p.y;
-                        v.z = p.z;
-                        uvsArray[i].x = p.w;
+                        //ref readonly var p = ref points[i];
+                        //ref var v = ref vArray[i];
+                        vPtr.x = pPtr.x;
+                        vPtr.y = pPtr.y;
+                        vPtr.z = pPtr.z;
+                        uvsPtr.x = pPtr.w;
+
+                        pPtr = ref pPtr.Plus(1);
+                        vPtr = ref vPtr.Plus(1);
+                        uvsPtr = ref uvsPtr.Plus(1);
                     }
 
                     mesh.SetVertices(vertices);
@@ -182,16 +188,20 @@ namespace Iviz.Displays
                 }
                 else
                 {
-                    using var colors = new Rent<Color32>(points.Length);
-                    var cArray = MemoryMarshal.Cast<Color32, float>(colors);
-                    for (int i = 0; i < points.Length; i++)
+                    using var colors = new Rent<Color32>(pointsLength);
+                    ref float cPtr = ref Unsafe.As<Color32, float>(ref colors[0]);
+                    for (int i = 0; i < pointsLength; i++)
                     {
-                        ref readonly var p = ref points[i];
-                        ref var v = ref vArray[i];
-                        v.x = p.x;
-                        v.y = p.y;
-                        v.z = p.z;
-                        cArray[i] = p.w;
+                        //ref readonly var p = ref points[i];
+                        //ref var v = ref vArray[i];
+                        vPtr.x = pPtr.x;
+                        vPtr.y = pPtr.y;
+                        vPtr.z = pPtr.z;
+                        cPtr = pPtr.w;
+                        
+                        pPtr = ref pPtr.Plus(1);
+                        vPtr = ref vPtr.Plus(1);
+                        cPtr = ref cPtr.Plus(1);
                     }
 
                     mesh.SetVertices(vertices);
@@ -199,12 +209,14 @@ namespace Iviz.Displays
                 }
             }
 
-            using (var indices = new Rent<int>(points.Length))
+            using (var indices = new Rent<int>(pointsLength))
             {
-                var iArray = indices.AsSpan();
-                for (int i = 0; i < iArray.Length; i++)
+                ref int iPtr = ref indices.Array[0];
+                for (int i = 0; i < pointsLength; i++)
                 {
-                    iArray[i] = i;
+                    iPtr = i;
+                    iPtr = ref iPtr.Plus(1);
+                    //iArray[i] = i;
                 }
 
                 mesh.SetIndices(indices, MeshTopology.Points, 0);

@@ -21,7 +21,7 @@ namespace Iviz.App.Tests
      */
     public class OpencvTestScript : MonoBehaviour
     {
-        ARMarkerExecutor executor = new ARMarkerExecutor();
+        ARMarkerManager manager = new ARMarkerManager();
 
         void Start()
         {
@@ -71,7 +71,7 @@ namespace Iviz.App.Tests
                 CameraIntrinsic = new Intrinsic(3000, texture.width / 2f, 3000, texture.height / 2f).ToArray(),
             };
 
-            executor.Process(detectedMarker);
+            manager.Process(detectedMarker);
 
             Msgs.GeometryMsgs.Pose localPoseInRos = Transform.Identity;
             {

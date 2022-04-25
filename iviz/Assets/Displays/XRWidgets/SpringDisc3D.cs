@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Iviz.Displays.XR
 {
     [RequireComponent(typeof(BoxCollider))]
-    public sealed class SpringDisc3D : MonoBehaviour, IWidget, IWidgetWithColor, IWidgetCanBeMoved
+    public sealed class SpringDisc3D : MonoBehaviour, IWidgetWithColor, IWidgetCanBeMoved
     {
         [SerializeField] MeshMarkerDisplay? anchor;
         [SerializeField] MeshMarkerDisplay? link;
@@ -99,7 +99,7 @@ namespace Iviz.Displays.XR
             
             Link.Transform.localScale = new Vector3(0.2f, 0.2f, discDistance);
             Link.Transform.localPosition = discPosition / 2;
-            Link.Transform.localRotation = discPosition.sqrMagnitude < 0.01f 
+            Link.Transform.localRotation = discDistance < 0.001f 
                 ? Quaternion.identity 
                 : Quaternion.LookRotation(discPosition);
 

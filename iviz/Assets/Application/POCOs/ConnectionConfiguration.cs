@@ -18,6 +18,5 @@ namespace Iviz.App
         [DataMember] public List<Uri> LastMasterUris { get; set; } = new();
         [DataMember] public SettingsConfiguration Settings { get; set; } = new();
         [DataMember] public HostAlias?[] HostAliases { get; set; } = Array.Empty<HostAlias?>();
-        [DataMember] public ARMarkersConfiguration MarkersConfiguration { get; set; } = new();
     }
 }

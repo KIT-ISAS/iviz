@@ -122,7 +122,7 @@ namespace Iviz.Displays
 
                     l1.w = UnityUtils.AsFloat(color);
 
-                    array.Add(line);
+                    array.AddUnsafe(line);
 
                     p = q;
                     l0.w = l1.w;

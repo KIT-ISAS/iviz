@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.App;
@@ -14,6 +15,7 @@ using Iviz.Resources;
 using Iviz.Tools;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.XR;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using Object = UnityEngine.Object;
@@ -198,6 +200,9 @@ namespace Iviz.Controllers
                 base.PinRootMarker = value;
             }
         }
+        
+        public bool ProvidesMesh { get; private set; }
+        public bool ProvidesOcclusion { get; private set; }
 
         public ARFoundationController(ARConfiguration? config)
         {
@@ -213,21 +218,17 @@ namespace Iviz.Controllers
 
             canvas = GameObject.Find("Canvas").AssertHasComponent<Canvas>(nameof(canvas));
             virtualCamera = Settings.FindMainCamera().AssertHasComponent<Camera>(nameof(virtualCamera));
-
-            MeshManager = ar.Camera.gameObject.AssertHasComponent<ARMeshManager>(nameof(MeshManager));
-
+            
             lastAnchorMoved = Time.time;
 
             defaultCullingMask = ar.Camera.cullingMask;
 
             ar.CameraManager.frameReceived += args => ProcessLights(args.lightEstimation);
 
-            /*
             var subsystems = new List<ISubsystem>();
             SubsystemManager.GetInstances(subsystems);
             ProvidesMesh = subsystems.Any(s => s is XRMeshSubsystem);
             ProvidesOcclusion = subsystems.Any(s => s is XROcclusionSubsystem);
-            */
 
             Config = config ?? new ARConfiguration();
 
@@ -318,11 +319,14 @@ namespace Iviz.Controllers
             }
 
             var cameraTransform = ar.Camera.transform;
-            setupModeFrame.Transform.rotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
+            var worldRotation = Quaternion.Euler(0, 90 + cameraTransform.rotation.eulerAngles.y, 0);
             var ray = new Ray(cameraTransform.position, cameraTransform.forward);
             if (TryGetRaycastHit(ray, out Pose hit))
             {
-                setupModeFrame.Transform.position = hit.position;
+                setupModeFrame.Transform.SetPose(
+                    MarkerManager.TryGetMarkerNearby(hit.position, out var pose)
+                        ? pose
+                        : new Pose(hit.position, worldRotation));  
                 setupModeFrame.Tint = Color.white;
                 ARSet.Visible = true;
                 ARInfoPanel.SetActive(false);
@@ -330,6 +334,7 @@ namespace Iviz.Controllers
             else
             {
                 setupModeFrame.Transform.localPosition = new Vector3(0, 0, 0.5f);
+                setupModeFrame.Transform.rotation = worldRotation;
                 setupModeFrame.Tint = Color.white.WithAlpha(0.3f);
                 ARSet.Visible = false;
             }

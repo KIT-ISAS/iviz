@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
@@ -67,14 +68,14 @@ namespace Iviz.Core
         {
             int nextLength = length + 1;
             EnsureCapacity(nextLength);
-            UnsafeGet(length) = t;
+            Unsafe.Add(ref array.GetUnsafeRef(), length) = t;
             length = nextLength;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddUnsafe(in T t)
         {
-            UnsafeGet(length++) = t;
+            Unsafe.Add(ref array.GetUnsafeRef(), length++) = t;
         }
 
         public void AddRange(ReadOnlySpan<T> otherArray)
@@ -101,10 +102,20 @@ namespace Iviz.Core
 
         public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref array.GetUnsafeRef(), length);
 
-        ReadOnlySpan<T> AsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(ref array.GetUnsafeRef(), length);
+        public ref T GetReference()
+        {
+            if (length == 0)
+            {
+                ThrowIndexOutOfRangeException();
+            }
+            
+            return ref array.GetUnsafeRef();
+        }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        ref T UnsafeGet(int index) => ref Unsafe.Add(ref array.GetUnsafeRef(), index);
+        [DoesNotReturn]
+        static void ThrowIndexOutOfRangeException() => throw new IndexOutOfRangeException();
+
+        ReadOnlySpan<T> AsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(ref array.GetUnsafeRef(), length);
 
         public void Clear()
         {

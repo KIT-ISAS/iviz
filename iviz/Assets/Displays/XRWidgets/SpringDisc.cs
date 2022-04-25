@@ -16,7 +16,10 @@ namespace Iviz.Displays.XR
         [SerializeField] MeshMarkerDisplay? outerDisc;
         [SerializeField] MeshMarkerDisplay? innerDisc;
         [SerializeField] MeshMarkerDisplay? glow;
+
         CancellationTokenSource? tokenSource;
+        Color color = new(0, 0.6f, 1f);
+        Color secondaryColor = Color.white;
 
         MeshMarkerDisplay Anchor => anchor.AssertNotNull(nameof(anchor));
         MeshMarkerDisplay Link => link.AssertNotNull(nameof(link));
@@ -26,10 +29,7 @@ namespace Iviz.Displays.XR
         XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
 
         public event Action<Vector3>? Moved;
-
-        Color color = new(0, 0.6f, 1f);
-        Color secondaryColor = Color.white;
-
+        
         public Color Color
         {
             get => color;

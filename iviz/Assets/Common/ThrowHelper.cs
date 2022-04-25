@@ -11,7 +11,7 @@ namespace Iviz.Core
         {
             if (t == null)
             {
-                ThrowNull(nameOfT);
+                ThrowArgumentNull(nameOfT);
             }
         }
 
@@ -19,7 +19,7 @@ namespace Iviz.Core
         {
             if (t is null)
             {
-                ThrowNull(nameOfT);
+                ThrowArgumentNull(nameOfT);
             }
         }
 
@@ -32,6 +32,6 @@ namespace Iviz.Core
         }
 
         [DoesNotReturn]
-        static void ThrowNull(string paramName) => throw new ArgumentNullException(paramName);
+        static void ThrowArgumentNull(string paramName) => throw new ArgumentNullException(paramName);
     }
 }

@@ -2,13 +2,14 @@
 
 using System;
 using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Core;
 using JetBrains.Annotations;
 using MarcusW.VncClient;
 using MarcusW.VncClient.Protocol.Implementation.Services.Communication;
-using UnityEngine;
+using Iviz.Tools;
 
 namespace VNC
 {
@@ -137,7 +138,7 @@ namespace VNC
         {
             int sizeToWrite = src2.Length;
             AssertSize(dst4, sizeToWrite);
-            
+
             ref int dstPtr = ref Unsafe.As<uint, int>(ref dst4.GetReference());
             ref ushort srcPtr = ref src2.GetReference();
 
@@ -156,7 +157,7 @@ namespace VNC
         }
 
         internal static int Convert565To888(int rgb565) => InternalConvert565To888(rgb565);
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static int InternalConvert565To888(int rgb565)
         {
@@ -245,9 +246,9 @@ namespace VNC
             int sizeToWrite = dst4.Length;
 
             AssertSize(indices, sizeToWrite);
-            
+
             ref uint palettePtr = ref palette.GetReference(); // palette is size 256
-            ref byte indicesPtr = ref indices.GetReference(); 
+            ref byte indicesPtr = ref indices.GetReference();
             ref uint dstPtr = ref dst4.GetReference();
 
             while (sizeToWrite > 8)
@@ -401,18 +402,22 @@ namespace VNC
                 }
             }
         }
-        
+
         [AssertionMethod]
         static void AssertSize(in Span<uint> span, int size)
         {
-            if (span.Length < size) throw new IndexOutOfRangeException();
-        } 
-        
+            if (span.Length < size) ThrowIndexOutOfRange();
+        }
+
         [AssertionMethod]
         static void AssertSize(in ReadOnlySpan<byte> span, int size)
         {
-            if (span.Length < size) throw new IndexOutOfRangeException();
-        }         
+            if (span.Length < size) ThrowIndexOutOfRange();
+        }
+
+        [DoesNotReturn]
+        static void ThrowIndexOutOfRange() =>
+            throw new IndexOutOfRangeException("Span array is too short for the given operation");
     }
 
     [StructLayout(LayoutKind.Sequential)]

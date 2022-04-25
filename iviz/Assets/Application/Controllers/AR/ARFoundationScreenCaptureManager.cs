@@ -1,14 +1,15 @@
 #nullable enable
 
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Tools;
-using Unity.Collections;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
@@ -86,7 +87,7 @@ namespace Iviz.Controllers
                 && lastColor != null
                 && (GameThread.Now - lastColor.Timestamp.ToDateTime()).TotalMilliseconds < reuseCaptureAgeInMs)
             {
-                return new ValueTask<Screenshot?>(lastColor);
+                return lastColor.AsTaskResultMaybeNull();
             }
 
             token.ThrowIfCancellationRequested();
@@ -108,29 +109,28 @@ namespace Iviz.Controllers
             var pose = arCameraTransform.AsPose();
             var ts = TaskUtils.CreateCompletionSource<Screenshot?>();
 
-            using (image)
+            using var _ = image;
+            image.ConvertAsync(conversionParams, (status, _, array) =>
             {
-                image.ConvertAsync(conversionParams, (status, _, array) =>
+                if (token.IsCancellationRequested)
                 {
-                    if (token.IsCancellationRequested)
-                    {
-                        ts.TrySetCanceled(token);
-                        return;
-                    }
+                    ts.TrySetCanceled(token);
+                    return;
+                }
 
-                    if (status != XRCpuImage.AsyncConversionStatus.Ready)
-                    {
-                        ts.TrySetException(InvalidScreenshotException(status));
-                        return;
-                    }
+                if (status != XRCpuImage.AsyncConversionStatus.Ready)
+                {
+                    ts.TrySetException(InvalidScreenshotException(status));
+                    return;
+                }
 
-                    var screenshot = new Screenshot(ScreenshotFormat.Rgb,
-                        GameThread.TimeNow, width, height,
-                        Intrinsic.Scale(0.5f), pose, array.ToArray());
-                    lastColor = screenshot;
-                    ts.TrySetResult(screenshot);
-                });
-            }
+                var screenshot = new Screenshot(ScreenshotFormat.Rgb,
+                    GameThread.TimeNow, width, height,
+                    Intrinsic.Scale(0.5f), pose, array.ToArray());
+                lastColor = screenshot;
+                ts.TrySetResult(screenshot);
+            });
+
 
             return ts.Task.AsValueTask();
         }
@@ -143,7 +143,7 @@ namespace Iviz.Controllers
                 && lastDepth != null
                 && (GameThread.Now - lastDepth.Timestamp.ToDateTime()).TotalMilliseconds < reuseCaptureAgeInMs)
             {
-                return new ValueTask<Screenshot?>(lastDepth);
+                return lastDepth.AsTaskResultMaybeNull();
             }
 
             token.ThrowIfCancellationRequested();
@@ -164,7 +164,7 @@ namespace Iviz.Controllers
                 inputRect = new RectInt(0, 0, image.width, image.height),
                 outputDimensions = new Vector2Int(image.width, image.height),
                 outputFormat = TextureFormat.RFloat,
-                transformation = XRCpuImage.Transformation.MirrorY
+                transformation = XRCpuImage.Transformation.MirrorY | XRCpuImage.Transformation.MirrorX 
             };
 
             var ts = TaskUtils.CreateCompletionSource<Screenshot?>();
@@ -173,42 +173,43 @@ namespace Iviz.Controllers
             var pose = arCameraTransform.AsPose();
             int colorWidth = cameraManager.subsystem.currentConfiguration?.width ?? width;
 
-            using (image)
+            using var _ = image;
+            image.ConvertAsync(conversionParams, (status, _, array) =>
             {
-                image.ConvertAsync(conversionParams, (status, _, array) =>
+                if (token.IsCancellationRequested)
                 {
-                    if (token.IsCancellationRequested)
-                    {
-                        ts.TrySetCanceled(token);
-                        return;
-                    }
+                    ts.TrySetCanceled(token);
+                    return;
+                }
 
-                    if (status != XRCpuImage.AsyncConversionStatus.Ready)
-                    {
-                        ts.TrySetException(InvalidScreenshotException(status));
-                        return;
-                    }
+                if (status != XRCpuImage.AsyncConversionStatus.Ready)
+                {
+                    ts.TrySetException(InvalidScreenshotException(status));
+                    return;
+                }
 
-                    float scale = width / (float)colorWidth;
-                    var screenshot = new Screenshot(ScreenshotFormat.Float,
-                        GameThread.TimeNow, width, height,
-                        Intrinsic.Scale(scale), pose, array.ToArray());
-                    
-                    Task.Run(() =>
+                float scale = width / (float)colorWidth;
+                var screenshot = new Screenshot(ScreenshotFormat.Float,
+                    GameThread.TimeNow, width, height,
+                    Intrinsic.Scale(scale), pose, array.ToArray());
+                ts.TrySetResult(screenshot);
+
+                /*
+                Task.Run(() =>
+                {
+                    try
                     {
-                        try
-                        {
-                            MirrorX<float>(screenshot);
-                            lastDepth = screenshot;
-                            ts.TrySetResult(screenshot);
-                        }
-                        catch (Exception e)
-                        {
-                            ts.TrySetException(e);
-                        }
-                    }, token);
-                });
-            }
+                        MirrorXf(screenshot.Width, screenshot.Height, screenshot.Bytes);
+                        lastDepth = screenshot;
+                        ts.TrySetResult(screenshot);
+                    }
+                    catch (Exception e)
+                    {
+                        ts.TrySetException(e);
+                    }
+                }, token);
+                */
+            });
 
             return ts.Task.AsValueTask();
         }
@@ -221,7 +222,7 @@ namespace Iviz.Controllers
                 && lastConfidence != null
                 && (GameThread.Now - lastConfidence.Timestamp.ToDateTime()).TotalMilliseconds < reuseCaptureAgeInMs)
             {
-                return new ValueTask<Screenshot?>(lastConfidence);
+                return lastConfidence.AsTaskResultMaybeNull();
             }
 
             token.ThrowIfCancellationRequested();
@@ -242,7 +243,7 @@ namespace Iviz.Controllers
                 inputRect = new RectInt(0, 0, image.width, image.height),
                 outputDimensions = new Vector2Int(image.width, image.height),
                 outputFormat = TextureFormat.R8,
-                transformation = XRCpuImage.Transformation.MirrorY
+                transformation = XRCpuImage.Transformation.MirrorY | XRCpuImage.Transformation.MirrorX
             };
 
 
@@ -253,42 +254,43 @@ namespace Iviz.Controllers
 
             int colorWidth = cameraManager.subsystem.currentConfiguration?.width ?? width;
 
-            using (image)
+            using var _ = image;
+            image.ConvertAsync(conversionParams, (status, _, array) =>
             {
-                image.ConvertAsync(conversionParams, (status, _, array) =>
+                if (token.IsCancellationRequested)
                 {
-                    if (token.IsCancellationRequested)
-                    {
-                        ts.TrySetCanceled();
-                        return;
-                    }
+                    ts.TrySetCanceled();
+                    return;
+                }
 
-                    if (status != XRCpuImage.AsyncConversionStatus.Ready)
-                    {
-                        ts.TrySetException(InvalidScreenshotException(status));
-                        return;
-                    }
+                if (status != XRCpuImage.AsyncConversionStatus.Ready)
+                {
+                    ts.TrySetException(InvalidScreenshotException(status));
+                    return;
+                }
 
-                    float scale = width / (float)colorWidth;
-                    var screenshot = new Screenshot(ScreenshotFormat.Mono8, 
-                        GameThread.TimeNow, width, height,
-                        Intrinsic.Scale(scale), pose, array.ToArray());
-                    
-                    Task.Run(() =>
+                float scale = width / (float)colorWidth;
+                var screenshot = new Screenshot(ScreenshotFormat.Mono8,
+                    GameThread.TimeNow, width, height,
+                    Intrinsic.Scale(scale), pose, array.ToArray());
+                ts.TrySetResult(screenshot);
+
+                /*
+                Task.Run(() =>
+                {
+                    try
                     {
-                        try
-                        {
-                            MirrorX<byte>(screenshot);
-                            lastConfidence = screenshot;
-                            ts.TrySetResult(screenshot);
-                        }
-                        catch (Exception e)
-                        {
-                            ts.TrySetException(e);
-                        }
-                    }, token);
-                });
-            }
+                        MirrorXb(screenshot.Width, screenshot.Height, screenshot.Bytes);
+                        lastConfidence = screenshot;
+                        ts.TrySetResult(screenshot);
+                    }
+                    catch (Exception e)
+                    {
+                        ts.TrySetException(e);
+                    }
+                }, token);
+                */
+            });
 
             return ts.Task.AsValueTask();
         }
@@ -297,23 +299,47 @@ namespace Iviz.Controllers
             new InvalidOperationException(
                 $"Conversion request of color image failed with status {status}");
 
-        static void MirrorX<T>(Screenshot screenshot) where T : unmanaged
+        /*
+        static void MirrorXf(int width, int height, byte[] bytes)
         {
-            Span<byte> bytes = screenshot.Bytes;
-            int width = screenshot.Width;
-            int height = screenshot.Height;
-            var span = bytes.Cast<T>()[..(width * height)];
-
+            if (width * height * sizeof(float) > bytes.Length) ThrowIndexOutOfRange();
+            ref float ptr = ref Unsafe.As<byte, float>(ref bytes[0]);
             foreach (int v in ..height)
             {
-                var row = span.Slice(v * width, width);
-                foreach (int u in ..(width / 2))
+                ref float l = ref ptr.Plus(v * width);
+                ref float r = ref l.Plus(width - 1);
+                foreach (int _ in ..(width / 2))
                 {
-                    ref T l = ref row[u];
-                    ref T r = ref row[^(1 + u)];
                     (l, r) = (r, l);
+                    l = ref l.Plus(1);
+                    r = ref r.Plus(-1);
                 }
             }
         }
+
+        static void MirrorXb(int width, int height, byte[] bytes)
+        {
+            if (width * height > bytes.Length) ThrowIndexOutOfRange();
+            ref byte ptr = ref bytes[0];
+            foreach (int v in ..height)
+            {
+                ref ulong l = ref Unsafe.As<byte, ulong>(ref ptr.Plus(v * width));
+                ref ulong r = ref l.Plus(width / 8 - 1);
+                foreach (int _ in ..(width / 16))
+                {
+                    ulong lFlip = BinaryPrimitives.ReverseEndianness(l);
+                    ulong rFlip = BinaryPrimitives.ReverseEndianness(r);
+                    l = rFlip;
+                    r = lFlip;
+
+                    l = ref l.Plus(1);
+                    r = ref r.Plus(-1);
+                }
+            }
+        }
+
+        [DoesNotReturn]
+        static void ThrowIndexOutOfRange() => throw new IndexOutOfRangeException();
+        */
     }
 }

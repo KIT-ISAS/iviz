@@ -10,6 +10,10 @@ using UnityEngine;
 
 namespace Iviz.App
 {
+    public enum ARMarkerAction
+    {
+    }
+     
     public sealed class ARMarkerDialogContents : DialogPanel
     {
         static readonly string[] TypesStr = {"Aruco", "QR", "Unset"};
@@ -65,7 +69,7 @@ namespace Iviz.App
             {
                 widget.ValueChanged += (index, _) => OnTypeChanged(row, (ARMarkerType) index);
                 widget.Options = TypesStr;
-                widget.Index = (int) ARMarkerType.Unset;
+                widget.Index = (int) ARMarkerType.Aruco;
             }
 
             foreach (var (widget, row) in codes.WithIndex())
@@ -95,7 +99,7 @@ namespace Iviz.App
         void OnTypeChanged(int id, ARMarkerType index)
         {
             TypesChanged?.Invoke(id, index);
-            bool restEnabled = (index != ARMarkerType.Unset);
+            bool restEnabled = (index != ARMarkerType.Aruco);
             Codes[id].Interactable = restEnabled;
             Sizes[id].Interactable = restEnabled;
             Actions[id].Interactable = restEnabled;
@@ -107,7 +111,7 @@ namespace Iviz.App
 
             foreach (int id in ..Codes.Count)
             {
-                Types[id].Index = (int) ARMarkerType.Unset;
+                Types[id].Index = (int) ARMarkerType.Aruco;
                 Codes[id].Interactable = false;
                 Sizes[id].Interactable = false;
                 Actions[id].Interactable = false;

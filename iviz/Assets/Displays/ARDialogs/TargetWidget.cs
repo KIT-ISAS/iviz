@@ -27,6 +27,8 @@ namespace Iviz.App.ARDialogs
         ModeType mode;
         bool scaling;
 
+        string mainButtonCaption = "Send!";
+
         public event Action<Vector2, Vector3> Moved;
         public event Action Cancelled;
 
@@ -76,7 +78,6 @@ namespace Iviz.App.ARDialogs
             }
         }
         
-        string mainButtonCaption = "Send!";
         public string MainButtonCaption
         {
             get => mainButtonCaption;

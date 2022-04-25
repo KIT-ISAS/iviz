@@ -22,6 +22,7 @@ namespace Iviz.Controllers.TF
             instance ?? throw new NullReferenceException("TfPublisher has not been set!");
 
         readonly Dictionary<string, TfPublishedFrame> frames = new();
+        
         PublishedFramePanelData? panelData;
         int secondsCounter;
 

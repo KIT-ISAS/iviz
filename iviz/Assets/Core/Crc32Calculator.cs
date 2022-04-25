@@ -3,6 +3,8 @@
 using System;
 using System.Runtime.CompilerServices;
 using System.Text;
+using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Tools;
 
 namespace Iviz.Core
@@ -40,12 +42,19 @@ namespace Iviz.Core
             return createTable;
         }
 
-        public static unsafe uint Compute<T>(in T value, uint startHash = DefaultSeed) where T : unmanaged
+        public static uint Compute(int value, uint startHash = DefaultSeed)
         {
-            fixed (T* ptr = &value)
-            {
-                return Compute(ref *(byte*)ptr, sizeof(T), startHash);
-            }
+            return Compute(ref Unsafe.As<int, byte>(ref value), sizeof(int), startHash);
+        }
+
+        public static uint Compute(Vector3 value, uint startHash = DefaultSeed)
+        {
+            return Compute(ref Unsafe.As<Vector3, byte>(ref value), Unsafe.SizeOf<Vector3>(), startHash);
+        }
+
+        public static uint Compute(ColorRGBA value, uint startHash = DefaultSeed)
+        {
+            return Compute(ref Unsafe.As<ColorRGBA, byte>(ref value), Unsafe.SizeOf<ColorRGBA>(), startHash);
         }
 
         public static uint Compute(in BuilderPool.BuilderRent value, uint startHash = DefaultSeed)
@@ -55,12 +64,20 @@ namespace Iviz.Core
                 : Compute((StringBuilder)value);
         }
 
-        public static uint Compute<T>(T[] array, uint startHash = DefaultSeed) where T : unmanaged
+        public static uint Compute(Point[] array, uint startHash = DefaultSeed)
         {
             int length = array.Length;
             return length == 0
                 ? startHash
-                : Compute(ref Unsafe.As<T, byte>(ref array[0]), length * Unsafe.SizeOf<T>(), startHash);
+                : Compute(ref Unsafe.As<Point, byte>(ref array[0]), length * Unsafe.SizeOf<Point>(), startHash);
+        }
+
+        public static uint Compute(ColorRGBA[] array, uint startHash = DefaultSeed)
+        {
+            int length = array.Length;
+            return length == 0
+                ? startHash
+                : Compute(ref Unsafe.As<ColorRGBA, byte>(ref array[0]), length * Unsafe.SizeOf<ColorRGBA>(), startHash);
         }
 
         public static uint Compute(string array, uint startHash = DefaultSeed)
@@ -81,8 +98,7 @@ namespace Iviz.Core
             int length = array.Length;
             return length == 0
                 ? startHash
-                : Compute(ref Unsafe.As<sbyte, byte>(ref array.GetReference()), length * sizeof(sbyte),
-                    startHash);
+                : Compute(ref Unsafe.As<sbyte, byte>(ref array.GetReference()), length * sizeof(sbyte), startHash);
         }
 
         static uint Compute(StringBuilder value, uint startHash = DefaultSeed)

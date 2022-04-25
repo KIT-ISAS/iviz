@@ -79,11 +79,12 @@ namespace Iviz.App
             panel.Description.Text = controller.Description;
             //panel.ARMarkers.Description = controller.MarkerExecutor.Description;
         }
-        
+
         public void UpdateConfiguration(ARConfiguration configuration)
         {
-            controller.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        }        
+            ThrowHelper.ThrowIfNull(configuration, nameof(configuration));
+            controller.Config = configuration;
+        }
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)
         {

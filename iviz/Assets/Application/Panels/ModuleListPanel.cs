@@ -67,7 +67,7 @@ namespace Iviz.App
         [SerializeField] AnchorCanvasPanel? anchorCanvasPanel;
         [SerializeField] UpperCanvasPanel? upperCanvasPanel;
         [SerializeField] BottomCanvasPanel? bottomCanvasPanel;
-        [SerializeField] ARSidePanel? arSidePanel;
+        [SerializeField] ARToolbarPanel? arSidePanel;
         [SerializeField] ModulePanelManager? dataPanelManager;
         [SerializeField] DialogPanelManager? dialogPanelManager;
         [SerializeField] ARJoystick? arJoystick;
@@ -123,7 +123,7 @@ namespace Iviz.App
         public DialogPanelManager DialogPanelManager => dialogPanelManager.AssertNotNull(nameof(dialogPanelManager));
         public TwistJoystick TwistJoystick => twistJoystick.AssertNotNull(nameof(twistJoystick));
         public ARJoystick ARJoystick => arJoystick.AssertNotNull(nameof(arJoystick));
-        public ARSidePanel ARSidePanel => arSidePanel.AssertNotNull(nameof(arSidePanel));
+        public ARToolbarPanel ARToolbarPanel => arSidePanel.AssertNotNull(nameof(arSidePanel));
 
         public XRContents XRController => xrController != null
             ? xrController
@@ -142,7 +142,7 @@ namespace Iviz.App
                 ModuleListCanvas.SetActive(value);
                 DataPanelCanvas.SetActive(value);
                 DialogPanelManager.Active = value;
-                ARSidePanel.Visible = !value;
+                ARToolbarPanel.Visible = !value;
             }
         }
 
@@ -682,7 +682,6 @@ namespace Iviz.App
                     .ToArray();
                 Connection.SetHostAliases(validHostPairs);
 
-                Dialogs.ARMarkerData.Configuration = config.MarkersConfiguration;
                 return;
             }
             catch (Exception e) when
@@ -714,7 +713,6 @@ namespace Iviz.App
                 LastMasterUris = new List<Uri>(Dialogs.ConnectionData.LastMasterUris),
                 Settings = Settings.SettingsManager.Config,
                 HostAliases = Dialogs.SystemData.HostAliases,
-                MarkersConfiguration = Dialogs.ARMarkerData.Configuration,
             };
 
             try
@@ -743,7 +741,6 @@ namespace Iviz.App
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
                 config.Settings = Settings.SettingsManager.Config;
                 config.HostAliases = Dialogs.SystemData.HostAliases;
-                config.MarkersConfiguration = Dialogs.ARMarkerData.Configuration;
                 string outText = BuiltIns.ToJsonString(config);
                 File.WriteAllText(path, outText);
             }

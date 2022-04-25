@@ -12,7 +12,5 @@ namespace Iviz.Common.Configurations
         [DataMember] public QualityType QualityInAr { get; set; } = QualityType.Ultra;
         [DataMember] public int NetworkFrameSkip { get; set; } = 1;
         [DataMember] public int TargetFps { get; set; } = -1;
-        //[DataMember] public ColorRGBA BackgroundColor { get; set; } = new(0.125f, 0.169f, 0.245f, 1);
-        //[DataMember] public int SunDirection { get; set; } = 0;
     }
 }

@@ -28,7 +28,8 @@ namespace Iviz.Ros
 
         public SubscribedTopic(string topic, RosTransportHint transportHint)
         {
-            this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
+            ThrowHelper.ThrowIfNull(topic, nameof(topic));
+            this.topic = topic;
             this.transportHint = transportHint;
         }
 
@@ -147,7 +148,7 @@ namespace Iviz.Ros
         void Callback(in T msg, IRosReceiver receiver)
         {
             var cache = listeners;
-            using (msg)
+            try
             {
                 foreach (var listener in cache)
                 {
@@ -160,6 +161,10 @@ namespace Iviz.Ros
                         RosLogger.Error($"{this}: Error in callback", e);
                     }
                 }
+            }
+            finally
+            {
+                msg.Dispose();
             }
         }
 

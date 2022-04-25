@@ -246,7 +246,7 @@ MonoBehaviour:
   link: {fileID: 798572246610192734}
   draggable: {fileID: 3602615320837110326}
   disc: {fileID: 8318936338848682962}
-  glow: {fileID: 7562268674771571319}
+  glow: {fileID: 7014749630790876588}
 --- !u!1 &7002819733210540196
 GameObject:
   m_ObjectHideFlags: 0
@@ -671,12 +671,6 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 6601101025673014937, guid: 3b61b72175db643ce8390bf4b3656908, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 3b61b72175db643ce8390bf4b3656908, type: 3}
---- !u!23 &3834849191497203496 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 6601101025673014936, guid: 3b61b72175db643ce8390bf4b3656908,
-    type: 3}
-  m_PrefabInstance: {fileID: 7972441634280739248}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &3834849191497203498 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6601101025673014938, guid: 3b61b72175db643ce8390bf4b3656908,
@@ -689,19 +683,6 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 7972441634280739248}
   m_PrefabAsset: {fileID: 0}
---- !u!65 &7016720609295999487
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3834849191497203499}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1.0000002, z: 1.4272087e-14}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &4491926868690590210
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -716,11 +697,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   offset: {x: 0, y: 0, z: 0}
   keepHorizontal: 0
---- !u!114 &7562268674771571319
+--- !u!114 &7014749630790876588 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 1151418414904978460, guid: 3b61b72175db643ce8390bf4b3656908,
+    type: 3}
+  m_PrefabInstance: {fileID: 7972441634280739248}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3834849191497203499}
   m_Enabled: 1
@@ -728,17 +709,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91e53ae859eaa2a449bf829338ecce5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Transform: {fileID: 3834849191497203498}
-  boxCollider: {fileID: 7016720609295999487}
-  diffuseTexture: {fileID: 2800000, guid: 0efa62481efb940378bf2592d1a12fa6, type: 3}
-  bumpTexture: {fileID: 0}
-  emissiveColor: {r: 0, g: 0, b: 0, a: 1}
-  color: {r: 1, g: 1, b: 1, a: 1}
-  mainRenderer: {fileID: 3834849191497203496}
-  meshFilter: {fileID: 3834849191497203503}
---- !u!33 &3834849191497203503 stripped
-MeshFilter:
-  m_CorrespondingSourceObject: {fileID: 6601101025673014943, guid: 3b61b72175db643ce8390bf4b3656908,
-    type: 3}
-  m_PrefabInstance: {fileID: 7972441634280739248}
-  m_PrefabAsset: {fileID: 0}

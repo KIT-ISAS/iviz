@@ -11,12 +11,17 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.Highlighters;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
 using UnityEngine;
+using Pose = UnityEngine.Pose;
+using Quaternion = UnityEngine.Quaternion;
+using Transform = UnityEngine.Transform;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -284,12 +289,21 @@ namespace Iviz.Controllers
             meshTriangles.Color = msg.Color.Sanitize().ToUnity();
             meshTriangles.FlipWinding = TriangleListFlipWinding;
 
-            var srcPoints = msg.Points;
-            using var points = new Rent<Vector3>(srcPoints.Length);
-            var pArray = points.AsSpan();
-            for (int i = 0; i < srcPoints.Length; i++)
+            int pointsLength = msg.Points.Length;
+            if (pointsLength == 0)
             {
-                srcPoints[i].Ros2Unity(out pArray[i]);
+                meshTriangles.Clear();
+                return;
+            }
+            
+            using var points = new Rent<Vector3>(pointsLength);
+            ref Point srcPtr = ref msg.Points[0];
+            ref Vector3 dstPtr = ref points.Array[0];
+            for (int i = 0; i < pointsLength; i++)
+            {
+                srcPtr.Ros2Unity(out dstPtr);
+                srcPtr = ref srcPtr.Plus(1);
+                dstPtr = ref dstPtr.Plus(1);
             }
 
             var colors = MemoryMarshal.Cast<ColorRGBA, Color>(msg.Colors);

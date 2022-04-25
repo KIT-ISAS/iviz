@@ -249,7 +249,7 @@ namespace Iviz.Displays
 
             if (TryGetGameObject(uriString, out var resource))
             {
-                return new ValueTask<ResourceKey<GameObject>?>(resource);
+                return resource.AsTaskResultMaybeNull();
             }
 
             float currentTime = Time.time;
@@ -430,7 +430,7 @@ namespace Iviz.Displays
 
             if (loadedTextures.TryGetValue(uriString, out var existingTexture))
             {
-                return new ValueTask<ResourceKey<Texture2D>?>(existingTexture);
+                return existingTexture.AsTaskResultMaybeNull();
             }
 
             float currentTime = Time.time;

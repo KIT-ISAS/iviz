@@ -98,7 +98,7 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Abs(this Vector3 p)
+        public static Vector3 Abs(this in Vector3 p)
         {
             Vector3 q;
             q.x = Mathf.Abs(p.x);
@@ -107,7 +107,7 @@ namespace Iviz.Core
             return q;
         }
 
-        public static Vector2 Abs(this Vector2 p)
+        public static Vector2 Abs(this in Vector2 p)
         {
             Vector2 q;
             q.x = Mathf.Abs(p.x);
@@ -252,10 +252,8 @@ namespace Iviz.Core
         /// <param name="o">The Unity object to evaluate</param>
         /// <typeparam name="T">The type of the Unity object</typeparam>
         /// <returns>The Unity object if not-null and valid, otherwise a normal C# null</returns>           
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T? CheckedNull<T>(this T? o) where T : UnityEngine.Object => o != null ? o : null;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T AssertNotNull<T>(this T? o, string name,
             [CallerFilePath] string? caller = null,
             [CallerLineNumber] int lineNumber = 0) where T : class
@@ -270,7 +268,6 @@ namespace Iviz.Core
                                                        $"At: {caller} line {lineNumber}");
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T AssertHasComponent<T>(this GameObject? o, string name,
             [CallerFilePath] string? caller = null,
             [CallerLineNumber] int lineNumber = 0)
@@ -292,7 +289,6 @@ namespace Iviz.Core
             return t;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T AssertHasComponent<T>(this Component? o, string name,
             [CallerFilePath] string? caller = null,
             [CallerLineNumber] int lineNumber = 0) =>
@@ -508,21 +504,11 @@ namespace Iviz.Core
         public static void Deconstruct(this in Ray r, out Vector3 origin, out Vector3 direction) =>
             (origin, direction) = (r.origin, r.direction);
 
-        /// <summary>
-        /// Returns the array inside a <see cref="Memory{T}"/> object to the <see cref="ArrayPool{T}"/>.
-        /// Used by some iviz messages which rent arrays from the pool instead of creating a new one.
-        /// </summary>
-        /// <param name="memory"></param>
-        /// <typeparam name="T"></typeparam>
-        public static void TryReturn<T>(this SharedRent<T> memory) where T : unmanaged
+        public static void TryReturn(this SharedRent<byte> memory)
         {
             memory.Dispose();
         }
 
-        /// <summary>
-        /// Empty function. Used for debugging purposes as an overload for <see cref="TryReturn{T}(SharedRent{T})"/>,
-        /// in case an iviz message is temporarily set to contain an array instead of a Memory.
-        /// </summary>
         public static void TryReturn(this Array? _)
         {
         }

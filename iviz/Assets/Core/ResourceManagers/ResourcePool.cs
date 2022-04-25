@@ -134,6 +134,13 @@ namespace Iviz.Displays
         {
             ThrowHelper.ThrowIfNull(resource, nameof(resource));
             ThrowHelper.ThrowIfNull(gameObject, nameof(gameObject));
+
+            if (Settings.IsShuttingDown)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            
             Instance.Add(resource, gameObject);
         }
 
@@ -144,7 +151,7 @@ namespace Iviz.Displays
             if (display is not MonoBehaviour behaviour)
             {
                 throw new ArgumentException(
-                    $"Argument to {nameof(ReturnDisplay)} be an object that inherits from MonoBehavior",
+                    $"Argument to {nameof(ReturnDisplay)} must be an object that inherits from MonoBehavior",
                     nameof(display));
             }
 

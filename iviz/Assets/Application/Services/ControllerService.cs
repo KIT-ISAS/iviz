@@ -594,7 +594,7 @@ namespace Iviz.Controllers
         {
             srv.Response.Success = true;
             srv.Response.Message = "";
-            return new ValueTask(TrySetFixedFrameAsync(srv.Request.Id));
+            return TrySetFixedFrameAsync(srv.Request.Id).AsValueTask();
         }
 
         static Task TrySetFixedFrameAsync(string id)
@@ -1038,7 +1038,7 @@ namespace Iviz.Controllers
 
                     if (dialog == null)
                     {
-                        return new ValueTask();
+                        return default;
                     }
 
                     // note: no if/else, dialog can be both!
@@ -1084,7 +1084,7 @@ namespace Iviz.Controllers
                         ts.TrySetResult();
                     }
 
-                    return new ValueTask(ts.Task);
+                    return ts.Task.AsValueTask();
                 });
             }
             catch (Exception e)

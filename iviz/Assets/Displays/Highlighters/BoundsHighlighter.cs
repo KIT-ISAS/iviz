@@ -24,7 +24,9 @@ namespace Iviz.Displays.Highlighters
 
         public BoundsHighlighter(IHasBounds holder, bool isPermanent = false, float duration = 0.5f)
         {
-            this.holder = holder ?? throw new ArgumentNullException(nameof(holder));
+            ThrowHelper.ThrowIfNull(holder, nameof(holder));
+            
+            this.holder = holder;
             Duration = duration;
             
             var node = new GameObject("[Bounds Highlighter]");

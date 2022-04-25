@@ -16,6 +16,7 @@ using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Msgs.VisualizationMsgs;
+using Iviz.Tools;
 using UnityEngine;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
 
@@ -97,7 +98,7 @@ namespace Iviz.Resources
         public static ValueTask<(bool result, string robotDescription)> TryGetRobotAsync(string robotName,
             CancellationToken token = default) =>
             Internal.TryGetRobot(robotName, out string? robotDescription)
-                ? new ValueTask<(bool, string)>((true, robotDescription))
+                ? (true, robotDescription).AsTaskResult()
                 : External.TryGetRobotAsync(robotName, token);
 
         public static bool TryGetResource(string uriString, [NotNullWhen(true)] out ResourceKey<GameObject>? info) =>
@@ -108,7 +109,7 @@ namespace Iviz.Resources
             IServiceProvider? provider,
             CancellationToken token) =>
             Internal.TryGet(uriString, out ResourceKey<GameObject>? info)
-                ? new ValueTask<ResourceKey<GameObject>?>(info)
+                ? info.AsTaskResultMaybeNull()
                 : External.TryGetGameObjectAsync(uriString, provider, token);
 
         internal static ValueTask<ResourceKey<Texture2D>?> GetTextureResourceAsync(
@@ -116,7 +117,7 @@ namespace Iviz.Resources
             IServiceProvider? provider,
             CancellationToken token) =>
             Internal.TryGet(uriString, out ResourceKey<Texture2D>? info)
-                ? new ValueTask<ResourceKey<Texture2D>?>(info)
+                ? info.AsTaskResultMaybeNull()
                 : External.TryGetTextureAsync(uriString, provider, token);
 
         public static void ClearResources()

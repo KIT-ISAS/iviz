@@ -84,15 +84,11 @@ namespace Iviz.Displays
         }
 
         static void CreateCapsulesFromSegments(ref float4x2 linePtr, int numSegments, float scale,
-            Vector3[] pArray, Color32[] cArray, Vector2[] uArray, int[] indicesArray)
+            Vector3[] pArray, Color32[] cArray, Vector2[] uArray, int[] iArray)
         {
-            float halfScale = scale * 0.5f;
-
-            int pOff = 0;
-            int cOff = 0;
-            int uvOff = 0;
-
             const float minMagnitude = 1e-5f;
+
+            float halfScale = scale * 0.5f;
 
             foreach (int segment in ..numSegments)
             {
@@ -149,8 +145,10 @@ namespace Iviz.Displays
                 pArray[pOff++] = b + halfDirX;
                 */
 
+                int offset = segment * 10;
+
                 {
-                    ref var pPtr = ref pArray[pOff];
+                    ref var pPtr = ref pArray[offset];
 
                     var halfDirX = halfScale * dirX;
                     var halfSumYz = halfScale * (dirY + dirZ);
@@ -162,14 +160,12 @@ namespace Iviz.Displays
                     pPtr.Plus(1) = a + halfSumYz;
                     pPtr.Plus(3) = a - halfSumYz;
                     pPtr.Plus(5) = b + halfSumYz;
-                    pPtr.Plus(9) = b - halfSumYz;
+                    pPtr.Plus(7) = b - halfSumYz;
 
                     pPtr.Plus(2) = a + halfDiffYz;
                     pPtr.Plus(4) = a - halfDiffYz;
                     pPtr.Plus(6) = b + halfDiffYz;
                     pPtr.Plus(8) = b - halfDiffYz;
-
-                    pOff += 10;
                 }
 
 
@@ -199,7 +195,7 @@ namespace Iviz.Displays
                 */
 
                 {
-                    ref var cPtr = ref cArray[cOff];
+                    ref var cPtr = ref cArray[offset];
 
                     var ca = UnityUtils.AsColor32(line.c0.w);
                     cPtr = ca;
@@ -214,8 +210,6 @@ namespace Iviz.Displays
                     cPtr.Plus(7) = cb;
                     cPtr.Plus(8) = cb;
                     cPtr.Plus(9) = cb;
-
-                    cOff += 10;
                 }
 
                 /*
@@ -250,7 +244,7 @@ namespace Iviz.Displays
                 }
                 */
                 {
-                    ref var uvPtr = ref uArray[uvOff];
+                    ref var uvPtr = ref uArray[offset];
 
                     Vector2 uv0;
                     uv0.x = line.c0.w;
@@ -271,14 +265,11 @@ namespace Iviz.Displays
                     uvPtr.Plus(7) = uv1;
                     uvPtr.Plus(8) = uv1;
                     uvPtr.Plus(9) = uv1;
-
-                    uvOff += 10;
                 }
             }
 
             ref int capsulePtr = ref CapsuleIndices[0];
-            ref int iPtr = ref indicesArray[0];
-            int iOff = 0;
+            ref int iPtr = ref iArray[0];
 
             /*
             foreach (int i in ..lineBuffer.Length)
@@ -296,7 +287,8 @@ namespace Iviz.Displays
                 int vertexOff = segment * 10;
                 foreach (int capsuleIndex in ..48)
                 {
-                    iPtr.Plus(iOff++) = vertexOff + capsulePtr.Plus(capsuleIndex);
+                    iPtr = vertexOff + capsulePtr.Plus(capsuleIndex);
+                    iPtr = ref iPtr.Plus(1);
                 }
             }
         }

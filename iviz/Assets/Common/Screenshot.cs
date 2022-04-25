@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Tools;
@@ -22,6 +23,8 @@ namespace Iviz.Common
         public Screenshot(ScreenshotFormat format, time timestamp, int width, int height, in Intrinsic intrinsic,
             in Pose cameraPose, byte[] bytes)
         {
+            ThrowHelper.ThrowIfNull(bytes, nameof(bytes));
+            
             Format = format;
             Timestamp = timestamp;
             Width = width;
@@ -29,7 +32,7 @@ namespace Iviz.Common
             Bpp = BppFromFormat(format);
             Intrinsic = intrinsic;
             CameraPose = cameraPose;
-            Bytes = bytes ?? throw new ArgumentNullException(nameof(bytes));
+            Bytes = bytes;
         }
 
         public CameraInfo CreateCameraInfoMessage(string cameraFrameId, uint seqId) =>

@@ -21,8 +21,10 @@ namespace Iviz.Ros
 
         public AdvertisedService(string service, Func<T, ValueTask> callback)
         {
-            this.service = service ?? throw new ArgumentNullException(nameof(service));
-            this.callback = callback ?? throw new ArgumentNullException(nameof(callback));
+            ThrowHelper.ThrowIfNull(service, nameof(service));
+            ThrowHelper.ThrowIfNull(callback, nameof(callback));
+            this.service = service;
+            this.callback = callback;
             callToCallback = t => this.callback(t);
         }
 
