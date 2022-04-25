@@ -163,5 +163,11 @@ public static class BufferExtensions
     {
         t = Unsafe.ReadUnaligned<Triangle>(ref buffer.GetRefAndAdvance(Unsafe.SizeOf<Triangle>()));
     }
+    
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Deserialize<T>(this ref ReadBuffer buffer, out T t)
+    {
+        t = Unsafe.ReadUnaligned<T>(ref buffer.GetRefAndAdvance(Unsafe.SizeOf<T>()));
+    }
 #endif
 }
