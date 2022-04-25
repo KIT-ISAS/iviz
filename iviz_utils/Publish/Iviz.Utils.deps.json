@@ -13,7 +13,6 @@
           "BitMiracle.LibJpeg.NET": "1.5.324",
           "Iviz.ModelService.Lib": "1.0.0",
           "Iviz.MsgsGen.Lib": "1.0.0",
-          "Iviz.MsgsWrapper": "1.0.0",
           "Iviz.Ntp": "1.0.0",
           "Iviz.Octree": "1.0.0",
           "Iviz.Rosbag.Lib": "1.0.0",
@@ -43,6 +42,14 @@
           "lib/netstandard2.0/BitMiracle.LibJpeg.NET.dll": {
             "assemblyVersion": "1.5.324.0",
             "fileVersion": "1.5.324.0"
+          }
+        }
+      },
+      "JetBrains.Annotations/2021.3.0": {
+        "runtime": {
+          "lib/netstandard2.0/JetBrains.Annotations.dll": {
+            "assemblyVersion": "2021.3.0.0",
+            "fileVersion": "2021.3.0.0"
           }
         }
       },
@@ -947,14 +954,6 @@
           "Iviz.MsgsGen.Lib.dll": {}
         }
       },
-      "Iviz.MsgsWrapper/1.0.0": {
-        "dependencies": {
-          "Iviz.Msgs": "1.0.0"
-        },
-        "runtime": {
-          "Iviz.MsgsWrapper.dll": {}
-        }
-      },
       "Iviz.Ntp/1.0.0": {
         "dependencies": {
           "Iviz.Tools": "1.0.0"
@@ -1013,6 +1012,7 @@
       },
       "Iviz.Tools/1.0.0": {
         "dependencies": {
+          "JetBrains.Annotations": "2021.3.0",
           "Newtonsoft.Json": "12.0.3",
           "System.Buffers": "4.5.1",
           "System.Threading.Tasks.Extensions": "4.5.4"
@@ -1060,6 +1060,13 @@
       "sha512": "sha512-2lcsK3+JwJueFIOdii/Dz8bFI2OOWHFn1m1co050CPr6yBdQhAhO5Nq/zsj4f/oj7TBo29T7k0qHMsUJzgKJiw==",
       "path": "bitmiracle.libjpeg.net/1.5.324",
       "hashPath": "bitmiracle.libjpeg.net.1.5.324.nupkg.sha512"
+    },
+    "JetBrains.Annotations/2021.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Ddxjs5RRjf+c8m9m++WvhW1lz1bqNhsTjWvCLbQN9bvKbkJeR9MhtfNwKgBRRdG2yLHcXFr5Lf7fsvvkiPaDRg==",
+      "path": "jetbrains.annotations/2021.3.0",
+      "hashPath": "jetbrains.annotations.2021.3.0.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/1.1.0": {
       "type": "package",
@@ -1642,11 +1649,6 @@
       "sha512": ""
     },
     "Iviz.MsgsGen.Lib/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Iviz.MsgsWrapper/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

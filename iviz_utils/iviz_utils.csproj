@@ -18,7 +18,6 @@
         <ProjectReference Include="..\biggustave\biggustave.csproj" />
         <ProjectReference Include="..\iviz_model_service_lib\iviz_model_service_lib.csproj" />
         <ProjectReference Include="..\iviz_msgs_gen_lib\iviz_msgs_gen_lib.csproj" />
-        <ProjectReference Include="..\iviz_msgs_wrapper\iviz_msgs_wrapper.csproj" />
         <ProjectReference Include="..\iviz_ntp_lib\iviz_ntp_lib.csproj" />
         <ProjectReference Include="..\iviz_octree_helper\iviz_octree_helper.csproj" />
         <ProjectReference Include="..\iviz_rosbag_lib\iviz_rosbag_lib.csproj" />
