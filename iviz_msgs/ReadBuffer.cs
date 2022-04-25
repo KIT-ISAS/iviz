@@ -38,23 +38,20 @@ namespace Iviz.Msgs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         readonly void ThrowIfOutOfRange(int off)
         {
-            if (off <= remaining)
+            if (off > remaining)
             {
-                return;
+                ThrowBufferException(off, remaining);
             }
-
-            if (ptr == default)
-            {
-                throw new BufferException("Buffer has not been initialized!");
-            }
-
-            throw new BufferException($"Requested {off} bytes, but only {remaining} remain!");
         }
+
+        [DoesNotReturn]
+        static void ThrowBufferException(int off, int remaining) =>
+            throw new BufferException($"Requested {off} bytes, but only {remaining} remain!");
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int ReadInt()
         {
-            Deserialize(out int i);
+            this.Deserialize(out int i);
             return i;
         }
 
@@ -111,197 +108,24 @@ namespace Iviz.Msgs
             return Array.Empty<string>();
         }
 
-        /*
-        public void DeserializeStringList(List<string> list)
-        {
-            int count = ReadInt();
-            DeserializeStringArray(list, count);
-        }
-        */
-
-        public void DeserializeStringArray(List<string> list, int count)
-        {
-            list.Clear();
-            if (list.Capacity < count)
-            {
-                list.Capacity = count;
-            }
-
-            for (int i = 0; i < list.Count; i++)
-            {
-                list[i] = DeserializeString();
-            }
-        }
-
+#if NETSTANDARD2_1
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal ref byte GetRefAndAdvance(int size)
+        {
+            ThrowIfOutOfRange(size);
+            ref byte result = ref ptr[offset].AsRef();
+            Advance(size);
+            return ref result;
+        }
+#else
         public void Deserialize<T>(out T t) where T : unmanaged
         {
-            ThrowIfOutOfRange(Unsafe.SizeOf<T>());
-            t = Unsafe.As<byte, T>(ref CurrentOffset());
-            Advance(Unsafe.SizeOf<T>());
+            int size = Unsafe.SizeOf<T>();
+            ThrowIfOutOfRange(size);
+            t = Unsafe.ReadUnaligned<T>(ref Unsafe.AsRef(in ptr[offset]));
+            Advance(size);
         }
-
-        #region Deserializers
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out byte t)
-        {
-            ThrowIfOutOfRange(sizeof(byte));
-            t = CurrentOffset();
-            Advance(sizeof(byte));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out sbyte t)
-        {
-            ThrowIfOutOfRange(sizeof(sbyte));
-            t = (sbyte)CurrentOffset();
-            Advance(sizeof(sbyte));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out short t)
-        {
-            ThrowIfOutOfRange(sizeof(short));
-            t = Unsafe.As<byte, short>(ref CurrentOffset());
-            Advance(sizeof(short));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out ushort t)
-        {
-            ThrowIfOutOfRange(sizeof(ushort));
-            t = Unsafe.As<byte, ushort>(ref CurrentOffset());
-            Advance(sizeof(ushort));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out int t)
-        {
-            ThrowIfOutOfRange(sizeof(int));
-            t = Unsafe.As<byte, int>(ref CurrentOffset());
-            Advance(sizeof(int));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out uint t)
-        {
-            ThrowIfOutOfRange(sizeof(uint));
-            t = Unsafe.As<byte, uint>(ref CurrentOffset());
-            Advance(sizeof(uint));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out long t)
-        {
-            ThrowIfOutOfRange(sizeof(long));
-            t = Unsafe.As<byte, long>(ref CurrentOffset());
-            Advance(sizeof(long));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out ulong t)
-        {
-            ThrowIfOutOfRange(sizeof(ulong));
-            t = Unsafe.As<byte, ulong>(ref CurrentOffset());
-            Advance(sizeof(ulong));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out float t)
-        {
-            ThrowIfOutOfRange(sizeof(float));
-            t = Unsafe.As<byte, float>(ref CurrentOffset());
-            Advance(sizeof(float));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out double t)
-        {
-            ThrowIfOutOfRange(sizeof(double));
-            t = Unsafe.As<byte, double>(ref CurrentOffset());
-            Advance(sizeof(double));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out bool t)
-        {
-            ThrowIfOutOfRange(sizeof(bool));
-            t = Unsafe.As<byte, bool>(ref CurrentOffset());
-            Advance(sizeof(bool));
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out duration t)
-        {
-            ThrowIfOutOfRange(Unsafe.SizeOf<duration>());
-            t = Unsafe.As<byte, duration>(ref CurrentOffset());
-            Advance(Unsafe.SizeOf<duration>());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out time t)
-        {
-            ThrowIfOutOfRange(Unsafe.SizeOf<time>());
-            t = Unsafe.As<byte, time>(ref CurrentOffset());
-            Advance(Unsafe.SizeOf<time>());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out GeometryMsgs.Quaternion t)
-        {
-            ThrowIfOutOfRange(Unsafe.SizeOf<GeometryMsgs.Quaternion>());
-            t = Unsafe.As<byte, GeometryMsgs.Quaternion>(ref CurrentOffset());
-            Advance(Unsafe.SizeOf<GeometryMsgs.Quaternion>());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out GeometryMsgs.Vector3 t)
-        {
-            ThrowIfOutOfRange(Unsafe.SizeOf<GeometryMsgs.Vector3>());
-            t = Unsafe.As<byte, GeometryMsgs.Vector3>(ref CurrentOffset());
-            Advance(Unsafe.SizeOf<GeometryMsgs.Vector3>());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out GeometryMsgs.Point t)
-        {
-            ThrowIfOutOfRange(Unsafe.SizeOf<GeometryMsgs.Point>());
-            t = Unsafe.As<byte, GeometryMsgs.Point>(ref CurrentOffset());
-            Advance(Unsafe.SizeOf<GeometryMsgs.Point>());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out GeometryMsgs.Pose t)
-        {
-            ThrowIfOutOfRange(Unsafe.SizeOf<GeometryMsgs.Pose>());
-            t = Unsafe.As<byte, GeometryMsgs.Pose>(ref CurrentOffset());
-            Advance(Unsafe.SizeOf<GeometryMsgs.Pose>());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out GeometryMsgs.Transform t)
-        {
-            ThrowIfOutOfRange(Unsafe.SizeOf<GeometryMsgs.Transform>());
-            t = Unsafe.As<byte, GeometryMsgs.Transform>(ref CurrentOffset());
-            Advance(Unsafe.SizeOf<GeometryMsgs.Transform>());
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Deserialize(out StdMsgs.ColorRGBA t)
-        {
-            ThrowIfOutOfRange(Unsafe.SizeOf<StdMsgs.ColorRGBA>());
-            t = Unsafe.As<byte, StdMsgs.ColorRGBA>(ref CurrentOffset());
-            Advance(Unsafe.SizeOf<StdMsgs.ColorRGBA>());
-        }
-
-        #endregion
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        unsafe ref byte CurrentOffset() =>
-            // we use unsafe here because this is kind of a hot path and
-            // unity's il2cpp code for MemoryMarshal is really slow 
-            ref *(byte*)ptr[offset];
+#endif
 
         public T[] DeserializeStructArray<T>() where T : unmanaged
         {
@@ -358,30 +182,6 @@ namespace Iviz.Msgs
             Advance(size);
             return Array.Empty<T>();
         }
-
-        /*
-        public void DeserializeStructList<T>(List<T> list) where T : unmanaged
-        {
-            int count = ReadInt();
-            DeserializeStructList(list, count);
-        }
-
-        public void DeserializeStructList<T>(List<T> list, int count) where T : unmanaged
-        {
-            ThrowIfOutOfRange(count * Unsafe.SizeOf<T>());
-            list.Clear();
-            if (list.Capacity < count)
-            {
-                list.Capacity = count;
-            }
-
-            for (int i = 0; i < count; i++)
-            {
-                Deserialize(out T t);
-                list.Add(t);
-            }
-        }
-        */
 
         public T[] DeserializeArray<T>() where T : IMessage, new()
         {

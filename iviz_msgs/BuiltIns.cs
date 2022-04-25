@@ -276,7 +276,7 @@ namespace Iviz.Msgs
         {
             return ReadBuffer.Deserialize(generator, bytes);
         }
-        
+
         public static T DeserializeMessage<T>(ReadOnlySpan<byte> bytes)
             where T : ISerializable, IDeserializable<T>, new()
         {
@@ -325,16 +325,10 @@ namespace Iviz.Msgs
         }
 
         [DoesNotReturn]
-        public static void ThrowNullReference(string name)
-        {
-            throw new NullReferenceException(name);
-        }
-        
+        public static void ThrowNullReference(string name) => throw new NullReferenceException(name);
+
         [DoesNotReturn]
-        public static void ThrowNullReference()
-        {
-            throw new NullReferenceException("Validation failed. A field was not set.");
-        }
+        public static void ThrowNullReference() => throw new NullReferenceException("Message fields cannot null.");
     }
 }
 
