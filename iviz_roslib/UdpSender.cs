@@ -380,7 +380,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
     public ValueTask PublishAndWaitAsync(in T message, CancellationToken token)
     {
         return !IsAlive
-            ? new ValueTask(Task.FromException(new ObjectDisposedException("this")))
+            ? Task.FromException(new ObjectDisposedException("this")).AsValueTask()
             : senderQueue.EnqueueAsync(message, token, ref numDropped, ref bytesDropped);
     }
 

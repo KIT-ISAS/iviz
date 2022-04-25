@@ -61,7 +61,7 @@ internal sealed class SenderQueue<T> where T : IMessage
             
         return token.CanBeCanceled
             ? WaitForSignal(msgSignal, token)
-            : new ValueTask(msgSignal.Task);
+            : msgSignal.Task.AsValueTask();
     }
 
     static async ValueTask WaitForSignal(TaskCompletionSource msgSignal, CancellationToken token)

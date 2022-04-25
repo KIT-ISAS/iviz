@@ -34,7 +34,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
 
     bool KeepRunning => !tokenSource.IsCancellationRequested;
     public Endpoint Endpoint => new((IPEndPoint)listener.LocalEndpoint);
-    
+
     public string Topic => topicInfo.Topic;
     public string TopicType => topicInfo.Type;
     public int NumConnections => senders.Count(sender => sender.IsAlive);
@@ -240,7 +240,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
                     tasks[i] = localSenders[i].PublishAndWaitAsync(msg, token).AsTask();
                 }
 
-                return new ValueTask(tasks.WhenAll());
+                return tasks.WhenAll().AsValueTask();
         }
     }
 
@@ -283,7 +283,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
     {
         latchedMessage = default;
     }
-    
+
     public override string ToString()
     {
         return $"[SenderManager '{Topic}']";
