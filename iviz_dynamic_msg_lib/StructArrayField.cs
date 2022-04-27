@@ -10,7 +10,7 @@ namespace Iviz.MsgsGen.Dynamic
         public T[] Value { get; set; } = Array.Empty<T>();
 
         object IField.Value => Value;
-        
+
         public FieldType Type => FieldType.StructArray;
 
         public int RosLength => 4 + Value.Length * Marshal.SizeOf<T>();
@@ -30,7 +30,8 @@ namespace Iviz.MsgsGen.Dynamic
 
         public void RosDeserializeInPlace(ref ReadBuffer b)
         {
-            Value = b.DeserializeStructArray<T>();
+            b.DeserializeStructArray(out T[] val);
+            Value = val;
         }
 
         public IField Generate()

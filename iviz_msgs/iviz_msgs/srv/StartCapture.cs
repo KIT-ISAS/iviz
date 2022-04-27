@@ -122,7 +122,7 @@ namespace Iviz.Msgs.IvizMsgs
         public StartCaptureResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            Message = b.DeserializeString();
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureResponse(ref b);

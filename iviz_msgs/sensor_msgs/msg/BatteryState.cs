@@ -93,10 +93,10 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out PowerSupplyHealth);
             b.Deserialize(out PowerSupplyTechnology);
             b.Deserialize(out Present);
-            CellVoltage = b.DeserializeStructArray<float>();
-            CellTemperature = b.DeserializeStructArray<float>();
-            Location = b.DeserializeString();
-            SerialNumber = b.DeserializeString();
+            b.DeserializeStructArray(out CellVoltage);
+            b.DeserializeStructArray(out CellTemperature);
+            b.DeserializeString(out Location);
+            b.DeserializeString(out SerialNumber);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new BatteryState(ref b);

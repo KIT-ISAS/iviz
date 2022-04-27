@@ -29,8 +29,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor with buffer.
         public KeyValue(ref ReadBuffer b)
         {
-            Key = b.DeserializeString();
-            Value = b.DeserializeString();
+            b.DeserializeString(out Key);
+            b.DeserializeString(out Value);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new KeyValue(ref b);

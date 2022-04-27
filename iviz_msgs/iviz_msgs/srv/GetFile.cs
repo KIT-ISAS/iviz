@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetFileRequest(ref ReadBuffer b)
         {
-            Uri = b.DeserializeString();
+            b.DeserializeString(out Uri);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetFileRequest(ref b);
@@ -121,8 +121,8 @@ namespace Iviz.Msgs.IvizMsgs
         public GetFileResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            Bytes = b.DeserializeStructArray<byte>();
-            Message = b.DeserializeString();
+            b.DeserializeStructArray(out Bytes);
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetFileResponse(ref b);

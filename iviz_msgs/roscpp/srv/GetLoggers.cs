@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Roscpp
         /// Constructor with buffer.
         public GetLoggersResponse(ref ReadBuffer b)
         {
-            Loggers = b.DeserializeArray<Logger>();
+            b.DeserializeArray(out Loggers);
             for (int i = 0; i < Loggers.Length; i++)
             {
                 Loggers[i] = new Logger(ref b);
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.Roscpp
             if (Loggers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Loggers.Length; i++)
             {
-                if (Loggers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Loggers)}[{i}]");
+                if (Loggers[i] is null) BuiltIns.ThrowNullReference(nameof(Loggers), i);
                 Loggers[i].RosValidate();
             }
         }

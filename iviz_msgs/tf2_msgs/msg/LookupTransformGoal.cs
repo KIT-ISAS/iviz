@@ -29,12 +29,12 @@ namespace Iviz.Msgs.Tf2Msgs
         /// Constructor with buffer.
         public LookupTransformGoal(ref ReadBuffer b)
         {
-            TargetFrame = b.DeserializeString();
-            SourceFrame = b.DeserializeString();
+            b.DeserializeString(out TargetFrame);
+            b.DeserializeString(out SourceFrame);
             b.Deserialize(out SourceTime);
             b.Deserialize(out Timeout);
             b.Deserialize(out TargetTime);
-            FixedFrame = b.DeserializeString();
+            b.DeserializeString(out FixedFrame);
             b.Deserialize(out Advanced);
         }
         

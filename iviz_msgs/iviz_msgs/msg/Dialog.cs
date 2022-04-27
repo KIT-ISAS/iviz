@@ -84,17 +84,17 @@ namespace Iviz.Msgs.IvizMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Action);
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             b.Deserialize(out Lifetime);
             b.Deserialize(out Scale);
             b.Deserialize(out Type);
             b.Deserialize(out Buttons);
             b.Deserialize(out Icon);
             b.Deserialize(out BackgroundColor);
-            Title = b.DeserializeString();
-            Caption = b.DeserializeString();
+            b.DeserializeString(out Title);
+            b.DeserializeString(out Caption);
             b.Deserialize(out CaptionAlignment);
-            MenuEntries = b.DeserializeStringArray();
+            b.DeserializeStringArray(out MenuEntries);
             b.Deserialize(out BindingType);
             b.Deserialize(out TfOffset);
             b.Deserialize(out DialogDisplacement);
@@ -134,7 +134,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (MenuEntries is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < MenuEntries.Length; i++)
             {
-                if (MenuEntries[i] is null) BuiltIns.ThrowNullReference($"{nameof(MenuEntries)}[{i}]");
+                if (MenuEntries[i] is null) BuiltIns.ThrowNullReference(nameof(MenuEntries), i);
             }
         }
     

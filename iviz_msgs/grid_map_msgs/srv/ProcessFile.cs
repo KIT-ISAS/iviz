@@ -73,8 +73,8 @@ namespace Iviz.Msgs.GridMapMsgs
         /// Constructor with buffer.
         public ProcessFileRequest(ref ReadBuffer b)
         {
-            FilePath = b.DeserializeString();
-            TopicName = b.DeserializeString();
+            b.DeserializeString(out FilePath);
+            b.DeserializeString(out TopicName);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileRequest(ref b);

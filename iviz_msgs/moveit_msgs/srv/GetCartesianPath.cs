@@ -93,9 +93,9 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             StartState = new RobotState(ref b);
-            GroupName = b.DeserializeString();
-            LinkName = b.DeserializeString();
-            Waypoints = b.DeserializeStructArray<GeometryMsgs.Pose>();
+            b.DeserializeString(out GroupName);
+            b.DeserializeString(out LinkName);
+            b.DeserializeStructArray(out Waypoints);
             b.Deserialize(out MaxStep);
             b.Deserialize(out JumpThreshold);
             b.Deserialize(out AvoidCollisions);

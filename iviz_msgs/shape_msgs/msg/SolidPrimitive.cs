@@ -55,7 +55,7 @@ namespace Iviz.Msgs.ShapeMsgs
         public SolidPrimitive(ref ReadBuffer b)
         {
             b.Deserialize(out Type);
-            Dimensions = b.DeserializeStructArray<double>();
+            b.DeserializeStructArray(out Dimensions);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SolidPrimitive(ref b);

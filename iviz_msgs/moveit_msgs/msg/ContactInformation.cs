@@ -43,9 +43,9 @@ namespace Iviz.Msgs.MoveitMsgs
             b.Deserialize(out Position);
             b.Deserialize(out Normal);
             b.Deserialize(out Depth);
-            ContactBody1 = b.DeserializeString();
+            b.DeserializeString(out ContactBody1);
             b.Deserialize(out BodyType1);
-            ContactBody2 = b.DeserializeString();
+            b.DeserializeString(out ContactBody2);
             b.Deserialize(out BodyType2);
         }
         

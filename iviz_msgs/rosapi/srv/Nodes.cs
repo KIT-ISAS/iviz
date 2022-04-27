@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public NodesResponse(ref ReadBuffer b)
         {
-            Nodes_ = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Nodes_);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new NodesResponse(ref b);
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.Rosapi
             if (Nodes_ is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Nodes_.Length; i++)
             {
-                if (Nodes_[i] is null) BuiltIns.ThrowNullReference($"{nameof(Nodes_)}[{i}]");
+                if (Nodes_[i] is null) BuiltIns.ThrowNullReference(nameof(Nodes_), i);
             }
         }
     

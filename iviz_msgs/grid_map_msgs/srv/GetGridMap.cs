@@ -74,12 +74,12 @@ namespace Iviz.Msgs.GridMapMsgs
         /// Constructor with buffer.
         public GetGridMapRequest(ref ReadBuffer b)
         {
-            FrameId = b.DeserializeString();
+            b.DeserializeString(out FrameId);
             b.Deserialize(out PositionX);
             b.Deserialize(out PositionY);
             b.Deserialize(out LengthX);
             b.Deserialize(out LengthY);
-            Layers = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Layers);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetGridMapRequest(ref b);
@@ -102,7 +102,7 @@ namespace Iviz.Msgs.GridMapMsgs
             if (Layers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Layers.Length; i++)
             {
-                if (Layers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Layers)}[{i}]");
+                if (Layers[i] is null) BuiltIns.ThrowNullReference(nameof(Layers), i);
             }
         }
     

@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public GetVertexCostsRequest(ref ReadBuffer b)
         {
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetVertexCostsRequest(ref b);

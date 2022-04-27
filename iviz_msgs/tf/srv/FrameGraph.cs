@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Tf
         /// Constructor with buffer.
         public FrameGraphResponse(ref ReadBuffer b)
         {
-            DotGraph = b.DeserializeString();
+            b.DeserializeString(out DotGraph);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FrameGraphResponse(ref b);

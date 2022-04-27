@@ -80,18 +80,18 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor with buffer.
         public InteractiveMarkerControl(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
+            b.DeserializeString(out Name);
             b.Deserialize(out Orientation);
             b.Deserialize(out OrientationMode);
             b.Deserialize(out InteractionMode);
             b.Deserialize(out AlwaysVisible);
-            Markers = b.DeserializeArray<Marker>();
+            b.DeserializeArray(out Markers);
             for (int i = 0; i < Markers.Length; i++)
             {
                 Markers[i] = new Marker(ref b);
             }
             b.Deserialize(out IndependentMarkerOrientation);
-            Description = b.DeserializeString();
+            b.DeserializeString(out Description);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerControl(ref b);
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.VisualizationMsgs
             if (Markers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Markers.Length; i++)
             {
-                if (Markers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Markers)}[{i}]");
+                if (Markers[i] is null) BuiltIns.ThrowNullReference(nameof(Markers), i);
                 Markers[i].RosValidate();
             }
             if (Description is null) BuiltIns.ThrowNullReference();

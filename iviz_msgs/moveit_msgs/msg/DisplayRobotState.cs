@@ -30,7 +30,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public DisplayRobotState(ref ReadBuffer b)
         {
             State = new RobotState(ref b);
-            HighlightLinks = b.DeserializeArray<ObjectColor>();
+            b.DeserializeArray(out HighlightLinks);
             for (int i = 0; i < HighlightLinks.Length; i++)
             {
                 HighlightLinks[i] = new ObjectColor(ref b);
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (HighlightLinks is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < HighlightLinks.Length; i++)
             {
-                if (HighlightLinks[i] is null) BuiltIns.ThrowNullReference($"{nameof(HighlightLinks)}[{i}]");
+                if (HighlightLinks[i] is null) BuiltIns.ThrowNullReference(nameof(HighlightLinks), i);
                 HighlightLinks[i].RosValidate();
             }
         }

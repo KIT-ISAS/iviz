@@ -30,12 +30,12 @@ namespace Iviz.Msgs.ShapeMsgs
         /// Constructor with buffer.
         public Mesh(ref ReadBuffer b)
         {
-            Triangles = b.DeserializeArray<MeshTriangle>();
+            b.DeserializeArray(out Triangles);
             for (int i = 0; i < Triangles.Length; i++)
             {
                 Triangles[i] = new MeshTriangle(ref b);
             }
-            Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
+            b.DeserializeStructArray(out Vertices);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Mesh(ref b);
@@ -53,7 +53,7 @@ namespace Iviz.Msgs.ShapeMsgs
             if (Triangles is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Triangles.Length; i++)
             {
-                if (Triangles[i] is null) BuiltIns.ThrowNullReference($"{nameof(Triangles)}[{i}]");
+                if (Triangles[i] is null) BuiltIns.ThrowNullReference(nameof(Triangles), i);
                 Triangles[i].RosValidate();
             }
             if (Vertices is null) BuiltIns.ThrowNullReference();

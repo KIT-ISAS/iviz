@@ -25,7 +25,7 @@ namespace Iviz.Msgs.PclMsgs
         /// Constructor with buffer.
         public Vertices(ref ReadBuffer b)
         {
-            Vertices_ = b.DeserializeStructArray<uint>();
+            b.DeserializeStructArray(out Vertices_);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Vertices(ref b);

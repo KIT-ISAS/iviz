@@ -28,20 +28,20 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Model(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Filename = b.DeserializeString();
-            OrientationHint = b.DeserializeString();
-            Meshes = b.DeserializeArray<Mesh>();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Filename);
+            b.DeserializeString(out OrientationHint);
+            b.DeserializeArray(out Meshes);
             for (int i = 0; i < Meshes.Length; i++)
             {
                 Meshes[i] = new Mesh(ref b);
             }
-            Materials = b.DeserializeArray<Material>();
+            b.DeserializeArray(out Materials);
             for (int i = 0; i < Materials.Length; i++)
             {
                 Materials[i] = new Material(ref b);
             }
-            Nodes = b.DeserializeArray<Node>();
+            b.DeserializeArray(out Nodes);
             for (int i = 0; i < Nodes.Length; i++)
             {
                 Nodes[i] = new Node(ref b);
@@ -70,19 +70,19 @@ namespace Iviz.Msgs.IvizMsgs
             if (Meshes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Meshes.Length; i++)
             {
-                if (Meshes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Meshes)}[{i}]");
+                if (Meshes[i] is null) BuiltIns.ThrowNullReference(nameof(Meshes), i);
                 Meshes[i].RosValidate();
             }
             if (Materials is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Materials.Length; i++)
             {
-                if (Materials[i] is null) BuiltIns.ThrowNullReference($"{nameof(Materials)}[{i}]");
+                if (Materials[i] is null) BuiltIns.ThrowNullReference(nameof(Materials), i);
                 Materials[i].RosValidate();
             }
             if (Nodes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Nodes.Length; i++)
             {
-                if (Nodes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Nodes)}[{i}]");
+                if (Nodes[i] is null) BuiltIns.ThrowNullReference(nameof(Nodes), i);
                 Nodes[i].RosValidate();
             }
         }

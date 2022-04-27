@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Orientation);
-            LinkName = b.DeserializeString();
+            b.DeserializeString(out LinkName);
             b.Deserialize(out AbsoluteXAxisTolerance);
             b.Deserialize(out AbsoluteYAxisTolerance);
             b.Deserialize(out AbsoluteZAxisTolerance);

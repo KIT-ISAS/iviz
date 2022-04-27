@@ -30,7 +30,7 @@ namespace Iviz.Msgs.VisionMsgs
         public Detection2DArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Detections = b.DeserializeArray<Detection2D>();
+            b.DeserializeArray(out Detections);
             for (int i = 0; i < Detections.Length; i++)
             {
                 Detections[i] = new Detection2D(ref b);
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.VisionMsgs
             if (Detections is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Detections.Length; i++)
             {
-                if (Detections[i] is null) BuiltIns.ThrowNullReference($"{nameof(Detections)}[{i}]");
+                if (Detections[i] is null) BuiltIns.ThrowNullReference(nameof(Detections), i);
                 Detections[i].RosValidate();
             }
         }

@@ -68,7 +68,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public TestArrayRequestRequest(ref ReadBuffer b)
         {
-            @int = b.DeserializeStructArray<int>();
+            b.DeserializeStructArray(out @int);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestArrayRequestRequest(ref b);

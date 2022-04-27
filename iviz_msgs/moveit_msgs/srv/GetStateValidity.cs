@@ -75,7 +75,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public GetStateValidityRequest(ref ReadBuffer b)
         {
             RobotState = new RobotState(ref b);
-            GroupName = b.DeserializeString();
+            b.DeserializeString(out GroupName);
             Constraints = new Constraints(ref b);
         }
         
@@ -142,17 +142,17 @@ namespace Iviz.Msgs.MoveitMsgs
         public GetStateValidityResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Valid);
-            Contacts = b.DeserializeArray<ContactInformation>();
+            b.DeserializeArray(out Contacts);
             for (int i = 0; i < Contacts.Length; i++)
             {
                 Contacts[i] = new ContactInformation(ref b);
             }
-            CostSources = b.DeserializeArray<CostSource>();
+            b.DeserializeArray(out CostSources);
             for (int i = 0; i < CostSources.Length; i++)
             {
                 CostSources[i] = new CostSource(ref b);
             }
-            ConstraintResult = b.DeserializeArray<ConstraintEvalResult>();
+            b.DeserializeArray(out ConstraintResult);
             for (int i = 0; i < ConstraintResult.Length; i++)
             {
                 ConstraintResult[i] = new ConstraintEvalResult(ref b);
@@ -176,19 +176,19 @@ namespace Iviz.Msgs.MoveitMsgs
             if (Contacts is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Contacts.Length; i++)
             {
-                if (Contacts[i] is null) BuiltIns.ThrowNullReference($"{nameof(Contacts)}[{i}]");
+                if (Contacts[i] is null) BuiltIns.ThrowNullReference(nameof(Contacts), i);
                 Contacts[i].RosValidate();
             }
             if (CostSources is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < CostSources.Length; i++)
             {
-                if (CostSources[i] is null) BuiltIns.ThrowNullReference($"{nameof(CostSources)}[{i}]");
+                if (CostSources[i] is null) BuiltIns.ThrowNullReference(nameof(CostSources), i);
                 CostSources[i].RosValidate();
             }
             if (ConstraintResult is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < ConstraintResult.Length; i++)
             {
-                if (ConstraintResult[i] is null) BuiltIns.ThrowNullReference($"{nameof(ConstraintResult)}[{i}]");
+                if (ConstraintResult[i] is null) BuiltIns.ThrowNullReference(nameof(ConstraintResult), i);
                 ConstraintResult[i].RosValidate();
             }
         }

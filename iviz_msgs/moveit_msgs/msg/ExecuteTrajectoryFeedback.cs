@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public ExecuteTrajectoryFeedback(ref ReadBuffer b)
         {
-            State = b.DeserializeString();
+            b.DeserializeString(out State);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ExecuteTrajectoryFeedback(ref b);

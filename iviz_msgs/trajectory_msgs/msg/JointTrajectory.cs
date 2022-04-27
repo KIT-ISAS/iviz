@@ -30,8 +30,8 @@ namespace Iviz.Msgs.TrajectoryMsgs
         public JointTrajectory(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            JointNames = b.DeserializeStringArray();
-            Points = b.DeserializeArray<JointTrajectoryPoint>();
+            b.DeserializeStringArray(out JointNames);
+            b.DeserializeArray(out Points);
             for (int i = 0; i < Points.Length; i++)
             {
                 Points[i] = new JointTrajectoryPoint(ref b);
@@ -54,12 +54,12 @@ namespace Iviz.Msgs.TrajectoryMsgs
             if (JointNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < JointNames.Length; i++)
             {
-                if (JointNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(JointNames)}[{i}]");
+                if (JointNames[i] is null) BuiltIns.ThrowNullReference(nameof(JointNames), i);
             }
             if (Points is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Points.Length; i++)
             {
-                if (Points[i] is null) BuiltIns.ThrowNullReference($"{nameof(Points)}[{i}]");
+                if (Points[i] is null) BuiltIns.ThrowNullReference(nameof(Points), i);
                 Points[i].RosValidate();
             }
         }

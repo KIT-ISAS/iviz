@@ -77,9 +77,9 @@ namespace Iviz.Msgs.IvizMsgs
         public UpdateRobotRequest(ref ReadBuffer b)
         {
             b.Deserialize(out Operation);
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             Configuration = new IvizMsgs.RobotConfiguration(ref b);
-            ValidFields = b.DeserializeStringArray();
+            b.DeserializeStringArray(out ValidFields);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateRobotRequest(ref b);
@@ -102,7 +102,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (ValidFields is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < ValidFields.Length; i++)
             {
-                if (ValidFields[i] is null) BuiltIns.ThrowNullReference($"{nameof(ValidFields)}[{i}]");
+                if (ValidFields[i] is null) BuiltIns.ThrowNullReference(nameof(ValidFields), i);
             }
         }
     
@@ -143,7 +143,7 @@ namespace Iviz.Msgs.IvizMsgs
         public UpdateRobotResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            Message = b.DeserializeString();
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateRobotResponse(ref b);

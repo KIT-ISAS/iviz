@@ -53,26 +53,26 @@ namespace Iviz.Msgs.MoveitMsgs
         public CollisionObject(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             Type = new ObjectRecognitionMsgs.ObjectType(ref b);
-            Primitives = b.DeserializeArray<ShapeMsgs.SolidPrimitive>();
+            b.DeserializeArray(out Primitives);
             for (int i = 0; i < Primitives.Length; i++)
             {
                 Primitives[i] = new ShapeMsgs.SolidPrimitive(ref b);
             }
-            PrimitivePoses = b.DeserializeStructArray<GeometryMsgs.Pose>();
-            Meshes = b.DeserializeArray<ShapeMsgs.Mesh>();
+            b.DeserializeStructArray(out PrimitivePoses);
+            b.DeserializeArray(out Meshes);
             for (int i = 0; i < Meshes.Length; i++)
             {
                 Meshes[i] = new ShapeMsgs.Mesh(ref b);
             }
-            MeshPoses = b.DeserializeStructArray<GeometryMsgs.Pose>();
-            Planes = b.DeserializeArray<ShapeMsgs.Plane>();
+            b.DeserializeStructArray(out MeshPoses);
+            b.DeserializeArray(out Planes);
             for (int i = 0; i < Planes.Length; i++)
             {
                 Planes[i] = new ShapeMsgs.Plane(ref b);
             }
-            PlanePoses = b.DeserializeStructArray<GeometryMsgs.Pose>();
+            b.DeserializeStructArray(out PlanePoses);
             b.Deserialize(out Operation);
         }
         
@@ -102,21 +102,21 @@ namespace Iviz.Msgs.MoveitMsgs
             if (Primitives is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Primitives.Length; i++)
             {
-                if (Primitives[i] is null) BuiltIns.ThrowNullReference($"{nameof(Primitives)}[{i}]");
+                if (Primitives[i] is null) BuiltIns.ThrowNullReference(nameof(Primitives), i);
                 Primitives[i].RosValidate();
             }
             if (PrimitivePoses is null) BuiltIns.ThrowNullReference();
             if (Meshes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Meshes.Length; i++)
             {
-                if (Meshes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Meshes)}[{i}]");
+                if (Meshes[i] is null) BuiltIns.ThrowNullReference(nameof(Meshes), i);
                 Meshes[i].RosValidate();
             }
             if (MeshPoses is null) BuiltIns.ThrowNullReference();
             if (Planes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Planes.Length; i++)
             {
-                if (Planes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Planes)}[{i}]");
+                if (Planes[i] is null) BuiltIns.ThrowNullReference(nameof(Planes), i);
                 Planes[i].RosValidate();
             }
             if (PlanePoses is null) BuiltIns.ThrowNullReference();

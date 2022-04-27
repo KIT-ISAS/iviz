@@ -37,8 +37,8 @@ namespace Iviz.Msgs.IvizMsgs
         public Feedback(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            VizId = b.DeserializeString();
-            Id = b.DeserializeString();
+            b.DeserializeString(out VizId);
+            b.DeserializeString(out Id);
             b.Deserialize(out Type);
             b.Deserialize(out EntryId);
             b.Deserialize(out Angle);

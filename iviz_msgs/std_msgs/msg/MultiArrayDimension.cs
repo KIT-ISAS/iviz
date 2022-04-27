@@ -31,7 +31,7 @@ namespace Iviz.Msgs.StdMsgs
         /// Constructor with buffer.
         public MultiArrayDimension(ref ReadBuffer b)
         {
-            Label = b.DeserializeString();
+            b.DeserializeString(out Label);
             b.Deserialize(out Size);
             b.Deserialize(out Stride);
         }

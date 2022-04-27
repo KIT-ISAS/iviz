@@ -24,7 +24,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public TestChar(ref ReadBuffer b)
         {
-            Data = b.DeserializeStructArray<sbyte>();
+            b.DeserializeStructArray(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestChar(ref b);

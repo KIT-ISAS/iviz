@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public ServiceProvidersRequest(ref ReadBuffer b)
         {
-            Service = b.DeserializeString();
+            b.DeserializeString(out Service);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServiceProvidersRequest(ref b);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public ServiceProvidersResponse(ref ReadBuffer b)
         {
-            Providers = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Providers);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServiceProvidersResponse(ref b);
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.Rosapi
             if (Providers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Providers.Length; i++)
             {
-                if (Providers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Providers)}[{i}]");
+                if (Providers[i] is null) BuiltIns.ThrowNullReference(nameof(Providers), i);
             }
         }
     

@@ -27,7 +27,8 @@ public readonly struct Rent<T> : IDisposable  where T : unmanaged
         switch (length)
         {
             case < 0:
-                throw new ArgumentException("Count cannot be negative", nameof(length));
+                Rent.ThrowArgumentNegative();
+                goto case 0; // unreachable
             case 0:
                 Array = System.Array.Empty<T>();
                 Length = 0;
@@ -87,4 +88,6 @@ public readonly struct Rent<T> : IDisposable  where T : unmanaged
 public static class Rent
 {
     public static Rent<T> Empty<T>() where T : unmanaged => new(0);
+    
+    internal static void ThrowArgumentNegative() => throw new ArgumentException("Rent size cannot be negative");
 }

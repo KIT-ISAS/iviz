@@ -8,7 +8,8 @@ namespace Iviz.Tools;
 
 public class SharedRent<T> : IDisposable where T : unmanaged
 {
-    public static readonly SharedRent<T> Empty = new(0);
+    static SharedRent<T>? empty;
+    public static SharedRent<T> Empty => empty ??= new SharedRent<T>(0);
 
     volatile int refCount;
 
@@ -21,7 +22,8 @@ public class SharedRent<T> : IDisposable where T : unmanaged
         switch (length)
         {
             case < 0:
-                throw new ArgumentException($"{nameof(length)} cannot be negative", nameof(length));
+                Rent.ThrowArgumentNegative();
+                goto case 0; // unreachable
             case 0:
                 Array = System.Array.Empty<T>();
                 Length = 0;

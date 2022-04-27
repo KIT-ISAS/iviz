@@ -36,7 +36,7 @@ namespace Iviz.Msgs.NavMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Info = new MapMetaData(ref b);
-            Data = b.DeserializeStructArray<sbyte>();
+            b.DeserializeStructArray(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new OccupancyGrid(ref b);

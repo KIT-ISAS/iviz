@@ -44,10 +44,10 @@ namespace Iviz.Msgs.SensorMsgs
         public JointState(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Name = b.DeserializeStringArray();
-            Position = b.DeserializeStructArray<double>();
-            Velocity = b.DeserializeStructArray<double>();
-            Effort = b.DeserializeStructArray<double>();
+            b.DeserializeStringArray(out Name);
+            b.DeserializeStructArray(out Position);
+            b.DeserializeStructArray(out Velocity);
+            b.DeserializeStructArray(out Effort);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JointState(ref b);
@@ -68,7 +68,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (Name is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Name.Length; i++)
             {
-                if (Name[i] is null) BuiltIns.ThrowNullReference($"{nameof(Name)}[{i}]");
+                if (Name[i] is null) BuiltIns.ThrowNullReference(nameof(Name), i);
             }
             if (Position is null) BuiltIns.ThrowNullReference();
             if (Velocity is null) BuiltIns.ThrowNullReference();

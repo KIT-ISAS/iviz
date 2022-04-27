@@ -79,7 +79,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public GetPositionFKRequest(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            FkLinkNames = b.DeserializeStringArray();
+            b.DeserializeStringArray(out FkLinkNames);
             RobotState = new RobotState(ref b);
         }
         
@@ -99,7 +99,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (FkLinkNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < FkLinkNames.Length; i++)
             {
-                if (FkLinkNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(FkLinkNames)}[{i}]");
+                if (FkLinkNames[i] is null) BuiltIns.ThrowNullReference(nameof(FkLinkNames), i);
             }
             if (RobotState is null) BuiltIns.ThrowNullReference();
             RobotState.RosValidate();
@@ -147,12 +147,12 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public GetPositionFKResponse(ref ReadBuffer b)
         {
-            PoseStamped = b.DeserializeArray<GeometryMsgs.PoseStamped>();
+            b.DeserializeArray(out PoseStamped);
             for (int i = 0; i < PoseStamped.Length; i++)
             {
                 PoseStamped[i] = new GeometryMsgs.PoseStamped(ref b);
             }
-            FkLinkNames = b.DeserializeStringArray();
+            b.DeserializeStringArray(out FkLinkNames);
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
@@ -172,13 +172,13 @@ namespace Iviz.Msgs.MoveitMsgs
             if (PoseStamped is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PoseStamped.Length; i++)
             {
-                if (PoseStamped[i] is null) BuiltIns.ThrowNullReference($"{nameof(PoseStamped)}[{i}]");
+                if (PoseStamped[i] is null) BuiltIns.ThrowNullReference(nameof(PoseStamped), i);
                 PoseStamped[i].RosValidate();
             }
             if (FkLinkNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < FkLinkNames.Length; i++)
             {
-                if (FkLinkNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(FkLinkNames)}[{i}]");
+                if (FkLinkNames[i] is null) BuiltIns.ThrowNullReference(nameof(FkLinkNames), i);
             }
             if (ErrorCode is null) BuiltIns.ThrowNullReference();
             ErrorCode.RosValidate();

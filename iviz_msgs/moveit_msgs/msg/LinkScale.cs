@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public LinkScale(ref ReadBuffer b)
         {
-            LinkName = b.DeserializeString();
+            b.DeserializeString(out LinkName);
             b.Deserialize(out Scale);
         }
         

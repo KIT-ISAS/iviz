@@ -105,7 +105,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public GetUUIDResponse(ref ReadBuffer b)
         {
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetUUIDResponse(ref b);

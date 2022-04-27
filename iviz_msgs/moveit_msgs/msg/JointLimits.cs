@@ -34,7 +34,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public JointLimits(ref ReadBuffer b)
         {
-            JointName = b.DeserializeString();
+            b.DeserializeString(out JointName);
             b.Deserialize(out HasPositionLimits);
             b.Deserialize(out MinPosition);
             b.Deserialize(out MaxPosition);

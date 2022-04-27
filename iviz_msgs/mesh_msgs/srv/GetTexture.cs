@@ -70,7 +70,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public GetTextureRequest(ref ReadBuffer b)
         {
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
             b.Deserialize(out TextureIndex);
         }
         

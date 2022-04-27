@@ -30,9 +30,9 @@ namespace Iviz.Msgs.OctomapMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Binary);
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             b.Deserialize(out Resolution);
-            Data = b.DeserializeStructArray<sbyte>();
+            b.DeserializeStructArray(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Octomap(ref b);

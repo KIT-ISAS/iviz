@@ -25,7 +25,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         /// Constructor with buffer.
         public FibonacciFeedback(ref ReadBuffer b)
         {
-            Sequence = b.DeserializeStructArray<int>();
+            b.DeserializeStructArray(out Sequence);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FibonacciFeedback(ref b);

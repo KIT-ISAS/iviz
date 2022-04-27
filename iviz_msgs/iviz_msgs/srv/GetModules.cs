@@ -107,7 +107,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetModulesResponse(ref ReadBuffer b)
         {
-            Configs = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Configs);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetModulesResponse(ref b);
@@ -124,7 +124,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Configs is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Configs.Length; i++)
             {
-                if (Configs[i] is null) BuiltIns.ThrowNullReference($"{nameof(Configs)}[{i}]");
+                if (Configs[i] is null) BuiltIns.ThrowNullReference(nameof(Configs), i);
             }
         }
     

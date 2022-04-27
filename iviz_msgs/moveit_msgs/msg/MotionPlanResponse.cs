@@ -32,7 +32,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public MotionPlanResponse(ref ReadBuffer b)
         {
             TrajectoryStart = new RobotState(ref b);
-            GroupName = b.DeserializeString();
+            b.DeserializeString(out GroupName);
             Trajectory = new RobotTrajectory(ref b);
             b.Deserialize(out PlanningTime);
             ErrorCode = new MoveItErrorCodes(ref b);

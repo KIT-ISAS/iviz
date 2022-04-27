@@ -37,9 +37,11 @@ namespace Iviz.App
             panel.Frame.Owner = guiInputModule;
             panel.Fov.Value = controller.CameraFieldOfView;
             panel.BackgroundColor.Value = controller.BackgroundColor;
+            panel.EnableSun.Value = controller.EnableShadows;
             panel.SunDirectionX.Value = controller.SunDirectionX;
             panel.SunDirectionY.Value = controller.SunDirectionY;
             panel.EnableShadows.Value = controller.EnableShadows;
+            panel.EquatorIntensity.Value = controller.EquatorIntensity;
 
             UpdatePose();
 
@@ -51,10 +53,12 @@ namespace Iviz.App
             }
 
             panel.Fov.ValueChanged += f => controller.CameraFieldOfView = f;
+            panel.EnableSun.ValueChanged += f => controller.EnableSun = f;
             panel.SunDirectionX.ValueChanged += f => controller.SunDirectionX = f;
             panel.SunDirectionY.ValueChanged += f => controller.SunDirectionY = f;
             panel.BackgroundColor.ValueChanged += f => controller.BackgroundColor = f;
             panel.EnableShadows.ValueChanged += f => controller.EnableShadows = f;
+            panel.EquatorIntensity.ValueChanged += f => controller.EquatorIntensity = f;
         }
 
         void OnARViewChanged(bool _) => CheckInteractable();

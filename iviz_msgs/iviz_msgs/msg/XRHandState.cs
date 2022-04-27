@@ -32,11 +32,11 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out IsValid);
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Palm);
-            Thumb = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Index = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Middle = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Ring = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Little = b.DeserializeStructArray<GeometryMsgs.Transform>();
+            b.DeserializeStructArray(out Thumb);
+            b.DeserializeStructArray(out Index);
+            b.DeserializeStructArray(out Middle);
+            b.DeserializeStructArray(out Ring);
+            b.DeserializeStructArray(out Little);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new XRHandState(ref b);

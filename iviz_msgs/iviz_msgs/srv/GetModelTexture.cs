@@ -68,7 +68,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetModelTextureRequest(ref ReadBuffer b)
         {
-            Uri = b.DeserializeString();
+            b.DeserializeString(out Uri);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetModelTextureRequest(ref b);
@@ -117,7 +117,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out Success);
             Image = new SensorMsgs.CompressedImage(ref b);
-            Message = b.DeserializeString();
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetModelTextureResponse(ref b);

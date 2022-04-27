@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public PublishersRequest(ref ReadBuffer b)
         {
-            Topic = b.DeserializeString();
+            b.DeserializeString(out Topic);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PublishersRequest(ref b);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public PublishersResponse(ref ReadBuffer b)
         {
-            Publishers_ = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Publishers_);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PublishersResponse(ref b);
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.Rosapi
             if (Publishers_ is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Publishers_.Length; i++)
             {
-                if (Publishers_[i] is null) BuiltIns.ThrowNullReference($"{nameof(Publishers_)}[{i}]");
+                if (Publishers_[i] is null) BuiltIns.ThrowNullReference(nameof(Publishers_), i);
             }
         }
     

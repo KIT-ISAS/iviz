@@ -13,38 +13,6 @@ using Newtonsoft.Json;
 
 namespace Iviz.Msgs
 {
-    public class RosException : Exception
-    {
-        public RosException(string msg) : base(msg)
-        {
-        }
-
-        public RosException(string msg, Exception e) : base(msg, e)
-        {
-        }
-    }
-
-    public class RosInvalidMessageException : RosException
-    {
-        public RosInvalidMessageException(string msg) : base(msg)
-        {
-        }
-    }
-
-    public class RosInvalidSizeForFixedArrayException : RosInvalidMessageException
-    {
-        public RosInvalidSizeForFixedArrayException() : base(
-            "Array size does not match the fixed size of the message definition")
-        {
-        }
-
-        public RosInvalidSizeForFixedArrayException(string name, int size, int expected) : base(
-            $"Array '{name}' with size {size.ToString()} does not match the fixed size " +
-            $"{expected.ToString()} of the message definition")
-        {
-        }
-    }
-
     public static class BuiltIns
     {
         public static UTF8Encoding UTF8 => Defaults.UTF8;
@@ -325,10 +293,24 @@ namespace Iviz.Msgs
         }
 
         [DoesNotReturn]
+        public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
+
+        [DoesNotReturn]
         public static void ThrowNullReference(string name) => throw new NullReferenceException(name);
 
         [DoesNotReturn]
+        public static void ThrowNullReference(string name, int i) => throw new NullReferenceException($"{name}[{i}]");
+
+        [DoesNotReturn]
         public static void ThrowNullReference() => throw new NullReferenceException("Message fields cannot null.");
+
+        [DoesNotReturn]
+        public static void ThrowBufferOverflow(int off, int remaining) =>
+            throw new RosBufferException($"Requested {off} bytes, but only {remaining} remain!");
+
+        [DoesNotReturn]
+        public static void ThrowInvalidSizeForFixedArray(int size, int expected) =>
+            throw new RosInvalidSizeForFixedArrayException(size, expected);
     }
 }
 

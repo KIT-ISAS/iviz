@@ -29,7 +29,7 @@ namespace Iviz.Msgs.ShapeMsgs
         /// Constructor with buffer.
         public Plane(ref ReadBuffer b)
         {
-            Coef = b.DeserializeStructArray<double>(4);
+            b.DeserializeStructArray(4, out Coef);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Plane(ref b);
@@ -44,7 +44,7 @@ namespace Iviz.Msgs.ShapeMsgs
         public void RosValidate()
         {
             if (Coef is null) BuiltIns.ThrowNullReference();
-            if (Coef.Length != 4) throw new RosInvalidSizeForFixedArrayException(nameof(Coef), Coef.Length, 4);
+            if (Coef.Length != 4) BuiltIns.ThrowInvalidSizeForFixedArray(Coef.Length, 4);
         }
     
         /// <summary> Constant size of this message. </summary> 

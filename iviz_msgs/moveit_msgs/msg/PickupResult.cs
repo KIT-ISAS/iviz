@@ -34,12 +34,12 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             ErrorCode = new MoveItErrorCodes(ref b);
             TrajectoryStart = new RobotState(ref b);
-            TrajectoryStages = b.DeserializeArray<RobotTrajectory>();
+            b.DeserializeArray(out TrajectoryStages);
             for (int i = 0; i < TrajectoryStages.Length; i++)
             {
                 TrajectoryStages[i] = new RobotTrajectory(ref b);
             }
-            TrajectoryDescriptions = b.DeserializeStringArray();
+            b.DeserializeStringArray(out TrajectoryDescriptions);
             Grasp = new Grasp(ref b);
             b.Deserialize(out PlanningTime);
         }
@@ -67,13 +67,13 @@ namespace Iviz.Msgs.MoveitMsgs
             if (TrajectoryStages is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < TrajectoryStages.Length; i++)
             {
-                if (TrajectoryStages[i] is null) BuiltIns.ThrowNullReference($"{nameof(TrajectoryStages)}[{i}]");
+                if (TrajectoryStages[i] is null) BuiltIns.ThrowNullReference(nameof(TrajectoryStages), i);
                 TrajectoryStages[i].RosValidate();
             }
             if (TrajectoryDescriptions is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < TrajectoryDescriptions.Length; i++)
             {
-                if (TrajectoryDescriptions[i] is null) BuiltIns.ThrowNullReference($"{nameof(TrajectoryDescriptions)}[{i}]");
+                if (TrajectoryDescriptions[i] is null) BuiltIns.ThrowNullReference(nameof(TrajectoryDescriptions), i);
             }
             if (Grasp is null) BuiltIns.ThrowNullReference();
             Grasp.RosValidate();

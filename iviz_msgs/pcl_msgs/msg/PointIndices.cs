@@ -27,7 +27,7 @@ namespace Iviz.Msgs.PclMsgs
         public PointIndices(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Indices = b.DeserializeStructArray<int>();
+            b.DeserializeStructArray(out Indices);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PointIndices(ref b);

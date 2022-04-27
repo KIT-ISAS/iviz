@@ -62,14 +62,14 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public PositionIKRequest(ref ReadBuffer b)
         {
-            GroupName = b.DeserializeString();
+            b.DeserializeString(out GroupName);
             RobotState = new MoveitMsgs.RobotState(ref b);
             Constraints = new Constraints(ref b);
             b.Deserialize(out AvoidCollisions);
-            IkLinkName = b.DeserializeString();
+            b.DeserializeString(out IkLinkName);
             PoseStamped = new GeometryMsgs.PoseStamped(ref b);
-            IkLinkNames = b.DeserializeStringArray();
-            PoseStampedVector = b.DeserializeArray<GeometryMsgs.PoseStamped>();
+            b.DeserializeStringArray(out IkLinkNames);
+            b.DeserializeArray(out PoseStampedVector);
             for (int i = 0; i < PoseStampedVector.Length; i++)
             {
                 PoseStampedVector[i] = new GeometryMsgs.PoseStamped(ref b);
@@ -109,12 +109,12 @@ namespace Iviz.Msgs.MoveitMsgs
             if (IkLinkNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < IkLinkNames.Length; i++)
             {
-                if (IkLinkNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(IkLinkNames)}[{i}]");
+                if (IkLinkNames[i] is null) BuiltIns.ThrowNullReference(nameof(IkLinkNames), i);
             }
             if (PoseStampedVector is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PoseStampedVector.Length; i++)
             {
-                if (PoseStampedVector[i] is null) BuiltIns.ThrowNullReference($"{nameof(PoseStampedVector)}[{i}]");
+                if (PoseStampedVector[i] is null) BuiltIns.ThrowNullReference(nameof(PoseStampedVector), i);
                 PoseStampedVector[i].RosValidate();
             }
         }

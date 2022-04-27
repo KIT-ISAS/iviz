@@ -33,7 +33,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public AccelWithCovariance(ref ReadBuffer b)
         {
             Accel = new Accel(ref b);
-            Covariance = b.DeserializeStructArray<double>(36);
+            b.DeserializeStructArray(36, out Covariance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AccelWithCovariance(ref b);
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.GeometryMsgs
             if (Accel is null) BuiltIns.ThrowNullReference();
             Accel.RosValidate();
             if (Covariance is null) BuiltIns.ThrowNullReference();
-            if (Covariance.Length != 36) throw new RosInvalidSizeForFixedArrayException(nameof(Covariance), Covariance.Length, 36);
+            if (Covariance.Length != 36) BuiltIns.ThrowInvalidSizeForFixedArray(Covariance.Length, 36);
         }
     
         /// <summary> Constant size of this message. </summary> 

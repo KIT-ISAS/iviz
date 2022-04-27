@@ -38,14 +38,14 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Scene(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Filename = b.DeserializeString();
-            Includes = b.DeserializeArray<Include>();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Filename);
+            b.DeserializeArray(out Includes);
             for (int i = 0; i < Includes.Length; i++)
             {
                 Includes[i] = new Include(ref b);
             }
-            Lights = b.DeserializeArray<Light>();
+            b.DeserializeArray(out Lights);
             for (int i = 0; i < Lights.Length; i++)
             {
                 Lights[i] = new Light(ref b);
@@ -71,13 +71,13 @@ namespace Iviz.Msgs.IvizMsgs
             if (Includes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Includes.Length; i++)
             {
-                if (Includes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Includes)}[{i}]");
+                if (Includes[i] is null) BuiltIns.ThrowNullReference(nameof(Includes), i);
                 Includes[i].RosValidate();
             }
             if (Lights is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Lights.Length; i++)
             {
-                if (Lights[i] is null) BuiltIns.ThrowNullReference($"{nameof(Lights)}[{i}]");
+                if (Lights[i] is null) BuiltIns.ThrowNullReference(nameof(Lights), i);
                 Lights[i].RosValidate();
             }
         }

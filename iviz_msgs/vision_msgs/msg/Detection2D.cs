@@ -40,7 +40,7 @@ namespace Iviz.Msgs.VisionMsgs
         public Detection2D(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Results = b.DeserializeArray<ObjectHypothesisWithPose>();
+            b.DeserializeArray(out Results);
             for (int i = 0; i < Results.Length; i++)
             {
                 Results[i] = new ObjectHypothesisWithPose(ref b);
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.VisionMsgs
             Bbox = new BoundingBox2D(ref b);
             SourceImg = new SensorMsgs.Image(ref b);
             b.Deserialize(out IsTracking);
-            TrackingId = b.DeserializeString();
+            b.DeserializeString(out TrackingId);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Detection2D(ref b);
@@ -70,7 +70,7 @@ namespace Iviz.Msgs.VisionMsgs
             if (Results is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Results.Length; i++)
             {
-                if (Results[i] is null) BuiltIns.ThrowNullReference($"{nameof(Results)}[{i}]");
+                if (Results[i] is null) BuiltIns.ThrowNullReference(nameof(Results), i);
                 Results[i].RosValidate();
             }
             if (Bbox is null) BuiltIns.ThrowNullReference();

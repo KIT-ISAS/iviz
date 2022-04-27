@@ -37,7 +37,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         /// Constructor with buffer.
         public ObjectInformation(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
+            b.DeserializeString(out Name);
             GroundTruthMesh = new ShapeMsgs.Mesh(ref b);
             GroundTruthPointCloud = new SensorMsgs.PointCloud2(ref b);
         }

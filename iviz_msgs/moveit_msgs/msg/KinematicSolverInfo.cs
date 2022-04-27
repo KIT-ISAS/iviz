@@ -33,13 +33,13 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public KinematicSolverInfo(ref ReadBuffer b)
         {
-            JointNames = b.DeserializeStringArray();
-            Limits = b.DeserializeArray<MoveitMsgs.JointLimits>();
+            b.DeserializeStringArray(out JointNames);
+            b.DeserializeArray(out Limits);
             for (int i = 0; i < Limits.Length; i++)
             {
                 Limits[i] = new MoveitMsgs.JointLimits(ref b);
             }
-            LinkNames = b.DeserializeStringArray();
+            b.DeserializeStringArray(out LinkNames);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new KinematicSolverInfo(ref b);
@@ -58,18 +58,18 @@ namespace Iviz.Msgs.MoveitMsgs
             if (JointNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < JointNames.Length; i++)
             {
-                if (JointNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(JointNames)}[{i}]");
+                if (JointNames[i] is null) BuiltIns.ThrowNullReference(nameof(JointNames), i);
             }
             if (Limits is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Limits.Length; i++)
             {
-                if (Limits[i] is null) BuiltIns.ThrowNullReference($"{nameof(Limits)}[{i}]");
+                if (Limits[i] is null) BuiltIns.ThrowNullReference(nameof(Limits), i);
                 Limits[i].RosValidate();
             }
             if (LinkNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < LinkNames.Length; i++)
             {
-                if (LinkNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(LinkNames)}[{i}]");
+                if (LinkNames[i] is null) BuiltIns.ThrowNullReference(nameof(LinkNames), i);
             }
         }
     

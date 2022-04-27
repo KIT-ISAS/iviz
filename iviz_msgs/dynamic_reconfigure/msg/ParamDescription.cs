@@ -25,11 +25,11 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor with buffer.
         public ParamDescription(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Type = b.DeserializeString();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Type);
             b.Deserialize(out Level);
-            Description = b.DeserializeString();
-            EditMethod = b.DeserializeString();
+            b.DeserializeString(out Description);
+            b.DeserializeString(out EditMethod);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ParamDescription(ref b);

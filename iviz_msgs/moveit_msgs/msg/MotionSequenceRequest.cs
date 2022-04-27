@@ -26,7 +26,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public MotionSequenceRequest(ref ReadBuffer b)
         {
-            Items = b.DeserializeArray<MotionSequenceItem>();
+            b.DeserializeArray(out Items);
             for (int i = 0; i < Items.Length; i++)
             {
                 Items[i] = new MotionSequenceItem(ref b);
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (Items is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Items.Length; i++)
             {
-                if (Items[i] is null) BuiltIns.ThrowNullReference($"{nameof(Items)}[{i}]");
+                if (Items[i] is null) BuiltIns.ThrowNullReference(nameof(Items), i);
                 Items[i].RosValidate();
             }
         }

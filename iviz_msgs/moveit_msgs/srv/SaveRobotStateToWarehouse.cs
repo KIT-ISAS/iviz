@@ -74,8 +74,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public SaveRobotStateToWarehouseRequest(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Robot = b.DeserializeString();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Robot);
             State = new MoveitMsgs.RobotState(ref b);
         }
         

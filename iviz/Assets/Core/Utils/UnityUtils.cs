@@ -34,7 +34,7 @@ namespace Iviz.Core
         public const int MeshUInt16Threshold = ushort.MaxValue;
 
         public static CultureInfo Culture => BuiltIns.Culture;
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in float3 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
@@ -259,13 +259,15 @@ namespace Iviz.Core
             [CallerLineNumber] int lineNumber = 0) where T : class
         {
 #if UNITY_EDITOR
-            return o != null
+            if (o == null)
 #else
-            return o is not null
+            if (o is null)
 #endif
-                ? o
-                : throw new MissingAssetFieldException($"Asset '{name}' has not been set!\n" +
-                                                       $"At: {caller} line {lineNumber}");
+            {
+                ThrowMissingAssetField(name, null, caller, lineNumber);
+            }
+
+            return o;
         }
 
         public static T AssertHasComponent<T>(this GameObject? o, string name,
@@ -274,19 +276,26 @@ namespace Iviz.Core
         {
             if (o == null)
             {
-                throw new MissingAssetFieldException(
-                    $"Asset '{name}' has not been set!\n" +
-                    $"At: {caller} line {lineNumber}");
+                ThrowMissingAssetField(name, null, caller, lineNumber);
             }
 
             if (!o.TryGetComponent(out T t))
             {
-                throw new MissingAssetFieldException(
-                    $"Asset '{name}' has does not have a component of type '{typeof(T).Name}!\n" +
-                    $"At: {caller} line {lineNumber}");
+                ThrowMissingAssetField(name, typeof(T), caller, lineNumber);
             }
 
             return t;
+        }
+
+        [DoesNotReturn]
+        static void ThrowMissingAssetField(string name, Type? type, string? caller, int lineNumber)
+        {
+            string s = type == null
+                ? $"Asset '{name}' has not been set!\n" +
+                  $"At: {caller} line {lineNumber.ToString()}"
+                : $"Asset '{name}' has does not have a component of type '{type.Name}!\n" +
+                  $"At: {caller} line {lineNumber.ToString()}";
+            throw new MissingAssetFieldException(s);
         }
 
         public static T AssertHasComponent<T>(this Component? o, string name,
@@ -564,7 +573,7 @@ namespace Iviz.Core
         /// Float representation from the bits of a Color32.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float AsFloat(Color32 f) =>  Unsafe.As<Color32, float>(ref f);
+        public static float AsFloat(Color32 f) => Unsafe.As<Color32, float>(ref f);
 
         public static Vector3 Forward(this in Quaternion rotation)
         {

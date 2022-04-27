@@ -24,7 +24,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public ARMarkerArray(ref ReadBuffer b)
         {
-            Markers = b.DeserializeArray<ARMarker>();
+            b.DeserializeArray(out Markers);
             for (int i = 0; i < Markers.Length; i++)
             {
                 Markers[i] = new ARMarker(ref b);
@@ -45,7 +45,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Markers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Markers.Length; i++)
             {
-                if (Markers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Markers)}[{i}]");
+                if (Markers[i] is null) BuiltIns.ThrowNullReference(nameof(Markers), i);
                 Markers[i].RosValidate();
             }
         }

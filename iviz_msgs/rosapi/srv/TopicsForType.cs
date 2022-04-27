@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public TopicsForTypeRequest(ref ReadBuffer b)
         {
-            Type = b.DeserializeString();
+            b.DeserializeString(out Type);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TopicsForTypeRequest(ref b);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public TopicsForTypeResponse(ref ReadBuffer b)
         {
-            Topics = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Topics);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TopicsForTypeResponse(ref b);
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.Rosapi
             if (Topics is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Topics.Length; i++)
             {
-                if (Topics[i] is null) BuiltIns.ThrowNullReference($"{nameof(Topics)}[{i}]");
+                if (Topics[i] is null) BuiltIns.ThrowNullReference(nameof(Topics), i);
             }
         }
     

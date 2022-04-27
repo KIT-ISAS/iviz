@@ -24,7 +24,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public TestDurationArray(ref ReadBuffer b)
         {
-            Durations = b.DeserializeStructArray<duration>();
+            b.DeserializeStructArray(out Durations);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestDurationArray(ref b);

@@ -71,8 +71,8 @@ namespace Iviz.Msgs.Roscpp
         /// Constructor with buffer.
         public SetLoggerLevelRequest(ref ReadBuffer b)
         {
-            Logger = b.DeserializeString();
-            Level = b.DeserializeString();
+            b.DeserializeString(out Logger);
+            b.DeserializeString(out Level);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetLoggerLevelRequest(ref b);

@@ -33,7 +33,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         public GoalID(ref ReadBuffer b)
         {
             b.Deserialize(out Stamp);
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GoalID(ref b);

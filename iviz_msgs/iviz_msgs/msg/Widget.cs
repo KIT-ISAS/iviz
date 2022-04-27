@@ -47,16 +47,16 @@ namespace Iviz.Msgs.IvizMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Action);
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             b.Deserialize(out Type);
             b.Deserialize(out Pose);
             b.Deserialize(out Color);
             b.Deserialize(out SecondaryColor);
             b.Deserialize(out Scale);
             b.Deserialize(out SecondaryScale);
-            Caption = b.DeserializeString();
+            b.DeserializeString(out Caption);
             Boundary = new BoundingBox(ref b);
-            SecondaryBoundaries = b.DeserializeArray<BoundingBoxStamped>();
+            b.DeserializeArray(out SecondaryBoundaries);
             for (int i = 0; i < SecondaryBoundaries.Length; i++)
             {
                 SecondaryBoundaries[i] = new BoundingBoxStamped(ref b);
@@ -92,7 +92,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (SecondaryBoundaries is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < SecondaryBoundaries.Length; i++)
             {
-                if (SecondaryBoundaries[i] is null) BuiltIns.ThrowNullReference($"{nameof(SecondaryBoundaries)}[{i}]");
+                if (SecondaryBoundaries[i] is null) BuiltIns.ThrowNullReference(nameof(SecondaryBoundaries), i);
                 SecondaryBoundaries[i].RosValidate();
             }
         }

@@ -53,7 +53,8 @@ namespace Iviz.MsgsGen.Dynamic
 
         public void RosDeserializeInPlace(ref ReadBuffer b)
         {
-            Value = b.DeserializeArray<T>();
+            b.DeserializeArray(out T[] array);
+            Value = array;
             for (int i = 0; i < Value.Length; i++)
             {
                 Value[i] = Generator.RosDeserialize(ref b);

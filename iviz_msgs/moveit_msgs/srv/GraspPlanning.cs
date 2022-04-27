@@ -79,15 +79,15 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public GraspPlanningRequest(ref ReadBuffer b)
         {
-            GroupName = b.DeserializeString();
+            b.DeserializeString(out GroupName);
             Target = new CollisionObject(ref b);
-            SupportSurfaces = b.DeserializeStringArray();
-            CandidateGrasps = b.DeserializeArray<Grasp>();
+            b.DeserializeStringArray(out SupportSurfaces);
+            b.DeserializeArray(out CandidateGrasps);
             for (int i = 0; i < CandidateGrasps.Length; i++)
             {
                 CandidateGrasps[i] = new Grasp(ref b);
             }
-            MovableObstacles = b.DeserializeArray<CollisionObject>();
+            b.DeserializeArray(out MovableObstacles);
             for (int i = 0; i < MovableObstacles.Length; i++)
             {
                 MovableObstacles[i] = new CollisionObject(ref b);
@@ -115,18 +115,18 @@ namespace Iviz.Msgs.MoveitMsgs
             if (SupportSurfaces is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < SupportSurfaces.Length; i++)
             {
-                if (SupportSurfaces[i] is null) BuiltIns.ThrowNullReference($"{nameof(SupportSurfaces)}[{i}]");
+                if (SupportSurfaces[i] is null) BuiltIns.ThrowNullReference(nameof(SupportSurfaces), i);
             }
             if (CandidateGrasps is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < CandidateGrasps.Length; i++)
             {
-                if (CandidateGrasps[i] is null) BuiltIns.ThrowNullReference($"{nameof(CandidateGrasps)}[{i}]");
+                if (CandidateGrasps[i] is null) BuiltIns.ThrowNullReference(nameof(CandidateGrasps), i);
                 CandidateGrasps[i].RosValidate();
             }
             if (MovableObstacles is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < MovableObstacles.Length; i++)
             {
-                if (MovableObstacles[i] is null) BuiltIns.ThrowNullReference($"{nameof(MovableObstacles)}[{i}]");
+                if (MovableObstacles[i] is null) BuiltIns.ThrowNullReference(nameof(MovableObstacles), i);
                 MovableObstacles[i].RosValidate();
             }
         }
@@ -172,7 +172,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public GraspPlanningResponse(ref ReadBuffer b)
         {
-            Grasps = b.DeserializeArray<Grasp>();
+            b.DeserializeArray(out Grasps);
             for (int i = 0; i < Grasps.Length; i++)
             {
                 Grasps[i] = new Grasp(ref b);
@@ -195,7 +195,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (Grasps is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Grasps.Length; i++)
             {
-                if (Grasps[i] is null) BuiltIns.ThrowNullReference($"{nameof(Grasps)}[{i}]");
+                if (Grasps[i] is null) BuiltIns.ThrowNullReference(nameof(Grasps), i);
                 Grasps[i].RosValidate();
             }
             if (ErrorCode is null) BuiltIns.ThrowNullReference();

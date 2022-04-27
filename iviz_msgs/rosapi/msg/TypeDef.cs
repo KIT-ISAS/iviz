@@ -30,13 +30,13 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public TypeDef(ref ReadBuffer b)
         {
-            Type = b.DeserializeString();
-            Fieldnames = b.DeserializeStringArray();
-            Fieldtypes = b.DeserializeStringArray();
-            Fieldarraylen = b.DeserializeStructArray<int>();
-            Examples = b.DeserializeStringArray();
-            Constnames = b.DeserializeStringArray();
-            Constvalues = b.DeserializeStringArray();
+            b.DeserializeString(out Type);
+            b.DeserializeStringArray(out Fieldnames);
+            b.DeserializeStringArray(out Fieldtypes);
+            b.DeserializeStructArray(out Fieldarraylen);
+            b.DeserializeStringArray(out Examples);
+            b.DeserializeStringArray(out Constnames);
+            b.DeserializeStringArray(out Constvalues);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TypeDef(ref b);
@@ -60,28 +60,28 @@ namespace Iviz.Msgs.Rosapi
             if (Fieldnames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Fieldnames.Length; i++)
             {
-                if (Fieldnames[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fieldnames)}[{i}]");
+                if (Fieldnames[i] is null) BuiltIns.ThrowNullReference(nameof(Fieldnames), i);
             }
             if (Fieldtypes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Fieldtypes.Length; i++)
             {
-                if (Fieldtypes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fieldtypes)}[{i}]");
+                if (Fieldtypes[i] is null) BuiltIns.ThrowNullReference(nameof(Fieldtypes), i);
             }
             if (Fieldarraylen is null) BuiltIns.ThrowNullReference();
             if (Examples is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Examples.Length; i++)
             {
-                if (Examples[i] is null) BuiltIns.ThrowNullReference($"{nameof(Examples)}[{i}]");
+                if (Examples[i] is null) BuiltIns.ThrowNullReference(nameof(Examples), i);
             }
             if (Constnames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Constnames.Length; i++)
             {
-                if (Constnames[i] is null) BuiltIns.ThrowNullReference($"{nameof(Constnames)}[{i}]");
+                if (Constnames[i] is null) BuiltIns.ThrowNullReference(nameof(Constnames), i);
             }
             if (Constvalues is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Constvalues.Length; i++)
             {
-                if (Constvalues[i] is null) BuiltIns.ThrowNullReference($"{nameof(Constvalues)}[{i}]");
+                if (Constvalues[i] is null) BuiltIns.ThrowNullReference(nameof(Constvalues), i);
             }
         }
     

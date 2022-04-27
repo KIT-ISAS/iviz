@@ -64,8 +64,8 @@ namespace Iviz.Msgs.VisionMsgs
         public VisionInfo(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Method = b.DeserializeString();
-            DatabaseLocation = b.DeserializeString();
+            b.DeserializeString(out Method);
+            b.DeserializeString(out DatabaseLocation);
             b.Deserialize(out DatabaseVersion);
         }
         

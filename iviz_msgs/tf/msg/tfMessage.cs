@@ -24,7 +24,7 @@ namespace Iviz.Msgs.Tf
         /// Constructor with buffer.
         public tfMessage(ref ReadBuffer b)
         {
-            Transforms = b.DeserializeArray<GeometryMsgs.TransformStamped>();
+            b.DeserializeArray(out Transforms);
             for (int i = 0; i < Transforms.Length; i++)
             {
                 GeometryMsgs.TransformStamped.Deserialize(ref b, out Transforms[i]);

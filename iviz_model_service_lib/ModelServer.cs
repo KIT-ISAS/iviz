@@ -141,7 +141,7 @@ public sealed class ModelServer : IDisposable
 
     void AddPath(string package, string path)
     {
-        if (!packagePaths.TryGetValue(package, out List<string> paths))
+        if (!packagePaths.TryGetValue(package, out var paths))
         {
             paths = new List<string>();
             packagePaths[package] = paths;
@@ -163,7 +163,7 @@ public sealed class ModelServer : IDisposable
     string? ResolvePath(Uri uri, out string? outPackagePath)
     {
         string package = uri.Host;
-        if (!packagePaths.TryGetValue(package, out List<string> paths))
+        if (!packagePaths.TryGetValue(package, out var paths))
         {
             LogError($"Failed to resolve uri '{uri}'. Reason: Package '{package}' not found.");
 
@@ -207,8 +207,7 @@ public sealed class ModelServer : IDisposable
             throw new ArgumentNullException(nameof(msg));
         }
 
-        bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
-        if (!success)
+        if (!Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out var uri))
         {
             msg.Response.Success = false;
             msg.Response.Message = "Failed to parse uri from requested string";
@@ -294,8 +293,7 @@ public sealed class ModelServer : IDisposable
 
         // TODO: force conversion to either png or jpg
 
-        bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
-        if (!success)
+        if (!Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out var uri))
         {
             msg.Response.Success = false;
             msg.Response.Message = "Failed to parse uri from requested string";
@@ -376,9 +374,9 @@ public sealed class ModelServer : IDisposable
             var doc = new XmlDocument();
             doc.Load(fileName);
             var nodeList = doc.GetElementsByTagName("up_axis");
-            if (nodeList.Count != 0 && nodeList[0] != null)
+            if (nodeList.Count != 0 && nodeList[0] is {} node)
             {
-                orientationHint = nodeList[0].InnerText ?? "";
+                orientationHint = node.InnerText ?? "";
             }
         }
 
@@ -547,8 +545,7 @@ public sealed class ModelServer : IDisposable
             throw new ArgumentNullException(nameof(msg));
         }
 
-        bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
-        if (!success)
+        if (!Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out var uri))
         {
             msg.Response.Message = "Failed to parse uri from requested string";
             return;
@@ -587,8 +584,7 @@ public sealed class ModelServer : IDisposable
             throw new ArgumentNullException(nameof(msg));
         }
 
-        bool success = Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out Uri uri);
-        if (!success)
+        if (!Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out var uri))
         {
             msg.Response.Message = "Failed to parse uri from requested string";
             return;

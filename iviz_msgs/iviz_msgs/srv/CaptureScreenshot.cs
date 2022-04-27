@@ -116,14 +116,14 @@ namespace Iviz.Msgs.IvizMsgs
         public CaptureScreenshotResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            Message = b.DeserializeString();
+            b.DeserializeString(out Message);
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Width);
             b.Deserialize(out Height);
             b.Deserialize(out Bpp);
-            Intrinsics = b.DeserializeStructArray<double>(9);
+            b.DeserializeStructArray(9, out Intrinsics);
             b.Deserialize(out Pose);
-            Data = b.DeserializeStructArray<byte>();
+            b.DeserializeStructArray(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);
@@ -147,7 +147,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             if (Message is null) BuiltIns.ThrowNullReference();
             if (Intrinsics is null) BuiltIns.ThrowNullReference();
-            if (Intrinsics.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(Intrinsics), Intrinsics.Length, 9);
+            if (Intrinsics.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(Intrinsics.Length, 9);
             if (Data is null) BuiltIns.ThrowNullReference();
         }
     

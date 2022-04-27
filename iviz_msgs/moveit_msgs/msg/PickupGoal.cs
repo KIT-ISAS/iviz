@@ -63,21 +63,21 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public PickupGoal(ref ReadBuffer b)
         {
-            TargetName = b.DeserializeString();
-            GroupName = b.DeserializeString();
-            EndEffector = b.DeserializeString();
-            PossibleGrasps = b.DeserializeArray<Grasp>();
+            b.DeserializeString(out TargetName);
+            b.DeserializeString(out GroupName);
+            b.DeserializeString(out EndEffector);
+            b.DeserializeArray(out PossibleGrasps);
             for (int i = 0; i < PossibleGrasps.Length; i++)
             {
                 PossibleGrasps[i] = new Grasp(ref b);
             }
-            SupportSurfaceName = b.DeserializeString();
+            b.DeserializeString(out SupportSurfaceName);
             b.Deserialize(out AllowGripperSupportCollision);
-            AttachedObjectTouchLinks = b.DeserializeStringArray();
+            b.DeserializeStringArray(out AttachedObjectTouchLinks);
             b.Deserialize(out MinimizeObjectDistance);
             PathConstraints = new Constraints(ref b);
-            PlannerId = b.DeserializeString();
-            AllowedTouchObjects = b.DeserializeStringArray();
+            b.DeserializeString(out PlannerId);
+            b.DeserializeStringArray(out AllowedTouchObjects);
             b.Deserialize(out AllowedPlanningTime);
             PlanningOptions = new PlanningOptions(ref b);
         }
@@ -111,14 +111,14 @@ namespace Iviz.Msgs.MoveitMsgs
             if (PossibleGrasps is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PossibleGrasps.Length; i++)
             {
-                if (PossibleGrasps[i] is null) BuiltIns.ThrowNullReference($"{nameof(PossibleGrasps)}[{i}]");
+                if (PossibleGrasps[i] is null) BuiltIns.ThrowNullReference(nameof(PossibleGrasps), i);
                 PossibleGrasps[i].RosValidate();
             }
             if (SupportSurfaceName is null) BuiltIns.ThrowNullReference();
             if (AttachedObjectTouchLinks is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < AttachedObjectTouchLinks.Length; i++)
             {
-                if (AttachedObjectTouchLinks[i] is null) BuiltIns.ThrowNullReference($"{nameof(AttachedObjectTouchLinks)}[{i}]");
+                if (AttachedObjectTouchLinks[i] is null) BuiltIns.ThrowNullReference(nameof(AttachedObjectTouchLinks), i);
             }
             if (PathConstraints is null) BuiltIns.ThrowNullReference();
             PathConstraints.RosValidate();
@@ -126,7 +126,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < AllowedTouchObjects.Length; i++)
             {
-                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AllowedTouchObjects)}[{i}]");
+                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects), i);
             }
             if (PlanningOptions is null) BuiltIns.ThrowNullReference();
             PlanningOptions.RosValidate();

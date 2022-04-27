@@ -6,7 +6,7 @@ namespace Iviz.Resources
     public sealed class ColorSchema
     {
         public Color FontEnabled { get; } = new Color(0.196f, 0.196f, 0.196f);
-        public Color FontDisabled { get; } = (new Color(0.196f, 0.196f, 0.196f) * 3).WithAlpha(1);
+        public Color FontDisabled { get; } = (new Color(0.196f, 0.196f, 0.196f) * 2).WithAlpha(1);
         public Color EnabledPanel { get; } = new Color(0.88f, 0.99f, 1f, 0.373f);
         public Color DisabledPanel { get; } = new Color(0.777f, 0.777f, 0.777f, 0.373f);
 

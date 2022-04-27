@@ -74,8 +74,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public AddModuleRequest(ref ReadBuffer b)
         {
-            ModuleType = b.DeserializeString();
-            Id = b.DeserializeString();
+            b.DeserializeString(out ModuleType);
+            b.DeserializeString(out Id);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddModuleRequest(ref b);
@@ -128,8 +128,8 @@ namespace Iviz.Msgs.IvizMsgs
         public AddModuleResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            Message = b.DeserializeString();
-            Id = b.DeserializeString();
+            b.DeserializeString(out Message);
+            b.DeserializeString(out Id);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddModuleResponse(ref b);

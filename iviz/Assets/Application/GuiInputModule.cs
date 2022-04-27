@@ -88,6 +88,8 @@ namespace Iviz.App
         Color backgroundColor = new(0.145f, 0.168f, 0.207f, 1);
         float sunDirectionX;
         float sunDirectionY;
+        bool enableSun = true;
+        float equatorIntensity = 0.5f;
 
         LeashDisplay Leash => ResourcePool.RentChecked(ref leash);
         Transform Transform => this.EnsureHasTransform(ref mTransform);
@@ -209,9 +211,18 @@ namespace Iviz.App
 
         public TfFrame Frame => TfModule.FixedFrame;
 
+        public bool EnableSun
+        {
+            get => enableSun;
+            set
+            {
+                enableSun = value;
+                MainLight.enabled = value;
+            }
+        }
+        
         public float SunDirectionX
         {
-            get => sunDirectionX;
             set
             {
                 sunDirectionX = value;
@@ -221,11 +232,19 @@ namespace Iviz.App
 
         public float SunDirectionY
         {
-            get => sunDirectionY;
             set
             {
                 sunDirectionY = value;
                 UpdateSunDirection();
+            }
+        }
+
+        public float EquatorIntensity
+        {
+            set
+            {
+                equatorIntensity = value;
+                UpdateLighting();
             }
         }
 
@@ -283,18 +302,20 @@ namespace Iviz.App
             get => backgroundColor;
             set
             {
-                //config.BackgroundColor = value.WithAlpha(1).ToRos();
                 backgroundColor = value;
 
                 Color colorToUse = Settings.IsHololens ? Color.black : value;
                 MainCamera.backgroundColor = colorToUse.WithAlpha(0);
-
-                RenderSettings.ambientSkyColor = value.WithAlpha(0);
-
-                Color.RGBToHSV(value, out float h, out float s, out float v);
-                var equatorColor = Color.HSVToRGB(h, Mathf.Min(s, 0.3f), v * 0.5f);
-                RenderSettings.ambientEquatorColor = equatorColor;
+                UpdateLighting();
             }
+        }
+
+        void UpdateLighting()
+        {
+            RenderSettings.ambientSkyColor = backgroundColor.WithAlpha(0);
+            Color.RGBToHSV(backgroundColor, out float h, out float s, out _);
+            var equatorColor = Color.HSVToRGB(h, Mathf.Min(s, 0.3f),  equatorIntensity);
+            RenderSettings.ambientEquatorColor = equatorColor;            
         }
 
         public int NetworkFrameSkip

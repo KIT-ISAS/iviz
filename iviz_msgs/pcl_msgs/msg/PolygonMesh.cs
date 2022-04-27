@@ -34,7 +34,7 @@ namespace Iviz.Msgs.PclMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Cloud = new SensorMsgs.PointCloud2(ref b);
-            Polygons = b.DeserializeArray<Vertices>();
+            b.DeserializeArray(out Polygons);
             for (int i = 0; i < Polygons.Length; i++)
             {
                 Polygons[i] = new Vertices(ref b);
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.PclMsgs
             if (Polygons is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Polygons.Length; i++)
             {
-                if (Polygons[i] is null) BuiltIns.ThrowNullReference($"{nameof(Polygons)}[{i}]");
+                if (Polygons[i] is null) BuiltIns.ThrowNullReference(nameof(Polygons), i);
                 Polygons[i].RosValidate();
             }
         }

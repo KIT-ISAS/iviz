@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public SaveMapRequest(ref ReadBuffer b)
         {
-            Filename = b.DeserializeString();
+            b.DeserializeString(out Filename);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SaveMapRequest(ref b);

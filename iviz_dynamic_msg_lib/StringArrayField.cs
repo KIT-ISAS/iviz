@@ -9,7 +9,7 @@ namespace Iviz.MsgsGen.Dynamic
         public string[] Value { get; set; } = Array.Empty<string>();
 
         object IField.Value => Value;
-        
+
         public FieldType Type => FieldType.StringArray;
 
         public int RosLength
@@ -49,7 +49,8 @@ namespace Iviz.MsgsGen.Dynamic
 
         public void RosDeserializeInPlace(ref ReadBuffer b)
         {
-            Value = b.DeserializeStringArray();
+            b.DeserializeStringArray(out string[] val);
+            Value = val;
         }
 
         public IField Generate()

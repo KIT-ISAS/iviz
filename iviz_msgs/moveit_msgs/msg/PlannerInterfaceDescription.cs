@@ -29,8 +29,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public PlannerInterfaceDescription(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            PlannerIds = b.DeserializeStringArray();
+            b.DeserializeString(out Name);
+            b.DeserializeStringArray(out PlannerIds);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PlannerInterfaceDescription(ref b);
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (PlannerIds is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PlannerIds.Length; i++)
             {
-                if (PlannerIds[i] is null) BuiltIns.ThrowNullReference($"{nameof(PlannerIds)}[{i}]");
+                if (PlannerIds[i] is null) BuiltIns.ThrowNullReference(nameof(PlannerIds), i);
             }
         }
     

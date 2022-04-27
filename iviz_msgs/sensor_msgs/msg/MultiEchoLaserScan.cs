@@ -62,12 +62,12 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out ScanTime);
             b.Deserialize(out RangeMin);
             b.Deserialize(out RangeMax);
-            Ranges = b.DeserializeArray<LaserEcho>();
+            b.DeserializeArray(out Ranges);
             for (int i = 0; i < Ranges.Length; i++)
             {
                 Ranges[i] = new LaserEcho(ref b);
             }
-            Intensities = b.DeserializeArray<LaserEcho>();
+            b.DeserializeArray(out Intensities);
             for (int i = 0; i < Intensities.Length; i++)
             {
                 Intensities[i] = new LaserEcho(ref b);
@@ -97,13 +97,13 @@ namespace Iviz.Msgs.SensorMsgs
             if (Ranges is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Ranges.Length; i++)
             {
-                if (Ranges[i] is null) BuiltIns.ThrowNullReference($"{nameof(Ranges)}[{i}]");
+                if (Ranges[i] is null) BuiltIns.ThrowNullReference(nameof(Ranges), i);
                 Ranges[i].RosValidate();
             }
             if (Intensities is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Intensities.Length; i++)
             {
-                if (Intensities[i] is null) BuiltIns.ThrowNullReference($"{nameof(Intensities)}[{i}]");
+                if (Intensities[i] is null) BuiltIns.ThrowNullReference(nameof(Intensities), i);
                 Intensities[i].RosValidate();
             }
         }

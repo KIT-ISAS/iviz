@@ -54,19 +54,19 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public PlaceGoal(ref ReadBuffer b)
         {
-            GroupName = b.DeserializeString();
-            AttachedObjectName = b.DeserializeString();
-            PlaceLocations = b.DeserializeArray<PlaceLocation>();
+            b.DeserializeString(out GroupName);
+            b.DeserializeString(out AttachedObjectName);
+            b.DeserializeArray(out PlaceLocations);
             for (int i = 0; i < PlaceLocations.Length; i++)
             {
                 PlaceLocations[i] = new PlaceLocation(ref b);
             }
             b.Deserialize(out PlaceEef);
-            SupportSurfaceName = b.DeserializeString();
+            b.DeserializeString(out SupportSurfaceName);
             b.Deserialize(out AllowGripperSupportCollision);
             PathConstraints = new Constraints(ref b);
-            PlannerId = b.DeserializeString();
-            AllowedTouchObjects = b.DeserializeStringArray();
+            b.DeserializeString(out PlannerId);
+            b.DeserializeStringArray(out AllowedTouchObjects);
             b.Deserialize(out AllowedPlanningTime);
             PlanningOptions = new PlanningOptions(ref b);
         }
@@ -97,7 +97,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (PlaceLocations is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PlaceLocations.Length; i++)
             {
-                if (PlaceLocations[i] is null) BuiltIns.ThrowNullReference($"{nameof(PlaceLocations)}[{i}]");
+                if (PlaceLocations[i] is null) BuiltIns.ThrowNullReference(nameof(PlaceLocations), i);
                 PlaceLocations[i].RosValidate();
             }
             if (SupportSurfaceName is null) BuiltIns.ThrowNullReference();
@@ -107,7 +107,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < AllowedTouchObjects.Length; i++)
             {
-                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AllowedTouchObjects)}[{i}]");
+                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects), i);
             }
             if (PlanningOptions is null) BuiltIns.ThrowNullReference();
             PlanningOptions.RosValidate();

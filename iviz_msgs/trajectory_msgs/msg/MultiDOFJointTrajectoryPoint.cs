@@ -35,13 +35,13 @@ namespace Iviz.Msgs.TrajectoryMsgs
         /// Constructor with buffer.
         public MultiDOFJointTrajectoryPoint(ref ReadBuffer b)
         {
-            Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Velocities = b.DeserializeArray<GeometryMsgs.Twist>();
+            b.DeserializeStructArray(out Transforms);
+            b.DeserializeArray(out Velocities);
             for (int i = 0; i < Velocities.Length; i++)
             {
                 Velocities[i] = new GeometryMsgs.Twist(ref b);
             }
-            Accelerations = b.DeserializeArray<GeometryMsgs.Twist>();
+            b.DeserializeArray(out Accelerations);
             for (int i = 0; i < Accelerations.Length; i++)
             {
                 Accelerations[i] = new GeometryMsgs.Twist(ref b);
@@ -67,13 +67,13 @@ namespace Iviz.Msgs.TrajectoryMsgs
             if (Velocities is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Velocities.Length; i++)
             {
-                if (Velocities[i] is null) BuiltIns.ThrowNullReference($"{nameof(Velocities)}[{i}]");
+                if (Velocities[i] is null) BuiltIns.ThrowNullReference(nameof(Velocities), i);
                 Velocities[i].RosValidate();
             }
             if (Accelerations is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Accelerations.Length; i++)
             {
-                if (Accelerations[i] is null) BuiltIns.ThrowNullReference($"{nameof(Accelerations)}[{i}]");
+                if (Accelerations[i] is null) BuiltIns.ThrowNullReference(nameof(Accelerations), i);
                 Accelerations[i].RosValidate();
             }
         }
