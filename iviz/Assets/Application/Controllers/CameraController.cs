@@ -45,6 +45,26 @@ namespace Iviz.Controllers
             }
         }
 
+        public bool EnableSun
+        {
+            get => Configuration.EnableSun;
+            set
+            {
+                Configuration.EnableSun = value;
+                GuiInputModule.EnableSun = value;
+            }
+        }
+        
+        public float EquatorIntensity
+        {
+            get => Configuration.EquatorIntensity;
+            set
+            {
+                Configuration.EquatorIntensity = value;
+                GuiInputModule.EquatorIntensity = value;
+            }
+        }
+
         public bool EnableShadows
         {
             get => Configuration.EnableShadows;

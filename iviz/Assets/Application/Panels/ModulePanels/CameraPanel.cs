@@ -9,8 +9,10 @@ namespace Iviz.App
         public Vector3MultiWidget RollPitchYaw { get; private set; }
         public Vector3MultiWidget Position { get; private set; }
         public ColorPickerWidget BackgroundColor { get; private set; }
+        public ToggleWidget EnableSun { get; private set; }
         public SliderWidget SunDirectionX { get; private set; }
         public SliderWidget SunDirectionY { get; private set; }
+        public SliderWidget EquatorIntensity { get; private set; }
         public ToggleWidget EnableShadows { get; private set; }
 
         void Awake()
@@ -25,8 +27,10 @@ namespace Iviz.App
             Position = p.AddVector3Multi("Position From Fixed");
 
             BackgroundColor = p.AddColorPicker("Background Color");
+            EnableSun = p.AddToggle("Enable Sun");
             SunDirectionX = p.AddSlider("Sun Direction X").SetMinValue(-80).SetMaxValue(80).SetIntegerOnly(true);
             SunDirectionY = p.AddSlider("Sun Direction Y").SetMinValue(-180).SetMaxValue(179).SetIntegerOnly(true);
+            EquatorIntensity = p.AddSlider("Equator Intensity").SetMinValue(0).SetMaxValue(1);
             EnableShadows = p.AddToggle("Enable Shadows");
             
             p.UpdateSize();

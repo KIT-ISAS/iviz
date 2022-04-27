@@ -32,14 +32,9 @@ namespace Iviz.Core
                 return;
             }
 
-            if (value < 0)
+            if (value is < 0 or > NativeList.MaxElements)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), "Capacity cannot be negative");
-            }
-
-            if (value > NativeList.MaxElements)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), "Capacity exceeds maximal size");
+                ThrowHelper.ThrowArgumentOutOfRange();
             }
 
             int newCapacity = Mathf.Max(Capacity, 16);
@@ -56,12 +51,6 @@ namespace Iviz.Core
             }
 
             array = newArray;
-
-            if (array.Length < value)
-            {
-                // this post-condition ensures that the unsafes later won't crash (as long as we're single-threaded) 
-                throw new InvalidOperationException("Array enlargement failed. Something went wrong!");
-            }
         }
 
         public void Add(in T t)
@@ -106,14 +95,11 @@ namespace Iviz.Core
         {
             if (length == 0)
             {
-                ThrowIndexOutOfRangeException();
+                ThrowHelper.ThrowIndexOutOfRange();
             }
             
             return ref array.GetUnsafeRef();
         }
-
-        [DoesNotReturn]
-        static void ThrowIndexOutOfRangeException() => throw new IndexOutOfRangeException();
 
         ReadOnlySpan<T> AsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(ref array.GetUnsafeRef(), length);
 

@@ -259,7 +259,7 @@ namespace Iviz.Controllers
         T ValidateResource<T>() where T : MarkerDisplay =>
             resource is T result
                 ? result
-                : throw new InvalidOperationException("Resource is not set!");
+                : throw new MissingAssetFieldException("Resource does not have a marker component!");
 
         void CreateTriangleList(Marker msg)
         {
