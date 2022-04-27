@@ -45,14 +45,14 @@ namespace Iviz.Msgs.SensorMsgs
         public MultiDOFJointState(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            JointNames = b.DeserializeStringArray();
-            Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Twist = b.DeserializeArray<GeometryMsgs.Twist>();
+            b.DeserializeStringArray(out JointNames);
+            b.DeserializeStructArray(out Transforms);
+            b.DeserializeArray(out Twist);
             for (int i = 0; i < Twist.Length; i++)
             {
                 Twist[i] = new GeometryMsgs.Twist(ref b);
             }
-            Wrench = b.DeserializeArray<GeometryMsgs.Wrench>();
+            b.DeserializeArray(out Wrench);
             for (int i = 0; i < Wrench.Length; i++)
             {
                 Wrench[i] = new GeometryMsgs.Wrench(ref b);
@@ -77,19 +77,19 @@ namespace Iviz.Msgs.SensorMsgs
             if (JointNames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < JointNames.Length; i++)
             {
-                if (JointNames[i] is null) BuiltIns.ThrowNullReference($"{nameof(JointNames)}[{i}]");
+                if (JointNames[i] is null) BuiltIns.ThrowNullReference(nameof(JointNames), i);
             }
             if (Transforms is null) BuiltIns.ThrowNullReference();
             if (Twist is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Twist.Length; i++)
             {
-                if (Twist[i] is null) BuiltIns.ThrowNullReference($"{nameof(Twist)}[{i}]");
+                if (Twist[i] is null) BuiltIns.ThrowNullReference(nameof(Twist), i);
                 Twist[i].RosValidate();
             }
             if (Wrench is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Wrench.Length; i++)
             {
-                if (Wrench[i] is null) BuiltIns.ThrowNullReference($"{nameof(Wrench)}[{i}]");
+                if (Wrench[i] is null) BuiltIns.ThrowNullReference(nameof(Wrench), i);
                 Wrench[i].RosValidate();
             }
         }

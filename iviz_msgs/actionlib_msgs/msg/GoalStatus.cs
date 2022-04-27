@@ -59,7 +59,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         {
             GoalId = new GoalID(ref b);
             b.Deserialize(out Status);
-            Text = b.DeserializeString();
+            b.DeserializeString(out Text);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GoalStatus(ref b);

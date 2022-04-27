@@ -35,9 +35,9 @@ namespace Iviz.Msgs.GridMapMsgs
         public GridMap(ref ReadBuffer b)
         {
             Info = new GridMapInfo(ref b);
-            Layers = b.DeserializeStringArray();
-            BasicLayers = b.DeserializeStringArray();
-            Data = b.DeserializeArray<StdMsgs.Float32MultiArray>();
+            b.DeserializeStringArray(out Layers);
+            b.DeserializeStringArray(out BasicLayers);
+            b.DeserializeArray(out Data);
             for (int i = 0; i < Data.Length; i++)
             {
                 Data[i] = new StdMsgs.Float32MultiArray(ref b);
@@ -67,17 +67,17 @@ namespace Iviz.Msgs.GridMapMsgs
             if (Layers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Layers.Length; i++)
             {
-                if (Layers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Layers)}[{i}]");
+                if (Layers[i] is null) BuiltIns.ThrowNullReference(nameof(Layers), i);
             }
             if (BasicLayers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < BasicLayers.Length; i++)
             {
-                if (BasicLayers[i] is null) BuiltIns.ThrowNullReference($"{nameof(BasicLayers)}[{i}]");
+                if (BasicLayers[i] is null) BuiltIns.ThrowNullReference(nameof(BasicLayers), i);
             }
             if (Data is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Data.Length; i++)
             {
-                if (Data[i] is null) BuiltIns.ThrowNullReference($"{nameof(Data)}[{i}]");
+                if (Data[i] is null) BuiltIns.ThrowNullReference(nameof(Data), i);
                 Data[i].RosValidate();
             }
         }

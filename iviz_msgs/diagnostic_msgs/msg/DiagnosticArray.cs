@@ -30,7 +30,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public DiagnosticArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Status = b.DeserializeArray<DiagnosticStatus>();
+            b.DeserializeArray(out Status);
             for (int i = 0; i < Status.Length; i++)
             {
                 Status[i] = new DiagnosticStatus(ref b);
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             if (Status is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Status.Length; i++)
             {
-                if (Status[i] is null) BuiltIns.ThrowNullReference($"{nameof(Status)}[{i}]");
+                if (Status[i] is null) BuiltIns.ThrowNullReference(nameof(Status), i);
                 Status[i].RosValidate();
             }
         }

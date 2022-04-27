@@ -41,8 +41,8 @@ namespace Iviz.Msgs.SensorMsgs
         public CompressedImage(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Format = b.DeserializeString();
-            Data = b.DeserializeStructArray<byte>();
+            b.DeserializeString(out Format);
+            b.DeserializeStructArray(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CompressedImage(ref b);

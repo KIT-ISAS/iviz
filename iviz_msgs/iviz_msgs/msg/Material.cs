@@ -31,7 +31,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Material(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
+            b.DeserializeString(out Name);
             b.Deserialize(out Ambient);
             b.Deserialize(out Diffuse);
             b.Deserialize(out Emissive);
@@ -41,7 +41,7 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out ShininessStrength);
             b.Deserialize(out Reflectivity);
             b.Deserialize(out BlendMode);
-            Textures = b.DeserializeArray<Texture>();
+            b.DeserializeArray(out Textures);
             for (int i = 0; i < Textures.Length; i++)
             {
                 Textures[i] = new Texture(ref b);
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Textures is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Textures.Length; i++)
             {
-                if (Textures[i] is null) BuiltIns.ThrowNullReference($"{nameof(Textures)}[{i}]");
+                if (Textures[i] is null) BuiltIns.ThrowNullReference(nameof(Textures), i);
                 Textures[i].RosValidate();
             }
         }

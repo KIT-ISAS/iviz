@@ -33,7 +33,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor with buffer.
         public ConfigDescription(ref ReadBuffer b)
         {
-            Groups = b.DeserializeArray<Group>();
+            b.DeserializeArray(out Groups);
             for (int i = 0; i < Groups.Length; i++)
             {
                 Groups[i] = new Group(ref b);
@@ -60,7 +60,7 @@ namespace Iviz.Msgs.DynamicReconfigure
             if (Groups is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Groups.Length; i++)
             {
-                if (Groups[i] is null) BuiltIns.ThrowNullReference($"{nameof(Groups)}[{i}]");
+                if (Groups[i] is null) BuiltIns.ThrowNullReference(nameof(Groups), i);
                 Groups[i].RosValidate();
             }
             if (Max is null) BuiltIns.ThrowNullReference();

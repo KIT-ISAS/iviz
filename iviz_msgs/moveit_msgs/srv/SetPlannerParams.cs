@@ -80,8 +80,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public SetPlannerParamsRequest(ref ReadBuffer b)
         {
-            PlannerConfig = b.DeserializeString();
-            Group = b.DeserializeString();
+            b.DeserializeString(out PlannerConfig);
+            b.DeserializeString(out Group);
             Params = new PlannerParams(ref b);
             b.Deserialize(out Replace);
         }

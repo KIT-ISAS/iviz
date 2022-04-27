@@ -38,7 +38,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Pose);
-            ConvexHull = b.DeserializeStructArray<GeometryMsgs.Point>();
+            b.DeserializeStructArray(out ConvexHull);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Table(ref b);

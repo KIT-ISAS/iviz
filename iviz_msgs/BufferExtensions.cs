@@ -7,9 +7,8 @@ using Iviz.Msgs.StdMsgs;
 namespace Iviz.Msgs;
 
 /// <summary>
-/// These are operations used by Unity, as a walk-around that some generics operations
-/// are slower in AOT and pointer operations are really fast in il2cpp.
-/// Here we assume that there is no GC compacting and pinning spans is a free operation. 
+/// These are operations used in iviz/Unity, as a walk-around that in il2cpp some generics operations
+/// are slower but pointer operations are really fast. 
 /// </summary>
 public static class BufferExtensions
 {
@@ -17,6 +16,7 @@ public static class BufferExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static unsafe ref byte AsRef(this in byte ptr)
     {
+        // pinning in il2cpp is a free operation
         fixed (byte *pPtr = &ptr) return ref *pPtr;
     }
 

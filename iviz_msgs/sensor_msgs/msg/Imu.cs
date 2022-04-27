@@ -44,11 +44,11 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Orientation);
-            OrientationCovariance = b.DeserializeStructArray<double>(9);
+            b.DeserializeStructArray(9, out OrientationCovariance);
             b.Deserialize(out AngularVelocity);
-            AngularVelocityCovariance = b.DeserializeStructArray<double>(9);
+            b.DeserializeStructArray(9, out AngularVelocityCovariance);
             b.Deserialize(out LinearAcceleration);
-            LinearAccelerationCovariance = b.DeserializeStructArray<double>(9);
+            b.DeserializeStructArray(9, out LinearAccelerationCovariance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Imu(ref b);
@@ -69,11 +69,11 @@ namespace Iviz.Msgs.SensorMsgs
         public void RosValidate()
         {
             if (OrientationCovariance is null) BuiltIns.ThrowNullReference();
-            if (OrientationCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(OrientationCovariance), OrientationCovariance.Length, 9);
+            if (OrientationCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(OrientationCovariance.Length, 9);
             if (AngularVelocityCovariance is null) BuiltIns.ThrowNullReference();
-            if (AngularVelocityCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(AngularVelocityCovariance), AngularVelocityCovariance.Length, 9);
+            if (AngularVelocityCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(AngularVelocityCovariance.Length, 9);
             if (LinearAccelerationCovariance is null) BuiltIns.ThrowNullReference();
-            if (LinearAccelerationCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(LinearAccelerationCovariance), LinearAccelerationCovariance.Length, 9);
+            if (LinearAccelerationCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(LinearAccelerationCovariance.Length, 9);
         }
     
         public int RosMessageLength => 296 + Header.RosMessageLength;

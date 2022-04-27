@@ -124,7 +124,7 @@ namespace Iviz.Msgs.SensorMsgs
         public SetCameraInfoResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            StatusMessage = b.DeserializeString();
+            b.DeserializeString(out StatusMessage);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetCameraInfoResponse(ref b);

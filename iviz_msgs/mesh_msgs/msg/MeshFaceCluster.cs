@@ -29,8 +29,8 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public MeshFaceCluster(ref ReadBuffer b)
         {
-            FaceIndices = b.DeserializeStructArray<uint>();
-            Label = b.DeserializeString();
+            b.DeserializeStructArray(out FaceIndices);
+            b.DeserializeString(out Label);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshFaceCluster(ref b);

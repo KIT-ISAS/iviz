@@ -51,7 +51,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         public ImageMarker(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Ns = b.DeserializeString();
+            b.DeserializeString(out Ns);
             b.Deserialize(out Id);
             b.Deserialize(out Type);
             b.Deserialize(out Action);
@@ -61,8 +61,8 @@ namespace Iviz.Msgs.VisualizationMsgs
             b.Deserialize(out Filled);
             b.Deserialize(out FillColor);
             b.Deserialize(out Lifetime);
-            Points = b.DeserializeStructArray<GeometryMsgs.Point>();
-            OutlineColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
+            b.DeserializeStructArray(out Points);
+            b.DeserializeStructArray(out OutlineColors);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ImageMarker(ref b);

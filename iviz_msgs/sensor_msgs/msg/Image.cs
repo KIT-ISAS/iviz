@@ -50,10 +50,10 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Height);
             b.Deserialize(out Width);
-            Encoding = b.DeserializeString();
+            b.DeserializeString(out Encoding);
             b.Deserialize(out IsBigendian);
             b.Deserialize(out Step);
-            Data = b.DeserializeStructRent<byte>();
+            b.DeserializeStructRent(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Image(ref b);

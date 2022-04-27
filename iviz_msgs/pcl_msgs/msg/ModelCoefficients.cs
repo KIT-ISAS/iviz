@@ -27,7 +27,7 @@ namespace Iviz.Msgs.PclMsgs
         public ModelCoefficients(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Values = b.DeserializeStructArray<float>();
+            b.DeserializeStructArray(out Values);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ModelCoefficients(ref b);

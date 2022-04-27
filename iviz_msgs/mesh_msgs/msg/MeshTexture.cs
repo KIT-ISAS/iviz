@@ -30,7 +30,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public MeshTexture(ref ReadBuffer b)
         {
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
             b.Deserialize(out TextureIndex);
             Image = new SensorMsgs.Image(ref b);
         }

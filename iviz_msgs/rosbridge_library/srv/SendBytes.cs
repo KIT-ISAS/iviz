@@ -111,7 +111,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public SendBytesResponse(ref ReadBuffer b)
         {
-            Data = b.DeserializeString();
+            b.DeserializeString(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SendBytesResponse(ref b);

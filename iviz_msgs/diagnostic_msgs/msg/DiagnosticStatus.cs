@@ -38,10 +38,10 @@ namespace Iviz.Msgs.DiagnosticMsgs
         public DiagnosticStatus(ref ReadBuffer b)
         {
             b.Deserialize(out Level);
-            Name = b.DeserializeString();
-            Message = b.DeserializeString();
-            HardwareId = b.DeserializeString();
-            Values = b.DeserializeArray<KeyValue>();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Message);
+            b.DeserializeString(out HardwareId);
+            b.DeserializeArray(out Values);
             for (int i = 0; i < Values.Length; i++)
             {
                 Values[i] = new KeyValue(ref b);
@@ -69,7 +69,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
             if (Values is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Values.Length; i++)
             {
-                if (Values[i] is null) BuiltIns.ThrowNullReference($"{nameof(Values)}[{i}]");
+                if (Values[i] is null) BuiltIns.ThrowNullReference(nameof(Values), i);
                 Values[i].RosValidate();
             }
         }

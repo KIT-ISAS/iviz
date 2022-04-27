@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshMaterialsStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
             MeshMaterials = new MeshMsgs.MeshMaterials(ref b);
         }
         

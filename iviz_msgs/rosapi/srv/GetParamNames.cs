@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public GetParamNamesResponse(ref ReadBuffer b)
         {
-            Names = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Names);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetParamNamesResponse(ref b);
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.Rosapi
             if (Names is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Names.Length; i++)
             {
-                if (Names[i] is null) BuiltIns.ThrowNullReference($"{nameof(Names)}[{i}]");
+                if (Names[i] is null) BuiltIns.ThrowNullReference(nameof(Names), i);
             }
         }
     

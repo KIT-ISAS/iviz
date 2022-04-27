@@ -31,9 +31,9 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public MeshGeometry(ref ReadBuffer b)
         {
-            Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
-            VertexNormals = b.DeserializeStructArray<GeometryMsgs.Point>();
-            Faces = b.DeserializeArray<MeshMsgs.TriangleIndices>();
+            b.DeserializeStructArray(out Vertices);
+            b.DeserializeStructArray(out VertexNormals);
+            b.DeserializeArray(out Faces);
             for (int i = 0; i < Faces.Length; i++)
             {
                 Faces[i] = new MeshMsgs.TriangleIndices(ref b);
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (Faces is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Faces.Length; i++)
             {
-                if (Faces[i] is null) BuiltIns.ThrowNullReference($"{nameof(Faces)}[{i}]");
+                if (Faces[i] is null) BuiltIns.ThrowNullReference(nameof(Faces), i);
                 Faces[i].RosValidate();
             }
         }

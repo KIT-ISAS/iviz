@@ -55,7 +55,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Texture(ref ReadBuffer b)
         {
-            Path = b.DeserializeString();
+            b.DeserializeString(out Path);
             b.Deserialize(out Index);
             b.Deserialize(out Type);
             b.Deserialize(out Mapping);

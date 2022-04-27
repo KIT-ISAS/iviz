@@ -40,13 +40,9 @@ namespace Iviz.Msgs
         {
             if (off > remaining)
             {
-                ThrowBufferException(off, remaining);
+                BuiltIns.ThrowBufferOverflow(off, remaining);
             }
         }
-
-        [DoesNotReturn]
-        static void ThrowBufferException(int off, int remaining) =>
-            throw new BufferException($"Requested {off} bytes, but only {remaining} remain!");
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int ReadInt()
@@ -56,47 +52,52 @@ namespace Iviz.Msgs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string DeserializeString()
+        public void DeserializeString(out string val)
         {
             int count = ReadInt();
             if (count == 0)
             {
-                return "";
+                val = "";
+                return;
             }
 
-            string val = BuiltIns.UTF8.GetString(ptr.Slice(offset, count));
+            val = BuiltIns.UTF8.GetString(ptr.Slice(offset, count));
             Advance(count);
-            return val;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string SkipString()
+        public void SkipString(out string val)
         {
             int count = ReadInt();
             Advance(count);
-            return "";
+            val = "";
         }
 
-        public string[] DeserializeStringArray()
+        public void DeserializeStringArray(out string[] val)
         {
             int count = ReadInt();
-            return count == 0 ? Array.Empty<string>() : DeserializeStringArray(count);
+            if (count == 0)
+            {
+                val = Array.Empty<string>();
+            }
+            else
+            {
+                DeserializeStringArray(count, out val);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), SkipLocalsInit]
-        public string[] DeserializeStringArray(int count)
+        public void DeserializeStringArray(int count, out string[] val)
         {
             ThrowIfOutOfRange(4 * count);
-            string[] val = new string[count];
+            val = new string[count];
             for (int i = 0; i < val.Length; i++)
             {
-                val[i] = DeserializeString();
+                DeserializeString(out val[i]);
             }
-
-            return val;
         }
 
-        public string[] SkipStringArray()
+        public void SkipStringArray(out string[] val)
         {
             int count = ReadInt();
             for (int i = 0; i < count; i++)
@@ -105,7 +106,7 @@ namespace Iviz.Msgs
                 Advance(innerCount);
             }
 
-            return Array.Empty<string>();
+            val = Array.Empty<string>();
         }
 
 #if NETSTANDARD2_1
@@ -127,50 +128,54 @@ namespace Iviz.Msgs
         }
 #endif
 
-        public T[] DeserializeStructArray<T>() where T : unmanaged
+        public void DeserializeStructArray<T>(out T[] val) where T : unmanaged
         {
             int count = ReadInt();
-            return count == 0 ? Array.Empty<T>() : DeserializeStructArray<T>(count);
+            if (count == 0)
+            {
+                val = Array.Empty<T>();
+            }
+            else
+            {
+                DeserializeStructArray(count, out val);
+            }
         }
 
 #if NETSTANDARD2_1
         [SkipLocalsInit]
 #endif
-        public T[] DeserializeStructArray<T>(int count) where T : unmanaged
+        public void DeserializeStructArray<T>(int count, out T[] val) where T : unmanaged
         {
             int sizeOfT = Unsafe.SizeOf<T>();
             int size = count * sizeOfT;
             var src = ptr.Slice(offset, size);
 
 #if NET5_0_OR_GREATER
-            T[] val = GC.AllocateUninitializedArray<T>(count);
+            val = GC.AllocateUninitializedArray<T>(count);
 #else
-            T[] val = new T[count];
+            val = new T[count];
 #endif
-
             src.CopyTo(MemoryMarshal.AsBytes(val.AsSpan()));
-
             Advance(size);
-            return val;
         }
 
-        public SharedRent<T> DeserializeStructRent<T>() where T : unmanaged
+        public void DeserializeStructRent(out SharedRent<byte> val)
         {
             int count = ReadInt();
             if (count == 0)
             {
-                return SharedRent<T>.Empty;
+                val = SharedRent<byte>.Empty;
+                return;
             }
 
-            int sizeOfT = Unsafe.SizeOf<T>();
+            const int sizeOfT = sizeof(byte);
             int size = count * sizeOfT;
             var src = ptr.Slice(offset, size);
 
-            var rent = new SharedRent<T>(count);
-            src.CopyTo(MemoryMarshal.AsBytes(rent.AsSpan()));
+            val = new SharedRent<byte>(count);
+            src.CopyTo(MemoryMarshal.AsBytes(val.AsSpan()));
 
             Advance(size);
-            return rent;
         }
 
         public T[] SkipStructArray<T>() where T : unmanaged
@@ -183,21 +188,21 @@ namespace Iviz.Msgs
             return Array.Empty<T>();
         }
 
-        public T[] DeserializeArray<T>() where T : IMessage, new()
+        public void DeserializeArray<T>(out T[] val) where T : IMessage, new()
         {
             int count = ReadInt();
             if (count == 0)
             {
-                return Array.Empty<T>();
+                val = Array.Empty<T>();
             }
 
             if (count <= 1024 * 1024 * 1024)
             {
-                return new T[count];
+                val = new T[count];
                 // entry deserializations happen outside
             }
 
-            throw new BufferException("Implausible message requested more than 1TB elements.");
+            throw new RosBufferException("Implausible message requested more than 1TB elements.");
         }
 
         /// <summary>

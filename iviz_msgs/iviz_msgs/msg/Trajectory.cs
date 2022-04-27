@@ -27,8 +27,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Trajectory(ref ReadBuffer b)
         {
-            Poses = b.DeserializeStructArray<GeometryMsgs.Pose>();
-            Timestamps = b.DeserializeStructArray<time>();
+            b.DeserializeStructArray(out Poses);
+            b.DeserializeStructArray(out Timestamps);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Trajectory(ref b);

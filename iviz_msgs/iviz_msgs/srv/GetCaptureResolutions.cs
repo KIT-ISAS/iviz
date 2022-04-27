@@ -111,8 +111,8 @@ namespace Iviz.Msgs.IvizMsgs
         public GetCaptureResolutionsResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            Message = b.DeserializeString();
-            Resolutions = b.DeserializeArray<Vector2i>();
+            b.DeserializeString(out Message);
+            b.DeserializeArray(out Resolutions);
             for (int i = 0; i < Resolutions.Length; i++)
             {
                 Resolutions[i] = new Vector2i(ref b);
@@ -136,7 +136,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Resolutions is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Resolutions.Length; i++)
             {
-                if (Resolutions[i] is null) BuiltIns.ThrowNullReference($"{nameof(Resolutions)}[{i}]");
+                if (Resolutions[i] is null) BuiltIns.ThrowNullReference(nameof(Resolutions), i);
                 Resolutions[i].RosValidate();
             }
         }

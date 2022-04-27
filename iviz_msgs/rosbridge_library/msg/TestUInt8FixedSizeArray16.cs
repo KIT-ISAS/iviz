@@ -24,7 +24,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public TestUInt8FixedSizeArray16(ref ReadBuffer b)
         {
-            Data = b.DeserializeStructArray<byte>(16);
+            b.DeserializeStructArray(16, out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestUInt8FixedSizeArray16(ref b);
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         public void RosValidate()
         {
             if (Data is null) BuiltIns.ThrowNullReference();
-            if (Data.Length != 16) throw new RosInvalidSizeForFixedArrayException(nameof(Data), Data.Length, 16);
+            if (Data.Length != 16) BuiltIns.ThrowInvalidSizeForFixedArray(Data.Length, 16);
         }
     
         /// <summary> Constant size of this message. </summary> 

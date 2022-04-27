@@ -38,7 +38,7 @@ namespace Iviz.Msgs.Actionlib
         {
             b.Deserialize(out TerminateStatus);
             b.Deserialize(out IgnoreCancel);
-            ResultText = b.DeserializeString();
+            b.DeserializeString(out ResultText);
             b.Deserialize(out TheResult);
             b.Deserialize(out IsSimpleClient);
             b.Deserialize(out DelayAccept);

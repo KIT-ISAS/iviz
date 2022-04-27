@@ -38,7 +38,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             ErrorCode = new MoveItErrorCodes(ref b);
             SequenceStart = new RobotState(ref b);
-            PlannedTrajectories = b.DeserializeArray<RobotTrajectory>();
+            b.DeserializeArray(out PlannedTrajectories);
             for (int i = 0; i < PlannedTrajectories.Length; i++)
             {
                 PlannedTrajectories[i] = new RobotTrajectory(ref b);
@@ -67,7 +67,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (PlannedTrajectories is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PlannedTrajectories.Length; i++)
             {
-                if (PlannedTrajectories[i] is null) BuiltIns.ThrowNullReference($"{nameof(PlannedTrajectories)}[{i}]");
+                if (PlannedTrajectories[i] is null) BuiltIns.ThrowNullReference(nameof(PlannedTrajectories), i);
                 PlannedTrajectories[i].RosValidate();
             }
         }

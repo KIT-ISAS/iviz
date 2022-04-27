@@ -68,7 +68,7 @@ namespace Iviz.Msgs.PclMsgs
         /// Constructor with buffer.
         public UpdateFilenameRequest(ref ReadBuffer b)
         {
-            Filename = b.DeserializeString();
+            b.DeserializeString(out Filename);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameRequest(ref b);

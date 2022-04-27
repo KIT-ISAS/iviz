@@ -32,7 +32,7 @@ namespace Iviz.Msgs.StdMsgs
         public Int64MultiArray(ref ReadBuffer b)
         {
             Layout = new MultiArrayLayout(ref b);
-            Data = b.DeserializeStructArray<long>();
+            b.DeserializeStructArray(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Int64MultiArray(ref b);

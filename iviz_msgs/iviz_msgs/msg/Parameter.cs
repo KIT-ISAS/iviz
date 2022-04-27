@@ -34,11 +34,11 @@ namespace Iviz.Msgs.IvizMsgs
             b.Deserialize(out @bool);
             b.Deserialize(out Int32);
             b.Deserialize(out Float64);
-            @string = b.DeserializeString();
-            Bytes = b.DeserializeStructArray<byte>();
-            Int32s = b.DeserializeStructArray<int>();
-            Float64s = b.DeserializeStructArray<double>();
-            Strings = b.DeserializeStringArray();
+            b.DeserializeString(out @string);
+            b.DeserializeStructArray(out Bytes);
+            b.DeserializeStructArray(out Int32s);
+            b.DeserializeStructArray(out Float64s);
+            b.DeserializeStringArray(out Strings);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Parameter(ref b);
@@ -67,7 +67,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Strings is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Strings.Length; i++)
             {
-                if (Strings[i] is null) BuiltIns.ThrowNullReference($"{nameof(Strings)}[{i}]");
+                if (Strings[i] is null) BuiltIns.ThrowNullReference(nameof(Strings), i);
             }
         }
     

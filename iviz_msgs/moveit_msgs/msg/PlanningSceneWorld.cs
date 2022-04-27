@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public PlanningSceneWorld(ref ReadBuffer b)
         {
-            CollisionObjects = b.DeserializeArray<CollisionObject>();
+            b.DeserializeArray(out CollisionObjects);
             for (int i = 0; i < CollisionObjects.Length; i++)
             {
                 CollisionObjects[i] = new CollisionObject(ref b);
@@ -52,7 +52,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (CollisionObjects is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < CollisionObjects.Length; i++)
             {
-                if (CollisionObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(CollisionObjects)}[{i}]");
+                if (CollisionObjects[i] is null) BuiltIns.ThrowNullReference(nameof(CollisionObjects), i);
                 CollisionObjects[i].RosValidate();
             }
             if (Octomap is null) BuiltIns.ThrowNullReference();

@@ -39,9 +39,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Type);
-            Code = b.DeserializeString();
-            Corners = b.DeserializeStructArray<GeometryMsgs.Vector3>(4);
-            CameraIntrinsic = b.DeserializeStructArray<double>(9);
+            b.DeserializeString(out Code);
+            b.DeserializeStructArray(4, out Corners);
+            b.DeserializeStructArray(9, out CameraIntrinsic);
             b.Deserialize(out CameraPose);
             b.Deserialize(out HasReliablePose);
             b.Deserialize(out MarkerSizeInMm);
@@ -69,9 +69,9 @@ namespace Iviz.Msgs.IvizMsgs
         {
             if (Code is null) BuiltIns.ThrowNullReference();
             if (Corners is null) BuiltIns.ThrowNullReference();
-            if (Corners.Length != 4) throw new RosInvalidSizeForFixedArrayException(nameof(Corners), Corners.Length, 4);
+            if (Corners.Length != 4) BuiltIns.ThrowInvalidSizeForFixedArray(Corners.Length, 4);
             if (CameraIntrinsic is null) BuiltIns.ThrowNullReference();
-            if (CameraIntrinsic.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(CameraIntrinsic), CameraIntrinsic.Length, 9);
+            if (CameraIntrinsic.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(CameraIntrinsic.Length, 9);
         }
     
         public int RosMessageLength

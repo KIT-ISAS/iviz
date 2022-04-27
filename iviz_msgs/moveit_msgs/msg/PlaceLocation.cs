@@ -37,12 +37,12 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public PlaceLocation(ref ReadBuffer b)
         {
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             PostPlacePosture = new TrajectoryMsgs.JointTrajectory(ref b);
             PlacePose = new GeometryMsgs.PoseStamped(ref b);
             PrePlaceApproach = new GripperTranslation(ref b);
             PostPlaceRetreat = new GripperTranslation(ref b);
-            AllowedTouchObjects = b.DeserializeStringArray();
+            b.DeserializeStringArray(out AllowedTouchObjects);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PlaceLocation(ref b);
@@ -73,7 +73,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < AllowedTouchObjects.Length; i++)
             {
-                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AllowedTouchObjects)}[{i}]");
+                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects), i);
             }
         }
     

@@ -44,9 +44,9 @@ namespace Iviz.Msgs.RosgraphMsgs
         /// Constructor with buffer.
         public TopicStatistics(ref ReadBuffer b)
         {
-            Topic = b.DeserializeString();
-            NodePub = b.DeserializeString();
-            NodeSub = b.DeserializeString();
+            b.DeserializeString(out Topic);
+            b.DeserializeString(out NodePub);
+            b.DeserializeString(out NodeSub);
             b.Deserialize(out WindowStart);
             b.Deserialize(out WindowStop);
             b.Deserialize(out DeliveredMsgs);

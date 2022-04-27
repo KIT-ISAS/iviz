@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public MeshVertexCosts(ref ReadBuffer b)
         {
-            Costs = b.DeserializeStructArray<float>();
+            b.DeserializeStructArray(out Costs);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexCosts(ref b);

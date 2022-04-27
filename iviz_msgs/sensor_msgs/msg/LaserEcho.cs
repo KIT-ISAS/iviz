@@ -28,7 +28,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor with buffer.
         public LaserEcho(ref ReadBuffer b)
         {
-            Echoes = b.DeserializeStructArray<float>();
+            b.DeserializeStructArray(out Echoes);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LaserEcho(ref b);

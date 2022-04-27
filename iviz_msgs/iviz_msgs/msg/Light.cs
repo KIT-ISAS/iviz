@@ -29,7 +29,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Light(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
+            b.DeserializeString(out Name);
             b.Deserialize(out Type);
             b.Deserialize(out CastShadows);
             b.Deserialize(out Diffuse);

@@ -117,7 +117,7 @@ namespace Iviz.Msgs.IvizMsgs
         public LaunchDialogResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            Message = b.DeserializeString();
+            b.DeserializeString(out Message);
             Feedback = new IvizMsgs.Feedback(ref b);
         }
         

@@ -32,16 +32,16 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public RobotConfiguration(ref ReadBuffer b)
         {
-            SourceParameter = b.DeserializeString();
-            SavedRobotName = b.DeserializeString();
-            FramePrefix = b.DeserializeString();
-            FrameSuffix = b.DeserializeString();
+            b.DeserializeString(out SourceParameter);
+            b.DeserializeString(out SavedRobotName);
+            b.DeserializeString(out FramePrefix);
+            b.DeserializeString(out FrameSuffix);
             b.Deserialize(out AttachedToTf);
             b.Deserialize(out RenderAsOcclusionOnly);
             b.Deserialize(out Tint);
             b.Deserialize(out Metallic);
             b.Deserialize(out Smoothness);
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             b.Deserialize(out Visible);
         }
         

@@ -38,10 +38,10 @@ namespace Iviz.Msgs
 
             if (ptr == default)
             {
-                throw new BufferException("Buffer has not been initialized!");
+                throw new RosBufferException("Buffer has not been initialized!");
             }
 
-            throw new BufferException($"Requested {off} bytes, but only {ptr.Length} remain!");
+            throw new RosBufferException($"Requested {off} bytes, but only {ptr.Length} remain!");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

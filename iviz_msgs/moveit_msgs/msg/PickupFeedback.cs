@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public PickupFeedback(ref ReadBuffer b)
         {
-            State = b.DeserializeString();
+            b.DeserializeString(out State);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PickupFeedback(ref b);

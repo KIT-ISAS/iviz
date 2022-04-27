@@ -50,13 +50,13 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             Type = new ObjectRecognitionMsgs.ObjectType(ref b);
             b.Deserialize(out Confidence);
-            PointClouds = b.DeserializeArray<SensorMsgs.PointCloud2>();
+            b.DeserializeArray(out PointClouds);
             for (int i = 0; i < PointClouds.Length; i++)
             {
                 PointClouds[i] = new SensorMsgs.PointCloud2(ref b);
             }
             BoundingMesh = new ShapeMsgs.Mesh(ref b);
-            BoundingContours = b.DeserializeStructArray<GeometryMsgs.Point>();
+            b.DeserializeStructArray(out BoundingContours);
             Pose = new GeometryMsgs.PoseWithCovarianceStamped(ref b);
         }
         
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             if (PointClouds is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PointClouds.Length; i++)
             {
-                if (PointClouds[i] is null) BuiltIns.ThrowNullReference($"{nameof(PointClouds)}[{i}]");
+                if (PointClouds[i] is null) BuiltIns.ThrowNullReference(nameof(PointClouds), i);
                 PointClouds[i].RosValidate();
             }
             if (BoundingMesh is null) BuiltIns.ThrowNullReference();

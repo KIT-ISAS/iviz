@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public MoveGroupFeedback(ref ReadBuffer b)
         {
-            State = b.DeserializeString();
+            b.DeserializeString(out State);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MoveGroupFeedback(ref b);

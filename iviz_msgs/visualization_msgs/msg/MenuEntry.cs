@@ -67,8 +67,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             b.Deserialize(out Id);
             b.Deserialize(out ParentId);
-            Title = b.DeserializeString();
-            Command = b.DeserializeString();
+            b.DeserializeString(out Title);
+            b.DeserializeString(out Command);
             b.Deserialize(out CommandType);
         }
         

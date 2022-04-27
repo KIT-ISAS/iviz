@@ -60,8 +60,8 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out ScanTime);
             b.Deserialize(out RangeMin);
             b.Deserialize(out RangeMax);
-            Ranges = b.DeserializeStructArray<float>();
-            Intensities = b.DeserializeStructArray<float>();
+            b.DeserializeStructArray(out Ranges);
+            b.DeserializeStructArray(out Intensities);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LaserScan(ref b);

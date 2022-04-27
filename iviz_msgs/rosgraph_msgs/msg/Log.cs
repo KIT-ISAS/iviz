@@ -66,12 +66,12 @@ namespace Iviz.Msgs.RosgraphMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out h.Header);
             b.Deserialize(out h.Level);
-            h.Name = b.DeserializeString();
-            h.Msg = b.DeserializeString();
-            h.File = b.SkipString();
-            h.Function = b.SkipString();
+            b.DeserializeString(out h.Name);
+            b.DeserializeString(out h.Msg);
+            b.SkipString(out h.File);
+            b.SkipString(out h.Function);
             b.Deserialize(out h.Line);
-            h.Topics = b.SkipStringArray();
+            b.SkipStringArray(out h.Topics);
         }
         
         readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Log(ref b);
@@ -102,7 +102,7 @@ namespace Iviz.Msgs.RosgraphMsgs
             {
                 for (int i = 0; i < Topics.Length; i++)
                 {
-                    if (Topics[i] is null) BuiltIns.ThrowNullReference($"{nameof(Topics)}[{i}]");
+                    if (Topics[i] is null) BuiltIns.ThrowNullReference(nameof(Topics), i);
                 }
             }
         }

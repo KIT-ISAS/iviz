@@ -38,27 +38,27 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public TriangleMesh(ref ReadBuffer b)
         {
-            Triangles = b.DeserializeArray<TriangleIndices>();
+            b.DeserializeArray(out Triangles);
             for (int i = 0; i < Triangles.Length; i++)
             {
                 Triangles[i] = new TriangleIndices(ref b);
             }
-            Vertices = b.DeserializeStructArray<GeometryMsgs.Point>();
-            VertexNormals = b.DeserializeStructArray<GeometryMsgs.Point>();
-            VertexColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
-            TriangleColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
-            VertexTextureCoords = b.DeserializeStructArray<GeometryMsgs.Point>();
-            FaceMaterials = b.DeserializeArray<MeshMsgs.MeshMaterial>();
+            b.DeserializeStructArray(out Vertices);
+            b.DeserializeStructArray(out VertexNormals);
+            b.DeserializeStructArray(out VertexColors);
+            b.DeserializeStructArray(out TriangleColors);
+            b.DeserializeStructArray(out VertexTextureCoords);
+            b.DeserializeArray(out FaceMaterials);
             for (int i = 0; i < FaceMaterials.Length; i++)
             {
                 FaceMaterials[i] = new MeshMsgs.MeshMaterial(ref b);
             }
-            Textures = b.DeserializeArray<SensorMsgs.Image>();
+            b.DeserializeArray(out Textures);
             for (int i = 0; i < Textures.Length; i++)
             {
                 Textures[i] = new SensorMsgs.Image(ref b);
             }
-            Clusters = b.DeserializeArray<MeshMsgs.MeshFaceCluster>();
+            b.DeserializeArray(out Clusters);
             for (int i = 0; i < Clusters.Length; i++)
             {
                 Clusters[i] = new MeshMsgs.MeshFaceCluster(ref b);
@@ -87,7 +87,7 @@ namespace Iviz.Msgs.MeshMsgs
             if (Triangles is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Triangles.Length; i++)
             {
-                if (Triangles[i] is null) BuiltIns.ThrowNullReference($"{nameof(Triangles)}[{i}]");
+                if (Triangles[i] is null) BuiltIns.ThrowNullReference(nameof(Triangles), i);
                 Triangles[i].RosValidate();
             }
             if (Vertices is null) BuiltIns.ThrowNullReference();
@@ -98,19 +98,19 @@ namespace Iviz.Msgs.MeshMsgs
             if (FaceMaterials is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < FaceMaterials.Length; i++)
             {
-                if (FaceMaterials[i] is null) BuiltIns.ThrowNullReference($"{nameof(FaceMaterials)}[{i}]");
+                if (FaceMaterials[i] is null) BuiltIns.ThrowNullReference(nameof(FaceMaterials), i);
                 FaceMaterials[i].RosValidate();
             }
             if (Textures is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Textures.Length; i++)
             {
-                if (Textures[i] is null) BuiltIns.ThrowNullReference($"{nameof(Textures)}[{i}]");
+                if (Textures[i] is null) BuiltIns.ThrowNullReference(nameof(Textures), i);
                 Textures[i].RosValidate();
             }
             if (Clusters is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Clusters.Length; i++)
             {
-                if (Clusters[i] is null) BuiltIns.ThrowNullReference($"{nameof(Clusters)}[{i}]");
+                if (Clusters[i] is null) BuiltIns.ThrowNullReference(nameof(Clusters), i);
                 Clusters[i].RosValidate();
             }
         }

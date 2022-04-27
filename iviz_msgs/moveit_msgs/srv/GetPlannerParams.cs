@@ -73,8 +73,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public GetPlannerParamsRequest(ref ReadBuffer b)
         {
-            PlannerConfig = b.DeserializeString();
-            Group = b.DeserializeString();
+            b.DeserializeString(out PlannerConfig);
+            b.DeserializeString(out Group);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPlannerParamsRequest(ref b);

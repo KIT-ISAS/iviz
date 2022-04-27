@@ -74,9 +74,9 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public RenameRobotStateInWarehouseRequest(ref ReadBuffer b)
         {
-            OldName = b.DeserializeString();
-            NewName = b.DeserializeString();
-            Robot = b.DeserializeString();
+            b.DeserializeString(out OldName);
+            b.DeserializeString(out NewName);
+            b.DeserializeString(out Robot);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RenameRobotStateInWarehouseRequest(ref b);

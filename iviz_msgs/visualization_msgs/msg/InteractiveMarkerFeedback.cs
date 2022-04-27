@@ -53,9 +53,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         public InteractiveMarkerFeedback(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            ClientId = b.DeserializeString();
-            MarkerName = b.DeserializeString();
-            ControlName = b.DeserializeString();
+            b.DeserializeString(out ClientId);
+            b.DeserializeString(out MarkerName);
+            b.DeserializeString(out ControlName);
             b.Deserialize(out EventType);
             b.Deserialize(out Pose);
             b.Deserialize(out MenuEntryId);

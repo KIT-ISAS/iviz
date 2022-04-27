@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public ServiceRequestDetailsRequest(ref ReadBuffer b)
         {
-            Type = b.DeserializeString();
+            b.DeserializeString(out Type);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServiceRequestDetailsRequest(ref b);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public ServiceRequestDetailsResponse(ref ReadBuffer b)
         {
-            Typedefs = b.DeserializeArray<TypeDef>();
+            b.DeserializeArray(out Typedefs);
             for (int i = 0; i < Typedefs.Length; i++)
             {
                 Typedefs[i] = new TypeDef(ref b);
@@ -131,7 +131,7 @@ namespace Iviz.Msgs.Rosapi
             if (Typedefs is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Typedefs.Length; i++)
             {
-                if (Typedefs[i] is null) BuiltIns.ThrowNullReference($"{nameof(Typedefs)}[{i}]");
+                if (Typedefs[i] is null) BuiltIns.ThrowNullReference(nameof(Typedefs), i);
                 Typedefs[i].RosValidate();
             }
         }

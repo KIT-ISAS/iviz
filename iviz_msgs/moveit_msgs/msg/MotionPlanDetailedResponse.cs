@@ -37,14 +37,14 @@ namespace Iviz.Msgs.MoveitMsgs
         public MotionPlanDetailedResponse(ref ReadBuffer b)
         {
             TrajectoryStart = new RobotState(ref b);
-            GroupName = b.DeserializeString();
-            Trajectory = b.DeserializeArray<RobotTrajectory>();
+            b.DeserializeString(out GroupName);
+            b.DeserializeArray(out Trajectory);
             for (int i = 0; i < Trajectory.Length; i++)
             {
                 Trajectory[i] = new RobotTrajectory(ref b);
             }
-            Description = b.DeserializeStringArray();
-            ProcessingTime = b.DeserializeStructArray<double>();
+            b.DeserializeStringArray(out Description);
+            b.DeserializeStructArray(out ProcessingTime);
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
@@ -70,13 +70,13 @@ namespace Iviz.Msgs.MoveitMsgs
             if (Trajectory is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Trajectory.Length; i++)
             {
-                if (Trajectory[i] is null) BuiltIns.ThrowNullReference($"{nameof(Trajectory)}[{i}]");
+                if (Trajectory[i] is null) BuiltIns.ThrowNullReference(nameof(Trajectory), i);
                 Trajectory[i].RosValidate();
             }
             if (Description is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Description.Length; i++)
             {
-                if (Description[i] is null) BuiltIns.ThrowNullReference($"{nameof(Description)}[{i}]");
+                if (Description[i] is null) BuiltIns.ThrowNullReference(nameof(Description), i);
             }
             if (ProcessingTime is null) BuiltIns.ThrowNullReference();
             if (ErrorCode is null) BuiltIns.ThrowNullReference();

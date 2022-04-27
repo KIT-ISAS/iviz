@@ -34,8 +34,8 @@ namespace Iviz.Msgs.SensorMsgs
         public Joy(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Axes = b.DeserializeStructArray<float>();
-            Buttons = b.DeserializeStructArray<int>();
+            b.DeserializeStructArray(out Axes);
+            b.DeserializeStructArray(out Buttons);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Joy(ref b);

@@ -28,23 +28,23 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public Constraints(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            JointConstraints = b.DeserializeArray<JointConstraint>();
+            b.DeserializeString(out Name);
+            b.DeserializeArray(out JointConstraints);
             for (int i = 0; i < JointConstraints.Length; i++)
             {
                 JointConstraints[i] = new JointConstraint(ref b);
             }
-            PositionConstraints = b.DeserializeArray<PositionConstraint>();
+            b.DeserializeArray(out PositionConstraints);
             for (int i = 0; i < PositionConstraints.Length; i++)
             {
                 PositionConstraints[i] = new PositionConstraint(ref b);
             }
-            OrientationConstraints = b.DeserializeArray<OrientationConstraint>();
+            b.DeserializeArray(out OrientationConstraints);
             for (int i = 0; i < OrientationConstraints.Length; i++)
             {
                 OrientationConstraints[i] = new OrientationConstraint(ref b);
             }
-            VisibilityConstraints = b.DeserializeArray<VisibilityConstraint>();
+            b.DeserializeArray(out VisibilityConstraints);
             for (int i = 0; i < VisibilityConstraints.Length; i++)
             {
                 VisibilityConstraints[i] = new VisibilityConstraint(ref b);
@@ -70,25 +70,25 @@ namespace Iviz.Msgs.MoveitMsgs
             if (JointConstraints is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < JointConstraints.Length; i++)
             {
-                if (JointConstraints[i] is null) BuiltIns.ThrowNullReference($"{nameof(JointConstraints)}[{i}]");
+                if (JointConstraints[i] is null) BuiltIns.ThrowNullReference(nameof(JointConstraints), i);
                 JointConstraints[i].RosValidate();
             }
             if (PositionConstraints is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PositionConstraints.Length; i++)
             {
-                if (PositionConstraints[i] is null) BuiltIns.ThrowNullReference($"{nameof(PositionConstraints)}[{i}]");
+                if (PositionConstraints[i] is null) BuiltIns.ThrowNullReference(nameof(PositionConstraints), i);
                 PositionConstraints[i].RosValidate();
             }
             if (OrientationConstraints is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < OrientationConstraints.Length; i++)
             {
-                if (OrientationConstraints[i] is null) BuiltIns.ThrowNullReference($"{nameof(OrientationConstraints)}[{i}]");
+                if (OrientationConstraints[i] is null) BuiltIns.ThrowNullReference(nameof(OrientationConstraints), i);
                 OrientationConstraints[i].RosValidate();
             }
             if (VisibilityConstraints is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < VisibilityConstraints.Length; i++)
             {
-                if (VisibilityConstraints[i] is null) BuiltIns.ThrowNullReference($"{nameof(VisibilityConstraints)}[{i}]");
+                if (VisibilityConstraints[i] is null) BuiltIns.ThrowNullReference(nameof(VisibilityConstraints), i);
                 VisibilityConstraints[i].RosValidate();
             }
         }

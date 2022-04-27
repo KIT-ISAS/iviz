@@ -37,10 +37,10 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Include(ref ReadBuffer b)
         {
-            Uri = b.DeserializeString();
+            b.DeserializeString(out Uri);
             Pose = new Matrix4(ref b);
             Material = new Material(ref b);
-            Package = b.DeserializeString();
+            b.DeserializeString(out Package);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Include(ref b);

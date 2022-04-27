@@ -71,8 +71,8 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public GetParamRequest(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            @default = b.DeserializeString();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out @default);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetParamRequest(ref b);
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public GetParamResponse(ref ReadBuffer b)
         {
-            Value = b.DeserializeString();
+            b.DeserializeString(out Value);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetParamResponse(ref b);

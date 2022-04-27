@@ -59,7 +59,7 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out Latitude);
             b.Deserialize(out Longitude);
             b.Deserialize(out Altitude);
-            PositionCovariance = b.DeserializeStructArray<double>(9);
+            b.DeserializeStructArray(9, out PositionCovariance);
             b.Deserialize(out PositionCovarianceType);
         }
         
@@ -83,7 +83,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (Status is null) BuiltIns.ThrowNullReference();
             Status.RosValidate();
             if (PositionCovariance is null) BuiltIns.ThrowNullReference();
-            if (PositionCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(PositionCovariance), PositionCovariance.Length, 9);
+            if (PositionCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(PositionCovariance.Length, 9);
         }
     
         public int RosMessageLength => 100 + Header.RosMessageLength;

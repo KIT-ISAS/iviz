@@ -30,7 +30,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor with buffer.
         public GroupState(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
+            b.DeserializeString(out Name);
             b.Deserialize(out State);
             b.Deserialize(out Id);
             b.Deserialize(out Parent);

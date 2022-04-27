@@ -34,7 +34,7 @@ namespace Iviz.Msgs.Tf2Msgs
         public TF2Error(ref ReadBuffer b)
         {
             b.Deserialize(out Error);
-            ErrorString = b.DeserializeString();
+            b.DeserializeString(out ErrorString);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TF2Error(ref b);

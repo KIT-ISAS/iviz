@@ -32,10 +32,10 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Node(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
+            b.DeserializeString(out Name);
             b.Deserialize(out Parent);
             Transform = new Matrix4(ref b);
-            Meshes = b.DeserializeStructArray<int>();
+            b.DeserializeStructArray(out Meshes);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Node(ref b);

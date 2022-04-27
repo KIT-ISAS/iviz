@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public MeshVertexColors(ref ReadBuffer b)
         {
-            VertexColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
+            b.DeserializeStructArray(out VertexColors);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexColors(ref b);

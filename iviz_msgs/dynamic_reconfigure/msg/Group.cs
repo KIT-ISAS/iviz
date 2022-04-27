@@ -24,9 +24,9 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor with buffer.
         public Group(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Type = b.DeserializeString();
-            Parameters = b.DeserializeArray<ParamDescription>();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Type);
+            b.DeserializeArray(out Parameters);
             for (int i = 0; i < Parameters.Length; i++)
             {
                 Parameters[i] = new ParamDescription(ref b);
@@ -55,7 +55,7 @@ namespace Iviz.Msgs.DynamicReconfigure
             if (Parameters is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Parameters.Length; i++)
             {
-                if (Parameters[i] is null) BuiltIns.ThrowNullReference($"{nameof(Parameters)}[{i}]");
+                if (Parameters[i] is null) BuiltIns.ThrowNullReference(nameof(Parameters), i);
                 Parameters[i].RosValidate();
             }
         }

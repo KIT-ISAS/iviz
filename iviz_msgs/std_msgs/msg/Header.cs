@@ -43,7 +43,7 @@ namespace Iviz.Msgs.StdMsgs
         {
             b.Deserialize(out h.Seq);
             b.Deserialize(out h.Stamp);
-            h.FrameId = b.DeserializeString();
+            b.DeserializeString(out h.FrameId);
         }
         
         readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Header(ref b);

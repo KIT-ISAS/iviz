@@ -46,8 +46,8 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor with buffer.
         public ChannelFloat32(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Values = b.DeserializeStructArray<float>();
+            b.DeserializeString(out Name);
+            b.DeserializeStructArray(out Values);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ChannelFloat32(ref b);

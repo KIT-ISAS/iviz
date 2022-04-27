@@ -29,7 +29,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public PositionConstraint(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            LinkName = b.DeserializeString();
+            b.DeserializeString(out LinkName);
             b.Deserialize(out TargetPointOffset);
             ConstraintRegion = new BoundingVolume(ref b);
             b.Deserialize(out Weight);

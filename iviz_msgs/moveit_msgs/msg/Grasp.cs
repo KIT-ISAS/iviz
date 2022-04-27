@@ -62,7 +62,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public Grasp(ref ReadBuffer b)
         {
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             PreGraspPosture = new TrajectoryMsgs.JointTrajectory(ref b);
             GraspPosture = new TrajectoryMsgs.JointTrajectory(ref b);
             GraspPose = new GeometryMsgs.PoseStamped(ref b);
@@ -71,7 +71,7 @@ namespace Iviz.Msgs.MoveitMsgs
             PostGraspRetreat = new GripperTranslation(ref b);
             PostPlaceRetreat = new GripperTranslation(ref b);
             b.Deserialize(out MaxContactForce);
-            AllowedTouchObjects = b.DeserializeStringArray();
+            b.DeserializeStringArray(out AllowedTouchObjects);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Grasp(ref b);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < AllowedTouchObjects.Length; i++)
             {
-                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AllowedTouchObjects)}[{i}]");
+                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects), i);
             }
         }
     

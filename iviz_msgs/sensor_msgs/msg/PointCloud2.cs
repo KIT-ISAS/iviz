@@ -47,7 +47,7 @@ namespace Iviz.Msgs.SensorMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Height);
             b.Deserialize(out Width);
-            Fields = b.DeserializeArray<PointField>();
+            b.DeserializeArray(out Fields);
             for (int i = 0; i < Fields.Length; i++)
             {
                 Fields[i] = new PointField(ref b);
@@ -55,7 +55,7 @@ namespace Iviz.Msgs.SensorMsgs
             b.Deserialize(out IsBigendian);
             b.Deserialize(out PointStep);
             b.Deserialize(out RowStep);
-            Data = b.DeserializeStructRent<byte>();
+            b.DeserializeStructRent(out Data);
             b.Deserialize(out IsDense);
         }
         
@@ -81,7 +81,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (Fields is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Fields.Length; i++)
             {
-                if (Fields[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fields)}[{i}]");
+                if (Fields[i] is null) BuiltIns.ThrowNullReference(nameof(Fields), i);
                 Fields[i].RosValidate();
             }
             if (Data is null) BuiltIns.ThrowNullReference();

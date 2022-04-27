@@ -44,20 +44,20 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor with buffer.
         public InteractiveMarkerUpdate(ref ReadBuffer b)
         {
-            ServerId = b.DeserializeString();
+            b.DeserializeString(out ServerId);
             b.Deserialize(out SeqNum);
             b.Deserialize(out Type);
-            Markers = b.DeserializeArray<InteractiveMarker>();
+            b.DeserializeArray(out Markers);
             for (int i = 0; i < Markers.Length; i++)
             {
                 Markers[i] = new InteractiveMarker(ref b);
             }
-            Poses = b.DeserializeArray<InteractiveMarkerPose>();
+            b.DeserializeArray(out Poses);
             for (int i = 0; i < Poses.Length; i++)
             {
                 Poses[i] = new InteractiveMarkerPose(ref b);
             }
-            Erases = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Erases);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerUpdate(ref b);
@@ -80,19 +80,19 @@ namespace Iviz.Msgs.VisualizationMsgs
             if (Markers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Markers.Length; i++)
             {
-                if (Markers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Markers)}[{i}]");
+                if (Markers[i] is null) BuiltIns.ThrowNullReference(nameof(Markers), i);
                 Markers[i].RosValidate();
             }
             if (Poses is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Poses.Length; i++)
             {
-                if (Poses[i] is null) BuiltIns.ThrowNullReference($"{nameof(Poses)}[{i}]");
+                if (Poses[i] is null) BuiltIns.ThrowNullReference(nameof(Poses), i);
                 Poses[i].RosValidate();
             }
             if (Erases is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Erases.Length; i++)
             {
-                if (Erases[i] is null) BuiltIns.ThrowNullReference($"{nameof(Erases)}[{i}]");
+                if (Erases[i] is null) BuiltIns.ThrowNullReference(nameof(Erases), i);
             }
         }
     

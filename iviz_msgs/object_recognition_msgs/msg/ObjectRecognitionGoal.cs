@@ -28,7 +28,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         public ObjectRecognitionGoal(ref ReadBuffer b)
         {
             b.Deserialize(out UseRoi);
-            FilterLimits = b.DeserializeStructArray<float>();
+            b.DeserializeStructArray(out FilterLimits);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ObjectRecognitionGoal(ref b);

@@ -106,7 +106,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public QueryPlannerInterfacesResponse(ref ReadBuffer b)
         {
-            PlannerInterfaces = b.DeserializeArray<PlannerInterfaceDescription>();
+            b.DeserializeArray(out PlannerInterfaces);
             for (int i = 0; i < PlannerInterfaces.Length; i++)
             {
                 PlannerInterfaces[i] = new PlannerInterfaceDescription(ref b);
@@ -127,7 +127,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (PlannerInterfaces is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PlannerInterfaces.Length; i++)
             {
-                if (PlannerInterfaces[i] is null) BuiltIns.ThrowNullReference($"{nameof(PlannerInterfaces)}[{i}]");
+                if (PlannerInterfaces[i] is null) BuiltIns.ThrowNullReference(nameof(PlannerInterfaces), i);
                 PlannerInterfaces[i].RosValidate();
             }
         }

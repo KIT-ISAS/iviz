@@ -38,8 +38,8 @@ namespace Iviz.Msgs.SensorMsgs
         public PointCloud(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Points = b.DeserializeStructArray<GeometryMsgs.Point32>();
-            Channels = b.DeserializeArray<ChannelFloat32>();
+            b.DeserializeStructArray(out Points);
+            b.DeserializeArray(out Channels);
             for (int i = 0; i < Channels.Length; i++)
             {
                 Channels[i] = new ChannelFloat32(ref b);
@@ -63,7 +63,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (Channels is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Channels.Length; i++)
             {
-                if (Channels[i] is null) BuiltIns.ThrowNullReference($"{nameof(Channels)}[{i}]");
+                if (Channels[i] is null) BuiltIns.ThrowNullReference(nameof(Channels), i);
                 Channels[i].RosValidate();
             }
         }

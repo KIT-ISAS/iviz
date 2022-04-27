@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public NodeDetailsRequest(ref ReadBuffer b)
         {
-            Node = b.DeserializeString();
+            b.DeserializeString(out Node);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new NodeDetailsRequest(ref b);
@@ -116,9 +116,9 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public NodeDetailsResponse(ref ReadBuffer b)
         {
-            Subscribing = b.DeserializeStringArray();
-            Publishing = b.DeserializeStringArray();
-            Services = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Subscribing);
+            b.DeserializeStringArray(out Publishing);
+            b.DeserializeStringArray(out Services);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new NodeDetailsResponse(ref b);
@@ -137,17 +137,17 @@ namespace Iviz.Msgs.Rosapi
             if (Subscribing is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Subscribing.Length; i++)
             {
-                if (Subscribing[i] is null) BuiltIns.ThrowNullReference($"{nameof(Subscribing)}[{i}]");
+                if (Subscribing[i] is null) BuiltIns.ThrowNullReference(nameof(Subscribing), i);
             }
             if (Publishing is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Publishing.Length; i++)
             {
-                if (Publishing[i] is null) BuiltIns.ThrowNullReference($"{nameof(Publishing)}[{i}]");
+                if (Publishing[i] is null) BuiltIns.ThrowNullReference(nameof(Publishing), i);
             }
             if (Services is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Services.Length; i++)
             {
-                if (Services[i] is null) BuiltIns.ThrowNullReference($"{nameof(Services)}[{i}]");
+                if (Services[i] is null) BuiltIns.ThrowNullReference(nameof(Services), i);
             }
         }
     

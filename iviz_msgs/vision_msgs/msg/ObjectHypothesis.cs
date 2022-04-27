@@ -32,7 +32,7 @@ namespace Iviz.Msgs.VisionMsgs
         /// Constructor with buffer.
         public ObjectHypothesis(ref ReadBuffer b)
         {
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             b.Deserialize(out Score);
         }
         

@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         /// Constructor with buffer.
         public Polygon(ref ReadBuffer b)
         {
-            Points = b.DeserializeStructArray<Point32>();
+            b.DeserializeStructArray(out Points);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Polygon(ref b);

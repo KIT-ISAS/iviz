@@ -29,7 +29,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         public GoalStatusArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            StatusList = b.DeserializeArray<GoalStatus>();
+            b.DeserializeArray(out StatusList);
             for (int i = 0; i < StatusList.Length; i++)
             {
                 StatusList[i] = new GoalStatus(ref b);
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.ActionlibMsgs
             if (StatusList is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < StatusList.Length; i++)
             {
-                if (StatusList[i] is null) BuiltIns.ThrowNullReference($"{nameof(StatusList)}[{i}]");
+                if (StatusList[i] is null) BuiltIns.ThrowNullReference(nameof(StatusList), i);
                 StatusList[i].RosValidate();
             }
         }

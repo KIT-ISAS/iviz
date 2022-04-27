@@ -34,12 +34,12 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         public RecognizedObjectArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Objects = b.DeserializeArray<ObjectRecognitionMsgs.RecognizedObject>();
+            b.DeserializeArray(out Objects);
             for (int i = 0; i < Objects.Length; i++)
             {
                 Objects[i] = new ObjectRecognitionMsgs.RecognizedObject(ref b);
             }
-            Cooccurrence = b.DeserializeStructArray<float>();
+            b.DeserializeStructArray(out Cooccurrence);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RecognizedObjectArray(ref b);
@@ -58,7 +58,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             if (Objects is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Objects.Length; i++)
             {
-                if (Objects[i] is null) BuiltIns.ThrowNullReference($"{nameof(Objects)}[{i}]");
+                if (Objects[i] is null) BuiltIns.ThrowNullReference(nameof(Objects), i);
                 Objects[i].RosValidate();
             }
             if (Cooccurrence is null) BuiltIns.ThrowNullReference();

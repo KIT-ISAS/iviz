@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public ServiceNodeRequest(ref ReadBuffer b)
         {
-            Service = b.DeserializeString();
+            b.DeserializeString(out Service);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServiceNodeRequest(ref b);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public ServiceNodeResponse(ref ReadBuffer b)
         {
-            Node = b.DeserializeString();
+            b.DeserializeString(out Node);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServiceNodeResponse(ref b);

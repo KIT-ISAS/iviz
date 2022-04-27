@@ -78,9 +78,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public UpdateModuleRequest(ref ReadBuffer b)
         {
-            Id = b.DeserializeString();
-            Fields = b.DeserializeStringArray();
-            Config = b.DeserializeString();
+            b.DeserializeString(out Id);
+            b.DeserializeStringArray(out Fields);
+            b.DeserializeString(out Config);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateModuleRequest(ref b);
@@ -100,7 +100,7 @@ namespace Iviz.Msgs.IvizMsgs
             if (Fields is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Fields.Length; i++)
             {
-                if (Fields[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fields)}[{i}]");
+                if (Fields[i] is null) BuiltIns.ThrowNullReference(nameof(Fields), i);
             }
             if (Config is null) BuiltIns.ThrowNullReference();
         }
@@ -144,7 +144,7 @@ namespace Iviz.Msgs.IvizMsgs
         public UpdateModuleResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            Message = b.DeserializeString();
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateModuleResponse(ref b);

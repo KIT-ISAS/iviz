@@ -110,7 +110,7 @@ namespace Iviz.Msgs.StdSrvs
         public TriggerResponse(ref ReadBuffer b)
         {
             b.Deserialize(out Success);
-            Message = b.DeserializeString();
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TriggerResponse(ref b);

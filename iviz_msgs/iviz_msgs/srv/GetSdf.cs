@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetSdfRequest(ref ReadBuffer b)
         {
-            Uri = b.DeserializeString();
+            b.DeserializeString(out Uri);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetSdfRequest(ref b);
@@ -122,7 +122,7 @@ namespace Iviz.Msgs.IvizMsgs
         {
             b.Deserialize(out Success);
             Scene = new Scene(ref b);
-            Message = b.DeserializeString();
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetSdfResponse(ref b);

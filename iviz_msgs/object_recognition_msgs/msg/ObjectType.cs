@@ -48,8 +48,8 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         /// Constructor with buffer.
         public ObjectType(ref ReadBuffer b)
         {
-            Key = b.DeserializeString();
-            Db = b.DeserializeString();
+            b.DeserializeString(out Key);
+            b.DeserializeString(out Db);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ObjectType(ref b);

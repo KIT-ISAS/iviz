@@ -76,7 +76,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         {
             b.Deserialize(out @int);
             b.Deserialize(out @float);
-            @string = b.DeserializeString();
+            b.DeserializeString(out @string);
             b.Deserialize(out @bool);
         }
         

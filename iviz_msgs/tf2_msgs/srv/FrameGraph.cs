@@ -105,7 +105,7 @@ namespace Iviz.Msgs.Tf2Msgs
         /// Constructor with buffer.
         public FrameGraphResponse(ref ReadBuffer b)
         {
-            FrameYaml = b.DeserializeString();
+            b.DeserializeString(out FrameYaml);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FrameGraphResponse(ref b);

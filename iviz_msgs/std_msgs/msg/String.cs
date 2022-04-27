@@ -24,7 +24,7 @@ namespace Iviz.Msgs.StdMsgs
         /// Constructor with buffer.
         public String(ref ReadBuffer b)
         {
-            Data = b.DeserializeString();
+            b.DeserializeString(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new String(ref b);

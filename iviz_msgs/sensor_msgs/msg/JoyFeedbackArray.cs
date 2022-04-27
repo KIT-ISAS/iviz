@@ -25,7 +25,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor with buffer.
         public JoyFeedbackArray(ref ReadBuffer b)
         {
-            Array = b.DeserializeArray<JoyFeedback>();
+            b.DeserializeArray(out Array);
             for (int i = 0; i < Array.Length; i++)
             {
                 Array[i] = new JoyFeedback(ref b);
@@ -46,7 +46,7 @@ namespace Iviz.Msgs.SensorMsgs
             if (Array is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Array.Length; i++)
             {
-                if (Array[i] is null) BuiltIns.ThrowNullReference($"{nameof(Array)}[{i}]");
+                if (Array[i] is null) BuiltIns.ThrowNullReference(nameof(Array), i);
                 Array[i].RosValidate();
             }
         }

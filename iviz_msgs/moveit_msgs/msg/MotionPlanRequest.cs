@@ -59,15 +59,15 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             WorkspaceParameters = new WorkspaceParameters(ref b);
             StartState = new RobotState(ref b);
-            GoalConstraints = b.DeserializeArray<Constraints>();
+            b.DeserializeArray(out GoalConstraints);
             for (int i = 0; i < GoalConstraints.Length; i++)
             {
                 GoalConstraints[i] = new Constraints(ref b);
             }
             PathConstraints = new Constraints(ref b);
             TrajectoryConstraints = new TrajectoryConstraints(ref b);
-            PlannerId = b.DeserializeString();
-            GroupName = b.DeserializeString();
+            b.DeserializeString(out PlannerId);
+            b.DeserializeString(out GroupName);
             b.Deserialize(out NumPlanningAttempts);
             b.Deserialize(out AllowedPlanningTime);
             b.Deserialize(out MaxVelocityScalingFactor);
@@ -102,7 +102,7 @@ namespace Iviz.Msgs.MoveitMsgs
             if (GoalConstraints is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < GoalConstraints.Length; i++)
             {
-                if (GoalConstraints[i] is null) BuiltIns.ThrowNullReference($"{nameof(GoalConstraints)}[{i}]");
+                if (GoalConstraints[i] is null) BuiltIns.ThrowNullReference(nameof(GoalConstraints), i);
                 GoalConstraints[i].RosValidate();
             }
             if (PathConstraints is null) BuiltIns.ThrowNullReference();

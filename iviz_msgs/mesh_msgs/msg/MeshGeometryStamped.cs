@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshGeometryStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
             MeshGeometry = new MeshMsgs.MeshGeometry(ref b);
         }
         
