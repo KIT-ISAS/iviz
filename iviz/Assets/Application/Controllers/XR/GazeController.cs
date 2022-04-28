@@ -44,8 +44,8 @@ namespace Iviz.Controllers.XR
                 return;
             }
 
-            //controllerState.poseDataFlags = PoseDataFlags.NoData;
-            controllerState.inputTrackingState = InputTrackingState.None;
+            controllerState.poseDataFlags = PoseDataFlags.NoData;
+            //controllerState.inputTrackingState = InputTrackingState.None;
 
             if (!TryGetDevice(out var device) 
                 || !device.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracking) 
@@ -56,18 +56,18 @@ namespace Iviz.Controllers.XR
 
             if (device.TryGetFeatureValue(GazeRotation, out controllerState.rotation))
             {
-                //controllerState.poseDataFlags = PoseDataFlags.Rotation;
-                controllerState.inputTrackingState = InputTrackingState.Rotation;
+                controllerState.poseDataFlags = PoseDataFlags.Rotation;
+                //controllerState.inputTrackingState = InputTrackingState.Rotation;
             }
 
             if (device.TryGetFeatureValue(GazePosition, out controllerState.position))
             {
-                //controllerState.poseDataFlags |= PoseDataFlags.Position;
-                controllerState.inputTrackingState |= InputTrackingState.Position;
+                controllerState.poseDataFlags |= PoseDataFlags.Position;
+                //controllerState.inputTrackingState |= InputTrackingState.Position;
             }
 
-            //if (controllerState.poseDataFlags == (PoseDataFlags.Position | PoseDataFlags.Rotation))
-            if (controllerState.inputTrackingState != (InputTrackingState.Position | InputTrackingState.Rotation))
+            if (controllerState.poseDataFlags == (PoseDataFlags.Position | PoseDataFlags.Rotation))
+            //if (controllerState.inputTrackingState == (InputTrackingState.Position | InputTrackingState.Rotation))
             {
                 IsActiveInFrame = true;
                 

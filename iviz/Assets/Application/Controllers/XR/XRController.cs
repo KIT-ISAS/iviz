@@ -82,7 +82,6 @@ namespace Iviz.Controllers.XR
 
         public static XRController? Instance { get; private set; }
 
-
         public XRConfiguration Config
         {
             get => config;

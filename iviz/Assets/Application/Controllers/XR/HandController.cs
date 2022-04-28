@@ -104,8 +104,8 @@ namespace Iviz.Controllers.XR
                 return;
             }
 
-            controllerState.inputTrackingState = InputTrackingState.None;
-            //controllerState.poseDataFlags = PoseDataFlags.NoData;
+            //controllerState.inputTrackingState = InputTrackingState.None;
+            controllerState.poseDataFlags = PoseDataFlags.NoData;
 
             if (!TryGetDevice(out var device) || !device.TryGetFeatureValue(HandData, out var hand))
             {
@@ -142,10 +142,10 @@ namespace Iviz.Controllers.XR
                 ((handType == HandType.Left ? palmOffset : -palmOffset) * Vector3.right);
             var pivot = cameraTransform.TransformPoint(shoulderToCamera);
 
-            //controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
-            controllerState.inputTrackingState = InputTrackingState.Position | InputTrackingState.Rotation; 
+            controllerState.poseDataFlags = PoseDataFlags.Position | PoseDataFlags.Rotation;
+            //controllerState.inputTrackingState = InputTrackingState.Position | InputTrackingState.Rotation; 
 
-            var controllerForward = LockedPosition is { } lockedPosition
+            var controllerForward = EnableLocking && LockedPosition is { } lockedPosition
                 ? lockedPosition - controllerPosition
                 : controllerPosition - pivot;
 
@@ -157,6 +157,8 @@ namespace Iviz.Controllers.XR
             cachedHandState.Cursor = HasCursor
                 ? new Ray(controllerPosition, controllerForward.normalized)
                 : null;
+            
+            //Debug.Log(uiPressInteractionState.active + "         " + controllerState.uiPressInteractionState.active);
 
             if (ButtonUp)
             {
@@ -216,7 +218,7 @@ namespace Iviz.Controllers.XR
             const float distanceTransitionToOpen = 0.04f;
             const float distanceTransitionToClose = 0.025f;
 
-            base.UpdateInput(controllerState);
+            //base.UpdateInput(controllerState);
             if (controllerState == null)
             {
                 return;
@@ -230,6 +232,8 @@ namespace Iviz.Controllers.XR
                 ButtonUp = ButtonState;
                 ButtonState = false;
 
+                //controllerState.uiPressInteractionState.deactivatedThisFrame = true;
+                //controllerState.selectInteractionState.deactivatedThisFrame = true;
                 controllerState.selectInteractionState.SetFrameState(false);
                 controllerState.uiPressInteractionState.SetFrameState(false);
                 LockedPosition = null;
@@ -244,13 +248,15 @@ namespace Iviz.Controllers.XR
 
             float distance = Vector3.Distance(thumb.Transform.position, index.Transform.position);
             bool newButtonState = distance < (ButtonState ? distanceTransitionToOpen : distanceTransitionToClose);
-
+            
             ButtonDown = newButtonState && !ButtonState;
             ButtonUp = !newButtonState && ButtonState;
             ButtonState = newButtonState;
 
             controllerState.selectInteractionState.SetFrameState(ButtonState);
             controllerState.uiPressInteractionState.SetFrameState(ButtonState);
+
+            //Debug.Log("ButtonState: " + ButtonState);
 
             // --------
 

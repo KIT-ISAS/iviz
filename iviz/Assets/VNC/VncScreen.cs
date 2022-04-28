@@ -183,14 +183,16 @@ namespace VNC
                 return;
             }
 
-            interactorTransform = args.interactorObject.transform;
+            //interactorTransform = args.interactorObject.transform;
+            interactorTransform = args.interactor.transform;
             interactorController = interactorTransform.AssertHasComponent<IXRController>(nameof(interactorTransform));
             GameThread.EveryFrame += TriggerPointerMove;
         }
 
         void OnHoverExit(HoverExitEventArgs args)
         {
-            if (args.interactorObject.transform != interactorTransform)
+            //if (args.interactorObject.transform != interactorTransform)
+            if (args.interactor.transform != interactorTransform)
             {
                 return;
             }

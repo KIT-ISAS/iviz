@@ -10,8 +10,5 @@ namespace Iviz.Core.XR
         bool ButtonUp { get; }
         bool ButtonDown { get; }
         bool IsNearInteraction { get; }
-        
-        public Vector2? PrimaryAxisMove { get; set; }
-        public bool? PrimaryAxisDown { get; set; }
     }
 }

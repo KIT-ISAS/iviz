@@ -24,7 +24,8 @@ namespace Iviz.Displays
 
         void OnSelectEntered(SelectEnterEventArgs args)
         {
-            interactorTransform = args.interactorObject.transform;
+            //interactorTransform = args.interactorObject.transform;
+            interactorTransform = args.interactor.transform;
             StartSelected();
             GameThread.EveryFrame += TriggerPointerMove;
         }
