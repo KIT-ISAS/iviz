@@ -7,6 +7,7 @@ using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Displays;
 using Iviz.MarkerDetection;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
@@ -299,7 +300,7 @@ namespace Iviz.Controllers
         void OnARJoystickChangedPosition(Vector3 dPos)
         {
             Vector3 newVelocityPos;
-            if (joyVelocityPos is { } velocityPos 
+            if (joyVelocityPos is { } velocityPos
                 && (Sign(velocityPos) == 0 || Sign(velocityPos) == Sign(dPos)))
             {
                 newVelocityPos = velocityPos + 0.0005f * dPos;
@@ -330,7 +331,7 @@ namespace Iviz.Controllers
             static int Sign(in Vector3 v) =>
                 Math.Sign(v.x) + Math.Sign(v.y) + Math.Sign(v.z); // only one of the components is nonzero
         }
-        
+
         void OnARJoystickChangedScale(float dA)
         {
             float newVelocityScale;
@@ -345,9 +346,9 @@ namespace Iviz.Controllers
             }
 
             joyVelocityScale = newVelocityScale;
-            
-            WorldScale *= Mathf.Exp(newVelocityScale);  
-        }        
+
+            WorldScale *= Mathf.Exp(newVelocityScale);
+        }
 
         void OnARJoystickPointerUp()
         {
@@ -441,7 +442,7 @@ namespace Iviz.Controllers
             foreach (var marker in array)
             {
                 MarkerManager.Process(marker);
-                GameThread.Post(() => MarkerManager.Highlight(marker));
+                MarkerManager.Highlight(marker);
             }
 
             MarkerSender?.Publish(new ARMarkerArray(array));
@@ -497,10 +498,6 @@ namespace Iviz.Controllers
 
         protected sealed class PulseManager
         {
-            static readonly int PulseCenter = Shader.PropertyToID("_PulseCenter");
-            static readonly int PulseTime = Shader.PropertyToID("_PulseTime");
-            static readonly int PulseDelta = Shader.PropertyToID("_PulseDelta");
-
             CancellationTokenSource? pulseTokenSource;
             public bool HasPulse => pulseTokenSource is { IsCancellationRequested: false };
 
@@ -510,15 +507,15 @@ namespace Iviz.Controllers
                 pulseTokenSource = new CancellationTokenSource();
 
                 var material = Resource.Materials.LinePulse.Object;
-                material.SetVector(PulseCenter, start);
-                material.SetFloat(PulseDelta, 0.25f);
+                material.SetVector(ShaderIds.PulseCenterId, start);
+                material.SetFloat(ShaderIds.PulseDeltaId, 0.25f);
 
                 FAnimator.Spawn(pulseTokenSource.Token, 10,
                     static t =>
                     {
                         float timeDiff = t * 10;
                         var material = Resource.Materials.LinePulse.Object;
-                        material.SetFloat(PulseTime, (timeDiff - 0.5f));
+                        material.SetFloat(ShaderIds.PulseTimeId, (timeDiff - 0.5f));
                     },
                     () => pulseTokenSource.Cancel()
                 );

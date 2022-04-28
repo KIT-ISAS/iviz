@@ -21,6 +21,8 @@
             CloseButton = p.AddCloseButton();
             RollPitchYaw = p.AddVector3Multi("Roll, Pitch, Yaw").SetRange(10);
             Position = p.AddVector3Multi("Translation");
+            
+            p.UpdateSize();
             gameObject.SetActive(false);
         }
     }

@@ -13,7 +13,7 @@ namespace Iviz.Core
     /// <summary>
     /// Singleton that other threads can use to post actions to the main thread.
     /// </summary>
-    public class GameThread : MonoBehaviour
+    public sealed class GameThread : MonoBehaviour
     {
         static GameThread? instance;
 

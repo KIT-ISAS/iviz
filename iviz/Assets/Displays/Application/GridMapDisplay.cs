@@ -16,14 +16,7 @@ namespace Iviz.Displays
     public sealed class GridMapDisplay : MarkerDisplayWithColormap, ISupportsPbr, ISupportsShadows
     {
         static float baseOffset = 0.001f + 5e-6f;
-
-        static readonly int PropInputTexture = Shader.PropertyToID("_InputTex");
-        static readonly int PropSquareTexture = Shader.PropertyToID("_SquareTex");
-        static readonly int PropSquareCoeff = Shader.PropertyToID("_SquareCoeff");
-        static readonly int PropTint = Shader.PropertyToID("_Tint");
-        static readonly int PropSmoothness = Shader.PropertyToID("_Smoothness");
-        static readonly int PropMetallic = Shader.PropertyToID("_Metallic");
-
+        
         [SerializeField] Material? opaqueMaterial;
         [SerializeField] Material? transparentMaterial;
         [SerializeField] MeshRenderer? meshRenderer;
@@ -121,12 +114,12 @@ namespace Iviz.Displays
         void UpdateMaterial()
         {
             var material = MeshRenderer.sharedMaterial;
-            material.SetTexture(PropInputTexture, texture);
-            material.SetVector(PropSquareCoeff,
+            material.SetTexture(ShaderIds.InputTextureId, texture);
+            material.SetVector(ShaderIds.SquareCoeffId,
                 new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY));
-            material.SetColor(PropTint, Tint);
-            material.SetFloat(PropSmoothness, smoothness);
-            material.SetFloat(PropMetallic, metallic);
+            material.SetColor(ShaderIds.TintId, Tint);
+            material.SetFloat(ShaderIds.SmoothnessId, smoothness);
+            material.SetFloat(ShaderIds.MetallicId, metallic);
             UpdateProperties();
         }
 
@@ -239,14 +232,14 @@ namespace Iviz.Displays
             var textureParams = new Vector4(cellsX, cellsY, 1f / cellsX, 1f / cellsY);
             if (opaqueMaterial != null)
             {
-                opaqueMaterial.SetTexture(PropInputTexture, texture);
-                opaqueMaterial.SetVector(PropSquareCoeff, textureParams);
+                opaqueMaterial.SetTexture(ShaderIds.InputTextureId, texture);
+                opaqueMaterial.SetVector(ShaderIds.SquareCoeffId, textureParams);
             }
 
             if (transparentMaterial != null)
             {
-                transparentMaterial.SetTexture(PropInputTexture, texture);
-                transparentMaterial.SetVector(PropSquareCoeff, textureParams);
+                transparentMaterial.SetTexture(ShaderIds.InputTextureId, texture);
+                transparentMaterial.SetVector(ShaderIds.SquareCoeffId, textureParams);
             }
 
             return texture;

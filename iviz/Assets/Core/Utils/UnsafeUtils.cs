@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -27,5 +28,11 @@ namespace Iviz.Core
 #endif
             return array;
         }
+        
+        /// <summary>
+        /// Creates a span from the given pointer and size. 
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Span<byte> AsSpan(this IntPtr ptr, int size) => new(ptr.ToPointer(), size);
     }
 }

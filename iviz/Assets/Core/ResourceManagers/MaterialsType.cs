@@ -1,18 +1,13 @@
 #nullable enable
 
 using Iviz.Core;
+using Iviz.Displays;
 using UnityEngine;
 
 namespace Iviz.Resources
 {
     public sealed class MaterialsType
     {
-        static readonly int Tint = Shader.PropertyToID("_Tint");
-
-        //public Texture2D Atlas { get; }
-        //public Texture2D AtlasLarge { get; }
-        //public Texture2D AtlasLargeFlip { get; }
-
         public ResourceKey<Material> FontMaterial { get; }
         public ResourceKey<Material> FontMaterialZWrite { get; }
 
@@ -65,8 +60,8 @@ namespace Iviz.Resources
 
         public MaterialsType()
         {
-            var assetHolder = Resource.Extras.AssetHolder;
-            var appAssetHolder = Resource.Extras.AppAssetHolder;
+            var assetHolder = ResourcePool.AssetHolder;
+            var appAssetHolder = ResourcePool.AppAssetHolder;
 
             //Atlas = assetHolder.Atlas.AssertNotNull(nameof(assetHolder.Atlas));
             //AtlasLarge = appAssetHolder.AtlasLarge.AssertNotNull(nameof(appAssetHolder.AtlasLarge));
@@ -116,12 +111,12 @@ namespace Iviz.Resources
             LinePulse = Create(Settings.SupportsComputeBuffers
                 ? assetHolder.LinePulse
                 : assetHolder.LinePulseSimple);
-            LinePulse.Object.SetColor(Tint, Color.white);
+            LinePulse.Object.SetColor(ShaderIds.TintId, Color.white);
 
             LineMesh = Create(Settings.SupportsComputeBuffers
                 ? assetHolder.LineMesh
                 : assetHolder.LineMeshSimple);
-            LineMesh.Object.SetColor(Tint, Color.white);
+            LineMesh.Object.SetColor(ShaderIds.TintId, Color.white);
 
             MeshList = Create(assetHolder.MeshListMaterial);
             MeshListWithColormap = Create(assetHolder.MeshListWithColormap);

@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Linq;
 using System.Text;
 using Iviz.Controllers.TF;
 using Iviz.Core;
@@ -18,11 +19,12 @@ namespace Iviz.Controllers
         readonly FrameNode node;
         readonly ResourceKey<GameObject> resourceKey;
         readonly IDisplay display;
+        readonly string typeDescription;
         float scale = 1;
+        float expirationTime;
 
         public string ParentId => node.Parent?.Id ?? TfModule.DefaultFrame.Id;
         public string Id { get; }
-        public DateTime ExpirationTime { get; }
         public WidgetType Type { get; }
 
         public bool Visible
@@ -41,12 +43,14 @@ namespace Iviz.Controllers
             }
         }
 
-        public GuiObject(GuiWidgetListener parent, Widget msg, ResourceKey<GameObject> resourceKey)
+        public GuiObject(GuiWidgetListener parent, Widget msg, ResourceKey<GameObject> resourceKey,
+            string typeDescription)
         {
             this.resourceKey = resourceKey;
+            this.typeDescription = typeDescription;
             node = new FrameNode(msg.Id);
             Id = msg.Id;
-            ExpirationTime = DateTime.MaxValue;
+            expirationTime = float.MaxValue;
             Type = (WidgetType)msg.Type;
 
             var widget = ResourcePool.Rent(resourceKey, node.Transform).GetComponent<IWidget>();
@@ -61,6 +65,17 @@ namespace Iviz.Controllers
             if (widget is IWidgetCanBeRotated canBeRotated)
             {
                 canBeRotated.Moved += angle => parent.OnWidgetRotated(this, angle);
+            }
+
+            if (widget is IWidgetCanBeResized canBeResized)
+            {
+                canBeResized.Resized += bounds =>
+                    parent.OnWidgetResized(this, new Bounds(bounds.center, bounds.size * scale));
+            }
+
+            if (widget is IWidgetCanBeClicked canBeClicked)
+            {
+                canBeClicked.Clicked += entry => parent.OnWidgetClicked(this, entry);
             }
 
             UpdateWidget(msg);
@@ -104,7 +119,7 @@ namespace Iviz.Controllers
             {
                 withBoundaries.Set(new BoundingBoxStamped(msg.Header, msg.Boundary), msg.SecondaryBoundaries);
             }
-            
+
             if (display is IWidgetWithCaption withCaption)
             {
                 withCaption.Caption = msg.Caption;
@@ -115,9 +130,11 @@ namespace Iviz.Controllers
             transform.localScale = Vector3.one * scale;
         }
 
-        public GuiObject(GuiWidgetListener parent, Dialog msg, ResourceKey<GameObject> resourceKey)
+        public GuiObject(GuiWidgetListener parent, Dialog msg, ResourceKey<GameObject> resourceKey,
+            string typeDescription)
         {
             this.resourceKey = resourceKey;
+            this.typeDescription = typeDescription;
             node = new FrameNode(msg.Id);
             node.AttachTo(msg.Header.FrameId);
             Id = msg.Id;
@@ -130,9 +147,9 @@ namespace Iviz.Controllers
 
             dialog.Scale = msg.Scale == 0 ? 1f : (float)msg.Scale;
             dialog.PivotFrameId = msg.Header.FrameId;
-            dialog.PivotFrameOffset = msg.TfOffset.Ros2Unity();
-            dialog.PivotDisplacement = AdjustDisplacement(msg.TfDisplacement);
-            dialog.LocalDisplacement = AdjustDisplacement(msg.DialogDisplacement);
+            dialog.TfFrameOffset = msg.TfOffset.Ros2Unity();
+            dialog.TfDisplacement = AdjustDisplacement(msg.TfDisplacement);
+            dialog.DialogDisplacement = AdjustDisplacement(msg.DialogDisplacement);
 
             if (msg.BackgroundColor.A != 0)
             {
@@ -188,9 +205,9 @@ namespace Iviz.Controllers
 
             dialog.Initialize();
 
-            ExpirationTime = msg.Lifetime == default
-                ? DateTime.MaxValue
-                : GameThread.Now + msg.Lifetime.ToTimeSpan();
+            expirationTime = msg.Lifetime == default
+                ? float.MaxValue
+                : GameThread.GameTime + (float)msg.Lifetime.ToTimeSpan().TotalSeconds;
 
             display = dialog;
         }
@@ -202,15 +219,6 @@ namespace Iviz.Controllers
             v.y = (float)displacement.Y;
             v.z = -(float)displacement.Z;
             return v;
-        }
-
-        GuiObject(GuiObject source)
-        {
-            node = source.node;
-            resourceKey = source.resourceKey;
-            display = source.display;
-            Id = source.Id;
-            ExpirationTime = DateTime.MinValue;
         }
 
         public IDialog AsDialog()
@@ -226,8 +234,15 @@ namespace Iviz.Controllers
 
         public void GenerateLog(StringBuilder description)
         {
+            description.Append("<b>").Append(Id).Append("</b>").AppendLine();
+            description.Append(typeDescription).AppendLine();
+            description.AppendLine();
         }
 
-        public GuiObject AsExpired() => new(this);
+        public bool Expired => expirationTime < GameThread.GameTime;
+
+        public void MarkAsExpired() => expirationTime = float.MinValue;
+
+        public override string ToString() => $"[{nameof(GuiObject)} '{Id}']";
     }
 }

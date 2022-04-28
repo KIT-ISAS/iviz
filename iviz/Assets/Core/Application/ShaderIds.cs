@@ -35,5 +35,16 @@ namespace Iviz.Displays
         public static readonly int MetallicId = Shader.PropertyToID("_Metallic");
         
         public static readonly int BumpMapId = Shader.PropertyToID("_BumpMap");
+        public static readonly int TintId = Shader.PropertyToID("_Tint");
+        
+        public static readonly int InputTextureId = Shader.PropertyToID("_InputTex");
+        public static readonly int SquareTextureId = Shader.PropertyToID("_SquareTex");
+        public static readonly int SquareCoeffId = Shader.PropertyToID("_SquareCoeff");
+        
+        public static readonly int IntensityTextureId = Shader.PropertyToID("_IntensityTexture");
+        
+        public static readonly int PulseCenterId = Shader.PropertyToID("_PulseCenter");
+        public static readonly int PulseTimeId = Shader.PropertyToID("_PulseTime");
+        public static readonly int PulseDeltaId = Shader.PropertyToID("_PulseDelta");
     }
 }

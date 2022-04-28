@@ -224,14 +224,17 @@ namespace Iviz.MarkerDetection
 
         void RaiseOnMarkerDetected(Screenshot screenshot, IReadOnlyList<IDetectedMarker> detectedMarkers)
         {
-            try
+            GameThread.Post(() =>
             {
-                MarkerDetected?.Invoke(screenshot, detectedMarkers);
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error("Error during detector event:", e);
-            }
+                try
+                {
+                    MarkerDetected?.Invoke(screenshot, detectedMarkers);
+                }
+                catch (Exception e)
+                {
+                    RosLogger.Error("Error during detector event:", e);
+                }
+            });
         }
 
         public void Dispose()

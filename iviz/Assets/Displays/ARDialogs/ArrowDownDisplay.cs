@@ -1,15 +1,16 @@
-using System;
+#nullable enable
+
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Tools;
 using JetBrains.Annotations;
 using UnityEngine;
 
-namespace Iviz.App.ARDialogs
+namespace Iviz.Displays.XR
 {
     public sealed class ArrowDownDisplay : MeshMarkerDisplay
     {
-        static Mesh baseMesh;
+        static Mesh? baseMesh;
         float? currentAngle;
 
         [SerializeField] Vector3 startPosition = Vector3.zero;
@@ -24,18 +25,19 @@ namespace Iviz.App.ARDialogs
             }
 
             Mesh = baseMesh;
-            //Color = Color.cyan.WithAlpha(0.95f);
-            EmissiveColor = Color.WithAlpha(1);
             
-            Position = startPosition;
-            Transform.localScale = new Vector3(0.25f, 0.25f, 0.5f);
+            //Position = startPosition;
+            //Transform.localScale = new Vector3(0.25f, 0.25f, 0.5f);
         }
 
+        /*
         Vector3 Position
         {
             set => Transform.localPosition = value + 0.5f * Vector3.up;
         }
+        */
 
+        /*
         void Update()
         {
             UpdateRotation();
@@ -78,9 +80,10 @@ namespace Iviz.App.ARDialogs
             Transform.rotation = Quaternion.AngleAxis(currentAngle.Value, Vector3.up) 
                                  * Quaternions.Rotate270AroundX;
         }
+        */
 
         [NotNull]
-        static Mesh CreateMesh([NotNull] Mesh sourceMesh)
+        static Mesh CreateMesh(Mesh sourceMesh)
         {
             var vertices = sourceMesh.vertices;
             var normals = sourceMesh.normals;

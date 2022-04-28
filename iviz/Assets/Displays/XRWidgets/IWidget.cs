@@ -42,6 +42,16 @@ namespace Iviz.Displays.XR
     {
         public event Action<float>? Moved;
     }
+    
+    public interface IWidgetCanBeResized : IWidget
+    {
+        public event Action<Bounds>? Resized;
+    }    
+    
+    public interface IWidgetCanBeClicked : IWidget
+    {
+        public event Action<int>? Clicked;
+    }        
 
     public interface IWidgetWithBoundary : IWidget
     {

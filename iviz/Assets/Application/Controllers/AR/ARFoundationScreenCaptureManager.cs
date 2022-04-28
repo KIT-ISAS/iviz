@@ -164,7 +164,7 @@ namespace Iviz.Controllers
                 inputRect = new RectInt(0, 0, image.width, image.height),
                 outputDimensions = new Vector2Int(image.width, image.height),
                 outputFormat = TextureFormat.RFloat,
-                transformation = XRCpuImage.Transformation.MirrorY | XRCpuImage.Transformation.MirrorX 
+                transformation = XRCpuImage.Transformation.MirrorY  // additional mirror x doesn't seem to work here
             };
 
             var ts = TaskUtils.CreateCompletionSource<Screenshot?>();
@@ -191,10 +191,8 @@ namespace Iviz.Controllers
                 float scale = width / (float)colorWidth;
                 var screenshot = new Screenshot(ScreenshotFormat.Float,
                     GameThread.TimeNow, width, height,
-                    Intrinsic.Scale(scale), pose, array.ToArray());
-                ts.TrySetResult(screenshot);
+                    Intrinsic.Scale(scale), pose, array.ToArray()); 
 
-                /*
                 Task.Run(() =>
                 {
                     try
@@ -208,7 +206,6 @@ namespace Iviz.Controllers
                         ts.TrySetException(e);
                     }
                 }, token);
-                */
             });
 
             return ts.Task.AsValueTask();
@@ -243,7 +240,7 @@ namespace Iviz.Controllers
                 inputRect = new RectInt(0, 0, image.width, image.height),
                 outputDimensions = new Vector2Int(image.width, image.height),
                 outputFormat = TextureFormat.R8,
-                transformation = XRCpuImage.Transformation.MirrorY | XRCpuImage.Transformation.MirrorX
+                transformation = XRCpuImage.Transformation.MirrorY // additional mirror x doesn't seem to work here
             };
 
 
@@ -273,9 +270,7 @@ namespace Iviz.Controllers
                 var screenshot = new Screenshot(ScreenshotFormat.Mono8,
                     GameThread.TimeNow, width, height,
                     Intrinsic.Scale(scale), pose, array.ToArray());
-                ts.TrySetResult(screenshot);
 
-                /*
                 Task.Run(() =>
                 {
                     try
@@ -289,7 +284,6 @@ namespace Iviz.Controllers
                         ts.TrySetException(e);
                     }
                 }, token);
-                */
             });
 
             return ts.Task.AsValueTask();
@@ -299,14 +293,13 @@ namespace Iviz.Controllers
             new InvalidOperationException(
                 $"Conversion request of color image failed with status {status}");
 
-        /*
         static void MirrorXf(int width, int height, byte[] bytes)
         {
-            if (width * height * sizeof(float) > bytes.Length) ThrowIndexOutOfRange();
-            ref float ptr = ref Unsafe.As<byte, float>(ref bytes[0]);
+            int pitch = width * sizeof(float); 
+            if (pitch * height > bytes.Length) ThrowIndexOutOfRange();
             foreach (int v in ..height)
             {
-                ref float l = ref ptr.Plus(v * width);
+                ref float l = ref Unsafe.As<byte, float>(ref bytes[v * pitch]);
                 ref float r = ref l.Plus(width - 1);
                 foreach (int _ in ..(width / 2))
                 {
@@ -320,10 +313,9 @@ namespace Iviz.Controllers
         static void MirrorXb(int width, int height, byte[] bytes)
         {
             if (width * height > bytes.Length) ThrowIndexOutOfRange();
-            ref byte ptr = ref bytes[0];
             foreach (int v in ..height)
             {
-                ref ulong l = ref Unsafe.As<byte, ulong>(ref ptr.Plus(v * width));
+                ref ulong l = ref Unsafe.As<byte, ulong>(ref bytes[v * width]);
                 ref ulong r = ref l.Plus(width / 8 - 1);
                 foreach (int _ in ..(width / 16))
                 {
@@ -340,6 +332,5 @@ namespace Iviz.Controllers
 
         [DoesNotReturn]
         static void ThrowIndexOutOfRange() => throw new IndexOutOfRangeException();
-        */
     }
 }

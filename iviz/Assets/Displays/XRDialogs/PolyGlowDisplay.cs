@@ -1,18 +1,19 @@
+#nullable enable
+
 using System.Collections.Generic;
 using Iviz.Core;
-using Iviz.Displays;
-using JetBrains.Annotations;
+using Iviz.Tools;
 using UnityEngine;
 
-namespace Iviz.App.ARDialogs
+namespace Iviz.Displays.XR
 {
     public sealed class PolyGlowDisplay : MeshMarkerDisplay
     {
-        static Mesh squareMesh;
-        [NotNull] static Mesh SquareMesh => squareMesh != null ? squareMesh : (squareMesh = CreateMesh(4));
+        static Mesh? squareMesh;
+        static Mesh SquareMesh => squareMesh != null ? squareMesh : (squareMesh = CreateMesh(4));
 
-        static Mesh circleMesh;
-        [NotNull] static Mesh CircleMesh => circleMesh != null ? circleMesh : (circleMesh = CreateMesh(40));
+        static Mesh? circleMesh;
+        static Mesh CircleMesh => circleMesh != null ? circleMesh : (circleMesh = CreateMesh(40));
 
         protected override void Awake()
         {
@@ -30,17 +31,16 @@ namespace Iviz.App.ARDialogs
             Mesh = CircleMesh;
         }
 
-        [NotNull]
         static Mesh CreateMesh(int numVertices)
         {
-            List<Vector3> vertices = new List<Vector3>();
-            List<int> indices = new List<int>();
-            List<Color> colors = new List<Color>();
+            var vertices = new List<Vector3>();
+            var indices = new List<int>();
+            var colors = new List<Color>();
 
-            Color outerColor = Color.white;
-            Color innerColor = Color.white.WithAlpha(0);
+            var outerColor = Color.white;
+            var innerColor = Color.white.WithAlpha(0);
 
-            for (int i = 0; i < numVertices; i++)
+            foreach (int i in ..numVertices)
             {
                 float a0 = Mathf.PI * 2 / numVertices * i;
                 float a1 = Mathf.PI * 2 / numVertices * (i + 1);
@@ -81,7 +81,7 @@ namespace Iviz.App.ARDialogs
                 colors.Add(outerColor);
             }
 
-            Mesh mesh = new Mesh();
+            var mesh = new Mesh();
             mesh.SetVertices(vertices);
             mesh.SetIndices(indices, MeshTopology.Quads, 0);
             mesh.SetColors(colors);

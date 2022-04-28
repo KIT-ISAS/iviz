@@ -16,8 +16,7 @@ namespace Iviz.App.ARDialogs
         [SerializeField] XRButton? button;
         [SerializeField] MeshMarkerDisplay? anchor;
         [SerializeField] XRScreenDraggable? draggable;
-        [SerializeField] MeshMarkerDisplay? outerDisc;
-        [SerializeField] MeshMarkerDisplay? innerDisc;
+        [SerializeField] MeshMarkerDisplay? disc;
         [SerializeField] MeshMarkerDisplay? glow;
         [SerializeField] float linkWidth = 0.04f;
         [SerializeField] float buttonDistance = 1f;
@@ -27,14 +26,14 @@ namespace Iviz.App.ARDialogs
 
         CancellationTokenSource? tokenSource;
         string mainButtonCaption = "Send!";
+        
         Color color = new(0, 1f, 0.6f);
         Color secondaryColor = Color.white;
 
         readonly LineWithColor[] lineBuffer = new LineWithColor[3];
 
         MeshMarkerDisplay Anchor => anchor.AssertNotNull(nameof(anchor));
-        MeshMarkerDisplay OuterDisc => outerDisc.AssertNotNull(nameof(outerDisc));
-        MeshMarkerDisplay InnerDisc => innerDisc.AssertNotNull(nameof(innerDisc));
+        MeshMarkerDisplay Disc => disc.AssertNotNull(nameof(disc));
         MeshMarkerDisplay Glow => glow.AssertNotNull(nameof(glow));
         XRScreenDraggable Draggable => draggable.AssertNotNull(nameof(draggable));
         LineDisplay Line => ResourcePool.RentChecked(ref line, Transform);
@@ -59,7 +58,7 @@ namespace Iviz.App.ARDialogs
             set
             {
                 color = value;
-                OuterDisc.Color = value.WithValue(0.5f);
+                Disc.Color = value.WithValue(0.5f);
                 Glow.Color = value.WithAlpha(0.8f);
                 Glow.EmissiveColor = value;
             }
@@ -71,7 +70,6 @@ namespace Iviz.App.ARDialogs
             set
             {
                 secondaryColor = value;
-                InnerDisc.Color = value;
                 Anchor.Color = value;
             }
         }
@@ -88,6 +86,7 @@ namespace Iviz.App.ARDialogs
 
             Color = Color;
             SecondaryColor = SecondaryColor;
+            
             Glow.Visible = false;            
             
             Button.Icon = XRIcon.Ok;
@@ -101,8 +100,7 @@ namespace Iviz.App.ARDialogs
                 Button.Visible = false;
                 tokenSource?.Cancel();
                 Line.Visible = true;
-                InnerDisc.EmissiveColor = SecondaryColor;
-                OuterDisc.EmissiveColor = Color;
+                Disc.EmissiveColor = Color;
                 Glow.Visible = true;                
             };
             Draggable.Moved += () =>
@@ -128,8 +126,7 @@ namespace Iviz.App.ARDialogs
             };            
             Draggable.EndDragging += () =>
             {
-                InnerDisc.EmissiveColor = Color.black;
-                OuterDisc.EmissiveColor = Color.black;
+                Disc.EmissiveColor = Color.black;
                 Glow.Visible = false;
                 
                 //Button.Transform.SetLocalPose(Draggable.Transform.AsLocalPose().Multiply(BaseButtonPose));

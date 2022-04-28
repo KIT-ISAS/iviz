@@ -91,7 +91,7 @@ namespace Iviz.MarkerDetection
             }
         }
 
-        public bool MatchesSize(int width, int height) => (width, height) == (this.width, this.height);
+        public bool MatchesSize(int otherWidth, int otherHeight) => (otherWidth, otherHeight) == (width, height);
 
         public void SetImageData(ReadOnlySpan<byte> image, int bpp)
         {

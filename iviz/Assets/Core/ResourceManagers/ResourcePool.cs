@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Iviz.Core;
 using Iviz.Resources;
 using UnityEngine;
@@ -17,12 +18,47 @@ namespace Iviz.Displays
         const bool CheckDuplicates = !Settings.IsStandalone;
         const int TimeToDestroyInSec = 60;
 
+        [SerializeField] AssetHolder? assetHolder;
+        [SerializeField] AppAssetHolder? appAssetHolder;
+        [SerializeField] WidgetAssetHolder? widgetAssetHolder;
+        [SerializeField] AudioAssetHolder? audioAssetHolder;
+
+        public static AssetHolder AssetHolder =>
+            Instance.assetHolder.AssertNotNull(nameof(Instance.assetHolder));
+
+        public static AppAssetHolder AppAssetHolder =>
+            Instance.appAssetHolder.AssertNotNull(nameof(Instance.appAssetHolder));
+
+        public static WidgetAssetHolder WidgetAssetHolder =>
+            Instance.widgetAssetHolder.AssertNotNull(nameof(Instance.widgetAssetHolder));
+
+        public static AudioAssetHolder AudioAssetHolder =>
+            Instance.audioAssetHolder.AssertNotNull(nameof(Instance.audioAssetHolder));
+
         static ResourcePool? instance;
 
-        static ResourcePool Instance =>
-            instance != null
-                ? instance
-                : instance = GameObject.Find("Resource Pool").AssertHasComponent<ResourcePool>(nameof(Instance));
+        static ResourcePool Instance => TryGetInstance(out var resourcePool)
+            ? resourcePool
+            : throw new MissingAssetFieldException("Cannot find resource pool!");
+
+        static bool TryGetInstance([NotNullWhen(true)] out ResourcePool? resourcePool)
+        {
+            if (instance != null)
+            {
+                resourcePool = instance;
+                return true;
+            }
+
+            var obj = GameObject.Find("Resource Pool");
+            if (obj == null || !obj.TryGetComponent(out ResourcePool rp))
+            {
+                resourcePool = null;
+                return false;
+            }
+
+            instance = resourcePool = rp;
+            return true;
+        }
 
         readonly List<GameObject> objectsToDestroy = new();
         readonly HashSet<int> disposedObjectIds = new();
@@ -47,10 +83,7 @@ namespace Iviz.Displays
             instance = null;
         }
 
-        public static void ClearResources()
-        {
-            instance = null;
-        }
+        public static void ClearResources() => instance = null;
 
         /// <summary>
         /// Rents an object of the given resource type. If no object of the type exists in the pool, a new one
@@ -135,13 +168,15 @@ namespace Iviz.Displays
             ThrowHelper.ThrowIfNull(resource, nameof(resource));
             ThrowHelper.ThrowIfNull(gameObject, nameof(gameObject));
 
-            if (Settings.IsShuttingDown)
+            // do double check here. we may be too early or during shutdown,
+            // so there's no guarantee that the resource pool exists
+            if (!TryGetInstance(out var resourcePool))
             {
                 Destroy(gameObject);
                 return;
             }
-            
-            Instance.Add(resource, gameObject);
+
+            resourcePool.Add(resource, gameObject);
         }
 
         internal static void ReturnDisplay(IDisplay display)

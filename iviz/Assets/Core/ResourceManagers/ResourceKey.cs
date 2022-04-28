@@ -61,7 +61,7 @@ namespace Iviz.Resources
 
         public static bool operator !=(ResourceKey<T>? a, ResourceKey<T>? b) => !(a == b);
 
-        public override int GetHashCode() => Id;
+        public override int GetHashCode() => Object.GetHashCode();
     }
 
     public static class ResourceKey

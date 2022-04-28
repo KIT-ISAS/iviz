@@ -24,7 +24,6 @@ namespace Iviz.Displays.XR
         float scale = 1;
 
         ISupportsColor? backgroundObject;
-        Vector3 baseDisplacement;
 
         FrameNode Node => node ??= new FrameNode("Dialog Node");
         XRDialogConnector Connector => connector.AssertNotNull(nameof(connector));
@@ -55,9 +54,9 @@ namespace Iviz.Displays.XR
         public event Action? Expired;
 
         public BindingType BindingType { get; set; }
-        public Vector3 LocalDisplacement { get; set; }
-        public Vector3 PivotFrameOffset { get; set; }
-        public Vector3 PivotDisplacement { get; set; }
+        public Vector3 DialogDisplacement { get; set; }
+        public Vector3 TfFrameOffset { get; set; }
+        public Vector3 TfDisplacement { get; set; }
 
         public float PositionDamping { get; set; } = 0.05f;
 
@@ -66,7 +65,6 @@ namespace Iviz.Displays.XR
             set
             {
                 scale = value;
-                baseDisplacement = -socketPosition * scale;
                 transform.localScale = scale * Vector3.one;
             }
         }
@@ -107,16 +105,17 @@ namespace Iviz.Displays.XR
 
         Transform Transform => _transform != null ? _transform : (_transform = transform);
 
-        internal Vector3 ConnectorStart => Transform.AsLocalPose().Multiply(-baseDisplacement);
+        internal Vector3 ConnectorStart =>
+            TfModule.RelativeToOrigin(Transform.TransformPoint(socketPosition));
 
         internal Vector3 ConnectorEnd
         {
             get
             {
-                var framePosition = TfModule.RelativeToOrigin(Node.Transform.position) + PivotFrameOffset;
-                return PivotDisplacement.MaxAbsCoeff() == 0
+                var framePosition = TfModule.RelativeToOrigin(Node.Transform.position) + TfFrameOffset;
+                return TfDisplacement.MaxAbsCoeff() == 0
                     ? framePosition
-                    : framePosition + GetFlatCameraRotationRelativeTo(framePosition) * PivotDisplacement;
+                    : framePosition + GetFlatCameraRotationRelativeTo(framePosition) * TfDisplacement;
             }
         }
 
@@ -158,6 +157,7 @@ namespace Iviz.Displays.XR
                 // not initialized yet
                 return;
             }
+
             var direction = Transform.position - cameraPosition;
             var targetRotation = Quaternion.LookRotation(direction.ApproximatelyZero() ? Vector3.forward : direction);
             if (resetOrientation)
@@ -178,15 +178,13 @@ namespace Iviz.Displays.XR
             switch (BindingType)
             {
                 case BindingType.None:
-                case BindingType.Tf when pivotFrameId == null:
-                    return;
                 case BindingType.Tf:
                 {
                     var absolutePivotPosition = Node.Transform.position;
-                    var localFramePosition = TfModule.RelativeToOrigin(absolutePivotPosition) + PivotFrameOffset;
+                    var localFramePosition = TfModule.RelativeToOrigin(absolutePivotPosition) + TfFrameOffset;
                     var localCameraRotation = GetFlatCameraRotationRelativeTo(localFramePosition);
                     var localTargetPosition =
-                        localFramePosition + localCameraRotation * LocalDisplacement + baseDisplacement;
+                        localFramePosition + localCameraRotation * DialogDisplacement - socketPosition;
                     absoluteTargetPosition = TfModule.OriginTransform.TransformPoint(localTargetPosition);
                     break;
                 }
@@ -198,9 +196,10 @@ namespace Iviz.Displays.XR
                         // not initialized yet
                         return;
                     }
+
                     var absoluteRotation = Quaternion.LookRotation(cameraForward.WithY(0));
                     var absolutePose = new Pose(Settings.MainCameraTransform.position, absoluteRotation);
-                    absoluteTargetPosition = absolutePose.Multiply(LocalDisplacement) + PivotFrameOffset;
+                    absoluteTargetPosition = absolutePose.Multiply(DialogDisplacement) + TfFrameOffset;
                     break;
                 }
                 default:
@@ -229,13 +228,13 @@ namespace Iviz.Displays.XR
 
         public virtual void Suspend()
         {
-            LocalDisplacement = Vector3.zero;
-            PivotDisplacement = Vector3.zero;
-            PivotFrameOffset = Vector3.zero;
-            
+            DialogDisplacement = Vector3.zero;
+            TfDisplacement = Vector3.zero;
+            TfFrameOffset = Vector3.zero;
+
             currentPosition = null;
             resetOrientation = true;
-            
+
             Connector.Visible = false;
             Expired?.Invoke();
             Expired = null;

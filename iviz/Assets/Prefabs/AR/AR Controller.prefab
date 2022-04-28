@@ -353,7 +353,7 @@ Transform:
   m_GameObject: {fileID: 6019251948242916430}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 10, y: 10, z: 10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 4653990593114288910}
@@ -477,7 +477,7 @@ MonoBehaviour:
   m_HumanSegmentationStencilMode: 0
   m_HumanSegmentationDepthMode: 0
   m_EnvironmentDepthMode: 0
-  m_EnvironmentDepthTemporalSmoothing: 1
+  m_EnvironmentDepthTemporalSmoothing: 0
   m_OcclusionPreferenceMode: 0
 --- !u!1 &6174123620095790151
 GameObject:
@@ -540,10 +540,15 @@ PrefabInstance:
       propertyPath: grandparentCamera
       value: 
       objectReference: {fileID: 6019251948242916433}
+    - target: {fileID: 4694768697783269929, guid: 1dd964befeabf466689ae7034b5f36be,
+        type: 3}
+      propertyPath: field of view
+      value: 30
+      objectReference: {fileID: 0}
     - target: {fileID: 4694768697783269930, guid: 1dd964befeabf466689ae7034b5f36be,
         type: 3}
       propertyPath: m_Name
-      value: Camera for Overlay Display
+      value: Overlay Camera
       objectReference: {fileID: 0}
     - target: {fileID: 4694768697783269931, guid: 1dd964befeabf466689ae7034b5f36be,
         type: 3}
@@ -599,6 +604,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8229773445374723588, guid: 1dd964befeabf466689ae7034b5f36be,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8229773445374723588, guid: 1dd964befeabf466689ae7034b5f36be,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8229773445374723588, guid: 1dd964befeabf466689ae7034b5f36be,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1dd964befeabf466689ae7034b5f36be, type: 3}

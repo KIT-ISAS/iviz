@@ -12,7 +12,7 @@ namespace Iviz.App
 {
     public sealed class ListenerWidget : MonoBehaviour, IWidget
     {
-        const int MaxTopicLength = 200;
+        const int MaxTopicWidth = 220;
 
         [SerializeField] TMP_Text? text;
         [SerializeField] Image? panel;
@@ -56,7 +56,7 @@ namespace Iviz.App
 
             using var description = BuilderPool.Rent();
             description
-                .Append(Resource.Font.Split(Topic ?? "", MaxTopicLength))
+                .Append(Resource.Font.Split(Topic ?? "", MaxTopicWidth))
                 .Append("\n<b>");
 
             listener.WriteDescriptionTo(description);
@@ -65,7 +65,7 @@ namespace Iviz.App
                 .Append(MessagesPerSecond)
                 .Append(" Hz | ");
 
-            RosUtils.AppendBandwidth(description, BytesPerSecond);
+            description.AppendBandwidth(BytesPerSecond);
 
             description.Append("/s</b>");
             Text.SetTextRent(description);

@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e352f93572734d6e9d4c74001ef27df5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dialog: {fileID: 0}
+  dialog: {fileID: 2936698241881147147}
 --- !u!1 &1112487726586028169
 GameObject:
   m_ObjectHideFlags: 0
@@ -634,7 +634,7 @@ GameObject:
   - component: {fileID: 9024825353754890542}
   - component: {fileID: 2936698241881147147}
   m_Layer: 2
-  m_Name: XR Dialog Menu
+  m_Name: XR Menu Dialog
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -693,6 +693,7 @@ MonoBehaviour:
   - {fileID: 195440967123403268}
   upButton: {fileID: 870037625937468449}
   downButton: {fileID: 6951505241788974101}
+  closeButton: {fileID: 1261777583700865138}
   titleObject: {fileID: 5900309319232627984}
   captionObject: {fileID: 3960206710846526241}
 --- !u!1001 &586438442386524082
@@ -1244,6 +1245,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2300080500092085110, guid: b5e124c759cf142be9e8c5e0ded7bde2,
         type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 3.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2300080500092085110, guid: b5e124c759cf142be9e8c5e0ded7bde2,
+        type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
@@ -1576,6 +1582,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b5e124c759cf142be9e8c5e0ded7bde2, type: 3}
+--- !u!114 &1261777583700865138 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1947759236956349054, guid: b5e124c759cf142be9e8c5e0ded7bde2,
+    type: 3}
+  m_PrefabInstance: {fileID: 758127226612781580}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 837d4d94de5a441f9a972d652787a567, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &7833956785404552305 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7364131420513646205, guid: b5e124c759cf142be9e8c5e0ded7bde2,
@@ -1818,6 +1836,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2300080500092085110, guid: b5e124c759cf142be9e8c5e0ded7bde2,
         type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 3.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2300080500092085110, guid: b5e124c759cf142be9e8c5e0ded7bde2,
+        type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
@@ -2000,6 +2023,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2300080500092085110, guid: b5e124c759cf142be9e8c5e0ded7bde2,
         type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 3.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2300080500092085110, guid: b5e124c759cf142be9e8c5e0ded7bde2,
+        type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
@@ -2179,6 +2207,16 @@ PrefabInstance:
         type: 3}
       propertyPath: backgroundVisible
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2300080500092085110, guid: b5e124c759cf142be9e8c5e0ded7bde2,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 3.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2300080500092085110, guid: b5e124c759cf142be9e8c5e0ded7bde2,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2300080500092085110, guid: b5e124c759cf142be9e8c5e0ded7bde2,
         type: 3}

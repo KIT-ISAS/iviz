@@ -61,7 +61,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetTransform: {fileID: 3834849191676742097}
-  rayCollider: {fileID: 2997211786952223757}
+  rayCollider: {fileID: 3834849191676742103}
   forwardScale: 2
 --- !u!1 &6693431961827736242
 GameObject:
@@ -190,7 +190,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7002819732865035588}
-  - component: {fileID: 7002819732865035590}
   - component: {fileID: 7002819732865035586}
   m_Layer: 2
   m_Name: Spring Disc 3D
@@ -217,19 +216,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &7002819732865035590
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7002819732865035587}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 0.25, y: 0.01, z: 0.25}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &7002819732865035586
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -371,6 +357,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Sphere
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: e75b78ac41d65416dbe4a25e568561a2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e75b78ac41d65416dbe4a25e568561a2, type: 3}
 --- !u!33 &1611546650755586680 stripped
@@ -400,7 +391,7 @@ BoxCollider:
   m_GameObject: {fileID: 3078586490591022951}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -544,7 +535,7 @@ BoxCollider:
   m_GameObject: {fileID: 4936805807746765827}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -697,6 +688,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   offset: {x: 0, y: 0, z: 0}
   keepHorizontal: 0
+  useAbsoluteOffset: 1
 --- !u!114 &7014749630790876588 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1151418414904978460, guid: 3b61b72175db643ce8390bf4b3656908,

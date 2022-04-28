@@ -332,7 +332,7 @@ namespace Iviz.App
         void OnDestroy()
         {
             instance = null;
-            TfListener.AfterProcessMessages -= ProcessPoseChanges;
+            TfModule.AfterProcessFrames -= ProcessPoseChanges;
             GameThread.EveryFrame -= ProcessPointer;
             TfModule.ResetFrames -= OnResetFrames;
         }
@@ -361,7 +361,7 @@ namespace Iviz.App
 
             if (ModuleListPanel.TryGetInstance() is { } moduleListPanel)
             {
-                TfListener.AfterProcessMessages += ProcessPoseChanges;
+                TfModule.AfterProcessFrames += ProcessPoseChanges;
                 moduleListPanel.UnlockButton.onClick.AddListener(DisableCameraLock);
             }
             else
@@ -972,7 +972,7 @@ namespace Iviz.App
 
         public static void PlayClickAudio(in Vector3 position)
         {
-            var assetHolder = Resource.Extras.AppAssetHolder;
+            var assetHolder = ResourcePool.AppAssetHolder;
             AudioSource.PlayClipAtPoint(assetHolder.Click, position);
         }
 

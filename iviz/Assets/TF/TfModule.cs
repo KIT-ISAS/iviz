@@ -77,6 +77,8 @@ namespace Iviz.Controllers.TF
             set => RootFrame.Transform.localScale = value * Vector3.one;
         }
 
+        public static event Action? AfterProcessFrames;
+            
         public bool FlipZ { get; set; }
 
         public bool Visible
@@ -247,7 +249,7 @@ namespace Iviz.Controllers.TF
 
                 KeepAllFrames = true;
 
-                GameThread.LateEveryFrame += LateUpdate;
+                //GameThread.LateEveryFrame += LateUpdate;
             }
             catch (Exception)
             {
@@ -491,7 +493,7 @@ namespace Iviz.Controllers.TF
             frame.Dispose();
         }
 
-        void ProcessWorldOffset()
+        public void ProcessWorldOffset()
         {
             // task: move fixed frame so that it has identity transform to root frame
             // hierarchy: root -> origin -> fixed
@@ -509,25 +511,20 @@ namespace Iviz.Controllers.TF
                 fixedFramePose = FixedFrame.OriginWorldPose;
             }
 
-            if (fixedFramePose.EqualsApprox(cachedFixedPose))
+            if (!fixedFramePose.EqualsApprox(cachedFixedPose))
             {
-                return;
+                cachedFixedPose = fixedFramePose;
+                OriginTransform.SetLocalPose(fixedFramePose.Inverse());
             }
 
-            cachedFixedPose = fixedFramePose;
-            OriginTransform.SetLocalPose(fixedFramePose.Inverse());
-        }
-
-        void LateUpdate()
-        {
-            ProcessWorldOffset();
+            AfterProcessFrames?.Invoke();
         }
 
         public void Dispose()
         {
             OriginFrame.Dispose(); // get rid of children so they won't get deleted when it does
 
-            GameThread.LateEveryFrame -= LateUpdate;
+            //GameThread.LateEveryFrame -= LateUpdate;
             staticListenerNode.Dispose();
             ResetFrames = null;
             instance = null;

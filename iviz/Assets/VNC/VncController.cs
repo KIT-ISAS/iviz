@@ -86,7 +86,7 @@ namespace VNC
             foreach (var dialog in new XRDialog[] { PlainDialog, ConnectionDialog, PasswordDialog })
             {
                 dialog.BindingType = BindingType.User;
-                dialog.LocalDisplacement = new Vector3(0, -0.3f, 0.6f);
+                dialog.DialogDisplacement = new Vector3(0, -0.3f, 0.6f);
                 dialog.Scale = 0.45f;
                 dialog.PositionDamping = 0.01f;
             }

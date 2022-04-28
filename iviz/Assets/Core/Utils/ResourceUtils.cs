@@ -19,7 +19,7 @@ namespace Iviz.Core
         /// <param name="display">The object to return.</param>
         public static void ReturnToPool(this IDisplay? display)
         {
-            if (display == null)
+            if ((UnityEngine.Object?)display == null)
             {
                 return;
             }

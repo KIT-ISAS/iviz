@@ -152,7 +152,7 @@ namespace Iviz.Displays
 
             ownMesh.Clear();
             
-            if (points.Length == 0)
+            if (points.Length == 0 || triangles.Length == 0)
             {
                 Collider.SetLocalBounds(ownMesh.bounds);
                 BoundsChanged?.Invoke();

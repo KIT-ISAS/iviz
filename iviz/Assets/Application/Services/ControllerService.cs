@@ -10,6 +10,7 @@ using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Displays;
 using Iviz.Displays.XR;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.IvizMsgs;
@@ -266,7 +267,7 @@ namespace Iviz.Controllers
                 return ("", false, $"Failed to find topic '{topic}'");
             }
 
-            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out ModuleType resource))
+            if (!Resource.TryGetResourceByRosMessageType(type, out ModuleType resource))
             {
                 return ("", false, $"Type '{type}' is unsupported");
             }
@@ -810,7 +811,7 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        var screenshot = Resource.Extras.AppAssetHolder.Screenshot;
+                        var screenshot = ResourcePool.AppAssetHolder.Screenshot;
                         AudioSource.PlayClipAtPoint(screenshot, Settings.MainCamera.transform.position);
 
                         ss = await Settings.ScreenCaptureManager.CaptureColorAsync();

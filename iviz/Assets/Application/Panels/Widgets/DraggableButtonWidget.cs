@@ -10,8 +10,8 @@ using IDragHandler = UnityEngine.EventSystems.IDragHandler;
 
 namespace Iviz.App
 {
-    public class DraggableButtonWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler, IBeginDragHandler,
-        IPointerUpHandler
+    public class DraggableButtonWidget : MonoBehaviour, // not sealed, has children
+        IWidget, IDragHandler, IEndDragHandler, IBeginDragHandler, IPointerUpHandler
     {
         [SerializeField] Button? button;
         [SerializeField] RectTransform? targetTransform;

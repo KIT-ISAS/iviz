@@ -245,7 +245,7 @@ namespace Iviz.Displays
 
             base.Awake();
 
-            ElementScale = 0.1f;
+            //ElementScale = 0.1f;
             UseColormap = false;
         }
 

@@ -16,13 +16,6 @@ namespace Iviz.Displays
     /// 
     public abstract class MarkerDisplayWithColormap : MarkerDisplay, ISupportsTint
     {
-        static readonly int IntensityCoeffId = Shader.PropertyToID("_IntensityCoeff");
-        static readonly int IntensityAddId = Shader.PropertyToID("_IntensityAdd");
-        static readonly int LocalToWorldId = Shader.PropertyToID("_LocalToWorld");
-        static readonly int WorldToLocalId = Shader.PropertyToID("_WorldToLocal");
-        static readonly int TintId = Shader.PropertyToID("_Tint");
-        static readonly int AtlasRowId = Shader.PropertyToID("_AtlasRow");
-
         ColormapId colormap;
         Vector2 intensityBounds;
         bool flipMinMax;
@@ -47,7 +40,7 @@ namespace Iviz.Displays
             set
             {
                 colormap = value;
-                Properties.SetFloat(AtlasRowId,
+                Properties.SetFloat(ShaderIds.AtlasRowId,
                     (ColormapsType.AtlasSize - 0.5f - (float) value) / ColormapsType.AtlasSize);
                 UpdateProperties();
             }
@@ -81,8 +74,8 @@ namespace Iviz.Displays
                     add = intensityBounds.y / intensitySpan;
                 }
 
-                Properties.SetFloat(IntensityCoeffId, coeff);
-                Properties.SetFloat(IntensityAddId, add);
+                Properties.SetFloat(ShaderIds.IntensityCoeffId, coeff);
+                Properties.SetFloat(ShaderIds.IntensityAddId, add);
                 UpdateProperties();
             }
         }
@@ -161,15 +154,15 @@ namespace Iviz.Displays
             set
             {
                 tint = value;
-                Properties.SetColor(TintId, value);
+                Properties.SetColor(ShaderIds.TintId, value);
                 UpdateProperties();
             }
         }
 
         protected void UpdateTransform()
         {
-            Properties.SetMatrix(LocalToWorldId, transform.localToWorldMatrix);
-            Properties.SetMatrix(WorldToLocalId, transform.worldToLocalMatrix);
+            Properties.SetMatrix(ShaderIds.LocalToWorldId, transform.localToWorldMatrix);
+            Properties.SetMatrix(ShaderIds.WorldToLocalId, transform.worldToLocalMatrix);
             UpdateProperties();
         }
 

@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Iviz.Msgs;
@@ -131,6 +132,16 @@ namespace Iviz.Core
             q.x = -p.Y;
             q.y = p.Z;
             q.z = p.X;
+            return q;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Msgs.GeometryMsgs.Vector3 Abs(this in Msgs.GeometryMsgs.Vector3 p)
+        {
+            Msgs.GeometryMsgs.Vector3 q;
+            q.X = Math.Abs(p.X);
+            q.Y = Math.Abs(p.Y);
+            q.Z = Math.Abs(p.Z);
             return q;
         }
 

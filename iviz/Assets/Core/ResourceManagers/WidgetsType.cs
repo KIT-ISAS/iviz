@@ -1,5 +1,6 @@
 #nullable enable
 
+using Iviz.Displays;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -57,7 +58,7 @@ namespace Iviz.Resources
 
         public WidgetsType()
         {
-            var assetHolder = Resource.Extras.WidgetAssetHolder;
+            var assetHolder = ResourcePool.WidgetAssetHolder;
 
             DraggableDisplayButton =
                 Create(assetHolder.DraggableDisplayButton, nameof(assetHolder.DraggableDisplayButton));

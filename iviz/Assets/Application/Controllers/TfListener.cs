@@ -35,8 +35,6 @@ namespace Iviz.Controllers
         public Sender<TFMessage> Publisher { get; }
         public TfFrame Frame => TfModule.FixedFrame;
 
-        public static event Action? AfterProcessMessages;
-
         public bool FlipZ
         {
             get => config.FlipZ;
@@ -173,8 +171,6 @@ namespace Iviz.Controllers
                     Tf.Process(in transform, isStatic);
                 }
             }
-
-            AfterProcessMessages?.Invoke();
         }
 
         bool HandlerNonStatic(TFMessage msg, IRosReceiver? _)
@@ -209,6 +205,7 @@ namespace Iviz.Controllers
         void LateUpdate()
         {
             ProcessMessages();
+            Tf.ProcessWorldOffset();
             DoPublish();
         }
 

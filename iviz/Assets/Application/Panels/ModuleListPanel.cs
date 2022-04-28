@@ -32,7 +32,7 @@ namespace Iviz.App
     /// </summary>
     public sealed class ModuleListPanel : MonoBehaviour
     {
-        const int ModuleDataCaptionWidth = 200;
+        const int ModuleDataCaptionWidth = 220;
 
         static ModuleListPanel? instance;
 
@@ -916,7 +916,7 @@ namespace Iviz.App
             ThrowHelper.ThrowIfNull(topic, nameof(topic));
             ThrowHelper.ThrowIfNull(type, nameof(type));
 
-            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out var resource))
+            if (!Resource.TryGetResourceByRosMessageType(type, out var resource))
             {
                 throw new ArgumentException(nameof(type));
             }

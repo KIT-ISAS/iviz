@@ -41,7 +41,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 327149289443996896}
-  - component: {fileID: 327149289443996898}
   - component: {fileID: 327149289443996897}
   m_Layer: 2
   m_Name: Position Disc
@@ -69,19 +68,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &327149289443996898
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 327149289443996903}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  serializedVersion: 2
-  m_Size: {x: 0.25, y: 0.01, z: 0.25}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &327149289443996897
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95,13 +81,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   button: {fileID: 7252683578558804099}
-  disc: {fileID: 327149290269433381}
   anchor: {fileID: 7596363696691157505}
   draggable: {fileID: 327149290269433381}
   outerDisc: {fileID: 7596363695467736034}
   innerDisc: {fileID: 7596363696400650104}
   glow: {fileID: 2475377581108712706}
   linkWidth: 0.04
+  buttonDistance: 1
 --- !u!1 &327149289453766131
 GameObject:
   m_ObjectHideFlags: 0

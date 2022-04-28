@@ -4,7 +4,7 @@ using Iviz.Msgs.StdMsgs;
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public class GridMapConfiguration : IConfigurationWithTopic
+    public sealed class GridMapConfiguration : IConfigurationWithTopic
     {
         [DataMember] public string Id { get; set; } = System.Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.GridMap;

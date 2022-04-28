@@ -27,7 +27,7 @@ namespace Iviz.Controllers
         const float AnchorPauseTimeInSec = 2;
 
         static AnchorToggleButton ARSet => ModuleListPanel.Instance.AnchorCanvasPanel.ARSet;
-        static GameObject ARInfoPanel => ModuleListPanel.Instance.AnchorCanvasPanel.ARInfoPanel;
+        static GameObject ARMoveDevicePanel => ModuleListPanel.Instance.AnchorCanvasPanel.ARInfoPanel;
 
         readonly ARContents ar;
         readonly CancellationTokenSource tokenSource = new();
@@ -145,7 +145,7 @@ namespace Iviz.Controllers
                 if (value)
                 {
                     ar.Camera.cullingMask = (1 << LayerType.ARSetupMode) | (1 << LayerType.UI);
-                    ARInfoPanel.SetActive(true);
+                    ARMoveDevicePanel.SetActive(true);
                 }
                 else
                 {
@@ -208,7 +208,7 @@ namespace Iviz.Controllers
         {
             Instance = this;
 
-            var arObject = Object.Instantiate(Resource.Extras.AppAssetHolder.ARPrefab);
+            var arObject = Object.Instantiate(ResourcePool.AppAssetHolder.ARPrefab);
             if (!arObject.TryGetComponent(out ar))
             {
                 throw new MissingAssetFieldException("AR object does not have contents");
@@ -239,7 +239,7 @@ namespace Iviz.Controllers
 
             ARSet.Clicked += ArSetOnClicked;
             ARSet.Visible = false;
-            ARInfoPanel.SetActive(true);
+            ARMoveDevicePanel.SetActive(true);
 
             WorldPoseChanged += OnWorldPoseChanged;
             GuiInputModule.Instance.LongClick += TriggerPulse;
@@ -329,7 +329,7 @@ namespace Iviz.Controllers
                         : new Pose(hit.position, worldRotation));  
                 setupModeFrame.Tint = Color.white;
                 ARSet.Visible = true;
-                ARInfoPanel.SetActive(false);
+                ARMoveDevicePanel.SetActive(false);
             }
             else
             {
@@ -621,7 +621,7 @@ namespace Iviz.Controllers
             GuiInputModule.Instance.LongClick -= TriggerPulse;
 
             ARSet.Visible = false;
-            ARInfoPanel.SetActive(false);
+            ARMoveDevicePanel.SetActive(false);
 
             Settings.ARCamera = null;
             Settings.ScreenCaptureManager = null;

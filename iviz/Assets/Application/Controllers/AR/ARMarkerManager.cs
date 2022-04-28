@@ -20,8 +20,8 @@ namespace Iviz.Controllers
         readonly Dictionary<(ARMarkerType, string), ARSeenMarker> seenMarkers = new();
         readonly Dictionary<(ARMarkerType, string), float> activeMarkerHighlighters = new();
 
-        const float MaxDetectionDistanceInM = 0.5f;
-        const float MaxSnapDistanceInM = 0.05f;
+        const float MaxDetectionDistanceInM = 1f;
+        const float MaxSnapDistanceInM = 0.1f;
 
         public bool TryGetMarkerNearby(Vector3 position, out Pose pose)
         {
@@ -55,7 +55,7 @@ namespace Iviz.Controllers
             double distanceMarkerToCameraSq = (rosCameraPosition - rosMarkerPose.Position).SquaredNorm;
             if (distanceMarkerToCameraSq > MaxDetectionDistanceInM * MaxDetectionDistanceInM)
             {
-                RosLogger.Debug($"{this}: Detected marker at distance " +
+                RosLogger.Debug($"{this}: Detected far marker at distance " +
                                 $"{distanceMarkerToCameraSq.ToString(BuiltIns.Culture)}, " +
                                 "discarding.");
                 return;

@@ -27,7 +27,7 @@ namespace Iviz.App
         ARMarkers,
     }
 
-    public class DialogPanelManager : MonoBehaviour
+    public sealed class DialogPanelManager : MonoBehaviour
     {
         readonly Dictionary<DialogPanelType, IDialogPanel> panelByType = new();
         readonly HashSet<DialogData> detachedDialogDatas = new();

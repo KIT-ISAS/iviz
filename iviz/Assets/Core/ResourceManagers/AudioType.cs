@@ -22,7 +22,7 @@ namespace Iviz.Resources
     {
         public AudioClip GetAudioClip(AudioClipType clip)
         {
-            var assetHolder = Resource.Extras.AudioAssetHolder;
+            var assetHolder = ResourcePool.AudioAssetHolder;
             var assetClip = clip switch
             {
                 AudioClipType.Click => assetHolder.Click.AssertNotNull(nameof(assetHolder.Click)),

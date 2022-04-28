@@ -10,9 +10,9 @@ namespace Iviz.Core
     /// <summary>
     /// Note: These operations are meant for il2cpp.
     /// In normal C# using 'fixed' is really slow and should be avoided in hot paths, but in il2cpp it is a free operation.
-    /// They are used in <see cref="GetReference(System.ReadOnlySpan{byte})"/> and variants because
-    /// <see cref="Unsafe.AsRef"/> is slow in il2cpp and generics have lots of unnecessary internal checks.
-    /// Also the <see cref="Plus(ref byte,int)"/> pointers will probably break in GCs with compacting (i.e., normal .NET). 
+    /// We use this variants because <see cref="Unsafe.AsRef{T}"/> is slow in il2cpp and generics have lots of
+    /// unnecessary internal checks.
+    /// Note that the <see cref="Plus(ref byte,int)"/> pointers will probably break in GCs with compacting (i.e., normal .NET). 
     /// </summary>
     public static class SpanUnsafeUtils
     {
@@ -168,8 +168,5 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref Point Plus(this ref Point ptr, int i) => ref Unsafe.Add(ref ptr, i);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe Span<byte> AsSpan(this IntPtr ptr, int size) => new(ptr.ToPointer(), size);
     }
 }

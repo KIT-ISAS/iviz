@@ -15,7 +15,7 @@ namespace Iviz.App
 {
     public sealed class AddTopicDialogData : DialogData
     {
-        const int MaxLineWidth = 250;
+        const int MaxLineWidth = 290;
 
         static readonly Color[] ColorList =
         {
@@ -57,7 +57,7 @@ namespace Iviz.App
                     continue;
                 }
 
-                var resourceType = Resource.ResourceByRosMessageType.TryGetValue(msgType, out var moduleType)
+                var resourceType = Resource.TryGetResourceByRosMessageType(msgType, out var moduleType)
                     ? moduleType
                     : ModuleType.Invalid;
                 result.Add(new TopicWithResource(topic, msgType, resourceType));

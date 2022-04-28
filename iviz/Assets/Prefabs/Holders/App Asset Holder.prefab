@@ -106,6 +106,8 @@ MonoBehaviour:
   Tooltip: {fileID: 2498166935032724989, guid: 6303af998896f4ad29bf3fbf96bd0cdd, type: 3}
   TargetArea: {fileID: 5887126199942291436, guid: 409cbf21c450241b79b9e4327b57da61,
     type: 3}
+  TooltipWidget: {fileID: 566482875618487995, guid: d400e7a90dbfa42dcba1abce6a2828e9,
+    type: 3}
   Boundary: {fileID: 8214874507214888100, guid: b6ea9643ec70d44bdb2e83278435d719,
     type: 3}
   BoundaryLink: {fileID: 6996529739439326712, guid: 359c642ac24754957b8e39579cd74264,

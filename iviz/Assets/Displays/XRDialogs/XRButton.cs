@@ -160,10 +160,7 @@ namespace Iviz.Displays.XR
             //ResetHighlights();
         }
     }
-}
 
-namespace Iviz.Displays.XR
-{
     public enum XRIcon
     {
         None = Msgs.IvizMsgs.Dialog.ICON_NONE,

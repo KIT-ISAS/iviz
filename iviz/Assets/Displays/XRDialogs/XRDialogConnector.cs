@@ -15,7 +15,7 @@ namespace Iviz.Displays.XR
         MeshMarkerDisplay[]? spheres;
         FrameNode? node;
         LineDisplay? lines;
-        Color32 color = Color.cyan;
+        Color color = Color.cyan;
 
         FrameNode Node => node ??= new FrameNode("XRDialogConnector Node", TfModule.OriginFrame);
         LineDisplay Lines => ResourcePool.RentChecked(ref lines, Node.Transform);
@@ -31,6 +31,7 @@ namespace Iviz.Displays.XR
         void OnEnable()
         {
             Node.Parent = TfModule.OriginFrame;
+            TfModule.AfterProcessFrames += UpdateEnds;
         }
 
         void OnDisable()
@@ -39,6 +40,8 @@ namespace Iviz.Displays.XR
             {
                 Node.Parent = null;
             }
+
+            TfModule.AfterProcessFrames -= UpdateEnds;
         }
 
         MeshMarkerDisplay RentSphere()
@@ -94,7 +97,7 @@ namespace Iviz.Displays.XR
             }
         }
 
-        void Update()
+        void UpdateEnds()
         {
             var mDialog = Dialog;
             var a = mDialog.ConnectorStart;

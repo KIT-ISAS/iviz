@@ -10,24 +10,27 @@ using TMPro;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class XRMenuDialog : XRDialog, IDialogWithCaption, IDialogWithTitle, IDialogCanBeMenuClicked,
-        IDialogWithEntries
+    public sealed class XRMenuDialog : XRDialog, IDialogWithCaption, IDialogWithTitle,
+        IDialogCanBeMenuClicked, IDialogCanBeClicked, IDialogWithEntries
     {
         [SerializeField] XRButton[]? menuButtons;
         [SerializeField] XRButton? upButton;
         [SerializeField] XRButton? downButton;
+        [SerializeField] XRButton? closeButton;
         [SerializeField] TMP_Text? titleObject;
         [SerializeField] TMP_Text? captionObject;
 
         XRButton[] Buttons => menuButtons.AssertNotNull(nameof(menuButtons));
         XRButton UpButton => upButton.AssertNotNull(nameof(upButton));
         XRButton DownButton => downButton.AssertNotNull(nameof(downButton));
+        XRButton CloseButton => closeButton.AssertNotNull(nameof(closeButton));
         TMP_Text TitleObject => titleObject.AssertNotNull(nameof(titleObject));
         TMP_Text CaptionObject => captionObject.AssertNotNull(nameof(captionObject));
 
         int menuPage;
         string[] menuEntries = Array.Empty<string>();
 
+        public event Action<int>? Clicked;
         public event Action<int>? MenuClicked;
 
         public string Caption
@@ -40,24 +43,9 @@ namespace Iviz.Displays.XR
             set => TitleObject.text = value;
         }
 
-        protected override void Awake()
-        {
-            base.Awake();
-            foreach (int i in ..Buttons.Length)
-            {
-                Buttons[i].Clicked += () => MenuClicked?.Invoke(i);
-            }
-        }
-
-        public override void Suspend()
-        {
-            base.Suspend();
-            MenuClicked = null;
-            //Button.ResetHighlights();
-        }
-
         int MenuPage
         {
+            get => menuPage;
             set
             {
                 menuPage = value;
@@ -83,9 +71,44 @@ namespace Iviz.Displays.XR
         {
             set
             {
-                menuEntries = value.ToArray();
+                menuEntries = value is string[] array ? array : value.ToArray();
                 MenuPage = 0;
             }
         }
+        
+        protected override void Awake()
+        {
+            base.Awake();
+            CloseButton.Clicked += () => Clicked?.Invoke(0);
+            UpButton.Clicked += OnScrollUpClick;
+            DownButton.Clicked += OnScrollDownClick;
+            foreach (int i in ..Buttons.Length)
+            {
+                Buttons[i].Clicked += () => MenuClicked?.Invoke(i);
+            }
+        }
+
+        public override void Suspend()
+        {
+            base.Suspend();
+            MenuClicked = null;
+            //Button.ResetHighlights();
+        }
+
+        void OnScrollUpClick()
+        {
+            if (MenuPage > 0)
+            {
+                MenuPage--;
+            }
+        }
+
+        void OnScrollDownClick()
+        {
+            if ((MenuPage + 1) * Buttons.Length < menuEntries.Length)
+            {
+                MenuPage++;
+            }
+        }        
     }
 }

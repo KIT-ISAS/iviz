@@ -23,6 +23,7 @@ namespace Iviz.Displays
 
         readonly List<WrapperBoundsControl> wrappers = new();
         IBoundsControl? control;
+        Transform? mTransform;
 
         public event Action? BoundsChanged;
         public event Action? PointerDown;
@@ -31,6 +32,8 @@ namespace Iviz.Displays
         public event Action? StartDragging;
         public event Action? EndDragging;
 
+        public Transform Transform => this.EnsureHasTransform(ref mTransform);
+        
         public TranslationConstraintType TranslationConstraint
         {
             set
@@ -69,7 +72,7 @@ namespace Iviz.Displays
 
             wrappers.Clear();
 
-            var targetTransform = transform;
+            var targetTransform = Transform;
 
             control = translationConstraint switch
             {
