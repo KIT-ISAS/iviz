@@ -98,7 +98,11 @@ public static class TaskUtils
             Task result = await (task, timeoutTask).WhenAny();
             if (result != task)
             {
-                Logger.LogErrorFormat(GenericExceptionFormat, caller, new TimeoutException());
+                if (!token.IsCancellationRequested)
+                {
+                    Logger.LogErrorFormat(GenericExceptionFormat, caller, new TimeoutException());
+                }
+
                 return;
             }
 
@@ -323,8 +327,9 @@ public static class TaskUtils
     public static ValueTask<Task> WhenAny(this (Task t1, Task t2) ts)
     {
         var (t1, t2) = ts;
-        return (t1.IsCompleted ? t1 :
-            t2.IsCompleted ? t2 : Task.WhenAny(t1, t2)).AsTaskResult();
+        return t1.IsCompleted ? t1.AsTaskResult() :
+            t2.IsCompleted ? t2.AsTaskResult() : 
+            Task.WhenAny(t1, t2).AsValueTask();
     }
 
     /// <summary>
