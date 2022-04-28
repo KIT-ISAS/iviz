@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Roslib;
@@ -36,6 +37,7 @@ namespace Iviz.ModelService
             bool enableFileSchema = false;
             bool verbose = false;
 
+            var additionalPaths = new StringBuilder();
             foreach (string arg in args)
             {
                 if (arg == "--enable-file-schema" && !enableFileSchema)
@@ -48,62 +50,53 @@ namespace Iviz.ModelService
                 {
                     verbose = true;
                 }
-            }
-
-            string? rosPackagePathExtras;
-            string? extrasPath = await GetPathExtras();
-            if (extrasPath != null && File.Exists(extrasPath))
-            {
-                try
+                else
                 {
-                    rosPackagePathExtras = await File.ReadAllTextAsync(extrasPath);
-                }
-                catch (IOException e)
-                {
-                    Console.WriteLine($"EE Extras file '{extrasPath}' could not be read: {e.Message}");
-                    rosPackagePathExtras = null;
+                    additionalPaths.Append(arg);
                 }
             }
-            else
+
+            if (await GetPathExtras() is { } paths)
             {
-                rosPackagePathExtras = null;
+                additionalPaths.Append(additionalPaths.Length == 0 ? paths : (":" + paths));
             }
 
-            using var modelServer = new ModelServer(rosPackagePathExtras, enableFileSchema, verbose);
+            using var modelServer = new ModelServer(additionalPaths.ToString(), enableFileSchema, verbose);
 
             if (modelServer.NumPackages == 0)
             {
                 return;
             }
 
+            Console.WriteLine($"** Found {modelServer.NumPackages} ROS packages. Trying to connect...");
+
             Uri myUri = RosClient.TryGetCallerUriFor(masterUri) ?? RosClient.TryGetCallerUri();
             await using RosClient client = await RosClient.CreateAsync(masterUri, "iviz_model_service", myUri);
 
             Console.WriteLine($"** Starting node at URI {client.CallerUri}...");
 
-            Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.ModelServiceName,
+            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.ModelServiceName,
                 GetModelResource.RosServiceType);
 
-            Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.ModelServiceName,
+            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.ModelServiceName,
                 GetModelResource.RosServiceType);
             await client.AdvertiseServiceAsync<GetModelResource>(ModelServer.ModelServiceName,
                 modelServer.ModelCallback);
 
-            Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.TextureServiceName,
+            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.TextureServiceName,
                 GetModelTexture.RosServiceType);
             await client.AdvertiseServiceAsync<GetModelTexture>(ModelServer.TextureServiceName,
                 modelServer.TextureCallback);
 
-            Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.FileServiceName, GetFile.RosServiceType);
+            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.FileServiceName, GetFile.RosServiceType);
             await client.AdvertiseServiceAsync<GetFile>(ModelServer.FileServiceName, modelServer.FileCallback);
 
-            Console.WriteLine("** Starting service {0} [{1}]...", ModelServer.SdfServiceName, GetSdf.RosServiceType);
+            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.SdfServiceName, GetSdf.RosServiceType);
             await client.AdvertiseServiceAsync<GetSdf>(ModelServer.SdfServiceName, modelServer.SdfCallback);
 
 
             Console.WriteLine("** Done.");
-            Console.WriteLine("** Iviz.ModelService started with " + modelServer.NumPackages + " ROS package path(s).");
-            Console.WriteLine("** Standing by for requests.");
+            Console.WriteLine("** Iviz.ModelService started. Standing by for requests.");
 
             await WaitForCancel();
 
@@ -149,12 +142,12 @@ namespace Iviz.ModelService
 
             try
             {
-                Console.WriteLine($"** Reading extra ROS package paths from file '{extrasPath}'");
-                return await File.ReadAllTextAsync(extrasPath);
+                Console.WriteLine($"** Checking file '{extrasPath}' for additional ROS paths...");
+                return (await File.ReadAllTextAsync(extrasPath)).Trim();
             }
             catch (IOException e)
             {
-                Logger.LogErrorFormat("EE ROS package file '{0}' exists but could not be read. Reason: {1}", 
+                Logger.LogErrorFormat("EE ROS package file '{0}' exists but could not be read. Reason: {1}",
                     extrasPath, e.Message);
                 return null;
             }

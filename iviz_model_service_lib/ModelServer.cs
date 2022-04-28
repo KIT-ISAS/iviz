@@ -53,72 +53,70 @@ public sealed class ModelServer : IDisposable
         string? packagePath = Environment.GetEnvironmentVariable("ROS_PACKAGE_PATH");
         if (packagePath is null && additionalPaths is null)
         {
-            LogError("Cannot retrieve environment variable ROS_PACKAGE_PATH, or any other source of packages.");
+            LogError("Environment variable ROS_PACKAGE_PATH is not set, and no other source of packages was provided.");
+            return;
         }
-        else
+
+        var paths = new List<string>();
+
+        if (verbose)
         {
-            var paths = new List<string>();
+            Log("Adding the following package paths:");
+        }
 
+        if (packagePath != null)
+        {
+            string[] newPaths = packagePath.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
             if (verbose)
             {
-                Log("Adding the following package paths:");
+                foreach (string path in newPaths)
+                {
+                    Log("    " + path);
+                }
             }
 
-            if (packagePath != null)
-            {
-                string[] newPaths = packagePath.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-                if (verbose)
-                {
-                    foreach (string path in newPaths)
-                    {
-                        Log("    " + path);
-                    }
-                }
+            paths.AddRange(newPaths);
+        }
 
-                paths.AddRange(newPaths);
-            }
-
-            if (additionalPaths != null)
-            {
-                if (verbose)
-                {
-                    Log("Adding additional package paths:");
-                }
-
-                string[] newPaths = additionalPaths.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-                if (verbose)
-                {
-                    foreach (string path in newPaths)
-                    {
-                        Log("    " + path);
-                    }
-                }
-
-                paths.AddRange(newPaths);
-            }
-
+        if (additionalPaths != null)
+        {
             if (verbose)
             {
-                Log("** Resolving subfolders:");
+                Log("Adding additional package paths:");
             }
 
-            foreach (string path in paths)
+            string[] newPaths = additionalPaths.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+            if (verbose)
             {
-                string pathNormalized = path.Trim();
-                if (!Directory.Exists(pathNormalized))
+                foreach (string path in newPaths)
                 {
-                    continue;
+                    Log("    " + path);
                 }
-
-                string folderName = new DirectoryInfo(pathNormalized).Name;
-                CheckPath(folderName, pathNormalized);
             }
+
+            paths.AddRange(newPaths);
+        }
+
+        if (verbose)
+        {
+            Log("** Resolving subfolders:");
+        }
+
+        foreach (string path in paths)
+        {
+            string pathNormalized = path.Trim();
+            if (!Directory.Exists(pathNormalized))
+            {
+                continue;
+            }
+
+            string folderName = new DirectoryInfo(pathNormalized).Name;
+            CheckPath(folderName, pathNormalized);
         }
 
         if (packagePaths.Count == 0)
         {
-            LogError("No package paths were found. Try setting the ROS_PACKAGE_PATH environment variable, " +
-                     "or creating a ros_package_path file.");
+            LogError("No packages were found in the given paths were found.");
         }
 
         IsFileSchemaEnabled = enableFileSchema;
@@ -374,7 +372,7 @@ public sealed class ModelServer : IDisposable
             var doc = new XmlDocument();
             doc.Load(fileName);
             var nodeList = doc.GetElementsByTagName("up_axis");
-            if (nodeList.Count != 0 && nodeList[0] is {} node)
+            if (nodeList.Count != 0 && nodeList[0] is { } node)
             {
                 orientationHint = node.InnerText ?? "";
             }
