@@ -309,6 +309,10 @@ namespace Iviz.Msgs
             throw new RosBufferException($"Requested {off} bytes, but only {remaining} remain!");
 
         [DoesNotReturn]
+        public static void ThrowImplausibleBufferSize() =>
+            throw new RosBufferException("Implausible message requested more than 1TB elements.");
+
+        [DoesNotReturn]
         public static void ThrowInvalidSizeForFixedArray(int size, int expected) =>
             throw new RosInvalidSizeForFixedArrayException(size, expected);
     }

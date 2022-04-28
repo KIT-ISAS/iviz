@@ -194,15 +194,17 @@ namespace Iviz.Msgs
             if (count == 0)
             {
                 val = Array.Empty<T>();
+                return;
             }
 
             if (count <= 1024 * 1024 * 1024)
             {
                 val = new T[count];
-                // entry deserializations happen outside
+                return; // entry deserializations happen outside
             }
 
-            throw new RosBufferException("Implausible message requested more than 1TB elements.");
+            BuiltIns.ThrowImplausibleBufferSize();
+            val = Array.Empty<T>(); // unreachable
         }
 
         /// <summary>
