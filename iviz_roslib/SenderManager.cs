@@ -37,7 +37,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
 
     public string Topic => topicInfo.Topic;
     public string TopicType => topicInfo.Type;
-    public int NumConnections => senders.Count(sender => sender.IsAlive);
+    public int NumConnections => cachedSenders.Count(sender => sender.IsAlive);
     public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
     public bool ForceTcpNoDelay

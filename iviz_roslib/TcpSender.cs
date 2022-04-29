@@ -248,6 +248,9 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
                 case SocketException:
                     Logger.LogDebugFormat(BaseUtils.GenericExceptionFormat, this, e);
                     break;
+                case RoslibException:
+                    Logger.LogErrorFormat(BaseUtils.GenericExceptionFormat, this, e);
+                    break;
                 default:
                     Logger.LogFormat(BaseUtils.GenericExceptionFormat, this, e);
                     break;
