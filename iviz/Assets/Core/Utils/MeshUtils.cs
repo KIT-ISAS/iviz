@@ -3,6 +3,7 @@
 using System;
 using UnityEngine;
 using Iviz.Tools;
+using UnityEngine.Rendering;
 
 namespace Iviz.Core
 {
@@ -29,6 +30,9 @@ namespace Iviz.Core
         public static void SetIndices(this Mesh mesh, ReadOnlySpan<int> ps, MeshTopology topology, int subMesh)
         {
             var array = UnsafeUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
+            mesh.indexFormat = ps.Length < ushort.MaxValue
+                ? IndexFormat.UInt16
+                : IndexFormat.UInt32;
             mesh.SetIndices(array, topology, subMesh);
         }
 

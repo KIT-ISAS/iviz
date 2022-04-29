@@ -218,11 +218,6 @@ namespace Iviz.Displays
                 }
 
                 mesh.SetVertices(pointsArray);
-                //mesh.SetVertices(pointsArray.Array, 0, points.Length);
-
-                mesh.indexFormat = indicesArray.Length < 65536
-                    ? IndexFormat.UInt16
-                    : IndexFormat.UInt32;
                 mesh.SetIndices(indicesArray, MeshTopology.Quads, 0);
                 mesh.RecalculateNormals();
                 mesh.Optimize();

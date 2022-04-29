@@ -31,26 +31,16 @@ namespace Iviz.Displays
             }
         }
 
-        Mesh EnsureOwnMesh(int numPointsNeeded)
+        Mesh EnsureOwnMesh()
         {
-            var indexFormat = numPointsNeeded <= UnityUtils.MeshUInt16Threshold
-                ? IndexFormat.UInt16
-                : IndexFormat.UInt32;
-
             if (mesh != null)
             {
-                if (mesh.indexFormat != indexFormat)
-                {
-                    mesh.indexFormat = indexFormat;
-                }
-
                 return mesh;
             }
 
             var newMesh = new Mesh
             {
-                indexFormat = indexFormat,
-                name = "MeshTrianglesResource Mesh"
+                name = nameof(MeshTrianglesDisplay) + " Mesh"
             };
 
 
@@ -61,7 +51,7 @@ namespace Iviz.Displays
 
         public void Clear()
         {
-            EnsureOwnMesh(0).Clear();
+            EnsureOwnMesh().Clear();
         }
 
         public void Set(ReadOnlySpan<Vector3> points, ReadOnlySpan<Color> colors = default)
@@ -77,10 +67,10 @@ namespace Iviz.Displays
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
-            var ownMesh = EnsureOwnMesh(pointsLength);
+            var ownMesh = EnsureOwnMesh();
 
             ownMesh.Clear();
-            
+
             if (pointsLength == 0)
             {
                 Collider.SetLocalBounds(ownMesh.bounds);
@@ -148,17 +138,17 @@ namespace Iviz.Displays
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
-            var ownMesh = EnsureOwnMesh(points.Length);
+            var ownMesh = EnsureOwnMesh();
 
             ownMesh.Clear();
-            
+
             if (points.Length == 0 || triangles.Length == 0)
             {
                 Collider.SetLocalBounds(ownMesh.bounds);
                 BoundsChanged?.Invoke();
                 return;
             }
-            
+
             ownMesh.SetVertices(points);
             if (normals.Length != 0)
             {
