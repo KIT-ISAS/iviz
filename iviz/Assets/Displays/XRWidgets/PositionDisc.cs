@@ -227,6 +227,7 @@ namespace Iviz.App.ARDialogs
         public void Suspend()
         {
             Button.Transform.parent = Transform;
+            Button.Visible = false;
             Draggable.Transform.localPosition = Vector3.zero;
             Line.Visible = false;
             Moved = null;

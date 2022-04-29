@@ -119,7 +119,7 @@ namespace Iviz.App.ARDialogs
                 lineBuffer.Add(new LineWithColor(positions[i], positions[i + 1]));
             }
 
-            Lines.Set(lineBuffer);
+            Lines.Set(lineBuffer, false);
         }
 
         public override void Suspend()

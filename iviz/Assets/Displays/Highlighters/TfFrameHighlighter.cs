@@ -59,7 +59,8 @@ namespace Iviz.Displays.Highlighters
             axisResource.Tint = color;
 
             tooltip.Scale = labelSize;
-            tooltip.Transform.position = nodePosition + (1.2f * axisResource.AxisLength + 5 * labelSize) * Vector3.up;
+            float tooltipOffset = (1.2f * axisResource.AxisLength + 5 * labelSize) * TfModule.RootScale;
+            tooltip.Transform.position = nodePosition + tooltipOffset * Vector3.up;
             tooltip.CaptionColor = color;
             tooltip.Color = Resource.Colors.TooltipBackground.WithAlpha(alpha);
             if (t == 0)

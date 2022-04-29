@@ -26,10 +26,7 @@ namespace Iviz.Displays.XR
 
         public CaptionAlignmentType CaptionAlignment
         {
-            set => CaptionObject.alignment =
-                value == CaptionAlignmentType.Default
-                    ? TextAlignmentOptions.Midline
-                    : (TextAlignmentOptions)value;
+            set => CaptionObject.alignment = (TextAlignmentOptions)value;
         }
     }
 }

@@ -131,6 +131,9 @@ namespace Iviz.Controllers.XR
 
             leftGestures.PalmClicked += () => ToggleMainCanvas(LeftController!);
             leftGestures.GestureChanged += ManageGestureLeft;
+            
+            leftPaddle.SecondaryClicked += () => ToggleMainCanvas(leftPaddle);
+            rightPaddle.SecondaryClicked += () => ToggleMainCanvas(rightPaddle);
 
             anchorManager = contents.AnchorManager;
 

@@ -74,6 +74,7 @@ namespace Iviz.Controllers.TF
 
         public static float RootScale
         {
+            get => RootFrame.Transform.localScale.x;
             set => RootFrame.Transform.localScale = value * Vector3.one;
         }
 

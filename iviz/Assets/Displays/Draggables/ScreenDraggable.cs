@@ -20,7 +20,7 @@ namespace Iviz.Displays
 
         protected Transform? interactorTransform;
 
-        public bool IsHovering { get; private set; }
+        public bool IsHovering { get; protected set; }
         public bool IsDragging { get; private set; }
 
         public abstract Quaternion BaseOrientation { set; }
@@ -134,11 +134,21 @@ namespace Iviz.Displays
 
         void IPointerEnterHandler.OnPointerEnter(PointerEventData _)
         {
+            StartHover();
+        }
+
+        void IPointerExitHandler.OnPointerExit(PointerEventData _)
+        {
+            EndHover();
+        }
+
+        protected void StartHover()
+        {
             IsHovering = true;
             StateChanged?.Invoke();
         }
 
-        void IPointerExitHandler.OnPointerExit(PointerEventData _)
+        protected void EndHover()
         {
             IsHovering = false;
             StateChanged?.Invoke();

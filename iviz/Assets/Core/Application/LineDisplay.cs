@@ -102,7 +102,7 @@ namespace Iviz.Displays
             Set(MemoryMarshal.Cast<LineWithColor, float4x2>(lines), overrideNeedsAlpha);
         }
 
-        public void Set(ReadOnlySpan<float4x2> lines, bool? overrideNeedsAlpha = null)
+        public void Set(ReadOnlySpan<float4x2> lines, bool? overrideNeedsAlpha)
         {
             lineBuffer.Clear();
             lineBuffer.AddRange(lines);

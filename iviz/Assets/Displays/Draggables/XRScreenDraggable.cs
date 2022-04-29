@@ -18,6 +18,8 @@ namespace Iviz.Displays
             }
             
             interactable = gameObject.EnsureComponent<XRSimpleInteractable>();
+            interactable.hoverEntered.AddListener(OnHoverEntered);
+            interactable.hoverExited.AddListener(OnHoverExited);
             interactable.selectEntered.AddListener(OnSelectEntered);
             interactable.selectExited.AddListener(OnSelectExited);
         }
@@ -35,6 +37,16 @@ namespace Iviz.Displays
             GameThread.EveryFrame -= TriggerPointerMove;
             EndSelected();
             interactorTransform = null;
+        }
+
+        void OnHoverEntered(HoverEnterEventArgs _)
+        {
+            StartHover();
+        }
+
+        void OnHoverExited(HoverExitEventArgs _)
+        {
+            EndHover();
         }
 
         void TriggerPointerMove()

@@ -1,5 +1,7 @@
 #nullable enable
 
+using System;
+using System.Buffers;
 using Iviz.Core;
 using Iviz.Tools;
 using Unity.Mathematics;
@@ -68,47 +70,51 @@ namespace Iviz.Displays
 
         void BuildLeash(Ray pointerRay, Vector3 target)
         {
-            float distance = (target - pointerRay.origin).Magnitude();
+            var (start, tangent) = pointerRay;
+
+            float distance = (target - start).Magnitude();
             int numSegments = (int)(distance * 16);
             
             var colorBase = Color;
-            Lines.SetDirect(array =>
+            if (distance.ApproximatelyZero())
             {
-                var (start, tangent) = pointerRay;
+                return;
+            }
 
-                if (distance.ApproximatelyZero())
-                {
-                    return false;
-                }
+            var direction = (target - start) / distance;
+            var tangentReflected = tangent - Vector3.Dot(tangent, direction) * 2 * direction;
+            float dirScale = distance / 3;
 
-                var direction = (target - start) / distance;
-                var tangentReflected = tangent - Vector3.Dot(tangent, direction) * 2 * direction;
-                float dirScale = distance / 3;
+            var f = new float3x4(
+                start,
+                start + dirScale * tangent,
+                target + dirScale * tangentReflected,
+                target);
 
+            var line = new float4x2();
 
-                var f = new float3x4(
-                    start,
-                    start + dirScale * tangent,
-                    target + dirScale * tangentReflected,
-                    target);
+            ref var c0 = ref f.c0;
+            ref var c3 = ref f.c3;
 
-                var line = new float4x2();
+            ref var l0 = ref line.c0;
+            ref var l1 = ref line.c1;
 
-                ref var c0 = ref f.c0;
-                ref var c3 = ref f.c3;
+            var p = c0;
 
-                ref var l0 = ref line.c0;
-                ref var l1 = ref line.c1;
+            float colorA = colorBase.a;
 
-                var p = c0;
+            Color32 color = colorBase;
+            color.a = 0;
 
-                float colorA = colorBase.a;
+            l0.w = UnityUtils.AsFloat(color);
 
-                Color32 color = colorBase;
-                color.a = 0;
+            var rented = Rent.Empty<float4x2>();
+            Span<float4x2> span = numSegments < 64
+                ? stackalloc float4x2[numSegments]
+                : (rented = new Rent<float4x2>(numSegments));
 
-                l0.w = UnityUtils.AsFloat(color);
-
+            using (rented)
+            {
                 foreach (int i in ..numSegments)
                 {
                     float t = (i + 1f) / numSegments;
@@ -122,14 +128,14 @@ namespace Iviz.Displays
 
                     l1.w = UnityUtils.AsFloat(color);
 
-                    array.Add(line);
+                    span[i] = line;
 
                     p = q;
                     l0.w = l1.w;
                 }
-
-                return true;
-            }, numSegments);
+                
+                Lines.Set(span, true);
+            }
         }
 
         static float AlphaFromDistance(in float3 p, in float3 start, in float3 end)

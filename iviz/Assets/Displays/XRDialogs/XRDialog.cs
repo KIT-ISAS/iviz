@@ -112,7 +112,7 @@ namespace Iviz.Displays.XR
         {
             get
             {
-                var framePosition = TfModule.RelativeToOrigin(Node.Transform.position) + TfFrameOffset;
+                var framePosition = TfModule.RelativeToOrigin(Node.Transform.TransformPoint(TfFrameOffset));
                 return TfDisplacement.MaxAbsCoeff() == 0
                     ? framePosition
                     : framePosition + GetFlatCameraRotationRelativeTo(framePosition) * TfDisplacement;
@@ -180,8 +180,8 @@ namespace Iviz.Displays.XR
                 case BindingType.None:
                 case BindingType.Tf:
                 {
-                    var absolutePivotPosition = Node.Transform.position;
-                    var localFramePosition = TfModule.RelativeToOrigin(absolutePivotPosition) + TfFrameOffset;
+                    var absolutePivotPosition = Node.Transform.TransformPoint(TfFrameOffset);
+                    var localFramePosition = TfModule.RelativeToOrigin(absolutePivotPosition);
                     var localCameraRotation = GetFlatCameraRotationRelativeTo(localFramePosition);
                     var localTargetPosition =
                         localFramePosition + localCameraRotation * DialogDisplacement - socketPosition;

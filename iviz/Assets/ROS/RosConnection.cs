@@ -71,7 +71,10 @@ namespace Iviz.Ros
             GameThread.Post(() => ConnectionWarningStateChanged?.Invoke(value));
         }
 
-        protected void AddTask(Func<ValueTask> a)
+        /// <summary>
+        /// Runs the task in the connection thread. 
+        /// </summary>
+        protected void Post(Func<ValueTask> a)
         {
             if (disposed)
             {
@@ -83,6 +86,9 @@ namespace Iviz.Ros
             Signal();
         }
 
+        /// <summary>
+        /// Notifies the connection thread that it has a new task. 
+        /// </summary>
         protected void Signal()
         {
             signal.Release();
@@ -184,7 +190,7 @@ namespace Iviz.Ros
             lastConnectionTry = DateTime.MinValue;
         }
         
-        public sealed override string ToString() => "[RosConnection]";
+        public sealed override string ToString() => $"[{nameof(RosConnection)}]";
     }
 
     public enum RequestType

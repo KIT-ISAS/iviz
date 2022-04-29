@@ -173,7 +173,10 @@ namespace Iviz.Controllers
 
             if (dialog is IDialogWithAlignment withAlignment)
             {
-                withAlignment.CaptionAlignment = (CaptionAlignmentType)msg.CaptionAlignment;
+                var alignment = (CaptionAlignmentType)msg.CaptionAlignment;
+                withAlignment.CaptionAlignment = alignment == CaptionAlignmentType.Default
+                    ? CaptionAlignmentType.Mid | CaptionAlignmentType.Center
+                    : alignment;
             }
 
             if (dialog is IDialogWithIcon withIcon)

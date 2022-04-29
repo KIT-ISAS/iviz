@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SpatialTracking;
@@ -13,14 +14,18 @@ namespace Iviz.Controllers.XR
         [SerializeField] HandType handType;
         [SerializeField] float triggerAxisThreshold = 0.1f;
         [SerializeField] Vector3 centerOffset = new Vector3(0, 0, 0.1f);
-        
+        bool secondaryState;
+
         public Pose? Pose { get; private set; }
-        
+
+        public event Action? SecondaryClicked;
+
+
         public PaddleController()
         {
             HasCursor = true;
         }
-        
+
         protected override bool MatchesDevice(InputDeviceCharacteristics characteristics,
             List<InputFeatureUsage> usages)
         {
@@ -45,7 +50,7 @@ namespace Iviz.Controllers.XR
             controllerState.poseDataFlags = PoseDataFlags.NoData;
 
             if (!TryGetDevice(out var device)
-                || !device.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracking) 
+                || !device.TryGetFeatureValue(CommonUsages.isTracked, out bool isTracking)
                 || !isTracking)
             {
                 return;
@@ -65,14 +70,14 @@ namespace Iviz.Controllers.XR
             }
 
             if (controllerState.poseDataFlags != (PoseDataFlags.Position | PoseDataFlags.Rotation))
-            //if (controllerState.inputTrackingState != (InputTrackingState.Position | InputTrackingState.Rotation))
+                //if (controllerState.inputTrackingState != (InputTrackingState.Position | InputTrackingState.Rotation))
             {
                 return;
             }
 
             IsActiveInFrame = true;
             Pose = new Pose(controllerState.position, controllerState.rotation);
-            
+
             if (device.TryGetFeatureValue(CommonUsages.trigger, out float squeeze))
             {
                 bool newButtonState = squeeze > triggerAxisThreshold;
@@ -83,6 +88,15 @@ namespace Iviz.Controllers.XR
 
             //PrimaryAxisMove = device.TryGetFeatureValue(CommonUsages.primary2DAxis, out var axis) ? axis : null;
             //PrimaryAxisDown = device.TryGetFeatureValue(CommonUsages.primary2DAxisClick, out bool click) ? click : null;
+            if (device.TryGetFeatureValue(CommonUsages.primary2DAxisClick, out bool newSecondaryState))
+            {
+                if (newSecondaryState && !secondaryState)
+                {
+                    SecondaryClicked?.Invoke();
+                }
+
+                secondaryState = newSecondaryState;
+            }
         }
 
         /// <inheritdoc />

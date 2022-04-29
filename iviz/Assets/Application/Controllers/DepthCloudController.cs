@@ -251,7 +251,7 @@ namespace Iviz.Controllers
                 config.DepthTopic = depthTopic;
 
                 string infoTopic = RosUtils.GetCameraInfoTopic(depthTopic);
-                depthInfoListener = new Listener<CameraInfo>(infoTopic, InfoHandler, RosTransportHint.PreferUdp);
+                depthInfoListener = new Listener<CameraInfo>(infoTopic, InfoHandler);
             }
         }
 

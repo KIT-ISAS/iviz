@@ -211,7 +211,7 @@ namespace Iviz.Displays.XR
                 segments[i] = new LineWithColor(dirA0, dirA1);
             }
 
-            Lines.Set(segments);
+            Lines.Set(segments, false);
         }
 
         public void SplitForRecycle()

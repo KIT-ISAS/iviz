@@ -57,7 +57,7 @@ namespace Iviz.App
 
             if (Settings.IsMobile)
             {
-                modelService.Visible = false;
+                ModelService.Visible = false;
             }
         }
 

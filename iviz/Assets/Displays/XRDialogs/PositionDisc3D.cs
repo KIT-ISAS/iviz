@@ -20,13 +20,13 @@ namespace Iviz.App.ARDialogs
         [SerializeField] MeshMarkerDisplay? glow;
         [SerializeField] float linkWidth = 0.04f;
         [SerializeField] float buttonDistance = 1f;
-        
+
         LineDisplay? line;
         Transform? mTransform;
 
         CancellationTokenSource? tokenSource;
         string mainButtonCaption = "Send!";
-        
+
         Color color = new(0, 1f, 0.6f);
         Color secondaryColor = Color.white;
 
@@ -78,7 +78,7 @@ namespace Iviz.App.ARDialogs
         {
             set => Draggable.enabled = value;
         }
-        
+
         void Awake()
         {
             Line.ElementScale = linkWidth;
@@ -86,9 +86,9 @@ namespace Iviz.App.ARDialogs
 
             Color = Color;
             SecondaryColor = SecondaryColor;
-            
-            Glow.Visible = false;            
-            
+
+            Glow.Visible = false;
+
             Button.Icon = XRIcon.Ok;
             Button.Caption = "Send!";
             Button.Visible = false;
@@ -101,10 +101,24 @@ namespace Iviz.App.ARDialogs
                 tokenSource?.Cancel();
                 Line.Visible = true;
                 Disc.EmissiveColor = Color;
-                Glow.Visible = true;                
+                Glow.Visible = true;
             };
             Draggable.Moved += () =>
             {
+                var discPosition = Draggable.Transform.localPosition;
+
+                var p0 = Vector3.zero;
+                var p1 = new Vector3(0, discPosition.y, 0);
+                var p2 = new Vector3(0, discPosition.y, discPosition.z);
+                var p3 = discPosition;
+
+                lineBuffer[0] = new LineWithColor(p0, p1, Color.blue.WithAlpha(0.5f));
+                lineBuffer[1] = new LineWithColor(p1, p2, Color.red.WithAlpha(0.5f));
+                lineBuffer[2] = new LineWithColor(p2, p3, Color.green.WithAlpha(0.5f));
+
+                Line.Set(lineBuffer, true);
+
+                /*
                 var discPosition = Draggable.Transform.localPosition;
 
                 var localToFixed = TfModule.RelativeToFixedFrame(Transform);
@@ -123,17 +137,18 @@ namespace Iviz.App.ARDialogs
                 lineBuffer[1] = new LineWithColor(p1, p2, Color.red.WithAlpha(0.5f));
                 lineBuffer[2] = new LineWithColor(p2, p3, Color.green.WithAlpha(0.5f));
                 Line.Set(lineBuffer, true);           
-            };            
+                */
+            };
             Draggable.EndDragging += () =>
             {
                 Disc.EmissiveColor = Color.black;
                 Glow.Visible = false;
-                
+
                 //Button.Transform.SetLocalPose(Draggable.Transform.AsLocalPose().Multiply(BaseButtonPose));
                 //Button.Transform.localPosition = Draggable.Transform.TransformPoint(new Vector3(-0.8f, 0, 0));
                 Button.Transform.localPosition = Draggable.Transform.localPosition + buttonDistance * Vector3.up;
                 Button.Visible = true;
-                
+
                 //button.Transform.SetLocalPose(disc.Transform.AsLocalPose().Multiply(BaseButtonPose));
                 //button.Visible = true;
             };
@@ -146,12 +161,10 @@ namespace Iviz.App.ARDialogs
                 tokenSource = new CancellationTokenSource();
 
                 var startPosition = Draggable.Transform.localPosition;
-                FAnimator.Spawn(tokenSource.Token, 0.1f, t =>
-                {
-                    Draggable.Transform.localPosition = (1 - Mathf.Sqrt(t)) * startPosition;
-                });                
-                
-                Moved?.Invoke(startPosition);                
+                FAnimator.Spawn(tokenSource.Token, 0.1f,
+                    t => { Draggable.Transform.localPosition = (1 - Mathf.Sqrt(t)) * startPosition; });
+
+                Moved?.Invoke(startPosition);
                 /*
                 button.Visible = false;
                 Debug.Log("click");
@@ -222,8 +235,9 @@ namespace Iviz.App.ARDialogs
         {
             Button.Transform.parent = Transform;
             Draggable.Transform.localPosition = Vector3.zero;
+            Button.Visible = false;
             Line.Visible = false;
-            Moved = null;            
+            Moved = null;
         }
 
         public void SplitForRecycle()

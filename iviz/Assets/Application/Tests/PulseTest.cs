@@ -29,7 +29,7 @@ namespace Iviz.App.Tests
                     }
                 }
                 
-                resource.Set(lines);
+                resource.Set(lines, false);
             }
 
             start = Time.time;

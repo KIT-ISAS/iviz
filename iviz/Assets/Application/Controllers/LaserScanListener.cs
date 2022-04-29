@@ -145,7 +145,7 @@ namespace Iviz.Controllers
                 Topic = topic,
             };
 
-            Listener = new Listener<LaserScan>(Config.Topic, Handler, RosTransportHint.PreferUdp);
+            Listener = new Listener<LaserScan>(Config.Topic, Handler);
         }
 
         void Handler(LaserScan msg)

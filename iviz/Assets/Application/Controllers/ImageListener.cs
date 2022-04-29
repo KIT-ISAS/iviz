@@ -237,7 +237,7 @@ namespace Iviz.Controllers
             billboard.Title = Listener.Topic;
 
             string infoTopic = RosUtils.GetCameraInfoTopic(Config.Topic);
-            infoListener = new Listener<CameraInfo>(infoTopic, InfoHandler, RosTransportHint.PreferUdp);
+            infoListener = new Listener<CameraInfo>(infoTopic, InfoHandler);
         }
 
         bool HandlerCompressed(CompressedImage msg)

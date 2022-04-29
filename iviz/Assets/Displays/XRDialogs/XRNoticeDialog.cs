@@ -10,7 +10,7 @@ namespace Iviz.Displays.XR
     {
         [SerializeField] TMP_Text? caption;
         [SerializeField] XRIconPlane? iconObject;
-        
+
         TMP_Text CaptionObject => caption.AssertNotNull(nameof(caption));
         XRIconPlane IconObject => iconObject.AssertNotNull(nameof(iconObject));
 

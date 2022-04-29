@@ -34,7 +34,7 @@ namespace Iviz.Controllers.XR
         void OnSelectEntered(SelectEnterEventArgs args)
         {
             //if (args.interactableObject is not XRBaseInteractable interactable)
-            if (args.interactable is not XRBaseInteractable interactable)
+            if (args.interactable is not { } interactable)
             {
                 return;
             }

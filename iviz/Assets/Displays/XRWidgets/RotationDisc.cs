@@ -15,13 +15,11 @@ namespace Iviz.Displays.XR
         [SerializeField] CircleFixedDistanceDraggable? fixedCircle;
         [SerializeField] Transform? disc;
         [SerializeField] MeshMarkerDisplay? outer;
-        [SerializeField] MeshMarkerDisplay? ring;
         [SerializeField] MeshMarkerDisplay? glow;
-        LineDisplay? lines;
+        LineDisplay? partialLines;
+        LineDisplay? ringLines;
 
         const int RingElements = 64;
-
-        readonly LineWithColor[] lineBuffer = new LineWithColor[RingElements];
 
         float currentAngle;
         Color color = new(0, 0.6f, 1f);
@@ -30,9 +28,9 @@ namespace Iviz.Displays.XR
 
         MeshMarkerDisplay Glow => glow.AssertNotNull(nameof(glow));
         MeshMarkerDisplay Outer => outer.AssertNotNull(nameof(outer));
-        MeshMarkerDisplay Ring => ring.AssertNotNull(nameof(ring));
         Transform Disc => disc.AssertNotNull(nameof(disc));
-        LineDisplay Lines => ResourcePool.RentChecked(ref lines, transform);
+        LineDisplay PartialLines => ResourcePool.RentChecked(ref partialLines, transform);
+        LineDisplay RingLines => ResourcePool.RentChecked(ref ringLines, transform);
 
         XRScreenDraggable Draggable => Settings.IsXR
             ? fixedCircle.AssertNotNull(nameof(fixedCircle))
@@ -44,10 +42,9 @@ namespace Iviz.Displays.XR
             set
             {
                 color = value;
-                Ring.Color = value.WithAlpha(0.2f);
-                Ring.EmissiveColor = value;
                 Glow.Color = value.WithAlpha(0.8f);
                 Glow.EmissiveColor = value;
+                PartialLines.Tint = value;
             }
         }
 
@@ -58,13 +55,13 @@ namespace Iviz.Displays.XR
             {
                 secondaryColor = value;
                 Outer.Color = value;
-                Lines.Tint = value;
+                RingLines.Tint = value;
             }
         }
 
         public float SecondaryScale
         {
-            set => Disc.localScale = value * Vector3.one;
+            set => Disc.localScale = value * 0.5f * Vector3.one;
         }
 
         public bool Interactable
@@ -80,8 +77,25 @@ namespace Iviz.Displays.XR
             SecondaryColor = SecondaryColor;
             Glow.Visible = false;
 
-            Lines.ElementScale = 0.02f;
-            Lines.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
+            PartialLines.ElementScale = 0.02f;
+            PartialLines.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
+
+            RingLines.ElementScale = 0.005f;
+            RingLines.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
+
+            {
+                Span<LineWithColor> ringBuffer = stackalloc LineWithColor[RingElements];
+                foreach (int i in ..RingElements)
+                {
+                    float a0 = 2 * Mathf.PI * i / RingElements;
+                    float a1 = 2 * Mathf.PI * (i + 1) / RingElements;
+                    var v0 = new Vector3(Mathf.Cos(a0), 0, Mathf.Sin(a0));
+                    var v1 = new Vector3(Mathf.Cos(a1), 0, Mathf.Sin(a1));
+                    ringBuffer[i] = new LineWithColor(v0, v1);
+                }
+
+                RingLines.Set(ringBuffer, false);
+            }
 
             var draggable = Draggable;
 
@@ -89,7 +103,6 @@ namespace Iviz.Displays.XR
             draggable.StartDragging += () =>
             {
                 tokenSource?.Cancel();
-                Ring.Color = Color.WithAlpha(0.8f);
                 Outer.Color = Color;
                 Outer.EmissiveColor = Color;
                 Glow.Visible = true;
@@ -102,7 +115,6 @@ namespace Iviz.Displays.XR
             {
                 Outer.Color = SecondaryColor;
                 Outer.EmissiveColor = Color.black;
-                Ring.Color = Color.WithAlpha(0.2f);
                 Glow.Visible = false;
 
                 Moved?.Invoke(0);
@@ -135,6 +147,8 @@ namespace Iviz.Displays.XR
             ref var a = ref line.f.c0;
             ref var b = ref line.f.c1;
 
+            Span<LineWithColor> lineBuffer = stackalloc LineWithColor[RingElements];
+            
             (a.x, a.z) = (0, 1);
             foreach (int i in ..RingElements)
             {
@@ -145,7 +159,7 @@ namespace Iviz.Displays.XR
                 a = b;
             }
 
-            Lines.Set(lineBuffer, false);
+            PartialLines.Set(lineBuffer, false);
 
             if (raiseOnMoved)
             {
@@ -161,18 +175,19 @@ namespace Iviz.Displays.XR
 
         public void SplitForRecycle()
         {
-            lines.ReturnToPool();
+            partialLines.ReturnToPool();
+            ringLines.ReturnToPool();
         }
 
         public void Suspend()
         {
             Moved = null;
             Disc.localPosition = Vector3.forward;
-            Lines.Reset();
+            PartialLines.Reset();
 
             Color = Color;
             SecondaryColor = SecondaryColor;
-            SecondaryScale = 0.4f;
+            SecondaryScale = 1;
             Glow.Visible = false;
         }
     }

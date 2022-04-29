@@ -24,19 +24,20 @@ namespace Iviz.Ros
 {
     public sealed class RoslibConnection : RosConnection, Iviz.Displays.IServiceProvider
     {
-        static BriefTopicInfo[] EmptyTopics => Array.Empty<BriefTopicInfo>();
-        static string[] EmptyParameters => Array.Empty<string>();
-        static Random Random => Defaults.Random;
-
-        readonly ConcurrentDictionary<int, IRosPublisher?> publishers = new();
+        readonly BriefTopicInfo[] EmptyTopics = Array.Empty<BriefTopicInfo>();
+        readonly string[] EmptyParameters = Array.Empty<string>();
+        readonly Random Random = Defaults.Random;
+        
+        //readonly ConcurrentDictionary<int, IRosPublisher?> publishers = new();
+        readonly IRosPublisher?[] publishers = new IRosPublisher[256];
         readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new();
         readonly Dictionary<string, IAdvertisedService> servicesByTopic = new();
         readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new();
         readonly List<(string hostname, string address)> hostAliases = new();
 
-        string[] cachedParameters = EmptyParameters;
-        BriefTopicInfo[] cachedPublishedTopics = EmptyTopics;
-        BriefTopicInfo[] cachedTopics = EmptyTopics;
+        string[] cachedParameters;
+        BriefTopicInfo[] cachedPublishedTopics;
+        BriefTopicInfo[] cachedTopics;
         SystemState? cachedSystemState;
         RosClient? client;
         BagListener? bagListener;
@@ -91,7 +92,7 @@ namespace Iviz.Ros
             get => bagListener;
             set
             {
-                AddTask(async () =>
+                Post(async () =>
                 {
                     if (bagListener == value)
                     {
@@ -110,6 +111,13 @@ namespace Iviz.Ros
                     }
                 });
             }
+        }
+
+        public RoslibConnection()
+        {
+            cachedParameters = EmptyParameters;
+            cachedPublishedTopics = EmptyTopics;
+            cachedTopics = EmptyTopics;
         }
 
         public void SetHostAliases(IEnumerable<(string hostname, string address)> newHostAliases)
@@ -181,7 +189,7 @@ namespace Iviz.Ros
 
                 Client.RosMasterClient.TimeoutInMs = rpcTimeoutInMs;
 
-                AddTask(async () =>
+                Post(async () =>
                 {
                     RosLogger.Internal("Resubscribing and readvertising...");
                     token.ThrowIfCancellationRequested();
@@ -337,7 +345,7 @@ namespace Iviz.Ros
             {
                 return;
             }
-            
+
             try
             {
                 await Task.Delay(5000, token);
@@ -346,7 +354,7 @@ namespace Iviz.Ros
             {
                 return;
             }
-            
+
             if (RosManager.Logger.Sender.NumSubscribers != 0)
             {
                 RosLogger.Internal("Never mind, /rosout just saw us.");
@@ -472,15 +480,28 @@ namespace Iviz.Ros
             }
         }
 
-        static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 100), token);
+        Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 100), token);
 
         async ValueTask ReAdvertise(IAdvertisedTopic topic, CancellationToken token)
         {
             await RandomDelay(token);
             await topic.AdvertiseAsync(Connected ? Client : null, token);
-            int id = publishers.Count;
+            int id = GetFreeId();
             topic.Id = id;
             publishers[id] = topic.Publisher;
+        }
+
+        int GetFreeId()
+        {
+            for (int i = 0; i < publishers.Length; i++)
+            {
+                if (publishers[i] == null)
+                {
+                    return i;
+                }
+            }
+
+            throw new InvalidOperationException("Ran out of publishers!"); // NYI!
         }
 
         async ValueTask ReSubscribe(ISubscribedTopic topic, CancellationToken token)
@@ -505,7 +526,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            AddTask(DisconnectImpl);
+            Post(DisconnectImpl);
         }
 
         async ValueTask DisconnectImpl()
@@ -514,7 +535,7 @@ namespace Iviz.Ros
             {
                 return;
             }
-            
+
             foreach (var entry in publishersByTopic.Values)
             {
                 entry.Invalidate();
@@ -525,7 +546,7 @@ namespace Iviz.Ros
                 entry.Invalidate();
             }
 
-            publishers.Clear();
+            publishers.AsSpan().Fill(null);
 
             RosLogger.Internal("Disconnecting...");
             await DisposeClientAsync();
@@ -550,7 +571,7 @@ namespace Iviz.Ros
             ThrowHelper.ThrowIfNull(advertiser, nameof(advertiser));
             advertiser.Id = null;
             CancellationToken token = runningTs.Token;
-            AddTask(async () =>
+            Post(async () =>
             {
                 try
                 {
@@ -579,9 +600,7 @@ namespace Iviz.Ros
             int? id;
             if (Connected)
             {
-                int newId = publishers.Where(pair => pair.Value == null).TryGetFirst(out var freePair)
-                    ? freePair.Key
-                    : publishers.Count;
+                int newId = GetFreeId();
 
                 await newAdvertisedTopic.AdvertiseAsync(Client, token);
                 var publisher = newAdvertisedTopic.Publisher;
@@ -623,8 +642,8 @@ namespace Iviz.Ros
             ThrowHelper.ThrowIfNull(service, nameof(service));
             ThrowHelper.ThrowIfNull(callback, nameof(callback));
 
-            CancellationToken token = runningTs.Token;
-            AddTask(async () =>
+            var token = runningTs.Token;
+            Post(async () =>
             {
                 try
                 {
@@ -726,8 +745,8 @@ namespace Iviz.Ros
 
             try
             {
-                if (publishers.TryGetValue(id, out var basePublisher)
-                    && basePublisher is { NumSubscribers: > 0 } and IRosPublisher<T> publisher)
+                var basePublisher = publishers[id];
+                if (basePublisher is { NumSubscribers: > 0 } and RosPublisher<T> publisher)
                 {
                     publisher.Publish(msg);
                 }
@@ -743,7 +762,7 @@ namespace Iviz.Ros
             ThrowHelper.ThrowIfNull(listener, nameof(listener));
 
             var token = runningTs.Token;
-            AddTask(async () =>
+            Post(async () =>
             {
                 try
                 {
@@ -776,7 +795,7 @@ namespace Iviz.Ros
         {
             ThrowHelper.ThrowIfNull(listener, nameof(listener));
 
-            AddTask(() =>
+            Post(() =>
             {
                 if (subscribersByTopic.TryGetValue(listener.Topic, out var subscribedTopic) &&
                     subscribedTopic.Subscriber != null)
@@ -793,7 +812,7 @@ namespace Iviz.Ros
             ThrowHelper.ThrowIfNull(advertiser, nameof(advertiser));
 
             var token = runningTs.Token;
-            AddTask(async () =>
+            Post(async () =>
             {
                 try
                 {
@@ -835,7 +854,7 @@ namespace Iviz.Ros
             ThrowHelper.ThrowIfNull(subscriber, nameof(subscriber));
 
             var token = runningTs.Token;
-            AddTask(async () =>
+            Post(async () =>
             {
                 try
                 {
@@ -872,7 +891,7 @@ namespace Iviz.Ros
             ThrowHelper.ThrowIfNull(service, nameof(service));
 
             var token = runningTs.Token;
-            AddTask(async () =>
+            Post(async () =>
             {
                 try
                 {
@@ -1087,8 +1106,7 @@ namespace Iviz.Ros
         internal int GetNumSubscribers(ISender sender)
         {
             return sender.Id is { } id
-                   && publishers.TryGetValue(id, out var basePublisher)
-                   && basePublisher != null
+                   && publishers[id] is { } basePublisher
                 ? basePublisher.NumSubscribers
                 : 0;
         }
@@ -1096,7 +1114,7 @@ namespace Iviz.Ros
         internal override void Dispose()
         {
             Disconnect();
-            AddTask(RosManager.Server.DisposeAsync);
+            Post(RosManager.Server.DisposeAsync);
             base.Dispose();
         }
     }
