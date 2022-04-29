@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public class TooltipWidget : MonoBehaviour, IWidgetWithColor, IWidgetWithCaption
+    public class TooltipWidget : MonoBehaviour, IWidgetWithColor, IWidgetWithCaption, IRecyclable
     {
         [SerializeField] Tooltip? tooltip;
 
@@ -21,7 +21,7 @@ namespace Iviz.Displays.XR
 
         public void Suspend()
         {
-            tooltip.ReturnToPool();
+            Tooltip.Scale = 0.02f;
         }
 
         public bool Interactable
@@ -42,6 +42,11 @@ namespace Iviz.Displays.XR
         public string Caption
         {
             set => Tooltip.Caption = value;
+        }
+
+        public void SplitForRecycle()
+        {
+            tooltip.ReturnToPool();
         }
     }
 }

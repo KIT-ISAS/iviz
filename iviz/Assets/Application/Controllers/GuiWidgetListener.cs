@@ -209,7 +209,7 @@ namespace Iviz.Controllers
                 WidgetType.SpringDisc => Resource.Displays.SpringDisc,
                 WidgetType.SpringDisc3D => Resource.Displays.SpringDisc3D,
                 //WidgetType.TrajectoryDisc => Resource.Displays.TrajectoryDisc,
-                //WidgetType.TargetArea => Resource.Displays.TargetArea,
+                WidgetType.TargetArea => Resource.Displays.TargetArea,
                 WidgetType.PositionDisc3D => Resource.Displays.PositionDisc3D,
                 WidgetType.PositionDisc => Resource.Displays.PositionDisc,
                 WidgetType.Boundary => Resource.Displays.Boundary,

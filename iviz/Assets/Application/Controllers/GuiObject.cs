@@ -70,7 +70,7 @@ namespace Iviz.Controllers
             if (widget is IWidgetCanBeResized canBeResized)
             {
                 canBeResized.Resized += bounds =>
-                    parent.OnWidgetResized(this, new Bounds(bounds.center, bounds.size * scale));
+                    parent.OnWidgetResized(this, new Bounds(bounds.center * scale, bounds.size * scale));
             }
 
             if (widget is IWidgetCanBeClicked canBeClicked)
