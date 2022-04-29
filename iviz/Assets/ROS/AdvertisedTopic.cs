@@ -26,7 +26,8 @@ namespace Iviz.Ros
 
         public AdvertisedTopic(string topic)
         {
-            this.topic = topic ?? throw new ArgumentNullException(nameof(topic));
+            ThrowHelper.ThrowIfNull(topic, nameof(topic));
+            this.topic = topic;
         }
 
         public int? Id

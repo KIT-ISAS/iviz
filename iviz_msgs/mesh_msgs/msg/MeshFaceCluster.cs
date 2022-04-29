@@ -29,8 +29,8 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public MeshFaceCluster(ref ReadBuffer b)
         {
-            FaceIndices = b.DeserializeStructArray<uint>();
-            Label = b.DeserializeString();
+            b.DeserializeStructArray(out FaceIndices);
+            b.DeserializeString(out Label);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshFaceCluster(ref b);
@@ -45,8 +45,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (FaceIndices is null) BuiltIns.ThrowNullReference(nameof(FaceIndices));
-            if (Label is null) BuiltIns.ThrowNullReference(nameof(Label));
+            if (FaceIndices is null) BuiltIns.ThrowNullReference();
+            if (Label is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + 4 * FaceIndices.Length + BuiltIns.GetStringSize(Label);

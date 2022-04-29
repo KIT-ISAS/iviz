@@ -16,11 +16,6 @@ namespace Iviz.Displays
 {
     public sealed class ImageTexture
     {
-        static readonly int IntensityCoeffID = Shader.PropertyToID("_IntensityCoeff");
-        static readonly int IntensityAddID = Shader.PropertyToID("_IntensityAdd");
-        static readonly int IntensityID = Shader.PropertyToID("_IntensityTexture");
-        static readonly int MainTexID = Shader.PropertyToID("_MainTex");
-
         byte[] bitmapBuffer = Array.Empty<byte>();
         Vector2 normalizedIntensityBounds;
         ColormapId colormap;
@@ -47,20 +42,20 @@ namespace Iviz.Displays
 
                 if (intensitySpan == 0)
                 {
-                    Material.SetFloat(IntensityCoeffID, 1);
-                    Material.SetFloat(IntensityAddID, 0);
+                    Material.SetFloat(ShaderIds.IntensityCoeffId, 1);
+                    Material.SetFloat(ShaderIds.IntensityAddId, 0);
                 }
                 else
                 {
                     if (!FlipMinMax)
                     {
-                        Material.SetFloat(IntensityCoeffID, 1 / intensitySpan);
-                        Material.SetFloat(IntensityAddID, -normalizedIntensityBounds.x / intensitySpan);
+                        Material.SetFloat(ShaderIds.IntensityCoeffId, 1 / intensitySpan);
+                        Material.SetFloat(ShaderIds.IntensityAddId, -normalizedIntensityBounds.x / intensitySpan);
                     }
                     else
                     {
-                        Material.SetFloat(IntensityCoeffID, -1 / intensitySpan);
-                        Material.SetFloat(IntensityAddID, normalizedIntensityBounds.y / intensitySpan);
+                        Material.SetFloat(ShaderIds.IntensityCoeffId, -1 / intensitySpan);
+                        Material.SetFloat(ShaderIds.IntensityAddId, normalizedIntensityBounds.y / intensitySpan);
                     }
                 }
             }
@@ -103,7 +98,7 @@ namespace Iviz.Displays
             set
             {
                 colormap = value;
-                Material.SetTexture(IntensityID, ColormapTexture);
+                Material.SetTexture(ShaderIds.IntensityTextureId, ColormapTexture);
             }
         }
 
@@ -623,7 +618,7 @@ namespace Iviz.Displays
             }
 
             Texture = new Texture2D(width, height, format, false);
-            Material.SetTexture(MainTexID, Texture);
+            Material.SetTexture(ShaderIds.MainTexId, Texture);
             TextureChanged?.Invoke(Texture);
             return Texture;
         }
@@ -639,8 +634,8 @@ namespace Iviz.Displays
             }
 
             format = Texture.format;
-            int u = Math.Clamp((int)(rawUV.x * Texture.width), 0, Texture.width - 1);
-            int v = Math.Clamp((int)(rawUV.y * Texture.height), 0, Texture.height - 1);
+            int u = Mathf.Clamp((int)(rawUV.x * Texture.width), 0, Texture.width - 1);
+            int v = Mathf.Clamp((int)(rawUV.y * Texture.height), 0, Texture.height - 1);
             bool rbFlipped = Material.IsKeywordEnabled("FLIP_RB");
             uv = new Vector2Int(u, v);
 
@@ -684,7 +679,7 @@ namespace Iviz.Displays
 
             UnityEngine.Object.Destroy(Texture);
             Texture = null;
-            Material.SetTexture(MainTexID, Texture2D.whiteTexture);
+            Material.SetTexture(ShaderIds.MainTexId, Texture2D.whiteTexture);
             Material.DisableKeyword("USE_INTENSITY");
             TextureChanged?.Invoke(null);
         }

@@ -5,6 +5,7 @@ using Iviz.Common;
 using Iviz.Core;
 using Iviz.Displays.Highlighters;
 using Iviz.Tools;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -61,7 +62,7 @@ namespace Iviz.App
             const int maxToDisplay = 50;
 
             using var description = BuilderPool.Rent();
-            listener.GenerateLog(description, 0, Math.Min(listener.NumEntriesForLog, maxToDisplay));
+            listener.GenerateLog(description, 0, Mathf.Min(listener.NumEntriesForLog, maxToDisplay));
             panel.Text.SetTextRent(description);
         }
 

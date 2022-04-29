@@ -44,8 +44,8 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor with buffer.
         public NavSatStatus(ref ReadBuffer b)
         {
-            Status = b.Deserialize<sbyte>();
-            Service = b.Deserialize<ushort>();
+            b.Deserialize(out Status);
+            b.Deserialize(out Service);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new NavSatStatus(ref b);

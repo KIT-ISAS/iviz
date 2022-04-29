@@ -37,11 +37,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor with buffer.
         public DiagnosticStatus(ref ReadBuffer b)
         {
-            Level = b.Deserialize<byte>();
-            Name = b.DeserializeString();
-            Message = b.DeserializeString();
-            HardwareId = b.DeserializeString();
-            Values = b.DeserializeArray<KeyValue>();
+            b.Deserialize(out Level);
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Message);
+            b.DeserializeString(out HardwareId);
+            b.DeserializeArray(out Values);
             for (int i = 0; i < Values.Length; i++)
             {
                 Values[i] = new KeyValue(ref b);
@@ -63,13 +63,13 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (HardwareId is null) BuiltIns.ThrowNullReference(nameof(HardwareId));
-            if (Values is null) BuiltIns.ThrowNullReference(nameof(Values));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Message is null) BuiltIns.ThrowNullReference();
+            if (HardwareId is null) BuiltIns.ThrowNullReference();
+            if (Values is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Values.Length; i++)
             {
-                if (Values[i] is null) BuiltIns.ThrowNullReference($"{nameof(Values)}[{i}]");
+                if (Values[i] is null) BuiltIns.ThrowNullReference(nameof(Values), i);
                 Values[i].RosValidate();
             }
         }

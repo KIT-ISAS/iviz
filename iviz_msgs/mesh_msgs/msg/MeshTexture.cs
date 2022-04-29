@@ -30,8 +30,8 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public MeshTexture(ref ReadBuffer b)
         {
-            Uuid = b.DeserializeString();
-            TextureIndex = b.Deserialize<uint>();
+            b.DeserializeString(out Uuid);
+            b.Deserialize(out TextureIndex);
             Image = new SensorMsgs.Image(ref b);
         }
         
@@ -48,8 +48,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
-            if (Image is null) BuiltIns.ThrowNullReference(nameof(Image));
+            if (Uuid is null) BuiltIns.ThrowNullReference();
+            if (Image is null) BuiltIns.ThrowNullReference();
             Image.RosValidate();
         }
     
@@ -65,23 +65,27 @@ namespace Iviz.Msgs.MeshMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7VVTW8bNxA9l79iAB1iJ5YctJfCQNAWTdPqEKBocgsCgVqOdtlyyTU/JG1+fR5JrT5q" +
-                "O8mhXciSl+S8+XgzjzN6y6GjX2L0ep0i59cgWxYBC7allLQSSdv4w/cUeR+T55W2ivcisA3Or/rQhttl" +
-                "DxPS+VuIV//xI96++/2OHrgTM3rf6UB9DZgaZ6PUNpC0lGzj+sFjh9UhrBldvbyhl9cEExkpumFueBNh" +
-                "5i17cpvpnBB/sFRY6urP4ZnRYTlqeIyyHyh0LhlFaybZ3CcddNTOlv0THD32HLE2XvaopzqDckPUjTR1" +
-                "K+M0+PXyKSDndattPlcNHgI1bGNN8MtIL/aT8eDANypEsWMCfhcJLvLLF3N6MV4CKLez32b46dIQfy67" +
-                "H4y0pQRfRVjWM8dyduxBilWXqwekX0sZlnbjnoKbWkqG4BotI5pop2N3iiM328boJj6FkE+uuZNb7Xzu" +
-                "uISR2WjLSkzD1HEp7MmkAtflGwCgSXW4IZv6daXPu12YrHdaIZ4H1mX5UePGmdTbIMrUMBlu0RpbaRIH" +
-                "2iBGxsSoPPASlQNpG23QTL65LcCraTssmmEQpeCjS7STtVEwD1ZJr/QnFI0s7+ggH4DuJdL5G8TCzLsw" +
-                "T4F9+NnoEMMiuOQbxqGWF5ZjoQyDrvIMcy+1ocG7wYUSWMGdAlmISaGOkU+l+G1aQNqD3rMJNJ9T00lr" +
-                "2YBbabF5g8nBBJb/AsJ+nMjMpPyHUQ7v+kJqjjsDV+chl0rbxiTFt+cK9e+qdZX3H8HKaq1bpKiRYmUu" +
-                "ABhfSkZJx72fJqZD5OEioDfJmNwL4NC2aAJEsB4jBzErHj58rEhnFrKJCWyDCK/3ZbfmnF1fFfznpbmu" +
-                "xTnCd5P5h7+gIB//N12PqpasSiKa5N2hmUBVlCWX3KAd5oI9NHsLEov+YirLbhwHDovpOsAHJcSAGzNS" +
-                "yvqP/sRt0CcLOcQFd9TvyR6WqKGkQXooZjLS4zy6Q9t8vKhHRscn8H0Cp0zL13dZAgI3KWoENOYm8CxL" +
-                "oy5f05E8vhez9zs3xyu3F5fHYUaJ99M9JcMdfDyvyS2AnS89eFGFJayt8BquQV0OgQfXdHSFyP8cY+eq" +
-                "zG6l13JtCrPQfgPUZ9no2fUZsi3QVlo3wVfEk49vgbVH3JzTHNOlTM4+pFYWycPkbrXC0fVYQBqj0UcY" +
-                "oLWXfhTlmiwuxexNubpOU5Cv6EvpnYZ90nIhPgNN7mC8uQgAAA==";
+                "H4sIAAAAAAAAE7VVy24bNxTd8ysuoEXsxJKDdhMYKJogr2oRoGiyCwKBM7yaYcshx3zoka/vIamRrNhO" +
+                "s2gGsuQhec99nHsPZ/SBQ0+vYvS6SZHza5Adi4AF21FKWomkbfz1F4q8i8nzSlvFOxHYBudXQ+jC9XKA" +
+                "Cen8LcRv//MjPnx8f0P33IkZfep1oKEGTK2zUWobSFpKtnXD6LHD6hDWjC6eX9HzS4KJjBTdODe8jjDz" +
+                "lj259XROiD9YKiz19efwzOiwHDU8RjmMFHqXjKKGSba3SQcdtbNl/wRHDz1HrLWXA+qp7kC5MepWmrqV" +
+                "cVr8evkYkPO60zafqwb3gVq2sSb4faRnu8l4dOAbFaLYMwG/jwQX+eW7OT3bnwMot7U/Zvj13BB/Lrsf" +
+                "jbSlBP+JsKxnjuXs2YMUq85XD0ivSxmWdu0eg5taSobgWi0jmmirY3+KIzfb2ug2PoaQTzbcy412Pndc" +
+                "wsistWUlpmHquRT2ZFKB6/IVANCkOlyRTUNT6fNuGybrrVaI5551WX7QuHUmDTaIMjVMhju0xkaaxIHW" +
+                "iJExMSoPvETlQNpaGzSTb68L8GraDot2HEUp+N4l2sraKJgHq6RX+iuKRpa3dJAPQA8S6fwNYmHmXZin" +
+                "wD68NDrEsAgu+ZZxqOOF5Vgow6CrPMM8SG1o9G50oQRWcKdAFmJSqGPkUyneTgtIe9Q7NoHmc2p7aS0b" +
+                "cCstNq8wOZjA8l9A2A8TmZmU/zDK4d1QSM1xZ+DqPORSaduapPj6rkJ9W7W+8v4CrKwa3SFFjRQrcwHA" +
+                "+FIySjru/T4xHSKPZwG9S8bkXgCHtkMTIIJmH7m2xovPXyrQHYPPf0EBvkCjYgLnoMPrXTlUM88BXBQv" +
+                "T0uLXf40BY+qFqeKH9rh46FtQEqUJezcij0mgD3UeQO6itJi/spu3I8cFpPw44NiYZSN2VPKSo9OhO4P" +
+                "yUL4cJUdlXqyhyWqJWmUHtqYjPQ4jz7QNh8vOpHR8Ql8m8Ae0/LNTR72wG2KGgHtM92eZWnJ5Rs60sS3" +
+                "YvZp6+Z45e7smjhMI/FuupFkuIGPpzW5BbDz9QYvqjCBtRVewyXoySHw6NqeLhD5n/vYuyqoG+m1bExh" +
+                "DypvgPokGz25vINsC7SV1k3wFfHk40dg7RE35zTHHCmTsw+pk0XcMKMbrXC02ReQ1mh0HEal8dLvRbkQ" +
+                "i0sxe1cuqVO/58v4XGSnsZ5UW4h/AUvlkUajCAAA";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public void Dispose()
+        {
+        }
     }
 }

@@ -69,8 +69,8 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public AddTwoIntsRequest(ref ReadBuffer b)
         {
-            A = b.Deserialize<long>();
-            B = b.Deserialize<long>();
+            b.Deserialize(out A);
+            b.Deserialize(out B);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddTwoIntsRequest(ref b);
@@ -114,7 +114,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public AddTwoIntsResponse(ref ReadBuffer b)
         {
-            Sum = b.Deserialize<long>();
+            b.Deserialize(out Sum);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddTwoIntsResponse(ref b);

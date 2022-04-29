@@ -75,7 +75,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public ExecuteKnownTrajectoryRequest(ref ReadBuffer b)
         {
             Trajectory = new RobotTrajectory(ref b);
-            WaitForExecution = b.Deserialize<bool>();
+            b.Deserialize(out WaitForExecution);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ExecuteKnownTrajectoryRequest(ref b);
@@ -90,7 +90,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
+            if (Trajectory is null) BuiltIns.ThrowNullReference();
             Trajectory.RosValidate();
         }
     
@@ -134,7 +134,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference();
             ErrorCode.RosValidate();
         }
     

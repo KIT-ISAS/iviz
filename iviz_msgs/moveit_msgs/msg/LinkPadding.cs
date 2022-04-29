@@ -28,8 +28,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public LinkPadding(ref ReadBuffer b)
         {
-            LinkName = b.DeserializeString();
-            Padding = b.Deserialize<double>();
+            b.DeserializeString(out LinkName);
+            b.Deserialize(out Padding);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LinkPadding(ref b);
@@ -44,7 +44,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (LinkName is null) BuiltIns.ThrowNullReference(nameof(LinkName));
+            if (LinkName is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 12 + BuiltIns.GetStringSize(LinkName);

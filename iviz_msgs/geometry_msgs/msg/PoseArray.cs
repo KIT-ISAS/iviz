@@ -28,7 +28,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public PoseArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Poses = b.DeserializeStructArray<Pose>();
+            b.DeserializeStructArray(out Poses);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PoseArray(ref b);
@@ -43,7 +43,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
+            if (Poses is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + 56 * Poses.Length;

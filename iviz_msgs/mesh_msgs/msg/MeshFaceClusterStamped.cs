@@ -36,9 +36,9 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshFaceClusterStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
             Cluster = new MeshFaceCluster(ref b);
-            @override = b.Deserialize<bool>();
+            b.Deserialize(out @override);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshFaceClusterStamped(ref b);
@@ -55,8 +55,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
-            if (Cluster is null) BuiltIns.ThrowNullReference(nameof(Cluster));
+            if (Uuid is null) BuiltIns.ThrowNullReference();
+            if (Cluster is null) BuiltIns.ThrowNullReference();
             Cluster.RosValidate();
         }
     

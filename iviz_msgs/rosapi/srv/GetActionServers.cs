@@ -66,7 +66,8 @@ namespace Iviz.Msgs.Rosapi
         
         public GetActionServersRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetActionServersRequest Singleton = new GetActionServersRequest();
+        static GetActionServersRequest? singleton;
+        public static GetActionServersRequest Singleton => singleton ??= new GetActionServersRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -104,7 +105,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public GetActionServersResponse(ref ReadBuffer b)
         {
-            ActionServers = b.DeserializeStringArray();
+            b.DeserializeStringArray(out ActionServers);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetActionServersResponse(ref b);
@@ -118,10 +119,10 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (ActionServers is null) BuiltIns.ThrowNullReference(nameof(ActionServers));
+            if (ActionServers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < ActionServers.Length; i++)
             {
-                if (ActionServers[i] is null) BuiltIns.ThrowNullReference($"{nameof(ActionServers)}[{i}]");
+                if (ActionServers[i] is null) BuiltIns.ThrowNullReference(nameof(ActionServers), i);
             }
         }
     

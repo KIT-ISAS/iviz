@@ -53,9 +53,11 @@ namespace Iviz.Displays
 
         public string Name { get; }
         public string? BaseLink { get; private set; }
-        public GameObject BaseLinkObject => !disposed ? baseLinkObject : throw new ObjectDisposedException("this");
         public string Description { get; }
         public IReadOnlyDictionary<string, string> LinkParents => linkParents;
+
+        public GameObject BaseLinkObject => 
+            !disposed ? baseLinkObject : throw new ObjectDisposedException("this");
 
         public IReadOnlyDictionary<string, GameObject> LinkObjects =>
             !disposed ? linkObjects : throw new ObjectDisposedException("this");
@@ -195,10 +197,10 @@ namespace Iviz.Displays
 
             runningTs.Token.ThrowIfCancellationRequested();
             ApplyAnyValidConfiguration();
-            
+
             var modelLoadingTasks = robot.Links.SelectMany(
                 link => ProcessLinkAsync(keepMeshMaterials, link, rootMaterials, provider, runningTs.Token));
-            
+
             try
             {
                 await modelLoadingTasks.WhenAll();
@@ -466,7 +468,7 @@ namespace Iviz.Displays
             }
             else if (sphere != null)
             {
-                Rent(Resource.Displays.Sphere, Math.Abs(sphere.Radius) * Vector3.one);
+                Rent(Resource.Displays.Sphere, Mathf.Abs(sphere.Radius) * Vector3.one);
             }
             else
             {
@@ -541,7 +543,7 @@ namespace Iviz.Displays
             {
                 Dispose();
                 throw new MalformedUrdfException(
-                    $"Node '{parent.name}' is child of '{child.name}' and cannot be set as its parent!");
+                    $"Node '{parent.name}' is descendant of '{child.name}' and cannot be set as its parent!");
             }
 
             linkParents[joint.Child.Link] = joint.Parent.Link;
@@ -655,13 +657,13 @@ namespace Iviz.Displays
             }
 
             var axis = joint.Axis.Xyz.ToVector3();
-            Pose? unityPose = joint.Type switch
+            var unityPose = joint.Type switch
             {
                 Joint.JointType.Revolute or Joint.JointType.Continuous =>
                     Pose.identity.WithRotation(Quaternion.AngleAxis(-value * Mathf.Rad2Deg, axis)),
                 Joint.JointType.Prismatic =>
                     Pose.identity.WithPosition(axis * value),
-                _ => null
+                _ => (Pose?)null
             };
 
             if (unityPose is not { } validatedPose)
@@ -674,6 +676,6 @@ namespace Iviz.Displays
             return true;
         }
 
-        public override string ToString() => $"[Robot {Name}]";
+        public override string ToString() => $"[Robot '{Name}']";
     }
 }

@@ -67,7 +67,8 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public GetOctomapRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetOctomapRequest Singleton = new GetOctomapRequest();
+        static GetOctomapRequest? singleton;
+        public static GetOctomapRequest Singleton => singleton ??= new GetOctomapRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -119,7 +120,7 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public void RosValidate()
         {
-            if (Map is null) BuiltIns.ThrowNullReference(nameof(Map));
+            if (Map is null) BuiltIns.ThrowNullReference();
             Map.RosValidate();
         }
     

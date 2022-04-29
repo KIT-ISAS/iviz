@@ -29,13 +29,13 @@ namespace Iviz.Msgs.Tf2Msgs
         /// Constructor with buffer.
         public LookupTransformGoal(ref ReadBuffer b)
         {
-            TargetFrame = b.DeserializeString();
-            SourceFrame = b.DeserializeString();
-            SourceTime = b.Deserialize<time>();
-            Timeout = b.Deserialize<duration>();
-            TargetTime = b.Deserialize<time>();
-            FixedFrame = b.DeserializeString();
-            Advanced = b.Deserialize<bool>();
+            b.DeserializeString(out TargetFrame);
+            b.DeserializeString(out SourceFrame);
+            b.Deserialize(out SourceTime);
+            b.Deserialize(out Timeout);
+            b.Deserialize(out TargetTime);
+            b.DeserializeString(out FixedFrame);
+            b.Deserialize(out Advanced);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LookupTransformGoal(ref b);
@@ -55,9 +55,9 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (TargetFrame is null) BuiltIns.ThrowNullReference(nameof(TargetFrame));
-            if (SourceFrame is null) BuiltIns.ThrowNullReference(nameof(SourceFrame));
-            if (FixedFrame is null) BuiltIns.ThrowNullReference(nameof(FixedFrame));
+            if (TargetFrame is null) BuiltIns.ThrowNullReference();
+            if (SourceFrame is null) BuiltIns.ThrowNullReference();
+            if (FixedFrame is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

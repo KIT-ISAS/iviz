@@ -93,12 +93,12 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             StartState = new RobotState(ref b);
-            GroupName = b.DeserializeString();
-            LinkName = b.DeserializeString();
-            Waypoints = b.DeserializeStructArray<GeometryMsgs.Pose>();
-            MaxStep = b.Deserialize<double>();
-            JumpThreshold = b.Deserialize<double>();
-            AvoidCollisions = b.Deserialize<bool>();
+            b.DeserializeString(out GroupName);
+            b.DeserializeString(out LinkName);
+            b.DeserializeStructArray(out Waypoints);
+            b.Deserialize(out MaxStep);
+            b.Deserialize(out JumpThreshold);
+            b.Deserialize(out AvoidCollisions);
             PathConstraints = new Constraints(ref b);
         }
         
@@ -121,12 +121,12 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (StartState is null) BuiltIns.ThrowNullReference(nameof(StartState));
+            if (StartState is null) BuiltIns.ThrowNullReference();
             StartState.RosValidate();
-            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
-            if (LinkName is null) BuiltIns.ThrowNullReference(nameof(LinkName));
-            if (Waypoints is null) BuiltIns.ThrowNullReference(nameof(Waypoints));
-            if (PathConstraints is null) BuiltIns.ThrowNullReference(nameof(PathConstraints));
+            if (GroupName is null) BuiltIns.ThrowNullReference();
+            if (LinkName is null) BuiltIns.ThrowNullReference();
+            if (Waypoints is null) BuiltIns.ThrowNullReference();
+            if (PathConstraints is null) BuiltIns.ThrowNullReference();
             PathConstraints.RosValidate();
         }
     
@@ -182,7 +182,7 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             StartState = new RobotState(ref b);
             Solution = new RobotTrajectory(ref b);
-            Fraction = b.Deserialize<double>();
+            b.Deserialize(out Fraction);
             ErrorCode = new MoveItErrorCodes(ref b);
         }
         
@@ -200,11 +200,11 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (StartState is null) BuiltIns.ThrowNullReference(nameof(StartState));
+            if (StartState is null) BuiltIns.ThrowNullReference();
             StartState.RosValidate();
-            if (Solution is null) BuiltIns.ThrowNullReference(nameof(Solution));
+            if (Solution is null) BuiltIns.ThrowNullReference();
             Solution.RosValidate();
-            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference();
             ErrorCode.RosValidate();
         }
     

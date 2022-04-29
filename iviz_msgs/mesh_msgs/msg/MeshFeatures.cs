@@ -27,8 +27,8 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public MeshFeatures(ref ReadBuffer b)
         {
-            MapUuid = b.DeserializeString();
-            Features = b.DeserializeArray<MeshMsgs.Feature>();
+            b.DeserializeString(out MapUuid);
+            b.DeserializeArray(out Features);
             for (int i = 0; i < Features.Length; i++)
             {
                 Features[i] = new MeshMsgs.Feature(ref b);
@@ -47,11 +47,11 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (MapUuid is null) BuiltIns.ThrowNullReference(nameof(MapUuid));
-            if (Features is null) BuiltIns.ThrowNullReference(nameof(Features));
+            if (MapUuid is null) BuiltIns.ThrowNullReference();
+            if (Features is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Features.Length; i++)
             {
-                if (Features[i] is null) BuiltIns.ThrowNullReference($"{nameof(Features)}[{i}]");
+                if (Features[i] is null) BuiltIns.ThrowNullReference(nameof(Features), i);
                 Features[i].RosValidate();
             }
         }

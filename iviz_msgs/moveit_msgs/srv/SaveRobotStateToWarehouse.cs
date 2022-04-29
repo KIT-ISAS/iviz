@@ -74,8 +74,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public SaveRobotStateToWarehouseRequest(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Robot = b.DeserializeString();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Robot);
             State = new MoveitMsgs.RobotState(ref b);
         }
         
@@ -92,9 +92,9 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Robot is null) BuiltIns.ThrowNullReference(nameof(Robot));
-            if (State is null) BuiltIns.ThrowNullReference(nameof(State));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Robot is null) BuiltIns.ThrowNullReference();
+            if (State is null) BuiltIns.ThrowNullReference();
             State.RosValidate();
         }
     
@@ -131,7 +131,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public SaveRobotStateToWarehouseResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SaveRobotStateToWarehouseResponse(ref b);

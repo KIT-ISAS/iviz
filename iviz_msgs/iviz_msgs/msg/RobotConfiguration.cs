@@ -32,17 +32,17 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public RobotConfiguration(ref ReadBuffer b)
         {
-            SourceParameter = b.DeserializeString();
-            SavedRobotName = b.DeserializeString();
-            FramePrefix = b.DeserializeString();
-            FrameSuffix = b.DeserializeString();
-            AttachedToTf = b.Deserialize<bool>();
-            RenderAsOcclusionOnly = b.Deserialize<bool>();
+            b.DeserializeString(out SourceParameter);
+            b.DeserializeString(out SavedRobotName);
+            b.DeserializeString(out FramePrefix);
+            b.DeserializeString(out FrameSuffix);
+            b.Deserialize(out AttachedToTf);
+            b.Deserialize(out RenderAsOcclusionOnly);
             b.Deserialize(out Tint);
-            Metallic = b.Deserialize<float>();
-            Smoothness = b.Deserialize<float>();
-            Id = b.DeserializeString();
-            Visible = b.Deserialize<bool>();
+            b.Deserialize(out Metallic);
+            b.Deserialize(out Smoothness);
+            b.DeserializeString(out Id);
+            b.Deserialize(out Visible);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RobotConfiguration(ref b);
@@ -66,11 +66,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (SourceParameter is null) BuiltIns.ThrowNullReference(nameof(SourceParameter));
-            if (SavedRobotName is null) BuiltIns.ThrowNullReference(nameof(SavedRobotName));
-            if (FramePrefix is null) BuiltIns.ThrowNullReference(nameof(FramePrefix));
-            if (FrameSuffix is null) BuiltIns.ThrowNullReference(nameof(FrameSuffix));
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (SourceParameter is null) BuiltIns.ThrowNullReference();
+            if (SavedRobotName is null) BuiltIns.ThrowNullReference();
+            if (FramePrefix is null) BuiltIns.ThrowNullReference();
+            if (FrameSuffix is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

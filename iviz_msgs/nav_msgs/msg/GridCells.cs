@@ -32,9 +32,9 @@ namespace Iviz.Msgs.NavMsgs
         public GridCells(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            CellWidth = b.Deserialize<float>();
-            CellHeight = b.Deserialize<float>();
-            Cells = b.DeserializeStructArray<GeometryMsgs.Point>();
+            b.Deserialize(out CellWidth);
+            b.Deserialize(out CellHeight);
+            b.DeserializeStructArray(out Cells);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GridCells(ref b);
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Cells is null) BuiltIns.ThrowNullReference(nameof(Cells));
+            if (Cells is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 12 + Header.RosMessageLength + 24 * Cells.Length;

@@ -28,7 +28,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         public TableArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Tables = b.DeserializeArray<ObjectRecognitionMsgs.Table>();
+            b.DeserializeArray(out Tables);
             for (int i = 0; i < Tables.Length; i++)
             {
                 Tables[i] = new ObjectRecognitionMsgs.Table(ref b);
@@ -47,10 +47,10 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (Tables is null) BuiltIns.ThrowNullReference(nameof(Tables));
+            if (Tables is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Tables.Length; i++)
             {
-                if (Tables[i] is null) BuiltIns.ThrowNullReference($"{nameof(Tables)}[{i}]");
+                if (Tables[i] is null) BuiltIns.ThrowNullReference(nameof(Tables), i);
                 Tables[i].RosValidate();
             }
         }

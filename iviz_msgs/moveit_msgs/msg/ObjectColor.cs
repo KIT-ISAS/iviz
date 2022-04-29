@@ -28,7 +28,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public ObjectColor(ref ReadBuffer b)
         {
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             b.Deserialize(out Color);
         }
         
@@ -44,7 +44,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Id is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 20 + BuiltIns.GetStringSize(Id);

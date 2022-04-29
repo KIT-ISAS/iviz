@@ -66,7 +66,8 @@ namespace Iviz.Msgs.Roscpp
         
         public EmptyRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly EmptyRequest Singleton = new EmptyRequest();
+        static EmptyRequest? singleton;
+        public static EmptyRequest Singleton => singleton ??= new EmptyRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -102,7 +103,8 @@ namespace Iviz.Msgs.Roscpp
         
         public EmptyResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly EmptyResponse Singleton = new EmptyResponse();
+        static EmptyResponse? singleton;
+        public static EmptyResponse Singleton => singleton ??= new EmptyResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

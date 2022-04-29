@@ -27,7 +27,7 @@ namespace Iviz.Msgs.PclMsgs
         public ModelCoefficients(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Values = b.DeserializeStructArray<float>();
+            b.DeserializeStructArray(out Values);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ModelCoefficients(ref b);
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Values is null) BuiltIns.ThrowNullReference(nameof(Values));
+            if (Values is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + Header.RosMessageLength + 4 * Values.Length;

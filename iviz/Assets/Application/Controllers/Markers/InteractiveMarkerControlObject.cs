@@ -425,7 +425,7 @@ namespace Iviz.Controllers
         static Color ColorFromOrientation(in Quaternion orientation, in Vector3 direction)
         {
             var (x, y, z) = orientation * direction;
-            return new Color(Math.Abs(x), Math.Abs(y), Math.Abs(z));
+            return new Color(Mathf.Abs(x), Mathf.Abs(y), Mathf.Abs(z));
         }
     }
 }

@@ -71,8 +71,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public ListRobotStatesInWarehouseRequest(ref ReadBuffer b)
         {
-            Regex = b.DeserializeString();
-            Robot = b.DeserializeString();
+            b.DeserializeString(out Regex);
+            b.DeserializeString(out Robot);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ListRobotStatesInWarehouseRequest(ref b);
@@ -87,8 +87,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Regex is null) BuiltIns.ThrowNullReference(nameof(Regex));
-            if (Robot is null) BuiltIns.ThrowNullReference(nameof(Robot));
+            if (Regex is null) BuiltIns.ThrowNullReference();
+            if (Robot is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Regex) + BuiltIns.GetStringSize(Robot);
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public ListRobotStatesInWarehouseResponse(ref ReadBuffer b)
         {
-            States = b.DeserializeStringArray();
+            b.DeserializeStringArray(out States);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ListRobotStatesInWarehouseResponse(ref b);
@@ -130,10 +130,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (States is null) BuiltIns.ThrowNullReference(nameof(States));
+            if (States is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < States.Length; i++)
             {
-                if (States[i] is null) BuiltIns.ThrowNullReference($"{nameof(States)}[{i}]");
+                if (States[i] is null) BuiltIns.ThrowNullReference(nameof(States), i);
             }
         }
     

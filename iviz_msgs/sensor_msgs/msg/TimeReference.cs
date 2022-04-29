@@ -34,8 +34,8 @@ namespace Iviz.Msgs.SensorMsgs
         public TimeReference(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            TimeRef = b.Deserialize<time>();
-            Source = b.DeserializeString();
+            b.Deserialize(out TimeRef);
+            b.DeserializeString(out Source);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TimeReference(ref b);
@@ -51,7 +51,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Source is null) BuiltIns.ThrowNullReference(nameof(Source));
+            if (Source is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 12 + Header.RosMessageLength + BuiltIns.GetStringSize(Source);

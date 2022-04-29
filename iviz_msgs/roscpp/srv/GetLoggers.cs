@@ -66,7 +66,8 @@ namespace Iviz.Msgs.Roscpp
         
         public GetLoggersRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetLoggersRequest Singleton = new GetLoggersRequest();
+        static GetLoggersRequest? singleton;
+        public static GetLoggersRequest Singleton => singleton ??= new GetLoggersRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -104,7 +105,7 @@ namespace Iviz.Msgs.Roscpp
         /// Constructor with buffer.
         public GetLoggersResponse(ref ReadBuffer b)
         {
-            Loggers = b.DeserializeArray<Logger>();
+            b.DeserializeArray(out Loggers);
             for (int i = 0; i < Loggers.Length; i++)
             {
                 Loggers[i] = new Logger(ref b);
@@ -122,10 +123,10 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosValidate()
         {
-            if (Loggers is null) BuiltIns.ThrowNullReference(nameof(Loggers));
+            if (Loggers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Loggers.Length; i++)
             {
-                if (Loggers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Loggers)}[{i}]");
+                if (Loggers[i] is null) BuiltIns.ThrowNullReference(nameof(Loggers), i);
                 Loggers[i].RosValidate();
             }
         }

@@ -66,7 +66,8 @@ namespace Iviz.Msgs.Rosapi
         
         public TopicsAndRawTypesRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly TopicsAndRawTypesRequest Singleton = new TopicsAndRawTypesRequest();
+        static TopicsAndRawTypesRequest? singleton;
+        public static TopicsAndRawTypesRequest Singleton => singleton ??= new TopicsAndRawTypesRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -110,9 +111,9 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public TopicsAndRawTypesResponse(ref ReadBuffer b)
         {
-            Topics = b.DeserializeStringArray();
-            Types = b.DeserializeStringArray();
-            TypedefsFullText = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Topics);
+            b.DeserializeStringArray(out Types);
+            b.DeserializeStringArray(out TypedefsFullText);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TopicsAndRawTypesResponse(ref b);
@@ -128,20 +129,20 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Topics is null) BuiltIns.ThrowNullReference(nameof(Topics));
+            if (Topics is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Topics.Length; i++)
             {
-                if (Topics[i] is null) BuiltIns.ThrowNullReference($"{nameof(Topics)}[{i}]");
+                if (Topics[i] is null) BuiltIns.ThrowNullReference(nameof(Topics), i);
             }
-            if (Types is null) BuiltIns.ThrowNullReference(nameof(Types));
+            if (Types is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Types.Length; i++)
             {
-                if (Types[i] is null) BuiltIns.ThrowNullReference($"{nameof(Types)}[{i}]");
+                if (Types[i] is null) BuiltIns.ThrowNullReference(nameof(Types), i);
             }
-            if (TypedefsFullText is null) BuiltIns.ThrowNullReference(nameof(TypedefsFullText));
+            if (TypedefsFullText is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < TypedefsFullText.Length; i++)
             {
-                if (TypedefsFullText[i] is null) BuiltIns.ThrowNullReference($"{nameof(TypedefsFullText)}[{i}]");
+                if (TypedefsFullText[i] is null) BuiltIns.ThrowNullReference(nameof(TypedefsFullText), i);
             }
         }
     

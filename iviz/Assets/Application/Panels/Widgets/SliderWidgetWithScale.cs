@@ -58,7 +58,7 @@ namespace Iviz.App
                 SignText.text = value < 0 ? "[-]" : "[+]";
                 isNegative = value < 0;
 
-                float absValue = Math.Abs(value);
+                float absValue = Mathf.Abs(value);
                 if (absValue == 0)
                 {
                     ValueInternal = 0;

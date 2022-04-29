@@ -65,14 +65,14 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public VisibilityConstraint(ref ReadBuffer b)
         {
-            TargetRadius = b.Deserialize<double>();
+            b.Deserialize(out TargetRadius);
             TargetPose = new GeometryMsgs.PoseStamped(ref b);
-            ConeSides = b.Deserialize<int>();
+            b.Deserialize(out ConeSides);
             SensorPose = new GeometryMsgs.PoseStamped(ref b);
-            MaxViewAngle = b.Deserialize<double>();
-            MaxRangeAngle = b.Deserialize<double>();
-            SensorViewDirection = b.Deserialize<byte>();
-            Weight = b.Deserialize<double>();
+            b.Deserialize(out MaxViewAngle);
+            b.Deserialize(out MaxRangeAngle);
+            b.Deserialize(out SensorViewDirection);
+            b.Deserialize(out Weight);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new VisibilityConstraint(ref b);
@@ -93,9 +93,9 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (TargetPose is null) BuiltIns.ThrowNullReference(nameof(TargetPose));
+            if (TargetPose is null) BuiltIns.ThrowNullReference();
             TargetPose.RosValidate();
-            if (SensorPose is null) BuiltIns.ThrowNullReference(nameof(SensorPose));
+            if (SensorPose is null) BuiltIns.ThrowNullReference();
             SensorPose.RosValidate();
         }
     

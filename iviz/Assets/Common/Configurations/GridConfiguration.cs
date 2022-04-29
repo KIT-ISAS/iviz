@@ -23,11 +23,12 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool Visible { get; set; } = true;
         [DataMember] public GridOrientation Orientation { get; set; } = GridOrientation.XY;
         [DataMember] public ColorRGBA GridColor { get; set; } = new(0.3f, 0.3f,0.3f, 1);
-        [DataMember] public ColorRGBA InteriorColor { get; set; } = new(0.4f, 0.4f, 0.4f, 1);
+        [DataMember] public ColorRGBA InteriorColor { get; set; } = new(0.7f, 0.7f, 0.7f, 1);
         [DataMember] public bool InteriorVisible { get; set; } = true;
         [DataMember] public bool FollowCamera { get; set; } = true;
         [DataMember] public bool HideInARMode { get; set; } = true;
         [DataMember] public bool Interactable { get; set; } = true;
+        [DataMember] public bool DarkMode { get; set; } = true;
         [DataMember] public Vector3 Offset { get; set; } = Vector3.Zero;
     }
 }

@@ -25,7 +25,8 @@ namespace Iviz.MsgsGen.Dynamic
 
         public void RosDeserializeInPlace(ref ReadBuffer b)
         {
-            Value = b.Deserialize<T>();
+            b.Deserialize(out T t);
+            Value = t;
         }
 
         public IField Generate()

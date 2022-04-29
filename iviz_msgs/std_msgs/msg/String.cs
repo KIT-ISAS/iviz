@@ -24,7 +24,7 @@ namespace Iviz.Msgs.StdMsgs
         /// Constructor with buffer.
         public String(ref ReadBuffer b)
         {
-            Data = b.DeserializeString();
+            b.DeserializeString(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new String(ref b);
@@ -38,7 +38,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Data);

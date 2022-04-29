@@ -29,15 +29,15 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Light(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Type = b.Deserialize<byte>();
-            CastShadows = b.Deserialize<bool>();
+            b.DeserializeString(out Name);
+            b.Deserialize(out Type);
+            b.Deserialize(out CastShadows);
             b.Deserialize(out Diffuse);
-            Range = b.Deserialize<float>();
+            b.Deserialize(out Range);
             b.Deserialize(out Position);
             b.Deserialize(out Direction);
-            InnerAngle = b.Deserialize<float>();
-            OuterAngle = b.Deserialize<float>();
+            b.Deserialize(out InnerAngle);
+            b.Deserialize(out OuterAngle);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Light(ref b);
@@ -59,7 +59,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Name is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 46 + BuiltIns.GetStringSize(Name);

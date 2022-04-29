@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Tools;
 
-using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<object?>;
-
 namespace Iviz.Roslib;
 
 internal sealed class SenderQueue<T> where T : IMessage
@@ -56,20 +54,20 @@ internal sealed class SenderQueue<T> where T : IMessage
             numDropped++;
             return default;
         }
-            
-        var msgSignal = new TaskCompletionSource();
+
+        var msgSignal = TaskUtils.CreateCompletionSource();
         messageQueue.Enqueue(new Entry(message, msgSignal));
         signal.Release();
             
         return token.CanBeCanceled
             ? WaitForSignal(msgSignal, token)
-            : new ValueTask(msgSignal.Task);
+            : msgSignal.Task.AsValueTask();
     }
 
     static async ValueTask WaitForSignal(TaskCompletionSource msgSignal, CancellationToken token)
     {
         // ReSharper disable once UseAwaitUsing
-        using (token.Register(StreamUtils.OnCanceled, msgSignal))
+        using (token.Register(CallbackHelpers.OnCanceled, msgSignal))
         {
             await msgSignal.Task;
         }
@@ -216,7 +214,7 @@ internal sealed class SenderQueue<T> where T : IMessage
 
                 numSent++;
                 bytesSent += msgLength + 4;
-                msgSignal?.TrySetResult(null);
+                msgSignal?.TrySetResult();
             }
         }
         catch (Exception e)

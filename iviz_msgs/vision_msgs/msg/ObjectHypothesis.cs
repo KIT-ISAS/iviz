@@ -32,8 +32,8 @@ namespace Iviz.Msgs.VisionMsgs
         /// Constructor with buffer.
         public ObjectHypothesis(ref ReadBuffer b)
         {
-            Id = b.DeserializeString();
-            Score = b.Deserialize<double>();
+            b.DeserializeString(out Id);
+            b.Deserialize(out Score);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ObjectHypothesis(ref b);
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Id is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 12 + BuiltIns.GetStringSize(Id);

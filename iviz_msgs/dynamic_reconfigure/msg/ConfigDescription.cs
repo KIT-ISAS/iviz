@@ -33,7 +33,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor with buffer.
         public ConfigDescription(ref ReadBuffer b)
         {
-            Groups = b.DeserializeArray<Group>();
+            b.DeserializeArray(out Groups);
             for (int i = 0; i < Groups.Length; i++)
             {
                 Groups[i] = new Group(ref b);
@@ -57,17 +57,17 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Groups is null) BuiltIns.ThrowNullReference(nameof(Groups));
+            if (Groups is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Groups.Length; i++)
             {
-                if (Groups[i] is null) BuiltIns.ThrowNullReference($"{nameof(Groups)}[{i}]");
+                if (Groups[i] is null) BuiltIns.ThrowNullReference(nameof(Groups), i);
                 Groups[i].RosValidate();
             }
-            if (Max is null) BuiltIns.ThrowNullReference(nameof(Max));
+            if (Max is null) BuiltIns.ThrowNullReference();
             Max.RosValidate();
-            if (Min is null) BuiltIns.ThrowNullReference(nameof(Min));
+            if (Min is null) BuiltIns.ThrowNullReference();
             Min.RosValidate();
-            if (Dflt is null) BuiltIns.ThrowNullReference(nameof(Dflt));
+            if (Dflt is null) BuiltIns.ThrowNullReference();
             Dflt.RosValidate();
         }
     

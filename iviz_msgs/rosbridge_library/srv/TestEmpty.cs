@@ -66,7 +66,8 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public TestEmptyRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly TestEmptyRequest Singleton = new TestEmptyRequest();
+        static TestEmptyRequest? singleton;
+        public static TestEmptyRequest Singleton => singleton ??= new TestEmptyRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -102,7 +103,8 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public TestEmptyResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly TestEmptyResponse Singleton = new TestEmptyResponse();
+        static TestEmptyResponse? singleton;
+        public static TestEmptyResponse Singleton => singleton ??= new TestEmptyResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

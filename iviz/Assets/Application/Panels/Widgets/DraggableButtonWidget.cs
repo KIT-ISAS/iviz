@@ -10,8 +10,8 @@ using IDragHandler = UnityEngine.EventSystems.IDragHandler;
 
 namespace Iviz.App
 {
-    public class DraggableButtonWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler, IBeginDragHandler,
-        IPointerUpHandler
+    public class DraggableButtonWidget : MonoBehaviour, // not sealed, has children
+        IWidget, IDragHandler, IEndDragHandler, IBeginDragHandler, IPointerUpHandler
     {
         [SerializeField] Button? button;
         [SerializeField] RectTransform? targetTransform;
@@ -103,8 +103,8 @@ namespace Iviz.App
 
             if (movedX > 0 && !allowRevealLeft
                 || movedX < 0 && !allowRevealRight
-                || Math.Abs(movedX) < ScaledMinMotionThreshold && !isDragging
-                || Math.Abs(movedY) > ScaledMaxMotionYThreshold && !isDragging)
+                || Mathf.Abs(movedX) < ScaledMinMotionThreshold && !isDragging
+                || Mathf.Abs(movedY) > ScaledMaxMotionYThreshold && !isDragging)
             {
                 ParentScrollRect.OnDrag(eventData);
                 return;

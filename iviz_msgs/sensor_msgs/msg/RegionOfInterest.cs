@@ -37,11 +37,11 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor with buffer.
         public RegionOfInterest(ref ReadBuffer b)
         {
-            XOffset = b.Deserialize<uint>();
-            YOffset = b.Deserialize<uint>();
-            Height = b.Deserialize<uint>();
-            Width = b.Deserialize<uint>();
-            DoRectify = b.Deserialize<bool>();
+            b.Deserialize(out XOffset);
+            b.Deserialize(out YOffset);
+            b.Deserialize(out Height);
+            b.Deserialize(out Width);
+            b.Deserialize(out DoRectify);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RegionOfInterest(ref b);

@@ -28,7 +28,7 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor with buffer.
         public LaserEcho(ref ReadBuffer b)
         {
-            Echoes = b.DeserializeStructArray<float>();
+            b.DeserializeStructArray(out Echoes);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LaserEcho(ref b);
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Echoes is null) BuiltIns.ThrowNullReference(nameof(Echoes));
+            if (Echoes is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + 4 * Echoes.Length;

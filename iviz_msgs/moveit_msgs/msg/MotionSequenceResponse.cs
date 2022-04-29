@@ -38,12 +38,12 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             ErrorCode = new MoveItErrorCodes(ref b);
             SequenceStart = new RobotState(ref b);
-            PlannedTrajectories = b.DeserializeArray<RobotTrajectory>();
+            b.DeserializeArray(out PlannedTrajectories);
             for (int i = 0; i < PlannedTrajectories.Length; i++)
             {
                 PlannedTrajectories[i] = new RobotTrajectory(ref b);
             }
-            PlanningTime = b.Deserialize<double>();
+            b.Deserialize(out PlanningTime);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MotionSequenceResponse(ref b);
@@ -60,14 +60,14 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference();
             ErrorCode.RosValidate();
-            if (SequenceStart is null) BuiltIns.ThrowNullReference(nameof(SequenceStart));
+            if (SequenceStart is null) BuiltIns.ThrowNullReference();
             SequenceStart.RosValidate();
-            if (PlannedTrajectories is null) BuiltIns.ThrowNullReference(nameof(PlannedTrajectories));
+            if (PlannedTrajectories is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < PlannedTrajectories.Length; i++)
             {
-                if (PlannedTrajectories[i] is null) BuiltIns.ThrowNullReference($"{nameof(PlannedTrajectories)}[{i}]");
+                if (PlannedTrajectories[i] is null) BuiltIns.ThrowNullReference(nameof(PlannedTrajectories), i);
                 PlannedTrajectories[i].RosValidate();
             }
         }

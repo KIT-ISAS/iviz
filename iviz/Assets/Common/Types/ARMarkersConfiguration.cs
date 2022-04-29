@@ -11,6 +11,6 @@ namespace Iviz.Common
     public sealed class ARMarkersConfiguration : JsonToString
     {
         [DataMember] public float MaxMarkerDistanceInM { get; set; } = 0.5f;
-        [DataMember] public ARExecutableMarker[] Markers { get; set; } = Array.Empty<ARExecutableMarker>();
+        [DataMember] public ARSeenMarker[] Markers { get; set; } = Array.Empty<ARSeenMarker>();
     }
 }

@@ -26,27 +26,27 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor with buffer.
         public Config(ref ReadBuffer b)
         {
-            Bools = b.DeserializeArray<BoolParameter>();
+            b.DeserializeArray(out Bools);
             for (int i = 0; i < Bools.Length; i++)
             {
                 Bools[i] = new BoolParameter(ref b);
             }
-            Ints = b.DeserializeArray<IntParameter>();
+            b.DeserializeArray(out Ints);
             for (int i = 0; i < Ints.Length; i++)
             {
                 Ints[i] = new IntParameter(ref b);
             }
-            Strs = b.DeserializeArray<StrParameter>();
+            b.DeserializeArray(out Strs);
             for (int i = 0; i < Strs.Length; i++)
             {
                 Strs[i] = new StrParameter(ref b);
             }
-            Doubles = b.DeserializeArray<DoubleParameter>();
+            b.DeserializeArray(out Doubles);
             for (int i = 0; i < Doubles.Length; i++)
             {
                 Doubles[i] = new DoubleParameter(ref b);
             }
-            Groups = b.DeserializeArray<GroupState>();
+            b.DeserializeArray(out Groups);
             for (int i = 0; i < Groups.Length; i++)
             {
                 Groups[i] = new GroupState(ref b);
@@ -68,34 +68,34 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Bools is null) BuiltIns.ThrowNullReference(nameof(Bools));
+            if (Bools is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Bools.Length; i++)
             {
-                if (Bools[i] is null) BuiltIns.ThrowNullReference($"{nameof(Bools)}[{i}]");
+                if (Bools[i] is null) BuiltIns.ThrowNullReference(nameof(Bools), i);
                 Bools[i].RosValidate();
             }
-            if (Ints is null) BuiltIns.ThrowNullReference(nameof(Ints));
+            if (Ints is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Ints.Length; i++)
             {
-                if (Ints[i] is null) BuiltIns.ThrowNullReference($"{nameof(Ints)}[{i}]");
+                if (Ints[i] is null) BuiltIns.ThrowNullReference(nameof(Ints), i);
                 Ints[i].RosValidate();
             }
-            if (Strs is null) BuiltIns.ThrowNullReference(nameof(Strs));
+            if (Strs is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Strs.Length; i++)
             {
-                if (Strs[i] is null) BuiltIns.ThrowNullReference($"{nameof(Strs)}[{i}]");
+                if (Strs[i] is null) BuiltIns.ThrowNullReference(nameof(Strs), i);
                 Strs[i].RosValidate();
             }
-            if (Doubles is null) BuiltIns.ThrowNullReference(nameof(Doubles));
+            if (Doubles is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Doubles.Length; i++)
             {
-                if (Doubles[i] is null) BuiltIns.ThrowNullReference($"{nameof(Doubles)}[{i}]");
+                if (Doubles[i] is null) BuiltIns.ThrowNullReference(nameof(Doubles), i);
                 Doubles[i].RosValidate();
             }
-            if (Groups is null) BuiltIns.ThrowNullReference(nameof(Groups));
+            if (Groups is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Groups.Length; i++)
             {
-                if (Groups[i] is null) BuiltIns.ThrowNullReference($"{nameof(Groups)}[{i}]");
+                if (Groups[i] is null) BuiltIns.ThrowNullReference(nameof(Groups), i);
                 Groups[i].RosValidate();
             }
         }

@@ -35,8 +35,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public DisplayTrajectory(ref ReadBuffer b)
         {
-            ModelId = b.DeserializeString();
-            Trajectory = b.DeserializeArray<RobotTrajectory>();
+            b.DeserializeString(out ModelId);
+            b.DeserializeArray(out Trajectory);
             for (int i = 0; i < Trajectory.Length; i++)
             {
                 Trajectory[i] = new RobotTrajectory(ref b);
@@ -57,14 +57,14 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ModelId is null) BuiltIns.ThrowNullReference(nameof(ModelId));
-            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
+            if (ModelId is null) BuiltIns.ThrowNullReference();
+            if (Trajectory is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Trajectory.Length; i++)
             {
-                if (Trajectory[i] is null) BuiltIns.ThrowNullReference($"{nameof(Trajectory)}[{i}]");
+                if (Trajectory[i] is null) BuiltIns.ThrowNullReference(nameof(Trajectory), i);
                 Trajectory[i].RosValidate();
             }
-            if (TrajectoryStart is null) BuiltIns.ThrowNullReference(nameof(TrajectoryStart));
+            if (TrajectoryStart is null) BuiltIns.ThrowNullReference();
             TrajectoryStart.RosValidate();
         }
     

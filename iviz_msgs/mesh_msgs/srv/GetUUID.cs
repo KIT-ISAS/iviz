@@ -66,7 +66,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public GetUUIDRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetUUIDRequest Singleton = new GetUUIDRequest();
+        static GetUUIDRequest? singleton;
+        public static GetUUIDRequest Singleton => singleton ??= new GetUUIDRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -104,7 +105,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public GetUUIDResponse(ref ReadBuffer b)
         {
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetUUIDResponse(ref b);
@@ -118,7 +119,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
+            if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);

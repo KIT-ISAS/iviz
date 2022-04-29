@@ -46,8 +46,8 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor with buffer.
         public ChannelFloat32(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Values = b.DeserializeStructArray<float>();
+            b.DeserializeString(out Name);
+            b.DeserializeStructArray(out Values);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ChannelFloat32(ref b);
@@ -62,8 +62,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Values is null) BuiltIns.ThrowNullReference(nameof(Values));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Values is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + 4 * Values.Length;

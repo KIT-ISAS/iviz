@@ -23,7 +23,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public Num(ref ReadBuffer b)
         {
-            Num_ = b.Deserialize<long>();
+            b.Deserialize(out Num_);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Num(ref b);

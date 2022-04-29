@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public AllowedCollisionEntry(ref ReadBuffer b)
         {
-            Enabled = b.DeserializeStructArray<bool>();
+            b.DeserializeStructArray(out Enabled);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AllowedCollisionEntry(ref b);
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Enabled is null) BuiltIns.ThrowNullReference(nameof(Enabled));
+            if (Enabled is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + Enabled.Length;

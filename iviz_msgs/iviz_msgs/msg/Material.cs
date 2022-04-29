@@ -31,17 +31,17 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Material(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
+            b.DeserializeString(out Name);
             b.Deserialize(out Ambient);
             b.Deserialize(out Diffuse);
             b.Deserialize(out Emissive);
-            Opacity = b.Deserialize<float>();
-            BumpScaling = b.Deserialize<float>();
-            Shininess = b.Deserialize<float>();
-            ShininessStrength = b.Deserialize<float>();
-            Reflectivity = b.Deserialize<float>();
-            BlendMode = b.Deserialize<byte>();
-            Textures = b.DeserializeArray<Texture>();
+            b.Deserialize(out Opacity);
+            b.Deserialize(out BumpScaling);
+            b.Deserialize(out Shininess);
+            b.Deserialize(out ShininessStrength);
+            b.Deserialize(out Reflectivity);
+            b.Deserialize(out BlendMode);
+            b.DeserializeArray(out Textures);
             for (int i = 0; i < Textures.Length; i++)
             {
                 Textures[i] = new Texture(ref b);
@@ -69,11 +69,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Textures is null) BuiltIns.ThrowNullReference(nameof(Textures));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Textures is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Textures.Length; i++)
             {
-                if (Textures[i] is null) BuiltIns.ThrowNullReference($"{nameof(Textures)}[{i}]");
+                if (Textures[i] is null) BuiltIns.ThrowNullReference(nameof(Textures), i);
                 Textures[i].RosValidate();
             }
         }

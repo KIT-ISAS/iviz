@@ -67,7 +67,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public SendBytesRequest(ref ReadBuffer b)
         {
-            Count = b.Deserialize<long>();
+            b.Deserialize(out Count);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SendBytesRequest(ref b);
@@ -111,7 +111,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public SendBytesResponse(ref ReadBuffer b)
         {
-            Data = b.DeserializeString();
+            b.DeserializeString(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SendBytesResponse(ref b);
@@ -125,7 +125,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Data);

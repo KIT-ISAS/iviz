@@ -66,7 +66,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public SelfTestRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly SelfTestRequest Singleton = new SelfTestRequest();
+        static SelfTestRequest? singleton;
+        public static SelfTestRequest Singleton => singleton ??= new SelfTestRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -109,9 +110,9 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor with buffer.
         public SelfTestResponse(ref ReadBuffer b)
         {
-            Id = b.DeserializeString();
-            Passed = b.Deserialize<byte>();
-            Status = b.DeserializeArray<DiagnosticStatus>();
+            b.DeserializeString(out Id);
+            b.Deserialize(out Passed);
+            b.DeserializeArray(out Status);
             for (int i = 0; i < Status.Length; i++)
             {
                 Status[i] = new DiagnosticStatus(ref b);
@@ -131,11 +132,11 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Status is null) BuiltIns.ThrowNullReference(nameof(Status));
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (Status is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Status.Length; i++)
             {
-                if (Status[i] is null) BuiltIns.ThrowNullReference($"{nameof(Status)}[{i}]");
+                if (Status[i] is null) BuiltIns.ThrowNullReference(nameof(Status), i);
                 Status[i].RosValidate();
             }
         }

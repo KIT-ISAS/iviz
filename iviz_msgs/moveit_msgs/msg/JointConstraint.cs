@@ -25,11 +25,11 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public JointConstraint(ref ReadBuffer b)
         {
-            JointName = b.DeserializeString();
-            Position = b.Deserialize<double>();
-            ToleranceAbove = b.Deserialize<double>();
-            ToleranceBelow = b.Deserialize<double>();
-            Weight = b.Deserialize<double>();
+            b.DeserializeString(out JointName);
+            b.Deserialize(out Position);
+            b.Deserialize(out ToleranceAbove);
+            b.Deserialize(out ToleranceBelow);
+            b.Deserialize(out Weight);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new JointConstraint(ref b);
@@ -47,7 +47,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (JointName is null) BuiltIns.ThrowNullReference(nameof(JointName));
+            if (JointName is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 36 + BuiltIns.GetStringSize(JointName);

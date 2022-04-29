@@ -31,11 +31,11 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Orientation);
-            LinkName = b.DeserializeString();
-            AbsoluteXAxisTolerance = b.Deserialize<double>();
-            AbsoluteYAxisTolerance = b.Deserialize<double>();
-            AbsoluteZAxisTolerance = b.Deserialize<double>();
-            Weight = b.Deserialize<double>();
+            b.DeserializeString(out LinkName);
+            b.Deserialize(out AbsoluteXAxisTolerance);
+            b.Deserialize(out AbsoluteYAxisTolerance);
+            b.Deserialize(out AbsoluteZAxisTolerance);
+            b.Deserialize(out Weight);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new OrientationConstraint(ref b);
@@ -55,7 +55,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (LinkName is null) BuiltIns.ThrowNullReference(nameof(LinkName));
+            if (LinkName is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 68 + Header.RosMessageLength + BuiltIns.GetStringSize(LinkName);

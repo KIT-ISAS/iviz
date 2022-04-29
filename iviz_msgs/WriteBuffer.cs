@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Iviz.Tools;
 
 namespace Iviz.Msgs
 {
@@ -37,10 +38,10 @@ namespace Iviz.Msgs
 
             if (ptr == default)
             {
-                throw new BufferException("Buffer has not been initialized!");
+                throw new RosBufferException("Buffer has not been initialized!");
             }
 
-            throw new BufferException($"Requested {off} bytes, but only {ptr.Length} remain!");
+            throw new RosBufferException($"Requested {off} bytes, but only {ptr.Length} remain!");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -125,6 +126,7 @@ namespace Iviz.Msgs
             }
         }
 
+        /*
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SerializeArray(List<string> val, int count = 0)
         {
@@ -142,6 +144,7 @@ namespace Iviz.Msgs
                 Serialize(str);
             }
         }
+        */
 
         public void SerializeStructArray<T>(T[] val) where T : unmanaged
         {
@@ -155,14 +158,14 @@ namespace Iviz.Msgs
             Advance(size);
         }
         
-        public void SerializeStructArray<T>(Memory<T> val) where T : unmanaged
+        public void SerializeStructArray<T>(SharedRent<T> val) where T : unmanaged
         {
             int sizeOfT = Unsafe.SizeOf<T>();
             int size = val.Length * sizeOfT;
             ThrowIfOutOfRange(4 + size);
             
             WriteInt(val.Length);
-            MemoryMarshal.AsBytes(val.Span).CopyTo(ptr);
+            MemoryMarshal.AsBytes(val.AsSpan()).CopyTo(ptr);
             
             Advance(size);
         }
@@ -179,6 +182,7 @@ namespace Iviz.Msgs
             Advance(size);
         }
 
+        /*
         public void SerializeStructList<T>(List<T> val, int count = 0) where T : unmanaged
         {
             int sizeOfT = Unsafe.SizeOf<T>();
@@ -198,6 +202,7 @@ namespace Iviz.Msgs
                 Serialize(v);
             }
         }
+        */
 
         public void SerializeArray<T>(T[] val) where T : IMessage
         {

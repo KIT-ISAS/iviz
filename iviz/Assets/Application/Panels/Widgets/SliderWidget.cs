@@ -52,7 +52,7 @@ namespace Iviz.App
         float ValueInternal
         {
             get => Slider.value;
-            set => Slider.SetValueWithoutNotify(Math.Max((int)value, 0));
+            set => Slider.SetValueWithoutNotify(Mathf.Max((int)value, 0));
         }
 
         public bool Interactable

@@ -74,6 +74,8 @@ namespace Iviz.App
             panel.Interactable.ValueChanged += f => listener.Interactable = f;
             panel.ResetButton.Clicked += () => listener.ResetController();
             panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
+
+            panel.CloseButton.Clicked += () => ModulePanelManager.TogglePanel(this);
         }
 
         public override void Close()
@@ -88,7 +90,8 @@ namespace Iviz.App
 
         public void UpdateConfiguration(TfConfiguration configuration)
         {
-            listener.Config = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            ThrowHelper.ThrowIfNull(configuration, nameof(configuration));
+            listener.Config = configuration;
         }
 
         public override void UpdateConfiguration(string configAsJson, string[] fields)

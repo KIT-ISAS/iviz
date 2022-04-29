@@ -24,7 +24,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public TestHeaderArray(ref ReadBuffer b)
         {
-            Header = b.DeserializeArray<StdMsgs.Header>();
+            b.DeserializeArray(out Header);
             for (int i = 0; i < Header.Length; i++)
             {
                 StdMsgs.Header.Deserialize(ref b, out Header[i]);
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (Header is null) BuiltIns.ThrowNullReference(nameof(Header));
+            if (Header is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetArraySize(Header);

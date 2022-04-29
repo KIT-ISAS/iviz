@@ -28,8 +28,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public LinkScale(ref ReadBuffer b)
         {
-            LinkName = b.DeserializeString();
-            Scale = b.Deserialize<double>();
+            b.DeserializeString(out LinkName);
+            b.Deserialize(out Scale);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LinkScale(ref b);
@@ -44,7 +44,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (LinkName is null) BuiltIns.ThrowNullReference(nameof(LinkName));
+            if (LinkName is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 12 + BuiltIns.GetStringSize(LinkName);

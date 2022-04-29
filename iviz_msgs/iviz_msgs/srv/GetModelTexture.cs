@@ -68,7 +68,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetModelTextureRequest(ref ReadBuffer b)
         {
-            Uri = b.DeserializeString();
+            b.DeserializeString(out Uri);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetModelTextureRequest(ref b);
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Uri is null) BuiltIns.ThrowNullReference(nameof(Uri));
+            if (Uri is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uri);
@@ -115,9 +115,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetModelTextureResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Image = new SensorMsgs.CompressedImage(ref b);
-            Message = b.DeserializeString();
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetModelTextureResponse(ref b);
@@ -133,9 +133,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Image is null) BuiltIns.ThrowNullReference(nameof(Image));
+            if (Image is null) BuiltIns.ThrowNullReference();
             Image.RosValidate();
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Message is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + Image.RosMessageLength + BuiltIns.GetStringSize(Message);

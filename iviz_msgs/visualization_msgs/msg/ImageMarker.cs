@@ -51,18 +51,18 @@ namespace Iviz.Msgs.VisualizationMsgs
         public ImageMarker(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Ns = b.DeserializeString();
-            Id = b.Deserialize<int>();
-            Type = b.Deserialize<int>();
-            Action = b.Deserialize<int>();
+            b.DeserializeString(out Ns);
+            b.Deserialize(out Id);
+            b.Deserialize(out Type);
+            b.Deserialize(out Action);
             b.Deserialize(out Position);
-            Scale = b.Deserialize<float>();
+            b.Deserialize(out Scale);
             b.Deserialize(out OutlineColor);
-            Filled = b.Deserialize<byte>();
+            b.Deserialize(out Filled);
             b.Deserialize(out FillColor);
-            Lifetime = b.Deserialize<duration>();
-            Points = b.DeserializeStructArray<GeometryMsgs.Point>();
-            OutlineColors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
+            b.Deserialize(out Lifetime);
+            b.DeserializeStructArray(out Points);
+            b.DeserializeStructArray(out OutlineColors);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ImageMarker(ref b);
@@ -88,9 +88,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Ns is null) BuiltIns.ThrowNullReference(nameof(Ns));
-            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
-            if (OutlineColors is null) BuiltIns.ThrowNullReference(nameof(OutlineColors));
+            if (Ns is null) BuiltIns.ThrowNullReference();
+            if (Points is null) BuiltIns.ThrowNullReference();
+            if (OutlineColors is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

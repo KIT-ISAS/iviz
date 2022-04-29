@@ -26,8 +26,8 @@ namespace Iviz.Msgs.RosbridgeMsgs
         /// Constructor with buffer.
         public ConnectedClient(ref ReadBuffer b)
         {
-            IpAddress = b.DeserializeString();
-            ConnectionTime = b.Deserialize<time>();
+            b.DeserializeString(out IpAddress);
+            b.Deserialize(out ConnectionTime);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ConnectedClient(ref b);
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         
         public void RosValidate()
         {
-            if (IpAddress is null) BuiltIns.ThrowNullReference(nameof(IpAddress));
+            if (IpAddress is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 12 + BuiltIns.GetStringSize(IpAddress);

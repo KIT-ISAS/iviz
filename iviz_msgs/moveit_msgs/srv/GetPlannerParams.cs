@@ -73,8 +73,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public GetPlannerParamsRequest(ref ReadBuffer b)
         {
-            PlannerConfig = b.DeserializeString();
-            Group = b.DeserializeString();
+            b.DeserializeString(out PlannerConfig);
+            b.DeserializeString(out Group);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPlannerParamsRequest(ref b);
@@ -89,8 +89,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (PlannerConfig is null) BuiltIns.ThrowNullReference(nameof(PlannerConfig));
-            if (Group is null) BuiltIns.ThrowNullReference(nameof(Group));
+            if (PlannerConfig is null) BuiltIns.ThrowNullReference();
+            if (Group is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(PlannerConfig) + BuiltIns.GetStringSize(Group);
@@ -133,7 +133,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Params is null) BuiltIns.ThrowNullReference(nameof(Params));
+            if (Params is null) BuiltIns.ThrowNullReference();
             Params.RosValidate();
         }
     

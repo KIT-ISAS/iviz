@@ -17,7 +17,8 @@ namespace Iviz.Core
             return ((MonoBehaviour?)resource)?.transform;
         }
 
-        static readonly Vector3[] CubePoints =
+        static Vector3[]? cubePoints;
+        static Vector3[] CubePoints => cubePoints ??= new[]
         {
             Vector3.right + Vector3.up + Vector3.forward,
             Vector3.right + Vector3.up - Vector3.forward,
@@ -79,7 +80,7 @@ namespace Iviz.Core
         {
             return TransformBound(bounds, transform.AsLocalPose(), transform.localScale);
         }
-        
+
         public static Bounds? CombineBounds(this IEnumerable<Bounds?> enumOfBounds)
         {
             ThrowHelper.ThrowIfNull(enumOfBounds, nameof(enumOfBounds));
@@ -125,7 +126,8 @@ namespace Iviz.Core
             return bounds;
         }
 
-        static readonly Plane[] PlaneCache = new Plane[6];
+        static Plane[]? planeCache;
+        static Plane[] PlaneCache => planeCache ??= new Plane[6];
 
         public static bool IsVisibleFromMainCamera(this in Bounds bounds)
         {

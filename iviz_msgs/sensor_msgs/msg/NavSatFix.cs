@@ -56,11 +56,11 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             Status = new NavSatStatus(ref b);
-            Latitude = b.Deserialize<double>();
-            Longitude = b.Deserialize<double>();
-            Altitude = b.Deserialize<double>();
-            PositionCovariance = b.DeserializeStructArray<double>(9);
-            PositionCovarianceType = b.Deserialize<byte>();
+            b.Deserialize(out Latitude);
+            b.Deserialize(out Longitude);
+            b.Deserialize(out Altitude);
+            b.DeserializeStructArray(9, out PositionCovariance);
+            b.Deserialize(out PositionCovarianceType);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new NavSatFix(ref b);
@@ -80,10 +80,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Status is null) BuiltIns.ThrowNullReference(nameof(Status));
+            if (Status is null) BuiltIns.ThrowNullReference();
             Status.RosValidate();
-            if (PositionCovariance is null) BuiltIns.ThrowNullReference(nameof(PositionCovariance));
-            if (PositionCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(PositionCovariance), PositionCovariance.Length, 9);
+            if (PositionCovariance is null) BuiltIns.ThrowNullReference();
+            if (PositionCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(PositionCovariance.Length, 9);
         }
     
         public int RosMessageLength => 100 + Header.RosMessageLength;

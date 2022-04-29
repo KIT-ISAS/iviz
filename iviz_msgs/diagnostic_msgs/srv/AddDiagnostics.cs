@@ -83,7 +83,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor with buffer.
         public AddDiagnosticsRequest(ref ReadBuffer b)
         {
-            LoadNamespace = b.DeserializeString();
+            b.DeserializeString(out LoadNamespace);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddDiagnosticsRequest(ref b);
@@ -97,7 +97,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (LoadNamespace is null) BuiltIns.ThrowNullReference(nameof(LoadNamespace));
+            if (LoadNamespace is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(LoadNamespace);
@@ -132,8 +132,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor with buffer.
         public AddDiagnosticsResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
-            Message = b.DeserializeString();
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddDiagnosticsResponse(ref b);
@@ -148,7 +148,7 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Message is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);

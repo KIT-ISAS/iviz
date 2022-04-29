@@ -29,10 +29,10 @@ namespace Iviz.Msgs.MoveitMsgs
         public PositionConstraint(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            LinkName = b.DeserializeString();
+            b.DeserializeString(out LinkName);
             b.Deserialize(out TargetPointOffset);
             ConstraintRegion = new BoundingVolume(ref b);
-            Weight = b.Deserialize<double>();
+            b.Deserialize(out Weight);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PositionConstraint(ref b);
@@ -50,8 +50,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (LinkName is null) BuiltIns.ThrowNullReference(nameof(LinkName));
-            if (ConstraintRegion is null) BuiltIns.ThrowNullReference(nameof(ConstraintRegion));
+            if (LinkName is null) BuiltIns.ThrowNullReference();
+            if (ConstraintRegion is null) BuiltIns.ThrowNullReference();
             ConstraintRegion.RosValidate();
         }
     

@@ -36,7 +36,7 @@ namespace Iviz.Msgs.NavMsgs
         public Odometry(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            ChildFrameId = b.DeserializeString();
+            b.DeserializeString(out ChildFrameId);
             Pose = new GeometryMsgs.PoseWithCovariance(ref b);
             Twist = new GeometryMsgs.TwistWithCovariance(ref b);
         }
@@ -55,10 +55,10 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (ChildFrameId is null) BuiltIns.ThrowNullReference(nameof(ChildFrameId));
-            if (Pose is null) BuiltIns.ThrowNullReference(nameof(Pose));
+            if (ChildFrameId is null) BuiltIns.ThrowNullReference();
+            if (Pose is null) BuiltIns.ThrowNullReference();
             Pose.RosValidate();
-            if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
+            if (Twist is null) BuiltIns.ThrowNullReference();
             Twist.RosValidate();
         }
     

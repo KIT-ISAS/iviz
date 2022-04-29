@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public TriangleIndices(ref ReadBuffer b)
         {
-            VertexIndices = b.DeserializeStructArray<uint>(3);
+            b.DeserializeStructArray(3, out VertexIndices);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TriangleIndices(ref b);
@@ -39,8 +39,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (VertexIndices is null) BuiltIns.ThrowNullReference(nameof(VertexIndices));
-            if (VertexIndices.Length != 3) throw new RosInvalidSizeForFixedArrayException(nameof(VertexIndices), VertexIndices.Length, 3);
+            if (VertexIndices is null) BuiltIns.ThrowNullReference();
+            if (VertexIndices.Length != 3) BuiltIns.ThrowInvalidSizeForFixedArray(VertexIndices.Length, 3);
         }
     
         /// <summary> Constant size of this message. </summary> 

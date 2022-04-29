@@ -83,19 +83,19 @@ namespace Iviz.Msgs.IvizMsgs
         public Dialog(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Action = b.Deserialize<byte>();
-            Id = b.DeserializeString();
-            Lifetime = b.Deserialize<duration>();
-            Scale = b.Deserialize<double>();
-            Type = b.Deserialize<byte>();
-            Buttons = b.Deserialize<byte>();
-            Icon = b.Deserialize<byte>();
+            b.Deserialize(out Action);
+            b.DeserializeString(out Id);
+            b.Deserialize(out Lifetime);
+            b.Deserialize(out Scale);
+            b.Deserialize(out Type);
+            b.Deserialize(out Buttons);
+            b.Deserialize(out Icon);
             b.Deserialize(out BackgroundColor);
-            Title = b.DeserializeString();
-            Caption = b.DeserializeString();
-            CaptionAlignment = b.Deserialize<ushort>();
-            MenuEntries = b.DeserializeStringArray();
-            BindingType = b.Deserialize<byte>();
+            b.DeserializeString(out Title);
+            b.DeserializeString(out Caption);
+            b.Deserialize(out CaptionAlignment);
+            b.DeserializeStringArray(out MenuEntries);
+            b.Deserialize(out BindingType);
             b.Deserialize(out TfOffset);
             b.Deserialize(out DialogDisplacement);
             b.Deserialize(out TfDisplacement);
@@ -128,13 +128,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Title is null) BuiltIns.ThrowNullReference(nameof(Title));
-            if (Caption is null) BuiltIns.ThrowNullReference(nameof(Caption));
-            if (MenuEntries is null) BuiltIns.ThrowNullReference(nameof(MenuEntries));
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (Title is null) BuiltIns.ThrowNullReference();
+            if (Caption is null) BuiltIns.ThrowNullReference();
+            if (MenuEntries is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < MenuEntries.Length; i++)
             {
-                if (MenuEntries[i] is null) BuiltIns.ThrowNullReference($"{nameof(MenuEntries)}[{i}]");
+                if (MenuEntries[i] is null) BuiltIns.ThrowNullReference(nameof(MenuEntries), i);
             }
         }
     

@@ -13,17 +13,18 @@ namespace Iviz.Resources
     public sealed class FontInfo
     {
         readonly Font font;
-        readonly int dotWidth;
-        readonly int spaceWidth;
+        readonly int dotsWidth;
         readonly Dictionary<char, int> charWidths = new();
 
         public FontInfo()
         {
-            font = Resource.Extras.AssetHolder.BaseFont.AssertNotNull(nameof(font));
-            dotWidth = CharWidth('.') * 3; // ...
-            spaceWidth = CharWidth(' ');
+            font = ResourcePool.AssetHolder.BaseFont.AssertNotNull(nameof(font));
+            dotsWidth = CharWidth('.') * 3;
         }
 
+        /// <summary>
+        /// Splits a string into multiple lines that fit into maxWidth. 
+        /// </summary>
         public string Split(string str, int maxWidth, int maxLines = 2)
         {
             ThrowHelper.ThrowIfNull(str, nameof(str));
@@ -32,46 +33,66 @@ namespace Iviz.Resources
                 return "";
             }
 
-            int usableWidth = maxWidth - dotWidth;
+            int usableWidth = maxWidth - dotsWidth;
 
+            // quick check to see if we need the split at all
             int totalWidth = str.Sum(CharWidth);
-
             if (totalWidth <= usableWidth)
             {
                 return str;
             }
 
-            using var description = BuilderPool.Rent();
             int usedWidth = 0;
             int numLines = 0;
-            foreach (int i in ..str.Length)
+            int? lastSeparator = null;
+            using var description = BuilderPool.Rent();
+
+            for (int i = 0; i < str.Length; i++)
             {
                 int charWidth = CharWidth(str[i]);
-                if (usedWidth + charWidth > usableWidth)
-                {
-                    if (i >= str.Length - 2)
-                    {
-                        description.Append(str[i]);
-                        continue;
-                    }
 
-                    if (numLines != maxLines - 1)
-                    {
-                        description.Append("...\n  ").Append(str[i]);
-                        usedWidth = 2 * spaceWidth;
-                        numLines = 1;
-                    }
-                    else
-                    {
-                        description.Append("...");
-                        return description.ToString();
-                    }
-                }
-                else
+                // do we have enough space? append it
+                if (usedWidth + charWidth <= usableWidth)
                 {
                     description.Append(str[i]);
                     usedWidth += charWidth;
+
+                    if (str[i] is ' ' or '_' or '-' or '/')
+                    {
+                        lastSeparator = i;
+                    }
+
+                    continue;
                 }
+
+                // are we almost there? just append it
+                if (i >= str.Length - 2)
+                {
+                    description.Append(str[i]);
+                    continue;
+                }
+
+                // are we out of lines? bail out
+                if (numLines == maxLines - 1)
+                {
+                    description.Append("...");
+                    return description.ToString();
+                }
+
+                if (lastSeparator is { } separator && i - lastSeparator < 6)
+                {
+                    description.Length = separator + 1;
+                    description.Append("\n");
+                    i = separator;
+                }
+                else
+                {
+                    description.Append("...\n").Append(str[i]);
+                }
+
+                usedWidth = 0;
+                lastSeparator = null;
+                numLines++;
             }
 
             return description.ToString();

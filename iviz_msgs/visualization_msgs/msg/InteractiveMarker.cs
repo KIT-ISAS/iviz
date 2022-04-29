@@ -42,15 +42,15 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Pose);
-            Name = b.DeserializeString();
-            Description = b.DeserializeString();
-            Scale = b.Deserialize<float>();
-            MenuEntries = b.DeserializeArray<MenuEntry>();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Description);
+            b.Deserialize(out Scale);
+            b.DeserializeArray(out MenuEntries);
             for (int i = 0; i < MenuEntries.Length; i++)
             {
                 MenuEntries[i] = new MenuEntry(ref b);
             }
-            Controls = b.DeserializeArray<InteractiveMarkerControl>();
+            b.DeserializeArray(out Controls);
             for (int i = 0; i < Controls.Length; i++)
             {
                 Controls[i] = new InteractiveMarkerControl(ref b);
@@ -74,18 +74,18 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
-            if (MenuEntries is null) BuiltIns.ThrowNullReference(nameof(MenuEntries));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Description is null) BuiltIns.ThrowNullReference();
+            if (MenuEntries is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < MenuEntries.Length; i++)
             {
-                if (MenuEntries[i] is null) BuiltIns.ThrowNullReference($"{nameof(MenuEntries)}[{i}]");
+                if (MenuEntries[i] is null) BuiltIns.ThrowNullReference(nameof(MenuEntries), i);
                 MenuEntries[i].RosValidate();
             }
-            if (Controls is null) BuiltIns.ThrowNullReference(nameof(Controls));
+            if (Controls is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Controls.Length; i++)
             {
-                if (Controls[i] is null) BuiltIns.ThrowNullReference($"{nameof(Controls)}[{i}]");
+                if (Controls[i] is null) BuiltIns.ThrowNullReference(nameof(Controls), i);
                 Controls[i].RosValidate();
             }
         }

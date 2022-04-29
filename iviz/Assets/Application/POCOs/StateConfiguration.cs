@@ -30,9 +30,9 @@ namespace Iviz.App
         [DataMember] public List<OctomapConfiguration> Octomaps { get; set; } = new();
         [DataMember] public List<GuiWidgetConfiguration> Dialogs { get; set; } = new();
         [DataMember] public TfPublisherConfiguration TfPublisher { get; set; } = new();
+        [DataMember] public CameraConfiguration Camera { get; set; } = new();
         [DataMember] public ARConfiguration? AR { get; set; }
         [DataMember] public JoystickConfiguration? Joystick { get; set; }
-
         [DataMember] public XRConfiguration? XR { get; set; }
 
         public IEnumerable<IConfiguration> CreateListOfEntries() => new[]

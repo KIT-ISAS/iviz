@@ -44,7 +44,7 @@ namespace Iviz.Displays
                 {
                     float deltaDistance = Vector3.Dot(interactorTransform.forward,
                         lastControllerPosition - pointerRay.origin);
-                    distance = Math.Max(0.1f, distance - validatedForwardScale * deltaDistance);
+                    distance = Mathf.Max(0.1f, distance - validatedForwardScale * deltaDistance);
                 }
 
                 var intersectionWorld = pointerRay.origin + distance * pointerRay.direction;

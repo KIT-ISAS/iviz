@@ -8,11 +8,11 @@ namespace Iviz.MsgsGen
         {
             ["geometry_msgs/Point"] = new[]
             {
-                "public static readonly Point Zero;",
-                "public static readonly Point One = new(1, 1, 1);",
-                "public static readonly Point UnitX = new(1, 0, 0);",
-                "public static readonly Point UnitY = new(0, 1, 0);",
-                "public static readonly Point UnitZ = new(0, 0, 1);",
+                "public static Point Zero => new();",
+                "public static Point One => new(1, 1, 1);",
+                "public static Point UnitX => new(1, 0, 0);",
+                "public static Point UnitY => new(0, 1, 0);",
+                "public static Point UnitZ => new(0, 0, 1);",
                 "public static implicit operator Vector3(in Point p) => new(p.X, p.Y, p.Z);",
                 "public static Point operator +(in Point v, in Vector3 w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);",
                 "public static Point operator -(in Point v, in Vector3 w) => new(v.X - w.X, v.Y - w.Y, v.Z - w.Z);",
@@ -28,11 +28,11 @@ namespace Iviz.MsgsGen
 
             ["geometry_msgs/Vector3"] = new[]
             {
-                "public static readonly Vector3 Zero;",
-                "public static readonly Vector3 One = new(1, 1, 1);",
-                "public static readonly Vector3 UnitX = new(1, 0, 0);",
-                "public static readonly Vector3 UnitY = new(0, 1, 0);",
-                "public static readonly Vector3 UnitZ = new(0, 0, 1);",
+                "public static Vector3 Zero => new();",
+                "public static Vector3 One => new(1, 1, 1);",
+                "public static Vector3 UnitX => new(1, 0, 0);",
+                "public static Vector3 UnitY => new(0, 1, 0);",
+                "public static Vector3 UnitZ => new(0, 0, 1);",
                 "public static implicit operator Point(in Vector3 p) => new(p.X, p.Y, p.Z);",
                 "public static Vector3 operator +(in Vector3 v, in Vector3 w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);",
                 "public static Vector3 operator -(in Vector3 v, in Vector3 w) => new(v.X - w.X, v.Y - w.Y, v.Z - w.Z);",
@@ -49,7 +49,7 @@ namespace Iviz.MsgsGen
             ["geometry_msgs/Quaternion"] = new[]
             {
                 "public readonly Quaternion Inverse => new(-X, -Y, -Z, W);",
-                "public static readonly Quaternion Identity = new(0, 0, 0, 1);",
+                "public static Quaternion Identity => new(0, 0, 0, 1);",
                 "public static Quaternion operator *(in Quaternion a, in Quaternion b) => Extensions.Multiply(a, b).Normalized;",
                 "public static Vector3 operator *(in Quaternion q, in Vector3 v) => Extensions.Multiply(q, v);",
                 "public static Point operator *(in Quaternion q, in (double X, double Y, double Z) v) => q * (Vector3) v;",
@@ -63,7 +63,7 @@ namespace Iviz.MsgsGen
 
             ["geometry_msgs/Transform"] = new[]
             {
-                "public static readonly Transform Identity = new(Vector3.Zero, Quaternion.Identity);",
+                "public static Transform Identity => new(Vector3.Zero, Quaternion.Identity);",
                 "public static implicit operator Pose(in Transform p) => Extensions.AsPose(in p);",
                 "public readonly Transform Inverse => new(-(Rotation.Inverse * Translation), Rotation.Inverse);",
                 "public static Transform operator *(in Transform t, in Transform q) =>",
@@ -78,28 +78,28 @@ namespace Iviz.MsgsGen
 
             ["geometry_msgs/Pose"] = new[]
             {
-                "public static readonly Pose Identity = new(Point.Zero, Quaternion.Identity);",
+                "public static Pose Identity => new(Point.Zero, Quaternion.Identity);",
                 "public static implicit operator Transform(in Pose p) => Extensions.AsTransform(in p);",
                 "public static implicit operator Pose(in (Point position, Quaternion orientation) p) => new(p.position, p.orientation);",
             },
 
             ["geometry_msgs/Twist"] = new[]
             {
-                "public static readonly Twist Zero = new(Vector3.Zero, Vector3.Zero);",
+                "public static Twist Zero => new(Vector3.Zero, Vector3.Zero);",
                 "public static implicit operator Twist(in (Vector3 linear, Vector3 angular) p) => new(p.linear, p.angular);",
             },
 
             ["std_msgs/ColorRGBA"] = new[]
             {
-                "public static readonly ColorRGBA White = new(1, 1, 1, 1);",
-                "public static readonly ColorRGBA Black = new(0, 0, 0, 1);",
-                "public static readonly ColorRGBA Red = new(1, 0, 0, 1);",
-                "public static readonly ColorRGBA Green = new(0, 1, 0, 1);",
-                "public static readonly ColorRGBA Blue = new(0, 0, 1, 1);",
-                "public static readonly ColorRGBA Yellow = new(1, 1, 0, 1);",
-                "public static readonly ColorRGBA Cyan = new(0, 1, 1, 1);",
-                "public static readonly ColorRGBA Magenta = new(1, 0, 1, 1);",
-                "public static readonly ColorRGBA Grey = new(0.5f, 0.5f, 0.5f, 1);",
+                "public static ColorRGBA White => new(1, 1, 1, 1);",
+                "public static ColorRGBA Black => new(0, 0, 0, 1);",
+                "public static ColorRGBA Red => new(1, 0, 0, 1);",
+                "public static ColorRGBA Green => new(0, 1, 0, 1);",
+                "public static ColorRGBA Blue => new(0, 0, 1, 1);",
+                "public static ColorRGBA Yellow => new(1, 1, 0, 1);",
+                "public static ColorRGBA Cyan => new(0, 1, 1, 1);",
+                "public static ColorRGBA Magenta => new(1, 0, 1, 1);",
+                "public static ColorRGBA Grey => new(0.5f, 0.5f, 0.5f, 1);",
                 "public static ColorRGBA operator *(in ColorRGBA v, in ColorRGBA w) => new(v.R * w.R, v.G * w.G, v.B * w.B, v.A * w.A);",
                 "public static implicit operator ColorRGBA(in (float R, float G, float B, float A) p) => new(p.R, p.G, p.B, p.A);",
                 "public static implicit operator ColorRGBA(in ((float R, float G, float B) p, float A) q) => new(q.p.R, q.p.G, q.p.B, q.A);",
@@ -109,13 +109,14 @@ namespace Iviz.MsgsGen
 
             ["iviz_msgs/Vector3f"] = new[]
             {
-                "public static readonly Vector3f Zero;",
-                "public static readonly Vector3f One = new(1, 1, 1);",
-                "public static readonly Vector3f UnitX = new(1, 0, 0);",
-                "public static readonly Vector3f UnitY = new(0, 1, 0);",
-                "public static readonly Vector3f UnitZ = new(0, 0, 1);",
+                "public static Vector3f Zero => new();",
+                "public static Vector3f One => new(1, 1, 1);",
+                "public static Vector3f UnitX => new(1, 0, 0);",
+                "public static Vector3f UnitY => new(0, 1, 0);",
+                "public static Vector3f UnitZ => new(0, 0, 1);",
                 "public static implicit operator GeometryMsgs.Point(in Vector3f p) => new(p.X, p.Y, p.Z);",
                 "public static implicit operator GeometryMsgs.Vector3(in Vector3f p) => new(p.X, p.Y, p.Z);",
+                "public static implicit operator Vector3f(in GeometryMsgs.Vector3 p) => new((float)p.X, (float)p.Y, (float)p.Z);",
                 "public static Vector3f operator +(in Vector3f v, in Vector3f w) => new(v.X + w.X, v.Y + w.Y, v.Z + w.Z);",
                 "public static Vector3f operator -(in Vector3f v, in Vector3f w) => new(v.X - w.X, v.Y - w.Y, v.Z - w.Z);",
                 "public static Vector3f operator *(float f, in Vector3f v) => new(f * v.X, f * v.Y, f * v.Z);",
@@ -132,10 +133,10 @@ namespace Iviz.MsgsGen
 
             ["iviz_msgs/Vector2f"] = new[]
             {
-                "public static readonly Vector2f Zero = new(0, 0);",
-                "public static readonly Vector2f One = new(1, 1);",
-                "public static readonly Vector2f UnitX = new(1, 0);",
-                "public static readonly Vector2f UnitY = new(0, 1);",
+                "public static Vector2f Zero => new(0, 0);",
+                "public static Vector2f One => new(1, 1);",
+                "public static Vector2f UnitX => new(1, 0);",
+                "public static Vector2f UnitY => new(0, 1);",
                 "public static Vector2f operator +(in Vector2f v, in Vector2f w) => new(v.X + w.X, v.Y + w.Y);",
                 "public static Vector2f operator -(in Vector2f v, in Vector2f w) => new(v.X - w.X, v.Y - w.Y);",
                 "public static Vector2f operator *(float f, in Vector2f v) => new(f * v.X, f * v.Y);",

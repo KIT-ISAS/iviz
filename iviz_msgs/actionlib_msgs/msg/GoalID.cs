@@ -32,8 +32,8 @@ namespace Iviz.Msgs.ActionlibMsgs
         /// Constructor with buffer.
         public GoalID(ref ReadBuffer b)
         {
-            Stamp = b.Deserialize<time>();
-            Id = b.DeserializeString();
+            b.Deserialize(out Stamp);
+            b.DeserializeString(out Id);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GoalID(ref b);
@@ -48,7 +48,7 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Id is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 12 + BuiltIns.GetStringSize(Id);
@@ -69,6 +69,7 @@ namespace Iviz.Msgs.ActionlibMsgs
                 "sQw9OMoi8e/Am0Cnu91Dt8Gh9q7mZOhF3DUF9bPKOlwh/AJcvpWYTwEAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
         /// Custom iviz code
         public bool Equals(GoalID? other) => ReferenceEquals(this, other) || (other != null && Stamp == other.Stamp && Id == other.Id);
         public override bool Equals(object? obj) => ReferenceEquals(this, obj) || obj is GoalID other && Equals(other);

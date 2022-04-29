@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetFramePoseRequest(ref ReadBuffer b)
         {
-            Frames = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Frames);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetFramePoseRequest(ref b);
@@ -84,10 +84,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Frames is null) BuiltIns.ThrowNullReference(nameof(Frames));
+            if (Frames is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Frames.Length; i++)
             {
-                if (Frames[i] is null) BuiltIns.ThrowNullReference($"{nameof(Frames)}[{i}]");
+                if (Frames[i] is null) BuiltIns.ThrowNullReference(nameof(Frames), i);
             }
         }
     
@@ -121,8 +121,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetFramePoseResponse(ref ReadBuffer b)
         {
-            IsValid = b.DeserializeStructArray<bool>();
-            Poses = b.DeserializeStructArray<GeometryMsgs.Pose>();
+            b.DeserializeStructArray(out IsValid);
+            b.DeserializeStructArray(out Poses);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetFramePoseResponse(ref b);
@@ -137,8 +137,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (IsValid is null) BuiltIns.ThrowNullReference(nameof(IsValid));
-            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
+            if (IsValid is null) BuiltIns.ThrowNullReference();
+            if (Poses is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + IsValid.Length + 56 * Poses.Length;

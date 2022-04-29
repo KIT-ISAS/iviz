@@ -68,7 +68,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public TestArrayRequestRequest(ref ReadBuffer b)
         {
-            @int = b.DeserializeStructArray<int>();
+            b.DeserializeStructArray(out @int);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestArrayRequestRequest(ref b);
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (@int is null) BuiltIns.ThrowNullReference(nameof(@int));
+            if (@int is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + 4 * @int.Length;
@@ -108,7 +108,8 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public TestArrayRequestResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly TestArrayRequestResponse Singleton = new TestArrayRequestResponse();
+        static TestArrayRequestResponse? singleton;
+        public static TestArrayRequestResponse Singleton => singleton ??= new TestArrayRequestResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

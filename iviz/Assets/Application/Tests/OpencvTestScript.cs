@@ -21,7 +21,7 @@ namespace Iviz.App.Tests
      */
     public class OpencvTestScript : MonoBehaviour
     {
-        ARMarkerExecutor executor = new ARMarkerExecutor();
+        ARMarkerManager manager = new ARMarkerManager();
 
         void Start()
         {
@@ -71,7 +71,7 @@ namespace Iviz.App.Tests
                 CameraIntrinsic = new Intrinsic(3000, texture.width / 2f, 3000, texture.height / 2f).ToArray(),
             };
 
-            executor.Process(detectedMarker);
+            manager.Process(detectedMarker);
 
             Msgs.GeometryMsgs.Pose localPoseInRos = Transform.Identity;
             {
@@ -116,8 +116,8 @@ namespace Iviz.App.Tests
         static void DrawLine(Texture2D t, int x0, int y0, int x1, int y1, Color? color = null)
         {
             Color ccolor = color ?? Color.red;
-            int dx = Math.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-            int dy = -Math.Abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+            int dx = Mathf.Abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
+            int dy = -Mathf.Abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
             int err = dx + dy, e2; /* error value e_xy */
 
             while (true)

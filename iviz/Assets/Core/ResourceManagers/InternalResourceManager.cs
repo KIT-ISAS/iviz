@@ -22,8 +22,8 @@ namespace Iviz.Resources
 
         readonly Dictionary<string, ResourceKey<Texture2D>> textures = new();
 
-        readonly HashSet<string> negGameObjects = new();
-        readonly HashSet<string> negTextures = new();
+        readonly HashSet<string> blacklistedModelUris = new();
+        readonly HashSet<string> blacklistedTextureUris = new();
 
         readonly Dictionary<string, string> robotDescriptions;
 
@@ -47,7 +47,7 @@ namespace Iviz.Resources
                     UnityEngine.Resources.Load<TextAsset>("Package/iviz/robots/" + value)?.text;
                 if (robotDescription is null or "")
                 {
-                    RosLogger.Info($"{this}: Empty or null description file {value}!");
+                    RosLogger.Info($"{this}: Empty or null description file '{value}'!");
                     continue;
                 }
 
@@ -71,15 +71,15 @@ namespace Iviz.Resources
 
         public bool TryGet(string uriString, [NotNullWhen(true)] out ResourceKey<GameObject>? info)
         {
-            return TryGet(uriString, gameObjects, negGameObjects, out info);
+            return TryGet(uriString, gameObjects, blacklistedModelUris, out info);
         }
 
         public bool TryGet(string uriString, [NotNullWhen(true)] out ResourceKey<Texture2D>? info)
         {
-            return TryGet(uriString, textures, negTextures, out info);
+            return TryGet(uriString, textures, blacklistedTextureUris, out info);
         }
 
-        bool TryGet<T>(string uriString, IDictionary<string, ResourceKey<T>> repository, ISet<string> negRepository,
+        bool TryGet<T>(string uriString, IDictionary<string, ResourceKey<T>> repository, ISet<string> blacklistedUris,
             [NotNullWhen(true)] out ResourceKey<T>? info)
             where T : UnityEngine.Object
         {
@@ -98,7 +98,7 @@ namespace Iviz.Resources
                 return false;
             }
 
-            if (negRepository.Contains(uriString))
+            if (blacklistedUris.Contains(uriString))
             {
                 info = null;
                 return false;
@@ -107,19 +107,19 @@ namespace Iviz.Resources
             if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri uri))
             {
                 RosLogger.Warn($"{this}: Uri '{uriString}' is not a valid uri!");
-                negRepository.Add(uriString);
+                blacklistedUris.Add(uriString);
                 info = null;
                 return false;
             }
 
             string path = $"Package/{uri.Host}{Uri.UnescapeDataString(uri.AbsolutePath)}".Replace("//", "/");
-            T? resource = UnityEngine.Resources.Load<T>(path).CheckedNull()
+            var resource = UnityEngine.Resources.Load<T>(path).CheckedNull()
                           ?? UnityEngine.Resources.Load<T>(
                               $"{Path.GetDirectoryName(path)}/{Path.GetFileNameWithoutExtension(path)}");
 
             if (resource == null)
             {
-                negRepository.Add(uriString);
+                blacklistedUris.Add(uriString);
                 info = null;
                 return false;
             }
@@ -129,6 +129,6 @@ namespace Iviz.Resources
             return true;
         }
 
-        public override string ToString() => "[InternalResourceManager]";
+        public override string ToString() => $"[{nameof(InternalResourceManager)}]";
     }
 }

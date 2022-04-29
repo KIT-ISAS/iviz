@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using Iviz.Core;
+using Iviz.Displays;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -11,9 +12,6 @@ namespace Iviz.Resources
     {
         readonly Dictionary<FullKey, Material> materialsByTexture = new();
         readonly Dictionary<SimpleKey, Material> simpleMaterialsByTexture = new();
-
-        static readonly int BumpMap = Shader.PropertyToID("_BumpMap");
-        static readonly int MainTex = Shader.PropertyToID("_MainTex");
 
         public Material Get(Texture? diffuse = null, Texture? bump = null)
         {
@@ -39,7 +37,7 @@ namespace Iviz.Resources
             if (bump != null)
             {
                 material = Resource.Materials.BumpLit.Instantiate();
-                material.SetTexture(BumpMap, bump);
+                material.SetTexture(ShaderIds.BumpMapId, bump);
                 material.name = $"{Resource.Materials.BumpLit.Name} - {materialsByTexture.Count.ToString()}";
             }
             else
@@ -48,7 +46,7 @@ namespace Iviz.Resources
                 material.name = $"{Resource.Materials.TexturedLit.Name} - {materialsByTexture.Count.ToString()}";
             }
 
-            material.SetTexture(MainTex, diffuse);
+            material.SetTexture(ShaderIds.MainTexId, diffuse);
             materialsByTexture[key] = material;
             return material;
         }
@@ -65,7 +63,7 @@ namespace Iviz.Resources
             var material = Resource.Materials.SimpleTexturedLit.Instantiate();
             material.name =
                 $"{Resource.Materials.SimpleTexturedLit.Name} - {simpleMaterialsByTexture.Count.ToString()}";
-            material.SetTexture(MainTex, diffuse);
+            material.SetTexture(ShaderIds.MainTexId, diffuse);
             simpleMaterialsByTexture[key] = material;
             return material;
         }
@@ -94,7 +92,7 @@ namespace Iviz.Resources
             if (bump != null)
             {
                 material = Resource.Materials.TransparentBumpLit.Instantiate();
-                material.SetTexture(BumpMap, bump);
+                material.SetTexture(ShaderIds.BumpMapId, bump);
                 material.name = $"{Resource.Materials.TransparentBumpLit.Name} - {materialsByTexture.Count.ToString()}";
             }
             else
@@ -104,7 +102,7 @@ namespace Iviz.Resources
                     $"{Resource.Materials.TransparentTexturedLit.Name} - {materialsByTexture.Count.ToString()}";
             }
 
-            material.SetTexture(MainTex, diffuse);
+            material.SetTexture(ShaderIds.MainTexId, diffuse);
             materialsByTexture[key] = material;
             return material;
         }
@@ -121,7 +119,7 @@ namespace Iviz.Resources
             var material = Resource.Materials.SimpleTransparentTexturedLit.Instantiate();
             material.name =
                 $"{Resource.Materials.SimpleTransparentTexturedLit.Name} - {simpleMaterialsByTexture.Count.ToString()}";
-            material.SetTexture(MainTex, diffuse);
+            material.SetTexture(ShaderIds.MainTexId, diffuse);
             simpleMaterialsByTexture[key] = material;
             return material;
         }

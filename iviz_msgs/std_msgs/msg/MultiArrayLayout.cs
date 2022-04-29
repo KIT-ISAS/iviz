@@ -50,12 +50,12 @@ namespace Iviz.Msgs.StdMsgs
         /// Constructor with buffer.
         public MultiArrayLayout(ref ReadBuffer b)
         {
-            Dim = b.DeserializeArray<MultiArrayDimension>();
+            b.DeserializeArray(out Dim);
             for (int i = 0; i < Dim.Length; i++)
             {
                 Dim[i] = new MultiArrayDimension(ref b);
             }
-            DataOffset = b.Deserialize<uint>();
+            b.Deserialize(out DataOffset);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiArrayLayout(ref b);
@@ -70,10 +70,10 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Dim is null) BuiltIns.ThrowNullReference(nameof(Dim));
+            if (Dim is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Dim.Length; i++)
             {
-                if (Dim[i] is null) BuiltIns.ThrowNullReference($"{nameof(Dim)}[{i}]");
+                if (Dim[i] is null) BuiltIns.ThrowNullReference(nameof(Dim), i);
                 Dim[i].RosValidate();
             }
         }

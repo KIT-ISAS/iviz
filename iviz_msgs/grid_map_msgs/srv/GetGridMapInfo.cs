@@ -66,7 +66,8 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public GetGridMapInfoRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetGridMapInfoRequest Singleton = new GetGridMapInfoRequest();
+        static GetGridMapInfoRequest? singleton;
+        public static GetGridMapInfoRequest Singleton => singleton ??= new GetGridMapInfoRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -119,7 +120,7 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (Info is null) BuiltIns.ThrowNullReference(nameof(Info));
+            if (Info is null) BuiltIns.ThrowNullReference();
             Info.RosValidate();
         }
     

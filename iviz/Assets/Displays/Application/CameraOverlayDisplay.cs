@@ -1,5 +1,6 @@
 #nullable enable
 
+using System;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using UnityEngine;
@@ -37,6 +38,13 @@ namespace Iviz.Displays
             Display.Layer = gameObject.layer;
             Display.Emissive = 0.4f;
             CheckSettings();
+
+            GameThread.EveryFrame += DoUpdate;
+        }
+
+        void OnDestroy()
+        {
+            GameThread.EveryFrame -= DoUpdate;
         }
 
         void CheckSettings()
@@ -61,16 +69,20 @@ namespace Iviz.Displays
             Transform.position = widgetWorldPos;
         }
 
-        void LateUpdate()
+        void DoUpdate()
         {
-            bool isParentEnabled = GrandparentCamera.enabled;
+            bool isParentEnabled = GrandparentCamera.isActiveAndEnabled;
             if (Display.Visible != isParentEnabled)
             {
                 ParentCamera.enabled = isParentEnabled;
                 Display.Visible = isParentEnabled;
-                return;
             }
 
+            if (!isParentEnabled)
+            {
+                return;
+            }
+            
             CheckSettings();
 
             var baseTransform = Quaternions.Rotate90AroundY;

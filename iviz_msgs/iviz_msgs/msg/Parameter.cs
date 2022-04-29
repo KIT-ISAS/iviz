@@ -30,15 +30,15 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Parameter(ref ReadBuffer b)
         {
-            Type = b.Deserialize<byte>();
-            @bool = b.Deserialize<bool>();
-            Int32 = b.Deserialize<int>();
-            Float64 = b.Deserialize<double>();
-            @string = b.DeserializeString();
-            Bytes = b.DeserializeStructArray<byte>();
-            Int32s = b.DeserializeStructArray<int>();
-            Float64s = b.DeserializeStructArray<double>();
-            Strings = b.DeserializeStringArray();
+            b.Deserialize(out Type);
+            b.Deserialize(out @bool);
+            b.Deserialize(out Int32);
+            b.Deserialize(out Float64);
+            b.DeserializeString(out @string);
+            b.DeserializeStructArray(out Bytes);
+            b.DeserializeStructArray(out Int32s);
+            b.DeserializeStructArray(out Float64s);
+            b.DeserializeStringArray(out Strings);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Parameter(ref b);
@@ -60,14 +60,14 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (@string is null) BuiltIns.ThrowNullReference(nameof(@string));
-            if (Bytes is null) BuiltIns.ThrowNullReference(nameof(Bytes));
-            if (Int32s is null) BuiltIns.ThrowNullReference(nameof(Int32s));
-            if (Float64s is null) BuiltIns.ThrowNullReference(nameof(Float64s));
-            if (Strings is null) BuiltIns.ThrowNullReference(nameof(Strings));
+            if (@string is null) BuiltIns.ThrowNullReference();
+            if (Bytes is null) BuiltIns.ThrowNullReference();
+            if (Int32s is null) BuiltIns.ThrowNullReference();
+            if (Float64s is null) BuiltIns.ThrowNullReference();
+            if (Strings is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Strings.Length; i++)
             {
-                if (Strings[i] is null) BuiltIns.ThrowNullReference($"{nameof(Strings)}[{i}]");
+                if (Strings[i] is null) BuiltIns.ThrowNullReference(nameof(Strings), i);
             }
         }
     

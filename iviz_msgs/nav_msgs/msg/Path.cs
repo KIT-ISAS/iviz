@@ -28,7 +28,7 @@ namespace Iviz.Msgs.NavMsgs
         public Path(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Poses = b.DeserializeArray<GeometryMsgs.PoseStamped>();
+            b.DeserializeArray(out Poses);
             for (int i = 0; i < Poses.Length; i++)
             {
                 Poses[i] = new GeometryMsgs.PoseStamped(ref b);
@@ -47,10 +47,10 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
+            if (Poses is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Poses.Length; i++)
             {
-                if (Poses[i] is null) BuiltIns.ThrowNullReference($"{nameof(Poses)}[{i}]");
+                if (Poses[i] is null) BuiltIns.ThrowNullReference(nameof(Poses), i);
                 Poses[i].RosValidate();
             }
         }

@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public MoveGroupSequenceFeedback(ref ReadBuffer b)
         {
-            State = b.DeserializeString();
+            b.DeserializeString(out State);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MoveGroupSequenceFeedback(ref b);
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (State is null) BuiltIns.ThrowNullReference(nameof(State));
+            if (State is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(State);

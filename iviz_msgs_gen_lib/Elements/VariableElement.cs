@@ -127,8 +127,8 @@ namespace Iviz.MsgsGen
             }
 
             ClassInfo = classInfo;
-            RentHint = IsDynamicSizeArray && Comment == "[Rent]";
-            IgnoreHint = Comment == "[Ignore]";
+            RentHint = IsDynamicSizeArray && Comment.StartsWith("[Rent]");
+            IgnoreHint = Comment.StartsWith("[Ignore]");
         }
 
         public override string ToString()
@@ -184,7 +184,7 @@ namespace Iviz.MsgsGen
                     else
                     {
                         result = RentHint
-                            ? $"public System.Memory<{CsClassName}> {CsFieldName};"
+                            ? $"public Tools.SharedRent<{CsClassName}> {CsFieldName};"
                             : $"public {CsClassName}[] {CsFieldName};";
                     }
                 }

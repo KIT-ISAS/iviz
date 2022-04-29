@@ -29,9 +29,8 @@ namespace Iviz.Msgs.SensorMsgs
         [DataMember (Name = "point_step")] public uint PointStep;
         /// <summary> Length of a row in bytes </summary>
         [DataMember (Name = "row_step")] public uint RowStep;
-        //uint8[] data         # Actual point data, size is (row_step*height)
-        /// <summary> [Rent] </summary>
-        [DataMember (Name = "data")] public System.Memory<byte> Data;
+        /// <summary> [Rent] Actual point data, size is (row_step*height) </summary>
+        [DataMember (Name = "data")] public Tools.SharedRent<byte> Data;
         /// <summary> True if there are no invalid points </summary>
         [DataMember (Name = "is_dense")] public bool IsDense;
     
@@ -39,25 +38,25 @@ namespace Iviz.Msgs.SensorMsgs
         public PointCloud2()
         {
             Fields = System.Array.Empty<PointField>();
-            Data = System.Array.Empty<byte>();
+            Data = Tools.SharedRent<byte>.Empty;
         }
         
         /// Constructor with buffer.
         public PointCloud2(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Height = b.Deserialize<uint>();
-            Width = b.Deserialize<uint>();
-            Fields = b.DeserializeArray<PointField>();
+            b.Deserialize(out Height);
+            b.Deserialize(out Width);
+            b.DeserializeArray(out Fields);
             for (int i = 0; i < Fields.Length; i++)
             {
                 Fields[i] = new PointField(ref b);
             }
-            IsBigendian = b.Deserialize<bool>();
-            PointStep = b.Deserialize<uint>();
-            RowStep = b.Deserialize<uint>();
-            Data = b.DeserializeStructRent<byte>();
-            IsDense = b.Deserialize<bool>();
+            b.Deserialize(out IsBigendian);
+            b.Deserialize(out PointStep);
+            b.Deserialize(out RowStep);
+            b.DeserializeStructRent(out Data);
+            b.Deserialize(out IsDense);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PointCloud2(ref b);
@@ -79,12 +78,13 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Fields is null) BuiltIns.ThrowNullReference(nameof(Fields));
+            if (Fields is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Fields.Length; i++)
             {
-                if (Fields[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fields)}[{i}]");
+                if (Fields[i] is null) BuiltIns.ThrowNullReference(nameof(Fields), i);
                 Fields[i].RosValidate();
             }
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength
@@ -108,25 +108,30 @@ namespace Iviz.Msgs.SensorMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE7VVTW8bNxA9d3/FIDpECiQVtlPXMCAUQQ03BlInaNxTEAjcJaUlyiU3JFfu9tf3DbmU" +
-                "lLaHHlrBhrSzM49vvh5n9NTqQJ0KQewVtc7IQIIaZ4xqonaW3I4eV1J3ygY8CkO90zaGJT23ummpE2M1" +
-                "g7+NQlsSUuqY3bTdOd+JhBEGeIpAli0GsUBgvDguScVmDRIKKAmZpIiCwClE55XkMEG1tsKPVBtXIzgG" +
-                "MmJ0A3xVaLyu4VaPFBMIU1EgyMRhoRc7rZDUCxLei3FdwQWnTWc1xg0yn4hEqFbk/F5Y/QcQLyXNdYeq" +
-                "rIz+TS3whi4koucD0pAK3BZr+nCCCWexII3wFB0Kcu+dHJpElWmKTnmBBPrYUkAxnA/HOoUIeMcnRhR+" +
-                "5XarndH7Nmb2MHFyOSiTF82XQYdU+iUJK1PmjQNPFC4q2nkcRw93NEdT6EqWYofFunqrBLKhNn3xAZd3" +
-                "IOCHJg5elSqelWtND9mWi4dOHQuyBArzhBE4F4nJs5bIEF4cYpTd4+kfQKsBv68uJ4DylIKZ093U6AzT" +
-                "tMJaZUJJVfsyEJhBdpjmJdWGh2ZdpUbd8yh8+kx5JKqqds4QPjpsa71XVmphaUYPfAoY5/Dy4odCKvPe" +
-                "okk9Ymf07piUmFICi3qMKhwjvHsu/n+NwKuT/4wDbsAwHV0+M3qDZpTVS++WFDBoXNZ5wX6VS7eozjG+" +
-                "mQA+/YKd+DxljHQlhked8J/8ALDUFfRc4N86sDoIo+U0KVW1+Y8/1c8ff7rFqMltF/bh2zyH6PXHiLYK" +
-                "L6FKUaRC8NC2SE75lVEHZRAkul5NmxvHXoV12mvUA39oGHbLmJGGAKfosApdN1jd8C7wSn0Vj0iWLuqF" +
-                "j7oZjPB/Wx1Gx19QXwZlG96kWxaaoJohahAagdB4JYK2e16z0ngEVLOnZ7diwdsrfzocpRa8J6R+7z3U" +
-                "N4nGLc54lZNbAxvFUTgFyjJPti0ewwKdZwqqdxCLOZh/GGPr8twfhNeiNmkwGlQAqC856OXiDNkmaCus" +
-                "K/AZ8XTGv4G1R9ykUdhIaTj7MOxRQDhC7w5aHqUZe64xg2R07bGbFUflI6vZfZKn087hW4TgGo0GsIJA" +
-                "A6BIjJ66sdXyf5vGJKp5IE+SUWbr62uSk8oXUF9uSmeLqiFVP05yhPCE9SMr3eURJd+PWflu6OHx6YaX" +
-                "cUMXk+XXybShy5PPxXWyXJ35sGlDr08+rDiwfHfmw6YNXU+W+3fv37BpQ9+fW65fw3JTlVpbbsokEI8i" +
-                "XzpJOct0u90uqJgd3uffO+867qqP7J1LkS+T6aDUYN5YDrorv5Ud+DrM91dQkKDaHVQ5p3GDjRORt5DL" +
-                "TtiRlFFduucnyc/Mqj8B9mCArNEIAAA=";
+                "H4sIAAAAAAAAE7VV32/bNhB+nv6KQ/1Qu7A9JGmzIIAxFAuyBujSos2eisKgxLNNjCJdkkqm/fX7jpRs" +
+                "Z9vDHjbBhqTT3Xff/eSEHnYmUssxqi3TzlsdSVHjreUmGe/Ib+h+oU3LLuJVWdp741Kc09PONDtqVV9N" +
+                "oO+SMo6U1iYVNeM2PrQqY8QOmiqSE4mFLRAEL/Vz4tQsQYKBkpFJq6QInGLygbWYKaqNU6Gn2voaximS" +
+                "Vb3voMuxCaaGWt1TyiBChUFQiENCLzaGEdQLUiGofllBBd4GX431nS4eEQjVTD5slTN/APFc09S0yMrC" +
+                "mt94hi90pmE97RCGZnCbLenjESae2II0zLN1HJH3weuuyVSFpmo5KASwTzuKSIYP8ZCnmADvxWNC4hd+" +
+                "s9hYs92lwh4iCa4YFfKq+daZmFM/J+V0jrzx4InEJaZNgDu6u6EpikIXekx2nC2rd6wQDe3yTRyc34BA" +
+                "6JrUBR6zeJKuJd0VWUkeKnVIyBwowhNC4JxlJk9GI0JoiYllt8XbP4BWHZ4vzgeA8S0bC6ebodAFptkp" +
+                "59jGMVQTxoZAD4rC0C85N9I0yyoX6lZa4ctXKi1RVbX3lnCZuK7Nlp02ytGE7sQLGBfz8cOPI6nCe40i" +
+                "7WE7ofeHoNQQEljUfeJ4sAj+adT/qwU+Pde/AkHx/N2g/OUT2vkrvUU9xunL3+cU0WuS2ekI/6pkbzZE" +
+                "hrA0moRpuNA7oYNFzj5qq/B3Ht4flTV66IiqWv3HV/XL55+v0VJ63cZt/L70G2r6OaF8Kmhsn6RyrqU5" +
+                "d4iAw8LyI1sYqXbPw4Smfs9xmecXQeOHwmCGrO2pi1BKHi3ftp0zjfS8jM4ze1jKiqK9Csk0nVXhbyMi" +
+                "6PhF/taxa2RirmWhRG66ZECoB0ITWEXjtjJOY4FhUE0envxCFtuWw9E5Uq1kHoh/3wds2bwcruHjVQlu" +
+                "CWwkh+EFG2SaZWu8xhnKKxR477EUpmD+sU87X/r7UQWjapur3yADQH0pRi9nJ8guQzvl/AhfEI8+/g2s" +
+                "O+DmXYTJ01aij90WCYQi9tqj0YcVjHk2aFiypg6YwUqsistqcpvX0HG2cFcx+sagALIpMOvYPIKeq7E2" +
+                "+n/rxrw8S0MeV8PYW8+PQwmqHDT78UT0btxeCDX0w9qBecb6STba+QGlnINlw13R3f3DlQzjis4Gya+D" +
+                "aEXnR52zyyy5ONER0YpeH3Vks0Dy5kRHRCu6HCS37z+8FdGKfjiVXL6G5Koac+2kKMOCuFflcMkbcuxu" +
+                "v9lETkXhQ3neBN9KVUMS7ZKKcmgMjnKBZWLF6GZ8ZtfJsVfOqchYQbV/5NFP4zuXBiLvsBZb5Xpiy20+" +
+                "z4fVXphVfwK7taIQuQgAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public void Dispose()
+        {
+            Data.Dispose();
+        }
     }
 }

@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshVertexColorsStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
             MeshVertexColors = new MeshMsgs.MeshVertexColors(ref b);
         }
         
@@ -48,8 +48,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
-            if (MeshVertexColors is null) BuiltIns.ThrowNullReference(nameof(MeshVertexColors));
+            if (Uuid is null) BuiltIns.ThrowNullReference();
+            if (MeshVertexColors is null) BuiltIns.ThrowNullReference();
             MeshVertexColors.RosValidate();
         }
     

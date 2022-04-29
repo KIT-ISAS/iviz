@@ -19,9 +19,20 @@ namespace Iviz.Rosbag.Writer
             bytes.Dispose();
         }
 
-        void Write<T>(T value) where T : unmanaged
+        readonly void ThrowIfOutOfRange(int off)
         {
-            bytes.AsSpan()[p..].Write(value);
+            int remaining = bytes.Length - off;
+            if (off > remaining)
+            {
+                BuiltIns.ThrowBufferOverflow(off, remaining);
+            }
+        }        
+        
+        void Write<T>(T t)
+        {
+            ThrowIfOutOfRange(Unsafe.SizeOf<T>());
+            ref byte dstPtr = ref bytes.Array[p];
+            Unsafe.WriteUnaligned(ref dstPtr, t);
             p += Unsafe.SizeOf<T>();
         }
 
@@ -50,7 +61,7 @@ namespace Iviz.Rosbag.Writer
             byte[] array = bytes.Array;
             foreach (char t in value)
             {
-                array[p++] = (byte) t;
+                array[p++] = (byte)t;
             }
         }
 

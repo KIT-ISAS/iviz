@@ -2,16 +2,22 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Core;
 using Iviz.Tools;
 using MarcusW.VncClient;
+using MarcusW.VncClient.Protocol.EncodingTypes;
+using MarcusW.VncClient.Protocol.Implementation;
 using MarcusW.VncClient.Protocol.Implementation.MessageTypes.Outgoing;
 using MarcusW.VncClient.Protocol.Implementation.Services.Transports;
 using MarcusW.VncClient.Rendering;
 using Microsoft.Extensions.Logging.Abstractions;
+using Nito.AsyncEx;
+using VNC.Extensions;
 
 namespace VNC
 {
@@ -30,7 +36,7 @@ namespace VNC
 
         public Task StartAsync(VncController controller)
         {
-            var startSignal = new TaskCompletionSource();
+            var startSignal = TaskUtils.CreateCompletionSource();
 
             TaskUtils.Run(async () =>
             {
@@ -47,13 +53,22 @@ namespace VNC
             return startSignal.Task;
         }
 
+        static readonly IEnumerable<IEncodingType> OwnEncodingTypes = new[] { new CursorWithAlphaEncodingType() };
+
         async Task DoStartAsync(VncController controller, TaskCompletionSource startSignal)
         {
-            var (hostname, port) = await controller.RequestServerAsync();
+            var (hostname, port) = await GameThread.PostAsync(controller.RequestServerAsync);
+            
+            var rfbProtocolImplementation = new DefaultImplementation(
+                DefaultImplementation.GetDefaultSecurityTypes,
+                DefaultImplementation.GetDefaultMessageTypes,
+                context =>
+                    DefaultImplementation.GetDefaultEncodingTypes(context).Concat(OwnEncodingTypes)
+            );
 
-            var vncClient = new MarcusW.VncClient.VncClient(NullLoggerFactory.Instance);
+            var vncClient = new MarcusW.VncClient.VncClient(NullLoggerFactory.Instance, rfbProtocolImplementation);
 
-            var renderTarget = new RenderTarget(controller.Screen);
+            using var renderTarget = new RenderTarget(controller.Screen);
 
             // Configure the connect parameters
             var parameters = new ConnectParameters
@@ -65,7 +80,7 @@ namespace VNC
                 },
                 AuthenticationHandler = new AuthenticationHandler(controller),
                 InitialRenderTarget = renderTarget,
-                ConnectTimeout = TimeSpan.FromSeconds(3)
+                ConnectTimeout = TimeSpan.FromSeconds(3),
             };
 
             var token = tokenSource.Token;
@@ -151,7 +166,7 @@ namespace VNC
             public EventMessage(KeyEventMessage msg) : this() => (type, keyEventMessage) = (Type.Key, msg);
         }
 
-        sealed class RenderTarget : IRenderTarget
+        sealed class RenderTarget : IRenderTarget, IDisposable
         {
             readonly VncScreen screen;
             DeferredFrameBuffer? cachedFrameBuffer;
@@ -161,7 +176,7 @@ namespace VNC
                 this.screen = screen;
             }
 
-            public IFramebufferReference GrabFramebufferReference(Size size, IImmutableSet<Screen> layout)
+            public IFramebufferReference GrabFramebufferReference(Size size, IImmutableSet<Screen> _)
             {
                 if (cachedFrameBuffer != null && cachedFrameBuffer.Size == size)
                 {
@@ -171,6 +186,12 @@ namespace VNC
                 cachedFrameBuffer?.DisposeAllFrames();
                 cachedFrameBuffer = new DeferredFrameBuffer(screen, size);
                 return cachedFrameBuffer;
+            }
+
+            public void Dispose()
+            {
+                cachedFrameBuffer?.DisposeAllFrames();
+                cachedFrameBuffer = null;
             }
         }
     }

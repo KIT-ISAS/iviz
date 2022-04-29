@@ -45,12 +45,12 @@ namespace Iviz.Displays.Highlighters
             var nodePosition = node.Transform.position;
             float distanceToCam = Settings.MainCameraTransform.InverseTransformPoint(nodePosition).z;
 
-            float size = 0.25f * Math.Abs(distanceToCam);
-            float clampedSize = Math.Max(size, 2);
+            float size = 0.25f * Mathf.Abs(distanceToCam);
+            float clampedSize = Mathf.Max(size, 2);
 
             float baseFrameSize = TfModule.Instance.FrameSize;
             float frameSize = baseFrameSize * clampedSize;
-            float labelSize = baseFrameSize * Math.Max(size * 0.375f / 2, 0.075f);
+            float labelSize = baseFrameSize * Mathf.Max(size * 0.375f / 2, 0.075f);
 
             float alpha = 1 - t * t;
             var color = Color.white.WithAlpha(alpha);

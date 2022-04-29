@@ -38,7 +38,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Pose);
-            ConvexHull = b.DeserializeStructArray<GeometryMsgs.Point>();
+            b.DeserializeStructArray(out ConvexHull);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Table(ref b);
@@ -54,7 +54,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (ConvexHull is null) BuiltIns.ThrowNullReference(nameof(ConvexHull));
+            if (ConvexHull is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 60 + Header.RosMessageLength + 24 * ConvexHull.Length;

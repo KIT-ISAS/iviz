@@ -71,8 +71,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public CheckIfRobotStateExistsInWarehouseRequest(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Robot = b.DeserializeString();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Robot);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CheckIfRobotStateExistsInWarehouseRequest(ref b);
@@ -87,8 +87,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Robot is null) BuiltIns.ThrowNullReference(nameof(Robot));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Robot is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetStringSize(Robot);
@@ -115,7 +115,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public CheckIfRobotStateExistsInWarehouseResponse(ref ReadBuffer b)
         {
-            Exists = b.Deserialize<bool>();
+            b.Deserialize(out Exists);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CheckIfRobotStateExistsInWarehouseResponse(ref b);

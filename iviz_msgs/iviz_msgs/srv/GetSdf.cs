@@ -70,7 +70,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetSdfRequest(ref ReadBuffer b)
         {
-            Uri = b.DeserializeString();
+            b.DeserializeString(out Uri);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetSdfRequest(ref b);
@@ -84,7 +84,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Uri is null) BuiltIns.ThrowNullReference(nameof(Uri));
+            if (Uri is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uri);
@@ -120,9 +120,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetSdfResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
             Scene = new Scene(ref b);
-            Message = b.DeserializeString();
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetSdfResponse(ref b);
@@ -138,9 +138,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Scene is null) BuiltIns.ThrowNullReference(nameof(Scene));
+            if (Scene is null) BuiltIns.ThrowNullReference();
             Scene.RosValidate();
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Message is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + Scene.RosMessageLength + BuiltIns.GetStringSize(Message);

@@ -29,7 +29,8 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public SensorLevels RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly SensorLevels Singleton = new SensorLevels();
+        static SensorLevels? singleton;
+        public static SensorLevels Singleton => singleton ??= new SensorLevels();
     
         public void RosSerialize(ref WriteBuffer b)
         {

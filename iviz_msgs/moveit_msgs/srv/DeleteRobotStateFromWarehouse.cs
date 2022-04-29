@@ -71,8 +71,8 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public DeleteRobotStateFromWarehouseRequest(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Robot = b.DeserializeString();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Robot);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new DeleteRobotStateFromWarehouseRequest(ref b);
@@ -87,8 +87,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Robot is null) BuiltIns.ThrowNullReference(nameof(Robot));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Robot is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetStringSize(Robot);
@@ -114,7 +114,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public DeleteRobotStateFromWarehouseResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly DeleteRobotStateFromWarehouseResponse Singleton = new DeleteRobotStateFromWarehouseResponse();
+        static DeleteRobotStateFromWarehouseResponse? singleton;
+        public static DeleteRobotStateFromWarehouseResponse Singleton => singleton ??= new DeleteRobotStateFromWarehouseResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

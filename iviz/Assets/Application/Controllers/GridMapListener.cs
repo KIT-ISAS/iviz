@@ -289,9 +289,17 @@ namespace Iviz.Controllers
 
             int offset = (int)multiArray.Layout.DataOffset;
             int size = (int)(width * height);
-            resource.Set((int)width, (int)height,
-                (float)msg.Info.LengthX, (float)msg.Info.LengthY,
-                multiArray.Data.AsSpan().Slice(offset, size));
+
+            if (size != 0)
+            {
+                resource.Set((int)width, (int)height,
+                    (float)msg.Info.LengthX, (float)msg.Info.LengthY,
+                    multiArray.Data.AsSpan().Slice(offset, size));
+            }
+            else
+            {
+                resource.Reset();
+            }
 
             numCellsX = widthByResolution;
             numCellsY = heightByResolution;

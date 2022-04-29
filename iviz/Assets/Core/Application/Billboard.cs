@@ -12,6 +12,7 @@ namespace Iviz.Displays
 
         [SerializeField] Vector3 offset;
         [SerializeField] bool keepHorizontal;
+        [SerializeField] bool useAbsoluteOffset = true;
 
         public Vector3 Offset
         {
@@ -22,7 +23,11 @@ namespace Iviz.Displays
             }
         }
 
-        public bool UseAbsoluteOffset { get; set; } = true;
+        public bool UseAbsoluteOffset
+        {
+            get => useAbsoluteOffset;
+            set => useAbsoluteOffset = value;
+        }
 
         void LateUpdate()
         {

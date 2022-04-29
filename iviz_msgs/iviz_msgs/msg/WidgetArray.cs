@@ -27,12 +27,12 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public WidgetArray(ref ReadBuffer b)
         {
-            Dialogs = b.DeserializeArray<IvizMsgs.Dialog>();
+            b.DeserializeArray(out Dialogs);
             for (int i = 0; i < Dialogs.Length; i++)
             {
                 Dialogs[i] = new IvizMsgs.Dialog(ref b);
             }
-            Widgets = b.DeserializeArray<IvizMsgs.Widget>();
+            b.DeserializeArray(out Widgets);
             for (int i = 0; i < Widgets.Length; i++)
             {
                 Widgets[i] = new IvizMsgs.Widget(ref b);
@@ -51,16 +51,16 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Dialogs is null) BuiltIns.ThrowNullReference(nameof(Dialogs));
+            if (Dialogs is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Dialogs.Length; i++)
             {
-                if (Dialogs[i] is null) BuiltIns.ThrowNullReference($"{nameof(Dialogs)}[{i}]");
+                if (Dialogs[i] is null) BuiltIns.ThrowNullReference(nameof(Dialogs), i);
                 Dialogs[i].RosValidate();
             }
-            if (Widgets is null) BuiltIns.ThrowNullReference(nameof(Widgets));
+            if (Widgets is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Widgets.Length; i++)
             {
-                if (Widgets[i] is null) BuiltIns.ThrowNullReference($"{nameof(Widgets)}[{i}]");
+                if (Widgets[i] is null) BuiltIns.ThrowNullReference(nameof(Widgets), i);
                 Widgets[i].RosValidate();
             }
         }

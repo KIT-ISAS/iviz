@@ -34,8 +34,8 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshVertexCostsStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Uuid = b.DeserializeString();
-            Type = b.DeserializeString();
+            b.DeserializeString(out Uuid);
+            b.DeserializeString(out Type);
             MeshVertexCosts = new MeshMsgs.MeshVertexCosts(ref b);
         }
         
@@ -53,9 +53,9 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
-            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
-            if (MeshVertexCosts is null) BuiltIns.ThrowNullReference(nameof(MeshVertexCosts));
+            if (Uuid is null) BuiltIns.ThrowNullReference();
+            if (Type is null) BuiltIns.ThrowNullReference();
+            if (MeshVertexCosts is null) BuiltIns.ThrowNullReference();
             MeshVertexCosts.RosValidate();
         }
     

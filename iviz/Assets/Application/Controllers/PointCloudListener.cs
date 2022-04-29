@@ -23,8 +23,6 @@ namespace Iviz.Controllers
 {
     public sealed class PointCloudListener : ListenerController
     {
-        static readonly PointField EmptyPointField = new();
-
         readonly PointCloudConfiguration config = new();
         readonly List<string> fieldNames = new() { "x", "y", "z" };
         readonly FrameNode node;
@@ -194,7 +192,7 @@ namespace Iviz.Controllers
             }
         }
 
-        public bool IsIntensityUsed => pointCloud != null && pointCloud.UseColormap;
+        public bool IsIntensityUsed => pointCloud.UseColormap;
 
         public ReadOnlyCollection<string> FieldNames { get; }
 
@@ -243,16 +241,27 @@ namespace Iviz.Controllers
         {
             if (IsProcessing)
             {
-                msg.Data.TryReturn();
                 return false;
             }
 
             IsProcessing = true;
 
+            var shared = msg.Data.Share();
             Task.Run(() =>
             {
-                ProcessMessage(msg);
-                msg.Data.TryReturn();
+                try
+                {
+                    ProcessMessage(msg);
+                }
+                catch (Exception e)
+                {
+                    RosLogger.Error($"{this}: Error handling point cloud", e);
+                    IsProcessing = false;
+                }
+                finally
+                {
+                    shared.TryReturn();
+                }
             });
 
             return true;
@@ -302,127 +311,119 @@ namespace Iviz.Controllers
 
         void ProcessMessage(PointCloud2 msg)
         {
-            try
+            if (!node.IsAlive)
             {
-                if (!node.IsAlive)
+                // we're dead
+                IsProcessing = false;
+                return;
+            }
+
+            if (msg.PointStep < 3 * sizeof(float) ||
+                msg.RowStep < msg.PointStep * msg.Width ||
+                msg.Data.Length < msg.RowStep * msg.Height)
+            {
+                RosLogger.Info($"{this}: Invalid point cloud dimensions!");
+                IsProcessing = false;
+                return;
+            }
+
+            if (msg.Data.Length > NativeList.MaxElements)
+            {
+                RosLogger.Info(
+                    $"{this}: Number of elements is greater than maximum of {NativeList.MaxElements.ToString()}");
+                IsProcessing = false;
+                return;
+            }
+
+
+            if (!FieldsEqual(msg.Fields))
+            {
+                fieldNames.Clear();
+                foreach (var field in msg.Fields)
                 {
-                    // we're dead
-                    IsProcessing = false;
-                    return;
+                    fieldNames.Add(field.Name);
                 }
+            }
 
-                if (msg.PointStep < 3 * sizeof(float) ||
-                    msg.RowStep < msg.PointStep * msg.Width ||
-                    msg.Data.Length < msg.RowStep * msg.Height)
+            if (!TryGetField(msg.Fields, "x", out var xField) || xField.Datatype != PointField.FLOAT32 ||
+                !TryGetField(msg.Fields, "y", out var yField) || yField.Datatype != PointField.FLOAT32 ||
+                !TryGetField(msg.Fields, "z", out var zField) || zField.Datatype != PointField.FLOAT32)
+            {
+                RosLogger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
+                IsProcessing = false;
+                return;
+            }
+
+            int xOffset = (int)xField.Offset;
+            int yOffset = (int)yField.Offset;
+            int zOffset = (int)zField.Offset;
+
+            if (!TryGetField(msg.Fields, config.IntensityChannel, out PointField? iField))
+            {
+                IsProcessing = false;
+                return;
+            }
+
+            int iFieldSize = FieldSizeFromType(iField.Datatype);
+            if (iFieldSize == -1)
+            {
+                RosLogger.Info($"{this}: Invalid or unsupported intensity field type {iField.Datatype.ToString()}");
+                IsProcessing = false;
+                return;
+            }
+
+            if (msg.PointStep < iField.Offset + iFieldSize)
+            {
+                RosLogger.Info($"{this}: Invalid field properties iOffset={iField.Offset.ToString()} " +
+                               $"iFieldSize={iFieldSize.ToString()} dataType={iField.Datatype.ToString()}");
+                IsProcessing = false;
+                return;
+            }
+
+
+            bool rgbaHint = iFieldSize == 4 && iField.Name is "rgb" or "rgba";
+            GeneratePointBuffer(msg, xOffset, yOffset, zOffset, (int)iField.Offset, iField.Datatype, rgbaHint);
+
+            bool useColormap = !rgbaHint;
+            var header = msg.Header;
+            int numPoints = (int)(msg.Width * msg.Height);
+            GameThread.PostInListenerQueue(() =>
+            {
+                try
                 {
-                    RosLogger.Info($"{this}: Invalid point cloud dimensions!");
-                    IsProcessing = false;
-                    return;
-                }
-
-                if (msg.Data.Length > NativeList.MaxElements)
-                {
-                    RosLogger.Info(
-                        $"{this}: Number of elements is greater than maximum of {NativeList.MaxElements.ToString()}");
-                    IsProcessing = false;
-                    return;
-                }
-
-
-                if (!FieldsEqual(msg.Fields))
-                {
-                    fieldNames.Clear();
-                    foreach (var field in msg.Fields)
+                    if (!node.IsAlive)
                     {
-                        fieldNames.Add(field.Name);
+                        // we're dead
+                        return;
+                    }
+
+                    node.AttachTo(header);
+
+                    NumPoints = numPoints;
+
+                    if (pointBufferLength == 0)
+                    {
+                        pointCloud.Reset();
+                        meshCloud.Reset();
+                    }
+                    else if (PointCloudType == PointCloudType.Points)
+                    {
+                        pointCloud.UseColormap = useColormap;
+                        pointCloud.Set(pointBuffer.AsReadOnlySpan(..pointBufferLength));
+                        meshCloud.Reset();
+                    }
+                    else
+                    {
+                        meshCloud.UseColormap = useColormap;
+                        meshCloud.Set(pointBuffer.AsReadOnlySpan(..pointBufferLength));
+                        pointCloud.Reset();
                     }
                 }
-
-                if (!TryGetField(msg.Fields, "x", out var xField) || xField.Datatype != PointField.FLOAT32 ||
-                    !TryGetField(msg.Fields, "y", out var yField) || yField.Datatype != PointField.FLOAT32 ||
-                    !TryGetField(msg.Fields, "z", out var zField) || zField.Datatype != PointField.FLOAT32)
+                finally
                 {
-                    RosLogger.Info($"{this}: Unsupported point cloud! Expected XYZ as floats.");
                     IsProcessing = false;
-                    return;
                 }
-
-                int xOffset = (int)xField.Offset;
-                int yOffset = (int)yField.Offset;
-                int zOffset = (int)zField.Offset;
-
-                var iField = TryGetField(msg.Fields, config.IntensityChannel, out PointField? outField)
-                    ? outField
-                    : EmptyPointField;
-
-                int iOffset = (int)iField.Offset;
-                int iFieldSize = FieldSizeFromType(iField.Datatype);
-                if (iFieldSize == -1)
-                {
-                    RosLogger.Info($"{this}: Invalid or unsupported intensity field type {iField.Datatype.ToString()}");
-                    IsProcessing = false;
-                    return;
-                }
-
-                if (msg.PointStep < iOffset + iFieldSize)
-                {
-                    RosLogger.Info($"{this}: Invalid field properties iOffset={iOffset.ToString()} " +
-                                   $"iFieldSize={iFieldSize.ToString()} dataType={iField.Datatype.ToString()}");
-                    IsProcessing = false;
-                    return;
-                }
-
-
-                bool rgbaHint = iFieldSize == 4 && iField.Name is "rgb" or "rgba";
-                GeneratePointBuffer(msg, xOffset, yOffset, zOffset, iOffset, iField.Datatype, rgbaHint);
-                {
-                    bool useColormap = !rgbaHint;
-                    var header = msg.Header;
-                    int numPoints = (int)(msg.Width * msg.Height);
-                    GameThread.PostInListenerQueue(() =>
-                    {
-                        try
-                        {
-                            if (!node.IsAlive)
-                            {
-                                // we're dead
-                                return;
-                            }
-
-                            node.AttachTo(header);
-
-                            NumPoints = numPoints;
-
-                            if (pointBufferLength == 0)
-                            {
-                                pointCloud.Reset();
-                                meshCloud.Reset();
-                            }
-                            else if (PointCloudType == PointCloudType.Points)
-                            {
-                                pointCloud.UseColormap = useColormap;
-                                pointCloud.SetDirect(pointBuffer.AsReadOnlySpan(..pointBufferLength));
-                                meshCloud.Reset();
-                            }
-                            else
-                            {
-                                meshCloud.UseColormap = useColormap;
-                                meshCloud.SetDirect(pointBuffer.AsReadOnlySpan(..pointBufferLength));
-                                pointCloud.Reset();
-                            }
-                        }
-                        finally
-                        {
-                            IsProcessing = false;
-                        }
-                    });
-                }
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{this}: Error handling point cloud", e);
-                IsProcessing = false;
-            }
+            });
         }
 
         void GeneratePointBuffer(PointCloud2 msg, int xOffset, int yOffset,
@@ -556,20 +557,26 @@ namespace Iviz.Controllers
 
             // ----------       
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static bool IsPointInvalid4(in float4 point) =>
+                IsInvalid(point.x) || IsInvalid(point.y) || IsInvalid(point.z);
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static bool IsPointInvalid3(in float3 point) =>
+                IsInvalid(point.x) || IsInvalid(point.y) || IsInvalid(point.z);
+
             void ParseFloatAligned()
             {
-                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var points = dataRow.Cast<float4>()[..width];
                     foreach (ref readonly var point in points)
                     {
                         ref float4 f = ref dstBuffer[dstOff];
-                        if (IsInvalid(point.x)) continue;
+                        if (IsPointInvalid4(point)) continue;
                         f.z = point.x;
-                        if (IsInvalid(point.y)) continue;
                         f.x = -point.y;
-                        if (IsInvalid(point.z)) continue;
                         f.y = point.z;
                         f.w = point.w;
                         dstOff++;
@@ -578,15 +585,13 @@ namespace Iviz.Controllers
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            void TryAdd(ReadOnlySpan<byte> span, float w)
+            void TryAdd(ref byte dataPtr, float w)
             {
-                ref readonly var point = ref MemoryMarshal.Cast<byte, float3>(span)[0];
+                ref readonly var point = ref Unsafe.As<byte, float3>(ref dataPtr);
+                if (IsPointInvalid3(point)) return;
                 ref float4 f = ref dstBuffer[dstOff];
-                if (IsInvalid(point.x)) return;
                 f.z = point.x;
-                if (IsInvalid(point.y)) return;
                 f.x = -point.y;
-                if (IsInvalid(point.z)) return;
                 f.y = point.z;
                 f.w = w;
                 dstOff++;
@@ -594,72 +599,87 @@ namespace Iviz.Controllers
 
             void ParseFloat()
             {
-                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref dataOff.GetReference();
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset..].Read<float>());
+                        float value = Unsafe.As<byte, float>(ref dataPtr.Plus(iOffset));
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
 
             void ParseDouble()
             {
-                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref dataOff.GetReference();
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, (float)dataOff[iOffset..].Read<double>());
+                        double value = Unsafe.As<byte, double>(ref dataPtr.Plus(iOffset));
+                        TryAdd(ref dataPtr, (float)value);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
 
             void ParseInt8()
             {
-                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref dataOff.GetReference();
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, (sbyte)dataOff[iOffset]);
+                        sbyte value = (sbyte)dataPtr;
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
 
             void ParseUint8()
             {
-                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref dataOff.GetReference();
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset]);
+                        byte value = dataPtr;
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
 
             void ParseInt16()
             {
-                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref dataOff.GetReference();
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset..].Read<short>());
+                        short value = Unsafe.As<byte, short>(ref dataPtr.Plus(iOffset));
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
 
             void ParseUint16Aligned()
             {
-                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var points = dataRow.Cast<PointWithUshort>()[..width];
@@ -667,11 +687,9 @@ namespace Iviz.Controllers
                     {
                         ref float4 f = ref dstBuffer[dstOff];
 
-                        if (IsInvalid(point.f.x)) return;
+                        if (IsPointInvalid3(point.f)) continue;
                         f.z = point.f.x;
-                        if (IsInvalid(point.f.y)) return;
                         f.x = -point.f.y;
-                        if (IsInvalid(point.f.z)) return;
                         f.y = point.f.z;
                         f.w = point.w;
 
@@ -682,39 +700,48 @@ namespace Iviz.Controllers
 
             void ParseUint16()
             {
-                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref dataOff.GetReference();
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset..].Read<ushort>());
+                        ushort value = Unsafe.As<byte, ushort>(ref dataPtr.Plus(iOffset));
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
 
             void ParseInt32()
             {
-                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref dataOff.GetReference();
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset..].Read<int>());
+                        int value = Unsafe.As<byte, int>( ref dataPtr.Plus(iOffset));
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
 
             void ParseUint32()
             {
-                ReadOnlySpan<byte> dataRow = msg.Data.AsSpan();
+                var dataRow = msg.Data.AsSpan();
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
-                    var dataOff = dataRow;
-                    for (int u = width; u > 0; u--, dataOff = dataOff[pointStep..])
+                    var dataOff = dataRow[..(pointStep * width)];
+                    ref byte dataPtr = ref dataOff.GetReference();
+                    for (int u = width; u > 0; u--)
                     {
-                        TryAdd(dataOff, dataOff[iOffset..].Read<uint>());
+                        uint value = Unsafe.As<byte, uint>(ref dataPtr.Plus(iOffset));
+                        TryAdd(ref dataPtr, value);
+                        dataPtr = ref dataPtr.Plus(pointStep);
                     }
                 }
             }
@@ -737,11 +764,10 @@ namespace Iviz.Controllers
             public readonly float3 f;
             public readonly ushort w;
         }
-        
-        const float MaxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool IsInvalid(float f) => f.IsInvalid() || Math.Abs(f) > MaxPositionMagnitude;
 
+        const float MaxPositionMagnitude = PointListDisplay.MaxPositionMagnitude;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static bool IsInvalid(float f) => f.IsInvalid() || Mathf.Abs(f) > MaxPositionMagnitude;
     }
 }

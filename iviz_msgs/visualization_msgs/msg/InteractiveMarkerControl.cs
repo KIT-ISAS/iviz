@@ -80,18 +80,18 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor with buffer.
         public InteractiveMarkerControl(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
+            b.DeserializeString(out Name);
             b.Deserialize(out Orientation);
-            OrientationMode = b.Deserialize<byte>();
-            InteractionMode = b.Deserialize<byte>();
-            AlwaysVisible = b.Deserialize<bool>();
-            Markers = b.DeserializeArray<Marker>();
+            b.Deserialize(out OrientationMode);
+            b.Deserialize(out InteractionMode);
+            b.Deserialize(out AlwaysVisible);
+            b.DeserializeArray(out Markers);
             for (int i = 0; i < Markers.Length; i++)
             {
                 Markers[i] = new Marker(ref b);
             }
-            IndependentMarkerOrientation = b.Deserialize<bool>();
-            Description = b.DeserializeString();
+            b.Deserialize(out IndependentMarkerOrientation);
+            b.DeserializeString(out Description);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerControl(ref b);
@@ -112,14 +112,14 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Markers is null) BuiltIns.ThrowNullReference(nameof(Markers));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Markers is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Markers.Length; i++)
             {
-                if (Markers[i] is null) BuiltIns.ThrowNullReference($"{nameof(Markers)}[{i}]");
+                if (Markers[i] is null) BuiltIns.ThrowNullReference(nameof(Markers), i);
                 Markers[i].RosValidate();
             }
-            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
+            if (Description is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

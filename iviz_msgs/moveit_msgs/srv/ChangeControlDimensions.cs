@@ -70,12 +70,12 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public ChangeControlDimensionsRequest(ref ReadBuffer b)
         {
-            ControlXTranslation = b.Deserialize<bool>();
-            ControlYTranslation = b.Deserialize<bool>();
-            ControlZTranslation = b.Deserialize<bool>();
-            ControlXRotation = b.Deserialize<bool>();
-            ControlYRotation = b.Deserialize<bool>();
-            ControlZRotation = b.Deserialize<bool>();
+            b.Deserialize(out ControlXTranslation);
+            b.Deserialize(out ControlYTranslation);
+            b.Deserialize(out ControlZTranslation);
+            b.Deserialize(out ControlXRotation);
+            b.Deserialize(out ControlYRotation);
+            b.Deserialize(out ControlZRotation);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ChangeControlDimensionsRequest(ref b);
@@ -123,7 +123,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public ChangeControlDimensionsResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ChangeControlDimensionsResponse(ref b);

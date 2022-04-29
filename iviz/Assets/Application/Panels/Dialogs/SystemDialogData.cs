@@ -395,25 +395,24 @@ namespace Iviz.App
 
             panel.TextBottom.SetTextRent(description);
             //panel.TextBottom.UpdateVertexData();
-
-            async void GetParamValue(string param, CancellationToken token)
-            {
-                if (!RosManager.IsConnected)
-                {
-                    return;
-                }
-
-                try
-                {
-                    (paramValue, _) = await RosManager.Connection.GetParameterAsync(param, 5000, token);
-                    GameThread.Post(() => UpdateParametersLink(link));
-                }
-                catch (OperationCanceledException)
-                {
-                }
-            }
         }
 
+        async void GetParamValue(string param, CancellationToken token)
+        {
+            if (!RosManager.IsConnected)
+            {
+                return;
+            }
+
+            try
+            {
+                (paramValue, _) = await RosManager.Connection.GetParameterAsync(param, 5000, token);
+                GameThread.Post(() => UpdateParametersLink(param));
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
 
         void UpdateNodesLink(string link)
         {
@@ -482,30 +481,29 @@ namespace Iviz.App
             }
 
             panel.TextBottom.SetTextRent(description);
+        }
 
-
-            async void GetNodeInfo(string node, CancellationToken token)
+        async void GetNodeInfo(string node, CancellationToken token)
+        {
+            if (!RosManager.IsConnected)
             {
-                if (!RosManager.IsConnected)
+                return;
+            }
+
+            var client = RosManager.Connection.Client;
+            try
+            {
+                var response = await client.RosMasterClient.LookupNodeAsync(node, token);
+                if (response.Uri == null)
                 {
                     return;
                 }
 
-                var client = RosManager.Connection.Client;
-                try
-                {
-                    var response = await client.RosMasterClient.LookupNodeAsync(node, token);
-                    if (response.Uri == null)
-                    {
-                        return;
-                    }
-
-                    nodeAddress = response.Uri.ToString();
-                    UpdateNodesLink(node);
-                }
-                catch (OperationCanceledException)
-                {
-                }
+                nodeAddress = response.Uri.ToString();
+                UpdateNodesLink(node);
+            }
+            catch (OperationCanceledException)
+            {
             }
         }
 
@@ -586,12 +584,6 @@ namespace Iviz.App
                 ModuleListPanel.UpdateSimpleConfigurationSettings();
             }
         }
-
-        [Preserve]
-        public static object[] AotHelper => new object[]
-        {
-            new List<HostAlias>()
-        };
     }
 
     [DataContract]

@@ -28,10 +28,10 @@ namespace Iviz.Msgs.NavMsgs
         /// Constructor with buffer.
         public MapMetaData(ref ReadBuffer b)
         {
-            MapLoadTime = b.Deserialize<time>();
-            Resolution = b.Deserialize<float>();
-            Width = b.Deserialize<uint>();
-            Height = b.Deserialize<uint>();
+            b.Deserialize(out MapLoadTime);
+            b.Deserialize(out Resolution);
+            b.Deserialize(out Width);
+            b.Deserialize(out Height);
             b.Deserialize(out Origin);
         }
         

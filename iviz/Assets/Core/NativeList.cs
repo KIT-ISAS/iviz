@@ -1,11 +1,13 @@
 #nullable enable
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
 
 namespace Iviz.Core
 {
@@ -30,17 +32,12 @@ namespace Iviz.Core
                 return;
             }
 
-            if (value < 0)
+            if (value is < 0 or > NativeList.MaxElements)
             {
-                throw new ArgumentOutOfRangeException(nameof(value), "Capacity cannot be negative");
+                ThrowHelper.ThrowArgumentOutOfRange();
             }
 
-            if (value > NativeList.MaxElements)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value), "Capacity exceeds maximal size");
-            }
-
-            int newCapacity = Math.Max(Capacity, 16);
+            int newCapacity = Mathf.Max(Capacity, 16);
             while (newCapacity < value)
             {
                 newCapacity *= 2;
@@ -54,26 +51,20 @@ namespace Iviz.Core
             }
 
             array = newArray;
-
-            if (array.Length < value)
-            {
-                // this post-condition ensures that the unsafes later won't crash (as long as we're single-threaded) 
-                throw new InvalidOperationException("Array enlargement failed. Something went wrong!");
-            }
         }
 
         public void Add(in T t)
         {
             int nextLength = length + 1;
             EnsureCapacity(nextLength);
-            UnsafeGet(length) = t;
+            Unsafe.Add(ref array.GetUnsafeRef(), length) = t;
             length = nextLength;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddUnsafe(in T t)
         {
-            UnsafeGet(length++) = t;
+            Unsafe.Add(ref array.GetUnsafeRef(), length++) = t;
         }
 
         public void AddRange(ReadOnlySpan<T> otherArray)
@@ -100,10 +91,17 @@ namespace Iviz.Core
 
         public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref array.GetUnsafeRef(), length);
 
-        ReadOnlySpan<T> AsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(ref array.GetUnsafeRef(), length);
+        public ref T GetReference()
+        {
+            if (length == 0)
+            {
+                ThrowHelper.ThrowIndexOutOfRange();
+            }
+            
+            return ref array.GetUnsafeRef();
+        }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        ref T UnsafeGet(int index) => ref Unsafe.Add(ref array.GetUnsafeRef(), index);
+        ReadOnlySpan<T> AsReadOnlySpan() => MemoryMarshal.CreateReadOnlySpan(ref array.GetUnsafeRef(), length);
 
         public void Clear()
         {

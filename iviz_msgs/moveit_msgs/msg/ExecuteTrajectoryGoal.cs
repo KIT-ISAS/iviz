@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
+            if (Trajectory is null) BuiltIns.ThrowNullReference();
             Trajectory.RosValidate();
         }
     

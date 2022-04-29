@@ -66,7 +66,8 @@ namespace Iviz.Msgs.Rosapi
         
         public GetParamNamesRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetParamNamesRequest Singleton = new GetParamNamesRequest();
+        static GetParamNamesRequest? singleton;
+        public static GetParamNamesRequest Singleton => singleton ??= new GetParamNamesRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -104,7 +105,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public GetParamNamesResponse(ref ReadBuffer b)
         {
-            Names = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Names);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetParamNamesResponse(ref b);
@@ -118,10 +119,10 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Names is null) BuiltIns.ThrowNullReference(nameof(Names));
+            if (Names is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Names.Length; i++)
             {
-                if (Names[i] is null) BuiltIns.ThrowNullReference($"{nameof(Names)}[{i}]");
+                if (Names[i] is null) BuiltIns.ThrowNullReference(nameof(Names), i);
             }
         }
     

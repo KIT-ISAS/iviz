@@ -25,7 +25,7 @@ namespace Iviz.Msgs.GeometryMsgs
         /// Constructor with buffer.
         public Polygon(ref ReadBuffer b)
         {
-            Points = b.DeserializeStructArray<Point32>();
+            b.DeserializeStructArray(out Points);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Polygon(ref b);
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
+            if (Points is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + 12 * Points.Length;

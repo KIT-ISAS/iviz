@@ -25,7 +25,7 @@ namespace Iviz.Msgs.PclMsgs
         /// Constructor with buffer.
         public Vertices(ref ReadBuffer b)
         {
-            Vertices_ = b.DeserializeStructArray<uint>();
+            b.DeserializeStructArray(out Vertices_);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Vertices(ref b);
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Vertices_ is null) BuiltIns.ThrowNullReference(nameof(Vertices_));
+            if (Vertices_ is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + 4 * Vertices_.Length;

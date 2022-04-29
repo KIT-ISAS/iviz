@@ -25,8 +25,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Vector2i(ref ReadBuffer b)
         {
-            X = b.Deserialize<int>();
-            Y = b.Deserialize<int>();
+            b.Deserialize(out X);
+            b.Deserialize(out Y);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Vector2i(ref b);

@@ -30,10 +30,10 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor with buffer.
         public GroupState(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            State = b.Deserialize<bool>();
-            Id = b.Deserialize<int>();
-            Parent = b.Deserialize<int>();
+            b.DeserializeString(out Name);
+            b.Deserialize(out State);
+            b.Deserialize(out Id);
+            b.Deserialize(out Parent);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GroupState(ref b);
@@ -50,7 +50,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Name is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 13 + BuiltIns.GetStringSize(Name);

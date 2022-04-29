@@ -41,9 +41,9 @@ namespace Iviz.Msgs.StdMsgs
         
         public static void Deserialize(ref ReadBuffer b, out Header h)
         {
-            h.Seq = b.Deserialize<uint>();
-            h.Stamp = b.Deserialize<time>();
-            h.FrameId = b.DeserializeString();
+            b.Deserialize(out h.Seq);
+            b.Deserialize(out h.Stamp);
+            b.DeserializeString(out h.FrameId);
         }
         
         readonly ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Header(ref b);
@@ -87,6 +87,7 @@ namespace Iviz.Msgs.StdMsgs
                 "5lo2Yl+stXi2BQS4skZXVRp92caRg3NfAmsPMygCAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
         /// Custom iviz code
         public static implicit operator Header((uint seqId, string frameId) p) => new(p.seqId, time.Now(), p.frameId);
         public static implicit operator Header((uint seqId, time stamp, string frameId) p) => new(p.seqId, p.stamp, p.frameId);

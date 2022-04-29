@@ -74,10 +74,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public TestMultipleRequestFieldsRequest(ref ReadBuffer b)
         {
-            @int = b.Deserialize<int>();
-            @float = b.Deserialize<float>();
-            @string = b.DeserializeString();
-            @bool = b.Deserialize<bool>();
+            b.Deserialize(out @int);
+            b.Deserialize(out @float);
+            b.DeserializeString(out @string);
+            b.Deserialize(out @bool);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestMultipleRequestFieldsRequest(ref b);
@@ -94,7 +94,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public void RosValidate()
         {
-            if (@string is null) BuiltIns.ThrowNullReference(nameof(@string));
+            if (@string is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 13 + BuiltIns.GetStringSize(@string);
@@ -120,7 +120,8 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public TestMultipleRequestFieldsResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly TestMultipleRequestFieldsResponse Singleton = new TestMultipleRequestFieldsResponse();
+        static TestMultipleRequestFieldsResponse? singleton;
+        public static TestMultipleRequestFieldsResponse Singleton => singleton ??= new TestMultipleRequestFieldsResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

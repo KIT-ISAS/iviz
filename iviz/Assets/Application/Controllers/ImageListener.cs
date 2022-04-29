@@ -244,12 +244,12 @@ namespace Iviz.Controllers
         {
             if (IsProcessing)
             {
-                msg.Data.TryReturn();
                 return false;
             }
 
             IsProcessing = true;
 
+            var shared = msg.Data.Share();
             void PostProcess()
             {
                 if (node.IsAlive)
@@ -257,7 +257,7 @@ namespace Iviz.Controllers
                     node.AttachTo(msg.Header);
                 }
 
-                msg.Data.TryReturn();
+                shared.TryReturn();
                 IsProcessing = false;
             }
 
@@ -287,12 +287,12 @@ namespace Iviz.Controllers
         {
             if (IsProcessing)
             {
-                msg.Data.TryReturn();
                 return false;
             }
 
             IsProcessing = true;
 
+            var shared = msg.Data.Share();
             GameThread.PostInListenerQueue(() =>
             {
                 try
@@ -308,7 +308,7 @@ namespace Iviz.Controllers
                 finally
                 {
                     IsProcessing = false;
-                    msg.Data.TryReturn();
+                    shared.TryReturn();
                 }
             });
 

@@ -74,8 +74,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public AddModuleRequest(ref ReadBuffer b)
         {
-            ModuleType = b.DeserializeString();
-            Id = b.DeserializeString();
+            b.DeserializeString(out ModuleType);
+            b.DeserializeString(out Id);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddModuleRequest(ref b);
@@ -90,8 +90,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (ModuleType is null) BuiltIns.ThrowNullReference(nameof(ModuleType));
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (ModuleType is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(ModuleType) + BuiltIns.GetStringSize(Id);
@@ -127,9 +127,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public AddModuleResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
-            Message = b.DeserializeString();
-            Id = b.DeserializeString();
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
+            b.DeserializeString(out Id);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddModuleResponse(ref b);
@@ -145,8 +145,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Message is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 9 + BuiltIns.GetStringSize(Message) + BuiltIns.GetStringSize(Id);

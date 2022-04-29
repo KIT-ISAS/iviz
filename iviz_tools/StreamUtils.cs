@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ public static class StreamUtils
         }
 
         int received = socket.Receive(buffer, 0, toRead, SocketFlags.None);
-        return new ValueTask<bool>(received == toRead);
+        return (received == toRead).AsTaskResult();
     }
 
     static async ValueTask<bool> DoReadChunkAsync(Socket socket, byte[] buffer, int toRead, CancellationToken token)
@@ -71,20 +72,14 @@ public static class StreamUtils
             return await ReadChunkAsync(client, buffer.Array, remaining, token);
         }
     }
-
-
+    
     public static ValueTask<int> ReadChunkAsync(this UdpClient udpClient, Rent<byte> buffer, CancellationToken token)
     {
         return ReadSubChunkAsync(udpClient.Client, buffer.Array, 0, buffer.Length, token);
     }
 
-    static readonly AsyncCallback OnComplete =
-        result => ((TaskCompletionSource<IAsyncResult>)result.AsyncState!).TrySetResult(result);
-
-    public static readonly Action<object?> OnCanceled = tcs =>
-        ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetCanceled();
-
-    static ValueTask<int> ReadSubChunkAsync(Socket socket, byte[] buffer, int offset, int toRead, CancellationToken token)
+    static ValueTask<int> ReadSubChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
+        CancellationToken token)
     {
         if (socket.Available == 0)
         {
@@ -92,18 +87,18 @@ public static class StreamUtils
         }
 
         int received = socket.Receive(buffer, offset, toRead, SocketFlags.None);
-        return new ValueTask<int>(received);
+        return received.AsTaskResult();
     }
 
     static ValueTask<int> DoReadSubChunkAsync(Socket socket, byte[] buffer, int offset, int toRead,
         CancellationToken token)
     {
-        var tcs = new TaskCompletionSource<IAsyncResult>();
+        var tcs = TaskUtils.CreateCompletionSource<IAsyncResult>();
 
-        socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, OnComplete, tcs);
+        socket.BeginReceive(buffer, offset, toRead, SocketFlags.None, CallbackHelpers.OnComplete, tcs);
 
         return tcs.Task.IsCompleted
-            ? new ValueTask<int>(socket.EndReceive(tcs.Task.Result))
+            ? socket.EndReceive(tcs.Task.Result).AsTaskResult()
             : DoReadSubChunkWithTokenAsync(tcs, socket, token);
     }
 
@@ -111,7 +106,7 @@ public static class StreamUtils
         CancellationToken token)
     {
         // ReSharper disable once UseAwaitUsing
-        using (token.Register(OnCanceled, tcs))
+        using (token.Register(CallbackHelpers.OnCanceled, tcs))
         {
             return socket.EndReceive(await tcs.Task);
         }
@@ -143,12 +138,12 @@ public static class StreamUtils
     static ValueTask<int> DoWriteChunkAsync(Socket socket, byte[] buffer, int offset, int toWrite,
         CancellationToken token)
     {
-        var tcs = new TaskCompletionSource<IAsyncResult>();
+        var tcs = TaskUtils.CreateCompletionSource<IAsyncResult>();
 
-        socket.BeginSend(buffer, offset, toWrite, SocketFlags.None, OnComplete, tcs);
+        socket.BeginSend(buffer, offset, toWrite, SocketFlags.None, CallbackHelpers.OnComplete, tcs);
 
         return tcs.Task.IsCompleted
-            ? new ValueTask<int>(socket.EndSend(tcs.Task.Result))
+            ? socket.EndSend(tcs.Task.Result).AsTaskResult()
             : DoWriteWithTokenAsync(tcs, socket, token);
     }
 
@@ -156,7 +151,7 @@ public static class StreamUtils
         CancellationToken token)
     {
         // ReSharper disable once UseAwaitUsing
-        using (token.Register(OnCanceled, tcs))
+        using (token.Register(CallbackHelpers.OnCanceled, tcs))
         {
             return socket.EndSend(await tcs.Task);
         }
@@ -193,7 +188,7 @@ public static class StreamUtils
         int totalLength = 4 * contents.Length + contents.Sum(entry => Defaults.UTF8.GetByteCount(entry));
 
         using var array = new Rent<byte>(totalLength + 4);
-        
+
         // ReSharper disable once UseAwaitUsing
         using var writer = new BinaryWriter(new MemoryStream(array.Array));
 
@@ -249,4 +244,24 @@ public static class StreamUtils
         int terminatorIndex = message.IndexOf('\r');
         return terminatorIndex != -1 ? message[..terminatorIndex] : message;
     }
+}
+
+public static class CallbackHelpers
+{
+    static AsyncCallback? onComplete;
+    static Action<object?>? onCanceled;
+    static Action<object?>? onTimeout;
+    static Action<object?>? setResult;
+
+    public static AsyncCallback OnComplete => onComplete ??=
+        result => ((TaskCompletionSource<IAsyncResult>)result.AsyncState!).TrySetResult(result);
+
+    public static Action<object?> OnCanceled => onCanceled ??=
+        tcs => ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetCanceled();
+
+    public static Action<object?> OnTimeout => onTimeout ??=
+        tcs => ((TaskCompletionSource<IAsyncResult>)tcs!).TrySetException(new TimeoutException());
+
+    public static Action<object?> SetResult => setResult ??=
+        o => ((TaskCompletionSource)o!).TrySetResult();
 }

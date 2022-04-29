@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MoveitMsgs
         public MotionSequenceItem(ref ReadBuffer b)
         {
             Req = new MotionPlanRequest(ref b);
-            BlendRadius = b.Deserialize<double>();
+            b.Deserialize(out BlendRadius);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MotionSequenceItem(ref b);
@@ -46,7 +46,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Req is null) BuiltIns.ThrowNullReference(nameof(Req));
+            if (Req is null) BuiltIns.ThrowNullReference();
             Req.RosValidate();
         }
     

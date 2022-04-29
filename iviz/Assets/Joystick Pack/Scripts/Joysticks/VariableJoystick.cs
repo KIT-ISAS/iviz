@@ -9,7 +9,7 @@ namespace External
         public float MoveThreshold
         {
             get { return moveThreshold; }
-            set { moveThreshold = Math.Abs(value); }
+            set { moveThreshold = Mathf.Abs(value); }
         }
 
         [SerializeField] private float moveThreshold = 1;

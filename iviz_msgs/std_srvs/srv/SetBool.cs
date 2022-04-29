@@ -68,7 +68,7 @@ namespace Iviz.Msgs.StdSrvs
         /// Constructor with buffer.
         public SetBoolRequest(ref ReadBuffer b)
         {
-            Data = b.Deserialize<bool>();
+            b.Deserialize(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetBoolRequest(ref b);
@@ -116,8 +116,8 @@ namespace Iviz.Msgs.StdSrvs
         /// Constructor with buffer.
         public SetBoolResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
-            Message = b.DeserializeString();
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetBoolResponse(ref b);
@@ -132,7 +132,7 @@ namespace Iviz.Msgs.StdSrvs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Message is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);

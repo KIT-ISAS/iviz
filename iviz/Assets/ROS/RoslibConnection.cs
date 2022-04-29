@@ -26,8 +26,7 @@ namespace Iviz.Ros
     {
         static BriefTopicInfo[] EmptyTopics => Array.Empty<BriefTopicInfo>();
         static string[] EmptyParameters => Array.Empty<string>();
-
-        static readonly Random Random = new();
+        static Random Random => Defaults.Random;
 
         readonly ConcurrentDictionary<int, IRosPublisher?> publishers = new();
         readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new();
@@ -164,7 +163,7 @@ namespace Iviz.Ros
             {
                 const int rpcTimeoutInMs = 3000;
 
-                //Tools.Logger.LogDebug = RosLogger.Debug;
+                //Tools.Logger.LogDebugCallback = RosLogger.Debug;
                 Tools.Logger.LogErrorCallback = RosLogger.Error;
                 Tools.Logger.LogCallback = RosLogger.Info;
 
@@ -458,14 +457,14 @@ namespace Iviz.Ros
             }
 
             const int minOffsetInMs = 2;
-            if (Math.Abs(offset.TotalMilliseconds) < minOffsetInMs)
+            if (Mathf.Abs((float)offset.TotalMilliseconds) < minOffsetInMs)
             {
                 RosLogger.Info("[NtpChecker]: No significant time offset detected from master clock.");
             }
             else
             {
                 time.GlobalTimeOffset = offset;
-                string offsetStr = Math.Abs(offset.TotalSeconds) >= 1
+                string offsetStr = Mathf.Abs((float)offset.TotalSeconds) >= 1
                     ? $"{offset.TotalSeconds:#,0.###} sec"
                     : $"{offset.TotalMilliseconds:#,0.###} ms";
                 RosLogger.Info($"[NtpChecker]: Master clock appears to have a time offset of {offsetStr}. " +

@@ -8,6 +8,5 @@ namespace Iviz.Common
     {
         Aruco,
         QrCode,
-        Unset,
     }
 }

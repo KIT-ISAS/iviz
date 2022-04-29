@@ -14,7 +14,7 @@ namespace Iviz.App
         public SenderWidget JoySender { get; private set; }
 
         public ToggleWidget SendTwist { get; private set; }
-        public Vector3Widget MaxSpeed { get; private set; }
+        public Vector3MultiWidget MaxSpeed { get; private set; }
         public ToggleWidget XIsFront { get; private set; }
 
 
@@ -43,7 +43,7 @@ namespace Iviz.App
             JoySender = p.AddSender();
 
             SendTwist = p.AddToggle("Publish Twist Message");
-            MaxSpeed = p.AddVector3("Max Speed [X, Y, Angular]");
+            MaxSpeed = p.AddVector3Multi("Max Speed [X, Y, Angular]").SetRange(5);
             XIsFront = p.AddToggle("Joystick Right is Robot Front");
 
             UseStamped = p.AddToggle("Use TwistStamped instead of Twist");

@@ -1,0 +1,132 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6456278620437446038
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6627904747895868810}
+  - component: {fileID: 1478977870893174338}
+  m_Layer: 0
+  m_Name: Widget Asset Holder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6627904747895868810
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6456278620437446038}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1478977870893174338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6456278620437446038}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c387ed1fa4614875bf309bdb1572035c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AddTopicPanel: {fileID: 7786611109638139303, guid: 016eae5fc13634d5280ba1feff0b9e60,
+    type: 3}
+  CloseButton: {fileID: 6524995043497632422, guid: da7ab3b9ffc07dd4f801efc74796acd4,
+    type: 3}
+  ColorPicker: {fileID: 5338011060880831853, guid: acadcb7373d690e4f8a24b69ac6aa362,
+    type: 3}
+  ConnectionPanel: {fileID: 2332931896542372098, guid: a1a5bd15125d3410ab50e54beb05b61a,
+    type: 3}
+  ConsoleLog: {fileID: 7291371499597271211, guid: cd9078041210f43779aafeb5d8568202,
+    type: 3}
+  DataLabel: {fileID: 4751418848949287456, guid: 9c542219a0eec15448e8897cc2fc232d,
+    type: 3}
+  DataPanel: {fileID: 1548678831843444569, guid: c2bf7f3b3ac700d40b318b07fa3fad78,
+    type: 3}
+  DraggableDisplayButton: {fileID: 5577215166083142449, guid: ac3719ec5dcc84c14af4dd7200405c9d,
+    type: 3}
+  Dropdown: {fileID: 3511868748855208351, guid: 898d0743c1c9cc04197cbe8e2640b0b7,
+    type: 3}
+  EchoPanel: {fileID: 7291371499597271211, guid: f30c99942ded04fbfaab5696f4019948,
+    type: 3}
+  Frame: {fileID: 6053717162100960246, guid: 0a17ceb2a9abf462f836a2559104f1ae, type: 3}
+  HeadTitle: {fileID: 8104090242511038338, guid: 119873455f065cc49a432da6a26f5218,
+    type: 3}
+  ImagePanel: {fileID: 4506343921101368118, guid: 58cec7ec8b3884c04b28fc0882ce59d3,
+    type: 3}
+  ImagePreview: {fileID: 6749017422877557263, guid: f62cdbfab12b65b4a87f0a143e63e465,
+    type: 3}
+  InputFieldWithHints: {fileID: 1278147931763938638, guid: d14c7cb0e23584f58932ad32ab180992,
+    type: 3}
+  InputField: {fileID: 6182295506253913392, guid: 915e1318acad4b24995b16b667eb1f64,
+    type: 3}
+  ItemButton: {fileID: 3469946762671109746, guid: 4fa21197b1c85ce429b7a83baaca1f77,
+    type: 3}
+  ItemButtonWithDelete: {fileID: 3469946762671109746, guid: 8ece8b0a02ac54d958347bdf14a468b1,
+    type: 3}
+  ItemListPanel: {fileID: 7786611109638139303, guid: 58df81af2c8124f06b5dd932b80defce,
+    type: 3}
+  JoystickCanvas: {fileID: 600230701922661588, guid: 7fd41a8606e6d734e86c8e8b676e8aa9,
+    type: 3}
+  Listener: {fileID: 6469948729944380942, guid: 149e1657368ba4a608cc797f2a5f407f,
+    type: 3}
+  MarkersPanel: {fileID: 8682521506046349266, guid: 31b4f59234f794933a137aaa66bc6749,
+    type: 3}
+  Markers: {fileID: 6469948729944380942, guid: 0a09000492a484a10a4d499c4fdb89eb, type: 3}
+  MenuPanel: {fileID: 7353725378491947395, guid: e475c79fb57464d17b80d6da40983540,
+    type: 3}
+  NetworkPanel: {fileID: 3992802424159782102, guid: 55d28fe7850ad4e8d811fca73793cc9d,
+    type: 3}
+  NumberInputField: {fileID: 4996971547462451916, guid: 218099ba975da4d4b8b3b3c88c3af085,
+    type: 3}
+  SaveAsPanel: {fileID: 7786611109638139303, guid: f59bb10ce6a0442b7b8c58dbe72a9841,
+    type: 3}
+  Sender: {fileID: 6469948729944380942, guid: 9e8c455ddca0f46fca19c60ff40a4b13, type: 3}
+  SettingsPanel: {fileID: 8946395367666485985, guid: 073a5f0da4fa34dbabc4b394ebda7d53,
+    type: 3}
+  Slider: {fileID: 2236944325299982083, guid: f4814752b52a24c4eb60c6322f4e24ab, type: 3}
+  SliderWithScale: {fileID: 1974338578587004767, guid: f6d2bdb112c514f1db8138329f0a22c0,
+    type: 3}
+  TfTreePanel: {fileID: 7291371499597271211, guid: f74455175387045dcb254fe3abbc19b1,
+    type: 3}
+  ToggleButton: {fileID: 8956375948674936311, guid: a528c13d8c7ab419591e517d2f44deae,
+    type: 3}
+  ResetButton: {fileID: 8956375948674936311, guid: 9aa58135d7d4b4d5fa9d29168469ae03,
+    type: 3}
+  Toggle: {fileID: 3835117570909620686, guid: ee3c7e16ede041b4887621df43318a22, type: 3}
+  TrashButton: {fileID: 6524995043497632422, guid: d249c7241f2b5f54fbfc9489a73c5455,
+    type: 3}
+  Vector3Slider: {fileID: 3925610196380257193, guid: 45e6e631e5e6246babb891d545866c74,
+    type: 3}
+  Vector3: {fileID: 3925610196380257193, guid: 6446f7c93f7c54d9ebe0f8fc3b1765ff, type: 3}
+  Vector3Multi: {fileID: 3925610196380257193, guid: 8daefb868f691422894c6e2ed7b33ec0,
+    type: 3}
+  SystemInfo: {fileID: 1273616110607400797, guid: 8f626f809b939485da186fa56eee2b25,
+    type: 3}
+  ARMarkerPanel: {fileID: 1273616110607400797, guid: c4b37e9aec82848dc925f2948f71c4a9,
+    type: 3}
+  ARMarkers: {fileID: 6469948729944380942, guid: 929fe40406d244701b9d2a3803336720,
+    type: 3}
+  TfPublisherWidget: {fileID: 6469948729944380942, guid: 3138219d9480a469d93f47f9bf5ab282,
+    type: 3}
+  MagnitudeWidget: {fileID: 6469948729944380942, guid: 41e568838dc6f43bebd62a83fbaf0230,
+    type: 3}
+  Collapsible: {fileID: 2258849891631992087, guid: a3e438c2d3c68400ab1e1eca1867896f,
+    type: 3}
+  ImageCanvas: {fileID: 5695383382360246554, guid: 00b524b7bc8454b9b85567116aa52eac,
+    type: 3}

@@ -64,11 +64,12 @@ namespace Iviz.Msgs.IvizMsgs
                 "H4sIAAAAAAAAE0vLyU8sMTZSqOBKg7IqubgAEeFgKBUAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
         /// Custom iviz code
-        public static readonly Vector2f Zero = new(0, 0);
-        public static readonly Vector2f One = new(1, 1);
-        public static readonly Vector2f UnitX = new(1, 0);
-        public static readonly Vector2f UnitY = new(0, 1);
+        public static Vector2f Zero => new(0, 0);
+        public static Vector2f One => new(1, 1);
+        public static Vector2f UnitX => new(1, 0);
+        public static Vector2f UnitY => new(0, 1);
         public static Vector2f operator +(in Vector2f v, in Vector2f w) => new(v.X + w.X, v.Y + w.Y);
         public static Vector2f operator -(in Vector2f v, in Vector2f w) => new(v.X - w.X, v.Y - w.Y);
         public static Vector2f operator *(float f, in Vector2f v) => new(f * v.X, f * v.Y);

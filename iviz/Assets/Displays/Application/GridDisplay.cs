@@ -24,7 +24,8 @@ namespace Iviz.Displays
         readonly List<MeshMarkerDisplay> horizontals = new();
         readonly List<MeshMarkerDisplay> verticals = new();
 
-        [SerializeField] Texture2D? texture;
+        [SerializeField] Texture2D? lightTexture;
+        [SerializeField] Texture2D? darkTexture;
         [SerializeField] MeshRenderer? meshRenderer;
 
         MeshMarkerDisplay? interiorObject;
@@ -130,14 +131,20 @@ namespace Iviz.Displays
 
         public bool FollowCamera { get; set; } = true;
 
+        public bool DarkMode
+        {
+            set => InteriorObject.DiffuseTexture = value ? darkTexture : lightTexture;
+        }
+
         void Awake()
         {
             InteriorObject.name = "Grid Interior";
             InteriorObject.transform.localPosition = new Vector3(0, 0, 0.01f);
             InteriorObject.Layer = LayerType.IgnoreRaycast;
-            InteriorObject.DiffuseTexture = texture;
             InteriorObject.Metallic = 0.5f;
             InteriorObject.Smoothness = 0.5f;
+            
+            DarkMode = true;
 
             InteriorRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             InteriorRenderer.receiveShadows = true;
@@ -205,9 +212,13 @@ namespace Iviz.Displays
         void UpdateMesh()
         {
             var tilingScale = new Vector2(NumberOfGridCells, NumberOfGridCells);
-            Resource.TexturedMaterials.GetFull(texture).mainTextureScale = tilingScale;
-            Resource.TexturedMaterials.GetSimple(texture).mainTextureScale = tilingScale;
 
+            Resource.TexturedMaterials.GetFull(lightTexture).mainTextureScale = tilingScale;
+            Resource.TexturedMaterials.GetSimple(lightTexture).mainTextureScale = tilingScale;
+
+            Resource.TexturedMaterials.GetFull(darkTexture).mainTextureScale = tilingScale;
+            Resource.TexturedMaterials.GetSimple(darkTexture).mainTextureScale = tilingScale;
+            
             float totalSize = GridCellSize * NumberOfGridCells + GridLineWidth;
 
             const float interiorHeight = 1 / 512f;

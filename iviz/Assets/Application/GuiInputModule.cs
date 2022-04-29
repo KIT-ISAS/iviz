@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Common;
-using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Controllers.XR;
@@ -24,20 +23,15 @@ using Touch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace Iviz.App
 {
-    public sealed class GuiInputModule : MonoBehaviour, ISettingsManager, IHasFrame, IDragHandler
+    public sealed class GuiInputModule : MonoBehaviour, IHasFrame, IDragHandler
     {
         const float MainSpeed = 2f;
         const float MainAccel = 5f;
         const float BrakeCoeff = 0.9f;
         const float LookAtAnimationTime = 0.3f;
 
-        static readonly string[] QualityInViewOptions =
-            { "Very Low", "Low", "Medium", "High", "Very High", "Ultra" };
-
-        static readonly string[] QualityInArOptions = { "Very Low", "Low", "Medium", "High", "Very High", "Ultra" };
-
         /// Weights for keyboard movements. Forward is slower.
-        static readonly Vector3 MoveDirectionWeight = new(1.5f, 1.5f, 1);
+        static Vector3 MoveDirectionWeight => new(1.5f, 1.5f, 1);
 
         static GuiInputModule? instance;
         static uint tapSeq;
@@ -50,12 +44,7 @@ namespace Iviz.App
 
         static Camera MainCamera => Settings.MainCamera;
 
-        public static GuiInputModule Instance =>
-            instance != null
-                ? instance
-                : instance = ((GuiInputModule)Settings.SettingsManager).AssertNotNull(nameof(instance));
-
-        readonly SettingsConfiguration config = new();
+        public static GuiInputModule Instance => MainCamera.EnsureHasComponent(ref instance, nameof(MainCamera));
 
         Vector3 accel;
         Vector3 velocity;
@@ -92,10 +81,24 @@ namespace Iviz.App
         LeashDisplay? leash;
         Transform? mTransform;
 
+        float cameraYaw;
+        float cameraPitch = 45;
+        float cameraRoll;
+
+        Color backgroundColor = new(0.145f, 0.168f, 0.207f, 1);
+        float sunDirectionX;
+        float sunDirectionY;
+        bool enableSun = true;
+        float equatorIntensity = 0.5f;
+
         LeashDisplay Leash => ResourcePool.RentChecked(ref leash);
         Transform Transform => this.EnsureHasTransform(ref mTransform);
         bool IsLookAtAnimationRunning => lookAtTokenSource is { IsCancellationRequested: false };
-        Quaternion OrbitRotation => Quaternion.Euler(CameraPitch, CameraYaw, CameraRoll);
+        Quaternion OrbitRotation => Quaternion.Euler(cameraPitch, cameraYaw, cameraRoll);
+
+        Light MainLight => mainLight != null
+            ? mainLight
+            : (mainLight = GameObject.Find("MainLight").AssertHasComponent<Light>(nameof(mainLight)));
 
         IScreenDraggable? DraggedObject
         {
@@ -170,14 +173,10 @@ namespace Iviz.App
             }
         }
 
-        public float CameraYaw { get; set; }
-        public float CameraPitch { get; set; } = 45;
-        public float CameraRoll { get; set; }
-
         public Vector3 CameraRpy
         {
-            get => new(CameraRoll, CameraPitch, CameraYaw);
-            set => (CameraRoll, CameraPitch, CameraYaw) = UnityUtils.RegularizeRpy(value);
+            get => new(cameraRoll, cameraPitch, cameraYaw);
+            set => (cameraRoll, cameraPitch, cameraYaw) = UnityUtils.RegularizeRpy(value);
         }
 
         public Vector3 CameraPosition
@@ -212,152 +211,118 @@ namespace Iviz.App
 
         public TfFrame Frame => TfModule.FixedFrame;
 
-        public int SunDirection
+        public bool EnableSun
         {
-            get => config.SunDirection;
+            get => enableSun;
             set
             {
-                config.SunDirection = value;
-                if (mainLight != null)
-                {
-                    mainLight.transform.rotation = Quaternion.Euler(90 + value, 0, 0);
-                }
+                enableSun = value;
+                MainLight.enabled = value;
             }
         }
-
-        public QualityType QualityInAr
+        
+        public float SunDirectionX
         {
-            get => config.QualityInAr;
             set
             {
-                config.QualityInAr = ValidateQuality(value);
-                if (!ARController.IsActive)
-                {
-                    return;
-                }
-
-                QualitySettings.SetQualityLevel((int)config.QualityInAr, true);
-                UpdateQualityLevel(config.QualityInAr);
+                sunDirectionX = value;
+                UpdateSunDirection();
             }
         }
 
-        public QualityType QualityInView
+        public float SunDirectionY
         {
-            get => config.QualityInView;
             set
             {
-                config.QualityInView = ValidateQuality(value);
-
-                var qualityToUse = Settings.IsHololens ? QualityType.VeryLow : config.QualityInView;
-
-                if (ARController.IsActive)
-                {
-                    return;
-                }
-
-                QualitySettings.SetQualityLevel((int)qualityToUse, true);
-                UpdateQualityLevel(qualityToUse);
+                sunDirectionY = value;
+                UpdateSunDirection();
             }
         }
 
-        void UpdateQualityLevel(QualityType qualityToUse)
+        public float EquatorIntensity
         {
-            // update materials
-            bool isVeryLow = qualityToUse == QualityType.VeryLow;
-            if (Settings.UseSimpleMaterials != isVeryLow)
+            set
             {
-                Settings.UseSimpleMaterials = isVeryLow;
-                foreach (var display in GetAllRootChildren().WithComponent<MeshMarkerDisplay>())
-                {
-                    display.UpdateMaterial();
-                }
-            }
-
-            // update main light
-            if (mainLight == null)
-            {
-                return;
-            }
-
-            if (isVeryLow)
-            {
-                mainLight.renderMode = LightRenderMode.ForceVertex;
-                mainLight.intensity = Settings.IsHololens ? 2 : 1;
-                mainLight.shadows = LightShadows.None;
-            }
-            else
-            {
-                mainLight.renderMode = LightRenderMode.Auto;
-                mainLight.intensity = 1;
-                mainLight.shadows = LightShadows.Soft;
+                equatorIntensity = value;
+                UpdateLighting();
             }
         }
 
-        static QualityType ValidateQuality(QualityType qualityType)
+        void UpdateSunDirection()
         {
-            return qualityType switch
+            MainLight.transform.rotation = Quaternion.Euler(90 + sunDirectionX, sunDirectionY, 0);
+        }
+
+        public bool EnableShadows
+        {
+            get => MainLight.shadows != LightShadows.None;
+            set => MainLight.shadows = value ? LightShadows.Soft : LightShadows.None;
+        }
+
+        public QualityType QualityType
+        {
+            set
             {
-                < QualityType.VeryLow => QualityType.VeryLow,
-                > QualityType.Ultra => QualityType.Ultra,
-                _ => qualityType
-            };
+                QualitySettings.SetQualityLevel((int)value, true);
+
+                // update materials
+                bool isVeryLow = value == QualityType.VeryLow;
+                if (Settings.UseSimpleMaterials != isVeryLow)
+                {
+                    Settings.UseSimpleMaterials = isVeryLow;
+                    foreach (var display in GetAllRootChildren().WithComponent<MeshMarkerDisplay>())
+                    {
+                        display.UpdateMaterial();
+                    }
+                }
+
+                // update main light
+                if (isVeryLow)
+                {
+                    MainLight.renderMode = LightRenderMode.ForceVertex;
+                    MainLight.intensity = Settings.IsHololens ? 2 : 1;
+                    MainLight.shadows = LightShadows.None;
+                }
+                else
+                {
+                    MainLight.renderMode = LightRenderMode.Auto;
+                    MainLight.intensity = 1;
+                    MainLight.shadows = LightShadows.Soft;
+                }
+            }
         }
 
         public int TargetFps
         {
-            get => config.TargetFps;
-            set
-            {
-                config.TargetFps = value;
-                Application.targetFrameRate = value;
-            }
+            set => Application.targetFrameRate = value;
         }
 
         public Color BackgroundColor
         {
-            get => config.BackgroundColor.ToUnity();
+            get => backgroundColor;
             set
             {
-                config.BackgroundColor = value.WithAlpha(1).ToRos();
+                backgroundColor = value;
 
                 Color colorToUse = Settings.IsHololens ? Color.black : value;
                 MainCamera.backgroundColor = colorToUse.WithAlpha(0);
-
-                RenderSettings.ambientSkyColor = value.WithAlpha(0);
-
-                Color.RGBToHSV(value, out float h, out float s, out float v);
-                var equatorColor = Color.HSVToRGB(h, Math.Min(s, 0.3f), v * 0.5f);
-                RenderSettings.ambientEquatorColor = equatorColor;
+                UpdateLighting();
             }
+        }
+
+        void UpdateLighting()
+        {
+            RenderSettings.ambientSkyColor = backgroundColor.WithAlpha(0);
+            Color.RGBToHSV(backgroundColor, out float h, out float s, out _);
+            var equatorColor = Color.HSVToRGB(h, Mathf.Min(s, 0.3f),  equatorIntensity);
+            RenderSettings.ambientEquatorColor = equatorColor;            
         }
 
         public int NetworkFrameSkip
         {
-            get => config.NetworkFrameSkip;
-            set
-            {
-                config.NetworkFrameSkip = value;
-                GameThread.NetworkFrameSkip = value;
-            }
+            set => GameThread.NetworkFrameSkip = value;
         }
 
-        public IEnumerable<string> QualityLevelsInView => QualityInViewOptions;
-
-        public IEnumerable<string> QualityLevelsInAR => QualityInArOptions;
-
-        public SettingsConfiguration Config
-        {
-            get => config;
-            set
-            {
-                BackgroundColor = value.BackgroundColor.ToUnity();
-                SunDirection = value.SunDirection;
-                NetworkFrameSkip = value.NetworkFrameSkip;
-                QualityInAr = value.QualityInAr;
-                QualityInView = value.QualityInView;
-                TargetFps = value.TargetFps;
-            }
-        }
 
         void Awake()
         {
@@ -367,7 +332,7 @@ namespace Iviz.App
         void OnDestroy()
         {
             instance = null;
-            TfListener.AfterProcessMessages -= ProcessPoseChanges;
+            TfModule.AfterProcessFrames -= ProcessPoseChanges;
             GameThread.EveryFrame -= ProcessPointer;
             TfModule.ResetFrames -= OnResetFrames;
         }
@@ -379,36 +344,30 @@ namespace Iviz.App
                 QualitySettings.vSyncCount = 0;
             }
 
-            if (!Settings.IsXR)
-            {
-                Settings.VirtualCamera = MainCamera;
-            }
+            Settings.DragHandler = this;
 
-            mainLight = GameObject.Find("MainLight")?.GetComponent<Light>();
-            
+            BackgroundColor = BackgroundColor;
+
             Leash.Color = Color.white.WithAlpha(0.75f);
-            
-            Config = Config;
-            
+
             TfModule.ResetFrames += OnResetFrames;
 
             if (Settings.IsXR)
             {
                 return;
             }
-            
+
             StartOrbiting();
 
             if (ModuleListPanel.TryGetInstance() is { } moduleListPanel)
             {
-                TfListener.AfterProcessMessages += ProcessPoseChanges;
+                TfModule.AfterProcessFrames += ProcessPoseChanges;
                 moduleListPanel.UnlockButton.onClick.AddListener(DisableCameraLock);
             }
             else
             {
                 GameThread.EveryFrame += ProcessPoseChanges;
             }
-            
         }
 
         void LateUpdate()
@@ -504,28 +463,16 @@ namespace Iviz.App
             OrbitCenterOverride = null;
         }
 
-        public void UpdateQualityLevel()
-        {
-            QualityInAr = QualityInAr;
-            QualityInView = QualityInView;
-        }
-
         public float XRDraggableNearDistance => Settings.IsXR ? XRController.NearDistance : float.MaxValue;
 
         public void TryUnsetDraggedObject(IScreenDraggable draggable)
         {
-            // do not fetch Instance here, we may be in the middle of shutting down the scene
-            if (instance == null)
+            if (DraggedObject != draggable)
             {
                 return;
             }
 
-            if (instance.DraggedObject != draggable)
-            {
-                return;
-            }
-
-            instance.DraggedObject = null;
+            DraggedObject = null;
         }
 
         public void TrySetDraggedObject(IScreenDraggable draggable)
@@ -611,7 +558,7 @@ namespace Iviz.App
 
             if (DraggedObject != null)
             {
-                var pointerRay = Settings.MainCamera.ScreenPointToRay(pointerPosition);
+                var pointerRay = MainCamera.ScreenPointToRay(pointerPosition);
                 DraggedObject.OnPointerMove(pointerRay);
                 if (DraggedObject.ReferencePoint is { } referencePoint
                     && DraggedObject.ReferenceNormal is { } referenceNormal)
@@ -658,11 +605,11 @@ namespace Iviz.App
         void StartOrbiting()
         {
             var diff = orbitCenter - Transform.localPosition;
-            orbitRadius = Math.Min(5, diff.magnitude);
+            orbitRadius = Mathf.Min(5, diff.Magnitude());
 
             var (diffX, diffY, diffZ) = diff;
-            CameraYaw = Mathf.Atan2(diffX, diffZ) * Mathf.Rad2Deg;
-            CameraPitch = -Mathf.Atan2(diffY, Mathf.Sqrt(diffX * diffX + diffZ * diffZ)) * Mathf.Rad2Deg;
+            cameraYaw = Mathf.Atan2(diffX, diffZ) * Mathf.Rad2Deg;
+            cameraPitch = -Mathf.Atan2(diffY, Mathf.Sqrt(diffX * diffX + diffZ * diffZ)) * Mathf.Rad2Deg;
 
             var rotation = OrbitRotation;
             Transform.SetLocalPose(-orbitRadius * rotation.Forward() + orbitCenter, rotation);
@@ -700,13 +647,13 @@ namespace Iviz.App
             const float minPitchInDeg = -90;
             const float maxPitchInDeg = 90;
 
-            CameraYaw += pointerDiffX * orbitCoeff;
-            CameraPitch -= pointerDiffY * orbitCoeff;
-            CameraPitch = Mathf.Clamp(CameraPitch, minPitchInDeg, maxPitchInDeg);
+            cameraYaw += pointerDiffX * orbitCoeff;
+            cameraPitch -= pointerDiffY * orbitCoeff;
+            cameraPitch = Mathf.Clamp(cameraPitch, minPitchInDeg, maxPitchInDeg);
 
             if (Keyboard.current[Key.W].isPressed)
             {
-                orbitRadius = Math.Max(0, orbitRadius - orbitRadiusAdvance);
+                orbitRadius = Mathf.Max(0, orbitRadius - orbitRadiusAdvance);
             }
             else if (Keyboard.current[Key.S].isPressed)
             {
@@ -802,9 +749,9 @@ namespace Iviz.App
             const float minPitchInDeg = -89;
             const float maxPitchInDeg = 89;
 
-            CameraYaw += pointerDiffX * turnCoeff;
-            CameraPitch -= pointerDiffY * turnCoeff;
-            CameraPitch = Mathf.Clamp(CameraPitch, minPitchInDeg, maxPitchInDeg);
+            cameraYaw += pointerDiffX * turnCoeff;
+            cameraPitch -= pointerDiffY * turnCoeff;
+            cameraPitch = Mathf.Clamp(cameraPitch, minPitchInDeg, maxPitchInDeg);
         }
 
         void ProcessFlying()
@@ -825,7 +772,7 @@ namespace Iviz.App
             if (baseInput.x == 0)
             {
                 accel.x *= BrakeCoeff;
-                if (Math.Abs(accel.x) < minAccelToStop)
+                if (Mathf.Abs(accel.x) < minAccelToStop)
                 {
                     accel.x = 0;
                 }
@@ -834,7 +781,7 @@ namespace Iviz.App
             if (baseInput.y == 0)
             {
                 accel.y *= BrakeCoeff;
-                if (Math.Abs(accel.y) < minAccelToStop)
+                if (Mathf.Abs(accel.y) < minAccelToStop)
                 {
                     accel.y = 0;
                 }
@@ -843,7 +790,7 @@ namespace Iviz.App
             if (baseInput.z == 0)
             {
                 accel.z *= BrakeCoeff;
-                if (Math.Abs(accel.z) < minAccelToStop)
+                if (Mathf.Abs(accel.z) < minAccelToStop)
                 {
                     accel.z = 0;
                 }
@@ -892,7 +839,7 @@ namespace Iviz.App
 
             if (!Settings.IsPhone)
             {
-                float distanceToFrame = (Transform.localPosition - targetPosition).magnitude;
+                float distanceToFrame = (Transform.localPosition - targetPosition).Magnitude();
                 float zoomRadius = Mathf.Clamp(distanceToFrame, minDistanceLookAt, maxDistanceLookAt);
                 return targetPosition - Transform.localRotation.Forward() * zoomRadius;
             }
@@ -940,10 +887,10 @@ namespace Iviz.App
 
         void OnClick(ClickHitInfo clickHitInfo, bool isShortClick)
         {
-            TriggerEnvironmentClick(clickHitInfo);
+            TriggerEnvironmentClick(clickHitInfo, isShortClick);
         }
 
-        public static void TriggerEnvironmentClick(ClickHitInfo clickHitInfo)
+        public static void TriggerEnvironmentClick(ClickHitInfo clickHitInfo, bool isShortClick)
         {
             if (clickHitInfo.TryGetRaycastResults(out var hitResults))
             {
@@ -980,6 +927,11 @@ namespace Iviz.App
                 }
             }
 
+            if (isShortClick)
+            {
+                return;
+            }
+            
             Pose poseToHighlight;
             if (clickHitInfo.TryGetARRaycastResults(out var arHitResults))
             {
@@ -1020,7 +972,7 @@ namespace Iviz.App
 
         public static void PlayClickAudio(in Vector3 position)
         {
-            var assetHolder = Resource.Extras.AppAssetHolder;
+            var assetHolder = ResourcePool.AppAssetHolder;
             AudioSource.PlayClipAtPoint(assetHolder.Click, position);
         }
 

@@ -85,7 +85,7 @@ namespace Iviz.App.ARDialogs
             }
             else
             {
-                float distance = (Transform.position - Settings.MainCameraTransform.position).magnitude;
+                float distance = (Transform.position - Settings.MainCameraTransform.position).Magnitude();
                 float alpha = Mathf.Clamp01(1 - (distance - minDistance) / (maxDistance - minDistance));
 
                 if (alpha == 0)

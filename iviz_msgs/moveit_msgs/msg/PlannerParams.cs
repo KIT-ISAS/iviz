@@ -33,9 +33,9 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public PlannerParams(ref ReadBuffer b)
         {
-            Keys = b.DeserializeStringArray();
-            Values = b.DeserializeStringArray();
-            Descriptions = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Keys);
+            b.DeserializeStringArray(out Values);
+            b.DeserializeStringArray(out Descriptions);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PlannerParams(ref b);
@@ -51,20 +51,20 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Keys is null) BuiltIns.ThrowNullReference(nameof(Keys));
+            if (Keys is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Keys.Length; i++)
             {
-                if (Keys[i] is null) BuiltIns.ThrowNullReference($"{nameof(Keys)}[{i}]");
+                if (Keys[i] is null) BuiltIns.ThrowNullReference(nameof(Keys), i);
             }
-            if (Values is null) BuiltIns.ThrowNullReference(nameof(Values));
+            if (Values is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Values.Length; i++)
             {
-                if (Values[i] is null) BuiltIns.ThrowNullReference($"{nameof(Values)}[{i}]");
+                if (Values[i] is null) BuiltIns.ThrowNullReference(nameof(Values), i);
             }
-            if (Descriptions is null) BuiltIns.ThrowNullReference(nameof(Descriptions));
+            if (Descriptions is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Descriptions.Length; i++)
             {
-                if (Descriptions[i] is null) BuiltIns.ThrowNullReference($"{nameof(Descriptions)}[{i}]");
+                if (Descriptions[i] is null) BuiltIns.ThrowNullReference(nameof(Descriptions), i);
             }
         }
     

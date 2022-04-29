@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public HasParamRequest(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
+            b.DeserializeString(out Name);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new HasParamRequest(ref b);
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Name is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Name);
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public HasParamResponse(ref ReadBuffer b)
         {
-            Exists = b.Deserialize<bool>();
+            b.Deserialize(out Exists);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new HasParamResponse(ref b);

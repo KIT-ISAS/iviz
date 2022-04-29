@@ -53,15 +53,15 @@ namespace Iviz.Msgs.SensorMsgs
         public LaserScan(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            AngleMin = b.Deserialize<float>();
-            AngleMax = b.Deserialize<float>();
-            AngleIncrement = b.Deserialize<float>();
-            TimeIncrement = b.Deserialize<float>();
-            ScanTime = b.Deserialize<float>();
-            RangeMin = b.Deserialize<float>();
-            RangeMax = b.Deserialize<float>();
-            Ranges = b.DeserializeStructArray<float>();
-            Intensities = b.DeserializeStructArray<float>();
+            b.Deserialize(out AngleMin);
+            b.Deserialize(out AngleMax);
+            b.Deserialize(out AngleIncrement);
+            b.Deserialize(out TimeIncrement);
+            b.Deserialize(out ScanTime);
+            b.Deserialize(out RangeMin);
+            b.Deserialize(out RangeMax);
+            b.DeserializeStructArray(out Ranges);
+            b.DeserializeStructArray(out Intensities);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new LaserScan(ref b);
@@ -84,8 +84,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Ranges is null) BuiltIns.ThrowNullReference(nameof(Ranges));
-            if (Intensities is null) BuiltIns.ThrowNullReference(nameof(Intensities));
+            if (Ranges is null) BuiltIns.ThrowNullReference();
+            if (Intensities is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

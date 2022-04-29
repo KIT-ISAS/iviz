@@ -126,7 +126,7 @@ namespace Iviz.Core
             mainCamera = null;
             mainCameraTransform = null;
             settingsManager = null;
-            inputModule = null;
+            dragHandler = null;
 
             supportsR16 = null;
             supportsRGB24 = null;
@@ -155,7 +155,7 @@ namespace Iviz.Core
         static Camera? mainCamera;
         static Transform? mainCameraTransform;
         static ISettingsManager? settingsManager;
-        static IDragHandler? inputModule;
+        static IDragHandler? dragHandler;
 
         static bool? supportsComputeBuffersHelper;
         static bool? supportsR16;
@@ -204,18 +204,19 @@ namespace Iviz.Core
         public static Camera? VirtualCamera { get; set; }
         public static Camera? ARCamera { get; set; }
 
-        public static ISettingsManager SettingsManager =>
-            (UnityEngine.Object?)settingsManager != null
-                ? settingsManager
-                : settingsManager = FindMainCamera().GetComponent<ISettingsManager>()
-                                    ?? throw new MissingAssetFieldException("Failed to find SettingsManager!");
+        public static ISettingsManager SettingsManager
+        {
+            get => settingsManager ?? throw new NullReferenceException("No settings manager!");
+            set => settingsManager = value;
+        }
 
-        public static bool HasDragHandler => inputModule != null;
+        public static bool HasDragHandler => dragHandler != null;
 
-        public static IDragHandler DragHandler =>
-            (UnityEngine.Object?)inputModule != null
-                ? inputModule
-                : inputModule = (IDragHandler)SettingsManager;
+        public static IDragHandler DragHandler
+        {
+            get => dragHandler ?? throw new NullReferenceException("No drag handler!");
+            set => dragHandler = value;
+        }
 
         public static IScreenCaptureManager? ScreenCaptureManager { get; set; }
 
@@ -241,11 +242,6 @@ namespace Iviz.Core
 #else
         public const bool IsShuttingDown = false;
 #endif
-
-        static Settings()
-        {
-            AotHelper.EnsureType<StringEnumConverter>();
-        }
     }
 
     public interface IDragHandler

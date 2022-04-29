@@ -939,7 +939,7 @@ public sealed class RosClient : IRosClient
                 $"requested type was [IMessage](generic)");
         }
 
-        return ValueTask2.FromResult((validatedSubscriber.Subscribe(callback), subscriber: validatedSubscriber));
+        return (validatedSubscriber.Subscribe(callback), subscriber: validatedSubscriber).AsTaskResult();
     }
 
     async ValueTask<(string id, IRosSubscriber subscriber)> IRosClient.SubscribeAsync(
@@ -983,7 +983,7 @@ public sealed class RosClient : IRosClient
                 $"requested type was [{BuiltIns.GetMessageType<T>()}]");
         }
 
-        return ValueTask2.FromResult((validatedSubscriber.Subscribe(callback), validatedSubscriber));
+        return (validatedSubscriber.Subscribe(callback), validatedSubscriber).AsTaskResult();
     }
 
     async ValueTask<(string id, IRosSubscriber<T> subscriber)> IRosClient.SubscribeAsync<T>(
@@ -1359,7 +1359,7 @@ public sealed class RosClient : IRosClient
         IRosPublisher? publisher =
             publishersByTopic.Values.FirstOrDefault(tmpPublisher => tmpPublisher.ContainsId(topicId));
 
-        return publisher?.UnadvertiseAsync(topicId) ?? new ValueTask<bool>(false);
+        return publisher?.UnadvertiseAsync(topicId) ?? false.AsTaskResult();
     }
 
     internal async ValueTask RemovePublisherAsync(IRosPublisher publisher, CancellationToken token)

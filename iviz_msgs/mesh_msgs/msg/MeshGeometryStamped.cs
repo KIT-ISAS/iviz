@@ -31,7 +31,7 @@ namespace Iviz.Msgs.MeshMsgs
         public MeshGeometryStamped(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
             MeshGeometry = new MeshMsgs.MeshGeometry(ref b);
         }
         
@@ -48,8 +48,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
-            if (MeshGeometry is null) BuiltIns.ThrowNullReference(nameof(MeshGeometry));
+            if (Uuid is null) BuiltIns.ThrowNullReference();
+            if (MeshGeometry is null) BuiltIns.ThrowNullReference();
             MeshGeometry.RosValidate();
         }
     

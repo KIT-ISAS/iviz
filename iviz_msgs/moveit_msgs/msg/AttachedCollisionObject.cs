@@ -36,11 +36,11 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public AttachedCollisionObject(ref ReadBuffer b)
         {
-            LinkName = b.DeserializeString();
+            b.DeserializeString(out LinkName);
             Object = new CollisionObject(ref b);
-            TouchLinks = b.DeserializeStringArray();
+            b.DeserializeStringArray(out TouchLinks);
             DetachPosture = new TrajectoryMsgs.JointTrajectory(ref b);
-            Weight = b.Deserialize<double>();
+            b.Deserialize(out Weight);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AttachedCollisionObject(ref b);
@@ -58,15 +58,15 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (LinkName is null) BuiltIns.ThrowNullReference(nameof(LinkName));
-            if (Object is null) BuiltIns.ThrowNullReference(nameof(Object));
+            if (LinkName is null) BuiltIns.ThrowNullReference();
+            if (Object is null) BuiltIns.ThrowNullReference();
             Object.RosValidate();
-            if (TouchLinks is null) BuiltIns.ThrowNullReference(nameof(TouchLinks));
+            if (TouchLinks is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < TouchLinks.Length; i++)
             {
-                if (TouchLinks[i] is null) BuiltIns.ThrowNullReference($"{nameof(TouchLinks)}[{i}]");
+                if (TouchLinks[i] is null) BuiltIns.ThrowNullReference(nameof(TouchLinks), i);
             }
-            if (DetachPosture is null) BuiltIns.ThrowNullReference(nameof(DetachPosture));
+            if (DetachPosture is null) BuiltIns.ThrowNullReference();
             DetachPosture.RosValidate();
         }
     

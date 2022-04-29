@@ -44,10 +44,10 @@ namespace Iviz.Msgs.SensorMsgs
         /// Constructor with buffer.
         public PointField(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Offset = b.Deserialize<uint>();
-            Datatype = b.Deserialize<byte>();
-            Count = b.Deserialize<uint>();
+            b.DeserializeString(out Name);
+            b.Deserialize(out Offset);
+            b.Deserialize(out Datatype);
+            b.Deserialize(out Count);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PointField(ref b);
@@ -64,7 +64,7 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Name is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 13 + BuiltIns.GetStringSize(Name);

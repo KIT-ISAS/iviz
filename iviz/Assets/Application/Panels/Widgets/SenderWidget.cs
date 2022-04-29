@@ -13,7 +13,7 @@ namespace Iviz.App
 {
     public sealed class SenderWidget : MonoBehaviour, IWidget
     {
-        const int MaxTopicLength = 200;
+        const int MaxTopicWidth = 220;
 
         [SerializeField] TMP_Text? text;
         [SerializeField] Image? panel;
@@ -81,7 +81,7 @@ namespace Iviz.App
 
             using var description = BuilderPool.Rent();
             description
-                .Append(Resource.Font.Split(Topic ?? "", MaxTopicLength))
+                .Append(Resource.Font.Split(Topic ?? "", MaxTopicWidth))
                 .Append("\n<b>");
 
             sender.WriteDescriptionTo(description);

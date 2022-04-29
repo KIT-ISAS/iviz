@@ -29,10 +29,10 @@ namespace Iviz.Msgs.OctomapMsgs
         public Octomap(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Binary = b.Deserialize<bool>();
-            Id = b.DeserializeString();
-            Resolution = b.Deserialize<double>();
-            Data = b.DeserializeStructArray<sbyte>();
+            b.Deserialize(out Binary);
+            b.DeserializeString(out Id);
+            b.Deserialize(out Resolution);
+            b.DeserializeStructArray(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Octomap(ref b);
@@ -50,8 +50,8 @@ namespace Iviz.Msgs.OctomapMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

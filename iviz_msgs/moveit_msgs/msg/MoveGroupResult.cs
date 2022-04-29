@@ -34,7 +34,7 @@ namespace Iviz.Msgs.MoveitMsgs
             TrajectoryStart = new MoveitMsgs.RobotState(ref b);
             PlannedTrajectory = new MoveitMsgs.RobotTrajectory(ref b);
             ExecutedTrajectory = new MoveitMsgs.RobotTrajectory(ref b);
-            PlanningTime = b.Deserialize<double>();
+            b.Deserialize(out PlanningTime);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MoveGroupResult(ref b);
@@ -52,13 +52,13 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ErrorCode is null) BuiltIns.ThrowNullReference(nameof(ErrorCode));
+            if (ErrorCode is null) BuiltIns.ThrowNullReference();
             ErrorCode.RosValidate();
-            if (TrajectoryStart is null) BuiltIns.ThrowNullReference(nameof(TrajectoryStart));
+            if (TrajectoryStart is null) BuiltIns.ThrowNullReference();
             TrajectoryStart.RosValidate();
-            if (PlannedTrajectory is null) BuiltIns.ThrowNullReference(nameof(PlannedTrajectory));
+            if (PlannedTrajectory is null) BuiltIns.ThrowNullReference();
             PlannedTrajectory.RosValidate();
-            if (ExecutedTrajectory is null) BuiltIns.ThrowNullReference(nameof(ExecutedTrajectory));
+            if (ExecutedTrajectory is null) BuiltIns.ThrowNullReference();
             ExecutedTrajectory.RosValidate();
         }
     

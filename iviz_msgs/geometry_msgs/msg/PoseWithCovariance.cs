@@ -32,7 +32,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public PoseWithCovariance(ref ReadBuffer b)
         {
             b.Deserialize(out Pose);
-            Covariance = b.DeserializeStructArray<double>(36);
+            b.DeserializeStructArray(36, out Covariance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PoseWithCovariance(ref b);
@@ -47,8 +47,8 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Covariance is null) BuiltIns.ThrowNullReference(nameof(Covariance));
-            if (Covariance.Length != 36) throw new RosInvalidSizeForFixedArrayException(nameof(Covariance), Covariance.Length, 36);
+            if (Covariance is null) BuiltIns.ThrowNullReference();
+            if (Covariance.Length != 36) BuiltIns.ThrowInvalidSizeForFixedArray(Covariance.Length, 36);
         }
     
         /// <summary> Constant size of this message. </summary> 

@@ -82,21 +82,21 @@ namespace Iviz.Msgs.SensorMsgs
         public BatteryState(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Voltage = b.Deserialize<float>();
-            Temperature = b.Deserialize<float>();
-            Current = b.Deserialize<float>();
-            Charge = b.Deserialize<float>();
-            Capacity = b.Deserialize<float>();
-            DesignCapacity = b.Deserialize<float>();
-            Percentage = b.Deserialize<float>();
-            PowerSupplyStatus = b.Deserialize<byte>();
-            PowerSupplyHealth = b.Deserialize<byte>();
-            PowerSupplyTechnology = b.Deserialize<byte>();
-            Present = b.Deserialize<bool>();
-            CellVoltage = b.DeserializeStructArray<float>();
-            CellTemperature = b.DeserializeStructArray<float>();
-            Location = b.DeserializeString();
-            SerialNumber = b.DeserializeString();
+            b.Deserialize(out Voltage);
+            b.Deserialize(out Temperature);
+            b.Deserialize(out Current);
+            b.Deserialize(out Charge);
+            b.Deserialize(out Capacity);
+            b.Deserialize(out DesignCapacity);
+            b.Deserialize(out Percentage);
+            b.Deserialize(out PowerSupplyStatus);
+            b.Deserialize(out PowerSupplyHealth);
+            b.Deserialize(out PowerSupplyTechnology);
+            b.Deserialize(out Present);
+            b.DeserializeStructArray(out CellVoltage);
+            b.DeserializeStructArray(out CellTemperature);
+            b.DeserializeString(out Location);
+            b.DeserializeString(out SerialNumber);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new BatteryState(ref b);
@@ -125,10 +125,10 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (CellVoltage is null) BuiltIns.ThrowNullReference(nameof(CellVoltage));
-            if (CellTemperature is null) BuiltIns.ThrowNullReference(nameof(CellTemperature));
-            if (Location is null) BuiltIns.ThrowNullReference(nameof(Location));
-            if (SerialNumber is null) BuiltIns.ThrowNullReference(nameof(SerialNumber));
+            if (CellVoltage is null) BuiltIns.ThrowNullReference();
+            if (CellTemperature is null) BuiltIns.ThrowNullReference();
+            if (Location is null) BuiltIns.ThrowNullReference();
+            if (SerialNumber is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

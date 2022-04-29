@@ -46,32 +46,32 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public PlanningScene(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
+            b.DeserializeString(out Name);
             RobotState = new RobotState(ref b);
-            RobotModelName = b.DeserializeString();
-            FixedFrameTransforms = b.DeserializeArray<GeometryMsgs.TransformStamped>();
+            b.DeserializeString(out RobotModelName);
+            b.DeserializeArray(out FixedFrameTransforms);
             for (int i = 0; i < FixedFrameTransforms.Length; i++)
             {
                 GeometryMsgs.TransformStamped.Deserialize(ref b, out FixedFrameTransforms[i]);
             }
             AllowedCollisionMatrix = new AllowedCollisionMatrix(ref b);
-            LinkPadding = b.DeserializeArray<LinkPadding>();
+            b.DeserializeArray(out LinkPadding);
             for (int i = 0; i < LinkPadding.Length; i++)
             {
                 LinkPadding[i] = new LinkPadding(ref b);
             }
-            LinkScale = b.DeserializeArray<LinkScale>();
+            b.DeserializeArray(out LinkScale);
             for (int i = 0; i < LinkScale.Length; i++)
             {
                 LinkScale[i] = new LinkScale(ref b);
             }
-            ObjectColors = b.DeserializeArray<ObjectColor>();
+            b.DeserializeArray(out ObjectColors);
             for (int i = 0; i < ObjectColors.Length; i++)
             {
                 ObjectColors[i] = new ObjectColor(ref b);
             }
             World = new PlanningSceneWorld(ref b);
-            IsDiff = b.Deserialize<bool>();
+            b.Deserialize(out IsDiff);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PlanningScene(ref b);
@@ -94,32 +94,32 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (RobotState is null) BuiltIns.ThrowNullReference(nameof(RobotState));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (RobotState is null) BuiltIns.ThrowNullReference();
             RobotState.RosValidate();
-            if (RobotModelName is null) BuiltIns.ThrowNullReference(nameof(RobotModelName));
-            if (FixedFrameTransforms is null) BuiltIns.ThrowNullReference(nameof(FixedFrameTransforms));
-            if (AllowedCollisionMatrix is null) BuiltIns.ThrowNullReference(nameof(AllowedCollisionMatrix));
+            if (RobotModelName is null) BuiltIns.ThrowNullReference();
+            if (FixedFrameTransforms is null) BuiltIns.ThrowNullReference();
+            if (AllowedCollisionMatrix is null) BuiltIns.ThrowNullReference();
             AllowedCollisionMatrix.RosValidate();
-            if (LinkPadding is null) BuiltIns.ThrowNullReference(nameof(LinkPadding));
+            if (LinkPadding is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < LinkPadding.Length; i++)
             {
-                if (LinkPadding[i] is null) BuiltIns.ThrowNullReference($"{nameof(LinkPadding)}[{i}]");
+                if (LinkPadding[i] is null) BuiltIns.ThrowNullReference(nameof(LinkPadding), i);
                 LinkPadding[i].RosValidate();
             }
-            if (LinkScale is null) BuiltIns.ThrowNullReference(nameof(LinkScale));
+            if (LinkScale is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < LinkScale.Length; i++)
             {
-                if (LinkScale[i] is null) BuiltIns.ThrowNullReference($"{nameof(LinkScale)}[{i}]");
+                if (LinkScale[i] is null) BuiltIns.ThrowNullReference(nameof(LinkScale), i);
                 LinkScale[i].RosValidate();
             }
-            if (ObjectColors is null) BuiltIns.ThrowNullReference(nameof(ObjectColors));
+            if (ObjectColors is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < ObjectColors.Length; i++)
             {
-                if (ObjectColors[i] is null) BuiltIns.ThrowNullReference($"{nameof(ObjectColors)}[{i}]");
+                if (ObjectColors[i] is null) BuiltIns.ThrowNullReference(nameof(ObjectColors), i);
                 ObjectColors[i].RosValidate();
             }
-            if (World is null) BuiltIns.ThrowNullReference(nameof(World));
+            if (World is null) BuiltIns.ThrowNullReference();
             World.RosValidate();
         }
     

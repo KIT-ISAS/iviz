@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public MeshVertexCosts(ref ReadBuffer b)
         {
-            Costs = b.DeserializeStructArray<float>();
+            b.DeserializeStructArray(out Costs);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshVertexCosts(ref b);
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Costs is null) BuiltIns.ThrowNullReference(nameof(Costs));
+            if (Costs is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + 4 * Costs.Length;

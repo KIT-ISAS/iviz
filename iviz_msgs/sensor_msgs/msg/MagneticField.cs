@@ -47,7 +47,7 @@ namespace Iviz.Msgs.SensorMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out MagneticField_);
-            MagneticFieldCovariance = b.DeserializeStructArray<double>(9);
+            b.DeserializeStructArray(9, out MagneticFieldCovariance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MagneticField(ref b);
@@ -63,8 +63,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (MagneticFieldCovariance is null) BuiltIns.ThrowNullReference(nameof(MagneticFieldCovariance));
-            if (MagneticFieldCovariance.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(MagneticFieldCovariance), MagneticFieldCovariance.Length, 9);
+            if (MagneticFieldCovariance is null) BuiltIns.ThrowNullReference();
+            if (MagneticFieldCovariance.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(MagneticFieldCovariance.Length, 9);
         }
     
         public int RosMessageLength => 96 + Header.RosMessageLength;

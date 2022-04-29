@@ -23,7 +23,8 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public ObjectRecognitionFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly ObjectRecognitionFeedback Singleton = new ObjectRecognitionFeedback();
+        static ObjectRecognitionFeedback? singleton;
+        public static ObjectRecognitionFeedback Singleton => singleton ??= new ObjectRecognitionFeedback();
     
         public void RosSerialize(ref WriteBuffer b)
         {

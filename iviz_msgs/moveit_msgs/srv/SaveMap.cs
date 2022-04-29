@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public SaveMapRequest(ref ReadBuffer b)
         {
-            Filename = b.DeserializeString();
+            b.DeserializeString(out Filename);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SaveMapRequest(ref b);
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
+            if (Filename is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Filename);
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public SaveMapResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SaveMapResponse(ref b);

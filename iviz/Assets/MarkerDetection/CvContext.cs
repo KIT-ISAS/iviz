@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using AOT;
@@ -20,6 +21,8 @@ namespace Iviz.MarkerDetection
         readonly IntPtr mContextPtr;
         readonly IntPtr imagePtr;
         readonly int imageSize;
+        readonly int width;
+        readonly int height;
         bool disposed;
 
         ArucoDictionaryName dictionaryName;
@@ -28,10 +31,11 @@ namespace Iviz.MarkerDetection
             ? mContextPtr
             : throw new ObjectDisposedException(nameof(mContextPtr), "Context already disposed");
 
-        public int Width { get; }
-        public int Height { get; }
+        Span<byte> ImageSpan => !disposed
+            ? imagePtr.AsSpan(width * height * 3)
+            : throw new ObjectDisposedException(nameof(mContextPtr), "Context already disposed");
 
-        public ArucoDictionaryName DictionaryName
+        ArucoDictionaryName DictionaryName
         {
             get => dictionaryName;
             set
@@ -70,8 +74,8 @@ namespace Iviz.MarkerDetection
 
 
                 mContextPtr = Native.CreateContext(width, height);
-                Width = width;
-                Height = height;
+                this.width = width;
+                this.height = height;
                 DictionaryName = ArucoDictionaryName.DictArucoOriginal;
 
                 imageSize = width * height * 3;
@@ -83,31 +87,26 @@ namespace Iviz.MarkerDetection
             }
             catch (DllNotFoundException e)
             {
-                throw new CvNotAvailableException(e);  
+                throw new CvNotAvailableException(e);
             }
         }
 
-        public void SetImageData(byte[] image, int bpp)
-        {
-            ThrowHelper.ThrowIfNull(image, nameof(image));
+        public bool MatchesSize(int otherWidth, int otherHeight) => (otherWidth, otherHeight) == (width, height);
 
+        public void SetImageData(ReadOnlySpan<byte> image, int bpp)
+        {
             if (bpp != 3)
             {
-                return;
+                throw new NotImplementedException();
             }
 
-            if (disposed)
-            {
-                throw new ObjectDisposedException(nameof(mContextPtr), "Context already disposed");
-            }
-
-            if (Width * Height * bpp > image.Length)
+            var span = ImageSpan;
+            if (span.Length > image.Length)
             {
                 throw new ArgumentException("Image size is too small", nameof(image));
             }
 
-
-            Marshal.Copy(image, 0, imagePtr, Width * Height * 3);
+            image.CopyTo(span);
         }
 
         public void SetImageDataFlipY(byte[] image, int bpp)
@@ -127,14 +126,14 @@ namespace Iviz.MarkerDetection
                 return;
             }
 
-            int stride = Width * 3;
-            for (int v = 0; v < Height; v++)
+            int stride = width * 3;
+            for (int v = 0; v < height; v++)
             {
-                Marshal.Copy(image, stride * v, imagePtr + stride * (Height - v - 1), stride);
+                Marshal.Copy(image, stride * v, imagePtr + stride * (height - v - 1), stride);
             }
         }
 
-        public QrMarkerCorners[] DetectQrMarkers()
+        public DetectedQrMarker[] DetectQrMarkers()
         {
             Native.DetectQrMarkers(ContextPtr);
 
@@ -146,7 +145,7 @@ namespace Iviz.MarkerDetection
 
             if (numDetected == 0)
             {
-                return Array.Empty<QrMarkerCorners>();
+                return Array.Empty<DetectedQrMarker>();
             }
 
             using var pointers = new Rent<IntPtr>(numDetected);
@@ -161,7 +160,7 @@ namespace Iviz.MarkerDetection
 
             var srcCorners = MemoryMarshal.Cast<float, Vector2f>(corners);
 
-            var markers = new QrMarkerCorners[numDetected];
+            var markers = new DetectedQrMarker[numDetected];
             foreach (int i in ..numDetected)
             {
                 ReadOnlySpan<byte> strBytes;
@@ -173,13 +172,13 @@ namespace Iviz.MarkerDetection
                 string code = BuiltIns.UTF8.GetString(strBytes);
                 var vectorCorners = new Vector2f[4];
                 srcCorners.Slice(4 * i, 4).CopyTo(vectorCorners);
-                markers[i] = new QrMarkerCorners(code, vectorCorners);
+                markers[i] = new DetectedQrMarker(code, vectorCorners);
             }
 
             return markers;
         }
 
-        public ArucoMarkerCorners[] DetectArucoMarkers()
+        public DetectedArucoMarker[] DetectArucoMarkers()
         {
             Native.DetectArucoMarkers(ContextPtr);
 
@@ -191,7 +190,7 @@ namespace Iviz.MarkerDetection
 
             if (numDetected == 0)
             {
-                return Array.Empty<ArucoMarkerCorners>();
+                return Array.Empty<DetectedArucoMarker>();
             }
 
             using var indices = new Rent<int>(numDetected);
@@ -205,12 +204,12 @@ namespace Iviz.MarkerDetection
                 throw new CvMarkerException();
             }
 
-            var markers = new ArucoMarkerCorners[numDetected];
+            var markers = new DetectedArucoMarker[numDetected];
             foreach (int i in ..numDetected)
             {
                 var vectorCorners = new Vector2f[4];
                 srcCorners.Slice(4 * i, 4).CopyTo(vectorCorners);
-                markers[i] = new ArucoMarkerCorners(indices[i], vectorCorners);
+                markers[i] = new DetectedArucoMarker(indices[i], vectorCorners);
             }
 
             return markers;
@@ -231,10 +230,10 @@ namespace Iviz.MarkerDetection
 
             intrinsic.CopyTo(cameraFloats);
 
-            if (!Native.EstimatePnp(in MemoryMarshal.GetReference(inputFloats), inputFloats.Length,
-                    in MemoryMarshal.GetReference(outputFloats), outputFloats.Length,
-                    in MemoryMarshal.GetReference(cameraFloats), cameraFloats.Length,
-                    ref MemoryMarshal.GetReference(resultFloats), resultFloats.Length))
+            if (!Native.EstimatePnp(in inputFloats[0], inputFloats.Length,
+                    in outputFloats[0], outputFloats.Length,
+                    in cameraFloats[0], cameraFloats.Length,
+                    ref resultFloats[0], resultFloats.Length))
             {
                 throw new CvMarkerException();
             }
@@ -448,32 +447,32 @@ namespace Iviz.MarkerDetection
         DictApriltag36H11
     };
 
-    public interface IMarkerCorners
+    public interface IDetectedMarker
     {
-        Vector2f[] Corners { get; }
         string Code { get; }
+        Vector2f[] Corners { get; }
         ARMarkerType Type { get; }
     }
 
     [DataContract]
-    public sealed class ArucoMarkerCorners : IMarkerCorners
+    public sealed class DetectedArucoMarker : IDetectedMarker
     {
         [DataMember] public ARMarkerType Type => ARMarkerType.Aruco;
         [DataMember] public string Code { get; }
         [DataMember] public Vector2f[] Corners { get; }
 
-        internal ArucoMarkerCorners(int id, Vector2f[] corners) => (Code, Corners) = (id.ToString(), corners);
+        internal DetectedArucoMarker(int id, Vector2f[] corners) => (Code, Corners) = (id.ToString(), corners);
         public override string ToString() => BuiltIns.ToJsonString(this, false);
     }
 
     [DataContract]
-    public sealed class QrMarkerCorners : IMarkerCorners
+    public sealed class DetectedQrMarker : IDetectedMarker
     {
         [DataMember] public ARMarkerType Type => ARMarkerType.QrCode;
         [DataMember] public string Code { get; }
         [DataMember] public Vector2f[] Corners { get; }
 
-        internal QrMarkerCorners(string code, Vector2f[] corners) => (Code, Corners) = (code, corners);
+        internal DetectedQrMarker(string code, Vector2f[] corners) => (Code, Corners) = (code, corners);
         public override string ToString() => BuiltIns.ToJsonString(this, false);
     }
 }

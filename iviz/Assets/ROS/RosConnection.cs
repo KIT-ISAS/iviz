@@ -8,6 +8,7 @@ using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Msgs;
 using Iviz.Tools;
+using UnityEngine;
 using IServiceProvider = Iviz.Displays.IServiceProvider;
 
 namespace Iviz.Ros
@@ -20,6 +21,8 @@ namespace Iviz.Ros
     {
         const int TaskWaitTimeInMs = 2000;
         const int ConnectionRetryTimeInMs = TaskWaitTimeInMs;
+
+        bool disposed;
 
         public static event Action<ConnectionState>? ConnectionStateChanged;
         public static event Action<bool>? ConnectionWarningStateChanged;
@@ -46,6 +49,7 @@ namespace Iviz.Ros
             connectionTs.Cancel();
             Signal();
             task.WaitNoThrow(this);
+            disposed = true;
 
             ConnectionStateChanged = null;
             ConnectionWarningStateChanged = null;
@@ -69,6 +73,12 @@ namespace Iviz.Ros
 
         protected void AddTask(Func<ValueTask> a)
         {
+            if (disposed)
+            {
+                //Debug.Log($"{nameof(RosConnection)}: Ignoring enqueued task. Reason: Already disposed.");
+                return;
+            }
+            
             toDos.Enqueue(a);
             Signal();
         }

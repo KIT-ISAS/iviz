@@ -238,6 +238,10 @@ namespace Iviz.MsgsGen.Dynamic
 
         public override string ToString() => this.ToJsonString();
 
+        public void Dispose()
+        {
+        }
+
         static ClassInfo CreateDefinitionFromDependencyString(string fullRosMsgName, string dependencies)
         {
             if (fullRosMsgName == null)

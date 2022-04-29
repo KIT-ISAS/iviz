@@ -27,7 +27,7 @@ namespace Iviz.Msgs.VisionMsgs
         public BoundingBox3DArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Boxes = b.DeserializeArray<VisionMsgs.BoundingBox3D>();
+            b.DeserializeArray(out Boxes);
             for (int i = 0; i < Boxes.Length; i++)
             {
                 Boxes[i] = new VisionMsgs.BoundingBox3D(ref b);
@@ -46,10 +46,10 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Boxes is null) BuiltIns.ThrowNullReference(nameof(Boxes));
+            if (Boxes is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Boxes.Length; i++)
             {
-                if (Boxes[i] is null) BuiltIns.ThrowNullReference($"{nameof(Boxes)}[{i}]");
+                if (Boxes[i] is null) BuiltIns.ThrowNullReference(nameof(Boxes), i);
                 Boxes[i].RosValidate();
             }
         }

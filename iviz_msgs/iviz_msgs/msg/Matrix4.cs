@@ -25,7 +25,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Matrix4(ref ReadBuffer b)
         {
-            M = b.DeserializeStructArray<float>(16);
+            b.DeserializeStructArray(16, out M);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Matrix4(ref b);
@@ -39,8 +39,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (M is null) BuiltIns.ThrowNullReference(nameof(M));
-            if (M.Length != 16) throw new RosInvalidSizeForFixedArrayException(nameof(M), M.Length, 16);
+            if (M is null) BuiltIns.ThrowNullReference();
+            if (M.Length != 16) BuiltIns.ThrowInvalidSizeForFixedArray(M.Length, 16);
         }
     
         /// <summary> Constant size of this message. </summary> 

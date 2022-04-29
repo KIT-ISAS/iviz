@@ -9,7 +9,6 @@ using Iviz.Tools;
 
 namespace Iviz.App
 {
-
     public sealed class ARMarkerDialogData : DialogData
     {
         readonly ARMarkerDialogContents panel;
@@ -20,14 +19,15 @@ namespace Iviz.App
         public ARMarkerDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<ARMarkerDialogContents>(DialogPanelType.ARMarkers);
-            ARController.ARStateChanged += OnARStateChanged;
+            //ARController.ARStateChanged += OnARStateChanged;
         }
         
         public override void Dispose()
         {
-            ARController.ARStateChanged -= OnARStateChanged;
+            //ARController.ARStateChanged -= OnARStateChanged;
         }
 
+        /*
         void OnARStateChanged(bool _)
         {
             if (ARController.Instance != null)
@@ -35,6 +35,7 @@ namespace Iviz.App
                 ARController.Instance.MarkerExecutor.Configuration = Configuration;
             }
         }
+        */
 
         public override void SetupPanel()
         {
@@ -56,7 +57,7 @@ namespace Iviz.App
             foreach (var (marker, index) in Configuration.Markers.WithIndex())
             {
                 panel.Types[index].Index = (int) marker.Type;
-                panel.Actions[index].Index = (int) marker.Action;
+                //panel.Actions[index].Index = (int) marker.Action;
                 panel.Codes[index].Value = marker.Code;
                 panel.Sizes[index].Value = marker.SizeInMm.ToString(BuiltIns.Culture);
             }
@@ -64,11 +65,11 @@ namespace Iviz.App
 
         void WritePanelToConfiguration()
         {
-            var markers = new List<ARExecutableMarker>();
+            var markers = new List<ARSeenMarker>();
             foreach (int index in ..panel.Types.Count)
             {
                 var type = (ARMarkerType) panel.Types[index].Index;
-                if (type == ARMarkerType.Unset)
+                if (type == ARMarkerType.Aruco)
                 {
                     continue;
                 }
@@ -87,10 +88,10 @@ namespace Iviz.App
                     continue;
                 }
 
-                var marker = new ARExecutableMarker
+                var marker = new ARSeenMarker
                 {
                     Type = type,
-                    Action = (ARMarkerAction) panel.Actions[index].Index,
+                    //Action = (ARMarkerAction) panel.Actions[index].Index,
                     Code = code,
                     SizeInMm = sizeInMm,
                 };
@@ -105,7 +106,7 @@ namespace Iviz.App
 
             if (ARController.Instance != null)
             {
-                ARController.Instance.MarkerExecutor.Configuration = Configuration;
+                //ARController.Instance.MarkerExecutor.Configuration = Configuration;
             }
 
             ModuleListPanel.UpdateSimpleConfigurationSettings();

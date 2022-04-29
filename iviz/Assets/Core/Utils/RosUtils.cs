@@ -20,14 +20,14 @@ namespace Iviz.Core
 {
     public static class RosUtils
     {
-        static readonly Quaternion XFrontToZFront = new(0.5, -0.5, 0.5, -0.5);
-
         /// Make camera point to +Z instead of +X
         public static Pose ToCameraFrame(this in Pose p)
         {
+            var xFrontToZFront = new Quaternion(0.5, -0.5, 0.5, -0.5);
+
             Pose q;
             q.Position = p.Position;
-            q.Orientation = p.Orientation * XFrontToZFront;
+            q.Orientation = p.Orientation * xFrontToZFront;
             return q;
         }
 
@@ -38,13 +38,15 @@ namespace Iviz.Core
             q.Orientation = pose.Orientation * /*XFrontToZFront.Inverse*/ new Quaternion(-0.5, 0.5, -0.5, -0.5);
             return q;
         }
-        
+
         public static UnityEngine.Pose ToCameraFrame(this in UnityEngine.Pose p)
         {
+            var xFrontToZFront = new Quaternion(0.5, -0.5, 0.5, -0.5);
+
             UnityEngine.Pose q;
             q.position = p.position;
             p.rotation.Unity2Ros(out var rosOrientation);
-            (rosOrientation * XFrontToZFront).Ros2Unity(out q.rotation);
+            (rosOrientation * xFrontToZFront).Ros2Unity(out q.rotation);
             return q;
         }
 
@@ -130,6 +132,16 @@ namespace Iviz.Core
             q.x = -p.Y;
             q.y = p.Z;
             q.z = p.X;
+            return q;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Msgs.GeometryMsgs.Vector3 Abs(this in Msgs.GeometryMsgs.Vector3 p)
+        {
+            Msgs.GeometryMsgs.Vector3 q;
+            q.X = Math.Abs(p.X);
+            q.Y = Math.Abs(p.Y);
+            q.Z = Math.Abs(p.Z);
             return q;
         }
 
@@ -241,7 +253,7 @@ namespace Iviz.Core
             return d;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static float SanitizeChannel(float f) => float.IsFinite(f) ? Math.Clamp(f, 0, 1) : 0;
+            static float SanitizeChannel(float f) => f.IsInvalid() ? 0 : Mathf.Clamp(f, 0, 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -344,13 +356,11 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this float f) => !float.IsFinite(f);
+        public static bool IsInvalid(this float f) => (Unsafe.As<float, int>(ref f) & 0x7FFFFFFF) == 0x7F800000;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsValid(this float f) => float.IsFinite(f);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInvalid(this double f) => !double.IsFinite(f);
+        public static bool IsInvalid(this double f) =>
+            (Unsafe.As<double, long>(ref f) & 0x7FFFFFFFFFFFFFFF) == 0x7FF0000000000000;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInvalid3(this in float4 v) =>

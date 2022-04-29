@@ -66,7 +66,8 @@ namespace Iviz.Msgs.Rosapi
         
         public ServicesRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly ServicesRequest Singleton = new ServicesRequest();
+        static ServicesRequest? singleton;
+        public static ServicesRequest Singleton => singleton ??= new ServicesRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -104,7 +105,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public ServicesResponse(ref ReadBuffer b)
         {
-            Services_ = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Services_);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServicesResponse(ref b);
@@ -118,10 +119,10 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Services_ is null) BuiltIns.ThrowNullReference(nameof(Services_));
+            if (Services_ is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Services_.Length; i++)
             {
-                if (Services_[i] is null) BuiltIns.ThrowNullReference($"{nameof(Services_)}[{i}]");
+                if (Services_[i] is null) BuiltIns.ThrowNullReference(nameof(Services_), i);
             }
         }
     

@@ -11,12 +11,17 @@ using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Displays.Highlighters;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
 using UnityEngine;
+using Pose = UnityEngine.Pose;
+using Quaternion = UnityEngine.Quaternion;
+using Transform = UnityEngine.Transform;
+using Vector3 = UnityEngine.Vector3;
 
 namespace Iviz.Controllers
 {
@@ -254,7 +259,7 @@ namespace Iviz.Controllers
         T ValidateResource<T>() where T : MarkerDisplay =>
             resource is T result
                 ? result
-                : throw new InvalidOperationException("Resource is not set!");
+                : throw new MissingAssetFieldException("Resource does not have a marker component!");
 
         void CreateTriangleList(Marker msg)
         {
@@ -284,12 +289,21 @@ namespace Iviz.Controllers
             meshTriangles.Color = msg.Color.Sanitize().ToUnity();
             meshTriangles.FlipWinding = TriangleListFlipWinding;
 
-            var srcPoints = msg.Points;
-            using var points = new Rent<Vector3>(srcPoints.Length);
-            var pArray = points.AsSpan();
-            for (int i = 0; i < srcPoints.Length; i++)
+            int pointsLength = msg.Points.Length;
+            if (pointsLength == 0)
             {
-                srcPoints[i].Ros2Unity(out pArray[i]);
+                meshTriangles.Clear();
+                return;
+            }
+            
+            using var points = new Rent<Vector3>(pointsLength);
+            ref Point srcPtr = ref msg.Points[0];
+            ref Vector3 dstPtr = ref points.Array[0];
+            for (int i = 0; i < pointsLength; i++)
+            {
+                srcPtr.Ros2Unity(out dstPtr);
+                srcPtr = ref srcPtr.Plus(1);
+                dstPtr = ref dstPtr.Plus(1);
             }
 
             var colors = MemoryMarshal.Cast<ColorRGBA, Color>(msg.Colors);
@@ -299,7 +313,7 @@ namespace Iviz.Controllers
         void CreatePoints(Marker msg)
         {
             var pointList = ValidateResource<PointListDisplay>();
-            pointList.ElementScale = Math.Abs((float)msg.Scale.X);
+            pointList.ElementScale = Mathf.Abs((float)msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || msg.Color.A.ApproximatelyZero()
@@ -316,14 +330,14 @@ namespace Iviz.Controllers
             }
 
             var setterCallback = PointHelper.GetPointSetter(msg);
-            pointList.SetDirect(setterCallback, msg.Points.Length);
+            pointList.Set(setterCallback, msg.Points.Length);
             pointList.UseColormap = false;
         }
 
         void CreateLine(Marker msg, bool isStrip)
         {
             var lineResource = ValidateResource<LineDisplay>();
-            float elementScale = Math.Abs((float)msg.Scale.X);
+            float elementScale = Mathf.Abs((float)msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || elementScale.ApproximatelyZero()
@@ -378,7 +392,7 @@ namespace Iviz.Controllers
             }
 
             var setterCallback = PointHelper.GetPointSetter(msg);
-            meshList.SetDirect(setterCallback, msg.Points.Length);
+            meshList.Set(setterCallback, msg.Points.Length);
         }
 
         void CreateTextResource(Marker msg)
@@ -421,7 +435,7 @@ namespace Iviz.Controllers
                 }
                 case 2:
                 {
-                    float sx = Math.Abs((float)msg.Scale.X);
+                    float sx = Mathf.Abs((float)msg.Scale.X);
                     if (sx.IsInvalid() || sx.ApproximatelyZero())
                     {
                         arrowMarker.Visible = false;
@@ -594,11 +608,11 @@ namespace Iviz.Controllers
         static uint CalculateMarkerHash(Marker msg, bool useScale)
         {
             uint hash = Crc32Calculator.Compute(msg.Type);
-            hash = Crc32Calculator.Compute(in msg.Color, hash);
+            hash = Crc32Calculator.Compute(msg.Color, hash);
             hash = Crc32Calculator.Compute(msg.Points, hash);
             hash = Crc32Calculator.Compute(msg.Colors, hash);
             return useScale
-                ? Crc32Calculator.Compute(in msg.Scale, hash)
+                ? Crc32Calculator.Compute(msg.Scale, hash)
                 : hash;
         }
 
@@ -773,7 +787,7 @@ namespace Iviz.Controllers
 
                         break;
                     case 2:
-                        float sx = Math.Abs((float)msg.Scale.X);
+                        float sx = Mathf.Abs((float)msg.Scale.X);
                         AppendColorLog(msg.Color);
                         AppendScalarLog(msg.Scale.X);
 
@@ -861,7 +875,7 @@ namespace Iviz.Controllers
 
             void CreateLineLog()
             {
-                float elementScale = Math.Abs((float)msg.Scale.X);
+                float elementScale = Mathf.Abs((float)msg.Scale.X);
 
                 AppendColorLog(msg.Color);
                 AppendScalarLog(elementScale);

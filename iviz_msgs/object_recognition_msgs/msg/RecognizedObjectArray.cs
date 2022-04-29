@@ -34,12 +34,12 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         public RecognizedObjectArray(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Objects = b.DeserializeArray<ObjectRecognitionMsgs.RecognizedObject>();
+            b.DeserializeArray(out Objects);
             for (int i = 0; i < Objects.Length; i++)
             {
                 Objects[i] = new ObjectRecognitionMsgs.RecognizedObject(ref b);
             }
-            Cooccurrence = b.DeserializeStructArray<float>();
+            b.DeserializeStructArray(out Cooccurrence);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RecognizedObjectArray(ref b);
@@ -55,13 +55,13 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (Objects is null) BuiltIns.ThrowNullReference(nameof(Objects));
+            if (Objects is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Objects.Length; i++)
             {
-                if (Objects[i] is null) BuiltIns.ThrowNullReference($"{nameof(Objects)}[{i}]");
+                if (Objects[i] is null) BuiltIns.ThrowNullReference(nameof(Objects), i);
                 Objects[i].RosValidate();
             }
-            if (Cooccurrence is null) BuiltIns.ThrowNullReference(nameof(Cooccurrence));
+            if (Cooccurrence is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength
@@ -116,19 +116,24 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
                 "xWYDNTAYqHJrJD6s2LjeXghNLQPtdokzWpiyKVhUEhMQsRIKzFHhYqPU2ckhfpWhE3mMNOPtcUXtVZBe" +
                 "h04+bArCy+JLo11MOF0Le2tep6qxSZmC26Tgxq270454dkz5sSk8tdXRij1zjcSbcWqRYTx4qjPIEFy4" +
                 "DdSUB0IzvdAlNIzNQKXqCZ7WME2XA4FBeuLNJNNxd3vFJ2OwrlXlkqraJkDEShHxwrYh0IwydtQrggLa" +
-                "pZiqstyYCgEJ6S5zjRxH7YTAZOB6Y3f34u9JqNi0wklz7N0QbzulZFQJUuStV67bYc0i0d/egVcr+g3a" +
-                "8BIS8tHpsyEO4YwUevxuKByARmbdTLy/C6bbyvo8/hQZfDxDTHyKGkPdkqtbx//CUsFlr1DKxy8Kja6v" +
-                "ZaXT6PBomYmdtD4xkWtDyM9TbqIOOZgFCto2AgDbe1mu4xIyUsDaS/S5Fy9J/QPxNK78HJcOxLMVzdM9" +
-                "Xtnt0dDSgXi+oiEfY+VFj4aWDsReXHn19vSQlg7EX/ore8+x8jJL+Z/qRnLJexnCnLGagGTGY7qaZYLT" +
-                "8H1szYyujCzf2AZThPCNBzEOuGpj03H6ruqGElDIGE4p6v6uVTqnQFPmoyCvAdCZrNGzV2rGmTVNiizZ" +
-                "Q8Hi5qzGKQDdZO+CIw1tlXasuqfefoJ+429xYijVUgDBdHFh1TgM8+mOhJXANIKxSrmPnzI64yIyQOh0" +
-                "vOgA4iZDAKYdoQHiPrGZMwFLs344S5seyVRJjTUmS2qhJ+yECh7/uBvkVMtLGO4hpV1joxTsRZpK7t5m" +
-                "dXl1bIFVN5eFCncwiKBl963tvn19LPF/ZbRMKqWLbL4vUQ7lnG9veeDl4VYGbPIF+p2CzeUtXY5ntyr1" +
-                "3bMfdJ79f4onja0ijTlPyG6wX3ktaN1ggyVf0/zBmkTZN8SZWWzP5Ge0KR0nmXBAuNhb7sFQncrhvzdp" +
-                "hrG6I+8NQnQ9iVFWL1W5LZd9GZmULwPBn3qYYcBeb4iyPDdsLocCzerXIeq174/L/xTE8c7yL+uX/8XL" +
-                "WwmmH3f3PvWUeTzXQaPDNfa9664h/ZeIlsv4PsQkAbNn7JEI/VVHkP3UAMW2Zr4rusdRcHX2OkzeEOgW" +
-                "NvH0ZSU4dQtA5/9OM+nbIsv+C/HYElb+HQAA";
+                "pZiqstyYCgEJ6S5zjRxH7YTAZOB6Y3f34u9JqNi0wklz7N0QbzulZFQJUuStV67bYc0i0d/egVc36V9C" +
+                "QDr5T5H44xng/Ekcwh8p+vj9UDhgjSy7mdh/F6y3FTWDWiVXsfgBdiwVVrY+pXb8oqDo+lpWOo0Ij5aB" +
+                "2BnrExC5MIT2POUg6oSD7rCGbaOjsb2XzTouIfMETL1EP3vxktQ/EE/jys9x6UA8W9E83eOV3R4NLR2I" +
+                "5ysa8iVWXvRoaOlA7MWVV29PD2npQPylv7L3HCsvs5TnqT4kl7yXIZwZkwkwZjymK1gmOA3fx9bM6GrI" +
+                "8s1sMEUI03gQg4KrMzYdp++qbijRhMzglKIu71qlcwo0Xz4K8hpAnMkavXmlZpxB00TIkj0ULG7OZBzq" +
+                "6Bp7FxlpOKu0Y9U99fAT9BV/i5NBqZYCCKYLCqvGYWhPdyGsBKYOjE/KffyU0RkXkQHirONFBxA3GaIs" +
+                "7QiNDveDzZwJWJr1Q1ja9EimSmqsMVlSC71fJ1Tw+MfdIKdaXsJwDyntGhulYC/S9HH31qrLn2MLrLq5" +
+                "LFS4a0EELbtvbfft62OJ/ysjZFIpXVjzvYhyKNt8S8uDLQ+xMmCTL8rvFGYuY+kSPLtVke+e/aBz6/9T" +
+                "PGlsFWnMeUJ2A/zKa0HrBhss+ZrmDNYkyr4hzsxieyY/ox3pOMmEA8LF3nIPhupUDv+lSbOK1R15b+Ch" +
+                "a0iMrHqpym257MvIpHzpB/7UqwwD9nrDkuX5YHM5FGhKvw5Rl31/LP6nII53ln9Zv/wvXt5KMP24u/ep" +
+                "p8zjuQ4aHa6x7113Dem/QbRcxvchJgmYPWOPROijOoLspwYotjXzXdE9joKrs9dh8oZAt7CJpy8rwalb" +
+                "ADr/d5pJ3xZZ9l/TPAf65h0AAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public void Dispose()
+        {
+            foreach (var e in Objects) e.Dispose();
+        }
     }
 }

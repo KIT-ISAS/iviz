@@ -78,9 +78,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public UpdateModuleRequest(ref ReadBuffer b)
         {
-            Id = b.DeserializeString();
-            Fields = b.DeserializeStringArray();
-            Config = b.DeserializeString();
+            b.DeserializeString(out Id);
+            b.DeserializeStringArray(out Fields);
+            b.DeserializeString(out Config);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateModuleRequest(ref b);
@@ -96,13 +96,13 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Fields is null) BuiltIns.ThrowNullReference(nameof(Fields));
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (Fields is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Fields.Length; i++)
             {
-                if (Fields[i] is null) BuiltIns.ThrowNullReference($"{nameof(Fields)}[{i}]");
+                if (Fields[i] is null) BuiltIns.ThrowNullReference(nameof(Fields), i);
             }
-            if (Config is null) BuiltIns.ThrowNullReference(nameof(Config));
+            if (Config is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength
@@ -143,8 +143,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public UpdateModuleResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
-            Message = b.DeserializeString();
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateModuleResponse(ref b);
@@ -159,7 +159,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Message is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);

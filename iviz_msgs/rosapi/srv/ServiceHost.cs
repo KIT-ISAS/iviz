@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public ServiceHostRequest(ref ReadBuffer b)
         {
-            Service = b.DeserializeString();
+            b.DeserializeString(out Service);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServiceHostRequest(ref b);
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Service is null) BuiltIns.ThrowNullReference(nameof(Service));
+            if (Service is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Service);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public ServiceHostResponse(ref ReadBuffer b)
         {
-            Host = b.DeserializeString();
+            b.DeserializeString(out Host);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ServiceHostResponse(ref b);
@@ -124,7 +124,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Host is null) BuiltIns.ThrowNullReference(nameof(Host));
+            if (Host is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Host);

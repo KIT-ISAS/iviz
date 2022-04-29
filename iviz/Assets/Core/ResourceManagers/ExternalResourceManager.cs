@@ -21,7 +21,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class ExternalResourceManager
+    public sealed class ExternalResourceManager
     {
         const int BlacklistDurationInMs = 5;
 
@@ -54,7 +54,7 @@ namespace Iviz.Displays
         readonly Dictionary<string, ResourceKey<GameObject>> loadedModels = new();
         readonly Dictionary<string, ResourceKey<Texture2D>> loadedTextures = new();
         readonly Dictionary<string, ResourceKey<GameObject>> loadedScenes = new();
-        readonly Dictionary<string, float> temporaryBlacklist = new();
+        readonly Dictionary<string, float> blacklistTimestamps = new();
         readonly Dictionary<string, AsyncLock> modelLocks = new();
         readonly GameObject? node;
 
@@ -249,24 +249,24 @@ namespace Iviz.Displays
 
             if (TryGetGameObject(uriString, out var resource))
             {
-                return new ValueTask<ResourceKey<GameObject>?>(resource);
+                return resource.AsTaskResultMaybeNull();
             }
 
             float currentTime = Time.time;
-            if (temporaryBlacklist.TryGetValue(uriString, out float blacklistTime))
+            if (blacklistTimestamps.TryGetValue(uriString, out float blacklistTime))
             {
                 if (currentTime < blacklistTime)
                 {
                     return default;
                 }
 
-                temporaryBlacklist.Remove(uriString);
+                blacklistTimestamps.Remove(uriString);
             }
 
             if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri uri))
             {
                 RosLogger.Warn($"{this}:  Uri '{uriString}' is not a valid uri!");
-                temporaryBlacklist.Add(uriString, float.MaxValue);
+                blacklistTimestamps.Add(uriString, float.MaxValue);
                 return default;
             }
 
@@ -303,7 +303,7 @@ namespace Iviz.Displays
                     var newResource = await GetModelAsync(uriString, provider, tokenSource.Token);
                     if (newResource == null)
                     {
-                        temporaryBlacklist[uriString] = Time.time + BlacklistDurationInMs;
+                        blacklistTimestamps[uriString] = Time.time + BlacklistDurationInMs;
                     }
 
                     return newResource;
@@ -323,8 +323,8 @@ namespace Iviz.Displays
         async ValueTask<ResourceKey<GameObject>?> GetModelAsync(string uriString, IServiceProvider? provider,
             CancellationToken token)
         {
-            // we just passed a mutex, the quick paths may have become valid
-            if (temporaryBlacklist.ContainsKey(uriString))
+            // we just passed a mutex, the quick paths may have just become valid
+            if (blacklistTimestamps.ContainsKey(uriString))
             {
                 return null;
             }
@@ -430,18 +430,18 @@ namespace Iviz.Displays
 
             if (loadedTextures.TryGetValue(uriString, out var existingTexture))
             {
-                return new ValueTask<ResourceKey<Texture2D>?>(existingTexture);
+                return existingTexture.AsTaskResultMaybeNull();
             }
 
             float currentTime = Time.time;
-            if (temporaryBlacklist.TryGetValue(uriString, out float blacklistTime))
+            if (blacklistTimestamps.TryGetValue(uriString, out float blacklistTime))
             {
                 if (currentTime < blacklistTime)
                 {
                     return default;
                 }
 
-                temporaryBlacklist.Remove(uriString);
+                blacklistTimestamps.Remove(uriString);
             }
 
             return GetTextureAsync(uriString, provider, token);
@@ -782,6 +782,6 @@ namespace Iviz.Displays
             return sceneNode;
         }
 
-        public override string ToString() => "ExternalResourceManager";
+        public override string ToString() => $"[{nameof(ExternalResourceManager)}]";
     }
 }

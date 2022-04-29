@@ -65,11 +65,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         /// Constructor with buffer.
         public MenuEntry(ref ReadBuffer b)
         {
-            Id = b.Deserialize<uint>();
-            ParentId = b.Deserialize<uint>();
-            Title = b.DeserializeString();
-            Command = b.DeserializeString();
-            CommandType = b.Deserialize<byte>();
+            b.Deserialize(out Id);
+            b.Deserialize(out ParentId);
+            b.DeserializeString(out Title);
+            b.DeserializeString(out Command);
+            b.Deserialize(out CommandType);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MenuEntry(ref b);
@@ -87,8 +87,8 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Title is null) BuiltIns.ThrowNullReference(nameof(Title));
-            if (Command is null) BuiltIns.ThrowNullReference(nameof(Command));
+            if (Title is null) BuiltIns.ThrowNullReference();
+            if (Command is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 17 + BuiltIns.GetStringSize(Title) + BuiltIns.GetStringSize(Command);

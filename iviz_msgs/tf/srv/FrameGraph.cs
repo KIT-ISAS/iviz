@@ -66,7 +66,8 @@ namespace Iviz.Msgs.Tf
         
         public FrameGraphRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly FrameGraphRequest Singleton = new FrameGraphRequest();
+        static FrameGraphRequest? singleton;
+        public static FrameGraphRequest Singleton => singleton ??= new FrameGraphRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -104,7 +105,7 @@ namespace Iviz.Msgs.Tf
         /// Constructor with buffer.
         public FrameGraphResponse(ref ReadBuffer b)
         {
-            DotGraph = b.DeserializeString();
+            b.DeserializeString(out DotGraph);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FrameGraphResponse(ref b);
@@ -118,7 +119,7 @@ namespace Iviz.Msgs.Tf
         
         public void RosValidate()
         {
-            if (DotGraph is null) BuiltIns.ThrowNullReference(nameof(DotGraph));
+            if (DotGraph is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(DotGraph);

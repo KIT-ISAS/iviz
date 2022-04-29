@@ -34,7 +34,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Pose);
-            Name = b.DeserializeString();
+            b.DeserializeString(out Name);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerPose(ref b);
@@ -50,7 +50,7 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Name is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 60 + Header.RosMessageLength + BuiltIns.GetStringSize(Name);

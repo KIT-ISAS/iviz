@@ -34,8 +34,8 @@ namespace Iviz.Msgs.SensorMsgs
         public Joy(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Axes = b.DeserializeStructArray<float>();
-            Buttons = b.DeserializeStructArray<int>();
+            b.DeserializeStructArray(out Axes);
+            b.DeserializeStructArray(out Buttons);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Joy(ref b);
@@ -51,8 +51,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Axes is null) BuiltIns.ThrowNullReference(nameof(Axes));
-            if (Buttons is null) BuiltIns.ThrowNullReference(nameof(Buttons));
+            if (Axes is null) BuiltIns.ThrowNullReference();
+            if (Buttons is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

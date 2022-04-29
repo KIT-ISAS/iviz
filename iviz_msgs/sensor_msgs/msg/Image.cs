@@ -34,27 +34,26 @@ namespace Iviz.Msgs.SensorMsgs
         [DataMember (Name = "is_bigendian")] public byte IsBigendian;
         /// <summary> Full row length in bytes </summary>
         [DataMember (Name = "step")] public uint Step;
-        //uint8[] data          # actual matrix data, size is (step * rows)
-        /// <summary> [Rent] </summary>
-        [DataMember (Name = "data")] public System.Memory<byte> Data;
+        /// <summary> [Rent] actual matrix data, size is (step * rows) </summary>
+        [DataMember (Name = "data")] public Tools.SharedRent<byte> Data;
     
         /// Constructor for empty message.
         public Image()
         {
             Encoding = "";
-            Data = System.Array.Empty<byte>();
+            Data = Tools.SharedRent<byte>.Empty;
         }
         
         /// Constructor with buffer.
         public Image(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Height = b.Deserialize<uint>();
-            Width = b.Deserialize<uint>();
-            Encoding = b.DeserializeString();
-            IsBigendian = b.Deserialize<byte>();
-            Step = b.Deserialize<uint>();
-            Data = b.DeserializeStructRent<byte>();
+            b.Deserialize(out Height);
+            b.Deserialize(out Width);
+            b.DeserializeString(out Encoding);
+            b.Deserialize(out IsBigendian);
+            b.Deserialize(out Step);
+            b.DeserializeStructRent(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Image(ref b);
@@ -74,7 +73,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Encoding is null) BuiltIns.ThrowNullReference(nameof(Encoding));
+            if (Encoding is null) BuiltIns.ThrowNullReference();
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength
@@ -98,22 +98,27 @@ namespace Iviz.Msgs.SensorMsgs
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         [Preserve] public const string RosDependenciesBase64 =
-                "H4sIAAAAAAAAE61VTW8bNxA9l7+CgA6xE0sJmkthIGiBpml9KFA0vgWBMCJHu2y55Jofkje/vo+kVrJg" +
-                "O80hC1nykpw3H+/NcCFvexPlwDFSx1J5l8i4KMnJ7JQfxoAd1tIM2BYLefHmSr65lDChJJMfl5a3CWbB" +
-                "cZB+O58T4g8mjaW+/RyehTwsJwOPiYZRxt5nq+WGJam7bKJJxru6f4KTTz1HrG2ggddGP4DyYzKKbNsq" +
-                "OAq/gZ4D8sF0xpVzzeAxkGKXWoJfR3p1PxuP3rhSIZl6lsDvk4SL8vLVnF5N5wDa7923GX45N8SfL+5H" +
-                "S66W4H8RbtqZYzl7DiDF6fPVA9KvtQw3buufg5slRTF6ZShBRHuT+lMcRWxba1R6DqGc3HBPO+NDUVx2" +
-                "mrfGsRYiI723PyLEWtiTSQNuy1cAgEhNvJIuD5tGX/D7OFvvjUY8j6zr8pPGyts8uCjQB7eIzXIHaezI" +
-                "Zo5yixgZHaON6yShciBtayzEFNTrCryet+NKjaOoBZ98lntqQkE/OE1Bmy8omnS8x0ooaIAeCOn8A2Jh" +
-                "Fnxc5sgh/mJNTHEVfQ6KcajjleNUKYuML/QwD2SsHIMffayBVdw5kJUQBxfHyOdS/DYvIO3R3LONcrmU" +
-                "qifn2IJbcti8QuegA+t/EWE/TWRhkv5llCP4oZJa4i7AzXkspTJO2az5NQKPPqyH2MVHVesb7z+BlfXG" +
-                "dEjRIMXGXAQwvjQlkse9n2emY+LxLKAP2dqiBXDoOogAEWymxFEsqodPnxvSAwtSKYNtEBHMfd1tORfX" +
-                "FxX/ZRXXpXiI8MNs/ulvTJDPQrz7zo/48+Pv18hPt5K1kQiRfDyICVQlqrkUgfboCw6Y2TuQWOcvurLu" +
-                "pmnkuKrCRkL4oIRocGsnmcv8hz5xGwzZYRwmPs3v2R6WqCHJkQImZrYUcB7qMK4cr9OjoOMT+S6DU5Y3" +
-                "76/LCIiscjIIaCoiCExVqDfv5ZE8vhOL271f4pW7s8vj0KOS7+d7iuI1fLxsya2AjeIwvOjKEtbWeI2X" +
-                "oK6EwKNXvbxA5H9NqfdtzO4oGNrYyixmvwXqi2L04vIBsqvQjpyf4Rviyce3wLojbslpie7StmQfc0d1" +
-                "5KFzd0bj6GaqIMoa6AgNtAkUJlGvyepSLD7Uq+vUBeWKPh+9c7PPs1yI/wBsocMc/gcAAA==";
+                "H4sIAAAAAAAAE61VTW8bNxC9768goEPsxFKC9hIYCBKgaVofChSNb0EgjJajXbZccs0hJW9+fR9JrWTB" +
+                "dppDF7LkJTlvPt6b4ULd9kbUwCLUsWq9i2ScKHIqudYPY8AOa2UGbDcLdfHmSr25VDChqKIfl5a3EWbB" +
+                "cVB+O59rmt+ZNJb6+nN4FuqwHA08RhpGJb1PVqsNK2rvkhETjXdl/wSnnnqOWNtAA6+NfgDlx2hasnUr" +
+                "47T4DfQckA+mMy6fqwaPgVp2sSb4faRX97Px6I3LFVKxZwX8Piq4yC/fzenVdA6g/d79mOG3c0P8+ex+" +
+                "tORKCf4T4aaeOZaz5wBSnD5fPSD9Uspw47b+ObhZUiTiW0MRItqb2J/iyGLbWtPG5xDyyQ33tDM+ZMUl" +
+                "p3lrHOumSUjv558QYinsyaQC1+UrAECkRq6US8Om0hf8XmbrvdGI55F1WX7SuPU2DU4a9MEtYrPcQRo7" +
+                "solFbREjo2O0cZ0iVA6kbY2FmEL7ugCv521ZtePYlIJPPqk9VaGgH5ymoM03FE053mMlZDRAD4R0/gax" +
+                "MAtelkk4yAdrJMpKfAot41DHK8exUCaML/QwD2SsGoMfvZTACu4cyKppDi6Okc+l+HVeQNqjuWcrarlU" +
+                "bU/OsQW35LB5hc5BB5b/BGE/TWRmkv5hlCP4oZCa487A1bnkUhnX2qT5NQIXH9aDdPKoan3l/S1YWW9M" +
+                "hxQNUqzMCYDxpSmSOu69n5mWyONZQJ+StVkL4NB1EAEi2EyRqzTefvlagR4YfPkLE+ArZlRM4Bx0BHNf" +
+                "DtXMcwAXxcvLIrHLpnn3Pz/NH59/u0YmuhanDj/I4fNBNiAlUgk7S7FHB3DAdN6BrjJp0X9lN04jy6pI" +
+                "GEHjg2Khla2dVMqTHkrE3B+Sw+CLfJrUsz0sUS1SIwXMxmQp4Dx0YFw+XuZERsdH+C6BPVY3H69zswu3" +
+                "KRoENGW6A1OR5M1HdaSJ75rF7d4v8crd2TVx6EbF9/ONRHINHy9rcitgozgML7owgbU1XuUS9OQQePRt" +
+                "ry4Q+Z9T7H0dqDsKhja2sIcpb4H6Ihu9uHyA7Aq0I+dn+Ip48vEjsO6Im3Naoo+0zdlL6qgMN/Tozmgc" +
+                "3UwFpLUGikOrbAKFqSkXYnHZLD6VS+qk93wZnw/Zua3nqd00/wIFjZgk6AcAAA==";
                 
         public override string ToString() => Extensions.ToString(this);
+    
+        public void Dispose()
+        {
+            Data.Dispose();
+        }
     }
 }

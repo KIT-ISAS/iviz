@@ -8,9 +8,8 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    [RequireComponent(typeof(BoxCollider))]
     public sealed class RotationDisc : MonoBehaviour,
-        IWidget, IWidgetWithColor, IWidgetWithSecondaryScale, IWidgetCanBeRotated, IRecyclable
+        IWidgetWithColor, IWidgetWithSecondaryScale, IWidgetCanBeRotated, IRecyclable
     {
         [SerializeField] CirclePlaneDraggable? planeCircle;
         [SerializeField] CircleFixedDistanceDraggable? fixedCircle;

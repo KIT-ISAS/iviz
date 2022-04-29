@@ -51,6 +51,7 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> SpringDisc3D { get; }
         public ResourceKey<GameObject> TrajectoryDisc { get; }
         public ResourceKey<GameObject> Tooltip { get; }
+        public ResourceKey<GameObject> TooltipWidget { get; }
         public ResourceKey<GameObject> TargetArea { get; }
         public ResourceKey<GameObject> PositionDisc3D { get; }
         public ResourceKey<GameObject> PositionDisc { get; }
@@ -69,8 +70,8 @@ namespace Iviz.Resources
 
         public DisplaysType()
         {
-            var assetHolder = Resource.Extras.AssetHolder;
-            var appAssetHolder = Resource.Extras.AppAssetHolder;
+            var assetHolder = ResourcePool.AssetHolder;
+            var appAssetHolder = ResourcePool.AppAssetHolder;
 
             Cube = Create(assetHolder.Cube);
             Cylinder = Create(assetHolder.Cylinder);
@@ -114,6 +115,7 @@ namespace Iviz.Resources
             SpringDisc3D = Create(appAssetHolder.SpringDisc3D, nameof(appAssetHolder.SpringDisc3D));
             TrajectoryDisc = Create(appAssetHolder.TrajectoryDisc, nameof(appAssetHolder.TrajectoryDisc));
             Tooltip = Create(appAssetHolder.Tooltip, nameof(appAssetHolder.Tooltip));
+            TooltipWidget = Create(appAssetHolder.TooltipWidget, nameof(appAssetHolder.TooltipWidget));
             TargetArea = Create(appAssetHolder.TargetArea, nameof(appAssetHolder.TargetArea));
             PositionDisc3D = Create(appAssetHolder.PositionDisc3D, nameof(appAssetHolder.PositionDisc3D));
             PositionDisc = Create(appAssetHolder.PositionDisc, nameof(appAssetHolder.PositionDisc));

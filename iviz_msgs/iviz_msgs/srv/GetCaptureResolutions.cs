@@ -66,7 +66,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public GetCaptureResolutionsRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetCaptureResolutionsRequest Singleton = new GetCaptureResolutionsRequest();
+        static GetCaptureResolutionsRequest? singleton;
+        public static GetCaptureResolutionsRequest Singleton => singleton ??= new GetCaptureResolutionsRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -109,9 +110,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public GetCaptureResolutionsResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
-            Message = b.DeserializeString();
-            Resolutions = b.DeserializeArray<Vector2i>();
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
+            b.DeserializeArray(out Resolutions);
             for (int i = 0; i < Resolutions.Length; i++)
             {
                 Resolutions[i] = new Vector2i(ref b);
@@ -131,11 +132,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (Resolutions is null) BuiltIns.ThrowNullReference(nameof(Resolutions));
+            if (Message is null) BuiltIns.ThrowNullReference();
+            if (Resolutions is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Resolutions.Length; i++)
             {
-                if (Resolutions[i] is null) BuiltIns.ThrowNullReference($"{nameof(Resolutions)}[{i}]");
+                if (Resolutions[i] is null) BuiltIns.ThrowNullReference(nameof(Resolutions), i);
                 Resolutions[i].RosValidate();
             }
         }

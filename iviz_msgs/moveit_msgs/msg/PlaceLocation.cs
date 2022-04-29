@@ -37,12 +37,12 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public PlaceLocation(ref ReadBuffer b)
         {
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             PostPlacePosture = new TrajectoryMsgs.JointTrajectory(ref b);
             PlacePose = new GeometryMsgs.PoseStamped(ref b);
             PrePlaceApproach = new GripperTranslation(ref b);
             PostPlaceRetreat = new GripperTranslation(ref b);
-            AllowedTouchObjects = b.DeserializeStringArray();
+            b.DeserializeStringArray(out AllowedTouchObjects);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PlaceLocation(ref b);
@@ -61,19 +61,19 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (PostPlacePosture is null) BuiltIns.ThrowNullReference(nameof(PostPlacePosture));
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (PostPlacePosture is null) BuiltIns.ThrowNullReference();
             PostPlacePosture.RosValidate();
-            if (PlacePose is null) BuiltIns.ThrowNullReference(nameof(PlacePose));
+            if (PlacePose is null) BuiltIns.ThrowNullReference();
             PlacePose.RosValidate();
-            if (PrePlaceApproach is null) BuiltIns.ThrowNullReference(nameof(PrePlaceApproach));
+            if (PrePlaceApproach is null) BuiltIns.ThrowNullReference();
             PrePlaceApproach.RosValidate();
-            if (PostPlaceRetreat is null) BuiltIns.ThrowNullReference(nameof(PostPlaceRetreat));
+            if (PostPlaceRetreat is null) BuiltIns.ThrowNullReference();
             PostPlaceRetreat.RosValidate();
-            if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects));
+            if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < AllowedTouchObjects.Length; i++)
             {
-                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AllowedTouchObjects)}[{i}]");
+                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects), i);
             }
         }
     

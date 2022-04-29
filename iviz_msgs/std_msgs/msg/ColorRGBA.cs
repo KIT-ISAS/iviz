@@ -68,16 +68,17 @@ namespace Iviz.Msgs.StdMsgs
                 "H4sIAAAAAAAAE0vLyU8sMTZSKOJKg7LS4awkOCuRiwsAZHVNWikAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);
+    
         /// Custom iviz code
-        public static readonly ColorRGBA White = new(1, 1, 1, 1);
-        public static readonly ColorRGBA Black = new(0, 0, 0, 1);
-        public static readonly ColorRGBA Red = new(1, 0, 0, 1);
-        public static readonly ColorRGBA Green = new(0, 1, 0, 1);
-        public static readonly ColorRGBA Blue = new(0, 0, 1, 1);
-        public static readonly ColorRGBA Yellow = new(1, 1, 0, 1);
-        public static readonly ColorRGBA Cyan = new(0, 1, 1, 1);
-        public static readonly ColorRGBA Magenta = new(1, 0, 1, 1);
-        public static readonly ColorRGBA Grey = new(0.5f, 0.5f, 0.5f, 1);
+        public static ColorRGBA White => new(1, 1, 1, 1);
+        public static ColorRGBA Black => new(0, 0, 0, 1);
+        public static ColorRGBA Red => new(1, 0, 0, 1);
+        public static ColorRGBA Green => new(0, 1, 0, 1);
+        public static ColorRGBA Blue => new(0, 0, 1, 1);
+        public static ColorRGBA Yellow => new(1, 1, 0, 1);
+        public static ColorRGBA Cyan => new(0, 1, 1, 1);
+        public static ColorRGBA Magenta => new(1, 0, 1, 1);
+        public static ColorRGBA Grey => new(0.5f, 0.5f, 0.5f, 1);
         public static ColorRGBA operator *(in ColorRGBA v, in ColorRGBA w) => new(v.R * w.R, v.G * w.G, v.B * w.B, v.A * w.A);
         public static implicit operator ColorRGBA(in (float R, float G, float B, float A) p) => new(p.R, p.G, p.B, p.A);
         public static implicit operator ColorRGBA(in ((float R, float G, float B) p, float A) q) => new(q.p.R, q.p.G, q.p.B, q.A);

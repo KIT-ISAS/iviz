@@ -71,8 +71,8 @@ namespace Iviz.Msgs.Roscpp
         /// Constructor with buffer.
         public SetLoggerLevelRequest(ref ReadBuffer b)
         {
-            Logger = b.DeserializeString();
-            Level = b.DeserializeString();
+            b.DeserializeString(out Logger);
+            b.DeserializeString(out Level);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetLoggerLevelRequest(ref b);
@@ -87,8 +87,8 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosValidate()
         {
-            if (Logger is null) BuiltIns.ThrowNullReference(nameof(Logger));
-            if (Level is null) BuiltIns.ThrowNullReference(nameof(Level));
+            if (Logger is null) BuiltIns.ThrowNullReference();
+            if (Level is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Logger) + BuiltIns.GetStringSize(Level);
@@ -114,7 +114,8 @@ namespace Iviz.Msgs.Roscpp
         
         public SetLoggerLevelResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly SetLoggerLevelResponse Singleton = new SetLoggerLevelResponse();
+        static SetLoggerLevelResponse? singleton;
+        public static SetLoggerLevelResponse Singleton => singleton ??= new SetLoggerLevelResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {

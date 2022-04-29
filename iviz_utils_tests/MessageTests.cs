@@ -215,6 +215,9 @@ namespace Iviz.UtilsTests
             public void RosValidate() => throw new NotImplementedException();
             public ISerializable RosDeserializeBase(ref ReadBuffer b) => throw new NotImplementedException();
             public string RosType => "";
+            public void Dispose()
+            {
+            }
         }
     }
 }

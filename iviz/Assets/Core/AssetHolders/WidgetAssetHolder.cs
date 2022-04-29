@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Iviz.Displays
 {
@@ -45,6 +44,7 @@ namespace Iviz.Displays
         public GameObject TrashButton = null;
         public GameObject Vector3Slider = null;
         public GameObject Vector3 = null;
+        public GameObject Vector3Multi = null;
         
         public GameObject SystemInfo = null;
         public GameObject ARMarkerPanel = null;

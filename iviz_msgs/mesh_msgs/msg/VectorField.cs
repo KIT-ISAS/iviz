@@ -27,8 +27,8 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public VectorField(ref ReadBuffer b)
         {
-            Positions = b.DeserializeStructArray<GeometryMsgs.Point>();
-            Vectors = b.DeserializeStructArray<GeometryMsgs.Vector3>();
+            b.DeserializeStructArray(out Positions);
+            b.DeserializeStructArray(out Vectors);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new VectorField(ref b);
@@ -43,8 +43,8 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Positions is null) BuiltIns.ThrowNullReference(nameof(Positions));
-            if (Vectors is null) BuiltIns.ThrowNullReference(nameof(Vectors));
+            if (Positions is null) BuiltIns.ThrowNullReference();
+            if (Vectors is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + 24 * Positions.Length + 24 * Vectors.Length;

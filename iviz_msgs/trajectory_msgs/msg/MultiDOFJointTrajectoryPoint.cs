@@ -35,18 +35,18 @@ namespace Iviz.Msgs.TrajectoryMsgs
         /// Constructor with buffer.
         public MultiDOFJointTrajectoryPoint(ref ReadBuffer b)
         {
-            Transforms = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Velocities = b.DeserializeArray<GeometryMsgs.Twist>();
+            b.DeserializeStructArray(out Transforms);
+            b.DeserializeArray(out Velocities);
             for (int i = 0; i < Velocities.Length; i++)
             {
                 Velocities[i] = new GeometryMsgs.Twist(ref b);
             }
-            Accelerations = b.DeserializeArray<GeometryMsgs.Twist>();
+            b.DeserializeArray(out Accelerations);
             for (int i = 0; i < Accelerations.Length; i++)
             {
                 Accelerations[i] = new GeometryMsgs.Twist(ref b);
             }
-            TimeFromStart = b.Deserialize<duration>();
+            b.Deserialize(out TimeFromStart);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiDOFJointTrajectoryPoint(ref b);
@@ -63,17 +63,17 @@ namespace Iviz.Msgs.TrajectoryMsgs
         
         public void RosValidate()
         {
-            if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
-            if (Velocities is null) BuiltIns.ThrowNullReference(nameof(Velocities));
+            if (Transforms is null) BuiltIns.ThrowNullReference();
+            if (Velocities is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Velocities.Length; i++)
             {
-                if (Velocities[i] is null) BuiltIns.ThrowNullReference($"{nameof(Velocities)}[{i}]");
+                if (Velocities[i] is null) BuiltIns.ThrowNullReference(nameof(Velocities), i);
                 Velocities[i].RosValidate();
             }
-            if (Accelerations is null) BuiltIns.ThrowNullReference(nameof(Accelerations));
+            if (Accelerations is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Accelerations.Length; i++)
             {
-                if (Accelerations[i] is null) BuiltIns.ThrowNullReference($"{nameof(Accelerations)}[{i}]");
+                if (Accelerations[i] is null) BuiltIns.ThrowNullReference(nameof(Accelerations), i);
                 Accelerations[i].RosValidate();
             }
         }

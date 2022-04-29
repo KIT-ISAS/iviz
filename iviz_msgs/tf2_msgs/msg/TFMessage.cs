@@ -24,7 +24,7 @@ namespace Iviz.Msgs.Tf2Msgs
         /// Constructor with buffer.
         public TFMessage(ref ReadBuffer b)
         {
-            Transforms = b.DeserializeArray<GeometryMsgs.TransformStamped>();
+            b.DeserializeArray(out Transforms);
             for (int i = 0; i < Transforms.Length; i++)
             {
                 GeometryMsgs.TransformStamped.Deserialize(ref b, out Transforms[i]);
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (Transforms is null) BuiltIns.ThrowNullReference(nameof(Transforms));
+            if (Transforms is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetArraySize(Transforms);

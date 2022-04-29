@@ -27,8 +27,8 @@ namespace Iviz.Msgs.Roscpp
         /// Constructor with buffer.
         public Logger(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Level = b.DeserializeString();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Level);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Logger(ref b);
@@ -43,8 +43,8 @@ namespace Iviz.Msgs.Roscpp
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Level is null) BuiltIns.ThrowNullReference(nameof(Level));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Level is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetStringSize(Level);

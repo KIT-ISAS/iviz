@@ -66,42 +66,53 @@ namespace Iviz.Displays
 
         public void Set(ReadOnlySpan<Vector3> points, ReadOnlySpan<Color> colors = default)
         {
-            if (points.Length % 3 != 0)
+            int pointsLength = points.Length;
+            if (pointsLength % 3 != 0)
             {
-                throw new ArgumentException($"Invalid triangle list {points.Length}", nameof(points));
+                throw new ArgumentException($"Invalid triangle list {pointsLength}", nameof(points));
             }
 
-            if (colors.Length != 0 && colors.Length != points.Length)
+            if (colors.Length != 0 && colors.Length != pointsLength)
             {
                 throw new ArgumentException("Inconsistent color size!", nameof(colors));
             }
 
-            var ownMesh = EnsureOwnMesh(points.Length);
+            var ownMesh = EnsureOwnMesh(pointsLength);
 
             ownMesh.Clear();
+            
+            if (pointsLength == 0)
+            {
+                Collider.SetLocalBounds(ownMesh.bounds);
+                BoundsChanged?.Invoke();
+                return;
+            }
+
             ownMesh.SetVertices(points);
             if (colors.Length != 0)
             {
                 ownMesh.SetColors(colors);
             }
 
-            using (var triangles = new Rent<int>(points.Length))
+            using (var triangles = new Rent<int>(pointsLength))
             {
-                var tArray = triangles.AsSpan();
+                ref int tPtr = ref triangles.Array[0];
                 if (FlipWinding)
                 {
-                    for (int i = 0; i < triangles.Length; i += 3)
+                    for (int i = 0; i < pointsLength; i += 3)
                     {
-                        tArray[i] = i;
-                        tArray[i + 1] = i + 2;
-                        tArray[i + 2] = i + 1;
+                        tPtr = i;
+                        tPtr.Plus(1) = i + 2;
+                        tPtr.Plus(2) = i + 1;
+                        tPtr = ref tPtr.Plus(3);
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < triangles.Length; i++)
+                    for (int i = 0; i < pointsLength; i++)
                     {
-                        tArray[i] = i;
+                        tPtr = i;
+                        tPtr = ref tPtr.Plus(1);
                     }
                 }
 
@@ -140,6 +151,14 @@ namespace Iviz.Displays
             var ownMesh = EnsureOwnMesh(points.Length);
 
             ownMesh.Clear();
+            
+            if (points.Length == 0 || triangles.Length == 0)
+            {
+                Collider.SetLocalBounds(ownMesh.bounds);
+                BoundsChanged?.Invoke();
+                return;
+            }
+            
             ownMesh.SetVertices(points);
             if (normals.Length != 0)
             {

@@ -33,7 +33,7 @@ namespace Iviz.Msgs.GeometryMsgs
         public TwistWithCovariance(ref ReadBuffer b)
         {
             Twist = new Twist(ref b);
-            Covariance = b.DeserializeStructArray<double>(36);
+            b.DeserializeStructArray(36, out Covariance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TwistWithCovariance(ref b);
@@ -48,10 +48,10 @@ namespace Iviz.Msgs.GeometryMsgs
         
         public void RosValidate()
         {
-            if (Twist is null) BuiltIns.ThrowNullReference(nameof(Twist));
+            if (Twist is null) BuiltIns.ThrowNullReference();
             Twist.RosValidate();
-            if (Covariance is null) BuiltIns.ThrowNullReference(nameof(Covariance));
-            if (Covariance.Length != 36) throw new RosInvalidSizeForFixedArrayException(nameof(Covariance), Covariance.Length, 36);
+            if (Covariance is null) BuiltIns.ThrowNullReference();
+            if (Covariance.Length != 36) BuiltIns.ThrowInvalidSizeForFixedArray(Covariance.Length, 36);
         }
     
         /// <summary> Constant size of this message. </summary> 

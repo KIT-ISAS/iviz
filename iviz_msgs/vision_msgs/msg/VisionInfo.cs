@@ -64,9 +64,9 @@ namespace Iviz.Msgs.VisionMsgs
         public VisionInfo(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Method = b.DeserializeString();
-            DatabaseLocation = b.DeserializeString();
-            DatabaseVersion = b.Deserialize<int>();
+            b.DeserializeString(out Method);
+            b.DeserializeString(out DatabaseLocation);
+            b.Deserialize(out DatabaseVersion);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new VisionInfo(ref b);
@@ -83,8 +83,8 @@ namespace Iviz.Msgs.VisionMsgs
         
         public void RosValidate()
         {
-            if (Method is null) BuiltIns.ThrowNullReference(nameof(Method));
-            if (DatabaseLocation is null) BuiltIns.ThrowNullReference(nameof(DatabaseLocation));
+            if (Method is null) BuiltIns.ThrowNullReference();
+            if (DatabaseLocation is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

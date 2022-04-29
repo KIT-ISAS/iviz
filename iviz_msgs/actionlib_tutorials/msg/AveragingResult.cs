@@ -26,8 +26,8 @@ namespace Iviz.Msgs.ActionlibTutorials
         /// Constructor with buffer.
         public AveragingResult(ref ReadBuffer b)
         {
-            InteriorAngle = b.Deserialize<float>();
-            Apothem = b.Deserialize<float>();
+            b.Deserialize(out InteriorAngle);
+            b.Deserialize(out Apothem);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AveragingResult(ref b);

@@ -53,14 +53,14 @@ namespace Iviz.Msgs.VisualizationMsgs
         public InteractiveMarkerFeedback(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            ClientId = b.DeserializeString();
-            MarkerName = b.DeserializeString();
-            ControlName = b.DeserializeString();
-            EventType = b.Deserialize<byte>();
+            b.DeserializeString(out ClientId);
+            b.DeserializeString(out MarkerName);
+            b.DeserializeString(out ControlName);
+            b.Deserialize(out EventType);
             b.Deserialize(out Pose);
-            MenuEntryId = b.Deserialize<uint>();
+            b.Deserialize(out MenuEntryId);
             b.Deserialize(out MousePoint);
-            MousePointValid = b.Deserialize<bool>();
+            b.Deserialize(out MousePointValid);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new InteractiveMarkerFeedback(ref b);
@@ -82,9 +82,9 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (ClientId is null) BuiltIns.ThrowNullReference(nameof(ClientId));
-            if (MarkerName is null) BuiltIns.ThrowNullReference(nameof(MarkerName));
-            if (ControlName is null) BuiltIns.ThrowNullReference(nameof(ControlName));
+            if (ClientId is null) BuiltIns.ThrowNullReference();
+            if (MarkerName is null) BuiltIns.ThrowNullReference();
+            if (ControlName is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

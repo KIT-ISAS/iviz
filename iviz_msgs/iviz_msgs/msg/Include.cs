@@ -37,10 +37,10 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Include(ref ReadBuffer b)
         {
-            Uri = b.DeserializeString();
+            b.DeserializeString(out Uri);
             Pose = new Matrix4(ref b);
             Material = new Material(ref b);
-            Package = b.DeserializeString();
+            b.DeserializeString(out Package);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Include(ref b);
@@ -57,12 +57,12 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Uri is null) BuiltIns.ThrowNullReference(nameof(Uri));
-            if (Pose is null) BuiltIns.ThrowNullReference(nameof(Pose));
+            if (Uri is null) BuiltIns.ThrowNullReference();
+            if (Pose is null) BuiltIns.ThrowNullReference();
             Pose.RosValidate();
-            if (Material is null) BuiltIns.ThrowNullReference(nameof(Material));
+            if (Material is null) BuiltIns.ThrowNullReference();
             Material.RosValidate();
-            if (Package is null) BuiltIns.ThrowNullReference(nameof(Package));
+            if (Package is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

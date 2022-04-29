@@ -82,7 +82,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Dialog is null) BuiltIns.ThrowNullReference(nameof(Dialog));
+            if (Dialog is null) BuiltIns.ThrowNullReference();
             Dialog.RosValidate();
         }
     
@@ -116,8 +116,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public LaunchDialogResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
-            Message = b.DeserializeString();
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
             Feedback = new IvizMsgs.Feedback(ref b);
         }
         
@@ -134,8 +134,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (Feedback is null) BuiltIns.ThrowNullReference(nameof(Feedback));
+            if (Message is null) BuiltIns.ThrowNullReference();
+            if (Feedback is null) BuiltIns.ThrowNullReference();
             Feedback.RosValidate();
         }
     

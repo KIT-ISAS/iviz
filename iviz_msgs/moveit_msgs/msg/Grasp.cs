@@ -62,16 +62,16 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public Grasp(ref ReadBuffer b)
         {
-            Id = b.DeserializeString();
+            b.DeserializeString(out Id);
             PreGraspPosture = new TrajectoryMsgs.JointTrajectory(ref b);
             GraspPosture = new TrajectoryMsgs.JointTrajectory(ref b);
             GraspPose = new GeometryMsgs.PoseStamped(ref b);
-            GraspQuality = b.Deserialize<double>();
+            b.Deserialize(out GraspQuality);
             PreGraspApproach = new GripperTranslation(ref b);
             PostGraspRetreat = new GripperTranslation(ref b);
             PostPlaceRetreat = new GripperTranslation(ref b);
-            MaxContactForce = b.Deserialize<float>();
-            AllowedTouchObjects = b.DeserializeStringArray();
+            b.Deserialize(out MaxContactForce);
+            b.DeserializeStringArray(out AllowedTouchObjects);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Grasp(ref b);
@@ -94,23 +94,23 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (PreGraspPosture is null) BuiltIns.ThrowNullReference(nameof(PreGraspPosture));
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (PreGraspPosture is null) BuiltIns.ThrowNullReference();
             PreGraspPosture.RosValidate();
-            if (GraspPosture is null) BuiltIns.ThrowNullReference(nameof(GraspPosture));
+            if (GraspPosture is null) BuiltIns.ThrowNullReference();
             GraspPosture.RosValidate();
-            if (GraspPose is null) BuiltIns.ThrowNullReference(nameof(GraspPose));
+            if (GraspPose is null) BuiltIns.ThrowNullReference();
             GraspPose.RosValidate();
-            if (PreGraspApproach is null) BuiltIns.ThrowNullReference(nameof(PreGraspApproach));
+            if (PreGraspApproach is null) BuiltIns.ThrowNullReference();
             PreGraspApproach.RosValidate();
-            if (PostGraspRetreat is null) BuiltIns.ThrowNullReference(nameof(PostGraspRetreat));
+            if (PostGraspRetreat is null) BuiltIns.ThrowNullReference();
             PostGraspRetreat.RosValidate();
-            if (PostPlaceRetreat is null) BuiltIns.ThrowNullReference(nameof(PostPlaceRetreat));
+            if (PostPlaceRetreat is null) BuiltIns.ThrowNullReference();
             PostPlaceRetreat.RosValidate();
-            if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects));
+            if (AllowedTouchObjects is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < AllowedTouchObjects.Length; i++)
             {
-                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AllowedTouchObjects)}[{i}]");
+                if (AllowedTouchObjects[i] is null) BuiltIns.ThrowNullReference(nameof(AllowedTouchObjects), i);
             }
         }
     

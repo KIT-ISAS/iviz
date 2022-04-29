@@ -73,8 +73,8 @@ namespace Iviz.Msgs.GridMapMsgs
         /// Constructor with buffer.
         public ProcessFileRequest(ref ReadBuffer b)
         {
-            FilePath = b.DeserializeString();
-            TopicName = b.DeserializeString();
+            b.DeserializeString(out FilePath);
+            b.DeserializeString(out TopicName);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileRequest(ref b);
@@ -89,8 +89,8 @@ namespace Iviz.Msgs.GridMapMsgs
         
         public void RosValidate()
         {
-            if (FilePath is null) BuiltIns.ThrowNullReference(nameof(FilePath));
-            if (TopicName is null) BuiltIns.ThrowNullReference(nameof(TopicName));
+            if (FilePath is null) BuiltIns.ThrowNullReference();
+            if (TopicName is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(FilePath) + BuiltIns.GetStringSize(TopicName);
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.GridMapMsgs
         /// Constructor with buffer.
         public ProcessFileResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ProcessFileResponse(ref b);

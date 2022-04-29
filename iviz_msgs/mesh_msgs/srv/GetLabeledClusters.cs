@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public GetLabeledClustersRequest(ref ReadBuffer b)
         {
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetLabeledClustersRequest(ref b);
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
+            if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public GetLabeledClustersResponse(ref ReadBuffer b)
         {
-            Clusters = b.DeserializeArray<MeshFaceCluster>();
+            b.DeserializeArray(out Clusters);
             for (int i = 0; i < Clusters.Length; i++)
             {
                 Clusters[i] = new MeshFaceCluster(ref b);
@@ -128,10 +128,10 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Clusters is null) BuiltIns.ThrowNullReference(nameof(Clusters));
+            if (Clusters is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Clusters.Length; i++)
             {
-                if (Clusters[i] is null) BuiltIns.ThrowNullReference($"{nameof(Clusters)}[{i}]");
+                if (Clusters[i] is null) BuiltIns.ThrowNullReference(nameof(Clusters), i);
                 Clusters[i].RosValidate();
             }
         }

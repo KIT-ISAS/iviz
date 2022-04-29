@@ -13,22 +13,6 @@ namespace Iviz.Displays
 {
     public sealed class DepthCloudDisplay : MarkerDisplay
     {
-        static readonly int PColor = Shader.PropertyToID("_ColorTexture");
-        static readonly int PDepth = Shader.PropertyToID("_DepthTexture");
-
-        static readonly int PPoints = Shader.PropertyToID("_Points");
-
-        //static readonly int PIntensity = Shader.PropertyToID("_IntensityTexture");
-        static readonly int PropPointSize = Shader.PropertyToID("_PointSize");
-        static readonly int PropPosSt = Shader.PropertyToID("_Pos_ST");
-        static readonly int PLocalToWorld = Shader.PropertyToID("_LocalToWorld");
-        static readonly int PWorldToLocal = Shader.PropertyToID("_WorldToLocal");
-        static readonly int PDepthScale = Shader.PropertyToID("_DepthScale");
-
-        static readonly int IntensityCoeffID = Shader.PropertyToID("_IntensityCoeff");
-        static readonly int IntensityAddID = Shader.PropertyToID("_IntensityAdd");
-        static readonly int AtlasRowId = Shader.PropertyToID("_AtlasRow");
-
         [SerializeField] Texture2D? atlas;
         [SerializeField] Material? material;
         [SerializeField] int width;
@@ -49,8 +33,8 @@ namespace Iviz.Displays
             ? material
             : (material = Resource.Materials.DepthCloud.Instantiate());
 
-        Texture2D Atlas => atlas.AssertNotNull(nameof(atlas)); 
-        
+        Texture2D Atlas => atlas.AssertNotNull(nameof(atlas));
+
         public Intrinsic? Intrinsic
         {
             set
@@ -125,20 +109,20 @@ namespace Iviz.Displays
 
                 if (intensitySpan == 0)
                 {
-                    Material.SetFloat(IntensityCoeffID, 1);
-                    Material.SetFloat(IntensityAddID, 0);
+                    Material.SetFloat(ShaderIds.IntensityCoeffId, 1);
+                    Material.SetFloat(ShaderIds.IntensityAddId, 0);
                 }
                 else
                 {
                     if (!FlipMinMax)
                     {
-                        Material.SetFloat(IntensityCoeffID, 1 / intensitySpan);
-                        Material.SetFloat(IntensityAddID, -intensityBounds.x / intensitySpan);
+                        Material.SetFloat(ShaderIds.IntensityCoeffId, 1 / intensitySpan);
+                        Material.SetFloat(ShaderIds.IntensityAddId, -intensityBounds.x / intensitySpan);
                     }
                     else
                     {
-                        Material.SetFloat(IntensityCoeffID, -1 / intensitySpan);
-                        Material.SetFloat(IntensityAddID, intensityBounds.y / intensitySpan);
+                        Material.SetFloat(ShaderIds.IntensityCoeffId, -1 / intensitySpan);
+                        Material.SetFloat(ShaderIds.IntensityAddId, intensityBounds.y / intensitySpan);
                     }
                 }
             }
@@ -160,9 +144,10 @@ namespace Iviz.Displays
             set
             {
                 colormap = value;
-                Material.SetTexture(PColor, Atlas);
-                Material.SetFloat(AtlasRowId,
+                Material.SetTexture(ShaderIds.ColorTextureId, Atlas);
+                Material.SetFloat(ShaderIds.AtlasRowId,
                     (ColormapsType.AtlasSize - 0.5f - (float)value) / ColormapsType.AtlasSize);
+                Material.DisableKeyword("USE_COLOR_GRAY");
                 Material.EnableKeyword("USE_INTENSITY");
             }
         }
@@ -180,9 +165,9 @@ namespace Iviz.Displays
             }
 
             var mMaterial = Material;
-            mMaterial.SetFloat(PropPointSize, Transform.lossyScale.x * pointSize);
-            mMaterial.SetMatrix(PLocalToWorld, Transform.localToWorldMatrix);
-            mMaterial.SetMatrix(PWorldToLocal, Transform.worldToLocalMatrix);
+            mMaterial.SetFloat(ShaderIds.PointSizeId, Transform.lossyScale.x * pointSize);
+            mMaterial.SetMatrix(ShaderIds.LocalToWorldId, Transform.localToWorldMatrix);
+            mMaterial.SetMatrix(ShaderIds.WorldToLocalId, Transform.worldToLocalMatrix);
 
             Graphics.DrawProcedural(mMaterial, WorldBounds, MeshTopology.Quads, 4, uvs.Length,
                 castShadows: ShadowCastingMode.Off, receiveShadows: false, layer: gameObject.layer);
@@ -225,21 +210,30 @@ namespace Iviz.Displays
 
         void UpdateColorTexture(Texture2D? texture)
         {
-            Material.SetTexture(PColor, texture);
+            Material.SetTexture(ShaderIds.ColorTextureId, texture);
 
             if (texture == null)
             {
+                Material.DisableKeyword("USE_COLOR_GRAY");
                 Material.EnableKeyword("USE_INTENSITY");
             }
             else
             {
                 Material.DisableKeyword("USE_INTENSITY");
+                if (texture.format is TextureFormat.R8 or TextureFormat.R16 or TextureFormat.RFloat)
+                {
+                    Material.EnableKeyword("USE_COLOR_GRAY");
+                }
+                else
+                {
+                    Material.DisableKeyword("USE_COLOR_GRAY");
+                }
             }
         }
 
         void UpdateDepthTexture(Texture2D? texture)
         {
-            Material.SetTexture(PDepth, texture);
+            Material.SetTexture(ShaderIds.DepthTextureId, texture);
 
             UpdatePointComputeBuffers(texture);
             UpdateIntrinsicScaling(texture);
@@ -258,7 +252,7 @@ namespace Iviz.Displays
                     _ => 1
                 };
 
-            Material.SetFloat(PDepthScale, depthScale);
+            Material.SetFloat(ShaderIds.DepthScaleId, depthScale);
         }
 
         void UpdatePointComputeBuffers(Texture2D? sourceTexture)
@@ -286,7 +280,7 @@ namespace Iviz.Displays
             pointComputeBuffer?.Release();
             pointComputeBuffer = new ComputeBuffer(uvs.Length, Unsafe.SizeOf<Vector2>());
             pointComputeBuffer.SetData(uvs, 0, 0, uvs.Length);
-            Material.SetBuffer(PPoints, pointComputeBuffer);
+            Material.SetBuffer(ShaderIds.PointsId, pointComputeBuffer);
         }
 
         void UpdateIntrinsicScaling(Texture? texture)
@@ -308,7 +302,7 @@ namespace Iviz.Displays
 
             pointSize = 1f / mIntrinsic.Fx;
 
-            Material.SetVector(PropPosSt, new Vector4(posMulX, posMulY, posAddX, posAddY));
+            Material.SetVector(ShaderIds.PosStId, new Vector4(posMulX, posMulY, posAddX, posAddY));
 
             const float maxDepthForBounds = 5.0f;
             var size = new Vector3(posMulX, 1, posMulY) * maxDepthForBounds;
@@ -327,8 +321,8 @@ namespace Iviz.Displays
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
 
-            Material.SetTexture(PColor, null);
-            Material.SetTexture(PDepth, null);
+            Material.SetTexture(ShaderIds.ColorTextureId, null);
+            Material.SetTexture(ShaderIds.DepthTextureId, null);
 
             width = 0;
             height = 0;

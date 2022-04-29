@@ -46,17 +46,17 @@ namespace Iviz.Msgs.IvizMsgs
         public Widget(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Action = b.Deserialize<byte>();
-            Id = b.DeserializeString();
-            Type = b.Deserialize<byte>();
+            b.Deserialize(out Action);
+            b.DeserializeString(out Id);
+            b.Deserialize(out Type);
             b.Deserialize(out Pose);
             b.Deserialize(out Color);
             b.Deserialize(out SecondaryColor);
-            Scale = b.Deserialize<double>();
-            SecondaryScale = b.Deserialize<double>();
-            Caption = b.DeserializeString();
+            b.Deserialize(out Scale);
+            b.Deserialize(out SecondaryScale);
+            b.DeserializeString(out Caption);
             Boundary = new BoundingBox(ref b);
-            SecondaryBoundaries = b.DeserializeArray<BoundingBoxStamped>();
+            b.DeserializeArray(out SecondaryBoundaries);
             for (int i = 0; i < SecondaryBoundaries.Length; i++)
             {
                 SecondaryBoundaries[i] = new BoundingBoxStamped(ref b);
@@ -85,14 +85,14 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Caption is null) BuiltIns.ThrowNullReference(nameof(Caption));
-            if (Boundary is null) BuiltIns.ThrowNullReference(nameof(Boundary));
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (Caption is null) BuiltIns.ThrowNullReference();
+            if (Boundary is null) BuiltIns.ThrowNullReference();
             Boundary.RosValidate();
-            if (SecondaryBoundaries is null) BuiltIns.ThrowNullReference(nameof(SecondaryBoundaries));
+            if (SecondaryBoundaries is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < SecondaryBoundaries.Length; i++)
             {
-                if (SecondaryBoundaries[i] is null) BuiltIns.ThrowNullReference($"{nameof(SecondaryBoundaries)}[{i}]");
+                if (SecondaryBoundaries[i] is null) BuiltIns.ThrowNullReference(nameof(SecondaryBoundaries), i);
                 SecondaryBoundaries[i].RosValidate();
             }
         }

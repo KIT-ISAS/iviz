@@ -44,20 +44,20 @@ namespace Iviz.Msgs.RosgraphMsgs
         /// Constructor with buffer.
         public TopicStatistics(ref ReadBuffer b)
         {
-            Topic = b.DeserializeString();
-            NodePub = b.DeserializeString();
-            NodeSub = b.DeserializeString();
-            WindowStart = b.Deserialize<time>();
-            WindowStop = b.Deserialize<time>();
-            DeliveredMsgs = b.Deserialize<int>();
-            DroppedMsgs = b.Deserialize<int>();
-            Traffic = b.Deserialize<int>();
-            PeriodMean = b.Deserialize<duration>();
-            PeriodStddev = b.Deserialize<duration>();
-            PeriodMax = b.Deserialize<duration>();
-            StampAgeMean = b.Deserialize<duration>();
-            StampAgeStddev = b.Deserialize<duration>();
-            StampAgeMax = b.Deserialize<duration>();
+            b.DeserializeString(out Topic);
+            b.DeserializeString(out NodePub);
+            b.DeserializeString(out NodeSub);
+            b.Deserialize(out WindowStart);
+            b.Deserialize(out WindowStop);
+            b.Deserialize(out DeliveredMsgs);
+            b.Deserialize(out DroppedMsgs);
+            b.Deserialize(out Traffic);
+            b.Deserialize(out PeriodMean);
+            b.Deserialize(out PeriodStddev);
+            b.Deserialize(out PeriodMax);
+            b.Deserialize(out StampAgeMean);
+            b.Deserialize(out StampAgeStddev);
+            b.Deserialize(out StampAgeMax);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TopicStatistics(ref b);
@@ -84,9 +84,9 @@ namespace Iviz.Msgs.RosgraphMsgs
         
         public void RosValidate()
         {
-            if (Topic is null) BuiltIns.ThrowNullReference(nameof(Topic));
-            if (NodePub is null) BuiltIns.ThrowNullReference(nameof(NodePub));
-            if (NodeSub is null) BuiltIns.ThrowNullReference(nameof(NodeSub));
+            if (Topic is null) BuiltIns.ThrowNullReference();
+            if (NodePub is null) BuiltIns.ThrowNullReference();
+            if (NodeSub is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

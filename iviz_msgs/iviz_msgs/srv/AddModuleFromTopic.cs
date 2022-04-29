@@ -74,8 +74,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public AddModuleFromTopicRequest(ref ReadBuffer b)
         {
-            Topic = b.DeserializeString();
-            Id = b.DeserializeString();
+            b.DeserializeString(out Topic);
+            b.DeserializeString(out Id);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddModuleFromTopicRequest(ref b);
@@ -90,8 +90,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Topic is null) BuiltIns.ThrowNullReference(nameof(Topic));
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Topic is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Topic) + BuiltIns.GetStringSize(Id);
@@ -127,9 +127,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public AddModuleFromTopicResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
-            Message = b.DeserializeString();
-            Id = b.DeserializeString();
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
+            b.DeserializeString(out Id);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new AddModuleFromTopicResponse(ref b);
@@ -145,8 +145,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
+            if (Message is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 9 + BuiltIns.GetStringSize(Message) + BuiltIns.GetStringSize(Id);

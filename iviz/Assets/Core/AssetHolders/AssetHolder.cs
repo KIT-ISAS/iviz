@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class AssetHolder : MonoBehaviour
+    public sealed class AssetHolder : MonoBehaviour
     {
         public GameObject Cube;
         public GameObject Cylinder;

@@ -24,7 +24,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public TexCoords(ref ReadBuffer b)
         {
-            Coords = b.DeserializeStructArray<Vector3f>();
+            b.DeserializeStructArray(out Coords);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TexCoords(ref b);
@@ -38,7 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Coords is null) BuiltIns.ThrowNullReference(nameof(Coords));
+            if (Coords is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + 12 * Coords.Length;

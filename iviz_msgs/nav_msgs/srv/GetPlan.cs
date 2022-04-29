@@ -80,7 +80,7 @@ namespace Iviz.Msgs.NavMsgs
         {
             Start = new GeometryMsgs.PoseStamped(ref b);
             Goal = new GeometryMsgs.PoseStamped(ref b);
-            Tolerance = b.Deserialize<float>();
+            b.Deserialize(out Tolerance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetPlanRequest(ref b);
@@ -96,9 +96,9 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Start is null) BuiltIns.ThrowNullReference(nameof(Start));
+            if (Start is null) BuiltIns.ThrowNullReference();
             Start.RosValidate();
-            if (Goal is null) BuiltIns.ThrowNullReference(nameof(Goal));
+            if (Goal is null) BuiltIns.ThrowNullReference();
             Goal.RosValidate();
         }
     
@@ -141,7 +141,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Plan is null) BuiltIns.ThrowNullReference(nameof(Plan));
+            if (Plan is null) BuiltIns.ThrowNullReference();
             Plan.RosValidate();
         }
     

@@ -37,11 +37,11 @@ namespace Iviz.Msgs.IvizMsgs
         public Feedback(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            VizId = b.DeserializeString();
-            Id = b.DeserializeString();
-            Type = b.Deserialize<byte>();
-            EntryId = b.Deserialize<int>();
-            Angle = b.Deserialize<double>();
+            b.DeserializeString(out VizId);
+            b.DeserializeString(out Id);
+            b.Deserialize(out Type);
+            b.Deserialize(out EntryId);
+            b.Deserialize(out Angle);
             b.Deserialize(out Position);
             b.Deserialize(out Orientation);
             b.Deserialize(out Scale);
@@ -68,9 +68,9 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (VizId is null) BuiltIns.ThrowNullReference(nameof(VizId));
-            if (Id is null) BuiltIns.ThrowNullReference(nameof(Id));
-            if (Trajectory is null) BuiltIns.ThrowNullReference(nameof(Trajectory));
+            if (VizId is null) BuiltIns.ThrowNullReference();
+            if (Id is null) BuiltIns.ThrowNullReference();
+            if (Trajectory is null) BuiltIns.ThrowNullReference();
             Trajectory.RosValidate();
         }
     

@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public MessageDetailsRequest(ref ReadBuffer b)
         {
-            Type = b.DeserializeString();
+            b.DeserializeString(out Type);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MessageDetailsRequest(ref b);
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
+            if (Type is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Type);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public MessageDetailsResponse(ref ReadBuffer b)
         {
-            Typedefs = b.DeserializeArray<TypeDef>();
+            b.DeserializeArray(out Typedefs);
             for (int i = 0; i < Typedefs.Length; i++)
             {
                 Typedefs[i] = new TypeDef(ref b);
@@ -128,10 +128,10 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Typedefs is null) BuiltIns.ThrowNullReference(nameof(Typedefs));
+            if (Typedefs is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Typedefs.Length; i++)
             {
-                if (Typedefs[i] is null) BuiltIns.ThrowNullReference($"{nameof(Typedefs)}[{i}]");
+                if (Typedefs[i] is null) BuiltIns.ThrowNullReference(nameof(Typedefs), i);
                 Typedefs[i].RosValidate();
             }
         }

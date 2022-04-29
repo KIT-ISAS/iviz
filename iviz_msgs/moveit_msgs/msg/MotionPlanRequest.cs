@@ -59,19 +59,19 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             WorkspaceParameters = new WorkspaceParameters(ref b);
             StartState = new RobotState(ref b);
-            GoalConstraints = b.DeserializeArray<Constraints>();
+            b.DeserializeArray(out GoalConstraints);
             for (int i = 0; i < GoalConstraints.Length; i++)
             {
                 GoalConstraints[i] = new Constraints(ref b);
             }
             PathConstraints = new Constraints(ref b);
             TrajectoryConstraints = new TrajectoryConstraints(ref b);
-            PlannerId = b.DeserializeString();
-            GroupName = b.DeserializeString();
-            NumPlanningAttempts = b.Deserialize<int>();
-            AllowedPlanningTime = b.Deserialize<double>();
-            MaxVelocityScalingFactor = b.Deserialize<double>();
-            MaxAccelerationScalingFactor = b.Deserialize<double>();
+            b.DeserializeString(out PlannerId);
+            b.DeserializeString(out GroupName);
+            b.Deserialize(out NumPlanningAttempts);
+            b.Deserialize(out AllowedPlanningTime);
+            b.Deserialize(out MaxVelocityScalingFactor);
+            b.Deserialize(out MaxAccelerationScalingFactor);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MotionPlanRequest(ref b);
@@ -95,22 +95,22 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (WorkspaceParameters is null) BuiltIns.ThrowNullReference(nameof(WorkspaceParameters));
+            if (WorkspaceParameters is null) BuiltIns.ThrowNullReference();
             WorkspaceParameters.RosValidate();
-            if (StartState is null) BuiltIns.ThrowNullReference(nameof(StartState));
+            if (StartState is null) BuiltIns.ThrowNullReference();
             StartState.RosValidate();
-            if (GoalConstraints is null) BuiltIns.ThrowNullReference(nameof(GoalConstraints));
+            if (GoalConstraints is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < GoalConstraints.Length; i++)
             {
-                if (GoalConstraints[i] is null) BuiltIns.ThrowNullReference($"{nameof(GoalConstraints)}[{i}]");
+                if (GoalConstraints[i] is null) BuiltIns.ThrowNullReference(nameof(GoalConstraints), i);
                 GoalConstraints[i].RosValidate();
             }
-            if (PathConstraints is null) BuiltIns.ThrowNullReference(nameof(PathConstraints));
+            if (PathConstraints is null) BuiltIns.ThrowNullReference();
             PathConstraints.RosValidate();
-            if (TrajectoryConstraints is null) BuiltIns.ThrowNullReference(nameof(TrajectoryConstraints));
+            if (TrajectoryConstraints is null) BuiltIns.ThrowNullReference();
             TrajectoryConstraints.RosValidate();
-            if (PlannerId is null) BuiltIns.ThrowNullReference(nameof(PlannerId));
-            if (GroupName is null) BuiltIns.ThrowNullReference(nameof(GroupName));
+            if (PlannerId is null) BuiltIns.ThrowNullReference();
+            if (GroupName is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

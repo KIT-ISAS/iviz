@@ -10,6 +10,7 @@ using Iviz.Msgs;
 using Iviz.Roslib;
 using Iviz.Tools;
 using JetBrains.Annotations;
+using UnityEngine;
 
 namespace Iviz.Ros
 {
@@ -198,19 +199,19 @@ namespace Iviz.Ros
                 return;
             }
 
-            if (CallbackInGameThread)
+            if (!CallbackInGameThread)
             {
-                if (messageQueue.Count >= MaxQueueSize)
-                {
-                    messageQueue.TryDequeue(out _);
-                    Interlocked.Increment(ref droppedMsgCounter);
-                }
-
-                messageQueue.Enqueue(msg);
+                CallHandlerDirect(msg, receiver);
                 return;
             }
 
-            CallHandlerDirect(msg, receiver);
+            if (messageQueue.Count >= MaxQueueSize)
+            {
+                messageQueue.TryDequeue(out _);
+                Interlocked.Increment(ref droppedMsgCounter);
+            }
+
+            messageQueue.Enqueue(msg);
         }
 
         void CallHandlerOnGameThread()
@@ -219,7 +220,7 @@ namespace Iviz.Ros
             {
                 return;
             }
-            
+
             int messageCount = messageQueue.Count;
             if (messageCount == 0 || handlerOnGameThread == null)
             {
@@ -236,7 +237,7 @@ namespace Iviz.Ros
                 }
             }
 
-            int start = Math.Max(0, messageHelper.Count - MaxQueueSize); // should be 0 unless MaxQueueSize changed
+            int start = Mathf.Max(0, messageHelper.Count - MaxQueueSize); // should be 0 unless MaxQueueSize changed
             foreach (var msg in messageHelper.Skip(start))
             {
                 try
@@ -257,7 +258,7 @@ namespace Iviz.Ros
 
         void CallHandlerDirect(in T msg, IRosReceiver receiver)
         {
-            if (directHandler == null)
+            if (directHandler == null) // shouldn't happen
             {
                 return;
             }
@@ -273,7 +274,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Error during callback", e);
+                RosLogger.Error($"{this}: Error during callback", e); // happens with annoying frequency
                 processed = false;
             }
 

@@ -52,8 +52,7 @@ namespace Iviz.MsgsGen
 
             switch (args[2])
             {
-                case "-p":
-                case "--package":
+                case "-p" or "--package":
                 {
                     string package = args[3];
 
@@ -65,12 +64,10 @@ namespace Iviz.MsgsGen
 
                     switch (args[4])
                     {
-                        case "-i":
-                        case "--input":
+                        case "-i" or "--input":
                             CreateIndividualMessages(args, fullOutputPath, package);
                             break;
-                        case "-if":
-                        case "--input-folder":
+                        case "-if" or "--input-folder":
                             CreateMessagesFromFolder(args, fullOutputPath);
                             break;
                         default:
@@ -80,8 +77,11 @@ namespace Iviz.MsgsGen
 
                     break;
                 }
+                case "-i" or "--input" or "-if" or "--input-folder":
+                    Console.Error.WriteLine($"EE Argument {args[2]} is out of order. Use -h to show usage.");
+                    break;
                 default:
-                    Console.Error.WriteLine($"EE Unknown argument {args[2]}. Use -h to show usage.");
+                    Console.Error.WriteLine($"EE Argument {args[2]} is unknown or out of order. Use -h to show usage.");
                     break;
             }
         }
@@ -114,7 +114,6 @@ namespace Iviz.MsgsGen
             }
 
             PackageInfo p = new PackageInfo();
-
 
             for (int i = 3; i < args.Length; i += 4)
             {
@@ -151,7 +150,7 @@ namespace Iviz.MsgsGen
                 Directory.CreateDirectory($"{fullOutputPath}/srv/");
             }
 
-            HashSet<string> usedNames = new HashSet<string>();
+            var usedNames = new HashSet<string>();
             foreach (ClassInfo classInfo in p.Messages.Values)
             {
                 string text = classInfo.ToCsString();
@@ -173,12 +172,6 @@ namespace Iviz.MsgsGen
 
         static void CreateIndividualMessages(string[] args, string fullOutputPath, string package)
         {
-            if (!Directory.Exists(fullOutputPath))
-            {
-                Console.WriteLine($"EE Output path '{fullOutputPath}' does not exist.");
-                return;
-            }
-
             var messageFullPaths = new List<string>();
             var serviceFullPaths = new List<string>();
             var actionFullPaths = new List<string>();
@@ -188,6 +181,13 @@ namespace Iviz.MsgsGen
                 string absolutePath = Path.GetFullPath(path);
                 if (!File.Exists(absolutePath))
                 {
+                    if (Directory.Exists(absolutePath))
+                    {
+                        Console.WriteLine(
+                            $"EE File path '{absolutePath}' refers to a directory. Did you mean to use '-if' instead of '-i'?");
+                        return;
+                    }
+
                     Console.WriteLine($"EE File path '{absolutePath}' does not exist.");
                     return;
                 }
@@ -217,6 +217,8 @@ namespace Iviz.MsgsGen
                 return;
             }
 
+            Directory.CreateDirectory(fullOutputPath);
+            
             if (messageFullPaths.Count != 0)
             {
                 Directory.CreateDirectory($"{fullOutputPath}/msg/");

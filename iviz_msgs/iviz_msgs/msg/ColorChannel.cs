@@ -24,7 +24,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public ColorChannel(ref ReadBuffer b)
         {
-            Colors = b.DeserializeStructArray<Color32>();
+            b.DeserializeStructArray(out Colors);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ColorChannel(ref b);
@@ -38,7 +38,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Colors is null) BuiltIns.ThrowNullReference(nameof(Colors));
+            if (Colors is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + 4 * Colors.Length;

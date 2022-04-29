@@ -7,6 +7,7 @@ using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Displays;
 using Iviz.MarkerDetection;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.SensorMsgs;
@@ -59,14 +60,13 @@ namespace Iviz.Controllers
         static Camera ARCamera => Settings.ARCamera.CheckedNull() ?? Settings.MainCamera;
         static ARJoystick ARJoystick => ModuleListPanel.Instance.ARJoystick;
 
-        public static readonly Vector3 DefaultWorldOffset = new(0.5f, 0, -0.2f);
+        public static Vector3 DefaultWorldOffset => new(0.5f, 0, -0.2f);
         public static bool IsActive => Instance != null;
         public static ARFoundationController? Instance { get; protected set; }
         public static bool IsXRVisible => Settings.IsHololens || Instance is { Visible: true };
 
         readonly ARConfiguration config = new();
         readonly MarkerDetector detector = new();
-        readonly Dictionary<(ARMarkerType, string), float> activeMarkerHighlighters = new();
 
         readonly IPublishedFrame headFrame;
         protected readonly IPublishedFrame cameraFrame;
@@ -76,9 +76,11 @@ namespace Iviz.Controllers
 
         float? joyVelocityAngle;
         Vector3? joyVelocityPos;
+        float? joyVelocityScale;
         uint markerSeq;
 
-        public ARMarkerExecutor MarkerExecutor { get; } = new();
+        protected ARMarkerManager MarkerManager { get; } = new();
+
         public Sender<ARMarkerArray>? MarkerSender { get; }
         public Sender<Image>? ColorSender { get; }
         public Sender<Image>? DepthSender { get; }
@@ -230,11 +232,13 @@ namespace Iviz.Controllers
         {
             ARJoystick.ChangedPosition += OnARJoystickChangedPosition;
             ARJoystick.ChangedAngle += OnARJoystickChangedAngle;
+            ARJoystick.ChangedScale += OnARJoystickChangedScale;
             ARJoystick.PointerUp += OnARJoystickPointerUp;
-            ARJoystick.Close += ModuleListPanel.Instance.ARSidePanel.ToggleARJoystick;
+            ARJoystick.ResetScale += OnARJoystickResetScale;
+            ARJoystick.Close += ModuleListPanel.Instance.ARToolbarPanel.ToggleARJoystick;
             GameThread.EveryFrame += Update;
 
-            GuiInputModule.Instance.UpdateQualityLevel();
+            Settings.SettingsManager.UpdateQualityLevel();
 
             MarkerSender = new Sender<ARMarkerArray>("~xr/markers");
             ColorSender = new Sender<Image>("~xr/color/image_color");
@@ -265,17 +269,14 @@ namespace Iviz.Controllers
         void OnARJoystickChangedAngle(float dA)
         {
             float newVelocityAngle;
-            if (joyVelocityAngle is not { } velocityAngle)
+            if (joyVelocityAngle is { } velocityAngle &&
+                (velocityAngle == 0 || Math.Sign(velocityAngle) == Math.Sign(dA)))
             {
-                newVelocityAngle = 0;
-            }
-            else if (Math.Sign(velocityAngle) != 0 && Math.Sign(velocityAngle) != Math.Sign(dA))
-            {
-                newVelocityAngle = 0;
+                newVelocityAngle = velocityAngle + 0.02f * dA;
             }
             else
             {
-                newVelocityAngle = velocityAngle + 0.02f * dA;
+                newVelocityAngle = 0;
             }
 
             joyVelocityAngle = newVelocityAngle;
@@ -299,17 +300,14 @@ namespace Iviz.Controllers
         void OnARJoystickChangedPosition(Vector3 dPos)
         {
             Vector3 newVelocityPos;
-            if (joyVelocityPos is not { } velocityPos)
+            if (joyVelocityPos is { } velocityPos
+                && (Sign(velocityPos) == 0 || Sign(velocityPos) == Sign(dPos)))
             {
-                newVelocityPos = Vector3.zero;
-            }
-            else if (Sign(velocityPos) != 0 && Sign(velocityPos) != Sign(dPos))
-            {
-                newVelocityPos = Vector3.zero;
+                newVelocityPos = velocityPos + 0.0005f * dPos;
             }
             else
             {
-                newVelocityPos = velocityPos + 0.0005f * dPos;
+                newVelocityPos = Vector3.zero;
             }
 
             joyVelocityPos = newVelocityPos;
@@ -334,10 +332,35 @@ namespace Iviz.Controllers
                 Math.Sign(v.x) + Math.Sign(v.y) + Math.Sign(v.z); // only one of the components is nonzero
         }
 
+        void OnARJoystickChangedScale(float dA)
+        {
+            float newVelocityScale;
+            if (joyVelocityScale is { } velocityScale &&
+                (velocityScale == 0 || Math.Sign(velocityScale) == Math.Sign(dA)))
+            {
+                newVelocityScale = velocityScale + 1e-4f * dA;
+            }
+            else
+            {
+                newVelocityScale = 0;
+            }
+
+            joyVelocityScale = newVelocityScale;
+
+            WorldScale *= Mathf.Exp(newVelocityScale);
+        }
+
         void OnARJoystickPointerUp()
         {
             joyVelocityPos = null;
             joyVelocityAngle = null;
+            joyVelocityScale = null;
+        }
+
+        void OnARJoystickResetScale()
+        {
+            joyVelocityScale = null;
+            WorldScale = 1;
         }
 
         void UpdateWorldPose(in Pose pose, RootMover mover)
@@ -399,9 +422,9 @@ namespace Iviz.Controllers
             headFrame.LocalPose = TfModule.RelativeToFixedFrame(absoluteArCameraPose).ToCameraFrame();
         }
 
-        void OnMarkerDetected(Screenshot screenshot, IMarkerCorners[] markers)
+        void OnMarkerDetected(Screenshot screenshot, IReadOnlyList<IDetectedMarker> markers)
         {
-            ARMarker ToMarker(IMarkerCorners marker) => new()
+            ARMarker ToMarker(IDetectedMarker marker) => new()
             {
                 Type = (byte)marker.Type,
                 Header = new Header(markerSeq++, screenshot.Timestamp, TfModule.FixedFrameId),
@@ -418,26 +441,11 @@ namespace Iviz.Controllers
             var array = markers.Select(ToMarker).ToArray();
             foreach (var marker in array)
             {
-                MarkerExecutor.Process(marker);
+                MarkerManager.Process(marker);
+                MarkerManager.Highlight(marker);
             }
 
             MarkerSender?.Publish(new ARMarkerArray(array));
-
-            foreach (var marker in array)
-            {
-                var key = ((ARMarkerType)marker.Type, marker.Code);
-                if (activeMarkerHighlighters.TryGetValue(key, out float existingExpirationTime)
-                    && GameThread.GameTime < existingExpirationTime)
-                {
-                    continue;
-                }
-
-                ARMarkerHighlighter.Highlight(marker);
-
-                const float markerLifetimeInSec = 5;
-                float expirationTime = GameThread.GameTime + markerLifetimeInSec;
-                activeMarkerHighlighters[key] = expirationTime;
-            }
         }
 
         public static Pose GetAbsoluteMarkerPose(ARMarker marker)
@@ -464,11 +472,10 @@ namespace Iviz.Controllers
             ShowARJoystick = false;
             Instance = null;
 
-            GuiInputModule.Instance.UpdateQualityLevel();
+            Settings.SettingsManager.UpdateQualityLevel();
 
             MarkerSender?.Dispose();
             detector.Dispose();
-            MarkerExecutor.Dispose();
 
             colorInfoSender?.Dispose();
             ColorSender?.Dispose();
@@ -491,10 +498,6 @@ namespace Iviz.Controllers
 
         protected sealed class PulseManager
         {
-            static readonly int PulseCenter = Shader.PropertyToID("_PulseCenter");
-            static readonly int PulseTime = Shader.PropertyToID("_PulseTime");
-            static readonly int PulseDelta = Shader.PropertyToID("_PulseDelta");
-
             CancellationTokenSource? pulseTokenSource;
             public bool HasPulse => pulseTokenSource is { IsCancellationRequested: false };
 
@@ -504,15 +507,15 @@ namespace Iviz.Controllers
                 pulseTokenSource = new CancellationTokenSource();
 
                 var material = Resource.Materials.LinePulse.Object;
-                material.SetVector(PulseCenter, start);
-                material.SetFloat(PulseDelta, 0.25f);
+                material.SetVector(ShaderIds.PulseCenterId, start);
+                material.SetFloat(ShaderIds.PulseDeltaId, 0.25f);
 
                 FAnimator.Spawn(pulseTokenSource.Token, 10,
                     static t =>
                     {
                         float timeDiff = t * 10;
                         var material = Resource.Materials.LinePulse.Object;
-                        material.SetFloat(PulseTime, (timeDiff - 0.5f));
+                        material.SetFloat(ShaderIds.PulseTimeId, (timeDiff - 0.5f));
                     },
                     () => pulseTokenSource.Cancel()
                 );

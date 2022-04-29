@@ -68,7 +68,7 @@ namespace Iviz.Msgs.PclMsgs
         /// Constructor with buffer.
         public UpdateFilenameRequest(ref ReadBuffer b)
         {
-            Filename = b.DeserializeString();
+            b.DeserializeString(out Filename);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameRequest(ref b);
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.PclMsgs
         
         public void RosValidate()
         {
-            if (Filename is null) BuiltIns.ThrowNullReference(nameof(Filename));
+            if (Filename is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Filename);
@@ -109,7 +109,7 @@ namespace Iviz.Msgs.PclMsgs
         /// Constructor with buffer.
         public UpdateFilenameResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new UpdateFilenameResponse(ref b);

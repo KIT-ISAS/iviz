@@ -1,5 +1,6 @@
 #nullable enable
 
+using Iviz.Displays;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -35,66 +36,69 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> DataLabel { get; }
         public ResourceKey<GameObject> ToggleButton { get; }
         public ResourceKey<GameObject> ResetButton { get; }
-        public ResourceKey<GameObject> Vector3 { get; }
         public ResourceKey<GameObject> Sender { get; }
         public ResourceKey<GameObject> Listener { get; }
         public ResourceKey<GameObject> Frame { get; }
         public ResourceKey<GameObject> Vector3Slider { get; }
+        public ResourceKey<GameObject> Vector3 { get; }
+        public ResourceKey<GameObject> Vector3Multi { get; }
         public ResourceKey<GameObject> InputWithHints { get; }
         public ResourceKey<GameObject> MarkerWidget { get; }
         public ResourceKey<GameObject> CollapsibleWidget { get; }
 
         public ResourceKey<GameObject> DataPanel { get; }
-        
+
         public ResourceKey<GameObject> ARMarkerPanel { get; }
         public ResourceKey<GameObject> ARMarkerWidget { get; }
-        
+
         public ResourceKey<GameObject> TfPublisherWidget { get; }
         public ResourceKey<GameObject> MagnitudeWidget { get; }
-        
+
         public ResourceKey<GameObject> ImageCanvas { get; }
 
         public WidgetsType()
         {
-            var assetHolder = Resource.Extras.WidgetAssetHolder;
+            var assetHolder = ResourcePool.WidgetAssetHolder;
 
-            DraggableDisplayButton = Create(assetHolder.DraggableDisplayButton);
-            ItemButton = Create(assetHolder.ItemButton);
-            ItemButtonWithDelete = Create(assetHolder.ItemButtonWithDelete);
-            ItemListPanel = Create(assetHolder.ItemListPanel);
-            ConnectionPanel = Create(assetHolder.ConnectionPanel);
-            TfPanel = Create(assetHolder.TfTreePanel);
-            SaveAsPanel = Create(assetHolder.SaveAsPanel);
-            AddTopicPanel = Create(assetHolder.AddTopicPanel);
-            MarkerPanel = Create(assetHolder.MarkersPanel);
-            NetworkPanel = Create(assetHolder.NetworkPanel);
-            ConsolePanel = Create(assetHolder.ConsoleLog);
-            SettingsPanel = Create(assetHolder.SettingsPanel);
-            EchoPanel = Create(assetHolder.EchoPanel);
-            SystemPanel = Create(assetHolder.SystemInfo);
-            
-            HeadTitle = Create(assetHolder.HeadTitle);
-            Toggle = Create(assetHolder.Toggle);
-            Slider = Create(assetHolder.Slider);
-            SliderWithScale = Create(assetHolder.SliderWithScale);
-            Input = Create(assetHolder.InputField);
-            NumberInput = Create(assetHolder.NumberInputField);
-            ColorPicker = Create(assetHolder.ColorPicker);
-            ImagePreview = Create(assetHolder.ImagePreview);
-            Dropdown = Create(assetHolder.Dropdown);
-            TrashButton = Create(assetHolder.TrashButton);
-            CloseButton = Create(assetHolder.CloseButton);
-            DataLabel = Create(assetHolder.DataLabel);
-            ToggleButton = Create(assetHolder.ToggleButton);
-            ResetButton = Create(assetHolder.ResetButton);
-            Vector3 = Create(assetHolder.Vector3);
-            Sender = Create(assetHolder.Sender);
-            Listener = Create(assetHolder.Listener);
-            Frame = Create(assetHolder.Frame);
-            Vector3Slider = Create(assetHolder.Vector3Slider);
-            InputWithHints = Create(assetHolder.InputFieldWithHints);
-            MarkerWidget = Create(assetHolder.Markers);            
-            
+            DraggableDisplayButton =
+                Create(assetHolder.DraggableDisplayButton, nameof(assetHolder.DraggableDisplayButton));
+            ItemButton = Create(assetHolder.ItemButton, nameof(assetHolder.ItemButton));
+            ItemButtonWithDelete = Create(assetHolder.ItemButtonWithDelete, nameof(assetHolder.ItemButtonWithDelete));
+            ItemListPanel = Create(assetHolder.ItemListPanel, nameof(assetHolder.ItemListPanel));
+            ConnectionPanel = Create(assetHolder.ConnectionPanel, nameof(assetHolder.ConnectionPanel));
+            TfPanel = Create(assetHolder.TfTreePanel, nameof(assetHolder.TfTreePanel));
+            SaveAsPanel = Create(assetHolder.SaveAsPanel, nameof(assetHolder.SaveAsPanel));
+            AddTopicPanel = Create(assetHolder.AddTopicPanel, nameof(assetHolder.AddTopicPanel));
+            MarkerPanel = Create(assetHolder.MarkersPanel, nameof(assetHolder.MarkersPanel));
+            NetworkPanel = Create(assetHolder.NetworkPanel, nameof(assetHolder.NetworkPanel));
+            ConsolePanel = Create(assetHolder.ConsoleLog, nameof(assetHolder.ConsoleLog));
+            SettingsPanel = Create(assetHolder.SettingsPanel, nameof(assetHolder.SettingsPanel));
+            EchoPanel = Create(assetHolder.EchoPanel, nameof(assetHolder.EchoPanel));
+            SystemPanel = Create(assetHolder.SystemInfo, nameof(assetHolder.SystemInfo));
+
+            HeadTitle = Create(assetHolder.HeadTitle, nameof(assetHolder.HeadTitle));
+            Toggle = Create(assetHolder.Toggle, nameof(assetHolder.Toggle));
+            Slider = Create(assetHolder.Slider, nameof(assetHolder.Slider));
+            SliderWithScale = Create(assetHolder.SliderWithScale, nameof(assetHolder.SliderWithScale));
+            Input = Create(assetHolder.InputField, nameof(assetHolder.InputField));
+            NumberInput = Create(assetHolder.NumberInputField, nameof(assetHolder.NumberInputField));
+            ColorPicker = Create(assetHolder.ColorPicker, nameof(assetHolder.ColorPicker));
+            ImagePreview = Create(assetHolder.ImagePreview, nameof(assetHolder.ImagePreview));
+            Dropdown = Create(assetHolder.Dropdown, nameof(assetHolder.Dropdown));
+            TrashButton = Create(assetHolder.TrashButton, nameof(assetHolder.TrashButton));
+            CloseButton = Create(assetHolder.CloseButton, nameof(assetHolder.CloseButton));
+            DataLabel = Create(assetHolder.DataLabel, nameof(assetHolder.DataLabel));
+            ToggleButton = Create(assetHolder.ToggleButton, nameof(assetHolder.ToggleButton));
+            ResetButton = Create(assetHolder.ResetButton, nameof(assetHolder.ResetButton));
+            Sender = Create(assetHolder.Sender, nameof(assetHolder.Sender));
+            Listener = Create(assetHolder.Listener, nameof(assetHolder.Listener));
+            Frame = Create(assetHolder.Frame, nameof(assetHolder.Frame));
+            Vector3 = Create(assetHolder.Vector3, nameof(assetHolder.Vector3));
+            Vector3Slider = Create(assetHolder.Vector3Slider, nameof(assetHolder.Vector3Slider));
+            Vector3Multi = Create(assetHolder.Vector3Multi, nameof(assetHolder.Vector3Multi));
+            InputWithHints = Create(assetHolder.InputFieldWithHints, nameof(assetHolder.InputFieldWithHints));
+            MarkerWidget = Create(assetHolder.Markers, nameof(assetHolder.Markers));
+
             DataPanel = Create(assetHolder.DataPanel, nameof(assetHolder.DataPanel));
             ARMarkerPanel = Create(assetHolder.ARMarkerPanel, nameof(assetHolder.ARMarkerPanel));
             ARMarkerWidget = Create(assetHolder.ARMarkers, nameof(assetHolder.ARMarkers));
@@ -103,8 +107,8 @@ namespace Iviz.Resources
             MagnitudeWidget = Create(assetHolder.MagnitudeWidget, nameof(assetHolder.MagnitudeWidget));
 
             CollapsibleWidget = Create(assetHolder.Collapsible, nameof(assetHolder.Collapsible));
-            ImageCanvas =  Create(assetHolder.ImageCanvas, nameof(assetHolder.ImageCanvas));
-            
+            ImageCanvas = Create(assetHolder.ImageCanvas, nameof(assetHolder.ImageCanvas));
+
             static ResourceKey<GameObject> Create(GameObject obj, string? msg = null) => new(obj, msg);
         }
     }

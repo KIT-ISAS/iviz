@@ -32,7 +32,7 @@ namespace Iviz.App
     /// </summary>
     public sealed class ModuleListPanel : MonoBehaviour
     {
-        const int ModuleDataCaptionWidth = 200;
+        const int ModuleDataCaptionWidth = 220;
 
         static ModuleListPanel? instance;
 
@@ -67,7 +67,7 @@ namespace Iviz.App
         [SerializeField] AnchorCanvasPanel? anchorCanvasPanel;
         [SerializeField] UpperCanvasPanel? upperCanvasPanel;
         [SerializeField] BottomCanvasPanel? bottomCanvasPanel;
-        [SerializeField] ARSidePanel? arSidePanel;
+        [SerializeField] ARToolbarPanel? arSidePanel;
         [SerializeField] ModulePanelManager? dataPanelManager;
         [SerializeField] DialogPanelManager? dialogPanelManager;
         [SerializeField] ARJoystick? arJoystick;
@@ -99,6 +99,7 @@ namespace Iviz.App
         IMenuDialogContents? menuDialog;
         CameraPanelData? cameraPanelData;
 
+        CameraPanelData CameraPanelData => cameraPanelData ??= new CameraPanelData();
         UpperCanvasPanel UpperCanvas => upperCanvasPanel.AssertNotNull(nameof(upperCanvasPanel));
         BottomCanvasPanel BottomCanvas => bottomCanvasPanel.AssertNotNull(nameof(bottomCanvasPanel));
         AnchorToggleButton BottomHideGuiButton => AnchorCanvasPanel.BottomHideGui;
@@ -122,7 +123,7 @@ namespace Iviz.App
         public DialogPanelManager DialogPanelManager => dialogPanelManager.AssertNotNull(nameof(dialogPanelManager));
         public TwistJoystick TwistJoystick => twistJoystick.AssertNotNull(nameof(twistJoystick));
         public ARJoystick ARJoystick => arJoystick.AssertNotNull(nameof(arJoystick));
-        public ARSidePanel ARSidePanel => arSidePanel.AssertNotNull(nameof(arSidePanel));
+        public ARToolbarPanel ARToolbarPanel => arSidePanel.AssertNotNull(nameof(arSidePanel));
 
         public XRContents XRController => xrController != null
             ? xrController
@@ -141,7 +142,7 @@ namespace Iviz.App
                 ModuleListCanvas.SetActive(value);
                 DataPanelCanvas.SetActive(value);
                 DialogPanelManager.Active = value;
-                ARSidePanel.Visible = !value;
+                ARToolbarPanel.Visible = !value;
             }
         }
 
@@ -180,6 +181,8 @@ namespace Iviz.App
             GuiWidgetListener.ClearResources();
             ARController.ClearResources();
             ResourcePool.ClearResources();
+
+            Settings.SettingsManager = new SettingsManager();
         }
 
         public void Dispose()
@@ -225,6 +228,7 @@ namespace Iviz.App
 
             connectionManager = new RosManager();
             tfModule = new TfModule(id => new TfFrameDisplay(id));
+            cameraPanelData = new CameraPanelData();
 
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
@@ -344,8 +348,7 @@ namespace Iviz.App
 
             BottomCanvas.CameraButtonClicked += () =>
             {
-                cameraPanelData ??= new CameraPanelData();
-                cameraPanelData.ToggleShowPanel();
+                CameraPanelData.ToggleShowPanel();
             };
 
             connectionData.MasterActiveChanged += _ => Connection.Disconnect();
@@ -547,6 +550,7 @@ namespace Iviz.App
             }
 
             config.TfPublisher = TfPublisher.Instance.Configuration;
+            config.Camera = CameraPanelData.Configuration;
 
             try
             {
@@ -570,7 +574,7 @@ namespace Iviz.App
             string defaultConfigFile = $"{Settings.SavedFolder}/{defaultConfigPrefix}{LoadConfigDialogData.Suffix}";
             if (File.Exists(defaultConfigFile))
             {
-                LoadStateConfiguration(defaultConfigFile);
+                LoadStateConfiguration($"{defaultConfigPrefix}{LoadConfigDialogData.Suffix}");
             }
         }
 
@@ -606,6 +610,7 @@ namespace Iviz.App
 
             TfData.UpdateConfiguration(stateConfig.Tf);
             TfPublisher.Instance.UpdateConfiguration(stateConfig.TfPublisher);
+            CameraPanelData.UpdateConfiguration(stateConfig.Camera);
 
             if (Settings.IsMobile && stateConfig.AR != null)
             {
@@ -677,7 +682,6 @@ namespace Iviz.App
                     .ToArray();
                 Connection.SetHostAliases(validHostPairs);
 
-                Dialogs.ARMarkerData.Configuration = config.MarkersConfiguration;
                 return;
             }
             catch (Exception e) when
@@ -709,7 +713,6 @@ namespace Iviz.App
                 LastMasterUris = new List<Uri>(Dialogs.ConnectionData.LastMasterUris),
                 Settings = Settings.SettingsManager.Config,
                 HostAliases = Dialogs.SystemData.HostAliases,
-                MarkersConfiguration = Dialogs.ARMarkerData.Configuration,
             };
 
             try
@@ -738,7 +741,6 @@ namespace Iviz.App
                 ConnectionConfiguration config = JsonConvert.DeserializeObject<ConnectionConfiguration>(inText);
                 config.Settings = Settings.SettingsManager.Config;
                 config.HostAliases = Dialogs.SystemData.HostAliases;
-                config.MarkersConfiguration = Dialogs.ARMarkerData.Configuration;
                 string outText = BuiltIns.ToJsonString(config);
                 File.WriteAllText(path, outText);
             }
@@ -914,7 +916,7 @@ namespace Iviz.App
             ThrowHelper.ThrowIfNull(topic, nameof(topic));
             ThrowHelper.ThrowIfNull(type, nameof(type));
 
-            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out var resource))
+            if (!Resource.TryGetResourceByRosMessageType(type, out var resource))
             {
                 throw new ArgumentException(nameof(type));
             }

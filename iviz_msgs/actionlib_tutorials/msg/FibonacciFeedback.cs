@@ -25,7 +25,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         /// Constructor with buffer.
         public FibonacciFeedback(ref ReadBuffer b)
         {
-            Sequence = b.DeserializeStructArray<int>();
+            b.DeserializeStructArray(out Sequence);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FibonacciFeedback(ref b);
@@ -39,7 +39,7 @@ namespace Iviz.Msgs.ActionlibTutorials
         
         public void RosValidate()
         {
-            if (Sequence is null) BuiltIns.ThrowNullReference(nameof(Sequence));
+            if (Sequence is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + 4 * Sequence.Length;

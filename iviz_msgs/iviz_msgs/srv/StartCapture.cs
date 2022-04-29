@@ -71,9 +71,9 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public StartCaptureRequest(ref ReadBuffer b)
         {
-            ResolutionX = b.Deserialize<int>();
-            ResolutionY = b.Deserialize<int>();
-            WithHolograms = b.Deserialize<bool>();
+            b.Deserialize(out ResolutionX);
+            b.Deserialize(out ResolutionY);
+            b.Deserialize(out WithHolograms);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureRequest(ref b);
@@ -121,8 +121,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public StartCaptureResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
-            Message = b.DeserializeString();
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new StartCaptureResponse(ref b);
@@ -137,7 +137,7 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Message is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);

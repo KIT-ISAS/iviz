@@ -31,9 +31,9 @@ namespace Iviz.Msgs.StdMsgs
         /// Constructor with buffer.
         public MultiArrayDimension(ref ReadBuffer b)
         {
-            Label = b.DeserializeString();
-            Size = b.Deserialize<uint>();
-            Stride = b.Deserialize<uint>();
+            b.DeserializeString(out Label);
+            b.Deserialize(out Size);
+            b.Deserialize(out Stride);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MultiArrayDimension(ref b);
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Label is null) BuiltIns.ThrowNullReference(nameof(Label));
+            if (Label is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 12 + BuiltIns.GetStringSize(Label);

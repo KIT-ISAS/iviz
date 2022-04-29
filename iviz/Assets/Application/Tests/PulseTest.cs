@@ -8,10 +8,7 @@ namespace Iviz.App.Tests
     public class PulseTest : MonoBehaviour
     {
         float start;
-        static readonly int PulseCenter = Shader.PropertyToID("_PulseCenter");
-        static readonly int PulseTime = Shader.PropertyToID("_PulseTime");
-        static readonly int PulseDelta = Shader.PropertyToID("_PulseDelta");
-
+        
         void Awake()
         {
             var resource = ResourcePool.RentDisplay<LineDisplay>();
@@ -42,9 +39,9 @@ namespace Iviz.App.Tests
         {
             float timeDiff = Time.time - start;
             var material = Resource.Materials.LinePulse.Object;
-            material.SetVector(PulseCenter,  new Vector4(0, 0, 0, 0));
-            material.SetFloat(PulseTime,  (timeDiff - 0.5f) );
-            material.SetFloat(PulseDelta, 0.25f);
+            material.SetVector(ShaderIds.PulseCenterId,  new Vector4(0, 0, 0, 0));
+            material.SetFloat(ShaderIds.PulseTimeId,  (timeDiff - 0.5f) );
+            material.SetFloat(ShaderIds.PulseDeltaId, 0.25f);
 
             if (timeDiff > 5)
             {

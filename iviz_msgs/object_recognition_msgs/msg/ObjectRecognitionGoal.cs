@@ -27,8 +27,8 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         /// Constructor with buffer.
         public ObjectRecognitionGoal(ref ReadBuffer b)
         {
-            UseRoi = b.Deserialize<bool>();
-            FilterLimits = b.DeserializeStructArray<float>();
+            b.Deserialize(out UseRoi);
+            b.DeserializeStructArray(out FilterLimits);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ObjectRecognitionGoal(ref b);
@@ -43,7 +43,7 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
         
         public void RosValidate()
         {
-            if (FilterLimits is null) BuiltIns.ThrowNullReference(nameof(FilterLimits));
+            if (FilterLimits is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + 4 * FilterLimits.Length;

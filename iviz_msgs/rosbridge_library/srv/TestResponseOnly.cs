@@ -66,7 +66,8 @@ namespace Iviz.Msgs.RosbridgeLibrary
         
         public TestResponseOnlyRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly TestResponseOnlyRequest Singleton = new TestResponseOnlyRequest();
+        static TestResponseOnlyRequest? singleton;
+        public static TestResponseOnlyRequest Singleton => singleton ??= new TestResponseOnlyRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -103,7 +104,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         /// Constructor with buffer.
         public TestResponseOnlyResponse(ref ReadBuffer b)
         {
-            Data = b.Deserialize<int>();
+            b.Deserialize(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestResponseOnlyResponse(ref b);

@@ -68,12 +68,13 @@ namespace Iviz.Displays
 
         void BuildLeash(Ray pointerRay, Vector3 target)
         {
-            const int maxSegments = 5 * 16;
+            float distance = (target - pointerRay.origin).Magnitude();
+            int numSegments = (int)(distance * 16);
+            
             var colorBase = Color;
             Lines.SetDirect(array =>
             {
                 var (start, tangent) = pointerRay;
-                float distance = Vector3.Distance(target, start);
 
                 if (distance.ApproximatelyZero())
                 {
@@ -84,7 +85,6 @@ namespace Iviz.Displays
                 var tangentReflected = tangent - Vector3.Dot(tangent, direction) * 2 * direction;
                 float dirScale = distance / 3;
 
-                int numSegments = (int)(math.length(start - target) * 16);
 
                 var f = new float3x4(
                     start,
@@ -129,7 +129,7 @@ namespace Iviz.Displays
                 }
 
                 return true;
-            }, maxSegments);
+            }, numSegments);
         }
 
         static float AlphaFromDistance(in float3 p, in float3 start, in float3 end)

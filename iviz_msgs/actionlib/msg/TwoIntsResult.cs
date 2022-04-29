@@ -23,7 +23,7 @@ namespace Iviz.Msgs.Actionlib
         /// Constructor with buffer.
         public TwoIntsResult(ref ReadBuffer b)
         {
-            Sum = b.Deserialize<long>();
+            b.Deserialize(out Sum);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TwoIntsResult(ref b);

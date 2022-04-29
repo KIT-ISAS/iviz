@@ -23,7 +23,7 @@ namespace Iviz.Msgs.Actionlib
         /// Constructor with buffer.
         public TestResult(ref ReadBuffer b)
         {
-            Result = b.Deserialize<int>();
+            b.Deserialize(out Result);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TestResult(ref b);

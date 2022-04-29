@@ -82,7 +82,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Scene is null) BuiltIns.ThrowNullReference(nameof(Scene));
+            if (Scene is null) BuiltIns.ThrowNullReference();
             Scene.RosValidate();
         }
     
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public ApplyPlanningSceneResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ApplyPlanningSceneResponse(ref b);

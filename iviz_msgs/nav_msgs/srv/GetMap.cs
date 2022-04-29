@@ -67,7 +67,8 @@ namespace Iviz.Msgs.NavMsgs
         
         public GetMapRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetMapRequest Singleton = new GetMapRequest();
+        static GetMapRequest? singleton;
+        public static GetMapRequest Singleton => singleton ??= new GetMapRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -119,7 +120,7 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Map is null) BuiltIns.ThrowNullReference(nameof(Map));
+            if (Map is null) BuiltIns.ThrowNullReference();
             Map.RosValidate();
         }
     

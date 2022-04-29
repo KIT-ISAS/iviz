@@ -71,8 +71,8 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public GetParamRequest(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            @default = b.DeserializeString();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out @default);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetParamRequest(ref b);
@@ -87,8 +87,8 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (@default is null) BuiltIns.ThrowNullReference(nameof(@default));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (@default is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetStringSize(@default);
@@ -116,7 +116,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public GetParamResponse(ref ReadBuffer b)
         {
-            Value = b.DeserializeString();
+            b.DeserializeString(out Value);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetParamResponse(ref b);
@@ -130,7 +130,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Value is null) BuiltIns.ThrowNullReference(nameof(Value));
+            if (Value is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Value);

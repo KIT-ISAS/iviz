@@ -24,15 +24,15 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor with buffer.
         public Group(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Type = b.DeserializeString();
-            Parameters = b.DeserializeArray<ParamDescription>();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Type);
+            b.DeserializeArray(out Parameters);
             for (int i = 0; i < Parameters.Length; i++)
             {
                 Parameters[i] = new ParamDescription(ref b);
             }
-            Parent = b.Deserialize<int>();
-            Id = b.Deserialize<int>();
+            b.Deserialize(out Parent);
+            b.Deserialize(out Id);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Group(ref b);
@@ -50,12 +50,12 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
-            if (Parameters is null) BuiltIns.ThrowNullReference(nameof(Parameters));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Type is null) BuiltIns.ThrowNullReference();
+            if (Parameters is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Parameters.Length; i++)
             {
-                if (Parameters[i] is null) BuiltIns.ThrowNullReference($"{nameof(Parameters)}[{i}]");
+                if (Parameters[i] is null) BuiltIns.ThrowNullReference(nameof(Parameters), i);
                 Parameters[i].RosValidate();
             }
         }

@@ -66,7 +66,8 @@ namespace Iviz.Msgs.Rosapi
         
         public GetTimeRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly GetTimeRequest Singleton = new GetTimeRequest();
+        static GetTimeRequest? singleton;
+        public static GetTimeRequest Singleton => singleton ??= new GetTimeRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -103,7 +104,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public GetTimeResponse(ref ReadBuffer b)
         {
-            Time = b.Deserialize<time>();
+            b.Deserialize(out Time);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetTimeResponse(ref b);

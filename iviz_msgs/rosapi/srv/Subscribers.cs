@@ -68,7 +68,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public SubscribersRequest(ref ReadBuffer b)
         {
-            Topic = b.DeserializeString();
+            b.DeserializeString(out Topic);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SubscribersRequest(ref b);
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Topic is null) BuiltIns.ThrowNullReference(nameof(Topic));
+            if (Topic is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Topic);
@@ -110,7 +110,7 @@ namespace Iviz.Msgs.Rosapi
         /// Constructor with buffer.
         public SubscribersResponse(ref ReadBuffer b)
         {
-            Subscribers_ = b.DeserializeStringArray();
+            b.DeserializeStringArray(out Subscribers_);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SubscribersResponse(ref b);
@@ -124,10 +124,10 @@ namespace Iviz.Msgs.Rosapi
         
         public void RosValidate()
         {
-            if (Subscribers_ is null) BuiltIns.ThrowNullReference(nameof(Subscribers_));
+            if (Subscribers_ is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Subscribers_.Length; i++)
             {
-                if (Subscribers_[i] is null) BuiltIns.ThrowNullReference($"{nameof(Subscribers_)}[{i}]");
+                if (Subscribers_[i] is null) BuiltIns.ThrowNullReference(nameof(Subscribers_), i);
             }
         }
     

@@ -33,13 +33,7 @@ namespace Iviz.Core
         /// </summary>
         public const int MeshUInt16Threshold = ushort.MaxValue;
 
-        public static readonly CultureInfo Culture = BuiltIns.Culture;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float MagnitudeSq(this in Vector3 v)
-        {
-            return v.x * v.x + v.y * v.y + v.z * v.z;
-        }
+        public static CultureInfo Culture => BuiltIns.Culture;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in float3 p) => MaxAbsCoeff(p.x, p.y, p.z);
@@ -48,35 +42,26 @@ namespace Iviz.Core
         public static float MaxAbsCoeff3(this in float4 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double MaxAbsCoeff(this in Point p) => MaxAbsCoeff(p.X, p.Y, p.Z);
+        public static float MaxAbsCoeff(this in Point p) => MaxAbsCoeff(p.X, p.Y, p.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static double MaxAbsCoeff(this in Msgs.GeometryMsgs.Vector3 p) => MaxAbsCoeff(p.X, p.Y, p.Z);
+        public static float MaxAbsCoeff(this in Msgs.GeometryMsgs.Vector3 p) => MaxAbsCoeff(p.X, p.Y, p.Z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in Vector3 p) => MaxAbsCoeff(p.x, p.y, p.z);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static float MaxAbsCoeff(float x, float y, float z) =>
-            Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+            Mathf.Max(Mathf.Max(Mathf.Abs(x), Mathf.Abs(y)), Mathf.Abs(z));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static double MaxAbsCoeff(double x, double y, double z) =>
-            Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+        static float MaxAbsCoeff(double x, double y, double z) =>
+            Mathf.Max(Mathf.Max(Mathf.Abs((float)x), Mathf.Abs((float)y)), Mathf.Abs((float)z));
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float MaxAbsCoeff(this in Vector4 p)
         {
-            return Math.Max(Math.Max(Math.Max(Math.Abs(p.x), Math.Abs(p.y)), Math.Abs(p.z)), Math.Abs(p.w));
-        }
-
-        public static Vector3 InvCoeff(this Vector3 p)
-        {
-            Vector3 q;
-            q.x = 1f / p.x;
-            q.y = 1f / p.y;
-            q.z = 1f / p.z;
-            return q;
+            return Mathf.Max(Mathf.Max(Mathf.Max(Mathf.Abs(p.x), Mathf.Abs(p.y)), Mathf.Abs(p.z)), Mathf.Abs(p.w));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,7 +73,7 @@ namespace Iviz.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Magnitude(this in Vector3 v)
         {
-            return Mathf.Sqrt(v.MagnitudeSq());
+            return Mathf.Sqrt(v.sqrMagnitude);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -113,20 +98,20 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Abs(this Vector3 p)
+        public static Vector3 Abs(this in Vector3 p)
         {
             Vector3 q;
-            q.x = Math.Abs(p.x);
-            q.y = Math.Abs(p.y);
-            q.z = Math.Abs(p.z);
+            q.x = Mathf.Abs(p.x);
+            q.y = Mathf.Abs(p.y);
+            q.z = Mathf.Abs(p.z);
             return q;
         }
 
-        public static Vector2 Abs(this Vector2 p)
+        public static Vector2 Abs(this in Vector2 p)
         {
             Vector2 q;
-            q.x = Math.Abs(p.x);
-            q.y = Math.Abs(p.y);
+            q.x = Mathf.Abs(p.x);
+            q.y = Mathf.Abs(p.y);
             return q;
         }
 
@@ -267,47 +252,52 @@ namespace Iviz.Core
         /// <param name="o">The Unity object to evaluate</param>
         /// <typeparam name="T">The type of the Unity object</typeparam>
         /// <returns>The Unity object if not-null and valid, otherwise a normal C# null</returns>           
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T? CheckedNull<T>(this T? o) where T : UnityEngine.Object => o != null ? o : null;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T AssertNotNull<T>(this T? o, string name,
             [CallerFilePath] string? caller = null,
-            [CallerLineNumber] int lineNumber = 0) where T : UnityEngine.Object
+            [CallerLineNumber] int lineNumber = 0) where T : class
         {
 #if UNITY_EDITOR
-            return o != null
+            if (o == null)
 #else
-            return o is not null
+            if (o is null)
 #endif
-                ? o
-                : throw new MissingAssetFieldException($"Asset '{name}' has not been set!\n" +
-                                                       $"At: {caller} line {lineNumber}");
+            {
+                ThrowMissingAssetField(name, null, caller, lineNumber);
+            }
+
+            return o;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static T AssertHasComponent<T>(this GameObject? o, string name,
             [CallerFilePath] string? caller = null,
             [CallerLineNumber] int lineNumber = 0)
         {
             if (o == null)
             {
-                throw new MissingAssetFieldException(
-                    $"Asset '{name}' has not been set!\n" +
-                    $"At: {caller} line {lineNumber}");
+                ThrowMissingAssetField(name, null, caller, lineNumber);
             }
 
             if (!o.TryGetComponent(out T t))
             {
-                throw new MissingAssetFieldException(
-                    $"Asset '{name}' has does not have a component of type '{typeof(T).Name}!\n" +
-                    $"At: {caller} line {lineNumber}");
+                ThrowMissingAssetField(name, typeof(T), caller, lineNumber);
             }
 
             return t;
         }
-        
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
+        [DoesNotReturn]
+        static void ThrowMissingAssetField(string name, Type? type, string? caller, int lineNumber)
+        {
+            string s = type == null
+                ? $"Asset '{name}' has not been set!\n" +
+                  $"At: {caller} line {lineNumber.ToString()}"
+                : $"Asset '{name}' has does not have a component of type '{type.Name}!\n" +
+                  $"At: {caller} line {lineNumber.ToString()}";
+            throw new MissingAssetFieldException(s);
+        }
+
         public static T AssertHasComponent<T>(this Component? o, string name,
             [CallerFilePath] string? caller = null,
             [CallerLineNumber] int lineNumber = 0) =>
@@ -324,7 +314,7 @@ namespace Iviz.Core
             t ??= o.AssertHasComponent<T>(name, caller, lineNumber);
 
         public static Transform EnsureHasTransform(this Component o, ref Transform? t) => t ??= o.transform;
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Color WithAlpha(this in Color c, float alpha)
         {
@@ -523,36 +513,19 @@ namespace Iviz.Core
         public static void Deconstruct(this in Ray r, out Vector3 origin, out Vector3 direction) =>
             (origin, direction) = (r.origin, r.direction);
 
-        /// <summary>
-        /// Returns the array inside a <see cref="Memory{T}"/> object to the <see cref="ArrayPool{T}"/>.
-        /// Used by some iviz messages which rent arrays from the pool instead of creating a new one.
-        /// </summary>
-        /// <param name="memory"></param>
-        /// <typeparam name="T"></typeparam>
-        public static void TryReturn<T>(this Memory<T> memory) where T : unmanaged
+        public static void TryReturn(this SharedRent<byte> memory)
         {
-            if (memory.Length == 0 || !MemoryMarshal.TryGetArray(memory, out ArraySegment<T> segment))
-            {
-                return;
-            }
-
-            try
-            {
-                ArrayPool<T>.Shared.Return(segment.Array);
-            }
-            catch (ArgumentException)
-            {
-            }
+            memory.Dispose();
         }
 
-        /// <summary>
-        /// Empty function. Used for debugging purposes as an overload for <see cref="TryReturn{T}(Memory{T})"/>,
-        /// in case an iviz message is temporarily set to contain an array instead of a Memory.
-        /// </summary>
-        public static void TryReturn(this Array _)
+        public static void TryReturn(this Array? _)
         {
         }
 
+        public static Array? Share(this Array _)
+        {
+            return null;
+        }
 
         public static float RegularizeAngle(float angleInDeg) =>
             angleInDeg switch
@@ -628,10 +601,10 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ApproximatelyZero(this float f) => Math.Abs(f) < 8 * float.Epsilon;
+        public static bool ApproximatelyZero(this float f) => Mathf.Abs(f) < 8 * float.Epsilon;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool ApproximatelyZero(this double f) => Math.Abs(f) < 8 * double.Epsilon;
+        public static bool ApproximatelyZero(this double f) => Mathf.Abs((float)f) < 8 * double.Epsilon;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyZero(this in Vector3 f) => f.MaxAbsCoeff() < 8 * float.Epsilon;
@@ -680,7 +653,7 @@ namespace Iviz.Core
         public static IEnumerable<Transform> GetAllChildren(this Transform parent)
         {
             return parent.childCount == 0
-                ? new[] { parent }
+                ? new[] { parent } // ok, we allocate here
                 : GetAllChildrenImpl(parent);
 
             static IEnumerable<Transform> GetAllChildrenImpl(Transform transform)
@@ -728,7 +701,7 @@ namespace Iviz.Core
 
         public static bool TryGetFirst<T>(this IReadOnlyList<T> ts, Predicate<T> p, [NotNullWhen(true)] out T? tp)
         {
-            for (int i = 0; i < ts.Count; i++)
+            foreach (int i in ..ts.Count)
             {
                 T t = ts[i];
                 if (p(t))
@@ -799,24 +772,5 @@ namespace Iviz.Core
 
         public WithIndexEnumerable(IEnumerable<T> a) => this.a = a;
         public Enumerator GetEnumerator() => new(a.GetEnumerator());
-    }
-
-    public static class Quaternions
-    {
-        public static readonly Quaternion Rotate90AroundX = new(0.707106769f, 0, 0, 0.707106769f);
-        public static readonly Quaternion Rotate180AroundX = new(1, 0, 0, 0);
-        public static readonly Quaternion Rotate270AroundX = new(-0.707106769f, 0, 0, 0.707106769f);
-        public static readonly Quaternion Rotate90AroundY = new(0, 0.707106769f, 0, 0.707106769f);
-        public static readonly Quaternion Rotate180AroundY = new(0, 1, 0, 0);
-        public static readonly Quaternion Rotate270AroundY = new(0, 0.707106769f, 0, -0.707106769f);
-        public static readonly Quaternion Rotate180AroundZ = new(0, 0, 1, 0);
-    }
-
-    public class TaskCompletionSource
-    {
-        readonly TaskCompletionSource<object?> ts = new();
-        public Task Task => ts.Task;
-        public void TrySetException(Exception e) => ts.TrySetException(e);
-        public void TrySetResult() => ts.TrySetResult(null);
     }
 }

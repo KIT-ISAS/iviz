@@ -1,0 +1,144 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4406747674369747258
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 582490250996183742}
+  - component: {fileID: 948491843014020968}
+  m_Layer: 0
+  m_Name: App Asset Holder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &582490250996183742
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4406747674369747258}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &948491843014020968
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4406747674369747258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31e8a65d20b0455ab15da27a6cdc9ce7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AtlasLarge: {fileID: 2800000, guid: 35ecb0d50786d49268687f6e935cbdf7, type: 3}
+  AtlasLargeFlip: {fileID: 2800000, guid: ea3d2e3990a0e40d088ee931e8e1c3a1, type: 3}
+  ARPrefab: {fileID: 906031459955196090, guid: 61bf8a72e8b0c41088677503199f213c, type: 3}
+  AngleAxis: {fileID: 3519643506196918197, guid: 01c562bee98e94e3d93cde8f28a2103d,
+    type: 3}
+  ARCameraFovDisplay: {fileID: 5596435619553090378, guid: 99feeeab7f2d0438dbf95744901ee262,
+    type: 3}
+  Arrow: {fileID: 5731292451851619792, guid: 026ed59e8f7d248d8b488a88de15f8d2, type: 3}
+  AxisFrame: {fileID: 1353168548401911560, guid: 5c5abf0f7c89046b081254e5bcc92ca7,
+    type: 3}
+  BoundaryFrame: {fileID: 2764836083797495983, guid: 0517e9c3c251f4aaaa0215bd879569fb,
+    type: 3}
+  DepthImage: {fileID: 1287237009152467733, guid: 82f33089581fb458085f5d7871471e5c,
+    type: 3}
+  Grid: {fileID: 1346616014813264747, guid: dfae3b16dfd594373a9da5633568c46f, type: 3}
+  GridMap: {fileID: 8890165288296654493, guid: 75d5771e81f6c4120bc5d608f22bf2d2, type: 3}
+  Image: {fileID: 7979687756811785169, guid: 7f66efcb8d7da5847ba5d219349a5914, type: 3}
+  InteractiveControl: {fileID: 2129656827226268980, guid: 6a7f6fab10a204aa69d9eb743d5d3f52,
+    type: 3}
+  LineConnector: {fileID: 538164998166567882, guid: 798f93d90dd2148bab7eb8f0978493a2,
+    type: 3}
+  OccupancyGrid: {fileID: 7604648359057699655, guid: 9f870dd485f0447a193faf9543d52c8a,
+    type: 3}
+  OccupancyGridTexture: {fileID: 3038931241545366743, guid: a6b49fae5a7a64f398fd1107d9bdd58c,
+    type: 3}
+  OverlayCamera: {fileID: 4694768697783269930, guid: 1dd964befeabf466689ae7034b5f36be,
+    type: 3}
+  Pyramid: {fileID: 1004992361040824138, guid: f4f56eb5c6153482383334a96a835310, type: 3}
+  RadialScan: {fileID: 1138564149853065790, guid: 439361d79edf3470ca410fd80fbd6d63,
+    type: 3}
+  Ring: {fileID: 2919033561988139937, guid: 71964f516a1b64eae9a12dd80a25b4d9, type: 3}
+  Square: {fileID: 5388285313566478080, guid: 9ba6887d9413647c49a9ad75f5c7a9a8, type: 3}
+  Trail: {fileID: 3045043143408952572, guid: 287fc9c08ef9d4183b317a1693cc66f8, type: 3}
+  Triangle: {fileID: 1279096251387851904, guid: 303e22e8ab8f349fbae59eed70100b13,
+    type: 3}
+  ARDialog: {fileID: 9024825353754890543, guid: cfab43ef0e4b942cba702ea098eb3d39,
+    type: 3}
+  ARDialogIcon: {fileID: 9024825353754890543, guid: 4f0b632fd70f3407a948d3a91b8100da,
+    type: 3}
+  ARDialogMenu: {fileID: 9024825353754890543, guid: 596955ea6035442359b73ae4ea9a32f7,
+    type: 3}
+  ARDialogShort: {fileID: 9024825353754890543, guid: b1c93fc2196764d308b15a8a360a5f2e,
+    type: 3}
+  ARTfFrame: {fileID: 6567602141477134692, guid: 67af1adae208f4fe8949e532576d55ee,
+    type: 3}
+  ARDialogNotice: {fileID: 9024825353754890543, guid: ffcf9df44385d4b86970093fa5a41022,
+    type: 3}
+  ARButtonDialog: {fileID: 9024825353754890543, guid: 95b4d773aaee24439bf45345ebf58509,
+    type: 3}
+  ARMarkerHighlighter: {fileID: 5697476348398527480, guid: 5e192b3ad8fd842c099e81f8ff2d3fe4,
+    type: 3}
+  RotationDisc: {fileID: 3400963749383913441, guid: 39ed52dc07cef4db08ddc7e159dc3afb,
+    type: 3}
+  SpringDisc: {fileID: 813713276496453762, guid: 2d48445f3f4c3481abdb17e9fb48a032,
+    type: 3}
+  SpringDisc3D: {fileID: 7002819732865035587, guid: 68518ad40aa4f4b588e6061d42800afe,
+    type: 3}
+  TrajectoryDisc: {fileID: 6036581522244349746, guid: c287762600d084ed6be063bf0f5a2ec8,
+    type: 3}
+  Tooltip: {fileID: 2498166935032724989, guid: 6303af998896f4ad29bf3fbf96bd0cdd, type: 3}
+  TargetArea: {fileID: 5887126199942291436, guid: 409cbf21c450241b79b9e4327b57da61,
+    type: 3}
+  TooltipWidget: {fileID: 566482875618487995, guid: d400e7a90dbfa42dcba1abce6a2828e9,
+    type: 3}
+  Boundary: {fileID: 8214874507214888100, guid: b6ea9643ec70d44bdb2e83278435d719,
+    type: 3}
+  BoundaryLink: {fileID: 6996529739439326712, guid: 359c642ac24754957b8e39579cd74264,
+    type: 3}
+  BoundaryCheck: {fileID: 6361059073634900896, guid: 1f606e05537014fb39caf297a0709d1e,
+    type: 3}
+  PositionDisc: {fileID: 327149289443996903, guid: fce2f5c41831445c09eb0349955089a1,
+    type: 3}
+  PositionDisc3D: {fileID: 5853665389834264231, guid: 50044df9508cc436a9ac5f9574c3df21,
+    type: 3}
+  LineConnectorMaterial: {fileID: 2100000, guid: cfb813fa6b5bb4474a07ff282fdc74d6,
+    type: 2}
+  TextMaterial: {fileID: 2100000, guid: 2d12233ced84548dabc51813d2d11354, type: 2}
+  ImagePreview: {fileID: 2100000, guid: bdca2e3222097a249b26542375318451, type: 2}
+  GridInterior: {fileID: 2100000, guid: 64f66be0487d84820abb42b120f807d5, type: 2}
+  GridInteriorSimple: {fileID: 2100000, guid: f3449decfce2b4320b10491c7a2a911a, type: 2}
+  GridMapMat: {fileID: 2100000, guid: f8f957cebab399e47b5efc4174b2b14d, type: 2}
+  TransparentGridMap: {fileID: 2100000, guid: 4e683f97d8be24d8ca6e940646270fe4, type: 2}
+  DepthCloud: {fileID: 2100000, guid: 068f66693b9c4b64b8fe01cf78ce88f6, type: 2}
+  OccupancyGridMat: {fileID: 2100000, guid: e410ed67dcc4542b6bde372d33cd3c6f, type: 2}
+  OccupancyGridClipMat: {fileID: 2100000, guid: 66c121943c904442598918986b422f44,
+    type: 2}
+  RoundedPlane: {fileID: 1062175728900501377, guid: 9f41191ada4f64586a000ddcde7d2f40,
+    type: 3}
+  Leash: {fileID: 1765330239399484400, guid: a687d63da0fd54620b233547f451e179, type: 3}
+  Reticle: {fileID: 8760531998953535710, guid: a94c03001012a4f66977000ad90a3273, type: 3}
+  SelectionFrame: {fileID: 9150732782772478815, guid: a13c81d7b358747f3bb59d9a7d2081fe,
+    type: 3}
+  CanvasHolder: {fileID: 4340412021783892170, guid: 8aaae644fa0e1459ca28dd17ce583d0b,
+    type: 3}
+  PalmCompass: {fileID: 6907080009653815434, guid: 50896ae2972e4442bbac447775203a5a,
+    type: 3}
+  Click: {fileID: 8300000, guid: 8ef554f74ef29574c82580a0a1b37c22, type: 3}
+  Screenshot: {fileID: 8300000, guid: b516c6c7a08544f429fcba475c006d49, type: 3}

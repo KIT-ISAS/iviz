@@ -29,8 +29,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         /// Constructor with buffer.
         public KeyValue(ref ReadBuffer b)
         {
-            Key = b.DeserializeString();
-            Value = b.DeserializeString();
+            b.DeserializeString(out Key);
+            b.DeserializeString(out Value);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new KeyValue(ref b);
@@ -45,8 +45,8 @@ namespace Iviz.Msgs.DiagnosticMsgs
         
         public void RosValidate()
         {
-            if (Key is null) BuiltIns.ThrowNullReference(nameof(Key));
-            if (Value is null) BuiltIns.ThrowNullReference(nameof(Value));
+            if (Key is null) BuiltIns.ThrowNullReference();
+            if (Value is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Key) + BuiltIns.GetStringSize(Value);

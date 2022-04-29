@@ -66,7 +66,8 @@ namespace Iviz.Msgs.StdSrvs
         
         public TriggerRequest RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly TriggerRequest Singleton = new TriggerRequest();
+        static TriggerRequest? singleton;
+        public static TriggerRequest Singleton => singleton ??= new TriggerRequest();
     
         public void RosSerialize(ref WriteBuffer b)
         {
@@ -108,8 +109,8 @@ namespace Iviz.Msgs.StdSrvs
         /// Constructor with buffer.
         public TriggerResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
-            Message = b.DeserializeString();
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TriggerResponse(ref b);
@@ -124,7 +125,7 @@ namespace Iviz.Msgs.StdSrvs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
+            if (Message is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + BuiltIns.GetStringSize(Message);

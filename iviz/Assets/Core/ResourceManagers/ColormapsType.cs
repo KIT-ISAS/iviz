@@ -38,7 +38,7 @@ namespace Iviz.Resources
                 "parula"
             };
 
-            var assetHolder = Resource.Extras.AssetHolder;
+            var assetHolder = ResourcePool.AssetHolder;
             Textures = new Dictionary<ColormapId, Texture2D>()
             {
                 [ColormapId.autumn] = assetHolder.Autumn,

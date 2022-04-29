@@ -25,7 +25,7 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public TrajectoryConstraints(ref ReadBuffer b)
         {
-            Constraints = b.DeserializeArray<Constraints>();
+            b.DeserializeArray(out Constraints);
             for (int i = 0; i < Constraints.Length; i++)
             {
                 Constraints[i] = new Constraints(ref b);
@@ -43,10 +43,10 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (Constraints is null) BuiltIns.ThrowNullReference(nameof(Constraints));
+            if (Constraints is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Constraints.Length; i++)
             {
-                if (Constraints[i] is null) BuiltIns.ThrowNullReference($"{nameof(Constraints)}[{i}]");
+                if (Constraints[i] is null) BuiltIns.ThrowNullReference(nameof(Constraints), i);
                 Constraints[i].RosValidate();
             }
         }

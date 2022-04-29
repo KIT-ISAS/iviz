@@ -18,13 +18,6 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class MeshListDisplay : MarkerDisplayWithColormap, ISupportsAROcclusion, ISupportsShadows
     {
-        const float MaxPositionMagnitude = 1e3f;
-
-        static readonly int BoundaryCenterID = Shader.PropertyToID("_BoundaryCenter");
-        static readonly int PointsID = Shader.PropertyToID("_Points");
-        static readonly int PropLocalScale = Shader.PropertyToID("_LocalScale");
-        static readonly int PropLocalOffset = Shader.PropertyToID("_LocalOffset");
-
         [SerializeField] Vector3 elementScale3;
         [SerializeField] Vector3 preTranslation;
         [SerializeField] Mesh? mesh;
@@ -160,7 +153,7 @@ namespace Iviz.Displays
             UpdateTransform();
 
             var worldBounds = Collider.bounds;
-            Properties.SetVector(BoundaryCenterID, worldBounds.center);
+            Properties.SetVector(ShaderIds.BoundaryCenterId, worldBounds.center);
 
             var material = FindMaterial();
 
@@ -223,7 +216,7 @@ namespace Iviz.Displays
 
             pointComputeBuffer?.Release();
             pointComputeBuffer = null;
-            Properties.SetBuffer(PointsID, (ComputeBuffer?)null);
+            Properties.SetBuffer(ShaderIds.PointsId, (ComputeBuffer?)null);
         }
 
         /// <summary>
@@ -233,24 +226,6 @@ namespace Iviz.Displays
         public void Set(ReadOnlySpan<PointWithColor> points)
         {
             Set(MemoryMarshal.Cast<PointWithColor, float4>(points));
-        }
-
-        void Set(ReadOnlySpan<float4> points)
-        {
-            pointBuffer.EnsureCapacity(points.Length);
-            pointBuffer.Clear();
-
-            foreach (ref readonly var point in points)
-            {
-                if (point.IsInvalid3() || point.MaxAbsCoeff3() > MaxPositionMagnitude)
-                {
-                    continue;
-                }
-
-                pointBuffer.AddUnsafe(point);
-            }
-
-            UpdateBuffer();
         }
 
         public void Reset()
@@ -263,14 +238,14 @@ namespace Iviz.Displays
         /// Copies the array directly without checking.
         /// </summary>
         /// <param name="points">A native array with the positions and colors.</param>        
-        public void SetDirect(ReadOnlySpan<float4> points)
+        public void Set(ReadOnlySpan<float4> points)
         {
             pointBuffer.Clear();
             pointBuffer.AddRange(points);
             UpdateBuffer();
         }
 
-        public void SetDirect(Action<NativeList<float4>> callback, int reserve = 0)
+        public void Set(Action<NativeList<float4>> callback, int reserve = 0)
         {
             if (callback == null)
             {
@@ -294,10 +269,10 @@ namespace Iviz.Displays
                 ElementScale * elementScale3.y,
                 ElementScale * elementScale3.z,
                 1);
-            Properties.SetVector(PropLocalScale, realScale);
+            Properties.SetVector(ShaderIds.LocalScaleId, realScale);
 
             preTranslation = UseIntensityForScaleY ? (ElementScale * ElementScale3.y / 2) * Vector3.up : Vector3.zero;
-            Properties.SetVector(PropLocalOffset, preTranslation);
+            Properties.SetVector(ShaderIds.LocalOffsetId, preTranslation);
         }
 
         void UpdateBuffer()
@@ -319,7 +294,7 @@ namespace Iviz.Displays
                 pointComputeBuffer?.Release();
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Unsafe.SizeOf<float4>(),
                     ComputeBufferType.Default, ComputeBufferMode.Dynamic);
-                Properties.SetBuffer(PointsID, pointComputeBuffer);
+                Properties.SetBuffer(ShaderIds.PointsId, pointComputeBuffer);
             }
 
             pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
@@ -334,7 +309,7 @@ namespace Iviz.Displays
             Vector3 meshScale = ElementScale * ElementScale3;
             if (UseIntensityForScaleY)
             {
-                meshScale.y *= Math.Max(Math.Abs(span.x), Math.Abs(span.y));
+                meshScale.y *= Mathf.Max(Mathf.Abs(span.x), Mathf.Abs(span.y));
             }
 
             var baseMeshBounds = Mesh.bounds;
@@ -358,20 +333,22 @@ namespace Iviz.Displays
         {
         }
 
+        public override string ToString() => $"[{nameof(MeshListDisplay)}]";
+
         protected override void Rebuild()
         {
             if (pointComputeBuffer != null)
             {
                 pointComputeBuffer.Release();
                 pointComputeBuffer = null;
-                Properties.SetBuffer(PointsID, (ComputeBuffer?)null);
+                Properties.SetBuffer(ShaderIds.PointsId, (ComputeBuffer?)null);
             }
 
             if (pointBuffer.Capacity != 0)
             {
                 pointComputeBuffer = new ComputeBuffer(pointBuffer.Capacity, Marshal.SizeOf<float4>());
                 pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
-                Properties.SetBuffer(PointsID, pointComputeBuffer);
+                Properties.SetBuffer(ShaderIds.PointsId, pointComputeBuffer);
             }
 
             if (argsComputeBuffer != null)

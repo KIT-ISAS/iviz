@@ -2,112 +2,112 @@
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
-namespace Iviz.Msgs
+namespace Iviz.Msgs;
+
+[DataContract(Name = "time")]
+[StructLayout(LayoutKind.Sequential)]
+public readonly struct time : IEquatable<time>, IComparable<time>
 {
-    [DataContract(Name = "time")]
-    [StructLayout(LayoutKind.Sequential)]
-    public readonly struct time : IEquatable<time>, IComparable<time>
+    /// <summary>
+    /// Time offset to add to all timestamps.
+    /// </summary>
+    public static TimeSpan GlobalTimeOffset { get; set; }
+
+    static DateTime? unixEpoch;
+    static DateTime UnixEpoch => (unixEpoch ??= new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc));
+
+    [DataMember(Name = "secs")] public readonly uint Secs;
+    [DataMember(Name = "nsecs")] public readonly uint Nsecs;
+
+    public time(uint secs, uint nsecs)
     {
-        /// <summary>
-        /// Time offset to add to all timestamps.
-        /// </summary>
-        public static TimeSpan GlobalTimeOffset { get; set; } = TimeSpan.Zero;
-        
-        [DataMember(Name = "secs")] public uint Secs { get; }
-        [DataMember(Name = "nsecs")] public uint Nsecs { get; }
+        Secs = secs;
+        Nsecs = nsecs;
+    }
 
-        public time(uint secs, uint nsecs)
-        {
-            Secs = secs;
-            Nsecs = nsecs;
-        }
+    /// <summary>
+    /// Constructs a time from the given DateTime. Does not consider <see cref="GlobalTimeOffset"/>.
+    /// </summary>
+    public time(in DateTime time)
+    {
+        TimeSpan diff = time.ToUniversalTime() - UnixEpoch;
+        Secs = (uint)diff.TotalSeconds;
+        Nsecs = (uint)(diff.Ticks % 10000000) * 100;
+    }
 
-        static readonly DateTime UnixEpoch = new(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+    /// <summary>
+    /// Current time with added <see cref="GlobalTimeOffset"/>.
+    /// </summary>
+    public static time Now() => new(DateTime.Now + GlobalTimeOffset);
 
-        /// <summary>
-        /// Constructs a time from the given DateTime. Does not consider <see cref="GlobalTimeOffset"/>.
-        /// </summary>
-        public time(in DateTime time)
-        {
-            TimeSpan diff = time.ToUniversalTime() - UnixEpoch;
-            Secs = (uint) diff.TotalSeconds;
-            Nsecs = (uint) (diff.Ticks % 10000000) * 100;
-        }
+    public DateTime ToDateTime()
+    {
+        return (UnixEpoch + ToTimeSpan()).ToLocalTime();
+    }
 
-        /// <summary>
-        /// Current time with added <see cref="GlobalTimeOffset"/>.
-        /// </summary>
-        public static time Now() => new(DateTime.Now + GlobalTimeOffset);
+    public TimeSpan ToTimeSpan()
+    {
+        return TimeSpan.FromSeconds(Secs) + TimeSpan.FromTicks(Nsecs / 100);
+    }
 
-        public DateTime ToDateTime()
-        {
-            return (UnixEpoch + ToTimeSpan()).ToLocalTime();
-        }
+    public override bool Equals(object? obj)
+    {
+        return (obj is time d) && (this == d);
+    }
 
-        public TimeSpan ToTimeSpan()
-        {
-            return TimeSpan.FromSeconds(Secs) + TimeSpan.FromTicks(Nsecs / 100);
-        }
+    public override int GetHashCode()
+    {
+        return (Secs, Nsecs).GetHashCode();
+    }
 
-        public override bool Equals(object? obj)
-        {
-            return (obj is time d) && (this == d);
-        }
+    public static bool operator ==(time left, time right)
+    {
+        return left.Nsecs == right.Nsecs && left.Secs == right.Secs;
+    }
 
-        public override int GetHashCode()
-        {
-            return (Secs, Nsecs).GetHashCode();
-        }
+    public static bool operator !=(time left, time right)
+    {
+        return !(left == right);
+    }
 
-        public static bool operator ==(time left, time right)
-        {
-            return left.Nsecs == right.Nsecs && left.Secs == right.Secs;
-        }
+    public bool Equals(time other)
+    {
+        return this == other;
+    }
 
-        public static bool operator !=(time left, time right)
-        {
-            return !(left == right);
-        }
+    public int CompareTo(time other)
+    {
+        int secsComparison = Secs.CompareTo(other.Secs);
+        return secsComparison != 0 ? secsComparison : Nsecs.CompareTo(other.Nsecs);
+    }
 
-        public bool Equals(time other)
-        {
-            return this == other;
-        }
+    public static bool operator >(time left, time right)
+    {
+        return left.Secs != right.Secs ? left.Secs > right.Secs : left.Nsecs > right.Nsecs;
+    }
 
-        public int CompareTo(time other)
-        {
-            int secsComparison = Secs.CompareTo(other.Secs);
-            return secsComparison != 0 ? secsComparison : Nsecs.CompareTo(other.Nsecs);
-        }
+    public static bool operator <(time left, time right)
+    {
+        return left.Secs != right.Secs ? left.Secs < right.Secs : left.Nsecs < right.Nsecs;
+    }
 
-        public static bool operator >(time left, time right)
-        {
-            return left.Secs != right.Secs ? left.Secs > right.Secs : left.Nsecs > right.Nsecs;
-        }
+    public static bool operator >=(time left, time right)
+    {
+        return !(left < right);
+    }
 
-        public static bool operator <(time left, time right)
-        {
-            return left.Secs != right.Secs ? left.Secs < right.Secs : left.Nsecs < right.Nsecs;
-        }
+    public static bool operator <=(time left, time right)
+    {
+        return !(left > right);
+    }
 
-        public static bool operator >=(time left, time right)
-        {
-            return !(left < right);
-        }
-        
-        public static bool operator <=(time left, time right)
-        {
-            return !(left > right);
-        }
+    public time WithSecs(uint secs)
+    {
+        return new(secs, Nsecs);
+    }
 
-        public time WithSecs(uint secs)
-        {
-            return new(secs, Nsecs);
-        }
-
-        public override string ToString()
-        {
-            return $"{{\"secs\":{Secs.ToString()},\"nsecs\":{Nsecs.ToString()}}}";
-        }
+    public override string ToString()
+    {
+        return $"{{\"secs\":{Secs.ToString()},\"nsecs\":{Nsecs.ToString()}}}";
     }
 }

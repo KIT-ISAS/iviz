@@ -27,8 +27,8 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Trajectory(ref ReadBuffer b)
         {
-            Poses = b.DeserializeStructArray<GeometryMsgs.Pose>();
-            Timestamps = b.DeserializeStructArray<time>();
+            b.DeserializeStructArray(out Poses);
+            b.DeserializeStructArray(out Timestamps);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Trajectory(ref b);
@@ -43,8 +43,8 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Poses is null) BuiltIns.ThrowNullReference(nameof(Poses));
-            if (Timestamps is null) BuiltIns.ThrowNullReference(nameof(Timestamps));
+            if (Poses is null) BuiltIns.ThrowNullReference();
+            if (Timestamps is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 8 + 56 * Poses.Length + 8 * Timestamps.Length;

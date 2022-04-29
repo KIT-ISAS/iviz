@@ -42,11 +42,11 @@ namespace Iviz.Msgs.MoveitMsgs
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Position);
             b.Deserialize(out Normal);
-            Depth = b.Deserialize<double>();
-            ContactBody1 = b.DeserializeString();
-            BodyType1 = b.Deserialize<uint>();
-            ContactBody2 = b.DeserializeString();
-            BodyType2 = b.Deserialize<uint>();
+            b.Deserialize(out Depth);
+            b.DeserializeString(out ContactBody1);
+            b.Deserialize(out BodyType1);
+            b.DeserializeString(out ContactBody2);
+            b.Deserialize(out BodyType2);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ContactInformation(ref b);
@@ -67,8 +67,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (ContactBody1 is null) BuiltIns.ThrowNullReference(nameof(ContactBody1));
-            if (ContactBody2 is null) BuiltIns.ThrowNullReference(nameof(ContactBody2));
+            if (ContactBody1 is null) BuiltIns.ThrowNullReference();
+            if (ContactBody2 is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

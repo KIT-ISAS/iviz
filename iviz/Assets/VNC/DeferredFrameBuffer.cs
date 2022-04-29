@@ -33,15 +33,22 @@ namespace VNC
 
         public void SetPixels(in Rectangle rectangle, ReadOnlySpan<byte> pixelData, in PixelFormat pixelFormat)
         {
+            if (pixelData.Length == 0)
+            {
+                return;
+            }
+            
             try
             {
                 var frame = new FrameRectangle(rectangle.Size);
-                frame.SetPixels(pixelData, pixelFormat);
-                Enqueue(new QueueEntry(frame, rectangle));
+                if (frame.SetPixels(pixelData, pixelFormat))
+                {
+                    Enqueue(new QueueEntry(frame, rectangle));
+                }
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                RosLogger.Error($"{nameof(DeferredFrameBuffer)}: Error in {nameof(SetPixels)}", e);
             }
         }
 
@@ -50,7 +57,7 @@ namespace VNC
             try
             {
                 Rgba color;
-                if (pixelFormat.IsBinaryCompatibleTo(PixelFormat.RfbRgb888))
+                if (pixelFormat.IsBinaryCompatibleTo(SupportedFormats.RfbRgb888))
                 {
                     color = default;
                     color.rgb = singlePixel.Read<Rgb>();
@@ -58,6 +65,12 @@ namespace VNC
                 else if (pixelFormat.IsBinaryCompatibleTo(TurboJpegDecoder.RgbaCompatiblePixelFormat))
                 {
                     color = singlePixel.Read<Rgba>();
+                }
+                else if (pixelFormat.IsBinaryCompatibleTo(SupportedFormats.RfbRgb565))
+                {
+                    int rgb565 = singlePixel.Read<ushort>();
+                    int rgba = FrameRectangle.Convert565To888(rgb565);
+                    color = Unsafe.As<int, Rgba>(ref rgba);
                 }
                 else
                 {
@@ -68,35 +81,35 @@ namespace VNC
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                RosLogger.Error($"{nameof(DeferredFrameBuffer)}: Error in {nameof(FillPixels)}", e);
             }
         }
 
         public void SetPixelsPalette(in Rectangle rectangle, ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette,
             in PixelFormat pixelFormat)
         {
+            if (indices.Length == 0)
+            {
+                return;
+            }
+            
             try
             {
                 var frame = new FrameRectangle(rectangle.Size);
-                frame.SetPixelsPalette(indices, palette, pixelFormat);
-                Enqueue(new QueueEntry(frame, rectangle));
+                if (frame.SetPixelsPalette(indices, palette, pixelFormat))
+                {
+                    Enqueue(new QueueEntry(frame, rectangle));
+                }
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                RosLogger.Error($"{nameof(DeferredFrameBuffer)}: Error in {nameof(SetPixelsPalette)}", e);
             }
         }
 
         public void CopyFrom(in Rectangle rectangle, in Rectangle srcRectangle)
         {
-            try
-            {
-                Enqueue(new QueueEntry(rectangle, srcRectangle));
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-            }
+            Enqueue(new QueueEntry(rectangle, srcRectangle));
         }
 
         void Enqueue(in QueueEntry entry)
@@ -146,20 +159,21 @@ namespace VNC
 
         void ProcessFrame(in QueueEntry queueEntry)
         {
+            var textureSpan = GetTextureSpan();
             if (queueEntry.frame is { } frame)
             {
                 using (frame)
                 {
-                    frame.CopyTo(GetTextureSpan(), width, queueEntry.rectangle.Position);
+                    frame.CopyTo(textureSpan, width, queueEntry.rectangle.Position);
                 }
             }
             else if (queueEntry.color is { } color)
             {
-                FrameRectangle.FillRectangle(GetTextureSpan(), width, queueEntry.rectangle, color);
+                FrameRectangle.FillRectangle(textureSpan, width, queueEntry.rectangle, color);
             }
             else
             {
-                FrameRectangle.CopyRectangle(GetTextureSpan(), width, queueEntry.rectangle, queueEntry.srcRectangle);
+                FrameRectangle.CopyRectangle(textureSpan, width, queueEntry.rectangle, queueEntry.srcRectangle);
             }
         }
 

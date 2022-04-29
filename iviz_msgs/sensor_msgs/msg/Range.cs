@@ -56,11 +56,11 @@ namespace Iviz.Msgs.SensorMsgs
         public Range(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            RadiationType = b.Deserialize<byte>();
-            FieldOfView = b.Deserialize<float>();
-            MinRange = b.Deserialize<float>();
-            MaxRange = b.Deserialize<float>();
-            Range_ = b.Deserialize<float>();
+            b.Deserialize(out RadiationType);
+            b.Deserialize(out FieldOfView);
+            b.Deserialize(out MinRange);
+            b.Deserialize(out MaxRange);
+            b.Deserialize(out Range_);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Range(ref b);

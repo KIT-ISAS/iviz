@@ -172,15 +172,7 @@ namespace Iviz.Controllers
                 return;
             }
 
-            try
-            {
-                resource.Set(msg.AngleMin, msg.AngleIncrement, msg.RangeMin, msg.RangeMax, msg.Ranges, msg.Intensities);
-            }
-            finally
-            {
-                msg.Ranges.TryReturn();
-                msg.Intensities.TryReturn();
-            }
+            resource.Set(msg.AngleMin, msg.AngleIncrement, msg.RangeMin, msg.RangeMax, msg.Ranges, msg.Intensities);
         }
 
         public override void Dispose()

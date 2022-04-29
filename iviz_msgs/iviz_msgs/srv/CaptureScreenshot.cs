@@ -67,7 +67,7 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public CaptureScreenshotRequest(ref ReadBuffer b)
         {
-            Compress = b.Deserialize<bool>();
+            b.Deserialize(out Compress);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotRequest(ref b);
@@ -115,15 +115,15 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public CaptureScreenshotResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
-            Message = b.DeserializeString();
+            b.Deserialize(out Success);
+            b.DeserializeString(out Message);
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Width = b.Deserialize<int>();
-            Height = b.Deserialize<int>();
-            Bpp = b.Deserialize<int>();
-            Intrinsics = b.DeserializeStructArray<double>(9);
+            b.Deserialize(out Width);
+            b.Deserialize(out Height);
+            b.Deserialize(out Bpp);
+            b.DeserializeStructArray(9, out Intrinsics);
             b.Deserialize(out Pose);
-            Data = b.DeserializeStructArray<byte>();
+            b.DeserializeStructArray(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CaptureScreenshotResponse(ref b);
@@ -145,10 +145,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Message is null) BuiltIns.ThrowNullReference(nameof(Message));
-            if (Intrinsics is null) BuiltIns.ThrowNullReference(nameof(Intrinsics));
-            if (Intrinsics.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(Intrinsics), Intrinsics.Length, 9);
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Message is null) BuiltIns.ThrowNullReference();
+            if (Intrinsics is null) BuiltIns.ThrowNullReference();
+            if (Intrinsics.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(Intrinsics.Length, 9);
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

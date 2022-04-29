@@ -87,7 +87,7 @@ namespace Iviz.Controllers
                 {
                     return $"<b>No widgets or dialogs</b>\nNo errors";
                 }
-                
+
                 string widgetStr = widgets.Count switch
                 {
                     0 => "<b>No widgets</b>",
@@ -208,12 +208,13 @@ namespace Iviz.Controllers
                 WidgetType.RotationDisc => Resource.Displays.RotationDisc,
                 WidgetType.SpringDisc => Resource.Displays.SpringDisc,
                 WidgetType.SpringDisc3D => Resource.Displays.SpringDisc3D,
-                WidgetType.TrajectoryDisc => Resource.Displays.TrajectoryDisc,
-                WidgetType.TargetArea => Resource.Displays.TargetArea,
+                //WidgetType.TrajectoryDisc => Resource.Displays.TrajectoryDisc,
+                //WidgetType.TargetArea => Resource.Displays.TargetArea,
                 WidgetType.PositionDisc3D => Resource.Displays.PositionDisc3D,
                 WidgetType.PositionDisc => Resource.Displays.PositionDisc,
                 WidgetType.Boundary => Resource.Displays.Boundary,
                 WidgetType.BoundaryCheck => Resource.Displays.BoundaryCheck,
+                WidgetType.Tooltip => Resource.Displays.TooltipWidget,
                 _ => null
             };
 
@@ -224,7 +225,8 @@ namespace Iviz.Controllers
             }
 
 
-            var guiObject = new GuiObject(this, msg, resourceKey) { Interactable = Interactable };
+            var guiObject = new GuiObject(this, msg, resourceKey, "Widget." + (WidgetType)msg.Type)
+                { Interactable = Interactable };
             widgets[guiObject.Id] = guiObject;
         }
 
@@ -320,7 +322,7 @@ namespace Iviz.Controllers
                 existingGuiObject.Dispose();
             }
 
-            var guiObject = new GuiObject(this, msg, resourceKey);
+            var guiObject = new GuiObject(this, msg, resourceKey, "Dialog." + (DialogType)msg.Type);
             dialogs[guiObject.Id] = guiObject;
         }
 
@@ -343,12 +345,10 @@ namespace Iviz.Controllers
 
         void CheckDeadDialogs()
         {
-            var now = GameThread.Now;
-
             List<GuiObject>? deadObjects = null;
             foreach (var guiObject in dialogs.Values)
             {
-                if (guiObject.ExpirationTime > now)
+                if (!guiObject.Expired)
                 {
                     return;
                 }
@@ -395,9 +395,9 @@ namespace Iviz.Controllers
             MarkAsExpired(dialog);
         }
 
-        void MarkAsExpired(GuiObject dialog)
+        static void MarkAsExpired(GuiObject dialog)
         {
-            dialogs[dialog.Id] = dialog.AsExpired();
+            dialog.MarkAsExpired();
         }
 
         internal void OnDialogExpired(GuiObject dialog)
@@ -456,7 +456,7 @@ namespace Iviz.Controllers
             });
         }
 
-        void OnTargetAreaMoved(GuiObject widget, in Vector2 scale, Vector3 position)
+        internal void OnWidgetResized(GuiObject widget, in Bounds bounds)
         {
             FeedbackSender?.Publish(new Feedback
             {
@@ -464,19 +464,19 @@ namespace Iviz.Controllers
                 VizId = RosManager.MyId ?? "",
                 Id = widget.Id,
                 Type = (byte)FeedbackType.ScaleChanged,
-                Scale = new Vector3(scale.x, 0, scale.y).Unity2RosVector3(),
-                Position = position.Unity2RosPoint()
+                Scale = bounds.size.Unity2RosVector3().Abs(),
+                Position = bounds.center.Unity2RosPoint()
             });
         }
 
-        void OnTargetAreaCanceled(GuiObject widget)
+        internal void OnWidgetClicked(GuiObject widget, int id)
         {
             FeedbackSender?.Publish(new Feedback
             {
                 VizId = RosManager.MyId ?? "",
                 Id = widget.Id,
                 Type = (byte)FeedbackType.ButtonClick,
-                EntryId = -1,
+                EntryId = id,
             });
         }
 
@@ -492,7 +492,7 @@ namespace Iviz.Controllers
 
             description.AppendLine().AppendLine();
         }
-        
+
         public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
         {
             bounds = null;

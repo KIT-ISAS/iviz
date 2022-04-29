@@ -144,15 +144,15 @@ namespace Iviz.Msgs.SensorMsgs
         public CameraInfo(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Height = b.Deserialize<uint>();
-            Width = b.Deserialize<uint>();
-            DistortionModel = b.DeserializeString();
-            D = b.DeserializeStructArray<double>();
-            K = b.DeserializeStructArray<double>(9);
-            R = b.DeserializeStructArray<double>(9);
-            P = b.DeserializeStructArray<double>(12);
-            BinningX = b.Deserialize<uint>();
-            BinningY = b.Deserialize<uint>();
+            b.Deserialize(out Height);
+            b.Deserialize(out Width);
+            b.DeserializeString(out DistortionModel);
+            b.DeserializeStructArray(out D);
+            b.DeserializeStructArray(9, out K);
+            b.DeserializeStructArray(9, out R);
+            b.DeserializeStructArray(12, out P);
+            b.Deserialize(out BinningX);
+            b.Deserialize(out BinningY);
             Roi = new RegionOfInterest(ref b);
         }
         
@@ -177,15 +177,15 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (DistortionModel is null) BuiltIns.ThrowNullReference(nameof(DistortionModel));
-            if (D is null) BuiltIns.ThrowNullReference(nameof(D));
-            if (K is null) BuiltIns.ThrowNullReference(nameof(K));
-            if (K.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(K), K.Length, 9);
-            if (R is null) BuiltIns.ThrowNullReference(nameof(R));
-            if (R.Length != 9) throw new RosInvalidSizeForFixedArrayException(nameof(R), R.Length, 9);
-            if (P is null) BuiltIns.ThrowNullReference(nameof(P));
-            if (P.Length != 12) throw new RosInvalidSizeForFixedArrayException(nameof(P), P.Length, 12);
-            if (Roi is null) BuiltIns.ThrowNullReference(nameof(Roi));
+            if (DistortionModel is null) BuiltIns.ThrowNullReference();
+            if (D is null) BuiltIns.ThrowNullReference();
+            if (K is null) BuiltIns.ThrowNullReference();
+            if (K.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(K.Length, 9);
+            if (R is null) BuiltIns.ThrowNullReference();
+            if (R.Length != 9) BuiltIns.ThrowInvalidSizeForFixedArray(R.Length, 9);
+            if (P is null) BuiltIns.ThrowNullReference();
+            if (P.Length != 12) BuiltIns.ThrowInvalidSizeForFixedArray(P.Length, 12);
+            if (Roi is null) BuiltIns.ThrowNullReference();
             Roi.RosValidate();
         }
     

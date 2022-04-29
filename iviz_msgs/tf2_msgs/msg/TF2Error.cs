@@ -33,8 +33,8 @@ namespace Iviz.Msgs.Tf2Msgs
         /// Constructor with buffer.
         public TF2Error(ref ReadBuffer b)
         {
-            Error = b.Deserialize<byte>();
-            ErrorString = b.DeserializeString();
+            b.Deserialize(out Error);
+            b.DeserializeString(out ErrorString);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new TF2Error(ref b);
@@ -49,7 +49,7 @@ namespace Iviz.Msgs.Tf2Msgs
         
         public void RosValidate()
         {
-            if (ErrorString is null) BuiltIns.ThrowNullReference(nameof(ErrorString));
+            if (ErrorString is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + BuiltIns.GetStringSize(ErrorString);

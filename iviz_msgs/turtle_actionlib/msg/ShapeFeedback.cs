@@ -23,7 +23,8 @@ namespace Iviz.Msgs.TurtleActionlib
         
         public ShapeFeedback RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly ShapeFeedback Singleton = new ShapeFeedback();
+        static ShapeFeedback? singleton;
+        public static ShapeFeedback Singleton => singleton ??= new ShapeFeedback();
     
         public void RosSerialize(ref WriteBuffer b)
         {

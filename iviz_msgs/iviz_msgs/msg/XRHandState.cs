@@ -29,14 +29,14 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public XRHandState(ref ReadBuffer b)
         {
-            IsValid = b.Deserialize<bool>();
+            b.Deserialize(out IsValid);
             StdMsgs.Header.Deserialize(ref b, out Header);
             b.Deserialize(out Palm);
-            Thumb = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Index = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Middle = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Ring = b.DeserializeStructArray<GeometryMsgs.Transform>();
-            Little = b.DeserializeStructArray<GeometryMsgs.Transform>();
+            b.DeserializeStructArray(out Thumb);
+            b.DeserializeStructArray(out Index);
+            b.DeserializeStructArray(out Middle);
+            b.DeserializeStructArray(out Ring);
+            b.DeserializeStructArray(out Little);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new XRHandState(ref b);
@@ -57,11 +57,11 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Thumb is null) BuiltIns.ThrowNullReference(nameof(Thumb));
-            if (Index is null) BuiltIns.ThrowNullReference(nameof(Index));
-            if (Middle is null) BuiltIns.ThrowNullReference(nameof(Middle));
-            if (Ring is null) BuiltIns.ThrowNullReference(nameof(Ring));
-            if (Little is null) BuiltIns.ThrowNullReference(nameof(Little));
+            if (Thumb is null) BuiltIns.ThrowNullReference();
+            if (Index is null) BuiltIns.ThrowNullReference();
+            if (Middle is null) BuiltIns.ThrowNullReference();
+            if (Ring is null) BuiltIns.ThrowNullReference();
+            if (Little is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

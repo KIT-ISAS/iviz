@@ -32,9 +32,9 @@ namespace Iviz.Msgs.GeometryMsgs
         /// Constructor with buffer.
         public Pose2D(ref ReadBuffer b)
         {
-            X = b.Deserialize<double>();
-            Y = b.Deserialize<double>();
-            Theta = b.Deserialize<double>();
+            b.Deserialize(out X);
+            b.Deserialize(out Y);
+            b.Deserialize(out Theta);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Pose2D(ref b);

@@ -10,12 +10,14 @@ using System.Runtime.Serialization;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Core.XR;
 using Iviz.Displays;
 using Iviz.Displays.XR;
 using Iviz.Msgs;
+using Iviz.Tools;
 using MarcusW.VncClient;
 using MarcusW.VncClient.Protocol;
 using MarcusW.VncClient.Protocol.SecurityTypes;
@@ -40,7 +42,7 @@ namespace VNC
 
         IXRController? leftControllerComp;
         IXRController? rightControllerComp;
-        
+
         TfModule? tfModule;
 
         string lastHostname = "";
@@ -77,14 +79,14 @@ namespace VNC
             Iviz.Resources.Resource.ClearResources();
             ResourcePool.ClearResources();
 #endif
-
+            
             tfModule = new TfModule(id => new TfFrameDisplay(id));
-            Settings.SettingsManager.BackgroundColor = Color.black;
+            SetBackgroundColor(Color.black);
 
-            foreach (var dialog in new XRDialog[] {PlainDialog, ConnectionDialog, PasswordDialog})
+            foreach (var dialog in new XRDialog[] { PlainDialog, ConnectionDialog, PasswordDialog })
             {
                 dialog.BindingType = BindingType.User;
-                dialog.LocalDisplacement = new Vector3(0, -0.3f, 0.6f);
+                dialog.DialogDisplacement = new Vector3(0, -0.3f, 0.6f);
                 dialog.Scale = 0.45f;
                 dialog.PositionDamping = 0.01f;
             }
@@ -98,20 +100,20 @@ namespace VNC
         async Task RunAsync()
         {
             PanelHolder.Visible = false;
-            
+
             LoadConfiguration();
-            
+
             while (!Token.IsCancellationRequested)
             {
                 hasConfirmedPassword = false;
-                
+
                 if (!await TryToConnect())
                 {
                     continue;
                 }
 
                 await SaveConfiguration();
-                
+
                 ShowMainPanel();
 
                 await foreach (var connectionState in ProcessConnectionChanges(Token))
@@ -133,7 +135,7 @@ namespace VNC
                 await LaunchPlainDialog(
                     "Error",
                     "<b>Authentication failed!</b>\n" +
-                    "Make sure that the server supports the \"VNC\" authentication type.");
+                    "Make sure that the server supports the \"VncAuth\" authentication type.");
             }
             catch (HandshakeFailedAuthenticationException e) when (e.Result == SecurityResult.FailedTooManyAttempts)
             {
@@ -151,7 +153,7 @@ namespace VNC
             }
             catch (SocketException e)
             {
-                //Debug.Log(e.SocketErrorCode);
+                Debug.Log(e);
                 string message = e.SocketErrorCode switch
                 {
                     SocketError.ConnectionRefused =>
@@ -172,7 +174,7 @@ namespace VNC
                     "Error",
                     "<b>Connection failed!</b>\n" +
                     "The connection timed out. Make sure the VNC server is reachable.");
-            }            
+            }
             catch (OperationCanceledException)
             {
             }
@@ -225,14 +227,7 @@ namespace VNC
             return Task.FromResult(true);
         }
 
-        public Task<(string, int)> RequestServerAsync()
-        {
-            var ts = new TaskCompletionSource<(string, int)>();
-            GameThread.Post(async () => ts.SetResult(await DoRequestServerAsync()));
-            return ts.Task;
-        }
-
-        async Task<(string, int)> DoRequestServerAsync()
+        public async ValueTask<(string, int)> RequestServerAsync()
         {
             while (true)
             {
@@ -245,7 +240,7 @@ namespace VNC
                         "The hostname cannot be empty.");
                     continue;
                 }
-                
+
                 if (Uri.CheckHostName(hostname) == UriHostNameType.Unknown)
                 {
                     await LaunchPlainDialog(
@@ -254,7 +249,7 @@ namespace VNC
                         "Make sure that the VNC server name is correct.");
                     continue;
                 }
-                
+
                 if (testPort.Length == 0)
                 {
                     await LaunchPlainDialog(
@@ -286,8 +281,8 @@ namespace VNC
             PlainDialog.Initialize();
 
             FAnimator.Spawn(Token, 0.1f, t => PlainDialog.Scale = Mathf.Sqrt(t) * 0.45f);
-            
-            var ts = new TaskCompletionSource();
+
+            var ts = TaskUtils.CreateCompletionSource();
 
             void OnClicked(int _)
             {
@@ -309,7 +304,7 @@ namespace VNC
 
             //FAnimator.Spawn(Token, 0.1f, t => ConnectionDialog.Scale = t * 0.45f);
 
-            var ts = new TaskCompletionSource();
+            var ts = TaskUtils.CreateCompletionSource();
 
             void OnClicked(int _)
             {
@@ -323,23 +318,18 @@ namespace VNC
 
             lastHostname = ConnectionDialog.Hostname;
             lastPort = ConnectionDialog.Port;
-            
+
             return (lastHostname, lastPort);
         }
 
         public Task<string> RequestPasswordAsync()
         {
-            if (hasConfirmedPassword)
-            {
-                return Task.FromResult(lastPassword);
-            }
-            
-            var ts = new TaskCompletionSource<string>();
-            GameThread.Post(async () => ts.SetResult(await DoRequestPasswordAsync()));
-            return ts.Task;
+            return hasConfirmedPassword 
+                ? Task.FromResult(lastPassword) 
+                : GameThread.PostAsync(DoRequestPasswordAsync);
         }
 
-        async Task<string> DoRequestPasswordAsync()
+        async ValueTask<string> DoRequestPasswordAsync()
         {
             while (true)
             {
@@ -366,7 +356,7 @@ namespace VNC
 
             FAnimator.Spawn(Token, 0.1f, t => ConnectionDialog.Scale = t * 0.45f);
 
-            var ts = new TaskCompletionSource();
+            var ts = TaskUtils.CreateCompletionSource();
 
             void OnClicked(int _)
             {
@@ -386,7 +376,7 @@ namespace VNC
         {
             var cameraPosition = Settings.MainCameraTransform.position;
             var cameraForward = Settings.MainCameraTransform.forward;
-            
+
             var position = (cameraPosition + 1.5f * cameraForward).WithY(cameraPosition.y - 0.6f);
             PanelHolder.Transform.position = position;
             PanelHolder.RotateToFront();
@@ -394,7 +384,7 @@ namespace VNC
         }
 
         static string ConfigPath => $"{Settings.VncFolder}/config.json";
-        
+
         async Task SaveConfiguration()
         {
             var config = new VncConfiguration
@@ -464,15 +454,27 @@ namespace VNC
             {
                 RosLogger.Debug($"{this}: Failed to reset VNC config", e);
             }
-        }        
-        
+        }
+
+        static void SetBackgroundColor(Color value)
+        {
+            Color colorToUse = Settings.IsHololens ? Color.black : value;
+            Settings.MainCamera.backgroundColor = colorToUse.WithAlpha(0);
+
+            RenderSettings.ambientSkyColor = value.WithAlpha(0);
+
+            Color.RGBToHSV(value, out float h, out float s, out float v);
+            var equatorColor = Color.HSVToRGB(h, Math.Min(s, 0.3f), v * 0.5f);
+            RenderSettings.ambientEquatorColor = equatorColor;
+        }
+
         void OnDestroy()
         {
             tokenSource.Cancel();
             tfModule?.Dispose();
             Client.Dispose();
         }
-        
+
         [DataContract]
         sealed class VncConfiguration
         {
@@ -480,6 +482,5 @@ namespace VNC
             [DataMember] public int Port { get; set; } = 5090;
             [DataMember] public string Password { get; set; } = "";
         }
-
     }
 }

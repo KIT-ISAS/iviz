@@ -70,20 +70,20 @@ namespace Iviz.Msgs.VisualizationMsgs
         public Marker(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Ns = b.DeserializeString();
-            Id = b.Deserialize<int>();
-            Type = b.Deserialize<int>();
-            Action = b.Deserialize<int>();
+            b.DeserializeString(out Ns);
+            b.Deserialize(out Id);
+            b.Deserialize(out Type);
+            b.Deserialize(out Action);
             b.Deserialize(out Pose);
             b.Deserialize(out Scale);
             b.Deserialize(out Color);
-            Lifetime = b.Deserialize<duration>();
-            FrameLocked = b.Deserialize<bool>();
-            Points = b.DeserializeStructArray<GeometryMsgs.Point>();
-            Colors = b.DeserializeStructArray<StdMsgs.ColorRGBA>();
-            Text = b.DeserializeString();
-            MeshResource = b.DeserializeString();
-            MeshUseEmbeddedMaterials = b.Deserialize<bool>();
+            b.Deserialize(out Lifetime);
+            b.Deserialize(out FrameLocked);
+            b.DeserializeStructArray(out Points);
+            b.DeserializeStructArray(out Colors);
+            b.DeserializeString(out Text);
+            b.DeserializeString(out MeshResource);
+            b.Deserialize(out MeshUseEmbeddedMaterials);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Marker(ref b);
@@ -111,11 +111,11 @@ namespace Iviz.Msgs.VisualizationMsgs
         
         public void RosValidate()
         {
-            if (Ns is null) BuiltIns.ThrowNullReference(nameof(Ns));
-            if (Points is null) BuiltIns.ThrowNullReference(nameof(Points));
-            if (Colors is null) BuiltIns.ThrowNullReference(nameof(Colors));
-            if (Text is null) BuiltIns.ThrowNullReference(nameof(Text));
-            if (MeshResource is null) BuiltIns.ThrowNullReference(nameof(MeshResource));
+            if (Ns is null) BuiltIns.ThrowNullReference();
+            if (Points is null) BuiltIns.ThrowNullReference();
+            if (Colors is null) BuiltIns.ThrowNullReference();
+            if (Text is null) BuiltIns.ThrowNullReference();
+            if (MeshResource is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

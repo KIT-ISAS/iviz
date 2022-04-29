@@ -11,6 +11,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/UI XR.unity
     guid: f9f4949b9809dab44a338019cc57ac9d
+  - enabled: 0
+    path: Assets/VNC/UI VNC.unity
+    guid: 47cf373c9fa8348489dc19963c2b1ae2
   m_configObjects:
     Unity.XR.OpenVR.Settings: {fileID: 11400000, guid: a805c8b5d1a1f9b4d92609c210bf04db,
       type: 2}

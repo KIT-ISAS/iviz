@@ -36,8 +36,8 @@ namespace Iviz.Msgs.SensorMsgs
         public FluidPressure(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            FluidPressure_ = b.Deserialize<double>();
-            Variance = b.Deserialize<double>();
+            b.Deserialize(out FluidPressure_);
+            b.Deserialize(out Variance);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new FluidPressure(ref b);

@@ -58,8 +58,8 @@ namespace Iviz.Msgs.ActionlibMsgs
         public GoalStatus(ref ReadBuffer b)
         {
             GoalId = new GoalID(ref b);
-            Status = b.Deserialize<byte>();
-            Text = b.DeserializeString();
+            b.Deserialize(out Status);
+            b.DeserializeString(out Text);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GoalStatus(ref b);
@@ -75,9 +75,9 @@ namespace Iviz.Msgs.ActionlibMsgs
         
         public void RosValidate()
         {
-            if (GoalId is null) BuiltIns.ThrowNullReference(nameof(GoalId));
+            if (GoalId is null) BuiltIns.ThrowNullReference();
             GoalId.RosValidate();
-            if (Text is null) BuiltIns.ThrowNullReference(nameof(Text));
+            if (Text is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + GoalId.RosMessageLength + BuiltIns.GetStringSize(Text);

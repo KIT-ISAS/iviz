@@ -27,9 +27,9 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public MeshMaterial(ref ReadBuffer b)
         {
-            TextureIndex = b.Deserialize<uint>();
+            b.Deserialize(out TextureIndex);
             b.Deserialize(out Color);
-            HasTexture = b.Deserialize<bool>();
+            b.Deserialize(out HasTexture);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new MeshMaterial(ref b);

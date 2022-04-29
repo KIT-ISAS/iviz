@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using System;
 using System.Linq;
 using Iviz.Common;
 using Iviz.Common.Configurations;
@@ -281,7 +282,12 @@ namespace Iviz.Controllers
         public DepthCloudController(DepthCloudConfiguration? config)
         {
             depthImageTexture = new ImageTexture();
-            colorImageTexture = new ImageTexture();
+            colorImageTexture = new ImageTexture
+            {
+                Colormap = ColormapId.gray,
+                OverrideIntensityBounds = true,
+                NormalizedIntensityBounds = new Vector2(0, 1)
+            };
 
             node = new FrameNode("DepthCloud");
             node.Transform.localRotation = new Quaternion(0, 0.7071f, 0.7071f, 0);
@@ -290,28 +296,27 @@ namespace Iviz.Controllers
             projector.DepthImage = depthImageTexture;
             projector.ColorImage = colorImageTexture;
             Config = config ?? new DepthCloudConfiguration();
-            colorImageTexture.Colormap = ColormapId.bone;
         }
 
         bool DepthHandler(Image msg)
         {
             if (DepthIsProcessing)
             {
-                msg.Data.TryReturn();
                 return false;
             }
 
             DepthIsProcessing = true;
 
+            var shared = msg.Data.Share();
             GameThread.PostInListenerQueue(() =>
             {
+                if (!node.IsAlive || DepthListener == null)
+                {
+                    return; // stopped!
+                }
+
                 try
                 {
-                    if (!node.IsAlive || DepthListener == null)
-                    {
-                        return; // stopped!
-                    }
-
                     node.AttachTo(msg.Header);
 
                     depthImageTexture.Set((int)msg.Width, (int)msg.Height, msg.Encoding, msg.Data.AsSpan());
@@ -319,7 +324,7 @@ namespace Iviz.Controllers
                 }
                 finally
                 {
-                    msg.Data.TryReturn();
+                    shared.TryReturn();
                     DepthIsProcessing = false;
                 }
             });
@@ -331,27 +336,27 @@ namespace Iviz.Controllers
         {
             if (DepthIsProcessing)
             {
-                msg.Data.TryReturn();
                 return false;
             }
 
             DepthIsProcessing = true;
 
+            var shared = msg.Data.Share();
             void PostProcess()
             {
+                if (!node.IsAlive)
+                {
+                    return; // stopped!
+                }
+
                 try
                 {
-                    if (!node.IsAlive)
-                    {
-                        return; // stopped!
-                    }
-
                     node.AttachTo(msg.Header);
                     UpdateIntensityBounds();
                 }
                 finally
                 {
-                    msg.Data.TryReturn();
+                    shared.TryReturn();
                     DepthIsProcessing = false;
                 }
             }
@@ -385,26 +390,26 @@ namespace Iviz.Controllers
         {
             if (ColorIsProcessing)
             {
-                msg.Data.TryReturn();
                 return false;
             }
 
             ColorIsProcessing = true;
 
+            var shared = msg.Data.Share();
             GameThread.PostInListenerQueue(() =>
             {
+                if (ColorListener == null)
+                {
+                    return;
+                }
+
                 try
                 {
-                    if (ColorListener == null)
-                    {
-                        return;
-                    }
-                    
                     colorImageTexture.Set((int)msg.Width, (int)msg.Height, msg.Encoding, msg.Data.AsSpan());
                 }
                 finally
                 {
-                    msg.Data.TryReturn();
+                    shared.TryReturn();
                     ColorIsProcessing = false;
                 }
             });
@@ -416,15 +421,15 @@ namespace Iviz.Controllers
         {
             if (ColorIsProcessing)
             {
-                msg.Data.TryReturn();
                 return false;
             }
 
             ColorIsProcessing = true;
 
+            var shared = msg.Data.Share();
             void PostProcess()
             {
-                msg.Data.TryReturn();
+                shared.TryReturn();
                 ColorIsProcessing = false;
             }
 

@@ -24,7 +24,7 @@ namespace Iviz.Msgs.RosbridgeMsgs
         /// Constructor with buffer.
         public ConnectedClients(ref ReadBuffer b)
         {
-            Clients = b.DeserializeArray<ConnectedClient>();
+            b.DeserializeArray(out Clients);
             for (int i = 0; i < Clients.Length; i++)
             {
                 Clients[i] = new ConnectedClient(ref b);
@@ -42,10 +42,10 @@ namespace Iviz.Msgs.RosbridgeMsgs
         
         public void RosValidate()
         {
-            if (Clients is null) BuiltIns.ThrowNullReference(nameof(Clients));
+            if (Clients is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Clients.Length; i++)
             {
-                if (Clients[i] is null) BuiltIns.ThrowNullReference($"{nameof(Clients)}[{i}]");
+                if (Clients[i] is null) BuiltIns.ThrowNullReference(nameof(Clients), i);
                 Clients[i].RosValidate();
             }
         }

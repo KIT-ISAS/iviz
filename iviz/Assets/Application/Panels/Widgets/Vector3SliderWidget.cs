@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class Vector3SliderWidget : MonoBehaviour, IWidget
+    public sealed class Vector3SliderWidget : MonoBehaviour, IVector3Widget
     {
         [SerializeField] SliderWidget inputX;
         [SerializeField] SliderWidget inputY;
@@ -17,14 +17,11 @@ namespace Iviz.App
         [SerializeField] Image panel;
         //bool disableUpdates;
 
-        [NotNull]
         public string Label
         {
-            get => label.text;
             set
             {
                 ThrowHelper.ThrowIfNull(value, nameof(value));
-                name = "Vector3SliderWidget:" + value;
                 label.text = value;
             }
         }
@@ -49,7 +46,7 @@ namespace Iviz.App
         
         float range;
 
-        public float Range
+        float Range
         {
             get => range;
             set
@@ -63,7 +60,8 @@ namespace Iviz.App
         }
 
         Vector3 mean;
-        public Vector3 Mean
+
+        Vector3 Mean
         {
             get => mean;
             set
@@ -82,7 +80,6 @@ namespace Iviz.App
 
         public bool Interactable
         {
-            get => inputX.Interactable;
             set
             {
                 inputX.Interactable = value;
@@ -93,17 +90,15 @@ namespace Iviz.App
             }
         }
 
+        public bool Visible
+        {
+            set => gameObject.SetActive(value);
+        }
+
         public event Action<Vector3> ValueChanged;
 
         void OnValueChanged()
         {
-            /*
-            if (disableUpdates)
-            {
-                return;
-            }
-            */
-
             value = new Vector3(
                 inputX.Value,
                 inputY.Value,
@@ -115,11 +110,9 @@ namespace Iviz.App
 
         void UpdateInputLabels()
         {
-            //disableUpdates = true;
             inputX.Value = value.x;
             inputY.Value = value.y;
             inputZ.Value = value.z;
-            //disableUpdates = false;
         }
 
         public void ClearSubscribers()

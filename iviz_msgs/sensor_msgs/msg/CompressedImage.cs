@@ -41,8 +41,8 @@ namespace Iviz.Msgs.SensorMsgs
         public CompressedImage(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            Format = b.DeserializeString();
-            Data = b.DeserializeStructArray<byte>();
+            b.DeserializeString(out Format);
+            b.DeserializeStructArray(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new CompressedImage(ref b);
@@ -58,8 +58,8 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Format is null) BuiltIns.ThrowNullReference(nameof(Format));
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Format is null) BuiltIns.ThrowNullReference();
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

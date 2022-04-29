@@ -10,6 +10,7 @@ using Iviz.App;
 using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Iviz.Displays;
 using Iviz.Displays.XR;
 using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.IvizMsgs;
@@ -168,6 +169,28 @@ namespace Iviz.Controllers
             }
 
             using var signal = new SemaphoreSlim(0);
+
+            try
+            {
+                await GameThread.PostAsync(() =>
+                {
+                    RosLogger.Debug(
+                        $"{nameof(ControllerService)}: Creating module of type {TryGetName(moduleType)}");
+                    var newModuleData = ModuleListPanel.Instance.CreateModule(moduleType,
+                        requestedId: requestedId.Length != 0 ? requestedId : null);
+                    result.id = newModuleData.Configuration.Id;
+                    result.success = true;
+                    RosLogger.Debug($"{nameof(ControllerService)}: Done!");
+                });
+            }
+            catch (Exception e)
+            {
+                result.message = $"An exception was raised: {e.Message}";
+            }
+
+            return result;
+
+            /*
             GameThread.Post(() =>
             {
                 try
@@ -179,16 +202,13 @@ namespace Iviz.Controllers
                     result.success = true;
                     RosLogger.Debug($"{nameof(ControllerService)}: Done!");
                 }
-                catch (Exception e)
-                {
-                    result.message = $"An exception was raised: {e.Message}";
-                }
                 finally
                 {
                     signal.Release();
                 }
             });
             return await signal.WaitAsync(DefaultTimeoutInMs) ? result : ("", false, "Request timed out!");
+            */
         }
 
         static async ValueTask AddModuleFromTopicAsync(AddModuleFromTopic srv)
@@ -247,11 +267,29 @@ namespace Iviz.Controllers
                 return ("", false, $"Failed to find topic '{topic}'");
             }
 
-            if (!Resource.ResourceByRosMessageType.TryGetValue(type, out ModuleType resource))
+            if (!Resource.TryGetResourceByRosMessageType(type, out ModuleType resource))
             {
                 return ("", false, $"Type '{type}' is unsupported");
             }
 
+            try
+            {
+                await GameThread.PostAsync(() =>
+                {
+                    result.id = ModuleListPanel.Instance.CreateModule(resource, topic, type,
+                        requestedId: requestedId.Length != 0 ? requestedId : null).Configuration.Id;
+                    result.message = "";
+                    result.success = true;
+                });
+            }
+            catch (Exception e)
+            {
+                result.message = $"An exception was raised: {e.Message}";
+                RosLogger.Error($"{nameof(ControllerService)}: Failed to create module for topic '{topic}'", e);
+            }
+
+            return result;
+            /*
             using var signal = new SemaphoreSlim(0);
             GameThread.Post(() =>
             {
@@ -272,8 +310,9 @@ namespace Iviz.Controllers
                     signal.Release();
                 }
             });
-
+        
             return await signal.WaitAsync(DefaultTimeoutInMs) ? result : ("", false, "Request timed out!");
+            */
         }
 
         static async ValueTask UpdateModuleAsync(UpdateModule srv)
@@ -324,6 +363,45 @@ namespace Iviz.Controllers
                 return result;
             }
 
+            try
+            {
+                await GameThread.PostAsync(() =>
+                {
+                    if (!ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out var module))
+                    {
+                        result.success = false;
+                        result.message = $"There is no module with id '{id}'";
+                        return;
+                    }
+
+                    if (module.ModuleType != moduleType)
+                    {
+                        result.success = false;
+                        result.message = $"Given ModuleType field '{ModuleNames[moduleType]}' does not match " +
+                                         $"existing type '{ModuleNames[module.ModuleType]}'";
+                        return;
+                    }
+
+                    module.UpdateConfiguration(config, validatedFields);
+                    result.success = true;
+                });
+            }
+            catch (JsonException e)
+            {
+                result.success = false;
+                result.message = $"Error parsing JSON config: {e.Message}";
+                RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryUpdateModuleAsync)}", e);
+            }
+            catch (Exception e)
+            {
+                result.success = false;
+                result.message = $"An exception was raised: {e.Message}";
+                RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryUpdateModuleAsync)}", e);
+            }
+
+            return result;
+
+            /*
             using var signal = new SemaphoreSlim(0);
             GameThread.Post(() =>
             {
@@ -365,6 +443,7 @@ namespace Iviz.Controllers
                 }
             });
             return await signal.WaitAsync(DefaultTimeoutInMs) ? result : (false, "Request timed out!");
+            */
         }
 
         sealed class GenericModule
@@ -395,6 +474,30 @@ namespace Iviz.Controllers
                 return result;
             }
 
+            try
+            {
+                await GameThread.PostAsync(() =>
+                {
+                    if (!ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out var module))
+                    {
+                        result.success = false;
+                        result.message = "There is no module with that id";
+                        return;
+                    }
+
+                    module.ResetController();
+                    result.success = true;
+                });
+            }
+            catch (Exception e)
+            {
+                result.success = false;
+                result.message = $"An exception was raised: {e.Message}";
+                RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryResetModuleAsync)}", e);
+            }
+
+            return result;
+            /*
             using var signal = new SemaphoreSlim(0);
             GameThread.Post(() =>
             {
@@ -422,6 +525,7 @@ namespace Iviz.Controllers
                 }
             });
             return await signal.WaitAsync(DefaultTimeoutInMs) ? result : (false, "Request timed out!");
+            */
         }
 
         static async ValueTask GetModulesAsync(GetModules srv)
@@ -434,6 +538,28 @@ namespace Iviz.Controllers
         {
             using var signal = new SemaphoreSlim(0);
             string[] result = Array.Empty<string>();
+            try
+            {
+                await GameThread.PostAsync(() =>
+                {
+                    var configurations = ModuleDatas.Select(data => data.Configuration).ToArray();
+                    result = configurations.Select(JsonConvert.SerializeObject).ToArray();
+                });
+            }
+            catch (JsonException e)
+            {
+                RosLogger.Error(
+                    $"{nameof(ControllerService)}: Unexpected JSON exception in {nameof(GetModulesAsync)}", e);
+            }
+            catch (Exception e)
+            {
+                RosLogger.Error(
+                    $"{nameof(ControllerService)}: Unexpected exception in {nameof(GetModulesAsync)}", e);
+            }
+
+            return result;
+
+            /*
             GameThread.Post(() =>
             {
                 try
@@ -462,20 +588,21 @@ namespace Iviz.Controllers
             }
 
             return result;
+            */
         }
 
-        static async ValueTask SetFixedFrameAsync(SetFixedFrame srv)
+        static ValueTask SetFixedFrameAsync(SetFixedFrame srv)
         {
-            (bool success, string? message) =
-                await TrySetFixedFrameAsync(srv.Request.Id).AwaitAndLog(nameof(SetFixedFrameAsync));
-            srv.Response.Success = success;
-            srv.Response.Message = message ?? "";
+            srv.Response.Success = true;
+            srv.Response.Message = "";
+            return TrySetFixedFrameAsync(srv.Request.Id).AsValueTask();
         }
 
-        static async ValueTask<(bool success, string? message)> TrySetFixedFrameAsync(string id)
+        static Task TrySetFixedFrameAsync(string id)
         {
-            (bool success, string? message) result = default;
+            return GameThread.PostAsync(() => TfModule.FixedFrameId = id);
 
+            /*
             using (var signal = new SemaphoreSlim(0))
             {
                 GameThread.Post(() =>
@@ -497,8 +624,7 @@ namespace Iviz.Controllers
                     return result;
                 }
             }
-
-            return (true, "");
+            */
         }
 
         static async ValueTask GetFramePoseAsync(GetFramePose srv)
@@ -685,7 +811,7 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        var screenshot = Resource.Extras.AppAssetHolder.Screenshot;
+                        var screenshot = ResourcePool.AppAssetHolder.Screenshot;
                         AudioSource.PlayClipAtPoint(screenshot, Settings.MainCamera.transform.position);
 
                         ss = await Settings.ScreenCaptureManager.CaptureColorAsync();
@@ -832,7 +958,7 @@ namespace Iviz.Controllers
             ModuleData? moduleData;
             if (id.Length != 0)
             {
-                if (ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out moduleData) 
+                if (ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out moduleData)
                     && moduleData.ModuleType != ModuleType.Robot)
                 {
                     srv.Response.Success = false;
@@ -892,87 +1018,81 @@ namespace Iviz.Controllers
                 return;
             }
 
-            if (Math.Abs(srv.Request.Dialog.Scale) < 1e-8)
+            if (Mathf.Abs((float)srv.Request.Dialog.Scale) < 1e-8)
             {
                 srv.Response.Success = false;
                 srv.Response.Message = "Cannot launch dialog with scale 0";
                 return;
             }
 
-            Feedback feedback = new();
-            using SemaphoreSlim signal = new(0);
-            GameThread.Post(() =>
+            var feedback = new Feedback();
+            try
             {
-                try
+                await GameThread.PostAsync(() =>
                 {
                     RosLogger.Info($"{nameof(ControllerService)}: Creating dialog");
 
                     bool overrideExpired = false;
-                    string id = srv.Request.Dialog.Id;
+                    string dialogId = srv.Request.Dialog.Id;
                     var dialog = GuiWidgetListener.DefaultHandler.AddDialog(srv.Request.Dialog);
+                    var ts = TaskUtils.CreateCompletionSource();
+
                     if (dialog == null)
                     {
-                        TryRelease(signal);
-                        return;
+                        return default;
                     }
 
+                    // note: no if/else, dialog can be both!
                     if (dialog is IDialogCanBeClicked canBeClicked)
                     {
-                        canBeClicked.Clicked += TriggerButton;
+                        canBeClicked.Clicked += entryId => TriggerButton(entryId, false);
                     }
 
-                    //dialog.MenuEntryClicked += TriggerMenu;
+                    if (dialog is IDialogCanBeMenuClicked canBeMenuClicked)
+                    {
+                        canBeMenuClicked.MenuClicked += entryId => TriggerButton(entryId, false);
+                    }
+
                     dialog.Expired += OnExpired;
 
-                    void TriggerButton(int buttonId)
+                    void TriggerButton(int buttonId, bool isMenuClick)
                     {
+                        var feedbackType = isMenuClick
+                            ? FeedbackType.MenuEntryClick
+                            : FeedbackType.ButtonClick;
+
                         feedback.VizId = RosManager.MyId ?? "";
-                        feedback.Id = id;
-                        feedback.Type = (byte)FeedbackType.ButtonClick;
+                        feedback.Id = dialogId;
+                        feedback.Type = (byte)feedbackType;
                         feedback.EntryId = buttonId;
                         overrideExpired = true;
 
-                        TryRelease(signal);
+                        ts.TrySetResult();
                     }
-
-                    /*
-                    void TriggerMenu(int buttonId)
-                    {
-                        feedback.VizId = RosManager.MyId ?? "";
-                        feedback.Id = id;
-                        feedback.Type = (byte)FeedbackType.MenuEntryClick;
-                        feedback.EntryId = buttonId;
-                        overrideExpired = true;
-
-                        TryRelease(signal);
-                    }
-                    */
 
                     void OnExpired()
                     {
-                        // ReSharper disable once AccessToModifiedClosure
                         if (overrideExpired)
                         {
                             return;
                         }
 
                         feedback.VizId = RosManager.MyId ?? "";
-                        feedback.Id = id;
+                        feedback.Id = dialogId;
                         feedback.Type = (byte)FeedbackType.Expired;
                         feedback.EntryId = 0;
 
-                        TryRelease(signal);
+                        ts.TrySetResult();
                     }
-                }
-                catch (Exception e)
-                {
-                    srv.Response.Success = false;
-                    srv.Response.Message = $"An exception was raised: {e.Message}";
-                    TryRelease(signal);
-                }
-            });
 
-            await signal.WaitAsync();
+                    return ts.Task.AsValueTask();
+                });
+            }
+            catch (Exception e)
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = $"An exception was raised: {e.Message}";
+            }
 
             if (string.IsNullOrEmpty(srv.Response.Message))
             {

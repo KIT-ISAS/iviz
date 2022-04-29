@@ -68,7 +68,7 @@ namespace Iviz.Msgs.MeshMsgs
         /// Constructor with buffer.
         public GetMaterialsRequest(ref ReadBuffer b)
         {
-            Uuid = b.DeserializeString();
+            b.DeserializeString(out Uuid);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new GetMaterialsRequest(ref b);
@@ -82,7 +82,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (Uuid is null) BuiltIns.ThrowNullReference(nameof(Uuid));
+            if (Uuid is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(Uuid);
@@ -124,7 +124,7 @@ namespace Iviz.Msgs.MeshMsgs
         
         public void RosValidate()
         {
-            if (MeshMaterialsStamped is null) BuiltIns.ThrowNullReference(nameof(MeshMaterialsStamped));
+            if (MeshMaterialsStamped is null) BuiltIns.ThrowNullReference();
             MeshMaterialsStamped.RosValidate();
         }
     

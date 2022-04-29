@@ -47,13 +47,13 @@ namespace Iviz.Msgs.MoveitMsgs
         public PlanningOptions(ref ReadBuffer b)
         {
             PlanningSceneDiff = new PlanningScene(ref b);
-            PlanOnly = b.Deserialize<bool>();
-            LookAround = b.Deserialize<bool>();
-            LookAroundAttempts = b.Deserialize<int>();
-            MaxSafeExecutionCost = b.Deserialize<double>();
-            Replan = b.Deserialize<bool>();
-            ReplanAttempts = b.Deserialize<int>();
-            ReplanDelay = b.Deserialize<double>();
+            b.Deserialize(out PlanOnly);
+            b.Deserialize(out LookAround);
+            b.Deserialize(out LookAroundAttempts);
+            b.Deserialize(out MaxSafeExecutionCost);
+            b.Deserialize(out Replan);
+            b.Deserialize(out ReplanAttempts);
+            b.Deserialize(out ReplanDelay);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new PlanningOptions(ref b);
@@ -74,7 +74,7 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (PlanningSceneDiff is null) BuiltIns.ThrowNullReference(nameof(PlanningSceneDiff));
+            if (PlanningSceneDiff is null) BuiltIns.ThrowNullReference();
             PlanningSceneDiff.RosValidate();
         }
     

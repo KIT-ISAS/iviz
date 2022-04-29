@@ -32,7 +32,7 @@ namespace Iviz.Msgs.StdMsgs
         public Int8MultiArray(ref ReadBuffer b)
         {
             Layout = new MultiArrayLayout(ref b);
-            Data = b.DeserializeStructArray<sbyte>();
+            b.DeserializeStructArray(out Data);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Int8MultiArray(ref b);
@@ -47,9 +47,9 @@ namespace Iviz.Msgs.StdMsgs
         
         public void RosValidate()
         {
-            if (Layout is null) BuiltIns.ThrowNullReference(nameof(Layout));
+            if (Layout is null) BuiltIns.ThrowNullReference();
             Layout.RosValidate();
-            if (Data is null) BuiltIns.ThrowNullReference(nameof(Data));
+            if (Data is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 4 + Layout.RosMessageLength + Data.Length;

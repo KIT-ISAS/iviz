@@ -25,11 +25,11 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor with buffer.
         public ParamDescription(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Type = b.DeserializeString();
-            Level = b.Deserialize<uint>();
-            Description = b.DeserializeString();
-            EditMethod = b.DeserializeString();
+            b.DeserializeString(out Name);
+            b.DeserializeString(out Type);
+            b.Deserialize(out Level);
+            b.DeserializeString(out Description);
+            b.DeserializeString(out EditMethod);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new ParamDescription(ref b);
@@ -47,10 +47,10 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Type is null) BuiltIns.ThrowNullReference(nameof(Type));
-            if (Description is null) BuiltIns.ThrowNullReference(nameof(Description));
-            if (EditMethod is null) BuiltIns.ThrowNullReference(nameof(EditMethod));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Type is null) BuiltIns.ThrowNullReference();
+            if (Description is null) BuiltIns.ThrowNullReference();
+            if (EditMethod is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength

@@ -13,7 +13,7 @@ namespace Iviz.Core
     /// <summary>
     /// Singleton that other threads can use to post actions to the main thread.
     /// </summary>
-    public class GameThread : MonoBehaviour
+    public sealed class GameThread : MonoBehaviour
     {
         static GameThread? instance;
 
@@ -274,16 +274,99 @@ namespace Iviz.Core
 
         /// <summary>
         /// Puts this async action in a queue to be run on the main thread.
-        /// If it is already on the main thread, it will run on the next frame -
-        /// though the run order of async tasks is not very well defined.
-        /// The return type is treated as async void. 
+        /// The function returns immediately.
         /// </summary>
         /// <param name="action">Action to be run.</param>
-        public static void Post(Func<Task> action) => Post(() => { action(); });
+        public static void Post(Func<ValueTask> action) => Post(() => { action(); });
 
         /// <summary>
-        /// Puts this async action in a queue to be run on the main thread.
-        /// The listener queue may have less priority than <see cref="Post(System.Action)"/>
+        /// Puts this async action in a queue to be run on the main thread,
+        /// and returns a task that will be completed when the given action finishes running.
+        /// </summary>
+        /// <param name="action">Action to be run.</param>
+        public static Task PostAsync(Func<ValueTask> action)
+        {
+            ThrowHelper.ThrowIfNull(action, nameof(action));
+            var ts = TaskUtils.CreateCompletionSource();
+            Post(() => TrySetAsync(ts, action()));
+            return ts.Task;
+            
+            static async ValueTask TrySetAsync(TaskCompletionSource ts, ValueTask task)
+            {
+                try
+                {
+                    await task;
+                    ts.TrySetResult();
+                }
+                catch (OperationCanceledException)
+                {
+                    ts.TrySetCanceled();
+                }
+                catch (Exception e)
+                {
+                    ts.TrySetException(e);
+                }
+            }  
+        }
+        
+        /// <summary>
+        /// Puts this async action in a queue to be run on the main thread,
+        /// and returns a task that will be completed when the given action finishes running.
+        /// </summary>
+        /// <param name="action">Action to be run.</param>
+        public static Task<T> PostAsync<T>(Func<ValueTask<T>> action)
+        {
+            ThrowHelper.ThrowIfNull(action, nameof(action));
+            var ts = TaskUtils.CreateCompletionSource<T>();
+            Post(() => TrySetAsync(ts, action()));
+            return ts.Task;
+            
+            static async ValueTask TrySetAsync(TaskCompletionSource<T> ts, ValueTask<T> task)
+            {
+                try
+                {
+                    ts.TrySetResult(await task);
+                }
+                catch (OperationCanceledException)
+                {
+                    ts.TrySetCanceled();
+                }
+                catch (Exception e)
+                {
+                    ts.TrySetException(e);
+                }
+            }       
+        }
+
+        /// <summary>
+        /// Puts this async action in a queue to be run on the main thread,
+        /// and returns a task that will be completed when the given action finishes running.
+        /// </summary>
+        /// <param name="action">Action to be run.</param>
+        public static Task PostAsync(Action action)
+        {
+            ThrowHelper.ThrowIfNull(action, nameof(action));
+            var ts = TaskUtils.CreateCompletionSource();
+            Post(() => TrySet(ts, action));
+            return ts.Task;
+            
+            static void TrySet(TaskCompletionSource ts, Action action)
+            {
+                try
+                {
+                    action();
+                    ts.TrySetResult();
+                }
+                catch (Exception e)
+                {
+                    ts.TrySetException(e);
+                }
+            }          
+        }
+
+        /// <summary>
+        /// Puts this action in a queue to be run on the main thread.
+        /// The listener queue can have less priority than <see cref="Post(System.Action)"/> and may skip several frames.
         /// If it is already on the main thread, it will run on the next frame.
         /// </summary>
         /// <param name="action">Action to be run.</param>
@@ -304,7 +387,6 @@ namespace Iviz.Core
         /// If it is already on the main thread, runs it immediately.
         /// </summary>
         /// <param name="action">Action to be run.</param>
-        /// <exception cref="ArgumentNullException">If action is null.</exception>        
         public static void PostImmediate(Action action)
         {
             ThrowHelper.ThrowIfNull(action, nameof(action));

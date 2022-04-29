@@ -17,29 +17,24 @@ namespace Iviz.Tools;
 /// </typeparam>
 public readonly struct Rent<T> : IDisposable  where T : unmanaged
 {
-    static readonly ArrayPool<T> Pool = ArrayPool<T>.Shared;
-
     public readonly int Length;
     public readonly T[] Array;
 
-    public Span<T> AsSpan() => new(Array, 0, Length);
-    public ReadOnlySpan<T> AsReadOnlySpan() => new(Array, 0, Length);
-    public Span<T> Slice(int start, int count) => AsSpan().Slice(start, count);
-    public ReadOnlyMemory<T> AsReadOnlyMemory() => new(Array, 0, Length);
-    public Memory<T> AsMemory() => new(Array, 0, Length);
+    Rent(T[] array, int length) => (Array, Length) = (array, length);
 
     public Rent(int length)
     {
         switch (length)
         {
             case < 0:
-                throw new ArgumentException("Count cannot be negative", nameof(length));
+                Rent.ThrowArgumentNegative();
+                goto case 0; // unreachable
             case 0:
                 Array = System.Array.Empty<T>();
                 Length = 0;
                 break;
             default:
-                Array = Pool.Rent(length);
+                Array = ArrayPool<T>.Shared.Rent(length);
                 Length = length;
                 break;
         }
@@ -49,25 +44,21 @@ public readonly struct Rent<T> : IDisposable  where T : unmanaged
     {
         span.CopyTo(AsSpan());
     }
-
-    Rent(T[] array, int length) => (Array, Length) = (array, length);
-
+    
     public void Dispose()
     {
         if (Length > 0)
         {
-            Pool.Return(Array);
+            ArrayPool<T>.Shared.Return(Array);
         }
     }
 
     public override string ToString()
     {
-        return $"[Rent Type={typeof(T).Name} Length={Length.ToString()} " +
+        return $"[{nameof(Rent<T>)} Type={typeof(T).Name} Length={Length.ToString()} " +
                $"RealSize={(Array != null ? Array.Length : 0).ToString()}]";
     }
-
-    public RentEnumerator<T> GetEnumerator() => new(Array, Length);
-
+    
     public ref T this[int index]
     {
         get
@@ -81,15 +72,22 @@ public readonly struct Rent<T> : IDisposable  where T : unmanaged
         }
     }
 
+    public Span<T> AsSpan() => new(Array, 0, Length);
+    public ReadOnlySpan<T> AsReadOnlySpan() => AsSpan();
+    public Span<T> Slice(int start, int count) => AsSpan().Slice(start, count);
+    public Memory<T> AsMemory() => new(Array, 0, Length);
+    public RentEnumerator<T> GetEnumerator() => new(Array, Length);
     public Span<T> this[Range range] => AsSpan()[range];
     public Rent<T> Resize(int newLength) => new(Array, newLength);
-
     public static implicit operator Span<T>(Rent<T> rent) => rent.AsSpan();
-    public static implicit operator ReadOnlySpan<T>(Rent<T> rent) => rent.AsReadOnlySpan();
-    public static implicit operator ReadOnlyMemory<T>(Rent<T> rent) => rent.AsReadOnlyMemory();
+    public static implicit operator ReadOnlySpan<T>(Rent<T> rent) => rent.AsSpan();
+    public static implicit operator Memory<T>(Rent<T> rent) => rent.AsMemory();
+    public static implicit operator ReadOnlyMemory<T>(Rent<T> rent) => rent.AsMemory();
 }
 
 public static class Rent
 {
     public static Rent<T> Empty<T>() where T : unmanaged => new(0);
+    
+    internal static void ThrowArgumentNegative() => throw new ArgumentException("Rent size cannot be negative");
 }

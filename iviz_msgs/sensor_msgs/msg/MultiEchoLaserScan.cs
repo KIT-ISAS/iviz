@@ -55,19 +55,19 @@ namespace Iviz.Msgs.SensorMsgs
         public MultiEchoLaserScan(ref ReadBuffer b)
         {
             StdMsgs.Header.Deserialize(ref b, out Header);
-            AngleMin = b.Deserialize<float>();
-            AngleMax = b.Deserialize<float>();
-            AngleIncrement = b.Deserialize<float>();
-            TimeIncrement = b.Deserialize<float>();
-            ScanTime = b.Deserialize<float>();
-            RangeMin = b.Deserialize<float>();
-            RangeMax = b.Deserialize<float>();
-            Ranges = b.DeserializeArray<LaserEcho>();
+            b.Deserialize(out AngleMin);
+            b.Deserialize(out AngleMax);
+            b.Deserialize(out AngleIncrement);
+            b.Deserialize(out TimeIncrement);
+            b.Deserialize(out ScanTime);
+            b.Deserialize(out RangeMin);
+            b.Deserialize(out RangeMax);
+            b.DeserializeArray(out Ranges);
             for (int i = 0; i < Ranges.Length; i++)
             {
                 Ranges[i] = new LaserEcho(ref b);
             }
-            Intensities = b.DeserializeArray<LaserEcho>();
+            b.DeserializeArray(out Intensities);
             for (int i = 0; i < Intensities.Length; i++)
             {
                 Intensities[i] = new LaserEcho(ref b);
@@ -94,16 +94,16 @@ namespace Iviz.Msgs.SensorMsgs
         
         public void RosValidate()
         {
-            if (Ranges is null) BuiltIns.ThrowNullReference(nameof(Ranges));
+            if (Ranges is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Ranges.Length; i++)
             {
-                if (Ranges[i] is null) BuiltIns.ThrowNullReference($"{nameof(Ranges)}[{i}]");
+                if (Ranges[i] is null) BuiltIns.ThrowNullReference(nameof(Ranges), i);
                 Ranges[i].RosValidate();
             }
-            if (Intensities is null) BuiltIns.ThrowNullReference(nameof(Intensities));
+            if (Intensities is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < Intensities.Length; i++)
             {
-                if (Intensities[i] is null) BuiltIns.ThrowNullReference($"{nameof(Intensities)}[{i}]");
+                if (Intensities[i] is null) BuiltIns.ThrowNullReference(nameof(Intensities), i);
                 Intensities[i].RosValidate();
             }
         }

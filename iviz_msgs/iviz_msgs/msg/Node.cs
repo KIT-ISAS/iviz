@@ -32,10 +32,10 @@ namespace Iviz.Msgs.IvizMsgs
         /// Constructor with buffer.
         public Node(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Parent = b.Deserialize<int>();
+            b.DeserializeString(out Name);
+            b.Deserialize(out Parent);
             Transform = new Matrix4(ref b);
-            Meshes = b.DeserializeStructArray<int>();
+            b.DeserializeStructArray(out Meshes);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new Node(ref b);
@@ -52,10 +52,10 @@ namespace Iviz.Msgs.IvizMsgs
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
-            if (Transform is null) BuiltIns.ThrowNullReference(nameof(Transform));
+            if (Name is null) BuiltIns.ThrowNullReference();
+            if (Transform is null) BuiltIns.ThrowNullReference();
             Transform.RosValidate();
-            if (Meshes is null) BuiltIns.ThrowNullReference(nameof(Meshes));
+            if (Meshes is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 76 + BuiltIns.GetStringSize(Name) + 4 * Meshes.Length;

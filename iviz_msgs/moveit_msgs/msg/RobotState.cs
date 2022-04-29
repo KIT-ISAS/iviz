@@ -40,12 +40,12 @@ namespace Iviz.Msgs.MoveitMsgs
         {
             JointState = new SensorMsgs.JointState(ref b);
             MultiDofJointState = new SensorMsgs.MultiDOFJointState(ref b);
-            AttachedCollisionObjects = b.DeserializeArray<AttachedCollisionObject>();
+            b.DeserializeArray(out AttachedCollisionObjects);
             for (int i = 0; i < AttachedCollisionObjects.Length; i++)
             {
                 AttachedCollisionObjects[i] = new AttachedCollisionObject(ref b);
             }
-            IsDiff = b.Deserialize<bool>();
+            b.Deserialize(out IsDiff);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RobotState(ref b);
@@ -62,14 +62,14 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (JointState is null) BuiltIns.ThrowNullReference(nameof(JointState));
+            if (JointState is null) BuiltIns.ThrowNullReference();
             JointState.RosValidate();
-            if (MultiDofJointState is null) BuiltIns.ThrowNullReference(nameof(MultiDofJointState));
+            if (MultiDofJointState is null) BuiltIns.ThrowNullReference();
             MultiDofJointState.RosValidate();
-            if (AttachedCollisionObjects is null) BuiltIns.ThrowNullReference(nameof(AttachedCollisionObjects));
+            if (AttachedCollisionObjects is null) BuiltIns.ThrowNullReference();
             for (int i = 0; i < AttachedCollisionObjects.Length; i++)
             {
-                if (AttachedCollisionObjects[i] is null) BuiltIns.ThrowNullReference($"{nameof(AttachedCollisionObjects)}[{i}]");
+                if (AttachedCollisionObjects[i] is null) BuiltIns.ThrowNullReference(nameof(AttachedCollisionObjects), i);
                 AttachedCollisionObjects[i].RosValidate();
             }
         }

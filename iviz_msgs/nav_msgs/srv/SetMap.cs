@@ -88,9 +88,9 @@ namespace Iviz.Msgs.NavMsgs
         
         public void RosValidate()
         {
-            if (Map is null) BuiltIns.ThrowNullReference(nameof(Map));
+            if (Map is null) BuiltIns.ThrowNullReference();
             Map.RosValidate();
-            if (InitialPose is null) BuiltIns.ThrowNullReference(nameof(InitialPose));
+            if (InitialPose is null) BuiltIns.ThrowNullReference();
             InitialPose.RosValidate();
         }
     
@@ -118,7 +118,7 @@ namespace Iviz.Msgs.NavMsgs
         /// Constructor with buffer.
         public SetMapResponse(ref ReadBuffer b)
         {
-            Success = b.Deserialize<bool>();
+            b.Deserialize(out Success);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new SetMapResponse(ref b);

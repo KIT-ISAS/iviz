@@ -26,8 +26,8 @@ namespace Iviz.Msgs.DynamicReconfigure
         /// Constructor with buffer.
         public BoolParameter(ref ReadBuffer b)
         {
-            Name = b.DeserializeString();
-            Value = b.Deserialize<bool>();
+            b.DeserializeString(out Name);
+            b.Deserialize(out Value);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new BoolParameter(ref b);
@@ -42,7 +42,7 @@ namespace Iviz.Msgs.DynamicReconfigure
         
         public void RosValidate()
         {
-            if (Name is null) BuiltIns.ThrowNullReference(nameof(Name));
+            if (Name is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength => 5 + BuiltIns.GetStringSize(Name);

@@ -74,9 +74,9 @@ namespace Iviz.Msgs.MoveitMsgs
         /// Constructor with buffer.
         public RenameRobotStateInWarehouseRequest(ref ReadBuffer b)
         {
-            OldName = b.DeserializeString();
-            NewName = b.DeserializeString();
-            Robot = b.DeserializeString();
+            b.DeserializeString(out OldName);
+            b.DeserializeString(out NewName);
+            b.DeserializeString(out Robot);
         }
         
         ISerializable ISerializable.RosDeserializeBase(ref ReadBuffer b) => new RenameRobotStateInWarehouseRequest(ref b);
@@ -92,9 +92,9 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public void RosValidate()
         {
-            if (OldName is null) BuiltIns.ThrowNullReference(nameof(OldName));
-            if (NewName is null) BuiltIns.ThrowNullReference(nameof(NewName));
-            if (Robot is null) BuiltIns.ThrowNullReference(nameof(Robot));
+            if (OldName is null) BuiltIns.ThrowNullReference();
+            if (NewName is null) BuiltIns.ThrowNullReference();
+            if (Robot is null) BuiltIns.ThrowNullReference();
         }
     
         public int RosMessageLength
@@ -129,7 +129,8 @@ namespace Iviz.Msgs.MoveitMsgs
         
         public RenameRobotStateInWarehouseResponse RosDeserialize(ref ReadBuffer b) => Singleton;
         
-        public static readonly RenameRobotStateInWarehouseResponse Singleton = new RenameRobotStateInWarehouseResponse();
+        static RenameRobotStateInWarehouseResponse? singleton;
+        public static RenameRobotStateInWarehouseResponse Singleton => singleton ??= new RenameRobotStateInWarehouseResponse();
     
         public void RosSerialize(ref WriteBuffer b)
         {
