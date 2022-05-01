@@ -123,7 +123,7 @@ namespace Iviz.App
         public override void UpdatePanelFast()
         {
             panel.PreviewWidget.UpdateMaterial();
-            imageDialogData?.ToggleImageEnabled();
+            imageDialogData?.ResetImageEnabled();
         }
 
         public override void AddToState(StateConfiguration config)

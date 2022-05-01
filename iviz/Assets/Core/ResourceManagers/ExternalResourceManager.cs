@@ -30,10 +30,9 @@ namespace Iviz.Displays
         const string FileServiceName = "/iviz/get_file";
         const string SceneServiceName = "/iviz/get_sdf";
 
-        const string StrMissingFileRemoving = "ExternalResourceManager: Missing file '{0}'. Removing.";
+        const string StrMissingFileRemoving = nameof(ExternalResourceManager) + ": Missing file '{0}'. Removing.";
         const string StrServiceFailedWithMessage = "Model Loader Service failed to load '{0}'. Reason: {1}";
-
-        const string StrCallServiceFailed = "ExternalResourceManager: Call Service failed! " +
+        const string StrCallServiceFailed = nameof(ExternalResourceManager) + ": Call Service failed! " +
                                             "Are you sure iviz is connected and the Iviz.Model.Service program is running?";
 
         const int TimeoutInMs = 10000;

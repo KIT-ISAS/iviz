@@ -17,7 +17,7 @@ namespace Iviz.Displays
                 return;
             }
             
-            interactable = gameObject.EnsureComponent<XRSimpleInteractable>();
+            interactable = gameObject.TryAddComponent<XRSimpleInteractable>();
             interactable.hoverEntered.AddListener(OnHoverEntered);
             interactable.hoverExited.AddListener(OnHoverExited);
             interactable.selectEntered.AddListener(OnSelectEntered);

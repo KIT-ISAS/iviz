@@ -158,8 +158,6 @@ namespace Iviz.Controllers.XR
                 ? new Ray(controllerPosition, controllerForward.normalized)
                 : null;
             
-            //Debug.Log(uiPressInteractionState.active + "         " + controllerState.uiPressInteractionState.active);
-
             if (ButtonUp)
             {
                 LockedPosition = null;
@@ -255,8 +253,6 @@ namespace Iviz.Controllers.XR
 
             controllerState.selectInteractionState.SetFrameState(ButtonState);
             controllerState.uiPressInteractionState.SetFrameState(ButtonState);
-
-            //Debug.Log("ButtonState: " + ButtonState);
 
             // --------
 

@@ -494,7 +494,7 @@ namespace Iviz.Controllers
                 if (msg.Type() != MarkerType.MeshResource)
                 {
                     // shouldn't happen!
-                    Debug.LogWarning($"Mesh resource '{resourceKey}' has no IDisplay!");
+                    RosLogger.Warn($"{this}: Mesh resource '{resourceKey}' has no IDisplay!");
                 }
 
                 // add generic wrapper

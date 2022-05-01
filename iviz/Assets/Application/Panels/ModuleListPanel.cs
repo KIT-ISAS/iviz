@@ -652,7 +652,7 @@ namespace Iviz.App
                     return;
                 }
 
-                Debug.Log("Using settings from " + path);
+                RosLogger.Debug($"{this}: Using settings from {path}");
 
                 string text = File.ReadAllText(path);
                 var config = JsonConvert.DeserializeObject<ConnectionConfiguration?>(text);

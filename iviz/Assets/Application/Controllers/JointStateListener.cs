@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Iviz.Common.Configurations;
 using Iviz.Controllers.TF;
+using Iviz.Core;
 using Iviz.Msgs.SensorMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
@@ -119,7 +120,7 @@ namespace Iviz.Controllers
 
             if (msg.Name.Length != msg.Position.Length)
             {
-                Debug.Log($"{this}: Names and positions have different lengths!");
+                RosLogger.Debug($"{this}: Names and positions have different lengths!");
                 return;
             }
 
@@ -127,7 +128,7 @@ namespace Iviz.Controllers
             {
                 if (double.IsNaN(position))
                 {
-                    Debug.Log($"JointStateListener: Joint for '{name}' is NaN!");
+                    RosLogger.Debug($"{this}: Joint for '{name}' is NaN!");
                     continue;
                 }
 
@@ -145,8 +146,7 @@ namespace Iviz.Controllers
 
                 if (!warnNotFound.Contains(msgJoint))
                 {
-                    Debug.Log("JointStateListener for '" + config.Topic + "': Cannot find joint '" + msgJoint +
-                              "' (original: '" + name + "')");
+                    RosLogger.Debug($"{this}: Cannot find joint '{msgJoint}' (original: '{name}')");
                     warnNotFound.Add(msgJoint);
                 }
             }

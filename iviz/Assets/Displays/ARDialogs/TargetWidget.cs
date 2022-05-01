@@ -165,9 +165,6 @@ namespace Iviz.Displays.XR
 
             OkButton.Clicked += () =>
             {
-                Debug.Log($"{this}: Sending scale");
-                //float totalScale = transform.parent.lossyScale.x;
-                //Debug.Log(TargetScale / Scale / totalScale);
                 var bounds = new Bounds(Transform.localPosition, new Vector3(TargetScale.x, 0, TargetScale.y));
                 Resized?.Invoke(bounds);
             };

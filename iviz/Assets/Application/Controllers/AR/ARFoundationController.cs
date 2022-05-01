@@ -174,7 +174,7 @@ namespace Iviz.Controllers
                 base.EnableMeshing = value;
                 if (value)
                 {
-                    MeshManager = ar.Camera.gameObject.EnsureComponent<ARMeshManager>();
+                    MeshManager = ar.Camera.gameObject.TryAddComponent<ARMeshManager>();
                     MeshManager.meshPrefab = ar.MeshPrefab;
                     MeshManager.normals = false;
                 }

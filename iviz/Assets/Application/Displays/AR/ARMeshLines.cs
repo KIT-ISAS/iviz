@@ -128,7 +128,7 @@ namespace Iviz.Displays
         {
             if (writing)
             {
-                Debug.LogError("Whee!");
+                //Debug.LogError("Whee!");
             }
 
             writing = true;

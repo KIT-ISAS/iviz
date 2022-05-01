@@ -69,7 +69,7 @@ namespace Iviz.Displays
                 var obj = new GameObject();
                 obj.AddComponent<MeshRenderer>();
                 obj.AddComponent<MeshFilter>();
-                obj.EnsureComponent<BoxCollider>();
+                obj.TryAddComponent<BoxCollider>();
 
                 obj.transform.SetParent(root.transform, false);
 

@@ -104,7 +104,6 @@ namespace Iviz.App
                 numberOfSteps = value;
                 Slider.minValue = 0;
                 Slider.maxValue = NumberOfSteps;
-                //Debug.Log(Label + " " + NumberOfSteps);
                 Value = v;
             }
         }

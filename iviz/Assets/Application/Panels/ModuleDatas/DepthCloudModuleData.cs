@@ -164,8 +164,8 @@ namespace Iviz.App
 
         public override void UpdatePanelFast()
         {
-            colorDialogData?.ToggleImageEnabled();
-            depthDialogData?.ToggleImageEnabled();
+            colorDialogData?.ResetImageEnabled();
+            depthDialogData?.ResetImageEnabled();
 
             panel.ColorPreview.UpdateMaterial();
             panel.DepthPreview.UpdateMaterial();
