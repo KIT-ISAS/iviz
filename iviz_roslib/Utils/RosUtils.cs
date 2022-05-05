@@ -102,13 +102,14 @@ internal static class RosUtils
                 "Partner did not send type and definition, required to instantiate dynamic messages.");
         }
 
-        if (DynamicMessage.IsGenericMessage<T>()
+        if (DynamicMessage.IsGenericMessage<T>() // T == IMessage
             && BuiltIns.TryGetTypeFromMessageName(dynamicMsgName) is { } lookupMsgName
-            && Activator.CreateInstance(lookupMsgName) is { } lookupGenerator)
+            && Activator.CreateInstance(lookupMsgName) is T lookupGenerator)
         {
-            return new TopicInfo<T>(callerId, topicName, (IDeserializable<T>)lookupGenerator);
+            return new TopicInfo<T>(callerId, topicName, lookupGenerator);
         }
 
+        // T == DynamicMessage
         var generator = DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
         return new TopicInfo<T>(callerId, topicName, generator);
     }

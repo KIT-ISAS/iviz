@@ -42,49 +42,23 @@ internal sealed class TopicInfo<T> where T : IMessage
     public IDeserializable<T> Generator =>
         generator ?? throw new InvalidOperationException("This type does not have a generator!");
 
-    TopicInfo(string messageDependencies, string callerId, string topic, string md5Sum, string type,
-        IDeserializable<T>? generator)
+    public TopicInfo(string callerId, string topic, in T generator)
     {
-        MessageDependencies = messageDependencies;
+        MessageDependencies = BuiltIns.DecompressDependencies(generator.RosDependenciesBase64);
         CallerId = callerId;
         Topic = topic;
-        Md5Sum = md5Sum;
-        Type = type;
-        this.generator = generator;
-    }
-
-    public TopicInfo(string callerId, string topic)
-        : this(
-            BuiltIns.DecompressDependencies<T>(),
-            callerId, topic,
-            BuiltIns.GetMd5Sum<T>(),
-            BuiltIns.GetMessageType<T>(),
-            null
-        )
-    {
-    }
-
-    public TopicInfo(string callerId, string topic, IDeserializable<T> generator)
-        : this(
-            BuiltIns.DecompressDependencies(generator.GetType()),
-            callerId, topic,
-            BuiltIns.GetMd5Sum(generator.GetType()),
-            BuiltIns.GetMessageType(generator.GetType()),
-            generator
-        )
-    {
+        Md5Sum = generator.RosMd5Sum;
+        Type = generator.RosMessageType;
+        this.generator = generator is IDeserializable<T> deserializable
+            ? deserializable
+            : throw new InvalidOperationException("Type T needs to be IDeserializable");
     }
 
     public TopicInfo(string callerId, string topic, DynamicMessage generator)
-        : this(
-            generator.RosInstanceDependencies ??
-            throw new NullReferenceException("Dynamic message has not been initialized"),
-            callerId, topic,
-            generator.RosInstanceMd5Sum ??
-            throw new NullReferenceException("Dynamic message has not been initialized"),
-            generator.RosType,
-            generator as IDeserializable<T> ??
-            throw new InvalidOperationException("Type T needs to be DynamicMessage"))
+        : this(callerId, topic,
+            generator is T generatorT
+                ? generatorT
+                : throw new InvalidOperationException("Type T needs to be DynamicMessage"))
     {
     }
 }

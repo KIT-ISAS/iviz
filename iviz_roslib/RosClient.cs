@@ -47,7 +47,7 @@ public sealed class RosClient : IRosClient
     RosNodeServer? listener;
     TimeSpan tcpRosTimeout = TimeSpan.FromSeconds(3);
     TimeSpan rpcNodeTimeout = TimeSpan.FromSeconds(3);
-    
+
     public delegate void ShutdownActionCall(string callerId, string reason);
 
     /// <summary>
@@ -687,7 +687,7 @@ public sealed class RosClient : IRosClient
     {
         GetPidResponse response;
         var ownUri = CallerUri;
-        
+
         try
         {
             response = await CreateNodeClient(ownUri).GetPidAsync(token);
@@ -717,7 +717,7 @@ public sealed class RosClient : IRosClient
 
     (string id, RosSubscriber<T> subscriber)
         CreateSubscriber<T>(string topic, bool requestNoDelay, Action<T> firstCallback,
-            IDeserializable<T> generator, RosTransportHint transportHint)
+            in T generator, RosTransportHint transportHint)
         where T : IMessage
     {
         var topicInfo = new TopicInfo<T>(CallerId, topic, generator);
@@ -742,9 +742,7 @@ public sealed class RosClient : IRosClient
 
     async ValueTask<(string id, RosSubscriber<T> subscriber)>
         CreateSubscriberAsync<T>(string topic, bool requestNoDelay, RosCallback<T> firstCallback,
-            IDeserializable<T> generator,
-            RosTransportHint transportHint,
-            CancellationToken token)
+            T generator, RosTransportHint transportHint, CancellationToken token)
         where T : IMessage
     {
         var topicInfo = new TopicInfo<T>(CallerId, topic, generator);
@@ -1089,10 +1087,10 @@ public sealed class RosClient : IRosClient
         };
     }
 
-    RosPublisher<T> CreatePublisher<T>(string topic, DynamicMessage? generator = null) where T : IMessage
+    RosPublisher<T> CreatePublisher<T>(string topic, T generator) where T : IMessage
     {
-        TopicInfo<T> topicInfo = generator == null
-            ? new TopicInfo<T>(CallerId, topic)
+        var topicInfo = generator is DynamicMessage dynamicMessage
+            ? new TopicInfo<T>(CallerId, topic, dynamicMessage)
             : new TopicInfo<T>(CallerId, topic, generator);
 
         RosPublisher<T> publisher = new(this, topicInfo)
@@ -1121,10 +1119,10 @@ public sealed class RosClient : IRosClient
     }
 
     async ValueTask<IRosPublisher> CreatePublisherAsync<T>(string topic, CancellationToken token,
-        DynamicMessage? generator = null) where T : IMessage
+        T generator) where T : IMessage
     {
-        TopicInfo<T> topicInfo = generator == null
-            ? new TopicInfo<T>(CallerId, topic)
+        var topicInfo = generator is DynamicMessage dynamicMessage
+            ? new TopicInfo<T>(CallerId, topic, dynamicMessage)
             : new TopicInfo<T>(CallerId, topic, generator);
 
         var publisher = new RosPublisher<T>(this, topicInfo)
@@ -1167,13 +1165,13 @@ public sealed class RosClient : IRosClient
     /// Use this structure to publish messages to your topic.
     /// </param>
     /// <returns>An identifier that can be used to unadvertise from this publisher.</returns>
-    public string Advertise<T>(string topic, out RosPublisher<T> publisher) where T : IMessage
+    public string Advertise<T>(string topic, out RosPublisher<T> publisher) where T : IMessage, new()
     {
         string resolvedTopic = ResolveResourceName(topic);
 
         if (!TryGetPublisher(resolvedTopic, out IRosPublisher? existingPublisher))
         {
-            publisher = CreatePublisher<T>(resolvedTopic);
+            publisher = CreatePublisher(resolvedTopic, new T());
             return publisher.Advertise();
         }
 
@@ -1230,7 +1228,7 @@ public sealed class RosClient : IRosClient
         {
             throw new RosInvalidMessageTypeException(
                 $"There is already an advertiser for '{topic}' with a different type [{existingPublisher.TopicType}] - " +
-                $"requested type was [{generator.RosType}](dynamic)");
+                $"requested type was [{generator.RosMessageType}](dynamic)");
         }
 
         publisher = validatedPublisher;
@@ -1253,14 +1251,14 @@ public sealed class RosClient : IRosClient
     /// <param name="token">An optional cancellation token</param>
     /// <returns>A pair containing an identifier that can be used to unadvertise from this publisher, and the publisher object.</returns>
     public async ValueTask<(string id, RosPublisher<T> publisher)> AdvertiseAsync<T>(string topic,
-        CancellationToken token = default) where T : IMessage
+        CancellationToken token = default) where T : IMessage, new()
     {
         string resolvedTopic = ResolveResourceName(topic);
 
         RosPublisher<T> publisher;
         if (!TryGetPublisher(topic, out IRosPublisher? existingPublisher))
         {
-            publisher = (RosPublisher<T>)await CreatePublisherAsync<T>(resolvedTopic, token);
+            publisher = (RosPublisher<T>)await CreatePublisherAsync(resolvedTopic, token, new T());
             return (publisher.Advertise(), publisher);
         }
 
@@ -1308,14 +1306,14 @@ public sealed class RosClient : IRosClient
         if (!TryGetPublisher(topic, out var basePublisher))
         {
             publisher = (RosPublisher<DynamicMessage>)
-                await CreatePublisherAsync<DynamicMessage>(resolvedTopic, token, generator);
+                await CreatePublisherAsync(resolvedTopic, token, generator);
         }
         else
         {
             var newPublisher = basePublisher as RosPublisher<DynamicMessage>;
             publisher = newPublisher ?? throw new RosInvalidMessageTypeException(
                 $"There is already an advertiser for '{topic}' with a different type [{basePublisher.TopicType}] - " +
-                $"requested type was [{generator.RosType}](dynamic)");
+                $"requested type was [{generator.RosMessageType}](dynamic)");
         }
 
         return (publisher.Advertise(), publisher);
@@ -1581,11 +1579,11 @@ public sealed class RosClient : IRosClient
         tokenSource.CancelAfter(timeoutInMs);
         var innerToken = tokenSource.Token;
 
-        List<Task> tasks = new();
+        var tasks = new List<Task>();
 
         if (listener != null)
         {
-            Task listenerDispose = listener.DisposeAsync().AsTask();
+            var listenerDispose = listener.DisposeAsync().AsTask();
             tasks.Add(listenerDispose);
         }
 
@@ -1625,8 +1623,8 @@ public sealed class RosClient : IRosClient
                 .AwaitNoThrow(this));
         }
 
-        Task timeoutTask = Task.Delay(timeoutInMs, innerToken);
-        Task finalTask = await (tasks.WhenAll(), timeoutTask).WhenAny();
+        var timeoutTask = Task.Delay(timeoutInMs, innerToken);
+        var finalTask = await (tasks.WhenAll(), timeoutTask).WhenAny();
         if (finalTask == timeoutTask)
         {
             Logger.LogErrorFormat("EE {0}: Close() tasks timed out.", this);
@@ -1696,7 +1694,7 @@ public sealed class RosClient : IRosClient
     /// <returns>Whether the call succeeded.</returns>
     /// <exception cref="TaskCanceledException">The operation timed out.</exception>
     public T CallService<T>(string serviceName, T service, bool persistent, int timeoutInMs)
-        where T : IService
+        where T : IService, new()
     {
         using CancellationTokenSource timeoutTs = new(timeoutInMs);
         return CallService(serviceName, service, persistent, timeoutTs.Token);
@@ -1724,7 +1722,7 @@ public sealed class RosClient : IRosClient
     /// <exception cref="RosServiceCallFailed">Thrown if the server could not process the call.</exception>
     public T CallService<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default)
-        where T : IService
+        where T : IService, new()
     {
         return TaskUtils.Run(() => CallServiceAsync(serviceName, service, persistent, token).AsTask(), token)
             .WaitAndRethrow();
@@ -1741,7 +1739,7 @@ public sealed class RosClient : IRosClient
     /// <exception cref="TaskCanceledException">Thrown if the timeout expired.</exception>
     /// <exception cref="RosServiceCallFailed">Thrown if the server could not process the call.</exception>
     public async ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent,
-        int timeoutInMs) where T : IService
+        int timeoutInMs) where T : IService, new()
     {
         using var timeoutTs = new CancellationTokenSource(timeoutInMs);
         try
@@ -1778,13 +1776,13 @@ public sealed class RosClient : IRosClient
     /// <returns>Whether the call succeeded.</returns>
     public async ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default)
-        where T : IService
+        where T : IService, new()
     {
         string resolvedServiceName = ResolveResourceName(serviceName);
 
         if (persistent && subscribedServicesByName.TryGetValue(resolvedServiceName, out var existingReceiver))
         {
-            if (service.RosType != existingReceiver.ServiceType)
+            if (service.RosServiceType != existingReceiver.ServiceType)
             {
                 throw new RosInvalidMessageTypeException(
                     $"Existing connection of {resolvedServiceName} with service type {existingReceiver.ServiceType} " +
@@ -1921,7 +1919,7 @@ public sealed class RosClient : IRosClient
     {
         string resolvedServiceName = ResolveResourceName(serviceName);
 
-        var serviceInfo = ServiceInfo.Instantiate<T>(CallerId, resolvedServiceName, () => new T());
+        var serviceInfo = ServiceInfo.Instantiate<T>(CallerId, resolvedServiceName);
 
         if (ServiceAlreadyAdvertised(resolvedServiceName, serviceInfo.Type))
         {

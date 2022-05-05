@@ -89,7 +89,6 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
         cancelPublisher!.Dispose();
         feedbackSubscriber!.Dispose();
         resultSubscriber!.Dispose();
-        runningTs.Dispose();
     }
 
     public async ValueTask DisposeAsync()
@@ -111,7 +110,6 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
         await cancelPublisher!.DisposeAsync();
         await feedbackSubscriber!.DisposeAsync();
         await resultSubscriber!.DisposeAsync();
-        runningTs.Dispose();
     }
 
     public event Action<RosActionClientState /* old */, RosActionClientState /* new */>? StateChanged;

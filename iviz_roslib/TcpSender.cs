@@ -180,7 +180,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
 
         if (!values.TryGetValue("type", out string? receivedType) || receivedType != topicInfo.Type)
         {
-            if (receivedType != DynamicMessage.RosMessageType) // "*"
+            if (receivedType != DynamicMessage.RosAny) // "*"
             {
                 errorMessage =
                     $"error=Expected message type [{topicInfo.Type}] but received [{receivedType}]";
@@ -190,7 +190,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
 
         if (!values.TryGetValue("md5sum", out string? receivedMd5Sum) || receivedMd5Sum != topicInfo.Md5Sum)
         {
-            if (receivedMd5Sum != DynamicMessage.RosMd5Sum) // "*"
+            if (receivedMd5Sum != DynamicMessage.RosAny) // "*"
             {
                 errorMessage =
                     $"error=Expected md5 '{topicInfo.Md5Sum}' but received '{receivedMd5Sum}'";

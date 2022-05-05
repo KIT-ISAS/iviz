@@ -11,7 +11,7 @@ using Nito.AsyncEx;
 
 namespace Iviz.Roslib;
 
-internal sealed class ReceiverManager<T> where T : IMessage
+internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
 {
     const int DefaultTimeoutInMs = 5000;
 
@@ -19,8 +19,8 @@ internal sealed class ReceiverManager<T> where T : IMessage
     readonly ConcurrentDictionary<Uri, ReceiverConnector> connectorsByUri = new();
     readonly ConcurrentDictionary<Uri, IProtocolReceiver> receiversByUri = new();
     readonly RosClient client;
-    readonly RosSubscriber<T> subscriber;
-    readonly TopicInfo<T> topicInfo;
+    readonly RosSubscriber<TMessage> subscriber;
+    readonly TopicInfo<TMessage> topicInfo;
     readonly RosTransportHint transportHint;
     HashSet<Uri> cachedPublisherUris = new();
 
@@ -39,7 +39,7 @@ internal sealed class ReceiverManager<T> where T : IMessage
         }
     }
 
-    public ReceiverManager(RosSubscriber<T> subscriber, RosClient client, TopicInfo<T> topicInfo,
+    public ReceiverManager(RosSubscriber<TMessage> subscriber, RosClient client, TopicInfo<TMessage> topicInfo,
         bool requestNoDelay, RosTransportHint transportHint)
     {
         this.subscriber = subscriber;
@@ -56,7 +56,7 @@ internal sealed class ReceiverManager<T> where T : IMessage
     public bool RequestNoDelay { get; }
     public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
 
-    internal void MessageCallback(in T msg, IRosReceiver receiver)
+    internal void MessageCallback(in TMessage msg, IRosReceiver receiver)
     {
         subscriber.MessageCallback(msg, receiver);
     }
@@ -89,7 +89,7 @@ internal sealed class ReceiverManager<T> where T : IMessage
                 foreach (Uri remoteUri in toAdd)
                 {
                     var udpTopicRequest = transportHint != RosTransportHint.OnlyTcp
-                        ? UdpReceiver<T>.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
+                        ? UdpReceiver<TMessage>.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
                         : null;
 
                     if (connectorsByUri.TryGetValue(remoteUri, out var oldConnector))
@@ -127,12 +127,12 @@ internal sealed class ReceiverManager<T> where T : IMessage
         {
             udpClient?.Dispose();
             receiver =
-                new TcpReceiver<T>(this, connector.RemoteUri, endPoint, topicInfo, RequestNoDelay, TimeoutInMs)
+                new TcpReceiver<TMessage>(this, connector.RemoteUri, endPoint, topicInfo, RequestNoDelay, TimeoutInMs)
                     { IsPaused = IsPaused };
         }
         else if (udpResponse != null && udpClient != null)
         {
-            receiver = new UdpReceiver<T>(this, udpResponse, udpClient, connector.RemoteUri, topicInfo);
+            receiver = new UdpReceiver<TMessage>(this, udpResponse, udpClient, connector.RemoteUri, topicInfo);
         }
         else
         {
@@ -157,7 +157,7 @@ internal sealed class ReceiverManager<T> where T : IMessage
                 }
 
                 var udpTopicRequest = transportHint != RosTransportHint.OnlyTcp
-                    ? UdpReceiver<T>.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
+                    ? UdpReceiver<TMessage>.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
                     : null;
 
                 var rosNodeClient = client.CreateNodeClient(remoteUri);
@@ -178,11 +178,11 @@ internal sealed class ReceiverManager<T> where T : IMessage
         }
     }
     
-    public bool TryGetLoopbackReceiver(Endpoint endPoint, out ILoopbackReceiver<T>? receiver)
+    public bool TryGetLoopbackReceiver(Endpoint endPoint, out ILoopbackReceiver<TMessage>? receiver)
     {
         IProtocolReceiver? newReceiver =
             receiversByUri.FirstOrDefault(pair => endPoint.Equals(pair.Value.Endpoint)).Value;
-        receiver = newReceiver as ILoopbackReceiver<T>;
+        receiver = newReceiver as ILoopbackReceiver<TMessage>;
         return receiver != null;
     }
 
@@ -225,8 +225,8 @@ internal sealed class ReceiverManager<T> where T : IMessage
         var connectors = connectorsByUri.Values.ToArray();
         connectorsByUri.Clear();
 
-        await receivers.Select(receiver => receiver.DisposeAsync(token).AsTask()).WhenAll();
-        await connectors.Select(connector => connector.DisposeAsync(token).AsTask()).WhenAll();
+        await receivers.Select(receiver => receiver.DisposeAsync(token).AsTask()).WhenAll().AwaitNoThrow(this);
+        await connectors.Select(connector => connector.DisposeAsync(token).AsTask()).WhenAll().AwaitNoThrow(this);
     }
 
     public SubscriberReceiverState[] GetStates()
@@ -274,5 +274,5 @@ internal sealed class ReceiverManager<T> where T : IMessage
         return states;
     }
 
-    public override string ToString() => $"[ReceiverManager '{Topic}']";
+    public override string ToString() => $"[{nameof(ReceiverManager<TMessage>)} '{Topic}']";
 }

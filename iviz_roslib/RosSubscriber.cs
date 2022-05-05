@@ -150,7 +150,6 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
         cachedCallbacks = EmptyCallback;
         NumPublishersChanged = null;
         manager.Stop();
-        runningTs.Dispose();
     }
 
     public async ValueTask DisposeAsync(CancellationToken token)
@@ -165,8 +164,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
         callbacksById.Clear();
         cachedCallbacks = EmptyCallback;
         NumPublishersChanged = null;
-        await manager.StopAsync(token);
-        runningTs.Dispose();
+        await manager.StopAsync(token).AwaitNoThrow(this);
     }
 
     public bool MessageTypeMatches(Type type)
