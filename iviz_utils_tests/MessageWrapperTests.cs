@@ -9,6 +9,8 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.MsgsWrapper;
 using NUnit.Framework;
 
+#if false
+
 namespace Iviz.UtilsTests
 {
     [Category("MessageWrappers")]
@@ -140,3 +142,5 @@ namespace Iviz.UtilsTests
         }
     }
 }
+
+#endif
