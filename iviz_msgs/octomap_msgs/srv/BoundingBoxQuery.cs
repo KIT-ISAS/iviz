@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.OctomapMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class BoundingBoxQuery : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.OctomapMsgs
             set => Response = (BoundingBoxQueryResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "octomap_msgs/BoundingBoxQuery";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "octomap_msgs/BoundingBoxQuery";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "93aa3d73b866f04880927745f4aab303";
+        public string RosMd5Sum => "93aa3d73b866f04880927745f4aab303";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -91,7 +88,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 48;
+        public const int RosFixedMessageLength = 48;
         
         public int RosMessageLength => RosFixedMessageLength;
     
@@ -128,7 +125,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 0;
+        public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     

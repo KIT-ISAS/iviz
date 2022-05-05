@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class TestChar : IDeserializable<TestChar>, IMessage
     {
         [DataMember (Name = "data")] public sbyte[] Data;
@@ -43,16 +43,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
     
         public int RosMessageLength => 4 + Data.Length;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "rosbridge_library/TestChar";
+        public const string MessageType = "rosbridge_library/TestChar";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "7b8d15902c8b049d5a32b4cb73fa86f5";
+        public string RosMd5Sum => "7b8d15902c8b049d5a32b4cb73fa86f5";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE0vOSCyKjlVISSxJ5AIAudt/QwwAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class GripperTranslation : IDeserializable<GripperTranslation>, IMessage
     {
         // defines a translation for the gripper, used in pickup or place tasks
@@ -58,16 +58,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public int RosMessageLength => 8 + Direction.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/GripperTranslation";
+        public const string MessageType = "moveit_msgs/GripperTranslation";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "b53bc0ad0f717cdec3b0e42dec300121";
+        public string RosMd5Sum => "b53bc0ad0f717cdec3b0e42dec300121";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VwW7UQAy95yss9dAWtYtUEIdK3CqgB6RKrbhW3oyTDE1mwozTNnw9z5PdtBUIcQBW" +
                 "KyU7Yz/72c/eA3LS+CCZmDRxyD2rj4GamEg7oTb5cZR0QlMWRz7Q6Ou7aSRcjz3XQsr5LlcHxUEeeRh7" +
                 "Ke+9b9SHljhQ3H6VWik2jQXhLSxgwOOYItedGVmk5aLZAeO0AqpdOJ/gbknFZrF8yrNqJQ6iab4dcptf" +

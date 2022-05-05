@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Image : IDeserializable<Image>, IMessage
     {
         // This message contains an uncompressed image
@@ -88,16 +88,16 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "sensor_msgs/Image";
+        public const string MessageType = "sensor_msgs/Image";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "060021388200f6f0f447d0fcd9c64743";
+        public string RosMd5Sum => "060021388200f6f0f447d0fcd9c64743";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61VTW8bNxC9768goEPsxFKC9hIYCBKgaVofChSNb0EgjJajXbZccs0hJW9+fR9JrWTB" +
                 "dppDF7LkJTlvPt6b4ULd9kbUwCLUsWq9i2ScKHIqudYPY8AOa2UGbDcLdfHmSr25VDChqKIfl5a3EWbB" +
                 "cVB+O59rmt+ZNJb6+nN4FuqwHA08RhpGJb1PVqsNK2rvkhETjXdl/wSnnnqOWNtAA6+NfgDlx2hasnUr" +

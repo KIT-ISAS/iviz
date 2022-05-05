@@ -237,13 +237,16 @@ namespace Iviz.MsgsGen
                 $"    set => Response = ({Name}Response)value;",
                 "}",
                 "",
-                "string IService.RosType => RosServiceType;",
+                //"string IService.RosType => RosServiceType;",
+                $"public const string ServiceType = \"{RosPackage}/{Name}\";",
+                $"public string RosServiceType => ServiceType;",
                 "",
-                "/// Full ROS name of this service.",
-                $"[Preserve] public const string RosServiceType = \"{RosPackage}/{Name}\";",
-                "",
-                "/// MD5 hash of a compact representation of the service.",
-                $"[Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};",
+                //"/// Full ROS name of this service.",
+                //$"[Preserve] public const string ServiceType = \"{RosPackage}/{Name}\";",
+                //"",
+                //"/// MD5 hash of a compact representation of the service.",
+                //$"[Preserve] public const string RosMd5Sum = {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};",
+                $"public string RosMd5Sum => {(md5Property.Length == 0 ? "null" : $"\"{md5Property}\"")};",
                 "",
                 "public override string ToString() => Extensions.ToString(this);",
             };
@@ -259,7 +262,7 @@ namespace Iviz.MsgsGen
             str.AppendNewLine("");
             str.AppendNewLine($"namespace Iviz.Msgs.{CsPackage}");
             str.AppendNewLine("{");
-            str.AppendNewLine($"    [DataContract (Name = RosServiceType)]");
+            str.AppendNewLine($"    [DataContract]");
             str.AppendNewLine($"    public sealed class {Name} : IService");
             str.AppendNewLine("    {");
 

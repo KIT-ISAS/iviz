@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class VisibilityConstraint : IDeserializable<VisibilityConstraint>, IMessage
     {
         // The constraint is useful to maintain visibility to a disc (the target) in a particular frame.
@@ -101,16 +101,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public int RosMessageLength => 37 + TargetPose.RosMessageLength + SensorPose.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/VisibilityConstraint";
+        public const string MessageType = "moveit_msgs/VisibilityConstraint";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "62cda903bfe31ff2e5fcdc3810d577ad";
+        public string RosMd5Sum => "62cda903bfe31ff2e5fcdc3810d577ad";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71XTW8bNxC9768g4EPsQnEcNyiKFD4E+Wh9yEfrHJJcBGp3JBHmLjckV7Ly6/tmuFxR" +
                 "slP00CZwIGlJPs68efOxJ+rjmlTtuhC9Nl1UJqgh0HKwKjrV8iP8VxsTzMJYE3f8WKvGhFqdRhyN2q8o" +
                 "nils0qrXPpp6sNqrpdctnVcnwAek7F863wbFhxY6kHJLnMjAO7aB1HbtsBJNz3boKJudNyugYzv/CtQF" +

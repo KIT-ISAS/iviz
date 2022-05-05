@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class WorkspaceParameters : IDeserializable<WorkspaceParameters>, IMessage
     {
         // This message contains a set of parameters useful in
@@ -56,16 +56,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public int RosMessageLength => 48 + Header.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/WorkspaceParameters";
+        public const string MessageType = "moveit_msgs/WorkspaceParameters";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "d639a834e7b1f927e9f1d6c30e920016";
+        public string RosMd5Sum => "d639a834e7b1f927e9f1d6c30e920016";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VVsW7bQAzd9RUEMjQpHBdIig4BugVtMxQIkKBrQEuUdOjpqN6dbKtf38eTo6RAhw6t" +
                 "F8s6vsdH8vF8Ro+9SzRIStwJ1Royu5CIKUkmbWnkyINkiYmmJO3kyYXqzE6zCx1NI+VeaK9+GoTOmXZ6" +
                 "vEAIHXpX9+Us6k4zIQl7rwdpKCsNupctaEpyt1Jr8DOQEmj0HIIlaDUieue8mJScTBOAL8Sc6CDebyu8" +

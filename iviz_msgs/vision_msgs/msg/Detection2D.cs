@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Detection2D : IDeserializable<Detection2D>, IMessage
     {
         // Defines a 2D detection result.
@@ -92,16 +92,16 @@ namespace Iviz.Msgs.VisionMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "vision_msgs/Detection2D";
+        public const string MessageType = "vision_msgs/Detection2D";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "e38d1866e74825fff6b9ec7ca5865dc2";
+        public string RosMd5Sum => "e38d1866e74825fff6b9ec7ca5865dc2";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71ZW3PcthV+56/AjB4kJbu0G3c8GXc6bW01jR7SOrHTm0ajwZLYXdggwQCgdulf3++c" +
                 "A5K70trJQ22NRrsEgYNz/c5FZ+rKrG1rotLqmytVm2SqZH2rgom9S2VxVpypt1sbFX6jbazTQSUvuyun" +
                 "Y7RrW2k6slCrPinbVq6vQa/z0TIl2659aGQLiCmlnfM7225A5JhCvlRhP97FzlT0SlXBdwpLttEbA7q2" +

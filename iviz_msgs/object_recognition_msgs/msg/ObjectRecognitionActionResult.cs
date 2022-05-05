@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ObjectRecognitionMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class ObjectRecognitionActionResult : IDeserializable<ObjectRecognitionActionResult>, IActionResult<ObjectRecognitionResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -64,16 +64,16 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "object_recognition_msgs/ObjectRecognitionActionResult";
+        public const string MessageType = "object_recognition_msgs/ObjectRecognitionActionResult";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "1ef766aeca50bc1bb70773fc73d4471d";
+        public string RosMd5Sum => "1ef766aeca50bc1bb70773fc73d4471d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE8Va/1MbNxb/+fav0IQfgI5xmpDSlBvmhoBT6BCgQO+ul8kw8q5sK6xXjqTFdm/uf7/P" +
                 "e5LWazAtTRvKJMHWSk/v+/u8tzlSslBWjPhXJnOvTVXq/vXYDd3z740sL730tROOf2Vn/Y8q9xcqN8NK" +
                 "094L5erSC8u/sr0/+Sd7d/n9Lu4uAj9Hgcs1AaaqQtpCjJWXhfRSDAyE0MORslululUlMTyeqELwUz+f" +

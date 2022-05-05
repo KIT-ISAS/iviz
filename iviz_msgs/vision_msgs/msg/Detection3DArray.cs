@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Detection3DArray : IDeserializable<Detection3DArray>, IMessage
     {
         // A list of 3D detections, for a multi-object 3D detector.
@@ -59,16 +59,16 @@ namespace Iviz.Msgs.VisionMsgs
     
         public int RosMessageLength => 4 + Header.RosMessageLength + BuiltIns.GetArraySize(Detections);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "vision_msgs/Detection3DArray";
+        public const string MessageType = "vision_msgs/Detection3DArray";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "ce4a6fa9e38b86b8d286a82799ca586d";
+        public string RosMd5Sum => "ce4a6fa9e38b86b8d286a82799ca586d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71ZbW/cuBH+XP0K4vwh9mFXPcdXN0hhFEkWaQxck/SSXl8Cw+BK3F1eJFEhKdubX99n" +
                 "Zkit1tn0+qGxkTgSRQ7n5ZlnhsyReqYaG6JyK3W2ULWJporWdWGmVs4rrdqhiXbulr9ifDfD+bIoXhld" +
                 "G682/E9RHE1ExY1JM02teu96F3QTSswQeXloFKdau95EtTad8ToaCFMQYoNIvLVxo1rdbVWlu9rWmDFR" +

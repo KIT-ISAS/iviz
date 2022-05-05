@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class VisionInfo : IDeserializable<VisionInfo>, IMessage
     {
         // Provides meta-information about a visual pipeline.
@@ -98,16 +98,16 @@ namespace Iviz.Msgs.VisionMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "vision_msgs/VisionInfo";
+        public const string MessageType = "vision_msgs/VisionInfo";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "eee36f8dc558754ceb4ef619179d8b34";
+        public string RosMd5Sum => "eee36f8dc558754ceb4ef619179d8b34";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61WTW/rNhC861cQ8CFJ4bhAewvQS78f8NI+NOlDbwElrSQWFKnyw4776zu7pOQkzaGH" +
                 "BkYSi9zh7uzsUDv1Kfij6SmqmZK+NW7wYdbJeKd063NSWh1NzNqqxSxkjaNDs2t26nEyHBKjHklFCkcg" +
                 "aBXNbKwOaslh8ZFU8lhz0YenOY7xy+/0TEF/wBl71QLbuJhI94BTyg+qJeNGlQz1HDjp0J90oL0ySQVa" +

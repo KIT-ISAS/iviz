@@ -11,7 +11,13 @@ namespace Iviz.Msgs
         /// <summary>
         /// Full ROS name of the message.
         /// </summary>
-        string RosType { get; }
+        string RosMessageType { get; }
+        
+        /// <summary> MD5 hash of a compact representation of the message. </summary>
+        public string RosMd5Sum { get; }
+
+        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
+        public string RosDependenciesBase64 { get; }
 
         void IDisposable.Dispose()
         {

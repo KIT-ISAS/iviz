@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GridMapMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class SetGridMap : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.GridMapMsgs
             set => Response = (SetGridMapResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "grid_map_msgs/SetGridMap";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "grid_map_msgs/SetGridMap";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "4f8e24cfd42bc1470fe765b7516ff7e5";
+        public string RosMd5Sum => "4f8e24cfd42bc1470fe765b7516ff7e5";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -122,7 +119,7 @@ namespace Iviz.Msgs.GridMapMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 0;
+        public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     

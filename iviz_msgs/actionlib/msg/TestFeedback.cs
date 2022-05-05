@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class TestFeedback : IDeserializable<TestFeedback>, IFeedback<TestActionFeedback>
     {
         [DataMember (Name = "feedback")] public int Feedback;
@@ -40,20 +40,20 @@ namespace Iviz.Msgs.Actionlib
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 4;
+        public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "actionlib/TestFeedback";
+        public const string MessageType = "actionlib/TestFeedback";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "49ceb5b32ea3af22073ede4a0328249e";
+        public string RosMd5Sum => "49ceb5b32ea3af22073ede4a0328249e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE8vMKzE2UkhLTU1JSkzO5uICAIj0iCsQAAAA";
                 
         public override string ToString() => Extensions.ToString(this);

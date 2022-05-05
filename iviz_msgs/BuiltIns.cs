@@ -23,123 +23,32 @@ namespace Iviz.Msgs
 
         public const string EmptyDependenciesBase64 = "H4sIAAAAAAAAE+MCAJMG1zIBAAAA";
 
-        static string GetClassStringConstant(Type type, string name)
+        /// <summary>
+        /// Returns the constant field <see cref="IMessage.RosMessageType"/> for the given type T. 
+        /// </summary>
+        public static string GetMessageType<T>() where T : IMessage, new()
         {
-            Type? currentType = type;
-            string? constant;
-            do
-            {
-                constant = currentType.GetField(name)?.GetRawConstantValue() as string
-                           ?? currentType.GetProperty(name)?.GetValue(null) as string;
-                currentType = currentType.BaseType;
-            } while (constant == null && currentType != null);
-
-            if (constant == null)
-            {
-                throw new RosInvalidMessageException($"Failed to resolve constant '{name}' in class {type.FullName}");
-            }
-
-            return constant;
+            return new T().RosMessageType;
         }
 
         /// <summary>
-        /// Returns the ROS message name of the given message type.
+        /// Returns the constant field <see cref="IService.RosServiceType"/> for the given type T. 
         /// </summary>
-        /// <param name="type">The message type. Should derive from IMessage.</param>
-        /// <returns>The ROS message type.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the type is null</exception>
-        /// <exception cref="ArgumentException">Thrown if the type does not implement IMessage.</exception>
-        public static string GetMessageType(Type type)
+        public static string GetServiceType<T>() where T : IService, new()
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            return GetClassStringConstant(type, "RosMessageType");
+            return new T().RosServiceType;
         }
-
-        public static string GetMessageType<T>() where T : IMessage => GetMessageType(typeof(T));
 
         /// <summary>
-        /// Returns the ROS service name of the given service type.
+        /// Returns the constant field <see cref="IService.RosMd5Sum"/> for the given type T. 
         /// </summary>
-        /// <param name="type">The message type. Should derive from IService.</param>
-        /// <returns>The ROS service type.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the type is null</exception>
-        /// <exception cref="ArgumentException">Thrown if the type does not implement IService.</exception>
-        public static string GetServiceType(Type type)
+        public static string GetMd5Sum<T>() where T : IMessage, new()
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            return GetClassStringConstant(type, "RosServiceType");
+            return new T().RosMd5Sum;
         }
 
-        public static string GetServiceType<T>() where T : IService => GetServiceType(typeof(T));
-
-        /// <summary>
-        /// Returns the MD5 value of the given message or service type.
-        /// </summary>
-        /// <param name="type">The message type. Should derive from IMessage or IService.</param>
-        /// <returns>The MD5 value.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the type is null</exception>
-        /// <exception cref="ArgumentException">Thrown if the type does not implement IMessage or IService.</exception>
-        public static string GetMd5Sum(Type type)
+        public static string DecompressDependencies(string dependenciesBase64)
         {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            return GetClassStringConstant(type, "RosMd5Sum");
-        }
-
-        public static string GetMd5Sum<T>() => GetMd5Sum(typeof(T));
-
-        /// <summary>
-        /// Checks if the size of the ROS message type is fixed, and returns it.
-        /// </summary>
-        /// <typeparam name="T">The message type. Should derive from IMessage.</typeparam>
-        /// <param name="size">The fixed size, if it exists.</param>
-        /// <returns>True if the message has a fixed size.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if the type is null.</exception>
-        public static bool TryGetFixedSize<T>(out int size) where T : ISerializable
-        {
-            var type = typeof(T);
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            int? constant = (int?)type.GetField("RosFixedMessageLength")?.GetRawConstantValue();
-            if (constant == null)
-            {
-                size = default;
-                return false;
-            }
-
-            size = constant.Value;
-            return true;
-        }
-
-        static string GetDependenciesBase64(Type type)
-        {
-            return GetClassStringConstant(type, "RosDependenciesBase64");
-        }
-
-        public static string DecompressDependencies<T>() where T : ISerializable => DecompressDependencies(typeof(T));
-
-        public static string DecompressDependencies(Type type)
-        {
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            string dependenciesBase64 = GetDependenciesBase64(type);
             byte[] inputBytes = Convert.FromBase64String(dependenciesBase64);
 
             Span<byte> outputBytes = stackalloc byte[32];
@@ -156,6 +65,7 @@ namespace Iviz.Msgs
 
             return str.ToString();
         }
+        
 
         static string RosNameToCs(string name)
         {

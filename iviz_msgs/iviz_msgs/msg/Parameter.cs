@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Parameter : IDeserializable<Parameter>, IMessage
     {
         [DataMember (Name = "type")] public byte Type;
@@ -84,16 +84,16 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "iviz_msgs/Parameter";
+        public const string MessageType = "iviz_msgs/Parameter";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "b32e29f252ff98ac5d0cd0104be754bc";
+        public string RosMd5Sum => "b32e29f252ff98ac5d0cd0104be754bc";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEyvNzCuxUCipLEjlSsrPz1EAEVxAMWMjBTDJlZaTn1hiZqIApbmKS4oy89IVIBRXKUh7" +
                 "dKxCUmVJajFEH5AHpothWoECUFYxVDdQBMIo5gICAJ1TqtGDAAAA";
                 

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class PlaceGoal : IDeserializable<PlaceGoal>, IGoal<PlaceActionGoal>
     {
         // An action for placing an object
@@ -129,16 +129,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/PlaceGoal";
+        public const string MessageType = "moveit_msgs/PlaceGoal";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "e3f3e956e536ccd313fd8f23023f0a94";
+        public string RosMd5Sum => "e3f3e956e536ccd313fd8f23023f0a94";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+08a3Mbx5Hf8Su2zKojGUOQLCopHx2lShZpWy7rEVHxS6VCDXYHwIaLnfXOLkHo6v77" +
                 "9XNmFgAl+XJk7iqXpCJid6Znuqff3bOj0ch3bVkvskXr+mZam5UdhWem60y+tMXUzf5u807fvqpMbn9w" +
                 "uelKV799lzX4e1rJAw8jRjPnKnlu7XwUQfq+aVzbTX3fzvGtgJQZpqrcerpoy6ax7VTH5q6qSg+gYdhT" +

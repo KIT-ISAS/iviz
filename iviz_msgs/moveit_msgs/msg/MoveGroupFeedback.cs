@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class MoveGroupFeedback : IDeserializable<MoveGroupFeedback>, IFeedback<MoveGroupActionFeedback>
     {
         // The internal state that the move group action currently is in
@@ -44,16 +44,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public int RosMessageLength => 4 + BuiltIns.GetStringSize(State);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/MoveGroupFeedback";
+        public const string MessageType = "moveit_msgs/MoveGroupFeedback";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "af6d3a99f0fbeb66d3248fa4b3e675fb";
+        public string RosMd5Sum => "af6d3a99f0fbeb66d3248fa4b3e675fb";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+PiKi4pysxLVyguSSxJ5QIAXR/O4Q8AAAA=";
                 
         public override string ToString() => Extensions.ToString(this);

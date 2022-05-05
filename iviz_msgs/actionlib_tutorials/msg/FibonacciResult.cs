@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class FibonacciResult : IDeserializable<FibonacciResult>, IResult<FibonacciActionResult>
     {
         //result definition
@@ -44,16 +44,16 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public int RosMessageLength => 4 + 4 * Sequence.Length;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "actionlib_tutorials/FibonacciResult";
+        public const string MessageType = "actionlib_tutorials/FibonacciResult";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "b81e37d2a31925a0e8ae261a8699cb79";
+        public string RosMd5Sum => "b81e37d2a31925a0e8ae261a8699cb79";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+PKzCsxNoqOVShOLSxNzUtO5QIAoiQSixIAAAA=";
                 
         public override string ToString() => Extensions.ToString(this);

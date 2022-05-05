@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class PlannerInterfaceDescription : IDeserializable<PlannerInterfaceDescription>, IMessage
     {
         // The name of the planner interface
@@ -55,16 +55,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name) + BuiltIns.GetArraySize(PlannerIds);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/PlannerInterfaceDescription";
+        public const string MessageType = "moveit_msgs/PlannerInterfaceDescription";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "ea5f6e6129aa1b110ccda9900d2bf25e";
+        public string RosMd5Sum => "ea5f6e6129aa1b110ccda9900d2bf25e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1NWCMlIVchLzE1VyE9TKAGyC3IS8/JSixQy80pSi9ISk1O5ikuKMvPSwYq4uJThGoox" +
                 "dKQUK5RnlmRk5oGF0Q2IjoWpjAeq5OICAIb3GGd7AAAA";
                 

@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.PclMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class UpdateFilename : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.PclMsgs
             set => Response = (UpdateFilenameResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "pcl_msgs/UpdateFilename";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "pcl_msgs/UpdateFilename";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "93a4bc4c60dc17e2a69e3fcaaa25d69d";
+        public string RosMd5Sum => "93a4bc4c60dc17e2a69e3fcaaa25d69d";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -126,7 +123,7 @@ namespace Iviz.Msgs.PclMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 1;
+        public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
     

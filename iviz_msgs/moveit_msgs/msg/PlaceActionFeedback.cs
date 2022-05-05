@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class PlaceActionFeedback : IDeserializable<PlaceActionFeedback>, IActionFeedback<PlaceFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -64,16 +64,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/PlaceActionFeedback";
+        public const string MessageType = "moveit_msgs/PlaceActionFeedback";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "12232ef97486c7962f264c105aae2958";
+        public string RosMd5Sum => "12232ef97486c7962f264c105aae2958";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71WTXPbNhC981dgRofYnVptk36kntFBlRRHGSfR2GqvHhBckWhBUAVAyfr3fQtSFOVY" +
                 "jQ5JNLL1Bbx9ePt2sW9JZuREEV8SqYKurNHpQ+lz/8NNJc19kKH2wseXZGGkojdEWSrVP2LVvklGX/iR" +
                 "vL+/uUbMrOHxtmE3ECBjM+kyUVKQmQxSrCqQ13lB7srQhgwTLdeUifhr2K3JD7FxWWgv8MzJkpPG7ETt" +

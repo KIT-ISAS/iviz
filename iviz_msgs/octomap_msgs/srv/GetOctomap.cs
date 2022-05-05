@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.OctomapMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class GetOctomap : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.OctomapMsgs
             set => Response = (GetOctomapResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "octomap_msgs/GetOctomap";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "octomap_msgs/GetOctomap";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "be9d2869d24fe40d6bc21ac21f6bb2c5";
+        public string RosMd5Sum => "be9d2869d24fe40d6bc21ac21f6bb2c5";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -79,7 +76,7 @@ namespace Iviz.Msgs.OctomapMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 0;
+        public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     

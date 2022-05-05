@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Tf2Msgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class LookupTransformActionGoal : IDeserializable<LookupTransformActionGoal>, IActionGoal<LookupTransformGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -64,16 +64,16 @@ namespace Iviz.Msgs.Tf2Msgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "tf2_msgs/LookupTransformActionGoal";
+        public const string MessageType = "tf2_msgs/LookupTransformActionGoal";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "f2e7bcdb75c847978d0351a13e699da5";
+        public string RosMd5Sum => "f2e7bcdb75c847978d0351a13e699da5";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VUwWobMRC971cM5JCkYBfSW6C30MTQQiG+m7E03hXZlbYayc7+fZ+0azeFHHpozIKQ" +
                 "NPPmzbwnPwlbidTVpWGTXPC92+8GbfXzY+B+80Atlp2zzfcQXvK4jez1EOJQbutd8/U//5ofz4/3pMnO" +
                 "NJ5mclf0nNhbjpYGSWw5MYEHda7tJK56OUqPJB5GsVRv0zSKrpG47ZwSvla8RO77ibIiKAUyYRiyd4aT" +

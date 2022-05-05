@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class FibonacciActionGoal : IDeserializable<FibonacciActionGoal>, IActionGoal<FibonacciGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -55,16 +55,16 @@ namespace Iviz.Msgs.ActionlibTutorials
     
         public int RosMessageLength => 4 + Header.RosMessageLength + GoalId.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "actionlib_tutorials/FibonacciActionGoal";
+        public const string MessageType = "actionlib_tutorials/FibonacciActionGoal";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "006871c7fa1d0e3d5fe2226bf17b2a94";
+        public string RosMd5Sum => "006871c7fa1d0e3d5fe2226bf17b2a94";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VUTWvbQBC961cM+JCkEAfam6G3kI9DoZDczXh3LA2VdtWdlV39+75d2W4CPfTQCIFY" +
                 "aebNm3lv9CTsJVFXHw27rDH0utsO1trdY+T++Z5aPLbqmwfdxcDOaXlf3zZf//PVfHt53JBlvxB4Wmit" +
                 "6CVz8Jw8DZLZc2baR7DWtpN028tBeiTxMIqn+jXPo9gaia+dGuFuJUjivp9pMgTlSC4OwxTUcRbKOsi7" +

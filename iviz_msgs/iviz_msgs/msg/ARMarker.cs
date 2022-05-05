@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class ARMarker : IDeserializable<ARMarker>, IMessage
     {
         public const byte TYPE_ARUCO = 0;
@@ -85,16 +85,16 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "iviz_msgs/ARMarker";
+        public const string MessageType = "iviz_msgs/ARMarker";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "c8f6b41386c19105b6644958405c417b";
+        public string RosMd5Sum => "c8f6b41386c19105b6644958405c417b";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VUW/bNhB+nn7FAXloMjjq1hQDGqAPQdJteSiapFmBrhgEWjpLbCVSJSnbyq/fd2Qk" +
                 "10Ww7qGNYVgUyfvu7rvvzssxMN2+v3pVnN38df6GXtIv2XLeu745f3PxCpu/ZtmfrCp21MRHuhPGnjMf" +
                 "nDY1lbbin+RzQLe8DfGd9IqubxakTeAatsrT/W0cnLmhtHlWs+04uLHofO2fvuMyWHfy4fk/AHCGnRfA" +

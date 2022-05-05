@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class TriangleMeshStamped : IDeserializable<TriangleMeshStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -48,16 +48,16 @@ namespace Iviz.Msgs.MeshMsgs
     
         public int RosMessageLength => 0 + Header.RosMessageLength + Mesh.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "mesh_msgs/TriangleMeshStamped";
+        public const string MessageType = "mesh_msgs/TriangleMeshStamped";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "3e766dd12107291d682eb5e6c7442b9d";
+        public string RosMd5Sum => "3e766dd12107291d682eb5e6c7442b9d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71XXW/bNhR9168g4IckbewU6zAUGYZ9pGuXhwBFm7egMGjpSuJGkSpJJXZ+/c4lRdlO" +
                 "nawPSw0Hlsh7Dy/v54kP1bLzjT/7i2RFTrTxp+jIt2n92ilpGk1XWBG8XBS//M+f4urT+3Ph9y0pZuJT" +
                 "kKaSrsKxQVYySFFbWKialtxc0y1pKMmup0rE3bDpyS+geN0qL/BtyJCTWm/E4CEUrCht1w1GlTKQCArX" +

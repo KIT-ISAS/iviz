@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class GetMapActionFeedback : IDeserializable<GetMapActionFeedback>, IActionFeedback<GetMapFeedback>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -55,16 +55,16 @@ namespace Iviz.Msgs.NavMsgs
     
         public int RosMessageLength => 0 + Header.RosMessageLength + Status.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "nav_msgs/GetMapActionFeedback";
+        public const string MessageType = "nav_msgs/GetMapActionFeedback";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "aae20e09065c3809e8a8e87c4c8953fd";
+        public string RosMd5Sum => "aae20e09065c3809e8a8e87c4c8953fd";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71WTXPbNhC981dgRofYnVptkzZJPaODKimOMnbisdVePSC5ItGCIIsPyfr3fQtSlORY" +
                 "jQ5JNLL1Bbx9ePt2se9J5mRFGV8SmXlVG63Sh8oV7qerWup7L31wwsWX5Ir8jWzeEeWpzP4Ry+5NMvrK" +
                 "j+Tm/uoSQfOWyPuW3kCAjcmlzUVFXubSS7GswV4VJdkLTSvSzLRqKBfxV79pyA2xcVEqJ/AsyJCVWm9E" +
