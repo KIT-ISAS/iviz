@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     [StructLayout(LayoutKind.Sequential)]
     public struct Pose : IMessage, IDeserializable<Pose>, System.IEquatable<Pose>
     {
@@ -48,20 +48,20 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 56;
+        public const int RosFixedMessageLength = 56;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
-        public readonly string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "geometry_msgs/Pose";
+        public const string MessageType = "geometry_msgs/Pose";
+    
+        public readonly string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "e45d45a5a1ce597b249e23fb30fc871f";
+        public readonly string RosMd5Sum => "e45d45a5a1ce597b249e23fb30fc871f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71RsQrCMBTc31c8cJW6iIPg4OQkKLpLqC9twOTVvIjWrzctNrGTi5jpLrm83F0muEZP" +
                 "jSchF1Qw7JA1NiyExqH2RCiNKmmKJdtu+/w+N71Wuci9Ge4WCDs2LiQB7G8qkHf93KwDWP14wfawWWJF" +
                 "bCn49mSlkllvBSZ4rI1E+/Ft4wRDTdl/zKIi6yyP4oK+sAqLOT4SahN6/sd+rm7IkD5KYvGffY7Nd+ya" +

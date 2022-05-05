@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class StartCapture : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (StartCaptureResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "iviz_msgs/StartCapture";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "iviz_msgs/StartCapture";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "ddc13484ad3a5f74f6f36b363081b7e2";
+        public string RosMd5Sum => "ddc13484ad3a5f74f6f36b363081b7e2";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -92,7 +89,7 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 9;
+        public const int RosFixedMessageLength = 9;
         
         public int RosMessageLength => RosFixedMessageLength;
     

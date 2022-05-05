@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ObjectRecognitionMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class ObjectRecognitionGoal : IDeserializable<ObjectRecognitionGoal>, IGoal<ObjectRecognitionActionGoal>
     {
         // Optional ROI to use for the object detection
@@ -48,16 +48,16 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
     
         public int RosMessageLength => 5 + 4 * FilterLimits.Length;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "object_recognition_msgs/ObjectRecognitionGoal";
+        public const string MessageType = "object_recognition_msgs/ObjectRecognitionGoal";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "49bea2f03a1bba0ad05926e01e3525fa";
+        public string RosMd5Sum => "49bea2f03a1bba0ad05926e01e3525fa";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+NKys/PUSgtTo0vys/kSsvJTywxNoqOVUjLzClJLYrPyczNLCnmAgBz2M+rJgAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);

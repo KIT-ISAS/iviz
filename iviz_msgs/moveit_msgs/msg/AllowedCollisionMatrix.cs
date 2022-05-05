@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class AllowedCollisionMatrix : IDeserializable<AllowedCollisionMatrix>, IMessage
     {
         // The list of entry names in the matrix
@@ -98,16 +98,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/AllowedCollisionMatrix";
+        public const string MessageType = "moveit_msgs/AllowedCollisionMatrix";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "aedce13587eef0d79165a075659c1879";
+        public string RosMd5Sum => "aedce13587eef0d79165a075659c1879";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61SzU7DMAy+9yks7QLSNMSOSBwmQIgDXOCG0OQ27hqRxl2SbuztcZKWbYzd6KFSa/v7" +
                 "syfw1hAY7QNwDWSD24HFljxoC0FKLQanvwovb7t6/8gty9RSFJM0ra3SG616NKmq98NoDG9JQcVGKDTb" +
                 "EW4Cft2joyn4XduS/KumsNWhAS/IwE6RA/RHbIsMdjdiPcTaj6INmj5LerKASukQ6QInHb/5QQdPphbK" +

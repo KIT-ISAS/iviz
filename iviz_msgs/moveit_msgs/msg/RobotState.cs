@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class RobotState : IDeserializable<RobotState>, IMessage
     {
         // This message contains information about the robot state, i.e. the positions of its joints and links
@@ -85,16 +85,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/RobotState";
+        public const string MessageType = "moveit_msgs/RobotState";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "217a2e8e5547f4162b13a37db9cb4da4";
+        public string RosMd5Sum => "217a2e8e5547f4162b13a37db9cb4da4";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+1aW28bNxZ+n19BNA+2W0Vp47ToapGHJHYaB02cJuklDQKBmqEk1qOhSlKW1cX+9/3O" +
                 "OeTMSFaaFlgbWGCzi1ozJM/9zrmj3s5tUAsTgp4ZVbomatsEZZup8wsdrWuUnrhVVHFulHcTF1WIOpqB" +
                 "skMz5LdLFyxtDMpNlY1B/eZsgz+6qVRtm4tQBNME58eLMAv3ntPiGwIh+8YMrijuqOdyLM51VAu9UXN9" +

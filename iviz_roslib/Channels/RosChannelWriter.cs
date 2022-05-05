@@ -10,7 +10,7 @@ using Iviz.Tools;
 namespace Iviz.Roslib;
 
 public sealed class RosChannelWriter<T> : IRosChannelWriter
-    where T : IMessage
+    where T : IMessage, new()
 {
     IRosPublisher<T>? publisher;
     string? publisherId;
@@ -271,20 +271,20 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
             return; // not started
         }
 
-        await Publisher.UnadvertiseAsync(publisherId!).AsTask().AwaitNoThrow(this);
+        await Publisher.UnadvertiseAsync(publisherId!).AwaitNoThrow(this);
     }
 }
 
 public static class RosChannelWriterUtils
 {
     public static RosChannelWriter<T> CreateWriter<T>(this IRosClient client, string topic, bool latchingEnabled = false)
-        where T : IMessage
+        where T : IMessage, new()
     {
         return new RosChannelWriter<T>(client, topic) {LatchingEnabled = latchingEnabled};
     }
         
     public static async ValueTask<RosChannelWriter<T>> CreateWriterAsync<T>(this IRosClient client, string topic, bool latchingEnabled = false, CancellationToken token = default)
-        where T : IMessage
+        where T : IMessage, new()
     {
         var writer = new RosChannelWriter<T> {LatchingEnabled = latchingEnabled};
         await writer.StartAsync(client, topic, token);
@@ -319,11 +319,6 @@ public static class RosChannelWriterUtils
     
     static IRosChannelWriter CreateWriterForMessage(Type msgType)
     {
-        if (typeof(IMessage) == msgType)
-        {
-            return new RosChannelWriter<IMessage>();
-        }
-
         if (!typeof(IMessage).IsAssignableFrom(msgType))
         {
             throw new ArgumentException("msgType is not a message type", nameof(msgType));

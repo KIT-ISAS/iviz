@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class SendBytes : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (SendBytesResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "rosbridge_library/SendBytes";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "rosbridge_library/SendBytes";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "d875457256decc7436099d9d612ebf8a";
+        public string RosMd5Sum => "d875457256decc7436099d9d612ebf8a";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -84,7 +81,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 8;
+        public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
     

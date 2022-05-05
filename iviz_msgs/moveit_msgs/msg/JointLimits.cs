@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class JointLimits : IDeserializable<JointLimits>, IMessage
     {
         // This message contains information about limits of a particular joint (or control dimension)
@@ -67,16 +67,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public int RosMessageLength => 39 + BuiltIns.GetStringSize(JointName);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/JointLimits";
+        public const string MessageType = "moveit_msgs/JointLimits";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "8ca618c7329ea46142cbc864a2efe856";
+        public string RosMd5Sum => "8ca618c7329ea46142cbc864a2efe856";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE22QQW6EMAxF95ziS7NpF91VPUn3yIQwuEriUWyqmds3HWAggmX8/4uffMH3yIroVenq" +
                 "4SQZcVJwGiRHMpYE6mQyBI5sChlAuFE2dlOgjB/hZHiT/GSzBPQcfdICvjdqmdN17rSJom+aCyxPHjzA" +
                 "Rr/QIyluovzcNu9pOilflaBdg3YJyg+Ri1TqEel+4IYgZF+f/50Xug3pvg13KpvGrw/i2B4HjTXYa5T1" +

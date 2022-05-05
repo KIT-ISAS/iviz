@@ -59,7 +59,7 @@ namespace Iviz.Ros
         {
             ThrowHelper.ThrowIfNullOrEmpty(topic, nameof(topic));
             Topic = topic;
-            Type = BuiltIns.GetMessageType(typeof(T));
+            Type = BuiltIns.GetMessageType<T>();
             this.transportHint = transportHint;
             GameThread.EverySecond += UpdateStats;
         }

@@ -228,6 +228,8 @@ namespace Iviz.App.ARDialogs
         {
             Button.Transform.parent = Transform;
             Button.Visible = false;
+            TooltipX.Visible = false;
+            TooltipY.Visible = false;
             Draggable.Transform.localPosition = Vector3.zero;
             Line.Visible = false;
             Moved = null;

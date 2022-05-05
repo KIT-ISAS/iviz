@@ -238,15 +238,15 @@ namespace Iviz.Controllers
             var transportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
             Listener = Config.Type switch
             {
-                PoseStamped.RosMessageType => CreateListener<PoseStamped>(Handler),
-                Pose.RosMessageType => CreateListener<Pose>(Handler),
-                PointStamped.RosMessageType => CreateListener<PointStamped>(Handler),
-                Point.RosMessageType => CreateListener<Point>(Handler),
-                WrenchStamped.RosMessageType => CreateListener<WrenchStamped>(Handler),
-                Wrench.RosMessageType => CreateListener<Wrench>(Handler),
-                TwistStamped.RosMessageType => CreateListener<TwistStamped>(Handler),
-                Twist.RosMessageType => CreateListener<Twist>(Handler),
-                Odometry.RosMessageType => CreateListener<Odometry>(Handler),
+                PoseStamped.MessageType => CreateListener<PoseStamped>(Handler),
+                Pose.MessageType => CreateListener<Pose>(Handler),
+                PointStamped.MessageType => CreateListener<PointStamped>(Handler),
+                Point.MessageType => CreateListener<Point>(Handler),
+                WrenchStamped.MessageType => CreateListener<WrenchStamped>(Handler),
+                Wrench.MessageType => CreateListener<Wrench>(Handler),
+                TwistStamped.MessageType => CreateListener<TwistStamped>(Handler),
+                Twist.MessageType => CreateListener<Twist>(Handler),
+                Odometry.MessageType => CreateListener<Odometry>(Handler),
                 _ => throw new InvalidOperationException("Invalid message type")
             };
 
@@ -255,29 +255,29 @@ namespace Iviz.Controllers
 
             switch (Config.Type)
             {
-                case PoseStamped.RosMessageType:
-                case Pose.RosMessageType:
+                case PoseStamped.MessageType:
+                case Pose.MessageType:
                     RentFrame(frameNode, out axisFrame);
                     break;
-                case PointStamped.RosMessageType:
-                case Point.RosMessageType:
+                case PointStamped.MessageType:
+                case Point.MessageType:
                     RentSphere(frameNode, VectorColor, out sphere);
                     break;
-                case WrenchStamped.RosMessageType:
-                case Wrench.RosMessageType:
-                    RentFrame(frameNode, out axisFrame);
-                    RentArrow(frameNode, VectorColor, out arrow);
-                    RentAngleAxis(frameNode, AngleColor, out angleAxis);
-                    RentSphere(frameNode, VectorColor, out sphere);
-                    break;
-                case TwistStamped.RosMessageType:
-                case Twist.RosMessageType:
+                case WrenchStamped.MessageType:
+                case Wrench.MessageType:
                     RentFrame(frameNode, out axisFrame);
                     RentArrow(frameNode, VectorColor, out arrow);
                     RentAngleAxis(frameNode, AngleColor, out angleAxis);
                     RentSphere(frameNode, VectorColor, out sphere);
                     break;
-                case Odometry.RosMessageType:
+                case TwistStamped.MessageType:
+                case Twist.MessageType:
+                    RentFrame(frameNode, out axisFrame);
+                    RentArrow(frameNode, VectorColor, out arrow);
+                    RentAngleAxis(frameNode, AngleColor, out angleAxis);
+                    RentSphere(frameNode, VectorColor, out sphere);
+                    break;
+                case Odometry.MessageType:
                     RentFrame(frameNode, out axisFrame);
                     RentSphere(frameNode, VectorColor, out sphere);
                     childNode = new FrameNode($"{Config.Topic} | Child");

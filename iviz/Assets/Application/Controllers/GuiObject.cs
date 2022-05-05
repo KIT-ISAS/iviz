@@ -70,7 +70,11 @@ namespace Iviz.Controllers
             if (widget is IWidgetCanBeResized canBeResized)
             {
                 canBeResized.Resized += bounds =>
-                    parent.OnWidgetResized(this, new Bounds(bounds.center, bounds.size * scale));
+                {
+                    var localPose = node.Transform.AsLocalPose();
+                    var transformedCenter = localPose.Multiply(scale * bounds.center);
+                    parent.OnWidgetResized(this, new Bounds(transformedCenter, bounds.size * scale));
+                };
             }
 
             if (widget is IWidgetCanBeClicked canBeClicked)

@@ -251,8 +251,8 @@ namespace Iviz.Controllers
 
             Listener = Config.Type switch
             {
-                Marker.RosMessageType => new Listener<Marker>(Config.Topic, Handler, rosTransportHint),
-                MarkerArray.RosMessageType => new Listener<MarkerArray>(Config.Topic, Handler, rosTransportHint),
+                Marker.MessageType => new Listener<Marker>(Config.Topic, Handler, rosTransportHint),
+                MarkerArray.MessageType => new Listener<MarkerArray>(Config.Topic, Handler, rosTransportHint),
                 _ => throw new InvalidOperationException("Invalid message type")
             };
 

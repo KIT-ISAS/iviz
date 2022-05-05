@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class BoundingBoxStamped : IDeserializable<BoundingBoxStamped>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -48,16 +48,16 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 80 + Header.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "iviz_msgs/BoundingBoxStamped";
+        public const string MessageType = "iviz_msgs/BoundingBoxStamped";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "da26f418902c5d679a0e80380a951267";
+        public string RosMd5Sum => "da26f418902c5d679a0e80380a951267";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VwU7cMBC95ytG4gBUSypB1QNSD0VVC4dKVKBe0aw9SawmdrCdXcLX99nZzbICiR4K" +
                 "q0jrxDNv3sw8jy+FtXhq8l9x4Qarja0v3AMt05r9WBRf/vOv+Hnz45xC1HddqMPHyyn2Ad1EThE1dRJZ" +
                 "c2SqHKiZuhF/0spKWjhx14umvBvHXkIJx9vGBMJTixXPbTvSEGAUHSnXdYM1iqNQNJ3s+cPTWGLq2Uej" +

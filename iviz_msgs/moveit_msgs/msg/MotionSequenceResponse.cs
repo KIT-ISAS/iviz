@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class MotionSequenceResponse : IDeserializable<MotionSequenceResponse>, IMessage
     {
         // An error code reflecting what went wrong
@@ -74,16 +74,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public int RosMessageLength => 16 + SequenceStart.RosMessageLength + BuiltIns.GetArraySize(PlannedTrajectories);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/MotionSequenceResponse";
+        public const string MessageType = "moveit_msgs/MotionSequenceResponse";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "3b9d4e8079db4576e4829d30617a3d1d";
+        public string RosMd5Sum => "3b9d4e8079db4576e4829d30617a3d1d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+1bbXPbNrb+zl+BWc+s7a2sNHGabX3HHxRbTtTakivJ2aaZDAciIQlrilAByrK6s/99" +
                 "zwtAUrScdGfXvnNnbtpxTBI4wHl7zguQPdHJhbLWWJGYVAmrpplKCp3PxHouC7FWOfywJp9FV+ZO9You" +
                 "jj2DoY6nxTgtivbEeK7EdJVlwhXSEgH4pVDCTEUBn6yZmEIARXygIeGLU7+tVJ6oaIhDRjQpvItpZCBf" +

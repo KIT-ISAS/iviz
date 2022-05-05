@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     [StructLayout(LayoutKind.Sequential)]
     public struct Triangle : IMessage, IDeserializable<Triangle>, System.IEquatable<Triangle>
     {
@@ -49,20 +49,20 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 12;
+        public const int RosFixedMessageLength = 12;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
-        public readonly string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "iviz_msgs/Triangle";
+        public const string MessageType = "iviz_msgs/Triangle";
+    
+        public readonly string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "7fbd9596e2fe5bfb3fb6622c0cdf3da9";
+        public readonly string RosMd5Sum => "7fbd9596e2fe5bfb3fb6622c0cdf3da9";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEyvNzCsxNlJI5CqFMJJgjGQuLgA3MPMeHAAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);

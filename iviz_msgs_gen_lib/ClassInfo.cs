@@ -324,7 +324,7 @@ namespace Iviz.MsgsGen
                 return new[]
                 {
                     "/// <summary> Constant size of this message. </summary> ",
-                    $"[Preserve] public const int RosFixedMessageLength = {fixedSize};",
+                    $"public const int RosFixedMessageLength = {fixedSize};",
                     "",
                     $"public {readOnlyId}int RosMessageLength => RosFixedMessageLength;"
                 };
@@ -589,7 +589,7 @@ namespace Iviz.MsgsGen
                                 else
                                 {
                                     lines.Add($"    b.Deserialize(out {prefix}{variable.CsFieldName});");
-                                
+
                                     //lines.Add(
                                     //    $"    {prefix}{variable.CsFieldName} = b.Deserialize<{variable.CsClassName}>();");
                                 }
@@ -1007,7 +1007,8 @@ namespace Iviz.MsgsGen
         IEnumerable<string> CreateClassContent()
         {
             var lines = new List<string>();
-            lines.Add($"[Preserve, DataContract (Name = RosMessageType)]");
+            //lines.Add($"[Preserve, DataContract (Name = RosMessageType)]");
+            lines.Add($"[DataContract]");
             if (ForceStruct)
             {
                 lines.Add("[StructLayout(LayoutKind.Sequential)]");
@@ -1071,12 +1072,13 @@ namespace Iviz.MsgsGen
             }
 
             lines.Add("");
-            string readOnlyId = ForceStruct ? "readonly " : "";
-            lines.Add($"    public {readOnlyId}string RosType => RosMessageType;");
-
-            lines.Add("");
             lines.Add("    /// <summary> Full ROS name of this message. </summary>");
-            lines.Add($"    [Preserve] public const string RosMessageType = \"{RosPackage}/{Name}\";");
+            lines.Add($"    public const string MessageType = \"{RosPackage}/{Name}\";");
+            lines.Add("");
+            string readOnlyId = ForceStruct ? "readonly " : "";
+            lines.Add($"    public {readOnlyId}string RosMessageType => MessageType;");
+
+            //lines.Add("");
 
 
             lines.Add("");
@@ -1092,7 +1094,8 @@ namespace Iviz.MsgsGen
                 emptyMd5Sum => "BuiltIns.EmptyMd5Sum",
                 _ => $"\"{Md5Hash}\""
             };
-            lines.Add($"    [Preserve] public const string RosMd5Sum = {md5Hash};");
+            lines.Add($"    public {readOnlyId}string RosMd5Sum => {md5Hash};");
+            //lines.Add($"    public string RosMd5Sum => {md5Hash};");
 
             lines.Add("");
 
@@ -1103,13 +1106,15 @@ namespace Iviz.MsgsGen
             string compressedDeps = Compress(catDependencies);
             if (compressedDeps == emptyDependenciesBase64)
             {
-                lines.Add(
-                    "    [Preserve] public const string RosDependenciesBase64 = BuiltIns.EmptyDependenciesBase64;");
+                //lines.Add(
+                //    "    [Preserve] public const string RosDependenciesBase64 = BuiltIns.EmptyDependenciesBase64;");
+                lines.Add($"    public {readOnlyId}string RosDependenciesBase64 => BuiltIns.EmptyDependenciesBase64;");
                 lines.Add("");
             }
             else
             {
-                lines.Add("    [Preserve] public const string RosDependenciesBase64 =");
+                //lines.Add("    [Preserve] public const string RosDependenciesBase64 =");
+                lines.Add($"    public {readOnlyId}string RosDependenciesBase64 =>");
                 var splitDeps = Split(compressedDeps);
                 foreach (string entry in splitDeps)
                 {

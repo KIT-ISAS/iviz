@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class PointCloud : IDeserializable<PointCloud>, IMessage
     {
         // This message holds a collection of 3d points, plus optional additional
@@ -79,16 +79,16 @@ namespace Iviz.Msgs.SensorMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "sensor_msgs/PointCloud";
+        public const string MessageType = "sensor_msgs/PointCloud";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "d8e9c3f5afbdd8a130fd1d2763945fca";
+        public string RosMd5Sum => "d8e9c3f5afbdd8a130fd1d2763945fca";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VWTW8bNxC9768YyIfIgazCTg+FgR7atE5zKBA0vhWFMdod7RLhkmuSK1v99X1D7urD" +
                 "8SGHRhCg1ZJ8M/PmzQwv6L4zkXqJkVuhztsmElPtrZU6Ge/Ib+ldQ4M3LsUVDXaM5AddYUvcNKY8Vhdk" +
                 "3NaHnvMh3vgxkXDdlZPrChvuTS8KF8VFH6jhxMT142hiBlnBqg+NcZyEtoGx+eNv6+oP4UYCdflHYX4J" +

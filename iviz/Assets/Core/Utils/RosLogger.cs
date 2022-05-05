@@ -17,6 +17,7 @@ namespace Iviz.Core
         static int publishedThisSec;
 
         public delegate void ExternalLogDelegate(in LogMessage msg);
+
         public static event Action<string>? LogInternal;
         public static event ExternalLogDelegate? LogExternal;
 
@@ -86,15 +87,26 @@ namespace Iviz.Core
                     Exception? childException = e;
                     while (childException != null)
                     {
-                        if (childException is not AggregateException)
+                        if (childException is AggregateException)
                         {
-                            description.AppendLine()
-                                .Append("<color=red>")
-                                .Append(childException.GetType().Name)
-                                .Append("</color> ")
-                                .Append(childException.CheckMessage());
+                            childException = childException.InnerException;
+                            continue;
                         }
 
+                        if (childException is OperationCanceledException)
+                        {
+                            description.AppendLine()
+                                .Append("<color=red>" + nameof(OperationCanceledException) + "</color> " +
+                                        "The task was canceled");
+                            childException = childException.InnerException;
+                            continue;
+                        }
+
+                        description.AppendLine()
+                            .Append("<color=red>")
+                            .Append(childException.GetType().Name)
+                            .Append("</color> ")
+                            .Append(childException.CheckMessage());
                         childException = childException.InnerException;
                     }
                 }
@@ -119,7 +131,7 @@ namespace Iviz.Core
             if (publishedThisSec == MaxPublishedPerSecond)
             {
                 UnityEngine.Debug.LogWarning($"{nameof(RosLogger)}: Already published " +
-                                             $"{MaxPublishedPerSecond.ToString()} messages this second. " +
+                                             MaxPublishedPerSecond + " messages this second. " +
                                              "Suppressing the rest.");
                 return;
             }
@@ -158,7 +170,7 @@ namespace Iviz.Core
                 PublishLocal();
                 return;
             }
-            
+
             Interlocked.Increment(ref publishedThisSec);
             if (publishedThisSec == MaxPublishedPerSecond)
             {
@@ -221,11 +233,11 @@ namespace Iviz.Core
                 {
                     if (level == LogLevel.Debug)
                     {
-                        UnityEngine.Debug.Log(message);
+                        UnityEngine.Debug.Log(msg);
                     }
                     else
                     {
-                        UnityEngine.Debug.LogWarning(message);
+                        UnityEngine.Debug.LogWarning(msg);
                     }
                 }
             }

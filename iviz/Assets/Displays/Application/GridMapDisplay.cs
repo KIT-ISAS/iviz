@@ -188,7 +188,7 @@ namespace Iviz.Displays
                 float stepX = 1f / cellsX;
                 float stepY = 1f / cellsY;
                 int off = 0;
-                foreach (int v in ..cellsY)
+                foreach (int v in ..(cellsY + 1))
                 {
                     foreach (int u in ..(cellsX + 1))
                     {
@@ -217,8 +217,9 @@ namespace Iviz.Displays
                     }
                 }
 
+                mesh.Clear();
                 mesh.SetVertices(pointsArray);
-                mesh.SetIndices(indicesArray, MeshTopology.Quads, 0);
+                mesh.SetIndices(indicesArray, MeshTopology.Quads);
                 mesh.RecalculateNormals();
                 mesh.Optimize();
             }

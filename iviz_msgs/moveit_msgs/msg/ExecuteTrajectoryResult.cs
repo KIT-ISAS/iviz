@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class ExecuteTrajectoryResult : IDeserializable<ExecuteTrajectoryResult>, IResult<ExecuteTrajectoryActionResult>
     {
         // Error code - encodes the overall reason for failure
@@ -44,20 +44,20 @@ namespace Iviz.Msgs.MoveitMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 4;
+        public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/ExecuteTrajectoryResult";
+        public const string MessageType = "moveit_msgs/ExecuteTrajectoryResult";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "1f7ab918f5d0c5312f25263d3d688122";
+        public string RosMd5Sum => "1f7ab918f5d0c5312f25263d3d688122";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61Sy47TMBTd+ysiIbGLoI+ZYZCycFM3Y+r4FtupxOoqDNEQ0QckoRJ/z/VgV5kIscIL" +
                 "x/E5vo9zD2Pl+dLIQXTducvPX5o+afwRH+nMWPafFytt8T45Usp2wGP/1L+ZpmftaVjMk0t9YOxVQmBX" +
                 "Hw7J5+ZrfWnPXUBtlefC2mwW/jdcqsqI7N4vFi53imstdYEeFessjWyp91zJNZbgJGj0vCydB3B0iYHI" +

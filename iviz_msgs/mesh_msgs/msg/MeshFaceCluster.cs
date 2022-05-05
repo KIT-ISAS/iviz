@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class MeshFaceCluster : IDeserializable<MeshFaceCluster>, IMessage
     {
         //Cluster
@@ -51,16 +51,16 @@ namespace Iviz.Msgs.MeshMsgs
     
         public int RosMessageLength => 8 + 4 * FaceIndices.Length + BuiltIns.GetStringSize(Label);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "mesh_msgs/MeshFaceCluster";
+        public const string MessageType = "mesh_msgs/MeshFaceCluster";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "9e0f40b9dcf1de10d00e57182c9d138f";
+        public string RosMd5Sum => "9e0f40b9dcf1de10d00e57182c9d138f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1N2ziktLkkt4irNzCsxNoqOVUhLTE6Nz8xLyUxOLeZSzi8oyczPS8zhKi4pysxLV8hJ" +
                 "TErN4eICAKZztFU3AAAA";
                 

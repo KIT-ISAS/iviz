@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StereoMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class DisparityImage : IDeserializable<DisparityImage>, IMessage
     {
         // Separate header for compatibility with current TimeSynchronizer.
@@ -80,16 +80,16 @@ namespace Iviz.Msgs.StereoMsgs
     
         public int RosMessageLength => 37 + Header.RosMessageLength + Image.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "stereo_msgs/DisparityImage";
+        public const string MessageType = "stereo_msgs/DisparityImage";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "04a177815f75271039fa21f16acad8c9";
+        public string RosMd5Sum => "04a177815f75271039fa21f16acad8c9";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71XbY/UNhD+nl9hcR+4hb09VL4gKtSqpdeeRAWCkyodoitvPNkYHDvYzr7w6/uMnWSz" +
                 "e0D5QLsS3K4zb5555pnJmXhDrfQykqhJKvKicl6Urmll1CttdNyLrY61KDvvyUZxoxt6s7dl7Z3Vn8gv" +
                 "ijPxQn8gsxfRiRUJT43bkBLaCikMDHscGZKB5qILJHQj17TonWkbIr4tij/y73xcwOaVcYjArkXrNNwq" +

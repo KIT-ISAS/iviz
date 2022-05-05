@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Roscpp
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class GetLoggers : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.Roscpp
             set => Response = (GetLoggersResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "roscpp/GetLoggers";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "roscpp/GetLoggers";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "32e97e85527d4678a8f9279894bb64b0";
+        public string RosMd5Sum => "32e97e85527d4678a8f9279894bb64b0";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -78,7 +75,7 @@ namespace Iviz.Msgs.Roscpp
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 0;
+        public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     

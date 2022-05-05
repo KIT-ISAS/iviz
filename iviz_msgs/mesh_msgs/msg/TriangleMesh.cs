@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class TriangleMesh : IDeserializable<TriangleMesh>, IMessage
     {
         //# Definition of a triangle mesh
@@ -132,16 +132,16 @@ namespace Iviz.Msgs.MeshMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "mesh_msgs/TriangleMesh";
+        public const string MessageType = "mesh_msgs/TriangleMesh";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "b112c5b670c2c3e8b1571aae11ccc3da";
+        public string RosMd5Sum => "b112c5b670c2c3e8b1571aae11ccc3da";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71XW2/bNhR+568g4IckbewU7TAUGYZdkqXzQ4CizVtQGLR0JHGjSIWkfMmv30dSlO3c" +
                 "1odlgh1T5DnfOTz3TCb8kiqppZdGc1Nxwb2VQteKeEuuYexmeJ3rUhbkbr+NBI5PuJLOB7Zx7yfuG+JS" +
                 "l7ThK6F6UFmqyHJveGdclONwzldkfQDkx0KX8Y02C21sK5Q75bLitVyRPmE1mZa83S5aV7uzz0ZqDx1G" +

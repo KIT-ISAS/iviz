@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Light : IDeserializable<Light>, IMessage
     {
         public const byte POINT = 0;
@@ -64,16 +64,16 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 46 + BuiltIns.GetStringSize(Name);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "iviz_msgs/Light";
+        public const string MessageType = "iviz_msgs/Light";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "c08cec0d4c9fe9b11d0596f99987e126";
+        public string RosMd5Sum => "c08cec0d4c9fe9b11d0596f99987e126";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7WQzwrCMAzG73mKvoE6LyLsICoyUDfc8Dqq62agNqPt/LOnt2JXX0Bz+b780oQm0KGy" +
                 "M5alyb5gMRvDJ18lh/WySNL9YuvoxNM8S9+PIgBjNaqGKX4VvmafrYATkWRnbmxpLryiu4ElSdLTiFVY" +
                 "150RUEvi1uWaq0bAUZytK9esJYMWSX1JhdrZNxpaUCmhS9cnv2Oos4G5iH8csMs3c4Y37MuraczIb+NX" +

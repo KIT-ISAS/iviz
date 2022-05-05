@@ -25,7 +25,7 @@ namespace Iviz.Core
 #endif
 
         public const bool IsStandalone =
-#if !UNITY_EDITOR && UNITY_STANDALONE
+#if !UNITY_EDITOR
             true;
 #else
             false;

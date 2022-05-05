@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ObjectRecognitionMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Table : IDeserializable<Table>, IMessage
     {
         // Informs that a planar table has been detected at a given location
@@ -59,16 +59,16 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
     
         public int RosMessageLength => 60 + Header.RosMessageLength + 24 * ConvexHull.Length;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "object_recognition_msgs/Table";
+        public const string MessageType = "object_recognition_msgs/Table";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "39efebc7d51e44bd2d72f2df6c7823a2";
+        public string RosMd5Sum => "39efebc7d51e44bd2d72f2df6c7823a2";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71UwW4TMRC9+ytGyqEtokECxKGIA1IF9AAU0RtC1WR3smvYtbe2N8n263ljJ2lDD3CA" +
                 "RpF27Z15b97zeGZ04ZY+9JFSy4mYho4dB0q86IRajrQQcVRLkipJTTmmsSvsdb7iZL0z5oNwLYHa/DBm" +
                 "Rlet0OCj5MhIkx8BL5QCu6hshSzxTynffP5ceR9q6zgJxSkm6YHklyVTy3lKa5vavPbBNtZR9L2sWwlC" +

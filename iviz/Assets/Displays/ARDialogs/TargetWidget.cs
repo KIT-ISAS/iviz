@@ -37,8 +37,8 @@ namespace Iviz.Displays.XR
         ModeType mode;
 
         Color color = new(0.6f, 0, 1f);
-        Color secondaryColor = Color.white;        
-        
+        Color secondaryColor = Color.white;
+
         string caption = "Send!";
 
         MeshMarkerDisplay Arrow => arrow.AssertNotNull(nameof(arrow));
@@ -108,7 +108,7 @@ namespace Iviz.Displays.XR
                 OkButton.Caption = value;
             }
         }
-        
+
         public bool Interactable
         {
             set
@@ -117,7 +117,7 @@ namespace Iviz.Displays.XR
                 Corner.enabled = value;
             }
         }
-        
+
         public Color Color
         {
             get => color;
@@ -143,7 +143,7 @@ namespace Iviz.Displays.XR
                 Inner.Color = value;
                 Lines.Tint = value;
             }
-        }        
+        }
 
         void Awake()
         {
@@ -168,18 +168,18 @@ namespace Iviz.Displays.XR
                 Debug.Log($"{this}: Sending scale");
                 //float totalScale = transform.parent.lossyScale.x;
                 //Debug.Log(TargetScale / Scale / totalScale);
-                var bounds = new Bounds(Transform.localPosition, TargetScale);
+                var bounds = new Bounds(Transform.localPosition, new Vector3(TargetScale.x, 0, TargetScale.y));
                 Resized?.Invoke(bounds);
             };
             CancelButton.Clicked += () => Clicked?.Invoke(0);
         }
-        
+
         void OnMove()
         {
             (float x, _, float z) = Corner.Transform.localPosition;
             TargetScale = 2 * new Vector2(x, z).Abs();
         }
-        
+
 
         /*
         protected override void Update()

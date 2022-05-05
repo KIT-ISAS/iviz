@@ -26,7 +26,7 @@ public interface IRosClient : IDisposable
     /// Use this structure to publish messages to your topic.
     /// </param>
     /// <returns>An identifier that can be used to unadvertise from this publisher.</returns>        
-    string Advertise<T>(string topic, out IRosPublisher<T> publisher) where T : IMessage;
+    string Advertise<T>(string topic, out IRosPublisher<T> publisher) where T : IMessage, new();
 
     /// <summary>
     /// Advertises the given topic with the given dynamic message.
@@ -50,7 +50,7 @@ public interface IRosClient : IDisposable
     /// <returns>A pair containing an identifier that can be used to unadvertise from this publisher, and the publisher object.</returns>
     ValueTask<(string id, IRosPublisher<T> publisher)> AdvertiseAsync<T>(string topic,
         CancellationToken token = default)
-        where T : IMessage;
+        where T : IMessage, new();
 
     /// <summary>
     /// Advertises the given topic with the given dynamic message.
@@ -168,7 +168,7 @@ public interface IRosClient : IDisposable
     /// <returns>Whether the call succeeded.</returns>
     /// <exception cref="TaskCanceledException">The operation timed out.</exception>
     T CallService<T>(string serviceName, T service, bool persistent = false, int timeoutInMs = 5000)
-        where T : IService;
+        where T : IService, new();
 
     /// <summary>
     /// Calls the given ROS service.
@@ -184,5 +184,5 @@ public interface IRosClient : IDisposable
     /// <returns>Whether the call succeeded.</returns>
     ValueTask<T> CallServiceAsync<T>(string serviceName, T service, bool persistent = false,
         CancellationToken token = default)
-        where T : IService;
+        where T : IService, new();
 }

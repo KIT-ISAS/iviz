@@ -219,7 +219,7 @@ namespace Iviz.Displays
                     //iArray[i] = i;
                 }
 
-                mesh.SetIndices(indices, MeshTopology.Points, 0);
+                mesh.SetIndices(indices, MeshTopology.Points);
             }
 
             isDirty = false;

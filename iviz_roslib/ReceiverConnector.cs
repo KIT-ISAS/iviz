@@ -178,7 +178,6 @@ internal class ReceiverConnector
         disposed = true;
         tokenSource.Cancel();
         await task.AwaitNoThrow(DisposeTimeoutInMs, this, token);
-        tokenSource.Dispose();
         Logger.LogDebugFormat("{0}: Disposing!", this);
     }
 

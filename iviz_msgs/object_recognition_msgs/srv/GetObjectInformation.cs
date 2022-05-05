@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ObjectRecognitionMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class GetObjectInformation : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.ObjectRecognitionMsgs
             set => Response = (GetObjectInformationResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "object_recognition_msgs/GetObjectInformation";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "object_recognition_msgs/GetObjectInformation";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "dd7d344324fd86c32836f4fe1bc7b322";
+        public string RosMd5Sum => "dd7d344324fd86c32836f4fe1bc7b322";
         
         public override string ToString() => Extensions.ToString(this);
     }

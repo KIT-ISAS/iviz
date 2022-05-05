@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DynamicReconfigure
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class ConfigDescription : IDeserializable<ConfigDescription>, IMessage
     {
         [DataMember (Name = "groups")] public Group[] Groups;
@@ -83,16 +83,16 @@ namespace Iviz.Msgs.DynamicReconfigure
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "dynamic_reconfigure/ConfigDescription";
+        public const string MessageType = "dynamic_reconfigure/ConfigDescription";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "757ce9d44ba8ddd801bb30bc456f946f";
+        public string RosMd5Sum => "757ce9d44ba8ddd801bb30bc456f946f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE72UQWrDMBBF93MK3aDQli4K2TQB00Uh4GUJQbHGrkCWjGYUmttXsuNETtpdkTYefSH8" +
                 "/sxHlXdh+NyJLn0J1s62uhO9/L6U2s6lag0DrP55wUddvQp1srLXzd5jM/4seHyoEhMQe207EY9xrvk0" +
                 "IGyll/0GqfF6YO1sNDEkCRk9gbb89JgEtCzOO61K0t/y/WkkTHQGj2jmA3V/D5XmfXT35YramGYPb86Z" +

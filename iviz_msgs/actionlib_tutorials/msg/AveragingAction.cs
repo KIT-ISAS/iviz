@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ActionlibTutorials
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class AveragingAction : IDeserializable<AveragingAction>,
 		IAction<AveragingActionGoal, AveragingActionFeedback, AveragingActionResult>
     {
@@ -68,16 +68,16 @@ namespace Iviz.Msgs.ActionlibTutorials
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "actionlib_tutorials/AveragingAction";
+        public const string MessageType = "actionlib_tutorials/AveragingAction";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "d73b17d6237a925511f5d7727a1dc903";
+        public string RosMd5Sum => "d73b17d6237a925511f5d7727a1dc903";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE8VX224bNxB9368g4IfYRe20SS+pAT2otpI6cBLDVvtqUMvZXbZcUuXFsv6+Z7irleRL" +
                 "LRRxLciWKA3PnLmPxjfkZa1tPS6jdvaDk0bI/Pa6xvtivP39JYVk4krC59NdmfdEaibLv1ZSVX8uRl/5" +
                 "UXy6+nDcazF6dh1TdF5LE16P71tV/EZSkRdNfinWt9pQh9cscXYq2ORrrdYWZX9kRzwP+RBVR6BjV+yJ" +

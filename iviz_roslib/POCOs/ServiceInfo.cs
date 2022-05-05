@@ -11,7 +11,7 @@ namespace Iviz.Roslib;
 [DataContract]
 internal sealed class ServiceInfo : JsonToString
 {
-    readonly Func<IService>? generator;
+    readonly Func<IService> generator;
 
     /// <summary>
     /// ROS name of this node.
@@ -37,7 +37,7 @@ internal sealed class ServiceInfo : JsonToString
     [DataMember]
     public string Type { get; }
 
-    ServiceInfo(string callerId, string topic, string md5Sum, string type, Func<IService>? generator)
+    ServiceInfo(string callerId, string topic, string md5Sum, string type, Func<IService> generator)
     {
         CallerId = callerId;
         Service = topic;
@@ -46,15 +46,17 @@ internal sealed class ServiceInfo : JsonToString
         this.generator = generator;
     }
 
-    public static ServiceInfo Instantiate<T>(string callerId, string service, Func<IService>? generator = null)
-        where T : IService =>
-        new(
+    public static ServiceInfo Instantiate<T>(string callerId, string service)
+        where T : IService, new()
+    {
+        T generator = new T();
+        return new ServiceInfo(
             callerId, service,
-            BuiltIns.GetMd5Sum<T>(),
-            BuiltIns.GetServiceType<T>(),
-            generator
+            generator.RosMd5Sum,
+            generator.RosServiceType,
+            () => new T()
         );
+    }
 
-    public IService Create() =>
-        generator?.Invoke() ?? throw new InvalidOperationException("The generator has not been set");
+    public IService Create() => generator();
 }

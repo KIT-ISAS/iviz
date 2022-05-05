@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Texture : IDeserializable<Texture>, IMessage
     {
         public const byte TYPE_NONE = 0;
@@ -90,16 +90,16 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 21 + BuiltIns.GetStringSize(Path);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "iviz_msgs/Texture";
+        public const string MessageType = "iviz_msgs/Texture";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "0c05ed3d1750fc865d4edeecbd425ef0";
+        public string RosMd5Sum => "0c05ed3d1750fc865d4edeecbd425ef0";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE2WQzVKDMBSF9zwFj6D90bpwkUIoGfM3CbSyyqClykwLDELVtzehoLfjhoHvHO499/Rl" +
                 "1a38JJPYcMGx/+jfeP0fC0kUpdrhW4i1xEFKkbJ8Bjlia4J5YvEcYsyI1mTrxiwgjzHZxM69hJQLxRDV" +
                 "Ft9d7YwJJxxrJ9xDQUgUkCSzeHUdXUuKAswugR6gRt1ehqS76+pehSOKg4QI7qSrm1P+xMVu4DNvFOwI" +

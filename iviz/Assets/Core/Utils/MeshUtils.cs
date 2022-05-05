@@ -3,6 +3,7 @@
 using System;
 using UnityEngine;
 using Iviz.Tools;
+using UnityEngine.Rendering;
 
 namespace Iviz.Core
 {
@@ -26,10 +27,13 @@ namespace Iviz.Core
             mesh.SetTangents(array);
         }
 
-        public static void SetIndices(this Mesh mesh, ReadOnlySpan<int> ps, MeshTopology topology, int subMesh)
+        public static void SetIndices(this Mesh mesh, ReadOnlySpan<int> ps, MeshTopology topology)
         {
             var array = UnsafeUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
-            mesh.SetIndices(array, topology, subMesh);
+            mesh.indexFormat = ps.Length < ushort.MaxValue
+                ? IndexFormat.UInt16
+                : IndexFormat.UInt32;
+            mesh.SetIndices(array, topology, 0);
         }
 
         public static void SetColors(this Mesh mesh, ReadOnlySpan<Color> ps)
@@ -56,9 +60,9 @@ namespace Iviz.Core
             mesh.SetUVs(channel, array);
         }
 
-        public static void SetTriangles(this Mesh mesh, ReadOnlySpan<int> ps, int subMesh = 0)
+        public static void SetTriangles(this Mesh mesh, ReadOnlySpan<int> ps)
         {
-            mesh.SetIndices(ps, MeshTopology.Triangles, subMesh);
+            mesh.SetIndices(ps, MeshTopology.Triangles);
         }
     }
 }

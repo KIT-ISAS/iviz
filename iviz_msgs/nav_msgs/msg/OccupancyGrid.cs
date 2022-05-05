@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class OccupancyGrid : IDeserializable<OccupancyGrid>, IMessage
     {
         // This represents a 2-D grid map, in which each cell represents the probability of
@@ -59,16 +59,16 @@ namespace Iviz.Msgs.NavMsgs
     
         public int RosMessageLength => 80 + Header.RosMessageLength + Data.Length;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "nav_msgs/OccupancyGrid";
+        public const string MessageType = "nav_msgs/OccupancyGrid";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "3381f2d731d4076ec5c71b0759edbe4e";
+        public string RosMd5Sum => "3381f2d731d4076ec5c71b0759edbe4e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VTW/TQBC9768YKQdalIS0IIQqcUCqgB4qioBTVEWT9cResHfN7rqp+fW8XcdJChLi" +
                 "QKmsxl7PvHnz5sMT+lyZQF5aL0FsDMR0Pruk0puCGm6nZCxtK6MrEsY/LXV9bB0roda7Na9NbWJPbqMm" +
                 "5LTuWra6nyv1XrgQT9Xwo9TkWiJfcmTaOJ/dEUVdc7s/N3bjYAdi+R0VOMw0vNvOGv4KN+cBNqUQ2Udj" +

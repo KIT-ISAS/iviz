@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.PclMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class ModelCoefficients : IDeserializable<ModelCoefficients>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -47,16 +47,16 @@ namespace Iviz.Msgs.PclMsgs
     
         public int RosMessageLength => 4 + Header.RosMessageLength + 4 * Values.Length;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "pcl_msgs/ModelCoefficients";
+        public const string MessageType = "pcl_msgs/ModelCoefficients";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "ca27dea75e72cb894cd36f9e5005e93e";
+        public string RosMd5Sum => "ca27dea75e72cb894cd36f9e5005e93e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE62RQYsUMRCF7/kVBXPYXWFW0NuAN9H1IAi7N5GhJqnpLkgnbap61v73vvTgqjcPNoGQ" +
                 "znvfq1Q9CCdpNG5bOOfK/vbN12904byIhRDe/ecvfH78eCDzdJxssNcP1+AdPTqXxC3RJM6JnelcUZcO" +
                 "o7R9lotkmHiaJdF26+ssdg/j06hGWIMUaZzzSotB5JVinaalaGQXcp3kLz+cWohp5uYal8wN+tqSli4/" +

@@ -22,10 +22,8 @@ using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
-using LaunchDialog = Iviz.Msgs.IvizCommonMsgs.LaunchDialog;
 using Logger = Iviz.Msgs.Roscpp.Logger;
 using Pose = Iviz.Msgs.GeometryMsgs.Pose;
-using UpdateRobot = Iviz.Msgs.IvizCommonMsgs.UpdateRobot;
 
 namespace Iviz.Controllers
 {
@@ -880,6 +878,7 @@ namespace Iviz.Controllers
             });
         }
 
+        /*
         static ValueTask UpdateRobotAsync(UpdateRobot srv)
         {
             switch (srv.Request.Operation)
@@ -894,6 +893,7 @@ namespace Iviz.Controllers
                     return default;
             }
         }
+        */
 
         static async ValueTask RemoveRobotAsync(UpdateRobot srv)
         {
@@ -951,6 +951,7 @@ namespace Iviz.Controllers
             }
         }
 
+        /*
         static async ValueTask AddRobotAsync(UpdateRobot srv)
         {
             string id = srv.Request.Id;
@@ -1008,6 +1009,7 @@ namespace Iviz.Controllers
                 srv.Response.Success = true;
             }
         }
+        */
 
         static async ValueTask LaunchDialogAsync(LaunchDialog srv)
         {

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.PclMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Vertices : IDeserializable<Vertices>, IMessage
     {
         // List of point indices
@@ -44,16 +44,16 @@ namespace Iviz.Msgs.PclMsgs
     
         public int RosMessageLength => 4 + 4 * Vertices_.Length;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "pcl_msgs/Vertices";
+        public const string MessageType = "pcl_msgs/Vertices";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "39bd7b1c23763ddd1b882b97cb7cfe11";
+        public string RosMd5Sum => "39bd7b1c23763ddd1b882b97cb7cfe11";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1NW8MksLlHIT1MoyM/MK1HIzEvJTE4t5ioFcoyNomMVylKLSsAiXAA/hR0KKwAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);

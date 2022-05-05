@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class MoveGroupAction : IDeserializable<MoveGroupAction>,
 		IAction<MoveGroupActionGoal, MoveGroupActionFeedback, MoveGroupActionResult>
     {
@@ -68,16 +68,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/MoveGroupAction";
+        public const string MessageType = "moveit_msgs/MoveGroupAction";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "be9c7984423000efe94194063f359cfc";
+        public string RosMd5Sum => "be9c7984423000efe94194063f359cfc";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+09a3PbyJHf+StQcdVJytK0/NjNrhKlSpZorzaWqEi091UuFEgMSUQgwMVDNPfq/vv1" +
                 "c2YAgrY3F2nvKuek1iYw09PT09PvGVzkd+Z1kderk2mV5NnrPEqDiP4ZzuHfvYvm+2tT1mmlLQr61W7z" +
                 "yph4Ek1vtdVMfveO/8V/ehc3r4+CJYyeVOGynJdPLrZn0/vWRLEpggX91WOc0mTCHbDF+VmAUw2T2M2E" +

@@ -189,8 +189,8 @@ namespace Iviz.Controllers
                         : null;
                 ColorListener = type switch
                 {
-                    Image.RosMessageType => new Listener<Image>(colorTopic, ColorHandler),
-                    CompressedImage.RosMessageType => new Listener<CompressedImage>(colorTopic, ColorHandlerCompressed),
+                    Image.MessageType => new Listener<Image>(colorTopic, ColorHandler),
+                    CompressedImage.MessageType => new Listener<CompressedImage>(colorTopic, ColorHandlerCompressed),
                     _ => null
                 };
 
@@ -236,8 +236,8 @@ namespace Iviz.Controllers
                         : null;
                 DepthListener = type switch
                 {
-                    Image.RosMessageType => new Listener<Image>(depthTopic, DepthHandler),
-                    CompressedImage.RosMessageType => new Listener<CompressedImage>(depthTopic, DepthHandlerCompressed),
+                    Image.MessageType => new Listener<Image>(depthTopic, DepthHandler),
+                    CompressedImage.MessageType => new Listener<CompressedImage>(depthTopic, DepthHandlerCompressed),
                     _ => null
                 };
 

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class PlanningSceneWorld : IDeserializable<PlanningSceneWorld>, IMessage
     {
         // collision objects
@@ -61,16 +61,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public int RosMessageLength => 4 + BuiltIns.GetArraySize(CollisionObjects) + Octomap.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/PlanningSceneWorld";
+        public const string MessageType = "moveit_msgs/PlanningSceneWorld";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "373d88390d1db385335639f687723ee6";
+        public string RosMd5Sum => "373d88390d1db385335639f687723ee6";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71ZW1MbORZ+71+hmjwYTxyTCZmpWW/xAJgMTCWBAXY3CUVRcrdsa1FLHUltcLb2v+93" +
                 "pFZ3m5CZna0FhwpW99G5fDpX8YzlRinppNHMzP4pcu+yg/TkJDy4vOporhNN9oxdLAUzuTclr5hfcs+s" +
                 "qKxwQnvHeFFID3quevwL7nnW7Lgu3cJtn8TFP6RfnhrXssuy3f/zJ3t3/suElWYlpI+i7xkJe/bYUvBC" +

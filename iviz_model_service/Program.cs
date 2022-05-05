@@ -76,22 +76,22 @@ namespace Iviz.ModelService
             Console.WriteLine($"** Starting node at URI {client.CallerUri}...");
 
             Console.WriteLine("** Starting service {0} [{1}].", ModelServer.ModelServiceName,
-                GetModelResource.RosServiceType);
+                GetModelResource.ServiceType);
 
             Console.WriteLine("** Starting service {0} [{1}].", ModelServer.ModelServiceName,
-                GetModelResource.RosServiceType);
+                GetModelResource.ServiceType);
             await client.AdvertiseServiceAsync<GetModelResource>(ModelServer.ModelServiceName,
                 modelServer.ModelCallback);
 
             Console.WriteLine("** Starting service {0} [{1}].", ModelServer.TextureServiceName,
-                GetModelTexture.RosServiceType);
+                GetModelTexture.ServiceType);
             await client.AdvertiseServiceAsync<GetModelTexture>(ModelServer.TextureServiceName,
                 modelServer.TextureCallback);
 
-            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.FileServiceName, GetFile.RosServiceType);
+            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.FileServiceName, GetFile.ServiceType);
             await client.AdvertiseServiceAsync<GetFile>(ModelServer.FileServiceName, modelServer.FileCallback);
 
-            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.SdfServiceName, GetSdf.RosServiceType);
+            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.SdfServiceName, GetSdf.ServiceType);
             await client.AdvertiseServiceAsync<GetSdf>(ModelServer.SdfServiceName, modelServer.SdfCallback);
 
 

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class PositionConstraint : IDeserializable<PositionConstraint>, IMessage
     {
         // This message contains the definition of a position constraint.
@@ -66,16 +66,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/PositionConstraint";
+        public const string MessageType = "moveit_msgs/PositionConstraint";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "c83edf208d87d3aa3169f47775a58e6a";
+        public string RosMd5Sum => "c83edf208d87d3aa3169f47775a58e6a";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71X224bNxB9368g4AdL7UZN46AoXPghiZ1YQJO4thvkgkCgdke7RFbkhuTKVr6+Z8i9" +
                 "ybGbPtRODEirnTkzc+ZG7onLUjmxJudkQSIz2kulnfAliZxWSiuvjBZmJaSojYtPkHLeQs7PkuSUZE5W" +
                 "lOEjSfYASMKapfGiUvoLkIA/aAhLK7IwYBL8onQRpBZarqlTNquVIy8mSgc3AsrKQmAqVsaG37y0BURq" +

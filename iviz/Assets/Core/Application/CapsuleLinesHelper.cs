@@ -58,10 +58,6 @@ namespace Iviz.Displays
 
             int indicesSize = 16 * 3 * bufferLength;
             mesh.Clear();
-            mesh.indexFormat = indicesSize <= UnityUtils.MeshUInt16Threshold
-                ? IndexFormat.UInt16
-                : IndexFormat.UInt32;
-
             var indices = new Rent<int>(indicesSize);
 
             try

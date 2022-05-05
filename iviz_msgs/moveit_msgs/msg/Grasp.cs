@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Grasp : IDeserializable<Grasp>, IMessage
     {
         // This message contains a description of a grasp that would be used
@@ -130,16 +130,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/Grasp";
+        public const string MessageType = "moveit_msgs/Grasp";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "e26c8fb64f589c33c5d5e54bd7b5e4cb";
+        public string RosMd5Sum => "e26c8fb64f589c33c5d5e54bd7b5e4cb";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71YS2/bRhC+81cs7EPsQFaKtOghbQ4B0qYp0DZFjPYQBMKKHEqbkLvM7lKy+uv7zSyX" +
                 "pGSnadA6hgHxMe+d+WaG5+p6a4JqKQS9IVU6G7WxQWlVUSi96aJxVrkaDzZeh07FrY5q7/qmUmtSfaCq" +
                 "OFd7E7eg6LSPpuwb7RXZ6orqmsrovIpuYNYQtX6HhwtlbNn0lbEbtXV7UECK7jrvdLlVBu830C0XFMul" +

@@ -47,13 +47,11 @@ namespace Iviz.XmlRpc
         /// </summary>
         public int LocalPort { get; }
 
-        
         public void Dispose()
         {
             DisposeAsync(true).WaitNoThrow(this); // shouldn't block
         }
         
-
         public ValueTask DisposeAsync()
         {
             return DisposeAsync(false);
@@ -76,27 +74,17 @@ namespace Iviz.XmlRpc
             }
 
             Logger.LogDebugFormat("{0}: Disposing listener...", this);
-            try
+            if (sync)
             {
-                using TcpClient client = new(AddressFamily.InterNetworkV6)
-                    { Client = { DualMode = true, NoDelay = true } };
-                if (sync)
-                {
-                    client.Connect(IPAddress.Loopback, LocalPort);
-                }
-                else
-                {
-                    await client.ConnectAsync(IPAddress.Loopback, LocalPort);
-                }
+                StreamUtils.EnqueueConnection(LocalPort, this);
             }
-            catch (Exception)
+            else
             {
-                Logger.LogDebugFormat("{0}: Listener threw while disposing", this);
+                await StreamUtils.EnqueueConnectionAsync(LocalPort, this);
             }
 
             listener.Stop();
             Logger.LogDebugFormat("{0}: Listener dispose out", this);
-            runningTs.Dispose();
         }
 
         /// <summary>

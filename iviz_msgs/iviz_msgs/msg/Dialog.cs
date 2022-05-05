@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Dialog : IDeserializable<Dialog>, IMessage
     {
         public const byte ACTION_ADD = 0;
@@ -151,16 +151,16 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "iviz_msgs/Dialog";
+        public const string MessageType = "iviz_msgs/Dialog";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "bbe9e66b575853ee815ca21e671ed62b";
+        public string RosMd5Sum => "bbe9e66b575853ee815ca21e671ed62b";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VWW2/iOBR+z684Uh+mXbVsSy/brTQPFEKbHSAshBlVq1VkEidYk8QZ22nL/Po9di4k" +
                 "wGj3YadCJTn+zufP52YKlql7GAw9x535g9EIPsKlVbSNC3vqfrbRfnXMPphMcKlvVWvey9z255OBMwPN" +
                 "BHACBEJGEh7DG1MbUEwl9BwUfVfnQLIQlwV/Ax7BulCKZxLaTMtnd+FppquSSaYkSag4ZDRUmrTtPXM9" +

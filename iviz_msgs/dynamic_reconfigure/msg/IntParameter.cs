@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DynamicReconfigure
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class IntParameter : IDeserializable<IntParameter>, IMessage
     {
         [DataMember (Name = "name")] public string Name;
@@ -47,16 +47,16 @@ namespace Iviz.Msgs.DynamicReconfigure
     
         public int RosMessageLength => 8 + BuiltIns.GetStringSize(Name);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "dynamic_reconfigure/IntParameter";
+        public const string MessageType = "dynamic_reconfigure/IntParameter";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "65fedc7a0cbfb8db035e46194a350bf1";
+        public string RosMd5Sum => "65fedc7a0cbfb8db035e46194a350bf1";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEysuKcrMS1fIS8xN5crMKzE2UihLzClN5eICAPL2vOMZAAAA";
                 
         public override string ToString() => Extensions.ToString(this);

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TurtleActionlib
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class ShapeActionGoal : IDeserializable<ShapeActionGoal>, IActionGoal<ShapeGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -55,16 +55,16 @@ namespace Iviz.Msgs.TurtleActionlib
     
         public int RosMessageLength => 8 + Header.RosMessageLength + GoalId.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "turtle_actionlib/ShapeActionGoal";
+        public const string MessageType = "turtle_actionlib/ShapeActionGoal";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "dbfccd187f2ec9c593916447ffd6cc77";
+        public string RosMd5Sum => "dbfccd187f2ec9c593916447ffd6cc77";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VUwWobMRC96ysGfEhSiAPtzdBbaJJDoeDczVga74pqpa1Ga3f/vk9a202hhx4as7BI" +
                 "O/Pmzbw3fhZ2kqlvL8O2+BSD3+8G7fThKXF4eaQOr513ZtvzKPWu3ZjP//lnvm6fNqTFLcWfF0or2haO" +
                 "jrOjQQo7LkyHBMa+6yXfBzlKQBIPozhqX8s8iq6R+Np7JTydRMkcwkyTIqgksmkYpugtF6HiB/kjH5k+" +

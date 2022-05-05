@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class InteractiveMarkerControl : IDeserializable<InteractiveMarkerControl>, IMessage
     {
         // Represents a control that is to be displayed together with an interactive marker
@@ -133,16 +133,16 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerControl";
+        public const string MessageType = "visualization_msgs/InteractiveMarkerControl";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "b3c81e785788195d1840b86c28da1aac";
+        public string RosMd5Sum => "b3c81e785788195d1840b86c28da1aac";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71YbXPbNhL+XP0KTDyd2FeZfktzre78QbHkRFPb8klKmkyno4FISEJNEQpAWlZ+/T27" +
                 "ACnKspv7cInjiUkQ2Pd9dhd7YqCWVjmV5U5IEZsstyYV+VzmQjuRGzFRItFumcq1SvA+U/lcWbHS+VzI" +
                 "TOgsV1bGub5XYiHtnbKNxp7oJaCnp2udzYTLLf2ZGguqIBlYRNj2yRQiU0xWSOf0LIMIRaY/F0rcyxT/" +

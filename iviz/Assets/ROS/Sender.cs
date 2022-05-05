@@ -11,7 +11,7 @@ namespace Iviz.Ros
 {
     /// <inheritdoc cref="ISender"/>
     /// <typeparam name="T">The ROS message type</typeparam>
-    public sealed class Sender<T> : ISender where T : IMessage
+    public sealed class Sender<T> : ISender where T : IMessage, new()
     {
         static RoslibConnection Connection => RosManager.Connection;
 
@@ -33,7 +33,7 @@ namespace Iviz.Ros
             }
 
             Topic = topic;
-            Type = BuiltIns.GetMessageType(typeof(T));
+            Type = BuiltIns.GetMessageType<T>();
 
             GameThread.EverySecond += UpdateStats;
             Connection.Advertise(this);

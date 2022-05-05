@@ -94,7 +94,8 @@ namespace Iviz.Displays.Highlighters
                 }
                 else if (frame != null)
                 {
-                    frame.ReturnToPool();
+                    var tmpFrame = frame;
+                    GameThread.Post(() => tmpFrame.ReturnToPool());
                     frame = null;
                 }
             };

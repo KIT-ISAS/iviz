@@ -229,8 +229,8 @@ namespace Iviz.Controllers
 
             Listener = Config.Type switch
             {
-                Image.RosMessageType => new Listener<Image>(Config.Topic, Handler),
-                CompressedImage.RosMessageType => new Listener<CompressedImage>(Config.Topic, HandlerCompressed),
+                Image.MessageType => new Listener<Image>(Config.Topic, Handler),
+                CompressedImage.MessageType => new Listener<CompressedImage>(Config.Topic, HandlerCompressed),
                 _ => throw new InvalidOperationException("Invalid message type")
             };
 

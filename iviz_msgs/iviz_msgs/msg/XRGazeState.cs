@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class XRGazeState : IDeserializable<XRGazeState>, IMessage
     {
         [DataMember (Name = "is_valid")] public bool IsValid;
@@ -49,16 +49,16 @@ namespace Iviz.Msgs.IvizMsgs
     
         public int RosMessageLength => 57 + Header.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "iviz_msgs/XRGazeState";
+        public const string MessageType = "iviz_msgs/XRGazeState";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "b062fdd884f10dff560e6f7d4400606b";
+        public string RosMd5Sum => "b062fdd884f10dff560e6f7d4400606b";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71UwW7UMBC9+ytG6qEt2i5SizhU4oaAHpCKWnFdzcaziYVjp7azafh6np3dbBeK4ABd" +
                 "rRQnmfdm5r2ZrL23ZOJqy9Zo9UlYS6CmXFQtvpUUxlUb6/j6PrCLGx9aSvuTUurdP/6pz3cfrykmPSWd" +
                 "ClIndJfYaQ6aUBFrTkwogBpTNxIurGzFAsRtJ5rK2zR2EpcA3jcmokGqxUlga0fqI4KSp8q3be9MxUko" +

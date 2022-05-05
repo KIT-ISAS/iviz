@@ -11,7 +11,7 @@ using Iviz.Tools;
 
 namespace Iviz.Ros
 {
-    internal sealed class AdvertisedTopic<T> : IAdvertisedTopic where T : IMessage
+    internal sealed class AdvertisedTopic<T> : IAdvertisedTopic where T : IMessage, new()
     {
         const int NumRetries = 3;
         const int WaitBetweenRetriesInMs = 500;

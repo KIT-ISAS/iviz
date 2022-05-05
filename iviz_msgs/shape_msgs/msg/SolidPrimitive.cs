@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ShapeMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class SolidPrimitive : IDeserializable<SolidPrimitive>, IMessage
     {
         // Define box, sphere, cylinder, cone 
@@ -75,16 +75,16 @@ namespace Iviz.Msgs.ShapeMsgs
     
         public int RosMessageLength => 5 + 8 * Dimensions.Length;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "shape_msgs/SolidPrimitive";
+        public const string MessageType = "shape_msgs/SolidPrimitive";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "d8f8cbc74c5ff283fca29569ccefb45d";
+        public string RosMd5Sum => "d8f8cbc74c5ff283fca29569ccefb45d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE3WTbWsbMQzH39+nEPRFW3Yc3VZGGeRF29yWwGhH2kGSUYJ7p+QMF/uwfSX59pNs30Mz" +
                 "SiCcbEl/6Sf5DKa4lQrhVR9SsE2FBlMojrVUJRr60nSXnMFtXYOtRIMWhEEofVAJTkMl3hBchdJQjlaV" +
                 "Uu04GTkWqBylKymCL+AqpV+WJK1U7gbuHpeTz/H76fcsX+STL9G8X/2aP0zzxeRrd/D4kE+uE6rjuSKx" +

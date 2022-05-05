@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class LinkPadding : IDeserializable<LinkPadding>, IMessage
     {
         //name for the link
@@ -49,16 +49,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public int RosMessageLength => 12 + BuiltIns.GetStringSize(LinkName);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/LinkPadding";
+        public const string MessageType = "moveit_msgs/LinkPadding";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "b3ea75670df55c696fedee97774d5947";
+        public string RosMd5Sum => "b3ea75670df55c696fedee97774d5947";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1POS8xNVUjLL1IoyUhVyMnMy+YqLinKzEsHs+NBslxcygoFiSkpIMGSfIXEgoKcShAD" +
                 "riEtJz+xxMwEpoiLCwCaqbVAVQAAAA==";
                 
