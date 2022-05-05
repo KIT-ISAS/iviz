@@ -185,8 +185,8 @@ namespace Iviz.Controllers
         void RebuildTwist()
         {
             string twistType = UseTwistStamped
-                ? TwistStamped.RosMessageType
-                : Twist.RosMessageType;
+                ? TwistStamped.MessageType
+                : Twist.MessageType;
 
             if (SenderTwist != null &&
                 (SenderTwist.Topic != config.TwistTopic || SenderTwist.Type != twistType))

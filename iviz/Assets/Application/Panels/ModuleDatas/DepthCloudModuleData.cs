@@ -175,7 +175,7 @@ namespace Iviz.App
         {
             var topics = new List<string> { NoneStr };
             topics.AddRange(RosManager.Connection.GetSystemPublishedTopicTypes()
-                .Where(topicInfo => topicInfo.Type is Image.RosMessageType or CompressedImage.RosMessageType)
+                .Where(topicInfo => topicInfo.Type is Image.MessageType or CompressedImage.MessageType)
                 .Select(topicInfo => topicInfo.Topic)
             );
             return topics;

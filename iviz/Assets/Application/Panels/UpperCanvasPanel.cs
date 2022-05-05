@@ -1,5 +1,8 @@
 #nullable enable
 
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Iviz.Core;
 using UnityEngine;
 using UnityEngine.UI;
@@ -63,5 +66,32 @@ namespace Iviz.App
         public Sprite ConnectingSprite => connectingSprite.AssertNotNull(nameof(connectingSprite));
         public Sprite DisconnectedSprite => disconnectedSprite.AssertNotNull(nameof(disconnectedSprite));
         public Sprite QuestionSprite => questionSprite.AssertNotNull(nameof(questionSprite));
+
+        CancellationTokenSource? tokenSource;
+
+        public Sprite StatusSprite
+        {
+            set
+            {
+                Status.enabled = true;
+                Status.sprite = value;
+
+                tokenSource?.Cancel();
+                tokenSource = new CancellationTokenSource();
+                _ = HideStatus(Status, tokenSource.Token);
+            }
+        }
+
+        static async Task HideStatus(Behaviour status, CancellationToken token)
+        {
+            try
+            {
+                await Task.Delay(5000, token);
+                status.enabled = false;
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
     }
 }

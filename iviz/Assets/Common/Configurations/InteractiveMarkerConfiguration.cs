@@ -2,9 +2,6 @@
 
 using System;
 using System.Runtime.Serialization;
-using Iviz.Msgs;
-using Iviz.MsgsWrapper;
-using JetBrains.Annotations;
 
 namespace Iviz.Common.Configurations
 {

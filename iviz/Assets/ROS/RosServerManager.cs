@@ -63,7 +63,16 @@ namespace Iviz.Ros
             // start in background
             serverTask = TaskUtils.Run(() => server.StartAsync(initCompletedSignal).AwaitNoThrow(this));
 
-            await initCompletedSignal.Task;
+            try
+            {
+                await initCompletedSignal.Task;
+            }
+            catch
+            {
+                await DisposeAsync();
+                return false; 
+            }
+
             await Task.Delay(100);
 
             if (await PingMaster(server.MasterUri))

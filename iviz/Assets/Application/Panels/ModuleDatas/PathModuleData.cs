@@ -57,12 +57,12 @@ namespace Iviz.App
 
             switch (TopicType)
             {
-                case PoseArray.RosMessageType:
+                case PoseArray.MessageType:
                     panel.ShowAxes.Interactable = false;
                     panel.ShowLines.Interactable = true;
                     break;
-                case PolygonStamped.RosMessageType:
-                case Polygon.RosMessageType:
+                case PolygonStamped.MessageType:
+                case Polygon.MessageType:
                     panel.ShowAxes.Interactable = false;
                     panel.ShowLines.Interactable = true;
                     break;

@@ -13,6 +13,6 @@ namespace Iviz.Displays
     public interface IServiceProvider
     {
         ValueTask<bool> CallModelServiceAsync<T>(string service, T srv, int timeoutInMs, CancellationToken token)
-            where T : class, IService;
+            where T : IService, new();
     }
 }

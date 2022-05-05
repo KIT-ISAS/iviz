@@ -24,9 +24,9 @@ namespace Iviz.Ros
 {
     public sealed class RoslibConnection : RosConnection, Iviz.Displays.IServiceProvider
     {
-        readonly BriefTopicInfo[] EmptyTopics = Array.Empty<BriefTopicInfo>();
-        readonly string[] EmptyParameters = Array.Empty<string>();
-        readonly Random Random = Defaults.Random;
+        static readonly BriefTopicInfo[] EmptyTopics = Array.Empty<BriefTopicInfo>();
+        static readonly string[] EmptyParameters = Array.Empty<string>();
+        static readonly Random Random = Defaults.Random;
         
         //readonly ConcurrentDictionary<int, IRosPublisher?> publishers = new();
         readonly IRosPublisher?[] publishers = new IRosPublisher[256];
@@ -566,7 +566,7 @@ namespace Iviz.Ros
             base.Disconnect();
         }
 
-        internal void Advertise<T>(Sender<T> advertiser) where T : IMessage
+        internal void Advertise<T>(Sender<T> advertiser) where T : IMessage, new()
         {
             ThrowHelper.ThrowIfNull(advertiser, nameof(advertiser));
             advertiser.Id = null;
@@ -584,7 +584,7 @@ namespace Iviz.Ros
             });
         }
 
-        async ValueTask AdvertiseImpl<T>(Sender<T> advertiser, CancellationToken token) where T : IMessage
+        async ValueTask AdvertiseImpl<T>(Sender<T> advertiser, CancellationToken token) where T : IMessage, new()
         {
             if (publishersByTopic.TryGetValue(advertiser.Topic, out var advertisedTopic))
             {
@@ -593,7 +593,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Advertising <b>{advertiser.Topic}</b> [{BuiltIns.GetMessageType<T>()}].");
+            RosLogger.Info($"{this}: Advertising <b>{advertiser.Topic}</b> [{advertiser.Type}].");
 
             var newAdvertisedTopic = new AdvertisedTopic<T>(advertiser.Topic);
 
@@ -677,7 +677,7 @@ namespace Iviz.Ros
         }
 
         public async ValueTask<bool> CallModelServiceAsync<T>(string service, T srv, int timeoutInMs,
-            CancellationToken token) where T : class, IService
+            CancellationToken token) where T : IService, new()
         {
             using var myLock = await modelServiceLock.LockAsync();
 
@@ -700,7 +700,7 @@ namespace Iviz.Ros
         }
 
         async ValueTask<bool> CallServiceAsync<T>(string service, T srv, int timeoutInMs,
-            CancellationToken token) where T : class, IService
+            CancellationToken token) where T : IService, new()
         {
             ThrowHelper.ThrowIfNull(service, nameof(service));
             ThrowHelper.ThrowIfNull(srv, nameof(srv));
@@ -726,7 +726,7 @@ namespace Iviz.Ros
             }
         }
 
-        internal void Publish<T>(Sender<T> advertiser, in T msg) where T : IMessage
+        internal void Publish<T>(Sender<T> advertiser, in T msg) where T : IMessage, new()
         {
             if (advertiser.Id is not { } id || runningTs.IsCancellationRequested)
             {
@@ -784,7 +784,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Subscribing to <b>{listener.Topic}</b> [{BuiltIns.GetMessageType<T>()}].");
+            RosLogger.Info($"{this}: Subscribing to <b>{listener.Topic}</b> [{listener.Type}].");
 
             var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic, listener.TransportHint);
             subscribersByTopic.Add(listener.Topic, newSubscribedTopic);

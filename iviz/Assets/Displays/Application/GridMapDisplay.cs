@@ -217,8 +217,9 @@ namespace Iviz.Displays
                     }
                 }
 
+                mesh.Clear();
                 mesh.SetVertices(pointsArray);
-                mesh.SetIndices(indicesArray, MeshTopology.Quads, 0);
+                mesh.SetIndices(indicesArray, MeshTopology.Quads);
                 mesh.RecalculateNormals();
                 mesh.Optimize();
             }
