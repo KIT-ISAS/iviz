@@ -32,18 +32,22 @@ namespace Iviz.MsgsGen.Dynamic
             ["byte"] = typeof(byte),
         };
 
+        public const string RosAny = "*";
+
         public ReadOnlyCollection<Property> Fields { get; }
-        public string RosType { get; }
-        public string? RosInstanceMd5Sum { get; }
-        public string? RosInstanceDependencies { get; }
+        public string RosMessageType { get; }
+        public string RosMd5Sum { get; }
+        public string RosDependenciesBase64 { get; }
 
         public FieldType Type => FieldType.DynamicMessage;
 
-        public bool IsInitialized => !string.IsNullOrEmpty(RosType);
+        public bool IsInitialized => !string.IsNullOrEmpty(RosMessageType);
 
         public DynamicMessage()
         {
-            RosType = "";
+            RosMessageType = "";
+            RosMd5Sum = "";
+            RosDependenciesBase64 = "";
             var fields = Array.Empty<Property>();
             Fields = new ReadOnlyCollection<Property>(fields);
         }
@@ -66,11 +70,11 @@ namespace Iviz.MsgsGen.Dynamic
                 throw new ArgumentNullException(nameof(registered));
             }
 
-            RosType = classInfo.FullRosName;
-            RosInstanceMd5Sum = classInfo.Md5Hash;
-            RosInstanceDependencies = classInfo.CreateCatDependencies();
+            RosMessageType = classInfo.FullRosName;
+            RosMd5Sum = classInfo.Md5Hash;
+            RosDependenciesBase64 = classInfo.CreateCatDependencies();
 
-            registered[RosType] = this;
+            registered[RosMessageType] = this;
 
             string FullRosName(string rosType) => rosType.Contains("/") ? rosType : $"{classInfo.RosPackage}/{rosType}";
 
@@ -149,9 +153,9 @@ namespace Iviz.MsgsGen.Dynamic
 
         internal DynamicMessage(DynamicMessage other)
         {
-            RosType = other.RosType;
-            RosInstanceMd5Sum = other.RosInstanceMd5Sum;
-            RosInstanceDependencies = other.RosInstanceDependencies;
+            RosMessageType = other.RosMessageType;
+            RosMd5Sum = other.RosMd5Sum;
+            RosDependenciesBase64 = other.RosDependenciesBase64;
             var fields = new Property[other.Fields.Count];
             for (int i = 0; i < fields.Length; i++)
             {
@@ -228,14 +232,6 @@ namespace Iviz.MsgsGen.Dynamic
 
         public static bool IsGenericMessage<T>() => typeof(IMessage) == typeof(T);
 
-        [Preserve] public const string RosMessageType = "*";
-
-        /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "*";
-
-        /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 = "";
-
         public override string ToString() => this.ToJsonString();
 
         public void Dispose()
@@ -268,7 +264,7 @@ namespace Iviz.MsgsGen.Dynamic
         public static DynamicMessage CreateFromDependencyString(string fullRosMsgName, string dependencies,
             bool allowAssemblyLookup = true)
         {
-            return new(
+            return new DynamicMessage(
                 CreateDefinitionFromDependencyString(fullRosMsgName, dependencies),
                 allowAssemblyLookup);
         }
