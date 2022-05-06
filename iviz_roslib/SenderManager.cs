@@ -193,7 +193,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
             newSender.LoopbackReceiver = loopbackReceiver;
         }
 
-        Task.Run(async () =>
+        TaskUtils.Run(async () =>
         {
             using (await mutex.LockAsync(tokenSource.Token))
             {
@@ -259,6 +259,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
         disposed = true;
         tokenSource.Cancel();
 
+        // this is a bad hack, but it's the only reliable way I've found to make the previous AcceptTcpClient come out 
         using (var client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } })
         {
             await client.ConnectAsync(IPAddress.Loopback, Endpoint.Port);
@@ -267,7 +268,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
         listener.Stop();
         if (!await task.AwaitFor(2000, token))
         {
-            Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
+            Logger.LogDebugFormat("{0}: Sender stuck. Abandoning.", this);
         }
 
         await senders.Select(sender => sender.DisposeAsync(token).AsTask()).WhenAll().AwaitNoThrow(this);
@@ -286,7 +287,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
 
     public override string ToString()
     {
-        return $"[SenderManager '{Topic}']";
+        return $"[{nameof(SenderManager<TMessage>)} '{Topic}']";
     }
 }
 
@@ -301,8 +302,5 @@ internal readonly struct NullableMessage<T>
         hasValue = true;
     }
 
-    public static implicit operator NullableMessage<T>(in T message)
-    {
-        return new NullableMessage<T>(message);
-    }
+    public static implicit operator NullableMessage<T>(in T message) => new(message);
 }

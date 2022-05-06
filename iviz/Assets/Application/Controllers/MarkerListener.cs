@@ -246,8 +246,7 @@ namespace Iviz.Controllers
                 Id = topic
             };
 
-            //var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
-            const RosTransportHint rosTransportHint = RosTransportHint.PreferTcp;
+            var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
 
             Listener = Config.Type switch
             {

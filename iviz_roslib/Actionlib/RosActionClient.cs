@@ -125,7 +125,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
     {
         if (client == null)
         {
-            throw new ArgumentNullException(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
         if (!string.IsNullOrEmpty(actionName))
@@ -238,7 +238,7 @@ public sealed class RosActionClient<TAGoal, TAFeedback, TAResult> : IDisposable
     {
         if (goal == null)
         {
-            throw new ArgumentNullException(nameof(goal));
+            BuiltIns.ThrowArgumentNull(nameof(goal));
         }
 
         time now = time.Now();

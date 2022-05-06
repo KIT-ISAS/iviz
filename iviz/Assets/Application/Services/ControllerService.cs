@@ -853,6 +853,17 @@ namespace Iviz.Controllers
                 return;
             }
 
+            try
+            {
+                srv.Response.Data = await CompressAsync(ss);
+            }
+            catch
+            {
+                srv.Response.Success = false;
+                srv.Response.Message = "PNG compression failed for unknown reason";
+                return;
+            }
+            
             srv.Response.Success = true;
             srv.Response.Width = ss.Width;
             srv.Response.Height = ss.Height;
@@ -860,7 +871,6 @@ namespace Iviz.Controllers
             srv.Response.Header = (screenshotSeq++, ss.Timestamp, TfModule.FixedFrameId);
             srv.Response.Intrinsics = ss.Intrinsic.ToArray();
             srv.Response.Pose = pose ?? Pose.Identity;
-            srv.Response.Data = await CompressAsync(ss);
         }
 
 
@@ -1037,12 +1047,13 @@ namespace Iviz.Controllers
                     var dialog = GuiWidgetListener.DefaultHandler.AddDialog(srv.Request.Dialog);
                     var ts = TaskUtils.CreateCompletionSource();
 
+                    // ReSharper disable once ConvertIfStatementToSwitchStatement
                     if (dialog == null)
                     {
                         return default;
                     }
 
-                    // note: no if/else, dialog can be both!
+                    // note: no if/else or switch, dialog can be both!
                     if (dialog is IDialogCanBeClicked canBeClicked)
                     {
                         canBeClicked.Clicked += entryId => TriggerButton(entryId, false);
@@ -1050,7 +1061,7 @@ namespace Iviz.Controllers
 
                     if (dialog is IDialogCanBeMenuClicked canBeMenuClicked)
                     {
-                        canBeMenuClicked.MenuClicked += entryId => TriggerButton(entryId, false);
+                        canBeMenuClicked.MenuClicked += entryId => TriggerButton(entryId, true);
                     }
 
                     dialog.Expired += OnExpired;
@@ -1098,17 +1109,6 @@ namespace Iviz.Controllers
             {
                 srv.Response.Success = true;
                 srv.Response.Feedback = feedback;
-            }
-        }
-
-        static void TryRelease(SemaphoreSlim signal)
-        {
-            try
-            {
-                signal.Release();
-            }
-            catch (ObjectDisposedException)
-            {
             }
         }
     }

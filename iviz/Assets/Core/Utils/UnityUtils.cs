@@ -254,6 +254,7 @@ namespace Iviz.Core
         /// <returns>The Unity object if not-null and valid, otherwise a normal C# null</returns>           
         public static T? CheckedNull<T>(this T? o) where T : UnityEngine.Object => o != null ? o : null;
 
+        [AssertionMethod]
         public static T AssertNotNull<T>(this T? o, string name,
             [CallerFilePath] string? caller = null,
             [CallerLineNumber] int lineNumber = 0) where T : class
@@ -298,21 +299,25 @@ namespace Iviz.Core
             throw new MissingAssetFieldException(s);
         }
 
+        [AssertionMethod]
         public static T AssertHasComponent<T>(this Component? o, string name,
             [CallerFilePath] string? caller = null,
             [CallerLineNumber] int lineNumber = 0) =>
             AssertHasComponent<T>(o != null ? o.gameObject : null, name, caller, lineNumber);
 
+        [AssertionMethod]
         public static T EnsureHasComponent<T>(this Component? o, ref T? t, string name,
             [CallerFilePath] string? caller = null,
             [CallerLineNumber] int lineNumber = 0) =>
             t ??= o.AssertHasComponent<T>(name, caller, lineNumber);
 
+        [AssertionMethod]
         public static T EnsureHasComponent<T>(this GameObject? o, ref T? t, string name,
             [CallerFilePath] string? caller = null,
             [CallerLineNumber] int lineNumber = 0) =>
             t ??= o.AssertHasComponent<T>(name, caller, lineNumber);
 
+        [AssertionMethod]
         public static Transform EnsureHasTransform(this Component o, ref Transform? t) => t ??= o.transform;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -331,16 +336,6 @@ namespace Iviz.Core
         {
             c.a = alpha;
             return c;
-        }
-
-        public static Color Clamp(this in Color c)
-        {
-            Color q;
-            q.r = Mathf.Clamp01(c.r);
-            q.g = Mathf.Clamp01(c.g);
-            q.b = Mathf.Clamp01(c.b);
-            q.a = Mathf.Clamp01(c.a);
-            return q;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -652,7 +647,6 @@ namespace Iviz.Core
         /// Note: The parent is included in the enumeration.
         /// </summary>
         /// <param name="parent">The node to start the search in</param>
-        /// <returns></returns>
         public static IEnumerable<Transform> GetAllChildren(this Transform parent)
         {
             return parent.childCount == 0
@@ -748,7 +742,7 @@ namespace Iviz.Core
             return a.MoveNext();
         }
 
-        public (T, int) Current => (a.Current, index);
+        public (T value, int index) Current => (a.Current, index);
         public WithIndexEnumerable(IEnumerable<T> a) => (this.a, index) = (a.GetEnumerator(), -1);
         public WithIndexEnumerable<T> GetEnumerator() => this;
     }

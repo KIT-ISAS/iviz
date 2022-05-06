@@ -107,7 +107,7 @@ internal sealed class ServiceRequestManager
 
         tokenSource.Cancel();
 
-        // this is a bad hack, but it's the only reliable way I've found to make AcceptTcpClient come out 
+        // this is a bad hack, but it's the only reliable way I've found to make the previous AcceptTcpClient come out 
         using (var client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } })
         {
             await client.ConnectAsync(IPAddress.Loopback, Uri.Port);

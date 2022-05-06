@@ -46,18 +46,14 @@ namespace Iviz.App
             panel.Scale.Value = listener.Scale;
             panel.VectorScale.Value = listener.VectorScale;
             panel.HideButton.State = listener.Visible;
-            //panel.PreferUdp.Value = listener.PreferUdp;
-
 
             panel.ShowTrail.ValueChanged += f => listener.TrailVisible = f;
             panel.ShowAngle.ValueChanged += f => listener.AngleVisible = f;
             panel.VectorColor.ValueChanged += f => listener.VectorColor = f;
-            //panel.TrailTime.ValueChanged += f => { listener.TrailTime = f; };
             panel.Scale.ValueChanged += f => listener.Scale = f;
             panel.ShowAxis.ValueChanged += f => listener.FrameVisible = f;
             panel.ShowVector.ValueChanged += f => listener.VectorVisible = f;
             panel.VectorScale.ValueChanged += f => listener.VectorScale = f;
-            //panel.PreferUdp.ValueChanged += f => listener.PreferUdp = f;
 
             switch (listener.Config.Type)
             {
