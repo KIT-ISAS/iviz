@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.NavMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class GetMap : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.NavMsgs
             set => Response = (GetMapResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "nav_msgs/GetMap";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "nav_msgs/GetMap";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "6cdd0a18e0aff5b0a3ca2326a89b54ff";
+        public string RosMd5Sum => "6cdd0a18e0aff5b0a3ca2326a89b54ff";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -79,7 +76,7 @@ namespace Iviz.Msgs.NavMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 0;
+        public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     

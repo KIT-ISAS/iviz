@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     [StructLayout(LayoutKind.Sequential)]
     public struct Header : IMessage, IDeserializable<Header>, System.IEquatable<Header>
     {
@@ -69,16 +69,16 @@ namespace Iviz.Msgs.StdMsgs
     
         public readonly int RosMessageLength => 16 + BuiltIns.GetStringSize(FrameId);
     
-        public readonly string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "std_msgs/Header";
+        public const string MessageType = "std_msgs/Header";
+    
+        public readonly string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "2176decaecbce78abc3b96ef049fabed";
+        public readonly string RosMd5Sum => "2176decaecbce78abc3b96ef049fabed";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE42RT2vDMAzF7/4UghzaDtrDdut5DHYbrPei2moscOxMVtrl209O2brdBobg+L3f058O" +
                 "3hVzQAkwkGJARTgXgch9JNkmulCCqjiMFGB51XmkunMdHCJXsNNTJsGUZpiqibSAL8MwZfaoBMoD/fGb" +
                 "kzMgjCjKfkoopi8SODf5WXCgRrdT6WOi7Alen/emyZX8pGwFzUbwQlg59/YIbuKsT4/N4LrDtWztSj3J" +

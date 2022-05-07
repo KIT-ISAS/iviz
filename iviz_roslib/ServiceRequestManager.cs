@@ -37,7 +37,7 @@ internal sealed class ServiceRequestManager
 
         Logger.LogDebugFormat("{0}: Starting!", this);
 
-        task = TaskUtils.Run(() => RunLoop().AsTask().AwaitNoThrow(this));
+        task = TaskUtils.Run(() => RunLoop().AwaitNoThrow(this));
     }
 
     public Uri Uri { get; }
@@ -107,11 +107,8 @@ internal sealed class ServiceRequestManager
 
         tokenSource.Cancel();
 
-        // this is a bad hack, but it's the only reliable way I've found to make the previous AcceptTcpClient come out 
-        using (var client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } })
-        {
-            await client.ConnectAsync(IPAddress.Loopback, Uri.Port);
-        }
+        // try to make the listener come out
+        await StreamUtils.EnqueueConnectionAsync(Uri.Port, this);
 
         listener.Stop();
         if (!await task.AwaitFor(2000, token))
@@ -119,12 +116,8 @@ internal sealed class ServiceRequestManager
             Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
         }
 
-
-        Task[] tasks = requests.Select(request => request.StopAsync(token).AsTask()).ToArray();
-        await tasks.WhenAll().AwaitNoThrow(this);
+        await requests.Select(request => request.StopAsync(token).AsTask()).WhenAll().AwaitNoThrow(this);
         requests.Clear();
-
-        tokenSource.Dispose();
     }
 
     public override string ToString()

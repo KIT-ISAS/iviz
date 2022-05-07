@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class BoundingBox3D : IDeserializable<BoundingBox3D>, IMessage
     {
         // A 3D bounding box that can be positioned and rotated about its center (6 DOF)
@@ -50,20 +50,20 @@ namespace Iviz.Msgs.VisionMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 80;
+        public const int RosFixedMessageLength = 80;
         
         public int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "vision_msgs/BoundingBox3D";
+        public const string MessageType = "vision_msgs/BoundingBox3D";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "727c83f2b037373b8e968433d9c84ecb";
+        public string RosMd5Sum => "727c83f2b037373b8e968433d9c84ecb";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71UwWrcQAy9+ysEe2gCxoWm5FDoIbCk5FCa0tJr0dqydxp75M6Mu9l8fd+M196YLO0l" +
                 "rE8aj/T0nqTRim7oak0bHWxlbAPjkcKWA5VsaSPUqzfBqJWK2FbkNHCINgICmeCpFBvE0cU1rb/cXmYr" +
                 "WptOrEeIJ62BZXwCZSdkLHUCb58nMPbkh3KbA4c63sd0nWlcShAUUAQ3DVvA91w+cCN5CoiBjSig3P5n" +

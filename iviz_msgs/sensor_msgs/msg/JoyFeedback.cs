@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class JoyFeedback : IDeserializable<JoyFeedback>, IMessage
     {
         // Declare of the type of feedback
@@ -56,20 +56,20 @@ namespace Iviz.Msgs.SensorMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 6;
+        public const int RosFixedMessageLength = 6;
         
         public int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "sensor_msgs/JoyFeedback";
+        public const string MessageType = "sensor_msgs/JoyFeedback";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "f4dcd73460360d98f36e55ee7f2e46f1";
+        public string RosMd5Sum => "f4dcd73460360d98f36e55ee7f2e46f1";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1WPQWvCMBiG7/kVL3gtpTqEHexF1oPgYIge5mWkyRcaFhNJUrX/fp+dHS6n5PmS530z" +
                 "wxspJyMhGOSOkIfzuDdEupXqW/TW51fsPz+ar23zBl41qme6O7yvtw3T+TNdH47HZsd0IR74bhZihn1n" +
                 "E67WOXTBaUgPq+H7U0sRJkSQVN1fjfEwdSn5dXOTp7OjYixrbEwZjjSuoWdXS+yqq99hIhX8/8nU0Op7" +

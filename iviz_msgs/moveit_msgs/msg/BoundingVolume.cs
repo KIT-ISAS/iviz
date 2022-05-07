@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class BoundingVolume : IDeserializable<BoundingVolume>, IMessage
     {
         // Define a volume in 3D
@@ -94,16 +94,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/BoundingVolume";
+        public const string MessageType = "moveit_msgs/BoundingVolume";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "22db94010f39e9198032cb4a1aeda26e";
+        public string RosMd5Sum => "22db94010f39e9198032cb4a1aeda26e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71W227UMBB9z1eMxENbsVouRQiB9qHQhVaCUtoi9SK0cpPZjUViB9tZdvl6ZnxJsi0t" +
                 "L9DuQ+N4fGbOmYvzCPZxLhWCgKWu2hpBKtjdz7JHsAcWHeg5WF3JAhaoa3RG5tAYWUsnl2jBlcJBLb4j" +
                 "tA0tMIE4DUXA3RaWsFsltdrJbCkanNV2YZ+cMuhxQrr6NkBl52eE1WhLLsjBz1LmpYcfuBYGodK5cFhk" +

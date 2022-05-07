@@ -64,8 +64,8 @@ namespace Iviz.App
             Sender = newSender;
             if (newSender == null)
             {
-                Text.text = "<i>Empty</i>\n" +
-                            $"<b>{BuiltIns.GetMessageType(typeof(T))}</b>";
+                Text.text = "<i>Empty</i>\n"  +
+                            $"<b>{BuiltIns.GetMessageType<T>()}</b>";
             }
         }
 

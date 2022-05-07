@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class GetVertexColors : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.MeshMsgs
             set => Response = (GetVertexColorsResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "mesh_msgs/GetVertexColors";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "mesh_msgs/GetVertexColors";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "f9925939094ed9c8a413184db9bca5b3";
+        public string RosMd5Sum => "f9925939094ed9c8a413184db9bca5b3";
         
         public override string ToString() => Extensions.ToString(this);
     }

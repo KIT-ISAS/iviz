@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.GeometryMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Wrench : IDeserializable<Wrench>, IMessage
     {
         // This represents force in free space, separated into
@@ -46,20 +46,20 @@ namespace Iviz.Msgs.GeometryMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 48;
+        public const int RosFixedMessageLength = 48;
         
         public int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "geometry_msgs/Wrench";
+        public const string MessageType = "geometry_msgs/Wrench";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "4f539cf138b23283b520fd271b567936";
+        public string RosMd5Sum => "4f539cf138b23283b520fd271b567936";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61SwUrEMBC95ysG9qJQIqh4EDzLHgRB8SqzzTQbTJM6mVrr1zvZLl3Ws4WWafLem/cm" +
                 "2cDrPhRgGpgKJSnQZW4JQoKOiaAM2FIDhQZkFHK6IdlsICgyhkTIgMnp68eotaKkWPNGrWS+gUXs9Kvf" +
                 "z5GMefjnxzy9PN6Dp9yT8PzeF1+ujk3V69+ECF+HvfOQFhS6FVBsTnGGnjCJOj4xlegCKzXkZFWVmDSf" +

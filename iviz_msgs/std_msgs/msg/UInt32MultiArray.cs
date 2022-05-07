@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class UInt32MultiArray : IDeserializable<UInt32MultiArray>, IMessage
     {
         // Please look at the MultiArrayLayout message definition for
@@ -54,16 +54,16 @@ namespace Iviz.Msgs.StdMsgs
     
         public int RosMessageLength => 4 + Layout.RosMessageLength + 4 * Data.Length;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "std_msgs/UInt32MultiArray";
+        public const string MessageType = "std_msgs/UInt32MultiArray";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "4d6a180abc9be191b96a7eda6c8a233d";
+        public string RosMd5Sum => "4d6a180abc9be191b96a7eda6c8a233d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71U32vbMBB+919xJC9tlmb5Ucpa6ENgsJcWBh2MEkJQrXOsRJaCJDfr/vp9sh3bafc4" +
                 "ZgyW73R33/fpTkP6rll4Jm3tnkSgkDM9ljqopXPi7UG82TJQwd6LLZPkTBkVlDWUWZcMSdq0LNgEUdnw" +
                 "Cq2piOEihvtJknxIRrr51s+Q/IFTlam0SZKRFEE0u5JSmbCYr9bUPpWXuvCq0iksSZL7f/wkj0/f7sgH" +

@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class GetUUID : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.MeshMsgs
             set => Response = (GetUUIDResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "mesh_msgs/GetUUID";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "mesh_msgs/GetUUID";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "18ad0215778d252d8f14959901273e8d";
+        public string RosMd5Sum => "18ad0215778d252d8f14959901273e8d";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -78,7 +75,7 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 0;
+        public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     

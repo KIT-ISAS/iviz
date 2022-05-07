@@ -85,8 +85,6 @@ internal sealed class RosNodeServer
             await listener.DisposeAsync().AwaitNoThrow(this);
             await task.AwaitNoThrow(2000, this);
         }
-
-        runningTs.Dispose();
     }
 
     public void Start()

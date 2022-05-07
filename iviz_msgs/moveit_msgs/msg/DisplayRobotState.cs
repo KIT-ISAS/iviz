@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class DisplayRobotState : IDeserializable<DisplayRobotState>, IMessage
     {
         // The robot state to display
@@ -61,16 +61,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public int RosMessageLength => 4 + State.RosMessageLength + BuiltIns.GetArraySize(HighlightLinks);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/DisplayRobotState";
+        public const string MessageType = "moveit_msgs/DisplayRobotState";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "6a3bab3a33a8c47aee24481a455a21aa";
+        public string RosMd5Sum => "6a3bab3a33a8c47aee24481a455a21aa";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+0aWW8bN/p9fgVRP8hqFaWN06KrhR8c22kcJLFru0caGAI1Q0msZ4YqybGsLPa/73eQ" +
                 "nNGRpgXWBhbY7GHNkPzum7MnrudKWDMxXjgvvRLeiEK7RSlX2SW+vqK3tJZle+J84bWpZVmuBuJOWm0a" +
                 "J0pd3zqRy1pMlJjr2byE/3lVZOeT31Xuj01p7IebdmVMB7Ls8L/8L3t79cNIVOZOaT+u3Mw9bTkA0q/n" +

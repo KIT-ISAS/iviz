@@ -136,11 +136,11 @@ namespace Iviz.App
         void UpdateHints()
         {
             panel.JoyTopic.Hints = GetTopicTypes()
-                .Where(info => info.Type == Joy.RosMessageType)
+                .Where(info => info.Type == Joy.MessageType)
                 .Select(info => info.Topic);
             string expectedType = controller.UseTwistStamped
-                ? TwistStamped.RosMessageType
-                : Twist.RosMessageType;
+                ? TwistStamped.MessageType
+                : Twist.MessageType;
             panel.TwistTopic.Hints = GetTopicTypes()
                 .Where(info => info.Type == expectedType)
                 .Select(info => info.Topic);

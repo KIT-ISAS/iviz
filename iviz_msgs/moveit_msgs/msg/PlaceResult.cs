@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class PlaceResult : IDeserializable<PlaceResult>, IResult<PlaceActionResult>
     {
         // The result of the place attempt
@@ -91,16 +91,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/PlaceResult";
+        public const string MessageType = "moveit_msgs/PlaceResult";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "94bc2148a619282cbe09156013d6c4c9";
+        public string RosMd5Sum => "94bc2148a619282cbe09156013d6c4c9";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+07a28bN7bf51cQG+Da3spKE6fZ1hf+oNhKotaWXEnJtg2CATVDSbMeDVVyZFm9uP/9" +
                 "ngfJeVhOuthrLy5w3SKeGZKHPO8Hj6PoSt+qQdk3RptznSorFD7GCTxHUTTWM11OSlkqURr5D5WU2uxi" +
                 "W0pT+tFp+P7pc2vSQtkosqXJikVzDPZJTLYuM13AjOg6l4m61InED2KNb3HuXmF4nmtZvn6FA0UBsOIy" +

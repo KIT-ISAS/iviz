@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Tf2Msgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class TF2Error : IDeserializable<TF2Error>, IMessage
     {
         public const byte NO_ERROR = 0;
@@ -54,16 +54,16 @@ namespace Iviz.Msgs.Tf2Msgs
     
         public int RosMessageLength => 5 + BuiltIns.GetStringSize(ErrorString);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "tf2_msgs/TF2Error";
+        public const string MessageType = "tf2_msgs/TF2Error";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "bc6848fd6fd750c92e38575618a4917d";
+        public string RosMd5Sum => "bc6848fd6fd750c92e38575618a4917d";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE0XKuw7CMAyF4T1PkUfgLhaGqARkkdiVcSqYMiHUpUihfX8kasJ4/u9M/TDuLVL2zMT2" +
                 "YBdm+qZAdEltzUvNDSH6RqADuVdcKfqbsGspOAHCqmtVwM4FOGbH5xQ9Sj1s9CAQPaV/3/46O7yeiGOV" +
                 "nVF6lPIq5j2WfnjOI8/DmA8cjH3N2gAAAA==";

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class PickupActionGoal : IDeserializable<PickupActionGoal>, IActionGoal<PickupGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -64,16 +64,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/PickupActionGoal";
+        public const string MessageType = "moveit_msgs/PickupActionGoal";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "9e12196da542c9a26bbc43e9655a1906";
+        public string RosMd5Sum => "9e12196da542c9a26bbc43e9655a1906";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+09/W8bN5a/668gEuBst4qSJt1Fz20WSGO3SdHE2TjbryAQKA0lsR7NqMMZy8rh/vd7" +
                 "nyRHkpP29uzeYa9b1JoZ8vHx8fF9k/vM2cI1ZkF/Bnba+roq/WS8DPNw/9vals9PzBz+jH0xeOWnF90K" +
                 "X9KrweP/4X8GL86/PTahLXj0Z4zTXXPe2qqwTWGWrrWFba2Z1YCyny9cc690l66ETna5coWhr+1m5cII" +

@@ -131,18 +131,18 @@ namespace Iviz.Controllers
         {
             switch (config.Type)
             {
-                case Path.RosMessageType:
+                case Path.MessageType:
                     listener = new Listener<Path>(config.Topic, Handler);
                     break;
-                case PoseArray.RosMessageType:
+                case PoseArray.MessageType:
                     listener = new Listener<PoseArray>(config.Topic, Handler);
                     LinesVisible = false;
                     break;
-                case PolygonStamped.RosMessageType:
+                case PolygonStamped.MessageType:
                     listener = new Listener<PolygonStamped>(config.Topic, Handler);
                     FramesVisible = false;
                     break;
-                case Polygon.RosMessageType:
+                case Polygon.MessageType:
                     node.Parent = TfModule.DefaultFrame;
                     listener = new Listener<Polygon>(config.Topic, Handler);
                     FramesVisible = false;

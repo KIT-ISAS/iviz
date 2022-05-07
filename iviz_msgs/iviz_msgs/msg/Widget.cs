@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Widget : IDeserializable<Widget>, IMessage
     {
         public const byte ACTION_ADD = 0;
@@ -109,16 +109,16 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "iviz_msgs/Widget";
+        public const string MessageType = "iviz_msgs/Widget";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "a71dfa7c0575b3eb185fffdf20b1768b";
+        public string RosMd5Sum => "a71dfa7c0575b3eb185fffdf20b1768b";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71WW2/iRhR+9684Uh42qRLaTba720j74ADN0mYDC3SlqKrQYB/MqGbGOzOGkF/fb8bG" +
                 "mJZq+9AEIRifyzfnflxK5d5T3J0OhvezuNejD/RDVLaJ4/6n4Zc+6K+P0eO7O7Auo5o3fRj1Z+PhNPYi" +
                 "vcGk28ILvMloPLi/rTmvj3OuegGyxZuO41/63elw/FBrXh1wh8O76WAE8psDcjy+7eOnH4PzY5szGk4G" +

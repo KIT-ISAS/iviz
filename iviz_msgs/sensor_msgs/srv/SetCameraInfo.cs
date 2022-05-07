@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.SensorMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class SetCameraInfo : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.SensorMsgs
             set => Response = (SetCameraInfoResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "sensor_msgs/SetCameraInfo";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "sensor_msgs/SetCameraInfo";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "bef1df590ed75ed1f393692395e15482";
+        public string RosMd5Sum => "bef1df590ed75ed1f393692395e15482";
         
         public override string ToString() => Extensions.ToString(this);
     }

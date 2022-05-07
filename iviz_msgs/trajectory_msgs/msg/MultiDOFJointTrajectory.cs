@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.TrajectoryMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class MultiDOFJointTrajectory : IDeserializable<MultiDOFJointTrajectory>, IMessage
     {
         // The header is used to specify the coordinate frame and the reference time for the trajectory durations
@@ -80,16 +80,16 @@ namespace Iviz.Msgs.TrajectoryMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "trajectory_msgs/MultiDOFJointTrajectory";
+        public const string MessageType = "trajectory_msgs/MultiDOFJointTrajectory";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "ef145a45a5f47b77b7f5cdde4b16c942";
+        public string RosMd5Sum => "ef145a45a5f47b77b7f5cdde4b16c942";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71WS4/bNhC+81cM4EPswusFkiKHBXookKbdAkFTxMilKAxaGklMJFIhqXXUX99vqJft" +
                 "TR9AmzV84Gve33yjFe0rpop1zp5MoC5wTtFRaDkzRU8Rt5lzPjdWR6bC64ZJ2zxdeC7Ys82YosFx4Xw6" +
                 "jl5/4Cw631PeeR2Ns0H9NJgYLCm1ou8h3noObGN6Qq4gTU1XR3OTY/3BGRvPda1ZZxW16RiearmzAUab" +

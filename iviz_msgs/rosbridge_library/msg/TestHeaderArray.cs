@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class TestHeaderArray : IDeserializable<TestHeaderArray>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header[] Header;
@@ -47,16 +47,16 @@ namespace Iviz.Msgs.RosbridgeLibrary
     
         public int RosMessageLength => 4 + BuiltIns.GetArraySize(Header);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "rosbridge_library/TestHeaderArray";
+        public const string MessageType = "rosbridge_library/TestHeaderArray";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "d7be0bb39af8fb9129d5a76e6b63a290";
+        public string RosMd5Sum => "d7be0bb39af8fb9129d5a76e6b63a290";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE62RTWvkMAyG7/4Vgjn0A6YL29tAb2U/DoWF9raUQWOrscCxU0mZbv79yhl22956aDAk" +
                 "jt/3eWVJLe1HHfTLD8JE8vsR8voRbj75CXf333eg7+PCBu4Na0JJMJJhQkN4agKZh0yyLXSk4iYcJ0qw" +
                 "ntoykV658SGzgq+BKgmWssCsLrIGsY3jXDmiERiP9M7vTq6AMKEYx7mguL5J4trlT4IjdbovpeeZaiT4" +

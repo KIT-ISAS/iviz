@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     [StructLayout(LayoutKind.Sequential)]
     public struct Color32 : IMessage, IDeserializable<Color32>, System.IEquatable<Color32>
     {
@@ -51,20 +51,20 @@ namespace Iviz.Msgs.IvizMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 4;
+        public const int RosFixedMessageLength = 4;
         
         public readonly int RosMessageLength => RosFixedMessageLength;
     
-        public readonly string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "iviz_msgs/Color32";
+        public const string MessageType = "iviz_msgs/Color32";
+    
+        public readonly string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "3a89b17adab5bedef0b554f03235d9b3";
+        public readonly string RosMd5Sum => "3a89b17adab5bedef0b554f03235d9b3";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAEyvNzCuxUCjiKgXT6VA6CUoncnEBACHBa7shAAAA";
                 
         public override string ToString() => Extensions.ToString(this);

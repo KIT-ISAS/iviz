@@ -18,7 +18,7 @@ namespace Iviz.Controllers
 
         [DataMember] public bool EnableQrDetection { get; set; } = true;
         [DataMember] public bool EnableArucoDetection { get; set; } = true;
-        [DataMember] public bool EnableMeshing { get; set; } = true;
+        [DataMember] public bool EnableMeshing { get; set; } = false;
         [DataMember] public bool EnablePlaneDetection { get; set; } = true;
         [DataMember] public OcclusionQualityType OcclusionQuality { get; set; } = OcclusionQualityType.Fast;
         [DataMember] public PublicationFrequency PublicationFrequency { get; set; } = PublicationFrequency.Fps15;

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class InteractiveMarkerFeedback : IDeserializable<InteractiveMarkerFeedback>, IMessage
     {
         // Time/frame info.
@@ -99,16 +99,16 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerFeedback";
+        public const string MessageType = "visualization_msgs/InteractiveMarkerFeedback";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "ab0f1eee058667e28c19ff3ffc3f4b78";
+        public string RosMd5Sum => "ab0f1eee058667e28c19ff3ffc3f4b78";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71W227bRhB951cM4Ickhay0cRoEBvLg2koixBcVltpHYkUOqYXJXWZ3aUX9+p5ZXkzV" +
                 "RdGHNoYBUcuZM3POXFYntNY1vy6cqpm0Kew8+cwqZ0e7+JEkJ7TM2QRdHLQpyQeHjzndtD7Qlqk1+msr" +
                 "nhR2TME2OiMDLN+ojOdJZ05ZpQGR6lzgPjLnW5U9EKy8Kpk83lE8KZytI9CnzXJGPC/nsN/vuEP3QYXW" +

@@ -57,13 +57,13 @@ namespace Iviz.App
 
             switch (listener.Config.Type)
             {
-                case PoseStamped.RosMessageType:
-                case PointStamped.RosMessageType:
+                case PoseStamped.MessageType:
+                case PointStamped.MessageType:
                     panel.ShowVector.Interactable = false;
                     panel.VectorScale.Interactable = false;
                     break;
-                case WrenchStamped.RosMessageType:
-                case TwistStamped.RosMessageType:
+                case WrenchStamped.MessageType:
+                case TwistStamped.MessageType:
                     panel.ShowVector.Interactable = true;
                     panel.VectorScale.Interactable = true;
                     break;

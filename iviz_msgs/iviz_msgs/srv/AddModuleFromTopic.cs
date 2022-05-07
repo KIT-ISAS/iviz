@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class AddModuleFromTopic : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (AddModuleFromTopicResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "iviz_msgs/AddModuleFromTopic";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "iviz_msgs/AddModuleFromTopic";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "68ab9eda5fc795e020e1e72fec9f4815";
+        public string RosMd5Sum => "68ab9eda5fc795e020e1e72fec9f4815";
         
         public override string ToString() => Extensions.ToString(this);
     }

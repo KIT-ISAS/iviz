@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.ShapeMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class MeshTriangle : IDeserializable<MeshTriangle>, IMessage
     {
         // Definition of a triangle's vertices
@@ -44,20 +44,20 @@ namespace Iviz.Msgs.ShapeMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 12;
+        public const int RosFixedMessageLength = 12;
         
         public int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "shape_msgs/MeshTriangle";
+        public const string MessageType = "shape_msgs/MeshTriangle";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "23688b2e6d2de3d32fe8af104a903253";
+        public string RosMd5Sum => "23688b2e6d2de3d32fe8af104a903253";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1NWcElNy8zLLMnMz1PIT1NIVCgpykzMS89JVS9WKEstKslMTi3mKs3MKzE2ijaOBQul" +
                 "VsRn5qWAJbgAjDTRWEAAAAA=";
                 

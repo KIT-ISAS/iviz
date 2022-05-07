@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class GetMotionSequence : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetMotionSequenceResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "moveit_msgs/GetMotionSequence";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "moveit_msgs/GetMotionSequence";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "da3890ab96dfd351e68c0fd2615116bd";
+        public string RosMd5Sum => "da3890ab96dfd351e68c0fd2615116bd";
         
         public override string ToString() => Extensions.ToString(this);
     }

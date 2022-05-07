@@ -346,10 +346,7 @@ namespace Iviz.App
                 KeepReconnecting = true;
             };
 
-            BottomCanvas.CameraButtonClicked += () =>
-            {
-                CameraPanelData.ToggleShowPanel();
-            };
+            BottomCanvas.CameraButtonClicked += () => { CameraPanelData.ToggleShowPanel(); };
 
             connectionData.MasterActiveChanged += _ => Connection.Disconnect();
             RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
@@ -478,8 +475,7 @@ namespace Iviz.App
                 Connection.MyUri == null ||
                 Connection.MyId == null)
             {
-                UpperCanvas.Status.enabled = true;
-                UpperCanvas.Status.sprite = UpperCanvas.QuestionSprite;
+                UpperCanvas.StatusSprite = UpperCanvas.QuestionSprite;
                 return;
             }
 
@@ -487,8 +483,7 @@ namespace Iviz.App
             {
                 case ConnectionState.Connected:
                     GameThread.EveryTenthOfASecond -= RotateSprite;
-                    UpperCanvas.Status.enabled = true;
-                    UpperCanvas.Status.sprite = UpperCanvas.ConnectedSprite;
+                    UpperCanvas.StatusSprite = UpperCanvas.ConnectedSprite;
                     UpperCanvas.TopPanel.color = RosManager.Server.IsActive
                         ? Resource.Colors.ConnectionPanelOwnMaster
                         : Resource.Colors.ConnectionPanelConnected;
@@ -496,12 +491,11 @@ namespace Iviz.App
                     break;
                 case ConnectionState.Disconnected:
                     GameThread.EveryTenthOfASecond -= RotateSprite;
-                    UpperCanvas.Status.enabled = false;
+                    UpperCanvas.StatusSprite = UpperCanvas.DisconnectedSprite;
                     UpperCanvas.TopPanel.color = Resource.Colors.ConnectionPanelDisconnected;
                     break;
                 case ConnectionState.Connecting:
-                    UpperCanvas.Status.enabled = true;
-                    UpperCanvas.Status.sprite = UpperCanvas.ConnectingSprite;
+                    UpperCanvas.StatusSprite = UpperCanvas.ConnectingSprite;
                     GameThread.EveryTenthOfASecond += RotateSprite;
                     break;
             }
@@ -1091,10 +1085,9 @@ namespace Iviz.App
 #else
             BottomCanvas.Time.text = GameThread.Now.ToString("HH:mm");
 #endif
-            BottomCanvas.Fps.text =
-                frameCounter < 100
-                    ? $"{frameCounter.ToString()} FPS"
-                    : frameCounter.ToString();
+            BottomCanvas.Fps.text = frameCounter < 100
+                ? $"{frameCounter.ToString()} FPS"
+                : ">99FPS";
             frameCounter = 0;
 
             (long downB, long upB) = RosManager.CollectBandwidthReport();
@@ -1115,7 +1108,7 @@ namespace Iviz.App
                 -1 => "---",
                 1 when state is BatteryStatus.Full or BatteryStatus.Charging => "<color=#005500>Full</color>",
                 1 => "Full",
-                _ when state == BatteryStatus.Charging =>
+                _ when state is BatteryStatus.Charging =>
                     $"<color=#005500>{((int)(batteryLevel * 100)).ToString()}%</color>",
                 _ => $"{((int)(batteryLevel * 100)).ToString()}%"
             };

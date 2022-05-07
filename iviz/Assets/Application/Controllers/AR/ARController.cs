@@ -424,6 +424,12 @@ namespace Iviz.Controllers
 
         void OnMarkerDetected(Screenshot screenshot, IReadOnlyList<IDetectedMarker> markers)
         {
+            if (!(TfModule.RootScale - 1).ApproximatelyZero())
+            {
+                //Debug.Log(this + ": Marker detection disabled if scale is not 1!");
+                return;
+            }
+
             ARMarker ToMarker(IDetectedMarker marker) => new()
             {
                 Type = (byte)marker.Type,

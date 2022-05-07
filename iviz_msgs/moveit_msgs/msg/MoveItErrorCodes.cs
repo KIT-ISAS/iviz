@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class MoveItErrorCodes : IDeserializable<MoveItErrorCodes>, IMessage
     {
         [DataMember (Name = "val")] public int Val;
@@ -68,20 +68,20 @@ namespace Iviz.Msgs.MoveitMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 4;
+        public const int RosFixedMessageLength = 4;
         
         public int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/MoveItErrorCodes";
+        public const string MessageType = "moveit_msgs/MoveItErrorCodes";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "aa336b18d80531f66439810112c0a43e";
+        public string RosMd5Sum => "aa336b18d80531f66439810112c0a43e";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE32ST4vbMBDF7/4UhsLeDM2f3e0efFAcJatGnslKcmBPg1tMa5p1WjsN9Nt3FKTgNaU+" +
                 "yFjvp/HozWu782KeXupjknxIT5emr4/H9Evzvb60pz5pr6qtikJam8/C90YoXRmZP/knCZt7LQAUbMmr" +
                 "cp1nkVZwEFqtqUSnEMhzeTYP4miTAiicXNPqlSQclEEoJTgqngVsZZ4twrECwRnUt38tw34FYqUlOSTx" +

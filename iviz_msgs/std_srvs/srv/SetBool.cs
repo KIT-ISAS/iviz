@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.StdSrvs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class SetBool : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.StdSrvs
             set => Response = (SetBoolResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "std_srvs/SetBool";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "std_srvs/SetBool";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "09fb03525b03e7ea1fd3992bafd87e16";
+        public string RosMd5Sum => "09fb03525b03e7ea1fd3992bafd87e16";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -85,7 +82,7 @@ namespace Iviz.Msgs.StdSrvs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 1;
+        public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
     

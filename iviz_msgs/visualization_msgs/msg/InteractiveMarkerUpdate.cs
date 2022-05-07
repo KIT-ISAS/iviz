@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisualizationMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class InteractiveMarkerUpdate : IDeserializable<InteractiveMarkerUpdate>, IMessage
     {
         // Identifying string. Must be unique in the topic namespace
@@ -108,16 +108,16 @@ namespace Iviz.Msgs.VisualizationMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "visualization_msgs/InteractiveMarkerUpdate";
+        public const string MessageType = "visualization_msgs/InteractiveMarkerUpdate";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "710d308d0a9276d65945e92dd30b3946";
+        public string RosMd5Sum => "710d308d0a9276d65945e92dd30b3946";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE91aW3PbNhZ+rn4FJp5O7K0s39Jsq10/KJacaOrb2nLaTqejgUhIQk0RDEhaVn59v3MA" +
                 "UKRlJ52dTTqz2c6aAnEOzv0GbolhrNJCT1c6nYm8sPjTEedlXoiJEmWqP5RK6FQUcyUKk+lIpHKh8kxG" +
                 "qrWFVVng/3QucmXvlRVLY+9yYdJOy6Hy62Mdt7D9RgFbGimRlouJsh0sjYA3SjRIEEudJKLMlUNYGBGr" +

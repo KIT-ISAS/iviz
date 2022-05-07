@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Feedback : IDeserializable<Feedback>, IMessage
     {
         public const byte TYPE_EXPIRED = 0;
@@ -86,16 +86,16 @@ namespace Iviz.Msgs.IvizMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "iviz_msgs/Feedback";
+        public const string MessageType = "iviz_msgs/Feedback";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "beec894d41c35d3624bcb12f27355c75";
+        public string RosMd5Sum => "beec894d41c35d3624bcb12f27355c75";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71V32/bNhB+119xQB6aDI63JV1RBOiDl3it1zZxE3VYMQzGRTpL3CRSJSm77l+/j5Qt" +
                 "26mH7mGpIcAk7+7j/fzYKu2fU/phOp6Nf59ObsdX9IJ+SNrt8c/v0/Tmenb5ZnL5GrIfd2Vvx9fvx9fp" +
                 "7YdefLYrnt7cTdJJMH41un4Zoc935Te3E1iPHqg83VW5uxy9Ge8If9oVprejX8eX6U24v9d4liTO57Pa" +

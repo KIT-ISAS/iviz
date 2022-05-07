@@ -208,7 +208,6 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
         await manager.DisposeAsync(token).AwaitNoThrow(this);
 
         NumSubscribersChanged = null;
-        runningTs.Dispose();
     }
 
     void Dispose()
@@ -223,7 +222,6 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
         ids.Clear();
         manager.Dispose();
         NumSubscribersChanged = null;
-        runningTs.Dispose();
     }
 
     public string Advertise()

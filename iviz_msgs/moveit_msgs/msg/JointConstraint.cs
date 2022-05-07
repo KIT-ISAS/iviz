@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class JointConstraint : IDeserializable<JointConstraint>, IMessage
     {
         // Constrain the position of a joint to be within a certain bound
@@ -52,16 +52,16 @@ namespace Iviz.Msgs.MoveitMsgs
     
         public int RosMessageLength => 36 + BuiltIns.GetStringSize(JointName);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/JointConstraint";
+        public const string MessageType = "moveit_msgs/JointConstraint";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "c02a15146bec0ce13564807805b008f0";
+        public string RosMd5Sum => "c02a15146bec0ce13564807805b008f0";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE21Qy07DMBC8+ytG6qUI6AlxR/0MhKqNs2kWOd7KXhKJr2eTgqkQB1/mtTPe4ai5WiHJ" +
                 "sJFx0SommqEDCO8q2WCKjrGIjS4iRC62yjv9yH1wr+TzVXnKNHEIuy1po7+9FEfhmXtIxWs78ehs4kI5" +
                 "8qnjpMvD7/n7G446nfktDEnJnp+apgF/lP/gW/pa7AULy3m0tfJA0bRg8OfLKuLPRxj2PWc1riicyGRm" +

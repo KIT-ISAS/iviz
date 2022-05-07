@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.IvizMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class GetModelResource : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.IvizMsgs
             set => Response = (GetModelResourceResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "iviz_msgs/GetModelResource";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "iviz_msgs/GetModelResource";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "a67de8e71bc8e03882d5d86e64000b51";
+        public string RosMd5Sum => "a67de8e71bc8e03882d5d86e64000b51";
         
         public override string ToString() => Extensions.ToString(this);
     }

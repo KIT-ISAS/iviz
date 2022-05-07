@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DiagnosticMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class DiagnosticArray : IDeserializable<DiagnosticArray>, IMessage
     {
         // This message is used to send diagnostic information about the state of the robot
@@ -59,16 +59,16 @@ namespace Iviz.Msgs.DiagnosticMsgs
     
         public int RosMessageLength => 4 + Header.RosMessageLength + BuiltIns.GetArraySize(Status);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "diagnostic_msgs/DiagnosticArray";
+        public const string MessageType = "diagnostic_msgs/DiagnosticArray";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "60810da900de1dd6ddd437c3503511da";
+        public string RosMd5Sum => "60810da900de1dd6ddd437c3503511da";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71UwW7bMAy96ysI5NB2QNutvRXIoUC7rei2FmmwHYahoG3WFmpLniQn89/vSYqTrMCA" +
                 "HbYFDiTZ5CP5+KgZLRvtqRPvuRbCdvBSUbDkxVRUaa6N9UGXpM2TdR0HbQ1xYYdAoRHygYOQfUoHZwsb" +
                 "1HvhShw1eZnBi4JGgMBdr662gA/wHPzXbwli8DQjBrBzPEa40na9NWKCp0K0qclJb11Aatao+V/+qY8P" +

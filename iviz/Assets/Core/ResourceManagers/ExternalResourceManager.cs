@@ -505,7 +505,7 @@ namespace Iviz.Displays
         {
             using var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
             if (buffer.Length < Md5SumLength ||
-                BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != Model.RosMd5Sum)
+                BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != BuiltIns.GetMd5Sum<Model>())
             {
                 RosLogger.Warn($"{this}: Resource {uriString} is out of date");
                 return null;
@@ -576,7 +576,7 @@ namespace Iviz.Displays
             {
                 using var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
                 if (buffer.Length < Md5SumLength ||
-                    BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != Scene.RosMd5Sum)
+                    BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != BuiltIns.GetMd5Sum<Scene>())
                 {
                     RosLogger.Warn($"{this}: Resource {uriString} is out of date");
                     return null;
@@ -611,7 +611,7 @@ namespace Iviz.Displays
 
                 using (var buffer = new Rent<byte>(msg.Model.RosMessageLength + Md5SumLength))
                 {
-                    BuiltIns.UTF8.GetBytes(Model.RosMd5Sum, 0, Md5SumLength, buffer.Array, 0);
+                    BuiltIns.UTF8.GetBytes(msg.Model.RosMd5Sum, 0, Md5SumLength, buffer.Array, 0);
                     msg.Model.SerializeTo(buffer[Md5SumLength..]);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                 }
@@ -676,7 +676,7 @@ namespace Iviz.Displays
 
                 using (var buffer = new Rent<byte>(msg.Scene.RosMessageLength + Md5SumLength))
                 {
-                    BuiltIns.UTF8.GetBytes(Scene.RosMd5Sum, 0, Md5SumLength, buffer.Array, 0);
+                    BuiltIns.UTF8.GetBytes(msg.Scene.RosMd5Sum, 0, Md5SumLength, buffer.Array, 0);
                     msg.Scene.SerializeTo(buffer[Md5SumLength..]);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                     RosLogger.Debug($"{this}: Saving to {Settings.ResourcesPath}/{localPath}");

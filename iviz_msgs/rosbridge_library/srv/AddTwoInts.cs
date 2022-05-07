@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class AddTwoInts : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (AddTwoIntsResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "rosbridge_library/AddTwoInts";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "rosbridge_library/AddTwoInts";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "6a2e34150c00229791cc89ff309fff21";
+        public string RosMd5Sum => "6a2e34150c00229791cc89ff309fff21";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -88,7 +85,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 16;
+        public const int RosFixedMessageLength = 16;
         
         public int RosMessageLength => RosFixedMessageLength;
     
@@ -131,7 +128,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 8;
+        public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
     

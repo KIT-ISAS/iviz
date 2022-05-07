@@ -6,7 +6,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosgraphMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     [StructLayout(LayoutKind.Sequential)]
     public struct Log : IMessage, IDeserializable<Log>, System.IEquatable<Log>
     {
@@ -121,16 +121,16 @@ namespace Iviz.Msgs.RosgraphMsgs
             }
         }
     
-        public readonly string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "rosgraph_msgs/Log";
+        public const string MessageType = "rosgraph_msgs/Log";
+    
+        public readonly string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "acffd30cd6b6de30f120938c17c593fb";
+        public readonly string RosMd5Sum => "acffd30cd6b6de30f120938c17c593fb";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public readonly string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61TwWrcMBC9+ysGdEhS2ISkpYQFH1I2my60Sdls6SGERbZmbYEsuZK8W/99n+yuu6WX" +
                 "HmoMkjXz3ozmPQuRCUHPvGevY08GG0OlsyFKGwNiWdFHpsX9h68P+TUJxUVXjWljZPW4fMpviETFlr00" +
                 "p7Fvd+vH/B1iB+mttn/g7tfrp3V+S4K9d/40srzb3H3Kr9+T2MkozVWJznQ5MYuh46Vmo4b+PrJU7Kke" +

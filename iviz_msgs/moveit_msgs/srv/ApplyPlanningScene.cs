@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class ApplyPlanningScene : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (ApplyPlanningSceneResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "moveit_msgs/ApplyPlanningScene";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "moveit_msgs/ApplyPlanningScene";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "60a182de67a2bc514fbbc64e682bcaaa";
+        public string RosMd5Sum => "60a182de67a2bc514fbbc64e682bcaaa";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -127,7 +124,7 @@ namespace Iviz.Msgs.MoveitMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 1;
+        public const int RosFixedMessageLength = 1;
         
         public int RosMessageLength => RosFixedMessageLength;
     

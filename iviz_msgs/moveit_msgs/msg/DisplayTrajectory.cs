@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class DisplayTrajectory : IDeserializable<DisplayTrajectory>, IMessage
     {
         // The model id for which this path has been generated
@@ -79,16 +79,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/DisplayTrajectory";
+        public const string MessageType = "moveit_msgs/DisplayTrajectory";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "c3c039261ab9e8a11457dac56b6316c8";
+        public string RosMd5Sum => "c3c039261ab9e8a11457dac56b6316c8";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+1bbW8bNxL+vr+CqD/YvipyL06Lnop8SGKncdDEbuy+BoFA7VLS1qululxZVg/332+e" +
                 "GZL7IrlJcWcDB1waxN5dcjgznLdnyO6pq7lRC5uZQuWZmtpKred5Olf1PHdqqeu5mmunJsaUamZKU+na" +
                 "ZImrq7ycybRxniXJHpOpzLIyzpS1rnNbKjslKkaIpJbe5iWRtC7nrze6WBnHK+qi4JG/2bysHf2qa6Ur" +

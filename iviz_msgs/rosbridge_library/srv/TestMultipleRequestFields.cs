@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.RosbridgeLibrary
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class TestMultipleRequestFields : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.RosbridgeLibrary
             set => Response = (TestMultipleRequestFieldsResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "rosbridge_library/TestMultipleRequestFields";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "rosbridge_library/TestMultipleRequestFields";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "6cce9fb727dd0f31d504d7d198a1f4ef";
+        public string RosMd5Sum => "6cce9fb727dd0f31d504d7d198a1f4ef";
         
         public override string ToString() => Extensions.ToString(this);
     }
@@ -132,7 +129,7 @@ namespace Iviz.Msgs.RosbridgeLibrary
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 0;
+        public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     

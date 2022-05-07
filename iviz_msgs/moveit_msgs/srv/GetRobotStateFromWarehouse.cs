@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class GetRobotStateFromWarehouse : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetRobotStateFromWarehouseResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "moveit_msgs/GetRobotStateFromWarehouse";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "moveit_msgs/GetRobotStateFromWarehouse";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "1e46b17b23bf82bdaafbbc818f6d91b0";
+        public string RosMd5Sum => "1e46b17b23bf82bdaafbbc818f6d91b0";
         
         public override string ToString() => Extensions.ToString(this);
     }

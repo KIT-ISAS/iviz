@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class GetGeometry : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.MeshMsgs
             set => Response = (GetGeometryResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "mesh_msgs/GetGeometry";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "mesh_msgs/GetGeometry";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "e21c42f8a3978429fcbcd1c03ddeb4e3";
+        public string RosMd5Sum => "e21c42f8a3978429fcbcd1c03ddeb4e3";
         
         public override string ToString() => Extensions.ToString(this);
     }

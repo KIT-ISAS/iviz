@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class ContactInformation : IDeserializable<ContactInformation>, IMessage
     {
         // Standard ROS header contains information 
@@ -82,16 +82,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/ContactInformation";
+        public const string MessageType = "moveit_msgs/ContactInformation";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "116228ca08b0c286ec5ca32a50fdc17b";
+        public string RosMd5Sum => "116228ca08b0c286ec5ca32a50fdc17b";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VTW/UMBC951eM1AMtahcoiEOlHoDlY/naql3BceWNJ4lFYgfbaRt+PW/s7LYFJDgA" +
                 "q0ib2POe5+PNeI8uorJaeU3nywtqWGn2VDoblbGBjK2c71Q0zlKxR2rjhkixYaq86hjbdNWYssGSCWKQ" +
                 "gGUkfIWeS1MZ1sWbTJq5C1iduWASpasS2RbVO2NjUbPrOPpx3YU6PDiTNexkhKA/ikctQN5z6J3VxtYU" +

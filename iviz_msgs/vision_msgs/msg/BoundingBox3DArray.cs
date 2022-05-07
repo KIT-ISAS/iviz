@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class BoundingBox3DArray : IDeserializable<BoundingBox3DArray>, IMessage
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header;
@@ -56,16 +56,16 @@ namespace Iviz.Msgs.VisionMsgs
     
         public int RosMessageLength => 4 + Header.RosMessageLength + 80 * Boxes.Length;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "vision_msgs/BoundingBox3DArray";
+        public const string MessageType = "vision_msgs/BoundingBox3DArray";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "9e1a3932308592aa1b20232d818486db";
+        public string RosMd5Sum => "9e1a3932308592aa1b20232d818486db";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71WwW7cRgy96ysI+GC7WG+AuMjBQA8NFml9KOoiQS9FYXAlrjSNNLPhjHatfH0fRyvZ" +
                 "Qp20h8YLAStpyEe+Rw5HMVX3Xazjq5+FK1Fq8l9xcNEFP668Db2vnK/fhofrzR9/0jY8SCx++J9/xS/v" +
                 "f7qhuEynOKP3iX3FWlEniStOTLuANF3diF61cpAWTtztpaK8moa9xDUcPzQuEq5avCi37UB9hFEKVIau" +

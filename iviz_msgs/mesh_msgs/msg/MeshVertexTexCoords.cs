@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MeshMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class MeshVertexTexCoords : IDeserializable<MeshVertexTexCoords>, IMessage
     {
         // Mesh Attribute Type
@@ -45,20 +45,20 @@ namespace Iviz.Msgs.MeshMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 8;
+        public const int RosFixedMessageLength = 8;
         
         public int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "mesh_msgs/MeshVertexTexCoords";
+        public const string MessageType = "mesh_msgs/MeshVertexTexCoords";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "4f5254e0e12914c461d4b17a0cd07f7f";
+        public string RosMd5Sum => "4f5254e0e12914c461d4b17a0cd07f7f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE1NW8E0tzlBwLCkpykwqLUlVCKksSOVKy8lPLDE2UiiFs8q4uADIua4VKwAAAA==";
                 
         public override string ToString() => Extensions.ToString(this);

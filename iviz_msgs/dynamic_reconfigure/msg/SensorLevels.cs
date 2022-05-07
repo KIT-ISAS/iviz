@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.DynamicReconfigure
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class SensorLevels : IDeserializable<SensorLevels>, IMessage
     {
         // This message is deprecated, please use driver_base/SensorLevels instead.
@@ -41,20 +41,20 @@ namespace Iviz.Msgs.DynamicReconfigure
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 0;
+        public const int RosFixedMessageLength = 0;
         
         public int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "dynamic_reconfigure/SensorLevels";
+        public const string MessageType = "dynamic_reconfigure/SensorLevels";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "6322637bee96d5489db6e2127c47602c";
+        public string RosMd5Sum => "6322637bee96d5489db6e2127c47602c";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE42QsWrDQAyGdz/FD1lL29A5U3BDINjBTuYg+37sA/tsTteUvH2UUtqhgXSQkAT6PqEF" +
                 "Dr1XjFSVjrDScY5sJdE9YR4oSnxYuOjPjKfG+peaQae445mDwgdNFPecZc0lEVW+Lov37eZY5af1rqxz" +
                 "rPAGLLCXKCMToyL1khBIB4F+sZAmNISmaZ5t3E6jqROHCz57BrS9hI7ur6E+lHsTLP8luNEtRcroQ/eA" +

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class KinematicSolverInfo : IDeserializable<KinematicSolverInfo>, IMessage
     {
         // A list of joints in the kinematic tree
@@ -84,16 +84,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/KinematicSolverInfo";
+        public const string MessageType = "moveit_msgs/KinematicSolverInfo";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "cc048557c0f9795c392dd80f8bb00489";
+        public string RosMd5Sum => "cc048557c0f9795c392dd80f8bb00489";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE62SP0/DQAzF93wKSywwIBbEgMTAhIRggg2hyE3c1vTuHJ0vVfn2OH+a5GjZyHZnv+ef" +
                 "X+4CHsGxJpA1fAmHpMAB0pZgx4E8Jq4gRaJCU+Sw+fgcusqAnrS4+K22k2fzqCRG0kZCbSJI0jsOHYPS" +
                 "y544lV43evPc3b/0QvMfHDJrx2GnZoEpJ1MIUhM0UfZck4KKaxNLUFhLnIk7+QhcPPzzV7y+Pd3DH9vY" +

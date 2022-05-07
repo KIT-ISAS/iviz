@@ -89,6 +89,8 @@ namespace Iviz.Core
         /// </summary>
         public static event Action? LateEverySecond;
 
+        public static event Action? ApplicationPause;
+
         readonly ConcurrentQueue<Action> actionsQueue = new();
         readonly ConcurrentQueue<Action> listenerQueue = new();
         float lastSecondRunTime;
@@ -239,6 +241,11 @@ namespace Iviz.Core
             {
                 RosLogger.Error($"{this}: Error during LateEveryFrame", e);
             }
+        }
+
+        void OnApplicationPause(bool pauseStatus)
+        {
+            ApplicationPause?.Invoke();
         }
 
         void OnDestroy()

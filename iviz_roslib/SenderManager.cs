@@ -259,11 +259,8 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
         disposed = true;
         tokenSource.Cancel();
 
-        // this is a bad hack, but it's the only reliable way I've found to make the previous AcceptTcpClient come out 
-        using (var client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } })
-        {
-            await client.ConnectAsync(IPAddress.Loopback, Endpoint.Port);
-        }
+        // try to make the listener come out
+        await StreamUtils.EnqueueConnectionAsync(Endpoint.Port, this);
 
         listener.Stop();
         if (!await task.AwaitFor(2000, token))

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class MotionPlanRequest : IDeserializable<MotionPlanRequest>, IMessage
     {
         // This service contains the definition for a request to the motion
@@ -128,16 +128,16 @@ namespace Iviz.Msgs.MoveitMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/MotionPlanRequest";
+        public const string MessageType = "moveit_msgs/MotionPlanRequest";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "c3bec13a525a6ae66e0fc57b768fdca6";
+        public string RosMd5Sum => "c3bec13a525a6ae66e0fc57b768fdca6";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+0823IbuZXv/ApU/CBxh6blS1JZpfxgW3LsqbHlWMqML+VigWyQxKjZ4DS6RdFb++97" +
                 "LjgAuknFntpIu1tZJzUiu4ED4Nxv4D11sbReeVNf2ZlRM1c12lZeNUujCjO3lW2sq9Tc1Uqr2vzWGt+o" +
                 "xtH7lcN3g3tqXeqqMjCiKuiFa5t12yjbqHXtrmxh/ABGvdO1XpnG1J7A4cCNqy/9WsPCzVI39Ehg+aVr" +

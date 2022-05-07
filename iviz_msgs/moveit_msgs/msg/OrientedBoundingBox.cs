@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class OrientedBoundingBox : IDeserializable<OrientedBoundingBox>, IMessage
     {
         // the pose of the box
@@ -46,20 +46,20 @@ namespace Iviz.Msgs.MoveitMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 68;
+        public const int RosFixedMessageLength = 68;
         
         public int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/OrientedBoundingBox";
+        public const string MessageType = "moveit_msgs/OrientedBoundingBox";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "da3bd98e7cb14efa4141367a9d886ee7";
+        public string RosMd5Sum => "da3bd98e7cb14efa4141367a9d886ee7";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71UTUvDQBC9768Y8KJQKrTiQfAgHsSDoOhdtsk0GUx24s7Gpv31zm4+aulBEGlOk52P" +
                 "fe/NzJ5BKBEaFgReJ3vFnSmQawx++15LIZfP0RtDjDlLIdgFdEF+ZMzAirQ1uSKdZOpGDyRgQzpgTwW5" +
                 "o7rkwnIxljPm9p8/8/T6cAPHZJTGHXhsPIpebAOxi1ySCuRg7RFBGpvhDDKu43E++CnFWpdHRmPuHEyi" +

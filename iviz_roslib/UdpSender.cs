@@ -90,7 +90,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 
         if (!fields.TryGetValue("type", out string? receivedType) || receivedType != topicInfo.Type)
         {
-            if (receivedType != DynamicMessage.RosMessageType) // "*"
+            if (receivedType != DynamicMessage.RosAny) // "*"
             {
                 throw new RosInvalidHeaderException(
                     $"error=Expected message type [{topicInfo.Type}] but received [{receivedType}]");
@@ -99,7 +99,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 
         if (!fields.TryGetValue("md5sum", out string? receivedMd5Sum) || receivedMd5Sum != topicInfo.Md5Sum)
         {
-            if (receivedMd5Sum != DynamicMessage.RosMd5Sum) // "*"
+            if (receivedMd5Sum != DynamicMessage.RosAny) // "*"
             {
                 throw new RosInvalidHeaderException(
                     $"Expected md5 '{topicInfo.Md5Sum}' but received '{receivedMd5Sum}'");

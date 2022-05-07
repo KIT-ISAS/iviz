@@ -19,7 +19,13 @@
         /// <summary>
         /// Full ROS name of the service.
         /// </summary>
-        string RosType { get; }
+        string RosServiceType { get; }
+        
+        /// <summary>
+        /// MD5 hash of a compact representation of the service."
+        /// </summary>
+        string RosMd5Sum { get; }
+        
     }
 
     /// <summary>

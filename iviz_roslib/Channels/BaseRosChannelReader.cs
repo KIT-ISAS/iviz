@@ -81,7 +81,7 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
 #else
             subscriberToken.Dispose();
 #endif
-        await subscriber.UnsubscribeAsync(subscriberId!).AsTask().AwaitNoThrow(this);
+        await subscriber.UnsubscribeAsync(subscriberId!).AwaitNoThrow(this);
     }
 
     public void Dispose()

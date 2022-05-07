@@ -52,7 +52,6 @@ internal sealed class ServiceRequest
         tcpClient.Close();
         runningTs.Cancel();
         await task.AwaitNoThrow(2000, this, token);
-        runningTs.Dispose();
     }
 
     async ValueTask<Rent<byte>> ReceivePacket(CancellationToken token)
@@ -111,7 +110,7 @@ internal sealed class ServiceRequest
 
         if (!values.TryGetValue("md5sum", out string? receivedMd5Sum) || receivedMd5Sum != serviceInfo.Md5Sum)
         {
-            if (receivedMd5Sum == DynamicMessage.RosMd5Sum) // "*"
+            if (receivedMd5Sum == DynamicMessage.RosAny) // "*"
             {
                 // OK?
             }
@@ -124,7 +123,7 @@ internal sealed class ServiceRequest
 
         if (values.TryGetValue("type", out string? receivedType) && receivedType != serviceInfo.Type)
         {
-            if (receivedType == DynamicMessage.RosMessageType) // "*"
+            if (receivedType == DynamicMessage.RosAny) // "*"
             {
                 // OK?
             }

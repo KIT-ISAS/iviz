@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.PclMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class PolygonMesh : IDeserializable<PolygonMesh>, IMessage
     {
         // Separate header for the polygonal surface
@@ -75,16 +75,16 @@ namespace Iviz.Msgs.PclMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "pcl_msgs/PolygonMesh";
+        public const string MessageType = "pcl_msgs/PolygonMesh";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "45a5fc6ad2cde8489600a790acc9a38a";
+        public string RosMd5Sum => "45a5fc6ad2cde8489600a790acc9a38a";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71WUW/bNhB+nn4FUT80LmIPSbosCGAMxYIsAbo0WLK9FEVAiSeLGEW6JOVU/fX7jhQd" +
                 "N8jDHtYZDmKd7j7efffdSTNxRxvpZSTRkVTkReu8iB2JjTPj2llpRBh8KxuqrrJD9qtm4i/yUTcUhGtT" +
                 "RE+hEzIIiVhto2iMG1QVyAbnH/qwDj/esv1XNh9Pd2fivQ6REabzQlVgP356slWr//hT/X7327kIUeXE" +

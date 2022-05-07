@@ -2,7 +2,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [DataContract (Name = RosServiceType)]
+    [DataContract]
     public sealed class GetPositionFK : IService
     {
         /// Request message.
@@ -37,13 +37,10 @@ namespace Iviz.Msgs.MoveitMsgs
             set => Response = (GetPositionFKResponse)value;
         }
         
-        string IService.RosType => RosServiceType;
+        public const string ServiceType = "moveit_msgs/GetPositionFK";
+        public string RosServiceType => ServiceType;
         
-        /// Full ROS name of this service.
-        [Preserve] public const string RosServiceType = "moveit_msgs/GetPositionFK";
-        
-        /// MD5 hash of a compact representation of the service.
-        [Preserve] public const string RosMd5Sum = "03d4858215085d70e74807025d68dc4c";
+        public string RosMd5Sum => "03d4858215085d70e74807025d68dc4c";
         
         public override string ToString() => Extensions.ToString(this);
     }

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.VisionMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class ObjectHypothesisWithPose : IDeserializable<ObjectHypothesisWithPose>, IMessage
     {
         // An object hypothesis that contains position information.
@@ -68,16 +68,16 @@ namespace Iviz.Msgs.VisionMsgs
     
         public int RosMessageLength => 356 + BuiltIns.GetStringSize(Id);
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "vision_msgs/ObjectHypothesisWithPose";
+        public const string MessageType = "vision_msgs/ObjectHypothesisWithPose";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "33f27ec2eb451c31670b819827352622";
+        public string RosMd5Sum => "33f27ec2eb451c31670b819827352622";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71VS2/UMBC+51eMtBeQsgEE2kMRh0IltAcQ0IpXVaFJPNm4JHZqO9ukv56x4yTbh+CC" +
                 "uoddx5n5Zr5vHruCYwU6v6TCQTW02lVkpQVXoYNCK4dSWWi1lU5qBVKV2jToz1mSrOCsIuiUvOoItieg" +
                 "S/ajCa2o0doMzjTsyAEKESCwPgQBzHXnGAjYk8NuT1KwXVEBWpDOQtU1qNaGUGBe0wgJChtKoZbWkSJj" +

@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.MoveitMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class CostSource : IDeserializable<CostSource>, IMessage
     {
         // The density of the cost source
@@ -52,20 +52,20 @@ namespace Iviz.Msgs.MoveitMsgs
         }
     
         /// <summary> Constant size of this message. </summary> 
-        [Preserve] public const int RosFixedMessageLength = 56;
+        public const int RosFixedMessageLength = 56;
         
         public int RosMessageLength => RosFixedMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "moveit_msgs/CostSource";
+        public const string MessageType = "moveit_msgs/CostSource";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "abb7e013237dacaaa8b97e704102f908";
+        public string RosMd5Sum => "abb7e013237dacaaa8b97e704102f908";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE62SwUrEQAyG7/MUAS8KawUVD4IHvYgHQVC8LmmbdoPtpExSd+vTm+kuVUE82VOayfcn" +
                 "+WeO4GVDUFNUtgmkAfPfStRAZUwVhaYTtKvLObc+1IVwNGPv0o09/UIBKyQaEilFoxpQAaNDuGM9xY7b" +
                 "6MlSxlhzbD3YwfHt7d3dyUE3x1lCB6q44Vw7gW0ld2JTkGEQnyO3TJGShtCS9GRpWvfa6tkrVSbpAhDL" +

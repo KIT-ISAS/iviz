@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class TestRequestActionGoal : IDeserializable<TestRequestActionGoal>, IActionGoal<TestRequestGoal>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -64,16 +64,16 @@ namespace Iviz.Msgs.Actionlib
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "actionlib/TestRequestActionGoal";
+        public const string MessageType = "actionlib/TestRequestActionGoal";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "1889556d3fef88f821c7cb004e4251f3";
+        public string RosMd5Sum => "1889556d3fef88f821c7cb004e4251f3";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE7VUwW7bMAy9+ysI9LB2QNOt3S4FcugSr82wNkXiAbsZjMTYwmTJk+Sk/vtRcpJ2yw47" +
                 "rIYBwSL5+MhH+o5QkoM6HRmKoKzRalU2vvIXtxb1bAoVH6WSWUE+LOhnx0e0pPts/J+f7H55ew0+yIHC" +
                 "3UDsBJYBjUQnoaGAEgPC2jJvVdXkzjVtSHMQNi1JSNbQt+RHHFjUygO/FRlyqHUPnWenYEHYpumMEhgI" +

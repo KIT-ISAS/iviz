@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.OctomapMsgs
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class Octomap : IDeserializable<Octomap>, IMessage
     {
         // A 3D map in binary format, as Octree
@@ -65,16 +65,16 @@ namespace Iviz.Msgs.OctomapMsgs
             }
         }
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "octomap_msgs/Octomap";
+        public const string MessageType = "octomap_msgs/Octomap";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "9a45536b45c5e409cd49f04bb2d9999f";
+        public string RosMd5Sum => "9a45536b45c5e409cd49f04bb2d9999f";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE61TTW8TMRC9+1eMlEMT1KQSRQhF4oCoCj0gEO2tQtWsPdm15LUX25uy/Hre7DYFbhyI" +
                 "Iu3XvDfz3huv6B1dXlHPA/lIjY+cJzqk3HM9Jy702dYsYj4KO8nUzRdjVnQduKWayElMVYhP0HWKAQTA" +
                 "XCRrx8GL21DKdBhDoPkNRzvhTmlpvWvqxS5VOvggG9OkFJ6ItMf7wKWQd5QOVDshm2JlH8Wd4KbU7GOL" +

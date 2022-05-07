@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 
 namespace Iviz.Msgs.Actionlib
 {
-    [Preserve, DataContract (Name = RosMessageType)]
+    [DataContract]
     public sealed class TwoIntsActionResult : IDeserializable<TwoIntsActionResult>, IActionResult<TwoIntsResult>
     {
         [DataMember (Name = "header")] public StdMsgs.Header Header { get; set; }
@@ -55,16 +55,16 @@ namespace Iviz.Msgs.Actionlib
     
         public int RosMessageLength => 8 + Header.RosMessageLength + Status.RosMessageLength;
     
-        public string RosType => RosMessageType;
-    
         /// <summary> Full ROS name of this message. </summary>
-        [Preserve] public const string RosMessageType = "actionlib/TwoIntsActionResult";
+        public const string MessageType = "actionlib/TwoIntsActionResult";
+    
+        public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        [Preserve] public const string RosMd5Sum = "3ba7dea8b8cddcae4528ade4ef74b6e7";
+        public string RosMd5Sum => "3ba7dea8b8cddcae4528ade4ef74b6e7";
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
-        [Preserve] public const string RosDependenciesBase64 =
+        public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE71WwXLbNhC98yswo0PsTq20SZqmntFBlVRHGSfx2EqvHpBYkWhBUAVAyfr7vgUpinKs" +
                 "RIckGtu0JODtw9u3i31LUpETRXwkMgu6skan96XP/fOrSpq7IEPthY+PZLGp5jb4W/K1CcLFRzL6xq/k" +
                 "/d3VJSKqhsXbhttAgIpV0ilRUpBKBimWFajrvCB3YWhNhmmWK1Iifhu2K/JDbFwU2gv85GTJSWO2ovZY" +
