@@ -2,14 +2,15 @@
 	<s:Boolean x:Key="/Default/AddReferences/RecentPaths/=_002FUsers_002Fakzeac_002FDocuments_002Fiviz_002Fassimpnet_002FAssimpNet_002Fbin_002FRelease_002Fnetstandard1_002E3_002FAssimpNet_002Edll/@EntryIndexedValue">True</s:Boolean>
 	<s:String x:Key="/Default/CodeInspection/ExcludedFiles/FilesAndFoldersToSkip2/=7020124F_002D9FFC_002D4AC3_002D8F3D_002DAAB8E0240759_002Ff_003ASocket_002Ecs_002Fl_003A_002E_002E_003F_002E_002E_003FLibrary_003FApplication_0020Support_003FJetBrains_003FRider2021_002E2_003Fresharper_002Dhost_003FSourcesCache_003Fd3525442f0c2430f8599c032103e0deb8f000_003F1E_003FSocket_002Ecs/@EntryIndexedValue">ForceIncluded</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/PredefinedNamingRules/=PrivateConstants/@EntryIndexedValue">&lt;Policy Inspect="True" Prefix="" Suffix="" Style="AaBb_AaBb" /&gt;</s:String>
-	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">/usr/local/share/dotnet/sdk/6.0.100/MSBuild.dll</s:String>
+	<s:String x:Key="/Default/Environment/Hierarchy/Build/BuildTool/CustomBuildToolPath/@EntryValue">/usr/local/share/dotnet/sdk/6.0.202/MSBuild.dll</s:String>
 	<s:Int64 x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsbuildVersion/@EntryValue">1114112</s:Int64>
+	<s:String x:Key="/Default/Environment/Hierarchy/Build/SolutionBuilderNext/OutputVerbosityLevel/@EntryValue">Diagnostic</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=289aa647_002D5e74_002D4287_002D96d2_002D3cbb7b0f8886/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestTf" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestMagnitude&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=c19efdf8_002D9b7c_002D4544_002D9db1_002D35f8f67ab4e8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestTf2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=c19efdf8_002D9b7c_002D4544_002D9db1_002D35f8f67ab4e8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestTf2" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
     &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf2&lt;/TestId&gt;
     &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestOccupancyGrid&lt;/TestId&gt;
@@ -17,7 +18,7 @@
     &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net6.0::Iviz.UtilsTests.IvizTests.TestTf3&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e3adf1f9_002D6f13_002D431e_002Da944_002Db6b703a80cb5/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="TestChannelsAsync" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=e3adf1f9_002D6f13_002D431e_002Da944_002Db6b703a80cb5/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="TestChannelsAsync" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;Or&gt;
     &lt;TestAncestor&gt;
       &lt;TestId&gt;NUnit3x::D426E606-432C-4314-B451-285C6AEA44F2::net5.0::Iviz.UtilsTests.NetworkTests.TestChannelsAsync&lt;/TestId&gt;
@@ -43,6 +44,9 @@
 	
 	
 	<s:Boolean x:Key="/Default/ResxEditorPersonal/Initialized/@EntryValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UnloadedProject/UnloadedProjects/=817471d7_002D0209_002D4429_002D98ba_002D44291b25384a_0023iviz_005Fmsgs_005Fwrapper/@EntryIndexedValue">True</s:Boolean>
+	
+	
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Rosbag/@EntryIndexedValue">True</s:Boolean>
 	
 	</wpf:ResourceDictionary>

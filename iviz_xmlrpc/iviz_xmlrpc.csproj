@@ -4,7 +4,7 @@
         <LangVersion>latest</LangVersion>
         <AssemblyName>Iviz.XmlRpc</AssemblyName>
         <RootNamespace>Iviz.XmlRpc</RootNamespace>
-        <TargetFrameworks>net5.0;net6.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
