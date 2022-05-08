@@ -4,6 +4,7 @@ using System;
 using Iviz.Common;
 using Iviz.Core;
 using Iviz.Displays.Highlighters;
+using Iviz.Resources;
 using Iviz.Tools;
 using UnityEngine;
 
@@ -29,7 +30,8 @@ namespace Iviz.App
                 throw new InvalidOperationException("Cannot setup panel without a listener!");
             }
 
-            panel.Label.Text = $"<b>Topic:</b> {listener.Topic}";
+            const int maxLabelWidth = 300;
+            panel.Label.Text = Resource.Font.Split(listener.Topic, maxLabelWidth);
             panel.Close.Clicked += Close;
             panel.ResetAll += listener.ResetController;
             panel.LinkClicked += markerId => HighlightMarker(listener, markerId);

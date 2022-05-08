@@ -53,17 +53,6 @@ namespace Iviz.App
 
                 imageSize = value;
                 AdjustSize();
-                
-                /*
-                var imageTransform = (RectTransform)PreviewImage.transform;
-                var parentTransform = ScalerWidget.TargetTransform;
-                var rrect = imageTransform.rect;
-                rrect.height = imageTransform.rect.height * imageTransform.localScale.y + Text.preferredHeight;
-                parentTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, rrect.height);
-                Debug.Log(imageTransform.rect.height);
-                Debug.Log(rrect.height);
-                Debug.Log(parentTransform.rect.height);
-                */
             }
         }
         
@@ -104,7 +93,7 @@ namespace Iviz.App
                 : Vector3.one.WithX(scaledX / maxWidth);
         }
 
-        public void ToggleImageEnabled()
+        public void ResetImageEnabled()
         {
             PreviewImage.enabled = false;
             PreviewImage.enabled = true;

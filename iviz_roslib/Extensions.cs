@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Msgs;
 using Iviz.Tools;
 using Iviz.XmlRpc;
 
@@ -26,12 +27,12 @@ public static class Extensions
     {
         if (client == null)
         {
-            throw new ArgumentNullException(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
         if (service == null)
         {
-            throw new ArgumentNullException(nameof(service));
+            BuiltIns.ThrowArgumentNull(nameof(service));
         }
 
         TaskUtils.Run(() => client.WaitForServiceAsync(service, token).AsTask(), token).WaitAndRethrow();
@@ -42,12 +43,12 @@ public static class Extensions
     {
         if (client == null)
         {
-            throw new ArgumentNullException(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
         if (service == null)
         {
-            throw new ArgumentNullException(nameof(service));
+            BuiltIns.ThrowArgumentNull(nameof(service));
         }
 
         while (true)

@@ -83,7 +83,11 @@ namespace Iviz.App.ARDialogs
 
         public bool Interactable
         {
-            set => Draggable.enabled = value;
+            set
+            {
+                Draggable.Interactable = value;
+                Button.Interactable = value;
+            } 
         }
         
         void Awake()

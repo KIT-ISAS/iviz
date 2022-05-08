@@ -45,6 +45,17 @@ namespace Iviz.Displays.XR
             set => SetupButtons(Button1, Button2, Button3, value);
         }
 
+        public override bool Interactable
+        {
+            set
+            {
+                base.Interactable = value;
+                Button1.Interactable = value;
+                Button2.Interactable = value;
+                Button3.Interactable = value;
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -60,9 +71,6 @@ namespace Iviz.Displays.XR
         {
             base.Suspend();
             Clicked = null;
-            //Button1.ResetHighlights();
-            //Button2.ResetHighlights();
-            //Button3.ResetHighlights();
         }
     }
 }

@@ -108,7 +108,7 @@ internal sealed class ServiceRequestManager
         tokenSource.Cancel();
 
         // try to make the listener come out
-        await StreamUtils.EnqueueConnectionAsync(Uri.Port, this);
+        await StreamUtils.EnqueueConnectionAsync(Uri.Port, this, token);
 
         listener.Stop();
         if (!await task.AwaitFor(2000, token))

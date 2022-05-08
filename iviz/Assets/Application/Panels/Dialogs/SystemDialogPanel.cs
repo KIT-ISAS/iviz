@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Iviz.Core;
 using Iviz.Tools;
 using TMPro;
 using UnityEngine;
@@ -107,14 +108,16 @@ namespace Iviz.App
                 .Select(obj => obj.transform.GetChild(1).GetComponentInChildren<InputFieldWidget>())
                 .ToArray();
 
-            foreach (int i in ..hostnames.Length)
+            foreach (var (hostname, i) in hostnames.WithIndex())
             {
-                hostnames[i].EndEdit += str => HostnameEndEdit?.Invoke(i, str);
+                hostname.Placeholder = "Enter hostname...";
+                hostname.EndEdit += str => HostnameEndEdit?.Invoke(i, str);
             }
 
-            foreach (int i in ..addresses.Length)
+            foreach (var (address, i) in addresses.WithIndex())
             {
-                addresses[i].EndEdit += str => AddressEndEdit?.Invoke(i, str);
+                address.Placeholder = "Enter address...";
+                address.EndEdit += str => AddressEndEdit?.Invoke(i, str);
             }
         }
 

@@ -9,6 +9,9 @@ namespace Iviz.Ros
 {
     public sealed class RosLoggerManager
     {
+        const string RosOutTopic = "/rosout";
+        const string RosOutAggTopic = "/rosout_agg";
+
         uint logSeq;
 
         public delegate void LogDelegate(in Log log);
@@ -20,19 +23,19 @@ namespace Iviz.Ros
         
         public RosLoggerManager()
         {
-            Sender = new Sender<Log>("/rosout");
-            Listener = new Listener<Log>("/rosout_agg", Handler, RosTransportHint.PreferUdp);
+            Sender = new Sender<Log>(RosOutTopic);
+            Listener = new Listener<Log>(RosOutAggTopic, Handle, RosTransportHint.PreferUdp);
 
-            RosLogger.LogExternal += LogMessage;
+            RosLogger.LogExternal += Publish;
         }
         
-        bool Handler(Log msg)
+        bool Handle(Log msg)
         {
             MessageArrived?.Invoke(msg);
             return true;
         }
 
-        void LogMessage(in LogMessage msg)
+        void Publish(in LogMessage msg)
         {
             if (msg.Level < MinLogLevel)
             {
@@ -56,7 +59,7 @@ namespace Iviz.Ros
             Sender.Dispose();
 
             MessageArrived = null;
-            RosLogger.LogExternal -= LogMessage;
+            RosLogger.LogExternal -= Publish;
         }
     }
 }

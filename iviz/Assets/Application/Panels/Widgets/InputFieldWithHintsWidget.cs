@@ -52,11 +52,11 @@ namespace Iviz.App
 
         public string Placeholder
         {
-            get => Input.PlaceholderText;
+            get => Input.Placeholder;
             set
             {
                 ThrowHelper.ThrowIfNull(value, nameof(value));
-                Input.PlaceholderText = value;
+                Input.Placeholder = value;
             }
         }
 

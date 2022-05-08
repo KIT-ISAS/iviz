@@ -85,7 +85,9 @@ namespace Iviz.Msgs.VisionMsgs
         public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public string RosMd5Sum => "fcf55de4cff8870324fd6e7873a6f904";
+        public const string Md5Sum = "fcf55de4cff8870324fd6e7873a6f904";
+    
+        public string RosMd5Sum => Md5Sum;
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public string RosDependenciesBase64 =>
@@ -115,6 +117,7 @@ namespace Iviz.Msgs.VisionMsgs
                 "2/y98a7ji4jn2/SUitym00GJFHzJZKOL+buyAwtNVoaA+YjZvFfzObUbbJwceQ0idvzfFWVUlxR0aqbs" +
                 "WfEv6HutrxENAAA=";
                 
+    
         public override string ToString() => Extensions.ToString(this);
     
         public void Dispose()

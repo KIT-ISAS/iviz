@@ -193,7 +193,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
             newSender.LoopbackReceiver = loopbackReceiver;
         }
 
-        Task.Run(async () =>
+        TaskUtils.Run(async () =>
         {
             using (await mutex.LockAsync(tokenSource.Token))
             {
@@ -260,12 +260,12 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
         tokenSource.Cancel();
 
         // try to make the listener come out
-        await StreamUtils.EnqueueConnectionAsync(Endpoint.Port, this);
+        await StreamUtils.EnqueueConnectionAsync(Endpoint.Port, this, token);
 
         listener.Stop();
         if (!await task.AwaitFor(2000, token))
         {
-            Logger.LogDebugFormat("{0}: Listener stuck. Abandoning.", this);
+            Logger.LogDebugFormat("{0}: Sender stuck. Abandoning.", this);
         }
 
         await senders.Select(sender => sender.DisposeAsync(token).AsTask()).WhenAll().AwaitNoThrow(this);
@@ -299,8 +299,5 @@ internal readonly struct NullableMessage<T>
         hasValue = true;
     }
 
-    public static implicit operator NullableMessage<T>(in T message)
-    {
-        return new NullableMessage<T>(message);
-    }
+    public static implicit operator NullableMessage<T>(in T message) => new(message);
 }

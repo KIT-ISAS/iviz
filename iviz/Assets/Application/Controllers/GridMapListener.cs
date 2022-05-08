@@ -188,10 +188,10 @@ namespace Iviz.Controllers
                 Id = topic,
             };
 
-            Listener = new Listener<GridMap>(Config.Topic, Handler);
+            Listener = new Listener<GridMap>(Config.Topic, Handle);
         }
 
-        void Handler(GridMap msg)
+        void Handle(GridMap msg)
         {
             static bool IsInvalidSize(double x) => x.IsInvalid() || x <= 0;
 

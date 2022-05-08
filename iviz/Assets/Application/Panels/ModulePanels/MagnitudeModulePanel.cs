@@ -37,7 +37,7 @@ namespace Iviz.App
             
             VectorColor = p.AddColorPicker("Vector Color");
             VectorScale = p.AddSliderWidgetWithScale("Additional Scale (Vector)");
-            p.AddCollapsibleWidget("Vector...")
+            p.AddCollapsibleWidget("Vector")
                 .Attach(VectorColor)
                 .Attach(VectorScale)
                 .FinishAttaching();

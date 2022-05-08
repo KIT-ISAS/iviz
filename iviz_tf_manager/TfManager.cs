@@ -14,12 +14,15 @@ using Iviz.Tools;
 
 namespace Iviz.TfHelpers
 {
-    public class TfManager : IDisposable
+    public sealed class TfManager : IDisposable
     {
+        const string TfTopicName = "/tf";
+
         readonly ConcurrentDictionary<string, Frame> frames = new();
         readonly RosChannelReader<TFMessage>? reader;
         readonly RosChannelWriter<TFMessage>? writer;
         uint seqId;
+        bool disposed;
 
         public TfManager()
         {
@@ -28,8 +31,8 @@ namespace Iviz.TfHelpers
 
         public TfManager(IRosClient client) : this()
         {
-            reader = client.CreateReader<TFMessage>("/tf");
-            writer = client.CreateWriter<TFMessage>("/tf");
+            reader = client.CreateReader<TFMessage>(TfTopicName);
+            writer = client.CreateWriter<TFMessage>(TfTopicName);
         }
 
         public TfManager(RosChannelWriter<TFMessage> writer) : this()
@@ -57,7 +60,7 @@ namespace Iviz.TfHelpers
         {
             if (reader == null)
             {
-                throw new NullReferenceException("Reader not set!");
+                BuiltIns.ThrowNullReference("Reader not set!");
             }
 
             foreach (var tfMessage in reader.ReadAll(token))
@@ -76,14 +79,14 @@ namespace Iviz.TfHelpers
                 throw new NullReferenceException("Reader not set!");
             }
 
-            TaskUtils.Run(() => UpdateAllAsync(token).AsTask(), token);
+            TaskUtils.Run(() => UpdateAllAsync(token).AwaitNoThrow(this), token);
         }
 
         public async ValueTask UpdateAllAsync(CancellationToken token = default)
         {
             if (reader == null)
             {
-                throw new NullReferenceException("Reader not set!");
+                BuiltIns.ThrowNullReference("Reader not set!");
             }
 
             await foreach (var tfMessage in reader.ReadAllAsync(token))
@@ -99,7 +102,7 @@ namespace Iviz.TfHelpers
         {
             root = frame;
             transform = Transform.Identity;
-            
+
             while (frames.TryGetValue(root, out Frame ts))
             {
                 transform = ts.transform * transform;
@@ -147,12 +150,12 @@ namespace Iviz.TfHelpers
         {
             writer?.Publisher.WaitForAnySubscriber();
         }
-        
+
         public void WaitForAnyPublisher()
         {
             reader?.Subscriber.WaitForAnyPublisher();
         }
-        
+
         public void Publish(string frameId, string parentId) => Publish(frameId, parentId, Transform.Identity);
 
         public void Publish(string frameId, in Transform transform)
@@ -202,6 +205,11 @@ namespace Iviz.TfHelpers
 
         void PublishSingle(string frameId, string parentId, in Transform transform)
         {
+            if (disposed || writer == null)
+            {
+                return;
+            }
+
             var msg = new TFMessage(new[]
             {
                 new TransformStamped(
@@ -216,7 +224,7 @@ namespace Iviz.TfHelpers
 
         public void PublishOwn()
         {
-            if (writer == null)
+            if (disposed || writer == null)
             {
                 return;
             }
@@ -236,19 +244,38 @@ namespace Iviz.TfHelpers
         {
             TaskUtils.Run(async () =>
             {
-                while (true)
+                try
                 {
-                    await Task.Delay(3000, token);
-                    PublishOwn();
+                    while (!token.IsCancellationRequested)
+                    {
+                        await Task.Delay(3000, token);
+                        PublishOwn();
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                catch (Exception e)
+                {
+                    Logger.LogErrorFormat("{0}: Task {1} stopped due to exception {2}", this,
+                        nameof(PublishInBackground), e);
                 }
             }, token);
         }
 
         public void Dispose()
         {
+            if (disposed)
+            {
+                return;
+            }
+
+            disposed = true;
             reader?.Dispose();
             writer?.Dispose();
         }
+
+        public override string ToString() => $"[{nameof(TfManager)}]";
 
         readonly struct Frame
         {

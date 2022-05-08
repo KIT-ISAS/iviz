@@ -31,7 +31,7 @@ namespace Iviz.Controllers
         Vector3 cachedDirection;
 
         public override TfFrame? Frame => frameNode.Parent;
-        public Magnitude? Magnitude { get; set; }
+        public Magnitude? Magnitude { get; private set; }
 
         public MagnitudeConfiguration Config
         {
@@ -174,8 +174,8 @@ namespace Iviz.Controllers
                     angleAxis.Color = value;
                 }
             }
-        }        
-        
+        }
+
         public float Scale
         {
             get => config.Scale;
@@ -340,7 +340,7 @@ namespace Iviz.Controllers
 
         void Handler(Point msg)
         {
-            Magnitude = new Magnitude { name = "Point", position = msg };
+            Magnitude = new Magnitude("Point", msg);
 
             if (msg.IsInvalid())
             {
@@ -360,7 +360,7 @@ namespace Iviz.Controllers
 
         void Handler(Wrench msg)
         {
-            Magnitude = new Magnitude { name = "Wrench", position = msg.Force, orientation = msg.Torque };
+            Magnitude = new Magnitude("Wrench", msg.Force, msg.Torque);
 
             if (msg.Force.IsInvalid() || msg.Torque.IsInvalid())
             {
@@ -392,7 +392,7 @@ namespace Iviz.Controllers
 
         void Handler(Twist msg)
         {
-            Magnitude = new Magnitude { name = "Twist", position = msg.Linear, orientation = msg.Angular };
+            Magnitude = new Magnitude("Twist", msg.Linear, msg.Angular);
 
             var (linear, angular) = msg;
             if (angular.IsInvalid() || linear.IsInvalid())
@@ -419,8 +419,7 @@ namespace Iviz.Controllers
         {
             var (linear, angular) = msg.Twist.Twist;
 
-            Magnitude = new Magnitude
-                { name = "Odometry", position = linear, orientation = angular, twist = msg.Twist.Twist };
+            Magnitude = new Magnitude("Odometry", linear, angular, msg.Twist.Twist);
 
             frameNode.AttachTo(msg.Header);
             childNode?.AttachTo(msg.ChildFrameId);

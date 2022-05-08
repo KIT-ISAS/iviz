@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Iviz.Roslib</AssemblyName>
     <RootNamespace>Iviz.Roslib</RootNamespace>
-    <TargetFrameworks>net5.0;net6.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>default</LangVersion>
   </PropertyGroup>

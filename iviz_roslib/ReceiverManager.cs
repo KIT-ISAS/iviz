@@ -136,8 +136,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
         }
         else
         {
-            Logger.LogDebugFormat("{0}: Internal error, neither TCP nor UDP was set when creating connection",
-                this);
+            Logger.LogErrorFormat("{0}: Internal error, neither TCP nor UDP was set when creating connection", this);
             return;
         }
 
@@ -156,12 +155,13 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
                     await existingConnector.DisposeAsync(token);
                 }
 
+                token.ThrowIfCancellationRequested();
+
                 var udpTopicRequest = transportHint != RosTransportHint.OnlyTcp
                     ? UdpReceiver<TMessage>.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
                     : null;
 
                 var rosNodeClient = client.CreateNodeClient(remoteUri);
-                token.ThrowIfCancellationRequested();
                 var receiverConnector = new ReceiverConnector(rosNodeClient, topicInfo.Topic, transportHint,
                     udpTopicRequest, OnConnectionSucceeded);
 
@@ -236,9 +236,9 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
         var connectors = new Dictionary<Uri, ReceiverConnector>(connectorsByUri);
 
         SubscriberReceiverState[] states = new SubscriberReceiverState[publisherUris.Count];
-        int r = 0;
+        int receiverIndex = 0;
 
-        void Add(SubscriberReceiverState state) => states[r++] = state;
+        void Add(SubscriberReceiverState state) => states[receiverIndex++] = state;
         
         foreach (Uri uri in publisherUris)
         {

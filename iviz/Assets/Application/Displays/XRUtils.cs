@@ -50,7 +50,7 @@ namespace Iviz.Controllers.XR
             // add a TrackedDeviceGraphicRaycaster to ensure the canvas can interact with the XRController 
             foreach (var subCanvas in root.GetAllChildren().WithComponent<Canvas>())
             {
-                subCanvas.gameObject.EnsureComponent<TrackedDeviceGraphicRaycaster>();
+                subCanvas.gameObject.TryAddComponent<TrackedDeviceGraphicRaycaster>();
             }
 
             // remove the RectMask2D added for hololens compatibility

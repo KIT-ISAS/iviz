@@ -151,7 +151,7 @@ namespace Iviz.Resources
                 var info = (ResourceKey<GameObject>?)property.GetValue(o);
                 if (info == null)
                 {
-                    Debug.LogError($"{nameof(DisplaysType)}: Property {property.Name} has not been set!");
+                    RosLogger.Error($"{nameof(DisplaysType)}: Property {property.Name} has not been set!");
                     continue;
                 }
 

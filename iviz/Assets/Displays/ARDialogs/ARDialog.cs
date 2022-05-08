@@ -1,5 +1,7 @@
 #nullable enable
 
+#if false
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -519,3 +521,5 @@ namespace Iviz.App.ARDialogs
         }
     }
 }
+
+#endif

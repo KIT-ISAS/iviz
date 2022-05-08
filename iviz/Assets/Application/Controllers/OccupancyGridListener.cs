@@ -219,10 +219,10 @@ namespace Iviz.Controllers
                 Topic = topic,
             };
 
-            Listener = new Listener<OccupancyGrid>(Config.Topic, Handler);
+            Listener = new Listener<OccupancyGrid>(Config.Topic, Handle);
         }
 
-        void Handler(OccupancyGrid msg)
+        void Handle(OccupancyGrid msg)
         {
             if (IsProcessing)
             {

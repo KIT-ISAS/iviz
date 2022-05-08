@@ -23,18 +23,15 @@ namespace Iviz.App
         static readonly JsonConverter[] JsonConverter = { new XmlRpcValue.JsonConverter() };
 
         readonly SystemDialogPanel panel;
-        public override IDialogPanel Panel => panel;
-
         readonly SortedSet<string> hostsBuffer = new();
 
-        uint? descriptionHash;
-
         CancellationTokenSource? tokenSource;
-
+        uint? descriptionHash;
         string? nodeAddress;
         string? providerAddress;
         XmlRpcValue paramValue;
 
+        public override IDialogPanel Panel => panel;
         public HostAlias?[] HostAliases { get; set; } = Array.Empty<HostAlias?>();
 
         public SystemDialogData()

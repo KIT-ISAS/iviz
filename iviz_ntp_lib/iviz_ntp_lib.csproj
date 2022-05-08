@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net5.0;netstandard2.1</TargetFrameworks>
+        <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
         <AssemblyName>Iviz.Ntp</AssemblyName>
         <RootNamespace>Iviz.Ntp</RootNamespace>
         <Nullable>enable</Nullable>

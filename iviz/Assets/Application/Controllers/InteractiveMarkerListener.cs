@@ -160,7 +160,7 @@ namespace Iviz.Controllers
                 Id = topic
             };
 
-            Listener = new Listener<InteractiveMarkerUpdate>(Config.Topic, HandlerUpdate) { MaxQueueSize = 50 };
+            Listener = new Listener<InteractiveMarkerUpdate>(Config.Topic, HandleUpdate) { MaxQueueSize = 50 };
 
             string root;
             if (Config.Topic.HasSuffix("/update"))
@@ -177,7 +177,7 @@ namespace Iviz.Controllers
             string fullTopic = string.Format(UpdateFullFormatStr, root);
 
             Publisher = new Sender<InteractiveMarkerFeedback>(feedbackTopic);
-            FullListener = new Listener<InteractiveMarkerInit>(fullTopic, HandlerUpdateFull);
+            FullListener = new Listener<InteractiveMarkerInit>(fullTopic, HandleUpdateFull);
         }
 
         public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
@@ -213,7 +213,7 @@ namespace Iviz.Controllers
             Publisher?.Reset();
         }
 
-        void HandlerUpdate(InteractiveMarkerUpdate msg)
+        void HandleUpdate(InteractiveMarkerUpdate msg)
         {
             if (msg.Type == InteractiveMarkerUpdate.KEEP_ALIVE)
             {
@@ -242,7 +242,7 @@ namespace Iviz.Controllers
             }
         }
 
-        void HandlerUpdateFull(InteractiveMarkerInit msg)
+        void HandleUpdateFull(InteractiveMarkerInit msg)
         {
             foreach (var marker in msg.Markers)
             {

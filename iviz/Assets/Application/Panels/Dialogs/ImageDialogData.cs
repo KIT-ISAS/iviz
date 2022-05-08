@@ -79,9 +79,9 @@ namespace Iviz.App
             panel.ImageSize = listener.ImageSize;
         }
 
-        public void ToggleImageEnabled()
+        public void ResetImageEnabled()
         {
-            panel.ToggleImageEnabled();
+            panel.ResetImageEnabled();
             panel.ImageSize = listener.ImageSize;
         }
 

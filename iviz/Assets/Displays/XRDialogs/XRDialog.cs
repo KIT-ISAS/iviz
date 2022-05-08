@@ -51,6 +51,11 @@ namespace Iviz.Displays.XR
             }
         }
 
+        public virtual bool Interactable
+        {
+            set { }
+        }
+
         public event Action? Expired;
 
         public BindingType BindingType { get; set; }
@@ -248,15 +253,6 @@ namespace Iviz.Displays.XR
             var absoluteRotation =
                 Quaternion.LookRotation((direction.ApproximatelyZero() ? Vector3.forward : direction).WithY(0));
             return originTransform.rotation.Inverse() * absoluteRotation;
-
-            /*
-            var absolutePosition = TfModule.OriginFrame.Transform.TransformPoint(localPosition);
-            (float x, _, float z) = absolutePosition - Settings.MainCameraTransform.position;
-            float targetAngle = -Mathf.Atan2(z, x) * Mathf.Rad2Deg + 90;
-            var absoluteRotation = Quaternion.AngleAxis(targetAngle, Vector3.up);
-
-            return TfModule.OriginFrame.Transform.rotation.Inverse() * absoluteRotation;
-             */
         }
 
         protected static void SetupButtons(XRButton button1, XRButton button2, XRButton button3, ButtonSetup value)

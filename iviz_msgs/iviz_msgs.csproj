@@ -3,7 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Iviz.Msgs</AssemblyName>
     <RootNamespace>Iviz.Msgs</RootNamespace>
-    <TargetFrameworks>net6.0;net5.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
     <Nullable>enable</Nullable>
     <LangVersion>default</LangVersion>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
