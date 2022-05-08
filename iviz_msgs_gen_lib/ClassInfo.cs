@@ -715,23 +715,23 @@ namespace Iviz.MsgsGen
                 if (myVars.Length == 0)
                 {
                     lines.Add("");
-                    lines.Add("public readonly override int GetHashCode() => 0;");
-                    lines.Add($"public readonly override bool Equals(object? o) => o is {name};");
-                    lines.Add($"public readonly bool Equals({name} o) => true;");
-                    lines.Add($"public static bool operator==(in {name} _, in {name} __) => true;");
-                    lines.Add($"public static bool operator!=(in {name} _, in {name} __) => false;");
+                    //lines.Add("public readonly override int GetHashCode() => 0;");
+                    //lines.Add($"public readonly override bool Equals(object? o) => o is {name};");
+                    //lines.Add($"public readonly bool Equals({name} o) => true;");
+                    //lines.Add($"public static bool operator==(in {name} _, in {name} __) => true;");
+                    //lines.Add($"public static bool operator!=(in {name} _, in {name} __) => false;");
                 }
                 else
                 {
                     lines.Add("");
-                    lines.Add($"public readonly override int GetHashCode() => ({myVars}).GetHashCode();");
-                    lines.Add($"public readonly override bool Equals(object? o) => o is {name} s && Equals(s);");
+                    //lines.Add($"public readonly override int GetHashCode() => ({myVars}).GetHashCode();");
+                    //lines.Add($"public readonly override bool Equals(object? o) => o is {name} s && Equals(s);");
 
-                    string oVars = string.Join(", ", variables.Select(x => $"o.{x.CsFieldName}"));
+                    //string oVars = string.Join(", ", variables.Select(x => $"o.{x.CsFieldName}"));
 
-                    lines.Add($"public readonly bool Equals({name} o) => ({myVars}) == ({oVars});");
-                    lines.Add($"public static bool operator==(in {name} a, in {name} b) => a.Equals(b);");
-                    lines.Add($"public static bool operator!=(in {name} a, in {name} b) => !a.Equals(b);");
+                    //lines.Add($"public readonly bool Equals({name} o) => ({myVars}) == ({oVars});");
+                    //lines.Add($"public static bool operator==(in {name} a, in {name} b) => a.Equals(b);");
+                    //lines.Add($"public static bool operator!=(in {name} a, in {name} b) => !a.Equals(b);");
                 }
             }
 
@@ -1014,7 +1014,8 @@ namespace Iviz.MsgsGen
                 lines.Add("[StructLayout(LayoutKind.Sequential)]");
                 lines.Add(variables.Any(element => element.IsFixedSizeArray)
                     ? $"public unsafe struct {Name} : IMessage, IDeserializable<{Name}>"
-                    : $"public struct {Name} : IMessage, IDeserializable<{Name}>, System.IEquatable<{Name}>");
+                    //: $"public struct {Name} : IMessage, IDeserializable<{Name}>, System.IEquatable<{Name}>");
+                    : $"public struct {Name} : IMessage, IDeserializable<{Name}>");
             }
             else
             {
