@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Iviz.Tools;
 
@@ -15,7 +16,7 @@ namespace Iviz.Tools;
 /// after returning it to the array pool, which keeps them from being garbage collected.
 /// For a more generic version that clears the array after disposing, use <see cref="RentAndClear{T}"/>.
 /// </typeparam>
-public readonly struct Rent<T> : IDisposable  where T : unmanaged
+public readonly struct Rent<T> : IDisposable where T : unmanaged
 {
     public readonly int Length;
     public readonly T[] Array;
@@ -44,7 +45,7 @@ public readonly struct Rent<T> : IDisposable  where T : unmanaged
     {
         span.CopyTo(AsSpan());
     }
-    
+
     public void Dispose()
     {
         if (Length > 0)
@@ -58,17 +59,17 @@ public readonly struct Rent<T> : IDisposable  where T : unmanaged
         return $"[{nameof(Rent<T>)} Type={typeof(T).Name} Length={Length.ToString()} " +
                $"RealSize={(Array != null ? Array.Length : 0).ToString()}]";
     }
-    
+
     public ref T this[int index]
     {
         get
         {
-            if ((uint) index >= Length)
+            if ((uint)index >= Length)
             {
-                throw new IndexOutOfRangeException();
+                Rent.ThrowOutOfRange();
             }
-                
-            return ref Array[index];                
+
+            return ref Array[index];
         }
     }
 
@@ -88,6 +89,10 @@ public readonly struct Rent<T> : IDisposable  where T : unmanaged
 public static class Rent
 {
     public static Rent<T> Empty<T>() where T : unmanaged => new(0);
-    
+
+    [DoesNotReturn]
     internal static void ThrowArgumentNegative() => throw new ArgumentException("Rent size cannot be negative");
+
+    [DoesNotReturn]
+    internal static void ThrowOutOfRange() => throw new IndexOutOfRangeException();
 }
