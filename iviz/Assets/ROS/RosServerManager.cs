@@ -127,9 +127,14 @@ namespace Iviz.Ros
                 await connection.MethodCallAsync(callerUri, "getUri", new XmlRpcArg[] { callerId }, tokenSource.Token);
                 return true;
             }
+            catch (OperationCanceledException)
+            {
+                RosLogger.Info($"{nameof(RosServerManager)}: Failed to ping master.");
+                return false;
+            }
             catch (Exception e)
             {
-                Debug.LogError(e);
+                RosLogger.Error($"{nameof(RosServerManager)}: Failed to ping master. Reason: ", e);
                 return false;
             }
         }
