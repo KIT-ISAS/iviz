@@ -78,15 +78,11 @@ namespace Iviz.Rosbag.Reader
                 ? stackalloc byte[dataSize]
                 : (rent = new Rent<byte>(dataSize)).AsSpan();
 
-            try
+            using (rent)
             {
                 reader.Seek(dataStart, SeekOrigin.Begin);
                 reader.Read(span);
                 return ReadBuffer.Deserialize(generator, span);
-            }
-            finally
-            {
-                rent.Dispose();
             }
         }
 
@@ -113,15 +109,11 @@ namespace Iviz.Rosbag.Reader
                 ? stackalloc byte[dataSize]
                 : (rent = new Rent<byte>(dataSize)).AsSpan();
 
-            try
+            using (rent)
             {
                 reader.Seek(dataStart, SeekOrigin.Begin);
                 reader.Read(span);
                 return ReadBuffer.Deserialize(generator, span);
-            }
-            finally
-            {
-                rent.Dispose();
             }
         }
 
@@ -164,15 +156,11 @@ namespace Iviz.Rosbag.Reader
                 ? stackalloc byte[dataSize]
                 : (rent = new Rent<byte>(dataSize)).AsSpan();
 
-            try
+            using (rent)
             {
                 reader.Seek(dataStart, SeekOrigin.Begin);
                 reader.Read(span);
                 return (IMessage)ReadBuffer.Deserialize(generator, span);
-            }
-            finally
-            {
-                rent.Dispose();
             }
         }
 

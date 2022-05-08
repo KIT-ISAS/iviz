@@ -26,10 +26,10 @@ public static class BuilderPool
     /// </summary>
     public readonly struct BuilderRent : IDisposable
     {
-        static ConcurrentBag<(StringBuilder builder, ReadOnlyMemory<char> chunk)>? pool;
+        static ConcurrentQueue<(StringBuilder builder, ReadOnlyMemory<char> chunk)>? pool;
 
-        static ConcurrentBag<(StringBuilder builder, ReadOnlyMemory<char> chunk)> Pool =>
-            pool ??= new ConcurrentBag<(StringBuilder builder, ReadOnlyMemory<char> chunk)>();
+        static ConcurrentQueue<(StringBuilder builder, ReadOnlyMemory<char> chunk)> Pool =>
+            pool ??= new ConcurrentQueue<(StringBuilder builder, ReadOnlyMemory<char> chunk)>();
 
         readonly StringBuilder builder;
         readonly ReadOnlyMemory<char> chunk;
@@ -47,7 +47,7 @@ public static class BuilderPool
 
         internal BuilderRent(int _)
         {
-            if (Pool.TryTake(out var entry))
+            if (Pool.TryDequeue(out var entry))
             {
                 builder = entry.builder;
                 chunk = entry.chunk;
@@ -61,7 +61,7 @@ public static class BuilderPool
         public void Dispose()
         {
             builder.Clear();
-            Pool.Add((builder, chunk));
+            Pool.Enqueue((builder, chunk));
         }
 
         /// <summary>

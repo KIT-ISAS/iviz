@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -31,46 +30,26 @@ namespace Iviz.Msgs
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         readonly void ThrowIfOutOfRange(int off)
         {
-            if (0 <= off && off <= ptr.Length)
+            int remaining = ptr.Length;
+            if (0 <= off && off <= remaining)
             {
                 return;
             }
 
-            if (ptr == default)
-            {
-                throw new RosBufferException("Buffer has not been initialized!");
-            }
-
-            throw new RosBufferException($"Requested {off} bytes, but only {ptr.Length} remain!");
+            BuiltIns.ThrowBufferOverflow(off, remaining);
         }
-
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static void ThrowIfWrongSize(Array array, int size)
         {
             if (array is null)
             {
-                throw new ArgumentNullException(nameof(array));
+                BuiltIns.ThrowArgumentNull(nameof(array));
             }
 
             if (array.Length != size)
             {
-                throw new IndexOutOfRangeException(
-                    $"Cannot write {array.Length} values into array of fixed size {size}.");
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static void ThrowIfWrongSize(IList array, int size)
-        {
-            if (array is null)
-            {
-                throw new ArgumentNullException(nameof(array));
-            }
-
-            if (array.Count != size)
-            {
-                throw new IndexOutOfRangeException(
-                    $"Cannot write {array.Count} values into array of fixed size {size}.");
+                BuiltIns.ThrowInvalidSizeForFixedArray(array.Length, size);
             }
         }
 

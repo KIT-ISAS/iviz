@@ -72,7 +72,7 @@ namespace Iviz.Msgs
         {
             if (name == null)
             {
-                throw new ArgumentNullException(nameof(name));
+                ThrowArgumentNull(nameof(name));
             }
 
             using var str = BuilderPool.Rent();

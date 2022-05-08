@@ -120,7 +120,7 @@ public sealed class RosMasterServer : IDisposable
 
     public override string ToString()
     {
-        return $"[RosMaster Uri={MasterUri}]";
+        return $"[{nameof(RosMasterServer)} Uri={MasterUri}]";
     }
 
     public void AddKey(string key, XmlRpcArg value)
