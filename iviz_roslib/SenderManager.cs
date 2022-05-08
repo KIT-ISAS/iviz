@@ -260,7 +260,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
         tokenSource.Cancel();
 
         // try to make the listener come out
-        await StreamUtils.EnqueueConnectionAsync(Endpoint.Port, this);
+        await StreamUtils.EnqueueConnectionAsync(Endpoint.Port, this, token);
 
         listener.Stop();
         if (!await task.AwaitFor(2000, token))

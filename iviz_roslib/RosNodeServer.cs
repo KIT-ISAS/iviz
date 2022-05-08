@@ -94,7 +94,7 @@ internal sealed class RosNodeServer
 
     public override string ToString()
     {
-        return $"[RosNodeServer {Uri}]";
+        return $"[{nameof(RosNodeServer)} {Uri}]";
     }
 
     async ValueTask Run()
