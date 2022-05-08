@@ -283,7 +283,7 @@ namespace Iviz.MsgsGen
                 throw new ArgumentNullException(nameof(type));
             }
 
-            return GetClassStringConstant(type, "RosMd5Sum");
+            return GetClassStringConstant(type,  "Md5Sum");
         }
 
         static string GetClassStringConstant(Type type, string name)

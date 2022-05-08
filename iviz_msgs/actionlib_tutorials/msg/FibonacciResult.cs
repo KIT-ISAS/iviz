@@ -50,12 +50,15 @@ namespace Iviz.Msgs.ActionlibTutorials
         public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public string RosMd5Sum => "b81e37d2a31925a0e8ae261a8699cb79";
+        public const string Md5Sum = "b81e37d2a31925a0e8ae261a8699cb79";
+    
+        public string RosMd5Sum => Md5Sum;
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public string RosDependenciesBase64 =>
                 "H4sIAAAAAAAAE+PKzCsxNoqOVShOLSxNzUtO5QIAoiQSixIAAAA=";
                 
+    
         public override string ToString() => Extensions.ToString(this);
     }
 }

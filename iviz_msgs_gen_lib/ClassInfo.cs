@@ -1094,7 +1094,9 @@ namespace Iviz.MsgsGen
                 emptyMd5Sum => "BuiltIns.EmptyMd5Sum",
                 _ => $"\"{Md5Hash}\""
             };
-            lines.Add($"    public {readOnlyId}string RosMd5Sum => {md5Hash};");
+            lines.Add($"    public const string Md5Sum = {md5Hash};");
+            lines.Add("");
+            lines.Add($"    public {readOnlyId}string RosMd5Sum => Md5Sum;");
             //lines.Add($"    public string RosMd5Sum => {md5Hash};");
 
             lines.Add("");

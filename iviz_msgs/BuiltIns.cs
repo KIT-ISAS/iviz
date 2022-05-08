@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Iviz.Tools;
+using JetBrains.Annotations;
 using Newtonsoft.Json;
 
 #if !NETSTANDARD2_0
@@ -202,19 +203,19 @@ namespace Iviz.Msgs
             return s == null ? 0 : UTF8.GetByteCount(s);
         }
 
-        [DoesNotReturn]
+        [DoesNotReturn, AssertionMethod]
         public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
 
-        [DoesNotReturn]
+        [DoesNotReturn, AssertionMethod]
         public static void ThrowNullReference(string name) => throw new NullReferenceException(name);
 
-        [DoesNotReturn]
+        [DoesNotReturn, AssertionMethod]
         public static void ThrowNullReference(string name, int i) => throw new NullReferenceException($"{name}[{i}]");
 
         [DoesNotReturn]
-        public static void ThrowNullReference() => throw new NullReferenceException("Message fields cannot null.");
+        public static void ThrowNullReference() => throw new NullReferenceException("Message fields cannot be null.");
 
-        [DoesNotReturn]
+        [DoesNotReturn, AssertionMethod]
         public static void ThrowBufferOverflow(int off, int remaining) =>
             throw new RosBufferException($"Requested {off} bytes, but only {remaining} remain!");
 
@@ -222,7 +223,7 @@ namespace Iviz.Msgs
         public static void ThrowImplausibleBufferSize() =>
             throw new RosBufferException("Implausible message requested more than 1TB elements.");
 
-        [DoesNotReturn]
+        [DoesNotReturn, AssertionMethod]
         public static void ThrowInvalidSizeForFixedArray(int size, int expected) =>
             throw new RosInvalidSizeForFixedArrayException(size, expected);
     }
