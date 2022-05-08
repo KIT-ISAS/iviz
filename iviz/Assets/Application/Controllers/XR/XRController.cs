@@ -259,11 +259,11 @@ namespace Iviz.Controllers.XR
             }
 
             leftControllerFrame.LocalPose = LeftController is { IsActiveInFrame: true } leftController
-                ? leftController.transform.AsPose()
+                ? TfModule.RelativeToFixedFrame(leftController.transform.AsPose())
                 : Pose.identity;
 
             rightControllerFrame.LocalPose = RightController is { IsActiveInFrame: true } rightController
-                ? rightController.transform.AsPose()
+                ? TfModule.RelativeToFixedFrame(rightController.transform.AsPose())
                 : Pose.identity;
 
             leftGestures.Process(leftHand.State);

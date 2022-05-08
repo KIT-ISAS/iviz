@@ -71,11 +71,11 @@ namespace Iviz.Controllers.XR
                 Leash.ReticleColor = Color.white;
                 Leash.ReticleEmissiveColor = Color.white;
                 Leash.Width = interactingWidth;
-                Controller.IsNearInteraction = (currentPosition - referencePoint).Magnitude() < XRController.NearDistance;
+                //Controller.IsNearInteraction = (currentPosition - referencePoint).Magnitude() < XRController.NearDistance;
 
                 if (draggable.ReferenceNormal is { } referenceNormal)
                 {
-                    Leash.Set(transformRay, referencePoint, referenceNormal, !Controller.IsNearInteraction);
+                    Leash.Set(transformRay, referencePoint, referenceNormal);
                 }
                 else
                 {
@@ -87,7 +87,7 @@ namespace Iviz.Controllers.XR
 
             bool hitExists = TryGetHitInfo(out var hitPosition, out var hitNormal, out bool isUIHitClosest);
 
-            Controller.IsNearInteraction = (currentPosition - hitPosition).Magnitude() < XRController.NearDistance;
+            //Controller.IsNearInteraction = (currentPosition - hitPosition).Magnitude() < XRController.NearDistance;
 
             if (Controller.ButtonUp && !isUIHitClosest)
             {
@@ -99,8 +99,7 @@ namespace Iviz.Controllers.XR
                 Leash.Color = Color.white;
                 Leash.ReticleColor = Color.white;
                 Leash.Width = hoveringWidth;
-                Leash.Set(transformRay, hitPosition, hitNormal, isUIHitClosest ? 0.005f : 0.001f,
-                    !Controller.IsNearInteraction);
+                Leash.Set(transformRay, hitPosition, hitNormal, isUIHitClosest ? 0.005f : 0.001f);
 
                 if (isUIHitClosest && Controller.ButtonDown && Controller is HandController handController)
                 {

@@ -53,11 +53,11 @@ namespace Iviz.Controllers.XR
         [SerializeField] HandType handType;
         [SerializeField] Transform? cameraTransform;
         [SerializeField] Vector3 shoulderToCamera = new(-0.1f, -0.2f, -0.05f);
+        [SerializeField] IndexController? indexController;
 
         GameObject? modelRoot;
 
-        public HandState? State { get; private set; }
-        public Transform? PalmTransform => fingerTips[2].CheckedNull()?.Transform;
+        IndexController IndexController => indexController.AssertNotNull(nameof(indexController));
 
         Transform RootTransform
         {
@@ -79,6 +79,9 @@ namespace Iviz.Controllers.XR
         {
             set => RootTransform.gameObject.SetActive(value);
         }
+
+        public HandState? State { get; private set; }
+        public Transform? PalmTransform => fingerTips[2].CheckedNull()?.Transform;
 
         protected override bool MatchesDevice(InputDeviceCharacteristics characteristics,
             List<InputFeatureUsage> usages)
@@ -131,6 +134,8 @@ namespace Iviz.Controllers.XR
             fingerTips[0] = HandleBoneMesh(fingerTips[0], cachedHandState.ThumbFingertip);
             fingerTips[1] = HandleBoneMesh(fingerTips[1], cachedHandState.IndexFingertip);
 
+            IndexController.transform.SetPose(fingerTips[1]!.Transform.AsPose());
+
             var palmResource = HandleBoneMesh(fingerTips[2], cachedHandState.Palm);
             fingerTips[2] = palmResource;
 
@@ -153,12 +158,11 @@ namespace Iviz.Controllers.XR
             (controllerState.position, controllerState.rotation) =
                 referenceTransform.InverseTransformPose(controllerPose);
 
-            HasCursor = Vector3.Dot(palmRotation * Vector3.up, cameraTransform.forward) < 0;
+            HasCursor = !IndexController.IsHovering &&
+                        Vector3.Dot(palmRotation * Vector3.up, cameraTransform.forward) < 0;
             cachedHandState.Cursor = HasCursor
                 ? new Ray(controllerPosition, controllerForward.normalized)
                 : null;
-            
-            //Debug.Log(uiPressInteractionState.active + "         " + controllerState.uiPressInteractionState.active);
 
             if (ButtonUp)
             {
@@ -232,8 +236,6 @@ namespace Iviz.Controllers.XR
                 ButtonUp = ButtonState;
                 ButtonState = false;
 
-                //controllerState.uiPressInteractionState.deactivatedThisFrame = true;
-                //controllerState.selectInteractionState.deactivatedThisFrame = true;
                 controllerState.selectInteractionState.SetFrameState(false);
                 controllerState.uiPressInteractionState.SetFrameState(false);
                 LockedPosition = null;
@@ -248,25 +250,38 @@ namespace Iviz.Controllers.XR
 
             float distance = Vector3.Distance(thumb.Transform.position, index.Transform.position);
             bool newButtonState = distance < (ButtonState ? distanceTransitionToOpen : distanceTransitionToClose);
-            
+
             ButtonDown = newButtonState && !ButtonState;
             ButtonUp = !newButtonState && ButtonState;
             ButtonState = newButtonState;
 
-            controllerState.selectInteractionState.SetFrameState(ButtonState);
-            controllerState.uiPressInteractionState.SetFrameState(ButtonState);
+            if (IndexController.IsHovering)
+            {
+                IndexController.HandButtonState = ButtonState;
+                controllerState.selectInteractionState.SetFrameState(false);
+                controllerState.uiPressInteractionState.SetFrameState(false);
+            }
+            else
+            {
+                IndexController.HandButtonState = false;
+                controllerState.selectInteractionState.SetFrameState(ButtonState);
+                controllerState.uiPressInteractionState.SetFrameState(ButtonState);
+            }
+
 
             //Debug.Log("ButtonState: " + ButtonState);
 
             // --------
 
             var color = ButtonState ? Color.black : Color.blue;
-            var scale = 0.005f * (ButtonState ? 3 : 1) * Vector3.one;
+            var thumbScale = 0.005f * (ButtonState ? 3 : 1) * Vector3.one;
+            var indexScale = 0.005f * (ButtonState || IndexController.IsHovering ? 4 : 1) * Vector3.one;
 
             thumb.EmissiveColor = color;
-            thumb.Transform.localScale = scale;
+            thumb.Transform.localScale = thumbScale;
+            
             index.EmissiveColor = color;
-            index.Transform.localScale = scale;
+            index.Transform.localScale = indexScale;
         }
 
         MeshMarkerDisplay HandleBoneMesh(MeshMarkerDisplay? resource, in Pose pose)

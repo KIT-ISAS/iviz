@@ -9,6 +9,6 @@ namespace Iviz.Core.XR
         bool ButtonState { get; }
         bool ButtonUp { get; }
         bool ButtonDown { get; }
-        bool IsNearInteraction { get; }
+        //bool IsNearInteraction { get; }
     }
 }

@@ -278,7 +278,7 @@ namespace Iviz.Controllers
 
             if (msg.Buttons > (byte)ButtonSetup.Backward)
             {
-                RosLogger.Info($"{this}: Dialog '{msg.Id}' has unknown button setup id {msg.Action.ToString()}");
+                RosLogger.Info($"{this}: Dialog '{msg.Id}' has unknown button setup id {msg.Buttons.ToString()}");
                 return;
             }
 
@@ -296,12 +296,12 @@ namespace Iviz.Controllers
 
             var resourceKey = (DialogType)msg.Type switch
             {
-                DialogType.Button => Resource.Displays.ARButtonDialog,
-                DialogType.Notice => Resource.Displays.ARDialogNotice,
-                DialogType.Plain => Resource.Displays.ARDialog,
-                DialogType.Short => Resource.Displays.ARDialogShort,
-                DialogType.Menu => Resource.Displays.ARDialogMenu,
-                DialogType.Icon => Resource.Displays.ARDialogIcon,
+                DialogType.Button => Resource.Displays.XRButtonDialog,
+                DialogType.Notice => Resource.Displays.XRDialogNotice,
+                DialogType.Plain => Resource.Displays.XRDialog,
+                DialogType.Short => Resource.Displays.XRDialogShort,
+                DialogType.Menu => Resource.Displays.XRDialogMenu,
+                DialogType.Icon => Resource.Displays.XRDialogIcon,
                 _ => null
             };
 

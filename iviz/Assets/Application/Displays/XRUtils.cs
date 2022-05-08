@@ -17,6 +17,7 @@ namespace Iviz.Controllers.XR
         /// </summary>
         public static void SetupForHololens()
         {
+#if WINDOWS_UWP
             // make thread pool huge because ROS makes dozens of connections
             // quickly and the hololens 2 cannot cope. this makes the hololens
             // freeze out of nowhere for 1 or 2 seconds
@@ -24,7 +25,6 @@ namespace Iviz.Controllers.XR
 
             // this enables rendering from pv camera to align holograms when recording videos
             // see https://docs.microsoft.com/en-us/windows/mixed-reality/develop/unity/mixed-reality-capture-unity
-#if WINDOWS_UWP
             var kind = global::Windows.Graphics.Holographic.HolographicViewConfigurationKind.PhotoVideoCamera;
             var viewConfiguration =
                 global::Windows.Graphics.Holographic.HolographicDisplay.GetDefault()?.TryGetViewConfiguration(kind);

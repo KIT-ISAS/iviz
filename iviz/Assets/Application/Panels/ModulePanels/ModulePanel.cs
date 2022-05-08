@@ -43,10 +43,12 @@ namespace Iviz.App
                 .ToList();
         }
 
-        public static ModulePanel AddTo(GameObject o, ModuleType resource)
+        public static ModulePanel AddResourceToDataPanel(GameObject o, ModuleType resource)
         {
             return resource switch
             {
+                ModuleType.Invalid => throw new ArgumentException("Cannot create module panel for resource Invalid",
+                    nameof(resource)),
                 ModuleType.TF => o.AddComponent<TfModulePanel>(),
                 ModuleType.PointCloud => o.AddComponent<PointCloudModulePanel>(),
                 ModuleType.Grid => o.AddComponent<GridModulePanel>(),
@@ -68,8 +70,7 @@ namespace Iviz.App
                 ModuleType.XR => o.AddComponent<XRModulePanel>(),
                 ModuleType.Camera => o.AddComponent<CameraPanel>(),
                 ModuleType.TFPublisher => o.AddComponent<PublishedFramePanel>(),
-                _ => throw new ArgumentException($"Failed to find panel contents for module type '{resource}'",
-                    nameof(resource))
+                _ => throw new IndexOutOfRangeException()
             };
         }
     }

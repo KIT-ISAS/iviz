@@ -109,8 +109,8 @@ namespace Iviz.Controllers.XR
             }
 
             controllerState.ResetFrameDependentStates();
-            controllerState.selectInteractionState.SetFrameState(ButtonState || IsNearInteraction);
-            controllerState.uiPressInteractionState.SetFrameState(ButtonState || IsNearInteraction);
+            controllerState.selectInteractionState.SetFrameState(ButtonState);
+            controllerState.uiPressInteractionState.SetFrameState(ButtonState);
         }
     }
 }

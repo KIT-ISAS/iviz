@@ -228,7 +228,7 @@ namespace VNC
                 return MouseButtons.None;
             }
 
-            bool currentButtonDown = interactorController.ButtonState || interactorController.IsNearInteraction;
+            bool currentButtonDown = interactorController.ButtonState;
             return currentButtonDown ? MouseButtons.Left : MouseButtons.None;
         }
 

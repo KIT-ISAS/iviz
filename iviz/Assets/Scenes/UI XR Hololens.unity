@@ -14128,7 +14128,6 @@ Transform:
   - {fileID: 1954494704}
   - {fileID: 1924208741}
   - {fileID: 1840524969}
-  - {fileID: 2125563147}
   - {fileID: 2025835182}
   - {fileID: 1047412894}
   m_Father: {fileID: 0}
@@ -19207,8 +19206,8 @@ MonoBehaviour:
   joystickY: {fileID: 1572957588}
   joystickZ: {fileID: 2095836245}
   joystickA: {fileID: 2117318191}
-  joystickS: {fileID: 0}
-  resetScale: {fileID: 0}
+  joystickS: {fileID: 2117318191}
+  resetScale: {fileID: 1980515369}
 --- !u!114 &1736594132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19248,7 +19247,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!223 &1736594134
 Canvas:
   m_ObjectHideFlags: 0
@@ -23356,7 +23355,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1360200844}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 90, y: -180, z: 180}
 --- !u!108 &2025835183
 Light:
@@ -24495,54 +24494,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 45977bbae16431c46a013576a1aea384, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &2125563146
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2125563147}
-  - component: {fileID: 2125563148}
-  m_Layer: 0
-  m_Name: Trash Can
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
-  m_IsActive: 1
---- !u!4 &2125563147
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2125563146}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1360200844}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2125563148
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2125563146}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cde59eccc2edfbb43b6022d8c3de81a5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  assetHolder: {fileID: 0}
-  appAssetHolder: {fileID: 0}
-  widgetAssetHolder: {fileID: 0}
-  audioAssetHolder: {fileID: 0}
 --- !u!1 &2131141578
 GameObject:
   m_ObjectHideFlags: 0

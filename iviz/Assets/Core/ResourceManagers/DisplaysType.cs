@@ -39,13 +39,13 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> GridMap { get; }
         public ResourceKey<GameObject> OccupancyGridTextureResource { get; }
 
-        public ResourceKey<GameObject> ARDialog { get; }
-        public ResourceKey<GameObject> ARDialogIcon { get; }
-        public ResourceKey<GameObject> ARDialogMenu { get; }
-        public ResourceKey<GameObject> ARDialogShort { get; }
+        public ResourceKey<GameObject> XRDialog { get; }
+        public ResourceKey<GameObject> XRDialogIcon { get; }
+        public ResourceKey<GameObject> XRDialogMenu { get; }
+        public ResourceKey<GameObject> XRDialogShort { get; }
         public ResourceKey<GameObject> ARTfFrame { get; }
-        public ResourceKey<GameObject> ARDialogNotice { get; }
-        public ResourceKey<GameObject> ARButtonDialog { get; }
+        public ResourceKey<GameObject> XRDialogNotice { get; }
+        public ResourceKey<GameObject> XRButtonDialog { get; }
         public ResourceKey<GameObject> RotationDisc { get; }
         public ResourceKey<GameObject> SpringDisc { get; }
         public ResourceKey<GameObject> SpringDisc3D { get; }
@@ -100,13 +100,13 @@ namespace Iviz.Resources
 
             Pyramid = Create(appAssetHolder.Pyramid, nameof(appAssetHolder.Pyramid));
 
-            ARDialog = Create(appAssetHolder.ARDialog, nameof(appAssetHolder.ARDialog));
-            ARDialogIcon = Create(appAssetHolder.ARDialogIcon, nameof(appAssetHolder.ARDialogIcon));
-            ARDialogMenu = Create(appAssetHolder.ARDialogMenu, nameof(appAssetHolder.ARDialogMenu));
-            ARDialogShort = Create(appAssetHolder.ARDialogShort, nameof(appAssetHolder.ARDialogShort));
+            XRDialog = Create(appAssetHolder.ARDialog, nameof(appAssetHolder.ARDialog));
+            XRDialogIcon = Create(appAssetHolder.ARDialogIcon, nameof(appAssetHolder.ARDialogIcon));
+            XRDialogMenu = Create(appAssetHolder.ARDialogMenu, nameof(appAssetHolder.ARDialogMenu));
+            XRDialogShort = Create(appAssetHolder.ARDialogShort, nameof(appAssetHolder.ARDialogShort));
             ARTfFrame = Create(appAssetHolder.ARTfFrame, nameof(appAssetHolder.ARTfFrame));
-            ARDialogNotice = Create(appAssetHolder.ARDialogNotice, nameof(appAssetHolder.ARDialogNotice));
-            ARButtonDialog = Create(appAssetHolder.ARButtonDialog, nameof(appAssetHolder.ARButtonDialog));
+            XRDialogNotice = Create(appAssetHolder.ARDialogNotice, nameof(appAssetHolder.ARDialogNotice));
+            XRButtonDialog = Create(appAssetHolder.ARButtonDialog, nameof(appAssetHolder.ARButtonDialog));
             ARMarkerHighlighter =
                 Create(appAssetHolder.ARMarkerHighlighter, nameof(appAssetHolder.ARMarkerHighlighter));
 

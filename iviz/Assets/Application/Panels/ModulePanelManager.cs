@@ -51,11 +51,8 @@ namespace Iviz.App
                     : throw new InvalidOperationException($"Panel type for {resource}does not match!");
             }
 
-            var newContents = ModulePanel.AddTo(CreatePanelObject($"{resource} Panel"), resource);
-            if (newContents == null)
-            {
-                throw new InvalidOperationException($"There is no panel for type {resource}");
-            }
+            var newDataPanel = CreateDataPanel($"{resource} Panel", transform);
+            var newContents = ModulePanel.AddResourceToDataPanel(newDataPanel, resource);
 
             if (newContents is not T contents)
             {
@@ -64,7 +61,13 @@ namespace Iviz.App
 
             panelByResourceType[resource] = contents;
 
-            var rootCanvas = contents.GetComponentInParent<Canvas>();
+            var rootCanvas = contents.GetComponentInParent<Canvas>(true);
+            if (rootCanvas == null)
+            {
+                throw new InvalidOperationException(
+                    $"Error creating canvas for {resource}. Reason: No canvas component");
+            }
+
             rootCanvas.ProcessCanvasForXR();
 
             return contents;
@@ -77,7 +80,7 @@ namespace Iviz.App
                 return;
             }
 
-            if (newSelected.Panel is null)
+            if (newSelected.Panel == null)
             {
                 throw new NullReferenceException("Invalid selected panel: null");
             }
@@ -132,7 +135,7 @@ namespace Iviz.App
             }
         }
 
-        GameObject CreatePanelObject(string panelName)
+        static GameObject CreateDataPanel(string panelName, Transform transform)
         {
             var o = Resource.Widgets.DataPanel.Instantiate(transform);
             o.name = panelName;
@@ -146,7 +149,7 @@ namespace Iviz.App
                 SelectedModuleData.UpdatePanel();
             }
         }
-        
+
         void UpdateSelectedFast()
         {
             if (SelectedModuleData?.Panel is { isActiveAndEnabled: true })
