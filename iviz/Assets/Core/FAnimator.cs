@@ -3,6 +3,7 @@
 using System;
 using System.Threading;
 using Iviz.Common;
+using Iviz.Msgs;
 using UnityEngine;
 
 namespace Iviz.Core
@@ -106,10 +107,11 @@ namespace Iviz.Core
         public static void Start(IAnimatable highlighter) =>
             Spawn(highlighter.Token, highlighter.Duration, highlighter.Update, highlighter.Dispose);
         
-        public override string ToString() => "[Animator " + (GameThread.GameTime - startTime) + "/" + duration + "]";
+        public override string ToString() => $"[{nameof(FAnimator)} " +
+                                             $"{(GameThread.GameTime - startTime).ToString(BuiltIns.Culture)}/" +
+                                             $"{duration.ToString(BuiltIns.Culture)}]";
     }
-
-
+    
     public interface IAnimatable
     {
         CancellationToken Token { get; }

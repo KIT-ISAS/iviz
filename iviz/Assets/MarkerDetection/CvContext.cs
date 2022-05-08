@@ -163,12 +163,7 @@ namespace Iviz.MarkerDetection
             var markers = new DetectedQrMarker[numDetected];
             foreach (int i in ..numDetected)
             {
-                ReadOnlySpan<byte> strBytes;
-                unsafe
-                {
-                    strBytes = new ReadOnlySpan<byte>(pointers[i].ToPointer(), pointerLengths[i]);
-                }
-
+                var strBytes = pointers[i].AsSpan(pointerLengths[i]);
                 string code = BuiltIns.UTF8.GetString(strBytes);
                 var vectorCorners = new Vector2f[4];
                 srcCorners.Slice(4 * i, 4).CopyTo(vectorCorners);

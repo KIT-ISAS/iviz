@@ -40,6 +40,10 @@ namespace Iviz.Controllers
                 {
                     widget.Interactable = value;
                 }
+                else if (display is IDialog dialog)
+                {
+                    dialog.Interactable = value;
+                }
             }
         }
 
@@ -239,6 +243,7 @@ namespace Iviz.Controllers
 
         public void Dispose()
         {
+            Interactable = true;
             display.ReturnToPool(resourceKey);
             node.Dispose();
         }

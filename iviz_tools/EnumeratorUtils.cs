@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using JetBrains.Annotations;
 
 namespace Iviz.Tools;
 
@@ -10,12 +12,12 @@ public static class EnumeratorUtils
     {
         if (a == null)
         {
-            throw new ArgumentNullException(nameof(a));
+            ThrowArgumentNull(nameof(a));
         }
 
         if (b == null)
         {
-            throw new ArgumentNullException(nameof(b));
+            ThrowArgumentNull(nameof(b));
         }
 
         return new ZipEnumerable<TA, TB>(a, b);
@@ -26,12 +28,12 @@ public static class EnumeratorUtils
     {
         if (a == null)
         {
-            throw new ArgumentNullException(nameof(a));
+            ThrowArgumentNull(nameof(a));
         }
 
         if (f == null)
         {
-            throw new ArgumentNullException(nameof(f));
+            ThrowArgumentNull(nameof(f));
         }
 
         return new SelectEnumerable<IReadOnlyList<TA>, TA, TB>(a, f);
@@ -41,12 +43,12 @@ public static class EnumeratorUtils
     {
         if (a == null)
         {
-            throw new ArgumentNullException(nameof(a));
+            ThrowArgumentNull(nameof(a));
         }
 
         if (f == null)
         {
-            throw new ArgumentNullException(nameof(f));
+            ThrowArgumentNull(nameof(f));
         }
 
         return new SelectEnumerable<TA[], TA, TB>(a, f);
@@ -80,4 +82,8 @@ public static class EnumeratorUtils
     {
         return t.AsSpan(range);
     }
+    
+    [DoesNotReturn, AssertionMethod]
+    public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
+
 }

@@ -16,11 +16,11 @@ public readonly struct RangeEnumerable<TA> : IReadOnlyList<TA>
     public Enumerator GetEnumerator() => new(a, start, end);
     IEnumerator<TA> IEnumerable<TA>.GetEnumerator() => GetEnumerator();
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
     public int Count => end - start;
-
     public TA this[int index] => a[index];
-
+    public RangeEnumerable<TA> Take(int count) => new(a, start, start + count);
+    public RangeEnumerable<TA> Skip(int toSkip) => new(a, start + toSkip, end);
+    public SelectEnumerable<RangeEnumerable<TA>, TA, TB> Select<TB>(Func<TA, TB> f) => new(this, f);
 
     public struct Enumerator : IEnumerator<TA>
     {
@@ -28,11 +28,9 @@ public readonly struct RangeEnumerable<TA> : IReadOnlyList<TA>
         readonly int end;
         int index;
 
-        public Enumerator(IReadOnlyList<TA> na, int nStart, int nEnd) =>
-            (a, index, end) = (na, nStart - 1, nEnd);
+        public Enumerator(IReadOnlyList<TA> na, int nStart, int nEnd) => (a, index, end) = (na, nStart - 1, nEnd);
 
         public bool MoveNext() => ++index < end;
-
         public void Reset() => index = -1;
         public TA Current => a[index];
         object? IEnumerator.Current => Current;
@@ -41,10 +39,4 @@ public readonly struct RangeEnumerable<TA> : IReadOnlyList<TA>
         {
         }
     }
-
-    public RangeEnumerable<TA> Take(int count) => new(a, start, start + count);
-
-    public RangeEnumerable<TA> Skip(int start) => new(a, this.start + start, end);
-
-    public SelectEnumerable<RangeEnumerable<TA>, TA, TB> Select<TB>(Func<TA, TB> f) => new(this, f);
 }

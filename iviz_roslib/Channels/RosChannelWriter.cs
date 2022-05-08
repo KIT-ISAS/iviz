@@ -68,7 +68,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
     {
         if (client == null)
         {
-            throw new ArgumentNullException(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
         if (DynamicMessage.IsDynamic<T>())
@@ -96,12 +96,12 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
 
         if (client == null)
         {
-            throw new ArgumentNullException(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
         if (generator == null)
         {
-            throw new ArgumentNullException(nameof(generator));
+            BuiltIns.ThrowArgumentNull(nameof(generator));
         }
 
         publisherId = client.Advertise(topic, generator, out var dynamicPublisher);
@@ -114,7 +114,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
     {
         if (client == null)
         {
-            throw new ArgumentNullException(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
         (publisherId, publisher) = await client.AdvertiseAsync<T>(topic, token);
@@ -132,12 +132,12 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
 
         if (client == null)
         {
-            throw new ArgumentNullException(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
         if (generator == null)
         {
-            throw new ArgumentNullException(nameof(generator));
+            BuiltIns.ThrowArgumentNull(nameof(generator));
         }
 
         IRosPublisher<DynamicMessage> dynamicPublisher;
@@ -169,7 +169,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
     {
         if (msgs == null)
         {
-            throw new ArgumentNullException(nameof(msgs));
+            BuiltIns.ThrowArgumentNull(nameof(msgs));
         }
 
         foreach (T msg in msgs)
@@ -182,7 +182,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
     {
         if (msgs == null)
         {
-            throw new ArgumentNullException(nameof(msgs));
+            BuiltIns.ThrowArgumentNull(nameof(msgs));
         }
 
         foreach (IMessage msg in msgs)
@@ -197,7 +197,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
     {
         if (messages == null)
         {
-            throw new ArgumentNullException(nameof(messages));
+            BuiltIns.ThrowArgumentNull(nameof(messages));
         }
 
         await foreach (T msg in messages.WithCancellation(token))
@@ -211,7 +211,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
     {
         if (messages == null)
         {
-            throw new ArgumentNullException(nameof(messages));
+            BuiltIns.ThrowArgumentNull(nameof(messages));
         }
 
         await foreach (IMessage msg in messages.WithCancellation(token))
@@ -225,12 +225,12 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
     {
         if (publisher == null)
         {
-            return "[RosChannelWriter (uninitialized)]";
+            return $"[{nameof(RosChannelWriter<T>)} (uninitialized)]";
         }
 
         return disposed
-            ? "[RosChannelWriter (disposed)]"
-            : $"[RosChannelWriter {Publisher.Topic} [{Publisher.TopicType}]]";
+            ? $"[{nameof(RosChannelWriter<T>)} (disposed)]"
+            : $"[{nameof(RosChannelWriter<T>)} {Publisher.Topic} [{Publisher.TopicType}]]";
     }
 
     public void Dispose()

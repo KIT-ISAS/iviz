@@ -44,6 +44,12 @@ namespace Iviz.Displays
         public event Action? EndDragging;
         public event Action? StateChanged;
 
+        public bool Interactable
+        {
+            get => enabled;
+            set => enabled = value;
+        }
+
         public Transform Transform => this.EnsureHasTransform(ref mTransform);
 
         protected Vector3? ReferencePointLocal { get; private set; }

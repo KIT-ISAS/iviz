@@ -49,9 +49,8 @@ internal sealed class TopicInfo<T> where T : IMessage
         Topic = topic;
         Md5Sum = generator.RosMd5Sum;
         Type = generator.RosMessageType;
-        this.generator = generator is IDeserializable<T> deserializable
-            ? deserializable
-            : throw new InvalidOperationException("Type T needs to be IDeserializable");
+        this.generator = generator as IDeserializable<T> ??
+                         throw new InvalidOperationException("Type T needs to be IDeserializable");
     }
 
     public TopicInfo(string callerId, string topic, DynamicMessage generator)

@@ -47,7 +47,7 @@ public sealed class RosMasterServer : IDisposable
 
     static XmlRpcArg DefaultOkResponse => OkResponse(0);
     static XmlRpcArg FailResponse => new(StatusCode.Failure, "Request failed", 0);
-    
+
     static XmlRpcArg OkResponse(XmlRpcArg arg) => new(StatusCode.Success, "", arg);
     static XmlRpcArg ErrorResponse(string msg) => new(StatusCode.Error, msg, 0);
 
@@ -120,7 +120,7 @@ public sealed class RosMasterServer : IDisposable
 
     public override string ToString()
     {
-        return $"[RosMaster Uri={MasterUri}]";
+        return $"[{nameof(RosMasterServer)} Uri={MasterUri}]";
     }
 
     public void AddKey(string key, XmlRpcArg value)
@@ -143,22 +143,29 @@ public sealed class RosMasterServer : IDisposable
                 "RosMasterServer has already been initialized as a background task");
         }
 
-        var listener = new HttpListener(MasterUri.Port);
+        var token = Token;
+        Task? startTask = null;
+        try
+        {
+            await using var listener = new HttpListener(MasterUri.Port);
+            Logger.LogDebugFormat("{0}: Starting!", this);
+            AddKey("/run_id", Guid.NewGuid().ToString());
 
-        Logger.LogDebugFormat("{0}: Starting!", this);
-        AddKey("/run_id", Guid.NewGuid().ToString());
+            startTask = TaskUtils.Run(() => listener.StartAsync(StartContext, true).AwaitNoThrow(this), token);
 
-        var startTask = TaskUtils.Run(() => listener.StartAsync(StartContext, true).AwaitNoThrow(this), Token);
+            await Task.Delay(100, token);
+            await TaskUtils.Run(() => ManageRosoutAggAsync(initCompletedSignal, token).AwaitNoThrow(this), token);
+        }
+        finally
+        {
+            runningTs.Cancel();
+            Logger.LogDebugFormat("{0}: Leaving thread.", this);
 
-        await Task.Delay(100, Token);
-
-        await TaskUtils.Run(() => ManageRosoutAggAsync(initCompletedSignal, Token).AwaitNoThrow(this), Token);
-
-        await listener.DisposeAsync();
-        await startTask;
-
-        runningTs.Cancel();
-        Logger.LogDebugFormat("{0}: Leaving thread.", this);
+            if (startTask != null)
+            {
+                await startTask;
+            }
+        }
     }
 
     async ValueTask StartContext(HttpListenerContext context, CancellationToken token)

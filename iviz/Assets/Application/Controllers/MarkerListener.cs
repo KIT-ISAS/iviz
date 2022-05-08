@@ -246,13 +246,12 @@ namespace Iviz.Controllers
                 Id = topic
             };
 
-            //var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
-            const RosTransportHint rosTransportHint = RosTransportHint.PreferTcp;
+            var rosTransportHint = PreferUdp ? RosTransportHint.PreferUdp : RosTransportHint.PreferTcp;
 
             Listener = Config.Type switch
             {
-                Marker.MessageType => new Listener<Marker>(Config.Topic, Handler, rosTransportHint),
-                MarkerArray.MessageType => new Listener<MarkerArray>(Config.Topic, Handler, rosTransportHint),
+                Marker.MessageType => new Listener<Marker>(Config.Topic, Handle, rosTransportHint),
+                MarkerArray.MessageType => new Listener<MarkerArray>(Config.Topic, Handle, rosTransportHint),
                 _ => throw new InvalidOperationException("Invalid message type")
             };
 
@@ -318,7 +317,7 @@ namespace Iviz.Controllers
             markers.Clear();
         }
 
-        bool Handler(MarkerArray msg)
+        bool Handle(MarkerArray msg)
         {
             lock (newMarkerBuffer)
             {
@@ -336,7 +335,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool Handler(Marker marker)
+        bool Handle(Marker marker)
         {
             lock (newMarkerBuffer)
             {

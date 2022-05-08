@@ -193,7 +193,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
         if (callback is null)
         {
-            throw new ArgumentNullException(nameof(callback));
+            BuiltIns.ThrowArgumentNull(nameof(callback));
         }
 
         AssertIsAlive();
@@ -208,7 +208,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
         if (id is null)
         {
-            throw new ArgumentNullException(nameof(id));
+            BuiltIns.ThrowArgumentNull(nameof(id));
         }
 
         return callbacksById.ContainsKey(id);
@@ -218,7 +218,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
         if (id == null)
         {
-            throw new ArgumentNullException(nameof(id));
+            BuiltIns.ThrowArgumentNull(nameof(id));
         }
 
         if (!IsAlive)
@@ -242,7 +242,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
         if (id is null)
         {
-            throw new ArgumentNullException(nameof(id));
+            BuiltIns.ThrowArgumentNull(nameof(id));
         }
 
         if (!IsAlive)
@@ -258,8 +258,8 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
         else
         {
             cachedCallbacks = EmptyCallback;
-            Task disposeTask = DisposeAsync(token).AwaitNoThrow(this);
-            Task unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
+            var disposeTask = DisposeAsync(token).AwaitNoThrow(this);
+            var unsubscribeTask = client.RemoveSubscriberAsync(this, token).AwaitNoThrow(this);
             await (disposeTask, unsubscribeTask).WhenAll();
         }
 

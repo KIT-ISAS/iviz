@@ -26,7 +26,7 @@ namespace Iviz.Roslib
         {
             if (sources == null)
             {
-                throw new ArgumentNullException(nameof(sources));
+                BuiltIns.ThrowArgumentNull(nameof(sources));
             }
 
             if (sources.Length == 0)
@@ -41,7 +41,7 @@ namespace Iviz.Roslib
         {
             if (sources == null)
             {
-                throw new ArgumentNullException(nameof(sources));
+                BuiltIns.ThrowArgumentNull(nameof(sources));
             }
 
             this.sources = sources.ToArray();

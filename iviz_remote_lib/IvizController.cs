@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Text;
+using Iviz.Msgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Roslib;
 
@@ -58,7 +59,7 @@ public sealed class IvizController
     {
         if (string.IsNullOrEmpty(topic))
         {
-            throw new ArgumentNullException(nameof(topic));
+            BuiltIns.ThrowArgumentNull(nameof(topic));
         }
 
         if (requestedId == "")
@@ -95,7 +96,7 @@ public sealed class IvizController
     {
         if (requestedId == null)
         {
-            throw new ArgumentNullException(nameof(requestedId));
+            BuiltIns.ThrowArgumentNull(nameof(requestedId));
         }
 
         var addModuleResponse =
@@ -113,12 +114,12 @@ public sealed class IvizController
     {
         if (config == null)
         {
-            throw new ArgumentNullException(nameof(config));
+            BuiltIns.ThrowArgumentNull(nameof(config));
         }
 
         if (string.IsNullOrEmpty(id))
         {
-            throw new ArgumentNullException(nameof(id));
+            BuiltIns.ThrowArgumentNull(nameof(id));
         }
 
         configStr.Clear();
@@ -145,7 +146,7 @@ public sealed class IvizController
     {
         if (string.IsNullOrEmpty(id))
         {
-            throw new ArgumentNullException(nameof(id));
+            BuiltIns.ThrowArgumentNull(nameof(id));
         }
 
         configStr.Clear();
@@ -172,7 +173,7 @@ public sealed class IvizController
     {
         if (string.IsNullOrEmpty(id))
         {
-            throw new ArgumentNullException(nameof(id));
+            BuiltIns.ThrowArgumentNull(nameof(id));
         }
 
         var response = client.CallService($"{ivizId}/reset_module", new ResetModuleRequest(id));

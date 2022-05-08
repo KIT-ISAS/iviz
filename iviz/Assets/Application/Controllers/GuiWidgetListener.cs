@@ -72,6 +72,11 @@ namespace Iviz.Controllers
                 {
                     widget.Interactable = value;
                 }
+                
+                foreach (var dialog in dialogs.Values)
+                {
+                    dialog.Interactable = value;
+                }
             }
         }
 

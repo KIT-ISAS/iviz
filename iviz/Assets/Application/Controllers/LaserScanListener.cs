@@ -145,10 +145,10 @@ namespace Iviz.Controllers
                 Topic = topic,
             };
 
-            Listener = new Listener<LaserScan>(Config.Topic, Handler);
+            Listener = new Listener<LaserScan>(Config.Topic, Handle);
         }
 
-        void Handler(LaserScan msg)
+        void Handle(LaserScan msg)
         {
             node.AttachTo(msg.Header);
 

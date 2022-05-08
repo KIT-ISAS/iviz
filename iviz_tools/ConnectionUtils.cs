@@ -11,7 +11,7 @@ namespace Iviz.Tools;
 public static class ConnectionUtils
 {
     /// <summary>
-    /// A list of host aliases in the form of (key: ip address, value: real name).
+    /// A list of host aliases in the form of (key: ip address, value: real ip or name).
     /// Used by all iviz connections. 
     /// </summary>
     public static Dictionary<string, string> GlobalResolver { get; } = new(StringComparer.OrdinalIgnoreCase);

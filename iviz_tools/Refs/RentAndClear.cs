@@ -27,7 +27,9 @@ public readonly struct RentAndClear<T> : IDisposable
         switch (count)
         {
             case < 0:
-                throw new ArgumentException("Count cannot be negative", nameof(count));
+                Rent.ThrowArgumentNegative();
+                this = default; // unreachable
+                break;
             case 0:
                 Array = System.Array.Empty<T>();
                 Length = 0;
@@ -61,25 +63,16 @@ public readonly struct RentAndClear<T> : IDisposable
 
     public RentEnumerator<T?> GetEnumerator() => new(Array, Length);
 
-    public T? this[int index]
+    public ref T? this[int index]
     {
         get
         {
             if ((uint) index >= Length)
             {
-                throw new IndexOutOfRangeException();
+                Rent.ThrowOutOfRange();
             }
 
-            return Array[index];
-        }
-        set
-        {
-            if ((uint) index >= Length)
-            {
-                throw new IndexOutOfRangeException();
-            }
-
-            Array[index] = value;
+            return ref Array[index];
         }
     }
     

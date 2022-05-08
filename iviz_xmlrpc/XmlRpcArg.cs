@@ -59,7 +59,7 @@ namespace Iviz.XmlRpc
         {
             if (f == null)
             {
-                throw new ArgumentNullException(nameof(f));
+                EnumeratorUtils.ThrowArgumentNull(nameof(f));
             }
 
             content = f.Length == 0
@@ -95,7 +95,7 @@ namespace Iviz.XmlRpc
         {
             if (fs == null)
             {
-                throw new ArgumentNullException(nameof(fs));
+                EnumeratorUtils.ThrowArgumentNull(nameof(fs));
             }
 
             if (fs.Length == 0)
@@ -160,7 +160,7 @@ namespace Iviz.XmlRpc
         {
             if (f == null)
             {
-                throw new ArgumentNullException(nameof(f));
+                EnumeratorUtils.ThrowArgumentNull(nameof(f));
             }
 
             content = f.Length == 0
@@ -172,7 +172,7 @@ namespace Iviz.XmlRpc
         {
             if (fs == null)
             {
-                throw new ArgumentNullException(nameof(fs));
+                EnumeratorUtils.ThrowArgumentNull(nameof(fs));
             }
 
             if (fs.Length == 0)

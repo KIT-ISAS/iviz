@@ -1,25 +1,37 @@
 ﻿#nullable enable
 
+using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Msgs;
+using Iviz.Msgs.GeometryMsgs;
 using Iviz.Tools;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Vector3 = Iviz.Msgs.GeometryMsgs.Vector3;
 
 namespace Iviz.App
 {
-    public struct Magnitude
+    public readonly struct Magnitude
     {
-        public string? name;
-        public Msgs.GeometryMsgs.Vector3 position;
-        public Msgs.GeometryMsgs.Vector3? orientation;
-        public Msgs.GeometryMsgs.Twist? twist;
+        public readonly string name;
+        public readonly Vector3 position;
+
+        public readonly Vector3? orientation;
+        //readonly Twist? twist; // TODO
+
+        public Magnitude(string name, in Vector3 position, Vector3? orientation = null, Twist? twist = null)
+        {
+            this.name = name;
+            this.position = position;
+            this.orientation = orientation;
+            //this.twist = twist;
+        }
     }
 
-    public interface IMagnitudeDataSource
+    public interface IMagnitudeDataSource : IHasFrame
     {
-        public Magnitude? Magnitude { get; }
+        Magnitude? Magnitude { get; }
     }
 
     public sealed class MagnitudeWidget : MonoBehaviour, IWidget
@@ -59,6 +71,12 @@ namespace Iviz.App
 
         void OnClick()
         {
+            if (dataSource is { Magnitude: not null } and { Frame: not null })
+            {
+                GuiInputModule.Instance.LookAt(
+                    dataSource.Frame.Transform,
+                    dataSource.Magnitude.Value.position.Ros2Unity());
+            }
         }
 
         void UpdateMagnitude()
@@ -68,12 +86,9 @@ namespace Iviz.App
                 Text.text = "<b>[no message]</b>";
                 return;
             }
-            
+
             using var description = BuilderPool.Rent();
-            if (magnitude.name != null)
-            {
-                description.Append("<b>- ").Append(magnitude.name).Append(" -</b>").AppendLine();
-            }
+            description.Append("<b>- ").Append(magnitude.name).Append(" -</b>").AppendLine();
 
             {
                 var (x, y, z) = magnitude.position;
@@ -91,7 +106,8 @@ namespace Iviz.App
                 string xStr = (x == 0) ? "0" : x.ToString(format, UnityUtils.Culture);
                 string yStr = (y == 0) ? "0" : y.ToString(format, UnityUtils.Culture);
                 string zStr = (z == 0) ? "0" : z.ToString(format, UnityUtils.Culture);
-                description.Append("r: ").Append(xStr).Append(" p: ").Append(yStr).Append(" y: ").Append(zStr).AppendLine();
+                description.Append("r: ").Append(xStr).Append(" p: ").Append(yStr).Append(" y: ").Append(zStr)
+                    .AppendLine();
             }
 
             description.Length--;

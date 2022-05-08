@@ -82,7 +82,7 @@ public sealed class RosClient : IRosClient
         {
             if (value.TotalMilliseconds <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(value));
+                BuiltIns.ThrowArgumentNull(nameof(value));
             }
 
             RosMasterClient.TimeoutInMs = (int)value.TotalMilliseconds;
@@ -99,7 +99,7 @@ public sealed class RosClient : IRosClient
         {
             if (value.TotalMilliseconds <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(value));
+                BuiltIns.ThrowArgumentNull(nameof(value));
             }
 
             rpcNodeTimeout = value;
@@ -116,7 +116,7 @@ public sealed class RosClient : IRosClient
         {
             if (value.TotalMilliseconds <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(value));
+                BuiltIns.ThrowArgumentNull(nameof(value));
             }
 
             tcpRosTimeout = value;
@@ -477,7 +477,7 @@ public sealed class RosClient : IRosClient
     {
         if (masterUri == null)
         {
-            throw new ArgumentNullException(nameof(masterUri));
+            BuiltIns.ThrowArgumentNull(nameof(masterUri));
         }
 
         string? envHostname = EnvironmentCallerHostname;
@@ -808,7 +808,7 @@ public sealed class RosClient : IRosClient
     {
         if (callback is null)
         {
-            throw new ArgumentNullException(nameof(callback));
+            BuiltIns.ThrowArgumentNull(nameof(callback));
         }
 
         string resolvedTopic = ResolveResourceName(topic);
@@ -849,7 +849,7 @@ public sealed class RosClient : IRosClient
     {
         if (callback is null)
         {
-            throw new ArgumentNullException(nameof(callback));
+            BuiltIns.ThrowArgumentNull(nameof(callback));
         }
 
         string resolvedTopic = ResolveResourceName(topic);
@@ -919,7 +919,7 @@ public sealed class RosClient : IRosClient
     {
         if (callback is null)
         {
-            throw new ArgumentNullException(nameof(callback));
+            BuiltIns.ThrowArgumentNull(nameof(callback));
         }
 
         string resolvedTopic = ResolveResourceName(topic);
@@ -965,7 +965,7 @@ public sealed class RosClient : IRosClient
     {
         if (callback is null)
         {
-            throw new ArgumentNullException(nameof(callback));
+            BuiltIns.ThrowArgumentNull(nameof(callback));
         }
 
         string resolvedTopic = ResolveResourceName(topic);
@@ -1000,7 +1000,7 @@ public sealed class RosClient : IRosClient
     {
         if (topicId is null)
         {
-            throw new ArgumentNullException(nameof(topicId));
+            BuiltIns.ThrowArgumentNull(nameof(topicId));
         }
 
         var subscriber = subscribersByTopic.Values.FirstOrDefault(s => s.ContainsId(topicId));
@@ -1016,7 +1016,7 @@ public sealed class RosClient : IRosClient
     {
         if (topicId is null)
         {
-            throw new ArgumentNullException(nameof(topicId));
+            BuiltIns.ThrowArgumentNull(nameof(topicId));
         }
 
         var subscriber = subscribersByTopic.Values.FirstOrDefault(s => s.ContainsId(topicId));
@@ -1093,7 +1093,7 @@ public sealed class RosClient : IRosClient
             ? new TopicInfo<T>(CallerId, topic, dynamicMessage)
             : new TopicInfo<T>(CallerId, topic, generator);
 
-        RosPublisher<T> publisher = new(this, topicInfo)
+        var publisher = new RosPublisher<T>(this, topicInfo)
             { TimeoutInMs = (int)TcpRosTimeout.TotalMilliseconds };
 
         publishersByTopic[topic] = publisher;
@@ -1208,7 +1208,7 @@ public sealed class RosClient : IRosClient
     {
         if (generator == null)
         {
-            throw new ArgumentNullException(nameof(generator));
+            BuiltIns.ThrowArgumentNull(nameof(generator));
         }
 
         if (!generator.IsInitialized)
@@ -1292,7 +1292,7 @@ public sealed class RosClient : IRosClient
     {
         if (generator == null)
         {
-            throw new ArgumentNullException(nameof(generator));
+            BuiltIns.ThrowArgumentNull(nameof(generator));
         }
 
         if (!generator.IsInitialized)
@@ -1334,7 +1334,7 @@ public sealed class RosClient : IRosClient
     {
         if (topicId is null)
         {
-            throw new ArgumentNullException(nameof(topicId));
+            BuiltIns.ThrowArgumentNull(nameof(topicId));
         }
 
         IRosPublisher? publisher = publishersByTopic.Values.FirstOrDefault(p => p.ContainsId(topicId));
@@ -1351,7 +1351,7 @@ public sealed class RosClient : IRosClient
     {
         if (topicId == null)
         {
-            throw new ArgumentNullException(nameof(topicId));
+            BuiltIns.ThrowArgumentNull(nameof(topicId));
         }
 
         IRosPublisher? publisher =

@@ -43,8 +43,8 @@ namespace Iviz.UtilsTests
             byte[] covArray = cov.SerializeToArray();
             Assert.AreEqual(BaseUtils.GetMd5Hash(covArray), "35ca07d018d5627c247bc4f9cbaccefc");
 
-            Assert.AreEqual(new TwistWithCovarianceStamped().RosMd5Sum, "8927a1a12fb2607ceea095b2dc440a96");
-            Assert.AreEqual(new Log().RosMd5Sum, "acffd30cd6b6de30f120938c17c593fb");
+            Assert.AreEqual(TwistWithCovarianceStamped.Md5Sum, "8927a1a12fb2607ceea095b2dc440a96");
+            Assert.AreEqual(Log.Md5Sum, "acffd30cd6b6de30f120938c17c593fb");
 
             Assert.AreEqual(new TwistWithCovarianceStamped().RosDependenciesBase64,
                 "H4sIAAAAAAAAE71VTW/bMAy9+1cQyKHNkGRAO+RQYKcN23oYUKzFPjEUjM3YWm3Jo+Qm3q/fk5y4KdpD" +

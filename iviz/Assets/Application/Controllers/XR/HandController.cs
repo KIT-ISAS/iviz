@@ -163,6 +163,8 @@ namespace Iviz.Controllers.XR
             cachedHandState.Cursor = HasCursor
                 ? new Ray(controllerPosition, controllerForward.normalized)
                 : null;
+            
+            //Debug.Log(uiPressInteractionState.active + "         " + controllerState.uiPressInteractionState.active);
 
             if (ButtonUp)
             {
@@ -268,8 +270,6 @@ namespace Iviz.Controllers.XR
                 controllerState.uiPressInteractionState.SetFrameState(ButtonState);
             }
 
-
-            //Debug.Log("ButtonState: " + ButtonState);
 
             // --------
 

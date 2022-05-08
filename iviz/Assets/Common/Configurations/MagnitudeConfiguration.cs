@@ -16,7 +16,7 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool AngleVisible { get; set; } = true;
         [DataMember] public bool FrameVisible { get; set; } = true;
         [DataMember] public float Scale { get; set; } = 1.0f;
-        [DataMember] public bool PreferUdp { get; set; } = true;
+        [DataMember] public bool PreferUdp { get; set; } = false;
         [DataMember] public bool VectorVisible { get; set; } = true;
         [DataMember] public float VectorScale { get; set; } = 1.0f;
         [DataMember] public ColorRGBA VectorColor { get; set; } = ColorRGBA.Red;

@@ -9,6 +9,7 @@ namespace Iviz.Displays.XR
 {
     public interface IDialog : IDisplay
     {
+        bool Interactable { set; }
         event Action? Expired;
         float Scale { set; }
         Color Color { set; }

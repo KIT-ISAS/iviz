@@ -61,7 +61,9 @@ namespace Iviz.Msgs.TurtleActionlib
         public string RosMessageType => MessageType;
     
         /// <summary> MD5 hash of a compact representation of the message. </summary>
-        public string RosMd5Sum => "aae20e09065c3809e8a8e87c4c8953fd";
+        public const string Md5Sum = "aae20e09065c3809e8a8e87c4c8953fd";
+    
+        public string RosMd5Sum => Md5Sum;
     
         /// <summary> Base64 of the GZip'd compression of the concatenated dependencies file. </summary>
         public string RosDependenciesBase64 =>
@@ -84,6 +86,7 @@ namespace Iviz.Msgs.TurtleActionlib
                 "yKg/KrT80V3a8QKtGPR2x1nYj6zsRuzAfBW0xzjpnCyoSY1bU6ZWKtsXQ2Tghi06z3rNApCqQiwK9DmF" +
                 "VcN98ngI+Uqp88F6TQ9dBl8eTeQI+x+by3R90QsAAA==";
                 
+    
         public override string ToString() => Extensions.ToString(this);
     }
 }

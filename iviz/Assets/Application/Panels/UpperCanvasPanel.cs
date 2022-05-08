@@ -86,7 +86,7 @@ namespace Iviz.App
         {
             try
             {
-                await Task.Delay(5000, token);
+                await Task.Delay(4000, token);
                 status.enabled = false;
             }
             catch (OperationCanceledException)

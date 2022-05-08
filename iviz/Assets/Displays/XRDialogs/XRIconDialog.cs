@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public sealed class XRIconDialog : XRDialog, 
+    public sealed class XRIconDialog : XRDialog,
         IDialogWithTitle, IDialogWithCaption, IDialogWithAlignment, IDialogWithIcon, IDialogWithButtonSetup
     {
         [SerializeField] TMP_Text? title;
@@ -15,10 +15,13 @@ namespace Iviz.Displays.XR
         [SerializeField] XRButton? button1;
         [SerializeField] XRButton? button2;
         [SerializeField] XRButton? button3;
-        
+
         TMP_Text TitleObject => title.AssertNotNull(nameof(title));
         TMP_Text CaptionObject => caption.AssertNotNull(nameof(caption));
         XRIconPlane IconObject => iconObject.AssertNotNull(nameof(iconObject));
+        XRButton Button1 => button1.AssertNotNull(nameof(button1));
+        XRButton Button2 => button2.AssertNotNull(nameof(button2));
+        XRButton Button3 => button3.AssertNotNull(nameof(button3));
 
         public string Title
         {
@@ -39,14 +42,21 @@ namespace Iviz.Displays.XR
         {
             set => IconObject.Icon = value;
         }
-        
+
+        public override bool Interactable
+        {
+            set
+            {
+                base.Interactable = value;
+                Button1.Interactable = value;
+                Button2.Interactable = value;
+                Button3.Interactable = value;
+            }
+        }
+
         public ButtonSetup ButtonSetup
         {
-            set => SetupButtons(
-                button1.AssertNotNull(nameof(button1)),
-                button2.AssertNotNull(nameof(button2)),
-                button3.AssertNotNull(nameof(button3)),
-                value);
+            set => SetupButtons(Button1, Button2, Button3, value);
         }
     }
 }

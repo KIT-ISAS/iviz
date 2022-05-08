@@ -53,7 +53,7 @@ namespace Iviz.Displays.XR
         
         public bool Interactable
         {
-            set => Draggable.enabled = value;
+            set => Draggable.Interactable = value;
         }        
 
         void Awake()

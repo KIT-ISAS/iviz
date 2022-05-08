@@ -269,12 +269,17 @@ public static class StreamUtils
     /// Used in DisposeAsync() functions to force a listener to get out of waiting, as simply
     /// closing it doesn't work in Mono. 
     /// </summary>
-    public static async Task EnqueueConnectionAsync(int port, object caller)
+    public static async Task EnqueueConnectionAsync(int port, object caller, CancellationToken token = default, int timeoutInMs = -1)
     {
         try
         {
             using var client = new TcpClient(AddressFamily.InterNetworkV6) { Client = { DualMode = true } };
-            await client.ConnectAsync(IPAddress.Loopback, port);
+            await client.TryConnectAsync("127.0.0.1", port, token, timeoutInMs);
+            //await client.ConnectAsync(IPAddress.Loopback, port);
+        }
+        catch (OperationCanceledException)
+        {
+            Logger.LogDebugFormat("{0}: Listener timed out while disposing", caller);
         }
         catch
         {

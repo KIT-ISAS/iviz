@@ -7,6 +7,9 @@ onBoardingDoNotAskAgain = true
 showPackageIndexes = false
 showStatusBar = false
 scopes = {
+	"last_search.7F95D817" = "ref:Assets/Prefabs/Icons/ar-augmented-reality-by-uxwing.png"
+	"OpenInspectorPreview.7F95D817" = "0"
+	"currentGroup.7F95D817" = "scene"
 }
 providers = {
 	adb = {
@@ -56,6 +59,7 @@ providers = {
 	}
 }
 recentSearches = [
+	"ref:Assets/Prefabs/Icons/ar-augmented-reality-by-uxwing.png"
 ]
 searchItemFavorites = [
 ]
@@ -66,3 +70,4 @@ expandedQueries = [
 queryBuilder = false
 ignoredProperties = "id;name;classname;imagecontentshash"
 helperWidgetCurrentArea = "all"
+disabledIndexers = ""

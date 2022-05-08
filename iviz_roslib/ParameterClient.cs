@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Msgs;
 using Iviz.XmlRpc;
 using TopicTuple = System.Tuple<string, string>;
 using TopicTuples = System.Tuple<string, string[]>;
@@ -34,7 +35,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         value.ThrowIfEmpty();
@@ -45,7 +46,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         value.ThrowIfEmpty();
@@ -56,7 +57,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         var response = GetParam(key);
@@ -70,7 +71,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         var response = await GetParamAsync(key, token);
@@ -105,7 +106,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         return DeleteParam(key).IsValid;
@@ -115,7 +116,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         return (await DeleteParamAsync(key, token)).IsValid;
@@ -125,7 +126,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         return HasParam(key).HasParam;
@@ -135,7 +136,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         return (await HasParamAsync(key, token)).HasParam;
@@ -145,7 +146,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         return SubscribeParam(key).IsValid;
@@ -155,7 +156,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         return (await SubscribeParamAsync(key, token)).IsValid;
@@ -165,7 +166,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         return UnsubscribeParam(key).IsValid;
@@ -175,7 +176,7 @@ public sealed class ParameterClient
     {
         if (key == null)
         {
-            throw new ArgumentNullException(nameof(key));
+            BuiltIns.ThrowArgumentNull(nameof(key));
         }
 
         return (await UnsubscribeParamAsync(key, token)).IsValid;

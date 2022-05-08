@@ -357,7 +357,7 @@ namespace Iviz.Displays
                 if (info == null)
                 {
                     RosLogger.Error($"{this}: Failed to retrieve '{meshUri}'. Reason: Resource not in cache, " +
-                                    "and model loader not reachable.");
+                                    "and model loader is not reachable.");
                     Object.Destroy(collisionObject);
                     numErrors++;
                     return;
@@ -373,7 +373,7 @@ namespace Iviz.Displays
                     child.transform.localScale = meshFilter.transform.lossyScale;
                     child.layer = LayerType.Collider;
 
-                    var collider = child.EnsureComponent<MeshCollider>();
+                    var collider = child.TryAddComponent<MeshCollider>();
                     collider.sharedMesh = meshFilter.sharedMesh;
                     collider.convex = true;
                 }
@@ -383,7 +383,7 @@ namespace Iviz.Displays
             else if (geometry.Cylinder is var (cylinderRadius, cylinderLength))
             {
                 var resourceObject = Resource.Displays.Cylinder.Object;
-                var collider = collisionObject.EnsureComponent<MeshCollider>();
+                var collider = collisionObject.TryAddComponent<MeshCollider>();
                 collider.sharedMesh = resourceObject.GetComponent<MeshFilter>().sharedMesh;
                 collider.convex = true;
 
@@ -394,12 +394,12 @@ namespace Iviz.Displays
             }
             else if (geometry.Box is { } box)
             {
-                var collider = collisionObject.EnsureComponent<BoxCollider>();
+                var collider = collisionObject.TryAddComponent<BoxCollider>();
                 collider.size = box.Size.ToVector3().Abs();
             }
             else if (geometry.Sphere is { } sphere)
             {
-                var collider = collisionObject.EnsureComponent<SphereCollider>();
+                var collider = collisionObject.TryAddComponent<SphereCollider>();
                 collider.radius = sphere.Radius;
             }
             else
@@ -450,7 +450,7 @@ namespace Iviz.Displays
                 if (info == null)
                 {
                     RosLogger.Error($"{this}: Failed to retrieve '{meshUri}'. Reason: Resource not in cache, " +
-                                    "and model loader not reachable.");
+                                    "and model loader is not reachable.");
                     numErrors++;
                     return;
                 }

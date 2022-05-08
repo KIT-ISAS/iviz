@@ -80,7 +80,7 @@ namespace Iviz.XmlRpc
             }
             else
             {
-                await StreamUtils.EnqueueConnectionAsync(LocalPort, this);
+                await StreamUtils.EnqueueConnectionAsync(LocalPort, this, timeoutInMs: 2000);
             }
 
             listener.Stop();
@@ -190,7 +190,7 @@ namespace Iviz.XmlRpc
 
         public override string ToString()
         {
-            return $"[HttpListener :{LocalPort.ToString()}]";
+            return $"[{nameof(HttpListener)} :{LocalPort.ToString()}]";
         }
     }
 }

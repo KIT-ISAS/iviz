@@ -49,7 +49,7 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T>
     {
         if (client == null)
         {
-            throw new ArgumentNullException(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
         if (subscriber != null)
@@ -68,7 +68,7 @@ public sealed class RosChannelReader<T> : BaseRosChannelReader<T>
     {
         if (client == null)
         {
-            throw new ArgumentNullException(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
         subscriberId = client.Subscribe(topic, Callback, out subscriber);
@@ -116,7 +116,7 @@ public sealed class RosChannelReader : BaseRosChannelReader<IMessage>
     {
         if (client == null)
         {
-            throw new ArgumentNullException(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
         if (subscriber != null)
@@ -135,7 +135,7 @@ public sealed class RosChannelReader : BaseRosChannelReader<IMessage>
     {
         if (client == null)
         {
-            throw new ArgumentNullException(nameof(client));
+            BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
         subscriberId = client.Subscribe(topic, Callback, out var newSubscriber);

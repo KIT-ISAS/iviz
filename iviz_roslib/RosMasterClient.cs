@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Iviz.Msgs;
 using Iviz.Roslib.Utils;
 using Iviz.Tools;
 using Iviz.XmlRpc;
@@ -86,7 +87,7 @@ public sealed class RosMasterClient : IDisposable
     {
         if (nodeId == null)
         {
-            throw new ArgumentNullException(nameof(nodeId));
+            BuiltIns.ThrowArgumentNull(nameof(nodeId));
         }
 
         XmlRpcArg[] args = { CallerId, nodeId };
@@ -98,7 +99,7 @@ public sealed class RosMasterClient : IDisposable
     {
         if (nodeId == null)
         {
-            throw new ArgumentNullException(nameof(nodeId));
+            BuiltIns.ThrowArgumentNull(nameof(nodeId));
         }
 
         XmlRpcArg[] args = { CallerId, nodeId };
@@ -137,12 +138,12 @@ public sealed class RosMasterClient : IDisposable
     {
         if (topic == null)
         {
-            throw new ArgumentNullException(nameof(topic));
+            BuiltIns.ThrowArgumentNull(nameof(topic));
         }
 
         if (topicType == null)
         {
-            throw new ArgumentNullException(nameof(topicType));
+            BuiltIns.ThrowArgumentNull(nameof(topicType));
         }
 
         XmlRpcArg[] args = { CallerId, topic, topicType, CallerUri };
@@ -155,12 +156,12 @@ public sealed class RosMasterClient : IDisposable
     {
         if (topic == null)
         {
-            throw new ArgumentNullException(nameof(topic));
+            BuiltIns.ThrowArgumentNull(nameof(topic));
         }
 
         if (topicType == null)
         {
-            throw new ArgumentNullException(nameof(topicType));
+            BuiltIns.ThrowArgumentNull(nameof(topicType));
         }
 
         XmlRpcArg[] args = { CallerId, topic, topicType, CallerUri };
@@ -172,7 +173,7 @@ public sealed class RosMasterClient : IDisposable
     {
         if (topic == null)
         {
-            throw new ArgumentNullException(nameof(topic));
+            BuiltIns.ThrowArgumentNull(nameof(topic));
         }
 
         XmlRpcArg[] args = { CallerId, topic, CallerUri };
@@ -185,7 +186,7 @@ public sealed class RosMasterClient : IDisposable
     {
         if (topic == null)
         {
-            throw new ArgumentNullException(nameof(topic));
+            BuiltIns.ThrowArgumentNull(nameof(topic));
         }
 
         XmlRpcArg[] args = { CallerId, topic, CallerUri };
@@ -197,12 +198,12 @@ public sealed class RosMasterClient : IDisposable
     {
         if (topic == null)
         {
-            throw new ArgumentNullException(nameof(topic));
+            BuiltIns.ThrowArgumentNull(nameof(topic));
         }
 
         if (topicType == null)
         {
-            throw new ArgumentNullException(nameof(topicType));
+            BuiltIns.ThrowArgumentNull(nameof(topicType));
         }
 
         XmlRpcArg[] args = { CallerId, topic, topicType, CallerUri };
@@ -215,12 +216,12 @@ public sealed class RosMasterClient : IDisposable
     {
         if (topic == null)
         {
-            throw new ArgumentNullException(nameof(topic));
+            BuiltIns.ThrowArgumentNull(nameof(topic));
         }
 
         if (topicType == null)
         {
-            throw new ArgumentNullException(nameof(topicType));
+            BuiltIns.ThrowArgumentNull(nameof(topicType));
         }
 
         XmlRpcArg[] args = { CallerId, topic, topicType, CallerUri };
@@ -232,7 +233,7 @@ public sealed class RosMasterClient : IDisposable
     {
         if (topic == null)
         {
-            throw new ArgumentNullException(nameof(topic));
+            BuiltIns.ThrowArgumentNull(nameof(topic));
         }
 
         XmlRpcArg[] args = { CallerId, topic, CallerUri };
@@ -245,7 +246,7 @@ public sealed class RosMasterClient : IDisposable
     {
         if (topic == null)
         {
-            throw new ArgumentNullException(nameof(topic));
+            BuiltIns.ThrowArgumentNull(nameof(topic));
         }
 
         XmlRpcArg[] args = { CallerId, topic, CallerUri };
@@ -269,7 +270,7 @@ public sealed class RosMasterClient : IDisposable
     {
         if (service == null)
         {
-            throw new ArgumentNullException(nameof(service));
+            BuiltIns.ThrowArgumentNull(nameof(service));
         }
 
         XmlRpcArg[] args = { CallerId, service };
@@ -282,7 +283,7 @@ public sealed class RosMasterClient : IDisposable
     {
         if (service == null)
         {
-            throw new ArgumentNullException(nameof(service));
+            BuiltIns.ThrowArgumentNull(nameof(service));
         }
 
         XmlRpcArg[] args = { CallerId, service };
@@ -294,12 +295,12 @@ public sealed class RosMasterClient : IDisposable
     {
         if (service == null)
         {
-            throw new ArgumentNullException(nameof(service));
+            BuiltIns.ThrowArgumentNull(nameof(service));
         }
 
         if (rosRpcUri == null)
         {
-            throw new ArgumentNullException(nameof(rosRpcUri));
+            BuiltIns.ThrowArgumentNull(nameof(rosRpcUri));
         }
 
         XmlRpcArg[] args = { CallerId, service, rosRpcUri, CallerUri };
@@ -312,12 +313,12 @@ public sealed class RosMasterClient : IDisposable
     {
         if (service == null)
         {
-            throw new ArgumentNullException(nameof(service));
+            BuiltIns.ThrowArgumentNull(nameof(service));
         }
 
         if (rosRpcUri == null)
         {
-            throw new ArgumentNullException(nameof(rosRpcUri));
+            BuiltIns.ThrowArgumentNull(nameof(rosRpcUri));
         }
 
         XmlRpcArg[] args = { CallerId, service, rosRpcUri, CallerUri };
@@ -329,12 +330,12 @@ public sealed class RosMasterClient : IDisposable
     {
         if (service == null)
         {
-            throw new ArgumentNullException(nameof(service));
+            BuiltIns.ThrowArgumentNull(nameof(service));
         }
 
         if (rosRpcUri == null)
         {
-            throw new ArgumentNullException(nameof(rosRpcUri));
+            BuiltIns.ThrowArgumentNull(nameof(rosRpcUri));
         }
 
         XmlRpcArg[] args = { CallerId, service, rosRpcUri };
@@ -347,12 +348,12 @@ public sealed class RosMasterClient : IDisposable
     {
         if (service == null)
         {
-            throw new ArgumentNullException(nameof(service));
+            BuiltIns.ThrowArgumentNull(nameof(service));
         }
 
         if (rosRpcUri == null)
         {
-            throw new ArgumentNullException(nameof(rosRpcUri));
+            BuiltIns.ThrowArgumentNull(nameof(rosRpcUri));
         }
 
         XmlRpcArg[] args = { CallerId, service, rosRpcUri };

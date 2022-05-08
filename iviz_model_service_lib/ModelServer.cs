@@ -202,7 +202,7 @@ public sealed class ModelServer : IDisposable
     {
         if (msg == null)
         {
-            throw new ArgumentNullException(nameof(msg));
+            BuiltIns.ThrowArgumentNull(nameof(msg));
         }
 
         if (!Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out var uri))
@@ -286,7 +286,7 @@ public sealed class ModelServer : IDisposable
     {
         if (msg == null)
         {
-            throw new ArgumentNullException(nameof(msg));
+            BuiltIns.ThrowArgumentNull(nameof(msg));
         }
 
         // TODO: force conversion to either png or jpg
@@ -540,7 +540,7 @@ public sealed class ModelServer : IDisposable
     {
         if (msg == null)
         {
-            throw new ArgumentNullException(nameof(msg));
+            BuiltIns.ThrowArgumentNull(nameof(msg));
         }
 
         if (!Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out var uri))
@@ -579,7 +579,7 @@ public sealed class ModelServer : IDisposable
     {
         if (msg == null)
         {
-            throw new ArgumentNullException(nameof(msg));
+            BuiltIns.ThrowArgumentNull(nameof(msg));
         }
 
         if (!Uri.TryCreate(msg.Request.Uri, UriKind.Absolute, out var uri))

@@ -79,8 +79,8 @@ namespace Iviz.App
             }
 
             listener = csType == typeof(DynamicMessage)
-                ? new Listener<DynamicMessage>(topicName, Handler)
-                : Listener.Create(topicName, Handler, csType);
+                ? new Listener<DynamicMessage>(topicName, Handle)
+                : Listener.Create(topicName, Handle, csType);
         }
 
         void CreateTopicList()
@@ -99,7 +99,7 @@ namespace Iviz.App
             entries.Sort();
         }
 
-        bool Handler(IMessage msg, IRosReceiver receiver)
+        bool Handle(IMessage msg, IRosReceiver receiver)
         {
             messageQueue.Enqueue((GameThread.NowFormatted, receiver.RemoteId, msg));
             if (messageQueue.Count > MaxMessages)
