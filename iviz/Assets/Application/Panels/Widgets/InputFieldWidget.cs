@@ -18,7 +18,7 @@ namespace Iviz.App
 
         TMP_Text Label => label.AssertNotNull(nameof(label));
         TMP_InputField Text => text.AssertNotNull(nameof(text));
-        TMP_Text Placeholder => placeholder.AssertNotNull(nameof(placeholder));
+        TMP_Text PlaceholderObject => placeholder.AssertNotNull(nameof(placeholder));
         Image TextImage => textImage.AssertNotNull(nameof(textImage));
         
         public string Title
@@ -42,13 +42,13 @@ namespace Iviz.App
             }
         }
 
-        public string PlaceholderText
+        public string Placeholder
         {
-            get => Placeholder.text;
+            get => PlaceholderObject.text;
             set
             {
                 ThrowHelper.ThrowIfNull(value, nameof(value));
-                Placeholder.text = value;
+                PlaceholderObject.text = value;
             }
         }
 
@@ -75,7 +75,7 @@ namespace Iviz.App
         void Awake()
         {
             Text.onValueChanged.AddListener(OnValueChanged);
-            Text.onEndEdit.AddListener(OnEndEdit);
+            Text.onSubmit.AddListener(OnEndEdit);
         }
         
         void OnValueChanged(string f)
@@ -108,7 +108,7 @@ namespace Iviz.App
 
         public InputFieldWidget SetPlaceholder(string f)
         {
-            PlaceholderText = f;
+            Placeholder = f;
             return this;
         }
 

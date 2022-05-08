@@ -1,13 +1,8 @@
 #nullable enable
 
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Iviz.Common;
-using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Msgs.IvizCommonMsgs;
-using Iviz.Tools;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Iviz.Resources

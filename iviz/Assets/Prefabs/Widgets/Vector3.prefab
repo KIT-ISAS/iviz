@@ -409,6 +409,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3925610196380257206}
     m_Modifications:
+    - target: {fileID: 2534569045023790136, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_KeyboardType
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2534569045023790136, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_CharacterValidation
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3997367665975296836, guid: 915e1318acad4b24995b16b667eb1f64,
         type: 3}
       propertyPath: m_text

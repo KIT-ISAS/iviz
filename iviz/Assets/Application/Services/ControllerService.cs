@@ -11,8 +11,6 @@ using Iviz.Common;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Displays;
-using Iviz.Displays.XR;
-using Iviz.Msgs.IvizCommonMsgs;
 using Iviz.Msgs.IvizMsgs;
 using Iviz.Msgs.Roscpp;
 using Iviz.Resources;
@@ -495,35 +493,6 @@ namespace Iviz.Controllers
             }
 
             return result;
-            /*
-            using var signal = new SemaphoreSlim(0);
-            GameThread.Post(() =>
-            {
-                try
-                {
-                    if (!ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out var module))
-                    {
-                        result.success = false;
-                        result.message = "There is no module with that id";
-                        return;
-                    }
-
-                    module.ResetController();
-                    result.success = true;
-                }
-                catch (Exception e)
-                {
-                    result.success = false;
-                    result.message = $"An exception was raised: {e.Message}";
-                    RosLogger.Error($"{nameof(ControllerService)}: Error in {nameof(TryResetModuleAsync)}", e);
-                }
-                finally
-                {
-                    signal.Release();
-                }
-            });
-            return await signal.WaitAsync(DefaultTimeoutInMs) ? result : (false, "Request timed out!");
-            */
         }
 
         static async ValueTask GetModulesAsync(GetModules srv)
@@ -556,37 +525,6 @@ namespace Iviz.Controllers
             }
 
             return result;
-
-            /*
-            GameThread.Post(() =>
-            {
-                try
-                {
-                    var configurations = ModuleDatas.Select(data => data.Configuration).ToArray();
-                    result = configurations.Select(JsonConvert.SerializeObject).ToArray();
-                }
-                catch (JsonException e)
-                {
-                    RosLogger.Error(
-                        $"{nameof(ControllerService)}: Unexpected JSON exception in {nameof(GetModulesAsync)}", e);
-                }
-                catch (Exception e)
-                {
-                    RosLogger.Error(
-                        $"{nameof(ControllerService)}: Unexpected exception in {nameof(GetModulesAsync)}", e);
-                }
-                finally
-                {
-                    signal.Release();
-                }
-            });
-            if (!await signal.WaitAsync(DefaultTimeoutInMs))
-            {
-                RosLogger.Error($"{nameof(ControllerService)}: Timeout in {nameof(GetModulesAsync)}");
-            }
-
-            return result;
-            */
         }
 
         static ValueTask SetFixedFrameAsync(SetFixedFrame srv)
@@ -599,32 +537,9 @@ namespace Iviz.Controllers
         static Task TrySetFixedFrameAsync(string id)
         {
             return GameThread.PostAsync(() => TfModule.FixedFrameId = id);
-
-            /*
-            using (var signal = new SemaphoreSlim(0))
-            {
-                GameThread.Post(() =>
-                {
-                    try
-                    {
-                        TfModule.FixedFrameId = id;
-                    }
-                    finally
-                    {
-                        signal.Release();
-                    }
-                });
-
-                if (!await signal.WaitAsync(DefaultTimeoutInMs))
-                {
-                    RosLogger.Error(
-                        $"{nameof(ControllerService)}: Unexpected timeout in {nameof(TrySetFixedFrameAsync)}");
-                    return result;
-                }
-            }
-            */
         }
 
+        /*
         static async ValueTask GetFramePoseAsync(GetFramePose srv)
         {
             (bool[] success, Pose[] poses) = await TryGetFramePoseAsync(srv.Request.Frames);
@@ -888,7 +803,6 @@ namespace Iviz.Controllers
             });
         }
 
-        /*
         static ValueTask UpdateRobotAsync(UpdateRobot srv)
         {
             switch (srv.Request.Operation)
@@ -903,7 +817,6 @@ namespace Iviz.Controllers
                     return default;
             }
         }
-        */
 
         static async ValueTask RemoveRobotAsync(UpdateRobot srv)
         {
@@ -961,7 +874,6 @@ namespace Iviz.Controllers
             }
         }
 
-        /*
         static async ValueTask AddRobotAsync(UpdateRobot srv)
         {
             string id = srv.Request.Id;
@@ -1019,7 +931,6 @@ namespace Iviz.Controllers
                 srv.Response.Success = true;
             }
         }
-        */
 
         static async ValueTask LaunchDialogAsync(LaunchDialog srv)
         {
@@ -1113,5 +1024,6 @@ namespace Iviz.Controllers
                 srv.Response.Feedback = feedback;
             }
         }
+        */        
     }
 }

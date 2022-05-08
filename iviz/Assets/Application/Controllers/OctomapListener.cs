@@ -109,10 +109,10 @@ namespace Iviz.Controllers
 
         public void StartListening()
         {
-            listener = new Listener<Octomap>(config.Topic, Handler);
+            listener = new Listener<Octomap>(config.Topic, Handle);
         }
 
-        void Handler([NotNull] Octomap msg)
+        void Handle([NotNull] Octomap msg)
         {
             node.AttachTo(msg.Header);
             lastMsg = msg;

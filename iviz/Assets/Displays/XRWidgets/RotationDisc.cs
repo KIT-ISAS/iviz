@@ -66,7 +66,7 @@ namespace Iviz.Displays.XR
 
         public bool Interactable
         {
-            set => Draggable.enabled = value;
+            set => Draggable.Interactable = value;
         }
 
         public event Action<float>? Moved;
@@ -99,7 +99,7 @@ namespace Iviz.Displays.XR
 
             var draggable = Draggable;
 
-            draggable.enabled = true;
+            draggable.Interactable = true;
             draggable.StartDragging += () =>
             {
                 tokenSource?.Cancel();

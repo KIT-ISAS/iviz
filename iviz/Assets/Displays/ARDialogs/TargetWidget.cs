@@ -115,6 +115,8 @@ namespace Iviz.Displays.XR
             {
                 Draggable.enabled = value;
                 Corner.enabled = value;
+                OkButton.Interactable = value;
+                CancelButton.Interactable = value;
             }
         }
 
@@ -176,23 +178,6 @@ namespace Iviz.Displays.XR
             (float x, _, float z) = Corner.Transform.localPosition;
             TargetScale = 2 * new Vector2(x, z).Abs();
         }
-
-
-        /*
-        protected override void Update()
-        {
-            base.Update();
-
-            var camPosition = Settings.MainCameraTransform.position;
-            buttonPivotTransform.LookAt(2 * buttonPivotTransform.position - camPosition, Vector3.up);
-
-            if (scaling)
-            {
-                (float x, _, float z) = corner.Transform.localPosition;
-                TargetScale = 2 * new Vector2(x, z).Abs();
-            }
-        }
-        */
 
         void SetLines(int numVertices)
         {

@@ -101,7 +101,7 @@ namespace Iviz.Controllers
 
         public void StartListening()
         {
-            listener = new Listener<JointState>(config.Topic, Handler);
+            listener = new Listener<JointState>(config.Topic, Handle);
         }
 
         public override void Dispose()
@@ -111,7 +111,7 @@ namespace Iviz.Controllers
             warnNotFound.Clear();
         }
 
-        void Handler(JointState msg)
+        void Handle(JointState msg)
         {
             if (Robot is null || Robot.AttachedToTf)
             {

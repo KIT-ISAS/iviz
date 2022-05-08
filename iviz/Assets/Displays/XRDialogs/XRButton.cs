@@ -36,6 +36,9 @@ namespace Iviz.Displays.XR
         MeshMarkerDisplay Cylinder => cylinder.AssertNotNull(nameof(cylinder));
         XRIconPlane IconObject => iconPlane.AssertNotNull(nameof(iconPlane));
 
+        StaticBoundsControl BoundsControl =>
+            boundsControl ??= new StaticBoundsControl(this) { FrameColumnWidth = 0.01f };
+
         public Transform Transform => this.EnsureHasTransform(ref m_Transform);
         public event Action? BoundsChanged;
         public event Action? Clicked;
@@ -92,6 +95,11 @@ namespace Iviz.Displays.XR
             }
         }
 
+        public bool Interactable
+        {
+            set => BoundsControl.Interactable = value;
+        }
+
         void Awake()
         {
             Icon = icon;
@@ -100,15 +108,14 @@ namespace Iviz.Displays.XR
             IconObject.Color = Color.white;
             IconObject.EmissiveColor = Color.white.WithValue(0.5f);
 
-            boundsControl = new StaticBoundsControl(this) { FrameColumnWidth = 0.01f };
-            boundsControl.PointerUp += OnClick;
+            BoundsControl.PointerUp += OnClick;
 
-            boundsControl.StartDragging += () =>
+            BoundsControl.StartDragging += () =>
             {
                 Cylinder.EmissiveColor = color;
                 IconObject.EmissiveColor = Color.white;
             };
-            boundsControl.EndDragging += () =>
+            BoundsControl.EndDragging += () =>
             {
                 Cylinder.EmissiveColor = Color.black;
                 IconObject.EmissiveColor = Color.white.WithValue(0.5f);
@@ -138,14 +145,6 @@ namespace Iviz.Displays.XR
             background.ReturnToPool();
         }
 
-        /*
-        public void ResetHighlights()
-        {
-            Cylinder.EmissiveColor = Color.black;
-            IconObject.EmissiveColor = Color.white.WithValue(0.5f);
-            boundsControl?.Reset();
-        }
-        */
         public void OnDisable()
         {
             Cylinder.EmissiveColor = Color.black;
@@ -157,7 +156,6 @@ namespace Iviz.Displays.XR
         {
             BoundsChanged = null;
             Clicked = null;
-            //ResetHighlights();
         }
     }
 

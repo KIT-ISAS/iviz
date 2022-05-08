@@ -24,6 +24,15 @@ namespace Iviz.Displays.XR
             set => Button.Icon = value;
         }
 
+        public override bool Interactable
+        {
+            set
+            {
+                base.Interactable = value;
+                Button.Interactable = value;
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -34,7 +43,6 @@ namespace Iviz.Displays.XR
         {
             base.Suspend();
             Clicked = null;
-            //Button.ResetHighlights();
         }
     }
 }

@@ -253,7 +253,7 @@ namespace Iviz.Core
             return d;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static float SanitizeChannel(float f) => f.IsInvalid() ? 0 : Mathf.Clamp(f, 0, 1);
+            static float SanitizeChannel(float f) => f.IsInvalid() ? 0 : Mathf.Clamp01(f);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

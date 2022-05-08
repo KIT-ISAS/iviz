@@ -24,18 +24,18 @@ namespace Iviz.Ros
         public RosLoggerManager()
         {
             Sender = new Sender<Log>(RosOutTopic);
-            Listener = new Listener<Log>(RosOutAggTopic, Handler, RosTransportHint.PreferUdp);
+            Listener = new Listener<Log>(RosOutAggTopic, Handle, RosTransportHint.PreferUdp);
 
-            RosLogger.LogExternal += LogMessage;
+            RosLogger.LogExternal += Publish;
         }
         
-        bool Handler(Log msg)
+        bool Handle(Log msg)
         {
             MessageArrived?.Invoke(msg);
             return true;
         }
 
-        void LogMessage(in LogMessage msg)
+        void Publish(in LogMessage msg)
         {
             if (msg.Level < MinLogLevel)
             {
@@ -59,7 +59,7 @@ namespace Iviz.Ros
             Sender.Dispose();
 
             MessageArrived = null;
-            RosLogger.LogExternal -= LogMessage;
+            RosLogger.LogExternal -= Publish;
         }
     }
 }

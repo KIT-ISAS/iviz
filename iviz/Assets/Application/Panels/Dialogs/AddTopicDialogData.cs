@@ -25,6 +25,8 @@ namespace Iviz.App
             Color.Lerp(Color.red, Color.white, 0.95f),
             Color.Lerp(Color.green, Color.white, 0.95f),
             Color.Lerp(Color.blue, Color.white, 0.95f),
+            Color.Lerp(new Color32(243, 114, 32, 255), Color.white, 0.95f),
+            Color.Lerp(new Color32(63, 127, 107, 255), Color.white, 0.95f),
         };
 
         readonly AddTopicDialogPanel panel;

@@ -565,8 +565,8 @@ namespace Iviz.App
         void TryLoadDefaultStateConfiguration()
         {
             const string defaultConfigPrefix = "_default";
-            string defaultConfigFile = $"{Settings.SavedFolder}/{defaultConfigPrefix}{LoadConfigDialogData.Suffix}";
-            if (File.Exists(defaultConfigFile))
+            string fullPath = $"{Settings.SavedFolder}/{defaultConfigPrefix}{LoadConfigDialogData.Suffix}";
+            if (File.Exists(fullPath))
             {
                 LoadStateConfiguration($"{defaultConfigPrefix}{LoadConfigDialogData.Suffix}");
             }
@@ -576,18 +576,21 @@ namespace Iviz.App
         {
             ThrowHelper.ThrowIfNull(file, nameof(file));
 
-            RosLogger.Debug($"{this}: Reading config from {Settings.SavedFolder}/{file}");
-            string text;
-            try
-            {
-                RosLogger.Internal("Loading config file...");
-                text = await FileUtils.ReadAllTextAsync($"{Settings.SavedFolder}/{file}", token);
-                RosLogger.Internal("Done.");
-            }
-            catch (FileNotFoundException)
+            string fullPath = $"{Settings.SavedFolder}/{file}";
+            RosLogger.Debug($"{this}: Reading config from {fullPath}");
+
+            RosLogger.Internal("Loading config file...");
+            if (!File.Exists(fullPath))
             {
                 RosLogger.Internal("<b>Error:</b> Config file not found.");
                 return;
+            }
+
+            string text;
+            try
+            {
+                text = await FileUtils.ReadAllTextAsync(fullPath, token);
+                RosLogger.Internal("Done.");
             }
             catch (Exception e)
             {

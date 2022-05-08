@@ -76,6 +76,22 @@ namespace Iviz.Displays.XR
             }
         }
         
+        public override bool Interactable
+        {
+            set
+            {
+                base.Interactable = value;
+                foreach (var button in Buttons)
+                {
+                    button.Interactable = value;
+                }
+
+                UpButton.Interactable = value;
+                DownButton.Interactable = value;
+                CloseButton.Interactable = value;
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();
@@ -109,6 +125,6 @@ namespace Iviz.Displays.XR
             {
                 MenuPage++;
             }
-        }        
+        }
     }
 }

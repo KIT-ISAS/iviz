@@ -13,6 +13,7 @@ using UnityEngine.XR.ARFoundation;
 
 namespace Iviz.Displays
 {
+    // disabled until I can find a way to make it work in mobile suspend without crashing
     [RequireComponent(typeof(MeshFilter))]
     public sealed class ARMeshLines : DisplayWrapper, IRecyclable
     {
