@@ -720,7 +720,7 @@ public sealed class RosClient : IRosClient
             in T generator, RosTransportHint transportHint)
         where T : IMessage
     {
-        var topicInfo = new TopicInfo<T>(CallerId, topic, generator);
+        var topicInfo = new TopicInfo(CallerId, topic, generator);
         int timeoutInMs = (int)TcpRosTimeout.TotalMilliseconds;
 
         var subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs, transportHint);
@@ -745,7 +745,7 @@ public sealed class RosClient : IRosClient
             T generator, RosTransportHint transportHint, CancellationToken token)
         where T : IMessage
     {
-        var topicInfo = new TopicInfo<T>(CallerId, topic, generator);
+        var topicInfo = new TopicInfo(CallerId, topic, generator);
         int timeoutInMs = (int)TcpRosTimeout.TotalMilliseconds;
         var subscription = new RosSubscriber<T>(this, topicInfo, requestNoDelay, timeoutInMs, transportHint);
         string id = subscription.Subscribe(firstCallback);
@@ -1089,9 +1089,7 @@ public sealed class RosClient : IRosClient
 
     RosPublisher<T> CreatePublisher<T>(string topic, T generator) where T : IMessage
     {
-        var topicInfo = generator is DynamicMessage dynamicMessage
-            ? new TopicInfo<T>(CallerId, topic, dynamicMessage)
-            : new TopicInfo<T>(CallerId, topic, generator);
+        var topicInfo = new TopicInfo(CallerId, topic, generator);
 
         var publisher = new RosPublisher<T>(this, topicInfo)
             { TimeoutInMs = (int)TcpRosTimeout.TotalMilliseconds };
@@ -1121,9 +1119,7 @@ public sealed class RosClient : IRosClient
     async ValueTask<IRosPublisher> CreatePublisherAsync<T>(string topic, CancellationToken token,
         T generator) where T : IMessage
     {
-        var topicInfo = generator is DynamicMessage dynamicMessage
-            ? new TopicInfo<T>(CallerId, topic, dynamicMessage)
-            : new TopicInfo<T>(CallerId, topic, generator);
+        var topicInfo = new TopicInfo(CallerId, topic, generator);
 
         var publisher = new RosPublisher<T>(this, topicInfo)
             { TimeoutInMs = (int)TcpRosTimeout.TotalMilliseconds };

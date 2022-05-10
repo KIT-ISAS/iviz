@@ -19,7 +19,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
     readonly AsyncLock mutex = new();
     readonly HashSet<IProtocolSender<TMessage>> senders = new();
     readonly RosPublisher<TMessage> publisher;
-    readonly TopicInfo<TMessage> topicInfo;
+    readonly TopicInfo topicInfo;
     readonly CancellationTokenSource tokenSource = new();
     readonly TcpListener listener;
     readonly Task task;
@@ -92,7 +92,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
         set => latchedMessage = value ?? throw new NullReferenceException("Latched message cannot be null");
     }
 
-    public SenderManager(RosPublisher<TMessage> publisher, TopicInfo<TMessage> topicInfo)
+    public SenderManager(RosPublisher<TMessage> publisher, TopicInfo topicInfo)
     {
         this.publisher = publisher;
         this.topicInfo = topicInfo;

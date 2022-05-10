@@ -14,14 +14,15 @@ using Buffer = System.Buffer;
 
 namespace Iviz.Roslib;
 
-internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, IUdpReceiver where T : IMessage
+internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiver<TMessage>, IUdpReceiver
+    where TMessage : IMessage
 {
     const int DisposeTimeoutInMs = 2000;
 
-    readonly TopicInfo<T> topicInfo;
+    readonly TopicInfo topicInfo;
     readonly CancellationTokenSource runningTs = new();
     readonly Task task;
-    readonly ReceiverManager<T> manager;
+    readonly ReceiverManager<TMessage> manager;
 
     long numReceived;
     long numDropped;
@@ -46,8 +47,8 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
     public UdpClient UdpClient { get; }
     public string? RemoteId { get; }
 
-    public UdpReceiver(ReceiverManager<T> manager, RpcUdpTopicResponse response, UdpClient client, Uri remoteUri,
-        TopicInfo<T> topicInfo)
+    public UdpReceiver(ReceiverManager<TMessage> manager, RpcUdpTopicResponse response, UdpClient client, Uri remoteUri,
+        TopicInfo topicInfo)
     {
         this.manager = manager;
 
@@ -100,11 +101,12 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
             return;
         }
 
-        if (DynamicMessage.IsDynamic<T>() || DynamicMessage.IsGenericMessage<T>())
+        if (DynamicMessage.IsDynamic<TMessage>() || DynamicMessage.IsGenericMessage<TMessage>())
         {
             try
             {
-                this.topicInfo = RosUtils.GenerateDynamicTopicInfo<T>(topicInfo.CallerId, topicInfo.Topic, RosHeader);
+                this.topicInfo =
+                    RosUtils.GenerateDynamicTopicInfo<TMessage>(topicInfo.CallerId, topicInfo.Topic, RosHeader);
             }
             catch (RosHandshakeException e)
             {
@@ -184,7 +186,10 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
 
     async ValueTask ProcessLoop()
     {
-        var generator = topicInfo.Generator ?? throw new InvalidOperationException("Invalid generator!");
+        if (topicInfo.Generator is not IDeserializable<TMessage> generator)
+        {
+            throw new InvalidOperationException("Invalid generator!"); // shouldn'T happen
+        }
 
         Status = ReceiverStatus.Running;
         using var readBuffer = new Rent<byte>(MaxPacketSize);
@@ -292,7 +297,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         }
     }
 
-    void ProcessMessage(IDeserializable<T> generator, ReadOnlySpan<byte> array, int rcvLength)
+    void ProcessMessage(IDeserializable<TMessage> generator, ReadOnlySpan<byte> array, int rcvLength)
     {
         if (IsPaused)
         {
@@ -332,25 +337,7 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
             recommendedSize / 1024);
     }
 
-    public static RpcUdpTopicRequest CreateRequest(string ownHostname, string remoteHostname, TopicInfo<T> topicInfo)
-    {
-        string[] contents =
-        {
-            $"message_definition={topicInfo.MessageDependencies}",
-            $"callerid={topicInfo.CallerId}",
-            $"topic={topicInfo.Topic}",
-            $"md5sum={topicInfo.Md5Sum}",
-            $"type={topicInfo.Type}",
-        };
-
-        byte[] header = StreamUtils.WriteHeaderToArray(contents);
-
-        int maxPacketSize = RosUtils.TryGetMaxPacketSizeForAddress(remoteHostname) ??
-                            (UdpRosParams.DefaultMTU - UdpRosParams.Ip4UdpHeadersLength);
-        return new RpcUdpTopicRequest(header, ownHostname, maxPacketSize);
-    }
-
-    void ILoopbackReceiver<T>.Post(in T message, int rcvLength)
+    void ILoopbackReceiver<TMessage>.Post(in TMessage message, int rcvLength)
     {
         if (!IsAlive)
         {
@@ -370,5 +357,26 @@ internal sealed class UdpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
     {
         return $"[UdpReceiver for '{topicInfo.Topic}' :{Endpoint.Port.ToString()} PartnerUri={RemoteUri} " +
                $"PartnerSocket={RemoteEndpoint.Hostname}:{RemoteEndpoint.Port.ToString()}]";
+    }
+}
+
+internal static class UdpReceiver
+{
+    public static RpcUdpTopicRequest CreateRequest(string ownHostname, string remoteHostname, TopicInfo topicInfo)
+    {
+        string[] contents =
+        {
+            $"message_definition={topicInfo.MessageDependencies}",
+            $"callerid={topicInfo.CallerId}",
+            $"topic={topicInfo.Topic}",
+            $"md5sum={topicInfo.Md5Sum}",
+            $"type={topicInfo.Type}",
+        };
+
+        byte[] header = StreamUtils.WriteHeaderToArray(contents);
+
+        int maxPacketSize = RosUtils.TryGetMaxPacketSizeForAddress(remoteHostname) ??
+                            (UdpRosParams.DefaultMTU - UdpRosParams.Ip4UdpHeadersLength);
+        return new RpcUdpTopicRequest(header, ownHostname, maxPacketSize);
     }
 }

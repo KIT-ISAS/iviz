@@ -109,10 +109,10 @@ internal sealed class SenderQueue<T> where T : IMessage
         long totalQueueSizeInBytes = 0;
 
         sendQueue.Clear();
-        while (messageQueue.TryDequeue(out var element))
+        while (messageQueue.TryDequeue(out var entry))
         {
-            sendQueue.Add(element);
-            if (element is { } notNullElement)
+            sendQueue.Add(entry);
+            if (entry is { } notNullElement)
             {
                 totalQueueSizeInBytes += notNullElement.messageLength;
             }

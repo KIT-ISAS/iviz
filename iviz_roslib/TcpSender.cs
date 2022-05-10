@@ -16,7 +16,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
 {
     readonly SenderQueue<T> senderQueue;
     readonly CancellationTokenSource runningTs = new();
-    readonly TopicInfo<T> topicInfo;
+    readonly TopicInfo topicInfo;
     readonly Task task;
     readonly byte[] lengthBuffer = new byte[4];
 
@@ -69,7 +69,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
             BytesDropped = bytesDropped
         };
 
-    public TcpSender(TcpClient client, TopicInfo<T> topicInfo, NullableMessage<T> latchedMsg)
+    public TcpSender(TcpClient client, TopicInfo topicInfo, NullableMessage<T> latchedMsg)
     {
         this.topicInfo = topicInfo;
         senderQueue = new SenderQueue<T>(this);

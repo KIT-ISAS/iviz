@@ -20,12 +20,19 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
     readonly ConcurrentDictionary<Uri, IProtocolReceiver> receiversByUri = new();
     readonly RosClient client;
     readonly RosSubscriber<TMessage> subscriber;
-    readonly TopicInfo<TMessage> topicInfo;
+    readonly TopicInfo topicInfo;
     readonly RosTransportHint transportHint;
     HashSet<Uri> cachedPublisherUris = new();
 
     bool isPaused;
 
+    public string Topic => topicInfo.Topic;
+    public string TopicType => topicInfo.Type;
+    public int NumConnections => receiversByUri.Count;
+    public int NumActiveConnections => receiversByUri.Count(pair => pair.Value.IsConnected);
+    public bool RequestNoDelay { get; }
+    public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
+    
     public bool IsPaused
     {
         get => isPaused;
@@ -39,7 +46,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
         }
     }
 
-    public ReceiverManager(RosSubscriber<TMessage> subscriber, RosClient client, TopicInfo<TMessage> topicInfo,
+    public ReceiverManager(RosSubscriber<TMessage> subscriber, RosClient client, TopicInfo topicInfo,
         bool requestNoDelay, RosTransportHint transportHint)
     {
         this.subscriber = subscriber;
@@ -48,14 +55,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
         this.transportHint = transportHint;
         RequestNoDelay = requestNoDelay;
     }
-
-    public string Topic => topicInfo.Topic;
-    public string TopicType => topicInfo.Type;
-    public int NumConnections => receiversByUri.Count;
-    public int NumActiveConnections => receiversByUri.Count(pair => pair.Value.IsConnected);
-    public bool RequestNoDelay { get; }
-    public int TimeoutInMs { get; set; } = DefaultTimeoutInMs;
-
+    
     internal void MessageCallback(in TMessage msg, IRosReceiver receiver)
     {
         subscriber.MessageCallback(msg, receiver);
@@ -89,7 +89,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
                 foreach (Uri remoteUri in toAdd)
                 {
                     var udpTopicRequest = transportHint != RosTransportHint.OnlyTcp
-                        ? UdpReceiver<TMessage>.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
+                        ? UdpReceiver.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
                         : null;
 
                     if (connectorsByUri.TryGetValue(remoteUri, out var oldConnector))
@@ -158,7 +158,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
                 token.ThrowIfCancellationRequested();
 
                 var udpTopicRequest = transportHint != RosTransportHint.OnlyTcp
-                    ? UdpReceiver<TMessage>.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
+                    ? UdpReceiver.CreateRequest(client.CallerUri.Host, remoteUri.Host, topicInfo)
                     : null;
 
                 var rosNodeClient = client.CreateNodeClient(remoteUri);

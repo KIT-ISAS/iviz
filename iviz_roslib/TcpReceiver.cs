@@ -12,11 +12,12 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, ITcpReceiver where T : IMessage
+internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiver<TMessage>, ITcpReceiver
+    where TMessage : IMessage
 {
     const int DisposeTimeoutInMs = 2000;
 
-    readonly ReceiverManager<T> manager;
+    readonly ReceiverManager<TMessage> manager;
     readonly bool requestNoDelay;
     readonly CancellationTokenSource runningTs = new();
     readonly Task task;
@@ -24,7 +25,7 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
 
     int receiveBufferSize = 8192;
 
-    TopicInfo<T> topicInfo;
+    TopicInfo topicInfo;
     bool disposed;
     long numReceived;
     long bytesReceived;
@@ -44,8 +45,8 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
     public TcpClient? TcpClient { get; private set; }
     public string? RemoteId { get; private set; }
 
-    public TcpReceiver(ReceiverManager<T> manager,
-        Uri remoteUri, Endpoint remoteEndpoint, TopicInfo<T> topicInfo,
+    public TcpReceiver(ReceiverManager<TMessage> manager,
+        Uri remoteUri, Endpoint remoteEndpoint, TopicInfo topicInfo,
         bool requestNoDelay, int timeoutInMs)
     {
         RemoteUri = remoteUri;
@@ -263,15 +264,19 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
 
         RosHeader = responseHeader.ToArray();
 
-        if (DynamicMessage.IsDynamic<T>() || DynamicMessage.IsGenericMessage<T>())
+        if (DynamicMessage.IsDynamic<TMessage>() || DynamicMessage.IsGenericMessage<TMessage>())
         {
-            topicInfo = RosUtils.GenerateDynamicTopicInfo<T>(topicInfo.CallerId, topicInfo.Topic, RosHeader);
+            topicInfo = RosUtils.GenerateDynamicTopicInfo<TMessage>(topicInfo.CallerId, topicInfo.Topic, RosHeader);
         }
     }
 
     async ValueTask ProcessMessages(TcpClient client)
     {
-        var generator = topicInfo.Generator ?? throw new InvalidOperationException("Invalid generator!");
+        if (topicInfo.Generator is not IDeserializable<TMessage> generator)
+        {
+            throw new InvalidOperationException("Invalid generator!"); // shouldn'T happen
+        }
+
         using var readBuffer = new ResizableRent();
         while (KeepRunning)
         {
@@ -328,7 +333,7 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
         await ProcessMessages(client);
     }
 
-    void ILoopbackReceiver<T>.Post(in T message, int rcvLength)
+    void ILoopbackReceiver<TMessage>.Post(in TMessage message, int rcvLength)
     {
         if (!IsAlive)
         {
@@ -360,7 +365,7 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
 
     public override string ToString()
     {
-        return $"[TcpReceiver for '{Topic}' PartnerUri={RemoteUri} " +
+        return $"[{nameof(TcpReceiver<TMessage>)} for '{Topic}' PartnerUri={RemoteUri} " +
                $"PartnerSocket={RemoteEndpoint.Hostname}:{RemoteEndpoint.Port.ToString()}]";
     }
 }
