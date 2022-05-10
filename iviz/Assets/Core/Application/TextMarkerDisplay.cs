@@ -24,11 +24,7 @@ namespace Iviz.Displays
         {
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
+                ThrowHelper.ThrowIfNull(value, nameof(value));
                 TextMesh.text = value;
             }
         }

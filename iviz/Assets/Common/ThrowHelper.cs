@@ -2,12 +2,13 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
 
 namespace Iviz.Core
 {
     public static class ThrowHelper
     {
-        public static void ThrowIfNull([NotNull] UnityEngine.Object? t, string nameOfT)
+        public static void ThrowIfNull([System.Diagnostics.CodeAnalysis.NotNull] UnityEngine.Object? t, string nameOfT)
         {
             if (t == null)
             {
@@ -15,7 +16,7 @@ namespace Iviz.Core
             }
         }
 
-        public static void ThrowIfNull([NotNull] object? t, string nameOfT)
+        public static void ThrowIfNull([System.Diagnostics.CodeAnalysis.NotNull] object? t, string nameOfT)
         {
             if (t is null)
             {
@@ -23,7 +24,7 @@ namespace Iviz.Core
             }
         }
 
-        public static void ThrowIfNullOrEmpty([NotNull] string? t, string nameOfT)
+        public static void ThrowIfNullOrEmpty([System.Diagnostics.CodeAnalysis.NotNull] string? t, string nameOfT)
         {
             if (string.IsNullOrEmpty(t))
             {
@@ -39,5 +40,9 @@ namespace Iviz.Core
 
         [DoesNotReturn]
         static void ThrowArgumentNull(string paramName) => throw new ArgumentNullException(paramName);
+
+        [DoesNotReturn, AssertionMethod]
+        public static void ThrowArgument(string paramName, string message) =>
+            throw new ArgumentException(paramName, message);
     }
 }

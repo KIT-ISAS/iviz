@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Tools;
 using JetBrains.Annotations;
@@ -74,7 +75,7 @@ namespace Iviz.App
 
                 if (index < 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(index));
+                    ThrowHelper.ThrowArgumentOutOfRange();
                 }
 
                 this.buttonHeight = buttonHeight;

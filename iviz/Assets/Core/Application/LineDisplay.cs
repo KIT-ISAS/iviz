@@ -142,10 +142,7 @@ namespace Iviz.Displays
         /// <param name="reserve">The expected number of lines, or 0 if unknown.</param>
         public void SetDirect(Func<NativeList<float4x2>, bool?> callback, int reserve)
         {
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            ThrowHelper.ThrowIfNull(callback, nameof(callback));
 
             lineBuffer.EnsureCapacity(reserve);
             lineBuffer.Clear();

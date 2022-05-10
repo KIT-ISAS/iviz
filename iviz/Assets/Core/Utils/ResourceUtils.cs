@@ -40,11 +40,12 @@ namespace Iviz.Core
             {
                 return;
             }
-            
+
             if (display is not MonoBehaviour behaviour)
             {
-                throw new ArgumentException("Argument is not a MonoBehavior");
-            }            
+                ThrowHelper.ThrowArgument(nameof(display), "Argument is not a MonoBehavior");
+                return; // unreachable
+            }
 
             display.Suspend();
             ResourcePool.Return(resourceKey, behaviour.gameObject);
