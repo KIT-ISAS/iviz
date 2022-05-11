@@ -60,7 +60,7 @@ namespace Iviz.App
         {
             set => GameObject.SetActive(value);
         }
-        
+
         public string ButtonText
         {
             set => ButtonLabel.text = value;
@@ -98,8 +98,9 @@ namespace Iviz.App
 
         void IDragHandler.OnDrag(PointerEventData eventData)
         {
-            movedX += eventData.delta.x;
-            movedY += eventData.delta.y;
+            float scale = Settings.IsXR ? 1 : ModuleListPanel.CanvasScale;
+            movedX += eventData.delta.x / scale;
+            movedY += eventData.delta.y / scale;
 
             if (movedX > 0 && !allowRevealLeft
                 || movedX < 0 && !allowRevealRight

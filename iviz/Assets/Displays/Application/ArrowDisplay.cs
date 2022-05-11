@@ -51,7 +51,7 @@ namespace Iviz.Displays
 
         public void Set(in Vector3 scale)
         {
-            Arrow.Transform.localScale = new Vector3(scale.z, scale.y, scale.x);
+            Arrow.Transform.localScale = scale;
             UpdateBounds();
         }
 

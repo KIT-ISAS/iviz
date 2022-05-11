@@ -3,22 +3,21 @@
 using System;
 using Iviz.Core;
 using Iviz.Resources;
+using TMPro;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    [RequireComponent(typeof(TextMesh))]
     [RequireComponent(typeof(Billboard))]
-    [RequireComponent(typeof(MeshRenderer))]
     public sealed class TextMarkerDisplay : MarkerDisplay
     {
-        [SerializeField] TextMesh? textMesh;
+        [SerializeField] TMP_Text? textMesh;
         [SerializeField] Billboard? billboard;
-        [SerializeField] MeshRenderer? meshRenderer;
+        //[SerializeField] MeshRenderer? meshRenderer;
 
-        TextMesh TextMesh => textMesh.AssertNotNull(nameof(textMesh));
+        TMP_Text TextMesh => textMesh.AssertNotNull(nameof(textMesh));
         Billboard Billboard => billboard.AssertNotNull(nameof(billboard));
-        MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
+        //MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
 
         public string Text
         {
@@ -26,6 +25,7 @@ namespace Iviz.Displays
             {
                 ThrowHelper.ThrowIfNull(value, nameof(value));
                 TextMesh.text = value;
+                Collider.size = new Vector3(TextMesh.preferredWidth, TextMesh.preferredHeight, 0.01f);                
             }
         }
 
@@ -49,11 +49,18 @@ namespace Iviz.Displays
             set => transform.localScale = Vector3.one * value;
         }
 
+        /*)
         public bool AlwaysVisible
         {
             set => MeshRenderer.sharedMaterial = value 
                 ? Resource.Materials.FontMaterial.Object 
                 : Resource.Materials.FontMaterialZWrite.Object;
+        }
+        */
+
+        public bool AlwaysVisible
+        {
+            set { }
         }
 
         public override void Suspend()
