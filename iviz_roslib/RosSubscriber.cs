@@ -63,7 +63,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
         set => manager.TimeoutInMs = value;
     }
 
-    internal RosSubscriber(RosClient client, TopicInfo<T> topicInfo, bool requestNoDelay, int timeoutInMs,
+    internal RosSubscriber(RosClient client, TopicInfo topicInfo, bool requestNoDelay, int timeoutInMs,
         RosTransportHint transportHint)
     {
         this.client = client;
@@ -280,7 +280,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
 
     internal void PublisherUpdateRcp(IEnumerable<Uri> publisherUris, CancellationToken token)
     {
-        TaskUtils.Run(() => PublisherUpdateRcpAsync(publisherUris, token).AsTask(), token).AwaitNoThrow(this);
+        _ = TaskUtils.Run(() => PublisherUpdateRcpAsync(publisherUris, token).AsTask(), token).AwaitNoThrow(this);
     }
 
     bool IRosSubscriber<T>.TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<T>? receiver) =>

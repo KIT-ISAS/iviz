@@ -21,7 +21,7 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
     int totalPublishers;
     bool disposed;
 
-    internal RosPublisher(RosClient client, TopicInfo<TMessage> topicInfo)
+    internal RosPublisher(RosClient client, TopicInfo topicInfo)
     {
         this.client = client;
         manager = new SenderManager<TMessage>(this, topicInfo) { ForceTcpNoDelay = true };

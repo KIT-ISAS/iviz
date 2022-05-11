@@ -116,8 +116,8 @@ namespace Iviz.App
         [NotNull]
         static SimpleRobotController GetRobotWithId(string robotId)
         {
-            ModuleData robotData = ModuleListPanel.Instance.ModuleDatas.FirstOrDefault(
-                data => data.Configuration.Id == robotId);
+            var robotData =
+                ModuleListPanel.Instance.ModuleDatas.FirstOrDefault(data => data.Configuration.Id == robotId);
             if (robotData == null)
             {
                 throw new InvalidOperationException($"No robot with id '{robotId}' found");

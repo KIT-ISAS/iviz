@@ -247,10 +247,7 @@ namespace Iviz.Displays
 
         public void Set(Action<NativeList<float4>> callback, int reserve = 0)
         {
-            if (callback == null)
-            {
-                throw new ArgumentNullException(nameof(callback));
-            }
+            ThrowHelper.ThrowIfNull(callback, nameof(callback));
 
             if (reserve != 0)
             {

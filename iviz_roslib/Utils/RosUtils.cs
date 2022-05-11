@@ -84,7 +84,7 @@ internal static class RosUtils
     }
 
 
-    internal static TopicInfo<T> GenerateDynamicTopicInfo<T>(string callerId, string topicName,
+    internal static TopicInfo GenerateDynamicTopicInfo<T>(string callerId, string topicName,
         IReadOnlyCollection<string> responses) where T : IMessage
     {
         const string typePrefix = "type=";
@@ -106,12 +106,12 @@ internal static class RosUtils
             && BuiltIns.TryGetTypeFromMessageName(dynamicMsgName) is { } lookupMsgName
             && Activator.CreateInstance(lookupMsgName) is T lookupGenerator)
         {
-            return new TopicInfo<T>(callerId, topicName, lookupGenerator);
+            return new TopicInfo(callerId, topicName, lookupGenerator);
         }
 
         // T == DynamicMessage
         var generator = DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
-        return new TopicInfo<T>(callerId, topicName, generator);
+        return new TopicInfo(callerId, topicName, generator);
     }
 
     static bool IsInSameSubnet(UnicastIPAddressInformation info, IPAddress addressB)

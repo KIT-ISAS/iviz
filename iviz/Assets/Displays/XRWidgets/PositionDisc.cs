@@ -171,62 +171,6 @@ namespace Iviz.App.ARDialogs
                 Moved?.Invoke(startPosition);
             };
         }
-        
-        /*
-        void Update()
-        {
-            //base.Update();
-
-            //anchor.transform.localRotation = disc.Transform.localRotation; // copy billboard
-            if (Button.Visible)
-            {
-                var camPosition = Settings.MainCameraTransform.position;
-                Button.Transform.LookAt(2 * button.Transform.position - camPosition, Vector3.up);
-            }
-
-            var discPosition = disc.Transform.localPosition;
-            if (Line.Visible)
-            {
-                Vector3 start = Vector3.zero;
-                Vector3 diff = discPosition;
-
-                Vector3 p0 = start;
-                Vector3 p1 = start + new Vector3(0, 0, diff.z);
-                Vector3 p2 = discPosition;
-
-                lineBuffer[0] = new LineWithColor(p0, p1, Color.red.WithAlpha(0.5f));
-                lineBuffer[1] = new LineWithColor(p1, p2, Color.green.WithAlpha(0.5f));
-
-                TooltipX.Transform.localPosition = ((p1 + p0) / 2).WithY(0.5f);
-                TooltipY.Transform.localPosition = ((p2 + p1) / 2).WithY(0.5f);
-
-                TooltipX.Caption = "X: " + ((p1 - p0) / Scale).WithY(0).magnitude.ToString("0.###") + " m";
-                TooltipY.Caption = "Y: " + ((p2 - p1) / Scale).WithY(0).magnitude.ToString("0.###") + " m";
-
-                Line.Set(lineBuffer);
-            }
-
-            float discDistance = discPosition.Magnitude();
-            if (discDistance < 0.005f)
-            {
-                if (dragBack)
-                {
-                    disc.Transform.localPosition = Vector3.zero;
-                    dragBack = false;
-                    line.Visible = false;
-                    tooltipX.Visible = false;
-                    tooltipY.Visible = false;
-                }
-
-                return;
-            }
-
-            if (dragBack)
-            {
-                disc.Transform.localPosition = 0.9f * discPosition;
-            }
-        }
-        */
 
         public void Suspend()
         {

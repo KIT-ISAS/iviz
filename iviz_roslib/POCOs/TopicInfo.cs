@@ -7,14 +7,12 @@ namespace Iviz.Roslib;
 /// <summary>
 ///     Full info about a ROS topic and its message type, including dependencies.
 /// </summary>
-internal sealed class TopicInfo<T> where T : IMessage
+internal sealed class TopicInfo
 {
-    readonly IDeserializable<T>? generator;
-
     /// <summary>
     ///     Concatenated dependencies file.
     /// </summary>
-    public string MessageDependencies { get; }
+    public string MessageDependencies => BuiltIns.DecompressDependencies(Generator.RosDependenciesBase64);
 
     /// <summary>
     ///     ROS name of this node.
@@ -29,35 +27,22 @@ internal sealed class TopicInfo<T> where T : IMessage
     /// <summary>
     ///     MD5 hash of the compact representation of the message.
     /// </summary>
-    public string Md5Sum { get; }
+    public string Md5Sum => Generator.RosMd5Sum;
 
     /// <summary>
     ///     Full ROS message type.
     /// </summary>
-    public string Type { get; }
+    public string Type => Generator.RosMessageType;
 
     /// <summary>
     ///     Instance of the message used to generate others of the same type.
     /// </summary>
-    public IDeserializable<T> Generator =>
-        generator ?? throw new InvalidOperationException("This type does not have a generator!");
+    public IMessage Generator { get; }
 
-    public TopicInfo(string callerId, string topic, in T generator)
+    public TopicInfo(string callerId, string topic, IMessage generator)
     {
-        MessageDependencies = BuiltIns.DecompressDependencies(generator.RosDependenciesBase64);
         CallerId = callerId;
         Topic = topic;
-        Md5Sum = generator.RosMd5Sum;
-        Type = generator.RosMessageType;
-        this.generator = generator as IDeserializable<T> ??
-                         throw new InvalidOperationException("Type T needs to be IDeserializable");
-    }
-
-    public TopicInfo(string callerId, string topic, DynamicMessage generator)
-        : this(callerId, topic,
-            generator is T generatorT
-                ? generatorT
-                : throw new InvalidOperationException("Type T needs to be DynamicMessage"))
-    {
+        Generator = generator;
     }
 }

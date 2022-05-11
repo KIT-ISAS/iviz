@@ -27,10 +27,7 @@ namespace Iviz.Ros
 
         public Sender(string topic)
         {
-            if (string.IsNullOrWhiteSpace(topic))
-            {
-                throw new ArgumentException("Sender topic is empty!", nameof(topic));
-            }
+            ThrowHelper.ThrowIfNullOrEmpty(topic, nameof(topic));
 
             Topic = topic;
             Type = BuiltIns.GetMessageType<T>();
@@ -95,6 +92,6 @@ namespace Iviz.Ros
             description.Append(numSubscribers).Append(" sub");
         }
 
-        public override string ToString() => $"[Sender {Topic} [{Type}]]";
+        public override string ToString() => $"[{nameof(Sender<T>)} {Topic} [{Type}]]";
     }
 }

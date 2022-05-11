@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.Msgs;
 using Iviz.Resources;
 using Iviz.Tools;
 using UnityEngine;
@@ -81,7 +82,7 @@ namespace Iviz.App
         {
             if (index < 0 || index >= buttons.Count)
             {
-                throw new ArgumentOutOfRangeException(nameof(index));
+                ThrowHelper.ThrowArgumentOutOfRange();
             }
 
             ThrowHelper.ThrowIfNull(content, nameof(content));

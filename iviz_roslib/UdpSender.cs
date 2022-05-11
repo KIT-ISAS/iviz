@@ -18,7 +18,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
 {
     readonly CancellationTokenSource runningTs = new();
     readonly SenderQueue<T> senderQueue;
-    readonly TopicInfo<T> topicInfo;
+    readonly TopicInfo topicInfo;
     readonly Task task;
 
     public IReadOnlyCollection<string> RosHeader { get; }
@@ -52,7 +52,7 @@ internal sealed class UdpSender<T> : IProtocolSender<T>, IUdpSender where T : IM
     public int MaxPacketSize { get; }
     public ILoopbackReceiver<T>? LoopbackReceiver { private get; set; }
 
-    public UdpSender(RpcUdpTopicRequest request, TopicInfo<T> topicInfo, NullableMessage<T> latchedMsg,
+    public UdpSender(RpcUdpTopicRequest request, TopicInfo topicInfo, NullableMessage<T> latchedMsg,
         out byte[] responseHeader)
     {
         this.topicInfo = topicInfo;
