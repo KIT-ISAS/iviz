@@ -296,7 +296,7 @@ namespace Iviz.Core
                   $"At: {caller} line {lineNumber.ToString()}"
                 : $"Asset '{name}' has does not have a component of type '{type.Name}!\n" +
                   $"At: {caller} line {lineNumber.ToString()}";
-            throw new MissingAssetFieldException(s);
+            ThrowHelper.ThrowMissingAssetField(s);
         }
 
         [AssertionMethod]

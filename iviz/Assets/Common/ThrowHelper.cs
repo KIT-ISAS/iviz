@@ -39,5 +39,8 @@ namespace Iviz.Core
 
         [DoesNotReturn]
         static void ThrowArgumentNull(string paramName) => throw new ArgumentNullException(paramName);
+        
+        [DoesNotReturn]
+        public static void ThrowMissingAssetField(string message) => throw new MissingAssetFieldException(message);
     }
 }

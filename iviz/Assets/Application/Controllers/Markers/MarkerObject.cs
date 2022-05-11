@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -256,10 +257,16 @@ namespace Iviz.Controllers
             BoundsChanged?.Invoke();
         }
 
-        T ValidateResource<T>() where T : MarkerDisplay =>
-            resource is T result
-                ? result
-                : throw new MissingAssetFieldException("Resource does not have a marker component!");
+        T ValidateResource<T>() where T : MarkerDisplay
+        {
+            T? t = resource as T;
+            if (t is null)
+            {
+                ThrowHelper.ThrowMissingAssetField("Resource does not have a marker component!");
+            }
+
+            return t;
+        }
 
         void CreateTriangleList(Marker msg)
         {
@@ -295,7 +302,7 @@ namespace Iviz.Controllers
                 meshTriangles.Clear();
                 return;
             }
-            
+
             using var points = new Rent<Vector3>(pointsLength);
             ref Point srcPtr = ref msg.Points[0];
             ref Vector3 dstPtr = ref points.Array[0];

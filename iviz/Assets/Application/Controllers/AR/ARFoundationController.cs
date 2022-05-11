@@ -211,7 +211,7 @@ namespace Iviz.Controllers
             var arObject = Object.Instantiate(ResourcePool.AppAssetHolder.ARPrefab);
             if (!arObject.TryGetComponent(out ar))
             {
-                throw new MissingAssetFieldException("AR object does not have contents");
+                ThrowHelper.ThrowMissingAssetField("AR object does not have contents");
             }
 
             Settings.ARCamera = ar.Camera;

@@ -60,7 +60,7 @@ namespace Iviz.Controllers
             var widget = ResourcePool.Rent(resourceKey, node.Transform).GetComponent<IWidget>();
             if ((Component)widget == null)
             {
-                throw new MissingAssetFieldException("Gui object does not have a widget!");
+                ThrowHelper.ThrowMissingAssetField("Gui object does not have a widget!");
             }
 
             display = widget;
@@ -154,7 +154,7 @@ namespace Iviz.Controllers
             var dialog = ResourcePool.Rent(resourceKey, node.Transform).GetComponent<IDialog>();
             if ((Component)dialog == null)
             {
-                throw new MissingAssetFieldException("Gui object does not have a dialog!");
+                ThrowHelper.ThrowMissingAssetField("Gui object does not have a dialog!");
             }
 
             dialog.Scale = msg.Scale == 0 ? 1f : (float)msg.Scale;

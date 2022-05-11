@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Common;
 using Iviz.Core;
+using Iviz.Msgs;
 using Iviz.Tools;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;

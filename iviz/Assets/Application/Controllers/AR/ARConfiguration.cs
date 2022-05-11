@@ -13,7 +13,7 @@ namespace Iviz.Controllers
     [DataContract]
     public sealed class ARConfiguration : JsonToString, IConfiguration
     {
-        [IgnoreDataMember] public float WorldScale { get; set; } = 1.0f;
+        [DataMember] public float WorldScale { get; set; } = 1.0f;
         [IgnoreDataMember] public Vector3 WorldOffset { get; set; } = ARController.DefaultWorldOffset.ToRos();
 
         [DataMember] public bool EnableQrDetection { get; set; } = true;
