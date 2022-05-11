@@ -6,6 +6,7 @@
         <RootNamespace>Iviz.XmlRpc</RootNamespace>
         <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
         <Nullable>enable</Nullable>
+        <IsTrimmable>true</IsTrimmable>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

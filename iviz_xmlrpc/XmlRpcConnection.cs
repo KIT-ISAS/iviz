@@ -59,12 +59,12 @@ namespace Iviz.XmlRpc
 
             if (callerUri is null)
             {
-                throw new ArgumentNullException(nameof(callerUri));
+                BaseUtils.ThrowArgumentNull(nameof(callerUri));
             }
 
             if (args is null)
             {
-                throw new ArgumentNullException(nameof(args));
+                BaseUtils.ThrowArgumentNull(nameof(args));
             }
 
             token.ThrowIfCancellationRequested();

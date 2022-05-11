@@ -103,7 +103,7 @@ namespace Iviz.XmlRpc
         {
             if (handler is null)
             {
-                throw new ArgumentNullException(nameof(handler));
+                BaseUtils.ThrowArgumentNull(nameof(handler));
             }
 
             var token = runningTs.Token;

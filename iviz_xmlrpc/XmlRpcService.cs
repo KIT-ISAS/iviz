@@ -211,17 +211,17 @@ namespace Iviz.XmlRpc
         {
             if (remoteUri is null)
             {
-                throw new ArgumentNullException(nameof(remoteUri));
+                BaseUtils.ThrowArgumentNull(nameof(remoteUri));
             }
 
             if (callerUri is null)
             {
-                throw new ArgumentNullException(nameof(callerUri));
+                BaseUtils.ThrowArgumentNull(nameof(callerUri));
             }
 
             if (args is null)
             {
-                throw new ArgumentNullException(nameof(args));
+                BaseUtils.ThrowArgumentNull(nameof(args));
             }
 
             string inData;
@@ -286,12 +286,12 @@ namespace Iviz.XmlRpc
         {
             if (httpContext is null)
             {
-                throw new ArgumentNullException(nameof(httpContext));
+                BaseUtils.ThrowArgumentNull(nameof(httpContext));
             }
 
             if (methods is null)
             {
-                throw new ArgumentNullException(nameof(methods));
+                BaseUtils.ThrowArgumentNull(nameof(methods));
             }
 
             string inData = await httpContext.GetRequestAsync(token: token);

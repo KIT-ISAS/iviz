@@ -56,23 +56,6 @@ namespace Iviz.XmlRpc
         /// <exception cref="OperationCanceledException">Thrown if the token expired</exception>
         public async ValueTask RespondAsync(Rent<byte> msgOut, int timeoutInMs = 2000, CancellationToken token = default)
         {
-            /*
-            if (msgOut is null)
-            {
-                throw new ArgumentNullException(nameof(msgOut));
-            }
-            */
-
-            //int msgOutLength = Defaults.UTF8.GetByteCount(msgOut);
-            /*
-            string str = "HTTP/1.0 200 OK\r\n" +
-                         "Server: iviz XML-RPC\r\n" +
-                         "Connection: close\r\n" +
-                         "Content-Type: text/xml; charset=utf-8\r\n" +
-                         $"Content-Length: {msgOutLength.ToString()}\r\n\r\n" +
-                         msgOut;
-                         */
-
             Rent<byte> bytes;
             using (var str = BuilderPool.Rent())
             {
