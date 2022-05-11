@@ -303,7 +303,7 @@ internal sealed class TcpSender<T> : IProtocolSender<T>, ITcpSender where T : IM
 
                 writeBuffer.EnsureCapacity(msgLength + 4);
 
-                writeBuffer[..4].Write(msgLength);
+                writeBuffer[..4].WriteInt(msgLength);
                 msg.SerializeTo(writeBuffer[4..]);
                 
                 await TcpClient.WriteChunkAsync(writeBuffer.Array, msgLength + 4, runningTs.Token);

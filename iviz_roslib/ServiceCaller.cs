@@ -99,7 +99,7 @@ internal sealed class ServiceCaller : IDisposable
             throw new IOException("Partner closed connection");
         }
 
-        int length = lengthBuffer.Read<int>();
+        int length = lengthBuffer.ReadInt();
 
         if (length == 0)
         {

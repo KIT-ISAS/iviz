@@ -291,7 +291,7 @@ internal sealed class ServiceRequest
     static void WriteHeader(Span<byte> array, byte status, int length)
     {
         array[0] = status;
-        array[1..].Write(length);
+        array[1..].WriteInt(length);
     }
 
     public override string ToString()

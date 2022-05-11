@@ -179,7 +179,7 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
             return -1;
         }
 
-        int length = array.Read<int>();
+        int length = array.ReadInt();
         if (length == 0)
         {
             return 0;
@@ -207,7 +207,7 @@ internal sealed class TcpReceiver<T> : IProtocolReceiver, ILoopbackReceiver<T>, 
             return -1;
         }
 
-        int length = readBuffer.AsSpan().Read<int>();
+        int length = readBuffer.AsSpan().ReadInt();
         if (length == 0)
         {
             return 0;

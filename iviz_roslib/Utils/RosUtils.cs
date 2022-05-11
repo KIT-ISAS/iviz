@@ -29,7 +29,7 @@ internal static class RosUtils
         List<string> contents = new();
         while (numRead < toRead)
         {
-            int length = readBuffer[numRead..].Read<int>();
+            int length = readBuffer[numRead..].ReadInt();
             if (length is < 0 or > maxEntrySize)
             {
                 throw new RosInvalidHeaderException($"Invalid packet size {length}");
