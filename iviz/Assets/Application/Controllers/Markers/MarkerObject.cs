@@ -46,7 +46,9 @@ namespace Iviz.Controllers
         ResourceKey<GameObject>? resourceKey;
         CancellationTokenSource? runningTs;
         BoundsHighlighter? highlighter;
+
         Marker? lastMessage;
+        int? triangleMeshFailedIndex;
 
         Pose localPose;
         Vector3 localScale;
@@ -300,6 +302,7 @@ namespace Iviz.Controllers
             if (pointsLength == 0)
             {
                 meshTriangles.Clear();
+                triangleMeshFailedIndex = null;
                 return;
             }
 
@@ -309,12 +312,20 @@ namespace Iviz.Controllers
             for (int i = 0; i < pointsLength; i++)
             {
                 srcPtr.Ros2Unity(out dstPtr);
+                if (dstPtr.IsInvalid()) // unlikely but needed!
+                {
+                    meshTriangles.Clear();
+                    triangleMeshFailedIndex = i;
+                    return;
+                }
+
                 srcPtr = ref srcPtr.Plus(1);
                 dstPtr = ref dstPtr.Plus(1);
             }
 
             var colors = MemoryMarshal.Cast<ColorRGBA, Color>(msg.Colors);
             meshTriangles.Set(points, colors);
+            triangleMeshFailedIndex = null;
         }
 
         void CreatePoints(Marker msg)
@@ -443,7 +454,10 @@ namespace Iviz.Controllers
                 case 2:
                 {
                     float sx = Mathf.Abs((float)msg.Scale.X);
-                    if (sx.IsInvalid() || sx.ApproximatelyZero())
+                    if (sx.IsInvalid()
+                        || sx.ApproximatelyZero()
+                        || msg.Points[0].IsInvalid()
+                        || msg.Points[1].IsInvalid())
                     {
                         arrowMarker.Visible = false;
                         return;
@@ -789,22 +803,27 @@ namespace Iviz.Controllers
 
                         if (msg.Scale.IsInvalid())
                         {
-                            description.Append(WarnStr).Append("Scale value of NaN").AppendLine();
+                            description.Append(WarnStr).Append("Scale value invalid").AppendLine();
                         }
 
                         break;
                     case 2:
-                        float sx = Mathf.Abs((float)msg.Scale.X);
+                        float sx = (float)msg.Scale.X;
                         AppendColorLog(msg.Color);
                         AppendScalarLog(msg.Scale.X);
 
-                        if (sx == 0)
+                        if (sx.ApproximatelyZero())
                         {
                             description.Append(WarnStr).Append("Scale value of 0").AppendLine();
                         }
                         else if (sx.IsInvalid())
                         {
                             description.Append(WarnStr).Append("Scale value of NaN or infinite").AppendLine();
+                        }
+
+                        if (msg.Points[0].IsInvalid() || msg.Points[1].IsInvalid())
+                        {
+                            description.Append(WarnStr).Append("Start or end point is invalid").AppendLine();
                         }
 
                         break;
@@ -1000,6 +1019,12 @@ namespace Iviz.Controllers
                 {
                     description.Append(ErrorStr).Append("Point array length ").Append(msg.Colors.Length)
                         .Append(" needs to be a multiple of 3").AppendLine();
+                }
+                
+                if (triangleMeshFailedIndex is { } failedIndex)
+                {
+                    description.Append(ErrorStr).Append("Index ").Append(failedIndex).Append(" has invalid values")
+                        .AppendLine();
                 }
             }
 
