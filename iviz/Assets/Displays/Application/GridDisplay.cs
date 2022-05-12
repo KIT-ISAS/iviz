@@ -167,7 +167,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            (float camX, _, float camZ) = TfModule.RelativeToOrigin(Settings.MainCameraTransform.position);
+            (float camX, _, float camZ) = TfModule.RelativeToOrigin(Settings.MainCameraPose.position);
             switch (Orientation)
             {
                 case GridOrientation.XY:

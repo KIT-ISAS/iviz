@@ -74,6 +74,7 @@ namespace Iviz.Controllers
                 else if (text != null)
                 {
                     text.ReturnToPool();
+                    text = null;
                 }
             }
         }
@@ -112,9 +113,9 @@ namespace Iviz.Controllers
             set
             {
                 interactable = value;
-                foreach (var controlObject in controls.Values)
+                foreach (var control in controls.Values)
                 {
-                    controlObject.Interactable = value;
+                    control.Interactable = value;
                 }
             }
         }
@@ -124,7 +125,7 @@ namespace Iviz.Controllers
             this.listener = listener;
             this.rosId = rosId;
 
-            node = new FrameNode($"InteractiveMarkerObject '{rosId}'", parent);
+            node = new FrameNode($"{nameof(InteractiveMarkerObject)} '{rosId}'", parent);
 
             ControlNode = new GameObject("[ControlNode]").transform;
             ControlNode.SetParentLocal(node.Transform);
@@ -149,7 +150,7 @@ namespace Iviz.Controllers
             {
                 string controlId = controlMsg.Name.Length != 0
                     ? controlMsg.Name
-                    : $"Unnamed/{(numUnnamed++).ToString()}";
+                    : $"[{(numUnnamed++).ToString()}]";
 
                 controlsToDelete.Remove(controlId);
 
@@ -233,9 +234,9 @@ namespace Iviz.Controllers
 
         public void Dispose()
         {
-            foreach (var controlObject in controls.Values)
+            foreach (var control in controls.Values)
             {
-                controlObject.Dispose();
+                control.Dispose();
             }
 
             controls.Clear();
@@ -253,18 +254,13 @@ namespace Iviz.Controllers
                 return;
             }
 
-            description.Append("<color=blue><b>** ");
+            description.Append("<color=blue><b>-- ");
 
-            if (string.IsNullOrEmpty(lastMessage.Name))
-            {
-                description.Append("(empty name)");
-            }
-            else
-            {
-                description.Append("'").Append(lastMessage.Name).Append("'");
-            }
+            description.Append(string.IsNullOrEmpty(lastMessage.Name)
+                ? "(empty name) --"
+                : lastMessage.Name);
 
-            description.Append("</b></color>").AppendLine();
+            description.Append(" --</b></color>").AppendLine();
 
             string msgDescription = lastMessage.Description.Length != 0
                 ? lastMessage.Description.Replace("\t", "\\t").Replace("\n", "\\n")
@@ -288,10 +284,14 @@ namespace Iviz.Controllers
             if (menuEntries != null)
             {
                 description.Append("+ ").Append(menuEntries.Count).Append(" menu entries").AppendLine();
-                if (controls.Values.All(control => control.InteractionMode != InteractionMode.Menu))
+                if (!controls.Values.Any(control => control.InteractionMode == InteractionMode.Menu))
                 {
                     description.Append(WarnStr)
                         .Append("Menu entries were set, but no control has interaction mode MENU").AppendLine();
+                    if (controls.Values.Any(control => control.InteractionMode != InteractionMode.Button))
+                    {
+                        description.Append(WarnStr).Append("Note: Buttons as menus are not implemented").AppendLine();
+                    }
                 }
 
                 if (menuEntries.ErrorMessages != null)

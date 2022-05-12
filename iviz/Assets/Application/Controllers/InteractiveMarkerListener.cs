@@ -56,9 +56,9 @@ namespace Iviz.Controllers
                 }
 
                 config.DescriptionsVisible = value;
-                foreach (var interactiveMarker in interactiveMarkers.Values)
+                foreach (var marker in interactiveMarkers.Values)
                 {
-                    interactiveMarker.DescriptionVisible = value;
+                    marker.DescriptionVisible = value;
                 }
             }
         }
@@ -70,7 +70,7 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
 
-                foreach (InteractiveMarkerObject marker in interactiveMarkers.Values)
+                foreach (var marker in interactiveMarkers.Values)
                 {
                     marker.Visible = value;
                 }
@@ -83,9 +83,9 @@ namespace Iviz.Controllers
             set
             {
                 interactable = value;
-                foreach (var interactiveMarker in interactiveMarkers.Values)
+                foreach (var marker in interactiveMarkers.Values)
                 {
-                    interactiveMarker.Interactable = value;
+                    marker.Interactable = value;
                 }
             }
         }
@@ -98,9 +98,9 @@ namespace Iviz.Controllers
         {
             ThrowHelper.ThrowIfNull(description, nameof(description));
 
-            foreach (var interactiveMarker in interactiveMarkers.Values.Skip(minIndex).Take(numEntries))
+            foreach (var marker in interactiveMarkers.Values.Skip(minIndex).Take(numEntries))
             {
-                interactiveMarker.GenerateLog(description);
+                marker.GenerateLog(description);
                 description.AppendLine();
             }
 
@@ -119,7 +119,7 @@ namespace Iviz.Controllers
                 };
 
                 int totalErrors = 0, totalWarnings = 0;
-                foreach (InteractiveMarkerObject marker in interactiveMarkers.Values)
+                foreach (var marker in interactiveMarkers.Values)
                 {
                     marker.GetErrorCount(out int numErrors, out int numWarnings);
                     totalErrors += numErrors;
@@ -194,9 +194,9 @@ namespace Iviz.Controllers
         {
             base.Dispose();
 
-            foreach (var markerObject in interactiveMarkers.Values)
+            foreach (var marker in interactiveMarkers.Values)
             {
-                markerObject.Dispose();
+                marker.Dispose();
             }
 
             interactiveMarkers.Clear();
@@ -309,7 +309,7 @@ namespace Iviz.Controllers
                 MousePointValid = position != null
             };
             Publisher?.Publish(msg);
-            RosLogger.Debug($"{this}: {nameof(OnControlMouseEvent)} Marker:{interactiveMarkerId} Type:{eventType}");
+            //RosLogger.Debug($"{this}: {nameof(OnControlMouseEvent)} Marker:{interactiveMarkerId} Type:{eventType}");
         }
 
         internal void OnControlMoved(
@@ -342,15 +342,15 @@ namespace Iviz.Controllers
                 MenuEntryId = menuEntryId
             };
             Publisher?.Publish(msg);
-            RosLogger.Debug($"{this}: {nameof(OnControlMenuSelect)} " +
-                            $"Marker:{interactiveMarkerId} Entry:{menuEntryId.ToString()}");
+            //RosLogger.Debug($"{this}: {nameof(OnControlMenuSelect)} " +
+            //                $"Marker:{interactiveMarkerId} Entry:{menuEntryId.ToString()}");
         }
 
         void DestroyAllMarkers()
         {
-            foreach (InteractiveMarkerObject markerObject in interactiveMarkers.Values)
+            foreach (var marker in interactiveMarkers.Values)
             {
-                markerObject.Dispose();
+                marker.Dispose();
             }
 
             interactiveMarkers.Clear();
@@ -358,7 +358,7 @@ namespace Iviz.Controllers
 
         public override string ToString()
         {
-            return $"[InteractiveMarkerListener '{Topic}']";
+            return $"[{nameof(InteractiveMarkerListener)} '{Topic}']";
         }
     }
 }

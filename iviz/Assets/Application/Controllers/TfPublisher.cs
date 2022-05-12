@@ -137,6 +137,7 @@ namespace Iviz.Controllers.TF
             if (panelData != null && panelData.Frame.Id == frameId)
             {
                 panelData.HidePanel();
+                panelData = null;
             }
 
             return true;

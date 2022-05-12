@@ -149,8 +149,8 @@ namespace Iviz.Controllers
             instance = this;
 
             Publisher = new Sender<TFMessage>(TfModule.DefaultTopic);
-            ListenerStatic = new Listener<TFMessage>(TfModule.DefaultTopicStatic, HandlerStatic);
-            Listener = new Listener<TFMessage>(TfModule.DefaultTopic, HandlerNonStatic);
+            ListenerStatic = new Listener<TFMessage>(TfModule.DefaultTopicStatic, HandleStatic);
+            Listener = new Listener<TFMessage>(TfModule.DefaultTopic, HandleNonStatic);
 
             Config = config ?? new TfConfiguration
             {
@@ -173,7 +173,7 @@ namespace Iviz.Controllers
             }
         }
 
-        bool HandlerNonStatic(TFMessage msg, IRosReceiver? _)
+        bool HandleNonStatic(TFMessage msg, IRosReceiver? _)
         {
             if (incomingMessages.Count > MaxQueueSize)
             {
@@ -184,7 +184,7 @@ namespace Iviz.Controllers
             return true;
         }
 
-        bool HandlerStatic(TFMessage msg, IRosReceiver? _)
+        bool HandleStatic(TFMessage msg, IRosReceiver? _)
         {
             if (incomingMessages.Count > MaxQueueSize)
             {
@@ -220,15 +220,15 @@ namespace Iviz.Controllers
             string parentFrameId;
             Pose localPose;
 
-            if (frame.Parent is { } parentFrame && parentFrame != TfModule.OriginFrame)
+            if (frame.Parent == null || frame.Parent == TfModule.OriginFrame)
             {
-                parentFrameId = parentFrame.Id;
-                localPose = frame.Transform.AsLocalPose();
+                parentFrameId = "";
+                localPose = TfModule.RelativeToFixedFrame(frame.Transform);
             }
             else
             {
-                parentFrameId = FixedFrameId;
-                localPose = TfModule.RelativeToFixedFrame(frame.Transform);
+                parentFrameId = frame.Parent.Id;
+                localPose = frame.Transform.AsLocalPose();
             }
 
             if (localPose.position.IsInvalid() || localPose.rotation.IsInvalid())

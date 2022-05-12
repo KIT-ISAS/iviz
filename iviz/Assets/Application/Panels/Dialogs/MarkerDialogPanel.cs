@@ -15,26 +15,50 @@ namespace Iviz.App
         [SerializeField] DataLabelWidget? label;
         [SerializeField] TMP_Text? text;
         [SerializeField] LinkResolver? linkResolver;
+        [SerializeField] Button? left;
+        [SerializeField] Button? right;
+        [SerializeField] TMP_Text? leftText;
+        [SerializeField] TMP_Text? rightText;
 
+        Button Reset => reset.AssertNotNull(nameof(reset));
+        LinkResolver LinkResolver => linkResolver.AssertNotNull(nameof(linkResolver));
+        Button Left => left.AssertNotNull(nameof(left));
+        Button Right => right.AssertNotNull(nameof(right));
+        TMP_Text LeftText => leftText.AssertNotNull(nameof(leftText));
+        TMP_Text RightText => rightText.AssertNotNull(nameof(rightText));
         public TrashButtonWidget Close => close.AssertNotNull(nameof(close));
         public DataLabelWidget Label => label.AssertNotNull(nameof(label));
         public TMP_Text Text => text.AssertNotNull(nameof(text));
-        LinkResolver LinkResolver => linkResolver.AssertNotNull(nameof(linkResolver));
+
+        public event Action<int>? Flipped; 
+        
+        public string LeftCaption
+        {
+            set => LeftText.text = value;
+        }
+
+        public string RightCaption
+        {
+            set => RightText.text = value;
+        }
 
         public event Action? ResetAll;
         public event Action<string>? LinkClicked;
 
         void Awake()
         {
-            reset.AssertNotNull(nameof(reset)).onClick.AddListener(() => ResetAll?.Invoke());
+            Reset.onClick.AddListener(() => ResetAll?.Invoke());
             LinkResolver.LinkClicked += s => LinkClicked?.Invoke(s);
+            Left.onClick.AddListener(() => Flipped?.Invoke(-1));
+            Right.onClick.AddListener(() => Flipped?.Invoke(1));
         }
         
         public override void ClearSubscribers()
         {
             Close.ClearSubscribers();
-            LinkClicked = null;
             ResetAll = null;
+            LinkClicked = null;
+            Flipped = null;
         }
     }
 }

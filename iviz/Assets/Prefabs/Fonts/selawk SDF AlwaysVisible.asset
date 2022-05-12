@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: selawk Atlas Material
-  m_Shader: {fileID: 4800000, guid: 68e6db2ebdc24f95958faec2be5558d6, type: 3}
+  m_Shader: {fileID: 4800000, guid: dd89cf5b9246416f84610a006f916af7, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -161,11 +161,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
-  m_Name: selawk SDF
+  m_Name: selawk SDF AlwaysVisible
   m_EditorClassIdentifier: 
-  hashCode: 443444086
+  hashCode: -570520215
   material: {fileID: -6388908872585162227}
-  materialHashCode: 197272342
+  materialHashCode: -1768720087
   m_Version: 1.1.0
   m_SourceFontFileGUID: ef36bb8981aae42299b70d71c2f27488
   m_SourceFontFile_EditorRef: {fileID: 12800000, guid: ef36bb8981aae42299b70d71c2f27488,

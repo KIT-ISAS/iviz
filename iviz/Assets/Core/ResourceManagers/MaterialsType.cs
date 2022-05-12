@@ -9,7 +9,7 @@ namespace Iviz.Resources
     public sealed class MaterialsType
     {
         public ResourceKey<Material> FontMaterial { get; }
-        public ResourceKey<Material> FontMaterialZWrite { get; }
+        public ResourceKey<Material> FontMaterialAlwaysVisible { get; }
 
         public ResourceKey<Material> Lit { get; }
         public ResourceKey<Material> TransparentLit { get; }
@@ -68,7 +68,7 @@ namespace Iviz.Resources
             //AtlasLargeFlip = appAssetHolder.AtlasLargeFlip.AssertNotNull(nameof(appAssetHolder.AtlasLargeFlip));
 
             FontMaterial = Create(assetHolder.FontMaterial);
-            FontMaterialZWrite = Create(assetHolder.FontMaterialZWrite);
+            FontMaterialAlwaysVisible = Create(assetHolder.FontMaterialZWrite);
 
             Lit = Create(assetHolder.Lit, nameof(assetHolder.Lit));
             TexturedLit = Create(assetHolder.TexturedLit, nameof(assetHolder.TexturedLit));

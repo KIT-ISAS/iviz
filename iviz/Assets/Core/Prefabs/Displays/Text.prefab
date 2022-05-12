@@ -85,6 +85,7 @@ MonoBehaviour:
   boxCollider: {fileID: 1128600323534261624}
   textMesh: {fileID: 4129823898610353578}
   billboard: {fileID: 3697026927689715932}
+  meshRenderer: {fileID: 2410140431391594300}
 --- !u!222 &7915898597591187390
 CanvasRenderer:
   m_ObjectHideFlags: 0

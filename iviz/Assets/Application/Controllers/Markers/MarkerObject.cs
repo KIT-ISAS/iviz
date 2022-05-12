@@ -18,6 +18,7 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
+using UnityEditor.PackageManager;
 using UnityEngine;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
@@ -59,6 +60,7 @@ namespace Iviz.Controllers
         bool shadowsEnabled = true;
         bool occlusionOnly;
         bool triangleListFlipWinding;
+        int numErrors, numWarnings;
 
         internal Quaternion LocalRotation => localPose.rotation;
         public DateTime ExpirationTime { get; private set; }
@@ -194,9 +196,13 @@ namespace Iviz.Controllers
                 ? DateTime.MaxValue
                 : GameThread.Now + msg.Lifetime.ToTimeSpan();
 
+            numErrors = 0;
+            numWarnings = 0;
+
             if (msg.Type is < 0 or > (int)MarkerType.TriangleList)
             {
                 // out!
+                numErrors++;
                 StopLoadResourceTask();
                 DiscardResource();
                 return;
@@ -213,10 +219,17 @@ namespace Iviz.Controllers
             catch (Exception e)
             {
                 RosLogger.Error($"{this}: Failed to update resource", e);
+                numErrors++;
                 return;
             }
 
-            if (runningTs is { Token: { IsCancellationRequested: true } } || resource == null)
+            if (resource == null)
+            {
+                numErrors++;
+                return;
+            }
+
+            if (runningTs is { Token: { IsCancellationRequested: true } })
             {
                 return;
             }
@@ -274,11 +287,18 @@ namespace Iviz.Controllers
         {
             var meshTriangles = ValidateResource<MeshTrianglesDisplay>();
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
-                || msg.Color.A.ApproximatelyZero()
                 || msg.Color.IsInvalid()
                 || msg.Points.Length % 3 != 0
                 || msg.Points.Length > NativeList.MaxElements)
             {
+                numErrors++;
+                meshTriangles.Clear();
+                return;
+            }
+            
+            if (msg.Color.A.ApproximatelyZero())
+            {
+                numWarnings++;
                 meshTriangles.Clear();
                 return;
             }
@@ -334,10 +354,17 @@ namespace Iviz.Controllers
             pointList.ElementScale = Mathf.Abs((float)msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
-                || msg.Color.A.ApproximatelyZero()
                 || msg.Color.IsInvalid()
                 || msg.Points.Length > NativeList.MaxElements)
             {
+                numErrors++;
+                pointList.Reset();
+                return;
+            }
+
+            if (msg.Color.A.ApproximatelyZero())
+            {
+                numWarnings++;
                 pointList.Reset();
                 return;
             }
@@ -358,12 +385,19 @@ namespace Iviz.Controllers
             float elementScale = Mathf.Abs((float)msg.Scale.X);
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
-                || elementScale.ApproximatelyZero()
                 || elementScale.IsInvalid()
-                || msg.Color.A.ApproximatelyZero()
                 || msg.Color.IsInvalid()
                 || msg.Points.Length > NativeList.MaxElements)
             {
+                numErrors++;
+                lineResource.Reset();
+                return;
+            }
+
+            if (elementScale.ApproximatelyZero()
+                || msg.Color.A.ApproximatelyZero())
+            {
+                numWarnings++;
                 lineResource.Reset();
                 return;
             }
@@ -393,11 +427,17 @@ namespace Iviz.Controllers
 
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || msg.Color.IsInvalid()
-                || msg.Color.A.ApproximatelyZero()
                 || msg.Scale.IsInvalid()
-                || msg.Scale.ApproximatelyZero()
                 || msg.Points.Length > NativeList.MaxElements)
             {
+                numErrors++;
+                meshList.Reset();
+                return;
+            }
+
+            if (msg.Color.A.ApproximatelyZero() || msg.Scale.ApproximatelyZero())
+            {
+                numWarnings++;
                 meshList.Reset();
                 return;
             }
@@ -416,6 +456,18 @@ namespace Iviz.Controllers
         void CreateTextResource(Marker msg)
         {
             var textResource = ValidateResource<TextMarkerDisplay>();
+
+            if (msg.Scale.Z.ApproximatelyZero())
+            {
+                numWarnings++;
+            }
+            else if (msg.Scale.Z.IsInvalid())
+            {
+                numErrors++;
+                textResource.Text = "";
+                return;
+            }
+
             textResource.Text = msg.Text;
             textResource.Color = msg.Color.Sanitize().ToUnity();
             textResource.BillboardEnabled = true;
@@ -429,7 +481,22 @@ namespace Iviz.Controllers
                 hasColor.Color = msg.Color.Sanitize().ToUnity();
             }
 
-            var newScale = msg.Scale.Ros2Unity().Abs();
+            Vector3 newScale;
+            if (msg.Scale.MaxAbsCoeff().ApproximatelyZero())
+            {
+                numWarnings++;
+                newScale = Vector3.zero;
+            }
+            else if (msg.Scale.IsInvalid())
+            {
+                numErrors++;
+                newScale = Vector3.zero;
+            }
+            else
+            {
+                newScale = msg.Scale.Ros2Unity().Abs();
+            }
+
             Transform.localScale = localScale = newScale;
         }
 
@@ -441,9 +508,17 @@ namespace Iviz.Controllers
             {
                 case 0:
                 {
-                    if (msg.Scale.IsInvalid() || msg.Scale.ApproximatelyZero())
+                    if (msg.Scale.IsInvalid())
                     {
                         arrowMarker.Visible = false;
+                        numErrors++;
+                        return;
+                    }
+
+                    if (msg.Scale.ApproximatelyZero())
+                    {
+                        arrowMarker.Visible = false;
+                        numWarnings++;
                         return;
                     }
 
@@ -455,10 +530,17 @@ namespace Iviz.Controllers
                 {
                     float sx = Mathf.Abs((float)msg.Scale.X);
                     if (sx.IsInvalid()
-                        || sx.ApproximatelyZero()
                         || msg.Points[0].IsInvalid()
                         || msg.Points[1].IsInvalid())
                     {
+                        numWarnings++;
+                        arrowMarker.Visible = false;
+                        return;
+                    }
+
+                    if (sx.ApproximatelyZero())
+                    {
+                        numWarnings++;
                         arrowMarker.Visible = false;
                         return;
                     }
@@ -467,6 +549,9 @@ namespace Iviz.Controllers
                     arrowMarker.Set(msg.Points[0].Ros2Unity(), msg.Points[1].Ros2Unity(), sx);
                     break;
                 }
+                default:
+                    numErrors++;
+                    break;
             }
         }
 
@@ -539,6 +624,7 @@ namespace Iviz.Controllers
         {
             if (msg.Pose.IsInvalid())
             {
+                numErrors++;
                 return;
             }
 
@@ -610,8 +696,8 @@ namespace Iviz.Controllers
 
         public void GetErrorCount(out int totalErrors, out int totalWarnings)
         {
-            totalErrors = 0;
-            totalWarnings = 0;
+            totalErrors = numErrors;
+            totalWarnings = numWarnings;
         }
 
         bool HasSameHash(Marker msg, bool useScale = false)
@@ -700,6 +786,7 @@ namespace Iviz.Controllers
 
             if (msg.Type is < 0 or > (int)MarkerType.TriangleList)
             {
+                description.Append(ErrorStr).Append("Unknown marker type.").AppendLine();
                 return;
             }
 
@@ -757,7 +844,7 @@ namespace Iviz.Controllers
 
                 if (msg.Pose.IsInvalid())
                 {
-                    description.Append(WarnStr).Append("Pose contains NaN values").AppendLine();
+                    description.Append(ErrorStr).Append("Pose contains NaN values").AppendLine();
                     return;
                 }
 
@@ -777,11 +864,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                if (msg.Type() != MarkerType.MeshResource)
-                {
-                    description.Append(ErrorStr).Append("Unknown marker type ").Append(msg.Type).AppendLine();
-                }
-                else
+                if (msg.Type() == MarkerType.MeshResource)
                 {
                     description.Append(WarnStr).Append("Unknown mesh resource '").Append(msg.MeshResource).Append("'")
                         .AppendLine();
@@ -803,7 +886,7 @@ namespace Iviz.Controllers
 
                         if (msg.Scale.IsInvalid())
                         {
-                            description.Append(WarnStr).Append("Scale value invalid").AppendLine();
+                            description.Append(ErrorStr).Append("Scale value invalid").AppendLine();
                         }
 
                         break;
@@ -818,12 +901,12 @@ namespace Iviz.Controllers
                         }
                         else if (sx.IsInvalid())
                         {
-                            description.Append(WarnStr).Append("Scale value of NaN or infinite").AppendLine();
+                            description.Append(ErrorStr).Append("Scale value invalid").AppendLine();
                         }
 
                         if (msg.Points[0].IsInvalid() || msg.Points[1].IsInvalid())
                         {
-                            description.Append(WarnStr).Append("Start or end point is invalid").AppendLine();
+                            description.Append(ErrorStr).Append("Start or end point is invalid").AppendLine();
                         }
 
                         break;
@@ -854,9 +937,14 @@ namespace Iviz.Controllers
                 AppendColorLog(msg.Color);
                 AppendScalarLog(msg.Scale.Z);
 
-                if (msg.Scale.Z.ApproximatelyZero() || msg.Scale.Z.IsInvalid())
+                if (msg.Scale.Z.ApproximatelyZero())
                 {
-                    description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
+                    description.Append(WarnStr).Append("Scale value of 0").AppendLine();
+                }
+
+                if (msg.Scale.Z.IsInvalid())
+                {
+                    description.Append(ErrorStr).Append("Scale value of NaN").AppendLine();
                 }
             }
 
@@ -895,7 +983,7 @@ namespace Iviz.Controllers
 
                 if (msg.Color.IsInvalid())
                 {
-                    description.Append(ErrorStr).Append("Color field has NaN. Marker will not be visible").AppendLine();
+                    description.Append(ErrorStr).Append("Color field is invalid").AppendLine();
                 }
             }
 
@@ -915,9 +1003,15 @@ namespace Iviz.Controllers
                     description.Append("Elements: ").Append(msg.Points.Length).AppendLine();
                 }
 
-                if (elementScale.IsInvalid() || elementScale.ApproximatelyZero())
+                if (elementScale.IsInvalid())
                 {
-                    description.Append(WarnStr).Append("Scale value of 0 or NaN").AppendLine();
+                    description.Append(ErrorStr).Append("Scale value invalid").AppendLine();
+                    return;
+                }
+
+                if (elementScale.ApproximatelyZero())
+                {
+                    description.Append(WarnStr).Append("Scale value of 0").AppendLine();
                     return;
                 }
 
@@ -936,9 +1030,14 @@ namespace Iviz.Controllers
                         .Append(NativeList.MaxElements);
                 }
 
-                if (msg.Color.IsInvalid() || msg.Color.A.ApproximatelyZero())
+                if (msg.Color.A.ApproximatelyZero())
                 {
-                    description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
+                    description.Append(WarnStr).Append("Color field has alpha 0").AppendLine();
+                }
+                
+                if (msg.Color.IsInvalid())
+                {
+                    description.Append(ErrorStr).Append("Color field is invalid").AppendLine();
                 }
             }
 
@@ -954,9 +1053,15 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                if (msg.Color.IsInvalid() || msg.Color.A.ApproximatelyZero())
+                if (msg.Color.IsInvalid())
                 {
-                    description.Append(WarnStr).Append("Color field has alpha 0 or NaN").AppendLine();
+                    description.Append(ErrorStr).Append("Color field is invalid").AppendLine();
+                    return;
+                }
+
+                if (msg.Color.A.ApproximatelyZero())
+                {
+                    description.Append(WarnStr).Append("Color field has alpha 0").AppendLine();
                     return;
                 }
 
@@ -1020,7 +1125,7 @@ namespace Iviz.Controllers
                     description.Append(ErrorStr).Append("Point array length ").Append(msg.Colors.Length)
                         .Append(" needs to be a multiple of 3").AppendLine();
                 }
-                
+
                 if (triangleMeshFailedIndex is { } failedIndex)
                 {
                     description.Append(ErrorStr).Append("Index ").Append(failedIndex).Append(" has invalid values")

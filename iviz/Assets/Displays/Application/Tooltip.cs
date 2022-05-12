@@ -122,7 +122,7 @@ namespace Iviz.Displays
 
         public void PointToCamera()
         {
-            Transform.LookAt(2 * Transform.position - Settings.MainCameraTransform.position, Vector3.up);
+            Transform.LookAt(2 * Transform.position - Settings.MainCameraPose.position, Vector3.up);
         }
 
         void Update()
@@ -132,7 +132,7 @@ namespace Iviz.Displays
 
         public static float GetRecommendedSize(in Vector3 unityPosition)
         {
-            float distanceToCam = Vector3.Distance(Settings.MainCameraTransform.position, unityPosition);
+            float distanceToCam = Vector3.Distance(Settings.MainCameraPose.position, unityPosition);
             float size = 0.2f * Mathf.Max(distanceToCam, 0);
             float baseFrameSize = TfModule.Instance.FrameSize;
             float labelSize = baseFrameSize * size * (1.2f * 0.375f / 2);

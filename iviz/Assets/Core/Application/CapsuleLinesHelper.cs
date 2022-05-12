@@ -50,7 +50,7 @@ namespace Iviz.Displays
                 mesh.Clear();
                 return;
             }
-
+            
             int length = 10 * bufferLength;
             var points = new Rent<Vector3>(length);
             var colors = new Rent<Color32>(length);

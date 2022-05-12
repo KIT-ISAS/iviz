@@ -107,6 +107,12 @@ namespace Iviz.Core
 
         void Update()
         {
+            Now = DateTime.Now;
+            TimeNow = time.Now();
+            nowFormatted = null;
+            GameTime = Time.time;
+            Settings.MainCameraPose = Settings.MainCameraTransform.AsPose();
+            
             try
             {
                 EveryFrame?.Invoke();
@@ -116,10 +122,6 @@ namespace Iviz.Core
                 RosLogger.Error($"{this}: Error during EveryFrame", e);
             }
 
-            Now = DateTime.Now;
-            TimeNow = time.Now();
-            nowFormatted = null;
-            GameTime = Time.time;
             if (GameTime - lastSecondRunTime > 1)
             {
                 try

@@ -121,8 +121,8 @@ namespace Iviz.Displays.XR
         public Pose GetTargetPose()
         {
             var mainCameraPose = new Pose(
-                Settings.MainCameraTransform.position,
-                Quaternion.Euler(0, Settings.MainCameraTransform.eulerAngles.y, 0)
+                Settings.MainCameraPose.position,
+                Quaternion.Euler(0, Settings.MainCameraPose.rotation.eulerAngles.y, 0)
             );
 
             var canvasTransform = (RectTransform)Canvas.transform;
@@ -163,8 +163,8 @@ namespace Iviz.Displays.XR
             tokenSource = new CancellationTokenSource();
             
             var mainCameraPose = new Pose(
-                Settings.MainCameraTransform.position,
-                Quaternion.Euler(0, Settings.MainCameraTransform.eulerAngles.y, 0)
+                Settings.MainCameraPose.position,
+                Quaternion.Euler(0, Settings.MainCameraPose.rotation.eulerAngles.y, 0)
             );
             var currentPose = Transform.AsPose();
 
@@ -180,7 +180,7 @@ namespace Iviz.Displays.XR
 
         Quaternion CalculateOrientationToCamera()
         {
-            return Quaternion.LookRotation((transform.position - Settings.MainCameraTransform.position).WithY(0));
+            return Quaternion.LookRotation((Transform.position - Settings.MainCameraPose.position).WithY(0));
         }
 
         public void ReturnToPool()
@@ -204,8 +204,8 @@ namespace Iviz.Displays.XR
             const float damping = 0.05f;
 
             var mainCameraPose = new Pose(
-                Settings.MainCameraTransform.position,
-                Quaternion.Euler(0, Settings.MainCameraTransform.eulerAngles.y, 0)
+                Settings.MainCameraPose.position,
+                Quaternion.Euler(0, Settings.MainCameraPose.rotation.eulerAngles.y, 0)
             );
 
             var currentPose = Transform.AsPose();

@@ -370,6 +370,7 @@ namespace Iviz.App
                 TfListener.Publish(publishedFrame.TfFrame);
             }
 
+            Flush();
             UpdateFrameButtons();
         }
 

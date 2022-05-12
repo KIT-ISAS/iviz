@@ -142,7 +142,7 @@ namespace Iviz.Displays.XR
 
         Quaternion CalculateOrientationToCamera()
         {
-            return Quaternion.LookRotation((Transform.position - Settings.MainCameraTransform.position).WithY(0));
+            return Quaternion.LookRotation((Transform.position - Settings.MainCameraPose.position).WithY(0));
         }
 
         void Update()

@@ -13,11 +13,11 @@ namespace Iviz.Displays
     {
         [SerializeField] TMP_Text? textMesh;
         [SerializeField] Billboard? billboard;
-        //[SerializeField] MeshRenderer? meshRenderer;
+        [SerializeField] MeshRenderer? meshRenderer;
 
         TMP_Text TextMesh => textMesh.AssertNotNull(nameof(textMesh));
         Billboard Billboard => billboard.AssertNotNull(nameof(billboard));
-        //MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
+        MeshRenderer MeshRenderer => meshRenderer.AssertNotNull(nameof(meshRenderer));
 
         public string Text
         {
@@ -49,18 +49,12 @@ namespace Iviz.Displays
             set => transform.localScale = Vector3.one * value;
         }
 
-        /*)
+        
         public bool AlwaysVisible
         {
             set => MeshRenderer.sharedMaterial = value 
-                ? Resource.Materials.FontMaterial.Object 
-                : Resource.Materials.FontMaterialZWrite.Object;
-        }
-        */
-
-        public bool AlwaysVisible
-        {
-            set { }
+                ? Resource.Materials.FontMaterialAlwaysVisible.Object 
+                : Resource.Materials.FontMaterial.Object;
         }
 
         public override void Suspend()

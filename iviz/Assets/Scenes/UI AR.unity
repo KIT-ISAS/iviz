@@ -6071,7 +6071,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1441077224}
   m_HandleRect: {fileID: 1441077223}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 4
   m_OnValueChanged:
@@ -6149,7 +6149,7 @@ RectTransform:
   - {fileID: 1711165708}
   - {fileID: 1328584313}
   m_Father: {fileID: 1661316698}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
@@ -7468,7 +7468,7 @@ PrefabInstance:
     - target: {fileID: 7382715443500159548, guid: d5b87317f645b4103a02fc4143b6650b,
         type: 3}
       propertyPath: m_RootOrder
-      value: 7
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 7382715443500159548, guid: d5b87317f645b4103a02fc4143b6650b,
         type: 3}
@@ -8557,7 +8557,6 @@ RectTransform:
   - {fileID: 1458699348}
   - {fileID: 2621286}
   - {fileID: 1710581304}
-  - {fileID: 5450026899849084300}
   - {fileID: 1018092912}
   m_Father: {fileID: 2076228659}
   m_RootOrder: 2
@@ -10709,7 +10708,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00008010864, y: 0}
+  m_AnchoredPosition: {x: -0.00008010864, y: -0.000091552734}
   m_SizeDelta: {x: 0.000076293945, y: 150.00363}
   m_Pivot: {x: 0, y: 1}
 --- !u!1001 &1273282774
@@ -12843,7 +12842,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1659761}
   m_Direction: 0
   m_Value: 1
-  m_Size: 0.9999997
+  m_Size: 0.9999995
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -14741,6 +14740,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 5450026899849084300}
   - {fileID: 674068955}
   m_Father: {fileID: 2076228659}
   m_RootOrder: 6
@@ -19957,7 +19957,7 @@ PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
-    m_TransformParent: {fileID: 1066004756}
+    m_TransformParent: {fileID: 1661316698}
     m_Modifications:
     - target: {fileID: 7353725378491947392, guid: e475c79fb57464d17b80d6da40983540,
         type: 3}
@@ -19972,7 +19972,7 @@ PrefabInstance:
     - target: {fileID: 7353725378491947392, guid: e475c79fb57464d17b80d6da40983540,
         type: 3}
       propertyPath: m_RootOrder
-      value: 6
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7353725378491947392, guid: e475c79fb57464d17b80d6da40983540,
         type: 3}
@@ -20042,7 +20042,7 @@ PrefabInstance:
     - target: {fileID: 7353725378491947392, guid: e475c79fb57464d17b80d6da40983540,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 5.9895
+      value: 7.66894
       objectReference: {fileID: 0}
     - target: {fileID: 7353725378491947392, guid: e475c79fb57464d17b80d6da40983540,
         type: 3}
@@ -20199,6 +20199,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 7353725380068029140, guid: e475c79fb57464d17b80d6da40983540,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e475c79fb57464d17b80d6da40983540, type: 3}
@@ -23664,6 +23669,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scalerWidget: {fileID: 0}
   close: {fileID: 269405153}
+  reset: {fileID: 0}
   tfLog: {fileID: 0}
   showOnlyUsed: {fileID: 730018304}
   createFrame: {fileID: 0}

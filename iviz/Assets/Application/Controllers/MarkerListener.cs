@@ -65,7 +65,7 @@ namespace Iviz.Controllers
             {
                 config.RenderAsOcclusionOnly = value;
 
-                foreach (var marker in markers.Values)
+                foreach (var (_, marker) in markers)
                 {
                     marker.OcclusionOnly = value;
                 }
@@ -79,7 +79,7 @@ namespace Iviz.Controllers
             {
                 config.Tint = value.ToRos();
 
-                foreach (var marker in markers.Values)
+                foreach (var (_, marker) in markers)
                 {
                     marker.Tint = value;
                 }
@@ -93,7 +93,7 @@ namespace Iviz.Controllers
             {
                 config.Visible = value;
 
-                foreach (var marker in markers.Values)
+                foreach (var (_, marker) in markers)
                 {
                     marker.Visible = value && config.VisibleMask[(int)marker.MarkerType];
                 }
@@ -107,7 +107,7 @@ namespace Iviz.Controllers
             {
                 config.TriangleListFlipWinding = value;
 
-                foreach (var marker in markers.Values)
+                foreach (var (_, marker) in markers)
                 {
                     marker.TriangleListFlipWinding = value;
                 }
@@ -121,7 +121,7 @@ namespace Iviz.Controllers
             {
                 config.Smoothness = value;
 
-                foreach (var marker in markers.Values)
+                foreach (var (_, marker) in markers)
                 {
                     marker.Smoothness = value;
                 }
@@ -154,7 +154,7 @@ namespace Iviz.Controllers
             set
             {
                 config.ShowDescriptions = value;
-                foreach (var marker in markers.Values)
+                foreach (var (_, marker) in markers)
                 {
                     marker.ShowDescription = value;
                 }
@@ -173,7 +173,7 @@ namespace Iviz.Controllers
                 };
 
                 int totalErrors = 0, totalWarnings = 0;
-                foreach (var marker in markers.Values)
+                foreach (var (_, marker) in markers)
                 {
                     marker.GetErrorCount(out int numErrors, out int numWarnings);
                     totalErrors += numErrors;
@@ -229,7 +229,7 @@ namespace Iviz.Controllers
                     return;
                 }
 
-                foreach (var marker in markers.Values)
+                foreach (var (_, marker) in markers)
                 {
                     int type = (int)marker.MarkerType;
                     marker.Visible = config.VisibleMask[type];
@@ -286,7 +286,7 @@ namespace Iviz.Controllers
         {
             ThrowHelper.ThrowIfNull(description, nameof(description));
 
-            foreach (var marker in markers.Values.Skip(minIndex).Take(numEntries))
+            foreach (var (_, marker) in markers.Skip(minIndex).Take(numEntries))
             {
                 marker.GenerateLog(description);
             }
@@ -309,7 +309,7 @@ namespace Iviz.Controllers
 
         void DisposeAllMarkers()
         {
-            foreach (var marker in markers.Values)
+            foreach (var (_, marker) in markers)
             {
                 marker.Dispose();
             }

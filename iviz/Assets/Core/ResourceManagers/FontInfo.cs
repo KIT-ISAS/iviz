@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Iviz.Core;
 using Iviz.Displays;
 using Iviz.Tools;
@@ -27,25 +28,37 @@ namespace Iviz.Resources
         /// </summary>
         public string Split(string str, int maxWidth, int maxLines = 2)
         {
+            using var description = BuilderPool.Rent();
+            Split(description, str, maxWidth, maxLines);
+            return description.Length == str.Length ? str : description.ToString();
+        }
+
+        public void Split(StringBuilder description, string str, int maxWidth, int maxLines = 2)
+        {
             ThrowHelper.ThrowIfNull(str, nameof(str));
             if (str.Length == 0)
             {
-                return "";
+                return;
             }
 
             int usableWidth = maxWidth - dotsWidth;
 
             // quick check to see if we need the split at all
-            int totalWidth = str.Sum(CharWidth);
+            int totalWidth = 0;
+            foreach (char c in str)
+            {
+                totalWidth += CharWidth(c);
+            }
+            
             if (totalWidth <= usableWidth)
             {
-                return str;
+                description.Append(str);
+                return;
             }
 
             int usedWidth = 0;
             int numLines = 0;
             int? lastSeparator = null;
-            using var description = BuilderPool.Rent();
 
             for (int i = 0; i < str.Length; i++)
             {
@@ -76,7 +89,7 @@ namespace Iviz.Resources
                 if (numLines == maxLines - 1)
                 {
                     description.Append("...");
-                    return description.ToString();
+                    return;
                 }
 
                 if (lastSeparator is { } separator && i - lastSeparator < 6)
@@ -94,8 +107,6 @@ namespace Iviz.Resources
                 lastSeparator = null;
                 numLines++;
             }
-
-            return description.ToString();
         }
 
         int CharWidth(char c)

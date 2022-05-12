@@ -3,6 +3,7 @@
 using System;
 using Iviz.Core;
 using Iviz.Tools;
+using UnityEngine;
 
 namespace Iviz.App
 {
@@ -37,6 +38,7 @@ namespace Iviz.App
             ThrowHelper.ThrowIfNull(newCallback, nameof(newCallback));
             callback = newCallback;
             Entries = menuEntries;
+            
             gameObject.SetActive(true);
         }
 

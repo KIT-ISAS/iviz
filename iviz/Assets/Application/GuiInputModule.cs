@@ -220,7 +220,7 @@ namespace Iviz.App
                 MainLight.enabled = value;
             }
         }
-        
+
         public float SunDirectionX
         {
             set
@@ -314,8 +314,8 @@ namespace Iviz.App
         {
             RenderSettings.ambientSkyColor = backgroundColor.WithAlpha(0);
             Color.RGBToHSV(backgroundColor, out float h, out float s, out _);
-            var equatorColor = Color.HSVToRGB(h, Mathf.Min(s, 0.3f),  equatorIntensity);
-            RenderSettings.ambientEquatorColor = equatorColor;            
+            var equatorColor = Color.HSVToRGB(h, Mathf.Min(s, 0.3f), equatorIntensity);
+            RenderSettings.ambientEquatorColor = equatorColor;
         }
 
         public int NetworkFrameSkip
@@ -483,8 +483,10 @@ namespace Iviz.App
                 return;
             }
 
-            Instance.DraggedObject = draggable;
+            DraggedObject = draggable;
         }
+
+        public bool IsDragging => (UnityEngine.Object?)DraggedObject != null;
 
         void ProcessPointer()
         {
@@ -931,7 +933,7 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             Pose poseToHighlight;
             if (clickHitInfo.TryGetARRaycastResults(out var arHitResults))
             {

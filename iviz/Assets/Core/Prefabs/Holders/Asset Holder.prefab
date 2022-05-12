@@ -57,8 +57,10 @@ MonoBehaviour:
     type: 3}
   Sphere: {fileID: 4602828156360642986, guid: 04469a87993a24ad4978e6e69619098c, type: 3}
   Text: {fileID: 3616584195209632817, guid: f89b75492bba14bc598806f892dbdf00, type: 3}
-  FontMaterial: {fileID: 2100000, guid: 48207f643b93d4e3b85c153dbb9bbaaa, type: 2}
-  FontMaterialZWrite: {fileID: 2100000, guid: 7aa9c595e29be460d810e7b0f9564d63, type: 2}
+  FontMaterial: {fileID: -6388908872585162227, guid: 7ab7bd6bfe316484d8697f049b23fb2c,
+    type: 2}
+  FontMaterialZWrite: {fileID: -6388908872585162227, guid: 83d1637e4adfe4dc7a9db60170b21cfb,
+    type: 2}
   Lit: {fileID: 2100000, guid: 002af6810bb6243818acb8f5941f5b6c, type: 2}
   TransparentLit: {fileID: 2100000, guid: ba0c0be43c9754a05ba038603d1c41d4, type: 2}
   TexturedLit: {fileID: 2100000, guid: f53a5de9d2f22f9498a56c363fe3adb5, type: 2}

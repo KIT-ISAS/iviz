@@ -73,7 +73,7 @@ namespace Iviz.Displays.XR
             }
 
             Tooltip.Visible = true;
-            Tooltip.Transform.localPosition = mid + (Settings.MainCameraTransform.position - mid).normalized * 0.25f;
+            Tooltip.Transform.localPosition = mid + (Settings.MainCameraPose.position - mid).normalized * 0.25f;
             Tooltip.Caption = distance.ToString("#,0.###", UnityUtils.Culture);
         }
 

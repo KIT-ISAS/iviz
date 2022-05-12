@@ -16,7 +16,7 @@ namespace Iviz.App
     {
         readonly PublishedFramePanel panel;
         readonly FrameOwner parentFrameOwner;
-        
+
         public TfFrame Frame { get; }
         public override ModulePanel Panel => panel;
 
@@ -49,15 +49,14 @@ namespace Iviz.App
                 TfListener.Publish(Frame);
                 UpdatePanelPose();
             };
-            
+
             panel.CloseButton.Clicked += Close;
             panel.ParentId.EndEdit += f =>
             {
-                string validatedParent = string.IsNullOrEmpty(f) 
-                    ? TfModule.OriginFrameId 
-                    : TfModule.ResolveFrameId(f);
+                var parentFrame = string.IsNullOrEmpty(f) || f == TfModule.OriginFrameId
+                    ? TfModule.OriginFrame
+                    : TfModule.GetOrCreateFrame(f);
                 
-                var parentFrame = TfModule.GetOrCreateFrame(validatedParent);
                 if (!Frame.TrySetParent(parentFrame))
                 {
                     RosLogger.Error(
@@ -97,7 +96,7 @@ namespace Iviz.App
             ModulePanelManager.HidePanelFor(this);
         }
 
-        public override string ToString() => "[TFPublisher]";
+        public override string ToString() => "[" + nameof(PublishedFramePanelData) + "]";
 
         sealed class FrameOwner : IHasFrame
         {

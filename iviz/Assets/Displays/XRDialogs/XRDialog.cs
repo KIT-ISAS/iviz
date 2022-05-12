@@ -156,7 +156,7 @@ namespace Iviz.Displays.XR
 
         void UpdateRotation()
         {
-            var cameraPosition = Settings.MainCameraTransform.position;
+            var cameraPosition = Settings.MainCameraPose.position;
             if (cameraPosition.ApproximatelyZero())
             {
                 // not initialized yet
@@ -203,7 +203,7 @@ namespace Iviz.Displays.XR
                     }
 
                     var absoluteRotation = Quaternion.LookRotation(cameraForward.WithY(0));
-                    var absolutePose = new Pose(Settings.MainCameraTransform.position, absoluteRotation);
+                    var absolutePose = new Pose(Settings.MainCameraPose.position, absoluteRotation);
                     absoluteTargetPosition = absolutePose.Multiply(DialogDisplacement) + TfFrameOffset;
                     break;
                 }
@@ -249,7 +249,7 @@ namespace Iviz.Displays.XR
         {
             var originTransform = TfModule.OriginTransform;
             var absolutePosition = originTransform.TransformPoint(localPosition);
-            var direction = absolutePosition - Settings.MainCameraTransform.position;
+            var direction = absolutePosition - Settings.MainCameraPose.position;
             var absoluteRotation =
                 Quaternion.LookRotation((direction.ApproximatelyZero() ? Vector3.forward : direction).WithY(0));
             return originTransform.rotation.Inverse() * absoluteRotation;

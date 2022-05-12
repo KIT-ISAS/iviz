@@ -23,40 +23,17 @@ namespace Iviz.App
 
             panel.FrameName.Value = "";
             panel.Close.Clicked += Close;
+            panel.Reset.Clicked += () =>
+            {
+                TfModule.Instance.Reset();
+                panel.TfLog.Flush();
+            };
             panel.TfLog.Close += Close;
             panel.TfLog.Flush();
             panel.TfLog.UpdateFrameButtons();
 
-            panel.CreateFrameClicked += () =>
-            {
-                string frameName = ValidateFrameName(panel.FrameName.Value.Trim());
-                if (frameName.Length == 0 || frameName == "/")
-                {
-                    RosLogger.Error($"{this}: Cannot create frame with empty name.");
-                    return;
-                }
-
-                string validatedFrameName = frameName[0] != '/' ? frameName : frameName[1..];
-                if (!RosClient.IsValidResourceName(validatedFrameName))
-                {
-                    RosLogger.Info(
-                        $"{this}: Created frame's name '{validatedFrameName}' is not a valid ROS resource name. " +
-                        "This may cause problems.");
-                }
-
-                var tfPublisher = TfPublisher.Instance;
-                if (tfPublisher.IsPublishing(validatedFrameName))
-                {
-                    RosLogger.Info($"{this}: A frame with name '{validatedFrameName}' already exists.");
-                    return;
-                }
-
-                panel.FrameName.Value = "";
-
-                var tfFrame = tfPublisher.GetOrCreate(validatedFrameName);
-                panel.TfLog.SelectedFrame = tfFrame.TfFrame;
-                panel.TfLog.Flush();
-            };
+            panel.FrameName.EndEdit += _ => OnCreateFrameClicked();
+            panel.CreateFrameClicked += OnCreateFrameClicked;
 
             panel.ShowOnlyUsed.Value = !TfModule.Instance.KeepAllFrames;
             panel.ShowOnlyUsed.ValueChanged += f =>
@@ -64,6 +41,37 @@ namespace Iviz.App
                 TfModule.Instance.KeepAllFrames = !f;
                 ModuleListPanel.Instance.ResetTfPanel();
             };
+        }
+
+        void OnCreateFrameClicked()
+        {
+            string frameName = ValidateFrameName(panel.FrameName.Value.Trim());
+            if (frameName.Length == 0 || frameName == "/")
+            {
+                RosLogger.Error($"{this}: Cannot create frame with empty name.");
+                return;
+            }
+
+            string validatedFrameName = frameName[0] != '/' ? frameName : frameName[1..];
+            if (!RosClient.IsValidResourceName(validatedFrameName))
+            {
+                RosLogger.Info(
+                    $"{this}: Created frame's name '{validatedFrameName}' is not a valid ROS resource name. " +
+                    "This may cause problems.");
+            }
+
+            var tfPublisher = TfPublisher.Instance;
+            if (tfPublisher.IsPublishing(validatedFrameName))
+            {
+                RosLogger.Info($"{this}: A frame with name '{validatedFrameName}' already exists.");
+                return;
+            }
+
+            panel.FrameName.Value = "";
+
+            var tfFrame = tfPublisher.GetOrCreate(validatedFrameName);
+            panel.TfLog.SelectedFrame = tfFrame.TfFrame;
+            panel.TfLog.Flush();
         }
 
         public override void UpdatePanel()

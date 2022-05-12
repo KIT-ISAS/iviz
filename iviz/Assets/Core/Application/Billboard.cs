@@ -31,7 +31,7 @@ namespace Iviz.Displays
 
         void LateUpdate()
         {
-            var z = 2 * Transform.position - Settings.MainCameraTransform.position;
+            var z = 2 * Transform.position - Settings.MainCameraPose.position;
             Transform.LookAt(z, keepHorizontal
                 ? Settings.MainCameraTransform.up
                 : Vector3.up);

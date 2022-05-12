@@ -52,7 +52,7 @@ namespace Iviz.Displays
 
             if (reticleVisible)
             {
-                float scale = 0.03f * Vector3.Distance(target, Settings.MainCameraTransform.position);
+                float scale = 0.03f * Vector3.Distance(target, Settings.MainCameraPose.position);
                 Reticle.Transform.localScale = baseReticleScale * scale * Vector3.one;
                 Reticle.Transform.SetPositionAndRotation(target, Quaternion.LookRotation(normal));
                 Reticle.Color = ReticleColor;
@@ -73,8 +73,8 @@ namespace Iviz.Displays
             var (start, tangent) = pointerRay;
 
             float distance = (target - start).Magnitude();
-            int numSegments = (int)(distance * 16);
-            
+            int numSegments = Mathf.Min((int)(distance * 16), 32);
+
             var colorBase = Color;
             if (distance.ApproximatelyZero())
             {
@@ -133,7 +133,7 @@ namespace Iviz.Displays
                     p = q;
                     l0.w = l1.w;
                 }
-                
+
                 Lines.Set(span, true);
             }
         }

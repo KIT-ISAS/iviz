@@ -32,7 +32,7 @@ namespace Iviz.Controllers
         bool interactable;
         bool independentMarkerOrientation;
 
-        public Transform Transform => node.transform;
+        public Transform Transform { get; }
 
         public InteractionMode InteractionMode { get; private set; }
 
@@ -51,7 +51,7 @@ namespace Iviz.Controllers
 
         public float Scale
         {
-            set => node.transform.localScale = value * Vector3.one;
+            set => Transform.localScale = value * Vector3.one;
         }
 
         public bool Interactable
@@ -72,6 +72,7 @@ namespace Iviz.Controllers
             this.rosId = rosId;
             this.parent = parent;
             node = new GameObject($"[ControlObject '{this.rosId}']");
+            Transform = node.transform;
             Transform.SetParentLocal(parent.ControlNode);
             Interactable = true;
         }
@@ -106,7 +107,7 @@ namespace Iviz.Controllers
             }
 
             GameThread.EveryFrame -= KeepPointingForward;
-            node.transform.rotation = Quaternion.identity;
+            Transform.rotation = Quaternion.identity;
 
             boundsControls.Clear();
         }
@@ -118,7 +119,7 @@ namespace Iviz.Controllers
             foreach (var marker in msg)
             {
                 var markerId = marker.Ns.Length == 0 && marker.Id == 0
-                    ? ("Unnamed", numUnnamed++)
+                    ? ("[]", numUnnamed++)
                     : MarkerListener.IdFromMessage(marker);
                 switch (marker.Action)
                 {
@@ -159,7 +160,6 @@ namespace Iviz.Controllers
 
         void UpdateInteractionMode(in Quaternion orientation, OrientationMode orientationMode)
         {
-            var nodeTransform = node.transform;
             var target = parent.ControlNode;
             var interactionMode = InteractionMode;
 
@@ -195,17 +195,17 @@ namespace Iviz.Controllers
                 switch (interactionMode)
                 {
                     case InteractionMode.MoveAxis:
-                        boundsControls.Add(new LineWrapperBoundsControl(nodeTransform, target)
+                        boundsControls.Add(new LineWrapperBoundsControl(Transform, target)
                             { BaseOrientation = orientation }, orientation);
                         break;
                     case InteractionMode.RotateAxis:
-                        boundsControls.Add(new RotationWrapperBoundsControl(nodeTransform, target)
+                        boundsControls.Add(new RotationWrapperBoundsControl(Transform, target)
                             { BaseOrientation = orientation }, orientation);
                         break;
                     case InteractionMode.MoveRotate:
-                        boundsControls.Add(new LineWrapperBoundsControl(nodeTransform, target)
+                        boundsControls.Add(new LineWrapperBoundsControl(Transform, target)
                             { BaseOrientation = orientation }, orientation);
-                        boundsControls.Add(new RotationWrapperBoundsControl(nodeTransform, target)
+                        boundsControls.Add(new RotationWrapperBoundsControl(Transform, target)
                             { BaseOrientation = orientation }, orientation);
                         break;
                 }
@@ -259,9 +259,10 @@ namespace Iviz.Controllers
 
             if (independentMarkerOrientation)
             {
-                var forwardWorld = Settings.MainCameraTransform.position - node.transform.position;
+                var transformPose = Transform.AsPose();
+                var forwardWorld = Settings.MainCameraPose.position - transformPose.position;
                 var deltaRotationWorld = Quaternion.LookRotation(forwardWorld);
-                var deltaRotationLocal = node.transform.rotation.Inverse() * deltaRotationWorld;
+                var deltaRotationLocal = transformPose.rotation.Inverse() * deltaRotationWorld;
 
                 foreach (var (boundsControl, baseOrientation) in boundsControls)
                 {
@@ -270,7 +271,7 @@ namespace Iviz.Controllers
             }
             else
             {
-                node.transform.LookAt(Settings.MainCameraTransform.position);
+                Transform.LookAt(Settings.MainCameraPose.position);
             }
         }
 
@@ -298,14 +299,14 @@ namespace Iviz.Controllers
                 return;
             }
 
-            description.Append("<color=#000080ff><b>* Control ");
+            description.Append("<color=#000080ff><b>Control ");
             if (string.IsNullOrEmpty(rosId))
             {
                 description.Append("(empty name)");
             }
             else
             {
-                description.Append("'").Append(rosId).Append("'");
+                description.Append(rosId);
             }
 
             description.Append("</b></color>").AppendLine();
@@ -357,10 +358,9 @@ namespace Iviz.Controllers
                     description.Append("Markers: Empty").AppendLine();
                     break;
                 case 1:
-                    description.Append("+1 marker ---").AppendLine();
                     break;
                 default:
-                    description.Append("+").Append(markers.Count).Append(" markers ---").AppendLine();
+                    description.Append("---").AppendLine();
                     break;
             }
 
@@ -398,7 +398,7 @@ namespace Iviz.Controllers
                 OrientationMode.Inherit => "Inherit",
                 OrientationMode.Fixed => "Fixed",
                 OrientationMode.ViewFacing when independentMarkerOrientation =>
-                    "ViewFacing + IndependentMarkerOrientation",
+                    "\n    ViewFacing\n    IndependentMarkerOrientation",
                 OrientationMode.ViewFacing => "ViewFacing",
                 _ => $"Unknown ({mode.ToString()})"
             };

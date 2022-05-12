@@ -150,12 +150,22 @@ namespace Iviz.Displays
 
         protected void StartHover()
         {
+            if (Settings.DragHandler.IsDragging)
+            {
+                return;
+            }
+            
             IsHovering = true;
             StateChanged?.Invoke();
         }
 
         protected void EndHover()
         {
+            if (!IsHovering)
+            {
+                return;
+            }
+            
             IsHovering = false;
             StateChanged?.Invoke();
         }

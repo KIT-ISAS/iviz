@@ -83,7 +83,7 @@ namespace Iviz.Displays.XR
 
             var worldBounds = bounds.TransformBound(boundsTransform.AsPose(), Vector3.one);
             var targetPosition = worldBounds.center + worldBounds.size.y * Vector3.up;
-            var targetRotation = Quaternion.LookRotation(targetPosition - Settings.MainCameraTransform.position);
+            var targetRotation = Quaternion.LookRotation(targetPosition - Settings.MainCameraPose.position);
 
             if (Damping is { } damping)
             {

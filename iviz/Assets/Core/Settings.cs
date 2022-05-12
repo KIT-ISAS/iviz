@@ -201,6 +201,8 @@ namespace Iviz.Core
                 ? mainCameraTransform
                 : (mainCameraTransform = MainCamera.transform);
 
+        public static Pose MainCameraPose { get; set; }
+
         public static Camera? VirtualCamera { get; set; }
         public static Camera? ARCamera { get; set; }
 
@@ -246,6 +248,7 @@ namespace Iviz.Core
 
     public interface IDragHandler
     {
+        bool IsDragging { get; }
         void TryUnsetDraggedObject(IScreenDraggable draggable);
         void TrySetDraggedObject(IScreenDraggable draggable);
         float XRDraggableNearDistance { get; }
