@@ -3,7 +3,6 @@ using Iviz.Msgs;
 
 namespace Iviz.MsgsGen.Dynamic
 {
-    [Preserve]
     internal sealed class DynamicMessageArrayField : IField
     {
         readonly DynamicMessage generator;

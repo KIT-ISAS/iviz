@@ -4,7 +4,6 @@ using Iviz.Msgs;
 
 namespace Iviz.MsgsGen.Dynamic
 {
-    [Preserve]
     public sealed class StructFixedArrayField<T> : IField where T : unmanaged
     {
         public int Count { get; }

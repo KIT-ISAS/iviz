@@ -3,7 +3,6 @@ using Iviz.Msgs;
 
 namespace Iviz.MsgsGen.Dynamic
 {
-    [Preserve]
     public sealed class MessageArrayField<T> : IField where T : IMessage, IDeserializable<T>, new()
     {
         static readonly IDeserializable<T> Generator = new T();

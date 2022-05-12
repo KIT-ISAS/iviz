@@ -5,7 +5,6 @@ using Newtonsoft.Json.Linq;
 
 namespace Iviz.MsgsGen.Dynamic
 {
-    [Preserve]
     public sealed class FieldJsonConverter : JsonConverter
     {
         public override bool CanConvert(Type objectType)

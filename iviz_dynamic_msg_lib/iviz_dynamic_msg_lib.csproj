@@ -6,6 +6,7 @@
         <Nullable>enable</Nullable>
         <AssemblyName>Iviz.MsgsGen.Dynamic.Lib</AssemblyName>
         <RootNamespace>Iviz.MsgsGen.Dynamic</RootNamespace>
+        <IsTrimmable>true</IsTrimmable>
     </PropertyGroup>
 
     <ItemGroup>

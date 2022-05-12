@@ -3,7 +3,6 @@ using Iviz.Msgs;
 
 namespace Iviz.MsgsGen.Dynamic
 {
-    [Preserve]
     public sealed class StructField<T> : IField where T : unmanaged
     {
         public T Value { get; set; }

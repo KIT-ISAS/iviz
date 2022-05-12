@@ -4,7 +4,6 @@ using Iviz.Msgs;
 
 namespace Iviz.MsgsGen.Dynamic
 {
-    [Preserve]
     public sealed class StructArrayField<T> : IField where T : unmanaged
     {
         public T[] Value { get; set; } = Array.Empty<T>();

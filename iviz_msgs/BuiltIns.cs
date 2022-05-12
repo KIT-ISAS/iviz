@@ -66,7 +66,7 @@ namespace Iviz.Msgs
 
             return str.ToString();
         }
-        
+
 
         static string RosNameToCs(string name)
         {
@@ -106,6 +106,18 @@ namespace Iviz.Msgs
                 && (type.IsValueType || type.GetConstructor(Type.EmptyTypes) != null))
             {
                 return type;
+            }
+
+            return null;
+        }
+
+        public static IMessage? TryGetGeneratorFromMessageName(string fullRosMessageName,
+            string assemblyName = "Iviz.Msgs")
+        {
+            if (TryGetTypeFromMessageName(fullRosMessageName, assemblyName) is { } lookupMsgType
+                && Activator.CreateInstance(lookupMsgType) is IMessage message)
+            {
+                return message;
             }
 
             return null;

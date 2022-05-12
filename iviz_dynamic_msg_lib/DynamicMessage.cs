@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Iviz.Tools;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.RosgraphMsgs;
 using Iviz.Msgs.StdMsgs;
-using Newtonsoft.Json;
 using ISerializable = Iviz.Msgs.ISerializable;
 
 
@@ -13,23 +15,41 @@ namespace Iviz.MsgsGen.Dynamic
 {
     public sealed class DynamicMessage : IField, IMessage, IDeserializable<DynamicMessage>
     {
-        static readonly Dictionary<string, Type> BaseTypes = new()
+        static Dictionary<string, IGenerator>? structTypes;
+
+        static Dictionary<string, IGenerator> StructTypes => structTypes ??= new Dictionary<string, IGenerator>
         {
-            ["bool"] = typeof(bool),
-            ["int8"] = typeof(sbyte),
-            ["uint8"] = typeof(byte),
-            ["int16"] = typeof(short),
-            ["uint16"] = typeof(ushort),
-            ["int32"] = typeof(int),
-            ["uint32"] = typeof(uint),
-            ["int64"] = typeof(long),
-            ["uint64"] = typeof(ulong),
-            ["float32"] = typeof(float),
-            ["float64"] = typeof(double),
-            ["time"] = typeof(time),
-            ["duration"] = typeof(duration),
-            ["char"] = typeof(char),
-            ["byte"] = typeof(byte),
+            ["bool"] = new StructGenerator<bool>(),
+            ["int8"] = new StructGenerator<sbyte>(),
+            ["uint8"] = new StructGenerator<byte>(),
+            ["int16"] = new StructGenerator<short>(),
+            ["uint16"] = new StructGenerator<ushort>(),
+            ["int32"] = new StructGenerator<int>(),
+            ["uint32"] = new StructGenerator<uint>(),
+            ["int64"] = new StructGenerator<long>(),
+            ["uint64"] = new StructGenerator<ulong>(),
+            ["float32"] = new StructGenerator<float>(),
+            ["float64"] = new StructGenerator<double>(),
+            ["time"] = new StructGenerator<time>(),
+            ["duration"] = new StructGenerator<duration>(),
+            ["char"] = new StructGenerator<char>(),
+            ["byte"] = new StructGenerator<byte>(),
+
+            [Vector3.MessageType] = new MessageGenerator<Vector3>(),
+            [Point.MessageType] = new MessageGenerator<Point>(),
+            [Point32.MessageType] = new MessageGenerator<Point32>(),
+            [Quaternion.MessageType] = new MessageGenerator<Quaternion>(),
+            [Pose.MessageType] = new MessageGenerator<Pose>(),
+            [Transform.MessageType] = new MessageGenerator<Transform>(),
+            [ColorRGBA.MessageType] = new MessageGenerator<ColorRGBA>(),
+            [Color32.MessageType] = new MessageGenerator<Color32>(),
+            [Vector2f.MessageType] = new MessageGenerator<Vector2f>(),
+            [Vector3f.MessageType] = new MessageGenerator<Vector3f>(),
+            [Triangle.MessageType] = new MessageGenerator<Triangle>(),
+
+            [Header.MessageType] = new MessageGenerator<Header>(),
+            [TransformStamped.MessageType] = new MessageGenerator<TransformStamped>(),
+            [Log.MessageType] = new MessageGenerator<Log>(),
         };
 
         public const string RosAny = "*";
@@ -57,17 +77,17 @@ namespace Iviz.MsgsGen.Dynamic
         {
         }
 
-        DynamicMessage(ClassInfo classInfo, IDictionary<string, DynamicMessage> registered,
+        DynamicMessage(ClassInfo classInfo, Dictionary<string, DynamicMessage> registered,
             bool allowAssemblyLookup = true)
         {
             if (classInfo == null)
             {
-                throw new ArgumentNullException(nameof(classInfo));
+                BuiltIns.ThrowArgumentNull(nameof(classInfo));
             }
 
             if (registered == null)
             {
-                throw new ArgumentNullException(nameof(registered));
+                BuiltIns.ThrowArgumentNull(nameof(registered));
             }
 
             RosMessageType = classInfo.FullRosName;
@@ -78,14 +98,14 @@ namespace Iviz.MsgsGen.Dynamic
 
             string FullRosName(string rosType) => rosType.Contains("/") ? rosType : $"{classInfo.RosPackage}/{rosType}";
 
-            List<Property> newFields = new();
-            foreach (VariableElement element in classInfo.Elements.OfType<VariableElement>())
+            var newFields = new List<Property>();
+            foreach (var element in classInfo.Elements.OfType<VariableElement>())
             {
                 IField field;
-                string name = element.RosFieldName;
-                string rosType = element.RosClassName;
+                string fieldName = element.RosFieldName;
+                string fieldRosType = element.RosClassType;
 
-                if (rosType == "string")
+                if (fieldRosType == "string")
                 {
                     field = element.ArraySize switch
                     {
@@ -94,22 +114,17 @@ namespace Iviz.MsgsGen.Dynamic
                         _ => new StringFixedArrayField(element.ArraySize)
                     };
                 }
-                else if (BaseTypes.TryGetValue(rosType, out Type? csType))
+                else if (StructTypes.TryGetValue(fieldRosType, out var baseGenerator))
                 {
-                    object? tmpField = element.ArraySize switch
+                    field = element.ArraySize switch
                     {
-                        VariableElement.NotAnArray =>
-                            Activator.CreateInstance(typeof(StructField<>).MakeGenericType(csType)),
-                        VariableElement.DynamicSizeArray =>
-                            Activator.CreateInstance(typeof(StructArrayField<>).MakeGenericType(csType)),
-                        _ =>
-                            Activator.CreateInstance(typeof(StructFixedArrayField<>).MakeGenericType(csType),
-                                element.ArraySize)
+                        VariableElement.NotAnArray => baseGenerator.CreateField(),
+                        VariableElement.DynamicSizeArray => baseGenerator.CreateArrayField(),
+                        _ => baseGenerator.CreateFixedArrayField(element.ArraySize)
                     };
-                    field = (IField)(tmpField ?? throw new NullReferenceException());
                 }
                 else if (allowAssemblyLookup &&
-                         (csType = BuiltIns.TryGetTypeFromMessageName(FullRosName(rosType))) != null)
+                         BuiltIns.TryGetTypeFromMessageName(FullRosName(fieldRosType)) is { } csType)
                 {
                     object? tmpField = element.ArraySize switch
                     {
@@ -125,27 +140,27 @@ namespace Iviz.MsgsGen.Dynamic
                 }
                 else
                 {
-                    if (!registered.TryGetValue(name, out DynamicMessage? generator))
+                    if (!registered.TryGetValue(fieldRosType, out DynamicMessage? dynamicGenerator))
                     {
                         if (element.ClassInfo == null)
                         {
                             throw new MessageParseException(
-                                $"Missing class info for '{element.RosClassName}' for field '{element.RosFieldName}'" +
+                                $"Missing class info for '{element.RosClassType}' for field '{element.RosFieldName}'" +
                                 $" in message '{classInfo.FullRosName}'");
                         }
 
-                        generator = new DynamicMessage(element.ClassInfo, registered);
+                        dynamicGenerator = new DynamicMessage(element.ClassInfo, registered, allowAssemblyLookup);
                     }
 
                     field = element.ArraySize switch
                     {
-                        VariableElement.NotAnArray => new DynamicMessage(generator),
-                        VariableElement.DynamicSizeArray => new DynamicMessageArrayField(generator),
-                        _ => new DynamicMessageFixedArrayField(element.ArraySize, generator)
+                        VariableElement.NotAnArray => new DynamicMessage(dynamicGenerator),
+                        VariableElement.DynamicSizeArray => new DynamicMessageArrayField(dynamicGenerator),
+                        _ => new DynamicMessageFixedArrayField(element.ArraySize, dynamicGenerator)
                     };
                 }
 
-                newFields.Add(new Property(name, field));
+                newFields.Add(new Property(fieldName, field));
             }
 
             Fields = new ReadOnlyCollection<Property>(newFields);
@@ -157,7 +172,7 @@ namespace Iviz.MsgsGen.Dynamic
             RosMd5Sum = other.RosMd5Sum;
             RosDependenciesBase64 = other.RosDependenciesBase64;
             var fields = new Property[other.Fields.Count];
-            for (int i = 0; i < fields.Length; i++)
+            foreach (int i in ..fields.Length)
             {
                 fields[i] = new Property(other.Fields[i].Name, other.Fields[i].Value.Generate());
             }
@@ -230,7 +245,7 @@ namespace Iviz.MsgsGen.Dynamic
 
         public static bool IsDynamic<T>() => typeof(DynamicMessage) == typeof(T);
 
-        public static bool IsGenericMessage<T>() => typeof(IMessage) == typeof(T);
+        public static bool IsGeneric<T>() => typeof(IMessage) == typeof(T) || IsDynamic<T>();
 
         public override string ToString() => this.ToJsonString();
 
@@ -294,43 +309,25 @@ namespace Iviz.MsgsGen.Dynamic
             }
         }
 
-        [Preserve]
-        public static IField[][] AotFields => new[]
+        interface IGenerator
         {
-            CreateAotFields<Vector3>(),
-            CreateAotFields<Point>(),
-            CreateAotFields<Point32>(),
-            CreateAotFields<Quaternion>(),
-            CreateAotFields<Pose>(),
-            CreateAotFields<Transform>(),
-            CreateAotFields<ColorRGBA>(),
-            CreateAotFields<Msgs.IvizMsgs.Color32>(),
-            CreateAotFields<Msgs.IvizMsgs.Vector3f>(),
-            CreateAotFields<Msgs.IvizMsgs.Vector2f>(),
-            CreateAotFields<Msgs.IvizMsgs.Triangle>(),
-            CreateAotFields<Header>(),
-            CreateAotFields<TransformStamped>(),
-            CreateAotFields<Msgs.RosgraphMsgs.Log>(),
+            IField CreateField();
+            IField CreateArrayField();
+            IField CreateFixedArrayField(int size);
+        }
 
-            CreateAotStructFields<bool>(),
-            CreateAotStructFields<sbyte>(),
-            CreateAotStructFields<byte>(),
-            CreateAotStructFields<short>(),
-            CreateAotStructFields<ushort>(),
-            CreateAotStructFields<int>(),
-            CreateAotStructFields<uint>(),
-            CreateAotStructFields<long>(),
-            CreateAotStructFields<ulong>(),
-            CreateAotStructFields<float>(),
-            CreateAotStructFields<double>(),
-            CreateAotStructFields<time>(),
-            CreateAotStructFields<duration>(),
-        };
+        sealed class StructGenerator<T> : IGenerator where T : unmanaged
+        {
+            public IField CreateField() => new StructField<T>();
+            public IField CreateArrayField() => new StructArrayField<T>();
+            public IField CreateFixedArrayField(int size) => new StructFixedArrayField<T>(size);
+        }
 
-        static IField[] CreateAotFields<T>() where T : struct, IMessage, IDeserializable<T> => new IField[]
-            { new MessageField<T>(), new MessageArrayField<T>(), new MessageFixedArrayField<T>(0) };
-
-        static IField[] CreateAotStructFields<T>() where T : unmanaged => new IField[]
-            { new StructField<T>(), new StructArrayField<T>(), new StructFixedArrayField<T>(0) };
+        sealed class MessageGenerator<T> : IGenerator where T : IMessage, IDeserializable<T>, new()
+        {
+            public IField CreateField() => new MessageField<T>();
+            public IField CreateArrayField() => new MessageArrayField<T>();
+            public IField CreateFixedArrayField(int size) => new MessageFixedArrayField<T>(size);
+        }
     }
 }

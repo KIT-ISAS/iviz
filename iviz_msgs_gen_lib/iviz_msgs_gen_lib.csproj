@@ -6,6 +6,7 @@
         <RootNamespace>Iviz.MsgsGen</RootNamespace>
         <Nullable>enable</Nullable>
         <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
+        <IsTrimmable>true</IsTrimmable>
     </PropertyGroup>
 
     <ItemGroup>

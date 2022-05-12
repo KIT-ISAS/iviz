@@ -94,7 +94,7 @@ namespace Iviz.MsgsGen
             string strType = isRequest ? "Request" : "Response";
             string name = service + strType;
 
-            List<string> lines = new List<string>();
+            var lines = new List<string>();
             lines.Add("[DataContract]");
             lines.Add(isRequest
                 ? $"public sealed class {name} : IRequest<{service}, {service}Response>, IDeserializable<{name}>"
@@ -145,7 +145,7 @@ namespace Iviz.MsgsGen
                 return md5;
             }
 
-            StringBuilder str = new StringBuilder(200);
+            var str = new StringBuilder(200);
 
             string[] constantsReq = elementsReq.OfType<ConstantElement>().Select(x => x.GetEntryForMd5Hash()).ToArray();
 
@@ -158,7 +158,7 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            var reqHashVariables = variablesReq.Select(x => x.GetEntryForMd5Hash(RosPackage)).ToArray();
+            string[] reqHashVariables = variablesReq.Select(x => x.GetEntryForMd5Hash(RosPackage)).ToArray();
             if (reqHashVariables.Any(md5String => md5String == null))
             {
                 return "";
@@ -178,7 +178,7 @@ namespace Iviz.MsgsGen
                 }
             }
 
-            var respHashVariables = variablesResp.Select(x => x.GetEntryForMd5Hash(RosPackage)).ToArray();
+            string[] respHashVariables = variablesResp.Select(x => x.GetEntryForMd5Hash(RosPackage)).ToArray();
             if (respHashVariables.Any(md5String => md5String == null))
             {
                 return "";
@@ -252,10 +252,9 @@ namespace Iviz.MsgsGen
             };
         }
 
-
         public string ToCsString()
         {
-            StringBuilder str = new StringBuilder(200);
+            var str = new StringBuilder(200);
 
             str.AppendNewLine("using System.Runtime.Serialization;");
 

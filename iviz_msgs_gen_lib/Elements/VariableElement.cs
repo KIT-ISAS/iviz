@@ -20,9 +20,9 @@ namespace Iviz.MsgsGen
         public ElementType Type => ElementType.Variable;
         public string Comment { get; }
         public string RosFieldName { get; }
-        public string RosClassName { get; }
+        public string RosClassType { get; }
         public string CsFieldName { get; }
-        public string CsClassName { get; }
+        public string CsClassType { get; }
         public int ArraySize { get; }
         public bool RentHint { get; }
         public bool IgnoreHint { get; }
@@ -31,8 +31,8 @@ namespace Iviz.MsgsGen
         public bool IsFixedSizeArray => ArraySize > 0;
         public int FixedArraySize => IsFixedSizeArray ? ArraySize : -1;
         public ClassInfo? ClassInfo { get; internal set; }
-        public bool ClassIsStruct => ClassInfo?.ForceStruct ?? ClassInfo.IsClassForceStruct(RosClassName);
-        public bool ClassIsBlittable => ClassInfo?.IsBlittable ?? ClassInfo.IsClassBlittable(RosClassName);
+        public bool ClassIsStruct => ClassInfo?.ForceStruct ?? ClassInfo.IsClassForceStruct(RosClassType);
+        public bool ClassIsBlittable => ClassInfo?.IsBlittable ?? ClassInfo.IsClassBlittable(RosClassType);
         public bool ClassHasFixedSize => ClassInfo != null && ClassInfo.HasFixedSize;
 
         static readonly HashSet<string> Keywords = new HashSet<string>
@@ -82,7 +82,7 @@ namespace Iviz.MsgsGen
             int bracketRight = rosClassToken.IndexOf(']');
             if (bracketLeft != -1 && bracketRight != -1)
             {
-                RosClassName = rosClassToken.Substring(0, bracketLeft);
+                RosClassType = rosClassToken.Substring(0, bracketLeft);
                 string arrayLengthStr = rosClassToken.Substring(bracketLeft + 1, bracketRight - bracketLeft - 1);
 
                 if (string.IsNullOrWhiteSpace(arrayLengthStr))
@@ -101,29 +101,29 @@ namespace Iviz.MsgsGen
             }
             else
             {
-                RosClassName = rosClassToken;
+                RosClassType = rosClassToken;
                 ArraySize = NotAnArray;
             }
 
             int slashIndex;
-            if (RosClassName == "Header")
+            if (RosClassType == "Header")
             {
-                RosClassName = "std_msgs/Header";
-                CsClassName = "StdMsgs.Header";
+                RosClassType = "std_msgs/Header";
+                CsClassType = "StdMsgs.Header";
             }
-            else if (MsgParser.BuiltInsMaps.TryGetValue(RosClassName, out string? className))
+            else if (MsgParser.BuiltInsMaps.TryGetValue(RosClassType, out string? className))
             {
-                CsClassName = className;
+                CsClassType = className;
             }
-            else if ((slashIndex = RosClassName.IndexOf('/')) != -1)
+            else if ((slashIndex = RosClassType.IndexOf('/')) != -1)
             {
-                string packageName = RosClassName.Substring(0, slashIndex);
-                string classProper = RosClassName.Substring(slashIndex + 1);
-                CsClassName = $"{MsgParser.CsIfy(packageName)}.{classProper}";
+                string packageName = RosClassType.Substring(0, slashIndex);
+                string classProper = RosClassType.Substring(slashIndex + 1);
+                CsClassType = $"{MsgParser.CsIfy(packageName)}.{classProper}";
             }
             else
             {
-                CsClassName = RosClassName;
+                CsClassType = RosClassType;
             }
 
             ClassInfo = classInfo;
@@ -145,7 +145,7 @@ namespace Iviz.MsgsGen
             string result;
             switch (ArraySize)
             {
-                case NotAnArray when CsClassName == "string":
+                case NotAnArray when CsClassType == "string":
                 {
                     if (serializeAsProperty)
                     {
@@ -164,12 +164,12 @@ namespace Iviz.MsgsGen
                     if (serializeAsProperty)
                     {
                         result = isInStruct
-                            ? $"public {CsClassName} {CsFieldName};"
-                            : $"public {CsClassName} {CsFieldName} {{ get; set; }}";
+                            ? $"public {CsClassType} {CsFieldName};"
+                            : $"public {CsClassType} {CsFieldName} {{ get; set; }}";
                     }
                     else
                     {
-                        result = $"public {CsClassName} {CsFieldName};";
+                        result = $"public {CsClassType} {CsFieldName};";
                     }
 
                     break;
@@ -178,14 +178,14 @@ namespace Iviz.MsgsGen
                     if (serializeAsProperty)
                     {
                         result = isInStruct
-                            ? $"public {CsClassName}[]? {CsFieldName};"
-                            : $"public {CsClassName}[] {CsFieldName} {{ get; set; }}";
+                            ? $"public {CsClassType}[]? {CsFieldName};"
+                            : $"public {CsClassType}[] {CsFieldName} {{ get; set; }}";
                     }
                     else
                     {
                         result = RentHint
-                            ? $"public Tools.SharedRent<{CsClassName}> {CsFieldName};"
-                            : $"public {CsClassName}[] {CsFieldName};";
+                            ? $"public Tools.SharedRent<{CsClassType}> {CsFieldName};"
+                            : $"public {CsClassType}[] {CsFieldName};";
                     }
                 }
 
@@ -195,12 +195,12 @@ namespace Iviz.MsgsGen
                     if (serializeAsProperty)
                     {
                         result = isInStruct
-                            ? $"public {CsClassName}[/*{ArraySize}*/]? {CsFieldName} {{ get; set; }}"
-                            : $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName} {{ get; set; }}";
+                            ? $"public {CsClassType}[/*{ArraySize}*/]? {CsFieldName} {{ get; set; }}"
+                            : $"public {CsClassType}[/*{ArraySize}*/] {CsFieldName} {{ get; set; }}";
                     }
                     else
                     {
-                        result = $"public {CsClassName}[/*{ArraySize}*/] {CsFieldName};";
+                        result = $"public {CsClassType}[/*{ArraySize}*/] {CsFieldName};";
                     }
 
                     break;
@@ -233,24 +233,24 @@ namespace Iviz.MsgsGen
                 return $"{ClassInfo.Md5Hash} {RosFieldName}";
             }
 
-            if (ClassInfo.IsBuiltinType(RosClassName))
+            if (ClassInfo.IsBuiltinType(RosClassType))
             {
                 return ArraySize switch
                 {
-                    NotAnArray => $"{RosClassName} {RosFieldName}",
-                    DynamicSizeArray => $"{RosClassName}[] {RosFieldName}",
-                    _ => $"{RosClassName}[{ArraySize}] {RosFieldName}"
+                    NotAnArray => $"{RosClassType} {RosFieldName}",
+                    DynamicSizeArray => $"{RosClassType}[] {RosFieldName}",
+                    _ => $"{RosClassType}[{ArraySize}] {RosFieldName}"
                 };
             }
 
             // now we start improvising
-            if (RosClassName == "std_msgs/Header")
+            if (RosClassType == "std_msgs/Header")
             {
                 return $"{CachedHeaderMd5} {RosFieldName}";
             }
 
             string fullRosClassName =
-                RosClassName.Contains("/") ? RosClassName : $"{parentPackageName}/{RosClassName}";
+                RosClassType.Contains("/") ? RosClassType : $"{parentPackageName}/{RosClassType}";
 
             // is it in the assembly?
             Type? guessType = BuiltIns.TryGetTypeFromMessageName(fullRosClassName);
@@ -258,7 +258,7 @@ namespace Iviz.MsgsGen
             {
                 // nope? we bail out
                 throw new MessageDependencyException(
-                    $"Cannot find md5 for type '{RosClassName}' or '{fullRosClassName}'.");
+                    $"Cannot find md5 for type '{RosClassType}' or '{fullRosClassName}'.");
             }
 
             string md5Sum = BuiltIns.GetMd5Sum(guessType);
