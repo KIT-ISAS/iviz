@@ -12,12 +12,12 @@ public static class EnumeratorUtils
     {
         if (a == null)
         {
-            ThrowArgumentNull(nameof(a));
+            BaseUtils.ThrowArgumentNull(nameof(a));
         }
 
         if (b == null)
         {
-            ThrowArgumentNull(nameof(b));
+            BaseUtils.ThrowArgumentNull(nameof(b));
         }
 
         return new ZipEnumerable<TA, TB>(a, b);
@@ -28,12 +28,12 @@ public static class EnumeratorUtils
     {
         if (a == null)
         {
-            ThrowArgumentNull(nameof(a));
+            BaseUtils.ThrowArgumentNull(nameof(a));
         }
 
         if (f == null)
         {
-            ThrowArgumentNull(nameof(f));
+            BaseUtils.ThrowArgumentNull(nameof(f));
         }
 
         return new SelectEnumerable<IReadOnlyList<TA>, TA, TB>(a, f);
@@ -43,12 +43,12 @@ public static class EnumeratorUtils
     {
         if (a == null)
         {
-            ThrowArgumentNull(nameof(a));
+            BaseUtils.ThrowArgumentNull(nameof(a));
         }
 
         if (f == null)
         {
-            ThrowArgumentNull(nameof(f));
+            BaseUtils.ThrowArgumentNull(nameof(f));
         }
 
         return new SelectEnumerable<TA[], TA, TB>(a, f);
@@ -82,8 +82,4 @@ public static class EnumeratorUtils
     {
         return t.AsSpan(range);
     }
-    
-    [DoesNotReturn, AssertionMethod]
-    public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
-
 }

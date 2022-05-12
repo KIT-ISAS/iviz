@@ -24,7 +24,7 @@ namespace Iviz.Rosbag.Writer
         public static Stream WriteValue(this Stream stream, int value)
         {
             Span<byte> bytes = stackalloc byte[4];
-            bytes.Write(value);
+            bytes.WriteInt(value);
             stream.Write(bytes);
             return stream;
         }
@@ -32,7 +32,7 @@ namespace Iviz.Rosbag.Writer
         public static async ValueTask WriteValueAsync(this Stream stream, int value)
         {
             using var bytes = new Rent<byte>(4);
-            bytes.AsSpan().Write(value);
+            bytes.AsSpan().WriteInt(value);
             await stream.WriteAsync(bytes);
         }
 

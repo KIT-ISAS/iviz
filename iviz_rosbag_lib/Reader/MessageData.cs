@@ -131,31 +131,31 @@ namespace Iviz.Rosbag.Reader
                 throw new InvalidOperationException("Connection record does not contain a type name");
             }
 
-            if (!GeneratorsByMessageType.TryGetValue(type, out ISerializable? generator))
+            ISerializable? generator;
+            if (GeneratorsByMessageType.TryGetValue(type, out ISerializable? serializable))
             {
-                var msgType = BuiltIns.TryGetTypeFromMessageName(type);
-                if (msgType != null)
-                {
-                    generator = (IMessage?)Activator.CreateInstance(msgType) ??
-                                throw new InvalidOperationException($"Failed to create message of type '{type}'");
-                }
-                else if (MessageDefinition != null)
-                {
-                    generator = DynamicMessage.CreateFromDependencyString(type, MessageDefinition);
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Failed to create message of type '{type}'");
-                }
-
+                generator = serializable;
+            }
+            else if (BuiltIns.TryGetGeneratorFromMessageName(type) is { } tryGenerator)
+            {
+                generator = tryGenerator;
                 GeneratorsByMessageType[type] = generator;
+            }
+            else if (MessageDefinition != null)
+            {
+                generator = DynamicMessage.CreateFromDependencyString(type, MessageDefinition);
+                GeneratorsByMessageType[type] = generator;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Failed to create message of type '{type}'");
             }
 
             var rent = Rent.Empty<byte>();
+
             Span<byte> span = dataSize < 256
                 ? stackalloc byte[dataSize]
                 : (rent = new Rent<byte>(dataSize)).AsSpan();
-
             using (rent)
             {
                 reader.Seek(dataStart, SeekOrigin.Begin);

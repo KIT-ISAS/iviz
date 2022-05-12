@@ -8,19 +8,21 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
+using System;
+
 /// <summary>
 /// Manager for a subscription to a ROS topic.
 /// </summary>
-public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
+public sealed class RosSubscriber<TMessage> : IRosSubscriber<TMessage> where TMessage : IMessage
 {
-    static RosCallback<T>[] EmptyCallback => Array.Empty<RosCallback<T>>();
+    static RosCallback<TMessage>[] EmptyCallback => Array.Empty<RosCallback<TMessage>>();
 
-    readonly Dictionary<string, RosCallback<T>> callbacksById = new();
+    readonly Dictionary<string, RosCallback<TMessage>> callbacksById = new();
     readonly CancellationTokenSource runningTs = new();
     readonly RosClient client;
-    readonly ReceiverManager<T> manager;
+    readonly ReceiverManager<TMessage> manager;
 
-    RosCallback<T>[] cachedCallbacks = EmptyCallback; // cache to iterate through callbacks quickly
+    RosCallback<TMessage>[] cachedCallbacks = EmptyCallback; // cache to iterate through callbacks quickly
     int totalSubscribers;
     bool disposed;
 
@@ -35,7 +37,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     /// <summary>
     /// Whether this subscriber is valid.
     /// </summary>
-    public bool IsAlive => !CancellationToken.IsCancellationRequested;
+    public bool IsAlive => !runningTs.IsCancellationRequested;
 
     public string Topic => manager.Topic;
     public string TopicType => manager.TopicType;
@@ -55,7 +57,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     /// <summary>
     /// Event triggered when a new publisher appears.
     /// </summary>
-    public event Action<RosSubscriber<T>>? NumPublishersChanged;
+    public event Action<RosSubscriber<TMessage>>? NumPublishersChanged;
 
     public int TimeoutInMs
     {
@@ -67,11 +69,11 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
         RosTransportHint transportHint)
     {
         this.client = client;
-        manager = new ReceiverManager<T>(this, client, topicInfo, requestNoDelay, transportHint)
+        manager = new ReceiverManager<TMessage>(this, client, topicInfo, requestNoDelay, transportHint)
             { TimeoutInMs = timeoutInMs };
     }
 
-    internal void MessageCallback(in T msg, IRosReceiver receiver)
+    internal void MessageCallback(in TMessage msg, IRosReceiver receiver)
     {
         foreach (var callback in cachedCallbacks)
         {
@@ -81,7 +83,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Exception from callback : {1}", this, e);
+                Logger.LogErrorFormat("{0}: Exception from " + nameof(MessageCallback) + ": {1}", this, e);
             }
         }
     }
@@ -92,7 +94,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
         {
             return;
         }
-            
+
         Task.Run(() =>
         {
             try
@@ -101,7 +103,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Exception from RaiseNumPublishersChanged : {1}", this, e);
+                Logger.LogErrorFormat("{0}: Exception from " + nameof(NumPublishersChanged) + ": {1}", this, e);
             }
         }, default);
     }
@@ -117,7 +119,7 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
     {
         if (!IsAlive)
         {
-            throw new ObjectDisposedException("this", "This is not a valid subscriber");
+            throw new ObjectDisposedException(nameof(RosSubscriber<TMessage>), "This is not a valid subscriber");
         }
     }
 
@@ -169,27 +171,27 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
 
     public bool MessageTypeMatches(Type type)
     {
-        return type == typeof(T);
+        return type == typeof(TMessage);
     }
 
-    string IRosSubscriber.Subscribe(Action<IMessage> callback) => 
+    string IRosSubscriber.Subscribe(Action<IMessage> callback) =>
         Subscribe(msg => callback(msg));
 
     string IRosSubscriber.Subscribe(Action<IMessage, IRosReceiver> callback) =>
-        Subscribe((in T msg, IRosReceiver receiver) => callback(msg, receiver));
+        Subscribe((in TMessage msg, IRosReceiver receiver) => callback(msg, receiver));
 
 
     /// <summary>
     /// Generates a new subscriber id with the given callback function.
     /// </summary>
     /// <param name="callback">The function to call when a message arrives.</param>
-    /// <typeparam name="T">The message type</typeparam>
+    /// <typeparam name="TMessage">The message type</typeparam>
     /// <returns>The subscribed id.</returns>
     /// <exception cref="ArgumentNullException">The callback is null.</exception>
-    public string Subscribe(Action<T> callback) => 
-        Subscribe((in T t, IRosReceiver _) => callback(t));
+    public string Subscribe(Action<TMessage> callback) =>
+        Subscribe((in TMessage t, IRosReceiver _) => callback(t));
 
-    public string Subscribe(RosCallback<T> callback)
+    public string Subscribe(RosCallback<TMessage> callback)
     {
         if (callback is null)
         {
@@ -283,8 +285,8 @@ public sealed class RosSubscriber<T> : IRosSubscriber<T> where T : IMessage
         _ = TaskUtils.Run(() => PublisherUpdateRcpAsync(publisherUris, token).AsTask(), token).AwaitNoThrow(this);
     }
 
-    bool IRosSubscriber<T>.TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<T>? receiver) =>
+    bool IRosSubscriber<TMessage>.TryGetLoopbackReceiver(in Endpoint endPoint, out ILoopbackReceiver<TMessage>? receiver) =>
         manager.TryGetLoopbackReceiver(endPoint, out receiver);
 
-    public override string ToString() => $"[Subscriber {Topic} [{TopicType}] ]";
+    public override string ToString() => $"[{nameof(RosSubscriber<TMessage>)} {Topic} [{TopicType}] ]";
 }

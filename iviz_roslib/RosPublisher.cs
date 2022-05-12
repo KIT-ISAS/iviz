@@ -349,6 +349,6 @@ public sealed class RosPublisher<TMessage> : IRosPublisher<TMessage> where TMess
 
     public override string ToString()
     {
-        return $"[Publisher {Topic} [{TopicType}] ]";
+        return $"[{nameof(RosPublisher<TMessage>)} {Topic} [{TopicType}] ]";
     }
 }

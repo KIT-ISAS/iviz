@@ -84,8 +84,8 @@ internal static class RosUtils
     }
 
 
-    internal static TopicInfo GenerateDynamicTopicInfo<T>(string callerId, string topicName,
-        IReadOnlyCollection<string> responses) where T : IMessage
+    internal static TopicInfo GenerateDynamicTopicInfo(string callerId, string topicName,
+        IReadOnlyCollection<string> responses, bool allowDirectLookup)
     {
         const string typePrefix = "type=";
         const string definitionPrefix = "message_definition=";
@@ -93,24 +93,29 @@ internal static class RosUtils
         string? dynamicMsgName = responses
             .FirstOrDefault(entry => entry.HasPrefix(typePrefix))
             ?[typePrefix.Length..];
-        string? dynamicDependencies = responses
-            .FirstOrDefault(entry => entry.HasPrefix(definitionPrefix))
-            ?[definitionPrefix.Length..];
-        if (dynamicMsgName == null || dynamicDependencies == null)
+        if (string.IsNullOrEmpty(dynamicMsgName))
         {
             throw new RosHandshakeException(
-                "Partner did not send type and definition, required to instantiate dynamic messages.");
+                "Partner did not send type, required to instantiate dynamic messages.");
         }
 
-        if (DynamicMessage.IsGenericMessage<T>() // T == IMessage
-            && BuiltIns.TryGetTypeFromMessageName(dynamicMsgName) is { } lookupMsgName
-            && Activator.CreateInstance(lookupMsgName) is T lookupGenerator)
+        if (allowDirectLookup && BuiltIns.TryGetGeneratorFromMessageName(dynamicMsgName) is { } lookupGenerator)
         {
             return new TopicInfo(callerId, topicName, lookupGenerator);
         }
 
+        string? dynamicDependencies = responses
+            .FirstOrDefault(entry => entry.HasPrefix(definitionPrefix))
+            ?[definitionPrefix.Length..];
+
+        if (string.IsNullOrEmpty(dynamicDependencies))
+        {
+            throw new RosHandshakeException(
+                "Partner did not send definition, required to instantiate dynamic messages.");
+        }
+
         // T == DynamicMessage
-        var generator = DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies);
+        var generator = DynamicMessage.CreateFromDependencyString(dynamicMsgName, dynamicDependencies, false);
         return new TopicInfo(callerId, topicName, generator);
     }
 
@@ -222,7 +227,7 @@ internal static class RosUtils
                 .FirstOrDefault(t => t.infos.Any(info => CanAccessAddress(info, masterAddress)))
                 .@interface;
         }
-        catch 
+        catch
         {
             return null;
         }

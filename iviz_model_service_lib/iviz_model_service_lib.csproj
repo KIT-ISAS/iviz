@@ -5,6 +5,7 @@
         <RootNamespace>Iviz.ModelService</RootNamespace>
         <LangVersion>default</LangVersion>
         <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
+        <IsTrimmable>true</IsTrimmable>
     </PropertyGroup>
 
     <ItemGroup>

@@ -80,7 +80,7 @@ namespace Iviz.Rosbag.Reader
             //Console.WriteLine("** Start " + start);
 
             headerStart = start + 4;
-            int headerLength = intBytes.Read<int>();
+            int headerLength = intBytes.ReadInt();
 
             //Console.WriteLine("** header_len " + headerLength);
 
@@ -88,7 +88,7 @@ namespace Iviz.Rosbag.Reader
             //Console.WriteLine("** data_len pos " + reader.Position);
 
             reader.Read(intBytes);
-            int dataLength = intBytes.Read<int>();
+            int dataLength = intBytes.ReadInt();
 
             //Console.WriteLine("** data_len " + dataLength);
 

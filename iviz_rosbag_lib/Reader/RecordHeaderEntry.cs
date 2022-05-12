@@ -30,7 +30,7 @@ namespace Iviz.Rosbag.Reader
 
             reader.Seek(valueStart, SeekOrigin.Begin);
             reader.Read(span);
-            return span.Read<T>();
+            return Unsafe.ReadUnaligned<T>(ref span[0]);
         }
 
         public byte ValueAsByte
@@ -97,7 +97,7 @@ namespace Iviz.Rosbag.Reader
 
             Span<byte> intBytes = stackalloc byte[4];
             reader.Read(intBytes);
-            int entrySize = intBytes.Read<int>();
+            int entrySize = intBytes.ReadInt();
 
             long nameStart = start + 4;
             long nextStart = nameStart + entrySize;

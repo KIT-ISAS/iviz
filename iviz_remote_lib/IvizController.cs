@@ -64,7 +64,7 @@ public sealed class IvizController
 
         if (requestedId == "")
         {
-            throw new ArgumentException("Requested id name cannot be empty");
+            BuiltIns.ThrowArgumentNull("Requested id name cannot be empty");
         }
 
         var addModuleResponse =

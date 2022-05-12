@@ -31,7 +31,7 @@ public static class RosMarkerHelper
     }
 
     public static Marker CreateArrow(string ns = "", int id = 0, Point a = default, Point b = default,
-        float width = 1, ColorRGBA? color = null, string frameId = "")
+        double width = 1, ColorRGBA? color = null, string frameId = "")
     {
         return new Marker
         {
@@ -41,7 +41,7 @@ public static class RosMarkerHelper
             Type = Marker.ARROW,
             Action = Marker.ADD,
             Pose = Pose.Identity,
-            Scale = width * Vector3.One,
+            Scale = (width, 1, 1),
             Color = color ?? ColorRGBA.White,
             FrameLocked = true,
             Points = new[] { a, b }
@@ -230,7 +230,7 @@ public static class RosMarkerHelper
     
     public static Marker CreatePointList(string ns = "", int id = 0, Point[]? positions = null,
         ColorRGBA[]? colors = null, ColorRGBA? color = null, Pose? pose = null,
-        float scale = 1, string frameId = "")
+        double scale = 1, string frameId = "")
     {
         if (colors != null && positions != null && colors.Length != positions.Length)
         {

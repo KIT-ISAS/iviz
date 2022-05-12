@@ -3,11 +3,14 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using JetBrains.Annotations;
 
 namespace Iviz.Tools;
 
@@ -199,15 +202,33 @@ public static class BaseUtils
         return sBuilder.ToString();
     }
 
-    public static T Read<T>(this Span<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
+    public static int ReadInt(this Span<byte> span) => span.Length >= sizeof(int)
+        ? Unsafe.ReadUnaligned<int>(ref span[0])
+        : ThrowIndexOutOfRange();
+
+    public static int ReadInt(this byte[] array) => array.Length >= sizeof(int)
+        ? Unsafe.ReadUnaligned<int>(ref array[0])
+        : ThrowIndexOutOfRange();
 
     public static T Read<T>(this ReadOnlySpan<byte> span) where T : unmanaged => MemoryMarshal.Read<T>(span);
 
-    public static T Read<T>(this byte[] array) where T : unmanaged => MemoryMarshal.Read<T>(array);
+    public static void WriteInt(this Span<byte> span, int t)
+    {
+        if (span.Length < sizeof(int))
+        {
+            ThrowIndexOutOfRange();
+        } 
+
+        Unsafe.WriteUnaligned(ref span[0], t);
+    }
 
     public static void Write<T>(this Span<byte> span, T t) where T : unmanaged => MemoryMarshal.Write(span, ref t);
- 
-    public static void Write<T>(this byte[] array, T t) where T : unmanaged => MemoryMarshal.Write(array, ref t);
+
+    [DoesNotReturn, AssertionMethod]
+    public static void ThrowArgumentNull(string arg) => throw new ArgumentNullException(arg);
+    
+    [DoesNotReturn]
+    static int ThrowIndexOutOfRange() => throw new IndexOutOfRangeException();
 }
 
 public sealed class ConcurrentSet<T> : IReadOnlyCollection<T> where T : notnull
