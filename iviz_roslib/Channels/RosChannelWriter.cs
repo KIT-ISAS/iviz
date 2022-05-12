@@ -9,10 +9,10 @@ using Iviz.Tools;
 
 namespace Iviz.Roslib;
 
-public sealed class RosChannelWriter<T> : IRosChannelWriter
-    where T : IMessage, new()
+public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
+    where TMessage : IMessage, new()
 {
-    IRosPublisher<T>? publisher;
+    IRosPublisher<TMessage>? publisher;
     string? publisherId;
     bool disposed;
     bool latchingEnabled;
@@ -20,7 +20,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
 
     public bool Started => publisher != null;
 
-    public IRosPublisher<T> Publisher =>
+    public IRosPublisher<TMessage> Publisher =>
         publisher ?? throw new InvalidOperationException("Publisher has not been started!");
 
     public bool IsAlive => publisher != null && !disposed;
@@ -71,7 +71,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
             BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
-        if (DynamicMessage.IsDynamic<T>())
+        if (DynamicMessage.IsDynamic(typeof(TMessage)))
         {
             throw new InvalidOperationException(
                 "This function cannot be used in channels for dynamic messages. Use the overload with the generator.");
@@ -84,7 +84,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
 
     public void Start(IRosClient client, string topic, DynamicMessage generator)
     {
-        if (!DynamicMessage.IsDynamic<T>())
+        if (!DynamicMessage.IsDynamic(typeof(TMessage)))
         {
             throw new InvalidOperationException("This function can only be used in channels for dynamic messages");
         }
@@ -105,7 +105,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
         }
 
         publisherId = client.Advertise(topic, generator, out var dynamicPublisher);
-        publisher = (IRosPublisher<T>) dynamicPublisher;
+        publisher = (IRosPublisher<TMessage>) dynamicPublisher;
         publisher.LatchingEnabled = LatchingEnabled;
         publisher.ForceTcpNoDelay = ForceTcpNoDelay;
     }
@@ -117,7 +117,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
             BuiltIns.ThrowArgumentNull(nameof(client));
         }
 
-        (publisherId, publisher) = await client.AdvertiseAsync<T>(topic, token);
+        (publisherId, publisher) = await client.AdvertiseAsync<TMessage>(topic, token);
         publisher.LatchingEnabled = LatchingEnabled;
         publisher.ForceTcpNoDelay = ForceTcpNoDelay;
     }
@@ -125,7 +125,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
     public async ValueTask StartAsync(IRosClient client, string topic, DynamicMessage generator,
         CancellationToken token = default)
     {
-        if (!DynamicMessage.IsDynamic<T>())
+        if (!DynamicMessage.IsDynamic(typeof(TMessage)))
         {
             throw new InvalidOperationException("This function can only be used in channels for dynamic messages");
         }
@@ -143,18 +143,18 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
         IRosPublisher<DynamicMessage> dynamicPublisher;
         (publisherId, dynamicPublisher) = await client.AdvertiseAsync(topic, generator, token);
 
-        publisher = (IRosPublisher<T>) dynamicPublisher;
+        publisher = (IRosPublisher<TMessage>) dynamicPublisher;
         publisher.LatchingEnabled = LatchingEnabled;
         publisher.ForceTcpNoDelay = ForceTcpNoDelay;
     }
 
 
-    public void Write(in T msg)
+    public void Write(in TMessage msg)
     {
         Publisher.Publish(msg);
     }
 
-    public async ValueTask WriteAsync(T msg, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
+    public async ValueTask WriteAsync(TMessage msg, RosPublishPolicy policy = RosPublishPolicy.DoNotWait,
         CancellationToken token = default)
     {
         await Publisher.PublishAsync(msg, policy, token);
@@ -165,14 +165,14 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
         Publisher.Publish(msg);
     }
 
-    public void WriteAll(IEnumerable<T> msgs)
+    public void WriteAll(IEnumerable<TMessage> msgs)
     {
         if (msgs == null)
         {
             BuiltIns.ThrowArgumentNull(nameof(msgs));
         }
 
-        foreach (T msg in msgs)
+        foreach (TMessage msg in msgs)
         {
             Publisher.Publish(msg);
         }
@@ -192,7 +192,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
     }
 
 #if !NETSTANDARD2_0
-    public async ValueTask WriteAllAsync(IAsyncEnumerable<T> messages, RosPublishPolicy policy =
+    public async ValueTask WriteAllAsync(IAsyncEnumerable<TMessage> messages, RosPublishPolicy policy =
         RosPublishPolicy.DoNotWait, CancellationToken token = default)
     {
         if (messages == null)
@@ -200,7 +200,7 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
             BuiltIns.ThrowArgumentNull(nameof(messages));
         }
 
-        await foreach (T msg in messages.WithCancellation(token))
+        await foreach (TMessage msg in messages.WithCancellation(token))
         {
             await Publisher.PublishAsync(msg, policy, token);
         }
@@ -225,12 +225,12 @@ public sealed class RosChannelWriter<T> : IRosChannelWriter
     {
         if (publisher == null)
         {
-            return $"[{nameof(RosChannelWriter<T>)} (uninitialized)]";
+            return $"[{nameof(RosChannelWriter<TMessage>)} (uninitialized)]";
         }
 
         return disposed
-            ? $"[{nameof(RosChannelWriter<T>)} (disposed)]"
-            : $"[{nameof(RosChannelWriter<T>)} {Publisher.Topic} [{Publisher.TopicType}]]";
+            ? $"[{nameof(RosChannelWriter<TMessage>)} (disposed)]"
+            : $"[{nameof(RosChannelWriter<TMessage>)} {Publisher.Topic} [{Publisher.TopicType}]]";
     }
 
     public void Dispose()

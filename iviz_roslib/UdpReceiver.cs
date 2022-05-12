@@ -101,11 +101,11 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
             return;
         }
 
-        if (DynamicMessage.IsGeneric<TMessage>())
+        if (DynamicMessage.IsGeneric(typeof(TMessage)))
         {
             try
             {
-                bool allowDirectLookup = DynamicMessage.IsDynamic<TMessage>();
+                bool allowDirectLookup = DynamicMessage.IsDynamic(typeof(TMessage));
                 this.topicInfo =
                     RosUtils.GenerateDynamicTopicInfo(topicInfo.CallerId, topicInfo.Topic, RosHeader,
                         allowDirectLookup);

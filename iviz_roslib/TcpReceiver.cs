@@ -249,7 +249,7 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
             throw new IOException("Connection closed during handshake");
         }
 
-        List<string> responseHeader = RosUtils.ParseHeader(readBuffer, receivedLength);
+        var responseHeader = RosUtils.ParseHeader(readBuffer, receivedLength);
         var dictionary = RosUtils.CreateHeaderDictionary(responseHeader);
 
         if (dictionary.TryGetValue("callerid", out string? remoteCallerId))
@@ -264,9 +264,9 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
 
         RosHeader = responseHeader.ToArray();
 
-        if (DynamicMessage.IsGeneric<TMessage>())
+        if (DynamicMessage.IsGeneric(typeof(TMessage)))
         {
-            bool allowDirectLookup = DynamicMessage.IsDynamic<TMessage>();
+            bool allowDirectLookup = DynamicMessage.IsDynamic(typeof(TMessage));
             topicInfo = RosUtils.GenerateDynamicTopicInfo(topicInfo.CallerId, topicInfo.Topic, RosHeader,
                 allowDirectLookup);
         }
