@@ -78,14 +78,14 @@ namespace Iviz.UtilsTests
         [Test]
         public void TestFindingMessage()
         {
-            Assert.NotNull(BuiltIns.TryGetTypeFromMessageName("std_msgs/Header"));
-            Assert.Null(BuiltIns.TryGetTypeFromMessageName("std_msgs/NonExistingMessage"));
+            Assert.NotNull(BuiltIns.TryGetGeneratorFromMessageName("std_msgs/Header"));
+            Assert.Null(BuiltIns.TryGetGeneratorFromMessageName("std_msgs/NonExistingMessage"));
 
             // these two are equivalent
-            Assert.NotNull(BuiltIns.TryGetTypeFromMessageName("dummy_namespace/DummyMessage", "Iviz.UtilsTests"));
-            Assert.NotNull(BuiltIns.TryGetTypeFromMessageName("DummyNamespace/DummyMessage", "Iviz.UtilsTests"));
+            Assert.NotNull(BuiltIns.TryGetGeneratorFromMessageName("dummy_namespace/DummyMessage", "Iviz.UtilsTests"));
+            Assert.NotNull(BuiltIns.TryGetGeneratorFromMessageName("DummyNamespace/DummyMessage", "Iviz.UtilsTests"));
         }
-
+        
         [Test]
         public void TestDynamicMessage()
         {
@@ -162,7 +162,7 @@ namespace Iviz.UtilsTests
             float64 w
             ";
 
-            DynamicMessage message =
+            var message =
                 DynamicMessage.CreateFromDependencyString("iviz_test/TransformStamped", fullDependencies);
 
             var realTransformStamped = new TransformStamped();
@@ -202,7 +202,6 @@ namespace Iviz.UtilsTests
             {
                 Assert.True(rent.Array != null && rent.Array.Length == 0);
             }
-
         }
     }
 
@@ -217,6 +216,7 @@ namespace Iviz.UtilsTests
             public string RosMessageType => "";
             public string RosMd5Sum => "";
             public string RosDependenciesBase64 => "";
+
             public void Dispose()
             {
             }

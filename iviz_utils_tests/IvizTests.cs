@@ -1,14 +1,18 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.IvizMsgs;
+using Iviz.Msgs.MoveitMsgs;
 using Iviz.Msgs.NavMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.Tf2Msgs;
+using Iviz.Msgs.VisualizationMsgs;
 using Iviz.RemoteLib;
 using Iviz.Roslib;
+using Iviz.Roslib.MarkerHelper;
 using Iviz.Tools;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -168,4 +172,145 @@ public class IvizTests
             Thread.Sleep(5);
         }
     }
+    
+    [Test]
+    public void TestMarkers()
+    {
+        var writer = client.CreateWriter<MarkerArray>("/markers", true);
+
+        var ivizController = new IvizController(client, IvizId);
+        ivizController.AddModuleFromTopic("/markers");
+
+        var markers = new List<Marker>();
+        markers.Add(RosMarkerHelper.CreateArrow(id: 1, a: (0, 0, 0), b: (0, 0, 1), width: 0.2, color: ColorRGBA.Green));
+        
+        markers.Add(RosMarkerHelper.CreateArrow(id: 2, pose: Pose.Identity.WithPosition(1, 0, 0), color: ColorRGBA.Blue, scale: (1, 0.1, 0.1)));
+
+        markers.Add(RosMarkerHelper.CreateArrow(id: 2, pose: Pose.Identity.WithPosition(1, 0, 0), color: ColorRGBA.Yellow, scale: (1, 0.25, 0.25)));
+
+        markers.Add(RosMarkerHelper.CreateCube(id: 3, pose: Pose.Identity.WithPosition(0, 1, 0), color: ColorRGBA.Red, scale: (1, 0.5, 0.25) ));
+
+        markers.Add(RosMarkerHelper.CreateSphere(id: 4, pose: Pose.Identity.WithPosition(1, 1, 0), color: ColorRGBA.Green, scale: (1, 0.5, 0.25) ));
+
+        markers.Add(RosMarkerHelper.CreateCube(id: 5, pose: Pose.Identity.WithPosition(2, 1, 0), color: ColorRGBA.Blue, scale: (2, 1, 0.5) ));
+
+        markers.Add(RosMarkerHelper.CreateCylinder(id: 5, pose: Pose.Identity.WithPosition(2, 1, 0), color: ColorRGBA.Blue, scale: (1, 0.5, 0.5) ));
+
+        markers.Add(RosMarkerHelper.CreateTextViewFacing(id: 6, position: (0, 2, 0), color: ColorRGBA.Blue, scale: 2, text: "lol"));
+
+        markers.Add(RosMarkerHelper.CreateTextViewFacing(id: 6, position: (0, 2, 0), color: ColorRGBA.Green, scale: 0.25, text: "LOL"));
+
+        markers.Add(RosMarkerHelper.CreateTextViewFacing(id: 7, position: (1, 2, 0), color: ColorRGBA.Red, scale: 0.5, text: "ABCD"));
+
+        markers.Add(RosMarkerHelper.CreateTextViewFacing(id: 7, position: (1, 2, 0), color: ColorRGBA.Red, scale: 0.5, text: "ABCD\neee"));
+
+        //----------------
+        
+        var points = new List<Point>();
+        for (int i = 0; i < 2 * 360; i += 9)
+        {
+            float angle = i * 180 / MathF.PI;
+            Point point = (MathF.Cos(angle), MathF.Sin(angle), i * 0.001);
+            points.Add(point);
+        }
+
+        markers.Add(RosMarkerHelper.CreateLineStrip(id: 8,pose: Pose.Identity.WithPosition(0, 3, 0), color: ColorRGBA.Blue, lines: points.ToArray(), width: 0.01));
+
+        points.Clear();
+        for (int i = 0; i < 5 * 360; i += 9)
+        {
+            float angle = i * 180 / MathF.PI;
+            Point point = (MathF.Cos(angle), MathF.Sin(angle), i * 0.001);
+            points.Add(point);
+        }
+
+        markers.Add(RosMarkerHelper.CreateLineStrip(id: 8,pose: Pose.Identity.WithPosition(0, 3, 0), color: ColorRGBA.Red, lines: points.ToArray(), width: 0.01));
+
+        var colors = new List<ColorRGBA>();
+        for (int i = 0; i < 5 * 360; i += 9)
+        {
+            float angle = i * 180 / MathF.PI;
+            var color = new ColorRGBA(0, MathF.Cos(angle) * 0.5f + 0.5f, 0, 1);
+            colors.Add(color);
+        }
+        
+        markers.Add(RosMarkerHelper.CreateLineStrip(id: 9,pose: Pose.Identity.WithPosition(2, 3, 0), colors: colors.ToArray(), lines: points.ToArray(), width: 0.01));
+        markers.Add(RosMarkerHelper.CreateLineStrip(id: 10,pose: Pose.Identity.WithPosition(2, 3, 0), colors: colors.ToArray(), lines: points.ToArray(), width: 0.01));
+
+        colors.Clear();
+        for (int i = 0; i < 5 * 360; i += 9)
+        {
+            float angle = i * 180 / MathF.PI;
+            var color = new ColorRGBA(0, 0, 1, MathF.Cos(angle) * 0.5f + 0.5f);
+            colors.Add(color);
+        }
+
+        markers.Add(RosMarkerHelper.CreateLineStrip(id: 10,pose: Pose.Identity.WithPosition(4, 3, 0), colors: colors.ToArray(), lines: points.ToArray(), width: 0.01));
+
+
+        //----------------
+        
+        points.Clear();
+        points.Add((1, 0,0));
+
+        for (int i = 0; i < 5 * 360; i += 9)
+        {
+            float angle = i * 180 / MathF.PI;
+            Point point = (MathF.Cos(angle), MathF.Sin(angle), i * 0.001);
+            points.Add(point);
+            points.Add(point);
+        }
+
+        points.RemoveAt(points.Count - 1);
+        
+        markers.Add(RosMarkerHelper.CreateLines(id: 11,pose: Pose.Identity.WithPosition(0, 5, 0), color: ColorRGBA.Red, lines: points.ToArray(), width: 0.01));
+        
+        colors.Clear();
+        colors.Add((1, 0,0));
+        for (int i = 0; i < 5 * 360; i += 9)
+        {
+            float angle = i * 180 / MathF.PI;
+            var color = new ColorRGBA(0, MathF.Cos(angle) * 0.5f + 0.5f, 0, 1);
+            colors.Add(color);
+            colors.Add(color);
+        }
+        
+        colors.RemoveAt(colors.Count - 1);
+        
+        markers.Add(RosMarkerHelper.CreateLines(id: 12,pose: Pose.Identity.WithPosition(2, 5, 0), colors: colors.ToArray(), lines: points.ToArray(), width: 0.01));
+
+        //----------------
+
+        markers.Add(RosMarkerHelper.CreatePointList(id: 13,pose: Pose.Identity.WithPosition(0, 7, 0), positions: points.ToArray(), scale: 0.05));
+
+        markers.Add(RosMarkerHelper.CreateMeshList(id: 14,pose: Pose.Identity.WithPosition(2, 7, 0), positions: points.ToArray(), scale: (0.05, 0.05, 0.05)));
+
+        //----------------
+
+        points.Clear();
+        points.Add((0,0,0));
+        for (int i = 0; i < 360; i += 9)
+        {
+            float angle = i * 180 / MathF.PI;
+            Point point = (MathF.Cos(angle), MathF.Sin(angle), i * 0.001);
+            points.Add(point);
+        }
+
+        var indices = new List<Point>();
+        for (int i = 0; i < 360/9; i++)
+        {
+            indices.Add(points[0]);
+            indices.Add(points[i]);
+            indices.Add(points[i+1]);
+        }
+        
+        markers.Add(RosMarkerHelper.CreateTriangleList(id: 15,pose: Pose.Identity.WithPosition(0, 9, 0), positions: indices.ToArray(), scale: (1, 1, 5)));
+
+        indices[^1] *= float.PositiveInfinity; 
+        markers.Add(RosMarkerHelper.CreateTriangleList(id: 16,pose: Pose.Identity.WithPosition(2, 9, 0), positions: indices.ToArray(), scale: (1, 1, 5)));
+
+        writer.Write(new MarkerArray(markers.ToArray()));
+        
+        Thread.Sleep(1000);
+    }    
 }
