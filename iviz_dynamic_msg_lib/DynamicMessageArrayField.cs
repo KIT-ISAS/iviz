@@ -36,7 +36,7 @@ namespace Iviz.MsgsGen.Dynamic
         {
             if (Value == null)
             {
-                throw new NullReferenceException(nameof(Value));
+                BuiltIns.ThrowNullReference(nameof(Value));
             }
 
             foreach (DynamicMessage field in Value)

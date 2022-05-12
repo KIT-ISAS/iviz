@@ -7,19 +7,19 @@ namespace Iviz.MsgsGen.Dynamic
     {
         static readonly IDeserializable<T> Generator = new T();
 
-        public T Value { get; set; } = new T();
+        public T Value { get; set; } = new();
 
         object IField.Value => Value;
-        
+
         public FieldType Type => FieldType.Message;
-        
+
         public int RosLength => Value.RosMessageLength;
 
         public void RosValidate()
         {
             if (Value == null)
             {
-                throw new NullReferenceException(nameof(Value));
+                BuiltIns.ThrowNullReference(nameof(Value));
             }
 
             Value.RosValidate();
@@ -39,7 +39,5 @@ namespace Iviz.MsgsGen.Dynamic
         {
             return new MessageField<T>();
         }
-        
-        
     }
 }

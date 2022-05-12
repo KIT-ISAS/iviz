@@ -44,12 +44,12 @@ namespace Iviz.MsgsGen.Dynamic
         {
             if (Value == null)
             {
-                throw new NullReferenceException(nameof(Value));
+                BuiltIns.ThrowNullReference(nameof(Value));
             }
 
             if (Value.Length != Count)
             {
-                throw new RosInvalidSizeForFixedArrayException();
+                BuiltIns.ThrowInvalidSizeForFixedArray(Value.Length, Count);
             }
         }
 

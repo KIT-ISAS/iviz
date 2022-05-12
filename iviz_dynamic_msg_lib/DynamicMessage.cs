@@ -243,9 +243,9 @@ namespace Iviz.MsgsGen.Dynamic
             return RosDeserialize(ref b);
         }
 
-        public static bool IsDynamic<T>() => typeof(DynamicMessage) == typeof(T);
+        public static bool IsDynamic(Type T) => typeof(DynamicMessage) == T;
 
-        public static bool IsGeneric<T>() => typeof(IMessage) == typeof(T) || IsDynamic<T>();
+        public static bool IsGeneric(Type T) => typeof(IMessage) == T || IsDynamic(T);
 
         public override string ToString() => this.ToJsonString();
 

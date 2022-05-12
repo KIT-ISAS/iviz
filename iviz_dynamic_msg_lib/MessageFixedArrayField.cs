@@ -43,19 +43,19 @@ namespace Iviz.MsgsGen.Dynamic
         {
             if (Value == null)
             {
-                throw new NullReferenceException(nameof(Value));
+                BuiltIns.ThrowNullReference(nameof(Value));
             }
 
             if (Value.Length != Count)
             {
-                throw new RosInvalidSizeForFixedArrayException();
+                BuiltIns.ThrowInvalidSizeForFixedArray(Value.Length, Count);
             }
 
             for (int i = 0; i < Value.Length; i++)
             {
                 if (Value[i] is null)
                 {
-                    throw new NullReferenceException($"{nameof(Value)}[{i}]");
+                    BuiltIns.ThrowNullReference(nameof(Value), i);
                 }
 
                 Value[i].RosValidate();

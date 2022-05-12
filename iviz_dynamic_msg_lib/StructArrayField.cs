@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Msgs;
 
@@ -12,13 +13,13 @@ namespace Iviz.MsgsGen.Dynamic
 
         public FieldType Type => FieldType.StructArray;
 
-        public int RosLength => 4 + Value.Length * Marshal.SizeOf<T>();
+        public int RosLength => 4 + Value.Length * Unsafe.SizeOf<T>();
 
         public void RosValidate()
         {
             if (Value == null)
             {
-                throw new NullReferenceException(nameof(Value));
+                BuiltIns.ThrowNullReference(nameof(Value));
             }
         }
 

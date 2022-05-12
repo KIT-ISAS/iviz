@@ -1,4 +1,3 @@
-using System;
 using System.Runtime.InteropServices;
 using Iviz.Msgs;
 
@@ -26,12 +25,12 @@ namespace Iviz.MsgsGen.Dynamic
         {
             if (Value == null)
             {
-                throw new NullReferenceException(nameof(Value));
+                BuiltIns.ThrowNullReference(nameof(Value));
             }
 
             if (Value.Length != Count)
             {
-                throw new RosInvalidSizeForFixedArrayException();
+                BuiltIns.ThrowInvalidSizeForFixedArray(Value.Length, Count);
             }
         }
 
@@ -42,7 +41,7 @@ namespace Iviz.MsgsGen.Dynamic
 
         public void RosDeserializeInPlace(ref ReadBuffer b)
         {
-            b.DeserializeStructArray<T>(Count, out T[] val);
+            b.DeserializeStructArray(Count, out T[] val);
             Value = val;
         }
 
