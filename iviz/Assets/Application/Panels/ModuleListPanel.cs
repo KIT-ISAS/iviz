@@ -534,7 +534,7 @@ namespace Iviz.App
 
         public async void SaveStateConfiguration(string file)
         {
-            ThrowHelper.ThrowIfNull(file, nameof(file));
+            ThrowHelper.ThrowIfNullOrEmpty(file, nameof(file));
 
             var config = new StateConfiguration();
 
@@ -659,8 +659,8 @@ namespace Iviz.App
                 }
 
                 var connectionData = Dialogs.ConnectionData;
-                connectionData.MasterUri = string.IsNullOrEmpty(config.MasterUri) ? null : new Uri(config.MasterUri);
-                connectionData.MyUri = string.IsNullOrEmpty(config.MyUri) ? null : new Uri(config.MyUri);
+                connectionData.MasterUri = string.IsNullOrWhiteSpace(config.MasterUri) ? null : new Uri(config.MasterUri);
+                connectionData.MyUri = string.IsNullOrWhiteSpace(config.MyUri) ? null : new Uri(config.MyUri);
                 connectionData.MyId = config.MyId;
                 if (config.LastMasterUris.Count != 0)
                 {

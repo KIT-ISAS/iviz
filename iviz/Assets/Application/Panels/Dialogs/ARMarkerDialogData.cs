@@ -82,7 +82,7 @@ namespace Iviz.App
                 }
 
                 string code = panel.Codes[index].Value.Trim();
-                if (string.IsNullOrEmpty(code))
+                if (string.IsNullOrWhiteSpace(code))
                 {
                     RosLogger.Info($"{this}: Ignoring empty code for entry {index.ToString()}.");
                     continue;

@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class SettingsDialogPanel : DialogPanel
+    public sealed class SettingsDialogPanel : DialogPanel
     {
         [SerializeField] TrashButtonWidget? close;
 

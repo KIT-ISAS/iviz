@@ -48,7 +48,19 @@ namespace Iviz.App
             panel.Marker.MarkerListener = listener;
             panel.HideButton.State = listener.Visible;
 
-            panel.DescriptionsVisible.ValueChanged += f => { listener.DescriptionsVisible = f; };
+            panel.TriangleListFlipWinding.Value = listener.TriangleListFlipWinding;
+            panel.Alpha.Value = listener.Alpha;
+            panel.Smoothness.Value = listener.Smoothness;
+            panel.Metallic.Value = listener.Metallic;
+            panel.Tint.Value = listener.Tint;
+
+            panel.DescriptionsVisible.ValueChanged += f => listener.DescriptionsVisible = f;
+            panel.TriangleListFlipWinding.ValueChanged += f => listener.TriangleListFlipWinding = f;
+            panel.Alpha.ValueChanged += f => listener.Alpha = f;
+            panel.Tint.ValueChanged += f => listener.Tint = f;
+            panel.Smoothness.ValueChanged += f => listener.Smoothness = f;
+            panel.Metallic.ValueChanged += f => listener.Metallic = f;
+            
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;
         }
@@ -71,6 +83,21 @@ namespace Iviz.App
                         break;
                     case nameof(InteractiveMarkerConfiguration.DescriptionsVisible):
                         listener.DescriptionsVisible = config.DescriptionsVisible;
+                        break;
+                    case nameof(InteractiveMarkerConfiguration.Tint):
+                        listener.Tint = config.Tint.ToUnity();
+                        break;
+                    case nameof(InteractiveMarkerConfiguration.Alpha):
+                        listener.Alpha = config.Alpha;
+                        break;
+                    case nameof(InteractiveMarkerConfiguration.Smoothness):
+                        listener.Smoothness = config.Smoothness;
+                        break;
+                    case nameof(InteractiveMarkerConfiguration.Metallic):
+                        listener.Metallic = config.Metallic;
+                        break;
+                    case nameof(InteractiveMarkerConfiguration.TriangleListFlipWinding):
+                        listener.TriangleListFlipWinding = config.TriangleListFlipWinding;
                         break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");

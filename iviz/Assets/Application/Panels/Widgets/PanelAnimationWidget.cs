@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class PanelAnimationWidget : MonoBehaviour
+    public sealed class PanelAnimationWidget : MonoBehaviour
     {
         [SerializeField] float start;
         [SerializeField] float end;

@@ -29,7 +29,7 @@ using Color = UnityEngine.Color;
 
 namespace VNC
 {
-    public class VncController : MonoBehaviour
+    public sealed class VncController : MonoBehaviour
     {
         [SerializeField] XRPlainDialog? plainDialog;
         [SerializeField] VncConnectionDialog? connectionDialog;

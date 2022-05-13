@@ -16,7 +16,7 @@
         public SliderWidget Smoothness { get; private set; }
         public DropdownWidget Mask { get; private set; }
         public MarkerWidget Marker { get; private set; }
-        CollapsibleWidget Material { get; set; }
+        CollapsibleWidget Visuals { get; set; }
 
         void Awake()
         {
@@ -25,15 +25,16 @@
             Listener = p.AddListener();
             //PreferUdp = p.AddToggle("Prefer UDP");
 
-            TriangleListFlipWinding = p.AddToggle("Clockwise Winding in Triangle Lists");
             ShowDescriptions = p.AddToggle("Show Descriptions");
             OcclusionOnlyMode = p.AddToggle("AR Occlusion Only Mode");
+            TriangleListFlipWinding = p.AddToggle("Clockwise Winding in Triangle Lists");
             Tint = p.AddColorPicker("Tint");
             Alpha = p.AddSlider("Alpha").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
             Metallic = p.AddSlider("Metallic").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
             Smoothness = p.AddSlider("Smoothness").SetMinValue(0).SetMaxValue(1).SetNumberOfSteps(256);
 
-            Material = p.AddCollapsibleWidget("Visuals")
+            Visuals = p.AddCollapsibleWidget("Visuals")
+                .Attach(TriangleListFlipWinding)
                 .Attach(OcclusionOnlyMode)
                 .Attach(Tint)
                 .Attach(Alpha)

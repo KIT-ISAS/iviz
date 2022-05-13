@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class RoundedPlaneDisplay : MeshMarkerHolderDisplay
+    public sealed class RoundedPlaneDisplay : MeshMarkerHolderDisplay
     {
         [SerializeField] Mesh? cornerMesh;
         [SerializeField] Mesh? quadMesh;

@@ -22,5 +22,6 @@ namespace Iviz.Controllers.TF
         [DataMember] public string Parent { get; set; } = "";
         [DataMember] public Msgs.GeometryMsgs.Pose LocalPose { get; set; }
         [DataMember] public float Scale { get; set; } = 1;
+        [DataMember] public bool Visible { get; set; } = true;
     }    
 }

@@ -260,12 +260,16 @@ namespace Iviz.Displays
             base.Stop();
         }
         
-        public override void ForceInvisible()
+        public override bool ForceInvisible
         {
-            forceInvisible = true;
-            Visible = Visible;
-            LabelVisible = LabelVisible;
-            ConnectorVisible = ConnectorVisible;
+            get => forceInvisible;
+            set
+            {
+                forceInvisible = value;
+                Visible = Visible;
+                LabelVisible = LabelVisible;
+                ConnectorVisible = ConnectorVisible;
+            }
         }
 
         public void Highlight(in Vector3 _) => Highlight();

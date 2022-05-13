@@ -26,7 +26,7 @@ namespace Iviz.Core
 
         public static void ThrowIfNullOrEmpty([System.Diagnostics.CodeAnalysis.NotNull] string? t, string nameOfT)
         {
-            if (string.IsNullOrEmpty(t))
+            if (string.IsNullOrWhiteSpace(t))
             {
                 throw new ArgumentException("Argument '" + nameOfT + "' cannot be null or empty");
             }

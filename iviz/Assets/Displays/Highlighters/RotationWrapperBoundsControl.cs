@@ -16,12 +16,28 @@ namespace Iviz.Displays.Highlighters
         float sizeX;
         float sizeY;
         float markerScale;
+        
+        bool interactable = true;
+        bool visible = true;
 
         MeshMarkerDisplay? ring;
 
         public override bool Interactable
         {
-            set => node.SetActive(value);
+            set
+            {
+                interactable = value;
+                node.SetActive(interactable && visible);  
+            } 
+        }
+
+        public override bool Visible
+        {
+            set
+            {
+                visible = value;
+                node.SetActive(interactable && visible);  
+            } 
         }
 
         public override float MarkerScale

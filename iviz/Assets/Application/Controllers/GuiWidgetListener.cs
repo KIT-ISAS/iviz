@@ -169,7 +169,7 @@ namespace Iviz.Controllers
 
         void HandleAddWidget(Widget msg)
         {
-            if (string.IsNullOrEmpty(msg.Id))
+            if (string.IsNullOrWhiteSpace(msg.Id))
             {
                 RosLogger.Info($"{this}: Cannot add dialog with empty id");
                 return;
@@ -269,7 +269,7 @@ namespace Iviz.Controllers
 
         void HandleAddDialog(Dialog msg)
         {
-            if (string.IsNullOrEmpty(msg.Id))
+            if (string.IsNullOrWhiteSpace(msg.Id))
             {
                 RosLogger.Info($"{this}: Cannot add dialog with empty id");
                 return;

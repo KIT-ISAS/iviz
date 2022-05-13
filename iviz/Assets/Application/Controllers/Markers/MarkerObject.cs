@@ -1,7 +1,6 @@
 ﻿#nullable enable
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -18,7 +17,6 @@ using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Resources;
 using Iviz.Ros;
 using Iviz.Tools;
-using UnityEditor.PackageManager;
 using UnityEngine;
 using Pose = UnityEngine.Pose;
 using Quaternion = UnityEngine.Quaternion;
@@ -781,12 +779,13 @@ namespace Iviz.Controllers
             }
             else
             {
-                description.Append("Expiration: ").Append(msg.Lifetime.Secs).Append(" secs").AppendLine();
+                string timeInSecs = msg.Lifetime.ToTimeSpan().TotalSeconds.ToString("N01");
+                description.Append("Expiration: ").Append(timeInSecs).Append(" secs").AppendLine();
             }
 
             if (msg.Type is < 0 or > (int)MarkerType.TriangleList)
             {
-                description.Append(ErrorStr).Append("Unknown marker type.").AppendLine();
+                description.Append(ErrorStr).Append("Unknown marker type ").AppendLine();
                 return;
             }
 
@@ -838,9 +837,15 @@ namespace Iviz.Controllers
 
             void UpdateTransformLog()
             {
-                description.Append("Frame Locked to: <i>")
-                    .Append(string.IsNullOrEmpty(msg.Header.FrameId) ? "(none)" : msg.Header.FrameId)
-                    .Append("</i>").AppendLine();
+                if (string.IsNullOrWhiteSpace(msg.Header.FrameId))
+                {
+                    description.Append("Frame Locked to: <i>(none)</i>").AppendLine();
+                    
+                }
+                else
+                {
+                    description.Append("Frame Locked to: <i>").Append(msg.Header.FrameId).Append("</i>").AppendLine();
+                }
 
                 if (msg.Pose.IsInvalid())
                 {

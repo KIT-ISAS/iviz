@@ -3,6 +3,7 @@
 using System;
 using Iviz.Common;
 using Iviz.Core.XR;
+using Iviz.Msgs;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Utilities;
 using UnityEngine;
@@ -244,8 +245,14 @@ namespace Iviz.Core
 #else
         public const bool IsShuttingDown = false;
 #endif
-    }
 
+        [Preserve]
+        public static void InitializeAOT()
+        {
+            AotHelper.EnsureType<StringEnumConverter>();            
+        }
+    }
+    
     public interface IDragHandler
     {
         bool IsDragging { get; }

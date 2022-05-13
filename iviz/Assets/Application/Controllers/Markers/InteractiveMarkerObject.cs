@@ -57,7 +57,7 @@ namespace Iviz.Controllers
             set
             {
                 descriptionVisible = value;
-                if (value && !string.IsNullOrEmpty(caption))
+                if (value && !string.IsNullOrWhiteSpace(caption))
                 {
                     if (text == null)
                     {
@@ -171,6 +171,7 @@ namespace Iviz.Controllers
                 }
 
                 controlObject.Set(controlMsg);
+
                 controlObject.Scale = controlObject.InteractionMode == InteractionMode.None ? defaultScale : 1;
             }
 
@@ -254,13 +255,13 @@ namespace Iviz.Controllers
                 return;
             }
 
-            description.Append("<color=blue><b>-- ");
+            description.Append("<color=blue><b>---- ");
 
-            description.Append(string.IsNullOrEmpty(lastMessage.Name)
-                ? "(empty name) --"
+            description.Append(string.IsNullOrWhiteSpace(lastMessage.Name)
+                ? "(empty name)"
                 : lastMessage.Name);
 
-            description.Append(" --</b></color>").AppendLine();
+            description.Append(" ----</b></color>").AppendLine();
 
             string msgDescription = lastMessage.Description.Length != 0
                 ? lastMessage.Description.Replace("\t", "\\t").Replace("\n", "\\n")
@@ -319,7 +320,7 @@ namespace Iviz.Controllers
             }
         }
 
-        internal IEnumerable<IHasBounds> GetAllBounds() =>
-            controls.Values.SelectMany(control => control.GetAllBounds());
+        internal IEnumerable<MarkerObject> GetAllMarkers() =>
+            controls.Values.SelectMany(control => control.GetAllMarkers());
     }
 }

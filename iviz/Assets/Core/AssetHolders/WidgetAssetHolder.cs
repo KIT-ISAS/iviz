@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public class WidgetAssetHolder : MonoBehaviour
+    public sealed class WidgetAssetHolder : MonoBehaviour
     {
         public GameObject AddTopicPanel = null;
         public GameObject CloseButton = null;

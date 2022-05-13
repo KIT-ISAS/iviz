@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class CollapsibleWidget : MonoBehaviour, IWidget
+    public sealed class CollapsibleWidget : MonoBehaviour, IWidget
     {
         [SerializeField] TMP_Text label;
         [SerializeField] Button button;

@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public class XRNotification : DisplayWrapper
+    public sealed class XRNotification : DisplayWrapper
     {
         public enum LevelType
         {

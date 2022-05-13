@@ -8,7 +8,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 namespace Iviz.Controllers.XR
 {
-    public class XRLeashVisual : MonoBehaviour
+    public sealed class XRLeashVisual : MonoBehaviour
     {
         [SerializeField] XRRayInteractor? interactor;
         [SerializeField] CustomController? controller;

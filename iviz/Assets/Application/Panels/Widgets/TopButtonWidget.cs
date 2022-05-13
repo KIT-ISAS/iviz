@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class TopButtonWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler
+    public sealed class TopButtonWidget : MonoBehaviour, IWidget, IDragHandler, IEndDragHandler
     {
         [SerializeField] Button button;
 

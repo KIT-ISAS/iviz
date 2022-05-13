@@ -49,7 +49,7 @@ namespace Iviz.Controllers.TF
         bool labelsVisible;
         bool parentConnectorVisible;
 
-        TfFrame? lastChild;
+        TfFrame? lastProcessedFrame;
 
         public static bool HasInstance => instance != null;
 
@@ -186,7 +186,7 @@ namespace Iviz.Controllers.TF
 
                 FixedFrame.RemoveListener(fixedFrameListenerNode);
 
-                if (string.IsNullOrEmpty(value))
+                if (string.IsNullOrWhiteSpace(value))
                 {
                     fixedFrame = mapFrame;
                     originFrame.Transform.SetLocalPose(Pose.identity);
@@ -225,11 +225,11 @@ namespace Iviz.Controllers.TF
 
                 rootFrame = CreateFrameObject("/", null);
                 rootFrame.Transform.parent = unityFrame.transform;
-                rootFrame.ForceInvisible();
+                rootFrame.ForceInvisible = true;
 
                 originFrame = CreateFrameObject(OriginFrameId, rootFrame);
                 originFrame.Parent = rootFrame;
-                originFrame.ForceInvisible();
+                originFrame.ForceInvisible = true;
 
                 keepAllListenerNode = new FrameNode("TFNode") { Visible = false };
                 staticListenerNode = new FrameNode("TFStatic") { Visible = false };
@@ -289,9 +289,9 @@ namespace Iviz.Controllers.TF
                 : childIdUnchecked[1..];
 
             TfFrame? child;
-            if (lastChild != null && lastChild.Id == childId)
+            if (lastProcessedFrame != null && lastProcessedFrame.Id == childId)
             {
-                child = lastChild;
+                child = lastProcessedFrame;
             }
             else if (isStatic)
             {
@@ -310,7 +310,7 @@ namespace Iviz.Controllers.TF
                 return;
             }
 
-            lastChild = child;
+            lastProcessedFrame = child;
 
             string parentIdUnchecked = transform.Header.FrameId;
             if (parentIdUnchecked.Length == 0)
@@ -410,7 +410,7 @@ namespace Iviz.Controllers.TF
 
         public static string ResolveFrameId(string frameId)
         {
-            if (string.IsNullOrEmpty(frameId))
+            if (string.IsNullOrWhiteSpace(frameId))
             {
                 return FixedFrameId;
             }
@@ -492,6 +492,11 @@ namespace Iviz.Controllers.TF
             ThrowHelper.ThrowIfNull(frame, nameof(frame));
             frames.Remove(frame.Id);
             frame.Dispose();
+
+            if (lastProcessedFrame == frame)
+            {
+                lastProcessedFrame = null;
+            }
         }
 
         public void ProcessWorldOffset()

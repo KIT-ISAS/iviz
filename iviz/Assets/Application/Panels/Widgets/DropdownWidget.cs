@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class DropdownWidget : MonoBehaviour, IWidget
+    public sealed class DropdownWidget : MonoBehaviour, IWidget
     {
         [SerializeField] TMP_Text? label;
         [SerializeField] TMP_Dropdown? dropdown;

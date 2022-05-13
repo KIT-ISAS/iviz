@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class ColorPickerWidget : MonoBehaviour, IWidget
+    public sealed class ColorPickerWidget : MonoBehaviour, IWidget
     {
         [SerializeField] SliderWidget sliderX;
         [SerializeField] SliderWidget sliderY;

@@ -18,6 +18,7 @@ namespace Iviz.App
 
     public sealed class Vector3MultiWidget : MonoBehaviour, IWidget
     {
+        [SerializeField] TMP_Text? label;
         [SerializeField] Vector3SliderWidget? slider;
         [SerializeField] Vector3Widget? plain;
         [SerializeField] Button? toggle;
@@ -34,6 +35,7 @@ namespace Iviz.App
         Vector3SliderWidget Slider => slider.AssertNotNull(nameof(slider));
         Vector3Widget Plain => plain.AssertNotNull(nameof(plain));
         Button Toggle => toggle.AssertNotNull(nameof(toggle));
+        TMP_Text LabelObject => label.AssertNotNull(nameof(label));
 
         public Vector3 Value
         {
@@ -43,11 +45,7 @@ namespace Iviz.App
 
         public string Label
         {
-            set
-            {
-                Slider.Label = value;
-                Plain.Label = value;
-            }
+            set => LabelObject.text = value;
         }
 
         public event Action<Vector3>? ValueChanged;

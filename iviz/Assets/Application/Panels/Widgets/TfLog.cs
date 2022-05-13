@@ -89,7 +89,7 @@ namespace Iviz.App
 
                 selectedFrame = value;
 
-                PlaceHolder.Parent = selectedFrame;
+                PlaceHolder.Parent = selectedFrame ?? TfModule.DefaultFrame;
 
                 if (selectedFrame != null)
                 {

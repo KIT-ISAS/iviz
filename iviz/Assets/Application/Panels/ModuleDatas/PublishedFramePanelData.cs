@@ -34,6 +34,13 @@ namespace Iviz.App
             panel.CloseButton.Clicked += Close;
             panel.ParentId.Value = Frame.ParentId ?? TfModule.OriginFrameId;
 
+            panel.HideButton.State = !Frame.ForceInvisible;
+            panel.HideButton.Clicked += () =>
+            {
+                Frame.ForceInvisible = !Frame.ForceInvisible;
+                panel.HideButton.State = !Frame.ForceInvisible;
+            };
+
             UpdateHints();
             UpdatePanelPose();
 
@@ -41,19 +48,19 @@ namespace Iviz.App
             {
                 Frame.Transform.localRotation = (f * Mathf.Deg2Rad).RosRpy2Unity();
                 TfListener.Publish(Frame);
-                UpdatePanelPose();
+                //UpdatePanelPose();
             };
             panel.Position.ValueChanged += f =>
             {
                 Frame.Transform.localPosition = f.Ros2Unity();
                 TfListener.Publish(Frame);
-                UpdatePanelPose();
+                //UpdatePanelPose();
             };
 
             panel.CloseButton.Clicked += Close;
             panel.ParentId.EndEdit += f =>
             {
-                var parentFrame = string.IsNullOrEmpty(f) || f == TfModule.OriginFrameId
+                var parentFrame = string.IsNullOrWhiteSpace(f) || f == TfModule.OriginFrameId
                     ? TfModule.OriginFrame
                     : TfModule.GetOrCreateFrame(f);
                 
@@ -96,7 +103,7 @@ namespace Iviz.App
             ModulePanelManager.HidePanelFor(this);
         }
 
-        public override string ToString() => "[" + nameof(PublishedFramePanelData) + "]";
+        public override string ToString() => $"[{nameof(PublishedFramePanelData)}]";
 
         sealed class FrameOwner : IHasFrame
         {

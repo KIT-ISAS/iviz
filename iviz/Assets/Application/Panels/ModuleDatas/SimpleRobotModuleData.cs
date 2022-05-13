@@ -51,7 +51,7 @@ namespace Iviz.App
                 return;
             }
 
-            if (!string.IsNullOrEmpty(RobotController.SourceParameter))
+            if (!string.IsNullOrWhiteSpace(RobotController.SourceParameter))
             {
                 RobotController.TryLoadFromSourceParameter(RobotController.SourceParameter);
             }
@@ -86,7 +86,7 @@ namespace Iviz.App
             panel.SourceParameter.Hints = GetParameterHints(tokenSource.Token);
 
             panel.SavedRobotName.Options = GetSavedRobots();
-            if (string.IsNullOrEmpty(RobotController.SavedRobotName) ||
+            if (string.IsNullOrWhiteSpace(RobotController.SavedRobotName) ||
                 !GetSavedRobots().Contains(RobotController.SavedRobotName))
             {
                 panel.SavedRobotName.Index = 0;
@@ -110,7 +110,7 @@ namespace Iviz.App
             panel.Suffix.Value = RobotController.FrameSuffix;
 
             panel.Save.Value = IsRobotSaved;
-            panel.Save.Interactable = !string.IsNullOrEmpty(RobotController.Robot?.Name);
+            panel.Save.Interactable = !string.IsNullOrWhiteSpace(RobotController.Robot?.Name);
 
             panel.Tint.ValueChanged += f =>
                 RobotController.Tint = f.WithAlpha(panel.Alpha.Value);
@@ -130,7 +130,7 @@ namespace Iviz.App
                 UpdateModuleButton();
 
                 panel.Save.Interactable =
-                    !string.IsNullOrEmpty(RobotController.Robot?.Name) &&
+                    !string.IsNullOrWhiteSpace(RobotController.Robot?.Name) &&
                     !Resource.Internal.ContainsRobot(name);
             };
             panel.SourceParameter.EndEdit += f =>
@@ -142,7 +142,7 @@ namespace Iviz.App
                 panel.HelpText.Text = RobotController.HelpText;
                 UpdateModuleButton();
 
-                panel.Save.Interactable = !string.IsNullOrEmpty(RobotController.Robot?.Name);
+                panel.Save.Interactable = !string.IsNullOrWhiteSpace(RobotController.Robot?.Name);
             };
             panel.AttachToTf.ValueChanged += f =>
                 RobotController.AttachedToTf = f;
@@ -189,7 +189,7 @@ namespace Iviz.App
             panel.HelpText.Text = RobotController.HelpText;
             RobotController.UpdateStartTaskStatus();
             UpdateModuleButton();
-            panel.Save.Interactable = !string.IsNullOrEmpty(RobotController.Robot?.Name);
+            panel.Save.Interactable = !string.IsNullOrWhiteSpace(RobotController.Robot?.Name);
         }
 
         static IEnumerable<string> GetParameterCandidates(CancellationToken token)

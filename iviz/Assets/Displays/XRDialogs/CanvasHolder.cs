@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public class CanvasHolder : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class CanvasHolder : MonoBehaviour, IDisplay, IRecyclable
     {
         const float HeaderHeight = 0.075f;
 

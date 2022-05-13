@@ -975,7 +975,7 @@ namespace Iviz.App
         public static void PlayClickAudio(in Vector3 position)
         {
             var assetHolder = ResourcePool.AppAssetHolder;
-            AudioSource.PlayClipAtPoint(assetHolder.Click, position);
+            AudioSource.PlayClipAtPoint(assetHolder.Click, position, 0.5f);
         }
 
         static IEnumerable<Transform> GetAllRootChildren()

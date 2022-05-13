@@ -54,6 +54,7 @@ namespace Iviz.Controllers.TF
                 frame.TfFrame.AttachTo(frameConfig.Parent);
                 frame.LocalPose = frameConfig.LocalPose.Ros2Unity();
                 frame.Scale = frameConfig.Scale;
+                frame.Visible = frameConfig.Visible;
             }
         } 
 
@@ -167,6 +168,7 @@ namespace Iviz.Controllers.TF
         {
             GameThread.EverySecond -= OnEverySecond;
             RosConnection.ConnectionStateChanged -= OnConnectionStateChanged;
+            panelData = null;
             instance = null;
         }
 
@@ -191,6 +193,7 @@ namespace Iviz.Controllers.TF
         sealed class TfPublishedFrame : IPublishedFrame
         {
             readonly FrameNode frameNode;
+            bool disposed;
 
             public readonly string id;
             public readonly bool isInternal;
@@ -204,6 +207,7 @@ namespace Iviz.Controllers.TF
                 get => tfFrame.Transform.AsLocalPose();
                 set
                 {
+                    AssertIsAlive();
                     if (TfFrame.TrySetLocalPose(value))
                     {
                         TfListener.Publish(TfFrame);
@@ -218,42 +222,59 @@ namespace Iviz.Controllers.TF
                 get => tfFrame.Transform.localScale.x;
                 set => tfFrame.Transform.localScale = value * Vector3.one;
             }
-            
+
+            public bool Visible
+            {
+                get => !tfFrame.ForceInvisible;
+                set => tfFrame.ForceInvisible = !value;
+            }
+
             public TfPublishedFrameConfiguration Configuration => new()
             {
                 Id = id,
                 Parent = tfFrame.Parent == TfModule.OriginFrame || tfFrame.Parent == null ? "" : tfFrame.Parent.Id,
                 LocalPose = LocalPose.Unity2RosPose(),
-                Scale = Scale
+                Scale = Scale,
+                Visible = Visible
             };
+
+            void AssertIsAlive()
+            {
+                if (disposed) throw new ObjectDisposedException(id);
+            }
 
             internal TfPublishedFrame(string id, bool isInternal)
             {
                 this.id = id;
                 this.isInternal = isInternal;
-                frameNode = new FrameNode("TfPublisher");
+                frameNode = new FrameNode("[TfPublisher Node]");
                 frameNode.AttachTo(id);
                 tfFrame = frameNode.Parent ??
                           throw new NullReferenceException("Newly created frame has null parent"); // shouldn't happen
+                tfFrame.IsPublishedLocally = true;
 
                 if (isInternal)
                 {
-                    TfFrame.ForceInvisible();
+                    tfFrame.ForceInvisible = true;
                 }
             }
 
             public void Dispose()
             {
+                disposed = true;
+                tfFrame.IsPublishedLocally = false;
                 frameNode.Dispose();
             }
 
             public void AttachToFixed()
             {
+                AssertIsAlive();
                 tfFrame.Parent = TfModule.FixedFrame;
             }
             
             public void UpdateFrame()
             {
+                AssertIsAlive();
                 frameNode.AttachTo(id);
                 tfFrame = frameNode.Parent ??
                           throw new NullReferenceException("Failed to set origin parent"); // shouldn't happen
@@ -265,7 +286,7 @@ namespace Iviz.Controllers.TF
     {
         public Pose LocalPose { set; }
         public float Scale { set; }
+        public bool Visible { set; }
         public TfFrame TfFrame { get; }
-        public void AttachToFixed();
     }
 }

@@ -9,7 +9,7 @@ using Iviz.Ros;
 
 namespace Iviz.App
 {
-    public class SettingsDialogData : DialogData
+    public sealed class SettingsDialogData : DialogData
     {
         static readonly string[] TargetFpsOptions = {"Default", "60", "30", "15"};
         static readonly string[] NetworkProcessingOptions = {"Every Frame", "Every Second", "Every Fourth"};

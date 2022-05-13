@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 namespace Iviz.App
 {
-    public class ImageCursorHandler : MonoBehaviour, IPointerClickHandler
+    public sealed class ImageCursorHandler : MonoBehaviour, IPointerClickHandler
     {
         public event Action<Vector2>? Clicked;
 

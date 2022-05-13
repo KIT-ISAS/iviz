@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Iviz.Common;
 using Iviz.Displays;
 using UnityEngine;
@@ -32,6 +33,11 @@ namespace Iviz.Core
 
         public static Bounds TransformBound(this in Bounds bounds, in Pose pose, in Vector3 scale)
         {
+            if (bounds.IsInvalid())
+            {
+                ThrowHelper.ThrowArgument(nameof(bounds), "Bounds contain invalid values");
+            }
+            
             if (pose == Pose.identity)
             {
                 return scale == Vector3.one
@@ -94,13 +100,18 @@ namespace Iviz.Core
                 {
                     continue;
                 }
-
+                
                 if (result == null)
                 {
                     result = bounds;
                 }
                 else
                 {
+                    if (bounds.Value.IsInvalid())
+                    {
+                        ThrowHelper.ThrowArgument(nameof(bounds), "Bounds contain invalid values");
+                    }
+                    
                     result.Value.Encapsulate(bounds.Value);
                 }
             }
@@ -117,6 +128,11 @@ namespace Iviz.Core
 
         static Bounds TransformBoundsUntil(Bounds bounds, Transform transform, Transform endTransform)
         {
+            if (bounds.IsInvalid())
+            {
+                ThrowHelper.ThrowArgument(nameof(bounds), "Bounds contain invalid values");
+            }
+            
             while (transform != endTransform)
             {
                 bounds = bounds.TransformBound(transform);
@@ -131,6 +147,11 @@ namespace Iviz.Core
 
         public static bool IsVisibleFromMainCamera(this in Bounds bounds)
         {
+            if (bounds.IsInvalid())
+            {
+                ThrowHelper.ThrowArgument(nameof(bounds), "Bounds contain invalid values");
+            }
+            
             GeometryUtility.CalculateFrustumPlanes(Settings.MainCamera, PlaneCache);
             return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
         }

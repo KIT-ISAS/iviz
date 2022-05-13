@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Iviz.Controllers.XR
 {
-    public class PalmCompass : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class PalmCompass : MonoBehaviour, IDisplay, IRecyclable
     {
         [SerializeField] MeshMarkerDisplay? ring;
         AxisFrameDisplay? frame;

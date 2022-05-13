@@ -10,7 +10,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public class PanelHolder : MonoBehaviour, IDisplay, IRecyclable
+    public sealed class PanelHolder : MonoBehaviour, IDisplay, IRecyclable
     {
         const float HeaderHeight = 0.06f;
 

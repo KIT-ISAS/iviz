@@ -22,7 +22,7 @@ using Position = MarcusW.VncClient.Position;
 
 namespace VNC
 {
-    public class VncScreen : MonoBehaviour, IPointerMoveHandler, IPointerUpHandler, IPointerDownHandler,
+    public sealed class VncScreen : MonoBehaviour, IPointerMoveHandler, IPointerUpHandler, IPointerDownHandler,
         ISupportsDynamicBounds
     {
         static readonly (Key Key, KeySymbol Symbol)[] KeyMap =

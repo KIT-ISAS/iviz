@@ -9,7 +9,7 @@ using UnityEngine.UI;
 namespace Iviz.App
 {
     [RequireComponent(typeof(Button))]
-    public class ARSideButton : MonoBehaviour
+    public sealed class ARSideButton : MonoBehaviour
     {
         [SerializeField] Image? image;
         [SerializeField] Image? frame;

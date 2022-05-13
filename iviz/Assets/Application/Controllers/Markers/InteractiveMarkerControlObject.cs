@@ -46,6 +46,11 @@ namespace Iviz.Controllers
                 {
                     marker.Visible = value;
                 }
+                
+                foreach (var control in boundsControls.Keys)
+                {
+                    control.Visible = value;
+                }
             }
         }
 
@@ -118,9 +123,17 @@ namespace Iviz.Controllers
 
             foreach (var marker in msg)
             {
-                var markerId = marker.Ns.Length == 0 && marker.Id == 0
-                    ? ("[]", numUnnamed++)
-                    : MarkerListener.IdFromMessage(marker);
+                if (marker.Ns.Length == 0)
+                {
+                    marker.Ns = "marker";
+                }
+
+                if (marker.Id == 0)
+                {
+                    marker.Id = numUnnamed++;
+                }
+
+                var markerId = MarkerListener.IdFromMessage(marker);
                 switch (marker.Action)
                 {
                     case Marker.ADD:
@@ -299,8 +312,8 @@ namespace Iviz.Controllers
                 return;
             }
 
-            description.Append("<color=#000080ff><b>Control ");
-            if (string.IsNullOrEmpty(rosId))
+            description.Append("<color=#000080ff><b>- Control ");
+            if (string.IsNullOrWhiteSpace(rosId))
             {
                 description.Append("(empty name)");
             }
@@ -309,7 +322,7 @@ namespace Iviz.Controllers
                 description.Append(rosId);
             }
 
-            description.Append("</b></color>").AppendLine();
+            description.Append(" -</b></color>").AppendLine();
 
             string msgDescription = lastMessage.Description.Length != 0
                 ? lastMessage.Description.Replace("\t", "\\t").Replace("\n", "\\n")
@@ -383,8 +396,8 @@ namespace Iviz.Controllers
             }
         }
 
-        internal IEnumerable<IHasBounds> GetAllBounds() => markers.Values;
-
+        internal IEnumerable<MarkerObject> GetAllMarkers() => markers.Values;
+        
         static InteractionMode? ValidateInteractionMode(int mode) =>
             mode is < 0 or > (int)InteractionMode.MoveRotate3D ? null : (InteractionMode?)mode;
 

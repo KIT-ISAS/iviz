@@ -93,12 +93,12 @@ namespace Iviz.App
 
         static string ValidateFrameName(string frameName)
         {
-            if (frameName == "")
+            if (frameName == "" || frameName[0] != '/')
             {
                 return frameName;
             }
 
-            return frameName[0] == '/' ? frameName[1..] : frameName;
+            return frameName[1..];
         }
     }
 }

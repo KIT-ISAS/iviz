@@ -34,6 +34,7 @@ namespace Iviz.Controllers.TF
         public abstract float FrameSize { get; set; }
         public virtual bool TrailVisible { get; set; }
         public abstract bool EnableCollider { set; }
+        public bool IsPublishedLocally { private get; set; }
 
         public SortedDictionary<string, TfFrame>.ValueCollection Children =>
             children is null ? Empty.Values : children.Values;
@@ -168,6 +169,11 @@ namespace Iviz.Controllers.TF
 
         public void SetLocalPose(in Pose newPose)
         {
+            if (IsPublishedLocally)
+            {
+                return;
+            }
+            
             if (!localPose.EqualsApprox(newPose))
             {
                 Transform.SetLocalPose(localPose = newPose);
@@ -202,7 +208,7 @@ namespace Iviz.Controllers.TF
             base.Stop();
         }
 
-        public abstract void ForceInvisible();
+        public abstract bool ForceInvisible { get; set; }
 
         public abstract void Highlight();
 

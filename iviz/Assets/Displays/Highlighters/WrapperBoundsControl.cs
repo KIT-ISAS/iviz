@@ -27,6 +27,7 @@ namespace Iviz.Displays.Highlighters
 
         public abstract bool Interactable { set; }
         public abstract Quaternion BaseOrientation { set; }
+        public abstract bool Visible { set; }
 
         public virtual void Dispose()
         {

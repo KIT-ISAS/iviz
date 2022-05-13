@@ -127,7 +127,7 @@ namespace Iviz.Controllers
         public string AttachToFrame
         {
             get => config.AttachToFrame;
-            set => config.AttachToFrame = string.IsNullOrEmpty(value) ? TfModule.FixedFrameId : value;
+            set => config.AttachToFrame = string.IsNullOrWhiteSpace(value) ? TfModule.FixedFrameId : value;
         }
 
         public bool XIsFront
@@ -210,7 +210,7 @@ namespace Iviz.Controllers
             var (leftX, leftY) = joystick.Left;
             var (rightX, rightY) = joystick.Right;
 
-            string frameId = string.IsNullOrEmpty(AttachToFrame) ? TfModule.FixedFrameId : AttachToFrame;
+            string frameId = string.IsNullOrWhiteSpace(AttachToFrame) ? TfModule.FixedFrameId : AttachToFrame;
 
             if (SenderTwist != null)
             {

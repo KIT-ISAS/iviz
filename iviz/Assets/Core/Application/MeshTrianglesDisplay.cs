@@ -15,8 +15,28 @@ namespace Iviz.Displays
     public sealed class MeshTrianglesDisplay : MeshMarkerDisplay, ISupportsDynamicBounds
     {
         Mesh? mesh;
+        bool flipWinding;
 
-        public bool FlipWinding { get; set; }
+        public bool FlipWinding
+        {
+            get => flipWinding;
+            set
+            {
+                if (flipWinding == value)
+                {
+                    return;
+                }
+
+                flipWinding = value;
+                if (mesh == null || mesh.GetIndexCount(0) == 0)
+                {
+                    return;
+                }
+
+                FlipMeshWinding(mesh);
+            }
+        }
+
         public override Bounds? Bounds => mesh != null && mesh.vertexCount != 0 ? Collider.GetLocalBounds() : null;
         public event Action? BoundsChanged;
 
@@ -47,6 +67,40 @@ namespace Iviz.Displays
             mesh = newMesh;
             gameObject.AssertHasComponent<MeshFilter>(nameof(gameObject)).sharedMesh = newMesh;
             return newMesh;
+        }
+
+        static void FlipMeshWinding(Mesh mesh)
+        {
+            var meshTopology = mesh.GetTopology(0);
+            if (meshTopology is not (MeshTopology.Triangles or MeshTopology.Quads))
+            {
+                return;
+            }
+            
+            int[] array = mesh.GetIndices(0); // allocates! use sparingly
+            switch (meshTopology)
+            {
+                case MeshTopology.Triangles:
+                    for (int i = 0; i < array.Length; i += 3)
+                    {
+                        ref int a = ref array[i + 1];
+                        ref int b = ref array[i + 2];
+                        (a, b) = (b, a);
+                    }
+
+                    break;
+                case MeshTopology.Quads:
+                    for (int i = 0; i < array.Length; i += 4)
+                    {
+                        ref int a = ref array[i + 1];
+                        ref int c = ref array[i + 3];
+                        (a, c) = (c, a);
+                    }
+
+                    break;
+            }
+
+            mesh.SetIndices(array, meshTopology, 0);
         }
 
         public void Clear()

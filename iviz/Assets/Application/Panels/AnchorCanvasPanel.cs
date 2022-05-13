@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class AnchorCanvasPanel : MonoBehaviour
+    public sealed class AnchorCanvasPanel : MonoBehaviour
     {
         [SerializeField] Button? sideHideGui;
         [SerializeField] AnchorToggleButton? hideGui;

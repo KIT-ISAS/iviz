@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public class BoundaryLinkDisplay : MonoBehaviour, IDisplay, ISupportsColor, IRecyclable
+    public sealed class BoundaryLinkDisplay : MonoBehaviour, IDisplay, ISupportsColor, IRecyclable
     {
         [SerializeField] BoxCollider? startCollider;
         [SerializeField] BoxCollider? endCollider;

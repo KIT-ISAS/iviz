@@ -10,9 +10,11 @@ using Iviz.Controllers.Markers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
 using Iviz.Ros;
 using Iviz.Tools;
+using UnityEngine;
 using Pose = UnityEngine.Pose;
 using Vector3 = UnityEngine.Vector3;
 
@@ -42,6 +44,11 @@ namespace Iviz.Controllers
                 config.Topic = value.Topic;
                 DescriptionsVisible = value.DescriptionsVisible;
                 Visible = value.Visible;
+                Alpha = value.Alpha;
+                Tint = value.Tint.ToUnity();
+                Smoothness = value.Smoothness;
+                Metallic = value.Metallic;
+                TriangleListFlipWinding = value.TriangleListFlipWinding;
             }
         }
 
@@ -73,6 +80,76 @@ namespace Iviz.Controllers
                 foreach (var marker in interactiveMarkers.Values)
                 {
                     marker.Visible = value;
+                }
+            }
+        }
+
+        public Color Tint
+        {
+            get => config.Tint.ToUnity();
+            set
+            {
+                config.Tint = value.ToRos();
+
+                foreach (var marker in GetAllMarkers())
+                {
+                    marker.Tint = value.WithAlpha(Alpha);
+                }
+            }
+        }
+
+        public float Alpha
+        {
+            get => config.Alpha;
+            set
+            {
+                config.Alpha = value;
+
+                foreach (var marker in GetAllMarkers())
+                {
+                    marker.Tint = Tint.WithAlpha(value);
+                }
+            }
+        }
+
+        public float Metallic
+        {
+            get => config.Metallic;
+            set
+            {
+                config.Metallic = value;
+
+                foreach (var marker in GetAllMarkers())
+                {
+                    marker.Metallic = value;
+                }
+            }
+        }
+
+        public float Smoothness
+        {
+            get => config.Smoothness;
+            set
+            {
+                config.Smoothness = value;
+
+                foreach (var marker in GetAllMarkers())
+                {
+                    marker.Smoothness = value;
+                }
+            }
+        }
+
+        public bool TriangleListFlipWinding
+        {
+            get => config.TriangleListFlipWinding;
+            set
+            {
+                config.TriangleListFlipWinding = value;
+
+                foreach (var marker in GetAllMarkers())
+                {
+                    marker.TriangleListFlipWinding = value;
                 }
             }
         }
@@ -182,13 +259,18 @@ namespace Iviz.Controllers
 
         public bool TryGetBoundsFromId(string id, [NotNullWhen(true)] out IHasBounds? bounds)
         {
-            return GetAllBounds().TryGetFirst(
-                markerBounds => ((MarkerObject)markerBounds).UniqueNodeName == id,
-                out bounds);
+            if (!GetAllMarkers().TryGetFirst(markerObject => markerObject.UniqueNodeName == id, out var marker))
+            {
+                bounds = null;
+                return false;
+            }
+
+            bounds = marker;
+            return true;
         }
 
-        public IEnumerable<IHasBounds> GetAllBounds() =>
-            interactiveMarkers.Values.SelectMany(interactiveMarker => interactiveMarker.GetAllBounds());
+        IEnumerable<MarkerObject> GetAllMarkers() =>
+            interactiveMarkers.Values.SelectMany(interactiveMarker => interactiveMarker.GetAllMarkers());
 
         public override void Dispose()
         {
@@ -255,19 +337,32 @@ namespace Iviz.Controllers
         void CreateInteractiveMarker(InteractiveMarker msg)
         {
             string id = msg.Name;
-            if (interactiveMarkers.TryGetValue(id, out InteractiveMarkerObject existingMarkerObject))
+            
+            InteractiveMarkerObject markerObject;
+            if (interactiveMarkers.TryGetValue(id, out var existingMarkerObject))
             {
-                existingMarkerObject.Set(msg);
-                return;
+                markerObject = existingMarkerObject;
+                markerObject.Set(msg);
+            }
+            else
+            {
+                markerObject = new InteractiveMarkerObject(this, id, TfModule.ListenersFrame)
+                {
+                    Visible = Visible,
+                    Interactable = Interactable
+                };
+                interactiveMarkers[id] = markerObject;
+                markerObject.Set(msg);
             }
 
-            var newMarkerObject = new InteractiveMarkerObject(this, id, TfModule.ListenersFrame)
+            var allMarkers = markerObject.GetAllMarkers();
+            foreach (var marker in allMarkers)
             {
-                Visible = Visible,
-                Interactable = Interactable
-            };
-            interactiveMarkers[id] = newMarkerObject;
-            newMarkerObject.Set(msg);
+                marker.Metallic = Metallic;
+                marker.Smoothness = Smoothness;
+                marker.Tint = Tint.WithAlpha(Alpha);
+                marker.TriangleListFlipWinding = TriangleListFlipWinding;
+            }
         }
 
         void UpdateInteractiveMarkerPose(InteractiveMarkerPose msg)

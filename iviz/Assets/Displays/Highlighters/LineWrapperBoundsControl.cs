@@ -14,6 +14,9 @@ namespace Iviz.Displays.Highlighters
         readonly LineDraggable leftDraggable;
         readonly LineDraggable rightDraggable;
 
+        bool interactable = true;
+        bool visible = true;
+
         float SizeZ
         {
             set
@@ -36,8 +39,19 @@ namespace Iviz.Displays.Highlighters
         {
             set
             {
-                left.Visible = value;
-                right.Visible = value;
+                interactable = value;
+                left.Visible = interactable && visible;
+                right.Visible = interactable && visible;
+            }
+        }
+
+        public override bool Visible
+        {
+            set
+            {
+                visible = value;
+                left.Visible = interactable && visible;
+                right.Visible = interactable && visible;
             }
         }
 

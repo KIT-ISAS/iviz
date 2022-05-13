@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 
 namespace Iviz.Displays.Highlighters
 {
-    public class BoundsHighlighter : IAnimatable
+    public sealed class BoundsHighlighter : IAnimatable
     {
         readonly Transform nodeTransform;
         readonly SelectionFrame frame;

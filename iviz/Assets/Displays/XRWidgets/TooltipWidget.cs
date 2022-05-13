@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public class TooltipWidget : MonoBehaviour, IWidgetWithColor, IWidgetWithCaption, IRecyclable
+    public sealed class TooltipWidget : MonoBehaviour, IWidgetWithColor, IWidgetWithCaption, IRecyclable
     {
         [SerializeField] Tooltip? tooltip;
 

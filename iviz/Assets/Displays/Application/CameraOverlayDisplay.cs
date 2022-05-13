@@ -11,7 +11,7 @@ namespace Iviz.Displays
     /// Axis frame shown on the top right of the camera overlay.
     /// </summary>
     [RequireComponent(typeof(AxisFrameDisplay))]
-    public class CameraOverlayDisplay : MonoBehaviour
+    public sealed class CameraOverlayDisplay : MonoBehaviour
     {
         [SerializeField] AxisFrameDisplay? resource;
         [SerializeField] Camera? parentCamera;

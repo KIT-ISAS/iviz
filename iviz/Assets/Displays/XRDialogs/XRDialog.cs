@@ -93,7 +93,7 @@ namespace Iviz.Displays.XR
         {
             set
             {
-                if (!string.IsNullOrEmpty(value))
+                if (!string.IsNullOrWhiteSpace(value))
                 {
                     pivotFrameId = value;
                     Node.AttachTo(pivotFrameId);

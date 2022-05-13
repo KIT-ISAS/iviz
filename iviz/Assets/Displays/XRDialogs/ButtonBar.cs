@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Iviz.Displays.XR
 {
-    public class ButtonBar : MonoBehaviour
+    public sealed class ButtonBar : MonoBehaviour
     {
         [SerializeField] XRButton[] buttons = Array.Empty<XRButton>();
         [SerializeField] GameObject? draggableObject;
@@ -23,7 +23,7 @@ namespace Iviz.Displays.XR
         public float? Damping { get; set; } = 0.1f;
         public event Action<int>? Clicked;
         
-        public virtual bool Visible
+        public bool Visible
         {
             get => gameObject.activeSelf;
             set => gameObject.SetActive(value);

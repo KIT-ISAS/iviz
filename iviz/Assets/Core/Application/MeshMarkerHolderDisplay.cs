@@ -126,9 +126,9 @@ namespace Iviz.Displays
         {
             set
             {
-                foreach (var resource in children)
+                foreach (var child in children)
                 {
-                    resource.EnableShadows = value;
+                    child.EnableShadows = value;
                 }
             }
         }
@@ -144,7 +144,7 @@ namespace Iviz.Displays
         {
             var markerChildren = children.Select(resource =>
                 BoundsUtils.TransformBoundsUntil(resource.Bounds, resource.Transform, Transform));
-            Collider.SetLocalBounds(markerChildren.CombineBounds() is { } rootBounds ? rootBounds : default);
+            Collider.SetLocalBounds(markerChildren.CombineBounds() ?? default);
             BoundsChanged?.Invoke();
         }
 

@@ -19,7 +19,6 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool KeepAllFrames { get; set; } = true;
         [DataMember] public string FixedFrameId { get; set; } = "";
         [DataMember] public bool Interactable { get; set; } = true;
-        [DataMember] public bool FlipZ { get; set; } = false;
-        [DataMember] public HashSet<string> BlacklistedFrames { get; set; } = new();
+        [DataMember] public bool FlipZ { get; set; }
     }
 }

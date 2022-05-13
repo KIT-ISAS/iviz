@@ -2,6 +2,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using Iviz.Msgs.StdMsgs;
 
 namespace Iviz.Common.Configurations
 {
@@ -12,6 +13,11 @@ namespace Iviz.Common.Configurations
         [DataMember] public bool DescriptionsVisible { get; set; }
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.InteractiveMarker;
+        [DataMember] public bool TriangleListFlipWinding { get; set; } = true;
+        [DataMember] public ColorRGBA Tint { get; set; } = ColorRGBA.White;
+        [DataMember] public float Alpha { get; set; } = 1;
+        [DataMember] public float Smoothness { get; set; } = 0.5f;
+        [DataMember] public float Metallic { get; set; } = 0.5f;
         [DataMember] public bool Visible { get; set; } = true;
     }
 }

@@ -29,6 +29,11 @@ namespace Iviz.Displays.Highlighters
             set => collider.enabled = value;
         }
 
+        public bool Visible
+        {
+            set => nodeTransform.gameObject.SetActive(value);
+        }
+
         protected AttachedBoundsControl()
         {
             var node = new GameObject("[Clickable Control]")

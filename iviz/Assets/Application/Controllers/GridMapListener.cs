@@ -229,7 +229,7 @@ namespace Iviz.Controllers
             fieldNames.Clear();
             fieldNames.AddRange(msg.Layers);
 
-            int layer = string.IsNullOrEmpty(IntensityChannel) ? 0 : fieldNames.IndexOf(IntensityChannel);
+            int layer = string.IsNullOrWhiteSpace(IntensityChannel) ? 0 : fieldNames.IndexOf(IntensityChannel);
             if (layer == -1 || layer >= msg.Data.Length)
             {
                 RosLogger.Info($"{this}: Gridmap layer {layer.ToString()} is missing!");

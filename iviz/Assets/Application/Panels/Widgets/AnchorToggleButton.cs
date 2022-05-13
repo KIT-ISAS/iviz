@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class AnchorToggleButton : MonoBehaviour
+    public sealed class AnchorToggleButton : MonoBehaviour
     {
         static Color EnabledColor => Settings.IsHololens
             ? new Color(0.45f, 0.75f, 0.75f, 1.0f)
@@ -42,11 +42,11 @@ namespace Iviz.App
                 if (text != null)
                 {
                     text.color = state ? EnabledColor : DisabledColor;
-                    if (value && !string.IsNullOrEmpty(enabledText))
+                    if (value && !string.IsNullOrWhiteSpace(enabledText))
                     {
                         text.text = enabledText;
                     }
-                    else if (!value && !string.IsNullOrEmpty(disabledText))
+                    else if (!value && !string.IsNullOrWhiteSpace(disabledText))
                     {
                         text.text = disabledText;
                     }

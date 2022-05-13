@@ -237,7 +237,7 @@ namespace Iviz.Controllers
                     return "[No Robot Loaded]";
                 }
 
-                if (!string.IsNullOrEmpty(Robot.Name))
+                if (!string.IsNullOrWhiteSpace(Robot.Name))
                 {
                     return Robot.Name;
                 }
@@ -297,16 +297,16 @@ namespace Iviz.Controllers
 
         public void ProcessRobotSource(string? savedRobotName, string? sourceParameter)
         {
-            if (!string.IsNullOrEmpty(savedRobotName))
+            if (!string.IsNullOrWhiteSpace(savedRobotName))
             {
-                if (!string.IsNullOrEmpty(sourceParameter))
+                if (!string.IsNullOrWhiteSpace(sourceParameter))
                 {
                     config.SourceParameter = "";
                 }
 
                 TryLoadSavedRobot(savedRobotName);
             }
-            else if (!string.IsNullOrEmpty(sourceParameter))
+            else if (!string.IsNullOrWhiteSpace(sourceParameter))
             {
                 TryLoadFromSourceParameter(sourceParameter);
             }
@@ -465,7 +465,7 @@ namespace Iviz.Controllers
                         {
                             HelpText = "[Invalid Robot]";
                         }
-                        else if (!string.IsNullOrEmpty(Robot.Name))
+                        else if (!string.IsNullOrWhiteSpace(Robot.Name))
                         {
                             HelpText = $"<b>- {Name} -</b>";
                         }
@@ -588,9 +588,9 @@ namespace Iviz.Controllers
         {
             Robot = null;
 
-            if (!string.IsNullOrEmpty(SavedRobotName))
+            if (!string.IsNullOrWhiteSpace(SavedRobotName))
             {
-                if (!string.IsNullOrEmpty(SourceParameter))
+                if (!string.IsNullOrWhiteSpace(SourceParameter))
                 {
                     config.SourceParameter = "";
                 }
@@ -598,7 +598,7 @@ namespace Iviz.Controllers
                 TryLoadSavedRobot(SavedRobotName);
             }
 
-            if (!string.IsNullOrEmpty(SourceParameter))
+            if (!string.IsNullOrWhiteSpace(SourceParameter))
             {
                 TryLoadFromSourceParameter(SourceParameter);
             }

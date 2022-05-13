@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Iviz.App
 {
-    public class DataPanelWidgets : MonoBehaviour
+    public sealed class DataPanelWidgets : MonoBehaviour
     {
         const float YCloseButton = -17.5f;
 

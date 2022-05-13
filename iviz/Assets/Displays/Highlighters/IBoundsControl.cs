@@ -11,6 +11,7 @@ namespace Iviz.Displays.Highlighters
         event Action StartDragging;
         event Action EndDragging;
         bool Interactable { set; }
+        bool Visible { set; }
         Quaternion BaseOrientation { set; }
         void Dispose();
     }

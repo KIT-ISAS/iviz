@@ -48,17 +48,6 @@ namespace Iviz.Displays
 
         static MeshMarkerDisplay[] CreateObjects(Transform transform)
         {
-            /*
-            var array = new MeshMarkerDisplay[12];
-            foreach (int i in ..12)
-            {
-                var resource = ResourcePool.Rent<MeshMarkerDisplay>(Resource.Displays.Cube, transform);
-                resource.EnableShadows = false;
-                resource.EnableCollider = false;
-                array[i] = resource;
-            }
-            */
-            
             var array = new MeshMarkerDisplay[12];
             foreach (ref var display in array.AsSpan())
             {
@@ -108,20 +97,6 @@ namespace Iviz.Displays
             {
                 child.Transform.localScale = new Vector3(ColumnWidth, size.y, ColumnWidth);
             }
-            
-            /*
-            children[12].Transform.localPosition = new Vector3(halfSizeX, 0, 0);
-            children[13].Transform.localPosition = new Vector3(-halfSizeX, 0, 0);
-            children[14].Transform.localPosition = new Vector3(0, halfSizeY, 0);
-            children[15].Transform.localPosition = new Vector3(0, -halfSizeY, 0);
-            children[16].Transform.localPosition = new Vector3(0, 0, -halfSizeZ);
-            children[17].Transform.localPosition = new Vector3(0, 0, halfSizeZ);
-
-            foreach (var child in children.Skip(12))
-            {
-                child.Transform.localScale = 0.01f * Vector3.one;
-            }
-            */
         }
 
         void UpdateColumnWidth()
@@ -161,6 +136,11 @@ namespace Iviz.Displays
 
         public void SetBounds(in Bounds bounds)
         {
+            if (bounds.IsInvalid())
+            {
+                ThrowHelper.ThrowArgument(nameof(bounds), "Bounds contain invalid values");
+            }
+
             Size = bounds.size;
             Transform.localPosition = bounds.center;
         }

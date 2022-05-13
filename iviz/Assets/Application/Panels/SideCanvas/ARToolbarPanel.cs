@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class ARToolbarPanel : MonoBehaviour
+    public sealed class ARToolbarPanel : MonoBehaviour
     {
         [NotNull]
         static ARFoundationController Controller =>
