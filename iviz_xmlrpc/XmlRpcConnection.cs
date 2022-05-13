@@ -129,11 +129,9 @@ namespace Iviz.XmlRpc
                     int msDiff = (int)(end - start).TotalMilliseconds;
                     if (msDiff > 5000)
                     {
-                        // bad stuff. this is way higher than the timeout. it means that the 
-                        // task was cancelled a long time ago and it wasn't processed.
-                        // most likely ran out of threadpool threads!
-                        Logger.LogErrorFormat("{0}: Request FAILED with {1} ms for '{2}' XXXXXXXXXXX", this, msDiff,
-                            method);
+                        Logger.LogErrorFormat("{0}: Request FAILED with {1} ms for '{2}'. " +
+                                              "Device probably got unsuspended.",
+                            this, msDiff, method);
                     }
 
                     AddToQueue(msDiff);
