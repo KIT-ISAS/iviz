@@ -105,7 +105,8 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
         {
             try
             {
-                bool allowDirectLookup = DynamicMessage.IsDynamic(typeof(TMessage));
+                const bool allowDirectLookup = false;
+                //bool allowDirectLookup = DynamicMessage.IsDynamic(typeof(TMessage));
                 this.topicInfo =
                     RosUtils.GenerateDynamicTopicInfo(topicInfo.CallerId, topicInfo.Topic, RosHeader,
                         allowDirectLookup);
@@ -364,8 +365,13 @@ internal sealed class UdpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
 
 internal static class UdpReceiver
 {
-    public static RpcUdpTopicRequest CreateRequest(string ownHostname, string remoteHostname, TopicInfo topicInfo)
+    public static RpcUdpTopicRequest? CreateRequest(string ownHostname, string remoteHostname, TopicInfo topicInfo)
     {
+        if (topicInfo.Generator is DynamicMessage { IsInitialized: false })
+        {
+            return null;
+        }
+        
         string[] contents =
         {
             $"message_definition={topicInfo.MessageDependencies}",

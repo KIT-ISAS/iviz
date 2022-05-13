@@ -182,24 +182,35 @@ public class RosQueueException : RoslibException
 /// <summary>
 /// Thrown when an error happened during the connection.
 /// </summary>
-public class RosServiceRequestTimeout : RoslibException
+public class RosServiceRequestTimeoutException : RoslibException
 {
-    public RosServiceRequestTimeout(string message, Exception innerException) : base(message, innerException)
+    public RosServiceRequestTimeoutException(string message, Exception innerException) : base(message, innerException)
     {
     }
 
-    public RosServiceRequestTimeout(string message) : base(message)
+    public RosServiceRequestTimeoutException(string message) : base(message)
     {
     }
 }
 
-public class RosInvalidResourceName : RoslibException
+public class RosInvalidResourceNameException : RoslibException
 {
-    public RosInvalidResourceName(string message, Exception innerException) : base(message, innerException)
+    public RosInvalidResourceNameException(string message, Exception innerException) : base(message, innerException)
     {
     }
 
-    public RosInvalidResourceName(string message) : base(message)
+    public RosInvalidResourceNameException(string message) : base(message)
+    {
+    }
+}
+
+public class RosDynamicMessageException : RoslibException
+{
+    public RosDynamicMessageException(string message, Exception innerException) : base(message, innerException)
+    {
+    }
+
+    public RosDynamicMessageException(string message) : base(message)
     {
     }
 }

@@ -65,9 +65,9 @@ namespace Iviz.MsgsGen.Dynamic
 
         public DynamicMessage()
         {
-            RosMessageType = "";
-            RosMd5Sum = "";
-            RosDependenciesBase64 = "";
+            RosMessageType = RosAny;
+            RosMd5Sum = RosAny;
+            RosDependenciesBase64 = RosAny;
             var fields = Array.Empty<Property>();
             Fields = new ReadOnlyCollection<Property>(fields);
         }

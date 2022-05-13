@@ -7,6 +7,11 @@ namespace Iviz.MsgsGen.Dynamic
 {
     public sealed class FieldJsonConverter : JsonConverter
     {
+        [Preserve]
+        public FieldJsonConverter()
+        {
+        }
+
         public override bool CanConvert(Type objectType)
         {
             return typeof(IField).IsAssignableFrom(objectType);

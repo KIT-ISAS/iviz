@@ -340,7 +340,7 @@ public enum RosEventType
     MouseUp = InteractiveMarkerFeedback.MOUSE_UP
 }
 
-public class RosInteractiveMarkerHelper
+public static class RosInteractiveMarkerHelper
 {
     public static InteractiveMarker Create(string name, Pose? pose = null, string description = "", float scale = 1,
         string frameId = "", params InteractiveMarkerControl[] controls)
@@ -368,7 +368,7 @@ public class RosInteractiveMarkerHelper
         };
     }
 
-    public class MenuEntry
+    public sealed class MenuEntry
     {
         public string Title { get; }
         public uint Id { get; }
@@ -413,16 +413,17 @@ public class RosInteractiveMarkerHelper
         };
     }
 
-    public static InteractiveMarkerUpdate CreateMarkerUpdate(params InteractiveMarker[] args)
+    public static InteractiveMarkerUpdate CreateMarkerUpdate(string? serverId = null, params InteractiveMarker[] args)
     {
         return new InteractiveMarkerUpdate
         {
+            ServerId = serverId ?? "iviz",
             Type = InteractiveMarkerUpdate.UPDATE,
             Markers = args
         };
     }
 
-    public class PoseUpdate
+    public sealed class PoseUpdate
     {
         public string Name { get; }
         public Pose Pose { get; }

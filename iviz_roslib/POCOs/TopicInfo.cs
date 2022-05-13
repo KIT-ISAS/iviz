@@ -12,7 +12,10 @@ internal sealed class TopicInfo
     /// <summary>
     ///     Concatenated dependencies file.
     /// </summary>
-    public string MessageDependencies => BuiltIns.DecompressDependencies(Generator.RosDependenciesBase64);
+    public string MessageDependencies =>
+        Generator.RosDependenciesBase64 == DynamicMessage.RosAny
+            ? DynamicMessage.RosAny
+            : BuiltIns.DecompressDependencies(Generator.RosDependenciesBase64);
 
     /// <summary>
     ///     ROS name of this node.

@@ -266,7 +266,8 @@ internal sealed class TcpReceiver<TMessage> : IProtocolReceiver, ILoopbackReceiv
 
         if (DynamicMessage.IsGeneric(typeof(TMessage)))
         {
-            bool allowDirectLookup = DynamicMessage.IsDynamic(typeof(TMessage));
+            //bool allowDirectLookup = DynamicMessage.IsDynamic(typeof(TMessage));
+            const bool allowDirectLookup = false;
             topicInfo = RosUtils.GenerateDynamicTopicInfo(topicInfo.CallerId, topicInfo.Topic, RosHeader,
                 allowDirectLookup);
         }
