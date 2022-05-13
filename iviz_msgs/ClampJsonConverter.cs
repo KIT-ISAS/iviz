@@ -13,8 +13,12 @@ namespace Iviz.Msgs
         readonly int maxArrayLength;
         readonly int maxArrayLengthForUnmanaged;
 
-        public ClampJsonConverter(int maxStringLength = 200, int maxArrayLength = 5,
-            int maxArrayLengthForUnmanaged = 16)
+        [Preserve]
+        public ClampJsonConverter()
+        {
+        }
+
+        public ClampJsonConverter(int maxStringLength, int maxArrayLength = 5, int maxArrayLengthForUnmanaged = 16)
         {
             this.maxStringLength = maxStringLength;
             this.maxArrayLength = maxArrayLength;
