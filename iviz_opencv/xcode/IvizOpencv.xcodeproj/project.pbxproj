@@ -7,24 +7,24 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		238647E425F73C3200DA5604 /* dictionary.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D225F73C3200DA5604 /* dictionary.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
-		238647E525F73C3200DA5604 /* charuco.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D325F73C3200DA5604 /* charuco.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
-		238647E625F73C3200DA5604 /* aruco.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D425F73C3200DA5604 /* aruco.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
-		238647E725F73C3200DA5604 /* zmaxheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647D625F73C3200DA5604 /* zmaxheap.cpp */; };
-		238647E825F73C3200DA5604 /* precomp.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D725F73C3200DA5604 /* precomp.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
-		238647E925F73C3200DA5604 /* unionfind.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D825F73C3200DA5604 /* unionfind.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
-		238647EA25F73C3200DA5604 /* predefined_dictionaries_apriltag.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D925F73C3200DA5604 /* predefined_dictionaries_apriltag.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
-		238647EB25F73C3200DA5604 /* zarray.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DA25F73C3200DA5604 /* zarray.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
-		238647EC25F73C3200DA5604 /* apriltag_quad_thresh.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DB25F73C3200DA5604 /* apriltag_quad_thresh.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
-		238647ED25F73C3200DA5604 /* aruco.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647DC25F73C3200DA5604 /* aruco.cpp */; };
-		238647EE25F73C3200DA5604 /* charuco.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647DD25F73C3200DA5604 /* charuco.cpp */; };
-		238647EF25F73C3200DA5604 /* predefined_dictionaries.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DE25F73C3200DA5604 /* predefined_dictionaries.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
-		238647F025F73C3200DA5604 /* zmaxheap.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DF25F73C3200DA5604 /* zmaxheap.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
-		238647F125F73C3200DA5604 /* apriltag_quad_thresh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647E025F73C3200DA5604 /* apriltag_quad_thresh.cpp */; };
-		238647F225F73C3200DA5604 /* dictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647E125F73C3200DA5604 /* dictionary.cpp */; };
-		238647F325F73C3200DA5604 /* OpenCv.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647E225F73C3200DA5604 /* OpenCv.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
-		238647F425F73C3200DA5604 /* OpenCv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647E325F73C3200DA5604 /* OpenCv.cpp */; };
-		239F617B25F74C09000CC38F /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 239F617A25F74C09000CC38F /* opencv2.framework */; };
+		238FB554283009CC004AE9F7 /* OpenCv.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647E225F73C3200DA5604 /* OpenCv.hpp */; settings = {ATTRIBUTES = (Public, ); }; };
+		238FB555283009EE004AE9F7 /* precomp.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D725F73C3200DA5604 /* precomp.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238FB556283009F0004AE9F7 /* unionfind.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D825F73C3200DA5604 /* unionfind.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238FB557283009F2004AE9F7 /* zarray.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DA25F73C3200DA5604 /* zarray.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238FB558283009F6004AE9F7 /* predefined_dictionaries.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DE25F73C3200DA5604 /* predefined_dictionaries.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238FB559283009F9004AE9F7 /* zmaxheap.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DF25F73C3200DA5604 /* zmaxheap.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238FB55A28300A16004AE9F7 /* apriltag_quad_thresh.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647DB25F73C3200DA5604 /* apriltag_quad_thresh.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238FB55B28300A2A004AE9F7 /* charuco.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D325F73C3200DA5604 /* charuco.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238FB55C28300A35004AE9F7 /* aruco.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D425F73C3200DA5604 /* aruco.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238FB55D28300A55004AE9F7 /* dictionary.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D225F73C3200DA5604 /* dictionary.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238FB55E28300A85004AE9F7 /* predefined_dictionaries_apriltag.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 238647D925F73C3200DA5604 /* predefined_dictionaries_apriltag.hpp */; settings = {ATTRIBUTES = (Private, ); }; };
+		238FB55F28300A95004AE9F7 /* zmaxheap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647D625F73C3200DA5604 /* zmaxheap.cpp */; };
+		238FB56028300A9C004AE9F7 /* aruco.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647DC25F73C3200DA5604 /* aruco.cpp */; };
+		238FB56128300A9E004AE9F7 /* charuco.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647DD25F73C3200DA5604 /* charuco.cpp */; };
+		238FB56228300AA0004AE9F7 /* apriltag_quad_thresh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647E025F73C3200DA5604 /* apriltag_quad_thresh.cpp */; };
+		238FB56328300AA3004AE9F7 /* dictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647E125F73C3200DA5604 /* dictionary.cpp */; };
+		238FB56428300AA4004AE9F7 /* OpenCv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 238647E325F73C3200DA5604 /* OpenCv.cpp */; };
+		238FB56528300AB4004AE9F7 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 239F617A25F74C09000CC38F /* opencv2.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +38,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		232F7387283004B4007430EC /* IvizOpencv.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IvizOpencv.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		232F7388283004B4007430EC /* IvizOpencv-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "IvizOpencv-iOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		238647D225F73C3200DA5604 /* dictionary.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = dictionary.hpp; sourceTree = "<group>"; };
 		238647D325F73C3200DA5604 /* charuco.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = charuco.hpp; sourceTree = "<group>"; };
 		238647D425F73C3200DA5604 /* aruco.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = aruco.hpp; sourceTree = "<group>"; };
@@ -56,10 +58,7 @@
 		238647E225F73C3200DA5604 /* OpenCv.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = OpenCv.hpp; sourceTree = "<group>"; };
 		238647E325F73C3200DA5604 /* OpenCv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OpenCv.cpp; sourceTree = "<group>"; };
 		2391451225F3AAFA0073171E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		2391453825F3C9090073171E /* IvizOpencv.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IvizOpencv.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		239F617A25F74C09000CC38F /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
-		23F8E0F0261A498E00C7434A /* IvizOpencv_iOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = IvizOpencv_iOS.framework; path = "/Users/akzeac/Documents/iviz/iviz_opencv/xcode/build/Debug-iphoneos/IvizOpencv_iOS.framework"; sourceTree = "<absolute>"; };
-		23F8E0F1261A498E00C7434A /* IvizOpencv-iOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = "IvizOpencv-iOSTests.xctest"; path = "/Users/akzeac/Documents/iviz/iviz_opencv/xcode/build/Debug-iphoneos/IvizOpencv-iOSTests.xctest"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +66,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				238FB56528300AB4004AE9F7 /* opencv2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -74,14 +74,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2391450C25F3AAFA0073171E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				239F617B25F74C09000CC38F /* opencv2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,8 +150,9 @@
 			children = (
 				238647CD25F73C3200DA5604 /* src */,
 				2391451125F3AAFA0073171E /* IvizOpencv */,
-				2391453825F3C9090073171E /* IvizOpencv.bundle */,
 				2391453925F3D98C0073171E /* Frameworks */,
+				232F7387283004B4007430EC /* IvizOpencv.framework */,
+				232F7388283004B4007430EC /* IvizOpencv-iOSTests.xctest */,
 			);
 			sourceTree = "<group>";
 		};
@@ -186,33 +179,26 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2391451D25F3AC930073171E /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				238647F325F73C3200DA5604 /* OpenCv.hpp in Headers */,
-				238647EB25F73C3200DA5604 /* zarray.hpp in Headers */,
-				238647EC25F73C3200DA5604 /* apriltag_quad_thresh.hpp in Headers */,
-				238647F025F73C3200DA5604 /* zmaxheap.hpp in Headers */,
-				238647E525F73C3200DA5604 /* charuco.hpp in Headers */,
-				238647E925F73C3200DA5604 /* unionfind.hpp in Headers */,
-				238647EF25F73C3200DA5604 /* predefined_dictionaries.hpp in Headers */,
-				238647EA25F73C3200DA5604 /* predefined_dictionaries_apriltag.hpp in Headers */,
-				238647E625F73C3200DA5604 /* aruco.hpp in Headers */,
-				238647E425F73C3200DA5604 /* dictionary.hpp in Headers */,
-				238647E825F73C3200DA5604 /* precomp.hpp in Headers */,
+				238FB554283009CC004AE9F7 /* OpenCv.hpp in Headers */,
+				238FB55E28300A85004AE9F7 /* predefined_dictionaries_apriltag.hpp in Headers */,
+				238FB556283009F0004AE9F7 /* unionfind.hpp in Headers */,
+				238FB558283009F6004AE9F7 /* predefined_dictionaries.hpp in Headers */,
+				238FB55C28300A35004AE9F7 /* aruco.hpp in Headers */,
+				238FB55D28300A55004AE9F7 /* dictionary.hpp in Headers */,
+				238FB55A28300A16004AE9F7 /* apriltag_quad_thresh.hpp in Headers */,
+				238FB55B28300A2A004AE9F7 /* charuco.hpp in Headers */,
+				238FB557283009F2004AE9F7 /* zarray.hpp in Headers */,
+				238FB559283009F9004AE9F7 /* zmaxheap.hpp in Headers */,
+				238FB555283009EE004AE9F7 /* precomp.hpp in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		2359D2EA25F4BCBD00316810 /* IvizOpencv-iOS */ = {
+		2359D2EA25F4BCBD00316810 /* IvizOpencv */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 2359D30025F4BCBD00316810 /* Build configuration list for PBXNativeTarget "IvizOpencv-iOS" */;
+			buildConfigurationList = 2359D30025F4BCBD00316810 /* Build configuration list for PBXNativeTarget "IvizOpencv" */;
 			buildPhases = (
 				2359D2E625F4BCBD00316810 /* Headers */,
 				2359D2E725F4BCBD00316810 /* Sources */,
@@ -223,9 +209,9 @@
 			);
 			dependencies = (
 			);
-			name = "IvizOpencv-iOS";
+			name = IvizOpencv;
 			productName = "IvizOpencv-iOS";
-			productReference = 23F8E0F0261A498E00C7434A /* IvizOpencv_iOS.framework */;
+			productReference = 232F7387283004B4007430EC /* IvizOpencv.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		2359D2F225F4BCBD00316810 /* IvizOpencv-iOSTests */ = {
@@ -243,26 +229,8 @@
 			);
 			name = "IvizOpencv-iOSTests";
 			productName = "IvizOpencv-iOSTests";
-			productReference = 23F8E0F1261A498E00C7434A /* IvizOpencv-iOSTests.xctest */;
+			productReference = 232F7388283004B4007430EC /* IvizOpencv-iOSTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		2391450E25F3AAFA0073171E /* IvizOpencv */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 2391451525F3AAFA0073171E /* Build configuration list for PBXNativeTarget "IvizOpencv" */;
-			buildPhases = (
-				2391451D25F3AC930073171E /* Headers */,
-				2391450B25F3AAFA0073171E /* Sources */,
-				2391450C25F3AAFA0073171E /* Frameworks */,
-				2391450D25F3AAFA0073171E /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = IvizOpencv;
-			productName = Iviz.Opencv2;
-			productReference = 2391453825F3C9090073171E /* IvizOpencv.bundle */;
-			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
 
@@ -270,16 +238,13 @@
 		2391450725F3AAFA0073171E /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1000;
+				LastUpgradeCheck = 1320;
 				ORGANIZATIONNAME = "Antonio Zea";
 				TargetAttributes = {
 					2359D2EA25F4BCBD00316810 = {
 						CreatedOnToolsVersion = 10.0;
 					};
 					2359D2F225F4BCBD00316810 = {
-						CreatedOnToolsVersion = 10.0;
-					};
-					2391450E25F3AAFA0073171E = {
 						CreatedOnToolsVersion = 10.0;
 					};
 				};
@@ -290,14 +255,14 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 2391450625F3AAFA0073171E;
 			productRefGroup = 2391450625F3AAFA0073171E;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				2391450E25F3AAFA0073171E /* IvizOpencv */,
-				2359D2EA25F4BCBD00316810 /* IvizOpencv-iOS */,
+				2359D2EA25F4BCBD00316810 /* IvizOpencv */,
 				2359D2F225F4BCBD00316810 /* IvizOpencv-iOSTests */,
 			);
 		};
@@ -318,13 +283,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		2391450D25F3AAFA0073171E /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -332,6 +290,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				238FB55F28300A95004AE9F7 /* zmaxheap.cpp in Sources */,
+				238FB56028300A9C004AE9F7 /* aruco.cpp in Sources */,
+				238FB56128300A9E004AE9F7 /* charuco.cpp in Sources */,
+				238FB56228300AA0004AE9F7 /* apriltag_quad_thresh.cpp in Sources */,
+				238FB56328300AA3004AE9F7 /* dictionary.cpp in Sources */,
+				238FB56428300AA4004AE9F7 /* OpenCv.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,25 +306,12 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		2391450B25F3AAFA0073171E /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				238647F425F73C3200DA5604 /* OpenCv.cpp in Sources */,
-				238647F125F73C3200DA5604 /* apriltag_quad_thresh.cpp in Sources */,
-				238647ED25F73C3200DA5604 /* aruco.cpp in Sources */,
-				238647E725F73C3200DA5604 /* zmaxheap.cpp in Sources */,
-				238647F225F73C3200DA5604 /* dictionary.cpp in Sources */,
-				238647EE25F73C3200DA5604 /* charuco.cpp in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
 		2359D2F625F4BCBD00316810 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 2359D2EA25F4BCBD00316810 /* IvizOpencv-iOS */;
+			target = 2359D2EA25F4BCBD00316810 /* IvizOpencv */;
 			targetProxy = 2359D2F525F4BCBD00316810 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -369,7 +320,8 @@
 		2359D2FC25F4BCBD00316810 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				BITCODE_GENERATION_MODE = bitcode;
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -381,7 +333,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/IvizOpencv/aruco/include";
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/eigen3,
+					"$(PROJECT_DIR)/../src/aruco/include",
+				);
 				INFOPLIST_FILE = "IvizOpencv-iOS/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
@@ -390,6 +345,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				OTHER_CFLAGS = "-fembed-bitcode";
 				PRODUCT_BUNDLE_IDENTIFIER = "isas.kit.edu.IvizOpencv-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = iphoneos;
@@ -403,7 +359,8 @@
 		2359D2FD25F4BCBD00316810 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				BITCODE_GENERATION_MODE = bitcode;
+				CODE_SIGN_IDENTITY = "";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -415,7 +372,10 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)",
 				);
-				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)/IvizOpencv/aruco/include";
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include/eigen3,
+					"$(PROJECT_DIR)/../src/aruco/include",
+				);
 				INFOPLIST_FILE = "IvizOpencv-iOS/Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
@@ -424,6 +384,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
+				OTHER_CFLAGS = "-fembed-bitcode";
 				PRODUCT_BUNDLE_IDENTIFIER = "isas.kit.edu.IvizOpencv-iOS";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SDKROOT = iphoneos;
@@ -502,6 +463,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -511,6 +473,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_BITCODE = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -561,6 +524,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -570,6 +534,7 @@
 				CODE_SIGN_IDENTITY = "Mac Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_BITCODE = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -587,68 +552,10 @@
 			};
 			name = Release;
 		};
-		2391451625F3AAFA0073171E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Manual;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = TF5SLD77X2;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/IvizOpencv",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../src/aruco/include",
-					/usr/local/include/eigen3,
-				);
-				INFOPLIST_FILE = IvizOpencv/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACH_O_TYPE = mh_bundle;
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = isas.kit.edu.IvizOpencv;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SKIP_INSTALL = YES;
-				VALID_ARCHS = x86_64;
-				WRAPPER_EXTENSION = bundle;
-			};
-			name = Debug;
-		};
-		2391451725F3AAFA0073171E /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Manual;
-				COMBINE_HIDPI_IMAGES = YES;
-				DEVELOPMENT_TEAM = TF5SLD77X2;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)",
-					"$(PROJECT_DIR)/IvizOpencv",
-				);
-				HEADER_SEARCH_PATHS = (
-					"$(PROJECT_DIR)/../src/aruco/include",
-					/usr/local/include/eigen3,
-				);
-				INFOPLIST_FILE = IvizOpencv/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
-				MACH_O_TYPE = mh_bundle;
-				ONLY_ACTIVE_ARCH = NO;
-				PRODUCT_BUNDLE_IDENTIFIER = isas.kit.edu.IvizOpencv;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				SKIP_INSTALL = YES;
-				VALID_ARCHS = x86_64;
-				WRAPPER_EXTENSION = bundle;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		2359D30025F4BCBD00316810 /* Build configuration list for PBXNativeTarget "IvizOpencv-iOS" */ = {
+		2359D30025F4BCBD00316810 /* Build configuration list for PBXNativeTarget "IvizOpencv" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2359D2FC25F4BCBD00316810 /* Debug */,
@@ -671,15 +578,6 @@
 			buildConfigurations = (
 				2391451325F3AAFA0073171E /* Debug */,
 				2391451425F3AAFA0073171E /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		2391451525F3AAFA0073171E /* Build configuration list for PBXNativeTarget "IvizOpencv" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				2391451625F3AAFA0073171E /* Debug */,
-				2391451725F3AAFA0073171E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

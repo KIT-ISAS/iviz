@@ -603,6 +603,7 @@ extern "C" {
 
     }
 
+/*
     bool EstimateUmeyama(const float *inputs, int inputSize, const float *outputs, int outputSize, bool estimateScale, float *result, int resultSize)
     {
         if (inputSize % 3 != 0)
@@ -671,6 +672,7 @@ extern "C" {
         
         return true;
     }
+ */
     
 }
 

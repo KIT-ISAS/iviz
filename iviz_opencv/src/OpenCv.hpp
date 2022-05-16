@@ -40,7 +40,9 @@ extern "C"
     bool EstimateMarkerPoses(const void *ctx, float markerSize, float *rotations, int rotationsSize, float *translations, int translationsSize);
     
     bool EstimatePnp(const float *inputs, int inputSize, const float *outputs, int outputSize, float *cameraArray, int cameraArraySize, float *result, int resultSize);
+/*
     bool EstimateUmeyama(const float *inputs, int inputSize, const float *outputs, int outputSize, bool estimateScale, float *result, int resultSize);
+ */
     
     void DisposeContext(void *ctx);
 }
