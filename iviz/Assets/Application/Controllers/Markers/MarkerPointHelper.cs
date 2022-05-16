@@ -45,36 +45,40 @@ namespace Iviz.Controllers.Markers
         void ProcessSingleColor(NativeList<float4> pointBuffer)
         {
             float w = UnityUtils.AsFloat(color32);
-
-            pointBuffer.EnsureCapacity(points.Length);
+            var mPoints = points;
+            
+            pointBuffer.EnsureCapacity(mPoints.Length);
             pointBuffer.Clear();
 
-            foreach (ref readonly var point in points.AsSpan())
+            for (int i = 0; i < mPoints.Length; i++)
             {
-                if (!PointListDisplay.IsElementValid(point))
+                if (!PointListDisplay.IsElementValid(mPoints[i]))
                 {
                     continue;
                 }
                 
-                point.Ros2Unity(w, out var f);
+                mPoints[i].Ros2Unity(w, out var f);
                 pointBuffer.AddUnsafe(f);
             }
         }
 
         void ProcessNoTint(NativeList<float4> pointBuffer)
         {
-            pointBuffer.EnsureCapacity(points.Length);
+            var mPoints = points;
+            var mColors = colors;
+
+            pointBuffer.EnsureCapacity(mPoints.Length);
             pointBuffer.Clear();
             
-            for (int i = 0; i < points.Length; i++)
+            for (int i = 0; i < mPoints.Length; i++)
             {
-                if (!PointListDisplay.IsElementValid(points[i]))
+                if (!PointListDisplay.IsElementValid(mPoints[i]))
                 {
                     continue;
                 }
-                
-                float w = UnityUtils.AsFloat(colors[i].ToUnityColor32());
-                points[i].Ros2Unity(w, out var f);
+
+                float w = UnityUtils.AsFloat(mColors[i].ToUnityColor32());
+                mPoints[i].Ros2Unity(w, out var f);
                 pointBuffer.AddUnsafe(f);
             }
         }
@@ -82,18 +86,21 @@ namespace Iviz.Controllers.Markers
         void ProcessTintColor(NativeList<float4> pointBuffer)
         {
             Color color = color32;
-            pointBuffer.EnsureCapacity(points.Length);
+            var mPoints = points;
+            var mColors = colors;
+
+            pointBuffer.EnsureCapacity(mPoints.Length);
             pointBuffer.Clear();
             
-            for (int i = 0; i < points.Length; i++)
+            for (int i = 0; i < mPoints.Length; i++)
             {
-                if (!PointListDisplay.IsElementValid(points[i]))
+                if (!PointListDisplay.IsElementValid(mPoints[i]))
                 {
                     continue;
                 }
-                
-                float w = UnityUtils.AsFloat(color * colors[i].ToUnity());
-                points[i].Ros2Unity(w, out var f);
+
+                float w = UnityUtils.AsFloat(color * mColors[i].ToUnity());
+                mPoints[i].Ros2Unity(w, out var f);
                 pointBuffer.AddUnsafe(f);
             }
         }

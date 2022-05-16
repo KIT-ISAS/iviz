@@ -28,5 +28,10 @@ namespace Iviz.Displays.XR
         {
             set => CaptionObject.alignment = (TextAlignmentOptions)value;
         }
+        
+        public override bool Interactable
+        {
+            set { } // no interactable components
+        }        
     }
 }

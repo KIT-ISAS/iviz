@@ -78,7 +78,11 @@ namespace Iviz.Controllers.TF
             set => RootFrame.Transform.localScale = value * Vector3.one;
         }
 
-        public static event Action? AfterProcessFrames;
+        /// Called after all the TFs of the frame have been processed, but before <see cref="AfterFramesUpdatedLate"/>
+        public static event Action? AfterFramesUpdated; // camera
+        
+        /// Called after all the TFs of the frame have been processed, but after <see cref="AfterFramesUpdated"/>
+        public static event Action? AfterFramesUpdatedLate; // sprites
             
         public bool FlipZ { get; set; }
 
@@ -523,12 +527,13 @@ namespace Iviz.Controllers.TF
                 OriginTransform.SetLocalPose(fixedFramePose.Inverse());
             }
 
-            AfterProcessFrames?.Invoke();
+            AfterFramesUpdated?.Invoke();
+            AfterFramesUpdatedLate?.Invoke();
         }
 
         public void Dispose()
         {
-            OriginFrame.Dispose(); // get rid of children so they won't get deleted when it does
+            OriginFrame.Dispose(); // get rid of children so they won't get deleted when OriginFrame does
 
             //GameThread.LateEveryFrame -= LateUpdate;
             staticListenerNode.Dispose();

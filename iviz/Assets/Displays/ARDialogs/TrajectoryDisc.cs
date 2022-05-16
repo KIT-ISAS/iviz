@@ -92,7 +92,7 @@ namespace Iviz.App.ARDialogs
 
         protected override void Update()
         {
-            base.Update();;
+            base.Update();
             if (button.Visible)
             {
                 button.Transform.SetLocalPose(Transform.AsLocalPose().Multiply(BaseButtonPose));

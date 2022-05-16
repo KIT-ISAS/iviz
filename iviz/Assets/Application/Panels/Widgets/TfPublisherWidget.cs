@@ -1,4 +1,8 @@
-﻿using Iviz.Controllers.TF;
+﻿#nullable enable
+
+using Iviz.Controllers.TF;
+using Iviz.Core;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,12 +10,15 @@ namespace Iviz.App
 {
     public sealed class TfPublisherWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text text;
-        [SerializeField] Button button;
+        [SerializeField] TMP_Text? text;
+        [SerializeField] Button? button;
+
+        TMP_Text Text => text.AssertNotNull(nameof(text));
+        Button Button => button.AssertNotNull(nameof(button));
 
         void Awake()
         {
-            button.onClick.AddListener(OnClick);
+            Button.onClick.AddListener(OnClick);
         }
 
         void OnClick()
@@ -32,7 +39,7 @@ namespace Iviz.App
                 _ => $"Transform Frames\n<b>{numTfFrames.ToString()} frames, {numTfFrames.ToString()} published</b>"
             };
             
-            text.text = frameStr;
+            Text.text = frameStr;
         }
 
         public void ClearSubscribers()

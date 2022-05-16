@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Iviz.Core;
 using Iviz.Tools;
+using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,11 +18,11 @@ namespace Iviz.App
         [SerializeField] Button nodes;
         [SerializeField] Button aliases;
 
-        [SerializeField] Text topicsText;
-        [SerializeField] Text servicesText;
-        [SerializeField] Text paramsText;
-        [SerializeField] Text nodesText;
-        [SerializeField] Text aliasesText;
+        [SerializeField] [CanBeNull] TMP_Text topicsText;
+        [SerializeField] [CanBeNull] TMP_Text servicesText;
+        [SerializeField] [CanBeNull] TMP_Text paramsText;
+        [SerializeField] [CanBeNull] TMP_Text nodesText;
+        [SerializeField] [CanBeNull] TMP_Text aliasesText;
 
         [SerializeField] TMP_Text textTop;
         [SerializeField] TMP_Text textBottom;
@@ -29,20 +30,20 @@ namespace Iviz.App
         [SerializeField] TrashButtonWidget close;
         [SerializeField] LinkResolver link;
 
-        [SerializeField] GameObject[] aliasesFields;
+        [SerializeField] [NotNull] GameObject[] aliasesFields = Array.Empty<GameObject>();
 
-        InputFieldWithHintsWidget[] hostnames;
-        InputFieldWidget[] addresses;
+        [NotNull] InputFieldWithHintsWidget[] hostnames = Array.Empty<InputFieldWithHintsWidget>();
+        [NotNull] InputFieldWidget[] addresses = Array.Empty<InputFieldWidget>();
 
         [SerializeField] GameObject aliasesTab;
         [SerializeField] GameObject infoTab;
 
-        public TrashButtonWidget Close => close;
-        public TMP_Text TextTop => textTop;
-        public TMP_Text TextBottom => textBottom;
+        [NotNull] public TrashButtonWidget Close => close.AssertNotNull(nameof(close));
+        [NotNull] public TMP_Text TextTop => textTop.AssertNotNull(nameof(textTop));
+        [NotNull] public TMP_Text TextBottom => textBottom.AssertNotNull(nameof(textBottom));
 
-        public IReadOnlyList<InputFieldWithHintsWidget> HostNames => hostnames;
-        public IReadOnlyList<InputFieldWidget> Addresses => addresses;
+        [NotNull] public IReadOnlyList<InputFieldWithHintsWidget> HostNames => hostnames;
+        [NotNull] public IReadOnlyList<InputFieldWidget> Addresses => addresses;
 
         public enum ModeType
         {
@@ -60,9 +61,9 @@ namespace Iviz.App
             get => mode;
             private set
             {
-                TextForMode(mode).fontStyle = FontStyle.Normal;
+                TextForMode(mode).fontStyle = FontStyles.Normal;
                 mode = value;
-                TextForMode(mode).fontStyle = FontStyle.Bold;
+                TextForMode(mode).fontStyle = FontStyles.Bold;
                 ModeChanged?.Invoke(mode);
 
                 aliasesTab.SetActive(mode == ModeType.Aliases);
@@ -70,24 +71,24 @@ namespace Iviz.App
             }
         }
 
-        Text TextForMode(ModeType m)
+        [NotNull]
+        TMP_Text TextForMode(ModeType m)
         {
             return m switch
             {
-                ModeType.Aliases => aliasesText,
-                ModeType.Nodes => nodesText,
-                ModeType.Params => paramsText,
-                ModeType.Services => servicesText,
-                ModeType.Topics => topicsText,
-                _ => throw new ArgumentException()
+                ModeType.Aliases => aliasesText.AssertNotNull(nameof(aliasesText)),
+                ModeType.Nodes => nodesText.AssertNotNull(nameof(nodesText)),
+                ModeType.Params => paramsText.AssertNotNull(nameof(paramsText)),
+                ModeType.Services => servicesText.AssertNotNull(nameof(servicesText)),
+                ModeType.Topics => topicsText.AssertNotNull(nameof(topicsText)),
+                _ => throw new IndexOutOfRangeException()
             };
         }
 
-        public event Action<ModeType> ModeChanged;
-        public event Action<string> LinkClicked;
-
-        public event Action<int, string> HostnameEndEdit;
-        public event Action<int, string> AddressEndEdit;
+        [CanBeNull] public event Action<ModeType> ModeChanged;
+        [CanBeNull] public event Action<string> LinkClicked;
+        [CanBeNull] public event Action<int, string> HostnameEndEdit;
+        [CanBeNull] public event Action<int, string> AddressEndEdit;
 
         void Awake()
         {

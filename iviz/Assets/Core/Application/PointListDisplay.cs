@@ -169,7 +169,7 @@ namespace Iviz.Displays
                 {
                     using var uvs = new Rent<Vector2>(pointsLength);
                     ref Vector2 uvsPtr = ref uvs.Array[0];
-                    for (int i = 0; i < pointsLength; i++)
+                    for (int i = pointsLength; i > 0; i--)
                     {
                         //ref readonly var p = ref points[i];
                         //ref var v = ref vArray[i];
@@ -190,7 +190,7 @@ namespace Iviz.Displays
                 {
                     using var colors = new Rent<Color32>(pointsLength);
                     ref float cPtr = ref Unsafe.As<Color32, float>(ref colors[0]);
-                    for (int i = 0; i < pointsLength; i++)
+                    for (int i = pointsLength; i > 0; i--)
                     {
                         //ref readonly var p = ref points[i];
                         //ref var v = ref vArray[i];

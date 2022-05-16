@@ -52,9 +52,9 @@ namespace Iviz.Controllers.Markers
 
         bool? ProcessLineStripSingleColor(NativeList<float4x2> lineBuffer)
         {
-            var lPoints = points;
+            var mPoints = points;
 
-            if (lPoints.Length == 0)
+            if (mPoints.Length == 0)
             {
                 return color32.a < 255;
             }
@@ -64,16 +64,16 @@ namespace Iviz.Controllers.Markers
             ref float4 c1 = ref f.c1;
 
             float colorAsFloat = UnityUtils.AsFloat(color32);
-
-            lPoints[0].Ros2Unity(colorAsFloat, out c1);
-
-            lineBuffer.EnsureCapacity(lPoints.Length - 1);
+            
+            lineBuffer.EnsureCapacity(mPoints.Length - 1);
             lineBuffer.Clear();
 
-            for (int i = 1; i < lPoints.Length; i++)
+            mPoints[0].Ros2Unity(colorAsFloat, out c1);
+            
+            for (int i = 1; i < mPoints.Length; i++)
             {
                 c0 = c1;
-                lPoints[i].Ros2Unity(colorAsFloat, out c1);
+                mPoints[i].Ros2Unity(colorAsFloat, out c1);
                 if (LineDisplay.IsElementValid(f))
                 {
                     lineBuffer.AddUnsafe(f);
@@ -85,10 +85,10 @@ namespace Iviz.Controllers.Markers
 
         bool? ProcessLineStripNoTint(NativeList<float4x2> lineBuffer)
         {
-            var lPoints = points;
-            var lColors = colors;
+            var mPoints = points;
+            var mColors = colors;
 
-            if (lPoints.Length == 0 || lPoints.Length != lColors.Length)
+            if (mPoints.Length == 0 || mPoints.Length != mColors.Length)
             {
                 return null;
             }
@@ -97,18 +97,18 @@ namespace Iviz.Controllers.Markers
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
 
-            float w0 = UnityUtils.AsFloat(lColors[0].ToUnityColor32());
-            lPoints[0].Ros2Unity(w0, out c1);
+            float w0 = UnityUtils.AsFloat(mColors[0].ToUnityColor32());
+            mPoints[0].Ros2Unity(w0, out c1);
 
-            lineBuffer.EnsureCapacity(lPoints.Length - 1);
+            lineBuffer.EnsureCapacity(mPoints.Length - 1);
             lineBuffer.Clear();
 
-            for (int i = 1; i < lPoints.Length; i++)
+            for (int i = 1; i < mPoints.Length; i++)
             {
                 c0 = c1;
 
-                float w = UnityUtils.AsFloat(lColors[i].ToUnityColor32());
-                lPoints[i].Ros2Unity(w, out c1);
+                float w = UnityUtils.AsFloat(mColors[i].ToUnityColor32());
+                mPoints[i].Ros2Unity(w, out c1);
 
                 if (LineDisplay.IsElementValid(f))
                 {
@@ -121,11 +121,11 @@ namespace Iviz.Controllers.Markers
 
         bool? ProcessLineStripTintColor(NativeList<float4x2> lineBuffer)
         {
-            var lPoints = points;
-            var lColors = colors;
+            var mPoints = points;
+            var mColors = colors;
             Color color = color32;
 
-            if (lPoints.Length == 0)
+            if (mPoints.Length == 0)
             {
                 return color.a < 1 ? true : null;
             }
@@ -134,18 +134,18 @@ namespace Iviz.Controllers.Markers
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
 
-            float w0 = UnityUtils.AsFloat(color * lColors[0].ToUnity());
-            lPoints[0].Ros2Unity(w0, out c1);
+            float w0 = UnityUtils.AsFloat(color * mColors[0].ToUnity());
+            mPoints[0].Ros2Unity(w0, out c1);
 
-            lineBuffer.EnsureCapacity(lPoints.Length - 1);
+            lineBuffer.EnsureCapacity(mPoints.Length - 1);
             lineBuffer.Clear();
 
-            for (int i = 1; i < lPoints.Length; i++)
+            for (int i = 1; i < mPoints.Length; i++)
             {
                 c0 = c1;
 
-                float w = UnityUtils.AsFloat(color * lColors[i].ToUnity());
-                lPoints[i].Ros2Unity(w, out c1);
+                float w = UnityUtils.AsFloat(color * mColors[i].ToUnity());
+                mPoints[i].Ros2Unity(w, out c1);
 
                 if (LineDisplay.IsElementValid(f))
                 {
@@ -174,7 +174,7 @@ namespace Iviz.Controllers.Markers
 
         bool? ProcessLineListSingleColor(NativeList<float4x2> lineBuffer)
         {
-            var lPoints = points;
+            var mPoints = points;
 
             var f = new float4x2();
             ref float4 c0 = ref f.c0;
@@ -184,13 +184,13 @@ namespace Iviz.Controllers.Markers
             c0.w = colorAsFloat;
             c1.w = colorAsFloat;
 
-            lineBuffer.EnsureCapacity(lPoints.Length / 2);
+            lineBuffer.EnsureCapacity(mPoints.Length / 2);
             lineBuffer.Clear();
 
-            for (int i = 0; i < lPoints.Length; i += 2)
+            for (int i = 0; i < mPoints.Length; i += 2)
             {
-                lPoints[i + 0].Ros2Unity(colorAsFloat, out c0);
-                lPoints[i + 1].Ros2Unity(colorAsFloat, out c1);
+                mPoints[i + 0].Ros2Unity(colorAsFloat, out c0);
+                mPoints[i + 1].Ros2Unity(colorAsFloat, out c1);
                 if (LineDisplay.IsElementValid(f))
                 {
                     lineBuffer.AddUnsafe(f);
@@ -202,22 +202,22 @@ namespace Iviz.Controllers.Markers
 
         bool? ProcessLineListNoTint(NativeList<float4x2> lineBuffer)
         {
-            var lPoints = points;
-            var lColors = colors;
+            var mPoints = points;
+            var mColors = colors;
 
             var f = new float4x2();
             ref var c0 = ref f.c0;
             ref var c1 = ref f.c1;
 
-            lineBuffer.EnsureCapacity(lPoints.Length / 2);
+            lineBuffer.EnsureCapacity(mPoints.Length / 2);
             lineBuffer.Clear();
 
-            for (int i = 0; i < lPoints.Length; i += 2)
+            for (int i = 0; i < mPoints.Length; i += 2)
             {
-                float w0 = UnityUtils.AsFloat(lColors[i + 0].ToUnityColor32());
-                lPoints[i + 0].Ros2Unity(w0, out c0);
-                float w1 = UnityUtils.AsFloat(lColors[i + 1].ToUnityColor32());
-                lPoints[i + 1].Ros2Unity(w1, out c1);
+                float w0 = UnityUtils.AsFloat(mColors[i + 0].ToUnityColor32());
+                mPoints[i + 0].Ros2Unity(w0, out c0);
+                float w1 = UnityUtils.AsFloat(mColors[i + 1].ToUnityColor32());
+                mPoints[i + 1].Ros2Unity(w1, out c1);
 
                 if (LineDisplay.IsElementValid(f))
                 {
@@ -230,23 +230,23 @@ namespace Iviz.Controllers.Markers
 
         bool? ProcessLineListTintColor(NativeList<float4x2> lineBuffer)
         {
-            var lPoints = points;
-            var lColors = colors;
+            var mPoints = points;
+            var mColors = colors;
             Color color = color32;
 
             var f = new float4x2();
             ref float4 c0 = ref f.c0;
             ref float4 c1 = ref f.c1;
 
-            lineBuffer.EnsureCapacity(lPoints.Length / 2);
+            lineBuffer.EnsureCapacity(mPoints.Length / 2);
             lineBuffer.Clear();
 
-            for (int i = 0; i < lPoints.Length; i += 2)
+            for (int i = 0; i < mPoints.Length; i += 2)
             {
-                float w0 = UnityUtils.AsFloat(color * lColors[i + 0].ToUnity());
-                lPoints[i + 0].Ros2Unity(w0, out c0);
-                float w1 = UnityUtils.AsFloat(color * lColors[i + 1].ToUnity());
-                lPoints[i + 1].Ros2Unity(w1, out c1);
+                float w0 = UnityUtils.AsFloat(color * mColors[i + 0].ToUnity());
+                mPoints[i + 0].Ros2Unity(w0, out c0);
+                float w1 = UnityUtils.AsFloat(color * mColors[i + 1].ToUnity());
+                mPoints[i + 1].Ros2Unity(w1, out c1);
 
                 if (LineDisplay.IsElementValid(f))
                 {

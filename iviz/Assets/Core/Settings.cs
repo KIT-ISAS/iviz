@@ -213,8 +213,6 @@ namespace Iviz.Core
             set => settingsManager = value;
         }
 
-        public static bool HasDragHandler => dragHandler != null;
-
         public static IDragHandler DragHandler
         {
             get => dragHandler ?? throw new NullReferenceException("No drag handler!");

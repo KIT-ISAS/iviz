@@ -181,17 +181,21 @@ namespace Iviz.Displays
             {
                 int srcOffset = (v + bounds.y) * pitch + bounds.x;
                 int dstOffset = v * rowSize;
- 
+
                 var srcSpan = src.Slice(srcOffset, rowSize);
                 var dstSpan = dest.Slice(dstOffset, rowSize);
 
                 srcSpan.CopyTo(dstSpan);
                 hash = Crc32Calculator.Compute(srcSpan, hash);
 
-                foreach (sbyte u in srcSpan)
+                ref sbyte uPtr = ref srcSpan.GetReference();
+                //foreach (sbyte u in srcSpan)
+                for (int i = rowSize; i > 0; i--)
                 {
                     //numValidValues += (u < 0) ? 1 : 0;
-                    numValidValues += (u >> 8) + 1;
+                    //numValidValues += (u >> 8) + 1;
+                    numValidValues += (uPtr >> 8) + 1;
+                    uPtr = ref uPtr.Plus(1);
                 }
             }
 
@@ -228,7 +232,7 @@ namespace Iviz.Displays
             previousHash = null;
             MeshRenderer.enabled = true;
             Title = "";
-            
+
             tokenSource?.Cancel();
             tokenSource = null;
         }
@@ -296,16 +300,33 @@ namespace Iviz.Displays
                 var row1 = srcSpan.Slice(width * (vSrc + 1), width);
                 var rowDst = dstSpan.Slice(halfWidth * vDst, halfWidth);
 
+                ref sbyte row0Ptr = ref row0.GetReference();
+                ref sbyte row1Ptr = ref row1.GetReference();
+                ref sbyte rowDstPtr = ref rowDst.GetReference();
+
                 //for (int uSrc = 0, uDst = 0; uDst < halfWidth; uSrc += 2, uDst++)
-                int uSrc = 0;
-                foreach (ref sbyte dst in rowDst)
+                //int uSrc = 0;
+                //foreach (ref sbyte dst in rowDst)
+                for (int i = halfWidth; i > 0; i--)
                 {
+                    /*
                     int a = row0[uSrc + 0];
                     int b = row0[uSrc + 1];
                     int c = row1[uSrc + 0];
                     int d = row1[uSrc + 1];
                     dst = (sbyte)Fuse(a, b, c, d);
                     uSrc += 2;
+                    */
+                    int a = row0Ptr;
+                    int b = row0Ptr.Plus(1);
+                    int c = row1Ptr;
+                    int d = row1Ptr.Plus(1);
+                    
+                    rowDstPtr = (sbyte)Fuse(a, b, c, d);
+                    
+                    row0Ptr = ref row0Ptr.Plus(2);
+                    row1Ptr = ref row1Ptr.Plus(2);
+                    rowDstPtr = ref rowDstPtr.Plus(1);
                 }
             }
         }
@@ -402,11 +423,11 @@ namespace Iviz.Displays
 
             return numValid switch
             {
-                <2 => -1,
+                < 2 => -1,
                 2 => sum >> 1, // sum / 2
                 3 => (sum * 21845) >> 16, // sum * (65536/3) / 65536
                 _ => sum >> 2
-            };            
+            };
         }
 
         public void Highlight(in Vector3 hitPoint)
@@ -441,7 +462,7 @@ namespace Iviz.Displays
 
             tokenSource?.Cancel();
             tokenSource = new CancellationTokenSource();
-            
+
             FAnimator.Start(new ClickedPoseHighlighter(unityPose, caption, 2, tokenSource.Token));
         }
 

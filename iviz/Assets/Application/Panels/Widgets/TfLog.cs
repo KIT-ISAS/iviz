@@ -31,9 +31,9 @@ namespace Iviz.App
         [SerializeField] Button? lockPivot;
         [SerializeField] Button? fixedFrame;
 
-        [SerializeField] Text? trailText;
-        [SerializeField] Text? lockPivotText;
-        [SerializeField] Text? publishingText;
+        [SerializeField] TMP_Text? trailText;
+        [SerializeField] TMP_Text? lockPivotText;
+        [SerializeField] TMP_Text? publishingText;
 
         [SerializeField] LinkResolver? tfLink;
         [SerializeField] DropdownWidget? showAs;
@@ -49,9 +49,9 @@ namespace Iviz.App
         DropdownWidget ShowAs => showAs.AssertNotNull(nameof(showAs));
         DropdownWidget PoseAs => poseAs.AssertNotNull(nameof(poseAs));
         LinkResolver TfLink => tfLink.AssertNotNull(nameof(tfLink));
-        Text TrailText => trailText.AssertNotNull(nameof(trailText));
-        Text LockPivotText => lockPivotText.AssertNotNull(nameof(lockPivotText));
-        Text PublishingText => publishingText.AssertNotNull(nameof(publishingText));
+        TMP_Text TrailText => trailText.AssertNotNull(nameof(trailText));
+        TMP_Text LockPivotText => lockPivotText.AssertNotNull(nameof(lockPivotText));
+        TMP_Text PublishingText => publishingText.AssertNotNull(nameof(publishingText));
         RectTransform ContentTransform => contentTransform.AssertNotNull(nameof(contentTransform));
 
         FrameNode PlaceHolder => placeHolder ??= new FrameNode("TFLog Placeholder");
@@ -85,7 +85,6 @@ namespace Iviz.App
 
                     return;
                 }
-
 
                 selectedFrame = value;
 

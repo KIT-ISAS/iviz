@@ -283,21 +283,21 @@ namespace Iviz.Controllers
 
         void CreateTriangleList(Marker msg)
         {
-            var meshTriangles = ValidateResource<MeshTrianglesDisplay>();
+            var meshResource = ValidateResource<MeshTrianglesDisplay>();
             if (msg.Colors.Length != 0 && msg.Colors.Length != msg.Points.Length
                 || msg.Color.IsInvalid()
                 || msg.Points.Length % 3 != 0
                 || msg.Points.Length > NativeList.MaxElements)
             {
                 numErrors++;
-                meshTriangles.Clear();
+                meshResource.Clear();
                 return;
             }
             
             if (msg.Color.A.ApproximatelyZero())
             {
                 numWarnings++;
-                meshTriangles.Clear();
+                meshResource.Clear();
                 return;
             }
 
@@ -313,37 +313,41 @@ namespace Iviz.Controllers
                 return;
             }
 
-            meshTriangles.Color = msg.Color.Sanitize().ToUnity();
-            meshTriangles.FlipWinding = TriangleListFlipWinding;
+            meshResource.Color = msg.Color.Sanitize().ToUnity();
+            meshResource.FlipWinding = TriangleListFlipWinding;
 
             int pointsLength = msg.Points.Length;
             if (pointsLength == 0)
             {
-                meshTriangles.Clear();
+                meshResource.Clear();
                 triangleMeshFailedIndex = null;
                 return;
             }
 
+            triangleMeshFailedIndex = CopyPoints(pointsLength, msg.Points, msg.Colors, meshResource);
+        }
+
+        static int? CopyPoints(int pointsLength, Point[] srcPoints, ColorRGBA[] srcColors, MeshTrianglesDisplay mesh)
+        {
             using var points = new Rent<Vector3>(pointsLength);
-            ref Point srcPtr = ref msg.Points[0];
+            ref Point srcPtr = ref srcPoints[0];
             ref Vector3 dstPtr = ref points.Array[0];
-            for (int i = 0; i < pointsLength; i++)
+            for (int i = pointsLength; i > 0; i--)
             {
                 srcPtr.Ros2Unity(out dstPtr);
                 if (dstPtr.IsInvalid()) // unlikely but needed!
                 {
-                    meshTriangles.Clear();
-                    triangleMeshFailedIndex = i;
-                    return;
+                    mesh.Clear();
+                    return pointsLength - i;
                 }
 
                 srcPtr = ref srcPtr.Plus(1);
                 dstPtr = ref dstPtr.Plus(1);
-            }
-
-            var colors = MemoryMarshal.Cast<ColorRGBA, Color>(msg.Colors);
-            meshTriangles.Set(points, colors);
-            triangleMeshFailedIndex = null;
+            }            
+            
+            var colors = MemoryMarshal.Cast<ColorRGBA, Color>(srcColors);
+            mesh.Set(points, colors);
+            return null;
         }
 
         void CreatePoints(Marker msg)

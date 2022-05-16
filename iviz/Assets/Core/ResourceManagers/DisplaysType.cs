@@ -35,7 +35,6 @@ namespace Iviz.Resources
         public ResourceKey<GameObject> AxisFrame { get; }
         public ResourceKey<GameObject> AngleAxis { get; }
         public ResourceKey<GameObject> Trail { get; }
-        public ResourceKey<GameObject> InteractiveControl { get; }
         public ResourceKey<GameObject> GridMap { get; }
         public ResourceKey<GameObject> OccupancyGridTextureResource { get; }
 
@@ -73,30 +72,29 @@ namespace Iviz.Resources
             var assetHolder = ResourcePool.AssetHolder;
             var appAssetHolder = ResourcePool.AppAssetHolder;
 
-            Cube = Create(assetHolder.Cube);
-            Cylinder = Create(assetHolder.Cylinder);
-            Sphere = Create(assetHolder.Sphere);
-            Text = Create(assetHolder.Text);
-            LineConnector = Create(appAssetHolder.LineConnector);
-            BoundaryFrame = Create(appAssetHolder.BoundaryFrame);
-            Arrow = Create(appAssetHolder.Arrow);
-            MeshList = Create(assetHolder.MeshList);
-            PointList = Create(assetHolder.PointList);
-            MeshTriangles = Create(assetHolder.MeshTriangles);
+            Cube = Create(assetHolder.Cube, nameof(assetHolder.Cube));
+            Cylinder = Create(assetHolder.Cylinder, nameof(assetHolder.Cylinder));
+            Sphere = Create(assetHolder.Sphere, nameof(assetHolder.Sphere));
+            Text = Create(assetHolder.Text, nameof(assetHolder.Text));
+            LineConnector = Create(appAssetHolder.LineConnector, nameof(appAssetHolder.LineConnector));
+            BoundaryFrame = Create(appAssetHolder.BoundaryFrame, nameof(appAssetHolder.BoundaryFrame));
+            Arrow = Create(appAssetHolder.Arrow, nameof(appAssetHolder.Arrow));
+            MeshList = Create(assetHolder.MeshList, nameof(assetHolder.MeshList));
+            PointList = Create(assetHolder.PointList, nameof(assetHolder.PointList));
+            MeshTriangles = Create(assetHolder.MeshTriangles, nameof(assetHolder.MeshTriangles));
             //TfFrame = Create(appAssetHolder.TFFrame);
-            Image = Create(appAssetHolder.Image);
-            Square = Create(assetHolder.Plane);
-            Line = Create(assetHolder.Line);
-            Grid = Create(appAssetHolder.Grid);
-            DepthImageDisplay = Create(appAssetHolder.DepthImage);
-            OccupancyGridDisplay = Create(appAssetHolder.OccupancyGrid);
-            RadialScanDisplay = Create(appAssetHolder.RadialScan);
-            AxisFrame = Create(appAssetHolder.AxisFrame);
-            AngleAxis = Create(appAssetHolder.AngleAxis);
-            Trail = Create(appAssetHolder.Trail);
-            InteractiveControl = Create(appAssetHolder.InteractiveControl);
-            GridMap = Create(appAssetHolder.GridMap);
-            OccupancyGridTextureResource = Create(appAssetHolder.OccupancyGridTexture);
+            Image = Create(appAssetHolder.Image, nameof(appAssetHolder.Image));
+            Square = Create(assetHolder.Plane, nameof(assetHolder.Plane));
+            Line = Create(assetHolder.Line, nameof(assetHolder.Line));
+            Grid = Create(appAssetHolder.Grid, nameof(appAssetHolder.Grid));
+            DepthImageDisplay = Create(appAssetHolder.DepthImage, nameof(appAssetHolder.DepthImage));
+            OccupancyGridDisplay = Create(appAssetHolder.OccupancyGrid, nameof(appAssetHolder.OccupancyGrid));
+            RadialScanDisplay = Create(appAssetHolder.RadialScan, nameof(appAssetHolder.RadialScan));
+            AxisFrame = Create(appAssetHolder.AxisFrame, nameof(appAssetHolder.AxisFrame));
+            AngleAxis = Create(appAssetHolder.AngleAxis, nameof(appAssetHolder.AngleAxis));
+            Trail = Create(appAssetHolder.Trail, nameof(appAssetHolder.Trail));
+            GridMap = Create(appAssetHolder.GridMap, nameof(appAssetHolder.GridMap));
+            OccupancyGridTextureResource = Create(appAssetHolder.OccupancyGridTexture, nameof(appAssetHolder.OccupancyGridTexture));
 
             Pyramid = Create(appAssetHolder.Pyramid, nameof(appAssetHolder.Pyramid));
 

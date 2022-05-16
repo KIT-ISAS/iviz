@@ -3,6 +3,7 @@
 using Iviz.Common;
 using Iviz.Core;
 using JetBrains.Annotations;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,11 +11,11 @@ namespace Iviz.App
 {
     public sealed class MarkerWidget : MonoBehaviour, IWidget
     {
-        [SerializeField] Text? text;
+        [SerializeField] TMP_Text? text;
         [SerializeField] Button? button;
         IMarkerDialogListener? listener;
         
-        Text Text => text.AssertNotNull(nameof(text));
+        TMP_Text Text => text.AssertNotNull(nameof(text));
         Button Button => button.AssertNotNull(nameof(button));
         
         public IMarkerDialogListener? MarkerListener

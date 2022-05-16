@@ -108,7 +108,7 @@ namespace Iviz.Displays
             EnsureOwnMesh().Clear();
         }
 
-        public void Set(ReadOnlySpan<Vector3> points, ReadOnlySpan<Color> colors = default)
+        public void Set(Rent<Vector3> points, ReadOnlySpan<Color> colors = default)
         {
             int pointsLength = points.Length;
             if (pointsLength % 3 != 0)

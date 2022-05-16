@@ -143,7 +143,7 @@ namespace Iviz.Ros
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Unexpected error in Connect", e);
+                RosLogger.Error($"{this}: Unexpected error in {nameof(TryToConnect)}", e);
                 return;
             }
             finally

@@ -319,6 +319,8 @@ namespace Iviz.Controllers
                 totalWarnings += newNumWarnings;
             }
         }
+        
+        public override string ToString() => $"[{nameof(InteractiveMarkerObject)} '{rosId}']";
 
         internal IEnumerable<MarkerObject> GetAllMarkers() =>
             controls.Values.SelectMany(control => control.GetAllMarkers());

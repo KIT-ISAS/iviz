@@ -232,14 +232,12 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Color ToUnity(this in ColorRGBA c)
+        public static unsafe ref readonly Color ToUnity(this in ColorRGBA c)
         {
-            Color d;
-            d.r = c.R;
-            d.g = c.G;
-            d.b = c.B;
-            d.a = c.A;
-            return d;
+            fixed (ColorRGBA* ptr = &c)
+            {
+                return ref *(Color*)ptr;
+            } 
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -269,7 +267,13 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ColorRGBA ToRos(this in Color p) => new(p.r, p.g, p.b, p.a);
+        public static unsafe ref readonly ColorRGBA ToRos(this in Color c)
+        {
+            fixed (Color* ptr = &c)
+            {
+                return ref *(ColorRGBA*)ptr;
+            } 
+        } 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static UnityEngine.Quaternion Ros2Unity(this in Quaternion p)

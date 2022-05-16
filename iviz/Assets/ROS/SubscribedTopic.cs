@@ -158,7 +158,7 @@ namespace Iviz.Ros
                     }
                     catch (Exception e)
                     {
-                        RosLogger.Error($"{this}: Error in callback", e);
+                        RosLogger.Error($"{this}: Error in {nameof(Callback)}", e);
                     }
                 }
             }
@@ -168,6 +168,6 @@ namespace Iviz.Ros
             }
         }
 
-        public override string ToString() => $"[SubscribedTopic '{topic}']";
+        public override string ToString() => $"[{nameof(SubscribedTopic<T>)} '{topic}']";
     }
 }

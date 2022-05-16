@@ -146,7 +146,7 @@ namespace Iviz.Displays
                 var row = values[(v * numCellsX)..];
                 float y = -v * size;
 
-                foreach (int u in bounds.x..bounds.xMax)
+                for (int u = bounds.x; u < bounds.xMax; u++)
                 {
                     sbyte val = row[u];
                     if (val <= 0)

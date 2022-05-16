@@ -332,7 +332,7 @@ namespace Iviz.App
         void OnDestroy()
         {
             instance = null;
-            TfModule.AfterProcessFrames -= ProcessPoseChanges;
+            TfModule.AfterFramesUpdated -= PoseChanges;
             GameThread.EveryFrame -= ProcessPointer;
             TfModule.ResetFrames -= OnResetFrames;
         }
@@ -361,12 +361,12 @@ namespace Iviz.App
 
             if (ModuleListPanel.TryGetInstance() is { } moduleListPanel)
             {
-                TfModule.AfterProcessFrames += ProcessPoseChanges;
+                TfModule.AfterFramesUpdated += PoseChanges;
                 moduleListPanel.UnlockButton.onClick.AddListener(DisableCameraLock);
             }
             else
             {
-                GameThread.EveryFrame += ProcessPoseChanges;
+                GameThread.EveryFrame += PoseChanges;
             }
         }
 
@@ -375,7 +375,7 @@ namespace Iviz.App
             ProcessPointer();
         }
 
-        void ProcessPoseChanges()
+        void PoseChanges()
         {
             if (!this)
             {
@@ -397,6 +397,7 @@ namespace Iviz.App
                     Transform.localPosition += Transform.localRotation * velocity;
                 }
 
+                Settings.MainCameraPose = Transform.AsPose();
                 return;
             }
 
@@ -419,6 +420,8 @@ namespace Iviz.App
 
                 var rotation = OrbitRotation;
                 Transform.SetLocalPose(-orbitRadius * rotation.Forward() + orbitCenter + rotation * velocity, rotation);
+                
+                Settings.MainCameraPose = Transform.AsPose();
                 return;
             }
 
@@ -439,6 +442,8 @@ namespace Iviz.App
                 Transform.localRotation = rotation;
                 Transform.localPosition += rotation * velocity;
             }
+            
+            Settings.MainCameraPose = Transform.AsPose();
         }
 
         void OnEnable()

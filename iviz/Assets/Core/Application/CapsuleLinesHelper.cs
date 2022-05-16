@@ -1,6 +1,7 @@
 #nullable enable
 
 using System;
+using System.Numerics;
 using Iviz.Core;
 using Iviz.Tools;
 using Unity.Mathematics;
@@ -90,9 +91,6 @@ namespace Iviz.Displays
             {
                 ref readonly var line = ref linePtr.Plus(segment);
 
-                //(a.x, a.y, a.z) = (line.c0.x, line.c0.y, line.c0.z);
-                //(b.x, b.y, b.z) = (line.c1.x, line.c1.y, line.c1.z);
-
                 Vector3 a;
                 a.x = line.c0.x;
                 a.y = line.c0.y;
@@ -123,26 +121,7 @@ namespace Iviz.Displays
                     dirZ = dirX.Cross(dirY);
                 }
 
-                /*
-                var halfDirX = halfScale * dirX;
-                var halfSumYz = halfScale * (dirY + dirZ);
-                var halfDiffYz = halfScale * (dirY - dirZ);
-
-                pArray[pOff++] = a - halfDirX;
-                pArray[pOff++] = a + halfSumYz;
-                pArray[pOff++] = a + halfDiffYz;
-                pArray[pOff++] = a - halfSumYz;
-                pArray[pOff++] = a - halfDiffYz;
-
-                pArray[pOff++] = b + halfSumYz;
-                pArray[pOff++] = b + halfDiffYz;
-                pArray[pOff++] = b - halfSumYz;
-                pArray[pOff++] = b - halfDiffYz;
-                pArray[pOff++] = b + halfDirX;
-                */
-
                 int offset = segment * 10;
-
                 {
                     ref var pPtr = ref pArray[offset];
 
@@ -164,32 +143,6 @@ namespace Iviz.Displays
                     pPtr.Plus(8) = b - halfDiffYz;
                 }
 
-
-                /*
-                for (int i = 0; i < 5; i++)
-                {
-                    colors[cOff++] = ca;
-                    uvs[uvOff++] = uv0;
-                }
-                */
-                /*
-                {
-                    var ca = UnityUtils.AsColor32(line.c0.w);
-                    cArray[cOff++] = ca;
-                    cArray[cOff++] = ca;
-                    cArray[cOff++] = ca;
-                    cArray[cOff++] = ca;
-                    cArray[cOff++] = ca;
-
-                    var cb = UnityUtils.AsColor32(line.c1.w);
-                    cArray[cOff++] = cb;
-                    cArray[cOff++] = cb;
-                    cArray[cOff++] = cb;
-                    cArray[cOff++] = cb;
-                    cArray[cOff++] = cb;
-                }
-                */
-
                 {
                     ref var cPtr = ref cArray[offset];
 
@@ -208,37 +161,6 @@ namespace Iviz.Displays
                     cPtr.Plus(9) = cb;
                 }
 
-                /*
-                for (int i = 5; i < 10; i++)
-                {
-                    colors[cOff++] = cb;
-                    uvs[uvOff++] = uv1;
-                }
-                */
-
-                /*
-                {
-                    Vector2 uv0;
-                    uv0.x = line.c0.w;
-                    uv0.y = 0;
-
-                    uArray[uvOff++] = uv0;
-                    uArray[uvOff++] = uv0;
-                    uArray[uvOff++] = uv0;
-                    uArray[uvOff++] = uv0;
-                    uArray[uvOff++] = uv0;
-
-                    Vector2 uv1;
-                    uv1.x = line.c1.w;
-                    uv1.y = 0;
-
-                    uArray[uvOff++] = uv1;
-                    uArray[uvOff++] = uv1;
-                    uArray[uvOff++] = uv1;
-                    uArray[uvOff++] = uv1;
-                    uArray[uvOff++] = uv1;
-                }
-                */
                 {
                     ref var uvPtr = ref uArray[offset];
 
@@ -264,20 +186,25 @@ namespace Iviz.Displays
                 }
             }
 
-            ref int capsulePtr = ref CapsuleIndices[0];
-            ref int iPtr = ref iArray[0];
 
             /*
-            foreach (int i in ..lineBuffer.Length)
+            int[] capsules = CapsuleIndices;
+            int wordSize = Vector<int>.Count;
+            int numWords = 48 / wordSize;
+            
+            for (int segment = numSegments; segment > 0; segment--)
             {
-                int baseOff = i * 10;
-                foreach (int index in cIndices)
+                var delta = new Vector<int>(segment * 10);
+                for (int j = 0; j < numWords; j++)
                 {
-                    iArray[iOff++] = baseOff + index;
+                    var capsulesSpan = new Vector<int>(capsules, j * wordSize);
+                    var indicesSpan = capsulesSpan + delta;
+                    (indicesSpan + delta).CopyTo(capsules, 48 * segment + j * wordSize);
                 }
             }
             */
 
+            /*
             foreach (int segment in ..numSegments)
             {
                 int vertexOff = segment * 10;
@@ -287,6 +214,26 @@ namespace Iviz.Displays
                     iPtr = ref iPtr.Plus(1);
                 }
             }
+            */
+            
+            int[] capsules = CapsuleIndices;
+            ref int indexPtr = ref iArray[0];
+            int vertexOff = 0;
+
+            for (int segment = numSegments; segment > 0; segment--)
+            {
+                ref int capsulePtr = ref capsules[0];
+                
+                for (int capsuleIndex = 48; capsuleIndex > 0; capsuleIndex--)
+                {
+                    indexPtr = vertexOff + capsulePtr;
+                    
+                    indexPtr = ref indexPtr.Plus(1);
+                    capsulePtr = ref capsulePtr.Plus(1);
+                }
+                
+                vertexOff += 10;
+            }            
         }
     }
 }

@@ -71,7 +71,7 @@ namespace Iviz.Displays.XR
         {
             set
             {
-                menuEntries = value is string[] array ? array : value.ToArray();
+                menuEntries = value as string[] ?? value.ToArray();
                 MenuPage = 0;
             }
         }
@@ -80,7 +80,6 @@ namespace Iviz.Displays.XR
         {
             set
             {
-                base.Interactable = value;
                 foreach (var button in Buttons)
                 {
                     button.Interactable = value;
@@ -108,7 +107,6 @@ namespace Iviz.Displays.XR
         {
             base.Suspend();
             MenuClicked = null;
-            //Button.ResetHighlights();
         }
 
         void OnScrollUpClick()

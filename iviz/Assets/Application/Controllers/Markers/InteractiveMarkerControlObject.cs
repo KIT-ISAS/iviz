@@ -111,7 +111,7 @@ namespace Iviz.Controllers
                 control.Dispose();
             }
 
-            GameThread.EveryFrame -= KeepPointingForward;
+            TfModule.AfterFramesUpdatedLate -= PointToCamera;
             Transform.rotation = Quaternion.identity;
 
             boundsControls.Clear();
@@ -259,11 +259,11 @@ namespace Iviz.Controllers
 
             if (orientationMode == OrientationMode.ViewFacing)
             {
-                GameThread.EveryFrame += KeepPointingForward;
+                TfModule.AfterFramesUpdatedLate += PointToCamera;
             }
         }
 
-        void KeepPointingForward()
+        void PointToCamera()
         {
             if (!parent.PoseUpdateEnabled)
             {
@@ -300,7 +300,7 @@ namespace Iviz.Controllers
 
         public void Dispose()
         {
-            GameThread.EveryFrame -= KeepPointingForward;
+            TfModule.AfterFramesUpdatedLate -= PointToCamera;
             DisposeAllMarkers();
             Object.Destroy(node);
         }
@@ -395,6 +395,8 @@ namespace Iviz.Controllers
                 totalWarnings += newNumWarnings;
             }
         }
+
+        public override string ToString() => $"[{nameof(InteractiveMarkerControlObject)} '{rosId}']";
 
         internal IEnumerable<MarkerObject> GetAllMarkers() => markers.Values;
         

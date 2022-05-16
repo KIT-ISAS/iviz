@@ -497,7 +497,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Error in CheckRobotStartTask", e);
+                RosLogger.Error($"{this}: Error in {nameof(UpdateStartTaskStatus)}", e);
             }
         }
 

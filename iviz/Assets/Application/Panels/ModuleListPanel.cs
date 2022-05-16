@@ -228,10 +228,11 @@ namespace Iviz.App
 
             connectionManager = new RosManager();
             tfModule = new TfModule(id => new TfFrameDisplay(id));
-            cameraPanelData = new CameraPanelData();
 
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
+
+            cameraPanelData = new CameraPanelData();
 
             RosLogger.Internal("<b>Welcome to iviz!</b>");
             RosLogger.Internal("This is the log for connection messages. " +
@@ -915,7 +916,7 @@ namespace Iviz.App
 
             if (!Resource.TryGetResourceByRosMessageType(type, out var resource))
             {
-                throw new ArgumentException(nameof(type));
+                ThrowHelper.ThrowArgument(nameof(type), "Cannot find resource for this topic");
             }
 
             return CreateModule(resource, topic, type);

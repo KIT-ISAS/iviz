@@ -57,8 +57,7 @@ namespace Iviz.Controllers
             expirationTime = float.MaxValue;
             Type = (WidgetType)msg.Type;
 
-            var widget = ResourcePool.Rent(resourceKey, node.Transform).GetComponent<IWidget>();
-            if ((Component)widget == null)
+            if (!ResourcePool.Rent(resourceKey, node.Transform).TryGetComponent(out IWidget widget))
             {
                 ThrowHelper.ThrowMissingAssetField("Gui object does not have a widget!");
             }
@@ -151,8 +150,7 @@ namespace Iviz.Controllers
             node.AttachTo(msg.Header.FrameId);
             Id = msg.Id;
 
-            var dialog = ResourcePool.Rent(resourceKey, node.Transform).GetComponent<IDialog>();
-            if ((Component)dialog == null)
+            if (!ResourcePool.Rent(resourceKey, node.Transform).TryGetComponent(out IDialog dialog))
             {
                 ThrowHelper.ThrowMissingAssetField("Gui object does not have a dialog!");
             }

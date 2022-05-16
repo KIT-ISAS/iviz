@@ -302,7 +302,7 @@ namespace Iviz.Controllers
             {
                 ref float l = ref Unsafe.As<byte, float>(ref bytes[v * pitch]);
                 ref float r = ref l.Plus(width - 1);
-                foreach (int _ in ..(width / 2))
+                for (int u = width / 2; u > 0; u--)
                 {
                     (l, r) = (r, l);
                     l = ref l.Plus(1);
@@ -318,7 +318,7 @@ namespace Iviz.Controllers
             {
                 ref ulong l = ref Unsafe.As<byte, ulong>(ref bytes[v * width]);
                 ref ulong r = ref l.Plus(width / 8 - 1);
-                foreach (int _ in ..(width / 16))
+                for (int u = width / 16; u > 0; u--)
                 {
                     ulong lFlip = BinaryPrimitives.ReverseEndianness(l);
                     ulong rFlip = BinaryPrimitives.ReverseEndianness(r);

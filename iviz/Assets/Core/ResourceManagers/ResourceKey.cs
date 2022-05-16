@@ -2,6 +2,7 @@
 
 using System;
 using Iviz.Core;
+using Iviz.Msgs;
 using UnityEngine;
 
 namespace Iviz.Resources
@@ -36,7 +37,7 @@ namespace Iviz.Resources
         {
             if (baseObject == null)
             {
-                throw new ArgumentNullException(nameof(baseObject),
+                ThrowHelper.ThrowArgumentNull(nameof(baseObject),
                     $"Resource key was not set for asset '{objectName ?? "unnamed"}'");
             }
 
@@ -67,13 +68,12 @@ namespace Iviz.Resources
 
     public static class ResourceKey
     {
-        public static T Instantiate<T>(this ResourceKey<GameObject> o, Transform? parent = null)
+        public static T Instantiate<T>(this ResourceKey<GameObject> resourceKey, Transform? parent = null)
         {
-            var component = o.Instantiate(parent).GetComponent<T>();
-            if (component == null)
+            ThrowHelper.ThrowIfNull(resourceKey, nameof(resourceKey));
+            if (!resourceKey.Instantiate(parent).TryGetComponent(out T component))
             {
-                throw new NullReferenceException("While instantiating " + o + " the component " +
-                                                 typeof(T).Name + " was not found.");
+                ThrowHelper.ThrowMissingAssetField($"{resourceKey} does not have a component of type {typeof(T).Name}");
             }
 
             return component;

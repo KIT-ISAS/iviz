@@ -601,7 +601,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Advertising <b>{advertiser.Topic}</b> [{advertiser.Type}].");
+            RosLogger.Info($"{this}: Advertising {advertiser.Topic} [{advertiser.Type}].");
 
             var newAdvertisedTopic = new AdvertisedTopic<T>(advertiser.Topic);
 
@@ -674,7 +674,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Advertising service <b>{serviceName}</b> [{BuiltIns.GetServiceType<T>()}].");
+            RosLogger.Info($"{this}: Advertising service {serviceName} [{BuiltIns.GetServiceType<T>()}].");
 
             var newAdvertisedService = new AdvertisedService<T>(serviceName, callback);
             servicesByTopic.Add(serviceName, newAdvertisedService);
@@ -792,7 +792,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Subscribing to <b>{listener.Topic}</b> [{listener.Type}].");
+            RosLogger.Info($"{this}: Subscribing to {listener.Topic} [{listener.Type}].");
 
             var newSubscribedTopic = new SubscribedTopic<T>(listener.Topic, listener.TransportHint);
             subscribersByTopic.Add(listener.Topic, newSubscribedTopic);
@@ -919,7 +919,7 @@ namespace Iviz.Ros
                 return;
             }
 
-            RosLogger.Info($"{this}: Unadvertising service <b>{serviceName}</b>.");
+            RosLogger.Info($"{this}: Unadvertising service {serviceName}.");
 
             if (Connected)
             {

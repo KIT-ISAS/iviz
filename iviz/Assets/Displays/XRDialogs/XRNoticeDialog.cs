@@ -28,5 +28,10 @@ namespace Iviz.Displays.XR
         {
             set => IconObject.Icon = value;
         }
+
+        public override bool Interactable
+        {
+            set { } // no interactable components
+        }
     }
 }

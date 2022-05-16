@@ -4,7 +4,6 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
@@ -34,7 +33,7 @@ namespace Iviz.Core
 
             if (value is < 0 or > NativeList.MaxElements)
             {
-                ThrowHelper.ThrowArgumentOutOfRange();
+                ThrowHelper.ThrowArgumentOutOfRange(nameof(value));
             }
 
             int newCapacity = Mathf.Max(Capacity, 16);
@@ -82,14 +81,6 @@ namespace Iviz.Core
         public NativeArray<T> AsArray() => length == 0 ? EmptyArray : array.GetSubArray(0, length);
 
         public int Length => length;
-
-        public ref T this[int index]
-        {
-            [UsedImplicitly]
-            get => ref AsSpan()[index];
-        }
-
-        public Span<T> AsSpan() => MemoryMarshal.CreateSpan(ref array.GetUnsafeRef(), length);
 
         public ref T GetReference()
         {
@@ -146,10 +137,7 @@ namespace Iviz.Core
             length = newSize;
         }
 
-        public static implicit operator ReadOnlySpan<T>(NativeList<T> list)
-        {
-            return list.AsReadOnlySpan();
-        }
+        public static implicit operator ReadOnlySpan<T>(NativeList<T> list) => list.AsReadOnlySpan();
     }
 
     public static class NativeList

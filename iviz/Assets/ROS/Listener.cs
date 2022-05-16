@@ -327,7 +327,7 @@ namespace Iviz.Ros
             }
         }
 
-        public override string ToString() => $"[Listener {Topic} [{Type}]]";
+        public override string ToString() => $"[{nameof(Listener<T>)} {Topic} [{Type}]]";
     }
 
     public static class Listener

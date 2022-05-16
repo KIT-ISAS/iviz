@@ -52,7 +52,7 @@ namespace Iviz.MarkerDetection
         {
             if (width <= 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(width));
+                ThrowHelper.ThrowArgumentOutOfRange(nameof(width));
             }
 
             if (height <= 0)
@@ -365,9 +365,11 @@ namespace Iviz.MarkerDetection
             public static extern bool EstimatePnp(in float inputs, int inputSize, in float outputs, int outputSize,
                 in float cameraArray, int cameraArraySize, ref float result, int resultSize);
 
+            /*
             [DllImport(IvizOpencvDll)]
             public static extern bool EstimateUmeyama(float[] inputs, int inputSize, float[] outputs, int outputSize,
                 bool estimateScale, float[] result, int resultSize);
+                */
         }
     }
 

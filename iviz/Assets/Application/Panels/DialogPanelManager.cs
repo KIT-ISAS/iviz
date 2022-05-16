@@ -42,7 +42,7 @@ namespace Iviz.App
                 if (selectedDialogData != null)
                 {
                     selectedDialogData.Panel.Active = value;
-                } 
+                }
             }
         }
 
@@ -84,11 +84,7 @@ namespace Iviz.App
 
         T CreatePanel<T>(ResourceKey<GameObject> source) where T : IDialogPanel
         {
-            if (source == null)
-            {
-                throw new NullReferenceException("Requested a panel from source null!");
-            }
-
+            ThrowHelper.ThrowIfNull(source, nameof(source));
             return source.Instantiate<T>(transform);
         }
 
@@ -120,8 +116,8 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception during UpdatePanel:", e);
-            }            
+                RosLogger.Error($"{this}: Exception during {nameof(UpdateDialogData)}:", e);
+            }
         }
 
         void UpdateAllFast()
@@ -136,7 +132,7 @@ namespace Iviz.App
                 UpdateDialogDataFast(dialogData);
             }
         }
-        
+
         void UpdateDialogDataFast(DialogData dialogData)
         {
             try
@@ -145,20 +141,24 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception during UpdatePanelFast:", e);
-            }            
+                RosLogger.Error($"{this}: Exception during {nameof(UpdateDialogDataFast)}:", e);
+            }
         }
 
         public T GetPanelByType<T>(DialogPanelType resource) where T : IDialogPanel
         {
             if (!panelByType.TryGetValue(resource, out IDialogPanel cm))
             {
-                throw new InvalidOperationException("There is no panel for this type!");
+                ThrowHelper.ThrowArgument(nameof(resource), "There is no panel for this type!");
             }
 
-            return cm is T contents
-                ? contents
-                : throw new InvalidOperationException("Panel type does not match!");
+            if (cm is T contents)
+            {
+                return contents;
+            }
+
+            ThrowHelper.ThrowMissingAssetField("Panel type does not match!");
+            return default; // unreachable
         }
 
         void SelectPanelFor(DialogData? newSelected)
@@ -173,7 +173,7 @@ namespace Iviz.App
                 return;
             }
 
-            if (newSelected is {Detached: true})
+            if (newSelected is { Detached: true })
             {
                 return;
             }
@@ -194,7 +194,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Exception during SetupPanel: ", e);
+                RosLogger.Error($"{this}: Exception during {nameof(ShowPanel)}: ", e);
             }
 
             ((MonoBehaviour)selectedDialogData.Panel).transform.SetAsLastSibling();
@@ -207,7 +207,7 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             HidePanel(selectedDialogData);
             selectedDialogData = null;
         }
@@ -225,7 +225,7 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             if (deselected.Detached)
             {
                 HidePanel(deselected);
@@ -257,7 +257,7 @@ namespace Iviz.App
             {
                 return;
             }
-            
+
             detachedDialogDatas.Add(selectedDialogData);
             selectedDialogData.Detached = true;
             selectedDialogData = null;
@@ -265,6 +265,6 @@ namespace Iviz.App
 
         public bool IsActive(DialogData dialogData) => selectedDialogData == dialogData || dialogData.Detached;
 
-        public override string ToString() => "[DialogPanelManager]";
+        public override string ToString() => $"[{nameof(DialogPanelManager)}]";
     }
 }

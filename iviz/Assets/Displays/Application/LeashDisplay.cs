@@ -115,7 +115,7 @@ namespace Iviz.Displays
 
             using (rented)
             {
-                foreach (int i in ..numSegments)
+                for (int i = 0; i < numSegments; i++)
                 {
                     float t = (i + 1f) / numSegments;
                     var q = Bezier(t, f);

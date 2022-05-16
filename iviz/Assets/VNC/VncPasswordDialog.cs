@@ -28,6 +28,16 @@ namespace Iviz.Displays.XR
             get => PasswordObject.text;
             set => PasswordObject.text = value;
         }
+        
+        public override bool Interactable
+        {
+            set
+            {
+                Button1.Interactable = value;
+                Button2.Interactable = value;
+                Button3.Interactable = value;
+            }
+        }        
 
         ButtonSetup ButtonSetup
         {

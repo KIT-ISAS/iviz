@@ -47,7 +47,6 @@ namespace Iviz.Displays.XR
         {
             set
             {
-                base.Interactable = value;
                 Button1.Interactable = value;
                 Button2.Interactable = value;
                 Button3.Interactable = value;

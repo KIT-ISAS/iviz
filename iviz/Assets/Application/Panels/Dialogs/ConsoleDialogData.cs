@@ -284,10 +284,10 @@ namespace Iviz.App
 
                     description.Append(messageLevel switch
                     {
-                        LogLevel.Warn => " [W]: </color></b>",
-                        LogLevel.Error => " [E]: </color></b>",
+                        //LogLevel.Warn => " [W]: </color></b>",
+                        //LogLevel.Error => " [E]: </color></b>",
                         LogLevel.Fatal => " [F]: </color></b>",
-                        _ => " : </color></b>",
+                        _ => ": </color></b>",
                     });
 
                     if (message.SourceId == null || message.Message.Length < MaxMessageLength)

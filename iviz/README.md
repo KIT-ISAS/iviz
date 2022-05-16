@@ -13,18 +13,18 @@ https://doi.org/10.1016/j.simpa.2021.100057) (open access!).
 ## 1. Installation
 
 To run iviz, you need the following:
-* Unity 2021.1 on either Windows, Linux, or macOS
 * For mobile: iOS (> 11.0) or Android (> 7.0)
+* For the standalone package: Windows, Linux, or macOS
+* For running from the editor: Unity 2021.3
 
-The iviz project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository, launching Unity, and selecting the scene at 'Scenes/UI AR'.
-
-If you have Android, there is an APK in the [Binaries](Binaries/android) folder.
+The Unity project has no external dependencies (all required libraries are included), so installing it is just a matter of cloning the repository, launching Unity, and selecting the scene at 'Scenes/UI AR'.
 
 ## 2. Getting Started
 
 Here are some instructions on how to get started:
 
-* (If using Unity) Start Unity 2021.2, and open the project on the iviz folder. Make sure that the scene **Scenes/UI AR** is active. Press Play.
+### Connect to the ROS master
+
 * On the panel at the top-left, right underneath the "- iviz -" label, tap on the address in bold with the arrow at the end.
 
 * You should now see the **Connection Dialog**.
@@ -33,14 +33,16 @@ Here are some instructions on how to get started:
     - Optional: In **My URI** write the URL you want for your device. The URL should have the form http://_hostname_:port/
         * The hostname is the content usually stored in _ROS_HOSTNAME_ or _ROS_IP_.
         * The port (7613) can be set to anything, just make sure it's not being used by another application.
-        * The hostname and port should be accessible to the ROS nodes that you want to contact. This is important for devices that are in multiple networks.
-        * Note that the hostname and port will be sent 'as is' to other ROS nodes. For example, if you use something like http://localhost:7613, other computers will try to connect to themselves instead of you.
-        * The arrow icon will show a list of example URLs based on the addresses of your device.
+        * The hostname and port should be accessible to the ROS nodes that you want to contact. Do not use something like http://localhost:7613, as this will cause other computers to try to connect to themselves instead of you.
     - Optional: In **My ID** write your ROS id. This is the name of your ROS node. It can be anything, but make sure it is unique in your network.
 * Once the data is correct, tap on the **Connect** button. The application will now try to connect to the ROS master, and keep retrying if it does not work. Tap **Stop** to cancel the operation.
 * Once you have connected, the top-left panel should become green. You can now add modules such as topic listeners, robots, watch the TF frames, and so on.
 
-The section below the Connect panel, with the two rows of buttons, is the **Dialog Panel**.
+![image](../wiki_files/connection-dialog.png)
+
+### Panels
+
+On the left side, below the Connect panel, you will find a panel with two rows of buttons, the **Dialog Panel**.
 Clicking on them will open the corresponding dialog in the center of the screen.
 
 Below it is the **Module Panel**.
@@ -54,7 +56,7 @@ You can drag it to the left (away from the screen) to destroy it - but be carefu
 Deep below the **Module Panel** is the **Camera Panel**.
 It tells you which view you are in (Virtual View / AR View / whatever).
 Below it is the current camera position in relation to the fixed frame.
-And finally, the panel also gives you the **p**itch and the **y*aw of the rotation.
+And finally, the panel also gives you the **p**itch and the **y**aw of the rotation.
 
 The last line contains basic statistics about the program.
 On PC, it will list the used memory, the current bandwidth, the battery (if available) and the frame rate.
@@ -63,6 +65,8 @@ On mobile, it will show the clock instead of the used memory.
 You can hide the GUI by pressing the **Hide GUI** button with the arrows: in PCs it is located at the center bottom, while on mobile it is located on the left side, next to the __Module Panel__.  
 Once the GUI is hidden, the button becomes semitransparent, and you can click it back to reopen the GUI.
 
+### Settings
+
 Finally, one option you should check out is the **Settings** dialog (the button with the gear icon).
 It presents multiple options that control the quality and CPU usage of the application.
 You can get an idea of how much resources iviz is using by checking the FPS value on the left panel, at the bottom.
@@ -70,8 +74,6 @@ You can set the maximum FPS at 60 if you want a fluid display, but you may also 
 The CPU usage can also be reduced by lowering the frequency at which network data is being processed.
 The Settings configuration is saved automatically, and will be reused the next time iviz is started.
 
-
-![image](../wiki_files/connection-dialog.png)
 
 ## 3. Navigation
 

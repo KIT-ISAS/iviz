@@ -375,7 +375,7 @@ namespace VNC
         void ShowMainPanel()
         {
             var cameraPosition = Settings.MainCameraPose.position;
-            var cameraForward = Settings.MainCameraTransform.forward;
+            var cameraForward = Settings.MainCameraPose.Forward();
 
             var position = (cameraPosition + 1.5f * cameraForward).WithY(cameraPosition.y - 0.6f);
             PanelHolder.Transform.position = position;

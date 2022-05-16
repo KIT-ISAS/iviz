@@ -46,9 +46,8 @@ namespace Iviz.App
         {
             if (panelByResourceType.TryGetValue(resource, out ModulePanel existingContents))
             {
-                return existingContents is T validatedContents
-                    ? validatedContents
-                    : throw new InvalidOperationException($"Panel type for {resource}does not match!");
+                return existingContents as T ??
+                       throw new InvalidOperationException($"Panel type for {resource}does not match!");
             }
 
             var newDataPanel = CreateDataPanel($"{resource} Panel", transform);
@@ -56,7 +55,8 @@ namespace Iviz.App
 
             if (newContents is not T contents)
             {
-                throw new InvalidOperationException($"Panel type for {resource} does not match!");
+                ThrowHelper.ThrowMissingAssetField($"Panel type for {resource} does not match!");
+                return default; // unreachable
             }
 
             panelByResourceType[resource] = contents;
@@ -64,7 +64,7 @@ namespace Iviz.App
             var rootCanvas = contents.GetComponentInParent<Canvas>(true);
             if (rootCanvas == null)
             {
-                throw new InvalidOperationException(
+                 ThrowHelper.ThrowMissingAssetField(
                     $"Error creating canvas for {resource}. Reason: No canvas component");
             }
 

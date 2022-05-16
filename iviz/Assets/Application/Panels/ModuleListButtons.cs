@@ -82,7 +82,7 @@ namespace Iviz.App
         {
             if (index < 0 || index >= buttons.Count)
             {
-                ThrowHelper.ThrowArgumentOutOfRange();
+                ThrowHelper.ThrowArgumentOutOfRange(nameof(index));
             }
 
             ThrowHelper.ThrowIfNull(content, nameof(content));

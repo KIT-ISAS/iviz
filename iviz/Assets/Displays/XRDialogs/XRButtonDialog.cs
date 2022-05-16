@@ -26,11 +26,7 @@ namespace Iviz.Displays.XR
 
         public override bool Interactable
         {
-            set
-            {
-                base.Interactable = value;
-                Button.Interactable = value;
-            }
+            set => Button.Interactable = value;
         }
 
         protected override void Awake()

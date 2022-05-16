@@ -43,6 +43,16 @@ namespace Iviz.Displays.XR
             set => SetupButtons(Button1, Button2, Button3, value);
         }
 
+        public override bool Interactable
+        {
+            set
+            {
+                Button1.Interactable = value;
+                Button2.Interactable = value;
+                Button3.Interactable = value;
+            }
+        }
+
         protected override void Awake()
         {
             base.Awake();

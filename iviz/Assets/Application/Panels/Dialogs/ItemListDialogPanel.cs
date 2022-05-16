@@ -75,7 +75,7 @@ namespace Iviz.App
 
                 if (index < 0)
                 {
-                    ThrowHelper.ThrowArgumentOutOfRange();
+                    ThrowHelper.ThrowArgumentOutOfRange(nameof(index));
                 }
 
                 this.buttonHeight = buttonHeight;

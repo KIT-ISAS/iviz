@@ -144,9 +144,9 @@ namespace Iviz.MarkerDetection
                 return ARMarkerType.Aruco;
             }
 
-            IReadOnlyList<IDetectedMarker> newArucoMarkers = context.DetectArucoMarkers();
-            IReadOnlyList<IDetectedMarker> newQrMarkers = context.DetectQrMarkers();
-            switch (newArucoMarkers.Count != 0, newQrMarkers.Count != 0)
+            var newArucoMarkers = context.DetectArucoMarkers();
+            var newQrMarkers = context.DetectQrMarkers();
+            switch (newArucoMarkers.Length != 0, newQrMarkers.Length != 0)
             {
                 case (true, false):
                     RaiseOnMarkerDetected(screenshot, newArucoMarkers);
@@ -155,7 +155,7 @@ namespace Iviz.MarkerDetection
                     RaiseOnMarkerDetected(screenshot, newQrMarkers);
                     return ARMarkerType.QrCode;
                 case (true, true):
-                    RaiseOnMarkerDetected(screenshot, newArucoMarkers.Concat(newQrMarkers).ToList());
+                    RaiseOnMarkerDetected(screenshot, newArucoMarkers.Concat<IDetectedMarker>(newQrMarkers).ToList());
                     return ARMarkerType.Aruco;
                 case (false, false):
                     return null;
@@ -232,7 +232,7 @@ namespace Iviz.MarkerDetection
                 }
                 catch (Exception e)
                 {
-                    RosLogger.Error("Error during detector event:", e);
+                    RosLogger.Error($"Error during {nameof(MarkerDetected)} event:", e);
                 }
             });
         }

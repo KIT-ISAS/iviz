@@ -28,11 +28,6 @@ namespace Iviz.Core
 {
     public static class UnityUtils
     {
-        /// <summary>
-        ///  Max amount of indices that a mesh can hold with short indices
-        /// </summary>
-        public const int MeshUInt16Threshold = ushort.MaxValue;
-
         public static CultureInfo Culture => BuiltIns.Culture;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -470,8 +465,7 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void Deconstruct(this Vector2 v, out float x, out float y) =>
-            (x, y) = (v.x, v.y);
+        public static void Deconstruct(this Vector2 v, out float x, out float y) => (x, y) = (v.x, v.y);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Deconstruct(this in float3 v, out float x, out float y, out float z)
@@ -594,6 +588,35 @@ namespace Iviz.Core
             vector3.z = 1.0f - (num4 + num5);
             return vector3;
         }
+
+        public static Vector3 Up(this in Quaternion rotation)
+        {
+            float x = rotation.x;
+            float y = rotation.y;
+            float z = rotation.z;
+            float w = rotation.w;
+
+            // copied from unity code
+            float num1 = x * 2f;
+            float num2 = y * 2f;
+            float num3 = z * 2f;
+            float num4 = x * num1;
+            float num6 = z * num3;
+            float num7 = x * num2;
+            float num9 = y * num3;
+            float num10 = w * num1;
+            float num12 = w * num3;
+            
+            Vector3 vector3;
+            vector3.x = num7 - num12;
+            vector3.y = 1.0f - (num4 + num6);
+            vector3.z = num9 + num10;
+            return vector3;
+        }
+        
+        public static Vector3 Forward(this in Pose pose) => pose.rotation.Forward();
+
+        public static Vector3 Up(this in Pose pose) => pose.rotation.Up();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool ApproximatelyZero(this float f) => Mathf.Abs(f) < 8 * float.Epsilon;

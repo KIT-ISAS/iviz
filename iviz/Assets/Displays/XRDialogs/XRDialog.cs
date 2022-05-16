@@ -51,10 +51,7 @@ namespace Iviz.Displays.XR
             }
         }
 
-        public virtual bool Interactable
-        {
-            set { }
-        }
+        public abstract bool Interactable { set; }
 
         public event Action? Expired;
 
@@ -134,7 +131,8 @@ namespace Iviz.Displays.XR
 
             resetOrientation = true;
             currentPosition = null;
-            Update();
+
+            TfModule.AfterFramesUpdatedLate += UpdatePose;
         }
 
         protected virtual void Awake()
@@ -148,7 +146,7 @@ namespace Iviz.Displays.XR
             PivotFrameId = pivotFrameId;
         }
 
-        void Update()
+        void UpdatePose()
         {
             UpdatePosition();
             UpdateRotation();
@@ -243,6 +241,8 @@ namespace Iviz.Displays.XR
             Connector.Visible = false;
             Expired?.Invoke();
             Expired = null;
+            
+            TfModule.AfterFramesUpdatedLate -= UpdatePose;
         }
 
         static Quaternion GetFlatCameraRotationRelativeTo(in Vector3 localPosition)
