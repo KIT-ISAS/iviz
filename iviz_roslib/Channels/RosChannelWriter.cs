@@ -253,7 +253,7 @@ public sealed class RosChannelWriter<TMessage> : IRosChannelWriter
         }
         catch (Exception e)
         {
-            Logger.LogErrorFormat("{0}: Error in Dispose: {1}", this, e);
+            Logger.LogErrorFormat("{0}: Error in " + nameof(Dispose) + ": {1}", this, e);
         }
     }
 

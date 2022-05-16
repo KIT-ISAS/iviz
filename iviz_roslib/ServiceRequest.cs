@@ -199,10 +199,10 @@ internal sealed class ServiceRequest
                     break;
                 case IOException:
                 case SocketException:
-                    Logger.LogDebugFormat("{0}: Error in StartSession: {1}", this, e);
+                    Logger.LogDebugFormat("{0}: Error in " + nameof(StartSession) + ": {1}", this, e);
                     break;
                 default:
-                    Logger.LogErrorFormat("{0}: Error in StartSession: {1}", this, e);
+                    Logger.LogErrorFormat("{0}: Error in " + nameof(StartSession) + ": {1}", this, e);
                     break;
             }
 

@@ -656,7 +656,7 @@ namespace Iviz.Rosbag.Writer
             }
             catch (Exception e)
             {
-                Logger.LogErrorFormat("{0}: Exception in Dispose: {1}", this, e);
+                Logger.LogErrorFormat("{0}: Exception in " + nameof(Dispose) + ": {1}", this, e);
             }
 
             cachedLastLength = writer.Length;

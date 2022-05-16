@@ -359,7 +359,7 @@ namespace Iviz.XmlRpc
                     throw;
                 }
                 
-                Logger.LogErrorFormat("XmlRpcService: Error during parsing. {0}", e);
+                Logger.LogErrorFormat(nameof(XmlRpcService) + ": Error during parsing. {0}", e);
                 await httpContext.RespondWithUnexpectedErrorAsync(token: token);
                 throw;
             }

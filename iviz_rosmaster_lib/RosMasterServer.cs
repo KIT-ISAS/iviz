@@ -181,10 +181,10 @@ public sealed class RosMasterServer : IDisposable
                 case OperationCanceledException:
                     break; // do nothing
                 case SocketException or IOException:
-                    Logger.LogDebugFormat("{0}: Error in StartContext: {1}", this, e);
+                    Logger.LogDebugFormat("{0}: Error in " + nameof(StartContext) + ": {1}", this, e);
                     break;
                 default:
-                    Logger.LogErrorFormat("{0}: Error in StartContext: {1}", this, e);
+                    Logger.LogErrorFormat("{0}: Error in " + nameof(StartContext) + ": {1}", this, e);
                     break;
             }
         }

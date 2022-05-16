@@ -106,7 +106,7 @@ public abstract class BaseRosChannelReader<T> : IEnumerable<T>, IRosChannelReade
         }
         catch (Exception e)
         {
-            Logger.LogErrorFormat("{0}: Error in Dispose: {1}", this, e);
+            Logger.LogErrorFormat("{0}: Error in " + nameof(Dispose) + ": {1}", this, e);
         }
     }
 

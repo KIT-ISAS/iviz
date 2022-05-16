@@ -367,12 +367,12 @@ internal sealed class RosNodeServer
         }
         catch (RosInvalidHeaderException e)
         {
-            Logger.LogErrorFormat("{0}: Header error in RequestTopic: {1}", this, e);
+            Logger.LogErrorFormat("{0}: Header error in " + nameof(RequestTopic) + ": {1}", this, e);
             return ErrorResponse($"Error while parsing ROS header: {e.Message}");
         }
         catch (Exception e)
         {
-            Logger.LogErrorFormat("{0}: Error in RequestTopic: {1}", this, e);
+            Logger.LogErrorFormat("{0}: Error in " + nameof(RequestTopic) + ": {1}", this, e);
             return ErrorResponse($"Internal error: {e.Message}");
         }
     }
