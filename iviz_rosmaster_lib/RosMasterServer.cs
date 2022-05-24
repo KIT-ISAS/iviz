@@ -45,8 +45,8 @@ public sealed class RosMasterServer : IDisposable
         public const int Success = 1;
     }
 
-    static XmlRpcArg DefaultOkResponse => OkResponse(0);
-    static XmlRpcArg FailResponse => new(StatusCode.Failure, "Request failed", 0);
+    readonly XmlRpcArg DefaultOkResponse = OkResponse(0);
+    readonly XmlRpcArg FailResponse = new(StatusCode.Failure, "Request failed", 0);
 
     static XmlRpcArg OkResponse(XmlRpcArg arg) => new(StatusCode.Success, "", arg);
     static XmlRpcArg ErrorResponse(string msg) => new(StatusCode.Error, msg, 0);
@@ -584,7 +584,7 @@ public sealed class RosMasterServer : IDisposable
             {
                 try
                 {
-                    AddDictionary(argEntries, key);
+                    AddDictionaryOfParams(argEntries, key);
                     return DefaultOkResponse;
                 }
                 catch (ParseException e)
@@ -622,15 +622,15 @@ public sealed class RosMasterServer : IDisposable
         return DefaultOkResponse;
     }
 
-    void AddDictionary((string, XmlRpcValue)[] entries, string root)
+    void AddDictionaryOfParams((string, XmlRpcValue)[] entries, string prefix)
     {
         foreach ((string name, XmlRpcValue value) in entries)
         {
-            string key = $"{root}/{name}";
+            string key = $"{prefix}/{name}";
 
-            if (value.TryGetStruct(out (string, XmlRpcValue)[] subEntries))
+            if (value.TryGetStruct(out var subEntries))
             {
-                AddDictionary(subEntries, key);
+                AddDictionaryOfParams(subEntries, key);
             }
             else
             {
@@ -703,8 +703,8 @@ public sealed class RosMasterServer : IDisposable
             keyAsNamespace += "/";
         }
 
-        var candidates = parameters.Where(pair => pair.Key.StartsWith(keyAsNamespace)).ToArray();
-        if (candidates.Length == 0)
+        var candidates = parameters.Where(pair => pair.Key.StartsWith(keyAsNamespace)).ToList();
+        if (candidates.Count == 0)
         {
             return ErrorResponse($"Parameter [{key}] is not set");
         }
