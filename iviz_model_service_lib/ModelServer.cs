@@ -26,6 +26,7 @@ public sealed class ModelServer : IDisposable
     readonly bool verbose;
     readonly AssimpContext importer = new();
     readonly Dictionary<string, List<string>> packagePaths = new();
+    bool disposed;
 
     public int NumPackages => packagePaths.Count;
     public bool IsFileSchemaEnabled { get; set; }
@@ -222,7 +223,7 @@ public sealed class ModelServer : IDisposable
                 if (modelPath is null)
                 {
                     msg.Response.Success = false;
-                    msg.Response.Message = "Failed to find resource path";
+                    msg.Response.Message = "Could not find resource with the given path";
                     return;
                 }
 
@@ -263,7 +264,7 @@ public sealed class ModelServer : IDisposable
         {
             LogError($"Failed to access uri '{uri}'. Reason: XML error while reading '{modelPath}'. {e.Message}");
             msg.Response.Success = false;
-            msg.Response.Message = "Failed to load model";
+            msg.Response.Message = "Failed to load model. Reason: XML error.";
             return;
         }
         catch (AssimpException e)
@@ -271,7 +272,7 @@ public sealed class ModelServer : IDisposable
             LogError($"Failed to access uri '{uri}'. Reason: Failed to read path '{modelPath}'. {e.Message}");
 
             msg.Response.Success = false;
-            msg.Response.Message = "Failed to load model";
+            msg.Response.Message = "Failed to load model. Reason: Assimp error.";
             return;
         }
 
@@ -308,7 +309,7 @@ public sealed class ModelServer : IDisposable
                 if (string.IsNullOrWhiteSpace(texturePath))
                 {
                     msg.Response.Success = false;
-                    msg.Response.Message = "Failed to find resource path";
+                    msg.Response.Message = "Could not find resource with the given path";
                     return;
                 }
 
@@ -552,7 +553,7 @@ public sealed class ModelServer : IDisposable
         string? filePath = ResolvePath(uri);
         if (string.IsNullOrWhiteSpace(filePath))
         {
-            msg.Response.Message = "Failed to find resource path";
+            msg.Response.Message = "Could not find resource with the given path";
             return;
         }
 
@@ -598,7 +599,7 @@ public sealed class ModelServer : IDisposable
         if (string.IsNullOrWhiteSpace(modelPath) || string.IsNullOrWhiteSpace(packagePath))
         {
             LogError("Failed to find resource path for '" + modelPath + "'");
-            msg.Response.Message = "Failed to find resource path";
+            msg.Response.Message = "Could not find resource with the given path";
             return;
         }
 
@@ -826,8 +827,6 @@ public sealed class ModelServer : IDisposable
         int a = (int)(Math.Max(Math.Min(color.A, 1), 0) * 255);
         return new Color32((byte)r, (byte)g, (byte)b, (byte)a);
     }
-
-    bool disposed;
 
     public void Dispose()
     {

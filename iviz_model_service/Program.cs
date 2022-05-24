@@ -26,7 +26,7 @@ namespace Iviz.ModelService
         {
             Console.WriteLine("** Starting Iviz.ModelService...");
 
-            Uri? masterUri = RosClient.EnvironmentMasterUri;
+            var masterUri = RosClient.EnvironmentMasterUri;
             if (masterUri is null)
             {
                 Console.Error.WriteLine("EE Fatal error: Failed to determine master uri. " +
@@ -70,33 +70,31 @@ namespace Iviz.ModelService
 
             Console.WriteLine($"** Found {modelServer.NumPackages} ROS packages. Trying to connect...");
 
-            Uri myUri = RosClient.TryGetCallerUriFor(masterUri) ?? RosClient.TryGetCallerUri();
+            var myUri = RosClient.TryGetCallerUriFor(masterUri) ?? RosClient.TryGetCallerUri();
             await using RosClient client = await RosClient.CreateAsync(masterUri, "iviz_model_service", myUri);
 
-            Console.WriteLine($"** Starting node at URI {client.CallerUri}...");
+            Console.WriteLine($"** Started node at URI {client.CallerUri}");
 
-            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.ModelServiceName,
-                GetModelResource.ServiceType);
+            //Console.WriteLine("** Starting service {0} [{1}].", ModelServer.ModelServiceName,
+            //    GetModelResource.ServiceType);
 
-            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.ModelServiceName,
-                GetModelResource.ServiceType);
+            //Console.WriteLine("** Starting service {0} [{1}].", ModelServer.ModelServiceName,
+            //    GetModelResource.ServiceType);
             await client.AdvertiseServiceAsync<GetModelResource>(ModelServer.ModelServiceName,
                 modelServer.ModelCallback);
 
-            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.TextureServiceName,
-                GetModelTexture.ServiceType);
+            //Console.WriteLine("** Starting service {0} [{1}].", ModelServer.TextureServiceName,
+            //    GetModelTexture.ServiceType);
             await client.AdvertiseServiceAsync<GetModelTexture>(ModelServer.TextureServiceName,
                 modelServer.TextureCallback);
 
-            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.FileServiceName, GetFile.ServiceType);
+            //Console.WriteLine("** Starting service {0} [{1}].", ModelServer.FileServiceName, GetFile.ServiceType);
             await client.AdvertiseServiceAsync<GetFile>(ModelServer.FileServiceName, modelServer.FileCallback);
 
-            Console.WriteLine("** Starting service {0} [{1}].", ModelServer.SdfServiceName, GetSdf.ServiceType);
+            //Console.WriteLine("** Starting service {0} [{1}].", ModelServer.SdfServiceName, GetSdf.ServiceType);
             await client.AdvertiseServiceAsync<GetSdf>(ModelServer.SdfServiceName, modelServer.SdfCallback);
 
-
-            Console.WriteLine("** Done.");
-            Console.WriteLine("** Iviz.ModelService started. Standing by for requests.");
+            Console.WriteLine("** Iviz.ModelService started. Standing by for requests...");
 
             await WaitForCancel();
 
@@ -105,8 +103,8 @@ namespace Iviz.ModelService
 
         static Task WaitForCancel()
         {
-            var tc = TaskUtils.CreateCompletionSource();
-            Console.CancelKeyPress += (_, __) => tc.SetResult();
+            var tc = new TaskCompletionSource();
+            Console.CancelKeyPress += (_, _) => tc.TrySetResult();
             return tc.Task;
         }
 
