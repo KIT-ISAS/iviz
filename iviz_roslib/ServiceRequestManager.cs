@@ -85,7 +85,7 @@ internal sealed class ServiceRequestManager
 
     async ValueTask CleanupAsync(CancellationToken token)
     {
-        var toRemove = requests.Where(request => !request.IsAlive).ToArray();
+        var toRemove = requests.Where(request => !request.IsAlive).ToList();
         var tasks = toRemove.Select(async request =>
         {
             Logger.LogDebugFormat("{0}: Removing service connection with '{1}' - dead x_x",

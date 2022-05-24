@@ -21,7 +21,7 @@ internal class ReceiverConnector
     readonly string topic;
     readonly CancellationTokenSource tokenSource = new();
     readonly Task task;
-    readonly Action<ReceiverConnector, Response> onConnectionSucceeded;
+    readonly Action<ReceiverConnector, ReceiverConnectorResponse> onConnectionSucceeded;
     readonly RpcUdpTopicRequest? udpRequest;
     readonly UdpClient? udpClient;
     readonly RosTransportHint transportHint;
@@ -34,23 +34,8 @@ internal class ReceiverConnector
     public ErrorMessage? ErrorDescription { get; private set; }
     public bool IsAlive => !task.IsCompleted;
 
-
-    public sealed class Response
-    {
-        public Endpoint? TcpResponse { get; }
-        public RpcUdpTopicResponse? UdpResponse { get; }
-        public UdpClient? UdpClient { get; }
-
-        public Response(Endpoint? tcpResponse, RpcUdpTopicResponse? udpResponse, UdpClient? udpClient) =>
-            (TcpResponse, UdpResponse, UdpClient) = (tcpResponse, udpResponse, udpClient);
-
-        public void Deconstruct(out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse,
-            out UdpClient? udpClient) =>
-            (tcpResponse, udpResponse, udpClient) = (TcpResponse, UdpResponse, UdpClient);
-    }
-
     public ReceiverConnector(RosNodeClient client, string topic, RosTransportHint transportHint,
-        RpcUdpTopicRequest? udpRequest, Action<ReceiverConnector, Response> onConnectionSucceeded)
+        RpcUdpTopicRequest? udpRequest, Action<ReceiverConnector, ReceiverConnectorResponse> onConnectionSucceeded)
     {
         this.topic = topic;
         this.client = client;
@@ -116,7 +101,8 @@ internal class ReceiverConnector
                 ErrorDescription = null;
                 status = ReceiverStatus.Connected;
                 Logger.LogDebugFormat("{0}: Connection succeeded.", this);
-                onConnectionSucceeded(this, new Response(response.TcpResponse, response.UdpResponse, udpClient));
+                onConnectionSucceeded(this,
+                    new ReceiverConnectorResponse(response.TcpResponse, response.UdpResponse, udpClient));
                 return;
             }
 
@@ -187,7 +173,7 @@ internal class ReceiverConnector
         ErrorDescription = ErrorDescription
     };
 
-    public override string ToString() => $"[ReceiverConnector '{topic}' Uri='{RemoteUri}']";
+    public override string ToString() => $"[{nameof(ReceiverConnector)} '{topic}' Uri='{RemoteUri}']";
 
     static int WaitTimeInMsFromTry(int numTry) => BaseUtils.Random.Next(0, 1000) +
                                                   numTry switch
@@ -196,4 +182,18 @@ internal class ReceiverConnector
                                                       < 50 => 5000,
                                                       _ => 10000
                                                   };
+}
+
+public sealed class ReceiverConnectorResponse
+{
+    public Endpoint? TcpResponse { get; }
+    public RpcUdpTopicResponse? UdpResponse { get; }
+    public UdpClient? UdpClient { get; }
+
+    public ReceiverConnectorResponse(Endpoint? tcpResponse, RpcUdpTopicResponse? udpResponse, UdpClient? udpClient) =>
+        (TcpResponse, UdpResponse, UdpClient) = (tcpResponse, udpResponse, udpClient);
+
+    public void Deconstruct(out Endpoint? tcpResponse, out RpcUdpTopicResponse? udpResponse,
+        out UdpClient? udpClient) =>
+        (tcpResponse, udpResponse, udpClient) = (TcpResponse, UdpResponse, UdpClient);
 }

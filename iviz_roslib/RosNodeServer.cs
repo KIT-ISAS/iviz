@@ -126,11 +126,11 @@ internal sealed class RosNodeServer
         }
     }
 
-    static (int code, string msg, XmlRpcArg arg) OkResponse(XmlRpcArg arg) => (StatusCode.Success, "ok", arg);
+    static XmlRpcArg OkResponse(XmlRpcArg arg) => new(StatusCode.Success, "ok", arg);
 
-    static (int code, string msg, XmlRpcArg arg) ErrorResponse(string msg) => (StatusCode.Error, msg, 0);
+    static XmlRpcArg ErrorResponse(string msg) => new(StatusCode.Error, msg, 0);
 
-    static (int code, string msg, XmlRpcArg arg) FailureResponse(string msg) => (StatusCode.Failure, msg, 0);
+    static XmlRpcArg FailureResponse(string msg) => new(StatusCode.Failure, msg, 0);
 
     static XmlRpcArg GetBusStats(XmlRpcValue[] _)
     {
@@ -361,8 +361,7 @@ internal sealed class RosNodeServer
                 TopicRequestRpcResult.NoSuitableProtocol =>
                     FailureResponse("Publisher does not support any of the proposed protocols"),
 
-                _ =>
-                    ErrorResponse("Unknown error")
+                _ => ErrorResponse("Unknown error")
             };
         }
         catch (RosInvalidHeaderException e)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -1832,9 +1833,18 @@ public sealed class RosClient : IRosClient
             {
                 serviceCaller.Dispose();
                 subscribedServicesByName.TryRemove(resolvedServiceName, out _);
-                if (e is OperationCanceledException or RosServiceCallFailed) throw;
-                throw new RoslibException($"Service call '{resolvedServiceName}' to " +
-                                          $"{serviceUri?.ToString() ?? "[unknown]"} failed", e);
+                switch (e)
+                {
+                    case OperationCanceledException or RosServiceCallFailed:
+                        throw;
+                    case SocketException or IOException:
+                        throw new RoslibException(
+                            $"Service call '{resolvedServiceName}' failed. Reason: " +
+                            $"Cannot connect to {serviceUri.ToString() ?? "[unknown]"}", e);
+                    default:
+                        throw new RoslibException($"Service call '{resolvedServiceName}' to " +
+                                                  $"{serviceUri.ToString() ?? "[unknown]"} failed", e);
+                }
             }
         }
 
@@ -1844,6 +1854,12 @@ public sealed class RosClient : IRosClient
             await serviceCaller.StartAsync(serviceUri, persistent, token);
             await serviceCaller.ExecuteAsync(service, token);
             return service;
+        }
+        catch (Exception e) when (e is SocketException or IOException)
+        {
+            throw new RoslibException(
+                $"Service call '{resolvedServiceName}' failed. Reason: " +
+                $"Cannot connect to {serviceUri.ToString() ?? "[unknown]"}", e);
         }
         catch (Exception e) when (e is not (OperationCanceledException or RosServiceCallFailed))
         {

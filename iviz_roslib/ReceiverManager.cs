@@ -75,7 +75,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
                 var toDelete = receiversByUri
                     .Where(pair => !newPublishers.Contains(pair.Key))
                     .Select(pair => pair.Value)
-                    .ToArray();
+                    .ToList();
 
                 await toDelete.Select(receiver => receiver.DisposeAsync(token).AsTask())
                     .WhenAll()
@@ -119,7 +119,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
         }
     }
 
-    void OnConnectionSucceeded(ReceiverConnector connector, ReceiverConnector.Response response)
+    void OnConnectionSucceeded(ReceiverConnector connector, ReceiverConnectorResponse response)
     {
         IProtocolReceiver receiver;
         var (tcpEndpoint, udpResponse, udpClient) = response;
@@ -188,7 +188,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
 
     async ValueTask<bool> CleanupAsync(CancellationToken token)
     {
-        var receiversToDelete = receiversByUri.Values.Where(receiver => !receiver.IsAlive).ToArray();
+        var receiversToDelete = receiversByUri.Values.Where(receiver => !receiver.IsAlive).ToList();
         var deleteTasks = receiversToDelete.Select(receiver =>
         {
             receiversByUri.TryRemove(receiver.RemoteUri, out _);
@@ -199,7 +199,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
 
         await deleteTasks.WhenAll().AwaitNoThrow(this);
 
-        var connectorsToDelete = connectorsByUri.Values.Where(connector => !connector.IsAlive).ToArray();
+        var connectorsToDelete = connectorsByUri.Values.Where(connector => !connector.IsAlive).ToList();
         var connectorTasks = connectorsToDelete.Select(connector =>
         {
             connectorsByUri.TryRemove(connector.RemoteUri, out _);
@@ -210,7 +210,7 @@ internal sealed class ReceiverManager<TMessage> where TMessage : IMessage
 
         await connectorTasks.WhenAll().AwaitNoThrow(this);
 
-        return receiversToDelete.Length != 0 || connectorsToDelete.Length != 0;
+        return receiversToDelete.Count != 0 || connectorsToDelete.Count != 0;
     }
 
     public void Stop()
