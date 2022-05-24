@@ -48,6 +48,9 @@ namespace Iviz.Msgs
             return new T().RosMd5Sum;
         }
 
+        /// <summary>
+        /// Decompresses the dependencies of an <see cref="IMessage.RosDependenciesBase64"/> field. 
+        /// </summary>
         public static string DecompressDependencies(string dependenciesBase64)
         {
             byte[] inputBytes = Convert.FromBase64String(dependenciesBase64);
@@ -97,6 +100,7 @@ namespace Iviz.Msgs
             return str.ToString();
         }
 
+        /// Obtains the C# class type for a given ROS message, if it exists. 
         public static Type? TryGetTypeFromMessageName(string fullRosMessageName, string assemblyName = "Iviz.Msgs")
         {
             string guessName = $"{assemblyName}.{RosNameToCs(fullRosMessageName)}, {assemblyName}";
@@ -111,6 +115,7 @@ namespace Iviz.Msgs
             return null;
         }
 
+        /// Obtains an instance of a C# ROS message, if it exists. 
         public static IMessage? TryGetGeneratorFromMessageName(string fullRosMessageName,
             string assemblyName = "Iviz.Msgs")
         {
@@ -224,14 +229,14 @@ namespace Iviz.Msgs
         [DoesNotReturn, AssertionMethod]
         public static void ThrowNullReference(string name, int i) => throw new NullReferenceException($"{name}[{i}]");
 
-        [DoesNotReturn]
+        [DoesNotReturn, AssertionMethod]
         public static void ThrowNullReference() => throw new NullReferenceException("Message fields cannot be null.");
 
         [DoesNotReturn, AssertionMethod]
         public static void ThrowBufferOverflow(int off, int remaining) =>
             throw new RosBufferException($"Requested {off} bytes, but only {remaining} remain!");
 
-        [DoesNotReturn]
+        [DoesNotReturn, AssertionMethod]
         public static void ThrowImplausibleBufferSize() =>
             throw new RosBufferException("Implausible message requested more than 1TB elements.");
 
