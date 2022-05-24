@@ -149,7 +149,7 @@ namespace Iviz.App
         {
             if (!panelByType.TryGetValue(resource, out IDialogPanel cm))
             {
-                ThrowHelper.ThrowArgument(nameof(resource), "There is no panel for this type!");
+                ThrowHelper.ThrowArgument("There is no panel for this type!", nameof(resource));
             }
 
             if (cm is T contents)

@@ -154,7 +154,7 @@ namespace Iviz.Controllers
             set
             {
                 config.ShowDescriptions = value;
-                foreach (var (_, marker) in markers)
+                foreach (var marker in markers.Values)
                 {
                     marker.ShowDescription = value;
                 }
@@ -206,8 +206,7 @@ namespace Iviz.Controllers
         public string Topic => config.Topic;
 
         public override IListener Listener { get; }
-
-
+        
         public IReadOnlyList<bool> VisibleMask
         {
             get => config.VisibleMask;
@@ -237,6 +236,8 @@ namespace Iviz.Controllers
             }
         }
 
+        public int NumEntriesForLog => markers.Count;
+        
         public MarkerListener(MarkerConfiguration? config, string topic, string type)
         {
             Config = config ?? new MarkerConfiguration
@@ -279,8 +280,6 @@ namespace Iviz.Controllers
             GameThread.EverySecond -= CheckDeadMarkers;
             GameThread.EveryFrame -= HandleAsync;
         }
-
-        public int NumEntriesForLog => markers.Count;
 
         public void GenerateLog(StringBuilder description, int minIndex, int numEntries)
         {
@@ -419,19 +418,19 @@ namespace Iviz.Controllers
                 case Marker.ADD:
                     if (msg.Pose.IsInvalid())
                     {
-                        RosLogger.Debug($"{this}: NaN in pose! Rejecting marker update {id.ToString()}.");
+                        RosLogger.Info($"{this}:Invalid pose! Rejecting marker update {id.ToString()}.");
                         break;
                     }
 
                     if (msg.Scale.IsInvalid())
                     {
-                        RosLogger.Debug($"{this}: NaN in scale! Rejecting marker update {id.ToString()}.");
+                        RosLogger.Info($"{this}: Invalid scale! Rejecting marker update {id.ToString()}.");
                         break;
                     }
 
-                    if (msg.Type >= config.VisibleMask.Length)
+                    if (msg.Type < 0  || msg.Type >= config.VisibleMask.Length)
                     {
-                        RosLogger.Debug(
+                        RosLogger.Info(
                             $"{this}: Unknown type {msg.Type.ToString()}.  Rejecting marker update {id.ToString()}.");
                         break;
                     }

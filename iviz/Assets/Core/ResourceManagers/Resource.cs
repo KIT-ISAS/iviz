@@ -27,7 +27,7 @@ namespace Iviz.Resources
         static ResourceCore? instance;
         static ResourceCore Instance => instance ??= new ResourceCore();
 
-        public static ColorSchema Colors { get; } = new(); // ColorSchema contains only constants, no refs
+        public static ColorSchema Colors => Instance.colors; // ColorSchema contains only constants, no refs
         public static MaterialsType Materials => Instance.materials ??= new MaterialsType();
         public static ColormapsType Colormaps => Instance.colormaps ??= new ColormapsType();
         public static DisplaysType Displays => Instance.displays ??= new DisplaysType();
@@ -76,6 +76,7 @@ namespace Iviz.Resources
 
         sealed class ResourceCore
         {
+            public readonly ColorSchema colors = new();
             public MaterialsType? materials;
             public ColormapsType? colormaps;
             public DisplaysType? displays;

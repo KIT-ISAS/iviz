@@ -256,7 +256,7 @@ namespace Iviz.Controllers.TF
 
                 //GameThread.LateEveryFrame += LateUpdate;
             }
-            catch (Exception)
+            catch
             {
                 instance = null;
                 throw;

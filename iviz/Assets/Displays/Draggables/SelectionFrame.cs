@@ -15,7 +15,6 @@ namespace Iviz.Displays
 
         public Vector3 Size
         {
-            get => size;
             set
             {
                 if (Mathf.Approximately(value.x, size.x)
@@ -33,18 +32,14 @@ namespace Iviz.Displays
 
         public float ColumnWidth
         {
-            get => columnWidth;
             set
             {
-                if (Mathf.Approximately(value, columnWidth))
-                {
-                    return;
-                }
-
                 columnWidth = value;
                 UpdateColumnWidth();
             }
         }
+
+        float AdjustedColumnWidth => columnWidth / Mathf.Min(Transform.lossyScale.MaxAbsCoeff(), 0.5f);
 
         static MeshMarkerDisplay[] CreateObjects(Transform transform)
         {
@@ -73,9 +68,10 @@ namespace Iviz.Displays
             children[2].Transform.localPosition = new Vector3(-halfSizeX, -halfSizeY, 0);
             children[3].Transform.localPosition = new Vector3(-halfSizeX, halfSizeY, 0);
 
+            float adjustedColumnWidth = AdjustedColumnWidth;
             foreach (var child in children.AsSpan(..4))
             {
-                child.Transform.localScale = new Vector3(ColumnWidth, ColumnWidth, size.z);
+                child.Transform.localScale = new Vector3(adjustedColumnWidth, adjustedColumnWidth, size.z);
             }
 
             children[4].Transform.localPosition = new Vector3(0, halfSizeY, halfSizeZ);
@@ -85,7 +81,7 @@ namespace Iviz.Displays
 
             foreach (var child in children.AsSpan(4..8))
             {
-                child.Transform.localScale = new Vector3(size.x, ColumnWidth, ColumnWidth);
+                child.Transform.localScale = new Vector3(size.x, adjustedColumnWidth, adjustedColumnWidth);
             }
 
             children[8].Transform.localPosition = new Vector3(halfSizeX, 0, halfSizeZ);
@@ -95,7 +91,7 @@ namespace Iviz.Displays
 
             foreach (var child in children.AsSpan(8..12))
             {
-                child.Transform.localScale = new Vector3(ColumnWidth, size.y, ColumnWidth);
+                child.Transform.localScale = new Vector3(adjustedColumnWidth, size.y, adjustedColumnWidth);
             }
         }
 
@@ -106,19 +102,20 @@ namespace Iviz.Displays
                 children = CreateObjects(Transform);
             }
 
+            float adjustedColumnWidth = AdjustedColumnWidth;
             foreach (var child in children.AsSpan(..4))
             {
-                child.Transform.localScale = new Vector3(ColumnWidth, ColumnWidth, size.z);
+                child.Transform.localScale = new Vector3(adjustedColumnWidth, adjustedColumnWidth, size.z);
             }
 
             foreach (var child in children.AsSpan(4..8))
             {
-                child.Transform.localScale = new Vector3(size.x, ColumnWidth, ColumnWidth);
+                child.Transform.localScale = new Vector3(size.x, adjustedColumnWidth, adjustedColumnWidth);
             }
 
             foreach (var child in children.Skip(8))
             {
-                child.Transform.localScale = new Vector3(ColumnWidth, size.y, ColumnWidth);
+                child.Transform.localScale = new Vector3(adjustedColumnWidth, size.y, adjustedColumnWidth);
             }
         }
 
@@ -138,7 +135,7 @@ namespace Iviz.Displays
         {
             if (bounds.IsInvalid())
             {
-                ThrowHelper.ThrowArgument(nameof(bounds), "Bounds contain invalid values");
+                ThrowHelper.ThrowArgument("Bounds contain invalid values", nameof(bounds));
             }
 
             Size = bounds.size;

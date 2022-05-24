@@ -43,7 +43,7 @@ namespace Iviz.Core
 
             if (display is not MonoBehaviour behaviour)
             {
-                ThrowHelper.ThrowArgument(nameof(display), "Argument is not a MonoBehavior");
+                ThrowHelper.ThrowArgument("Argument is not a MonoBehavior", nameof(display));
                 return; // unreachable
             }
 

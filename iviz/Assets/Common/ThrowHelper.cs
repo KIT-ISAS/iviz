@@ -28,7 +28,7 @@ namespace Iviz.Core
         {
             if (string.IsNullOrWhiteSpace(t))
             {
-                ThrowArgument(nameOfT, "Argument '" + nameOfT + "' cannot be null or empty");
+                ThrowArgumentNull(nameOfT, "Argument cannot be null or empty");
             }
         }
 
@@ -42,13 +42,14 @@ namespace Iviz.Core
         static void ThrowArgumentNull(string paramName) => throw new ArgumentNullException(paramName);
 
         [DoesNotReturn, AssertionMethod]
-        public static void ThrowArgumentNull(string paramName, string message) => throw new ArgumentNullException(paramName, message);
+        public static void ThrowArgumentNull(string paramName, string message) =>
+            throw new ArgumentNullException(paramName, message);
 
         [DoesNotReturn]
         public static void ThrowMissingAssetField(string message) => throw new MissingAssetFieldException(message);
 
         [DoesNotReturn, AssertionMethod]
-        public static void ThrowArgument(string paramName, string message) =>
-            throw new ArgumentException(paramName, message);
+        public static void ThrowArgument(string message, string paramName) =>
+            throw new ArgumentException(message, paramName);
     }
 }

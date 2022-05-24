@@ -42,8 +42,7 @@ namespace Iviz.App
 
             panel = canvas.GetComponentInChildren<ImageDialogPanel>();
             panel.Closed += () => Closed?.Invoke();
-
-
+            
             panel.Clicked += rawUV =>
             {
                 lastSample = GetSampleText(rawUV);

@@ -19,6 +19,7 @@ namespace Iviz.Core
         }
 
         static Vector3[]? cubePoints;
+
         static Vector3[] CubePoints => cubePoints ??= new[]
         {
             Vector3.right + Vector3.up + Vector3.forward,
@@ -35,9 +36,9 @@ namespace Iviz.Core
         {
             if (bounds.IsInvalid())
             {
-                ThrowHelper.ThrowArgument(nameof(bounds), "Bounds contain invalid values");
+                ThrowHelper.ThrowArgument("Bounds contain invalid values", nameof(bounds));
             }
-            
+
             if (pose == Pose.identity)
             {
                 return scale == Vector3.one
@@ -100,7 +101,7 @@ namespace Iviz.Core
                 {
                     continue;
                 }
-                
+
                 if (result == null)
                 {
                     result = bounds;
@@ -109,9 +110,9 @@ namespace Iviz.Core
                 {
                     if (bounds.Value.IsInvalid())
                     {
-                        ThrowHelper.ThrowArgument(nameof(bounds), "Bounds contain invalid values");
+                        ThrowHelper.ThrowArgument("Bounds contain invalid values", nameof(bounds));
                     }
-                    
+
                     result.Value.Encapsulate(bounds.Value);
                 }
             }
@@ -130,9 +131,9 @@ namespace Iviz.Core
         {
             if (bounds.IsInvalid())
             {
-                ThrowHelper.ThrowArgument(nameof(bounds), "Bounds contain invalid values");
+                ThrowHelper.ThrowArgument("Bounds contain invalid values", nameof(bounds));
             }
-            
+
             while (transform != endTransform)
             {
                 bounds = bounds.TransformBound(transform);
@@ -149,9 +150,9 @@ namespace Iviz.Core
         {
             if (bounds.IsInvalid())
             {
-                ThrowHelper.ThrowArgument(nameof(bounds), "Bounds contain invalid values");
+                ThrowHelper.ThrowArgument( "Bounds contain invalid values", nameof(bounds));
             }
-            
+
             GeometryUtility.CalculateFrustumPlanes(Settings.MainCamera, PlaneCache);
             return GeometryUtility.TestPlanesAABB(PlaneCache, bounds);
         }

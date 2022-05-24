@@ -37,10 +37,10 @@ namespace Iviz.App
         public DropdownWidget QualityInView => qualityInView.AssertNotNull(nameof(qualityInView));
         public DropdownWidget QualityInAr => qualityInAr.AssertNotNull(nameof(qualityInAr));
         public DropdownWidget TargetFps => targetFps.AssertNotNull(nameof(targetFps));
+
         public DropdownWidget NetworkProcessing => networkProcessing.AssertNotNull(nameof(networkProcessing));
-        //public ColorPickerWidget BackgroundColor => backgroundColor.AssertNotNull(nameof(backgroundColor));
-        //public SliderWidget SunDirection => sunDirection.AssertNotNull(nameof(sunDirection));
-        public DropdownWidget ModelService => modelService.AssertNotNull(nameof(modelService));
+
+        //public DropdownWidget ModelService => modelService.AssertNotNull(nameof(modelService));
         public TMP_Text ModelCacheLabel => modelCacheLabel.AssertNotNull(nameof(modelCacheLabel));
         public TMP_Text SavedFilesLabel => savedFilesLabel.AssertNotNull(nameof(savedFilesLabel));
         public TMP_Text HostHistoryLabel => hostHistoryLabel.AssertNotNull(nameof(hostHistoryLabel));
@@ -48,17 +48,19 @@ namespace Iviz.App
         public event Action? ClearModelCacheClicked;
         public event Action? ClearSavedFilesClicked;
         public event Action? ClearHostHistoryClicked;
-        
+
         void Awake()
         {
             ClearModelCache.onClick.AddListener(() => ClearModelCacheClicked?.Invoke());
             ClearSavedFiles.onClick.AddListener(() => ClearSavedFilesClicked?.Invoke());
             ClearHostHistory.onClick.AddListener(() => ClearHostHistoryClicked?.Invoke());
 
+            /*
             if (Settings.IsMobile)
             {
                 ModelService.Visible = false;
             }
+            */
         }
 
         public override void ClearSubscribers()
@@ -67,10 +69,8 @@ namespace Iviz.App
             QualityInAr.ClearSubscribers();
             TargetFps.ClearSubscribers();
             NetworkProcessing.ClearSubscribers();
-            //BackgroundColor.ClearSubscribers();
             Close.ClearSubscribers();
-            //SunDirection.ClearSubscribers();
-            ModelService.ClearSubscribers();
+            //ModelService.ClearSubscribers();
 
             ClearHostHistoryClicked = null;
             ClearModelCacheClicked = null;

@@ -916,7 +916,7 @@ namespace Iviz.App
 
             if (!Resource.TryGetResourceByRosMessageType(type, out var resource))
             {
-                ThrowHelper.ThrowArgument(nameof(type), "Cannot find resource for this topic");
+                ThrowHelper.ThrowArgument("Cannot find resource for this topic", nameof(type));
             }
 
             return CreateModule(resource, topic, type);

@@ -31,90 +31,63 @@ Here are some instructions on how to get started:
     - In **Master URI** write the URL of the master, i.e., where roscore is running. This is the content usually stored in the environment variable _ROS_MASTER_URI_.
         * The arrow icon will show you previously used masters.
     - Optional: In **My URI** write the URL you want for your device. The URL should have the form http://_hostname_:port/
-        * The hostname is the content usually stored in _ROS_HOSTNAME_ or _ROS_IP_.
+        * Your hostname is the content usually stored in _ROS_HOSTNAME_ or _ROS_IP_.
         * The port (7613) can be set to anything, just make sure it's not being used by another application.
         * The hostname and port should be accessible to the ROS nodes that you want to contact. Do not use something like http://localhost:7613, as this will cause other computers to try to connect to themselves instead of you.
     - Optional: In **My ID** write your ROS id. This is the name of your ROS node. It can be anything, but make sure it is unique in your network.
-* Once the data is correct, tap on the **Connect** button. The application will now try to connect to the ROS master, and keep retrying if it does not work. Tap **Stop** to cancel the operation.
+* Now tap on the **Connect** button. The application will try to connect to the ROS master, and keep retrying if it does not work. Tap **Stop** to cancel the operation.
 * Once you have connected, the top-left panel should become green. You can now add modules such as topic listeners, robots, watch the TF frames, and so on.
 
 ![image](../wiki_files/connection-dialog.png)
 
-### Panels
-
-On the left side, below the Connect panel, you will find a panel with two rows of buttons, the **Dialog Panel**.
-Clicking on them will open the corresponding dialog in the center of the screen.
-
-Below it is the **Module Panel**.
-It shows the active dialogs as large square buttons.
-For example, the TF module is always present.
-Clicking a module will open the **Data Panel** on the right, showing information for that module.
-Clicking the button again will close it.
-You can drag a button to the right (into the screen) to make it invisible in the world.
-You can drag it to the left (away from the screen) to destroy it - but be careful with it!
-
-Deep below the **Module Panel** is the **Camera Panel**.
-It tells you which view you are in (Virtual View / AR View / whatever).
-Below it is the current camera position in relation to the fixed frame.
-And finally, the panel also gives you the **p**itch and the **y**aw of the rotation.
-
-The last line contains basic statistics about the program.
-On PC, it will list the used memory, the current bandwidth, the battery (if available) and the frame rate.
-On mobile, it will show the clock instead of the used memory.
-
-You can hide the GUI by pressing the **Hide GUI** button with the arrows: in PCs it is located at the center bottom, while on mobile it is located on the left side, next to the __Module Panel__.  
-Once the GUI is hidden, the button becomes semitransparent, and you can click it back to reopen the GUI.
-
-### Settings
-
-Finally, one option you should check out is the **Settings** dialog (the button with the gear icon).
-It presents multiple options that control the quality and CPU usage of the application.
-You can get an idea of how much resources iviz is using by checking the FPS value on the left panel, at the bottom.
-You can set the maximum FPS at 60 if you want a fluid display, but you may also need to lower the graphics quality. 
-The CPU usage can also be reduced by lowering the frequency at which network data is being processed.
-The Settings configuration is saved automatically, and will be reused the next time iviz is started.
-
-
-## 3. Navigation
+### Navigation
 
 To move around:
-* On a PC: Hold down the right mouse button and move the mouse to rotate the camera. While holding the right button down, press W-A-S-D or Q-E to translate the camera. (This is the same behaviour as in Unity)
 * On a mobile device: Tap with one finger and drag to rotate the camera. Tap with two fingers and move to translate the camera. Pinch to zoom in and out.
+* On a PC: Hold down the right mouse button and move the mouse to rotate the camera. While holding the right button down, press W-A-S-D or Q-E to translate the camera. (This is the same behaviour as in Unity)
 
 The lines at the top-right tell you the current orientation of the camera (red is +X, green is +Y, purple is +Z) in relation to the fixed frame.
-If you get lost, you can click on the TF button on the left, and then on the green frame panel on the right.
+If you get lost, you can click on the TF button on the left, and then on the frame panel on the top right (green).
 It will take you back to the map frame, positioned on the origin - or whatever frame you chose as the fixed frame.
-Many modules also have green frame panels, you can click them to go to where the module is centered.
+Many modules also have frame panels in green, you can click them to go to where the module is centered.
 
-If the frame referenced by the green panel is moving, you can drag the button to the left (into the screen) to **Lock the Camera** on it.
+If the frame referenced by the frame panel is moving, you can click and drag the frame panel to the left (into the screen) to **Lock the Camera** onto it.
 You will now follow the frame whenever it moves.
 Click on the lock on the bottom of the screen to restore the camera.
 
-## 4. Adding Topics and Modules
+### Adding Modules
 
-In order to add a module that listens to a topic, click on the **+ Topic** dialog.
+In iviz, modules are entities that display visual data, usually from ROS streams. 
+They are represented by the rectangular buttons on the left side, right below the two rows of dialog buttons.
+When you start iviz, two modules are started by default: TF and Grid.
+
+In order to add a module for a ROS topic, click on the **+ Topic** dialog.
 You will be shown a list of available topics you can add.
-* **Show Unsupported**: Select this to show all the topics, even the ones that cannot be displayed.
+* **Show Unsupported**: Select this to show all the topics, even the ones that cannot be visualized by iviz.
 * **Sort by Type**: Sorts the topics by type. Otherwise they are sorted by topic name.
 
 ![image](../wiki_files/add-topic.png)
 
-iviz also supports some modules that are not related to topics, which can be found by clicking on the **+ Module** button.
+<!--
 These include:
 * **Augmented Reality**: The AR manager (more in Section 11).
 * **Robot**: Displays a robot (more in Section 10).
 * **DepthCloud**: Transforms a depth image (optionally with a color image) into a point cloud.
 * **Joystick**: Displays two on-screen joysticks that publish twist messages.
 * **Grid**: Creates a new grid.
+-->
 
-Once you add a module, it will appear as a square button on the lower part of the left panel. 
+Helpful Notes:
+* If you just want to see the a plain list of every topic and service, use the **System** dialog.
+* You can find additional debugging messages (from iviz and other nodes) in the Console **Log** dialog.
+* If you're only interested in listening to the messages in a topic, but not visualizing them, you can use the **Echo** dialog.
 
-Notes:
-* If you want to see the a plain list of every topic and service, use the **System** dialog.
-* You can find additional debugging messages (from iviz and other nodes) in the **Log** dialog. 
-* If you're only interested in listening to the messages in a topic, but not visualizing them, you can use the **Echo** dialog (see Section 8).
+Other modules that are not related to topics can be found by clicking on the **+ Module** button.
 
-## 5. Connections
+In order to remove a module, select the module and then on the trash button on the top right.
+Alternatively, you can click on the module button and drag it to the left, away from the screen.
+
+### Connections
 
 At each module that involves a ROS connection, you will see light-blue panels showing the ROS topic and statistics.
 These are called the **Listener Widgets**.
@@ -139,12 +112,55 @@ If this doesn't work, check the **Network** dialog for more information, or the 
 
 In some data panels, on the bottom in darker blue, are **Publisher Widgets** showing similar information.
 
-Notes: 
-* An important problem in ROS networks is usually a lack of **DNS resolving**. 
+### Connection Troubleshooting
+
+Notes:
+* An important problem in ROS networks is usually a lack of **DNS resolving**.
   For example, the Network dialog will show URIs in the form of "http://node-abc:XXXX/".
   The address of these nodes is usually stored in '/etc/hosts' files, but mobile devices do not have this system.
   To solve this, you can add an entry in the **Aliases** tab of the **System** dialog, which has an equivalent function.
-* If you are able to listen to other nodes publishing messages, but all of your iviz publishers show zero subscribers, then there is most likely a firewall problem preventing incoming connections.  
+* If you are able to listen to other nodes publishing messages, but all of your iviz publishers show zero subscribers, then there is most likely a firewall problem preventing incoming connections.
+
+
+### Settings
+
+Finally, one option you should check out is the **Settings** dialog (the button with the gear icon).
+It presents multiple options that control the quality and CPU usage of the application.
+You can get an idea of how much resources iviz is using by checking the FPS value on the left panel, at the bottom.
+You can set the maximum FPS at 60 if you want a fluid display, but you may also need to lower the graphics quality. 
+The CPU usage can also be reduced by lowering the frequency at which network data is being processed.
+The Settings configuration is saved automatically, and will be reused the next time iviz is started.
+
+
+## 2. Panels and Dialogs
+
+On the left side, below the Connect panel, you will find a panel with two rows of buttons, the **Dialog Panel**.
+Clicking on them will open the corresponding dialog in the center of the screen.
+
+Below it is the **Module Panel**.
+It shows the active dialogs as large square buttons.
+For example, the TF module is always present.
+Clicking a module will open the **Data Panel** on the right, showing information for that module.
+Clicking the button again will close it.
+You can drag a button to the right (into the screen) to make it invisible in the world.
+You can drag it to the left (away from the screen) to destroy it - but be careful with it!
+
+Deep below the **Module Panel** is the **Camera Panel**.
+It tells you which view you are in (Virtual View / AR View / whatever).
+Below it is the current camera position in relation to the fixed frame.
+And finally, the panel also gives you the **p**itch and the **y**aw of the rotation.
+
+The last line contains basic statistics about the program.
+On PC, it will list the used memory, the current bandwidth, the battery (if available) and the frame rate.
+On mobile, it will show the clock instead of the used memory.
+
+You can hide the GUI by pressing the **Hide GUI** button with the arrows: in PCs it is located at the center bottom, while on mobile it is located on the left side, next to the __Module Panel__.  
+Once the GUI is hidden, the button becomes semitransparent, and you can click it back to reopen the GUI.
+
+### Draggable Dialogs
+
+## 5. Connections
+
 
 
 ## 6. Working with Transform Frames
@@ -238,7 +254,9 @@ It has two widgets:
 Note that closing the window will leave the subscriber open (and will continue to consume bandwidth).
 If this is not desired, simply select (None) as the topic.
 
-## 9. Model Service and External Models
+## 9. Image Streams
+
+## 9. Model Loader Service and External Models
 
 When working with robots and markers, you will often need to work with 3D assets stored in external files, and probably on a different PC.
 This is problematic with iviz, as you will usually want to run it on an mobile device or on a PC without a ROS installation.
@@ -308,8 +326,12 @@ So unless your robot consists only of cubes and cylinders, it will be necessary 
 * There is an error message simply saying 'Failed to retrieve XXX'
   * This happens if retrieving a file fails multiple times. The original error should appear a little higher.
 
+## 11. Markers
 
-## 11. Working with Augmented Reality
+## 12. Loading and Saving
+
+
+## 13. Working with Augmented Reality
 To enable Augmented Reality (AR), go to the left panel and click the **AR View** button.
 Alternatively, you can click the **+ Module** button and then choose _Augmented Reality_.
 You will need an AR-capable device (tablet or smartphone) for this.
@@ -366,11 +388,8 @@ Use these if you want to capture data from your device into another application.
 * **Occlusion Quality**: This enables the Depth API present in newer devices that can hide a virtual object if it is located behind a real-world object.
 * **AR Markers**: (iPad only - to be written)
 
-## 12. Other Modules
 
-To be written!
-
-## 13. Credits
+## 14. Credits
 
 The code of iviz is open-source and released under the MIT license. 
 This work is part of the ROBDEKON project (https://robdekon.de) and is financed by the German Federal Ministry of Education and Research (BMBF).

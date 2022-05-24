@@ -115,7 +115,7 @@ namespace Iviz.Displays.Highlighters
         {
             if (source == null || draggable == null)
             {
-                Debug.LogError($"{this}: OnBoundsChanged() called on uninitialized attached bounds");
+                Debug.LogError($"{this}: {nameof(OnBoundsChanged)}() called on uninitialized attached bounds");
                 return;
             }
 

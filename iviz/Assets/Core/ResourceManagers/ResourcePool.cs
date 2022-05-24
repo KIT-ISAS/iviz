@@ -15,7 +15,7 @@ namespace Iviz.Displays
     /// </summary>
     public sealed class ResourcePool : MonoBehaviour
     {
-        const bool CheckDuplicates = !Settings.IsStandalone;
+        static bool CheckDuplicates => !Settings.IsStandalone;
         const int TimeToDestroyInSec = 60;
 
         [SerializeField] AssetHolder? assetHolder;

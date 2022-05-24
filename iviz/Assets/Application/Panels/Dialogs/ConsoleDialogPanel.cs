@@ -10,6 +10,7 @@ namespace Iviz.App
     {
         [SerializeField] TrashButtonWidget? close;
         [SerializeField] ToggleButtonWidget? pause;
+        [SerializeField] TrashButtonWidget? reset;
         [SerializeField] InputFieldWithHintsWidget? fromField;
         [SerializeField] DropdownWidget? logLevel;
         [SerializeField] DropdownWidget? timeFormat;
@@ -19,6 +20,7 @@ namespace Iviz.App
 
         public TrashButtonWidget Close => close.AssertNotNull(nameof(close));
         public ToggleButtonWidget Pause => pause.AssertNotNull(nameof(pause));
+        public TrashButtonWidget Reset => reset.AssertNotNull(nameof(reset));
         public InputFieldWithHintsWidget FromField => fromField.AssertNotNull(nameof(fromField));
         public DropdownWidget LogLevel => logLevel.AssertNotNull(nameof(logLevel));
         DropdownWidget TimeFormat => timeFormat.AssertNotNull(nameof(timeFormat));
@@ -34,6 +36,7 @@ namespace Iviz.App
             TimeFormat.ClearSubscribers();
             MessageFormat.ClearSubscribers();
             Pause.ClearSubscribers();
+            Reset.ClearSubscribers();
         }
     }
 }
