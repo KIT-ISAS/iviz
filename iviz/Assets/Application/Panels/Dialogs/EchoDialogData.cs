@@ -163,21 +163,17 @@ namespace Iviz.App
             ProcessMessages();
             if (listener == null)
             {
-                dialog.Publishers.text = "---";
                 dialog.Messages.text = "---";
-                dialog.KBytes.text = "---";
             }
             else
             {
-                using (var description = BuilderPool.Rent())
-                {
-                    listener.WriteDescriptionTo(description);
-                    dialog.Publishers.SetTextRent(description);
-                }
-
-                dialog.Messages.text = $"{listener.Stats.MessagesPerSecond.ToString()} msg/s";
-                long kBytesPerSecond = listener.Stats.BytesPerSecond / 1000;
-                dialog.KBytes.text = $"{kBytesPerSecond.ToString("N0")} kB/s";
+                using var description = BuilderPool.Rent();
+                listener.WriteDescriptionTo(description);
+                description.Append(" | ")
+                    .Append(listener.Stats.MessagesPerSecond)
+                    .Append(" msg/s | ")
+                    .AppendBandwidth(listener.Stats.BytesPerSecond);
+                dialog.Messages.SetText(description);
             }
         }
 

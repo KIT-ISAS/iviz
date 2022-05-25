@@ -89,7 +89,7 @@ namespace Iviz.App
 
             description.Append(" | ")
                 .Append(MessagesPerSecond)
-                .Append(" Hz | ");
+                .Append(" msg/s | ");
 
             RosUtils.AppendBandwidth(description, BytesPerSecond);
 

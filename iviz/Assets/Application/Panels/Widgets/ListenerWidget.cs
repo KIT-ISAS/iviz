@@ -64,7 +64,7 @@ namespace Iviz.App
 
             description.Append(" | ")
                 .Append(MessagesPerSecond)
-                .Append(" Hz | ");
+                .Append(" msg/s | ");
 
             description.AppendBandwidth(BytesPerSecond);
 

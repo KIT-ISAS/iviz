@@ -112,15 +112,15 @@ namespace Iviz.App
                     builder.Append("    <b>[");
                     if (receiver.RemoteUri == client.CallerUri)
                     {
-                        builder.Append("<i>Me</i>]</b> @ ");
+                        builder.Append("<i>Me</i>]</b> ");
                     }
                     else if (receiver.RemoteId != null)
                     {
-                        builder.Append(receiver.RemoteId).Append("]</b> @ ");
+                        builder.Append(receiver.RemoteId).Append("]</b> ");
                     }
                     else
                     {
-                        builder.Append("unknown]</b> @ ");
+                        builder.Append("unknown]</b> ");
                     }
 
                     builder.Append(receiver.RemoteUri.Host).Append(':').Append(receiver.RemoteUri.Port);
@@ -128,12 +128,9 @@ namespace Iviz.App
                     switch (receiver.Status)
                     {
                         case ReceiverStatus.Running:
-                            if (receiver.TransportType != null)
+                            if (receiver.TransportType is TransportType.Udp)
                             {
-                                builder.Append(receiver.TransportType == TransportType.Tcp
-                                    ? " TCP"
-                                    : " UDP"
-                                );
+                                builder.Append(" UDP");
                             }
 
                             builder.Append(" | ").AppendBandwidth(receiver.BytesReceived);
@@ -203,25 +200,25 @@ namespace Iviz.App
                     builder.Append("    <b>[");
                     if (sender.RemoteId == client.CallerId)
                     {
-                        builder.Append("<i>Me</i>]</b> @ ");
+                        builder.Append("<i>Me</i>]</b> ");
                     }
                     else if (sender.RemoteId.Length != 0)
                     {
-                        builder.Append(sender.RemoteId).Append("]</b> @ ");
+                        builder.Append(sender.RemoteId).Append("]</b> ");
                     }
                     else
                     {
-                        builder.Append("unknown]</b> @ ");
+                        builder.Append("unknown]</b> ");
                     }
 
                     builder.Append(sender.RemoteEndpoint != default
                         ? sender.RemoteEndpoint.Hostname
                         : "(Unknown address)");
 
-                    builder.Append(sender.TransportType == TransportType.Tcp
-                        ? " TCP"
-                        : " UDP"
-                    );
+                    if (sender.TransportType == TransportType.Udp)
+                    {
+                        builder.Append(" UDP");
+                    }
 
                     if (isAlive)
                     {

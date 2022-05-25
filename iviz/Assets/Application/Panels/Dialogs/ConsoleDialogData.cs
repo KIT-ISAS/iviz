@@ -118,7 +118,7 @@ namespace Iviz.App
             listener.WriteDescriptionTo(description);
             description.Append(" | ")
                 .Append(listener.Stats.MessagesPerSecond)
-                .Append(" Hz | ")
+                .Append(" msg/s | ")
                 .AppendBandwidth(listener.Stats.BytesPerSecond);
 
             dialog.BottomText.SetTextRent(description);

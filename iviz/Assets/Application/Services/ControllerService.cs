@@ -339,7 +339,7 @@ namespace Iviz.Controllers
             string[] validatedFields;
             try
             {
-                var moduleInfo = JsonConvert.DeserializeObject<GenericModule>(config);
+                var moduleInfo = JsonConvert.DeserializeObject<GenericConfiguration>(config);
                 if (moduleInfo.ModuleType is not { } type)
                 {
                     result.success = false;
@@ -363,6 +363,20 @@ namespace Iviz.Controllers
             {
                 await GameThread.PostAsync(() =>
                 {
+                    if (moduleType is ModuleType.Camera)
+                    {
+                        ModuleListPanel.Instance.CameraModuleData.UpdateConfiguration(config, validatedFields);
+                        result.success = true;
+                        return;
+                    } 
+                    
+                    if (moduleType is ModuleType.TFPublisher)
+                    {
+                        ModuleListPanel.Instance.TfPublisher.UpdateConfiguration(config, validatedFields);
+                        result.success = true;
+                        return;
+                    }
+                    
                     if (!ModuleDatas.TryGetFirst(data => data.Configuration.Id == id, out var module))
                     {
                         result.success = false;
@@ -442,7 +456,7 @@ namespace Iviz.Controllers
             */
         }
 
-        sealed class GenericModule
+        sealed class GenericConfiguration
         {
             [UsedImplicitly] public ModuleType? ModuleType { get; set; }
         }

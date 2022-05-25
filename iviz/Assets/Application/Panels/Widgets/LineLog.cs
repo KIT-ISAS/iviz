@@ -13,7 +13,7 @@ namespace Iviz.App
     {
         const int MaxLines = 100;
 
-        static readonly char[] Separators = { '\n' };
+        //static readonly char[] Separators = { '\n' };
 
         [SerializeField] TMP_Text? text;
 
@@ -41,7 +41,8 @@ namespace Iviz.App
 
             if (str.IndexOf('\n') != -1)
             {
-                string[] subLines = str.Split(Separators);
+                //string[] subLines = str.Split(Separators);
+                string[] subLines = str.Split('\n');
                 lines.AddRange(subLines);
             }
             else
@@ -57,6 +58,12 @@ namespace Iviz.App
                 return;
             }
 
+            if (lines.Count == 0)
+            {
+                Text.SetText("");
+                return;
+            }
+
             int overflow = lines.Count - MaxLines;
             if (overflow > 0)
             {
@@ -64,14 +71,11 @@ namespace Iviz.App
             }
 
             using var description = BuilderPool.Rent();
-            if (lines.Count != 0)
+            description.Append(lines[0]);
+            foreach (string line in lines.Skip(1))
             {
-                description.Append(lines[0]);
-                foreach (string line in lines.Skip(1))
-                {
-                    description.Append('\n');
-                    description.Append(line);
-                }
+                description.Append('\n');
+                description.Append(line);
             }
 
             Text.SetTextRent(description);

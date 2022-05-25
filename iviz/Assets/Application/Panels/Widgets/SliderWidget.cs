@@ -20,6 +20,11 @@ namespace Iviz.App
         TMP_Text Text => text.AssertNotNull(nameof(text));
         TMP_Text ValueText => valueText.AssertNotNull(nameof(valueText));
 
+        float max = 1;
+        float min;
+        int numberOfSteps = 99;
+        bool integerOnly;
+        
         public event Action<float>? ValueChanged;
 
         public string Label
@@ -66,8 +71,6 @@ namespace Iviz.App
             }
         }
 
-        float max = 1;
-
         public float Max
         {
             get => max;
@@ -79,8 +82,6 @@ namespace Iviz.App
             }
         }
 
-        float min;
-
         public float Min
         {
             get => min;
@@ -91,14 +92,17 @@ namespace Iviz.App
                 Value = v;
             }
         }
-
-        int numberOfSteps = 99;
-
+        
         public int NumberOfSteps
         {
             get => numberOfSteps;
             set
             {
+                if (value == 0)
+                {
+                    ThrowHelper.ThrowArgumentOutOfRange(nameof(value));
+                }
+                
                 float v = Value;
 
                 numberOfSteps = value;
@@ -107,9 +111,7 @@ namespace Iviz.App
                 Value = v;
             }
         }
-
-        bool integerOnly;
-
+        
         public bool IntegerOnly
         {
             get => integerOnly;

@@ -56,7 +56,12 @@ namespace Iviz.Controllers.TF
                 frame.Scale = frameConfig.Scale;
                 frame.Visible = frameConfig.Visible;
             }
-        } 
+        }
+
+        public void UpdateConfiguration(string configAsJson, string[] fields)
+        {
+            
+        }
 
         void OnConnectionStateChanged(ConnectionState state)
         {

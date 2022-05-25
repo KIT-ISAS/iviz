@@ -2,12 +2,14 @@
 
 using System;
 using System.Buffers;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using Iviz.Msgs;
 using Iviz.Msgs.GeometryMsgs;
@@ -289,7 +291,7 @@ namespace Iviz.Core
             string s = type == null
                 ? $"Asset '{name}' has not been set!\n" +
                   $"At: {caller} line {lineNumber.ToString()}"
-                : $"Asset '{name}' has does not have a component of type '{type.Name}!\n" +
+                : $"Asset '{name}' has not been set or does not have a component of type '{type.Name}!\n" +
                   $"At: {caller} line {lineNumber.ToString()}";
             ThrowHelper.ThrowMissingAssetField(s);
         }
@@ -606,14 +608,14 @@ namespace Iviz.Core
             float num9 = y * num3;
             float num10 = w * num1;
             float num12 = w * num3;
-            
+
             Vector3 vector3;
             vector3.x = num7 - num12;
             vector3.y = 1.0f - (num4 + num6);
             vector3.z = num9 + num10;
             return vector3;
         }
-        
+
         public static Vector3 Forward(this in Pose pose) => pose.rotation.Forward();
 
         public static Vector3 Up(this in Pose pose) => pose.rotation.Up();
@@ -674,20 +676,20 @@ namespace Iviz.Core
         {
             return parent.childCount == 0
                 ? new[] { parent } // ok, we allocate here
-                : GetAllChildrenImpl(parent);
+                : GetAllChildrenCore(parent);
+        }
 
-            static IEnumerable<Transform> GetAllChildrenImpl(Transform transform)
+        static IEnumerable<Transform> GetAllChildrenCore(Transform transform)
+        {
+            var stack = new Stack<Transform>(8);
+            stack.Push(transform);
+
+            while (stack.TryPop(out var childTransform))
             {
-                var stack = new Stack<Transform>();
-                stack.Push(transform);
-
-                while (stack.TryPop(out var childTransform))
+                yield return childTransform;
+                foreach (var grandChild in childTransform.GetChildren())
                 {
-                    yield return childTransform;
-                    foreach (int i in ..childTransform.childCount)
-                    {
-                        stack.Push(childTransform.GetChild(i));
-                    }
+                    stack.Push(grandChild);
                 }
             }
         }
@@ -729,12 +731,15 @@ namespace Iviz.Core
             if (!MemoryMarshal.TryGetArray(rent.Chunk, out ArraySegment<char> segment))
             {
                 // shouldn't happen
-                RosLogger.Debug($"{nameof(UnityUtils)}: Failed to retrieve array from StringBuilder memory chunk!");
+                RosLogger.Debug(
+                    $"{nameof(UnityUtils)}: Failed to retrieve array from {nameof(StringBuilder)} memory chunk!");
                 return;
             }
 
             text.SetCharArray(segment.Array, start, count);
         }
+
+        public static TransformEnumerator GetChildren(this Transform t) => new(t);
 
         /// <summary>
         /// Smallest power of 2 that is greater or equal. 
@@ -768,5 +773,27 @@ namespace Iviz.Core
         public (T value, int index) Current => (a.Current, index);
         public WithIndexEnumerable(IEnumerable<T> a) => (this.a, index) = (a.GetEnumerator(), -1);
         public WithIndexEnumerable<T> GetEnumerator() => this;
+    }
+
+    public struct TransformEnumerator
+    {
+        readonly Transform transform;
+        int currentIndex;
+
+        public TransformEnumerator(Transform transform) => (this.transform, currentIndex) = (transform, -1);
+        public Transform Current => transform.GetChild(currentIndex);
+        public bool MoveNext() => ++currentIndex < transform.childCount;
+        public TransformEnumerator GetEnumerator() => this;
+
+        public Transform[] ToArray()
+        {
+            var array = new Transform[transform.childCount];
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = transform.GetChild(i);
+            }
+
+            return array;
+        } 
     }
 }

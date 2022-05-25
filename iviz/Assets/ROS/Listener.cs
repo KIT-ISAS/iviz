@@ -320,10 +320,7 @@ namespace Iviz.Ros
             }
             else
             {
-                description.Append(numActivePublishers.ToString())
-                    .Append("/")
-                    .Append(numPublishers)
-                    .Append(" pub");
+                description.Append(numActivePublishers.ToString()).Append(" pub");
             }
         }
 

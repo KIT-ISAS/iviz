@@ -5,6 +5,7 @@ using Iviz.Common.Configurations;
 using Iviz.Controllers;
 using Iviz.Controllers.TF;
 using Iviz.Core;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Iviz.App
@@ -12,14 +13,14 @@ namespace Iviz.App
     /// <summary>
     /// <see cref="CameraPanel"/> 
     /// </summary>
-    public sealed class CameraPanelData : ModulePanelData
+    public sealed class CameraModuleData : ModulePanelData
     {
         readonly CameraPanel panel;
         readonly CameraController controller = new();
         public override ModulePanel Panel => panel;
         public CameraConfiguration Configuration => controller.Configuration;
 
-        public CameraPanelData()
+        public CameraModuleData()
         {
             panel = ModulePanelManager.GetPanelByResourceType<CameraPanel>(ModuleType.Camera);
             ARController.ARCameraViewChanged += OnARViewChanged;
@@ -118,6 +119,44 @@ namespace Iviz.App
         public void UpdateConfiguration(CameraConfiguration config)
         {
             controller.Configuration = config;
+        }
+
+        public void UpdateConfiguration(string configAsJson, string[] fields)
+        {
+            var config = JsonConvert.DeserializeObject<CameraConfiguration>(configAsJson);
+
+            foreach (string field in fields)
+            {
+                switch (field)
+                {
+                    case nameof(CameraConfiguration.BackgroundColor):
+                        controller.BackgroundColor = config.BackgroundColor.ToUnity();
+                        break;
+                    case nameof(CameraConfiguration.EnableShadows):
+                        controller.EnableShadows = config.EnableShadows;
+                        break;
+                    case nameof(CameraConfiguration.EnableSun):
+                        controller.EnableSun = config.EnableSun;
+                        break;
+                    case nameof(CameraConfiguration.EquatorIntensity):
+                        controller.EquatorIntensity = config.EquatorIntensity;
+                        break;
+                    case nameof(CameraConfiguration.SunDirectionX):
+                        controller.SunDirectionX = config.SunDirectionX;
+                        break;
+                    case nameof(CameraConfiguration.SunDirectionY):
+                        controller.SunDirectionY = config.SunDirectionY;
+                        break;
+                    case nameof(CameraConfiguration.CameraFieldOfView):
+                        controller.CameraFieldOfView = config.CameraFieldOfView;
+                        break;
+                    default:
+                        RosLogger.Error($"{this}: Unknown field '{field}'");
+                        break;
+                }
+            }
+            
+            ResetPanel();
         }
 
         static Vector3 TransformFixed(in Vector3 f) =>

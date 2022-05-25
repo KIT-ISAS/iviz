@@ -24,6 +24,19 @@ namespace Iviz.App
 
         public abstract ModulePanel Panel { get; }
 
+        protected bool IsPanelSelected => ModulePanelManager.SelectedModuleData == this;
+        
+        public void ResetPanel()
+        {
+            if (!IsPanelSelected)
+            {
+                return;
+            }
+
+            Panel.ClearSubscribers();
+            SetupPanel();
+        }
+        
         public void ToggleShowPanel()
         {
             ModulePanelManager.TogglePanel(this);
@@ -52,5 +65,7 @@ namespace Iviz.App
         public virtual void UpdatePanelFast()
         {
         }
+        
+        public override string ToString() => $"[{GetType().Name}]";
     }
 }

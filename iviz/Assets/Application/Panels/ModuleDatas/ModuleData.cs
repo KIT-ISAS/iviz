@@ -15,9 +15,7 @@ namespace Iviz.App
     public abstract class ModuleData : ModulePanelData
     {
         string moduleListButtonText = "";
-
-        protected bool IsPanelSelected => ModulePanelManager.SelectedModuleData == this;
-
+        
         public abstract ModuleType ModuleType { get; }
         public abstract IController Controller { get; }
         public abstract IConfiguration Configuration { get; }
@@ -54,17 +52,6 @@ namespace Iviz.App
             ModuleListPanel.RemoveModule(this);
         }
 
-        public void ResetPanel()
-        {
-            if (!IsPanelSelected)
-            {
-                return;
-            }
-
-            Panel.ClearSubscribers();
-            SetupPanel();
-        }
-
         public abstract void UpdateConfiguration(string configAsJson, string[] fields);
 
         public abstract void AddToState(StateConfiguration config);
@@ -79,10 +66,7 @@ namespace Iviz.App
             Controller.ResetController();
         }
 
-        public override string ToString()
-        {
-            return $"[{GetType().Name} id='{Configuration.Id}']";
-        }
+        public override string ToString() => $"[{GetType().Name} id='{Configuration.Id}']";
 
         public static ModuleData CreateFromResource(ModuleDataConstructor c)
         {

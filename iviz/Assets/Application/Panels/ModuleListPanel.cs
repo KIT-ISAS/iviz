@@ -97,9 +97,10 @@ namespace Iviz.App
         ModuleListButtons? buttons;
         DialogManager? dialogs;
         IMenuDialogContents? menuDialog;
-        CameraPanelData? cameraPanelData;
+        CameraModuleData? cameraPanelData;
 
-        CameraPanelData CameraPanelData => cameraPanelData ??= new CameraPanelData();
+        public CameraModuleData CameraModuleData => cameraPanelData ??= new CameraModuleData();
+        public TfPublisher TfPublisher => TfPublisher.Instance;
         UpperCanvasPanel UpperCanvas => upperCanvasPanel.AssertNotNull(nameof(upperCanvasPanel));
         BottomCanvasPanel BottomCanvas => bottomCanvasPanel.AssertNotNull(nameof(bottomCanvasPanel));
         AnchorToggleButton BottomHideGuiButton => AnchorCanvasPanel.BottomHideGui;
@@ -232,7 +233,7 @@ namespace Iviz.App
             Directory.CreateDirectory(Settings.SavedFolder);
             LoadSimpleConfiguration();
 
-            cameraPanelData = new CameraPanelData();
+            cameraPanelData = new CameraModuleData();
 
             RosLogger.Internal("<b>Welcome to iviz!</b>");
             RosLogger.Internal("This is the log for connection messages. " +
@@ -347,7 +348,7 @@ namespace Iviz.App
                 KeepReconnecting = true;
             };
 
-            BottomCanvas.CameraButtonClicked += () => { CameraPanelData.ToggleShowPanel(); };
+            BottomCanvas.CameraButtonClicked += () => { CameraModuleData.ToggleShowPanel(); };
 
             connectionData.MasterActiveChanged += _ => Connection.Disconnect();
             RosConnection.ConnectionStateChanged += OnConnectionStateChanged;
@@ -544,8 +545,8 @@ namespace Iviz.App
                 moduleData.AddToState(config);
             }
 
-            config.TfPublisher = TfPublisher.Instance.Configuration;
-            config.Camera = CameraPanelData.Configuration;
+            config.TfPublisher = tfPublisher.Configuration;
+            config.Camera = CameraModuleData.Configuration;
 
             try
             {
@@ -607,8 +608,8 @@ namespace Iviz.App
             // TF cannot be destroyed, resetting AR and XR loses world info
 
             TfData.UpdateConfiguration(stateConfig.Tf);
-            TfPublisher.Instance.UpdateConfiguration(stateConfig.TfPublisher);
-            CameraPanelData.UpdateConfiguration(stateConfig.Camera);
+            tfPublisher.UpdateConfiguration(stateConfig.TfPublisher);
+            CameraModuleData.UpdateConfiguration(stateConfig.Camera);
 
             if (Settings.IsMobile && stateConfig.AR != null)
             {

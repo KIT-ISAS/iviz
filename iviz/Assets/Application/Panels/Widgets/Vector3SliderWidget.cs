@@ -14,6 +14,7 @@ namespace Iviz.App
         [SerializeField] SliderWidget inputY;
         [SerializeField] SliderWidget inputZ;
         [SerializeField] TMP_Text label;
+
         [SerializeField] Image panel;
         //bool disableUpdates;
 
@@ -26,24 +27,24 @@ namespace Iviz.App
             }
         }
 
-        Vector3 value;
+        Vector3? value; // ensure that the next Value set will be different
 
         public Vector3 Value
         {
-            get => value;
+            get => value ?? Vector3.zero;
             set
             {
-                if ((this.value - value).ApproximatelyZero())
+                if (this.value is { } existingValue && (existingValue - value).ApproximatelyZero())
                 {
                     return;
                 }
-                
+
                 this.value = value;
                 Mean = value;
                 UpdateInputLabels();
             }
         }
-        
+
         float range;
 
         float Range
@@ -52,7 +53,7 @@ namespace Iviz.App
             set
             {
                 range = value;
-                int numSteps = (int) (2 * range * 100);
+                int numSteps = (int)(2 * range * 100);
                 inputX.SetMinValue(mean.x - range).SetMaxValue(mean.x + range).SetNumberOfSteps(numSteps);
                 inputY.SetMinValue(mean.y - range).SetMaxValue(mean.y + range).SetNumberOfSteps(numSteps);
                 inputZ.SetMinValue(mean.z - range).SetMaxValue(mean.z + range).SetNumberOfSteps(numSteps);
@@ -104,15 +105,15 @@ namespace Iviz.App
                 inputY.Value,
                 inputZ.Value
             );
-            ValueChanged?.Invoke(value);
+            ValueChanged?.Invoke(Value);
         }
 
 
         void UpdateInputLabels()
         {
-            inputX.Value = value.x;
-            inputY.Value = value.y;
-            inputZ.Value = value.z;
+            inputX.Value = Value.x;
+            inputY.Value = Value.y;
+            inputZ.Value = Value.z;
         }
 
         public void ClearSubscribers()
