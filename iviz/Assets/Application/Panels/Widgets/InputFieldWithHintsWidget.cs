@@ -27,6 +27,7 @@ namespace Iviz.App
             set => dropdown = value.CheckedNull() ?? throw new NullReferenceException("Cannot set dropdown to null!");
         }
 
+        public event Action<string>? Submit;
         public event Action<string>? EndEdit;
         public event Action<int>? ValueChanged;
 
@@ -112,6 +113,7 @@ namespace Iviz.App
 
         void Awake()
         {
+            Input.Submit += OnSubmit;
             Input.EndEdit += OnEndEdit;
 
             // this is actually an image with transparency 0, just so that TMP allows us to select index -1
@@ -128,20 +130,23 @@ namespace Iviz.App
                 return;
             }
 
-            Input.Value = optionDatas[i].text;
-            EndEdit?.Invoke(optionDatas[i].text);
+            string text = optionDatas[i].text;
+            Input.Value = text;
+            EndEdit?.Invoke(text);
+            Submit?.Invoke(text);
             ValueChanged?.Invoke(i);
             Dropdown.value = -1;
         }
 
-        void OnEndEdit(string f)
-        {
-            EndEdit?.Invoke(f);
-        }
+        void OnSubmit(string f) => Submit?.Invoke(f);
+        
+        void OnEndEdit(string f) => EndEdit?.Invoke(f);
 
         public void ClearSubscribers()
         {
+            Submit = null;
             EndEdit = null;
+            ValueChanged = null;
         }
 
         public InputFieldWithHintsWidget SetInteractable(bool f)
@@ -176,7 +181,7 @@ namespace Iviz.App
 
         public InputFieldWithHintsWidget SubscribeEndEdit(Action<string> f)
         {
-            EndEdit += f;
+            Submit += f;
             return this;
         }
     }

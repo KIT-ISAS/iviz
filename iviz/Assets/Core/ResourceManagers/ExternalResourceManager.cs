@@ -31,8 +31,9 @@ namespace Iviz.Displays
         const string SceneServiceName = "/iviz/get_sdf";
 
         const string StrMissingFileRemoving = nameof(ExternalResourceManager) + ": Missing file '{0}'. Removing.";
-        const string StrServiceFailedWithMessage = "Model Loader Service failed to load '{0}'. Reason: {1}";
-        const string StrCallServiceFailed = nameof(ExternalResourceManager) + ": Call Service failed! " +
+        const string StrServiceFailedWithMessage = "[Model Loader]: Failed to load '{0}'. Reason: {1}";
+
+        const string StrCallServiceFailed = "[Model Loader]: Call Service failed! " +
                                             "Are you sure iviz is connected and the Iviz.Model.Service program is running?";
 
         const int TimeoutInMs = 10000;
@@ -505,7 +506,7 @@ namespace Iviz.Displays
         {
             using var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
             if (buffer.Length < Md5SumLength ||
-                BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != BuiltIns.GetMd5Sum<Model>())
+                BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != Model.Md5Sum)
             {
                 RosLogger.Warn($"{this}: Resource {uriString} is out of date");
                 return null;
@@ -574,15 +575,20 @@ namespace Iviz.Displays
 
             try
             {
-                using var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token);
-                if (buffer.Length < Md5SumLength ||
-                    BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != BuiltIns.GetMd5Sum<Scene>())
+                Scene msg;
+
+                using (var buffer = await FileUtils.ReadAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", token))
                 {
-                    RosLogger.Warn($"{this}: Resource {uriString} is out of date");
-                    return null;
+                    if (buffer.Length < Md5SumLength ||
+                        BuiltIns.UTF8.GetString(buffer[..Md5SumLength]) != Scene.Md5Sum)
+                    {
+                        RosLogger.Warn($"{this}: Resource {uriString} is out of date");
+                        return null;
+                    }
+
+                    msg = BuiltIns.DeserializeMessage<Scene>(buffer[Md5SumLength..]);
                 }
 
-                var msg = BuiltIns.DeserializeMessage<Scene>(buffer[Md5SumLength..]);
                 obj = await CreateSceneNodeAsync(msg, provider, token);
             }
             catch (Exception e) when (e is not OperationCanceledException)
@@ -611,7 +617,7 @@ namespace Iviz.Displays
 
                 using (var buffer = new Rent<byte>(msg.Model.RosMessageLength + Md5SumLength))
                 {
-                    BuiltIns.UTF8.GetBytes(msg.Model.RosMd5Sum, 0, Md5SumLength, buffer.Array, 0);
+                    BuiltIns.UTF8.GetBytes(Model.Md5Sum, 0, Md5SumLength, buffer.Array, 0);
                     msg.Model.SerializeTo(buffer[Md5SumLength..]);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                 }
@@ -676,7 +682,7 @@ namespace Iviz.Displays
 
                 using (var buffer = new Rent<byte>(msg.Scene.RosMessageLength + Md5SumLength))
                 {
-                    BuiltIns.UTF8.GetBytes(msg.Scene.RosMd5Sum, 0, Md5SumLength, buffer.Array, 0);
+                    BuiltIns.UTF8.GetBytes(Scene.Md5Sum, 0, Md5SumLength, buffer.Array, 0);
                     msg.Scene.SerializeTo(buffer[Md5SumLength..]);
                     await FileUtils.WriteAllBytesAsync($"{Settings.ResourcesPath}/{localPath}", buffer, token);
                     RosLogger.Debug($"{this}: Saving to {Settings.ResourcesPath}/{localPath}");
@@ -743,7 +749,7 @@ namespace Iviz.Displays
                 var includeResource = await Resource.GetGameObjectResourceAsync(include.Uri, provider, token);
                 if (includeResource == null)
                 {
-                    RosLogger.Debug($"ExternalResourceManager: Failed to retrieve model '{include.Uri}'");
+                    RosLogger.Debug($"{nameof(ExternalResourceManager)}: Failed to retrieve model '{include.Uri}'");
                     continue;
                 }
 

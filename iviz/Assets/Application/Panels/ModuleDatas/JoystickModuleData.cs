@@ -104,14 +104,14 @@ namespace Iviz.App
                 panel.UseStamped.Interactable = f;
             };
             panel.MaxSpeed.ValueChanged += f => controller.MaxSpeed = f;
-            panel.AttachToFrame.EndEdit += f => controller.AttachToFrame = f;
+            panel.AttachToFrame.Submit += f => controller.AttachToFrame = f;
             panel.XIsFront.ValueChanged += f => controller.XIsFront = f;
-            panel.JoyTopic.EndEdit += f =>
+            panel.JoyTopic.Submit += f =>
             {
                 controller.JoyTopic = f;
                 panel.JoySender.Set(controller.SenderJoy);
             };
-            panel.TwistTopic.EndEdit += f =>
+            panel.TwistTopic.Submit += f =>
             {
                 controller.TwistTopic = f;
                 panel.TwistSender.Set(controller.SenderTwist);

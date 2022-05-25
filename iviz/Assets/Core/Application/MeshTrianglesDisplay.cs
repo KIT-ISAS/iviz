@@ -81,19 +81,19 @@ namespace Iviz.Displays
             switch (meshTopology)
             {
                 case MeshTopology.Triangles:
-                    for (int i = 0; i < array.Length; i += 3)
+                    for (int i = 1; i < array.Length; i += 3)
                     {
-                        ref int a = ref array[i + 1];
-                        ref int b = ref array[i + 2];
+                        ref int a = ref array[i];
+                        ref int b = ref array[i + 1];
                         (a, b) = (b, a);
                     }
 
                     break;
                 case MeshTopology.Quads:
-                    for (int i = 0; i < array.Length; i += 4)
+                    for (int i = 1; i < array.Length; i += 4)
                     {
-                        ref int a = ref array[i + 1];
-                        ref int c = ref array[i + 3];
+                        ref int a = ref array[i];
+                        ref int c = ref array[i + 2];
                         (a, c) = (c, a);
                     }
 
@@ -113,12 +113,12 @@ namespace Iviz.Displays
             int pointsLength = points.Length;
             if (pointsLength % 3 != 0)
             {
-                throw new ArgumentException($"Invalid triangle list {pointsLength}", nameof(points));
+                ThrowHelper.ThrowArgument($"Invalid point size {pointsLength.ToString()}", nameof(points));
             }
 
             if (colors.Length != 0 && colors.Length != pointsLength)
             {
-                throw new ArgumentException("Inconsistent color size!", nameof(colors));
+                ThrowHelper.ThrowArgument("Inconsistent color size!", nameof(colors));
             }
 
             var ownMesh = EnsureOwnMesh();
@@ -179,17 +179,17 @@ namespace Iviz.Displays
         {
             if (triangles.Length % 3 != 0)
             {
-                throw new ArgumentException($"Invalid triangle list {points.Length}", nameof(points));
+                ThrowHelper.ThrowArgument($"Invalid triangle list {points.Length.ToString()}", nameof(points));
             }
 
             if (normals.Length != 0 && normals.Length != points.Length)
             {
-                throw new ArgumentException("Inconsistent normals size!", nameof(normals));
+                ThrowHelper.ThrowArgument("Inconsistent normals size!", nameof(normals));
             }
 
             if (colors.Length != 0 && colors.Length != points.Length)
             {
-                throw new ArgumentException("Inconsistent color size!", nameof(colors));
+                ThrowHelper.ThrowArgument("Inconsistent color size!", nameof(colors));
             }
 
             var ownMesh = EnsureOwnMesh();

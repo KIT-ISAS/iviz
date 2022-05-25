@@ -37,8 +37,8 @@ namespace Iviz.Resources
         {
             if (baseObject == null)
             {
-                ThrowHelper.ThrowArgumentNull(nameof(baseObject),
-                    $"Resource key was not set for asset '{objectName ?? "unnamed"}'");
+                ThrowHelper.ThrowArgumentNull($"Resource key was not set for asset '{objectName ?? "unnamed"}'",
+                    nameof(baseObject));
             }
 
             Object = baseObject;

@@ -39,7 +39,7 @@ namespace Iviz.Displays
             {
                 return await CreateImpl(uriString, msg, provider, token, root);
             }
-            catch (Exception)
+            catch
             {
                 if (root != null)
                 {

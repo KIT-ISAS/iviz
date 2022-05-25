@@ -193,7 +193,7 @@ namespace Iviz.Displays.XR
                 }
                 case BindingType.User:
                 {
-                    var cameraForward = Settings.MainCameraTransform.forward;
+                    var cameraForward = Settings.MainCameraPose.Forward();
                     if ((cameraForward - Vector3.forward).ApproximatelyZero())
                     {
                         // not initialized yet

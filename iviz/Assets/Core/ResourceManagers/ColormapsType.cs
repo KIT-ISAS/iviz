@@ -11,7 +11,7 @@ namespace Iviz.Resources
     {
         public const int AtlasSize = 16;
         public IReadOnlyDictionary<ColormapId, Texture2D> Textures { get; }
-        public IEnumerable<string> Names { get; }
+        public string[] Names { get; }
         
         public ColormapsType()
         {

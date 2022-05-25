@@ -25,11 +25,11 @@ namespace Iviz.Core
         public const bool IsMobile = false;
 #endif
 
-        public const bool IsStandalone =
+        
 #if !UNITY_EDITOR
-            true;
+        public const bool IsStandalone = true;
 #else
-            false;
+        public static bool IsStandalone => false;
 #endif
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace Iviz.Core
             false;
 #endif
 
-#if UNITY_IOS || UNITY_ANDROID || UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+#if UNITY_IOS || UNITY_ANDROID
         /// <summary>
         /// Is this being run in a Hololens?
         /// </summary>
@@ -79,9 +79,18 @@ namespace Iviz.Core
         /// Is this being run on an XR platform? (VR or Hololens)
         /// </summary>
         public const bool IsXR = false;
+#elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+        /// <summary>
+        /// Is this being run in a Hololens?
+        /// </summary>
+        public static bool IsHololens => false;
+
+        /// <summary>
+        /// Is this being run on an XR platform? (VR or Hololens)
+        /// </summary>
+        public static bool IsXR => false;
 #else
         static bool? isHololens;
-
         static bool? isXR;
 
         static bool TryReadXRInfo()
@@ -184,11 +193,22 @@ namespace Iviz.Core
             ?? GameObject.Find("MainCamera").CheckedNull()
             ?? throw new MissingAssetFieldException("Failed to find camera!");
 
+        /// <summary>
+        /// Cached transform of the main camera. May refer to different objects depending on the view.
+        /// </summary>
         public static Camera MainCamera
         {
-            get => mainCamera != null
-                ? mainCamera
-                : mainCamera = FindMainCamera().AssertHasComponent<Camera>(nameof(mainCamera));
+            get
+            {
+                if (mainCamera != null)
+                {
+                    return mainCamera;
+                }
+                
+                mainCamera = FindMainCamera().AssertHasComponent<Camera>(nameof(mainCamera));
+                mainCameraTransform = mainCamera.transform;
+                return mainCamera;
+            }
 
             set
             {
@@ -197,14 +217,28 @@ namespace Iviz.Core
             }
         }
 
+        /// <summary>
+        /// Cached transform of the main camera. May refer to different objects depending on the view.
+        /// </summary>
         public static Transform MainCameraTransform =>
             mainCameraTransform != null
                 ? mainCameraTransform
                 : (mainCameraTransform = MainCamera.transform);
 
-        public static Pose MainCameraPose { get; set; }
+        /// <summary>
+        /// Cached absolute pose of <see cref="MainCameraTransform"/>. Updated each frame.
+        /// </summary>
+        public static Pose MainCameraPose;
 
+        /// <summary>
+        /// Camera for the birds-eye-view mode.
+        /// Always null for Hololens / VR
+        /// </summary>
         public static Camera? VirtualCamera { get; set; }
+        
+        /// <summary>
+        /// Camera for AR. Always null for non-mobile.
+        /// </summary>
         public static Camera? ARCamera { get; set; }
 
         public static ISettingsManager SettingsManager

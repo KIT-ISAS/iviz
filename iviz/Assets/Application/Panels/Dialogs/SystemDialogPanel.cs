@@ -112,12 +112,14 @@ namespace Iviz.App
             foreach (var (hostname, i) in hostnames.WithIndex())
             {
                 hostname.Placeholder = "Enter hostname...";
+                hostname.Submit += str => HostnameEndEdit?.Invoke(i, str);
                 hostname.EndEdit += str => HostnameEndEdit?.Invoke(i, str);
             }
 
             foreach (var (address, i) in addresses.WithIndex())
             {
                 address.Placeholder = "Enter address...";
+                address.Submit += str => AddressEndEdit?.Invoke(i, str);
                 address.EndEdit += str => AddressEndEdit?.Invoke(i, str);
             }
         }

@@ -62,7 +62,7 @@ namespace Iviz.App
             panel.Metallic.Value = listener.Metallic;
             panel.Smoothness.Value = listener.Smoothness;
             
-            panel.IntensityChannel.EndEdit += s => listener.IntensityChannel = s;
+            panel.IntensityChannel.Submit += s => listener.IntensityChannel = s;
             panel.Colormap.ValueChanged += (i, _) => listener.Colormap = (ColormapId) i;
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;

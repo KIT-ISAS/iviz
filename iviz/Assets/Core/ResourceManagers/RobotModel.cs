@@ -356,8 +356,8 @@ namespace Iviz.Displays
 
                 if (info == null)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve '{meshUri}'. Reason: Resource not in cache, " +
-                                    "and model loader is not reachable.");
+                    RosLogger.Error($"{this}: Failed to retrieve collision '{meshUri}'. Reason: Resource not in cache " +
+                                    "and model loader failed.");
                     Object.Destroy(collisionObject);
                     numErrors++;
                     return;
@@ -449,8 +449,8 @@ namespace Iviz.Displays
 
                 if (info == null)
                 {
-                    RosLogger.Error($"{this}: Failed to retrieve '{meshUri}'. Reason: Resource not in cache, " +
-                                    "and model loader is not reachable.");
+                    RosLogger.Error($"{this}: Failed to retrieve visual '{meshUri}'. Reason: Resource not in cache " +
+                                    "and model loader failed.");
                     numErrors++;
                     return;
                 }

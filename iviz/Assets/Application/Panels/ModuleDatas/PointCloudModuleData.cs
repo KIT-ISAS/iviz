@@ -55,7 +55,7 @@ namespace Iviz.App
             panel.PointCloudType.Index = (int) listener.PointCloudType;
 
             panel.PointSize.ValueChanged += f => listener.PointSize = f;
-            panel.IntensityChannel.EndEdit += s => listener.IntensityChannel = s;
+            panel.IntensityChannel.Submit += s => listener.IntensityChannel = s;
             panel.Colormap.ValueChanged += (i, _) => listener.Colormap = (ColormapId) i;
             panel.CloseButton.Clicked += Close;
             panel.HideButton.Clicked += ToggleVisible;

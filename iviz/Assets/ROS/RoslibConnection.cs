@@ -392,7 +392,7 @@ namespace Iviz.Ros
                     {
                         response = await masterApi.LookupNodeAsync("/rosout", token);
                     }
-                    catch (Exception)
+                    catch
                     {
                         if (!warningSet)
                         {

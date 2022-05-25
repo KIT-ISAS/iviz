@@ -164,7 +164,7 @@ internal sealed class SenderManager<TMessage> where TMessage : IMessage
             return;
         }
 
-        var sendersToDelete = allSenders.Where(deadSender => !deadSender.IsAlive).ToArray();
+        var sendersToDelete = allSenders.Where(deadSender => !deadSender.IsAlive).ToList();
 
         var tasks = sendersToDelete.Select(async deadSender =>
         {

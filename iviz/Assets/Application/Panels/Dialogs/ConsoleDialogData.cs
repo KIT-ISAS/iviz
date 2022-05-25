@@ -76,6 +76,7 @@ namespace Iviz.App
             ResetPanelPosition();
 
             dialog.Close.Clicked += Close;
+            dialog.Reset.Clicked += Reset;
             ProcessLog();
             dialog.FromField.Value = id;
             dialog.FromField.Hints = ExtraFields.Concat(ids);
@@ -86,7 +87,7 @@ namespace Iviz.App
                 minLogLevel = LevelFromIndex(f);
                 ProcessLog(true);
             };
-            dialog.FromField.EndEdit += f =>
+            dialog.FromField.Submit += f =>
             {
                 id = f;
                 idCode = GetIdCode(f);
@@ -306,6 +307,13 @@ namespace Iviz.App
             }
 
             dialog.Text.SetTextRent(description);
+            queueIsDirty = false;
+        }
+
+        void Reset()
+        {
+            messageQueue.Clear();
+            dialog.Text.text = "";
             queueIsDirty = false;
         }
     }

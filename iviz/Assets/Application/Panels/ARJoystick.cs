@@ -52,17 +52,20 @@ namespace Iviz.App
             CloseButton.onClick.AddListener(() => Close?.Invoke());
             ResetScaleButton.onClick.AddListener(() => ResetScale?.Invoke());
 
-            JoystickX.Changed += OnChangedPosition;
-            JoystickY.Changed += OnChangedPosition;
-            JoystickZ.Changed += OnChangedPosition;
+            Action<Vector2> onChangedPosition = OnChangedPosition;
+            JoystickX.Changed += onChangedPosition;
+            JoystickY.Changed += onChangedPosition;
+            JoystickZ.Changed += onChangedPosition;
+            
             JoystickA.Changed += OnChangedAngle;
             JoystickS.Changed += OnChangedScale;
 
-            JoystickX.PointerUp += OnPointerUp;
-            JoystickY.PointerUp += OnPointerUp;
-            JoystickZ.PointerUp += OnPointerUp;
-            JoystickA.PointerUp += OnPointerUp;
-            JoystickS.PointerUp += OnPointerUp;
+            Action onPointerUp = OnPointerUp;
+            JoystickX.PointerUp += onPointerUp;
+            JoystickY.PointerUp += onPointerUp;
+            JoystickZ.PointerUp += onPointerUp;
+            JoystickA.PointerUp += onPointerUp;
+            JoystickS.PointerUp += onPointerUp;
         }
 
         void OnButtonClick()

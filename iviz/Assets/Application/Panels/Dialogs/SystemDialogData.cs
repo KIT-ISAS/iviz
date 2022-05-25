@@ -9,6 +9,7 @@ using System.Threading;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Ros;
+using Iviz.Roslib.Utils;
 using Iviz.Tools;
 using Iviz.XmlRpc;
 using Newtonsoft.Json;
@@ -145,7 +146,8 @@ namespace Iviz.App
                 return;
             }
 
-            var services = new SortedSet<string>(systemState.Services.Select(service => service.Topic));
+            var services = systemState.Services.Select(service => service.Topic).ToList();
+            services.Sort();
 
             using var description = BuilderPool.Rent();
 
@@ -168,7 +170,8 @@ namespace Iviz.App
                 return;
             }
 
-            var parameters = new SortedSet<string>(RosManager.Connection.GetSystemParameterList());
+            string[] parameters = RosManager.Connection.GetSystemParameterList();
+            Array.Sort(parameters);
 
             using var description = BuilderPool.Rent();
 
@@ -196,7 +199,8 @@ namespace Iviz.App
                     systemState.Subscribers.SelectMany(tuple => tuple.Members).Concat(
                         systemState.Services.SelectMany(tuple => tuple.Members)
                     ));
-            var nodes = new SortedSet<string>(nodesEnumerator);
+            var nodes = nodesEnumerator.ToList();
+            nodes.Sort();
 
             using var description = BuilderPool.Rent();
 
@@ -391,7 +395,6 @@ namespace Iviz.App
             }
 
             panel.TextBottom.SetTextRent(description);
-            //panel.TextBottom.UpdateVertexData();
         }
 
         async void GetParamValue(string param, CancellationToken token)
@@ -403,7 +406,8 @@ namespace Iviz.App
 
             try
             {
-                (paramValue, _) = await RosManager.Connection.GetParameterAsync(param, 5000, token);
+                (paramValue, _) =
+                    await RosManager.Connection.GetParameterAsync(param, 5000, token).ConfigureAwait(false);
                 GameThread.Post(() => UpdateParametersLink(param));
             }
             catch (OperationCanceledException)
@@ -517,6 +521,8 @@ namespace Iviz.App
             {
                 if (HostAliases[i] is not ({ } hostname, { } address))
                 {
+                    panel.HostNames[i].Value = "";
+                    panel.Addresses[i].Value = "";
                     return;
                 }
 
@@ -562,8 +568,8 @@ namespace Iviz.App
             string address = panel.Addresses[index].Value;
             if (!string.IsNullOrWhiteSpace(hostname) && !string.IsNullOrWhiteSpace(address))
             {
-                var newHostAlias = new HostAlias { Hostname = hostname, Address = address };
-                if (!newHostAlias.Equals(HostAliases[index]))
+                var newHostAlias = new HostAlias(hostname, address);
+                if (newHostAlias.Equals(HostAliases[index]))
                 {
                     return;
                 }
@@ -584,10 +590,13 @@ namespace Iviz.App
     }
 
     [DataContract]
-    public sealed class HostAlias
+    public sealed class HostAlias : JsonToString
     {
-        [DataMember] public string Hostname { get; set; } = "";
-        [DataMember] public string Address { get; set; } = "";
+        [DataMember] public string Hostname { get; }
+        [DataMember] public string Address { get; }
+
+        [JsonConstructor]
+        public HostAlias(string hostname, string address) => (Hostname, Address) = (hostname, address);
 
         public void Deconstruct(out string hostname, out string address) => (hostname, address) = (Hostname, Address);
         public bool Equals(HostAlias? a) => a is var (hostname, address) && hostname == Hostname && address == Address;

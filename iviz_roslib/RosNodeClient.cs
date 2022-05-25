@@ -141,7 +141,7 @@ public sealed class RosNodeClient
                                   $"Expected type object[], got {wrapper}");
     }
 
-    public override string ToString() => $"[RosNodeClient {Uri}]";
+    public override string ToString() => $"[{nameof(RosNodeClient)} {Uri}]";
 }
 
 public sealed class RequestTopicResponse : BaseResponse
@@ -164,7 +164,7 @@ public sealed class RequestTopicResponse : BaseResponse
 
         if (protocolInfo.Length == 0)
         {
-            Logger.LogDebugFormat("[{0}]: Request for topic yielded no valid protocols", GetType().Name);
+            Logger.LogDebugFormat($"[{nameof(RequestTopicResponse)}]: Request for topic yielded no valid protocols");
             responseCode = StatusCode.Error;
             return;
         }

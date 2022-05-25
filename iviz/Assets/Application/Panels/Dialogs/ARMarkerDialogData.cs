@@ -104,7 +104,7 @@ namespace Iviz.App
                 Markers = markers.ToArray(),
             };
 
-            if (ARController.Instance != null)
+            //if (ARController.Instance != null)
             {
                 //ARController.Instance.MarkerExecutor.Configuration = Configuration;
             }

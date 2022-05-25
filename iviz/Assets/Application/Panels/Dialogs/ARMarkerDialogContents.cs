@@ -74,12 +74,12 @@ namespace Iviz.App
 
             foreach (var (widget, row) in codes.WithIndex())
             {
-                widget.EndEdit += value => CodesEndEdit?.Invoke(row, value);
+                widget.Submit += value => CodesEndEdit?.Invoke(row, value);
             }
 
             foreach (var (widget, row) in sizes.WithIndex())
             {
-                widget.EndEdit += value => SizesEndEdit?.Invoke(row,
+                widget.Submit += value => SizesEndEdit?.Invoke(row,
                     float.TryParse(value, NumberStyles.Float, BuiltIns.Culture, out float i) ? i : -1);
                 widget.Placeholder = "0";
                 widget.SetContentType(TMP_InputField.ContentType.DecimalNumber);

@@ -74,9 +74,11 @@ namespace Iviz.App
             panel.SavedFilesLabel.text = $"<b>Saved Files:</b> {ModuleListPanel.NumSavedFiles.ToString()} files";
             panel.HostHistoryLabel.text = $"<b>Host History:</b> {ModuleListPanel.Instance.NumMastersInCache.ToString()} entries";
 
+            /*
             panel.ModelService.Options = ModelServerModesNames;
             panel.ModelService.Text = UpdateModelServiceLabel();
             panel.ModelService.Interactable = !Settings.IsMobile;
+            */
 
             panel.QualityInView.ValueChanged += (f, _) =>
             {
@@ -88,14 +90,6 @@ namespace Iviz.App
                 SettingsManager.QualityInAr = (QualityType) f;
                 ModuleListPanel.UpdateSettings();
             };
-
-            /*
-            panel.BackgroundColor.ValueChanged += c =>
-            {
-                SettingsManager.BackgroundColor = c;
-                ModuleListPanel.UpdateSettings();
-            };
-            */
 
             panel.TargetFps.ValueChanged += (i, _) =>
             {
@@ -123,26 +117,16 @@ namespace Iviz.App
 
                 ModuleListPanel.UpdateSettings();
             };
-
-            /*
-            panel.SunDirection.ValueChanged += f =>
-            {
-                SettingsManager.SunDirection = (int) f;
-                ModuleListPanel.UpdateSettings();
-            };
-            */
-
+            
             panel.Close.Clicked += Close;
 
-            // ReSharper disable once AsyncVoidLambda
             panel.ClearModelCacheClicked += async () =>
             {
                 RosLogger.Info("Settings: Clearing model cache.");
                 await Resource.External.ClearModelCacheAsync();
                 panel.ModelCacheLabel.text = $"<b>Model Cache:</b> {Resource.External.ResourceCount.ToString()} files";
             };
-
-            // ReSharper disable once AsyncVoidLambda
+            
             panel.ClearHostHistoryClicked += async () =>
             {
                 RosLogger.Info("Settings: Clearing cache of master uris.");
@@ -158,6 +142,7 @@ namespace Iviz.App
                 panel.SavedFilesLabel.text = $"<b>Saved:</b> {ModuleListPanel.NumSavedFiles.ToString()} files";
             };
 
+            /*
             panel.ModelService.ValueChanged += (i, s) =>
             {
                 switch ((ModelServerModes) i)
@@ -175,8 +160,10 @@ namespace Iviz.App
 
                 panel.ModelService.Text = UpdateModelServiceLabel();
             };
+            */
         }
 
+        /*
         string UpdateModelServiceLabel()
         {
             if (Settings.IsMobile)
@@ -197,5 +184,6 @@ namespace Iviz.App
 
             return "<b>Model Service:</b> " + RosManager.ModelService.NumPackages + " packages";
         }
+        */
     }
 }
