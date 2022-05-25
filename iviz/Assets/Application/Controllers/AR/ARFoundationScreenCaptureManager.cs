@@ -294,47 +294,39 @@ namespace Iviz.Controllers
             new InvalidOperationException(
                 $"Conversion request of color image failed with status {status}");
 
-        static unsafe void MirrorXf(int width, int height, byte[] bytes)
+        static void MirrorXf(int width, int height, byte[] bytes)
         {
-            int pitch = width * sizeof(float);
+            int pitch = width * sizeof(float); 
             if (pitch * height > bytes.Length) ThrowIndexOutOfRange();
-            fixed (byte* bytesPtr = bytes)
+            foreach (int v in ..height)
             {
-                foreach (int v in ..height)
+                ref float l = ref Unsafe.As<byte, float>(ref bytes[v * pitch]);
+                ref float r = ref l.Plus(width - 1);
+                for (int u = width / 2; u > 0; u--)
                 {
-                    float* l = (float*)(bytesPtr + v * pitch);
-                    float* r = l + (width - 1);
-
-                    for (int u = width / 2; u > 0; u--)
-                    {
-                        (*l, *r) = (*r, *l);
-                        l++;
-                        r--;
-                    }
+                    (l, r) = (r, l);
+                    l = ref l.Plus(1);
+                    r = ref r.Plus(-1);
                 }
             }
         }
 
-        static unsafe void MirrorXb(int width, int height, byte[] bytes)
+        static void MirrorXb(int width, int height, byte[] bytes)
         {
             if (width * height > bytes.Length) ThrowIndexOutOfRange();
-            fixed (byte* bytesPtr = bytes)
+            foreach (int v in ..height)
             {
-                foreach (int v in ..height)
+                ref ulong l = ref Unsafe.As<byte, ulong>(ref bytes[v * width]);
+                ref ulong r = ref l.Plus(width / 8 - 1);
+                for (int u = width / 16; u > 0; u--)
                 {
-                    ulong* l = (ulong*)(bytesPtr + v * width);
-                    ulong* r = l + (width / 8 - 1);
+                    ulong lFlip = BinaryPrimitives.ReverseEndianness(l);
+                    ulong rFlip = BinaryPrimitives.ReverseEndianness(r);
+                    l = rFlip;
+                    r = lFlip;
 
-                    for (int u = width / 16; u > 0; u--)
-                    {
-                        ulong lFlip = BinaryPrimitives.ReverseEndianness(*l);
-                        ulong rFlip = BinaryPrimitives.ReverseEndianness(*r);
-                        *l = rFlip;
-                        *r = lFlip;
-
-                        l++;
-                        r--;
-                    }
+                    l = ref l.Plus(1);
+                    r = ref r.Plus(-1);
                 }
             }
         }

@@ -2,6 +2,7 @@
 
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Iviz.Core;
 using Iviz.Tools;
 using Unity.Mathematics;
@@ -87,6 +88,7 @@ namespace Iviz.Displays
 
             float halfScale = scale * 0.5f;
 
+            int offset = 0;
             for (int segment = 0; segment < numSegments; segment++)
             {
                 ref readonly var line = ref lines[segment];
@@ -134,61 +136,59 @@ namespace Iviz.Displays
 
                 var dirZ = dirX.Cross(dirY);
 
-                int offset = segment * 10;
-
                 var halfDirX = halfScale * dirX;
                 var halfSumYz = halfScale * (dirY + dirZ);
                 var halfDiffYz = halfScale * (dirY - dirZ);
 
-                // note: it's ok to pin the array in every loop, in il2cpp it's a free operation
-                // it's probably not a good idea to do this in normal C#
-                fixed (Vector3* pPtr = &pArray[offset]) 
-                {
-                    pPtr[0] = a - halfDirX;
-                    pPtr[9] = b + halfDirX;
-
-                    pPtr[1] = a + halfSumYz;
-                    pPtr[3] = a - halfSumYz;
-                    pPtr[5] = b + halfSumYz;
-                    pPtr[7] = b - halfSumYz;
-
-                    pPtr[2] = a + halfDiffYz;
-                    pPtr[4] = a - halfDiffYz;
-                    pPtr[6] = b + halfDiffYz;
-                    pPtr[8] = b - halfDiffYz;
-                }
+                ref Vector3 pPtr = ref pArray[offset];
                 
+                pPtr = a - halfDirX;
+                pPtr.Plus(9) = b + halfDirX;
+
+                pPtr.Plus(1) = a + halfSumYz;
+                pPtr.Plus(3) = a - halfSumYz;
+                pPtr.Plus(5) = b + halfSumYz;
+                pPtr.Plus(7) = b - halfSumYz;
+
+                pPtr.Plus(2) = a + halfDiffYz;
+                pPtr.Plus(4) = a - halfDiffYz;
+                pPtr.Plus(6) = b + halfDiffYz;
+                pPtr.Plus(8) = b - halfDiffYz;
+
+                offset += 10;
             }
 
-            for (int segment = 0; segment < numSegments; segment++)
-            {
-                ref readonly var line = ref lines[segment];
-                int offset = segment * 10;
-
-                var ca = UnityUtils.AsColor32(line.c0.w);
-                var cb = UnityUtils.AsColor32(line.c1.w);
-
-                fixed (Color32* cPtr = &cArray[offset])
-                {
-                    cPtr[0] = ca;
-                    cPtr[1] = ca;
-                    cPtr[2] = ca;
-                    cPtr[3] = ca;
-                    cPtr[4] = ca;
-
-                    cPtr[5] = cb;
-                    cPtr[6] = cb;
-                    cPtr[7] = cb;
-                    cPtr[8] = cb;
-                    cPtr[9] = cb;
-                }
-            }
-
+            offset = 0;
             for (int segment = 0; segment < numSegments; segment++)
             {
                 ref readonly var line = ref lines[segment];
 
-                int offset = segment * 10;
+                ref float cPtr = ref Unsafe.As<Color32, float>(ref cArray[offset]);
+
+                float ca = line.c0.w;
+                float cb = line.c1.w;
+                
+                cPtr = ca;
+                cPtr.Plus(1) = ca;
+                cPtr.Plus(2) = ca;
+                cPtr.Plus(3) = ca;
+                cPtr.Plus(4) = ca;
+
+                cPtr.Plus(5) = cb;
+                cPtr.Plus(6) = cb;
+                cPtr.Plus(7) = cb;
+                cPtr.Plus(8) = cb;
+                cPtr.Plus(9) = cb;
+
+                offset += 10;
+            }
+
+            offset = 0;
+            for (int segment = 0; segment < numSegments; segment++)
+            {
+                ref readonly var line = ref lines[segment];
+
+                ref Vector2 uvPtr = ref uArray[offset];
 
                 Vector2 uv0;
                 uv0.x = line.c0.w;
@@ -198,24 +198,20 @@ namespace Iviz.Displays
                 uv1.x = line.c1.w;
                 uv1.y = 0;
 
-                fixed (Vector2* uvPtr = &uArray[offset])
-                {
-                    uvPtr[0] = uv0;
-                    uvPtr[1] = uv0;
-                    uvPtr[2] = uv0;
-                    uvPtr[3] = uv0;
-                    uvPtr[4] = uv0;
+                uvPtr = uv0;
+                uvPtr.Plus(1) = uv0;
+                uvPtr.Plus(2) = uv0;
+                uvPtr.Plus(3) = uv0;
+                uvPtr.Plus(4) = uv0;
 
-                    uvPtr[5] = uv1;
-                    uvPtr[6] = uv1;
-                    uvPtr[7] = uv1;
-                    uvPtr[8] = uv1;
-                    uvPtr[9] = uv1;
-                }
+                uvPtr.Plus(5) = uv1;
+                uvPtr.Plus(6) = uv1;
+                uvPtr.Plus(7) = uv1;
+                uvPtr.Plus(8) = uv1;
+                uvPtr.Plus(9) = uv1;
+
+                offset += 10;
             }
-
-            
-            
 
             /*
             int[] capsules = CapsuleIndices;
@@ -246,41 +242,20 @@ namespace Iviz.Displays
             }
             */
 
-            /*
             int[] capsules = CapsuleIndices;
+            ref int capsulePtr = ref capsules[0];
             ref int indexPtr = ref iArray[0];
 
-            int vertexOff = 0;
+            offset = 0;
             for (int segment = numSegments; segment > 0; segment--)
             {
-                ref int capsulePtr = ref capsules[0];
-
-                for (int capsuleIndex = 48; capsuleIndex > 0; capsuleIndex--)
+                for (int i = 0; i < 48; i++)
                 {
-                    indexPtr = vertexOff + capsulePtr;
-
-                    indexPtr = ref indexPtr.Plus(1);
-                    capsulePtr = ref capsulePtr.Plus(1);
+                    indexPtr.Plus(i) = offset + capsulePtr.Plus(i);
                 }
 
-                vertexOff += 10;
-            }
-            */
-            fixed (int* iPtr0 = iArray, capsulePtr = CapsuleIndices)
-            {
-                int* iPtr = iPtr0;
-                int vertexOff = 0;
-
-                for (int segment = 0; segment < numSegments; segment++)
-                {
-                    for (int i = 0; i < 48; i++)
-                    {
-                        iPtr[i] = vertexOff + capsulePtr[i];
-                    }
-
-                    vertexOff += 10;
-                    iPtr += 48;
-                }            
+                indexPtr = ref indexPtr.Plus(48);
+                offset += 10;
             }
         }
     }
