@@ -2,7 +2,7 @@
 {
     public sealed class PublishedFramePanel : ModulePanel
     {
-        public TrashButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
         public FrameWidget Frame { get; private set; }
         public FrameWidget Parent { get; private set; }
         public InputFieldWithHintsWidget ParentId { get; private set; }

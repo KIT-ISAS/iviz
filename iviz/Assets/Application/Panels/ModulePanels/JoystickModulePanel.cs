@@ -6,7 +6,7 @@ namespace Iviz.App
     /// </summary>
     public sealed class JoystickModulePanel : ModulePanel
     {
-        public TrashButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
 
         public DropdownWidget Mode { get; private set; }
         public ToggleWidget SendJoy { get; private set; }

@@ -10,7 +10,7 @@ namespace Iviz.App
 {
     public sealed class SettingsDialogPanel : DialogPanel
     {
-        [SerializeField] TrashButtonWidget? close;
+        [SerializeField] SimpleButtonWidget? close;
 
         [SerializeField] DropdownWidget? qualityInView;
         [SerializeField] DropdownWidget? qualityInAr;
@@ -33,7 +33,7 @@ namespace Iviz.App
         Button ClearModelCache => clearModelCache.AssertNotNull(nameof(clearModelCache));
         Button ClearSavedFiles => clearSavedFiles.AssertNotNull(nameof(clearSavedFiles));
         Button ClearHostHistory => clearHostHistory.AssertNotNull(nameof(clearHostHistory));
-        public TrashButtonWidget Close => close.AssertNotNull(nameof(close));
+        public SimpleButtonWidget Close => close.AssertNotNull(nameof(close));
         public DropdownWidget QualityInView => qualityInView.AssertNotNull(nameof(qualityInView));
         public DropdownWidget QualityInAr => qualityInAr.AssertNotNull(nameof(qualityInAr));
         public DropdownWidget TargetFps => targetFps.AssertNotNull(nameof(targetFps));

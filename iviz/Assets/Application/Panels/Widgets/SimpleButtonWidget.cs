@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public class TrashButtonWidget : MonoBehaviour, IWidget
+    public class SimpleButtonWidget : MonoBehaviour, IWidget
     {
         [SerializeField] Button? button;
         [SerializeField] Image? image;
@@ -39,7 +39,7 @@ namespace Iviz.App
             Clicked = null;
         }
 
-        public TrashButtonWidget SubscribeClicked(Action f)
+        public SimpleButtonWidget SubscribeClicked(Action f)
         {
             Clicked += f;
             return this;

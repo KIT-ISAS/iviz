@@ -7,7 +7,7 @@ namespace Iviz.App
     /// </summary>
     public sealed class GridModulePanel : ModulePanel
     {
-        public TrashButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
         public ToggleWidget ShowInterior { get; private set; }
         public ToggleWidget FollowCamera { get; private set; }
         public ToggleWidget HideInARMode { get; private set; }

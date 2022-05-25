@@ -27,7 +27,7 @@ namespace Iviz.App
         [SerializeField] TMP_Text textTop;
         [SerializeField] TMP_Text textBottom;
 
-        [SerializeField] TrashButtonWidget close;
+        [SerializeField] SimpleButtonWidget close;
         [SerializeField] LinkResolver link;
 
         [SerializeField] [NotNull] GameObject[] aliasesFields = Array.Empty<GameObject>();
@@ -38,7 +38,7 @@ namespace Iviz.App
         [SerializeField] GameObject aliasesTab;
         [SerializeField] GameObject infoTab;
 
-        [NotNull] public TrashButtonWidget Close => close.AssertNotNull(nameof(close));
+        [NotNull] public SimpleButtonWidget Close => close.AssertNotNull(nameof(close));
         [NotNull] public TMP_Text TextTop => textTop.AssertNotNull(nameof(textTop));
         [NotNull] public TMP_Text TextBottom => textBottom.AssertNotNull(nameof(textBottom));
 

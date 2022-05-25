@@ -10,7 +10,7 @@ namespace Iviz.App
         public FrameWidget Frame { get; private set; }
         //public ToggleWidget PreferUdp { get; private set; }
         public MagnitudeWidget Magnitude { get; private set; }
-        public TrashButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
         public SliderWidgetWithScale Scale { get; private set; }
         public ToggleWidget ShowAxis { get; private set; }
         public ToggleWidget ShowTrail { get; private set; }

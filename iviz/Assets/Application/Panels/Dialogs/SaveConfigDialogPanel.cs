@@ -6,10 +6,10 @@ namespace Iviz.App
     public sealed class SaveConfigDialogPanel : ItemListDialogPanel
     {
         [SerializeField] InputFieldWidget input;
-        [SerializeField] TrashButtonWidget saveButton;
+        [SerializeField] SimpleButtonWidget saveButton;
 
         public InputFieldWidget Input => input;
-        public TrashButtonWidget SaveButton => saveButton;
+        public SimpleButtonWidget SaveButton => saveButton;
 
         public override void ClearSubscribers()
         {

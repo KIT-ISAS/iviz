@@ -5,8 +5,8 @@
     /// </summary>
     public sealed class MarkerModulePanel : ListenerModulePanel
     {
-        public TrashButtonWidget CloseButton { get; private set; }
-        public TrashButtonWidget ResetButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget ResetButton { get; private set; }
         public ColorPickerWidget Tint { get; private set; }
         public ToggleWidget TriangleListFlipWinding { get; private set; }
         public ToggleWidget ShowDescriptions { get; private set; }

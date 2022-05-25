@@ -339,9 +339,9 @@ namespace Iviz.App
 
         void Start()
         {
-            if (!Settings.IsPhone)
+            if (!Settings.IsMobile)
             {
-                QualitySettings.vSyncCount = 0;
+                QualitySettings.vSyncCount = 0; // in mobile this is ignored
             }
 
             Settings.DragHandler = this;

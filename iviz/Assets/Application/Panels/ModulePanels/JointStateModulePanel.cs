@@ -6,7 +6,7 @@
         public InputFieldWidget JointPrefix { get; private set; }
         public InputFieldWidget JointSuffix { get; private set; }
         public SliderWidget TrimFromEnd { get; private set; }
-        public TrashButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
 
         void Awake()
         {

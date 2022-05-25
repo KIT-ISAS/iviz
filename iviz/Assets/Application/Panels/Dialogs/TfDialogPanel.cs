@@ -9,8 +9,8 @@ namespace Iviz.App
 {
     public sealed class TfDialogPanel : DetachableDialogPanel
     {
-        [SerializeField] TrashButtonWidget? close;
-        [SerializeField] TrashButtonWidget? reset;
+        [SerializeField] SimpleButtonWidget? close;
+        [SerializeField] SimpleButtonWidget? reset;
         [SerializeField] TfLog? tfLog;
         [SerializeField] ToggleWidget? showOnlyUsed;
 
@@ -20,8 +20,8 @@ namespace Iviz.App
         public event Action? CreateFrameClicked; 
 
         Button CreateFrame => createFrame.AssertNotNull(nameof(createFrame));
-        public TrashButtonWidget Close => close.AssertNotNull(nameof(close));
-        public TrashButtonWidget Reset => reset.AssertNotNull(nameof(reset));
+        public SimpleButtonWidget Close => close.AssertNotNull(nameof(close));
+        public SimpleButtonWidget Reset => reset.AssertNotNull(nameof(reset));
         public TfLog TfLog => tfLog.AssertNotNull(nameof(tfLog));
         public ToggleWidget ShowOnlyUsed => showOnlyUsed.AssertNotNull(nameof(showOnlyUsed));
         public InputFieldWidget FrameName => frameName.AssertNotNull(nameof(frameName));

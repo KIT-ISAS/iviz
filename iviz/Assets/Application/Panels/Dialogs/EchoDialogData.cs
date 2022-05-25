@@ -117,6 +117,7 @@ namespace Iviz.App
             ResetPanelPosition();
 
             dialog.Close.Clicked += Close;
+            dialog.Reset.Clicked += Reset;
             dialog.Topics.ValueChanged += i =>
             {
                 if (i == 0)
@@ -173,7 +174,7 @@ namespace Iviz.App
                     .Append(listener.Stats.MessagesPerSecond)
                     .Append(" msg/s | ")
                     .AppendBandwidth(listener.Stats.BytesPerSecond);
-                dialog.Messages.SetText(description);
+                dialog.Messages.SetTextRent(description);
             }
         }
 
@@ -181,6 +182,13 @@ namespace Iviz.App
         {
             if (!queueIsDirty)
             {
+                return;
+            }
+
+            if (messageQueue.Count == 0)
+            {
+                dialog.Text.text = "";
+                queueIsDirty = false;
                 return;
             }
 
@@ -213,6 +221,13 @@ namespace Iviz.App
                 dialog.Text.SetTextRent(description);
             }
 
+            queueIsDirty = false;
+        }
+
+        void Reset()
+        {
+            messageQueue.Clear();
+            dialog.Text.text = "";
             queueIsDirty = false;
         }
 

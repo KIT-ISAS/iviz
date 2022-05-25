@@ -182,6 +182,7 @@ namespace Iviz.App
             GuiWidgetListener.ClearResources();
             ARController.ClearResources();
             ResourcePool.ClearResources();
+            GameThread.ClearResources();
 
             Settings.SettingsManager = new SettingsManager();
         }

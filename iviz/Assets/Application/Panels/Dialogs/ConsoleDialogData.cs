@@ -74,7 +74,7 @@ namespace Iviz.App
         public override void SetupPanel()
         {
             ResetPanelPosition();
-
+            
             dialog.Close.Clicked += Close;
             dialog.Reset.Clicked += Reset;
             ProcessLog();

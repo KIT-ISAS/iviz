@@ -15,7 +15,7 @@ namespace Iviz.App
         public DataLabelWidget NumPoints { get; private set; }
         public SliderWidgetWithScale PointSize { get; private set; }
         public DropdownWidget Colormap { get; private set; }
-        public TrashButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
         public ToggleWidget ForceMinMax { get; private set; }
         public NumberInputFieldWidget MinIntensity { get; private set; }
         public NumberInputFieldWidget MaxIntensity { get; private set; }

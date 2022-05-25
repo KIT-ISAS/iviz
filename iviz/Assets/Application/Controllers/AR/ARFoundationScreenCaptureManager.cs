@@ -165,7 +165,7 @@ namespace Iviz.Controllers
                 inputRect = new RectInt(0, 0, image.width, image.height),
                 outputDimensions = new Vector2Int(image.width, image.height),
                 outputFormat = TextureFormat.RFloat,
-                transformation = XRCpuImage.Transformation.MirrorY  // additional mirror x doesn't seem to work here
+                transformation = XRCpuImage.Transformation.MirrorY // additional mirror x doesn't seem to work here
             };
 
             var ts = TaskUtils.CreateCompletionSource<Screenshot?>();
@@ -192,7 +192,7 @@ namespace Iviz.Controllers
                 float scale = width / (float)colorWidth;
                 var screenshot = new Screenshot(ScreenshotFormat.Float,
                     GameThread.TimeNow, width, height,
-                    Intrinsic.Scale(scale), pose, array.ToArray()); 
+                    Intrinsic.Scale(scale), pose, array.ToArray());
 
                 Task.Run(() =>
                 {
@@ -294,39 +294,47 @@ namespace Iviz.Controllers
             new InvalidOperationException(
                 $"Conversion request of color image failed with status {status}");
 
-        static void MirrorXf(int width, int height, byte[] bytes)
+        static unsafe void MirrorXf(int width, int height, byte[] bytes)
         {
-            int pitch = width * sizeof(float); 
+            int pitch = width * sizeof(float);
             if (pitch * height > bytes.Length) ThrowIndexOutOfRange();
-            foreach (int v in ..height)
+            fixed (byte* bytesPtr = bytes)
             {
-                ref float l = ref Unsafe.As<byte, float>(ref bytes[v * pitch]);
-                ref float r = ref l.Plus(width - 1);
-                for (int u = width / 2; u > 0; u--)
+                foreach (int v in ..height)
                 {
-                    (l, r) = (r, l);
-                    l = ref l.Plus(1);
-                    r = ref r.Plus(-1);
+                    float* l = (float*)(bytesPtr + v * pitch);
+                    float* r = l + (width - 1);
+
+                    for (int u = width / 2; u > 0; u--)
+                    {
+                        (*l, *r) = (*r, *l);
+                        l++;
+                        r--;
+                    }
                 }
             }
         }
 
-        static void MirrorXb(int width, int height, byte[] bytes)
+        static unsafe void MirrorXb(int width, int height, byte[] bytes)
         {
             if (width * height > bytes.Length) ThrowIndexOutOfRange();
-            foreach (int v in ..height)
+            fixed (byte* bytesPtr = bytes)
             {
-                ref ulong l = ref Unsafe.As<byte, ulong>(ref bytes[v * width]);
-                ref ulong r = ref l.Plus(width / 8 - 1);
-                for (int u = width / 16; u > 0; u--)
+                foreach (int v in ..height)
                 {
-                    ulong lFlip = BinaryPrimitives.ReverseEndianness(l);
-                    ulong rFlip = BinaryPrimitives.ReverseEndianness(r);
-                    l = rFlip;
-                    r = lFlip;
+                    ulong* l = (ulong*)(bytesPtr + v * width);
+                    ulong* r = l + (width / 8 - 1);
 
-                    l = ref l.Plus(1);
-                    r = ref r.Plus(-1);
+                    for (int u = width / 16; u > 0; u--)
+                    {
+                        ulong lFlip = BinaryPrimitives.ReverseEndianness(*l);
+                        ulong rFlip = BinaryPrimitives.ReverseEndianness(*r);
+                        *l = rFlip;
+                        *r = lFlip;
+
+                        l++;
+                        r--;
+                    }
                 }
             }
         }

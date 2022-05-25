@@ -39,7 +39,7 @@ namespace Iviz.App
         [SerializeField] GameObject contentObject;
         [SerializeField] Text emptyText;
         [SerializeField] TMP_Text titleText;
-        [SerializeField] TrashButtonWidget closeButton;
+        [SerializeField] SimpleButtonWidget closeButton;
         [SerializeField] Canvas canvas;
 
         public event Action<int, int> ItemClicked;

@@ -5,10 +5,10 @@ namespace Iviz.App
 {
     public sealed class NetworkDialogPanel : DetachableDialogPanel
     {
-        [SerializeField] TrashButtonWidget close;
+        [SerializeField] SimpleButtonWidget close;
         [SerializeField] TMP_Text text;
 
-        public TrashButtonWidget Close => close;
+        public SimpleButtonWidget Close => close;
         public TMP_Text Text => text;
 
         public override void ClearSubscribers()

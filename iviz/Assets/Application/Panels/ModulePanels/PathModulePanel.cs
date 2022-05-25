@@ -7,7 +7,7 @@
     public sealed class PathModulePanel : ListenerModulePanel
     {
         public FrameWidget Frame { get; private set; }
-        public TrashButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
         public SliderWidget LineWidth { get; private set; }
         public ToggleWidget ShowAxes { get; private set; }
         public SliderWidget AxesLength { get; private set; }

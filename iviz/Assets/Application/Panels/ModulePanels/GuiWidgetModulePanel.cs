@@ -6,8 +6,8 @@ namespace Iviz.App
     /// </summary>
     public sealed class GuiWidgetModulePanel : ListenerModulePanel
     {
-        public TrashButtonWidget CloseButton { get; private set; }
-        public TrashButtonWidget ResetButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget ResetButton { get; private set; }
         public MarkerWidget Marker { get; private set; }
         public SenderWidget FeedbackSender { get; private set; }
 

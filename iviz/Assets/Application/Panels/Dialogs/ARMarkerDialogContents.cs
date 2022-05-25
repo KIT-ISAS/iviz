@@ -20,10 +20,10 @@ namespace Iviz.App
         static readonly string[] ActionsStr = Enum.GetNames(typeof(ARMarkerAction));
 
         [SerializeField] GameObject[] rows;
-        [SerializeField] TrashButtonWidget close;
+        [SerializeField] SimpleButtonWidget close;
         bool initialized;
 
-        public TrashButtonWidget Close => close;
+        public SimpleButtonWidget Close => close;
         public IReadOnlyList<DropdownWidget> Types { get; private set; }
         public IReadOnlyList<InputFieldWidget> Codes { get; private set; }
         public IReadOnlyList<InputFieldWidget> Sizes { get; private set; }

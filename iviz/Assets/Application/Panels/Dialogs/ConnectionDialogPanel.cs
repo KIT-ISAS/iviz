@@ -11,18 +11,18 @@ namespace Iviz.App
         [SerializeField] InputFieldWithHintsWidget masterUri;
         [SerializeField] InputFieldWithHintsWidget myUri;
         [SerializeField] InputFieldWithHintsWidget myId;
-        [SerializeField] TrashButtonWidget refreshMyUri;
-        [SerializeField] TrashButtonWidget refreshMyId;
-        [SerializeField] TrashButtonWidget close;
+        [SerializeField] SimpleButtonWidget refreshMyUri;
+        [SerializeField] SimpleButtonWidget refreshMyId;
+        [SerializeField] SimpleButtonWidget close;
         [SerializeField] ToggleButtonWidget serverMode;
         [SerializeField] LineLog lineLog;
 
         public InputFieldWithHintsWidget MasterUri => masterUri;
         public InputFieldWithHintsWidget MyUri => myUri;
         public InputFieldWithHintsWidget MyId => myId;
-        public TrashButtonWidget RefreshMyUri => refreshMyUri;
-        public TrashButtonWidget RefreshMyId => refreshMyId;
-        public TrashButtonWidget Close => close;
+        public SimpleButtonWidget RefreshMyUri => refreshMyUri;
+        public SimpleButtonWidget RefreshMyId => refreshMyId;
+        public SimpleButtonWidget Close => close;
         public LineLog LineLog => lineLog;
         public ToggleButtonWidget ServerMode => serverMode;
 

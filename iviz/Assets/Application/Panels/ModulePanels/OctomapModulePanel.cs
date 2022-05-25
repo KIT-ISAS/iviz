@@ -5,7 +5,7 @@
     /// </summary>
     public sealed class OctomapModulePanel : ListenerModulePanel
     {
-        public TrashButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
         public FrameWidget Frame { get; private set; }
         public SliderWidget MaxDepth { get; private set; }
         public ColorPickerWidget Tint { get; private set; }

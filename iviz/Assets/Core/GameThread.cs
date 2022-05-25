@@ -111,7 +111,7 @@ namespace Iviz.Core
             TimeNow = time.Now();
             nowFormatted = null;
             GameTime = Time.time;
-            
+
             try
             {
                 EveryFrame?.Invoke();
@@ -125,25 +125,7 @@ namespace Iviz.Core
             {
                 try
                 {
-                    if (Settings.IsIPhone)
-                    {
-                        // BUG!! IL2CPP crashes in IOS if EverySecond.Invoke() is called!
-                        // I have no idea why only EverySecond, but in C+++ rgctxVar is null.
-                        // I need to check in a few versions to see if it is fixed
-                        if (EverySecond != null)
-                        {
-                            var delegates = EverySecond.GetInvocationList();
-                            foreach (var @delegate in delegates)
-                            {
-                                var action = (Action)@delegate;
-                                action();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        EverySecond?.Invoke();
-                    }
+                    EverySecond?.Invoke();
                 }
                 catch (Exception e)
                 {
@@ -252,15 +234,20 @@ namespace Iviz.Core
         void OnDestroy()
         {
             instance = null;
+            ClearResources();
+            GameTime = 0;
+
+            actionsQueue.Clear();
+        }
+
+        public static void ClearResources()
+        {
             EveryFrame = null;
             ListenersEveryFrame = null;
             LateEveryFrame = null;
             EverySecond = null;
             LateEverySecond = null;
             EveryTenthOfASecond = null;
-            GameTime = 0;
-
-            actionsQueue.Clear();
         }
 
         /// <summary>
@@ -298,7 +285,7 @@ namespace Iviz.Core
             var ts = TaskUtils.CreateCompletionSource();
             Post(() => TrySetAsync(ts, action()));
             return ts.Task;
-            
+
             static async ValueTask TrySetAsync(TaskCompletionSource ts, ValueTask task)
             {
                 try
@@ -314,9 +301,9 @@ namespace Iviz.Core
                 {
                     ts.TrySetException(e);
                 }
-            }  
+            }
         }
-        
+
         /// <summary>
         /// Puts this async action in a queue to be run on the main thread,
         /// and returns a task that will be completed when the given action finishes running.
@@ -328,7 +315,7 @@ namespace Iviz.Core
             var ts = TaskUtils.CreateCompletionSource<T>();
             Post(() => TrySetAsync(ts, action()));
             return ts.Task;
-            
+
             static async ValueTask TrySetAsync(TaskCompletionSource<T> ts, ValueTask<T> task)
             {
                 try
@@ -343,7 +330,7 @@ namespace Iviz.Core
                 {
                     ts.TrySetException(e);
                 }
-            }       
+            }
         }
 
         /// <summary>
@@ -357,7 +344,7 @@ namespace Iviz.Core
             var ts = TaskUtils.CreateCompletionSource();
             Post(() => TrySet(ts, action));
             return ts.Task;
-            
+
             static void TrySet(TaskCompletionSource ts, Action action)
             {
                 try
@@ -369,7 +356,7 @@ namespace Iviz.Core
                 {
                     ts.TrySetException(e);
                 }
-            }          
+            }
         }
 
         /// <summary>

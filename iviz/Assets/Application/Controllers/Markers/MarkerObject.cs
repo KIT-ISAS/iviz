@@ -330,19 +330,19 @@ namespace Iviz.Controllers
         static int? CopyPoints(int pointsLength, Point[] srcPoints, ColorRGBA[] srcColors, MeshTrianglesDisplay mesh)
         {
             using var points = new Rent<Vector3>(pointsLength);
-            ref Point srcPtr = ref srcPoints[0];
-            ref Vector3 dstPtr = ref points.Array[0];
-            for (int i = pointsLength; i > 0; i--)
+            var dstPoints = points.Array;
+
+            for (int i = 0; i < pointsLength; i++)
             {
+                ref readonly Point srcPtr = ref srcPoints[i];
+                ref Vector3 dstPtr = ref dstPoints[i];
+                
                 srcPtr.Ros2Unity(out dstPtr);
                 if (dstPtr.IsInvalid()) // unlikely but needed!
                 {
                     mesh.Clear();
                     return pointsLength - i;
                 }
-
-                srcPtr = ref srcPtr.Plus(1);
-                dstPtr = ref dstPtr.Plus(1);
             }            
             
             var colors = MemoryMarshal.Cast<ColorRGBA, Color>(srcColors);

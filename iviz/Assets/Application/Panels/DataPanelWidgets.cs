@@ -19,13 +19,13 @@ namespace Iviz.App
         GameObject Statics => statics.AssertNotNull(nameof(statics));
         GameObject NonStatics => nonstatics.AssertNotNull(nameof(nonstatics));
 
-        public TrashButtonWidget AddTrashButton()
+        public SimpleButtonWidget AddTrashButton()
         {
             var o = Resource.Widgets.TrashButton.Instantiate(Statics.transform);
             var oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, YCloseButton);
             o.SetActive(true);
-            return o.AssertHasComponent<TrashButtonWidget>(nameof(o));
+            return o.AssertHasComponent<SimpleButtonWidget>(nameof(o));
         }
 
         public ToggleButtonWidget AddHideButton()
@@ -37,22 +37,22 @@ namespace Iviz.App
             return o.AssertHasComponent<ToggleButtonWidget>(nameof(o));
         }
         
-        public TrashButtonWidget AddCloseButton()
+        public SimpleButtonWidget AddCloseButton()
         {
             var o = Resource.Widgets.CloseButton.Instantiate(Statics.transform);
             var oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, YCloseButton);
             o.SetActive(true);
-            return o.AssertHasComponent<TrashButtonWidget>(nameof(o));
+            return o.AssertHasComponent<SimpleButtonWidget>(nameof(o));
         }
 
-        public TrashButtonWidget AddResetButton()
+        public SimpleButtonWidget AddResetButton()
         {
             var o = Resource.Widgets.ResetButton.Instantiate(Statics.transform);
             var oTransform = (RectTransform) o.transform;
             oTransform.anchoredPosition = new Vector2(oTransform.anchoredPosition.x, YCloseButton);
             o.SetActive(true);
-            return o.AssertHasComponent<TrashButtonWidget>(nameof(o));
+            return o.AssertHasComponent<SimpleButtonWidget>(nameof(o));
         }
 
         public HeadTitleWidget AddHeadTitleWidget(string label)

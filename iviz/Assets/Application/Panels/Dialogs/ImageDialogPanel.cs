@@ -12,7 +12,7 @@ namespace Iviz.App
     {
         [SerializeField] TMP_Text? text;
         [SerializeField] RawImage? previewImage;
-        [SerializeField] TrashButtonWidget? closeButton;
+        [SerializeField] SimpleButtonWidget? closeButton;
         [SerializeField] ImageCursorHandler? cursorHandler;
 
         Vector2 startRect;
@@ -20,7 +20,7 @@ namespace Iviz.App
 
         TMP_Text Text => text.AssertNotNull(nameof(text));
         RawImage PreviewImage => previewImage.AssertNotNull(nameof(previewImage));
-        TrashButtonWidget CloseButton => closeButton.AssertNotNull(nameof(closeButton));
+        SimpleButtonWidget CloseButton => closeButton.AssertNotNull(nameof(closeButton));
         ImageCursorHandler CursorHandler => cursorHandler.AssertNotNull(nameof(cursorHandler));
 
         public event Action? Closed;

@@ -6,7 +6,7 @@
     public sealed class InteractiveMarkerModulePanel : ListenerModulePanel
     {
         public ListenerWidget FullListener { get; private set; }
-        public TrashButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
         public ToggleWidget DescriptionsVisible { get; private set; }
         public ColorPickerWidget Tint { get; private set; }
         public ToggleWidget TriangleListFlipWinding { get; private set; }

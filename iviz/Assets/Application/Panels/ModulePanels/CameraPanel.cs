@@ -3,7 +3,7 @@ namespace Iviz.App
 {
     public sealed class CameraPanel : ModulePanel
     {
-        public TrashButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
         public FrameWidget Frame { get; private set; }
         public SliderWidget Fov { get; private set; }
         public Vector3MultiWidget RollPitchYaw { get; private set; }

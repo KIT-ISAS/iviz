@@ -8,9 +8,9 @@ namespace Iviz.App
 {
     public sealed class ConsoleDialogPanel : DetachableDialogPanel
     {
-        [SerializeField] TrashButtonWidget? close;
+        [SerializeField] SimpleButtonWidget? close;
         [SerializeField] ToggleButtonWidget? pause;
-        [SerializeField] TrashButtonWidget? reset;
+        [SerializeField] SimpleButtonWidget? reset;
         [SerializeField] InputFieldWithHintsWidget? fromField;
         [SerializeField] DropdownWidget? logLevel;
         [SerializeField] DropdownWidget? timeFormat;
@@ -18,9 +18,9 @@ namespace Iviz.App
         [SerializeField] TMP_Text? text;
         [SerializeField] TMP_Text? bottomText;
 
-        public TrashButtonWidget Close => close.AssertNotNull(nameof(close));
+        public SimpleButtonWidget Close => close.AssertNotNull(nameof(close));
         public ToggleButtonWidget Pause => pause.AssertNotNull(nameof(pause));
-        public TrashButtonWidget Reset => reset.AssertNotNull(nameof(reset));
+        public SimpleButtonWidget Reset => reset.AssertNotNull(nameof(reset));
         public InputFieldWithHintsWidget FromField => fromField.AssertNotNull(nameof(fromField));
         public DropdownWidget LogLevel => logLevel.AssertNotNull(nameof(logLevel));
         DropdownWidget TimeFormat => timeFormat.AssertNotNull(nameof(timeFormat));
@@ -28,6 +28,11 @@ namespace Iviz.App
         public TMP_Text Text => text.AssertNotNull(nameof(text));
         public TMP_Text BottomText => bottomText.AssertNotNull(nameof(bottomText));
 
+        void Awake()
+        {
+            Text.vertexBufferAutoSizeReduction = false;
+        }
+        
         public override void ClearSubscribers()
         {
             Close.ClearSubscribers();

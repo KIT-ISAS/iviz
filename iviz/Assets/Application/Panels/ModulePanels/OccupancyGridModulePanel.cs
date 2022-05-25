@@ -8,7 +8,7 @@ namespace Iviz.App
     /// </summary>
     public sealed class OccupancyGridModulePanel : ListenerModulePanel
     {
-        public TrashButtonWidget CloseButton { get; private set; }
+        public SimpleButtonWidget CloseButton { get; private set; }
 
         public FrameWidget Frame { get; private set; }
         public DropdownWidget Colormap { get; private set; }

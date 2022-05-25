@@ -12,9 +12,9 @@ namespace Iviz.App
     public sealed class UpperCanvasPanel : MonoBehaviour
     {
         [SerializeField] DataLabelWidget? masterUriStr;
-        [SerializeField] TrashButtonWidget? masterUriButton;
-        [SerializeField] TrashButtonWidget? connectButton;
-        [SerializeField] TrashButtonWidget? stopButton;
+        [SerializeField] SimpleButtonWidget? masterUriButton;
+        [SerializeField] SimpleButtonWidget? connectButton;
+        [SerializeField] SimpleButtonWidget? stopButton;
         [SerializeField] Image? topPanel;
         [SerializeField] Button? save;
         [SerializeField] Button? load;
@@ -40,9 +40,9 @@ namespace Iviz.App
         [SerializeField] Sprite? questionSprite;
 
         public DataLabelWidget MasterUriStr => masterUriStr.AssertNotNull(nameof(masterUriStr));
-        public TrashButtonWidget MasterUriButton => masterUriButton.AssertNotNull(nameof(masterUriButton));
-        public TrashButtonWidget ConnectButton => connectButton.AssertNotNull(nameof(connectButton));
-        public TrashButtonWidget StopButton => stopButton.AssertNotNull(nameof(stopButton));
+        public SimpleButtonWidget MasterUriButton => masterUriButton.AssertNotNull(nameof(masterUriButton));
+        public SimpleButtonWidget ConnectButton => connectButton.AssertNotNull(nameof(connectButton));
+        public SimpleButtonWidget StopButton => stopButton.AssertNotNull(nameof(stopButton));
         public Image TopPanel => topPanel.AssertNotNull(nameof(topPanel));
         public Button Save => save.AssertNotNull(nameof(save));
         public Button Load => load.AssertNotNull(nameof(load));

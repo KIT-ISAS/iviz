@@ -23,7 +23,7 @@ namespace Iviz.Controllers
 
         readonly TfConfiguration config = new();
         readonly ConcurrentQueue<(TransformStamped[] frame, bool isStatic)> incomingMessages = new();
-        readonly ConcurrentBag<TransformStamped> outgoingMessages = new();
+        readonly ConcurrentQueue<TransformStamped> outgoingMessages = new();
         uint tfSeq;
 
         static TfListener? instance;
@@ -242,7 +242,7 @@ namespace Iviz.Controllers
             t.Header.FrameId = parentFrameId;
             t.ChildFrameId = TfModule.ResolveFrameId(childFrameId);
             localPose.Unity2Ros(out t.Transform);
-            outgoingMessages.Add(t);
+            outgoingMessages.Enqueue(t);
         }
 
         void DoPublish()
@@ -256,7 +256,7 @@ namespace Iviz.Controllers
             var transforms = new TransformStamped[count];
             foreach (ref var transform in transforms.AsSpan())
             {
-                outgoingMessages.TryTake(out transform);
+                outgoingMessages.TryDequeue(out transform);
             }
 
             if (RosManager.IsConnected)

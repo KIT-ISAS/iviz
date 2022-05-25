@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Iviz.App
 {
-    public sealed class ToggleButtonWidget : TrashButtonWidget
+    public sealed class ToggleButtonWidget : SimpleButtonWidget
     {
         [SerializeField] Sprite? activeSprite;
         [SerializeField] Sprite? inactiveSprite;
