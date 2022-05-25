@@ -20,7 +20,7 @@ namespace Iviz.App
         TMP_InputField Text => text.AssertNotNull(nameof(text));
         TMP_Text PlaceholderObject => placeholder.AssertNotNull(nameof(placeholder));
         Image TextImage => textImage.AssertNotNull(nameof(textImage));
-        
+
         public string Title
         {
             get => Label.text;
@@ -70,27 +70,26 @@ namespace Iviz.App
         }
 
         public event Action<string>? ValueChanged;
+        public event Action<string>? Submit;
         public event Action<string>? EndEdit;
 
         void Awake()
         {
             Text.onValueChanged.AddListener(OnValueChanged);
-            Text.onSubmit.AddListener(OnEndEdit);
-        }
-        
-        void OnValueChanged(string f)
-        {
-            ValueChanged?.Invoke(f);
+            Text.onSubmit.AddListener(OnSubmit);
+            Text.onEndEdit.AddListener(OnEndEdit);
         }
 
-        void OnEndEdit(string f)
-        {
-            EndEdit?.Invoke(f);
-        }
+        void OnValueChanged(string f) => ValueChanged?.Invoke(f);
+
+        void OnSubmit(string f) => Submit?.Invoke(f);
+        
+        void OnEndEdit(string f) => EndEdit?.Invoke(f);
 
         public void ClearSubscribers()
         {
             ValueChanged = null;
+            Submit = null;
             EndEdit = null;
         }
 
@@ -132,7 +131,7 @@ namespace Iviz.App
 
         public InputFieldWidget SubscribeEndEdit(Action<string> f)
         {
-            EndEdit += f;
+            Submit += f;
             return this;
         }
     }

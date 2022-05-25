@@ -133,7 +133,7 @@ namespace Iviz.App
                     !string.IsNullOrWhiteSpace(RobotController.Robot?.Name) &&
                     !Resource.Internal.ContainsRobot(name);
             };
-            panel.SourceParameter.EndEdit += f =>
+            panel.SourceParameter.Submit += f =>
             {
                 RobotController.TryLoadFromSourceParameter(f);
                 panel.SavedRobotName.Index = 0;
@@ -172,8 +172,8 @@ namespace Iviz.App
                 }
             };
 
-            panel.Prefix.EndEdit += f => RobotController.FramePrefix = f;
-            panel.Suffix.EndEdit += f => RobotController.FrameSuffix = f;
+            panel.Prefix.Submit += f => RobotController.FramePrefix = f;
+            panel.Suffix.Submit += f => RobotController.FrameSuffix = f;
             panel.ResetButton.Clicked += RobotController.ResetController;
 
             RobotController.UpdateStartTaskStatus();

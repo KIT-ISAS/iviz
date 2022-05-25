@@ -32,7 +32,7 @@ namespace Iviz.App
             panel.TfLog.Flush();
             panel.TfLog.UpdateFrameButtons();
 
-            panel.FrameName.EndEdit += _ => OnCreateFrameClicked();
+            panel.FrameName.Submit += _ => OnCreateFrameClicked();
             panel.CreateFrameClicked += OnCreateFrameClicked;
 
             panel.ShowOnlyUsed.Value = !TfModule.Instance.KeepAllFrames;

@@ -126,7 +126,7 @@ namespace Iviz.App
             panel.ServerMode.State = RosManager.Server.IsActive;
 
             panel.Close.Clicked += Close;
-            panel.MyUri.EndEdit += text =>
+            panel.MyUri.Submit += text =>
             {
                 string trimmed = text.Trim();
                 var newUri = (Uri.TryCreate(trimmed, UriKind.Absolute, out Uri uri) && uri.Scheme == "http")
@@ -134,7 +134,7 @@ namespace Iviz.App
                     : null;
                 MyUri = newUri;
             };
-            panel.MasterUri.EndEdit += text =>
+            panel.MasterUri.Submit += text =>
             {
                 string trimmed = text.Trim();
                 MasterUri = (Uri.TryCreate(trimmed, UriKind.Absolute, out Uri uri) && uri.Scheme == "http")
@@ -154,7 +154,7 @@ namespace Iviz.App
                 MyUri = newCallerUri;
                 panel.MyUri.Value = newCallerUri.ToString();
             };
-            panel.MyId.EndEdit += text =>
+            panel.MyId.Submit += text =>
             {
                 string trimmed = text.Trim();
                 MyId = RosClient.IsValidResourceName(trimmed) ? trimmed : null;

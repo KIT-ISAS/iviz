@@ -4977,6 +4977,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7930439330908007830}
     m_Modifications:
+    - target: {fileID: 5144602517500001044, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6182295504228410612, guid: 915e1318acad4b24995b16b667eb1f64,
         type: 3}
       propertyPath: m_FontData.m_Alignment
@@ -5121,6 +5126,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9047866823016282429, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 915e1318acad4b24995b16b667eb1f64, type: 3}
@@ -5421,6 +5431,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3911987668333436324}
     m_Modifications:
+    - target: {fileID: 5144602517500001044, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6182295504228410612, guid: 915e1318acad4b24995b16b667eb1f64,
         type: 3}
       propertyPath: m_FontData.m_Alignment
@@ -5565,6 +5580,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9047866823016282429, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 915e1318acad4b24995b16b667eb1f64, type: 3}
@@ -5581,6 +5601,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8964221156062346981}
     m_Modifications:
+    - target: {fileID: 5144602517500001044, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6182295504228410612, guid: 915e1318acad4b24995b16b667eb1f64,
         type: 3}
       propertyPath: m_FontData.m_Alignment
@@ -5725,6 +5750,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9047866823016282429, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 915e1318acad4b24995b16b667eb1f64, type: 3}
@@ -6695,6 +6725,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 7888473067324355983}
     m_Modifications:
+    - target: {fileID: 5144602517500001044, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6182295504228410612, guid: 915e1318acad4b24995b16b667eb1f64,
         type: 3}
       propertyPath: m_FontData.m_Alignment
@@ -6839,6 +6874,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9047866823016282429, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 915e1318acad4b24995b16b667eb1f64, type: 3}
@@ -7372,6 +7412,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8000475653331243164}
     m_Modifications:
+    - target: {fileID: 5144602517500001044, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6182295504228410612, guid: 915e1318acad4b24995b16b667eb1f64,
         type: 3}
       propertyPath: m_FontData.m_Alignment
@@ -7516,6 +7561,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9047866823016282429, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 915e1318acad4b24995b16b667eb1f64, type: 3}
@@ -7532,6 +7582,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2106969963970774783}
     m_Modifications:
+    - target: {fileID: 5144602517500001044, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6182295504228410612, guid: 915e1318acad4b24995b16b667eb1f64,
         type: 3}
       propertyPath: m_FontData.m_Alignment
@@ -7676,6 +7731,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9047866823016282429, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 915e1318acad4b24995b16b667eb1f64, type: 3}
@@ -7888,6 +7948,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 271633214228206676}
     m_Modifications:
+    - target: {fileID: 5144602517500001044, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6182295504228410612, guid: 915e1318acad4b24995b16b667eb1f64,
         type: 3}
       propertyPath: m_FontData.m_Alignment
@@ -8032,6 +8097,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9047866823016282429, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 915e1318acad4b24995b16b667eb1f64, type: 3}
@@ -8048,6 +8118,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2455772428426981041}
     m_Modifications:
+    - target: {fileID: 5144602517500001044, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6182295504228410612, guid: 915e1318acad4b24995b16b667eb1f64,
         type: 3}
       propertyPath: m_FontData.m_Alignment
@@ -8192,6 +8267,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9047866823016282429, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 915e1318acad4b24995b16b667eb1f64, type: 3}
@@ -8404,6 +8484,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 558492898296723075}
     m_Modifications:
+    - target: {fileID: 5144602517500001044, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6182295504228410612, guid: 915e1318acad4b24995b16b667eb1f64,
         type: 3}
       propertyPath: m_FontData.m_Alignment
@@ -8548,6 +8633,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9047866823016282429, guid: 915e1318acad4b24995b16b667eb1f64,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 915e1318acad4b24995b16b667eb1f64, type: 3}

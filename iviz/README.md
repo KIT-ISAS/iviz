@@ -30,7 +30,7 @@ Here are some instructions on how to get started:
 * You should now see the **Connection Dialog**.
     - In **Master URI** write the URL of the master, i.e., where roscore is running. This is the content usually stored in the environment variable _ROS_MASTER_URI_.
         * The arrow icon will show you previously used masters.
-    - Optional: In **My URI** write the URL you want for your device. The URL should have the form http://_hostname_:port/
+    - Optional: In **My Caller URI** write the URL you want for your device. The URL should have the form http://_hostname_:port/
         * Your hostname is the content usually stored in _ROS_HOSTNAME_ or _ROS_IP_.
         * The port (7613) can be set to anything, just make sure it's not being used by another application.
         * The hostname and port should be accessible to the ROS nodes that you want to contact. Do not use something like http://localhost:7613, as this will cause other computers to try to connect to themselves instead of you.
@@ -46,8 +46,8 @@ To move around:
 * On a mobile device: Tap with one finger and drag to rotate the camera. Tap with two fingers and move to translate the camera. Pinch to zoom in and out.
 * On a PC: Hold down the right mouse button and move the mouse to rotate the camera. While holding the right button down, press W-A-S-D or Q-E to translate the camera. (This is the same behaviour as in Unity)
 
-The lines at the top-right tell you the current orientation of the camera (red is +X, green is +Y, purple is +Z) in relation to the fixed frame.
-If you get lost, you can click on the TF button on the left, and then on the frame panel on the top right (green).
+The axis frame at the top-right tell you the current orientation of the camera (red is +X, green is +Y, purple is +Z) in relation to the fixed frame.
+If you get lost, you can click on the TF button on the left, and then click on the frame panel on the top right (the green one).
 It will take you back to the map frame, positioned on the origin - or whatever frame you chose as the fixed frame.
 Many modules also have frame panels in green, you can click them to go to where the module is centered.
 
@@ -59,7 +59,8 @@ Click on the lock on the bottom of the screen to restore the camera.
 
 In iviz, modules are entities that display visual data, usually from ROS streams. 
 They are represented by the rectangular buttons on the left side, right below the two rows of dialog buttons.
-When you start iviz, two modules are started by default: TF and Grid.
+When you start iviz, two modules are started by default: TF (in charge of the transform frames) and Grid (the floor plane).
+All modules except TF can also be removed.
 
 In order to add a module for a ROS topic, click on the **+ Topic** dialog.
 You will be shown a list of available topics you can add.
@@ -114,12 +115,20 @@ In some data panels, on the bottom in darker blue, are **Publisher Widgets** sho
 
 ### Connection Troubleshooting
 
-Notes:
-* An important problem in ROS networks is usually a lack of **DNS resolving**.
-  For example, the Network dialog will show URIs in the form of "http://node-abc:XXXX/".
-  The address of these nodes is usually stored in '/etc/hosts' files, but mobile devices do not have this system.
-  To solve this, you can add an entry in the **Aliases** tab of the **System** dialog, which has an equivalent function.
-* If you are able to listen to other nodes publishing messages, but all of your iviz publishers show zero subscribers, then there is most likely a firewall problem preventing incoming connections.
+If you are having trouble with connections, you can try the following:
+
+* The **Network** dialog contains information about which nodes iviz is connected to. 
+If the app is trying to connect to a node and failing, this dialog can give an idea of why it's happening.
+
+![image](../wiki_files/network-dialog.png)
+* In ROS networks **DNS resolving** is very important, as we need to know which IP correspond to which hostname.
+As some networks are improvised, it is often required to put these entries in /etc/hosts, which may not exist in a mobile device.
+To address this, you can use the **Aliases** tab in the **System** dialog.
+For example, the previous picture has a node called 'telepresence-virtualbox', whose IP we add as follows.
+
+![image](../wiki_files/system-aliases.png)
+* If you are able to listen to other nodes publishing messages, but all of your iviz publishers show zero subscribers, then there may be a firewall problem preventing incoming connections.
+Or maybe the hostname you gave in **My Caller Uri** is not reachable.
 
 
 ### Settings
@@ -157,17 +166,19 @@ On mobile, it will show the clock instead of the used memory.
 You can hide the GUI by pressing the **Hide GUI** button with the arrows: in PCs it is located at the center bottom, while on mobile it is located on the left side, next to the __Module Panel__.  
 Once the GUI is hidden, the button becomes semitransparent, and you can click it back to reopen the GUI.
 
-### Draggable Dialogs
+![image](../wiki_files/panels.png)
 
-## 5. Connections
+### Detachable Dialogs
 
+
+![image](../wiki_files/draggable-dialogs.png)
 
 
 ## 6. Working with Transform Frames
 
 The TF module automatically subscribes itself to /tf and /tf_static when the client is connected, and will by default display every transformation frame.
 iviz does not enforce a unique root frame, and all frames without parents are assumed to be on the 'origin'.
-As mentioned before, on panels that deal with transform frames, there is a green panel showing the latest frame referenced by a message header.
+On panels that deal with transform frames, there is a green panel showing the latest frame referenced by a message header.
 You can click on it to move the camera to that frame.
 
 Of interest when working with frames are two modules:

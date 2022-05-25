@@ -85,7 +85,7 @@ namespace Iviz.App
             panel.Color.SetHints(topics);
             panel.Depth.SetHints(topics);
 
-            panel.Color.EndEdit += f =>
+            panel.Color.Submit += f =>
             {
                 controller.ColorTopic = f.Length == 0 || f[0] == NoneStr[0] ? "" : f;
                 panel.ColorPreview.UpdateMaterial();
@@ -96,7 +96,7 @@ namespace Iviz.App
                     colorDialogData.Title = SanitizeTitle(controller.ColorTopic);
                 }
             };
-            panel.Depth.EndEdit += f =>
+            panel.Depth.Submit += f =>
             {
                 controller.DepthTopic = f.Length == 0 || f[0] == NoneStr[0] ? "" : f;
                 UpdateModuleButton();

@@ -60,8 +60,8 @@ namespace Iviz.App
             panel.JointSuffix.Value = listener.MsgJointSuffix;
             panel.TrimFromEnd.Value = listener.MsgTrimFromEnd;
 
-            panel.JointPrefix.EndEdit += f => { listener.MsgJointPrefix = f; };
-            panel.JointSuffix.EndEdit += f => { listener.MsgJointSuffix = f; };
+            panel.JointPrefix.Submit += f => { listener.MsgJointPrefix = f; };
+            panel.JointSuffix.Submit += f => { listener.MsgJointSuffix = f; };
             panel.TrimFromEnd.ValueChanged += f => { listener.MsgTrimFromEnd = (int)f; };
             panel.Robot.ValueChanged += (i, s) =>
             {

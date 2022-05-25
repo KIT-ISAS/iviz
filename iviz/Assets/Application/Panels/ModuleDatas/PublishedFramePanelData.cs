@@ -58,7 +58,7 @@ namespace Iviz.App
             };
 
             panel.CloseButton.Clicked += Close;
-            panel.ParentId.EndEdit += f =>
+            panel.ParentId.Submit += f =>
             {
                 var parentFrame = string.IsNullOrWhiteSpace(f) || f == TfModule.OriginFrameId
                     ? TfModule.OriginFrame

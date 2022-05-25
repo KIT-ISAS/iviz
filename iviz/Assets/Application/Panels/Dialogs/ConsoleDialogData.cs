@@ -87,7 +87,7 @@ namespace Iviz.App
                 minLogLevel = LevelFromIndex(f);
                 ProcessLog(true);
             };
-            dialog.FromField.EndEdit += f =>
+            dialog.FromField.Submit += f =>
             {
                 id = f;
                 idCode = GetIdCode(f);
