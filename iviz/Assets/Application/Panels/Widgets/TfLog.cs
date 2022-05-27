@@ -45,7 +45,7 @@ namespace Iviz.App
         Button Publishing => publishing.AssertNotNull(nameof(publishing));
         Button Trail => trail.AssertNotNull(nameof(trail));
         Button LockPivot => lockPivot.AssertNotNull(nameof(lockPivot));
-        Button FixedFrame => fixedFrame.AssertNotNull(nameof(fixedFrame));
+        Button MakeFixed => fixedFrame.AssertNotNull(nameof(fixedFrame));
         DropdownWidget ShowAs => showAs.AssertNotNull(nameof(showAs));
         DropdownWidget PoseAs => poseAs.AssertNotNull(nameof(poseAs));
         LinkResolver TfLink => tfLink.AssertNotNull(nameof(tfLink));
@@ -99,7 +99,7 @@ namespace Iviz.App
                 Publishing.interactable = interactable;
                 Trail.interactable = interactable;
                 LockPivot.interactable = interactable;
-                FixedFrame.interactable = interactable;
+                MakeFixed.interactable = interactable;
 
                 Flush();
                 value?.Highlight();
@@ -136,6 +136,11 @@ namespace Iviz.App
                 UpdateFrameText();
             };
 
+            MakeFixed.onClick.AddListener(OnMakeFixedClicked);
+            Trail.onClick.AddListener(OnTrailClicked);
+            LockPivot.onClick.AddListener(OnLockPivotClicked);
+            Publishing.onClick.AddListener(OnPublishingClicked);
+
             TfModule.ResetFrames += OnResetFrames;
         }
 
@@ -168,7 +173,7 @@ namespace Iviz.App
             Publishing.interactable = false;
             Trail.interactable = false;
             LockPivot.interactable = false;
-            FixedFrame.interactable = false;
+            MakeFixed.interactable = false;
 
             UpdateFrameButtons();
         }
@@ -344,7 +349,7 @@ namespace Iviz.App
             }
         }
 
-        public void OnGotoClicked()
+        void OnGotoClicked()
         {
             if (SelectedFrame == null)
             {
@@ -373,7 +378,7 @@ namespace Iviz.App
             UpdateFrameButtons();
         }
 
-        public void OnTrailClicked()
+        void OnTrailClicked()
         {
             if (SelectedFrame != null)
             {
@@ -383,7 +388,7 @@ namespace Iviz.App
             UpdateFrameButtons();
         }
 
-        public void OnFixedFrameClicked()
+        void OnMakeFixedClicked()
         {
             if (SelectedFrame != null)
             {
@@ -394,7 +399,7 @@ namespace Iviz.App
             UpdateFrameButtons();
         }
 
-        public void OnLockPivotClicked()
+        void OnLockPivotClicked()
         {
             GuiInputModule.Instance.OrbitCenterOverride =
                 GuiInputModule.Instance.OrbitCenterOverride == SelectedFrame
@@ -405,7 +410,7 @@ namespace Iviz.App
             Close?.Invoke();
         }
 
-        public void OnLock1PVClicked()
+        void OnLock1PVClicked()
         {
             GuiInputModule.Instance.CameraViewOverride =
                 GuiInputModule.Instance.CameraViewOverride == SelectedFrame

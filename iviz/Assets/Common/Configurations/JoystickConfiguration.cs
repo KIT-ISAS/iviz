@@ -1,6 +1,6 @@
-using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Roslib.Utils;
 
 namespace Iviz.Common.Configurations
 {
@@ -13,7 +13,7 @@ namespace Iviz.Common.Configurations
     }
     
     [DataContract]
-    public sealed class JoystickConfiguration : IConfiguration
+    public sealed class JoystickConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string JoyTopic { get; set; } = "";
         [DataMember] public bool PublishJoy { get; set; }

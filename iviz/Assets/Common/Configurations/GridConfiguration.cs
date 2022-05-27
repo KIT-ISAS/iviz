@@ -2,6 +2,7 @@ using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
+using Iviz.Roslib.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -16,7 +17,7 @@ namespace Iviz.Common.Configurations
     }
 
     [DataContract]
-    public sealed class GridConfiguration : IConfiguration
+    public sealed class GridConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.Grid;

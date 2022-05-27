@@ -3,11 +3,12 @@
 using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs.StdMsgs;
+using Iviz.Roslib.Utils;
 
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class InteractiveMarkerConfiguration : IConfigurationWithTopic
+    public sealed class InteractiveMarkerConfiguration : JsonToString, IConfigurationWithTopic
     {
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public bool DescriptionsVisible { get; set; }

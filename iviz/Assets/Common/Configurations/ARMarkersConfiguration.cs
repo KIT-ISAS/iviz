@@ -3,7 +3,6 @@
 using System;
 using System.Runtime.Serialization;
 using Iviz.Roslib.Utils;
-using JetBrains.Annotations;
 
 namespace Iviz.Common
 {

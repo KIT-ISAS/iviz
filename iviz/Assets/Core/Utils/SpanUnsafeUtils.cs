@@ -174,5 +174,8 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref Point Plus(this ref Point ptr, int i) => ref Unsafe.Add(ref ptr, i);
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref R16 Plus(this ref R16 ptr, int i) => ref Unsafe.Add(ref ptr, i);
     }
 }

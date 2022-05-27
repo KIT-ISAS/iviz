@@ -3,11 +3,12 @@
 using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs.StdMsgs;
+using Iviz.Roslib.Utils;
 
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class RobotConfiguration : IConfiguration
+    public sealed class RobotConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string SourceParameter { get; set; } = "";
         [DataMember] public string SavedRobotName { get; set; } = "";

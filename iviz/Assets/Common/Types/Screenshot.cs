@@ -84,7 +84,7 @@ namespace Iviz.Common
 
         public override string ToString()
         {
-            return $"[Screenshot width={Width.ToString()} height={Height.ToString()} At={CameraPose.ToString()}]";
+            return $"[{nameof(Screenshot)} width={Width.ToString()} height={Height.ToString()} At={CameraPose.ToString()}]";
         }
     }
 }

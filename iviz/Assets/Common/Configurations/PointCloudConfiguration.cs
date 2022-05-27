@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.Serialization;
+using Iviz.Roslib.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
@@ -14,7 +15,7 @@ namespace Iviz.Common.Configurations
     }
 
     [DataContract]
-    public sealed class PointCloudConfiguration : IConfigurationWithTopic
+    public sealed class PointCloudConfiguration : JsonToString, IConfigurationWithTopic
     {
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string IntensityChannel { get; set; } = "z";

@@ -83,6 +83,7 @@ namespace Iviz.App
         public ConnectionDialogData()
         {
             panel = DialogPanelManager.GetPanelByType<ConnectionDialogPanel>(DialogPanelType.Connection);
+            panel.LineLog.Text.vertexBufferAutoSizeReduction = false;
             RosLogger.LogInternal += OnLogInternal;
         }
 

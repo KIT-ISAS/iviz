@@ -20,7 +20,7 @@ namespace Iviz.App
         readonly List<string> lines = new();
         bool active = true;
 
-        TMP_Text Text => text.AssertNotNull(nameof(text));
+        public TMP_Text Text => text.AssertNotNull(nameof(text));
 
         public bool Active
         {
@@ -60,7 +60,7 @@ namespace Iviz.App
 
             if (lines.Count == 0)
             {
-                Text.SetText("");
+                Text.text = "";
                 return;
             }
 

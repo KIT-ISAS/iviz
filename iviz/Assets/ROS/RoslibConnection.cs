@@ -24,20 +24,19 @@ namespace Iviz.Ros
 {
     public sealed class RoslibConnection : RosConnection, Iviz.Displays.IServiceProvider
     {
-        static readonly BriefTopicInfo[] EmptyTopics = Array.Empty<BriefTopicInfo>();
-        static readonly string[] EmptyParameters = Array.Empty<string>();
+        static BriefTopicInfo[] EmptyTopics => Array.Empty<BriefTopicInfo>();
+        static string[] EmptyParameters => Array.Empty<string>();
         static readonly Random Random = Defaults.Random;
-        
-        //readonly ConcurrentDictionary<int, IRosPublisher?> publishers = new();
+
         readonly IRosPublisher?[] publishers = new IRosPublisher[256];
         readonly Dictionary<string, IAdvertisedTopic> publishersByTopic = new();
         readonly Dictionary<string, IAdvertisedService> servicesByTopic = new();
         readonly Dictionary<string, ISubscribedTopic> subscribersByTopic = new();
         readonly List<(string hostname, string address)> hostAliases = new();
 
-        string[] cachedParameters;
-        BriefTopicInfo[] cachedPublishedTopics;
-        BriefTopicInfo[] cachedTopics;
+        string[] cachedParameters = EmptyParameters;
+        BriefTopicInfo[] cachedPublishedTopics = EmptyTopics;
+        BriefTopicInfo[] cachedTopics = EmptyTopics;
         SystemState? cachedSystemState;
         RosClient? client;
         BagListener? bagListener;
@@ -112,14 +111,7 @@ namespace Iviz.Ros
                 });
             }
         }
-
-        public RoslibConnection()
-        {
-            cachedParameters = EmptyParameters;
-            cachedPublishedTopics = EmptyTopics;
-            cachedTopics = EmptyTopics;
-        }
-
+        
         public void SetHostAliases(IEnumerable<(string hostname, string address)> newHostAliases)
         {
             hostAliases.Clear();
@@ -190,8 +182,10 @@ namespace Iviz.Ros
 
                 var token = runningTs.Token;
 
-                RosClient newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
+                var newClient = await RosClient.CreateAsync(MasterUri, MyId, MyUri, token: token);
                 client = newClient;
+
+                newClient.ShutdownAction = OnShutdown; 
 
                 await Client.CheckOwnUriAsync(token);
 
@@ -257,22 +251,22 @@ namespace Iviz.Ros
             {
                 switch (e)
                 {
-                    case RosUnreachableUriException _:
+                    case RosUnreachableUriException:
                         RosLogger.Internal($"<b>Connection failed:</b> Cannot reach my own URI. Reason: {e.Message}");
                         break;
-                    case RosUriBindingException _:
+                    case RosUriBindingException:
                         RosLogger.Internal(
                             $"<b>Error:</b> Port {MyUri?.Port.ToString()} is already being used by another application. " +
                             $"Maybe another iviz instance is running? Try another port!");
                         break;
-                    case RoslibException _:
-                    case TimeoutException _:
-                    case XmlRpcException _:
+                    case RoslibException:
+                    case TimeoutException:
+                    case XmlRpcException:
                     {
                         RosLogger.Internal("<b>Connection failed:</b>", e);
                         break;
                     }
-                    case OperationCanceledException _:
+                    case OperationCanceledException:
                         RosLogger.Info($"{this}: Connection cancelled!");
                         break;
                     default:
@@ -322,6 +316,17 @@ namespace Iviz.Ros
                 RosLogger.Info($"{nameof(RoslibConnection)}: Adding custom host {key} -> {value}");
                 ConnectionUtils.GlobalResolver[key] = value;
             }
+        }
+
+        void OnShutdown(string id, string reason)
+        {
+            Post(() =>
+            {
+                RosLogger.Internal($"Received <b>kill signal</b> from node '{id}'. Reason: {reason}");
+                KeepReconnecting = false;
+                Disconnect();
+                return default;
+            });
         }
 
         void AddConfigHostAliases()
@@ -488,7 +493,7 @@ namespace Iviz.Ros
             }
         }
 
-        Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 100), token);
+        static Task RandomDelay(CancellationToken token) => Task.Delay(Random.Next(0, 100), token);
 
         async ValueTask ReAdvertise(IAdvertisedTopic topic, CancellationToken token)
         {
@@ -585,6 +590,10 @@ namespace Iviz.Ros
                 {
                     await AdvertiseImpl(advertiser, token);
                 }
+                catch (OperationCanceledException)
+                {
+                    // ignore
+                }
                 catch (Exception e)
                 {
                     RosLogger.Error($"{this}: Exception during {nameof(Advertise)}()", e);
@@ -656,6 +665,10 @@ namespace Iviz.Ros
                 try
                 {
                     await AdvertiseServiceImpl(service, callback, token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // ignore
                 }
                 catch (Exception e)
                 {
@@ -743,23 +756,17 @@ namespace Iviz.Ros
 
             try
             {
-                msg.RosValidate();
-            }
-            catch (Exception e)
-            {
-                RosLogger.Error($"{this}: Rejecting invalid message", e);
-                return;
-            }
-
-            try
-            {
                 var basePublisher = publishers[id];
                 if (basePublisher is { NumSubscribers: > 0 } and RosPublisher<T> publisher)
                 {
                     publisher.Publish(msg);
                 }
             }
-            catch (Exception e) when (e is not OperationCanceledException)
+            catch (OperationCanceledException)
+            {
+                // ignore
+            }
+            catch (Exception e)
             {
                 RosLogger.Error($"{this}: Exception during {nameof(Publish)}()", e);
             }
@@ -776,7 +783,11 @@ namespace Iviz.Ros
                 {
                     await SubscribeImpl<T>(listener, token);
                 }
-                catch (Exception e) when (e is not OperationCanceledException)
+                catch (OperationCanceledException)
+                {
+                    // ignore
+                }
+                catch (Exception e) 
                 {
                     RosLogger.Error($"{this}: Exception during {nameof(Subscribe)}()", e);
                 }
@@ -826,7 +837,11 @@ namespace Iviz.Ros
                 {
                     await UnadvertiseImpl(advertiser, token);
                 }
-                catch (Exception e) when (e is not OperationCanceledException)
+                catch (OperationCanceledException)
+                {
+                    // ignore
+                }
+                catch (Exception e)
                 {
                     RosLogger.Error($"{this}: Exception during {nameof(Unadvertise)}()", e);
                 }
@@ -868,7 +883,11 @@ namespace Iviz.Ros
                 {
                     await UnsubscribeImpl(subscriber, token);
                 }
-                catch (Exception e) when (e is not OperationCanceledException)
+                catch (OperationCanceledException)
+                {
+                    // ignore
+                }
+                catch (Exception e)
                 {
                     RosLogger.Error($"{this}: Exception during {nameof(Unsubscribe)}()", e);
                 }
@@ -905,7 +924,11 @@ namespace Iviz.Ros
                 {
                     await UnadvertiseServiceImpl(service, token);
                 }
-                catch (Exception e) when (e is not OperationCanceledException)
+                catch (OperationCanceledException)
+                {
+                    // ignore
+                }
+                catch (Exception e)
                 {
                     RosLogger.Error($"{this}: Exception during {nameof(UnadvertiseService)}()", e);
                 }
@@ -957,6 +980,7 @@ namespace Iviz.Ros
             }
             catch (OperationCanceledException)
             {
+                // ignore
             }
             catch (Exception e)
             {
@@ -966,8 +990,7 @@ namespace Iviz.Ros
             return cachedPublishedTopics;
         }
 
-        public BriefTopicInfo[] GetSystemTopicTypes(
-            RequestType type = RequestType.CachedButRequestInBackground)
+        public BriefTopicInfo[] GetSystemTopicTypes(RequestType type = RequestType.CachedButRequestInBackground)
         {
             if (type == RequestType.CachedButRequestInBackground)
             {
@@ -1017,7 +1040,11 @@ namespace Iviz.Ros
                     using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token, internalToken);
                     cachedParameters = await Client.Parameters.GetParameterNamesAsync(tokenSource.Token);
                 }
-                catch (Exception e) when (e is not OperationCanceledException)
+                catch (OperationCanceledException)
+                {
+                    // ignore
+                }
+                catch (Exception e)
                 {
                     RosLogger.Error($"{this}: Exception during {nameof(GetSystemParameterList)}()", e);
                 }
@@ -1096,7 +1123,11 @@ namespace Iviz.Ros
                 tokenSource.CancelAfter(timeoutInMs);
                 cachedSystemState = await Client.GetSystemStateAsync(tokenSource.Token);
             }
-            catch (Exception e) when (e is not OperationCanceledException)
+            catch (OperationCanceledException)
+            {
+                // ignore
+            }
+            catch (Exception e)
             {
                 RosLogger.Error($"{this}: Exception during {nameof(GetSystemStateAsync)}()", e);
             }

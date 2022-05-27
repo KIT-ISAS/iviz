@@ -78,7 +78,6 @@ namespace Iviz.Ros
         {
             if (disposed)
             {
-                //Debug.Log($"{nameof(RosConnection)}: Ignoring enqueued task. Reason: Already disposed.");
                 return;
             }
             

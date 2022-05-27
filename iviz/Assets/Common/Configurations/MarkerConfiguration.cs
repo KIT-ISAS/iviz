@@ -5,12 +5,12 @@ using System.Linq;
 using System.Runtime.Serialization;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Msgs.VisualizationMsgs;
-using Iviz.Tools;
+using Iviz.Roslib.Utils;
 
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class MarkerConfiguration : IConfigurationWithTopic
+    public sealed class MarkerConfiguration : JsonToString, IConfigurationWithTopic
     {
         [DataMember] public string Topic { get; set; } = "";
         [DataMember] public string Type { get; set; } = "";

@@ -1,10 +1,11 @@
 using System.Runtime.Serialization;
 using Iviz.Msgs.StdMsgs;
+using Iviz.Roslib.Utils;
 
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class GridMapConfiguration : IConfigurationWithTopic
+    public sealed class GridMapConfiguration : JsonToString,IConfigurationWithTopic
     {
         [DataMember] public string Id { get; set; } = System.Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.GridMap;

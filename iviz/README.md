@@ -28,15 +28,17 @@ Here are some instructions on how to get started:
 * On the panel at the top-left, right underneath the "- iviz -" label, tap on the address in bold with the arrow at the end.
 
 * You should now see the **Connection Dialog**.
-    - In **Master URI** write the URL of the master, i.e., where roscore is running. This is the content usually stored in the environment variable _ROS_MASTER_URI_.
+    - In **Master URI** write the URL of the master, i.e., where roscore is running. This is the content usually stored in the environment variable ROS_MASTER_URI.
         * The arrow icon will show you previously used masters.
     - Optional: In **My Caller URI** write the URL you want for your device. The URL should have the form http://_hostname_:port/
-        * Your hostname is the content usually stored in _ROS_HOSTNAME_ or _ROS_IP_.
+        * The hostname is the address of your device. It would usually be stored in ROS_HOSTNAME or ROS_IP.
         * The port (7613) can be set to anything, just make sure it's not being used by another application.
         * The hostname and port should be accessible to the ROS nodes that you want to contact. Do not use something like http://localhost:7613, as this will cause other computers to try to connect to themselves instead of you.
+        * The arrow icon will show you all the addresses of your device.
     - Optional: In **My ID** write your ROS id. This is the name of your ROS node. It can be anything, but make sure it is unique in your network.
-* Now tap on the **Connect** button. The application will try to connect to the ROS master, and keep retrying if it does not work. Tap **Stop** to cancel the operation.
-* Once you have connected, the top-left panel should become green. You can now add modules such as topic listeners, robots, watch the TF frames, and so on.
+* Now tap on the **Connect** button. The application will try to connect to the ROS master, and keep retrying if it does not work. 
+Tap **Stop** to cancel the operation.
+* Once you have connected, the top-left panel should become green. You can now start using the app!
 
 ![image](../wiki_files/connection-dialog.png)
 
@@ -51,7 +53,8 @@ If you get lost, you can click on the TF button on the left, and then click on t
 It will take you back to the map frame, positioned on the origin - or whatever frame you chose as the fixed frame.
 Many modules also have frame panels in green, you can click them to go to where the module is centered.
 
-If the frame referenced by the frame panel is moving, you can click and drag the frame panel to the left (into the screen) to **Lock the Camera** onto it.
+If the frame referenced by the frame panel is moving, you can click on the panel and _drag_ it to the left (into the screen).
+This will **Lock the Camera** onto it.
 You will now follow the frame whenever it moves.
 Click on the lock on the bottom of the screen to restore the camera.
 
@@ -90,7 +93,7 @@ Alternatively, you can click on the module button and drag it to the left, away 
 
 ### Connections
 
-At each module that involves a ROS connection, you will see light-blue panels showing the ROS topic and statistics.
+When you click on a module that listens to a ROS topic, you will see light-blue panels on the top right showing the ROS topic and its statistics.
 These are called the **Listener Widgets**.
 An example can be found by clicking on the TF module.
 The cyan panels on the top right are the two listener widgets, one that listens to /tf and one that listens to /tf_static.
@@ -131,8 +134,7 @@ Or maybe the hostname you gave in **My Caller Uri** is not reachable.
 
 Finally, one option you should check out is the **Settings** dialog (the button with the gear icon).
 It presents multiple options that control the quality and CPU usage of the application.
-You can get an idea of how much resources iviz is using by checking the FPS value on the left panel, at the bottom.
-You can set the maximum FPS at 60 if you want a fluid display, but you may also need to lower the graphics quality. 
+You can set the maximum FPS at 60 if you want a fluid display, or you can lower the graphics quality to preserve battery. 
 The CPU usage can also be reduced by lowering the frequency at which network data is being processed.
 The Settings configuration is saved automatically, and will be reused the next time iviz is started.
 
@@ -146,12 +148,12 @@ This is the **Dialog Panel**.
 Clicking on the buttons will open the corresponding dialog in the center of the screen.
 
 Below it is the **Module Panel**.
-It shows the active dialogs as large square buttons.
+It shows the active dialogs as large rectangular buttons.
 For example, the TF module is always present.
 Clicking a module will open the **Data Panel** on the right, showing information for that module.
-Clicking the button again will close it.
+Clicking the module button again will close it.
 You can drag a button to the right (into the screen) to make it invisible in the world.
-You can drag it to the left (away from the screen) to destroy it - but be careful with it!
+You can also drag it to the left (away from the screen) to destroy it - but be careful with it!
 
 Deep below the **Module Panel** is the **Camera Panel**.
 It tells you which view you are in (Virtual View / AR View / whatever).
@@ -217,7 +219,7 @@ When you click on a frame name, it will show you information about it:
 * The frame name (in bold).
 * The parent frame.
 * The position.
-* The rotation in roll-pitch-yaw.
+* The orientation in roll-pitch-yaw.
 
 If you double-click the frame name, the camera will move to center on it.
 
@@ -245,12 +247,28 @@ A workaround for this is to use a child of the UTM frame as the fixed frame.
 
 ### Custom Frames
 
+The remaining two options control how iviz publishes its own frames.
+It consists of two options:
+
+* **Publishing: On/Off**: Tells iviz to take control of a frame, and start publishing it.
+* **Publish Custom**: Creates a new TF frame.
+
+When you take control of a frame or create a new one, a new data panel will appear to the right, **Published Frame**.
+This will let you set the local position and orientation of the frame, together with its parent.
+iviz will keep publishing the pose of the frame in /tf, unless you click **Publishing: Off** to release ownership.
+If you do this, you might want to refresh the frame list (circle button on top) in order to remove the outdated frame.
+
 ![image](../wiki_files/tf-own-dialog.png)
   
 ## 5. Log Dialog
 
 The **Console Log Dialog** is a detachable dialog in charge of presenting messages of iviz and other nodes sent to /rosout.
-It has two widgets:
+On top there are three buttons:
+* **Refresh**: Clears all messages.
+* **Pause/Continue**: Pauses or unpauses the collection of log messages.
+* **Close**: Closes the dialog.
+
+It also has two widgets:
 * **From**:  This limits whose messages will be printed. You can choose between _[All]_, _[None]_, _[Me]_, or a specific node.
 * **Log Level**: This sets the lowest message level to be displayed (such as Debug, Info, Warning, etc.). 
 
@@ -262,8 +280,12 @@ The **Echo Dialog** can be used to display messages from any topic.
 If iviz does not know the message, it will try to reconstruct the definitition based on information exchanged in the handshake.
 Arrays and long strings will be shortened to keep the GUI from being overflowed.
 
-It has two widgets:
-* **Pause** (top right): Use this to pause/unpause the listener.
+On top there are three buttons:
+* **Refresh**: Clears all messages.
+* **Pause/Continue**: Pauses or unpauses the collection of log messages.
+* **Close**: Closes the dialog.
+
+It also has one widgets:
 * **Topic**: Use this to select the topic, or (None) to cancel.
 
 ![image](../wiki_files/echo-dialog.png)
@@ -277,17 +299,18 @@ If this is not desired, simply select (None) as the topic.
 
 ## 8. Model Loader Service and External Models
 
-When working with robots and markers, you will often need to work with 3D assets stored in external files, and probably on a different PC.
-This is problematic with iviz, as you will usually want to run it on an mobile device or on a PC without a ROS installation.
-Instead of copying the files manually, you can simply use the model service node on the PC, which iviz will detect and use automatically whenever an asset file is requested.
+When working with robots and markers, you will often need to work with 3D assets stored in external files, for example in the machine with the ROS master.
+This is problematic, as iviz will usually run on an mobile device without a ROS installation.
+Instead of copying the files manually, you can simply start the model service node on the machine with the ROS assets, and
+iviz will detect the node automatically and it whenever an asset file is requested.
 
-The main way to start the model loader service is to start the app corresponding to your OS in the _iviz_model_service/Binaries_ folder.
-Within it, you can run the precompiled binary _Iviz.ModelService_.
+The easiest way to start the model loader service is to start the _Iviz.ModelService_ program corresponding to your OS in the _iviz_model_service/Binaries_ folder.
 It will look something like this:
 
-  ![image](../wiki_files/model-service-console-2.png)
+![image](../wiki_files/model-service-console-2.png)
 
 Make sure ROS_MASTER_URI is set and your ROS_PACKAGE_PATH variable points to your packages.
+Also don't forget to start the model loader on the machine that has the assets. This may not be the device that's running iviz!
 
 ## 9. Working with Robots
 
@@ -296,14 +319,16 @@ The new robot module will be empty.
 There are two ways to setup a robot:
 * **Load From Source Parameter:** This downloads a URDF from the parameter server. 
   You can write any parameter name you like, or select a parameter from the suggestions (i.e., all entries that include the text 'robot_description').
-* **Load From Saved:** This adds a robot from a list included by default in iviz.
+* **Load From Saved:** This loads a robot from the iviz defaults.
+
+If you need external assets such as 3D models, make sure the model loader service is running! 
 
 Other options include:
 * **Hide**: Use the eye button on the top-middle to hide the robot or make it visible again. 
 * **Trash**: The trash button on the top-right deletes the robot.
 * **Frame**: The widget in green shows the name of the base link frame. Click on it to focus the camera there. 
 Drag it to the left to follow the robot.
-ww* **Attach to TF Frames:** By default the robot only listens to the frame that corresponds to the base link.
+* **Attach to TF Frames:** By default the robot only listens to the frame that corresponds to the base link.
 Enable this to read the TF frames for all links. If you see the robot crumple onto the floor, then the TF frames have not been set.
 * **Save this Robot Locally:** Saves a copy of the robot on the device. The robot can then be loaded from the **Load From Saved** menu.
 
@@ -316,6 +341,12 @@ Hidden within the **Visuals...** collapsible are more options:
 * **Alpha:** Sets the transparency of the robot.
 * **Metallic:** Sets the metallic property of the robot shader. This controls how reflective the robot is.
 * **Smoothness:** Sets the smoothness property of the robot shader. This indicates how 'polished' the robot's surface is.
+
+Finally, hidden in **Prefixes and Suffixes** are two fields.
+These control how links are connected to TF frames.
+If the fields are not empty, then each link read from the robot specification will be adjusted with the given prefix and suffix, and the result will be the TF frame that controls it. 
+Thus, if you have multiple robots of the same type, you can add a prefix and publish a different set of TF frames to target each robot separately. 
+
 
 ![image](../wiki_files/robot_new.png)
 

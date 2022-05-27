@@ -36,6 +36,9 @@ namespace Iviz.Core
         public static void ThrowIndexOutOfRange() => throw new IndexOutOfRangeException();
 
         [DoesNotReturn]
+        public static void ThrowIndexOutOfRange(string message) => throw new IndexOutOfRangeException(message);
+
+        [DoesNotReturn]
         public static void ThrowArgumentOutOfRange(string arg) => throw new ArgumentOutOfRangeException(arg);
 
         [DoesNotReturn]

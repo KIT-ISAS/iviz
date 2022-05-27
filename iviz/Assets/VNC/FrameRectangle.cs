@@ -72,107 +72,12 @@ namespace VNC
 
         void SetPixels3(ReadOnlySpan<byte> src)
         {
-            SetPixels3N(BufferSpan().Cast<uint>(), src.Cast<Rgb>());
+            ConversionUtils.CopyPixelsRgbToRgba(BufferSpan().Cast<uint>(), src.Cast<Rgb>());
         }
 
         void SetPixels2(ReadOnlySpan<byte> src)
         {
-            SetPixels2N(BufferSpan().Cast<uint>(), src.Cast<ushort>());
-        }
-
-        static void SetPixels3N(Span<uint> dst4, ReadOnlySpan<Rgb> src3)
-        {
-            int sizeToWrite = src3.Length;
-            AssertSize(dst4, sizeToWrite);
-
-            var srcI4 = MemoryMarshal.Cast<Rgb, uint>(src3);
-
-            ref uint dstIPtr = ref dst4.GetReference();
-            ref uint srcIPtr = ref srcI4.GetReference();
-
-            while (sizeToWrite > 8)
-            {
-                // stolen from https://stackoverflow.com/questions/2973708/fast-24-bit-array-32-bit-array-conversion
-
-                uint sa = srcIPtr;
-                dstIPtr = sa;
-
-                uint sb = srcIPtr.Plus(1);
-                dstIPtr.Plus(1) = (sa >> 24) | (sb << 8);
-
-                uint sc = srcIPtr.Plus(2);
-                dstIPtr.Plus(2) = (sb >> 16) | (sc << 16);
-                dstIPtr.Plus(3) = sc >> 8;
-
-                // but twice!
-
-                uint sd = srcIPtr.Plus(3);
-                dstIPtr.Plus(4) = sd;
-
-                uint se = srcIPtr.Plus(4);
-                dstIPtr.Plus(5) = (sd >> 24) | (se << 8);
-
-                uint sf = srcIPtr.Plus(5);
-                dstIPtr.Plus(6) = (se >> 16) | (sf << 16);
-                dstIPtr.Plus(7) = sf >> 8;
-
-
-                sizeToWrite -= 8;
-                srcIPtr = ref srcIPtr.Plus(6);
-                dstIPtr = ref dstIPtr.Plus(8);
-            }
-
-            ref var srcPtr = ref Unsafe.As<uint, Rgb>(ref srcIPtr);
-            ref var dstPtr = ref Unsafe.As<uint, Rgba>(ref dstIPtr);
-
-            for (int x = sizeToWrite; x > 0; x--)
-            {
-                dstPtr.rgb = srcPtr; // dstPtr->rgb = *srcPtr;
-                srcPtr = ref Unsafe.Add(ref srcPtr, 1); // srcPtr++;
-                dstPtr = ref Unsafe.Add(ref dstPtr, 1); // dstPtr++;
-            }
-        }
-
-        static void SetPixels2N(Span<uint> dst4, ReadOnlySpan<ushort> src2)
-        {
-            int sizeToWrite = src2.Length;
-            AssertSize(dst4, sizeToWrite);
-
-            ref int dstPtr = ref Unsafe.As<uint, int>(ref dst4.GetReference());
-            ref ushort srcPtr = ref src2.GetReference();
-
-            for (int x = sizeToWrite; x > 0; x--)
-            {
-                // stolen from https://stackoverflow.com/questions/2442576/how-does-one-convert-16-bit-rgb565-to-24-bit-rgb888
-
-                int rgb565 = srcPtr;
-                srcPtr = ref srcPtr.Plus(1); // srcPtr++;
-
-                int rgba = InternalConvert565To888(rgb565);
-
-                dstPtr = rgba;
-                dstPtr = ref dstPtr.Plus(1); // dstPtr++;
-            }
-        }
-
-        internal static int Convert565To888(int rgb565) => InternalConvert565To888(rgb565);
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int InternalConvert565To888(int rgb565)
-        {
-            int r5 = (rgb565 & 0xf800) >> 11;
-            int r8 = (r5 * 527 + 23) >> 6;
-            int rgba = r8;
-
-            int g6 = (rgb565 & 0x07e0) >> 5;
-            int g8 = (g6 * 259 + 33) >> 6;
-            rgba |= g8 << 8;
-
-            int b5 = rgb565 & 0x001f;
-            int b8 = (b5 * 527 + 23) >> 6;
-            rgba |= b8 << 16;
-
-            return rgba;
+            ConversionUtils.CopyPixels565ToRgba(BufferSpan().Cast<uint>(), src.Cast<ushort>());
         }
 
         public bool SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette, in PixelFormat pixelFormat)
@@ -223,14 +128,14 @@ namespace VNC
         void SetPixelsPalette3(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
             var srcPalette3 = palette.Cast<Rgb>();
-            SetPixels3N(MemoryMarshal.Cast<float, uint>(PaletteBuffer), srcPalette3);
+            ConversionUtils.CopyPixelsRgbToRgba(MemoryMarshal.Cast<float, uint>(PaletteBuffer), srcPalette3);
             SetPixelsPalette(indices, PaletteBuffer);
         }
 
         void SetPixelsPalette2(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
             var srcPalette2 = palette.Cast<ushort>();
-            SetPixels2N(MemoryMarshal.Cast<float, uint>(PaletteBuffer), srcPalette2);
+            ConversionUtils.CopyPixels565ToRgba(MemoryMarshal.Cast<float, uint>(PaletteBuffer), srcPalette2);
             SetPixelsPalette(indices, PaletteBuffer);
         }
 
@@ -250,7 +155,7 @@ namespace VNC
             ref byte indicesPtr = ref indices.GetReference();
             ref float dstPtr = ref dst4.GetReference();
 
-            while (sizeToWrite > 8)
+            while (sizeToWrite >= 8)
             {
                 dstPtr = palettePtr.Plus(indicesPtr); // *dstPtr = *(palettePtr + *indicesPtr);
                 dstPtr.Plus(1) = palettePtr.Plus(indicesPtr.Plus(1));
@@ -303,7 +208,7 @@ namespace VNC
         public static void FillRectangle(Span<byte> textureSpan, int textureWidth, in Rectangle rectangle, Rgba rgba)
         {
             uint color = Unsafe.As<Rgba, uint>(ref rgba);
-            if (rgba.rgb.IsGray)
+            if (rgba.IsGray)
             {
                 // fill with byte uses memset
                 FillRectangle1(textureSpan, textureWidth, rectangle, (byte)(color & 0xff));
@@ -401,35 +306,13 @@ namespace VNC
                 }
             }
         }
-
-        [AssertionMethod]
-        static void AssertSize(in Span<uint> span, int size)
-        {
-            if (span.Length < size) ThrowIndexOutOfRange();
-        }
+        
 
         [AssertionMethod]
         static void AssertSize(in ReadOnlySpan<byte> span, int size)
         {
-            if (span.Length < size) ThrowIndexOutOfRange();
+            if (span.Length < size) 
+                ThrowHelper.ThrowIndexOutOfRange("Span array is too short for the given operation");
         }
-
-        [DoesNotReturn]
-        static void ThrowIndexOutOfRange() =>
-            throw new IndexOutOfRangeException("Span array is too short for the given operation");
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct Rgba
-    {
-        public Rgb rgb;
-        readonly byte a;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal readonly struct Rgb
-    {
-        readonly byte r, g, b;
-        public bool IsGray => r == g && g == b;
     }
 }

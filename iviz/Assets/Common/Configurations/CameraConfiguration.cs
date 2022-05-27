@@ -2,11 +2,12 @@
 
 using System.Runtime.Serialization;
 using Iviz.Msgs.StdMsgs;
+using Iviz.Roslib.Utils;
 
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class CameraConfiguration : IConfiguration
+    public sealed class CameraConfiguration : JsonToString, IConfiguration
     {
         [DataMember] public string Id { get; set; } = nameof(ModuleType.Camera);
         [DataMember] public ModuleType ModuleType => ModuleType.Camera;

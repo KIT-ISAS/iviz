@@ -60,7 +60,7 @@ namespace VNC
                 if (pixelFormat.IsBinaryCompatibleTo(SupportedFormats.RfbRgb888))
                 {
                     color = default;
-                    color.rgb = singlePixel.Read<Rgb>();
+                    color.Rgb = singlePixel.Read<Rgb>();
                 }
                 else if (pixelFormat.IsBinaryCompatibleTo(TurboJpegDecoder.RgbaCompatiblePixelFormat))
                 {
@@ -69,7 +69,7 @@ namespace VNC
                 else if (pixelFormat.IsBinaryCompatibleTo(SupportedFormats.RfbRgb565))
                 {
                     int rgb565 = singlePixel.Read<ushort>();
-                    int rgba = FrameRectangle.Convert565To888(rgb565);
+                    int rgba = ConversionUtils.Convert565To888(rgb565);
                     color = Unsafe.As<int, Rgba>(ref rgba);
                 }
                 else

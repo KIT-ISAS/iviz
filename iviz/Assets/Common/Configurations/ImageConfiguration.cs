@@ -1,11 +1,12 @@
 using System;
 using System.Runtime.Serialization;
 using Iviz.Msgs.GeometryMsgs;
+using Iviz.Roslib.Utils;
 
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class ImageConfiguration : IConfigurationWithTopic
+    public sealed class ImageConfiguration : JsonToString, IConfigurationWithTopic
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.Image;

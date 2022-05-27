@@ -1,12 +1,12 @@
 #nullable enable
 
-using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Iviz.Roslib.Utils;
 
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class TfConfiguration : IConfigurationWithTopic
+    public sealed class TfConfiguration : JsonToString, IConfigurationWithTopic
     {
         [DataMember] public ModuleType ModuleType => ModuleType.TF;
         [DataMember] public string Topic { get; set; } = "";

@@ -61,6 +61,7 @@ namespace Iviz.App
         public ConsoleDialogData()
         {
             dialog = DialogPanelManager.GetPanelByType<ConsoleDialogPanel>(DialogPanelType.Console);
+            dialog.Text.vertexBufferAutoSizeReduction = false;
             RosManager.Logger.MessageArrived += HandleMessage;
             RosLogger.LogExternal += HandleMessage;
         }

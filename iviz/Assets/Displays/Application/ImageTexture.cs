@@ -414,7 +414,8 @@ namespace Iviz.Displays
                     if (!Settings.SupportsRGB24)
                     {
                         texture = EnsureSize(width, height, TextureFormat.RGBA32);
-                        CopyRgb24ToRgba32(data, texture.AsSpan());
+                        //CopyRgb24ToRgba32(data, texture.AsSpan());
+                        ConversionUtils.CopyPixelsRgbToRgba(texture.AsSpan(), data);
                         alreadyCopied = true;
                     }
                     else
@@ -443,7 +444,8 @@ namespace Iviz.Displays
                     if (!Settings.SupportsR16)
                     {
                         texture = EnsureSize(width, height, TextureFormat.R8);
-                        CopyR16ToR8(data, texture.AsSpan());
+                        //CopyR16ToR8(data, texture.AsSpan());
+                        ConversionUtils.CopyPixelsR16ToR8(texture.AsSpan(), data);
                         alreadyCopied = true;
                     }
                     else
@@ -499,6 +501,7 @@ namespace Iviz.Displays
             texture.Apply(generateMipmaps);
         }
 
+        /*        
         [StructLayout(LayoutKind.Sequential)]
         readonly struct R16
         {
@@ -541,6 +544,7 @@ namespace Iviz.Displays
                 colorOut.a = 255;
             }
         }
+        */
 
         static Vector2 CalculateBounds(ReadOnlySpan<byte> src)
         {

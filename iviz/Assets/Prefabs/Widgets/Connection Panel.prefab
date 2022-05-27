@@ -481,7 +481,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: sfdsdfsdfsdf
+  m_text: sgfdsdfsdfsdf
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 730d16138aa4d4d7eb895ee3de74906c, type: 2}
   m_sharedMaterial: {fileID: 3453980654329330077, guid: 730d16138aa4d4d7eb895ee3de74906c,
@@ -545,7 +545,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 1, y: 0, z: 0, w: 2}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -3083,7 +3083,7 @@ PrefabInstance:
     - target: {fileID: 4646322574240461035, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -20.000092
+      value: -20.000122
       objectReference: {fileID: 0}
     - target: {fileID: 5661116835407948645, guid: d14c7cb0e23584f58932ad32ab180992,
         type: 3}

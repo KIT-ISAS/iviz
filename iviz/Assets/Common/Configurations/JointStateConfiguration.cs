@@ -1,10 +1,11 @@
 using System;
 using System.Runtime.Serialization;
+using Iviz.Roslib.Utils;
 
 namespace Iviz.Common.Configurations
 {
     [DataContract]
-    public sealed class JointStateConfiguration : IConfigurationWithTopic
+    public sealed class JointStateConfiguration : JsonToString, IConfigurationWithTopic
     {
         [DataMember] public string Id { get; set; } = Guid.NewGuid().ToString();
         [DataMember] public ModuleType ModuleType => ModuleType.JointState;
