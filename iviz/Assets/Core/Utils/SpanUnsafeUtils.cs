@@ -77,6 +77,9 @@ namespace Iviz.Core
         public static ref sbyte GetReference(this Span<sbyte> span) => ref span[0];
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref float GetReference(this Span<float> span) => ref span[0];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref uint GetReference(this Span<uint> span) => ref span[0];
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

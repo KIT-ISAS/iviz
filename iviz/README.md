@@ -93,25 +93,21 @@ Alternatively, you can click on the module button and drag it to the left, away 
 At each module that involves a ROS connection, you will see light-blue panels showing the ROS topic and statistics.
 These are called the **Listener Widgets**.
 An example can be found by clicking on the TF module.
-Cyan panels appear on top and represent listeners.
-Right below the topic, you will see statistics in the form of
+The cyan panels on the top right are the two listener widgets, one that listens to /tf and one that listens to /tf_static.
+In each, right below the topic, you will see statistics in the form of
 * Num Publishers | Messages per Second | KBytes per Second
 
-The number of publishers is a pair A/B, where A is the number of connections, and B is the number of nodes that are advertising the topic.
-If A is not equal to B, then there is at least one node that iviz could not connect to.
-This may be because the node is offline and forgot to unadvertise itself.
-However, if you think there is a network problem, check out the  **Network** dialog.
-It shows a summary of all connections the app is managing, together with the name of the nodes it is connected to (and those it failed to connect with).
+These wil give you an idea of how much information is being transmitted in that topic.
 
 ![image](../wiki_files/tf-listeners.png)
 
 A **Listener Widget** can be paused by clicking on it.
 You can unpause it by clicking it again.
-Sometimes, iviz will not be able to connect to a publisher, showing '0/X' even if a publisher is available.
+Sometimes, iviz will not be able to connect to a publisher, showing '0 pub' even if a publisher is available.
 In this case, a quick solution is to 'reset' the listener by pausing and unpausing it.
-If this doesn't work, check the **Network** dialog for more information, or the **Log** dialog for to see if any node has complained.
+If this doesn't work, check the **Network** dialog for more information, or the Console **Log** dialog for to see if the other node has published an error message.
 
-In some data panels, on the bottom in darker blue, are **Publisher Widgets** showing similar information.
+In some data panels, on the bottom in darker blue, are **Publisher Widgets** showing similar information for outgoing data.
 
 ### Connection Troubleshooting
 
@@ -141,10 +137,13 @@ The CPU usage can also be reduced by lowering the frequency at which network dat
 The Settings configuration is saved automatically, and will be reused the next time iviz is started.
 
 
-## 2. Panels and Dialogs
+## 3. Panels and Dialogs
 
-On the left side, below the Connect panel, you will find a panel with two rows of buttons, the **Dialog Panel**.
-Clicking on them will open the corresponding dialog in the center of the screen.
+In this section we will present a description of the app's UI layout, with all of its panels and buttons.
+
+On the left side, below the Connect panel, you will find a panel with two rows of buttons.
+This is the **Dialog Panel**.
+Clicking on the buttons will open the corresponding dialog in the center of the screen.
 
 Below it is the **Module Panel**.
 It shows the active dialogs as large square buttons.
@@ -170,27 +169,47 @@ Once the GUI is hidden, the button becomes semitransparent, and you can click it
 
 ### Detachable Dialogs
 
+When opened, all dialogs will appear at the center of the screen.
+However, most dialogs can also be **detached** by dragging the title to any position.
+When detached, the dialog will turn white, and a small circle will appear at the bottom right.
+Now you can move the dialog around by dragging its title, and resize it with the white circle at the bottom.
+In order to return the dialog to its previous mode, you can simply close it.
 
 ![image](../wiki_files/draggable-dialogs.png)
 
 
-## 6. Working with Transform Frames
+## 4. Working with Transform Frames
 
 The TF module automatically subscribes itself to /tf and /tf_static when the client is connected, and will by default display every transformation frame.
 iviz does not enforce a unique root frame, and all frames without parents are assumed to be on the 'origin'.
-On panels that deal with transform frames, there is a green panel showing the latest frame referenced by a message header.
+On panels that deal with transform frames, the frame panel (green) shows the latest frame referenced by a message header.
 You can click on it to move the camera to that frame.
+For the TF module, it will point to the fixed frame. 
+
+![image](../wiki_files/tf-dialog.png)
 
 Of interest when working with frames are two modules:
-First, the **TF** module is in charge of displaying transform frames. It contains the following widgets:
+
+### TF module
+First, the **TF** module is in charge of displaying transform frames. It contains the following options:
+
+On top:
 * **Visible**: Click on the eye on the top right to show or hide the frames.
 * **Reset**: Click on the circle on the top right to remove all frames. 
-Note: if a frame is being used by another module, iviz will retain it and its parents.
-* **Keep All Frames, Even if Unused**: If deactivated, it will remove all frames that do not have a module attached to them. 
-This is similar to a permanent **Reset**, that is, iviz will not add new frames unless a module starts using it.  
+* **Close**: Closes the data panel.
+
+Below the listeners:
+* **Prefer UDP**: Whether to use UDP when connecting to /tf. Only use this if you don't mind losing some packets.
+* **Keep All Frames, Even if Unused**: If deactivated, it will remove all frames that do not have a module attached to them.
+This is similar to a permanent **Reset**, that is, iviz will not add new frames unless a module starts using it.
 * **Show Frame Names**: Displays a text next to the frame with their names.
 * **Connect Children to Parents**: Displays lines that connect a child frame to their parent.
 * **Frame Size**: The size of the frame in meters.  
+* **Make Z Axis Point Down**: Rotates the world 180 degrees so that +Z points down. Can be useful in certain scenarios.
+* **Frames Interactable**: Makes the frames clickable so you can identify them quickly.
+But if you have a lot of clickable objects in the background, the frames might get in the way.
+
+### TF dialog
 
 Second, the **Transform Frames Dialog** can be accessed by clicking on the **Frames** button on the left panel. 
 It shows a list of all frames in the scene.
@@ -200,39 +219,23 @@ When you click on a frame name, it will show you information about it:
 * The position.
 * The rotation in roll-pitch-yaw.
 
-The following widgets control how the information of the selected frame is shown:
+If you double-click the frame name, the camera will move to center on it.
+
+The following drop-downs control how the information of the selected frame is shown:
 * **Show as Tree/Show as Root**: Shows how the frames from the scene are displayed in the list.
 * **Pose to Root/Relative to Parent/Relative to Fixed**: Controls how the position and rotation are displayed.
 
 Below that:
-* **Go To**: Moves the camera to that frame, similar to clicking on the green frame of a module.
+* **Make Fixed**: This will put the frame at the origin of the scene.
+  If the frame is transformed, iviz will apply the inverse of the transform to the world instead.
+  This is useful in AR mode when you want to 'teleport' the scene to a different place, or just to keep the camera on top of a moving robot.
+  Furthermore, events such as clicks on the grid will be published based on this frame.
 * **Trail: On/Off**: Enables or disables a 5 second trail that follows the movement of the frame.
 * **Lock Pivot: On/Off**: Enables or disables the lock pivot navigation.
 When active, the only movement allowed is rotation around the frame.
 You can zoom in and out by moving forward or backwards.
 The camera will follow the frame as it moves.
 Once active, an unlock button will appear on the lower part of the screen which can be clicked to deactivate it.
-* **Make Fixed**: This will put the frame at the origin of the scene.
-If the frame is transformed, iviz will apply the inverse of the transform to the world instead.
-This is useful in AR mode when you want to 'teleport' the scene to a different place, or just to keep the camera on top of a moving robot.
-Furthermore, events such as clicks on the grid will be published based on this frame.
-The fixed frame will be shown in green.
-
-![image](../wiki_files/tf-dialog.png)
-
-Two more things:
-* The **Transform Frames Dialog** is an example of a **Detachable Dialog**.
-In order to detach it, just tap on the title and drag it away from the center.
-Once a dialog is detached, it will slightly change color, and a small circle will appear on the bottom right.
-You can use this circle to resize the dialog.
-Detached dialogs will always be visible, even if you hide the GUI.
-Close the dialog to restore it to its normal function.
-* The **frame displays** (the axes with red-green-blue) are **highlightable**, that is, they can be right-clicked/tapped to show more information about them.
-You can use use this to know the name of the frame without having to make all frames visible.
-The grid is also highlightable, and you can right-click it to see which point you just clicked.
-All positions are in relation to the fixed frame.
-
-![image](../wiki_files/detachable.png)
 
 **Limitations**: Because iviz uses the Unity transform system as the backend for TF, you will have trouble working with coordinates that are extremely large in value (>10000).
 This is because 32-bit floats have low resolution in those ranges (ROS TF works with doubles), usually causing 3D models to be rendered incorrectly.
@@ -240,8 +243,11 @@ For this reason, TF messages with large values will be ignored.
 This can make it difficult to work with scenarios that depend on UTM coordinates.
 A workaround for this is to use a child of the UTM frame as the fixed frame.
 
+### Custom Frames
+
+![image](../wiki_files/tf-own-dialog.png)
   
-## 7. Log Dialog
+## 5. Log Dialog
 
 The **Console Log Dialog** is a detachable dialog in charge of presenting messages of iviz and other nodes sent to /rosout.
 It has two widgets:
@@ -250,7 +256,7 @@ It has two widgets:
 
 ![image](../wiki_files/console-log.png)
 
-## 8. Echo Dialog
+## 6. Echo Dialog
 
 The **Echo Dialog** can be used to display messages from any topic.
 If iviz does not know the message, it will try to reconstruct the definitition based on information exchanged in the handshake.
@@ -265,34 +271,25 @@ It has two widgets:
 Note that closing the window will leave the subscriber open (and will continue to consume bandwidth).
 If this is not desired, simply select (None) as the topic.
 
-## 9. Image Streams
+## 7. Image Streams
 
-## 9. Model Loader Service and External Models
+![image](../wiki_files/image-dialog.png)
+
+## 8. Model Loader Service and External Models
 
 When working with robots and markers, you will often need to work with 3D assets stored in external files, and probably on a different PC.
 This is problematic with iviz, as you will usually want to run it on an mobile device or on a PC without a ROS installation.
 Instead of copying the files manually, you can simply use the model service node on the PC, which iviz will detect and use automatically whenever an asset file is requested.
 
-There are three ways to enable the model service:
-1) It will most likely be that your roscore and the assets are running on a 64-bit Linux PC.
-In that case, either check-out the iviz sources in that PC, or copy the _iviz_model_service/Binaries_ folder from an existing installation there.
+The main way to start the model loader service is to start the app corresponding to your OS in the _iviz_model_service/Binaries_ folder.
 Within it, you can run the precompiled binary _Iviz.ModelService_.
 It will look something like this:
 
   ![image](../wiki_files/model-service-console-2.png)
-2) Clone the iviz sources on the PC with ROS installation and the assets, and make sure you have the NET 5.0 SDK installed.
-Then, run the following command on the GIT root folder (/iviz, but not /iviz/iviz):
-```bash
-dotnet iviz_model_service/Publish/Iviz.ModelService.dll
-```
-3) Start *iviz* on the PC with the assets and enable the model service on the **Settings** menu.
-   (Note that if the PC with the assets is not the same as the PC running the visualization, then you would need **two** iviz instances running.
-   Make sure that the ROS id of both instances are different.) 
 
-Note that the model service can only be started on a PC (Linux, Windows, macOS), and is disabled in mobile.
-  
+Make sure ROS_MASTER_URI is set and your ROS_PACKAGE_PATH variable points to your packages.
 
-## 10. Working with Robots
+## 9. Working with Robots
 
 You can add a robot by opening the **+ Module** dialog, and then selecting the **Robot** option.
 The new robot module will be empty. 
@@ -320,7 +317,7 @@ Hidden within the **Visuals...** collapsible are more options:
 * **Metallic:** Sets the metallic property of the robot shader. This controls how reflective the robot is.
 * **Smoothness:** Sets the smoothness property of the robot shader. This indicates how 'polished' the robot's surface is.
 
-![image](../wiki_files/robot-new.png)
+![image](../wiki_files/robot_new.png)
 
 
 **Note:** If you're downloading a URDF from the parameter server, you will most likely also need 3D assets such as meshes and textures.
@@ -333,16 +330,15 @@ So unless your robot consists only of cubes and cylinders, it will be necessary 
   * You need an external asset, but there is no Model Service active in the system. See Section 9.
 * There is an error message saying 'Failed to find resource path XXX' or 'Failed to find package XXX'
   * The model service is running, but could not find the requested file. 
-    Make sure that the model service node is running in the same PC as the assets, and that the root folder of the ROS package is in ros_package_path.
+    Make sure that the model service node is running in the same PC as the assets, and that the root folder of the ROS package is in ROS_PACKAGE_PATH.
 * There is an error message simply saying 'Failed to retrieve XXX'
   * This happens if retrieving a file fails multiple times. The original error should appear a little higher.
 
-## 11. Markers
+## 10. Loading and Saving
 
-## 12. Loading and Saving
+![image](../wiki_files/saving-dialog.png)
 
-
-## 13. Working with Augmented Reality
+## 11. Working with Augmented Reality
 To enable Augmented Reality (AR), go to the left panel and click the **AR View** button.
 Alternatively, you can click the **+ Module** button and then choose _Augmented Reality_.
 You will need an AR-capable device (tablet or smartphone) for this.
@@ -382,12 +378,8 @@ On the left part there is a toolbar with multiple buttons:
 
 There is also a long vertical grey bar. Press this in order to hide the toolbar.
 The button with the arrow will show the main GUI again.
-It should look like this (minus the robot):
-
-![image](../wiki_files/ar-virtual-view.PNG)
 
 This image shows the **Virtual View** of the same scene.
-On devices that support meshing, you will see the reconstructed mesh of your surroundings.
 On the right, you will see the contents of the **Augmented Reality** module, with the following options:
 * **Trash**: This disables the AR system.
 * **Frame Widget**: Shows the fixed TF frame used for the AR origin.
@@ -400,7 +392,7 @@ Use these if you want to capture data from your device into another application.
 * **AR Markers**: (iPad only - to be written)
 
 
-## 14. Credits
+## 12. Credits
 
 The code of iviz is open-source and released under the MIT license. 
 This work is part of the ROBDEKON project (https://robdekon.de) and is financed by the German Federal Ministry of Education and Research (BMBF).

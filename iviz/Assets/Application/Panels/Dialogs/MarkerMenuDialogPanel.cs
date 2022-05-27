@@ -3,7 +3,6 @@
 using System;
 using Iviz.Core;
 using Iviz.Tools;
-using UnityEngine;
 
 namespace Iviz.App
 {
@@ -26,8 +25,8 @@ namespace Iviz.App
         
         void Awake()
         {
-            yOffset = 1;
-            buttonHeight = 45;
+            VerticalOffset = 1;
+            ButtonHeight = 45;
             
             ItemClicked += OnItemClicked;
             CloseClicked += Close;

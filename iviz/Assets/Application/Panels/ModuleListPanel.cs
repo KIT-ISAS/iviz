@@ -175,15 +175,6 @@ namespace Iviz.App
 
         void Awake()
         {
-            // clear static stuff in case domain reloading is disabled
-            // this is only really needed in the editor
-            Settings.ClearResources();
-            Resource.ClearResources();
-            GuiWidgetListener.ClearResources();
-            ARController.ClearResources();
-            ResourcePool.ClearResources();
-            GameThread.ClearResources();
-
             Settings.SettingsManager = new SettingsManager();
         }
 

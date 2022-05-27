@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,53 +24,164 @@ namespace Iviz.App
             ? baseButtonHeight
             : baseButtonHeight = ((RectTransform)Resource.Widgets.ItemButton.Object.transform).rect.height;
 
-
         readonly List<ItemEntry> itemEntries = new();
-        protected float yOffset = 5;
-        protected float buttonHeight;
 
-        [CanBeNull] ResourceKey<GameObject> buttonType;
+        ResourceKey<GameObject>? buttonType;
 
-        [NotNull]
+        [SerializeField] GameObject? contentObject;
+        [SerializeField] Text? emptyText;
+        [SerializeField] TMP_Text? titleText;
+        [SerializeField] SimpleButtonWidget? closeButton;
+        [SerializeField] Canvas? canvas;
+
+        Canvas Canvas => canvas.AssertNotNull(nameof(canvas));
+        Text EmptyTextObject => emptyText.AssertNotNull(nameof(emptyText));
+        TMP_Text TitleText => titleText.AssertNotNull(nameof(titleText));
+        SimpleButtonWidget CloseButton => closeButton.AssertNotNull(nameof(closeButton));
+        GameObject ContentObject => contentObject.AssertNotNull(nameof(contentObject));
+
+        protected float VerticalOffset { get; set; } = 5;
+        protected float ButtonHeight { get; set; }
+
+        public event Action<int, int>? ItemClicked;
+        public event Action? CloseClicked;
+
         public ResourceKey<GameObject> ButtonType
         {
             get => buttonType ??= Resource.Widgets.ItemButton;
             set => buttonType = value;
         }
 
-        [SerializeField] GameObject contentObject;
-        [SerializeField] Text emptyText;
-        [SerializeField] TMP_Text titleText;
-        [SerializeField] SimpleButtonWidget closeButton;
-        [SerializeField] Canvas canvas;
-
-        public event Action<int, int> ItemClicked;
-        public event Action CloseClicked;
-
         public string Title
         {
-            get => titleText.text;
-            set => titleText.text = value;
+            set => TitleText.text = value;
         }
 
         public string EmptyText
         {
-            get => emptyText.text;
-            set => emptyText.text = value;
+            set => EmptyTextObject.text = value;
         }
+
+        public void SetItems<T>(T value) where T : IReadOnlyList<string>
+        {
+            if (ButtonHeight == 0)
+            {
+                ButtonHeight = BaseButtonHeight;
+            }
+
+            if (value.Count == itemEntries.Count)
+            {
+                foreach (int i in ..value.Count)
+                {
+                    itemEntries[i].Text = value[i];
+                }
+            }
+            else if (value.Count < itemEntries.Count)
+            {
+                Canvas.enabled = false;
+
+                foreach (int i in ..value.Count)
+                {
+                    itemEntries[i].Text = value[i];
+                }
+
+                foreach (int i in value.Count..itemEntries.Count)
+                {
+                    itemEntries[i].Dispose();
+                }
+
+                itemEntries.RemoveRange(value.Count, itemEntries.Count - value.Count);
+                UpdateSize();
+                Canvas.enabled = true;
+            }
+            else
+            {
+                Canvas.enabled = false;
+                foreach (int i in ..value.Count)
+                {
+                    if (i >= itemEntries.Count)
+                    {
+                        itemEntries.Add(new ItemEntry(i, ContentObject, ButtonHeight, VerticalOffset, ButtonType,
+                            RaiseClicked));
+                    }
+
+                    itemEntries[i].Text = value[i];
+                }
+
+                UpdateSize();
+                Canvas.enabled = true;
+            }
+        }
+
+        protected virtual void Start()
+        {
+            CloseButton.Clicked += RaiseClose;
+        }
+
+        void RaiseClicked(int id, int subId)
+        {
+            ItemClicked?.Invoke(id, subId);
+        }
+
+        void RaiseClose()
+        {
+            CloseClicked?.Invoke();
+        }
+
+        void UpdateSize()
+        {
+            var rectTransform = ((RectTransform)ContentObject.transform);
+            rectTransform.sizeDelta =
+                new Vector2(0, 2 * VerticalOffset + itemEntries.Count * (ButtonHeight + VerticalOffset));
+
+            EmptyTextObject.gameObject.SetActive(itemEntries.Count == 0);
+            foreach (var itemEntry in itemEntries)
+            {
+                itemEntry.Interactable = true;
+            }
+        }
+
+        protected void TrimPanelSize(int maxSizeInEntries)
+        {
+            int entriesCount = Mathf.Min(itemEntries.Count, maxSizeInEntries);
+            float sizeDelta = 2 * VerticalOffset + entriesCount * (ButtonHeight + VerticalOffset);
+
+            var rectTransform = (RectTransform)transform;
+            rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, sizeDelta + 45);
+        }
+
+        public override void ClearSubscribers()
+        {
+            ItemClicked = null;
+            CloseClicked = null;
+        }
+
+        public IEnumerator<IItemEntry> GetEnumerator()
+        {
+            return itemEntries.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public int Count => itemEntries.Count;
+
+        public IItemEntry this[int index] => itemEntries[index];
 
         sealed class ItemEntry : IItemEntry
         {
             readonly ItemButton button;
             readonly float buttonHeight;
-            readonly float yOffset;
+            readonly float verticalOffset;
             readonly ResourceKey<GameObject> buttonType;
             int index;
 
             public ItemEntry(int index,
-                [NotNull] GameObject parent, float buttonHeight, float yOffset,
-                [NotNull] ResourceKey<GameObject> buttonType,
-                [NotNull] Action<int, int> callback)
+                GameObject parent, float buttonHeight, float verticalOffset,
+                ResourceKey<GameObject> buttonType,
+                Action<int, int> callback)
             {
                 ThrowHelper.ThrowIfNull(parent, nameof(parent));
                 ThrowHelper.ThrowIfNull(callback, nameof(callback));
@@ -79,7 +192,7 @@ namespace Iviz.App
                 }
 
                 this.buttonHeight = buttonHeight;
-                this.yOffset = yOffset;
+                this.verticalOffset = verticalOffset;
                 this.buttonType = buttonType;
 
                 button = ResourcePool.Rent<ItemButton>(buttonType, parent.transform, false);
@@ -96,12 +209,11 @@ namespace Iviz.App
                 set
                 {
                     index = value;
-                    float y = yOffset + index * (yOffset + buttonHeight);
+                    float y = verticalOffset + index * (verticalOffset + buttonHeight);
                     button.AnchoredPosition = new Vector2(0, -y);
                 }
             }
 
-            [NotNull]
             public string Text
             {
                 set
@@ -139,113 +251,6 @@ namespace Iviz.App
                 ResourcePool.Return(buttonType, button.gameObject);
             }
         }
-
-        public void SetItems<T>([NotNull] T value) where T : IReadOnlyList<string>
-        {
-            if (buttonHeight == 0)
-            {
-                buttonHeight = BaseButtonHeight;
-            }
-
-            if (value.Count == itemEntries.Count)
-            {
-                foreach (int i in ..value.Count)
-                {
-                    itemEntries[i].Text = value[i];
-                }
-            }
-            else if (value.Count < itemEntries.Count)
-            {
-                canvas.enabled = false;
-
-                foreach (int i in ..value.Count)
-                {
-                    itemEntries[i].Text = value[i];
-                }
-
-                foreach (int i in value.Count..itemEntries.Count)
-                {
-                    itemEntries[i].Dispose();
-                }
-
-                itemEntries.RemoveRange(value.Count, itemEntries.Count - value.Count);
-                UpdateSize();
-                canvas.enabled = true;
-            }
-            else
-            {
-                canvas.enabled = false;
-                foreach (int i in ..value.Count)
-                {
-                    if (i >= itemEntries.Count)
-                    {
-                        itemEntries.Add(
-                            new ItemEntry(i, contentObject, buttonHeight, yOffset, ButtonType, RaiseClicked));
-                    }
-
-                    itemEntries[i].Text = value[i];
-                }
-
-                UpdateSize();
-                canvas.enabled = true;
-            }
-        }
-
-        protected virtual void Start()
-        {
-            closeButton.Clicked += RaiseClose;
-        }
-
-        void RaiseClicked(int id, int subId)
-        {
-            ItemClicked?.Invoke(id, subId);
-        }
-
-        void RaiseClose()
-        {
-            CloseClicked?.Invoke();
-        }
-
-        void UpdateSize()
-        {
-            RectTransform rectTransform = ((RectTransform)contentObject.transform);
-            rectTransform.sizeDelta = new Vector2(0, 2 * yOffset + itemEntries.Count * (buttonHeight + yOffset));
-
-            emptyText.gameObject.SetActive(itemEntries.Count == 0);
-            foreach (var x in itemEntries)
-            {
-                x.Interactable = true;
-            }
-        }
-
-        protected void TrimPanelSize(int maxSizeInEntries)
-        {
-            int entriesCount = Mathf.Min(itemEntries.Count, maxSizeInEntries);
-            float sizeDelta = 2 * yOffset + entriesCount * (buttonHeight + yOffset);
-
-            var t = (RectTransform)transform;
-            t.sizeDelta = new Vector2(t.sizeDelta.x, sizeDelta + 45);
-        }
-
-        public override void ClearSubscribers()
-        {
-            ItemClicked = null;
-            CloseClicked = null;
-        }
-
-        public IEnumerator<IItemEntry> GetEnumerator()
-        {
-            return itemEntries.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public int Count => itemEntries.Count;
-
-        public IItemEntry this[int index] => itemEntries[index];
     }
 
     public interface IItemEntry

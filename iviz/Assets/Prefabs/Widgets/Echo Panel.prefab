@@ -1644,6 +1644,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   scalerWidget: {fileID: 5558236137100064307}
   close: {fileID: 183655255588486700}
+  reset: {fileID: 4378564903301734993}
   pause: {fileID: 3658314685859932113}
   topics: {fileID: 7358244383954554675}
   text: {fileID: 5665220328991533606}

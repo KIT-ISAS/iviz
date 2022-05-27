@@ -9,14 +9,13 @@ using Iviz.Core;
 using JetBrains.Annotations;
 using MarcusW.VncClient;
 using MarcusW.VncClient.Protocol.Implementation.Services.Communication;
-using Iviz.Tools;
 
 namespace VNC
 {
     internal readonly struct FrameRectangle : IDisposable
     {
-        static uint[]? paletteBytes;
-        static Span<uint> PaletteBuffer => (paletteBytes ??= new uint[256]);
+        static float[]? paletteBytes;
+        static Span<float> PaletteBuffer => (paletteBytes ??= new float[256]);
 
         readonly byte[] buffer;
         readonly int width;
@@ -208,7 +207,7 @@ namespace VNC
 
         void SetPixelsPalette4(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
-            var srcPalette4 = palette.Cast<uint>();
+            var srcPalette4 = palette.Cast<float>();
 
             if (srcPalette4.Length == 256)
             {
@@ -224,32 +223,32 @@ namespace VNC
         void SetPixelsPalette3(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
             var srcPalette3 = palette.Cast<Rgb>();
-            SetPixels3N(PaletteBuffer, srcPalette3);
+            SetPixels3N(MemoryMarshal.Cast<float, uint>(PaletteBuffer), srcPalette3);
             SetPixelsPalette(indices, PaletteBuffer);
         }
 
         void SetPixelsPalette2(ReadOnlySpan<byte> indices, ReadOnlySpan<byte> palette)
         {
             var srcPalette2 = palette.Cast<ushort>();
-            SetPixels2N(PaletteBuffer, srcPalette2);
+            SetPixels2N(MemoryMarshal.Cast<float, uint>(PaletteBuffer), srcPalette2);
             SetPixelsPalette(indices, PaletteBuffer);
         }
 
-        void SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<uint> palette)
+        void SetPixelsPalette(ReadOnlySpan<byte> indices, ReadOnlySpan<float> palette)
         {
             SetPixelsPaletteN(BufferSpan(), indices, palette);
         }
 
-        static void SetPixelsPaletteN(ReadOnlySpan<byte> dst, ReadOnlySpan<byte> indices, ReadOnlySpan<uint> palette)
+        static void SetPixelsPaletteN(ReadOnlySpan<byte> dst, ReadOnlySpan<byte> indices, ReadOnlySpan<float> palette)
         {
-            var dst4 = dst.Cast<uint>();
+            var dst4 = dst.Cast<float>();
             int sizeToWrite = dst4.Length;
 
             AssertSize(indices, sizeToWrite);
 
-            ref uint palettePtr = ref palette.GetReference(); // palette is size 256
+            ref float palettePtr = ref palette.GetReference(); // palette is size 256
             ref byte indicesPtr = ref indices.GetReference();
-            ref uint dstPtr = ref dst4.GetReference();
+            ref float dstPtr = ref dst4.GetReference();
 
             while (sizeToWrite > 8)
             {

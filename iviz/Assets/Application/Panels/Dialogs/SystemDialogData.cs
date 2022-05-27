@@ -21,7 +21,7 @@ namespace Iviz.App
         const string EmptyTopText = "<b>State:</b> Disconnected. Nothing to show!";
         const string EmptyBottomText = "(Click on an item for more information)";
 
-        static readonly JsonConverter[] JsonConverter = { new XmlRpcValue.JsonConverter() };
+        readonly JsonConverter[] JsonConverter = { new XmlRpcValue.JsonConverter() };
 
         readonly SystemDialogPanel panel;
         readonly SortedSet<string> hostsBuffer = new();
