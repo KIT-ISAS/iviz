@@ -1558,80 +1558,6 @@ public sealed class RosClient : IRosClient
         return TopicRequestRpcResult.NoSuchTopic;
     }
 
-    /// <summary>
-    /// Close this connection. Unsubscribes and unadvertises all topics.
-    /// </summary>
-    public void Close(CancellationToken token = default)
-    {
-        TaskUtils.Run(() => CloseAsync(token).AsTask(), token).WaitNoThrow(this);
-    }
-
-    /// <summary>
-    /// Close this connection. Unsubscribes and unadvertises all topics.
-    /// </summary>
-    public async ValueTask CloseAsync(CancellationToken token = default)
-    {
-        const int timeoutInMs = 4000;
-        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
-        tokenSource.CancelAfter(timeoutInMs);
-        var innerToken = tokenSource.Token;
-
-        var tasks = new List<Task>();
-
-        if (listener != null)
-        {
-            var listenerDispose = listener.DisposeAsync().AsTask();
-            tasks.Add(listenerDispose);
-        }
-
-        var publishers = publishersByTopic.Values.ToArray();
-        publishersByTopic.Clear();
-
-        foreach (var publisher in publishers)
-        {
-            tasks.Add(publisher.DisposeAsync(innerToken).AwaitNoThrow(this));
-            tasks.Add(RosMasterClient.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this));
-        }
-
-        var subscribers = subscribersByTopic.Values.ToArray();
-        subscribersByTopic.Clear();
-
-        foreach (var subscriber in subscribers)
-        {
-            tasks.Add(subscriber.DisposeAsync(innerToken).AwaitNoThrow(this));
-            tasks.Add(RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this));
-        }
-
-        var receivers = subscribedServicesByName.Values.ToArray();
-        subscribedServicesByName.Clear();
-
-        foreach (var receiver in receivers)
-        {
-            receiver.Dispose();
-        }
-
-        var serviceManagers = publishedServicesByName.Values.ToArray();
-        publishedServicesByName.Clear();
-
-        foreach (var serviceManager in serviceManagers)
-        {
-            tasks.Add(serviceManager.DisposeAsync(innerToken).AwaitNoThrow(this));
-            tasks.Add(RosMasterClient.UnregisterServiceAsync(serviceManager.Service, serviceManager.Uri, innerToken)
-                .AwaitNoThrow(this));
-        }
-
-        var timeoutTask = Task.Delay(timeoutInMs, innerToken);
-        var finalTask = await (tasks.WhenAll(), timeoutTask).WhenAny();
-        if (finalTask == timeoutTask)
-        {
-            Logger.LogErrorFormat("EE {0}: Close() tasks timed out.", this);
-        }
-
-        await finalTask.AwaitNoThrow(this);
-
-        RosMasterClient.Dispose();
-    }
-
     public SubscriberState GetSubscriberStatistics() =>
         new(subscribersByTopic.Values.Select(subscriber => subscriber.GetState()).ToArray());
 
@@ -2003,6 +1929,83 @@ public sealed class RosClient : IRosClient
         return false;
     }
 
+    /// <summary>
+    /// Close this connection. Unsubscribes and unadvertises all topics.
+    /// </summary>
+    public void Close(CancellationToken token = default)
+    {
+        TaskUtils.Run(() => CloseAsync(token).AsTask(), token).WaitNoThrow(this);
+    }
+
+    /// <summary>
+    /// Close this connection. Unsubscribes and unadvertises all topics.
+    /// </summary>
+    public async ValueTask CloseAsync(CancellationToken token = default)
+    {
+        const int timeoutInMs = 4000;
+        using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(token);
+        tokenSource.CancelAfter(timeoutInMs);
+        var innerToken = tokenSource.Token;
+
+        ShutdownAction = null;
+        ParamUpdateAction = null;
+        
+        var tasks = new List<Task>();
+
+        if (listener != null)
+        {
+            var listenerDispose = listener.DisposeAsync().AsTask();
+            tasks.Add(listenerDispose);
+        }
+
+        var publishers = publishersByTopic.Values.ToArray();
+        publishersByTopic.Clear();
+
+        foreach (var publisher in publishers)
+        {
+            tasks.Add(publisher.DisposeAsync(innerToken).AwaitNoThrow(this));
+            tasks.Add(RosMasterClient.UnregisterPublisherAsync(publisher.Topic, innerToken).AwaitNoThrow(this));
+        }
+
+        var subscribers = subscribersByTopic.Values.ToArray();
+        subscribersByTopic.Clear();
+
+        foreach (var subscriber in subscribers)
+        {
+            tasks.Add(subscriber.DisposeAsync(innerToken).AwaitNoThrow(this));
+            tasks.Add(RosMasterClient.UnregisterSubscriberAsync(subscriber.Topic, innerToken).AwaitNoThrow(this));
+        }
+
+        var receivers = subscribedServicesByName.Values.ToArray();
+        subscribedServicesByName.Clear();
+
+        foreach (var receiver in receivers)
+        {
+            receiver.Dispose();
+        }
+
+        var serviceManagers = publishedServicesByName.Values.ToArray();
+        publishedServicesByName.Clear();
+
+        foreach (var serviceManager in serviceManagers)
+        {
+            tasks.Add(serviceManager.DisposeAsync(innerToken).AwaitNoThrow(this));
+            tasks.Add(RosMasterClient.UnregisterServiceAsync(serviceManager.Service, serviceManager.Uri, innerToken)
+                .AwaitNoThrow(this));
+        }
+
+        var timeoutTask = Task.Delay(timeoutInMs, innerToken);
+        var finalTask = await (tasks.WhenAll(), timeoutTask).WhenAny();
+        if (finalTask == timeoutTask)
+        {
+            Logger.LogErrorFormat("EE {0}: " + nameof(CloseAsync) + "() tasks timed out.", this);
+        }
+
+        await finalTask.AwaitNoThrow(this);
+
+        RosMasterClient.Dispose();
+    }
+
     public void Dispose()
     {
         Close();
@@ -2012,6 +2015,6 @@ public sealed class RosClient : IRosClient
 
     public override string ToString()
     {
-        return $"[RosClient '{CallerId}' MasterUri='{MasterUri}']";
+        return $"[{nameof(RosClient)} '{CallerId}' MasterUri='{MasterUri}']";
     }
 }
