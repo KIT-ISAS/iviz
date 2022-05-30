@@ -1,53 +1,52 @@
 using System.Runtime.InteropServices;
 using Iviz.Msgs;
 
-namespace Iviz.MsgsGen.Dynamic
+namespace Iviz.MsgsGen.Dynamic;
+
+public sealed class StructFixedArrayField<T> : IField<T[]> where T : unmanaged
 {
-    public sealed class StructFixedArrayField<T> : IField where T : unmanaged
-    {
-        public int Count { get; }
+    public int Count { get; }
 
-        public T[] Value { get; set; }
+    public T[] Value { get; set; }
 
-        object IField.Value => Value;
+    object IField.Value => Value;
         
-        public FieldType Type => FieldType.StructFixedArray;
+    public FieldType Type => FieldType.StructFixedArray;
 
-        public int RosLength => Count * Marshal.SizeOf<T>();
+    public int RosLength => Count * Marshal.SizeOf<T>();
 
-        public StructFixedArrayField(int count)
+    public StructFixedArrayField(int count)
+    {
+        Count = count;
+        Value = new T[Count];
+    }
+
+    public void RosValidate()
+    {
+        if (Value == null)
         {
-            Count = count;
-            Value = new T[Count];
+            BuiltIns.ThrowNullReference(nameof(Value));
         }
 
-        public void RosValidate()
+        if (Value.Length != Count)
         {
-            if (Value == null)
-            {
-                BuiltIns.ThrowNullReference(nameof(Value));
-            }
-
-            if (Value.Length != Count)
-            {
-                BuiltIns.ThrowInvalidSizeForFixedArray(Value.Length, Count);
-            }
+            BuiltIns.ThrowInvalidSizeForFixedArray(Value.Length, Count);
         }
+    }
 
-        public void RosSerialize(ref WriteBuffer b)
-        {
-            b.SerializeStructArray(Value, Count);
-        }
+    public void RosSerialize(ref WriteBuffer b)
+    {
+        b.SerializeStructArray(Value, Count);
+    }
 
-        public void RosDeserializeInPlace(ref ReadBuffer b)
-        {
-            b.DeserializeStructArray(Count, out T[] val);
-            Value = val;
-        }
+    public void RosDeserializeInPlace(ref ReadBuffer b)
+    {
+        b.DeserializeStructArray(Count, out T[] val);
+        Value = val;
+    }
 
-        public IField Generate()
-        {
-            return new StructFixedArrayField<T>(Count);
-        }
+    public IField Generate()
+    {
+        return new StructFixedArrayField<T>(Count);
     }
 }

@@ -1,68 +1,67 @@
 using System;
 using Iviz.Msgs;
 
-namespace Iviz.MsgsGen.Dynamic
+namespace Iviz.MsgsGen.Dynamic;
+
+public sealed class MessageArrayField<T> : IField<T[]> where T : IMessage, IDeserializable<T>, new()
 {
-    public sealed class MessageArrayField<T> : IField where T : IMessage, IDeserializable<T>, new()
+    static readonly IDeserializable<T> Generator = new T();
+
+    public T[] Value { get; set; } = Array.Empty<T>();
+
+    object IField.Value => Value;
+        
+    public FieldType Type => FieldType.MessageArray;
+        
+    public int RosLength
     {
-        static readonly IDeserializable<T> Generator = new T();
-
-        public T[] Value { get; set; } = Array.Empty<T>();
-
-        object IField.Value => Value;
-        
-        public FieldType Type => FieldType.MessageArray;
-        
-        public int RosLength
+        get
         {
-            get
+            int size = 4;
+            foreach (T t in Value)
             {
-                int size = 4;
-                foreach (T t in Value)
-                {
-                    size += t.RosMessageLength;
-                }
-
-                return size;
-            }
-        }
-
-        public void RosValidate()
-        {
-            if (Value == null)
-            {
-                BuiltIns.ThrowNullReference(nameof(Value));
+                size += t.RosMessageLength;
             }
 
-            for (int i = 0; i < Value.Length; i++)
+            return size;
+        }
+    }
+
+    public void RosValidate()
+    {
+        if (Value == null)
+        {
+            BuiltIns.ThrowNullReference(nameof(Value));
+        }
+
+        for (int i = 0; i < Value.Length; i++)
+        {
+            if (Value[i] is null)
             {
-                if (Value[i] is null)
-                {
-                    BuiltIns.ThrowNullReference(nameof(Value), i);
-                }
-
-                Value[i].RosValidate();
+                BuiltIns.ThrowNullReference(nameof(Value), i);
             }
-        }
 
-        public void RosSerialize(ref WriteBuffer b)
-        {
-            b.SerializeArray(Value);
+            Value[i].RosValidate();
         }
+    }
 
-        public void RosDeserializeInPlace(ref ReadBuffer b)
-        {
-            b.DeserializeArray(out T[] array);
-            Value = array;
-            for (int i = 0; i < Value.Length; i++)
-            {
-                Value[i] = Generator.RosDeserialize(ref b);
-            }
-        }
+    public void RosSerialize(ref WriteBuffer b)
+    {
+        b.SerializeArray(Value);
+    }
 
-        public IField Generate()
+    public void RosDeserializeInPlace(ref ReadBuffer b)
+    {
+        b.DeserializeArray(out T[] array);
+        Value = array;
+        for (int i = 0; i < Value.Length; i++)
         {
-            return new MessageArrayField<T>();
+            Value[i] = Generator.RosDeserialize(ref b);
         }
+    }
+
+    public IField Generate()
+    {
+        return new MessageArrayField<T>();
     }
 }

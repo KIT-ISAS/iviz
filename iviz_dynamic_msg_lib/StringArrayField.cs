@@ -1,60 +1,59 @@
 using System;
 using Iviz.Msgs;
 
-namespace Iviz.MsgsGen.Dynamic
+namespace Iviz.MsgsGen.Dynamic;
+
+public sealed class StringArrayField : IField<string[]>
 {
-    public sealed class StringArrayField : IField<string[]>
+    public string[] Value { get; set; } = Array.Empty<string>();
+
+    object IField.Value => Value;
+
+    public FieldType Type => FieldType.StringArray;
+
+    public int RosLength
     {
-        public string[] Value { get; set; } = Array.Empty<string>();
-
-        object IField.Value => Value;
-
-        public FieldType Type => FieldType.StringArray;
-
-        public int RosLength
+        get
         {
-            get
+            int size = 4 + 4 * Value.Length;
+            foreach (string t in Value)
             {
-                int size = 4 + 4 * Value.Length;
-                foreach (string t in Value)
-                {
-                    size += BuiltIns.UTF8.GetByteCount(t);
-                }
-
-                return size;
-            }
-        }
-
-        public void RosValidate()
-        {
-            if (Value == null)
-            {
-                throw new NullReferenceException(nameof(Value));
+                size += BuiltIns.UTF8.GetByteCount(t);
             }
 
-            for (int i = 0; i < Value.Length; i++)
+            return size;
+        }
+    }
+
+    public void RosValidate()
+    {
+        if (Value == null)
+        {
+            throw new NullReferenceException(nameof(Value));
+        }
+
+        for (int i = 0; i < Value.Length; i++)
+        {
+            if (Value[i] is null)
             {
-                if (Value[i] is null)
-                {
-                    throw new NullReferenceException($"{nameof(Value)}[{i}]");
-                }
+                throw new NullReferenceException($"{nameof(Value)}[{i}]");
             }
         }
+    }
 
-        public void RosSerialize(ref WriteBuffer b)
-        {
-            b.SerializeArray(Value);
-        }
+    public void RosSerialize(ref WriteBuffer b)
+    {
+        b.SerializeArray(Value);
+    }
 
-        public void RosDeserializeInPlace(ref ReadBuffer b)
-        {
-            b.DeserializeStringArray(out string[] val);
-            Value = val;
-        }
+    public void RosDeserializeInPlace(ref ReadBuffer b)
+    {
+        b.DeserializeStringArray(out string[] val);
+        Value = val;
+    }
 
-        public IField Generate()
-        {
-            return new StringArrayField();
-        }
+    public IField Generate()
+    {
+        return new StringArrayField();
     }
 }

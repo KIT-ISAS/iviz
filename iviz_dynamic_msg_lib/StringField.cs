@@ -1,40 +1,39 @@
 using System;
 using Iviz.Msgs;
 
-namespace Iviz.MsgsGen.Dynamic
+namespace Iviz.MsgsGen.Dynamic;
+
+public sealed class StringField : IField<string>
 {
-    public sealed class StringField : IField
-    {
-        public string Value { get; set; } = "";
+    public string Value { get; set; } = "";
 
-        object IField.Value => Value;
+    object IField.Value => Value;
 
-        public FieldType Type => FieldType.String;
+    public FieldType Type => FieldType.String;
         
-        public int RosLength => 4 + BuiltIns.UTF8.GetByteCount(Value);
+    public int RosLength => 4 + BuiltIns.UTF8.GetByteCount(Value);
 
-        public void RosValidate()
+    public void RosValidate()
+    {
+        if (Value == null)
         {
-            if (Value == null)
-            {
-                throw new NullReferenceException(nameof(Value));
-            }
+            throw new NullReferenceException(nameof(Value));
         }
+    }
 
-        public void RosSerialize(ref WriteBuffer b)
-        {
-            b.Serialize(Value);
-        }
+    public void RosSerialize(ref WriteBuffer b)
+    {
+        b.Serialize(Value);
+    }
 
-        public void RosDeserializeInPlace(ref ReadBuffer b)
-        {
-            b.DeserializeString(out string val);
-            Value = val;
-        }
+    public void RosDeserializeInPlace(ref ReadBuffer b)
+    {
+        b.DeserializeString(out string val);
+        Value = val;
+    }
 
-        public IField Generate()
-        {
-            return new StringField();
-        }
+    public IField Generate()
+    {
+        return new StringField();
     }
 }
