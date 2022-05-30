@@ -17,9 +17,6 @@ namespace Iviz.App
         [SerializeField] DropdownWidget? targetFps;
         [SerializeField] DropdownWidget? networkProcessing;
 
-        //[SerializeField] ColorPickerWidget? backgroundColor;
-        //[SerializeField] SliderWidget? sunDirection;
-
         [SerializeField] Button? clearModelCache;
         [SerializeField] Button? clearSavedFiles;
         [SerializeField] Button? clearHostHistory;

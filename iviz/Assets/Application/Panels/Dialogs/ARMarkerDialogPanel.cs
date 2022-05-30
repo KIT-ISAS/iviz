@@ -14,7 +14,7 @@ namespace Iviz.App
     {
     }
      
-    public sealed class ARMarkerDialogContents : DialogPanel
+    public sealed class ARMarkerDialogPanel : DialogPanel
     {
         static readonly string[] TypesStr = {"Aruco", "QR", "Unset"};
         static readonly string[] ActionsStr = Enum.GetNames(typeof(ARMarkerAction));

@@ -1,9 +1,9 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Iviz.Core;
-using Iviz.Tools;
-using JetBrains.Annotations;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,38 +12,48 @@ namespace Iviz.App
 {
     public sealed class SystemDialogPanel : DetachableDialogPanel
     {
-        [SerializeField] Button topics;
-        [SerializeField] Button services;
-        [SerializeField] Button @params;
-        [SerializeField] Button nodes;
-        [SerializeField] Button aliases;
+        [SerializeField] Button? topics;
+        [SerializeField] Button? services;
+        [SerializeField] Button? @params;
+        [SerializeField] Button? nodes;
+        [SerializeField] Button? aliases;
 
-        [SerializeField] [CanBeNull] TMP_Text topicsText;
-        [SerializeField] [CanBeNull] TMP_Text servicesText;
-        [SerializeField] [CanBeNull] TMP_Text paramsText;
-        [SerializeField] [CanBeNull] TMP_Text nodesText;
-        [SerializeField] [CanBeNull] TMP_Text aliasesText;
+        [SerializeField] TMP_Text? topicsText;
+        [SerializeField] TMP_Text? servicesText;
+        [SerializeField] TMP_Text? paramsText;
+        [SerializeField] TMP_Text? nodesText;
+        [SerializeField] TMP_Text? aliasesText;
 
-        [SerializeField] TMP_Text textTop;
-        [SerializeField] TMP_Text textBottom;
+        [SerializeField] TMP_Text? textTop;
+        [SerializeField] TMP_Text? textBottom;
 
-        [SerializeField] SimpleButtonWidget close;
-        [SerializeField] LinkResolver link;
+        [SerializeField] SimpleButtonWidget? close;
+        [SerializeField] LinkResolver? link;
 
-        [SerializeField] [NotNull] GameObject[] aliasesFields = Array.Empty<GameObject>();
+        [SerializeField] GameObject[] aliasesFields = Array.Empty<GameObject>();
 
-        [NotNull] InputFieldWithHintsWidget[] hostnames = Array.Empty<InputFieldWithHintsWidget>();
-        [NotNull] InputFieldWidget[] addresses = Array.Empty<InputFieldWidget>();
+        [SerializeField] GameObject? aliasesTab;
+        [SerializeField] GameObject? infoTab;
 
-        [SerializeField] GameObject aliasesTab;
-        [SerializeField] GameObject infoTab;
+        InputFieldWithHintsWidget[] hostnames = Array.Empty<InputFieldWithHintsWidget>();
+        InputFieldWidget[] addresses = Array.Empty<InputFieldWidget>();
+        ModeType mode;
 
-        [NotNull] public SimpleButtonWidget Close => close.AssertNotNull(nameof(close));
-        [NotNull] public TMP_Text TextTop => textTop.AssertNotNull(nameof(textTop));
-        [NotNull] public TMP_Text TextBottom => textBottom.AssertNotNull(nameof(textBottom));
+        GameObject AliasesTab => aliasesTab.AssertNotNull(nameof(aliasesTab));
+        GameObject InfoTab => infoTab.AssertNotNull(nameof(infoTab));
+        LinkResolver Link => link.AssertNotNull(nameof(link));
+        Button Topics => topics.AssertNotNull(nameof(topics));
+        Button Services => services.AssertNotNull(nameof(services));
+        Button Params => @params.AssertNotNull(nameof(@params));
+        Button Nodes => nodes.AssertNotNull(nameof(nodes));
+        Button Aliases => aliases.AssertNotNull(nameof(aliases));
 
-        [NotNull] public IReadOnlyList<InputFieldWithHintsWidget> HostNames => hostnames;
-        [NotNull] public IReadOnlyList<InputFieldWidget> Addresses => addresses;
+        public SimpleButtonWidget Close => close.AssertNotNull(nameof(close));
+        public TMP_Text TextTop => textTop.AssertNotNull(nameof(textTop));
+        public TMP_Text TextBottom => textBottom.AssertNotNull(nameof(textBottom));
+
+        public IReadOnlyList<InputFieldWithHintsWidget> HostNames => hostnames;
+        public IReadOnlyList<InputFieldWidget> Addresses => addresses;
 
         public enum ModeType
         {
@@ -53,8 +63,6 @@ namespace Iviz.App
             Nodes,
             Aliases
         }
-
-        ModeType mode;
 
         public ModeType Mode
         {
@@ -66,39 +74,25 @@ namespace Iviz.App
                 TextForMode(mode).fontStyle = FontStyles.Bold;
                 ModeChanged?.Invoke(mode);
 
-                aliasesTab.SetActive(mode == ModeType.Aliases);
-                infoTab.SetActive(mode != ModeType.Aliases);
+                AliasesTab.SetActive(mode == ModeType.Aliases);
+                InfoTab.SetActive(mode != ModeType.Aliases);
             }
         }
 
-        [NotNull]
-        TMP_Text TextForMode(ModeType m)
-        {
-            return m switch
-            {
-                ModeType.Aliases => aliasesText.AssertNotNull(nameof(aliasesText)),
-                ModeType.Nodes => nodesText.AssertNotNull(nameof(nodesText)),
-                ModeType.Params => paramsText.AssertNotNull(nameof(paramsText)),
-                ModeType.Services => servicesText.AssertNotNull(nameof(servicesText)),
-                ModeType.Topics => topicsText.AssertNotNull(nameof(topicsText)),
-                _ => throw new IndexOutOfRangeException()
-            };
-        }
-
-        [CanBeNull] public event Action<ModeType> ModeChanged;
-        [CanBeNull] public event Action<string> LinkClicked;
-        [CanBeNull] public event Action<int, string> HostnameEndEdit;
-        [CanBeNull] public event Action<int, string> AddressEndEdit;
+        public event Action<ModeType>? ModeChanged;
+        public event Action<string>? LinkClicked;
+        public event Action<int, string>? HostnameEndEdit;
+        public event Action<int, string>? AddressEndEdit;
 
         void Awake()
         {
             Mode = ModeType.Topics;
-            link.LinkClicked += l => LinkClicked?.Invoke(l);
-            topics.onClick.AddListener(() => Mode = ModeType.Topics);
-            services.onClick.AddListener(() => Mode = ModeType.Services);
-            @params.onClick.AddListener(() => Mode = ModeType.Params);
-            nodes.onClick.AddListener(() => Mode = ModeType.Nodes);
-            aliases.onClick.AddListener(() => Mode = ModeType.Aliases);
+            Link.LinkClicked += l => LinkClicked?.Invoke(l);
+            Topics.onClick.AddListener(() => Mode = ModeType.Topics);
+            Services.onClick.AddListener(() => Mode = ModeType.Services);
+            Params.onClick.AddListener(() => Mode = ModeType.Params);
+            Nodes.onClick.AddListener(() => Mode = ModeType.Nodes);
+            Aliases.onClick.AddListener(() => Mode = ModeType.Aliases);
 
             hostnames = aliasesFields
                 .Where(obj => obj != null)
@@ -123,6 +117,16 @@ namespace Iviz.App
                 address.EndEdit += str => AddressEndEdit?.Invoke(i, str);
             }
         }
+
+        TMP_Text TextForMode(ModeType modeType) => modeType switch
+        {
+            ModeType.Aliases => aliasesText.AssertNotNull(nameof(aliasesText)),
+            ModeType.Nodes => nodesText.AssertNotNull(nameof(nodesText)),
+            ModeType.Params => paramsText.AssertNotNull(nameof(paramsText)),
+            ModeType.Services => servicesText.AssertNotNull(nameof(servicesText)),
+            ModeType.Topics => topicsText.AssertNotNull(nameof(topicsText)),
+            _ => throw new IndexOutOfRangeException()
+        };
 
         public override void ClearSubscribers()
         {

@@ -12,10 +12,9 @@ namespace Iviz.App
 
         protected static ModuleListPanel ModuleListPanel => ModuleListPanel.Instance;
         protected static DialogPanelManager DialogPanelManager => ModuleListPanel.DialogPanelManager;
-        public abstract IDialogPanel Panel { get; }
 
         bool detached;
-
+        
         public bool Detached
         {
             get => detached;
@@ -28,6 +27,8 @@ namespace Iviz.App
                 }
             }
         }
+        
+        public abstract IDialogPanel Panel { get; }
 
         /// <summary>
         /// Called once when the dialog is selected.
@@ -70,11 +71,11 @@ namespace Iviz.App
             ModuleListPanel.AllGuiVisible = true;
         }
 
-        public override string ToString() => $"[{GetType().Name}]";
-
         protected void Close()
         {
             DialogPanelManager.HidePanelFor(this);
         }
+
+        public override string ToString() => $"[{GetType().Name}]";
     }
 }

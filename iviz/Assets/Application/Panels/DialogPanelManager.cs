@@ -63,7 +63,7 @@ namespace Iviz.App
                 (DialogPanelType.Settings, CreatePanel<SettingsDialogPanel>(Resource.Widgets.SettingsPanel)),
                 (DialogPanelType.Echo, CreatePanel<EchoDialogPanel>(Resource.Widgets.EchoPanel)),
                 (DialogPanelType.System, CreatePanel<SystemDialogPanel>(Resource.Widgets.SystemPanel)),
-                (DialogPanelType.ARMarkers, CreatePanel<ARMarkerDialogContents>(Resource.Widgets.ARMarkerPanel)),
+                (DialogPanelType.ARMarkers, CreatePanel<ARMarkerDialogPanel>(Resource.Widgets.ARMarkerPanel)),
             };
 
             foreach (var (type, panel) in panels)

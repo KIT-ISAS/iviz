@@ -198,6 +198,21 @@ namespace Iviz.App
                     case nameof(DepthCloudConfiguration.DepthTopic):
                         controller.DepthTopic = config.DepthTopic;
                         break;
+                    case nameof(DepthCloudConfiguration.Colormap):
+                        controller.Colormap = config.Colormap;
+                        break;
+                    case nameof(DepthCloudConfiguration.OverrideMinMax):
+                        controller.OverrideMinMax = config.OverrideMinMax;
+                        break;
+                    case nameof(DepthCloudConfiguration.MinIntensity):
+                        controller.MinIntensity = config.MinIntensity;
+                        break;
+                    case nameof(DepthCloudConfiguration.MaxIntensity):
+                        controller.MaxIntensity = config.MaxIntensity;
+                        break;
+                    case nameof(DepthCloudConfiguration.FlipMinMax):
+                        controller.FlipMinMax = config.FlipMinMax;
+                        break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");
                         break;

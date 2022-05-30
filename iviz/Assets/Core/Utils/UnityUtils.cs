@@ -254,7 +254,7 @@ namespace Iviz.Core
         [AssertionMethod]
         public static T AssertNotNull<T>(this T? o, string name,
             [CallerFilePath] string? caller = null,
-            [CallerLineNumber] int lineNumber = 0) where T : class
+            [CallerLineNumber] int lineNumber = 0) where T : UnityEngine.Object
         {
 #if UNITY_EDITOR
             if (o == null)
@@ -741,22 +741,16 @@ namespace Iviz.Core
 
         public static TransformEnumerator GetChildren(this Transform t) => new(t);
 
-        /// <summary>
-        /// Smallest power of 2 that is greater or equal. 
-        /// </summary>
-        public static int ClosestPot(int value)
+        public static string GetPlatformName() => Application.platform switch
         {
-            int p = value >= 256 ? 256 : 16;
-            while (true)
-            {
-                if (p >= value)
-                {
-                    return p;
-                }
-
-                p *= 2;
-            }
-        }
+            RuntimePlatform.OSXEditor or RuntimePlatform.OSXPlayer or RuntimePlatform.OSXServer => "osx",
+            RuntimePlatform.LinuxEditor or RuntimePlatform.LinuxPlayer or RuntimePlatform.LinuxServer => "linux",
+            RuntimePlatform.WindowsEditor or RuntimePlatform.WindowsPlayer or RuntimePlatform.WindowsServer => "win",
+            RuntimePlatform.IPhonePlayer => "ios",
+            RuntimePlatform.Android => "android",
+            RuntimePlatform.WSAPlayerX64 or RuntimePlatform.WSAPlayerX86 or RuntimePlatform.WSAPlayerARM => "wsa",
+            _ => Application.platform.ToString().ToLower()
+        };
     }
 
     public struct WithIndexEnumerable<T>
@@ -794,6 +788,6 @@ namespace Iviz.Core
             }
 
             return array;
-        } 
+        }
     }
 }

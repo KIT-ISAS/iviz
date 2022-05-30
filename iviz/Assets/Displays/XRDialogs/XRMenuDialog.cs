@@ -13,14 +13,14 @@ namespace Iviz.Displays.XR
     public sealed class XRMenuDialog : XRDialog, IDialogWithCaption, IDialogWithTitle,
         IDialogCanBeMenuClicked, IDialogCanBeClicked, IDialogWithEntries
     {
-        [SerializeField] XRButton[]? menuButtons;
+        [SerializeField] XRButton[] menuButtons = Array.Empty<XRButton>();
         [SerializeField] XRButton? upButton;
         [SerializeField] XRButton? downButton;
         [SerializeField] XRButton? closeButton;
         [SerializeField] TMP_Text? titleObject;
         [SerializeField] TMP_Text? captionObject;
 
-        XRButton[] Buttons => menuButtons.AssertNotNull(nameof(menuButtons));
+        XRButton[] Buttons => menuButtons;
         XRButton UpButton => upButton.AssertNotNull(nameof(upButton));
         XRButton DownButton => downButton.AssertNotNull(nameof(downButton));
         XRButton CloseButton => closeButton.AssertNotNull(nameof(closeButton));

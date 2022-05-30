@@ -152,19 +152,25 @@ namespace Iviz.App
                         listener.MaxIntensity = config.MaxIntensity;
                         break;
                     case nameof(ImageConfiguration.FlipMinMax):
-                        listener.Visible = config.Visible;
+                        listener.FlipMinMax = config.FlipMinMax;
+                        break;
+                    case nameof(ImageConfiguration.OverrideMinMax):
+                        listener.OverrideMinMax = config.OverrideMinMax;
                         break;
                     case nameof(ImageConfiguration.EnableBillboard):
-                        listener.Visible = config.Visible;
+                        listener.EnableBillboard = config.EnableBillboard;
                         break;
                     case nameof(ImageConfiguration.BillboardSize):
-                        listener.Visible = config.Visible;
+                        listener.BillboardSize = config.BillboardSize;
                         break;
                     case nameof(ImageConfiguration.BillboardFollowCamera):
-                        listener.Visible = config.Visible;
+                        listener.BillboardFollowsCamera = config.BillboardFollowCamera;
                         break;
                     case nameof(ImageConfiguration.BillboardOffset):
-                        listener.Visible = config.Visible;
+                        listener.BillboardOffset = config.BillboardOffset.Ros2Unity();
+                        break;
+                    case nameof(ImageConfiguration.UseIntrinsicScale):
+                        listener.UseIntrinsicScale = config.UseIntrinsicScale;
                         break;
                     default:
                         RosLogger.Error($"{this}: Unknown field '{field}'");
@@ -189,7 +195,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Failed to dispose controller", e);
+                RosLogger.Error($"{this}: Failed to dispose image dialog data", e);
             }
         }
 

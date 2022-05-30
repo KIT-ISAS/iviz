@@ -79,7 +79,7 @@ namespace VNC
             Iviz.Resources.Resource.ClearResources();
             ResourcePool.ClearResources();
 #endif
-            
+
             tfModule = new TfModule(id => new TfFrameDisplay(id));
             SetBackgroundColor(Color.black);
 
@@ -153,7 +153,7 @@ namespace VNC
             }
             catch (SocketException e)
             {
-                Debug.Log(e);
+                Debug.LogException(e);
                 string message = e.SocketErrorCode switch
                 {
                     SocketError.ConnectionRefused =>
@@ -180,7 +180,7 @@ namespace VNC
             }
             catch (Exception e)
             {
-                Debug.Log(e);
+                Debug.LogException(e);
             }
 
             return false;
@@ -324,8 +324,8 @@ namespace VNC
 
         public Task<string> RequestPasswordAsync()
         {
-            return hasConfirmedPassword 
-                ? Task.FromResult(lastPassword) 
+            return hasConfirmedPassword
+                ? Task.FromResult(lastPassword)
                 : GameThread.PostAsync(DoRequestPasswordAsync);
         }
 

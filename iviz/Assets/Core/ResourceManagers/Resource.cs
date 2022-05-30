@@ -33,7 +33,7 @@ namespace Iviz.Resources
         public static DisplaysType Displays => Instance.displays ??= new DisplaysType();
         public static WidgetsType Widgets => Instance.widgets ??= new WidgetsType();
         public static AudioType Audio => Instance.audio ??= new AudioType();
-        public static TexturedMaterialsType TexturedMaterials => Instance.textureds ??= new TexturedMaterialsType();
+        public static TexturedMaterialsType TexturedMaterials => Instance.texturedMaterials ??= new();
         public static FontInfo Font => Instance.fontInfo ??= new FontInfo();
         public static InternalResourceManager Internal => Instance.internals ??= new InternalResourceManager();
         public static ExternalResourceManager External => Instance.externals ??= new ExternalResourceManager();
@@ -82,7 +82,7 @@ namespace Iviz.Resources
             public DisplaysType? displays;
             public WidgetsType? widgets;
             public AudioType? audio;
-            public TexturedMaterialsType? textureds;
+            public TexturedMaterialsType? texturedMaterials;
             public FontInfo? fontInfo;
             public InternalResourceManager? internals;
             public ExternalResourceManager? externals;

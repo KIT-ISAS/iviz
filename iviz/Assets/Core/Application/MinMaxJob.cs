@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Iviz.Displays
 {
-    internal static class MinMaxJob
+    public static class MinMaxJob
     {
         [BurstCompile(CompileSynchronously = true)]
         struct MinMaxJobPoints : IJob
@@ -96,6 +96,40 @@ namespace Iviz.Displays
 
             bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
             intensitySpan = new Vector2(output[0].w, output[1].w);
+        }
+        
+        [BurstCompile(CompileSynchronously = true)]
+        struct MinMaxJobFloat : IJob
+        {
+            [ReadOnly]
+            public NativeArray<float> input;
+
+            [WriteOnly]
+            public float outputMin, outputMax;
+
+            public void Execute()
+            {
+                float min = float.MinValue;
+                float max = float.MaxValue;
+                foreach (float t in input)
+                {
+                    min = math.min(min, t);
+                    max = math.max(max, t);
+                }
+                outputMin = min;
+                outputMax = max;
+            }
+        }
+        
+        public static (float, float) CalculateBounds(in NativeArray<float> pointBuffer)
+        {
+            var job = new MinMaxJobFloat
+            {
+                input = pointBuffer,
+            };
+            job.Schedule().Complete();
+
+            return (job.outputMin, job.outputMax);
         }
     }
 

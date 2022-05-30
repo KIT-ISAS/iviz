@@ -250,7 +250,7 @@ namespace Iviz.Displays
                 linkChildren[parent].Add(child);
             }
 
-            HashSet<string> toHide = new HashSet<string>();
+            var toHide = new HashSet<string>();
 
             bool hasChanges;
             do
@@ -676,6 +676,6 @@ namespace Iviz.Displays
             return true;
         }
 
-        public override string ToString() => $"[Robot '{Name}']";
+        public override string ToString() => $"[{nameof(RobotModel)} '{Name}']";
     }
 }

@@ -185,9 +185,10 @@ namespace Iviz.Displays
 
             if (display is not MonoBehaviour behaviour)
             {
-                throw new ArgumentException(
+                ThrowHelper.ThrowArgument(
                     $"Argument to {nameof(ReturnDisplay)} must be an object that inherits from MonoBehavior",
                     nameof(display));
+                return; // unreachable
             }
 
             if (!Resource.Displays.TryGetResource(display.GetType(), out var info))

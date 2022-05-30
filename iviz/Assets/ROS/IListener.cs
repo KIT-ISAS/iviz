@@ -37,6 +37,10 @@ namespace Iviz.Ros
         /// When paused, the subscriber will still receive data, but will not parse it or generate a message. 
         /// </summary>      
         void SetPause(bool value);
+
+        /// <summary>
+        /// Writes the number of publishers and message frequency to the <see cref="StringBuilder"/> argument.
+        /// </summary>      
         void WriteDescriptionTo(StringBuilder b);
     }
 }

@@ -33,7 +33,7 @@ namespace Iviz.App
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: Failed to dispose controller", e);
+                RosLogger.Error($"{this}: Failed to dispose listener", e);
             }              
         }
         

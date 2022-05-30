@@ -17,10 +17,12 @@ namespace Iviz.App
     public sealed class ConnectionDialogData : DialogData
     {
         const int DefaultPort = 7613;
-        static readonly Uri LocalhostMaster = new Uri("http://127.0.0.1:11311/"); 
+        
+        static readonly Uri LocalhostMaster = new("http://127.0.0.1:11311/");
+        
         static Uri DefaultMasterUri => RosClient.TryGetMasterUri();
         static Uri DefaultMyUri => RosClient.TryGetCallerUri(DefaultPort);
-        static string DefaultMyId => "iviz_" + Application.platform.ToString().ToLower();
+        static string DefaultMyId => "iviz_" + UnityUtils.GetPlatformName();
 
         readonly ConnectionDialogPanel panel;
         readonly List<Uri> lastMasterUris = new();

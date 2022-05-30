@@ -44,6 +44,7 @@ namespace Iviz.Displays
         {
             Resource.ElementScale = 0.005f;
             Resource.RenderType = LineDisplay.LineRenderType.AlwaysCapsule;
+            Resource.EnableCollider = false;
             Color = Color.yellow.WithSaturation(0.75f);
             Layer = LayerType.IgnoreRaycast;
         }
@@ -149,6 +150,12 @@ namespace Iviz.Displays
 
         public void SplitForRecycle()
         {
+            if (resource == null)
+            {
+                return;
+            }
+            
+            resource.EnableCollider = true;
             resource.ReturnToPool();
         }
     }

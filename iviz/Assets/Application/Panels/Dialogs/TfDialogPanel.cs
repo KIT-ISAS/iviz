@@ -13,7 +13,6 @@ namespace Iviz.App
         [SerializeField] SimpleButtonWidget? reset;
         [SerializeField] TfLog? tfLog;
         [SerializeField] ToggleWidget? showOnlyUsed;
-
         [SerializeField] Button? createFrame;
         [SerializeField] InputFieldWidget? frameName;
         

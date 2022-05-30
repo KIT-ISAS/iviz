@@ -37,7 +37,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -9.8192, y: 11.0453}
+  m_AnchoredPosition: {x: -9.819214, y: 11.0453}
   m_SizeDelta: {x: 19.6296, y: 16.3821}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5424443679850325793
@@ -133,7 +133,7 @@ GameObject:
   - component: {fileID: 1974338578587004766}
   - component: {fileID: 8443247752767668557}
   m_Layer: 5
-  m_Name: Slider With Multiplier
+  m_Name: Slider With Scale
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -704,7 +704,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -130.92883, y: 10.871}
+  m_AnchoredPosition: {x: -57.856, y: 10.87}
   m_SizeDelta: {x: 25.2571, y: 16.734}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &157819573713336415
@@ -1034,10 +1034,10 @@ RectTransform:
   m_Father: {fileID: 6327445102164468707}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.0000047684, y: -0.13699}
-  m_SizeDelta: {x: 14.141, y: 16.46}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
+  m_AnchoredPosition: {x: 0.0000047683716, y: -0.13699}
+  m_SizeDelta: {x: -11.859, y: 16.46}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &629297411501147911
 CanvasRenderer:
@@ -1095,8 +1095,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 10
-  m_fontSizeBase: 10
+  m_fontSize: 9
+  m_fontSizeBase: 9
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -1430,8 +1430,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -91, y: 11.00741}
-  m_SizeDelta: {x: 60.5915, y: 16.46}
+  m_AnchoredPosition: {x: -98.645, y: 11.007}
+  m_SizeDelta: {x: 56.3213, y: 16.46}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4773181874411725953
 CanvasRenderer:
@@ -1461,9 +1461,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '0
-
-'
+  m_text: 999.991
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 7ab7bd6bfe316484d8697f049b23fb2c, type: 2}
   m_sharedMaterial: {fileID: -6388908872585162227, guid: 7ab7bd6bfe316484d8697f049b23fb2c,

@@ -16,6 +16,7 @@ namespace Iviz.App
 
         readonly ItemListDialogPanel itemList;
         readonly List<ISavedFileInfo> files = new();
+        
         public override IDialogPanel Panel => itemList;
 
         public LoadConfigDialogData()
@@ -73,12 +74,12 @@ namespace Iviz.App
 
         sealed class SavedFileInfo : ISavedFileInfo
         {
-            public string FullPath { get; }
-            public string FileName => Path.GetFileName(FullPath);
-
             DateTime date;
             DateTime Date => date != default ? date : (date = File.GetLastWriteTime(FullPath));
 
+            public string FullPath { get; }
+            public string FileName => Path.GetFileName(FullPath);
+            
             public string Description
             {
                 get

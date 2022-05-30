@@ -2,6 +2,7 @@
 
 using System;
 using System.IO;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using BitMiracle.LibJpeg;
@@ -9,8 +10,11 @@ using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
+using Unity.Mathematics;
 using UnityEngine;
 using Buffer = System.Buffer;
+using Vector2 = UnityEngine.Vector2;
+using Vector4 = UnityEngine.Vector4;
 
 namespace Iviz.Displays
 {
@@ -400,7 +404,7 @@ namespace Iviz.Displays
 
         void ApplyTexture(int width, int height, ReadOnlySpan<byte> data, string encoding, bool generateMipmaps)
         {
-            bool alreadyCopied = false;
+            bool alreadyCopied;
             Texture2D texture;
             Vector2 intensityBounds;
             switch (encoding.ToUpperInvariant())
@@ -421,6 +425,7 @@ namespace Iviz.Displays
                     else
                     {
                         texture = EnsureSize(width, height, TextureFormat.RGB24);
+                        alreadyCopied = false;
                     }
 
                     MeasuredIntensityBounds = null;
@@ -435,6 +440,7 @@ namespace Iviz.Displays
                     texture = EnsureSize(width, height, TextureFormat.RGBA32);
                     MeasuredIntensityBounds = null;
                     normalizationFactor = 1;
+                    alreadyCopied = false;
                     break;
                 case "MONO16":
                 case "16UC1":
@@ -444,13 +450,13 @@ namespace Iviz.Displays
                     if (!Settings.SupportsR16)
                     {
                         texture = EnsureSize(width, height, TextureFormat.R8);
-                        //CopyR16ToR8(data, texture.AsSpan());
                         ConversionUtils.CopyPixelsR16ToR8(texture.AsSpan(), data);
                         alreadyCopied = true;
                     }
                     else
                     {
                         texture = EnsureSize(width, height, TextureFormat.R16);
+                        alreadyCopied = false;
                     }
 
                     intensityBounds = CalculateBounds(data.Cast<ushort>());
@@ -471,6 +477,7 @@ namespace Iviz.Displays
                     intensityBounds = CalculateBounds(data);
                     MeasuredIntensityBounds = intensityBounds;
                     normalizationFactor = 1f / byte.MaxValue;
+                    alreadyCopied = false;
                     if (!OverrideIntensityBounds)
                     {
                         IntensityBounds = intensityBounds;
@@ -483,6 +490,7 @@ namespace Iviz.Displays
                     intensityBounds = CalculateBounds(data.Cast<float>());
                     MeasuredIntensityBounds = intensityBounds;
                     normalizationFactor = 1;
+                    alreadyCopied = false;
                     if (!OverrideIntensityBounds)
                     {
                         IntensityBounds = intensityBounds;
@@ -500,51 +508,6 @@ namespace Iviz.Displays
 
             texture.Apply(generateMipmaps);
         }
-
-        /*        
-        [StructLayout(LayoutKind.Sequential)]
-        readonly struct R16
-        {
-            readonly byte high;
-            public readonly byte low;
-        }
-
-        static void CopyR16ToR8(ReadOnlySpan<byte> src, Span<byte> dst)
-        {
-            var srcPtr = src.Cast<R16>();
-            for (int i = 0; i < srcPtr.Length; i++)
-            {
-                dst[i] = srcPtr[i].low;
-            }
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        struct Rgba
-        {
-            public byte r, g, b, a;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        readonly struct Rgb
-        {
-            public readonly byte r, g, b;
-        }
-
-        static void CopyRgb24ToRgba32(ReadOnlySpan<byte> src, Span<byte> dst)
-        {
-            var srcPtr = src.Cast<Rgb>();
-            var dstPtr = dst.Cast<Rgba>();
-            for (int i = 0; i < srcPtr.Length; i++)
-            {
-                ref readonly var colorIn = ref srcPtr[i];
-                ref var colorOut = ref dstPtr[i];
-                colorOut.r = colorIn.r;
-                colorOut.g = colorIn.g;
-                colorOut.b = colorIn.b;
-                colorOut.a = 255;
-            }
-        }
-        */
 
         static Vector2 CalculateBounds(ReadOnlySpan<byte> src)
         {
@@ -570,6 +533,7 @@ namespace Iviz.Displays
         {
             ushort min = ushort.MaxValue;
             ushort max = ushort.MinValue;
+
             foreach (ushort b in src)
             {
                 if (b > max)
@@ -590,6 +554,7 @@ namespace Iviz.Displays
         {
             float min = float.MaxValue;
             float max = float.MinValue;
+            
             foreach (float b in src)
             {
                 if (b > max)
@@ -604,6 +569,11 @@ namespace Iviz.Displays
             }
 
             return new Vector2(min, max);
+            /*
+            var nativeArray = UnsafeUtils.CreateNativeArrayWrapper(ref src.GetReference(), src.Length);
+            (float min, float max) = MinMaxJob.CalculateBounds(nativeArray);
+            return new Vector2(min, max);
+            */
         }
 
         Texture2D EnsureSize(int width, int height, TextureFormat format)

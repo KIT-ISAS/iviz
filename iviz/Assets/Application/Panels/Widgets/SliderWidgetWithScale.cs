@@ -4,6 +4,7 @@ using System;
 using System.Globalization;
 using Iviz.Core;
 using Iviz.Resources;
+using Iviz.Tools;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,8 +14,16 @@ namespace Iviz.App
     public sealed class SliderWidgetWithScale : MonoBehaviour, IWidget
     {
         const int MinPower = -4;
-        const int MaxPower = 5;
-        
+        const int MaxPower = 7;
+
+        static float[]? powersOf10;
+
+        static float[] PowersOf10 => powersOf10 ??= new[] // must match MinPower -> MaxPower!
+        {
+            1e-4f, 1e-3f, 1e-2f, 1e-1f, 1,
+            1e1f, 1e2f, 1e3f, 1e4f, 1e5f, 1e6f, 1e7f
+        };
+
         [SerializeField] Slider? slider;
         [SerializeField] TMP_Text? text;
         [SerializeField] TMP_Text? valueText;
@@ -39,11 +48,10 @@ namespace Iviz.App
 
         public string Label
         {
-            get => Text.text;
             set
             {
                 Text.text = value ?? throw new ArgumentNullException(nameof(value));
-                name = "SliderWithScale:" + value;
+                name = nameof(SliderWidgetWithScale) + ":" + value;
             }
         }
 
@@ -55,8 +63,8 @@ namespace Iviz.App
             get => ValueInternal / 100 * scale * (isNegative ? -1 : 1);
             set
             {
-                SignText.text = value < 0 ? "[-]" : "[+]";
                 isNegative = value < 0;
+                SignText.text = isNegative ? "[-]" : "[+]";
 
                 float absValue = Mathf.Abs(value);
                 if (absValue == 0)
@@ -68,20 +76,28 @@ namespace Iviz.App
                     return;
                 }
 
-                float threshold = Mathf.Pow(10, MinPower);
-                for (int i = MinPower; i < MaxPower; i++)
+                // ReSharper disable once NegativeIndex
+                foreach (int i in MinPower..MaxPower)
                 {
-                    if (absValue < threshold)
+                    if (absValue >= PowersOf10[i - MinPower])
                     {
-                        UpdatePower(i);
-                        ValueInternal = absValue * 100 / scale;
-                        UpdateLabel(value);
-                        OnValueChanged();
-                        break;
+                        continue;
                     }
 
-                    threshold *= 10;
+                    UpdatePower(i);
+                    ValueInternal = absValue * 100 / scale;
+                    UpdateLabel(value);
+                    OnValueChanged();
+                    return;
                 }
+
+                // just set maximum value
+                float newAbsValue = PowersOf10[MaxPower - MinPower];
+                float newValue = value < 0 ? -newAbsValue : newAbsValue;
+                UpdatePower(MaxPower);
+                ValueInternal = newAbsValue * 100 / scale;
+                UpdateLabel(newValue);
+                OnValueChanged();
             }
         }
 
@@ -93,17 +109,18 @@ namespace Iviz.App
 
         public bool Interactable
         {
-            get => Slider.interactable;
             set
             {
                 Slider.interactable = value;
                 Left.interactable = value;
                 Right.interactable = value;
                 Sign.interactable = value;
-                Text.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
-                ValueText.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
-                ScaleText.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
-                SignText.color = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
+                
+                var textColor = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
+                Text.color = textColor;
+                ValueText.color = textColor;
+                ScaleText.color = textColor;
+                SignText.color = textColor;
             }
         }
 
@@ -129,17 +146,12 @@ namespace Iviz.App
             OnValueChanged();
         }
 
+
         void UpdatePower(int newPower)
         {
-            power = newPower switch
-            {
-                < MinPower => MinPower,
-                > MaxPower => MaxPower,
-                _ => newPower
-            };
-
-            scale = Mathf.Pow(10, power);
-            ScaleText.text = power <= 0 ? power.ToString() : "+" + power;
+            power = Mathf.Clamp(newPower, MinPower, MaxPower);
+            scale = PowersOf10[power - MinPower];
+            ScaleText.text = power <= 0 ? power.ToString() : "+" + power.ToString();
         }
 
         void OnValueChanged()
@@ -188,7 +200,7 @@ namespace Iviz.App
             ValueChanged += f;
             return this;
         }
-        
+
         public SliderWidgetWithScale EnableNegative(bool f)
         {
             Sign.enabled = f;

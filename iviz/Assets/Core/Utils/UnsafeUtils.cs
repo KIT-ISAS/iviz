@@ -28,7 +28,12 @@ namespace Iviz.Core
 #endif
             return array;
         }
-        
+
+        public static NativeArray<T> CreateNativeArrayWrapper<T>(this Span<T> ptr) where T : unmanaged
+        {
+            return CreateNativeArrayWrapper(ref ptr[0], ptr.Length);
+        }
+
         /// <summary>
         /// Creates a span from the given pointer and size. 
         /// </summary>

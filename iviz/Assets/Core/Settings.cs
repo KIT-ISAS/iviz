@@ -25,7 +25,7 @@ namespace Iviz.Core
         public const bool IsMobile = false;
 #endif
 
-        
+
 #if !UNITY_EDITOR
         public const bool IsStandalone = true;
 #else
@@ -204,7 +204,7 @@ namespace Iviz.Core
                 {
                     return mainCamera;
                 }
-                
+
                 mainCamera = FindMainCamera().AssertHasComponent<Camera>(nameof(mainCamera));
                 mainCameraTransform = mainCamera.transform;
                 return mainCamera;
@@ -235,7 +235,7 @@ namespace Iviz.Core
         /// Always null for Hololens / VR
         /// </summary>
         public static Camera? VirtualCamera { get; set; }
-        
+
         /// <summary>
         /// Camera for AR. Always null for non-mobile.
         /// </summary>
@@ -255,18 +255,14 @@ namespace Iviz.Core
 
         public static IScreenCaptureManager? ScreenCaptureManager { get; set; }
 
-        public static bool SupportsComputeBuffers => supportsComputeBuffersHelper ??
-                                                     (supportsComputeBuffersHelper =
-                                                         !IsHololens &&
-                                                         SystemInfo.supportsComputeShaders &&
-                                                         SystemInfo.maxComputeBufferInputsVertex > 0).Value;
+        public static bool SupportsComputeBuffers =>
+            supportsComputeBuffersHelper ??=
+                !IsHololens &&
+                SystemInfo.supportsComputeShaders &&
+                SystemInfo.maxComputeBufferInputsVertex > 0;
 
-        public static bool SupportsR16 => supportsR16 ??
-                                          (supportsR16 = SystemInfo.SupportsTextureFormat(TextureFormat.R16)).Value;
-
-        public static bool SupportsRGB24 => supportsRGB24 ??
-                                            (supportsRGB24 = SystemInfo.SupportsTextureFormat(TextureFormat.RGB24))
-                                            .Value;
+        public static bool SupportsR16 => supportsR16 ??= SystemInfo.SupportsTextureFormat(TextureFormat.R16);
+        public static bool SupportsRGB24 => supportsRGB24 ??= SystemInfo.SupportsTextureFormat(TextureFormat.RGB24);
 
         /// <summary>
         /// Set when the app is being closed.
@@ -281,10 +277,10 @@ namespace Iviz.Core
         [Preserve]
         public static void InitializeAOT()
         {
-            AotHelper.EnsureType<StringEnumConverter>();            
+            AotHelper.EnsureType<StringEnumConverter>();
         }
     }
-    
+
     public interface IDragHandler
     {
         bool IsDragging { get; }

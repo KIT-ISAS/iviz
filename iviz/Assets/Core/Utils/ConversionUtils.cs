@@ -58,7 +58,7 @@ namespace Iviz.Core
             ref var srcPtr = ref Unsafe.As<uint, Rgb>(ref srcIPtr);
             ref var dstPtr = ref Unsafe.As<uint, Rgba>(ref dstIPtr);
 
-            for (int x = sizeToWrite; x > 0; x--)
+            for (int i = sizeToWrite; i > 0; i--)
             {
                 dstPtr.r = srcPtr.r; // dstPtr->rgb = *srcPtr;
                 srcPtr = ref Unsafe.Add(ref srcPtr, 1); // srcPtr++;
@@ -122,12 +122,12 @@ namespace Iviz.Core
             while (sizeToWrite >= 4)
             {
                 uint src0 = srcIPtr;
-                uint a = src0 & 0xff;
-                uint b = (src0 >> 8) & 0xff00;
+                uint a = (src0 >> 8) & 0xff;
+                uint b = (src0 >> 16) & 0xff00;
 
                 uint src1 = srcIPtr.Plus(1);
-                uint c = (src1 << 16) & 0xff0000;
-                uint d = (src1 << 8) & 0xff000000;
+                uint c = (src1 << 8) & 0xff0000;
+                uint d = (src1 << 16) & 0xff000000;
 
                 dstIPtr = a + b + c + d;
 
@@ -138,10 +138,10 @@ namespace Iviz.Core
 
             ref R16 srcPtr = ref Unsafe.As<uint, R16>(ref srcIPtr);
             ref byte dstPtr = ref Unsafe.As<uint, byte>(ref dstIPtr);
-            for (int i = 0; i < sizeToWrite; i++)
+            
+            for (int i = sizeToWrite; i > 0; i--)
             {
                 dstPtr = srcPtr.low;
-
                 srcPtr = ref srcPtr.Plus(1);
                 dstPtr = ref dstPtr.Plus(1);
             }
@@ -161,7 +161,6 @@ namespace Iviz.Core
             if (span.Length < size)
                 ThrowHelper.ThrowIndexOutOfRange("Span array is too short for the given operation");
         }
-        
     }
 
 

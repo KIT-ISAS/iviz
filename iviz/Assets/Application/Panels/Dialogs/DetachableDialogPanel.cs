@@ -12,16 +12,17 @@ namespace Iviz.App
     public abstract class DetachableDialogPanel : DialogPanel
     {
         [SerializeField] DialogScalerWidget? scalerWidget;
-        Image? panelImage;
         
+        Image? panelImage;
         CanvasHolder? canvasHolder;
         Transform? originalParent;
         Vector3 originalScale;
         Vector2 originalOffsetMin;
         Vector2 originalOffsetMax;
 
-        protected DialogScalerWidget ScalerWidget => scalerWidget.AssertNotNull(nameof(scalerWidget));
         Image PanelImage => this.EnsureHasComponent(ref panelImage, nameof(panelImage));
+        
+        protected DialogScalerWidget ScalerWidget => scalerWidget.AssertNotNull(nameof(scalerWidget));
 
         public bool Detached
         {

@@ -1,4 +1,7 @@
-﻿using Iviz.Ros;
+﻿#nullable enable
+
+using Iviz.Core;
+using Iviz.Ros;
 using UnityEngine;
 
 namespace Iviz.App
@@ -8,29 +11,29 @@ namespace Iviz.App
     /// </summary>
     public sealed class ConnectionDialogPanel : DialogPanel
     {
-        [SerializeField] InputFieldWithHintsWidget masterUri;
-        [SerializeField] InputFieldWithHintsWidget myUri;
-        [SerializeField] InputFieldWithHintsWidget myId;
-        [SerializeField] SimpleButtonWidget refreshMyUri;
-        [SerializeField] SimpleButtonWidget refreshMyId;
-        [SerializeField] SimpleButtonWidget close;
-        [SerializeField] ToggleButtonWidget serverMode;
-        [SerializeField] LineLog lineLog;
+        [SerializeField] InputFieldWithHintsWidget? masterUri;
+        [SerializeField] InputFieldWithHintsWidget? myUri;
+        [SerializeField] InputFieldWithHintsWidget? myId;
+        [SerializeField] SimpleButtonWidget? refreshMyUri;
+        [SerializeField] SimpleButtonWidget? refreshMyId;
+        [SerializeField] SimpleButtonWidget? close;
+        [SerializeField] ToggleButtonWidget? serverMode;
+        [SerializeField] LineLog? lineLog;
 
-        public InputFieldWithHintsWidget MasterUri => masterUri;
-        public InputFieldWithHintsWidget MyUri => myUri;
-        public InputFieldWithHintsWidget MyId => myId;
-        public SimpleButtonWidget RefreshMyUri => refreshMyUri;
-        public SimpleButtonWidget RefreshMyId => refreshMyId;
-        public SimpleButtonWidget Close => close;
-        public LineLog LineLog => lineLog;
-        public ToggleButtonWidget ServerMode => serverMode;
+        public InputFieldWithHintsWidget MasterUri => masterUri.AssertNotNull(nameof(masterUri));
+        public InputFieldWithHintsWidget MyUri => myUri.AssertNotNull(nameof(myUri));
+        public InputFieldWithHintsWidget MyId => myId.AssertNotNull(nameof(myId));
+        public SimpleButtonWidget RefreshMyUri => refreshMyUri.AssertNotNull(nameof(refreshMyUri));
+        public SimpleButtonWidget RefreshMyId => refreshMyId.AssertNotNull(nameof(refreshMyId));
+        public SimpleButtonWidget Close => close.AssertNotNull(nameof(close));
+        public LineLog LineLog => lineLog.AssertNotNull(nameof(lineLog));
+        public ToggleButtonWidget ServerMode => serverMode.AssertNotNull(nameof(serverMode));
 
         void Awake()
         {
-            serverMode.InactiveText = "Master\nOff";
-            serverMode.ActiveText = "Master\nOn";
-            serverMode.State = RosManager.Server.IsActive;
+            ServerMode.InactiveText = "Master\nOff";
+            ServerMode.ActiveText = "Master\nOn";
+            ServerMode.State = RosManager.Server.IsActive;
         }
 
         public override void ClearSubscribers()

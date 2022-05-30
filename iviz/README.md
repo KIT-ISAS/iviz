@@ -84,6 +84,7 @@ These include:
 Helpful Notes:
 * If you just want to see the a plain list of every topic and service, use the **System** dialog.
 * You can find additional debugging messages (from iviz and other nodes) in the Console **Log** dialog.
+Select [Me] in the **From** dropdown to filter out log messages from other nodes.
 * If you're only interested in listening to the messages in a topic, but not visualizing them, you can use the **Echo** dialog.
 
 Other modules that are not related to topics can be found by clicking on the **+ Module** button.
@@ -150,7 +151,7 @@ Clicking on the buttons will open the corresponding dialog in the center of the 
 Below it is the **Module Panel**.
 It shows the active dialogs as large rectangular buttons.
 For example, the TF module is always present.
-Clicking a module will open the **Data Panel** on the right, showing information for that module.
+Clicking a module will open the **Data Panel** on the right side, showing information for that module.
 Clicking the module button again will close it.
 You can drag a button to the right (into the screen) to make it invisible in the world.
 You can also drag it to the left (away from the screen) to destroy it - but be careful with it!
@@ -166,8 +167,6 @@ On mobile, it will show the clock instead of the used memory.
 
 You can hide the GUI by pressing the **Hide GUI** button with the arrows: in PCs it is located at the center bottom, while on mobile it is located on the left side, next to the __Module Panel__.  
 Once the GUI is hidden, the button becomes semitransparent, and you can click it back to reopen the GUI.
-
-![image](../wiki_files/panels.png)
 
 ### Detachable Dialogs
 
@@ -277,7 +276,7 @@ It also has two widgets:
 ## 6. Echo Dialog
 
 The **Echo Dialog** can be used to display messages from any topic.
-If iviz does not know the message, it will try to reconstruct the definitition based on information exchanged in the handshake.
+If iviz does not know the message, it will try to reconstruct the definition based on information exchanged in the handshake.
 Arrays and long strings will be shortened to keep the GUI from being overflowed.
 
 On top there are three buttons:
@@ -295,13 +294,55 @@ If this is not desired, simply select (None) as the topic.
 
 ## 7. Image Streams
 
+The **Image** module is in charge of displaying image streams, such as 'sensor_msgs/Image'.
+It has the following widgets:
+* **Description**: This label provides general information about the image.
+* **Preview**: Shows a preview of the last image received. Clicking on the preview opens a detachable dialog that provides a better view of the image.
+
+Inside of **Colormap** there are multiple options that only become active when dealing with grayscale images: 
+* **Colormap**: A colormap that applies colors to the image to better distinguish between the grayscale values.
+* **Colormap Override Min/Max**: By default, the colormap range is resized automatically to the minimum and maximum values in the image.
+Select this to use fixed values, selected in the following fields.
+* **Colormap Min**: The minimum value of the colormap range.  Use the arrows to multiply by a power of 10, and the [+] sign to make it negative or positive.   
+* **Colormap Max**: The maximum value of the colormap range.  Use the arrows to multiply by a power of 10, and the [+] sign to make it negative or positive.
+* **Flip Min/Max**: Flips the color scale used by the colormap.
+
+You can also add a billboard rectangle in-world that shows the image next to its transform frame.
+The options for this are in **Billboard**.
+
+* **Show as Billboard**: Enables or disables the billboard.
+* **Billboard Size**: Applies an additional scale on the billboard. Default is 1.
+* **Use Intrinsic for Billboard Scale**: If an intrinsic matrix is being published, it will be used to scale the billboard depending on the Z value of the offset.   
+* **Billboard Points to You**: If active, the billboard will act like a sprite and point to the camera at all times.
+* **Billboard Offset**: The distance between the frame and the billboard. 
+
 ![image](../wiki_files/image-dialog.png)
+
+Some sensors use depth images, which can be transformed into point clouds.
+In iviz this can be achieved using the **DepthCloud** module, which can be found by clicking the **+ Module** button on the **Dialog Panel**.
+
+It has the following widgets:
+* **Depth Topic**: The topic containing the depth image.
+* **Color Topic**: An optional topic containing a color image that corresponds to the depths.
+* **Depth Preview**: Shows a preview of the last depth image received. Clicking on the preview opens a detachable dialog that provides a better view of the image.
+* **Color Preview**: Shows a preview of the last color image received. Clicking on the preview also opens a detachable dialog.
+
+Similar to the **Image** module, a colormap is applied to the depth image if no color image is set.
+The parameters can be changed using the options inside **Colormap**:
+* **Colormap**: The name of the colormap.
+* **Colormap Override Min/Max**: By default, the colormap range is resized automatically to the minimum and maximum values in the depth image.
+  Select this to use fixed values, selected in the following fields.
+* **Colormap Min**: The minimum value of the colormap range.  Use the arrows to multiply by a power of 10, and the [+] sign to make it negative or positive.
+* **Colormap Max**: The maximum value of the colormap range.  Use the arrows to multiply by a power of 10, and the [+] sign to make it negative or positive.
+* **Flip Min/Max**: Flips the color scale used by the colormap.
+
+![image](../wiki_files/image-pointcloud.png)
 
 ## 8. Model Loader Service and External Models
 
 When working with robots and markers, you will often need to work with 3D assets stored in external files, for example in the machine with the ROS master.
 This is problematic, as iviz will usually run on an mobile device without a ROS installation.
-Instead of copying the files manually, you can simply start the model service node on the machine with the ROS assets, and
+Instead of copying the files manually, you can simply start the Model Loader service node on the machine with the ROS assets, and
 iviz will detect the node automatically and it whenever an asset file is requested.
 
 The easiest way to start the model loader service is to start the _Iviz.ModelService_ program corresponding to your OS in the _iviz_model_service/Binaries_ folder.
@@ -332,7 +373,7 @@ Drag it to the left to follow the robot.
 Enable this to read the TF frames for all links. If you see the robot crumple onto the floor, then the TF frames have not been set.
 * **Save this Robot Locally:** Saves a copy of the robot on the device. The robot can then be loaded from the **Load From Saved** menu.
 
-Hidden within the **Visuals...** collapsible are more options:
+Hidden within the **Visuals** collapsible are more options:
 * **AR Occlusion Only Mode:** This tells the shader to only write the depth values of the robot, but not the color.
   In essence, this 'punches' a hole in the scene, showing the background where the robot should be.
   This is useful in Augmented Reality when you have a digital twin of the robot at the exact same position as the real robot.
@@ -345,32 +386,39 @@ Hidden within the **Visuals...** collapsible are more options:
 Finally, hidden in **Prefixes and Suffixes** are two fields.
 These control how links are connected to TF frames.
 If the fields are not empty, then each link read from the robot specification will be adjusted with the given prefix and suffix, and the result will be the TF frame that controls it. 
-Thus, if you have multiple robots of the same type, you can add a prefix and publish a different set of TF frames to target each robot separately. 
-
+Thus, if you have multiple robots of the same type, you can add a prefix and publish a different set of TF frames to target each robot separately.
 
 ![image](../wiki_files/robot_new.png)
 
-
-**Note:** If you're downloading a URDF from the parameter server, you will most likely also need 3D assets such as meshes and textures.
-So unless your robot consists only of cubes and cylinders, it will be necessary to start the **Model Service** (Section 9).
-
 ### Troubleshooting
-* The robot doesn't move, but the frames do
+* You can see the frames moving, but the robot is empty.
+  * The model loader service is not active. Check the Console **Log**, and select [Me] in the **From** dropdown. You will probably see multiple errors like 'Resource not in cache and model loader failed'.
+Start the model loader and try again.
+* The robot is there but it doesn't move, even though the frames do.
   * Enable 'Attach to TF Frames'.
-* There is an error message saying 'provider not found'
-  * You need an external asset, but there is no Model Service active in the system. See Section 9.
+* There is an error message saying 'provider not found'.
+  * You need an external asset, but there is no Model Loader service active in the system.
 * There is an error message saying 'Failed to find resource path XXX' or 'Failed to find package XXX'
-  * The model service is running, but could not find the requested file. 
-    Make sure that the model service node is running in the same PC as the assets, and that the root folder of the ROS package is in ROS_PACKAGE_PATH.
-* There is an error message simply saying 'Failed to retrieve XXX'
-  * This happens if retrieving a file fails multiple times. The original error should appear a little higher.
+  * The model loader service is running, but could not find the requested file. 
+    Make sure that the model service node is running in the same PC as the assets, and that the root folder of the ROS package you need is in ROS_PACKAGE_PATH.
+* There is an error message saying 'Failed to retrieve visual' or 'Failed to retrieve collider'.
+  * This happens if retrieving a file fails multiple times. The original error should appear a little higher. If it says 'no provider', start the model loader and try again.
 
 ## 10. Loading and Saving
 
+You can save the current loaded modules and their configurations using the **Save** button.
+When you open it, you can get a list of previously saved files.
+By clicking on one of the buttons, you can overwrite. Or you can click on the cross to delete it.
+Similarly, you can load a previously saved file with the **Load** button.
+Your current modules will be deleted and overwritten with the ones from the saved file.
+
 ![image](../wiki_files/saving-dialog.png)
 
+An interesting save file is **_default**. It will be loaded every time you start iviz.
+You can use it if you're working on something and want a given topic module to be started every time, or if you change something in the camera or the background.
+
 ## 11. Working with Augmented Reality
-To enable Augmented Reality (AR), go to the left panel and click the **AR View** button.
+To enable Augmented Reality (AR), go to the **Dialog Panel** and click the **AR View** button.
 Alternatively, you can click the **+ Module** button and then choose _Augmented Reality_.
 You will need an AR-capable device (tablet or smartphone) for this.
 

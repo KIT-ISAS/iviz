@@ -11,14 +11,14 @@ namespace Iviz.App
 {
     public sealed class ARMarkerDialogData : DialogData
     {
-        readonly ARMarkerDialogContents panel;
+        readonly ARMarkerDialogPanel panel;
         public override IDialogPanel Panel => panel;
 
         public ARMarkersConfiguration Configuration { get; set; } = new();
 
         public ARMarkerDialogData()
         {
-            panel = DialogPanelManager.GetPanelByType<ARMarkerDialogContents>(DialogPanelType.ARMarkers);
+            panel = DialogPanelManager.GetPanelByType<ARMarkerDialogPanel>(DialogPanelType.ARMarkers);
             //ARController.ARStateChanged += OnARStateChanged;
         }
         

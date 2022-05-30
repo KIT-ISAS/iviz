@@ -24,15 +24,15 @@ namespace Iviz.App
             ? baseButtonHeight
             : baseButtonHeight = ((RectTransform)Resource.Widgets.ItemButton.Object.transform).rect.height;
 
-        readonly List<ItemEntry> itemEntries = new();
-
-        ResourceKey<GameObject>? buttonType;
-
         [SerializeField] GameObject? contentObject;
         [SerializeField] Text? emptyText;
         [SerializeField] TMP_Text? titleText;
         [SerializeField] SimpleButtonWidget? closeButton;
         [SerializeField] Canvas? canvas;
+
+        readonly List<ItemEntry> itemEntries = new();
+
+        ResourceKey<GameObject>? buttonType;
 
         Canvas Canvas => canvas.AssertNotNull(nameof(canvas));
         Text EmptyTextObject => emptyText.AssertNotNull(nameof(emptyText));

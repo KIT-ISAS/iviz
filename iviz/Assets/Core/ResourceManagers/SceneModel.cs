@@ -153,7 +153,7 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        RosLogger.Warn("SceneModel: Failed to retrieve diffuse texture " +
+                        RosLogger.Warn(nameof(SceneModel) + ": Failed to retrieve diffuse texture " +
                                        $"'{diffuseTexture.Path}' required by '{uriString}'");
                     }
                 }
@@ -167,7 +167,7 @@ namespace Iviz.Displays
                     }
                     else
                     {
-                        RosLogger.Warn("SceneModel: Failed to retrieve bump texture " +
+                        RosLogger.Warn(nameof(SceneModel) + ": Failed to retrieve bump texture " +
                                        $"'{bumpTexture.Path}' required by '{uriString}'");
                     }
                 }
@@ -177,7 +177,7 @@ namespace Iviz.Displays
             }
 
             var nodes = new List<GameObject>();
-            bool[] used = new bool[templateMeshes.Count];
+            using var meshIsBeingUsed = new Rent<bool>(templateMeshes.Count);
 
             foreach (var node in msg.Nodes)
             {
@@ -202,10 +202,10 @@ namespace Iviz.Displays
 
                 foreach (int meshId in node.Meshes)
                 {
-                    if (!used[meshId])
+                    if (!meshIsBeingUsed[meshId])
                     {
                         templateMeshes[meshId].transform.SetParent(nodeObjectTransform, false);
-                        used[meshId] = true;
+                        meshIsBeingUsed[meshId] = true;
                     }
                     else
                     {
