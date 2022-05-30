@@ -28,7 +28,7 @@ namespace Iviz.Rosbag.Writer
             }
         }        
         
-        void Write<T>(T t)
+        void WriteValue<T>(T t)
         {
             ThrowIfOutOfRange(Unsafe.SizeOf<T>());
             ref byte dstPtr = ref bytes.Array[p];
@@ -38,22 +38,22 @@ namespace Iviz.Rosbag.Writer
 
         public void Write(int value)
         {
-            Write<int>(value);
+            WriteValue(value);
         }
 
         public void Write(in time value)
         {
-            Write<time>(value);
+            WriteValue(value);
         }
 
         public void Write(OpCode value)
         {
-            Write((byte)value);
+            WriteValue((byte)value);
         }
 
         public void Write(long value)
         {
-            Write<long>(value);
+            WriteValue(value);
         }
 
         public void Write(string value)
@@ -75,7 +75,7 @@ namespace Iviz.Rosbag.Writer
 
         public void Write(char value)
         {
-            Write((byte)value);
+            WriteValue((byte)value);
         }
 
         public readonly Stream WriteTo(Stream stream)
