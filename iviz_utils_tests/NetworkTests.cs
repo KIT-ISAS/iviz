@@ -1,8 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Iviz.Msgs.StdMsgs;
+using Iviz.Msgs.Tf2Msgs;
+using Iviz.MsgsGen.Dynamic;
 using Iviz.Roslib;
 using Iviz.Roslib.XmlRpc;
 using NUnit.Framework;
@@ -14,12 +17,12 @@ namespace Iviz.UtilsTests
     [Category("Network")]
     public class NetworkTests
     {
-        static readonly Uri CallerUri = new Uri("http://localhost:7613");
+        static readonly Uri CallerUri = new Uri("http://localhost:7633");
 
         static readonly Uri OtherCallerUri = new Uri("http://localhost:7614");
 
-        static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
-        //static readonly Uri MasterUri = new Uri("http://192.168.0.220:11311");
+        //static readonly Uri MasterUri = new Uri("http://141.3.59.5:11311");
+        static readonly Uri MasterUri = new Uri("http://192.168.0.220:11311");
         const string CallerId = "/iviz_util_tests";
 
         [SetUp]
@@ -222,10 +225,22 @@ namespace Iviz.UtilsTests
 
             await foreach (var msg in subscriber.ReadAllAsync(source.Token))
             {
-                if (msg is String { Data: msgText })
+                if (msg is not DynamicMessage dynamic)
                 {
-                    break;
+                    throw new Exception("Message is not dynamic");
                 }
+
+                if (dynamic.Fields.FirstOrDefault(property => property is ("data", _)) is not (_, IField<string> field))
+                {
+                    throw new Exception("Data property is missing");
+                }
+
+                if (field.Value != msgText)
+                {
+                    throw new Exception("Data property is incorrect");
+                }
+
+                break;
             }
         }
 
@@ -234,7 +249,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_empty";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await RosChannelWriterUtils.CreateWriterAsync<Empty>(client, topicName);
+            await using var publisher = await client.CreateWriterAsync<Empty>(topicName);
             publisher.LatchingEnabled = true;
 
             var systemState = await client.GetSystemStateAsync();

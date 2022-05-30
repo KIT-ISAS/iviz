@@ -85,7 +85,7 @@ namespace Iviz.UtilsTests
             Assert.NotNull(BuiltIns.TryGetGeneratorFromMessageName("dummy_namespace/DummyMessage", "Iviz.UtilsTests"));
             Assert.NotNull(BuiltIns.TryGetGeneratorFromMessageName("DummyNamespace/DummyMessage", "Iviz.UtilsTests"));
         }
-        
+
         [Test]
         public void TestDynamicMessage()
         {

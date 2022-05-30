@@ -69,7 +69,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using (var publisher = await RosChannelWriterUtils.CreateWriterAsync<String>(client, topicName))
+            await using (var publisher = await client.CreateWriterAsync<String>(topicName))
             {
                 publisher.LatchingEnabled = true;
 
@@ -142,7 +142,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_empty";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await RosChannelWriterUtils.CreateWriterAsync<Empty>(client, topicName);
+            await using var publisher = await client.CreateWriterAsync<Empty>(topicName);
             publisher.LatchingEnabled = true;
 
             var systemState = await client.GetSystemStateAsync();
@@ -163,7 +163,7 @@ namespace Iviz.UtilsTests
         {
             const string topicName = "/my_test_topic_xyz_fixed";
             await using var client = await RosClient.CreateAsync(MasterUri, CallerId, CallerUri);
-            await using var publisher = await RosChannelWriterUtils.CreateWriterAsync<Twist>(client, topicName);
+            await using var publisher = await client.CreateWriterAsync<Twist>(topicName);
             publisher.LatchingEnabled = true;
 
             var systemState = await client.GetSystemStateAsync();
