@@ -332,7 +332,7 @@ namespace Iviz.Msgs
             $"{{\"x\": {p.X.ToString(BuiltIns.Culture)}, \"y\": {p.Y.ToString(BuiltIns.Culture)}, " +
             $"\"z\": {p.Z.ToString(BuiltIns.Culture)}, \"w\": {p.W.ToString(BuiltIns.Culture)}}}";
 
-        public static string ToString(in ISerializable t) => t.ToJsonString();
+        public static string ToString(ISerializable t) => t.ToJsonString();
 
         public static string ToString(IService t) => t.ToJsonString();
 
