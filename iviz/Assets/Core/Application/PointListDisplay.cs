@@ -302,7 +302,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            MinMaxJob.CalculateBounds(pointBuffer.AsArray(), Size, out Bounds bounds, out Vector2 span);
+            MinMaxJob.CalculateBounds(pointBuffer.AsArray(), out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
             Collider.size = bounds.size + ElementScale * Vector3.one;
             MeasuredIntensityBounds = span;

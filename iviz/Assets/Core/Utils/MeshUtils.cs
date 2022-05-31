@@ -55,6 +55,11 @@ namespace Iviz.Core
             mesh.SetUVs(0, ps.Array, 0, ps.Length);
         }
 
+        public static void SetUVs(this Mesh mesh, NativeArray<Vector2> ps)
+        {
+            mesh.SetUVs(0, ps, 0, ps.Length);
+        }
+
         public static void SetUVs(this Mesh mesh, ReadOnlySpan<Vector3> ps, int channel = 0)
         {
             var array = UnsafeUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);

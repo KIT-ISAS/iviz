@@ -17,6 +17,7 @@ using Iviz.Tools;
 using Iviz.Urdf;
 using JetBrains.Annotations;
 using TMPro;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using Color = UnityEngine.Color;
@@ -751,6 +752,13 @@ namespace Iviz.Core
             RuntimePlatform.WSAPlayerX64 or RuntimePlatform.WSAPlayerX86 or RuntimePlatform.WSAPlayerARM => "wsa",
             _ => Application.platform.ToString().ToLower()
         };
+        
+        public static NativeArray<T> TempArrayFromValue<T>(T t) where T : unmanaged
+        {
+            var array = new NativeArray<T>(1, Allocator.TempJob);
+            array[0] = t;
+            return array;
+        }
     }
 
     public struct WithIndexEnumerable<T>

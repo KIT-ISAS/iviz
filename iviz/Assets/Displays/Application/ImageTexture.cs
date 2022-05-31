@@ -10,6 +10,7 @@ using Iviz.Common;
 using Iviz.Core;
 using Iviz.Resources;
 using Iviz.Tools;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using Buffer = System.Buffer;
@@ -404,7 +405,6 @@ namespace Iviz.Displays
 
         void ApplyTexture(int width, int height, ReadOnlySpan<byte> data, string encoding, bool generateMipmaps)
         {
-            bool alreadyCopied;
             Texture2D texture;
             Vector2 intensityBounds;
             switch (encoding.ToUpperInvariant())
@@ -418,14 +418,12 @@ namespace Iviz.Displays
                     if (!Settings.SupportsRGB24)
                     {
                         texture = EnsureSize(width, height, TextureFormat.RGBA32);
-                        //CopyRgb24ToRgba32(data, texture.AsSpan());
                         ConversionUtils.CopyPixelsRgbToRgba(texture.AsSpan(), data);
-                        alreadyCopied = true;
                     }
                     else
                     {
                         texture = EnsureSize(width, height, TextureFormat.RGB24);
-                        alreadyCopied = false;
+                        texture.CopyFrom(data);
                     }
 
                     MeasuredIntensityBounds = null;
@@ -438,9 +436,9 @@ namespace Iviz.Displays
                 case "8SC4":
                 case "8UC4":
                     texture = EnsureSize(width, height, TextureFormat.RGBA32);
+                    texture.CopyFrom(data);
                     MeasuredIntensityBounds = null;
                     normalizationFactor = 1;
-                    alreadyCopied = false;
                     break;
                 case "MONO16":
                 case "16UC1":
@@ -451,15 +449,14 @@ namespace Iviz.Displays
                     {
                         texture = EnsureSize(width, height, TextureFormat.R8);
                         ConversionUtils.CopyPixelsR16ToR8(texture.AsSpan(), data);
-                        alreadyCopied = true;
                     }
                     else
                     {
                         texture = EnsureSize(width, height, TextureFormat.R16);
-                        alreadyCopied = false;
+                        texture.CopyFrom(data);
                     }
 
-                    intensityBounds = CalculateBounds(data.Cast<ushort>());
+                    intensityBounds = CalculateBounds(texture.GetRawTextureData<ushort>());
                     MeasuredIntensityBounds = intensityBounds;
                     normalizationFactor = 1f / ushort.MaxValue;
                     if (!OverrideIntensityBounds)
@@ -474,10 +471,10 @@ namespace Iviz.Displays
                 case "8SC1":
                 case "8SC":
                     texture = EnsureSize(width, height, TextureFormat.R8);
-                    intensityBounds = CalculateBounds(data);
+                    texture.CopyFrom(data);
+                    intensityBounds = CalculateBounds(texture.GetRawTextureData<byte>());
                     MeasuredIntensityBounds = intensityBounds;
                     normalizationFactor = 1f / byte.MaxValue;
-                    alreadyCopied = false;
                     if (!OverrideIntensityBounds)
                     {
                         IntensityBounds = intensityBounds;
@@ -487,10 +484,10 @@ namespace Iviz.Displays
                 case "32FC1":
                 case "32FC":
                     texture = EnsureSize(width, height, TextureFormat.RFloat);
-                    intensityBounds = CalculateBounds(data.Cast<float>());
+                    texture.CopyFrom(data);
+                    intensityBounds = CalculateBounds(texture.GetRawTextureData<float>());
                     MeasuredIntensityBounds = intensityBounds;
                     normalizationFactor = 1;
-                    alreadyCopied = false;
                     if (!OverrideIntensityBounds)
                     {
                         IntensityBounds = intensityBounds;
@@ -501,16 +498,12 @@ namespace Iviz.Displays
                     return;
             }
 
-            if (!alreadyCopied)
-            {
-                texture.CopyFrom(data);
-            }
-
             texture.Apply(generateMipmaps);
         }
 
-        static Vector2 CalculateBounds(ReadOnlySpan<byte> src)
+        static Vector2 CalculateBounds(NativeArray<byte> src)
         {
+            /*
             byte min = byte.MaxValue;
             byte max = byte.MinValue;
             foreach (byte b in src)
@@ -527,53 +520,20 @@ namespace Iviz.Displays
             }
 
             return new Vector2(min, max);
-        }
-
-        static Vector2 CalculateBounds(ReadOnlySpan<ushort> src)
-        {
-            ushort min = ushort.MaxValue;
-            ushort max = ushort.MinValue;
-
-            foreach (ushort b in src)
-            {
-                if (b > max)
-                {
-                    max = b;
-                }
-
-                if (b < min)
-                {
-                    min = b;
-                }
-            }
-
-            return new Vector2(min, max);
-        }
-
-        static Vector2 CalculateBounds(ReadOnlySpan<float> src)
-        {
-            /*
-            float min = float.MaxValue;
-            float max = float.MinValue;
-            
-            foreach (float b in src)
-            {
-                if (b > max)
-                {
-                    max = b;
-                }
-
-                if (b < min)
-                {
-                    min = b;
-                }
-            }
-
-            return new Vector2(min, max);
             */
-            
-            var nativeArray = UnsafeUtils.CreateNativeArrayWrapper(ref src.GetReference(), src.Length);
-            (float min, float max) = MinMaxJob.CalculateBounds(nativeArray);
+            (float min, float max) = MinMaxJob.CalculateBounds(src);
+            return new Vector2(min, max);
+        }
+
+        static Vector2 CalculateBounds(NativeArray<ushort> src)
+        {
+            (float min, float max) = MinMaxJob.CalculateBounds(src);
+            return new Vector2(min, max);
+        }
+
+        static Vector2 CalculateBounds(NativeArray<float> src)
+        {
+            (float min, float max) = MinMaxJob.CalculateBounds(src);
             return new Vector2(min, max);
         }
 

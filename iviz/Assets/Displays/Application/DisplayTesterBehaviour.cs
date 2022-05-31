@@ -68,92 +68,82 @@ namespace Iviz.Displays
         {
             {
                 var resource = ResourcePool.RentDisplay<MeshListDisplay>();
-                using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
+                using NativeList<PointWithColor> points = new NativeList<PointWithColor>();
+                for (int i = 0; i < 40; i++)
                 {
-                    for (int i = 0; i < 40; i++)
-                    {
-                        points.Add(new PointWithColor(new Vector3(i, 0, z), Color.green));
-                    }
-
-                    resource.MeshResource = Resource.Displays.Cube;
-                    resource.ElementScale = 0.5f;
-                    resource.ElementScale3 = new Vector3(1, 2, 1);
-                    resource.UseColormap = false;
-                    resource.Colormap = ColormapId.hsv;
-                    resource.Set(points);
+                    points.Add(new PointWithColor(new Vector3(i, 0, z), Color.green));
                 }
+
+                resource.MeshResource = Resource.Displays.Cube;
+                resource.ElementScale = 0.5f;
+                resource.ElementScale3 = new Vector3(1, 2, 1);
+                resource.UseColormap = false;
+                resource.Colormap = ColormapId.hsv;
+                resource.Set(points);
             }
 
             {
                 var resource = ResourcePool.RentDisplay<MeshListDisplay>();
-                using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
+                using NativeList<PointWithColor> points = new NativeList<PointWithColor>();
+                for (int i = 0; i < 40; i++)
                 {
-                    for (int i = 0; i < 40; i++)
-                    {
-                        points.Add(new PointWithColor(new Vector3(i, 0, z + 1), 0.025f * i));
-                    }
-
-                    resource.MeshResource = Resource.Displays.Cube;
-                    resource.ElementScale = 0.5f;
-                    resource.ElementScale3 = new Vector3(1, 2, 1);
-                    resource.UseColormap = true;
-                    resource.Colormap = ColormapId.hsv;
-                    resource.Set(points);
+                    points.Add(new PointWithColor(new Vector3(i, 0, z + 1), 0.025f * i));
                 }
+
+                resource.MeshResource = Resource.Displays.Cube;
+                resource.ElementScale = 0.5f;
+                resource.ElementScale3 = new Vector3(1, 2, 1);
+                resource.UseColormap = true;
+                resource.Colormap = ColormapId.hsv;
+                resource.Set(points);
             }
 
             {
                 var resource = ResourcePool.RentDisplay<MeshListDisplay>();
-                using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
+                using NativeList<PointWithColor> points = new NativeList<PointWithColor>();
+                for (int i = 0; i < 40; i++)
                 {
-                    for (int i = 0; i < 40; i++)
-                    {
-                        points.Add(new PointWithColor(new Vector3(i, 0, z + 2), 0.025f * i));
-                    }
-
-                    resource.MeshResource = Resource.Displays.Sphere;
-                    resource.ElementScale = 0.5f;
-                    resource.ElementScale3 = new Vector3(1, 2, 1);
-                    resource.UseIntensityForScaleY = true;
-                    resource.Colormap = ColormapId.hsv;
-                    resource.Set(points);
+                    points.Add(new PointWithColor(new Vector3(i, 0, z + 2), 0.025f * i));
                 }
+
+                resource.MeshResource = Resource.Displays.Sphere;
+                resource.ElementScale = 0.5f;
+                resource.ElementScale3 = new Vector3(1, 2, 1);
+                resource.UseIntensityForScaleY = true;
+                resource.Colormap = ColormapId.hsv;
+                resource.Set(points);
             }
 
             {
                 var resource = ResourcePool.RentDisplay<MeshListDisplay>();
-                using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
+                using NativeList<PointWithColor> points = new NativeList<PointWithColor>();
+                for (int i = 0; i < 40; i++)
                 {
-                    for (int i = 0; i < 40; i++)
-                    {
-                        points.Add(new PointWithColor(new Vector3(i, 0, z + 3), 0.025f * i));
-                    }
-
-                    resource.MeshResource = Resource.Displays.Cylinder;
-                    resource.ElementScale = 0.5f;
-                    resource.ElementScale3 = new Vector3(1, 2, 1);
-                    resource.Set(points);
-                    resource.OcclusionOnly = true;
+                    points.Add(new PointWithColor(new Vector3(i, 0, z + 3), 0.025f * i));
                 }
+
+                resource.MeshResource = Resource.Displays.Cylinder;
+                resource.ElementScale = 0.5f;
+                resource.ElementScale3 = new Vector3(1, 2, 1);
+                resource.Set(points);
+                resource.OcclusionOnly = true;
             }
 
             {
                 var resource = ResourcePool.RentDisplay<MeshListDisplay>();
-                using (NativeList<PointWithColor> points = new NativeList<PointWithColor>())
+                using NativeList<PointWithColor> points = new NativeList<PointWithColor>();
+                for (int i = 0; i < 40; i++)
                 {
-                    for (int i = 0; i < 40; i++)
-                    {
-                        points.Add(new PointWithColor(new Vector3(i, 0, z + 4), 0.025f * i));
-                    }
-
-                    resource.MeshResource = Resource.Displays.Cube;
-                    resource.ElementScale = 0.5f;
-                    resource.ElementScale3 = new Vector3(1, 2, 1);
-                    resource.UseIntensityForScaleY = true;
-                    resource.Colormap = ColormapId.hsv;
-                    resource.Set(points);
-                    resource.OcclusionOnly = true;
+                    points.Add(new PointWithColor(new Vector3(i, 0, z + 4), 0.025f * i));
                 }
+
+                resource.MeshResource = Resource.Displays.Cube;
+                resource.ElementScale = 0.5f;
+                resource.ElementScale3 = new Vector3(1, 2, 1);
+                resource.UseIntensityForScaleY = true;
+                resource.Colormap = ColormapId.hsv;
+                resource.Set(points);
+                resource.OcclusionOnly = true;
             }
         }
 
@@ -161,7 +151,7 @@ namespace Iviz.Displays
         {
             {
                 LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
-                NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
+                using NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
                 for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
                     lines.Add(new LineWithColor(
@@ -170,12 +160,13 @@ namespace Iviz.Displays
                     ));
                 }
 
+                resource.ElementScale = 0.1f;
                 resource.Set(lines);
             }
 
             {
                 LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
-                NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
+                using NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
                 for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
                     lines.Add(new LineWithColor(
@@ -186,12 +177,13 @@ namespace Iviz.Displays
 
                 resource.UseColormap = true;
                 resource.Colormap = ColormapId.hsv;
+                resource.ElementScale = 0.1f;
                 resource.Set(lines);
             }
 
             {
                 LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
-                NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
+                using NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
                 for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
                     lines.Add(new LineWithColor(
@@ -200,12 +192,13 @@ namespace Iviz.Displays
                     ));
                 }
 
+                resource.ElementScale = 0.1f;
                 resource.Set(lines);
             }
 
             {
                 LineDisplay resource = ResourcePool.RentDisplay<LineDisplay>();
-                NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
+                using NativeList<LineWithColor> lines = new NativeList<LineWithColor>();
                 for (int i = 0; i < MaxSegmentsForMesh / 2; i++)
                 {
                     lines.Add(new LineWithColor(
@@ -217,6 +210,7 @@ namespace Iviz.Displays
                 resource.UseColormap = true;
                 resource.Tint = Color.white.WithAlpha(0.25f);
                 resource.Colormap = ColormapId.hsv;
+                resource.ElementScale = 0.1f;
                 resource.Set(lines);
             }
         }
@@ -236,6 +230,7 @@ namespace Iviz.Displays
                     ));
                 }
 
+                resource.ElementScale = 0.1f;
                 resource.Set(lines);
             }
 
@@ -252,6 +247,7 @@ namespace Iviz.Displays
 
                 resource.UseColormap = true;
                 resource.Colormap = ColormapId.hsv;
+                resource.ElementScale = 0.1f;
                 resource.Set(lines);
             }
 
@@ -266,6 +262,7 @@ namespace Iviz.Displays
                     ));
                 }
 
+                resource.ElementScale = 0.1f;
                 resource.Set(lines);
             }
 
@@ -283,6 +280,7 @@ namespace Iviz.Displays
                 resource.UseColormap = true;
                 resource.Tint = new Color(1, 1, 1, 0.5f);
                 resource.Colormap = ColormapId.hsv;
+                resource.ElementScale = 0.1f;
                 resource.Set(lines);
             }
         }

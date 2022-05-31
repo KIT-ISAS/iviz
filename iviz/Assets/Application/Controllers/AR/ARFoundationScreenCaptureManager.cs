@@ -11,6 +11,10 @@ using Iviz.Common;
 using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Tools;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
@@ -296,7 +300,7 @@ namespace Iviz.Controllers
 
         static void MirrorXf(int width, int height, byte[] bytes)
         {
-            int pitch = width * sizeof(float); 
+            int pitch = width * sizeof(float);
             if (pitch * height > bytes.Length) ThrowIndexOutOfRange();
             foreach (int v in ..height)
             {
