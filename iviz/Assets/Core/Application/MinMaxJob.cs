@@ -11,11 +11,9 @@ namespace Iviz.Displays
         [BurstCompile(CompileSynchronously = true)]
         struct MinMaxJobPoints : IJob
         {
-            [ReadOnly]
-            public NativeSlice<float4> input;
+            [ReadOnly] public NativeSlice<float4> input;
 
-            [WriteOnly]
-            public NativeArray<float4> output;
+            [WriteOnly] public NativeArray<float4> output;
 
             public void Execute()
             {
@@ -26,6 +24,7 @@ namespace Iviz.Displays
                     min = math.min(min, input[i]);
                     max = math.max(max, input[i]);
                 }
+
                 output[0] = min;
                 output[1] = max;
             }
@@ -55,11 +54,9 @@ namespace Iviz.Displays
         [BurstCompile(CompileSynchronously = true)]
         struct MinMaxJobLines : IJob
         {
-            [ReadOnly]
-            public NativeSlice<float4x2> input;
+            [ReadOnly] public NativeSlice<float4x2> input;
 
-            [WriteOnly]
-            public NativeArray<float4> output;
+            [WriteOnly] public NativeArray<float4> output;
 
             public void Execute()
             {
@@ -72,6 +69,7 @@ namespace Iviz.Displays
                     min = math.min(min, input[i].c1);
                     max = math.max(max, input[i].c1);
                 }
+
                 output[0] = min;
                 output[1] = max;
             }
@@ -97,15 +95,13 @@ namespace Iviz.Displays
             bounds = new Bounds((positionMax + positionMin) / 2, positionMax - positionMin);
             intensitySpan = new Vector2(output[0].w, output[1].w);
         }
-        
+
         [BurstCompile(CompileSynchronously = true)]
         struct MinMaxJobFloat : IJob
         {
-            [ReadOnly]
-            public NativeArray<float> input;
+            [ReadOnly] public NativeArray<float> input;
 
-            [WriteOnly]
-            public float outputMin, outputMax;
+            [WriteOnly] public float outputMin, outputMax;
 
             public void Execute()
             {
@@ -113,14 +109,15 @@ namespace Iviz.Displays
                 float max = float.MaxValue;
                 foreach (float t in input)
                 {
-                    min = math.min(min, t);
-                    max = math.max(max, t);
+                    min = Mathf.Min(min, t);
+                    max = Mathf.Max(max, t);
                 }
+
                 outputMin = min;
                 outputMax = max;
             }
         }
-        
+
         public static (float, float) CalculateBounds(in NativeArray<float> pointBuffer)
         {
             var job = new MinMaxJobFloat
@@ -132,5 +129,4 @@ namespace Iviz.Displays
             return (job.outputMin, job.outputMax);
         }
     }
-
 }

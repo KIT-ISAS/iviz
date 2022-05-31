@@ -607,7 +607,7 @@ namespace Iviz.Controllers
             }
             catch (Exception e)
             {
-                RosLogger.Error($"{this}: CaptureScreenForPublish failed", e);
+                RosLogger.Error($"{this}: {nameof(CaptureScreenForPublish)} failed", e);
             }
         }
 

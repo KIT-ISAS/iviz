@@ -3,6 +3,7 @@
 using System;
 using UnityEngine;
 using Iviz.Tools;
+using Unity.Collections;
 using UnityEngine.Rendering;
 
 namespace Iviz.Core
@@ -80,6 +81,11 @@ namespace Iviz.Core
                 ? IndexFormat.UInt16
                 : IndexFormat.UInt32;
             mesh.SetIndices(ps.Array, 0, ps.Length, topology, 0);
+        }
+        
+        public static void SetTriangles(this Mesh mesh, NativeArray<int> ps)
+        {
+            mesh.SetIndices(ps, MeshTopology.Triangles, 0);
         }
     }
 }

@@ -5,6 +5,9 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using Iviz.Core;
 using Iviz.Tools;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -15,6 +18,7 @@ namespace Iviz.Displays
 {
     internal static class CapsuleLinesHelper
     {
+        /*
         static int[]? capsuleIndices;
 
         static int[] CapsuleIndices => capsuleIndices ??= new[]
@@ -41,6 +45,7 @@ namespace Iviz.Displays
             9, 8, 7,
             9, 5, 8
         };
+        */
 
         public static void CreateCapsulesFromSegments(ReadOnlySpan<float4x2> lineBuffer, float scale, Mesh mesh)
         {
@@ -59,13 +64,15 @@ namespace Iviz.Displays
             var uvs = new Rent<Vector2>(length);
 
             int indicesSize = 16 * 3 * bufferLength;
+            //var indices = new Rent<int>(indicesSize);
+            var indices = new NativeArray<int>(indicesSize, Allocator.TempJob);
+
             mesh.Clear();
-            var indices = new Rent<int>(indicesSize);
 
             try
             {
-                CreateCapsulesFromSegments(lineBuffer, bufferLength, scale,
-                    points.Array, colors.Array, uvs.Array, indices.Array);
+                CreateCapsulesFromSegments(lineBuffer, scale,
+                    points.Array, colors.Array, uvs.Array, indices);
 
                 mesh.SetVertices(points);
                 mesh.SetColors(colors);
@@ -81,14 +88,18 @@ namespace Iviz.Displays
             }
         }
 
-        static unsafe void CreateCapsulesFromSegments(ReadOnlySpan<float4x2> lines, int numSegments, float scale,
-            Vector3[] pArray, Color32[] cArray, Vector2[] uArray, int[] iArray)
+        static void CreateCapsulesFromSegments(ReadOnlySpan<float4x2> lines, float scale,
+            Vector3[] pArray, Color32[] cArray, Vector2[] uArray, NativeArray<int> iArray)
         {
             const float minMagnitude = 1e-5f;
 
             float halfScale = scale * 0.5f;
 
             int offset = 0;
+            int numSegments = lines.Length;
+
+            var iHandle = new CapsuleCreateIndices { output = iArray }.Schedule();
+            
             for (int segment = 0; segment < numSegments; segment++)
             {
                 ref readonly var line = ref lines[segment];
@@ -141,7 +152,7 @@ namespace Iviz.Displays
                 var halfDiffYz = halfScale * (dirY - dirZ);
 
                 ref Vector3 pPtr = ref pArray[offset];
-                
+
                 pPtr = a - halfDirX;
                 pPtr.Plus(9) = b + halfDirX;
 
@@ -167,7 +178,7 @@ namespace Iviz.Displays
 
                 float ca = line.c0.w;
                 float cb = line.c1.w;
-                
+
                 cPtr = ca;
                 cPtr.Plus(1) = ca;
                 cPtr.Plus(2) = ca;
@@ -242,6 +253,7 @@ namespace Iviz.Displays
             }
             */
 
+            /*
             int[] capsules = CapsuleIndices;
             ref int capsulePtr = ref capsules[0];
             ref int indexPtr = ref iArray[0];
@@ -256,6 +268,54 @@ namespace Iviz.Displays
 
                 indexPtr = ref indexPtr.Plus(48);
                 offset += 10;
+            }
+            */
+            iHandle.Complete();
+        }
+
+        [BurstCompile(CompileSynchronously = true)]
+        struct CapsuleCreateIndices : IJob
+        {
+            static readonly int[] CapsuleIndices =
+            {
+                0, 1, 2,
+                0, 2, 3,
+                0, 3, 4,
+                0, 4, 1,
+
+                1, 5, 6,
+                1, 6, 2,
+
+                2, 6, 7,
+                2, 7, 3,
+
+                3, 7, 8,
+                3, 8, 4,
+
+                4, 8, 5,
+                4, 5, 1,
+
+                9, 6, 5,
+                9, 7, 6,
+                9, 8, 7,
+                9, 5, 8
+            };
+
+            [WriteOnly] public NativeArray<int> output;
+
+            public void Execute()
+            {
+                int offset = 0;
+                int index = 0;
+                while (index != output.Length)
+                {
+                    for (int i = 0; i < 48; i++)
+                    {
+                        output[index++] = offset + CapsuleIndices[i];
+                    }
+
+                    offset += 10;
+                }
             }
         }
     }

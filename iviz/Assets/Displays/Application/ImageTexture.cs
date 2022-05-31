@@ -552,6 +552,7 @@ namespace Iviz.Displays
 
         static Vector2 CalculateBounds(ReadOnlySpan<float> src)
         {
+            /*
             float min = float.MaxValue;
             float max = float.MinValue;
             
@@ -569,11 +570,11 @@ namespace Iviz.Displays
             }
 
             return new Vector2(min, max);
-            /*
+            */
+            
             var nativeArray = UnsafeUtils.CreateNativeArrayWrapper(ref src.GetReference(), src.Length);
             (float min, float max) = MinMaxJob.CalculateBounds(nativeArray);
             return new Vector2(min, max);
-            */
         }
 
         Texture2D EnsureSize(int width, int height, TextureFormat format)
