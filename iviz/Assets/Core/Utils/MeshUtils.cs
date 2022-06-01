@@ -12,7 +12,7 @@ namespace Iviz.Core
     {
         public static void SetVertices(this Mesh mesh, ReadOnlySpan<Vector3> ps)
         {
-            var array = UnsafeUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
+            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
             mesh.SetVertices(array);
         }
 
@@ -23,25 +23,25 @@ namespace Iviz.Core
 
         public static void SetNormals(this Mesh mesh, ReadOnlySpan<Vector3> ps)
         {
-            var array = UnsafeUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
+            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
             mesh.SetNormals(array);
         }
 
         public static void SetTangents(this Mesh mesh, ReadOnlySpan<Vector4> ps)
         {
-            var array = UnsafeUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
+            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
             mesh.SetTangents(array);
         }
 
         public static void SetColors(this Mesh mesh, ReadOnlySpan<Color> ps)
         {
-            var array = UnsafeUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
+            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
             mesh.SetColors(array);
         }
 
         public static void SetColors(this Mesh mesh, ReadOnlySpan<Color32> ps)
         {
-            var array = UnsafeUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
+            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
             mesh.SetColors(array);
         }
 
@@ -62,13 +62,13 @@ namespace Iviz.Core
 
         public static void SetUVs(this Mesh mesh, ReadOnlySpan<Vector3> ps, int channel = 0)
         {
-            var array = UnsafeUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
+            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
             mesh.SetUVs(channel, array);
         }
 
         public static void SetTriangles(this Mesh mesh, ReadOnlySpan<int> ps)
         {
-            var array = UnsafeUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
+            var array = NativeArrayUtils.CreateNativeArrayWrapper(ref ps.GetReference(), ps.Length);
             mesh.indexFormat = ps.Length < ushort.MaxValue
                 ? IndexFormat.UInt16
                 : IndexFormat.UInt32;

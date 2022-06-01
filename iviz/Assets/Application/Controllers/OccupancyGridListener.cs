@@ -66,7 +66,7 @@ namespace Iviz.Controllers
 
                 return $"<b>{numCellsX.ToString("N0", BuiltIns.Culture)}x" +
                        $"{numCellsY.ToString("N0", BuiltIns.Culture)} cells | " +
-                       $"{cellSize.ToString("#,0.###", BuiltIns.Culture)} m/cell</b>\n" +
+                       $"{UnityUtils.FormatFloat(cellSize)} m/cell</b>\n" +
                        $"{numValid.ToString("N0", BuiltIns.Culture)} valid";
             }
         }

@@ -399,5 +399,28 @@ namespace Iviz.Core
 
             Instance.actionsQueue.Enqueue(action);
         }
+
+        public static Task WaitUntilAsync(Func<bool> predicate)
+        {
+            if (predicate())
+            {
+                return Task.CompletedTask;
+            }
+
+            var ts = new TaskCompletionSource(TaskCreationOptions.None);
+            EveryFrame += KeepChecking;
+            return ts.Task;
+            
+            void KeepChecking()
+            {
+                if (!predicate())
+                {
+                    return;
+                }
+
+                EveryFrame -= KeepChecking;
+                ts.TrySetResult();
+            }
+        }
     }
 }

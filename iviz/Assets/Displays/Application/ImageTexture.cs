@@ -503,37 +503,19 @@ namespace Iviz.Displays
 
         static Vector2 CalculateBounds(NativeArray<byte> src)
         {
-            /*
-            byte min = byte.MaxValue;
-            byte max = byte.MinValue;
-            foreach (byte b in src)
-            {
-                if (b > max)
-                {
-                    max = b;
-                }
-
-                if (b < min)
-                {
-                    min = b;
-                }
-            }
-
-            return new Vector2(min, max);
-            */
-            (float min, float max) = MinMaxJob.CalculateBounds(src);
+            (byte min, byte max) = MinMaxJobs.CalculateBounds(src);
             return new Vector2(min, max);
         }
 
         static Vector2 CalculateBounds(NativeArray<ushort> src)
         {
-            (float min, float max) = MinMaxJob.CalculateBounds(src);
+            (ushort min, ushort max) = MinMaxJobs.CalculateBounds(src);
             return new Vector2(min, max);
         }
 
         static Vector2 CalculateBounds(NativeArray<float> src)
         {
-            (float min, float max) = MinMaxJob.CalculateBounds(src);
+            (float min, float max) = MinMaxJobs.CalculateBounds(src);
             return new Vector2(min, max);
         }
 

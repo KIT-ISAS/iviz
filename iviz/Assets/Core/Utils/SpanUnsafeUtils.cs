@@ -173,9 +173,18 @@ namespace Iviz.Core
         public static ref float4 Plus(this ref float4 ptr, int i) => ref Unsafe.Add(ref ptr, i);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ref uint4 Plus(this ref uint4 ptr, int i) => ref Unsafe.Add(ref ptr, i);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref Point Plus(this ref Point ptr, int i) => ref Unsafe.Add(ref ptr, i);
         
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref R16 Plus(this ref R16 ptr, int i) => ref Unsafe.Add(ref ptr, i);
+        
+        /// <summary>
+        /// Creates a span from the given pointer and size. 
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe Span<byte> AsSpan(this IntPtr ptr, int size) => new(ptr.ToPointer(), size);
     }
 }

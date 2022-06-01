@@ -1,13 +1,12 @@
 #nullable enable
 
-using System.Numerics;
 using Iviz.Core;
 using Unity.Burst;
+using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Rendering;
 using Vector2 = UnityEngine.Vector2;
 
 namespace Iviz.Displays
@@ -26,15 +25,22 @@ namespace Iviz.Displays
             }
 
             int length = 10 * bufferLength;
-            using var points = new NativeArray<float3>(length, Allocator.TempJob);
-            using var colors = new NativeArray<float>(length, Allocator.TempJob);
-            using var uvs = new NativeArray<float2>(length, Allocator.TempJob);
-            using var indices = new NativeArray<int>(16 * 3 * bufferLength, Allocator.TempJob);
+            using var points = new NativeArray<float3>(length, Allocator.TempJob,
+                NativeArrayOptions.UninitializedMemory);
+            using var colors = new NativeArray<float>(length, Allocator.TempJob,
+                NativeArrayOptions.UninitializedMemory);
+            using var uvs = new NativeArray<float2>(length, Allocator.TempJob,
+                NativeArrayOptions.UninitializedMemory);
+            using var indices = new NativeArray<int>(16 * 3 * bufferLength, Allocator.TempJob,
+                NativeArrayOptions.UninitializedMemory);
 
-            var pHandle = new CapsuleCreatePositions { input = lineBuffer, scale = scale, output = points }.Schedule();
+            var pHandle =
+                new CapsuleCreatePositions { input = lineBuffer, scale = scale, output = points }.Schedule();
             var cHandle = new CapsuleCreateColors { input = lineBuffer, output = colors }.Schedule();
             var uvHandle = new CapsuleCreateUVs { input = lineBuffer, output = uvs }.Schedule();
             var iHandle = new CapsuleCreateIndices { output = indices }.Schedule();
+
+            JobHandle.ScheduleBatchedJobs();
 
             pHandle.Complete();
             cHandle.Complete();
@@ -55,7 +61,6 @@ namespace Iviz.Displays
             [ReadOnly] public float scale;
             [WriteOnly] public NativeArray<float3> output;
 
-
             public void Execute()
             {
                 const float minMagnitude = 1e-5f;
@@ -63,23 +68,17 @@ namespace Iviz.Displays
 
                 int offset = 0;
 
-                foreach (var line in input)
+                for (int index = 0; index < input.Length; index++)
                 {
-                    float3 a;
-                    a.x = line.c0.x;
-                    a.y = line.c0.y;
-                    a.z = line.c0.z;
+                    var line = input[index];
+                    var a = line.c0.xyz;
+                    var b = line.c1.xyz;
 
-                    float3 b;
-                    b.x = line.c1.x;
-                    b.y = line.c1.y;
-                    b.z = line.c1.z;
-
-                    float3 ab = b - a;
+                    var ab = b - a;
                     float3 dirX, dirY;
 
                     float abMagnitudeSq = math.lengthsq(ab);
-                    if (abMagnitudeSq < minMagnitude * minMagnitude)
+                    if (Hint.Unlikely(abMagnitudeSq < minMagnitude * minMagnitude))
                     {
                         dirX.x = dirX.y = dirX.z = 0;
                         dirY.x = dirY.y = dirY.z = 0;
@@ -88,7 +87,7 @@ namespace Iviz.Displays
                     {
                         dirX = ab / Mathf.Sqrt(abMagnitudeSq);
                         var (x, y, z) = dirX;
-                        if ((Mathf.Abs(z) - 1).ApproximatelyZero())
+                        if (Hint.Unlikely((Mathf.Abs(z) - 1).ApproximatelyZero()))
                         {
                             float den = Mathf.Sqrt(x * x + z * z);
                             dirY.x = -z / den;
@@ -137,8 +136,9 @@ namespace Iviz.Displays
             public void Execute()
             {
                 int offset = 0;
-                foreach (var line in input)
+                for (int index = 0; index < input.Length; index++)
                 {
+                    var line = input[index];
                     float ca = line.c0.w;
 
                     output[offset] = ca;
@@ -169,8 +169,9 @@ namespace Iviz.Displays
             public void Execute()
             {
                 int offset = 0;
-                foreach (var line in input)
+                for (int index = 0; index < input.Length; index++)
                 {
+                    var line = input[index];
                     float2 uv0;
                     uv0.x = line.c0.w;
                     uv0.y = 0;

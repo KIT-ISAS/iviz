@@ -472,7 +472,8 @@ namespace Iviz.Controllers
                 Visible = Visible && config.VisibleMask[msgType],
                 TriangleListFlipWinding = TriangleListFlipWinding,
                 Metallic = Metallic,
-                Smoothness = Smoothness
+                Smoothness = Smoothness,
+                ShowDescription = ShowDescriptions
             };
             markers[id] = marker;
             return marker;

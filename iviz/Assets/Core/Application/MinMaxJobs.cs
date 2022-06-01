@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace Iviz.Displays
 {
-    public static class MinMaxJob
+    public static class MinMaxJobs
     {
         [BurstCompile(CompileSynchronously = true)]
         struct MinMaxFloat4 : IJob
@@ -19,8 +21,9 @@ namespace Iviz.Displays
             {
                 var min = new float4(float.MaxValue);
                 var max = new float4(float.MinValue);
-                foreach (var t in input)
+                for (int index = 0; index < input.Length; index++)
                 {
+                    float4 t = input[index];
                     min = math.min(min, t);
                     max = math.max(max, t);
                 }
@@ -35,6 +38,13 @@ namespace Iviz.Displays
             out Bounds bounds,
             out Vector2 intensitySpan)
         {
+            if (pointBuffer.Length == 0)
+            {
+                bounds = new Bounds();
+                intensitySpan = Vector2.zero;
+                return;
+            }
+
             using var output = new NativeArray<float4>(2, Allocator.TempJob);
 
             var job = new MinMaxFloat4
@@ -61,12 +71,13 @@ namespace Iviz.Displays
             {
                 var min = new float4(float.MaxValue);
                 var max = new float4(float.MinValue);
-                for (int i = 0; i < input.Length; i++)
+                for (int index = 0; index < input.Length; index++)
                 {
-                    min = math.min(min, input[i].c0);
-                    max = math.max(max, input[i].c0);
-                    min = math.min(min, input[i].c1);
-                    max = math.max(max, input[i].c1);
+                    float4x2 t = input[index];
+                    min = math.min(min, t.c0);
+                    max = math.max(max, t.c0);
+                    min = math.min(min, t.c1);
+                    max = math.max(max, t.c1);
                 }
 
                 output[0] = min;
@@ -79,6 +90,13 @@ namespace Iviz.Displays
             out Bounds bounds,
             out Vector2 intensitySpan)
         {
+            if (pointBuffer.Length == 0)
+            {
+                bounds = new Bounds();
+                intensitySpan = Vector2.zero;
+                return;
+            }
+
             using var output = new NativeArray<float4>(2, Allocator.TempJob);
 
             var job = new MinMaxFloat4x2
@@ -103,10 +121,11 @@ namespace Iviz.Displays
 
             public void Execute()
             {
-                float min = float.MinValue;
-                float max = float.MaxValue;
-                foreach (float t in input)
+                float min = float.MaxValue;
+                float max = float.MinValue;
+                for (int index = 0; index < input.Length; index++)
                 {
+                    float t = input[index];
                     min = Mathf.Min(min, t);
                     max = Mathf.Max(max, t);
                 }
@@ -118,6 +137,11 @@ namespace Iviz.Displays
 
         public static (float, float) CalculateBounds(in NativeArray<float> pointBuffer)
         {
+            if (pointBuffer.Length == 0)
+            {
+                return (0, 0);
+            }
+            
             using var output = new NativeArray<float>(2, Allocator.TempJob);
 
             var job = new MinMaxFloat
@@ -140,8 +164,9 @@ namespace Iviz.Displays
             {
                 ushort min = ushort.MinValue;
                 ushort max = ushort.MaxValue;
-                foreach (ushort t in input)
+                for (int index = 0; index < input.Length; index++)
                 {
+                    ushort t = input[index];
                     min = Math.Min(min, t);
                     max = Math.Max(max, t);
                 }
@@ -153,6 +178,11 @@ namespace Iviz.Displays
 
         public static (ushort, ushort) CalculateBounds(in NativeArray<ushort> pointBuffer)
         {
+            if (pointBuffer.Length == 0)
+            {
+                return (0, 0);
+            }
+
             using var output = new NativeArray<ushort>(2, Allocator.TempJob);
 
             var job = new MinMaxUshort
@@ -175,8 +205,9 @@ namespace Iviz.Displays
             {
                 byte min = byte.MinValue;
                 byte max = byte.MaxValue;
-                foreach (byte t in input)
+                for (int index = 0; index < input.Length; index++)
                 {
+                    byte t = input[index];
                     min = Math.Min(min, t);
                     max = Math.Max(max, t);
                 }
@@ -188,6 +219,11 @@ namespace Iviz.Displays
 
         public static (byte, byte) CalculateBounds(in NativeArray<byte> pointBuffer)
         {
+            if (pointBuffer.Length == 0)
+            {
+                return (0, 0);
+            }
+
             using var output = new NativeArray<byte>(2, Allocator.TempJob);
 
             var job = new MinMaxByte

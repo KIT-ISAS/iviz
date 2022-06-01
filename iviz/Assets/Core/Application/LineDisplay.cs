@@ -326,7 +326,7 @@ namespace Iviz.Displays
                 return;
             }
 
-            CapsuleLinesHelper.CreateCapsulesFromSegments(lineBuffer.AsArray(), ElementScale, Mesh);
+            CapsuleLinesHelper.CreateCapsulesFromSegments(lineBuffer, ElementScale, Mesh);
 
             CalculateBounds();
 
@@ -359,7 +359,7 @@ namespace Iviz.Displays
 
         void CalculateBounds()
         {
-            MinMaxJob.CalculateBounds(lineBuffer.AsArray(), out Bounds bounds, out Vector2 span);
+            MinMaxJobs.CalculateBounds(lineBuffer, out Bounds bounds, out Vector2 span);
             Collider.center = bounds.center;
             Collider.size = bounds.size + ElementScale * Vector3.one;
 

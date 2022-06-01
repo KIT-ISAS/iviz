@@ -81,11 +81,11 @@ namespace Iviz.App
 
         bool TopicsHaveChanged()
         {
-            uint hash = Crc32Calculator.DefaultSeed;
+            uint hash = HashCalculator.DefaultSeed;
             foreach (var topic in newTopics)
             {
-                hash = Crc32Calculator.Compute(topic.topic, hash);
-                hash = Crc32Calculator.Compute(topic.type, hash);
+                hash = HashCalculator.Compute(topic.topic, hash);
+                hash = HashCalculator.Compute(topic.type, hash);
             }
 
             if (previousHash == hash)

@@ -23,7 +23,7 @@ namespace Iviz.App
             set
             {
                 ThrowHelper.ThrowIfNull(value, nameof(value));
-                uint newHash = Crc32Calculator.Compute(value);
+                uint newHash = HashCalculator.Compute(value);
                 if (newHash == textHash)
                 {
                     return;
@@ -36,7 +36,7 @@ namespace Iviz.App
 
         public void SetText(BuilderPool.BuilderRent builder)
         {
-            uint newHash = Crc32Calculator.Compute(builder);
+            uint newHash = HashCalculator.Compute(builder);
             if (newHash == textHash)
             {
                 return;

@@ -68,10 +68,17 @@ namespace Iviz.Displays.Highlighters
                 || holder.Bounds is not { } bounds)
             {
                 nodeTransform.gameObject.SetActive(false);
+                if (tooltip != null)
+                {
+                    tooltip.Visible = false;
+                }
+
                 return;
             }
 
             nodeTransform.gameObject.SetActive(true);
+            nodeTransform.SetParentLocal(transform);
+            
             frame.SetBounds(bounds);
 
             if (tooltip == null)
@@ -81,6 +88,7 @@ namespace Iviz.Displays.Highlighters
 
             var worldBounds = bounds.TransformBound(transform.AsPose(), transform.lossyScale);
             float labelSize = Tooltip.GetRecommendedSize(transform.position);
+            tooltip.Visible = true;
             tooltip.Scale = labelSize;
             tooltip.Transform.position = worldBounds.center +
                                          2f * (worldBounds.size.y * 0.3f + labelSize) * Vector3.up;

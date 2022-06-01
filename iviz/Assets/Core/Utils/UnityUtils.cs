@@ -18,6 +18,7 @@ using Iviz.Urdf;
 using JetBrains.Annotations;
 using TMPro;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using Color = UnityEngine.Color;
@@ -752,13 +753,15 @@ namespace Iviz.Core
             RuntimePlatform.WSAPlayerX64 or RuntimePlatform.WSAPlayerX86 or RuntimePlatform.WSAPlayerARM => "wsa",
             _ => Application.platform.ToString().ToLower()
         };
-        
-        public static NativeArray<T> TempArrayFromValue<T>(T t) where T : unmanaged
+
+        public static Task AsTask(this JobHandle handle)
         {
-            var array = new NativeArray<T>(1, Allocator.TempJob);
-            array[0] = t;
-            return array;
+            return GameThread.WaitUntilAsync(() => handle.IsCompleted);
         }
+
+        public static string FormatFloat(float x) => Mathf.Abs(x) is >= 1e4f or < 1e-3f
+            ? x.ToString("G", Culture)
+            : x.ToString("#,0.###", Culture);
     }
 
     public struct WithIndexEnumerable<T>

@@ -29,7 +29,7 @@ namespace Iviz.Controllers
         public Material Material => imageTexture.Material;
 
         public Vector2? MeasuredIntensityBounds => imageTexture.MeasuredIntensityBounds;
-        
+
         public string Description
         {
             get
@@ -45,8 +45,8 @@ namespace Iviz.Controllers
                 }
 
                 (float x, float y) = bounds;
-                string minIntensityStr = x.ToString("#,0.##", UnityUtils.Culture);
-                string maxIntensityStr = y.ToString("#,0.##", UnityUtils.Culture);
+                string minIntensityStr = UnityUtils.FormatFloat(x);
+                string maxIntensityStr = UnityUtils.FormatFloat(y);
                 return $"{imageTexture.Description}\n[{minIntensityStr} .. {maxIntensityStr}]";
             }
         }
@@ -250,6 +250,7 @@ namespace Iviz.Controllers
             IsProcessing = true;
 
             var shared = msg.Data.Share();
+
             void PostProcess()
             {
                 if (node.IsAlive)
@@ -324,14 +325,14 @@ namespace Iviz.Controllers
             {
                 return;
             }
-            
+
             var intrinsic = new Intrinsic(info.K);
             if (!intrinsic.IsValid)
             {
                 RosLogger.Error($"{this}: Ignoring invalid intrinsic {intrinsic.ToString()}.");
                 return;
-                    
-            } 
+            }
+
             billboard.Intrinsic = intrinsic;
         }
 

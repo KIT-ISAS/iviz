@@ -1,8 +1,15 @@
+#nullable enable
+
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Iviz.Urdf;
 using JetBrains.Annotations;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 
 namespace Iviz.Core
 {
@@ -63,6 +70,29 @@ namespace Iviz.Core
                 dstPtr.r = srcPtr.r; // dstPtr->rgb = *srcPtr;
                 srcPtr = ref Unsafe.Add(ref srcPtr, 1); // srcPtr++;
                 dstPtr = ref Unsafe.Add(ref dstPtr, 1); // dstPtr++;
+            }
+        }
+
+        [BurstCompile(CompileSynchronously = true)]
+        struct CopyPixelsRgbToRgbaJob : IJob
+        {
+            [ReadOnly] public NativeArray<uint3> input;
+            [WriteOnly] public NativeArray<uint4> output;
+
+            public void Execute()
+            {
+                for (int i = 0; i < input.Length; i++)
+                {
+                    uint3 valueIn = input[i];
+                    uint4 valueOut;
+
+                    valueOut.x = valueIn.x; 
+                    valueOut.y = (valueIn.x >> 24) | (valueIn.y << 8);
+                    valueOut.z = (valueIn.y >> 16) | (valueIn.z << 16);
+                    valueOut.w = valueIn.z >> 8;
+
+                    output[i] = valueOut;
+                }
             }
         }
 
@@ -138,7 +168,7 @@ namespace Iviz.Core
 
             ref R16 srcPtr = ref Unsafe.As<uint, R16>(ref srcIPtr);
             ref byte dstPtr = ref Unsafe.As<uint, byte>(ref dstIPtr);
-            
+
             for (int i = sizeToWrite; i > 0; i--)
             {
                 dstPtr = srcPtr.low;
@@ -146,7 +176,21 @@ namespace Iviz.Core
                 dstPtr = ref dstPtr.Plus(1);
             }
         }
+        
+        [BurstCompile(CompileSynchronously = true)]
+        struct CopyPixelsR16ToR8Job : IJob
+        {
+            [ReadOnly] public NativeArray<ushort> input;
+            [WriteOnly] public NativeArray<byte> output;
 
+            public void Execute()
+            {
+                for (int i = 0; i < input.Length; i++)
+                {
+                    output[i] = (byte)(input[i] >> 8);
+                }
+            }
+        }
 
         [AssertionMethod]
         static void AssertSize(in Span<uint> span, int size)
@@ -154,15 +198,100 @@ namespace Iviz.Core
             if (span.Length < size)
                 ThrowHelper.ThrowIndexOutOfRange("Span array is too short for the given operation");
         }
-        
+
         [AssertionMethod]
         static void AssertSize(in Span<byte> span, int size)
         {
             if (span.Length < size)
                 ThrowHelper.ThrowIndexOutOfRange("Span array is too short for the given operation");
         }
-    }
 
+        [BurstCompile(CompileSynchronously = true)]
+        struct MirrorXFloatJob : IJob
+        {
+            public int width, height;
+            [ReadOnly] public NativeArray<float> input;
+            [WriteOnly] public NativeArray<float> output;
+
+            public void Execute()
+            {
+                for (int v = 0; v < height; v++)
+                {
+                    int l = v * width;
+                    int r = l + width - 1;
+                    for (int i = 0; i < width; i++)
+                    {
+                        output[r - i] = input[l + i];
+                    }
+                }
+            }
+        }
+
+        public static JobHandle MirrorXfFast(int width, int height, NativeArray<float> src, byte[] dst)
+        {
+            return new MirrorXFloatJob
+            {
+                width = width,
+                height = height,
+                input = src,
+                output = dst.CreateNativeArrayWrapper().Reinterpret<float>()
+            }.Schedule();
+        }
+
+        [BurstCompile(CompileSynchronously = true)]
+        struct MirrorXByteJob : IJob
+        {
+            [ReadOnly] public int width, height;
+            [ReadOnly] public NativeArray<byte> input;
+            public NativeArray<byte> output;
+
+            public void Execute()
+            {
+                ExecuteScale();
+                ExecuteFlip();
+            }
+
+            void ExecuteFlip()
+            {
+                for (int v = 0; v < height; v++)
+                {
+                    int l = v * width;
+                    int r = l + width - 1;
+                    for (int i = 0; i < width; i++)
+                    {
+                        output[r - i] = input[l + i];
+                    }
+                }
+            }
+
+            void ExecuteScale()
+            {
+                NativeArray<uint> inputInt = input.Reinterpret<uint>();
+                for (int i = 0; i < inputInt.Length; i++)
+                {
+                    // 8 independent bytes, values are either 0, 1, or 2
+                    // 0 -> 0
+                    // 1 -> 128
+                    // 2 -> 255
+                    inputInt[i] = inputInt[i] * 127 + 0x01010101u;
+                }
+            }
+        }
+
+        public static JobHandle MirrorXbFast(int width, int height, NativeArray<byte> src, byte[] dst)
+        {
+            return new MirrorXByteJob
+            {
+                width = width,
+                height = height,
+                input = src,
+                output = dst.CreateNativeArrayWrapper()
+            }.Schedule();
+        }
+
+        [DoesNotReturn]
+        static void ThrowIndexOutOfRange() => throw new IndexOutOfRangeException();
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct Rgba

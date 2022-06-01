@@ -173,7 +173,7 @@ namespace Iviz.Displays
         static (uint hash, int numValidValues) Process(ReadOnlySpan<sbyte> src, RectInt bounds,
             int pitch, Span<sbyte> dest)
         {
-            uint hash = Crc32Calculator.DefaultSeed;
+            uint hash = HashCalculator.DefaultSeed;
             int numValidValues = 0;
 
             int rowSize = bounds.width;
@@ -186,7 +186,7 @@ namespace Iviz.Displays
                 var dstSpan = dest.Slice(dstOffset, rowSize);
 
                 srcSpan.CopyTo(dstSpan);
-                hash = Crc32Calculator.Compute(srcSpan, hash);
+                hash = HashCalculator.Compute(srcSpan, hash);
 
                 ref sbyte uPtr = ref srcSpan.GetReference();
                 //foreach (sbyte u in srcSpan)

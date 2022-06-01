@@ -12,6 +12,7 @@ using Iviz.Core;
 using Iviz.Msgs;
 using Iviz.Tools;
 using Unity.Burst;
+using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -140,7 +141,7 @@ namespace Iviz.Controllers
             return ts.Task.AsValueTask();
         }
 
-        public ValueTask<Screenshot?> CaptureDepthAsync(
+        public async ValueTask<Screenshot?> CaptureDepthAsync(
             int reuseCaptureAgeInMs = 0,
             CancellationToken token = default)
         {
@@ -148,20 +149,20 @@ namespace Iviz.Controllers
                 && lastDepth != null
                 && (GameThread.Now - lastDepth.Timestamp.ToDateTime()).TotalMilliseconds < reuseCaptureAgeInMs)
             {
-                return lastDepth.AsTaskResultMaybeNull();
+                return lastDepth;
             }
 
             token.ThrowIfCancellationRequested();
 
             if (occlusionManager.requestedEnvironmentDepthMode == EnvironmentDepthMode.Disabled)
             {
-                return default; // completed, null
+                return null;
             }
 
-            if (!occlusionManager.TryAcquireEnvironmentDepthCpuImage(out XRCpuImage image))
+            if (!occlusionManager.TryAcquireEnvironmentDepthCpuImage(out var image))
             {
                 RosLogger.Info($"{this}: Depth capture failed.");
-                return default; // completed, null
+                return null;
             }
 
             var conversionParams = new XRCpuImage.ConversionParams
@@ -172,13 +173,39 @@ namespace Iviz.Controllers
                 transformation = XRCpuImage.Transformation.MirrorY // additional mirror x doesn't seem to work here
             };
 
-            var ts = TaskUtils.CreateCompletionSource<Screenshot?>();
             int width = image.width;
             int height = image.height;
             var pose = arCameraTransform.AsPose();
             int colorWidth = cameraManager.subsystem.currentConfiguration?.width ?? width;
 
-            using var _ = image;
+            XRCpuImage.AsyncConversion conversion;
+            using (image)
+            {
+                conversion = image.ConvertAsync(conversionParams);
+            }
+
+            using (conversion)
+            {
+                await GameThread.WaitUntilAsync(() => IsFinished(conversion));
+
+                if (conversion.status != XRCpuImage.AsyncConversionStatus.Ready)
+                {
+                    throw InvalidScreenshotException(conversion.status);
+                }
+
+                byte[] array = new byte[width * height * sizeof(float)];
+                float scale = width / (float)colorWidth;
+                var screenshot = new Screenshot(ScreenshotFormat.Float,
+                    GameThread.TimeNow, width, height,
+                    Intrinsic.Scale(scale), pose, array);
+
+                await ConversionUtils.MirrorXfFast(width, height, conversion.GetData<float>(), array).AsTask();
+
+                return screenshot;
+            }
+
+
+            /*
             image.ConvertAsync(conversionParams, (status, _, array) =>
             {
                 if (token.IsCancellationRequested)
@@ -202,7 +229,7 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        MirrorXf(screenshot.Width, screenshot.Height, screenshot.Bytes);
+                        ConversionUtils.MirrorXf(screenshot.Width, screenshot.Height, screenshot.Bytes);
                         lastDepth = screenshot;
                         ts.TrySetResult(screenshot);
                     }
@@ -214,9 +241,10 @@ namespace Iviz.Controllers
             });
 
             return ts.Task.AsValueTask();
+            */
         }
 
-        public ValueTask<Screenshot?> CaptureDepthConfidenceAsync(
+        public async ValueTask<Screenshot?> CaptureDepthConfidenceAsync(
             int reuseCaptureAgeInMs = 0,
             CancellationToken token = default)
         {
@@ -224,20 +252,20 @@ namespace Iviz.Controllers
                 && lastConfidence != null
                 && (GameThread.Now - lastConfidence.Timestamp.ToDateTime()).TotalMilliseconds < reuseCaptureAgeInMs)
             {
-                return lastConfidence.AsTaskResultMaybeNull();
+                return lastConfidence;
             }
 
             token.ThrowIfCancellationRequested();
 
             if (occlusionManager.requestedEnvironmentDepthMode == EnvironmentDepthMode.Disabled)
             {
-                return default; // completed, null
+                return null;
             }
 
             if (!occlusionManager.TryAcquireEnvironmentDepthConfidenceCpuImage(out XRCpuImage image))
             {
                 RosLogger.Info($"{this}: Depth capture failed.");
-                return default; // completed, null
+                return null;
             }
 
             var conversionParams = new XRCpuImage.ConversionParams
@@ -248,7 +276,38 @@ namespace Iviz.Controllers
                 transformation = XRCpuImage.Transformation.MirrorY // additional mirror x doesn't seem to work here
             };
 
+            int width = image.width;
+            int height = image.height;
+            var pose = arCameraTransform.AsPose();
+            int colorWidth = cameraManager.subsystem.currentConfiguration?.width ?? width;
 
+            XRCpuImage.AsyncConversion conversion;
+            using (image)
+            {
+                conversion = image.ConvertAsync(conversionParams);
+            }
+
+            using (conversion)
+            {
+                await GameThread.WaitUntilAsync(() => IsFinished(conversion));
+
+                if (conversion.status != XRCpuImage.AsyncConversionStatus.Ready)
+                {
+                    throw InvalidScreenshotException(conversion.status);
+                }
+
+                byte[] array = new byte[width * height];
+                float scale = width / (float)colorWidth;
+                var screenshot = new Screenshot(ScreenshotFormat.Mono8,
+                    GameThread.TimeNow, width, height,
+                    Intrinsic.Scale(scale), pose, array);
+
+                await ConversionUtils.MirrorXbFast(width, height, conversion.GetData<byte>(), array).AsTask();
+
+                return screenshot;
+            }
+
+            /*
             var ts = TaskUtils.CreateCompletionSource<Screenshot?>();
             int width = image.width;
             int height = image.height;
@@ -280,7 +339,7 @@ namespace Iviz.Controllers
                 {
                     try
                     {
-                        MirrorXb(screenshot.Width, screenshot.Height, screenshot.Bytes);
+                        ConversionUtils.MirrorXb(screenshot.Width, screenshot.Height, screenshot.Bytes);
                         lastConfidence = screenshot;
                         ts.TrySetResult(screenshot);
                     }
@@ -292,50 +351,14 @@ namespace Iviz.Controllers
             });
 
             return ts.Task.AsValueTask();
+            */
         }
+
+        static bool IsFinished(XRCpuImage.AsyncConversion conversion) =>
+            conversion.status is XRCpuImage.AsyncConversionStatus.Ready or XRCpuImage.AsyncConversionStatus.Failed;
 
         static Exception InvalidScreenshotException(XRCpuImage.AsyncConversionStatus status) =>
             new InvalidOperationException(
                 $"Conversion request of color image failed with status {status}");
-
-        static void MirrorXf(int width, int height, byte[] bytes)
-        {
-            int pitch = width * sizeof(float);
-            if (pitch * height > bytes.Length) ThrowIndexOutOfRange();
-            foreach (int v in ..height)
-            {
-                ref float l = ref Unsafe.As<byte, float>(ref bytes[v * pitch]);
-                ref float r = ref l.Plus(width - 1);
-                for (int u = width / 2; u > 0; u--)
-                {
-                    (l, r) = (r, l);
-                    l = ref l.Plus(1);
-                    r = ref r.Plus(-1);
-                }
-            }
-        }
-
-        static void MirrorXb(int width, int height, byte[] bytes)
-        {
-            if (width * height > bytes.Length) ThrowIndexOutOfRange();
-            foreach (int v in ..height)
-            {
-                ref ulong l = ref Unsafe.As<byte, ulong>(ref bytes[v * width]);
-                ref ulong r = ref l.Plus(width / 8 - 1);
-                for (int u = width / 16; u > 0; u--)
-                {
-                    ulong lFlip = BinaryPrimitives.ReverseEndianness(l);
-                    ulong rFlip = BinaryPrimitives.ReverseEndianness(r);
-                    l = rFlip;
-                    r = lFlip;
-
-                    l = ref l.Plus(1);
-                    r = ref r.Plus(-1);
-                }
-            }
-        }
-
-        [DoesNotReturn]
-        static void ThrowIndexOutOfRange() => throw new IndexOutOfRangeException();
     }
 }

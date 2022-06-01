@@ -58,7 +58,7 @@ namespace Iviz.App
                     RosUtils.FormatPose(frame.FixedWorldPose, description, RosUtils.PoseFormat.OnlyPosition);
                 }
 
-                uint newHash = Crc32Calculator.Compute(description);
+                uint newHash = HashCalculator.Compute(description);
                 if (newHash == textHash)
                 {
                     return;

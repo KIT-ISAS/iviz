@@ -81,8 +81,8 @@ namespace Iviz.App
         string BuildDescriptionString()
         {
             var (x, y) = listener.MeasuredIntensityBounds;
-            string minIntensityStr = x.ToString("#,0.##", UnityUtils.Culture);
-            string maxIntensityStr = y.ToString("#,0.##", UnityUtils.Culture);
+            string minIntensityStr = UnityUtils.FormatFloat(x);
+            string maxIntensityStr = UnityUtils.FormatFloat(y);
             return
                 $"<b>{listener.NumValidPoints.ToString("N0")} Points</b>\n" +
                 (listener.NumValidPoints == 0 

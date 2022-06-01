@@ -36,8 +36,8 @@ namespace Iviz.App
             panel.Listener.Listener = listener.Listener;
             panel.Frame.Owner = listener;
 
-            string minIntensityStr = listener.MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
-            string maxIntensityStr = listener.MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
+            string minIntensityStr = UnityUtils.FormatFloat(listener.MeasuredIntensityBounds.x);
+            string maxIntensityStr = UnityUtils.FormatFloat(listener.MeasuredIntensityBounds.y);
             panel.Description.Text = $"Min Intensity: {minIntensityStr} Max: {maxIntensityStr}";
 
             panel.Colormap.Index = (int) listener.Colormap;

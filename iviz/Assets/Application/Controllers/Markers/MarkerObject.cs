@@ -716,12 +716,12 @@ namespace Iviz.Controllers
 
         static uint CalculateMarkerHash(Marker msg, bool useScale)
         {
-            uint hash = Crc32Calculator.Compute(msg.Type);
-            hash = Crc32Calculator.Compute(msg.Color, hash);
-            hash = Crc32Calculator.Compute(msg.Points, hash);
-            hash = Crc32Calculator.Compute(msg.Colors, hash);
+            uint hash = HashCalculator.Compute(msg.Type);
+            hash = HashCalculator.Compute(msg.Color, hash);
+            hash = HashCalculator.Compute(msg.Points, hash);
+            hash = HashCalculator.Compute(msg.Colors, hash);
             return useScale
-                ? Crc32Calculator.Compute(msg.Scale, hash)
+                ? HashCalculator.Compute(msg.Scale, hash)
                 : hash;
         }
 

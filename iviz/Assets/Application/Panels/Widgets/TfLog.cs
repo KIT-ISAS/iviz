@@ -213,7 +213,7 @@ namespace Iviz.App
                 EntryHelper.Write(TfModule.OriginFrame, selectedFrame, description);
 
                 description.AppendLine().AppendLine();
-                uint newHash = Crc32Calculator.Compute(description);
+                uint newHash = HashCalculator.Compute(description);
                 if (newHash == descriptionHash)
                 {
                     return;
@@ -242,7 +242,7 @@ namespace Iviz.App
                 }
 
                 description.AppendLine().AppendLine();
-                uint newHash = Crc32Calculator.Compute(description);
+                uint newHash = HashCalculator.Compute(description);
                 if (newHash == descriptionHash)
                 {
                     return;
@@ -303,7 +303,7 @@ namespace Iviz.App
                 RosUtils.FormatPose(pose, description);
             }
 
-            uint newHash = Crc32Calculator.Compute(description);
+            uint newHash = HashCalculator.Compute(description);
             if (newHash == textHash)
             {
                 return;

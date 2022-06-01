@@ -77,7 +77,7 @@ namespace Iviz.App
                 }
 
                 // ReSharper disable once NegativeIndex
-                foreach (int i in MinPower..MaxPower)
+                for (int i = MinPower; i < MaxPower; i++)
                 {
                     if (absValue >= PowersOf10[i - MinPower])
                     {
@@ -115,7 +115,7 @@ namespace Iviz.App
                 Left.interactable = value;
                 Right.interactable = value;
                 Sign.interactable = value;
-                
+
                 var textColor = value ? Resource.Colors.FontEnabled : Resource.Colors.FontDisabled;
                 Text.color = textColor;
                 ValueText.color = textColor;

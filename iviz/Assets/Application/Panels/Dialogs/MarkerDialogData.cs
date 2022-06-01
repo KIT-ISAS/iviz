@@ -111,7 +111,7 @@ namespace Iviz.App
             int maxIndex = Mathf.Min(currentMaxIndex, numEntries);
             listener.GenerateLog(description, minIndex, maxIndex - minIndex);
 
-            uint newHash = Crc32Calculator.Compute(description);
+            uint newHash = HashCalculator.Compute(description);
             if (newHash == textHash)
             {
                 return;

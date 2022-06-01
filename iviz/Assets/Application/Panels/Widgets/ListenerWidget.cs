@@ -55,8 +55,6 @@ namespace Iviz.App
             }
 
             using var description = BuilderPool.Rent();
-            //description
-            //    .Append(Resource.Font.Split(Topic ?? "", MaxTopicWidth))
             Resource.Font.Split(description, Topic ?? "", MaxTopicWidth);
             description.Append("\n<b>");
 

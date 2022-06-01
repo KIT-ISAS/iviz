@@ -216,7 +216,7 @@ namespace Iviz.App
 
         void UpdateTop(BuilderPool.BuilderRent description)
         {
-            uint newHash = Crc32Calculator.Compute(description);
+            uint newHash = HashCalculator.Compute(description);
             if (descriptionHash == newHash)
             {
                 return;

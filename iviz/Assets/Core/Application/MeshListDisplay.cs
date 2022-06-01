@@ -295,7 +295,7 @@ namespace Iviz.Displays
             }
 
             pointComputeBuffer.SetData(pointBuffer.AsArray(), 0, 0, Size);
-            MinMaxJob.CalculateBounds(pointBuffer.AsArray(), out Bounds pointBounds, out Vector2 span);
+            MinMaxJobs.CalculateBounds(pointBuffer, out Bounds pointBounds, out Vector2 span);
 
             bool isSinglePassStereo = XRSettings.eyeTextureDesc.vrUsage == VRTextureUsage.TwoEyes;
             int instanceCount = isSinglePassStereo ? 2 * Size : Size;

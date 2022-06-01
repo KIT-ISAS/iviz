@@ -1,3 +1,5 @@
+#nullable enable
+
 using System;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
@@ -5,7 +7,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace Iviz.Core
 {
-    public static unsafe class UnsafeUtils
+    public static unsafe class NativeArrayUtils
     {
         /// <summary>
         /// Returns the pointer enclosed in the array as a ref. 
@@ -24,20 +26,21 @@ namespace Iviz.Core
             var array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
                 Unsafe.AsPointer(ref ptr), length, Allocator.None);
 #if UNITY_EDITOR
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.GetTempMemoryHandle());
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, AtomicSafetyHandle.Create());
 #endif
             return array;
         }
 
-        public static NativeArray<T> CreateNativeArrayWrapper<T>(this Span<T> ptr) where T : unmanaged
+        public static NativeArray<T> CreateNativeArrayWrapper<T>(this T[] ptr) where T : unmanaged
         {
             return CreateNativeArrayWrapper(ref ptr[0], ptr.Length);
         }
-
-        /// <summary>
-        /// Creates a span from the given pointer and size. 
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<byte> AsSpan(this IntPtr ptr, int size) => new(ptr.ToPointer(), size);
+        
+        public static NativeArray<T> TempArrayFromValue<T>(T t) where T : unmanaged
+        {
+            var array = new NativeArray<T>(1, Allocator.TempJob);
+            array[0] = t;
+            return array;
+        }
     }
 }

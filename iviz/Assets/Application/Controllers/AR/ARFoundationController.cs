@@ -573,22 +573,6 @@ namespace Iviz.Controllers
 
                 if (confidence != null)
                 {
-                    void Multiply(Span<byte> bytes) // local func to work with span because we're in async
-                    {
-                        // reinterpret as long to process 8 bytes at once
-                        var longs = bytes.Cast<long>();
-                        // it would be 2x as fast using simd, but whatever
-                        foreach (ref long b in longs)
-                        {
-                            // 8 independent bytes, values are either 0, 1, or 2
-                            // 0 -> 0
-                            // 1 -> 128
-                            // 2 -> 255
-                            b = b * 127 + 0x0101010101010101L;
-                        }
-                    }
-
-                    Multiply(confidence.Bytes);
                     DepthConfidenceSender.Publish(confidence.CreateImageMessage(frameId, depthSeq));
                 }
 

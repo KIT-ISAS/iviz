@@ -65,7 +65,7 @@ namespace Iviz.Displays
         {
             set
             {
-                uint hash = Crc32Calculator.Compute(value);
+                uint hash = HashCalculator.Compute(value);
                 if (hash == prevTextHash)
                 {
                     return;
@@ -84,7 +84,7 @@ namespace Iviz.Displays
 
         public void SetCaption(BuilderPool.BuilderRent str)
         {
-            uint hash = Crc32Calculator.Compute(str);
+            uint hash = HashCalculator.Compute(str);
             if (hash == prevTextHash)
             {
                 return;

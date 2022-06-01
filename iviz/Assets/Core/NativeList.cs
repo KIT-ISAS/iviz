@@ -42,7 +42,8 @@ namespace Iviz.Core
                 newCapacity *= 2;
             }
 
-            var newArray = new NativeArray<T>(newCapacity, Allocator.Persistent);
+            var newArray =
+                new NativeArray<T>(newCapacity, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
             if (array.Length != 0)
             {
                 NativeArray<T>.Copy(array, newArray, length);
@@ -88,7 +89,7 @@ namespace Iviz.Core
             {
                 ThrowHelper.ThrowIndexOutOfRange();
             }
-            
+
             return ref array.GetUnsafeRef();
         }
 
@@ -138,6 +139,7 @@ namespace Iviz.Core
         }
 
         public static implicit operator ReadOnlySpan<T>(NativeList<T> list) => list.AsReadOnlySpan();
+        public static implicit operator NativeArray<T>(NativeList<T> list) => list.AsArray();
     }
 
     public static class NativeList

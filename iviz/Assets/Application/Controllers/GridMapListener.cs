@@ -160,11 +160,12 @@ namespace Iviz.Controllers
         {
             get
             {
-                string minIntensityStr = MeasuredIntensityBounds.x.ToString("#,0.##", UnityUtils.Culture);
-                string maxIntensityStr = MeasuredIntensityBounds.y.ToString("#,0.##", UnityUtils.Culture);
-
+                string minIntensityStr = UnityUtils.FormatFloat(MeasuredIntensityBounds.x);
+                string maxIntensityStr = UnityUtils.FormatFloat(MeasuredIntensityBounds.y);
+                string cellSizeStr = UnityUtils.FormatFloat(cellSize);
+                
                 return $"<b>{numCellsX.ToString("N0")}x{numCellsY.ToString("N0")} cells | " +
-                       $"{cellSize.ToString("#,0.###")} m/cell</b>\n" +
+                       $"{cellSizeStr} m/cell</b>\n" +
                        $"[{minIntensityStr} .. {maxIntensityStr}]";
             }
         }
