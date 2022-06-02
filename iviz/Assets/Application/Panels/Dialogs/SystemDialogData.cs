@@ -199,8 +199,8 @@ namespace Iviz.App
                     systemState.Subscribers.SelectMany(tuple => tuple.Members).Concat(
                         systemState.Services.SelectMany(tuple => tuple.Members)
                     ));
-            var nodes = nodesEnumerator.ToList();
-            nodes.Sort();
+
+            var nodes = new SortedSet<string>(nodesEnumerator);
 
             using var description = BuilderPool.Rent();
 

@@ -603,7 +603,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    ref byte dataPtr = ref dataOff.GetReference();
+                    ref byte dataPtr = ref dataOff[0];
                     for (int u = width; u > 0; u--)
                     {
                         float value = Unsafe.As<byte, float>(ref dataPtr.Plus(iOffset));
@@ -619,7 +619,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    ref byte dataPtr = ref dataOff.GetReference();
+                    ref byte dataPtr = ref dataOff[0];
                     for (int u = width; u > 0; u--)
                     {
                         double value = Unsafe.As<byte, double>(ref dataPtr.Plus(iOffset));
@@ -635,7 +635,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    ref byte dataPtr = ref dataOff.GetReference();
+                    ref byte dataPtr = ref dataOff[0];
                     for (int u = width; u > 0; u--)
                     {
                         sbyte value = (sbyte)dataPtr;
@@ -651,7 +651,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    ref byte dataPtr = ref dataOff.GetReference();
+                    ref byte dataPtr = ref dataOff[0];
                     for (int u = width; u > 0; u--)
                     {
                         byte value = dataPtr;
@@ -667,7 +667,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    ref byte dataPtr = ref dataOff.GetReference();
+                    ref byte dataPtr = ref dataOff[0];
                     for (int u = width; u > 0; u--)
                     {
                         short value = Unsafe.As<byte, short>(ref dataPtr.Plus(iOffset));
@@ -704,7 +704,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    ref byte dataPtr = ref dataOff.GetReference();
+                    ref byte dataPtr = ref dataOff[0];
                     for (int u = width; u > 0; u--)
                     {
                         ushort value = Unsafe.As<byte, ushort>(ref dataPtr.Plus(iOffset));
@@ -720,7 +720,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    ref byte dataPtr = ref dataOff.GetReference();
+                    ref byte dataPtr = ref dataOff[0];
                     for (int u = width; u > 0; u--)
                     {
                         int value = Unsafe.As<byte, int>( ref dataPtr.Plus(iOffset));
@@ -736,7 +736,7 @@ namespace Iviz.Controllers
                 for (int v = height; v > 0; v--, dataRow = dataRow[rowStep..])
                 {
                     var dataOff = dataRow[..(pointStep * width)];
-                    ref byte dataPtr = ref dataOff.GetReference();
+                    ref byte dataPtr = ref dataOff[0];
                     for (int u = width; u > 0; u--)
                     {
                         uint value = Unsafe.As<byte, uint>(ref dataPtr.Plus(iOffset));

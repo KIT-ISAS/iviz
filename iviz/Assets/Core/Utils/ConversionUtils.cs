@@ -15,19 +15,34 @@ namespace Iviz.Core
 {
     public static class ConversionUtils
     {
-        public static void CopyPixelsRgbToRgba(Span<byte> dst4, ReadOnlySpan<byte> src3)
+        public static void CopyPixelsRgbToRgba(Span<byte> dst4, ReadOnlySpan<byte> src3, bool withBurst = true)
         {
-            CopyPixelsRgbToRgba(dst4.Cast<uint>(), src3.Cast<Rgb>());
+            CopyPixelsRgbToRgba(dst4.Cast<uint>(), src3.Cast<Rgb>(), withBurst);
         }
 
-        public static void CopyPixelsRgbToRgba(Span<uint> dst4, ReadOnlySpan<Rgb> src3)
+        public static void CopyPixelsRgbToRgba(Span<uint> dst4, ReadOnlySpan<Rgb> src3, bool withBurst = true)
+        {
+            if (withBurst)
+            {
+                new CopyPixelsRgbToRgbaJob
+                {
+                    input = src3.CreateNativeArrayWrapper(),
+                    output = dst4.CreateNativeArrayWrapper().Cast<uint, Rgba>()
+                }.Schedule().Complete();
+                return;
+            }
+
+            CopyPixelsRgbToRgbaNoBurst(dst4, src3);
+        }
+
+        static void CopyPixelsRgbToRgbaNoBurst(Span<uint> dst4, ReadOnlySpan<Rgb> src3)
         {
             int sizeToWrite = src3.Length;
             AssertSize(dst4, sizeToWrite);
 
             var srcI4 = MemoryMarshal.Cast<Rgb, uint>(src3);
 
-            ref uint dstIPtr = ref dst4.GetReference();
+            ref uint dstIPtr = ref dst4[0];
             ref uint srcIPtr = ref srcI4.GetReference();
 
             while (sizeToWrite >= 8)
@@ -76,22 +91,21 @@ namespace Iviz.Core
         [BurstCompile(CompileSynchronously = true)]
         struct CopyPixelsRgbToRgbaJob : IJob
         {
-            [ReadOnly] public NativeArray<uint3> input;
-            [WriteOnly] public NativeArray<uint4> output;
+            [ReadOnly] public NativeArray<Rgb> input;
+            [WriteOnly] public NativeArray<Rgba> output;
 
             public void Execute()
             {
                 for (int i = 0; i < input.Length; i++)
                 {
-                    uint3 valueIn = input[i];
-                    uint4 valueOut;
-
-                    valueOut.x = valueIn.x; 
-                    valueOut.y = (valueIn.x >> 24) | (valueIn.y << 8);
-                    valueOut.z = (valueIn.y >> 16) | (valueIn.z << 16);
-                    valueOut.w = valueIn.z >> 8;
-
-                    output[i] = valueOut;
+                    var valueIn = input[i];
+                    output[i] = new Rgba
+                    {
+                        r = valueIn.r,
+                        g = valueIn.g,
+                        b = valueIn.b,
+                        a = valueIn.b, // unused
+                    };
                 }
             }
         }
@@ -101,7 +115,7 @@ namespace Iviz.Core
             int sizeToWrite = src2.Length;
             AssertSize(dst4, sizeToWrite);
 
-            ref int dstPtr = ref Unsafe.As<uint, int>(ref dst4.GetReference());
+            ref int dstPtr = ref Unsafe.As<uint, int>(ref dst4[0]);
             ref ushort srcPtr = ref src2.GetReference();
 
             for (int x = sizeToWrite; x > 0; x--)
@@ -138,12 +152,27 @@ namespace Iviz.Core
 
         public static int Convert565To888(int rgb565) => InternalConvert565To888(rgb565);
 
-        public static void CopyPixelsR16ToR8(Span<byte> dst, ReadOnlySpan<byte> src)
+        public static void CopyPixelsR16ToR8(Span<byte> dst, ReadOnlySpan<byte> src, bool withBurst = true)
+        {
+            if (withBurst)
+            {
+                new CopyPixelsR16ToR8Job
+                {
+                    input = src.CreateNativeArrayWrapper().Cast<byte, R16>(),
+                    output = dst.CreateNativeArrayWrapper()
+                }.Schedule().Complete();
+                return;
+            }
+
+            CopyPixelsR16ToR8NoBurst(dst, src);
+        }
+
+        static void CopyPixelsR16ToR8NoBurst(Span<byte> dst, ReadOnlySpan<byte> src)
         {
             var dst4 = dst.Cast<uint>();
             var src4 = src.Cast<uint>();
 
-            ref uint dstIPtr = ref dst4.GetReference();
+            ref uint dstIPtr = ref dst4[0];
             ref uint srcIPtr = ref src4.GetReference();
 
             int sizeToWrite = src.Length / 2;
@@ -176,18 +205,18 @@ namespace Iviz.Core
                 dstPtr = ref dstPtr.Plus(1);
             }
         }
-        
+
         [BurstCompile(CompileSynchronously = true)]
         struct CopyPixelsR16ToR8Job : IJob
         {
-            [ReadOnly] public NativeArray<ushort> input;
+            [ReadOnly] public NativeArray<R16> input;
             [WriteOnly] public NativeArray<byte> output;
 
             public void Execute()
             {
                 for (int i = 0; i < input.Length; i++)
                 {
-                    output[i] = (byte)(input[i] >> 8);
+                    output[i] = input[i].low;
                 }
             }
         }
@@ -234,7 +263,7 @@ namespace Iviz.Core
                 width = width,
                 height = height,
                 input = src,
-                output = dst.CreateNativeArrayWrapper().Reinterpret<float>()
+                output = dst.CreateNativeArrayWrapper().Cast<byte, float>()
             }.Schedule();
         }
 
@@ -266,7 +295,7 @@ namespace Iviz.Core
 
             void ExecuteScale()
             {
-                NativeArray<uint> inputInt = input.Reinterpret<uint>();
+                var inputInt = input.Cast<byte, uint>();
                 for (int i = 0; i < inputInt.Length; i++)
                 {
                     // 8 independent bytes, values are either 0, 1, or 2
@@ -288,16 +317,12 @@ namespace Iviz.Core
                 output = dst.CreateNativeArrayWrapper()
             }.Schedule();
         }
-
-        [DoesNotReturn]
-        static void ThrowIndexOutOfRange() => throw new IndexOutOfRangeException();
     }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct Rgba
     {
-        public byte r, g, b;
-        public readonly byte a;
+        public byte r, g, b, a;
 
         public bool IsGray => r == g && g == b;
 

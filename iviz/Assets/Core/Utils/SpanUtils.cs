@@ -60,7 +60,7 @@ namespace Iviz.Core
             var srcBytes = MemoryMarshal.AsBytes(srcSpan);
             var dstBytes = dst.AsSpan();
             Unsafe.CopyBlock(
-                ref dstBytes.GetReference(),
+                ref dstBytes[0],
                 ref srcBytes.GetReference(),
                 (uint)srcBytes.Length);
         }
@@ -69,8 +69,8 @@ namespace Iviz.Core
         public static void BlockCopyTo(this ReadOnlySpan<byte> src, Span<byte> dst)
         {
             Unsafe.CopyBlock(
+                ref dst[0],
                 ref src.GetReference(),
-                ref dst.GetReference(),
                 (uint)src.Length);
         }
 
@@ -78,8 +78,8 @@ namespace Iviz.Core
         public static void BlockCopyTo(this Span<byte> src, Span<byte> dst)
         {
             Unsafe.CopyBlock(
-                ref src.GetReference(),
-                ref dst.GetReference(),
+                ref dst[0],
+                ref src[0],
                 (uint)src.Length);
         }
 

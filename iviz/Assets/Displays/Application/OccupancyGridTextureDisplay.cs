@@ -300,9 +300,9 @@ namespace Iviz.Displays
                 var row1 = srcSpan.Slice(width * (vSrc + 1), width);
                 var rowDst = dstSpan.Slice(halfWidth * vDst, halfWidth);
 
-                ref sbyte row0Ptr = ref row0.GetReference();
-                ref sbyte row1Ptr = ref row1.GetReference();
-                ref sbyte rowDstPtr = ref rowDst.GetReference();
+                ref sbyte row0Ptr = ref row0[0];
+                ref sbyte row1Ptr = ref row1[0];
+                ref sbyte rowDstPtr = ref rowDst[0];
 
                 //for (int uSrc = 0, uDst = 0; uDst < halfWidth; uSrc += 2, uDst++)
                 //int uSrc = 0;

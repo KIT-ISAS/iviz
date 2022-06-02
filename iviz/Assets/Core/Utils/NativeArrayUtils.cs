@@ -35,7 +35,22 @@ namespace Iviz.Core
         {
             return CreateNativeArrayWrapper(ref ptr[0], ptr.Length);
         }
+
+        public static NativeArray<T> CreateNativeArrayWrapper<T>(this Span<T> ptr) where T : unmanaged
+        {
+            return CreateNativeArrayWrapper(ref ptr[0], ptr.Length);
+        }
+
+        public static NativeArray<T> CreateNativeArrayWrapper<T>(this ReadOnlySpan<T> ptr) where T : unmanaged
+        {
+            return CreateNativeArrayWrapper(ref ptr.GetReference(), ptr.Length);
+        }
         
+        public static NativeArray<TU> Cast<TT, TU>(this NativeArray<TT> ptr) where TT : unmanaged where TU : unmanaged
+        {
+            return ptr.Reinterpret<TU>(Unsafe.SizeOf<TT>());
+        }
+
         public static NativeArray<T> TempArrayFromValue<T>(T t) where T : unmanaged
         {
             var array = new NativeArray<T>(1, Allocator.TempJob);

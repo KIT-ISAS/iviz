@@ -3,17 +3,11 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Tools;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
-using Unity.Burst.Intrinsics;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Jobs;
 using Unity.Mathematics;
 using Debug = UnityEngine.Debug;
 using Vector3 = Iviz.Msgs.GeometryMsgs.Vector3;
@@ -87,14 +81,9 @@ namespace Iviz.Core
                 : Compute(ref Unsafe.As<sbyte, byte>(ref array.GetReference()), length * sizeof(sbyte), startHash);
         }
 
-        static uint ComputeCore(ref byte value, int size, uint startHash)
-        {
-            return Xx32Hash.Hash(ref value, size, startHash);
-        }
-
         static uint Compute(ref byte value, int size, uint startHash)
         {
-            return ComputeCore(ref value, size, startHash);
+            return Xx32Hash.Hash(ref value, size, startHash);
         }
 
         /// Implementation of the xxHash32 algorithm, using Zhent_xxHash32 as the starting point 
@@ -109,18 +98,23 @@ namespace Iviz.Core
 
             public static uint Hash(ref byte data, int length, uint seed)
             {
+                if (length <= 0)
+                {
+                    return Prime32_5;
+                }
+
                 unchecked
                 {
-                    if (length < 0) return 0;
-
                     int lengthInBulk = length / 16 * 16;
 
                     uint h32 = lengthInBulk switch
                     {
                         0 => Prime32_5,
-                        < 8192 => ExecuteDirect(seed, ref data, lengthInBulk / 16),
-                        _ => ExecuteAsJob(seed, ref data, lengthInBulk / 16)
+                        < 128 => ExecuteDirect(seed, ref data, lengthInBulk / 16),
+                        _ => ExecuteBurst(seed, ref data, lengthInBulk / 16)
                     };
+
+                    //Profile(seed, ref data, lengthInBulk);
 
                     h32 += (uint)length;
 
@@ -145,7 +139,7 @@ namespace Iviz.Core
 
                     ref byte remaining = ref Unsafe.As<uint, byte>(ref remainingInt);
 
-                    switch (remainingLength % sizeof(uint))
+                    switch (remainingLength % 4)
                     {
                         case 3:
                             h32 = RotateLeft(h32 + remaining * Prime32_5, 11) * Prime32_1;
@@ -170,6 +164,7 @@ namespace Iviz.Core
                 }
             }
 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             static uint ExecuteDirect(uint seed, ref byte data, int length)
             {
                 unchecked
@@ -204,25 +199,26 @@ namespace Iviz.Core
                 }
             }
 
-            static NativeArray<uint>? temp;
-
-            static uint ExecuteAsJob(uint seed, ref byte data, int lengthInBulk)
+            static unsafe uint ExecuteBurst(uint seed, ref byte data, int lengthInBulk)
             {
-                var input = NativeArrayUtils.CreateNativeArrayWrapper(ref Unsafe.As<byte, uint4>(ref data),
-                    lengthInBulk);
-                using var output = NativeArrayUtils.TempArrayFromValue(uint4.zero);
-                new Hash32Job { seed = seed, input = input, output = output }.Schedule().Complete();
-                return MergeValues(output[0].x, output[0].y, output[0].z, output[0].w);
+                uint4 output;
+                Hash32Job.Execute(seed, (uint4*)Unsafe.AsPointer(ref data), &output, lengthInBulk);
+                return MergeValues(output.x, output.y, output.z, output.w);
             }
 
-            [BurstCompile(CompileSynchronously = true)]
-            struct Hash32Job : IJob
-            {
-                [ReadOnly] public uint seed;
-                [ReadOnly] public NativeArray<uint4> input;
-                [WriteOnly] public NativeArray<uint4> output;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static uint RotateLeft(uint val, int bits) => (val << bits) | (val >> (32 - bits));
 
-                public void Execute()
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static uint MergeValues(uint v1, uint v2, uint v3, uint v4) =>
+                RotateLeft(v1, 1) + RotateLeft(v2, 7) + RotateLeft(v3, 12) + RotateLeft(v4, 18);
+
+            [BurstCompile(CompileSynchronously = true)]
+            static unsafe class Hash32Job
+            {
+                [BurstCompile(CompileSynchronously = true)]
+                public static void Execute(uint seed, [NoAlias] uint4* input, [NoAlias] uint4* output,
+                    [AssumeRange(8, int.MaxValue)] int length)
                 {
                     uint4 v;
                     unchecked
@@ -230,26 +226,42 @@ namespace Iviz.Core
                         v = new uint4(Prime32_1 + Prime32_2, Prime32_2, 0, 0 - Prime32_1) + seed;
                     }
 
-                    for (int i = 0; i < input.Length; i++)
+                    for (int i = 0; i < length; i++)
                     {
                         v += input[i] * Prime32_2;
                         v = (v << 13) | (v >> (32 - 13));
                         v *= Prime32_1;
                     }
 
-                    output[0] = v;
+                    *output = v;
                 }
             }
-            
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static uint RotateLeft(uint val, int bits) => (val << bits) | (val >> (32 - bits));
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static ulong RotateLeft(ulong val, int bits) => (val << bits) | (val >> (64 - bits));
+            static void Profile(uint seed, ref byte data, int lengthInBulk)
+            {
+                var stopWatch = new Stopwatch();
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            static uint MergeValues(uint v1, uint v2, uint v3, uint v4) =>
-                RotateLeft(v1, 1) + RotateLeft(v2, 7) + RotateLeft(v3, 12) + RotateLeft(v4, 18);
+                stopWatch.Restart();
+                for (int i = 0; i < 128; i++)
+                {
+                    ExecuteDirect(seed, ref data, lengthInBulk / 16);
+                }
+
+                stopWatch.Stop();
+                double d = stopWatch.Elapsed.TotalMilliseconds / 128;
+                stopWatch.Restart();
+
+                for (int i = 0; i < 128; i++)
+                {
+                    ExecuteBurst(seed, ref data, lengthInBulk / 16);
+                }
+
+                stopWatch.Stop();
+                double f = stopWatch.Elapsed.TotalMilliseconds / 128;
+
+                Debug.Log("Length: " + lengthInBulk + " Direct: " + d + " Pointer: " + f);
+                //Debug.Log(kk + " -- " + kkk);
+            }
         }
     }
 }
