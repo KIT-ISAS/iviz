@@ -25,7 +25,7 @@ namespace Iviz.Core
         static int networkFrameSkip = 1;
         static string? nowFormatted;
 
-        static bool IsGameThread => instance != null && Thread.CurrentThread == instance.gameThread;
+        public static bool IsGameThread => instance != null && Thread.CurrentThread == instance.gameThread;
 
         /// <summary>
         /// How many frames <see cref="ListenersEveryFrame"/> should skip.

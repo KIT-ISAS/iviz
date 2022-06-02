@@ -3,6 +3,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Iviz.Msgs.GeometryMsgs;
 using Iviz.Msgs.StdMsgs;
 using Iviz.Tools;
@@ -202,7 +203,8 @@ namespace Iviz.Core
             static unsafe uint ExecuteBurst(uint seed, ref byte data, int lengthInBulk)
             {
                 uint4 output;
-                Hash32Job.Execute(seed, (uint4*)Unsafe.AsPointer(ref data), &output, lengthInBulk);
+                uint4* pointer = (uint4*)Unsafe.AsPointer(ref data);
+                Hash32Job.Execute(seed, pointer, &output, lengthInBulk);
                 return MergeValues(output.x, output.y, output.z, output.w);
             }
 
@@ -213,7 +215,7 @@ namespace Iviz.Core
             static uint MergeValues(uint v1, uint v2, uint v3, uint v4) =>
                 RotateLeft(v1, 1) + RotateLeft(v2, 7) + RotateLeft(v3, 12) + RotateLeft(v4, 18);
 
-            [BurstCompile(CompileSynchronously = true)]
+            [BurstCompile]
             static unsafe class Hash32Job
             {
                 [BurstCompile(CompileSynchronously = true)]

@@ -23,6 +23,18 @@ namespace Iviz.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe T* AsPointer<T>(this Span<T> span) where T : unmanaged
+        {
+            return (T*)Unsafe.AsPointer(ref span[0]);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe T* AsPointer<T>(this ReadOnlySpan<T> span) where T : unmanaged
+        {
+            return (T*)Unsafe.AsPointer(ref span.GetReference());
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref byte Plus(this ref byte ptr, int i) => ref Unsafe.Add(ref ptr, i);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -75,10 +87,10 @@ namespace Iviz.Core
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref Point Plus(this ref Point ptr, int i) => ref Unsafe.Add(ref ptr, i);
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ref R16 Plus(this ref R16 ptr, int i) => ref Unsafe.Add(ref ptr, i);
-        
+
         /// <summary>
         /// Creates a span from the given pointer and size. 
         /// </summary>

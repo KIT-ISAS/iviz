@@ -66,7 +66,7 @@ namespace Iviz.Displays
                 const float minMagnitude = 1e-5f;
                 float halfScale = scale * 0.5f;
 
-                int offset = 0;
+                var batchOutput = output.Cast<float3, Batch>();
 
                 for (int index = 0; index < input.Length; index++)
                 {
@@ -111,19 +111,27 @@ namespace Iviz.Displays
                     var halfSumYz = halfScale * (dirY + dirZ);
                     var halfDiffYz = halfScale * (dirY - dirZ);
 
-                    output[offset] = a - halfDirX;
-                    output[offset + 1] = a + halfSumYz;
-                    output[offset + 2] = a + halfDiffYz;
-                    output[offset + 3] = a - halfSumYz;
-                    output[offset + 4] = a - halfDiffYz;
-                    output[offset + 5] = b + halfSumYz;
-                    output[offset + 6] = b + halfDiffYz;
-                    output[offset + 7] = b - halfSumYz;
-                    output[offset + 8] = b - halfDiffYz;
-                    output[offset + 9] = b + halfDirX;
+                    batchOutput[index] = new Batch
+                    {
+                        a = a - halfDirX,
+                        b = a + halfSumYz,
+                        c = a + halfDiffYz,
+                        d = a - halfSumYz,
+                        e = a - halfDiffYz,
 
-                    offset += 10;
+                        f = b + halfSumYz,
+                        g = b + halfDiffYz,
+                        h = b - halfSumYz,
+                        i = b - halfDiffYz,
+                        j = b + halfDirX
+                    };   
                 }
+            }
+            
+            struct Batch
+            {
+                public float3 a, b, c, d, e;
+                public float3 f, g, h, i, j;
             }
         }
 
@@ -135,28 +143,35 @@ namespace Iviz.Displays
 
             public void Execute()
             {
-                int offset = 0;
+                var batchOutput = output.Cast<float, Batch>();
+
                 for (int index = 0; index < input.Length; index++)
                 {
                     var line = input[index];
                     float ca = line.c0.w;
-
-                    output[offset] = ca;
-                    output[offset + 1] = ca;
-                    output[offset + 2] = ca;
-                    output[offset + 3] = ca;
-                    output[offset + 4] = ca;
-
                     float cb = line.c1.w;
 
-                    output[offset + 5] = cb;
-                    output[offset + 6] = cb;
-                    output[offset + 7] = cb;
-                    output[offset + 8] = cb;
-                    output[offset + 9] = cb;
+                    batchOutput[index] = new Batch
+                    {
+                        a = ca,
+                        b = ca,
+                        c = ca,
+                        d = ca,
+                        e = ca,
 
-                    offset += 10;
+                        f = cb,
+                        g = cb,
+                        h = cb,
+                        i = cb,
+                        j = cb
+                    };                    
                 }
+            }
+            
+            struct Batch
+            {
+                public float a, b, c, d, e;
+                public float f, g, h, i, j;
             }
         }
 
@@ -168,32 +183,40 @@ namespace Iviz.Displays
 
             public void Execute()
             {
-                int offset = 0;
+                var batchOutput = output.Cast<float2, Batch>();
+                
                 for (int index = 0; index < input.Length; index++)
                 {
                     var line = input[index];
                     float2 uv0;
                     uv0.x = line.c0.w;
-                    uv0.y = 0;
-
-                    output[offset] = uv0;
-                    output[offset + 1] = uv0;
-                    output[offset + 2] = uv0;
-                    output[offset + 3] = uv0;
-                    output[offset + 4] = uv0;
+                    uv0.y = line.c0.w; // unused
 
                     float2 uv1;
                     uv1.x = line.c1.w;
-                    uv1.y = 0;
+                    uv1.y = line.c1.w; // unused
 
-                    output[offset + 5] = uv1;
-                    output[offset + 6] = uv1;
-                    output[offset + 7] = uv1;
-                    output[offset + 8] = uv1;
-                    output[offset + 9] = uv1;
+                    batchOutput[index] = new Batch
+                    {
+                        a = uv0,
+                        b = uv0,
+                        c = uv0,
+                        d = uv0,
+                        e = uv0,
 
-                    offset += 10;
+                        f = uv1,
+                        g = uv1,
+                        h = uv1,
+                        i = uv1,
+                        j = uv1
+                    };
                 }
+            }
+
+            struct Batch
+            {
+                public float2 a, b, c, d, e;
+                public float2 f, g, h, i, j;
             }
         }
 

@@ -13,7 +13,7 @@ using Unity.Mathematics;
 
 namespace Iviz.Core
 {
-    public static class ConversionUtils
+    public static unsafe class ConversionUtils
     {
         public static void CopyPixelsRgbToRgba(Span<byte> dst4, ReadOnlySpan<byte> src3, bool withBurst = true)
         {
@@ -24,11 +24,7 @@ namespace Iviz.Core
         {
             if (withBurst)
             {
-                new CopyPixelsRgbToRgbaJob
-                {
-                    input = src3.CreateNativeArrayWrapper(),
-                    output = dst4.CreateNativeArrayWrapper().Cast<uint, Rgba>()
-                }.Schedule().Complete();
+                CopyPixelsRgbToRgbaJob.Execute(src3.AsPointer(), (Rgba*)dst4.AsPointer(), src3.Length);
                 return;
             }
 
@@ -88,15 +84,13 @@ namespace Iviz.Core
             }
         }
 
-        [BurstCompile(CompileSynchronously = true)]
-        struct CopyPixelsRgbToRgbaJob : IJob
+        [BurstCompile]
+        static class CopyPixelsRgbToRgbaJob
         {
-            [ReadOnly] public NativeArray<Rgb> input;
-            [WriteOnly] public NativeArray<Rgba> output;
-
-            public void Execute()
+            [BurstCompile(CompileSynchronously = true)]
+            public static void Execute([NoAlias] Rgb* input, [NoAlias] Rgba* output, int inputLength)
             {
-                for (int i = 0; i < input.Length; i++)
+                for (int i = 0; i < inputLength; i++)
                 {
                     var valueIn = input[i];
                     output[i] = new Rgba
@@ -110,7 +104,19 @@ namespace Iviz.Core
             }
         }
 
-        public static void CopyPixels565ToRgba(Span<uint> dst4, ReadOnlySpan<ushort> src2)
+        public static void CopyPixels565ToRgba(Span<uint> dst4, ReadOnlySpan<ushort> src2, bool withBurst = true)
+        {
+            if (withBurst)
+            {
+                Convert565To888Job.Execute(src2.AsPointer(), (int*)dst4.AsPointer(), src2.Length);
+                return;
+            }
+
+            CopyPixels565ToRgbaNoBurst(dst4, src2);
+        }
+
+
+        static void CopyPixels565ToRgbaNoBurst(Span<uint> dst4, ReadOnlySpan<ushort> src2)
         {
             int sizeToWrite = src2.Length;
             AssertSize(dst4, sizeToWrite);
@@ -150,17 +156,26 @@ namespace Iviz.Core
             return rgba;
         }
 
+        [BurstCompile]
+        static class Convert565To888Job
+        {
+            [BurstCompile(CompileSynchronously = true)]
+            public static void Execute([NoAlias] ushort* input, [NoAlias] int* output, int inputLength)
+            {
+                for (int i = 0; i < inputLength; i++)
+                {
+                    output[i] = InternalConvert565To888(input[i]);
+                }
+            }
+        }
+
         public static int Convert565To888(int rgb565) => InternalConvert565To888(rgb565);
 
         public static void CopyPixelsR16ToR8(Span<byte> dst, ReadOnlySpan<byte> src, bool withBurst = true)
         {
             if (withBurst)
             {
-                new CopyPixelsR16ToR8Job
-                {
-                    input = src.CreateNativeArrayWrapper().Cast<byte, R16>(),
-                    output = dst.CreateNativeArrayWrapper()
-                }.Schedule().Complete();
+                CopyPixelsR16ToR8Job.Execute(src.Cast<R16>().AsPointer(), dst.AsPointer(), dst.Length);
                 return;
             }
 
@@ -206,15 +221,13 @@ namespace Iviz.Core
             }
         }
 
-        [BurstCompile(CompileSynchronously = true)]
-        struct CopyPixelsR16ToR8Job : IJob
+        [BurstCompile]
+        static class CopyPixelsR16ToR8Job
         {
-            [ReadOnly] public NativeArray<R16> input;
-            [WriteOnly] public NativeArray<byte> output;
-
-            public void Execute()
+            [BurstCompile(CompileSynchronously = true)]
+            public static void Execute([NoAlias] R16* input, [NoAlias] byte* output, int inputLength)
             {
-                for (int i = 0; i < input.Length; i++)
+                for (int i = 0; i < inputLength; i++)
                 {
                     output[i] = input[i].low;
                 }
@@ -272,7 +285,7 @@ namespace Iviz.Core
         {
             [ReadOnly] public int width, height;
             [ReadOnly] public NativeArray<byte> input;
-            public NativeArray<byte> output;
+            [WriteOnly] public NativeArray<byte> output;
 
             public void Execute()
             {
