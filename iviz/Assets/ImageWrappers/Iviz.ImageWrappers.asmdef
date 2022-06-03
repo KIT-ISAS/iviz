@@ -1,9 +1,7 @@
 {
-    "name": "Iviz.MarkerDetection",
+    "name": "Iviz.ImageWrappers",
     "rootNamespace": "",
-    "references": [
-        "GUID:31a80e3fb3ac64b8385cd739784d42de"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,

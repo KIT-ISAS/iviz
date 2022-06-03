@@ -409,12 +409,7 @@ namespace Iviz.Displays
             Vector2 intensityBounds;
             switch (encoding.ToUpperInvariant())
             {
-                case "RGB8":
-                case "BGR8":
-                case "RGB":
-                case "BGR":
-                case "8SC3":
-                case "8UC3":
+                case "RGB8" or "BGR8" or "RGB" or "BGR" or "8SC3" or "8UC3":
                     if (!Settings.SupportsRGB24)
                     {
                         texture = EnsureSize(width, height, TextureFormat.RGBA32);
@@ -429,22 +424,13 @@ namespace Iviz.Displays
                     MeasuredIntensityBounds = null;
                     normalizationFactor = 1;
                     break;
-                case "RGBA8":
-                case "BGRA8":
-                case "BGRA":
-                case "RGBA":
-                case "8SC4":
-                case "8UC4":
+                case "RGBA8" or "BGRA8" or "BGRA" or "RGBA" or "8SC4" or "8UC4":
                     texture = EnsureSize(width, height, TextureFormat.RGBA32);
                     texture.CopyFrom(data);
                     MeasuredIntensityBounds = null;
                     normalizationFactor = 1;
                     break;
-                case "MONO16":
-                case "16UC1":
-                case "16SC1":
-                case "16UC":
-                case "16SC":
+                case "MONO16" or "16UC1" or "16SC1" or "16UC" or "16SC":
                     if (!Settings.SupportsR16)
                     {
                         texture = EnsureSize(width, height, TextureFormat.R8);
@@ -465,11 +451,7 @@ namespace Iviz.Displays
                     }
 
                     break;
-                case "MONO8":
-                case "8UC1":
-                case "8UC":
-                case "8SC1":
-                case "8SC":
+                case "MONO8" or "8UC1" or "8UC" or "8SC1" or "8SC":
                     texture = EnsureSize(width, height, TextureFormat.R8);
                     texture.CopyFrom(data);
                     intensityBounds = CalculateBounds(texture.GetRawTextureData<byte>());
@@ -481,8 +463,7 @@ namespace Iviz.Displays
                     }
 
                     break;
-                case "32FC1":
-                case "32FC":
+                case "32FC1" or "32FC":
                     texture = EnsureSize(width, height, TextureFormat.RFloat);
                     texture.CopyFrom(data);
                     intensityBounds = CalculateBounds(texture.GetRawTextureData<float>());
