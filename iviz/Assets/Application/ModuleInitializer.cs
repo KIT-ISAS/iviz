@@ -2,6 +2,7 @@
 using Iviz.Controllers;
 using Iviz.Core;
 using Iviz.Displays;
+using Iviz.ImageWrappers;
 using Iviz.Resources;
 using UnityEngine;
 

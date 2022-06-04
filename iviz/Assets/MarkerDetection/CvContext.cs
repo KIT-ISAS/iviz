@@ -268,12 +268,10 @@ namespace Iviz.MarkerDetection
 
         static class Native
         {
-            const string IvizOpencvDll =
+            const string Library =
                 Settings.IsIPhone
                     ? "__Internal"
-                    : Settings.IsAndroid
-                        ? "ivizopencv-lib"
-                        : "IvizOpencv";
+                    : "IvizOpencv";
 
             public delegate void Callback(string s);
 
@@ -295,81 +293,74 @@ namespace Iviz.MarkerDetection
                 UnityEngine.Debug.LogError(t);
             }
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern IntPtr CreateContext(int width, int height);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern void DisposeContext(IntPtr ctx);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern void SetupDebug(Callback callback);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern void SetupInfo(Callback callback);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern void SetupError(Callback callback);
-
-
-            [DllImport(IvizOpencvDll)]
+            
+            [DllImport(Library)]
             public static extern int ImageWidth(IntPtr ctx);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern int ImageHeight(IntPtr ctx);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern int ImageFormat(IntPtr ctx);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern int ImageSize(IntPtr ctx);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern bool CopyFrom(IntPtr ctx, /* const */ byte[] ptr, int size);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern bool CopyTo( /* const */ IntPtr ctx, ref byte ptr, int size);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern IntPtr GetImagePtr(IntPtr ctx);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern bool SetDictionary(IntPtr ctx, int value);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern bool DetectArucoMarkers(IntPtr ctx);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern bool DetectQrMarkers(IntPtr ctx);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern int GetNumDetectedMarkers(IntPtr ctx);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern bool GetArucoMarkerIds(IntPtr ctx, ref int arrayPtr, int arraySize);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern bool GetQrMarkerCodes(IntPtr ctx, ref IntPtr arrayPtr, ref int arrayLengths,
                 int arraySize);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern bool GetMarkerCorners(IntPtr ctx, ref float arrayPtr, int arraySize);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern bool SetCameraMatrix(IntPtr ctx, float[] arrayPtr, int arraySize);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern bool EstimateMarkerPoses(IntPtr ctx, float markerSize, float[] rotations,
                 int rotationsSize, float[] translations, int translationsSize);
 
-            [DllImport(IvizOpencvDll)]
+            [DllImport(Library)]
             public static extern bool EstimatePnp(in float inputs, int inputSize, in float outputs, int outputSize,
                 in float cameraArray, int cameraArraySize, ref float result, int resultSize);
-
-            /*
-            [DllImport(IvizOpencvDll)]
-            public static extern bool EstimateUmeyama(float[] inputs, int inputSize, float[] outputs, int outputSize,
-                bool estimateScale, float[] result, int resultSize);
-                */
         }
     }
 

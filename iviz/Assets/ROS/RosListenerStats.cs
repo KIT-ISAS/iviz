@@ -2,8 +2,6 @@
 
 using System.Runtime.Serialization;
 using Iviz.Msgs;
-using Iviz.Roslib;
-using JetBrains.Annotations;
 
 namespace Iviz.Ros
 {

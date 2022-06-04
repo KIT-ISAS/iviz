@@ -14,11 +14,6 @@ using Vector3 = Iviz.Msgs.GeometryMsgs.Vector3;
 
 namespace Iviz.App.Tests
 {
-    /*
-{"IvizE":0,"Size":176,"Tf":"table1"}
-{"IvizE":1,"Size":176}
-
-     */
     public class OpencvTestScript : MonoBehaviour
     {
         ARMarkerManager manager = new ARMarkerManager();
